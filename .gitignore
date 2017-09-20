@@ -1,4 +1,6 @@
 distribution
+bin
+tmp
 /out
 data/config.json
 **/.idea/workspace.xml
