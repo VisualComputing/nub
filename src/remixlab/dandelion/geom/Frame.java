@@ -11,10 +11,6 @@
 package remixlab.dandelion.geom;
 
 import remixlab.dandelion.constraint.Constraint;
-import remixlab.util.Copyable;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
 
 /**
  * A Frame is a 2D or 3D coordinate system, represented by a {@link #position()} , an
@@ -110,24 +106,14 @@ import remixlab.util.Util;
  * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
  * in the scene by whatever user interaction means you can imagine.
  */
-public class Frame implements Copyable {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(translation()).append(rotation()).append(scaling()).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Frame other = (Frame) obj;
-    return new EqualsBuilder().append(translation(), other.translation()).append(rotation(), other.rotation())
-        .append(scaling(), other.scaling()).isEquals();
+public class Frame {
+  /**
+   * Returns whether or not this Frame matches other.
+   *
+   * @param other frame
+   */
+  public boolean matches(Frame other) {
+    return translation().matches(other.translation()) && rotation().matches(other.rotation()) && scaling() == other.scaling();
   }
 
   protected Vec trans;
@@ -214,7 +200,6 @@ public class Frame implements Copyable {
     cnstrnt = other.constraint();
   }
 
-  @Override
   public Frame get() {
     return new Frame(this);
   }
@@ -743,7 +728,7 @@ public class Frame implements Copyable {
    * .
    */
   public final void setScaling(float s) {
-    if (Util.positive(s)) {
+    if (s > 0) {
       scl = s;
       modified();
     } else
@@ -1041,11 +1026,11 @@ public class Frame implements Copyable {
     Vec res;
     if (is3D()) {
       res = inverseTransformOf(new Vec(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
-      if (Util.diff(magnitude(), 1))
+      if (magnitude() != 1)
         res.normalize();
     } else {
       res = inverseTransformOf(new Vec(positive ? 1.0f : -1.0f, 0.0f));
-      if (Util.diff(magnitude(), 1))
+      if (magnitude() != 1)
         res.normalize();
     }
     return res;
@@ -1072,11 +1057,11 @@ public class Frame implements Copyable {
     Vec res;
     if (is3D()) {
       res = inverseTransformOf(new Vec(0.0f, positive ? 1.0f : -1.0f, 0.0f));
-      if (Util.diff(magnitude(), 1))
+      if (magnitude() != 1)
         res.normalize();
     } else {
       res = inverseTransformOf(new Vec(0.0f, positive ? 1.0f : -1.0f));
-      if (Util.diff(magnitude(), 1))
+      if (magnitude() != 1)
         res.normalize();
     }
     return res;
@@ -1103,7 +1088,7 @@ public class Frame implements Copyable {
     Vec res = new Vec();
     if (is3D()) {
       res = inverseTransformOf(new Vec(0.0f, 0.0f, positive ? 1.0f : -1.0f));
-      if (Util.diff(magnitude(), 1))
+      if (magnitude() != 1)
         res.normalize();
     }
     return res;
@@ -1240,7 +1225,7 @@ public class Frame implements Copyable {
    * {@link #coordinatesOf(Vec)} and {@link #transformOf(Vec)}.
    */
   public final void fromMatrix(Mat pM, float scl) {
-    if (Util.zero(pM.mat[15])) {
+    if (pM.mat[15] == 0) {
       System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
       return;
     }

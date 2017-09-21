@@ -10,30 +10,25 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A 2D {@link remixlab.dandelion.geom.Rotation} represented by an {@link #angle()}.
  */
 public class Rot implements Rotation {
+  /**
+   * Returns whether or not this Rot matches other.
+   *
+   * @param other rot
+   */
   @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(this.angle).toHashCode();
+  public boolean matches(Rotation other) {
+    if(other instanceof Rot)
+      return this.angle == ((Rot)other).angle;
+    return false;
   }
 
   @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Rot other = (Rot) obj;
-    return new EqualsBuilder().append(this.angle, other.angle).isEquals();
+  public void reset() {
+    angle = 0;
   }
 
   protected float angle;
@@ -172,7 +167,7 @@ public class Rot implements Rotation {
     // 2. http://mathworld.wolfram.com/PerpDotProduct.html
     float fromNorm = from.magnitude();
     float toNorm = to.magnitude();
-    if ((Util.zero(fromNorm)) || (Util.zero(toNorm)))
+    if (fromNorm == 0 || toNorm == 0)
       angle = 0;
     else
       // angle =(float) Math.acos( (double)Vec.dot(from, to) / ( fromNorm * toNorm ));

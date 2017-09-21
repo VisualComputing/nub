@@ -12,8 +12,6 @@ package remixlab.bias.event;
 
 import remixlab.bias.Event;
 import remixlab.bias.Shortcut;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 /**
  * This class represents {@link remixlab.bias.event.ClickEvent} shortcuts.
@@ -25,24 +23,6 @@ import remixlab.util.HashCodeBuilder;
  * Note that click shortcuts should have at least one click.
  */
 public class ClickShortcut extends Shortcut {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(numberOfClicks).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    ClickShortcut other = (ClickShortcut) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(numberOfClicks, other.numberOfClicks).isEquals();
-  }
-
   protected final int numberOfClicks;
 
   /**

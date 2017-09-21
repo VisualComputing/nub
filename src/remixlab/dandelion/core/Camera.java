@@ -11,8 +11,6 @@
 package remixlab.dandelion.core;
 
 import remixlab.dandelion.geom.*;
-import remixlab.util.Copyable;
-import remixlab.util.Util;
 
 import java.util.ArrayList;
 
@@ -47,7 +45,7 @@ import java.util.ArrayList;
  * {@link remixlab.dandelion.geom.Frame#transformOf(Vec)}, ...)) to convert to and from
  * the Eye {@link #frame()} coordinate system.
  */
-public class Camera extends Eye implements Copyable {
+public class Camera extends Eye {
   /**
    * Enumerates the two possible types of Camera.
    * <p>
@@ -204,11 +202,11 @@ public class Camera extends Eye implements Copyable {
    * @see #setUpVector(Vec)
    */
   public void setViewDirection(Vec direction) {
-    if (Util.zero(direction.squaredNorm()))
+    if (direction.squaredNorm() == 0)
       return;
 
     Vec xAxis = direction.cross(upVector());
-    if (Util.zero(xAxis.squaredNorm())) {
+    if (xAxis.squaredNorm() == 0) {
       // target is aligned with upVector, this means a rotation around X axis
       // X axis is then unchanged, let's keep it !
       xAxis = frame().xAxis();
@@ -794,7 +792,7 @@ public class Camera extends Eye implements Copyable {
       axis = Vec.add(axis, n[i]);
     }
 
-    if (Util.nonZero(axis.magnitude()))
+    if (axis.magnitude() != 0)
       axis.normalize();
     else
       axis.set(0, 0, 1);
@@ -964,7 +962,8 @@ public class Camera extends Eye implements Copyable {
   @Override
   public float rescalingOrthoFactor() {
     float toAnchor = this.distanceToAnchor();
-    return (2 * (Util.zero(toAnchor) ? Util.FLOAT_EPS : toAnchor) * rapK / screenHeight());
+    float epsilon = 0.0001f;
+    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * rapK / screenHeight());
   }
 
   @Override
@@ -972,7 +971,7 @@ public class Camera extends Eye implements Copyable {
     float prevDist = distanceToAnchor();
     this.anchorPnt = rap;
     float newDist = distanceToAnchor();
-    if ((Util.nonZero(prevDist)) && (Util.nonZero(newDist)))
+    if (prevDist != 0 && newDist != 0)
       rapK *= prevDist / newDist;
   }
 

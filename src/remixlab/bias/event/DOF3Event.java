@@ -10,35 +10,11 @@
 
 package remixlab.bias.event;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A {@link remixlab.bias.event.MotionEvent} with three degrees-of-freedom ( {@link #x()},
  * {@link #y()} and {@link #z()} ).
  */
 public class DOF3Event extends MotionEvent {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(x).append(dx).append(y).append(dy).append(z)
-        .append(dz).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    DOF3Event other = (DOF3Event) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(x, other.x).append(dx, other.dx).append(y, other.y)
-        .append(dy, other.dy).append(z, other.z).append(dz, other.dz).isEquals();
-  }
-
   protected float x, dx;
   protected float y, dy;
   protected float z, dz;
@@ -166,7 +142,7 @@ public class DOF3Event extends MotionEvent {
         this.dx = this.x() - ((DOF3Event) prevEvent).x();
         this.dy = this.y() - ((DOF3Event) prevEvent).y();
         this.dz = this.z() - ((DOF3Event) prevEvent).z();
-        distance = Util
+        distance = MotionEvent
             .distance(x, y, z, ((DOF3Event) prevEvent).x(), ((DOF3Event) prevEvent).y(), ((DOF3Event) prevEvent).z());
         delay = this.timestamp() - prevEvent.timestamp();
         if (delay == 0)
@@ -251,7 +227,7 @@ public class DOF3Event extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (Util.zero(dx()) && Util.zero(dy()) && Util.zero(dz()))
+    if (dx()==0 && dy()==0 && dz()==0)
       return true;
     return false;
   }

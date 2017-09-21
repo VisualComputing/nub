@@ -12,7 +12,6 @@ package remixlab.dandelion.core;
 
 import remixlab.dandelion.geom.Mat;
 import remixlab.dandelion.geom.Vec;
-import remixlab.util.Util;
 
 /**
  * Various matrix operations dandelion should support either through a third-party
@@ -415,7 +414,7 @@ public abstract class MatrixHelper {
     float z1 = eyeY - centerY;
     float z2 = eyeZ - centerZ;
     float mag = (float) Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
-    if (Util.nonZero(mag)) {
+    if (mag != 0) {
       z0 /= mag;
       z1 /= mag;
       z2 /= mag;
@@ -439,14 +438,14 @@ public abstract class MatrixHelper {
     // Cross product gives area of parallelogram, which is < 1.0 for
     // non-perpendicular unit-length vectors; so normalize x, y here:
     mag = (float) Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
-    if (Util.nonZero(mag)) {
+    if (mag != 0) {
       x0 /= mag;
       x1 /= mag;
       x2 /= mag;
     }
 
     mag = (float) Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
-    if (Util.nonZero(mag)) {
+    if (mag != 0) {
       y0 /= mag;
       y1 /= mag;
       y2 /= mag;

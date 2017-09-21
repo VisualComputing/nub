@@ -34,8 +34,6 @@ import remixlab.dandelion.core.Eye;
 import remixlab.dandelion.core.GenericFrame;
 import remixlab.dandelion.geom.Frame;
 import remixlab.dandelion.geom.Vec;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 import java.lang.reflect.Method;
 
@@ -78,12 +76,19 @@ import java.lang.reflect.Method;
  * @see remixlab.dandelion.core.GenericFrame
  */
 public class InteractiveFrame extends GenericFrame {
-  // TODO decide whether or not to include this and if so whether or not to include the
-  // profile
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(fShape).append(pShape).toHashCode();
+  // TODO decide whether or not to include this and if so whether or not to include the profile
+  /**
+   * Returns whether or not this InteractiveFrame matches other.
+   *
+   * @param other interactiveFrame
+   */
+
+  /*
+  //TODO decide me
+  boolean matches(InteractiveFrame other) {
+    return super.matches(other);
   }
+
 
   @Override
   public boolean equals(Object obj) {
@@ -98,6 +103,7 @@ public class InteractiveFrame extends GenericFrame {
     return new EqualsBuilder().appendSuper(super.equals(obj)).append(fShape, other.fShape).append(pShape, other.pShape)
         .isEquals();
   }
+  //*/
 
   /**
    * Enumerates the highlighting modes.

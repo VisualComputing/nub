@@ -10,42 +10,24 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * 4x4 matrix affine matrix implementation. Matrix is represented in column major order: |
  * m0 m4 m8 m12 | | m1 m5 m9 m13 | | m2 m6 m10 m14 | | m3 m7 m11 m15 |
  */
-public class Mat implements Linkable {
+public class Mat {
   /**
-   * Array col major representation
+   * Returns whether or not this Mat matches other.
+   *
+   * @param other rect
    */
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(this.mat[0]).append(this.mat[1]).append(this.mat[2]).append(this.mat[3])
-        .append(this.mat[4]).append(this.mat[5]).append(this.mat[6]).append(this.mat[7]).append(this.mat[8])
-        .append(this.mat[9]).append(this.mat[10]).append(this.mat[11]).append(this.mat[12]).append(this.mat[13])
-        .append(this.mat[14]).append(this.mat[15]).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Mat other = (Mat) obj;
-    return new EqualsBuilder().append(this.mat[0], other.mat[0]).append(this.mat[1], other.mat[1])
-        .append(this.mat[2], other.mat[2]).append(this.mat[3], other.mat[3]).append(this.mat[4], other.mat[4])
-        .append(this.mat[5], other.mat[5]).append(this.mat[6], other.mat[6]).append(this.mat[7], other.mat[7])
-        .append(this.mat[8], other.mat[8]).append(this.mat[9], other.mat[9]).append(this.mat[10], other.mat[10])
-        .append(this.mat[11], other.mat[11]).append(this.mat[12], other.mat[12]).append(this.mat[13], other.mat[13])
-        .append(this.mat[14], other.mat[14]).append(this.mat[15], other.mat[15]).isEquals();
+  public boolean matches(Mat other) {
+    boolean result = true;
+    for(int i = 0; i < mat.length; i++) {
+      if(mat[i] != other.mat[i])
+        result = false;
+      break;
+    }
+    return result;
   }
 
   public float mat[] = new float[16];
@@ -317,7 +299,6 @@ public class Mat implements Linkable {
   /**
    * Sets the identity matrix.
    */
-  @Override
   public void reset() {
     set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
   }
@@ -329,12 +310,10 @@ public class Mat implements Linkable {
     return mat;
   }
 
-  @Override
   public void link(float[] source) {
     mat = source;
   }
 
-  @Override
   public void unLink() {
     float[] data = new float[16];
     get(data);
@@ -344,7 +323,6 @@ public class Mat implements Linkable {
   /**
    * Returns a copy of this Matrix.
    */
-  @Override
   public Mat get() {
     return new Mat(this);
   }
@@ -353,7 +331,6 @@ public class Mat implements Linkable {
    * Copies the matrix contents into a 16 entry float array. If target is null (or not the
    * correct size), a new array will be created.
    */
-  @Override
   public float[] get(float[] target) {
     if ((target == null) || (target.length != 16)) {
       target = new float[16];
@@ -412,13 +389,6 @@ public class Mat implements Linkable {
     return rowMajor;
   }
 
-  @Override
-  public void set(Linkable src) {
-    if (!(src instanceof Mat))
-      throw new RuntimeException("src should be an instance of Mat");
-    set((Mat) src);
-  }
-
   /**
    * Sets the matrix contents from the {@code src} matrix contents.
    */
@@ -427,7 +397,6 @@ public class Mat implements Linkable {
         src.mat[9], src.mat[10], src.mat[11], src.mat[12], src.mat[13], src.mat[14], src.mat[15]);
   }
 
-  @Override
   public void set(float[] source) {
     if (source.length == 16) {
       mat[0] = source[0];
@@ -592,12 +561,13 @@ public class Mat implements Linkable {
    */
   public void rotate(float angle, float v0, float v1, float v2) {
     float norm2 = v0 * v0 + v1 * v1 + v2 * v2;
-    if (norm2 < Util.FLOAT_EPS) {
+    float epsilon = 0.0001f;
+    if (norm2 < epsilon) {
       // The vector is zero, cannot apply rotation.
       return;
     }
 
-    if (Math.abs(norm2 - 1) > Util.FLOAT_EPS) {
+    if (Math.abs(norm2 - 1) > epsilon) {
       // The rotation vector is not normalized.
       float norm = (float) Math.sqrt(norm2);
       v0 /= norm;
@@ -1108,7 +1078,7 @@ public class Mat implements Linkable {
    */
   public boolean invert() {
     float determinant = determinant();
-    if (Util.zero(determinant)) {
+    if (determinant == 0) {
       return false;
     }
 

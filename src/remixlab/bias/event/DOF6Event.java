@@ -10,36 +10,11 @@
 
 package remixlab.bias.event;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A {@link remixlab.bias.event.MotionEvent} with six degrees-of-freedom ( {@link #x()},
  * {@link #y()}, {@link #z()} , {@link #rx()}, {@link #ry()} and {@link #rz()}).
  */
 public class DOF6Event extends MotionEvent {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(x).append(dx).append(y).append(dy).append(z)
-        .append(dz).append(rx).append(drx).append(ry).append(dry).append(rz).append(drz).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    DOF6Event other = (DOF6Event) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(x, other.x).append(dx, other.dx).append(y, other.y)
-        .append(dy, other.dy).append(z, other.z).append(dz, other.dz).append(rx, other.rx).append(drx, other.drx)
-        .append(ry, other.ry).append(dry, other.dry).append(rz, other.rz).append(drz, other.drz).isEquals();
-  }
-
   protected float x, dx;
   protected float y, dy;
   protected float z, dz;
@@ -205,7 +180,7 @@ public class DOF6Event extends MotionEvent {
         this.drx = this.rx() - ((DOF6Event) prevEvent).rx();
         this.dry = this.ry() - ((DOF6Event) prevEvent).ry();
         this.drz = this.rz() - ((DOF6Event) prevEvent).rz();
-        distance = Util.distance(x, y, z, rx, ry, rz, ((DOF6Event) prevEvent).x(), ((DOF6Event) prevEvent).y(),
+        distance = MotionEvent.distance(x, y, z, rx, ry, rz, ((DOF6Event) prevEvent).x(), ((DOF6Event) prevEvent).y(),
             ((DOF6Event) prevEvent).z(), ((DOF6Event) prevEvent).rx(), ((DOF6Event) prevEvent).ry(),
             ((DOF6Event) prevEvent).rz());
         delay = this.timestamp() - prevEvent.timestamp();
@@ -378,7 +353,7 @@ public class DOF6Event extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (Util.zero(dx()) && Util.zero(dy()) && Util.zero(dz()) && Util.zero(drx()) && Util.zero(dry()) && Util.zero(drz()))
+    if (dx()==0 && dy()==0 && dz()==0 && drx()==0 && dry()==0 && drz()==0)
       return true;
     return false;
   }

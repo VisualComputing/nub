@@ -15,8 +15,6 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import remixlab.dandelion.core.AbstractScene;
 import remixlab.dandelion.geom.Vec;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 import java.lang.reflect.Method;
 
@@ -29,23 +27,18 @@ import java.lang.reflect.Method;
  * implementation itself.
  */
 class Shape {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(shp).append(obj).append(mth).append(shift).toHashCode();
-  }
+  /**
+   * Returns whether or not this Shape matches other.
+   *
+   * @param other shape
+   */
 
-  @Override
-  public boolean equals(Object object) {
-    if (object == null)
-      return false;
-    if (object == this)
-      return true;
-    if (object.getClass() != getClass())
-      return false;
-    Shape other = (Shape) object;
-    return new EqualsBuilder().append(shp, other.shp).append(obj, other.obj).append(mth, other.mth)
-        .append(shift, other.shift).isEquals();
+  //TODO decide me
+  /*
+  boolean matches(Shape other) {
+    return shift.matches(other.shift) && shp == other.shp && obj == other.obj && mth == other.mth;
   }
+  //*/
 
   InteractiveFrame iFrame;
   PShape shp;

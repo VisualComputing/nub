@@ -11,9 +11,6 @@
 package remixlab.bias;
 
 import remixlab.bias.event.KeyEvent;
-import remixlab.util.Copyable;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 /**
  * The root of all events that are to be handled by an {@link Agent}.
@@ -42,7 +39,7 @@ import remixlab.util.HashCodeBuilder;
  * of these mechanisms are available (as it often happens when dealing with specialized,
  * non-default input hardware).
  */
-public class Event implements Copyable {
+public class Event {
   // modifier keys
   public static final int NO_MODIFIER_MASK = 0;
   public static final int NO_ID = 0;
@@ -53,24 +50,6 @@ public class Event implements Copyable {
   public static final int ALT_GRAPH = 1 << 4;
 
   private boolean fire, flush;
-
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(modifiers).append(id).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Event other = (Event) obj;
-    return new EqualsBuilder().append(modifiers, other.modifiers).append(id, other.id).isEquals();
-  }
 
   protected final int modifiers;
   protected long timestamp;
@@ -103,7 +82,6 @@ public class Event implements Copyable {
     this.flush = other.flush;
   }
 
-  @Override
   public Event get() {
     return new Event(this);
   }

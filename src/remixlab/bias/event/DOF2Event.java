@@ -10,35 +10,11 @@
 
 package remixlab.bias.event;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A {@link remixlab.bias.event.MotionEvent} with two degrees-of-freedom ( {@link #x()}
  * and {@link #y()}).
  */
 public class DOF2Event extends MotionEvent {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).appendSuper(super.hashCode()).append(x).append(dx)
-        .append(y).append(dy).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    DOF2Event other = (DOF2Event) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(x, other.x).append(dx, other.dx).append(y, other.y)
-        .append(dy, other.dy).isEquals();
-  }
-
   protected float x, dx;
   protected float y, dy;
 
@@ -154,7 +130,7 @@ public class DOF2Event extends MotionEvent {
       if (prevEvent instanceof DOF2Event && prevEvent.id() == this.id()) {
         this.dx = this.x() - ((DOF2Event) prevEvent).x();
         this.dy = this.y() - ((DOF2Event) prevEvent).y();
-        distance = Util.distance(x, y, ((DOF2Event) prevEvent).x(), ((DOF2Event) prevEvent).y());
+        distance = MotionEvent.distance(x, y, ((DOF2Event) prevEvent).x(), ((DOF2Event) prevEvent).y());
         delay = this.timestamp() - prevEvent.timestamp();
         if (delay == 0)
           speed = distance;
@@ -216,7 +192,7 @@ public class DOF2Event extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (Util.zero(dx()) && Util.zero(dy()))
+    if (dx()==0 && dy()==0)
       return true;
     return false;
   }

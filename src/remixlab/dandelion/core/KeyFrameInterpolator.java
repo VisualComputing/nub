@@ -12,10 +12,6 @@ package remixlab.dandelion.core;
 
 import remixlab.dandelion.geom.*;
 import remixlab.fpstiming.TimingTask;
-import remixlab.util.Copyable;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,45 +77,35 @@ import java.util.ListIterator;
  * {@link #interpolationStarted()}, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
  */
-public class KeyFrameInterpolator implements Copyable {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(keyFrameList).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    KeyFrameInterpolator other = (KeyFrameInterpolator) obj;
-    return new EqualsBuilder().append(keyFrameList, other.keyFrameList).isEquals();
+public class KeyFrameInterpolator {
+  /**
+   * Returns whether or not this KeyFrameInterpolator matches other.
+   *
+   * @param other keyFrameInterpolator
+   */
+  public boolean matches(KeyFrameInterpolator other) {
+    boolean result = true;
+    for(int i = 0; i < keyFrameList.size(); i++) {
+      if(!keyFrameList.get(i).matches(other.keyFrameList.get(i)))
+        result = false;
+      break;
+    }
+    return result;
   }
 
   /**
    * Internal protected abstract base class for 2d and 3d KeyFrames
    */
-  protected abstract class KeyFrame implements Copyable {
-    @Override
-    public int hashCode() {
-      return new HashCodeBuilder(17, 37).append(frame()).append(time()).toHashCode();
-    }
+  protected abstract class KeyFrame {
+    public abstract KeyFrame get();
 
-    @Override
-    public boolean equals(Object obj) {
-      if (obj == null)
-        return false;
-      if (obj == this)
-        return true;
-      if (obj.getClass() != getClass())
-        return false;
-
-      KeyFrame other = (KeyFrame) obj;
-      return new EqualsBuilder().append(frame(), other.frame()).append(time(), other.time()).isEquals();
+    /**
+     * Returns whether or not this KeyFrame matches other.
+     *
+     * @param other KeyFrame
+     */
+    public boolean matches(KeyFrame other) {
+      return frame().matches(other.frame()) && time() == other.time();
     }
 
     protected Vec tgPVec;
@@ -337,7 +323,6 @@ public class KeyFrameInterpolator implements Copyable {
     this.invalidateValues();
   }
 
-  @Override
   public KeyFrameInterpolator get() {
     return new KeyFrameInterpolator(this);
   }
@@ -793,7 +778,7 @@ public class KeyFrameInterpolator implements Copyable {
               float stop = kf[2].orientation().angle();
               frame.setOrientation(new Rot(start + (stop - start) * alpha));
             }
-            frame.setMagnitude(Util.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
+            frame.setMagnitude(Vec.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             path.add(frame.get());
           }
 
@@ -982,7 +967,7 @@ public class KeyFrameInterpolator implements Copyable {
 
     float alpha;
     float dt = keyFrameList.get(currentFrame2.nextIndex()).time() - keyFrameList.get(currentFrame1.nextIndex()).time();
-    if (Util.zero(dt))
+    if (dt == 0)
       alpha = 0.0f;
     else
       alpha = (time - keyFrameList.get(currentFrame1.nextIndex()).time()) / dt;
@@ -991,7 +976,7 @@ public class KeyFrameInterpolator implements Copyable {
         Vec.add(keyFrameList.get(currentFrame1.nextIndex()).tgP(),
             Vec.multiply(Vec.add(pv1, Vec.multiply(pv2, alpha)), alpha)), alpha));
 
-    float mag = Util.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
+    float mag = Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
         keyFrameList.get(currentFrame2.nextIndex()).magnitude(), alpha);
 
     Rotation q;
@@ -1001,7 +986,7 @@ public class KeyFrameInterpolator implements Copyable {
           ((KeyFrame3D) keyFrameList.get(currentFrame2.nextIndex())).tgQ(),
           (Quat) keyFrameList.get(currentFrame2.nextIndex()).orientation(), alpha);
     } else {
-      q = new Rot(Util.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
+      q = new Rot(Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation().angle(), (alpha)));
     }
 

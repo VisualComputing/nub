@@ -10,32 +10,10 @@
 
 package remixlab.bias.event;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A {@link remixlab.bias.event.MotionEvent} with one degree of freedom ( {@link #x()}).
  */
 public class DOF1Event extends MotionEvent {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(x).append(dx).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    DOF1Event other = (DOF1Event) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(x, other.x).append(dx, other.dx).isEquals();
-  }
-
   protected float x, dx;
 
   /**
@@ -178,7 +156,7 @@ public class DOF1Event extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (Util.zero(dx()))
+    if (dx()==0)
       return true;
     return false;
   }

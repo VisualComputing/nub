@@ -11,8 +11,6 @@
 package remixlab.bias.event;
 
 import remixlab.bias.Shortcut;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 /**
  * This class represents {@link KeyEvent} shortcuts.
@@ -22,23 +20,6 @@ import remixlab.util.HashCodeBuilder;
  * key representing 'a').
  */
 public final class KeyShortcut extends Shortcut {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(key).toHashCode();
-  }
-
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    KeyShortcut rhs = (KeyShortcut) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(key, rhs.key).isEquals();
-  }
-
   protected final char key;
 
   /**

@@ -10,14 +10,18 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.Copyable;
-
 /**
  * Interface for 2D {@link remixlab.dandelion.geom.Rot} and 3D
  * {@link remixlab.dandelion.geom.Quat} rotations.
  */
-public interface Rotation extends Copyable {
-  @Override
+public interface Rotation {
+  public boolean matches(Rotation other);
+
+  //TODO decide me. Decide also hierarchy
+  //public void set(Rotation other);
+
+  public void reset();
+
   public Rotation get();
 
   /**

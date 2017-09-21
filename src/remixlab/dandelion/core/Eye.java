@@ -19,8 +19,6 @@ import remixlab.bias.event.MotionEvent;
 import remixlab.dandelion.core.AbstractScene.Platform;
 import remixlab.dandelion.geom.*;
 import remixlab.fpstiming.TimingTask;
-import remixlab.util.Copyable;
-import remixlab.util.Util;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -60,7 +58,7 @@ import java.util.List;
  * An Eye can also be used outside of an Scene for its coordinate system conversion
  * capabilities.
  */
-public abstract class Eye implements Copyable {
+public abstract class Eye {
   class GrabberEyeFrame extends GenericFrame {
     public final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID, // 1.b. Keys
         LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
@@ -296,7 +294,6 @@ public abstract class Eye implements Copyable {
     this.projectionMat = oVP.projectionMat.get();
   }
 
-  @Override
   public abstract Eye get();
 
   /**
@@ -1444,7 +1441,7 @@ public abstract class Eye implements Copyable {
     in[2] = in[2] * 2 - 1;
 
     projectionViewInverseMat.multiply(in, out);
-    if (Util.zero(out[3]))
+    if (out[3] == 0)
       return false;
 
     out[0] /= out[3];

@@ -12,8 +12,6 @@ package remixlab.bias;
 
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.KeyShortcut;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,24 +68,6 @@ import java.util.HashMap;
  * {@link #hashCode()} and {@link #equals(Object)} methods should be overridden as well.
  */
 public class Shortcut {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(mask).append(id).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Shortcut other = (Shortcut) obj;
-    return new EqualsBuilder().append(mask, other.mask).append(id, other.id).isEquals();
-  }
-
   protected final int mask;
   protected final int id;
   protected static HashMap<String, String> ids = new HashMap<String, String>();

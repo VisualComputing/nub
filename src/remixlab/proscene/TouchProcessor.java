@@ -15,8 +15,8 @@
 
 package remixlab.proscene;
 
+import remixlab.bias.event.MotionEvent;
 import remixlab.dandelion.geom.Vec;
-import remixlab.util.Util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -139,7 +139,7 @@ class TouchProcessor {
     // TODO: handle a long press event here?
     if (p == firstTap || p == secondTap) {
       // this could be either a Tap or a Flick gesture, based on movement
-      float d = Util.distance(p.x, p.y, p.px, p.py);
+      float d = MotionEvent.distance(p.x, p.y, p.px, p.py);
       if (d > FLICK_VELOCITY_THRESHOLD) {
         FlickEvent event = new FlickEvent(p.px, p.py, new Vec(p.x - p.px, p.y - p.py));
         events.add(event);
@@ -250,7 +250,7 @@ class TouchProcessor {
     TapEvent tapEvent = null;
     if (tapCount == 2) {
       // check if the tap point has moved
-      float d = Util.distance(firstTap.x, firstTap.y, secondTap.x, secondTap.y);
+      float d = MotionEvent.distance(firstTap.x, firstTap.y, secondTap.x, secondTap.y);
       if (d > DOUBLE_TAP_DIST_THRESHOLD) {
         // if the two taps are apart, count them as two single taps
         // TapEvent event1 = new TapEvent(firstTap.x, firstTap.y, TapEvent.SINGLE);
@@ -311,7 +311,7 @@ class TouchProcessor {
       float pinch = 0;
       for (int i = 0; i < touchPoints.size(); i++) {
         TouchPoint p = touchPoints.get(i);
-        float distance = Util.distance(p.x, p.y, getCx(), getCy());
+        float distance = MotionEvent.distance(p.x, p.y, getCx(), getCy());
         p.setPinch(distance);
         float delta = p.pinch - p.oldPinch;
         pinch += delta;
@@ -369,7 +369,7 @@ class TouchProcessor {
       if (touchPoints.size() == 1)
         clustered = true;
       else {
-        float distance = Util.distance(p.x, p.y, getCx(), getCy());
+        float distance = MotionEvent.distance(p.x, p.y, getCx(), getCy());
         if (distance < MAX_MULTI_DRAG_DISTANCE) {
           clustered = true;
         }

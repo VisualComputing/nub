@@ -10,10 +10,6 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A 3D {@link remixlab.dandelion.geom.Rotation} is a 4 element unit quaternion
  * represented by single precision floating point x,y,z,w coordinates. This class API aims
@@ -21,25 +17,20 @@ import remixlab.util.Util;
  * "http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html">libQGLViewer
  * Quaternion</a>.
  */
-public class Quat implements Linkable, Rotation {
+public class Quat implements Rotation {
+  /**
+   * Returns whether or not this Rot matches other.
+   *
+   * @param other rot
+   */
   @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(this.quat[0]).append(this.quat[1]).append(this.quat[2]).append(this.quat[3])
-        .toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Quat other = (Quat) obj;
-    return new EqualsBuilder().append(this.quat[0], other.quat[0]).append(this.quat[1], other.quat[1])
-        .append(this.quat[2], other.quat[2]).append(this.quat[3], other.quat[3]).isEquals();
+  public boolean matches(Rotation other) {
+    if(other instanceof Quat)
+      return quat[0] == ((Quat)other).quat[0]
+              && quat[1] == ((Quat)other).quat[1]
+              && quat[2] == ((Quat)other).quat[2]
+              && quat[3] == ((Quat)other).quat[3];
+    return false;
   }
 
   /**
@@ -205,7 +196,6 @@ public class Quat implements Linkable, Rotation {
     return new Quat(this);
   }
 
-  @Override
   public void reset() {
     this.quat[0] = 0;
     this.quat[1] = 0;
@@ -213,19 +203,16 @@ public class Quat implements Linkable, Rotation {
     this.quat[3] = 1;
   }
 
-  @Override
   public void link(float[] src) {
     quat = src;
   }
 
-  @Override
   public void unLink() {
     float[] data = new float[4];
     get(data);
     set(data);
   }
 
-  @Override
   public float[] get(float[] target) {
     if ((target == null) || (target.length != 4)) {
       target = new float[4];
@@ -238,7 +225,6 @@ public class Quat implements Linkable, Rotation {
     return target;
   }
 
-  @Override
   public void set(float[] source) {
     if (source.length == 4) {
       quat[0] = source[0];
@@ -304,10 +290,9 @@ public class Quat implements Linkable, Rotation {
     this.quat[3] = w;
   }
 
-  @Override
-  public void set(Linkable q) {
+  public void set(Rotation q) {
     if (!(q instanceof Quat))
-      throw new RuntimeException("q should be an instance of Vec");
+      throw new RuntimeException("q should be an instance of Quat");
     set((Quat) q);
   }
 
@@ -604,7 +589,7 @@ public class Quat implements Linkable, Rotation {
    */
   public void fromAxisAngle(Vec axis, float angle) {
     float norm = axis.magnitude();
-    if (Util.zero(norm)) {
+    if (norm == 0) {
       // Null rotation
       this.quat[0] = 0.0f;
       this.quat[1] = 0.0f;
@@ -740,7 +725,7 @@ public class Quat implements Linkable, Rotation {
     float fromSqNorm = from.squaredNorm();
     float toSqNorm = to.squaredNorm();
     // Identity Quat when one vector is null
-    if ((Util.zero(fromSqNorm)) || (Util.zero(toSqNorm))) {
+    if (fromSqNorm == 0 || toSqNorm == 0) {
       this.quat[0] = this.quat[1] = this.quat[2] = 0.0f;
       this.quat[3] = 1.0f;
     } else {
@@ -750,7 +735,7 @@ public class Quat implements Linkable, Rotation {
       float axisSqNorm = axis.squaredNorm();
 
       // Aligned vectors, pick any axis, not aligned with from or to
-      if (Util.zero(axisSqNorm))
+      if (axisSqNorm == 0)
         axis = from.orthogonalVector();
 
       float angle = (float) Math.asin((float) Math.sqrt(axisSqNorm / (fromSqNorm * toSqNorm)));
@@ -813,7 +798,7 @@ public class Quat implements Linkable, Rotation {
     // Compute one plus the trace of the matrix
     float onePlusTrace = 1.0f + threeXthree[0][0] + threeXthree[1][1] + threeXthree[2][2];
 
-    if (Util.nonZero(onePlusTrace) && onePlusTrace > 0) {
+    if (onePlusTrace > 0) {
       // Direct computation
       float s = (float) Math.sqrt(onePlusTrace) * 2.0f;
       this.quat[0] = (threeXthree[2][1] - threeXthree[1][2]) / s;
@@ -855,7 +840,7 @@ public class Quat implements Linkable, Rotation {
   public final Vec axis() {
     Vec res = new Vec(x(), y(), z());
     float sinus = res.magnitude();
-    if (Util.nonZero(sinus))
+    if (sinus != 0)
       res.divide(sinus);
     return res;
   }
@@ -939,7 +924,7 @@ public class Quat implements Linkable, Rotation {
     float len = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
 
-    if (Util.zero(len))
+    if (len == 0)
       return new Quat(this.quat[0], this.quat[1], this.quat[2], 0.0f, false);
     else {
       float coef = (float) Math.acos(this.quat[3]) / len;
@@ -956,7 +941,7 @@ public class Quat implements Linkable, Rotation {
     float theta = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
 
-    if (Util.zero(theta))
+    if (theta == 0)
       return new Quat(this.quat[0], this.quat[1], this.quat[2], (float) Math.cos(theta));
     else {
       float coef = (float) Math.sin(theta) / theta;

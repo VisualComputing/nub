@@ -11,8 +11,6 @@
 package remixlab.bias.event;
 
 import remixlab.bias.Event;
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
 
 /**
  * Base class of all DOF_n_Events: {@link Event}s defined from
@@ -25,26 +23,6 @@ import remixlab.util.HashCodeBuilder;
  * {@link #delay()}, absolute motion events don't.
  */
 public class MotionEvent extends Event {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(id).append(delay).append(distance)
-        .append(speed).append(rel).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    MotionEvent other = (MotionEvent) obj;
-    return new EqualsBuilder().appendSuper(super.equals(obj)).append(id, other.id).append(delay, other.delay)
-        .append(distance, other.distance).append(speed, other.speed).append(rel, other.rel).isEquals();
-  }
-
   // defaulting to zero:
   // http://stackoverflow.com/questions/3426843/what-is-the-default-initialization-of-an-array-in-java
   protected long delay;
@@ -252,5 +230,32 @@ public class MotionEvent extends Event {
     if (event instanceof DOF6Event)
       return (DOF6Event) event;
     return null;
+  }
+
+  /**
+   * @return Euclidean distance between points (x1,y1) and (x2,y2).
+   */
+  public static float distance(float x1, float y1, float x2, float y2) {
+    return (float) Math.sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0));
+  }
+
+  /**
+   * @return Euclidean distance between points (x1,y1,z1) and (x2,y2,z2).
+   */
+  public static float distance(float x1, float y1, float z1, float x2, float y2, float z2) {
+    return (float) Math
+            .sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0));
+  }
+
+  /**
+   * @return Euclidean distance between points (x1,y1,z1,rx1,y1,rz1) and
+   * (x2,y2,z2,rx2,y2,rz2).
+   */
+  public static float distance(float x1, float y1, float z1, float rx1, float ry1, float rz1, float x2, float y2,
+                               float z2, float rx2, float ry2, float rz2) {
+    return (float) Math.sqrt(
+            (float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0)
+                    + (float) Math.pow((rx2 - rx1), 2.0) + (float) Math.pow((ry2 - ry1), 2.0) + (float) Math
+                    .pow((rz2 - rz1), 2.0));
   }
 }

@@ -12,7 +12,6 @@ package remixlab.dandelion.constraint;
 
 import remixlab.dandelion.core.Eye;
 import remixlab.dandelion.geom.*;
-import remixlab.util.Util;
 
 /**
  * An AxisPlaneConstraint defined in the Eye coordinate system.
@@ -54,7 +53,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        if (frame.is2D() && Util.nonZero(translationConstraintDirection().z()))
+        if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = eye().frame().inverseTransformOf(translationConstraintDirection());
         if (frame.referenceFrame() != null)
@@ -62,7 +61,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
         res = Vec.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        if (frame.is2D() && Util.nonZero(translationConstraintDirection().z()))
+        if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = eye().frame().inverseTransformOf(translationConstraintDirection());
         if (frame.referenceFrame() != null)

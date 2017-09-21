@@ -12,7 +12,6 @@ package remixlab.dandelion.constraint;
 
 import remixlab.dandelion.geom.Rotation;
 import remixlab.dandelion.geom.Vec;
-import remixlab.util.Util;
 
 /**
  * An abstract class for Frame constraints defined by an axis or a plane.
@@ -135,7 +134,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
     if ((translationConstraintType() != AxisPlaneConstraint.Type.FREE) && (translationConstraintType()
         != AxisPlaneConstraint.Type.FORBIDDEN)) {
       float norm = direction.magnitude();
-      if (Util.zero(norm)) {
+      if (norm==0) {
         System.out
             .println("Warning: AxisPlaneConstraint.setTranslationConstraintDir: null vector for translation constraint");
         transConstraintType = AxisPlaneConstraint.Type.FREE;
@@ -161,7 +160,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
     if ((rotationConstraintType() != AxisPlaneConstraint.Type.FREE) && (rotationConstraintType()
         != AxisPlaneConstraint.Type.FORBIDDEN)) {
       float norm = direction.magnitude();
-      if (Util.zero(norm)) {
+      if (norm==0) {
         System.out.println("Warning: AxisPlaneConstraint.setRotationConstraintDir: null vector for rotation constraint");
         rotConstraintType = AxisPlaneConstraint.Type.FREE;
       } else

@@ -18,7 +18,6 @@ import remixlab.bias.event.*;
 import remixlab.dandelion.core.AbstractScene.Platform;
 import remixlab.dandelion.geom.*;
 import remixlab.fpstiming.TimingTask;
-import remixlab.util.Util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -1449,7 +1448,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     setSpinningRotation(rt);
     eventSpeed = speed;
     eventDelay = delay;
-    if (Util.zero(damping()) && eventSpeed < spinningSensitivity())
+    if (damping() == 0 && eventSpeed < spinningSensitivity())
       return;
     int updateInterval = (int) delay;
     if (updateInterval > 0)
@@ -1464,7 +1463,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   }
 
   protected void spinExecution() {
-    if (Util.zero(damping()))
+    if (damping() == 0)
       spin();
     else {
       if (eventSpeed == 0) {
@@ -1477,7 +1476,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   }
 
   protected void spin(Rotation rt, float speed, long delay) {
-    if (Util.zero(damping())) {
+    if (damping() == 0) {
       spin(rt);
       eventSpeed = speed;
       eventDelay = delay;

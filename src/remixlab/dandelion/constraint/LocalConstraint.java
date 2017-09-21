@@ -11,7 +11,6 @@
 package remixlab.dandelion.constraint;
 
 import remixlab.dandelion.geom.*;
-import remixlab.util.Util;
 
 /**
  * An AxisPlaneConstraint defined in the Frame local coordinate system.
@@ -35,14 +34,14 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        if (frame.is2D() && Util.nonZero(translationConstraintDirection().z()))
+        if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());
         res = Vec.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        if (frame.is2D() && Util.nonZero(translationConstraintDirection().z()))
+        if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());

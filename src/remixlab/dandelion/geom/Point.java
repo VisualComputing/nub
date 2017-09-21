@@ -10,29 +10,17 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-
 /**
  * Point class that provides a quick replacement for the java.awt.Point.
  */
 public class Point {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(x).append(y).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Point other = (Point) obj;
-    return new EqualsBuilder().append(x, other.x).append(y, other.y).isEquals();
+  /**
+   * Returns whether or not this Rect matches other.
+   *
+   * @param other rect
+   */
+  public boolean matches(Rect other) {
+    return this.x == other.x && this.y == other.y;
   }
 
   /**

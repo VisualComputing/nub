@@ -10,30 +10,17 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-
 /**
  * Rectangle class that provides a quick replacement for the java.awt.Rectangle.
  */
 public class Rect {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(this.x).append(this.y).append(this.width).append(this.height).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Rect other = (Rect) obj;
-    return new EqualsBuilder().append(this.x, other.x).append(this.y, other.y).append(this.width, other.width)
-        .append(this.height, other.height).isEquals();
+  /**
+   * Returns whether or not this Rect matches other.
+   *
+   * @param other rect
+   */
+  public boolean matches(Rect other) {
+    return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
   }
 
   /**

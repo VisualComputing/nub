@@ -10,10 +10,6 @@
 
 package remixlab.dandelion.geom;
 
-import remixlab.util.EqualsBuilder;
-import remixlab.util.HashCodeBuilder;
-import remixlab.util.Util;
-
 /**
  * A class to describe a two or three dimensional vector. This class API aims to conform
  * that of the great <a href="https://processing.org/reference/PVector.html">Processing
@@ -30,24 +26,14 @@ import remixlab.util.Util;
  * Initially based on the <a href="http://www.processing.org">Processing</a> PVector
  * class.
  */
-public class Vec implements Linkable {
-  @Override
-  public int hashCode() {
-    return new HashCodeBuilder(17, 37).append(this.vec[0]).append(this.vec[1]).append(this.vec[2]).toHashCode();
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (obj == null)
-      return false;
-    if (obj == this)
-      return true;
-    if (obj.getClass() != getClass())
-      return false;
-
-    Vec other = (Vec) obj;
-    return new EqualsBuilder().append(this.vec[0], other.vec[0]).append(this.vec[1], other.vec[1])
-        .append(this.vec[2], other.vec[2]).isEquals();
+public class Vec {
+  /**
+   * Returns whether or not this Vec matches other.
+   *
+   * @param other vec
+   */
+  public boolean matches(Vec other) {
+    return this.vec[0] == other.vec[0] && this.vec[1] == other.vec[1] && this.vec[2] == other.vec[2];
   }
 
   /**
@@ -148,7 +134,7 @@ public class Vec implements Linkable {
    */
   public static Vec projectVectorOnAxis(Vec src, Vec direction) {
     float directionSquaredNorm = squaredNorm(direction);
-    if (Util.zero(directionSquaredNorm))
+    if (directionSquaredNorm == 0)
       throw new RuntimeException("Direction squared norm is nearly 0");
 
     float modulation = src.dot(direction) / directionSquaredNorm;
@@ -170,7 +156,7 @@ public class Vec implements Linkable {
    */
   public static Vec projectVectorOnPlane(Vec src, Vec normal) {
     float normalSquaredNorm = squaredNorm(normal);
-    if (Util.zero(normalSquaredNorm))
+    if (normalSquaredNorm == 0)
       throw new RuntimeException("Normal squared norm is nearly 0");
 
     float modulation = src.dot(normal) / normalSquaredNorm;
@@ -217,12 +203,10 @@ public class Vec implements Linkable {
       return new Vec(-v.vec[1], v.vec[0], 0.0f);
   }
 
-  @Override
   public void link(float[] src) {
     vec = src;
   }
 
-  @Override
   public void unLink() {
     float[] data = new float[3];
     get(data);
@@ -256,13 +240,6 @@ public class Vec implements Linkable {
    *
    * @param v the Vec object to be copied
    */
-  @Override
-  public void set(Linkable v) {
-    if (!(v instanceof Vec))
-      throw new RuntimeException("v should be an instance of Vec");
-    set((Vec) v);
-  }
-
   public void set(Vec v) {
     this.vec[0] = v.vec[0];
     this.vec[1] = v.vec[1];
@@ -274,7 +251,6 @@ public class Vec implements Linkable {
    *
    * @param source array to copy from
    */
-  @Override
   public void set(float[] source) {
     if (source.length >= 2) {
       this.vec[0] = source[0];
@@ -288,12 +264,10 @@ public class Vec implements Linkable {
   /**
    * Get a copy of this vector.
    */
-  @Override
   public Vec get() {
     return new Vec(this);
   }
 
-  @Override
   public float[] get(float[] target) {
     if (target == null) {
       return new float[]{this.vec[0], this.vec[1], this.vec[2]};
@@ -685,6 +659,16 @@ public class Vec implements Linkable {
   }
 
   /**
+   * Calculates a number between two numbers at a specific increment. The {@code amt}
+   * parameter is the amount to interpolate between the two values where 0.0 equal to the
+   * first point, 0.1 is very near the first point, 0.5 is half-way in between, etc.
+   */
+  //TODO decide where to leave me
+  public static final float lerp(float start, float stop, float amt) {
+    return start + (stop - start) * amt;
+  }
+
+  /**
    * Linear interpolate the vector to another vector
    *
    * @param v   the vector to lerp to
@@ -693,9 +677,9 @@ public class Vec implements Linkable {
    *            in between.
    */
   public void lerp(Vec v, float amt) {
-    this.vec[0] = Util.lerp(this.vec[0], v.vec[0], amt);
-    this.vec[1] = Util.lerp(this.vec[1], v.vec[1], amt);
-    this.vec[2] = Util.lerp(this.vec[2], v.vec[2], amt);
+    this.vec[0] = Vec.lerp(this.vec[0], v.vec[0], amt);
+    this.vec[1] = Vec.lerp(this.vec[1], v.vec[1], amt);
+    this.vec[2] = Vec.lerp(this.vec[2], v.vec[2], amt);
   }
 
   /**
@@ -718,9 +702,9 @@ public class Vec implements Linkable {
    * @param z the z component to lerp to
    */
   public void lerp(float x, float y, float z, float amt) {
-    this.vec[0] = Util.lerp(this.x(), x, amt);
-    this.vec[1] = Util.lerp(this.y(), y, amt);
-    this.vec[2] = Util.lerp(this.z(), z, amt);
+    this.vec[0] = Vec.lerp(this.x(), x, amt);
+    this.vec[1] = Vec.lerp(this.y(), y, amt);
+    this.vec[2] = Vec.lerp(this.z(), z, amt);
   }
 
   /**
@@ -734,9 +718,9 @@ public class Vec implements Linkable {
     // We get NaN if we pass in a zero vector which can cause problems
     // Zero seems like a reasonable angle between a 0 length vector and
     // something else
-    if (Util.zero(v1.magnitude()))
+    if (v1.magnitude() == 0)
       return 0.0f;
-    if (Util.zero(v2.magnitude()))
+    if (v2.magnitude() == 0)
       return 0.0f;
 
     // as in P5:

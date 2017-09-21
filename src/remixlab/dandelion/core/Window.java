@@ -11,7 +11,6 @@
 package remixlab.dandelion.core;
 
 import remixlab.dandelion.geom.*;
-import remixlab.util.Copyable;
 
 /**
  * 2D implementation of the {@link remixlab.dandelion.core.Eye} abstract class.
@@ -25,7 +24,7 @@ import remixlab.util.Copyable;
  * {@link remixlab.dandelion.geom.Frame#transformOf(Vec)}, ...)) to convert to and from
  * the Eye {@link #frame()} coordinate system.
  */
-public class Window extends Eye implements Copyable {
+public class Window extends Eye {
   static final float FAKED_ZNEAR = -10;
   static final float FAKED_ZFAR = 10;
 
