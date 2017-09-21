@@ -10,12 +10,12 @@
 
 package remixlab.bias.event;
 
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
 
 /**
- * Base class of all DOF_n_Events: {@link BogusEvent}s defined from
+ * Base class of all DOF_n_Events: {@link Event}s defined from
  * DOFs (degrees-of-freedom).
  * <p>
  * A MotionEvent encapsulates a {@link remixlab.bias.event.MotionShortcut}. MotionEvents
@@ -24,7 +24,7 @@ import remixlab.util.HashCodeBuilder;
  * relative motion events have {@link #distance()}, {@link #speed()}, and
  * {@link #delay()}, absolute motion events don't.
  */
-public class MotionEvent extends BogusEvent {
+public class MotionEvent extends Event {
   @Override
   public int hashCode() {
     return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(id).append(delay).append(distance)

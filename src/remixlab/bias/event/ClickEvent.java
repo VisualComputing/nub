@@ -10,7 +10,7 @@
 
 package remixlab.bias.event;
 
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
 
@@ -19,7 +19,7 @@ import remixlab.util.HashCodeBuilder;
  * by the number of clicks. A click event holds the position where the event occurred (
  * {@link #x()} and {@link #y()}).
  */
-public class ClickEvent extends BogusEvent {
+public class ClickEvent extends Event {
   @Override
   public int hashCode() {
     return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(x).append(y).append(numberOfClicks)

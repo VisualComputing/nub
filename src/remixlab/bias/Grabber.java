@@ -20,15 +20,15 @@ public interface Grabber {
   /**
    * Defines the rules to set the grabber as an agent input-grabber.
    *
-   * @see Agent#updateTrackedGrabber(BogusEvent)
+   * @see Agent#updateTrackedGrabber(Event)
    * @see Agent#inputGrabber()
    */
-  boolean checkIfGrabsInput(BogusEvent event);
+  boolean checkIfGrabsInput(Event event);
 
   /**
    * Defines how the grabber should react according to the given bogus-event.
    *
-   * @see Agent#handle(BogusEvent)
+   * @see Agent#handle(Event)
    */
-  void performInteraction(BogusEvent event);
+  void performInteraction(Event event);
 }

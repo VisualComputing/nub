@@ -10,7 +10,7 @@
 
 package remixlab.bias.event;
 
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Shortcut;
 import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
@@ -51,7 +51,7 @@ public class ClickShortcut extends Shortcut {
    * @param id id
    */
   public ClickShortcut(int id) {
-    this(BogusEvent.NO_MODIFIER_MASK, id, 1);
+    this(Event.NO_MODIFIER_MASK, id, 1);
   }
 
   /**
@@ -61,7 +61,7 @@ public class ClickShortcut extends Shortcut {
    * @param c  number of clicks
    */
   public ClickShortcut(int id, int c) {
-    this(BogusEvent.NO_MODIFIER_MASK, id, c);
+    this(Event.NO_MODIFIER_MASK, id, c);
   }
 
   /**

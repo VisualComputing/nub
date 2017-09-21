@@ -20,7 +20,7 @@ import java.util.List;
  * {@link EventGrabberTuple}s ({@link #eventTupleQueue()}). Such tuple
  * represents a message passing to application objects, allowing an object to be
  * instructed to perform a particular user-defined action from a given
- * {@link BogusEvent}. For an introduction to BIAS please refer to
+ * {@link Event}. For an introduction to BIAS please refer to
  * <a href="http://nakednous.github.io/projects/bias">this</a>.
  * <p>
  * At runtime, the input handler should continuously run the two loops defined in
@@ -48,8 +48,8 @@ public class InputHandler {
    * <p>
    * 1. {@link EventGrabberTuple} producer loop which for each
    * registered agent calls: a.
-   * {@link Agent#updateTrackedGrabber(BogusEvent)}; and, b.
-   * {@link Agent#handle(BogusEvent)}. Note that the bogus event are
+   * {@link Agent#updateTrackedGrabber(Event)}; and, b.
+   * {@link Agent#handle(Event)}. Note that the bogus event are
    * obtained from the agents callback
    * {@link Agent#updateTrackedGrabberFeed()} and
    * {@link Agent#handleFeed()} methods, respectively. The bogus event
@@ -213,7 +213,7 @@ public class InputHandler {
    *
    * @param event to be removed.
    */
-  public void removeEventTuple(BogusEvent event) {
+  public void removeEventTuple(Event event) {
     eventTupleQueue.remove(event);
   }
 

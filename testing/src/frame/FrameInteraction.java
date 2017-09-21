@@ -1,9 +1,7 @@
 package frame;
 
 import processing.core.*;
-import processing.event.Event;
-import remixlab.bias.BogusEvent;
-import remixlab.bias.event.DOF2Event;
+import remixlab.bias.Event;
 import remixlab.bias.event.MotionEvent;
 import remixlab.dandelion.core.GenericFrame;
 import remixlab.proscene.InteractiveFrame;
@@ -46,11 +44,11 @@ public class FrameInteraction extends PApplet {
     frame2 = new InteractiveFrame(scene, frame1, loadShape("testing/data/frame_interaction/rocket.obj"));
     frame2.scale(0.2f);
     frame2.translate(-100, -100);
-    frame2.setMotionBinding((Event.SHIFT | Event.CTRL), LEFT, "translate");
+    frame2.setMotionBinding((processing.event.Event.SHIFT | processing.event.Event.CTRL), LEFT, "translate");
     frame2.setMotionBinding(RIGHT, "scale");
     frame2.setKeyBinding('u', "translateXPos");
     frame2.setKeyBinding(UP, "translateZPos");
-    frame2.setKeyBinding(Event.CTRL, UP, "translateZNeg");
+    frame2.setKeyBinding(processing.event.Event.CTRL, UP, "translateZNeg");
 
     //frame 3
     frame3 = new InteractiveFrame(scene, "drawAxes");
@@ -68,7 +66,7 @@ public class FrameInteraction extends PApplet {
     // also works. The first parameter points to the class where your code is implemented.
     // You will always need it when your code is declared within a class different than the PApplet.
     frame3.setKeyBinding(LEFT, "rotateYPos");
-    frame3.setKeyBinding((Event.SHIFT | Event.CTRL), LEFT, "rotateXNeg");
+    frame3.setKeyBinding((processing.event.Event.SHIFT | processing.event.Event.CTRL), LEFT, "rotateXNeg");
 
     //frame 4
     //frame4 will behave as frame3 since the latter is passed as its
@@ -87,7 +85,7 @@ public class FrameInteraction extends PApplet {
     // if two frames have the same key binding (frame2 has also the 'u' binding)
     // the one that is the default grabber takes higher precedence
     frame4.setKeyBinding('u', "translateXPos");
-    frame4.setKeyBinding(Event.SHIFT, 'u', "translateXNeg");
+    frame4.setKeyBinding(processing.event.Event.SHIFT, 'u', "translateXNeg");
 
     frame4.setTrackingEyeDistance(1000);
     frame4.setTrackingEyeAzimuth(PI);
@@ -214,7 +212,7 @@ public class FrameInteraction extends PApplet {
       frame4.get();
   }
 
-  public class CustomEvent extends BogusEvent {
+  public class CustomEvent extends Event {
   }
 
   public static void main(String args[]) {

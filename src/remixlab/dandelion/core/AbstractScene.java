@@ -11,7 +11,7 @@
 package remixlab.dandelion.core;
 
 import remixlab.bias.Agent;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
@@ -22,7 +22,6 @@ import remixlab.fpstiming.Animator;
 import remixlab.fpstiming.AnimatorObject;
 import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
-import sun.net.www.content.text.Generic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -542,7 +541,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // Grabber Implementation
 
   @Override
-  public boolean checkIfGrabsInput(BogusEvent event) {
+  public boolean checkIfGrabsInput(Event event) {
     if (event instanceof KeyboardEvent)
       return checkIfGrabsInput((KeyboardEvent) event);
     if (event instanceof ClickEvent)
@@ -623,7 +622,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     if (event instanceof ClickEvent)
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)

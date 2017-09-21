@@ -11,32 +11,32 @@
 package remixlab.bias;
 
 /**
- * A [{@link BogusEvent},{@link Grabber}] tuple. An
- * enqueued tuple fires {@link Grabber#performInteraction(BogusEvent)}
+ * A [{@link Event},{@link Grabber}] tuple. An
+ * enqueued tuple fires {@link Grabber#performInteraction(Event)}
  * call from the event in the tuple.
  * <p>
  * Tuples are typically enqueued by an agent (see
- * {@link Agent#handle(BogusEvent)}), but may be enqueued manually, see
+ * {@link Agent#handle(Event)}), but may be enqueued manually, see
  * {@link InputHandler#enqueueEventTuple(EventGrabberTuple)}.
  */
 public class EventGrabberTuple {
-  protected BogusEvent event;
+  protected Event event;
   protected Grabber grabber;
 
   /**
-   * Constructs a {@link BogusEvent},
+   * Constructs a {@link Event},
    * {@link Grabber} tuple.
    *
-   * @param e {@link BogusEvent}
+   * @param e {@link Event}
    * @param g {@link Grabber}
    */
-  public EventGrabberTuple(BogusEvent e, Grabber g) {
+  public EventGrabberTuple(Event e, Grabber g) {
     event = e;
     grabber = g;
   }
 
   /**
-   * Calls {@link Grabber#performInteraction(BogusEvent)}.
+   * Calls {@link Grabber#performInteraction(Event)}.
    *
    * @return true if succeeded and false otherwise.
    */
@@ -50,7 +50,7 @@ public class EventGrabberTuple {
   /**
    * Returns the event from the tuple.
    */
-  public BogusEvent event() {
+  public Event event() {
     return event;
   }
 

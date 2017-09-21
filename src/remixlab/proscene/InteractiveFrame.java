@@ -20,7 +20,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.core.PVector;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.Profile;
 import remixlab.bias.Shortcut;
@@ -330,10 +330,10 @@ public class InteractiveFrame extends GenericFrame {
   /**
    * Same as {@code profile.handle(event)}.
    *
-   * @see Profile#handle(BogusEvent)
+   * @see Profile#handle(Event)
    */
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     profile.handle(event);
   }
 
@@ -350,9 +350,9 @@ public class InteractiveFrame extends GenericFrame {
     if (Scene.platform() == Platform.PROCESSING_DESKTOP)
       if ((shortcut instanceof MotionShortcut || shortcut instanceof ClickShortcut) && scene().pg() instanceof PGraphicsJava2D && (shortcut.id() == PApplet.CENTER || shortcut.id() == PApplet.RIGHT))
         if (shortcut instanceof MotionShortcut)
-          shortcut = new MotionShortcut(shortcut.id() == PApplet.CENTER ? (BogusEvent.ALT | shortcut.modifiers()) : (BogusEvent.META | shortcut.modifiers()), shortcut.id());
+          shortcut = new MotionShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id());
         else
-          shortcut = new ClickShortcut(shortcut.id() == PApplet.CENTER ? (BogusEvent.ALT | shortcut.modifiers()) : (BogusEvent.META | shortcut.modifiers()), shortcut.id(), ((ClickShortcut) shortcut).clickCount());
+          shortcut = new ClickShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id(), ((ClickShortcut) shortcut).clickCount());
     return shortcut;
   }
 
@@ -363,7 +363,7 @@ public class InteractiveFrame extends GenericFrame {
    * {@code frame.setBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Shortcut shortcut, String action) {
@@ -377,7 +377,7 @@ public class InteractiveFrame extends GenericFrame {
    * {@code frame.setBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Object, Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Object object, Shortcut shortcut, String action) {
@@ -401,7 +401,7 @@ public class InteractiveFrame extends GenericFrame {
    * {@code frame.hasBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#hasBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public boolean hasBinding(Shortcut shortcut) {
@@ -415,7 +415,7 @@ public class InteractiveFrame extends GenericFrame {
    * {@code frame.removeBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#removeBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void removeBinding(Shortcut shortcut) {
@@ -509,15 +509,15 @@ public class InteractiveFrame extends GenericFrame {
     setKeyBinding(KeyAgent.LEFT_KEY, "translateXNeg");
     setKeyBinding(KeyAgent.UP_KEY, "translateYPos");
     setKeyBinding(KeyAgent.DOWN_KEY, "translateYNeg");
-    setKeyBinding(BogusEvent.ALT, KeyAgent.UP_KEY, "rotateZPos");
-    setKeyBinding(BogusEvent.ALT, KeyAgent.DOWN_KEY, "rotateZNeg");
+    setKeyBinding(Event.ALT, KeyAgent.UP_KEY, "rotateZPos");
+    setKeyBinding(Event.ALT, KeyAgent.DOWN_KEY, "rotateZNeg");
     if (is3D()) {
-      setKeyBinding((BogusEvent.SHIFT | BogusEvent.CTRL), KeyAgent.UP_KEY, "translateZPos");
-      setKeyBinding((BogusEvent.SHIFT | BogusEvent.CTRL), KeyAgent.DOWN_KEY, "translateZNeg");
-      setKeyBinding(BogusEvent.CTRL, KeyAgent.RIGHT_KEY, "rotateXPos");
-      setKeyBinding(BogusEvent.CTRL, KeyAgent.LEFT_KEY, "rotateXNeg");
-      setKeyBinding(BogusEvent.CTRL, KeyAgent.UP_KEY, "rotateYPos");
-      setKeyBinding(BogusEvent.CTRL, KeyAgent.DOWN_KEY, "rotateYNeg");
+      setKeyBinding((Event.SHIFT | Event.CTRL), KeyAgent.UP_KEY, "translateZPos");
+      setKeyBinding((Event.SHIFT | Event.CTRL), KeyAgent.DOWN_KEY, "translateZNeg");
+      setKeyBinding(Event.CTRL, KeyAgent.RIGHT_KEY, "rotateXPos");
+      setKeyBinding(Event.CTRL, KeyAgent.LEFT_KEY, "rotateXNeg");
+      setKeyBinding(Event.CTRL, KeyAgent.UP_KEY, "rotateYPos");
+      setKeyBinding(Event.CTRL, KeyAgent.DOWN_KEY, "rotateYNeg");
     }
   }
 
@@ -985,11 +985,11 @@ public class InteractiveFrame extends GenericFrame {
    * <p>
    * To use it, create a custom InteractiveFrame class, implement a
    * {@code checkIfGrabsInput(CustomEvent)} method and override the
-   * {@link #checkIfGrabsInput(BogusEvent)} as follows:
+   * {@link #checkIfGrabsInput(Event)} as follows:
    * <pre>
    * {@code
    * @Override
-   * public boolean checkIfGrabsInput(BogusEvent event) {
+   * public boolean checkIfGrabsInput(Event event) {
    *   if(event instanceof CustomEvent)
    *     return checkIfGrabsInput(event);
    *   else
@@ -998,30 +998,30 @@ public class InteractiveFrame extends GenericFrame {
    * }
    * </pre>
    *
-   * @see remixlab.dandelion.core.GenericFrame#checkIfGrabsInput(BogusEvent)
-   * @see #checkIfGrabsInput(BogusEvent)
+   * @see remixlab.dandelion.core.GenericFrame#checkIfGrabsInput(Event)
+   * @see #checkIfGrabsInput(Event)
    */
-  protected boolean supercheckIfGrabsInput(BogusEvent event) {
+  protected boolean supercheckIfGrabsInput(Event event) {
     return super.checkIfGrabsInput(event);
   }
 
   /**
    * Checks for the existence of the
-   * {@link Grabber#checkIfGrabsInput(BogusEvent)} condition at the
+   * {@link Grabber#checkIfGrabsInput(Event)} condition at the
    * {@link Scene#pApplet()}, having
    * {@code public boolean checkIfGrabsInput(InteractiveFrame, CustomEvent)} as method
    * prototype. If it doesn't find it there, looks for the condition at this instance,
    * with a similar method prototype, but without the InteractiveFrame parameter.
    * You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * <b>Note: </b> Call {@link #supercheckIfGrabsInput(BogusEvent)} at your
+   * <b>Note: </b> Call {@link #supercheckIfGrabsInput(Event)} at your
    * interactive-frame derived class, if you prefer to use inheritance to override the
    * frame picking condition on a custom-event.
    *
-   * @see #supercheckIfGrabsInput(BogusEvent)
+   * @see #supercheckIfGrabsInput(Event)
    */
   @Override
-  public boolean checkIfGrabsInput(BogusEvent event) {
+  public boolean checkIfGrabsInput(Event event) {
     Method mth = null;
     Object obj = scene().pApplet();
     boolean frameParam = false;

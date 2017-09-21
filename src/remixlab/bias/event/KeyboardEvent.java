@@ -10,10 +10,10 @@
 
 package remixlab.bias.event;
 
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 
 /**
- * A keyboard event is a {@link BogusEvent} specialization that
+ * A keyboard event is a {@link Event} specialization that
  * encapsulates a {@link remixlab.bias.event.KeyboardShortcut}. Keyboard shortcuts may be
  * of one form out of two: 1. A single Character; or, 2. A modifier mask (such as: (ALT |
  * SHIFT)) plus a virtual-key.
@@ -26,7 +26,7 @@ import remixlab.bias.BogusEvent;
  * KeyEvent</a> to get some VK_* values. Note that Proscene sets them automatically from
  * the platform where the framework is running.
  */
-public class KeyboardEvent extends BogusEvent {
+public class KeyboardEvent extends Event {
   protected final char key;
 
   /**

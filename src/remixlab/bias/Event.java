@@ -16,7 +16,7 @@ import remixlab.util.HashCodeBuilder;
 
 /**
  * The root of all events that are to be handled by an {@link Agent}.
- * Every BogusEvent encapsulates a {@link Shortcut} which may be bound
+ * Every Event encapsulates a {@link Shortcut} which may be bound
  * to an user-defined action (see {@link #shortcut()}). Gesture initialization and
  * termination, which may be of the interest of {@link Grabber}
  * objects, are reported by {@link #fired()} and {@link #flushed()}, respectively.
@@ -33,7 +33,7 @@ import remixlab.util.HashCodeBuilder;
  * {@link #hashCode()}, {@link #equals(Object)} and {@link #get()} methods should be
  * overridden as well.
  * <p>
- * <b>Note</b> BogusEvent detection/reduction could happened in several different ways.
+ * <b>Note</b> Event detection/reduction could happened in several different ways.
  * For instance, in the context of Java-based application, it typically takes place when
  * implementing a mouse listener interface. In Processing, it does it when registering at
  * the PApplet the so called mouseEvent and KeyEvent methods. Moreover, the
@@ -41,7 +41,7 @@ import remixlab.util.HashCodeBuilder;
  * of these mechanisms are available (as it often happens when dealing with specialized,
  * non-default input hardware).
  */
-public class BogusEvent implements Copyable {
+public class Event implements Copyable {
   // modifier keys
   public static final int NO_MODIFIER_MASK = 0;
   public static final int NO_ID = 0;
@@ -67,7 +67,7 @@ public class BogusEvent implements Copyable {
     if (obj.getClass() != getClass())
       return false;
 
-    BogusEvent other = (BogusEvent) obj;
+    Event other = (Event) obj;
     return new EqualsBuilder().append(modifiers, other.modifiers).append(id, other.id).isEquals();
   }
 
@@ -78,7 +78,7 @@ public class BogusEvent implements Copyable {
   /**
    * Constructs an event with an "empty" {@link Shortcut}.
    */
-  public BogusEvent() {
+  public Event() {
     this.modifiers = NO_MODIFIER_MASK;
     this.id = NO_ID;
     timestamp = System.currentTimeMillis();
@@ -88,13 +88,13 @@ public class BogusEvent implements Copyable {
    * Constructs an event taking the given {@code modifiers} as a
    * {@link Shortcut}.
    */
-  public BogusEvent(int modifiers, int id) {
+  public Event(int modifiers, int id) {
     this.modifiers = modifiers;
     this.id = id;
     timestamp = System.currentTimeMillis();
   }
 
-  protected BogusEvent(BogusEvent other) {
+  protected Event(Event other) {
     this.modifiers = other.modifiers;
     this.id = other.id;
     this.timestamp = System.currentTimeMillis();
@@ -103,8 +103,8 @@ public class BogusEvent implements Copyable {
   }
 
   @Override
-  public BogusEvent get() {
-    return new BogusEvent(this);
+  public Event get() {
+    return new Event(this);
   }
 
   /**
@@ -113,12 +113,12 @@ public class BogusEvent implements Copyable {
    *
    * @see #flushed()
    */
-  public BogusEvent flush() {
+  public Event flush() {
     if (fired() || flushed()) {
       System.out.println("Warning: event already " + (fired() ? "fired" : "flushed"));
       return this;
     }
-    BogusEvent bogusevent = this.get();
+    Event bogusevent = this.get();
     bogusevent.flush = true;
     return bogusevent;
   }
@@ -129,12 +129,12 @@ public class BogusEvent implements Copyable {
    *
    * @see #flushed()
    */
-  public BogusEvent fire() {
+  public Event fire() {
     if (fired() || flushed()) {
       System.out.println("Warning: event already " + (fired() ? "fired" : "flushed"));
       return this;
     }
-    BogusEvent bogusevent = this.get();
+    Event bogusevent = this.get();
     bogusevent.fire = true;
     return bogusevent;
   }

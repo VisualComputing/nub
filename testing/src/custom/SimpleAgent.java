@@ -1,7 +1,7 @@
 package custom;
 
 import remixlab.bias.Agent;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Shortcut;
 import remixlab.proscene.Scene;
 
@@ -12,7 +12,7 @@ public class SimpleAgent extends Agent {
   public static final int SIMPLE_ID = Shortcut.registerID("SIMPLE");
   //public static final int SIMPLE_ID = Shortcut.registerID(5, "SIMPLE");
 
-  protected BogusEvent currentEvent;
+  protected Event currentEvent;
   protected boolean move, press, drag, release;
   Scene scene;
 
@@ -40,7 +40,7 @@ public class SimpleAgent extends Agent {
     drag = e.getAction() == processing.event.MouseEvent.DRAG;
     release = e.getAction() == processing.event.MouseEvent.RELEASE;
     if (move || press || drag || release) {
-      currentEvent = new BogusEvent(BogusEvent.NO_MODIFIER_MASK, SIMPLE_ID);
+      currentEvent = new Event(Event.NO_MODIFIER_MASK, SIMPLE_ID);
       handle(currentEvent);
       return;
     }

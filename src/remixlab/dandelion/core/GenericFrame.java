@@ -11,7 +11,7 @@
 package remixlab.dandelion.core;
 
 import remixlab.bias.Agent;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
@@ -890,7 +890,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   }
 
   @Override
-  public boolean checkIfGrabsInput(BogusEvent event) {
+  public boolean checkIfGrabsInput(Event event) {
     if (event instanceof KeyboardEvent)
       return checkIfGrabsInput((KeyboardEvent) event);
     if (event instanceof ClickEvent)
@@ -988,7 +988,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   }
 
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     if (event instanceof ClickEvent)
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -2994,7 +2994,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns the grabs input threshold which is used by the interactive frame to
-   * {@link #checkIfGrabsInput(BogusEvent)}.
+   * {@link #checkIfGrabsInput(Event)}.
    *
    * @see #setGrabsInputThreshold(float)
    */
@@ -3056,7 +3056,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Sets the length of the squared area around the frame {@link #center()} screen
-   * projection that defined the {@link #checkIfGrabsInput(BogusEvent)} condition used for
+   * projection that defined the {@link #checkIfGrabsInput(Event)} condition used for
    * frame picking.
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#FIXED}, the
@@ -3084,7 +3084,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    *
    * @see #pickingPrecision()
    * @see #grabsInputThreshold()
-   * @see #checkIfGrabsInput(BogusEvent)
+   * @see #checkIfGrabsInput(Event)
    */
   public void setGrabsInputThreshold(float threshold) {
     if (isEyeFrame()) {

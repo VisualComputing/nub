@@ -1,8 +1,7 @@
 package custom;
 
 import processing.core.PApplet;
-import remixlab.bias.BogusEvent;
-import remixlab.bias.Shortcut;
+import remixlab.bias.Event;
 import remixlab.dandelion.geom.Vec;
 import remixlab.proscene.InteractiveFrame;
 import remixlab.proscene.Scene;
@@ -35,8 +34,8 @@ public class CustomEvents extends PApplet {
     iFrame.setGrabsInputThreshold(scene.radius() / 4);
     iFrame.translate(50, 50);
 
-    scene.eyeFrame().setBinding(new WeirdShortcut(BogusEvent.NO_MODIFIER_MASK, WeirdAgent.WEIRD_ID), "weirdBehavior");
-    //scene.eyeFrame().setBinding(new Shortcut(BogusEvent.NO_MODIFIER_MASK, SimpleAgent.SIMPLE_ID), "simpleBehavior");
+    scene.eyeFrame().setBinding(new WeirdShortcut(Event.NO_MODIFIER_MASK, WeirdAgent.WEIRD_ID), "weirdBehavior");
+    //scene.eyeFrame().setBinding(new Shortcut(Event.NO_MODIFIER_MASK, SimpleAgent.SIMPLE_ID), "simpleBehavior");
   }
 
   void drawGeom() {
@@ -51,7 +50,7 @@ public class CustomEvents extends PApplet {
     frame.translate(event.x/100, event.y/100);
   }
 
-  public void simpleBehavior(InteractiveFrame frame, BogusEvent event) {
+  public void simpleBehavior(InteractiveFrame frame, Event event) {
     println("Simple behavior Arrived!");
   }
 

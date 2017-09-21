@@ -23,17 +23,17 @@ import java.util.Map.Entry;
  * .
  * <p>
  * To attach a profile to a grabber first override your
- * {@link Grabber#performInteraction(BogusEvent)} method like this:
+ * {@link Grabber#performInteraction(Event)} method like this:
  * <p>
  * <pre>
  * {@code
- *   public void performInteraction(BogusEvent event) {
+ *   public void performInteraction(Event event) {
  *     profile.handle(event);
  *   }
  * }
  * </pre>
  * <p>
- * (see {@link #handle(BogusEvent)}) and then simply pass the grabber instance to the
+ * (see {@link #handle(Event)}) and then simply pass the grabber instance to the
  * {@link #Profile(Grabber)} constructor.
  */
 public class Profile {
@@ -168,13 +168,13 @@ public class Profile {
 
   /**
    * Main class method to be called from
-   * {@link Grabber#performInteraction(BogusEvent)}. Calls an action
-   * handler if the {@link BogusEvent#shortcut()} is bound.
+   * {@link Grabber#performInteraction(Event)}. Calls an action
+   * handler if the {@link Event#shortcut()} is bound.
    *
    * @see #setBinding(Shortcut, String)
    * @see #setBinding(Object, Shortcut, String)
    */
-  public boolean handle(BogusEvent event) {
+  public boolean handle(Event event) {
     Method iHandlerMethod = method(event.shortcut());
     if (iHandlerMethod != null) {
       try {
@@ -235,13 +235,13 @@ public class Profile {
    * <p>
    * The available action prototypes for the {@link #context} are:
    * <ol>
-   * <li><b>public void action(grabber.getClass(), BogusEvent)</b></li>
+   * <li><b>public void action(grabber.getClass(), Event)</b></li>
    * <li><b>public void action(grabber.getClass())</b></li>
    * </ol>
    * <p>
    * The available action prototypes for the {@link #grabber()} are:
    * <ol>
-   * <li><b>public void action(BogusEvent)</b></li>
+   * <li><b>public void action(Event)</b></li>
    * <li><b>public void action()</b></li>
    * </ol>
    * <p>
@@ -337,7 +337,7 @@ public class Profile {
    * Attempt to set a shortcut for the {@code action} implemented by {@code object}. The
    * action procedure may have two different prototypes:
    * <ol>
-   * <li><b>public void action(BogusEvent)</b></li>
+   * <li><b>public void action(Event)</b></li>
    * <li><b>public void action()</b></li>
    * </ol>
    * The bogus-event type that may be passed to the first prototype is the one specified

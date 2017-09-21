@@ -11,7 +11,7 @@
 package remixlab.proscene;
 
 import remixlab.bias.Agent;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.Profile;
 import remixlab.bias.event.KeyboardEvent;
@@ -59,7 +59,7 @@ public class KeyAgent extends Agent {
    * <p>
    * Current implementation requires grabber objects to have a
    * {@link Profile} and to implement
-   * {@link Grabber#checkIfGrabsInput(BogusEvent)} on a
+   * {@link Grabber#checkIfGrabsInput(Event)} on a
    * {@code KeyboardEvent} as follows:
    * <p>
    * <pre>

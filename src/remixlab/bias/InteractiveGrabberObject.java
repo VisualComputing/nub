@@ -53,10 +53,10 @@ public class InteractiveGrabberObject extends GrabberObject {
   /**
    * Same as {@code profile.handle(event)}.
    *
-   * @see Profile#handle(BogusEvent)
+   * @see Profile#handle(Event)
    */
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     profile.handle(event);
   }
 
@@ -67,7 +67,7 @@ public class InteractiveGrabberObject extends GrabberObject {
    * {@code grabber.setBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Shortcut shortcut, String action) {
@@ -81,7 +81,7 @@ public class InteractiveGrabberObject extends GrabberObject {
    * {@code grabber.setBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Object, Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Object object, Shortcut shortcut, String action) {
@@ -105,7 +105,7 @@ public class InteractiveGrabberObject extends GrabberObject {
    * {@code grabber.hasBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#hasBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public boolean hasBinding(Shortcut shortcut) {
@@ -119,7 +119,7 @@ public class InteractiveGrabberObject extends GrabberObject {
    * {@code grabber.removeBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#removeBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void removeBinding(Shortcut shortcut) {

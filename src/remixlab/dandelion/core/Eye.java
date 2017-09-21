@@ -11,7 +11,7 @@
 package remixlab.dandelion.core;
 
 import remixlab.bias.Agent;
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.event.ClickEvent;
 import remixlab.bias.event.KeyboardEvent;
@@ -62,7 +62,7 @@ import java.util.List;
  */
 public abstract class Eye implements Copyable {
   class GrabberEyeFrame extends GenericFrame {
-    public final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = BogusEvent.NO_ID, // 1.b. Keys
+    public final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID, // 1.b. Keys
         LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
 
     public GrabberEyeFrame(AbstractScene _scene) {

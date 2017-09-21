@@ -18,19 +18,19 @@ import java.util.List;
 /**
  * Agents gather data from different sources --mostly from input devices such touch
  * surfaces or simple mice-- and reduce them into a rather simple but quite 'useful' set
- * of interface events ({@link BogusEvent} ) for third party objects (
+ * of interface events ({@link Event} ) for third party objects (
  * {@link Grabber} objects) to consume them (
- * {@link #handle(BogusEvent)}). Agents thus effectively open up a channel between all
+ * {@link #handle(Event)}). Agents thus effectively open up a channel between all
  * kinds of input data sources and user-space objects. To add/remove a grabber to/from the
  * {@link #grabbers()} collection issue {@link #addGrabber(Grabber)} /
  * {@link #removeGrabber(Grabber)} calls. Derive from this agent and either call
- * {@link #handle(BogusEvent)} or override {@link #handleFeed()} .
+ * {@link #handle(Event)} or override {@link #handleFeed()} .
  * <p>
  * The agent may send bogus-events to its {@link #inputGrabber()} which may be regarded as
  * the agent's grabber target. The {@link #inputGrabber()} may be set by querying each
  * grabber object in {@link #grabbers()} to check if its
- * {@link Grabber#checkIfGrabsInput(BogusEvent)}) condition is met (see
- * {@link #updateTrackedGrabber(BogusEvent)}, {@link #updateTrackedGrabberFeed()}). The
+ * {@link Grabber#checkIfGrabsInput(Event)}) condition is met (see
+ * {@link #updateTrackedGrabber(Event)}, {@link #updateTrackedGrabberFeed()}). The
  * first grabber meeting the condition, namely the {@link #trackedGrabber()}), will then
  * be set as the {@link #inputGrabber()}. When no grabber meets the condition, the
  * {@link #trackedGrabber()} is then set to null. In this case, a non-null
@@ -129,7 +129,7 @@ public abstract class Agent {
   }
 
   /**
-   * Feeds {@link #updateTrackedGrabber(BogusEvent)} and {@link #handle(BogusEvent)} with
+   * Feeds {@link #updateTrackedGrabber(Event)} and {@link #handle(Event)} with
    * the returned event. Returns null by default. Use it in place of
    * {@link #updateTrackedGrabberFeed()} and/or {@link #handleFeed()} which take
    * higher-precedence.
@@ -141,15 +141,15 @@ public abstract class Agent {
    * @see InputHandler#handle()
    * @see #handleFeed()
    * @see #updateTrackedGrabberFeed()
-   * @see #handle(BogusEvent)
-   * @see #updateTrackedGrabber(BogusEvent)
+   * @see #handle(Event)
+   * @see #updateTrackedGrabber(Event)
    */
-  protected BogusEvent feed() {
+  protected Event feed() {
     return null;
   }
 
   /**
-   * Feeds {@link #handle(BogusEvent)} with the returned event. Returns null by default.
+   * Feeds {@link #handle(Event)} with the returned event. Returns null by default.
    * Use it in place of {@link #feed()} which takes lower-precedence.
    * <p>
    * Automatically call by the main event loop (
@@ -159,15 +159,15 @@ public abstract class Agent {
    * @see InputHandler#handle()
    * @see #feed()
    * @see #updateTrackedGrabberFeed()
-   * @see #handle(BogusEvent)
-   * @see #updateTrackedGrabber(BogusEvent)
+   * @see #handle(Event)
+   * @see #updateTrackedGrabber(Event)
    */
-  protected BogusEvent handleFeed() {
+  protected Event handleFeed() {
     return null;
   }
 
   /**
-   * Feeds {@link #updateTrackedGrabber(BogusEvent)} with the returned event. Returns null
+   * Feeds {@link #updateTrackedGrabber(Event)} with the returned event. Returns null
    * by default. Use it in place of {@link #feed()} which takes lower-precedence.
    * <p>
    * Automatically call by the main event loop (
@@ -176,10 +176,10 @@ public abstract class Agent {
    * @see InputHandler#handle()
    * @see #feed()
    * @see #handleFeed()
-   * @see #handle(BogusEvent)
-   * @see #updateTrackedGrabber(BogusEvent)
+   * @see #handle(Event)
+   * @see #updateTrackedGrabber(Event)
    */
-  protected BogusEvent updateTrackedGrabberFeed() {
+  protected Event updateTrackedGrabberFeed() {
     return null;
   }
 
@@ -193,7 +193,7 @@ public abstract class Agent {
   /**
    * If {@link #isTracking()} and the agent is registered at the {@link #inputHandler()}
    * then queries each object in the {@link #grabbers()} to check if the
-   * {@link Grabber#checkIfGrabsInput(BogusEvent)}) condition is met.
+   * {@link Grabber#checkIfGrabsInput(Event)}) condition is met.
    * The first object meeting the condition will be set as the {@link #inputGrabber()} and
    * returned. Note that a null grabber means that no object in the {@link #grabbers()}
    * met the condition. A {@link #inputGrabber()} may also be enforced simply with
@@ -203,12 +203,12 @@ public abstract class Agent {
    * @return the new grabber which may be null.
    * @see #setDefaultGrabber(Grabber)
    * @see #isTracking()
-   * @see #handle(BogusEvent)
+   * @see #handle(Event)
    * @see #trackedGrabber()
    * @see #defaultGrabber()
    * @see #inputGrabber()
    */
-  protected Grabber updateTrackedGrabber(BogusEvent event) {
+  protected Grabber updateTrackedGrabber(Event event) {
     if (event == null || !inputHandler().isAgentRegistered(this) || !isTracking())
       return trackedGrabber();
     // We first check if default grabber is tracked,
@@ -237,7 +237,7 @@ public abstract class Agent {
   }
 
   /**
-   * Returns the sensitivities used in {@link #handle(BogusEvent)} to
+   * Returns the sensitivities used in {@link #handle(Event)} to
    * {@link remixlab.bias.event.MotionEvent#modulate(float[])}.
    */
   public float[] sensitivities(MotionEvent event) {
@@ -248,15 +248,15 @@ public abstract class Agent {
    * Enqueues an EventGrabberTuple(event, inputGrabber()) on the
    * {@link InputHandler#eventTupleQueue()}, thus enabling a call on
    * the {@link #inputGrabber()}
-   * {@link Grabber#performInteraction(BogusEvent)} method (which is
+   * {@link Grabber#performInteraction(Event)} method (which is
    * scheduled for execution till the end of this main event loop iteration, see
    * {@link InputHandler#enqueueEventTuple(EventGrabberTuple)} for
    * details).
    *
    * @see #inputGrabber()
-   * @see #updateTrackedGrabber(BogusEvent)
+   * @see #updateTrackedGrabber(Event)
    */
-  protected boolean handle(BogusEvent event) {
+  protected boolean handle(Event event) {
     if (event == null || !handler.isAgentRegistered(this) || inputHandler() == null)
       return false;
     if (event instanceof MotionEvent)
@@ -299,7 +299,7 @@ public abstract class Agent {
 
   /**
    * Enables tracking so that the {@link #inputGrabber()} may be updated when calling
-   * {@link #updateTrackedGrabber(BogusEvent)}.
+   * {@link #updateTrackedGrabber(Event)}.
    *
    * @see #disableTracking()
    */
@@ -333,7 +333,7 @@ public abstract class Agent {
   }
 
   /**
-   * Returns the grabber set after {@link #updateTrackedGrabber(BogusEvent)} is called. It
+   * Returns the grabber set after {@link #updateTrackedGrabber(Event)} is called. It
    * may be null.
    */
   public Grabber trackedGrabber() {

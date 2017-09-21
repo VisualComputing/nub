@@ -18,14 +18,14 @@ import java.util.Collections;
 import java.util.HashMap;
 
 /**
- * Shortcuts are {@link BogusEvent} means to bind user-defined actions
- * from a {@link BogusEvent}.
+ * Shortcuts are {@link Event} means to bind user-defined actions
+ * from a {@link Event}.
  * <p>
- * Every {@link BogusEvent} instance has a shortcut which represents a
+ * Every {@link Event} instance has a shortcut which represents a
  * gesture-{@link #id()}, for instance, the button being dragged and the modifier key
  * pressed (see {@link #modifiers()}) at the very moment an user interaction takes place,
  * such as when she drags a giving mouse button while pressing the 'CTRL' modifier key.
- * See {@link BogusEvent#shortcut()}. Note that for the shortcut
+ * See {@link Event#shortcut()}. Note that for the shortcut
  * {@link #description()} to work properly, gesture-{@link #id()}s should be registered at
  * the shortcut class first (see {@link #registerID(String)}).
  * <p>
@@ -95,8 +95,8 @@ public class Shortcut {
    * parameter being NO_NOMODIFIER_MASK.
    */
   public Shortcut() {
-    mask = BogusEvent.NO_MODIFIER_MASK;
-    id = BogusEvent.NO_ID;
+    mask = Event.NO_MODIFIER_MASK;
+    id = Event.NO_ID;
   }
 
   /**
@@ -105,7 +105,7 @@ public class Shortcut {
    * @param _id gesture-id
    */
   public Shortcut(int _id) {
-    mask = BogusEvent.NO_MODIFIER_MASK;
+    mask = Event.NO_MODIFIER_MASK;
     id = _id;
   }
 
@@ -197,7 +197,7 @@ public class Shortcut {
    * @return description as a String
    */
   public String description() {
-    String m = BogusEvent.modifiersText(mask);
+    String m = Event.modifiersText(mask);
     String i = ids.get(getClass().getSimpleName() + String.valueOf(id));
     return ((m.length() > 0) ? m + "+" + i : i);
   }
@@ -221,8 +221,8 @@ public class Shortcut {
    *
    * @see #defaultEventClass()
    */
-  protected Class<? extends BogusEvent> eventClass() {
-    return BogusEvent.class;
+  protected Class<? extends Event> eventClass() {
+    return Event.class;
   }
 
   /**
@@ -234,7 +234,7 @@ public class Shortcut {
    *
    * @see #eventClass()
    */
-  protected Class<? extends BogusEvent> defaultEventClass() {
+  protected Class<? extends Event> defaultEventClass() {
     return null;
   }
 }

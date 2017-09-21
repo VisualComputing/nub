@@ -25,7 +25,6 @@ import remixlab.bias.event.KeyboardShortcut;
 import remixlab.bias.event.MotionShortcut;
 import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
-import remixlab.dandelion.ik.Solver;
 import remixlab.fpstiming.TimingTask;
 
 import java.lang.reflect.Method;
@@ -260,11 +259,11 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * To use it, create a custom InteractiveFrame class, implement a
    * {@code checkIfGrabsInput(CustomEvent)} method and override the
-   * {@link #checkIfGrabsInput(BogusEvent)} as follows:
+   * {@link #checkIfGrabsInput(Event)} as follows:
    * <pre>
    * {@code
    * @Override
-   * public boolean checkIfGrabsInput(BogusEvent event) {
+   * public boolean checkIfGrabsInput(Event event) {
    *   if(event instanceof CustomEvent)
    *     return checkIfGrabsInput(event);
    *   else
@@ -273,30 +272,30 @@ public class Scene extends AbstractScene implements PConstants {
    * }
    * </pre>
    *
-   * @see remixlab.dandelion.core.GenericFrame#checkIfGrabsInput(BogusEvent)
-   * @see #checkIfGrabsInput(BogusEvent)
+   * @see remixlab.dandelion.core.GenericFrame#checkIfGrabsInput(Event)
+   * @see #checkIfGrabsInput(Event)
    */
-  protected boolean supercheckIfGrabsInput(BogusEvent event) {
+  protected boolean supercheckIfGrabsInput(Event event) {
     return super.checkIfGrabsInput(event);
   }
 
   /**
    * Checks for the existence of the
-   * {@link Grabber#checkIfGrabsInput(BogusEvent)} condition at the
+   * {@link Grabber#checkIfGrabsInput(Event)} condition at the
    * {@link #pApplet()}, having
    * {@code public boolean checkIfGrabsInput(Scene, CustomEvent)} as method
    * prototype. If it doesn't find it there, looks for the condition at this instance,
    * with a similar method prototype, but without the Scene parameter.
    * You don't need to call this. Automatically called by agents handling this scene.
    * <p>
-   * <b>Note: </b> Call {@link #supercheckIfGrabsInput(BogusEvent)} at your scene
+   * <b>Note: </b> Call {@link #supercheckIfGrabsInput(Event)} at your scene
    * derived class, if you prefer to use inheritance to override the scene picking
    * condition on a custom-event.
    *
-   * @see #supercheckIfGrabsInput(BogusEvent)
+   * @see #supercheckIfGrabsInput(Event)
    */
   @Override
-  public boolean checkIfGrabsInput(BogusEvent event) {
+  public boolean checkIfGrabsInput(Event event) {
     Method mth = null;
     Object obj = pApplet();
     boolean sceneParam = false;
@@ -3292,10 +3291,10 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Same as {@code profile.handle(event)}.
    *
-   * @see Profile#handle(BogusEvent)
+   * @see Profile#handle(Event)
    */
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     profile.handle(event);
   }
 
@@ -3498,14 +3497,14 @@ public class Scene extends AbstractScene implements PConstants {
     setKeyBinding('r', "togglePathsVisualHint");
     setKeyBinding('s', "interpolateToFitScene");
     setKeyBinding('S', "showAll");
-    setKeyBinding(BogusEvent.CTRL, '1', "addKeyFrameToPath1");
-    setKeyBinding(BogusEvent.ALT, '1', "deletePath1");
+    setKeyBinding(Event.CTRL, '1', "addKeyFrameToPath1");
+    setKeyBinding(Event.ALT, '1', "deletePath1");
     setKeyBinding('1', "playPath1");
-    setKeyBinding(BogusEvent.CTRL, '2', "addKeyFrameToPath2");
-    setKeyBinding(BogusEvent.ALT, '2', "deletePath2");
+    setKeyBinding(Event.CTRL, '2', "addKeyFrameToPath2");
+    setKeyBinding(Event.ALT, '2', "deletePath2");
     setKeyBinding('2', "playPath2");
-    setKeyBinding(BogusEvent.CTRL, '3', "addKeyFrameToPath3");
-    setKeyBinding(BogusEvent.ALT, '3', "deletePath3");
+    setKeyBinding(Event.CTRL, '3', "addKeyFrameToPath3");
+    setKeyBinding(Event.ALT, '3', "deletePath3");
     setKeyBinding('3', "playPath3");
   }
 
@@ -3522,9 +3521,9 @@ public class Scene extends AbstractScene implements PConstants {
     if (platform() == Platform.PROCESSING_DESKTOP)
       if ((shortcut instanceof MotionShortcut || shortcut instanceof ClickShortcut) && pg() instanceof PGraphicsJava2D && (shortcut.id() == PApplet.CENTER || shortcut.id() == PApplet.RIGHT))
         if (shortcut instanceof MotionShortcut)
-          shortcut = new MotionShortcut(shortcut.id() == PApplet.CENTER ? (BogusEvent.ALT | shortcut.modifiers()) : (BogusEvent.META | shortcut.modifiers()), shortcut.id());
+          shortcut = new MotionShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id());
         else
-          shortcut = new ClickShortcut(shortcut.id() == PApplet.CENTER ? (BogusEvent.ALT | shortcut.modifiers()) : (BogusEvent.META | shortcut.modifiers()), shortcut.id(), ((ClickShortcut) shortcut).clickCount());
+          shortcut = new ClickShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id(), ((ClickShortcut) shortcut).clickCount());
     return shortcut;
   }
 
@@ -3535,7 +3534,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@code scene.setBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Shortcut shortcut, String action) {
@@ -3549,7 +3548,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@code scene.setBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
    *
    * @see Profile#setBinding(Object, Shortcut, String)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void setBinding(Object object, Shortcut shortcut, String action) {
@@ -3573,7 +3572,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@code scene.hasBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#hasBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public boolean hasBinding(Shortcut shortcut) {
@@ -3587,7 +3586,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@code scene.removeBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
    *
    * @see Profile#removeBinding(Shortcut)
-   * @see BogusEvent
+   * @see Event
    * @see Shortcut
    */
   public void removeBinding(Shortcut shortcut) {

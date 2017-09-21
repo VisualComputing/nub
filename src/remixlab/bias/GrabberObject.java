@@ -17,7 +17,7 @@ import remixlab.bias.event.*;
  * {@link Grabber} interface.
  * <p>
  * Based on the concrete event type, this model object splits the
- * {@link #checkIfGrabsInput(BogusEvent)} and the {@link #performInteraction(BogusEvent)}
+ * {@link #checkIfGrabsInput(Event)} and the {@link #performInteraction(Event)}
  * methods into more specific versions of them, e.g.,
  * {@link #checkIfGrabsInput(ClickEvent)}, {@link #checkIfGrabsInput(DOF3Event)},
  * {@link #performInteraction(DOF6Event)} , {@link #performInteraction(KeyboardEvent)} and
@@ -69,7 +69,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   @Override
-  public void performInteraction(BogusEvent event) {
+  public void performInteraction(Event event) {
     if (event instanceof KeyboardEvent)
       performInteraction((KeyboardEvent) event);
     if (event instanceof ClickEvent)
@@ -140,7 +140,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   @Override
-  public boolean checkIfGrabsInput(BogusEvent event) {
+  public boolean checkIfGrabsInput(Event event) {
     if (event instanceof KeyboardEvent)
       return checkIfGrabsInput((KeyboardEvent) event);
     if (event instanceof ClickEvent)

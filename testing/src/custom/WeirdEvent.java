@@ -1,11 +1,11 @@
 package custom;
 
-import remixlab.bias.BogusEvent;
+import remixlab.bias.Event;
 
 /**
  * Created by pierre on 11/24/16.
  */
-public class WeirdEvent extends BogusEvent {
+public class WeirdEvent extends Event {
   protected float x, y;
 
   public WeirdEvent(float dx, float dy, int modifiers, int id) {
