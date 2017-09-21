@@ -8,5 +8,18 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-3x" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/.lib/android" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/.lib/android" />
+        </SOURCES>
+        <jarDirectory url="file://$USER_HOME$/.lib/android" recursive="false" />
+        <jarDirectory url="file://$USER_HOME$/.lib/android" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
   </component>
 </module>
