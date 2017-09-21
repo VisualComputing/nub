@@ -20,7 +20,7 @@ import remixlab.bias.event.*;
  * {@link #checkIfGrabsInput(Event)} and the {@link #performInteraction(Event)}
  * methods into more specific versions of them, e.g.,
  * {@link #checkIfGrabsInput(ClickEvent)}, {@link #checkIfGrabsInput(DOF3Event)},
- * {@link #performInteraction(DOF6Event)} , {@link #performInteraction(KeyboardEvent)} and
+ * {@link #performInteraction(DOF6Event)} , {@link #performInteraction(KeyEvent)} and
  * so on. Thus allowing implementations of this abstract GrabberObject to override only
  * those method signatures that might be of their interest.
  */
@@ -70,8 +70,8 @@ public abstract class GrabberObject implements Grabber {
 
   @Override
   public void performInteraction(Event event) {
-    if (event instanceof KeyboardEvent)
-      performInteraction((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      performInteraction((KeyEvent) event);
     if (event instanceof ClickEvent)
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -99,9 +99,9 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to perform an interaction from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
-  protected void performInteraction(KeyboardEvent event) {
+  protected void performInteraction(KeyEvent event) {
   }
 
   /**
@@ -141,8 +141,8 @@ public abstract class GrabberObject implements Grabber {
 
   @Override
   public boolean checkIfGrabsInput(Event event) {
-    if (event instanceof KeyboardEvent)
-      return checkIfGrabsInput((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      return checkIfGrabsInput((KeyEvent) event);
     if (event instanceof ClickEvent)
       return checkIfGrabsInput((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -156,7 +156,7 @@ public abstract class GrabberObject implements Grabber {
    * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
    * <p>
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
   public boolean checkIfGrabsInput(MotionEvent event) {
     if (event instanceof DOF1Event)
@@ -172,9 +172,9 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
-  protected boolean checkIfGrabsInput(KeyboardEvent event) {
+  protected boolean checkIfGrabsInput(KeyEvent event) {
     return false;
   }
 

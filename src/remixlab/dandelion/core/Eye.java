@@ -14,7 +14,7 @@ import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.event.ClickEvent;
-import remixlab.bias.event.KeyboardEvent;
+import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
 import remixlab.dandelion.core.AbstractScene.Platform;
 import remixlab.dandelion.geom.*;
@@ -122,7 +122,7 @@ public abstract class Eye implements Copyable {
     }
 
     @Override
-    public void performInteraction(KeyboardEvent event) {
+    public void performInteraction(KeyEvent event) {
       if (event.isShiftDown()) {
         if (event.id() == UP_KEY)
           translateY(true);

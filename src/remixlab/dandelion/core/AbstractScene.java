@@ -70,12 +70,12 @@ import java.util.List;
  * </ol>
  * <p>
  * A grabber scene implements the {@link Grabber} interface and thus
- * can react to user (keyboard) gestures, (see {@link #performInteraction(KeyboardEvent)}
- * and {@link #checkIfGrabsInput(KeyboardEvent)}). For example, with the following code:
+ * can react to user (keyboard) gestures, (see {@link #performInteraction(KeyEvent)}
+ * and {@link #checkIfGrabsInput(KeyEvent)}). For example, with the following code:
  * <p>
  * <pre>
  * {@code
- * protected void performInteraction(KeyboardEvent event) {
+ * protected void performInteraction(KeyEvent event) {
  *   if(event.key() == 'z')
  *     toggleCameraType();
  * }
@@ -542,8 +542,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   @Override
   public boolean checkIfGrabsInput(Event event) {
-    if (event instanceof KeyboardEvent)
-      return checkIfGrabsInput((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      return checkIfGrabsInput((KeyEvent) event);
     if (event instanceof ClickEvent)
       return checkIfGrabsInput((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -580,10 +580,10 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
-  public boolean checkIfGrabsInput(KeyboardEvent event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyboardEvent event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(KeyEvent event) {
+    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -627,8 +627,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)
       performInteraction((MotionEvent) event);
-    if (event instanceof KeyboardEvent)
-      performInteraction((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      performInteraction((KeyEvent) event);
   }
 
   /**
@@ -687,10 +687,10 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Override this method when you want the object to perform an interaction from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
-  protected void performInteraction(KeyboardEvent event) {
-    AbstractScene.showMissingImplementationWarning("performInteraction(KeyboardEvent event)", this.getClass().getName());
+  protected void performInteraction(KeyEvent event) {
+    AbstractScene.showMissingImplementationWarning("performInteraction(KeyEvent event)", this.getClass().getName());
   }
 
   /**

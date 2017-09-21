@@ -10,6 +10,9 @@
 
 package remixlab.bias;
 
+import remixlab.bias.event.KeyEvent;
+import remixlab.bias.event.KeyShortcut;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -250,8 +253,8 @@ public class Profile {
    * <ol>
    * <li>A {@link remixlab.bias.event.ClickEvent} for a
    * {@link remixlab.bias.event.ClickShortcut}</li>
-   * <li>A {@link remixlab.bias.event.KeyboardEvent} for a
-   * {@link remixlab.bias.event.KeyboardShortcut}</li>
+   * <li>A {@link KeyEvent} for a
+   * {@link KeyShortcut}</li>
    * <li>A {@code DOFnEvent} for a {@link remixlab.bias.event.MotionShortcut}, where
    * {@code n} is the {@link remixlab.bias.event.MotionShortcut#dofs(int)} of the
    * motion-shortcut {@link remixlab.bias.event.MotionShortcut#id()}.</li>
@@ -345,8 +348,8 @@ public class Profile {
    * <ol>
    * <li>A {@link remixlab.bias.event.ClickEvent} for a
    * {@link remixlab.bias.event.ClickShortcut}</li>
-   * <li>A {@link remixlab.bias.event.KeyboardEvent} for a
-   * {@link remixlab.bias.event.KeyboardShortcut}</li>
+   * <li>A {@link KeyEvent} for a
+   * {@link KeyShortcut}</li>
    * <li>A {@code DOFnEvent} for a {@link remixlab.bias.event.MotionShortcut}, where
    * {@code n} is the {@link remixlab.bias.event.MotionShortcut#dofs(int)} of the
    * motion-shortcut {@link remixlab.bias.event.MotionShortcut#id()}.</li>

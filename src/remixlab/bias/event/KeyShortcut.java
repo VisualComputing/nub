@@ -15,13 +15,13 @@ import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
 
 /**
- * This class represents {@link remixlab.bias.event.KeyboardEvent} shortcuts.
+ * This class represents {@link KeyEvent} shortcuts.
  * <p>
  * Keyboard shortcuts can be of one out of two forms: 1. Characters (e.g., 'a'); 2.
  * Virtual keys (e.g., right arrow key); or, 2. Key combinations (e.g., CTRL key + virtual
  * key representing 'a').
  */
-public final class KeyboardShortcut extends Shortcut {
+public final class KeyShortcut extends Shortcut {
   @Override
   public int hashCode() {
     return new HashCodeBuilder(17, 37).appendSuper(super.hashCode()).append(key).toHashCode();
@@ -35,7 +35,7 @@ public final class KeyboardShortcut extends Shortcut {
     if (obj.getClass() != getClass())
       return false;
 
-    KeyboardShortcut rhs = (KeyboardShortcut) obj;
+    KeyShortcut rhs = (KeyShortcut) obj;
     return new EqualsBuilder().appendSuper(super.equals(obj)).append(key, rhs.key).isEquals();
   }
 
@@ -46,7 +46,7 @@ public final class KeyboardShortcut extends Shortcut {
    *
    * @param k the character that defines the keyboard shortcut.
    */
-  public KeyboardShortcut(char k) {
+  public KeyShortcut(char k) {
     super();
     key = k;
   }
@@ -57,7 +57,7 @@ public final class KeyboardShortcut extends Shortcut {
    * @param m  the mask
    * @param vk the virtual key that defines the keyboard shortcut.
    */
-  public KeyboardShortcut(int m, int vk) {
+  public KeyShortcut(int m, int vk) {
     super(m, vk);
     key = '\0';
   }
@@ -67,34 +67,34 @@ public final class KeyboardShortcut extends Shortcut {
    *
    * @param vk the virtual key that defines the keyboard shortcut.
    */
-  public KeyboardShortcut(int vk) {
+  public KeyShortcut(int vk) {
     super(vk);
     key = '\0';
   }
 
   @Override
-  public Class<? extends KeyboardEvent> eventClass() {
-    return KeyboardEvent.class;
+  public Class<? extends KeyEvent> eventClass() {
+    return KeyEvent.class;
   }
 
   /**
-   * Same as {@code return Shortcut.registerID(KeyboardShortcut.class, id, description)}.
+   * Same as {@code return Shortcut.registerID(KeyShortcut.class, id, description)}.
    *
    * @see Shortcut#registerID(Class, int, String)
    * @see #hasID(int)
    */
   public static int registerID(int id, String description) {
-    return Shortcut.registerID(KeyboardShortcut.class, id, description);
+    return Shortcut.registerID(KeyShortcut.class, id, description);
   }
 
   /**
-   * Same as {@code return Shortcut.hasID(KeyboardShortcut.class, id)}.
+   * Same as {@code return Shortcut.hasID(KeyShortcut.class, id)}.
    *
    * @see Shortcut#hasID(Class, int)
    * @see #registerID(int, String)
    */
   public static boolean hasID(int id) {
-    return Shortcut.hasID(KeyboardShortcut.class, id);
+    return Shortcut.hasID(KeyShortcut.class, id);
   }
 
   @Override

@@ -25,8 +25,8 @@ import remixlab.bias.Grabber;
 import remixlab.bias.Profile;
 import remixlab.bias.Shortcut;
 import remixlab.bias.event.ClickShortcut;
-import remixlab.bias.event.KeyboardEvent;
-import remixlab.bias.event.KeyboardShortcut;
+import remixlab.bias.event.KeyEvent;
+import remixlab.bias.event.KeyShortcut;
 import remixlab.bias.event.MotionShortcut;
 import remixlab.dandelion.core.AbstractScene;
 import remixlab.dandelion.core.AbstractScene.Platform;
@@ -607,111 +607,111 @@ public class InteractiveFrame extends GenericFrame {
   // Key
 
   /**
-   * Same as {@code setBinding(new KeyboardShortcut(vkey), action)}.
+   * Same as {@code setBinding(new KeyShortcut(vkey), action)}.
    *
    * @see #setBinding(Shortcut, String)
    */
   public void setKeyBinding(int vkey, String action) {
-    setBinding(new KeyboardShortcut(vkey), action);
+    setBinding(new KeyShortcut(vkey), action);
   }
 
   /**
-   * Same as {@code setBinding(new KeyboardShortcut(key), action)}.
+   * Same as {@code setBinding(new KeyShortcut(key), action)}.
    *
    * @see #setBinding(Object, Shortcut, String)
    */
   public void setKeyBinding(char key, String action) {
-    setBinding(new KeyboardShortcut(key), action);
+    setBinding(new KeyShortcut(key), action);
   }
 
   /**
-   * Same as {@code setBinding(object, new KeyboardShortcut(vkey), action)}.
+   * Same as {@code setBinding(object, new KeyShortcut(vkey), action)}.
    *
    * @see #setBinding(Object, Shortcut, String)
    */
   public void setKeyBinding(Object object, int vkey, String action) {
-    setBinding(object, new KeyboardShortcut(vkey), action);
+    setBinding(object, new KeyShortcut(vkey), action);
   }
 
   /**
-   * Same as {@code setBinding(object, new KeyboardShortcut(key), action)}.
+   * Same as {@code setBinding(object, new KeyShortcut(key), action)}.
    *
    * @see #setBinding(Object, Shortcut, String)
    */
   public void setKeyBinding(Object object, char key, String action) {
-    setBinding(object, new KeyboardShortcut(key), action);
+    setBinding(object, new KeyShortcut(key), action);
   }
 
   /**
-   * Same as {@code return hasBinding(new KeyboardShortcut(vkey))}.
+   * Same as {@code return hasBinding(new KeyShortcut(vkey))}.
    *
    * @see #hasBinding(Shortcut)
    */
   public boolean hasKeyBinding(int vkey) {
-    return hasBinding(new KeyboardShortcut(vkey));
+    return hasBinding(new KeyShortcut(vkey));
   }
 
   /**
-   * Same as {@code return hasBinding(new KeyboardShortcut(key))}.
+   * Same as {@code return hasBinding(new KeyShortcut(key))}.
    *
    * @see #hasBinding(Shortcut)
    */
   public boolean hasKeyBinding(char key) {
-    return hasBinding(new KeyboardShortcut(key));
+    return hasBinding(new KeyShortcut(key));
   }
 
   /**
-   * Same as {@code removeBinding(new KeyboardShortcut(vkey))}.
+   * Same as {@code removeBinding(new KeyShortcut(vkey))}.
    *
    * @see #removeBinding(Shortcut)
    */
   public void removeKeyBinding(int vkey) {
-    removeBinding(new KeyboardShortcut(vkey));
+    removeBinding(new KeyShortcut(vkey));
   }
 
   /**
-   * Same as {@code removeBinding(new KeyboardShortcut(key))}.
+   * Same as {@code removeBinding(new KeyShortcut(key))}.
    *
    * @see #removeBinding(Shortcut)
    */
   public void removeKeyBinding(char key) {
-    removeBinding(new KeyboardShortcut(key));
+    removeBinding(new KeyShortcut(key));
   }
 
   /**
-   * Same as {@code setBinding(new KeyboardShortcut(mask, vkey), action)}.
+   * Same as {@code setBinding(new KeyShortcut(mask, vkey), action)}.
    *
    * @see #setBinding(Shortcut, String)
    */
   public void setKeyBinding(int mask, int vkey, String action) {
-    setBinding(new KeyboardShortcut(mask, vkey), action);
+    setBinding(new KeyShortcut(mask, vkey), action);
   }
 
   /**
-   * Same as {@code setBinding(object, new KeyboardShortcut(mask, vkey), action)}.
+   * Same as {@code setBinding(object, new KeyShortcut(mask, vkey), action)}.
    *
    * @see #setBinding(Object, Shortcut, String)
    */
   public void setKeyBinding(Object object, int mask, int vkey, String action) {
-    setBinding(object, new KeyboardShortcut(mask, vkey), action);
+    setBinding(object, new KeyShortcut(mask, vkey), action);
   }
 
   /**
-   * Same as {@code return hasBinding(new KeyboardShortcut(mask, vkey))}.
+   * Same as {@code return hasBinding(new KeyShortcut(mask, vkey))}.
    *
    * @see #hasBinding(Shortcut)
    */
   public boolean hasKeyBinding(int mask, int vkey) {
-    return hasBinding(new KeyboardShortcut(mask, vkey));
+    return hasBinding(new KeyShortcut(mask, vkey));
   }
 
   /**
-   * Same as {@code removeBinding(new KeyboardShortcut(mask, vkey))}.
+   * Same as {@code removeBinding(new KeyShortcut(mask, vkey))}.
    *
    * @see #removeBinding(Shortcut)
    */
   public void removeKeyBinding(int mask, int vkey) {
-    removeBinding(new KeyboardShortcut(mask, vkey));
+    removeBinding(new KeyShortcut(mask, vkey));
   }
 
   /**
@@ -752,12 +752,12 @@ public class InteractiveFrame extends GenericFrame {
 
   /**
    * Remove all key bindings. Same as
-   * {@code removeBindings(KeyboardShortcut.class)}.
+   * {@code removeBindings(KeyShortcut.class)}.
    *
    * @see #removeBindings(Class)
    */
   public void removeKeyBindings() {
-    removeBindings(KeyboardShortcut.class);
+    removeBindings(KeyShortcut.class);
   }
 
   // click
@@ -1083,7 +1083,7 @@ public class InteractiveFrame extends GenericFrame {
    * @see remixlab.proscene.KeyAgent#keyEvent(processing.event.KeyEvent)
    */
   @Override
-  public boolean checkIfGrabsInput(KeyboardEvent event) {
+  public boolean checkIfGrabsInput(KeyEvent event) {
     return profile.hasBinding(event.shortcut());
   }
 

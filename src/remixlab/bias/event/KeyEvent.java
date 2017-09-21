@@ -14,7 +14,7 @@ import remixlab.bias.Event;
 
 /**
  * A keyboard event is a {@link Event} specialization that
- * encapsulates a {@link remixlab.bias.event.KeyboardShortcut}. Keyboard shortcuts may be
+ * encapsulates a {@link KeyShortcut}. Keyboard shortcuts may be
  * of one form out of two: 1. A single Character; or, 2. A modifier mask (such as: (ALT |
  * SHIFT)) plus a virtual-key.
  * <p>
@@ -26,28 +26,28 @@ import remixlab.bias.Event;
  * KeyEvent</a> to get some VK_* values. Note that Proscene sets them automatically from
  * the platform where the framework is running.
  */
-public class KeyboardEvent extends Event {
+public class KeyEvent extends Event {
   protected final char key;
 
   /**
    * Constructs a keyboard event with the <b>modifiers</b> and <b>vk</b> defining its
-   * {@link remixlab.bias.event.KeyboardShortcut}.
+   * {@link KeyShortcut}.
    */
-  public KeyboardEvent(int modifiers, int vk) {
+  public KeyEvent(int modifiers, int vk) {
     super(modifiers, vk);
     key = '\0';
   }
 
   /**
    * Constructs a keyboard event with <b>c</b> defining its
-   * {@link remixlab.bias.event.KeyboardShortcut}.
+   * {@link KeyShortcut}.
    */
-  public KeyboardEvent(int vk) {
+  public KeyEvent(int vk) {
     super(NO_MODIFIER_MASK, vk);
     key = '\0';
   }
 
-  public KeyboardEvent(char _key) {
+  public KeyEvent(char _key) {
     super();
     key = _key;
   }
@@ -55,32 +55,32 @@ public class KeyboardEvent extends Event {
   /**
    * @param other
    */
-  protected KeyboardEvent(KeyboardEvent other) {
+  protected KeyEvent(KeyEvent other) {
     super(other);
     this.key = other.key;
   }
 
   @Override
-  public KeyboardEvent get() {
-    return new KeyboardEvent(this);
+  public KeyEvent get() {
+    return new KeyEvent(this);
   }
 
   @Override
-  public KeyboardEvent flush() {
-    return (KeyboardEvent) super.flush();
+  public KeyEvent flush() {
+    return (KeyEvent) super.flush();
   }
 
   @Override
-  public KeyboardEvent fire() {
-    return (KeyboardEvent) super.fire();
+  public KeyEvent fire() {
+    return (KeyEvent) super.fire();
   }
 
   @Override
-  public KeyboardShortcut shortcut() {
+  public KeyShortcut shortcut() {
     if (key == '\0')
-      return new KeyboardShortcut(modifiers(), id());
+      return new KeyShortcut(modifiers(), id());
     else
-      return new KeyboardShortcut(key());
+      return new KeyShortcut(key());
   }
 
   public char key() {

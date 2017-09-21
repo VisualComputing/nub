@@ -14,10 +14,8 @@ import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.Profile;
-import remixlab.bias.event.KeyboardEvent;
-import remixlab.bias.event.KeyboardShortcut;
-
-import java.awt.event.KeyEvent;
+import remixlab.bias.event.KeyEvent;
+import remixlab.bias.event.KeyShortcut;
 
 /**
  * Proscene key-agent. A Processing fully fledged key {@link Agent}.
@@ -33,14 +31,14 @@ public class KeyAgent extends Agent {
   // UP_KEY = PApplet.UP, DOWN_KEY = PApplet.DOWN;
   protected Scene scene;
   protected boolean press, release, type;
-  protected KeyboardEvent currentEvent;
+  protected KeyEvent currentEvent;
 
   /**
    * Calls super on (scn,n) and sets default keyboard shortcuts.
    */
   public KeyAgent(Scene scn) {
     super(scn.inputHandler());
-    Profile.registerVKeys(KeyboardShortcut.class, KeyEvent.class);
+    Profile.registerVKeys(KeyShortcut.class, java.awt.event.KeyEvent.class);
     scene = scn;
     addGrabber(scene);
   }
@@ -60,11 +58,11 @@ public class KeyAgent extends Agent {
    * Current implementation requires grabber objects to have a
    * {@link Profile} and to implement
    * {@link Grabber#checkIfGrabsInput(Event)} on a
-   * {@code KeyboardEvent} as follows:
+   * {@code KeyEvent} as follows:
    * <p>
    * <pre>
    * {@code
-   * public boolean checkIfGrabsInput(KeyboardEvent event) {
+   * public boolean checkIfGrabsInput(KeyEvent event) {
    *   return profile.hasBinding(event.shortcut());
    * }
    * }
@@ -99,10 +97,10 @@ public class KeyAgent extends Agent {
     release = e.getAction() == processing.event.KeyEvent.RELEASE;
     type = e.getAction() == processing.event.KeyEvent.TYPE;
     currentEvent = type ?
-        (new KeyboardEvent(e.getKey())).fire() :
+        (new KeyEvent(e.getKey())).fire() :
         press ?
-            (new KeyboardEvent(e.getModifiers(), e.getKeyCode())).fire() :
-            (new KeyboardEvent(e.getModifiers(), e.getKeyCode())).flush();
+            (new KeyEvent(e.getModifiers(), e.getKeyCode())).fire() :
+            (new KeyEvent(e.getModifiers(), e.getKeyCode())).flush();
     if (press) {
       bypass = updateTrackedGrabber(currentEvent) != null;
       if (bypass)
@@ -125,12 +123,12 @@ public class KeyAgent extends Agent {
 
   // debug
 
-  // protected String printEvent(KeyboardEvent event) {
-  // return " mod: " + KeyboardEvent.modifiersText(event.modifiers()) + " vkey: " +
-  // event.id() + " description: " + KeyboardShortcut.description(event.id());
+  // protected String printEvent(KeyEvent event) {
+  // return " mod: " + KeyEvent.modifiersText(event.modifiers()) + " vkey: " +
+  // event.id() + " description: " + KeyShortcut.description(event.id());
   // }
   //
-  // protected String printTypedEvent(KeyboardEvent event) {
+  // protected String printTypedEvent(KeyEvent event) {
   // return " char: " + event.key();
   // }
 

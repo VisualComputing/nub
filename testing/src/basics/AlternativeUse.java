@@ -1,7 +1,7 @@
 package basics;
 
 import processing.core.PApplet;
-import remixlab.bias.event.KeyboardEvent;
+import remixlab.bias.event.KeyEvent;
 import remixlab.proscene.Scene;
 
 /**
@@ -36,7 +36,7 @@ public class AlternativeUse extends PApplet {
     }
 
     @Override
-    public boolean checkIfGrabsInput(KeyboardEvent event) {
+    public boolean checkIfGrabsInput(KeyEvent event) {
       println("scene picking condition overridden called!");
       return super.checkIfGrabsInput(event);
     }

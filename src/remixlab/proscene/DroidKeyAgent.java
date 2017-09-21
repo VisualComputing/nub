@@ -14,8 +14,8 @@ import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 import remixlab.bias.Agent;
 import remixlab.bias.Profile;
-import remixlab.bias.event.KeyboardEvent;
-import remixlab.bias.event.KeyboardShortcut;
+import remixlab.bias.event.KeyEvent;
+import remixlab.bias.event.KeyShortcut;
 
 /**
  * Proscene Android key-agent. A Processing fully fledged Android-key
@@ -23,11 +23,11 @@ import remixlab.bias.event.KeyboardShortcut;
  */
 public class DroidKeyAgent extends Agent {
   protected Scene scene;
-  protected KeyboardEvent currentEvent;
+  protected KeyEvent currentEvent;
 
   public DroidKeyAgent(Scene scn) {
     super(scn.inputHandler());
-    Profile.registerVKeys(KeyboardShortcut.class, android.view.KeyEvent.class);
+    Profile.registerVKeys(KeyShortcut.class, android.view.KeyEvent.class);
     scene = scn;
     addGrabber(scene);
   }
@@ -42,7 +42,7 @@ public class DroidKeyAgent extends Agent {
         InputMethodManager imm = (InputMethodManager) ((Context) context).getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(0, 0);
       } else {
-        currentEvent = new KeyboardEvent(e.getKey());
+        currentEvent = new KeyEvent(e.getKey());
         updateTrackedGrabber(currentEvent);
         handle(currentEvent);
       }

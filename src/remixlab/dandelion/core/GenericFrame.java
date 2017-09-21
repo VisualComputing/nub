@@ -72,7 +72,7 @@ import java.util.List;
  * {@link #translateX(boolean)}, etc. To use them, derive from this class and override the
  * version of {@code performInteraction} with the (bogus-event) parameter type you want to
  * customize (see {@link #performInteraction(MotionEvent)},
- * {@link #performInteraction(KeyboardEvent)}, etc.). For example, with the following
+ * {@link #performInteraction(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
@@ -891,8 +891,8 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
   @Override
   public boolean checkIfGrabsInput(Event event) {
-    if (event instanceof KeyboardEvent)
-      return checkIfGrabsInput((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      return checkIfGrabsInput((KeyEvent) event);
     if (event instanceof ClickEvent)
       return checkIfGrabsInput((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -929,10 +929,10 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link remixlab.bias.event.KeyboardEvent}.
+   * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
-  public boolean checkIfGrabsInput(KeyboardEvent event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyboardEvent event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(KeyEvent event) {
+    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -993,8 +993,8 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)
       performInteraction((MotionEvent) event);
-    if (event instanceof KeyboardEvent)
-      performInteraction((KeyboardEvent) event);
+    if (event instanceof KeyEvent)
+      performInteraction((KeyEvent) event);
   }
 
   /**
@@ -1053,9 +1053,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Override this method when you want the object to perform an interaction from a
-   * {@link remixlab.bias.event.KeyboardEvent}.
+   * {@link KeyEvent}.
    */
-  protected void performInteraction(KeyboardEvent event) {
+  protected void performInteraction(KeyEvent event) {
   }
 
   // APPLY TRANSFORMATION

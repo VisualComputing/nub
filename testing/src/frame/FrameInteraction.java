@@ -152,7 +152,7 @@ public class FrameInteraction extends PApplet {
   }
 
   /*
-  public boolean checkIfGrabsInput(Scene frame, KeyboardEvent event) {
+  public boolean checkIfGrabsInput(Scene frame, KeyEvent event) {
     println("scene picking condition called!");
     return scene.checkIfGrabsInput(event);
   }

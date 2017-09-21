@@ -10,6 +10,7 @@
 
 package remixlab.bias;
 
+import remixlab.bias.event.KeyEvent;
 import remixlab.util.Copyable;
 import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
@@ -23,7 +24,7 @@ import remixlab.util.HashCodeBuilder;
  * <p>
  * The following are the main class specializations:
  * {@link remixlab.bias.event.MotionEvent}, {@link remixlab.bias.event.ClickEvent}, and
- * {@link remixlab.bias.event.KeyboardEvent}. Please refer to their documentation for
+ * {@link KeyEvent}. Please refer to their documentation for
  * details.
  * <p>
  * If you ever need to define you're own bogus-event type, derive from this class, declare

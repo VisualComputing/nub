@@ -10,6 +10,8 @@
 
 package remixlab.bias;
 
+import remixlab.bias.event.KeyEvent;
+import remixlab.bias.event.KeyShortcut;
 import remixlab.util.EqualsBuilder;
 import remixlab.util.HashCodeBuilder;
 
@@ -39,8 +41,8 @@ import java.util.HashMap;
  * related to motion shortcuts.</li>
  * <li>{@link remixlab.bias.event.ClickEvent} / {@link remixlab.bias.event.ClickShortcut}
  * </li>
- * <li>{@link remixlab.bias.event.KeyboardEvent} /
- * {@link remixlab.bias.event.KeyboardShortcut}</li>
+ * <li>{@link KeyEvent} /
+ * {@link KeyShortcut}</li>
  * </ol>
  * If you ever need to define your own shortcut type (such as when declaring a custom
  * bogus-event type) derive from this class and override {@link #eventClass()}.e.g.,
