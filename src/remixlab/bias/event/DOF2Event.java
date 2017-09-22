@@ -182,15 +182,6 @@ public class DOF2Event extends MotionEvent {
   }
 
   @Override
-  public void modulate(float[] sens) {
-    if (sens != null)
-      if (sens.length >= 2 && this.isAbsolute()) {
-        dx = dx * sens[0];
-        dy = dy * sens[1];
-      }
-  }
-
-  @Override
   public boolean isNull() {
     if (dx()==0 && dy()==0)
       return true;

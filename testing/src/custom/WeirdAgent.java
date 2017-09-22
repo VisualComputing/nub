@@ -7,8 +7,7 @@ import remixlab.proscene.Scene;
  * Created by pierre on 11/24/16.
  */
 public class WeirdAgent extends Agent {
-  public static final int WEIRD_ID = WeirdShortcut.registerID("WEIRD");
-  //public static final int WEIRD_ID = WeirdShortcut.registerID(5, "WEIRD");
+  public static final int WEIRD_ID = 101;//TODO experimental
 
   protected WeirdEvent currentEvent;
   protected boolean move, press, drag, release;

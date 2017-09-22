@@ -60,60 +60,6 @@ public class ClickShortcut extends Shortcut {
       this.numberOfClicks = c;
   }
 
-  @Override
-  public Class<? extends ClickEvent> eventClass() {
-    return ClickEvent.class;
-  }
-
-  /**
-   * Same as {@code return Shortcut.registerID(ClickShortcut.class, id, description)}.
-   *
-   * @see #registerID(String)
-   * @see Shortcut#registerID(Class, int, String)
-   * @see #hasID(int)
-   */
-  public static int registerID(int id, String description) {
-    return Shortcut.registerID(ClickShortcut.class, id, description);
-  }
-
-  /**
-   * Same as {@code return Shortcut.registerID(ClickShortcut.class, description)}.
-   *
-   * @see #registerID(int, String)
-   * @see Shortcut#registerID(Class, String)
-   * @see #hasID(int)
-   */
-  public static int registerID(String description) {
-    return Shortcut.registerID(ClickShortcut.class, description);
-  }
-
-  /**
-   * Same as {@code return Shortcut.hasID(ClickShortcut.class, id)}.
-   *
-   * @see ClickShortcut#registerID(String)
-   * @see #registerID(int, String)
-   * @see Shortcut#hasID(Class, int)
-   */
-  public static boolean hasID(int id) {
-    return Shortcut.hasID(ClickShortcut.class, id);
-  }
-
-  /**
-   * Returns a textual description of this click shortcut.
-   *
-   * @return description
-   */
-  public String description() {
-    String r = super.description();
-    if (numberOfClicks == 1)
-      r += (r.length() > 0) ? "+" + String.valueOf(numberOfClicks) + "_click" : String.valueOf(numberOfClicks) + "_click";
-    else
-      r += (r.length() > 0) ?
-          "+" + String.valueOf(numberOfClicks) + "_clicks" :
-          String.valueOf(numberOfClicks) + "_clicks";
-    return r;
-  }
-
   /**
    * Returns the click-shortcut click count.
    */

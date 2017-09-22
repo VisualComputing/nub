@@ -216,16 +216,6 @@ public class DOF3Event extends MotionEvent {
   }
 
   @Override
-  public void modulate(float[] sens) {
-    if (sens != null)
-      if (sens.length >= 3 && this.isAbsolute()) {
-        dx = dx * sens[0];
-        dy = dy * sens[1];
-        dz = dz * sens[2];
-      }
-  }
-
-  @Override
   public boolean isNull() {
     if (dx()==0 && dy()==0 && dz()==0)
       return true;

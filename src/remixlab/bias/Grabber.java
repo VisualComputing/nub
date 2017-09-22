@@ -26,7 +26,7 @@ public interface Grabber {
   boolean checkIfGrabsInput(Event event);
 
   /**
-   * Defines how the grabber should react according to the given bogus-event.
+   * Defines how the grabber should react according to the given event.
    *
    * @see Agent#handle(Event)
    */

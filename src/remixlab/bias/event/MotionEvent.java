@@ -16,8 +16,7 @@ import remixlab.bias.Event;
  * Base class of all DOF_n_Events: {@link Event}s defined from
  * DOFs (degrees-of-freedom).
  * <p>
- * A MotionEvent encapsulates a {@link remixlab.bias.event.MotionShortcut}. MotionEvents
- * may be relative or absolute (see {@link #isRelative()}, {@link #isAbsolute()})
+ * MotionEvents may be relative or absolute (see {@link #isRelative()}, {@link #isAbsolute()})
  * depending whether or not they're constructed from a previous MotionEvent. While
  * relative motion events have {@link #distance()}, {@link #speed()}, and
  * {@link #delay()}, absolute motion events don't.
@@ -31,7 +30,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent with an "empty"
-   * {@link remixlab.bias.event.MotionShortcut}.
+   * {@link remixlab.bias.Shortcut}.
    */
   public MotionEvent() {
     super();
@@ -39,7 +38,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent taking the given {@code modifiers} as a
-   * {@link remixlab.bias.event.MotionShortcut}.
+   * {@link remixlab.bias.Shortcut}.
    */
   public MotionEvent(int modifiers) {
     super(modifiers, NO_ID);
@@ -47,7 +46,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent taking the given {@code modifiers} and
-   * {@code modifiers} as a {@link remixlab.bias.event.MotionShortcut}.
+   * {@code modifiers} as a {@link remixlab.bias.Shortcut}.
    */
   public MotionEvent(int modifiers, int id) {
     super(modifiers, id);
@@ -74,18 +73,6 @@ public class MotionEvent extends Event {
   @Override
   public MotionEvent fire() {
     return (MotionEvent) super.fire();
-  }
-
-  /**
-   * Modulate the event dofs according to {@code sens}. Only meaningful if the event
-   * {@link #isAbsolute()}.
-   */
-  public void modulate(float[] sens) {
-  }
-
-  @Override
-  public MotionShortcut shortcut() {
-    return new MotionShortcut(modifiers(), id());
   }
 
   /**
@@ -244,7 +231,7 @@ public class MotionEvent extends Event {
    */
   public static float distance(float x1, float y1, float z1, float x2, float y2, float z2) {
     return (float) Math
-            .sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0));
+        .sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0));
   }
 
   /**
@@ -254,8 +241,8 @@ public class MotionEvent extends Event {
   public static float distance(float x1, float y1, float z1, float rx1, float ry1, float rz1, float x2, float y2,
                                float z2, float rx2, float ry2, float rz2) {
     return (float) Math.sqrt(
-            (float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0)
-                    + (float) Math.pow((rx2 - rx1), 2.0) + (float) Math.pow((ry2 - ry1), 2.0) + (float) Math
-                    .pow((rz2 - rz1), 2.0));
+        (float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0) + (float) Math.pow((z2 - z1), 2.0)
+            + (float) Math.pow((rx2 - rx1), 2.0) + (float) Math.pow((ry2 - ry1), 2.0) + (float) Math
+            .pow((rz2 - rz1), 2.0));
   }
 }

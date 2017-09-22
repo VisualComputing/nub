@@ -12,6 +12,7 @@ package remixlab.proscene;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
+import remixlab.bias.Shortcut;
 import remixlab.bias.event.*;
 
 /**
@@ -22,12 +23,8 @@ import remixlab.bias.event.*;
  * @see remixlab.proscene.KeyAgent
  */
 public class MouseAgent extends Agent {
-  public static final int LEFT_ID = MotionShortcut.registerID(37, 2, "LEFT"), CENTER_ID = MotionShortcut
-      .registerID(3, 2, "CENTER"), RIGHT_ID = MotionShortcut.registerID(39, 2, "RIGHT"), WHEEL_ID = MotionShortcut
-      .registerID(8, 1, "WHEEL"), NO_BUTTON = MotionShortcut
-      .registerID(Event.NO_ID, 2, "NO_BUTTON"), LEFT_CLICK_ID = ClickShortcut
-      .registerID(LEFT_ID, "LEFT"), RIGHT_CLICK_ID = ClickShortcut
-      .registerID(RIGHT_ID, "RIGHT"), CENTER_CLICK_ID = ClickShortcut.registerID(CENTER_ID, "CENTER");
+  public static final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
+          LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
   protected float xSens = 1f;
   protected float ySens = 1f;
   protected Scene scene;
@@ -108,14 +105,6 @@ public class MouseAgent extends Agent {
       handle(bogusClickEvent);
       return;
     }
-  }
-
-  @Override
-  public float[] sensitivities(MotionEvent event) {
-    if (event instanceof DOF2Event)
-      return new float[]{xSens, ySens, 1f, 1f, 1f, 1f};
-    else
-      return super.sensitivities(event);
   }
 
   /**

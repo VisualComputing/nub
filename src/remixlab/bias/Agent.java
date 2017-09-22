@@ -10,8 +10,6 @@
 
 package remixlab.bias;
 
-import remixlab.bias.event.MotionEvent;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +24,7 @@ import java.util.List;
  * {@link #removeGrabber(Grabber)} calls. Derive from this agent and either call
  * {@link #handle(Event)} or override {@link #handleFeed()} .
  * <p>
- * The agent may send bogus-events to its {@link #inputGrabber()} which may be regarded as
+ * The agent may send events to its {@link #inputGrabber()} which may be regarded as
  * the agent's grabber target. The {@link #inputGrabber()} may be set by querying each
  * grabber object in {@link #grabbers()} to check if its
  * {@link Grabber#checkIfGrabsInput(Event)}) condition is met (see
@@ -220,7 +218,7 @@ public abstract class Agent {
         trackedGrabber = dG;
         return trackedGrabber();
       }
-    // then if tracked grabber remains the same:
+    // then if tracked grabber remains the matches:
     Grabber tG = trackedGrabber();
     if (tG != null)
       if (tG.checkIfGrabsInput(event))
@@ -234,14 +232,6 @@ public abstract class Agent {
           return trackedGrabber();
         }
     return trackedGrabber();
-  }
-
-  /**
-   * Returns the sensitivities used in {@link #handle(Event)} to
-   * {@link remixlab.bias.event.MotionEvent#modulate(float[])}.
-   */
-  public float[] sensitivities(MotionEvent event) {
-    return new float[]{1f, 1f, 1f, 1f, 1f, 1f};
   }
 
   /**
@@ -259,12 +249,12 @@ public abstract class Agent {
   protected boolean handle(Event event) {
     if (event == null || !handler.isAgentRegistered(this) || inputHandler() == null)
       return false;
-    if (event instanceof MotionEvent)
-      if (((MotionEvent) event).isAbsolute())
+    //Just trying to get rid of the nasty MotionEvent dependency
+    //TODO: really needs testing everywhere, -jp
+    //if (event instanceof MotionEvent)
+      //if (((MotionEvent) event).isAbsolute())
         if (event.isNull() && !event.flushed())
           return false;
-    if (event instanceof MotionEvent)
-      ((MotionEvent) event).modulate(sensitivities((MotionEvent) event));
     Grabber inputGrabber = inputGrabber();
     if (inputGrabber != null)
       return inputHandler().enqueueEventTuple(new EventGrabberTuple(event, inputGrabber));

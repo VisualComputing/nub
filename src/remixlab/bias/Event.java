@@ -10,26 +10,21 @@
 
 package remixlab.bias;
 
-import remixlab.bias.event.KeyEvent;
-
 /**
  * The root of all events that are to be handled by an {@link Agent}.
- * Every Event encapsulates a {@link Shortcut} which may be bound
- * to an user-defined action (see {@link #shortcut()}). Gesture initialization and
+ * Every Event encapsulates a {@link Shortcut}. Gesture initialization and
  * termination, which may be of the interest of {@link Grabber}
  * objects, are reported by {@link #fired()} and {@link #flushed()}, respectively.
  * <p>
  * The following are the main class specializations:
  * {@link remixlab.bias.event.MotionEvent}, {@link remixlab.bias.event.ClickEvent}, and
- * {@link KeyEvent}. Please refer to their documentation for
+ * {@link remixlab.bias.event.KeyEvent}. Please refer to their documentation for
  * details.
  * <p>
- * If you ever need to define you're own bogus-event type, derive from this class, declare
- * a shortcut type for your event (for details refer to the
- * {@link Shortcut}), and override the {@link #shortcut()} and
- * {@link #get()} methods. If your custom event class defines it's own attributes, its
- * {@link #hashCode()}, {@link #equals(Object)} and {@link #get()} methods should be
- * overridden as well.
+ * If you ever need to define you're own event type, derive from this class; and, optional,
+ * declare a shortcut type for your event (overriding the {@link #shortcut()). For details
+ * refer to the {@link Shortcut}. If your custom event class defines it's own attributes, its
+ * {@link #get()} method should be overridden.
  * <p>
  * <b>Note</b> Event detection/reduction could happened in several different ways.
  * For instance, in the context of Java-based application, it typically takes place when
@@ -97,9 +92,9 @@ public class Event {
       System.out.println("Warning: event already " + (fired() ? "fired" : "flushed"));
       return this;
     }
-    Event bogusevent = this.get();
-    bogusevent.flush = true;
-    return bogusevent;
+    Event event = this.get();
+    event.flush = true;
+    return event;
   }
 
   /**
@@ -113,9 +108,9 @@ public class Event {
       System.out.println("Warning: event already " + (fired() ? "fired" : "flushed"));
       return this;
     }
-    Event bogusevent = this.get();
-    bogusevent.fire = true;
-    return bogusevent;
+    Event event = this.get();
+    event.fire = true;
+    return event;
   }
 
   /**

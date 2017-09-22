@@ -339,19 +339,6 @@ public class DOF6Event extends MotionEvent {
   }
 
   @Override
-  public void modulate(float[] sens) {
-    if (sens != null)
-      if (sens.length >= 6 && this.isAbsolute()) {
-        dx = dx * sens[0];
-        dy = dy * sens[1];
-        dz = dz * sens[2];
-        drx = drx * sens[3];
-        dry = dry * sens[4];
-        drz = drz * sens[5];
-      }
-  }
-
-  @Override
   public boolean isNull() {
     if (dx()==0 && dy()==0 && dz()==0 && drx()==0 && dry()==0 && drz()==0)
       return true;

@@ -49,10 +49,10 @@ public class InputHandler {
    * 1. {@link EventGrabberTuple} producer loop which for each
    * registered agent calls: a.
    * {@link Agent#updateTrackedGrabber(Event)}; and, b.
-   * {@link Agent#handle(Event)}. Note that the bogus event are
+   * {@link Agent#handle(Event)}. Note that the event are
    * obtained from the agents callback
    * {@link Agent#updateTrackedGrabberFeed()} and
-   * {@link Agent#handleFeed()} methods, respectively. The bogus event
+   * {@link Agent#handleFeed()} methods, respectively. The event
    * may also be obtained from {@link Agent#handleFeed()} which may
    * replace both of the previous feeds when they are null.<br>
    * 2. User-defined action consumer loop: which for each
