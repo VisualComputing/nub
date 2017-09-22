@@ -1,9 +1,15 @@
 package frame;
 
 import processing.core.PApplet;
+import remixlab.bias.event.*;
+import remixlab.bias.*;
 import remixlab.primitives.Mat;
 import remixlab.primitives.Vec;
 import remixlab.proscene.Scene;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by pierre on 11/15/16.
@@ -18,9 +24,27 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void setup() {
-    //size(640, 360, P3D);
-    //size(640, 360, OPENGL);
-    scene = new Scene(this);
+    scene = new Scene(this) {
+      KeyShortcut a = new KeyShortcut('a');
+      KeyShortcut g = new KeyShortcut('g');
+      KeyShortcut f = new KeyShortcut('f');
+      List<Shortcut> l =  new ArrayList<Shortcut>(Arrays.asList(a, g, f));
+
+      @Override
+      public boolean checkIfGrabsInput(KeyEvent event) {
+        return Shortcut.matches(event.shortcut(), l);
+      }
+
+      @Override
+      public void performInteraction(Event event) {
+        if(event.shortcut().matches(a))
+          toggleAxesVisualHint();
+        if(event.shortcut().matches(g))
+          toggleGridVisualHint();
+        if(event.shortcut().matches(f))
+          this.togglePickingVisualhint();
+      }
+    };
     scene.setGridVisualHint(true);
     //scene.setCameraType(Camera.Type.ORTHOGRAPHIC);
     scene.setRadius(160);
@@ -37,6 +61,8 @@ public class CajasOrientadas extends PApplet {
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(scene);
 
+    if(scene.keyAgent().defaultGrabber() == scene.eyeFrame())
+      println("is eyeFrame!");
     //frameRate(500);
   }
 

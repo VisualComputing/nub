@@ -16,6 +16,7 @@ import remixlab.bias.event.KeyShortcut;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Shortcuts are {@link Event} means to bind user-defined actions
@@ -218,5 +219,21 @@ public class Shortcut {
    */
   protected Class<? extends Event> defaultEventClass() {
     return null;
+  }
+
+  /**
+   * Returns whether or not this shortcut matches the other.
+   *
+   * @param other shortcut
+   */
+  public boolean matches(Shortcut other) {
+    return id() == other.id() && modifiers() == other.modifiers();
+  }
+
+  public static boolean matches(Shortcut shortcut, List<Shortcut> list) {
+    for(Shortcut s : list)
+      if(s.matches(shortcut))
+        return true;
+    return false;
   }
 }

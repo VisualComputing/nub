@@ -1,10 +1,12 @@
 package frame;
 
 import processing.core.PApplet;
+import remixlab.bias.*;
+import remixlab.bias.event.*;
 import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.Quat;
 import remixlab.primitives.Vec;
-import remixlab.proscene.Scene;
+import remixlab.proscene.*;
 
 /**
  * Created by pierre on 11/15/16.
@@ -15,20 +17,34 @@ public class Box {
   float w, h, d;
   int c;
 
-  public Box(Scene scn, InteractiveFrame iF) {
-    scene = scn;
-    iFrame = iF;
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
-    //iFrame.setGrabsInputThreshold(25);
-    setSize();
-    setColor();
-  }
-
   public Box(Scene scn) {
     scene = scn;
-    iFrame = new InteractiveFrame(scn);
+    iFrame = new InteractiveFrame(scene) {
+      @Override
+      public void performInteraction(MotionEvent event) {
+        switch (event.shortcut().id()) {
+          case PApplet.LEFT:
+            translate(event);
+            break;
+          case PApplet.RIGHT:
+            screenTranslate(event);
+            break;
+          case processing.event.MouseEvent.WHEEL:
+            scale(event);
+            break;
+        }
+      }
+
+      @Override
+      public void performInteraction(KeyEvent event) {
+        if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
+          translateXPos();
+        if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
+          translateXNeg();
+      }
+    };
     iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
-    //iFrame.setGrabsInputThreshold(25);
+    iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();
     setPosition();

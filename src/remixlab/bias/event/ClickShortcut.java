@@ -120,4 +120,11 @@ public class ClickShortcut extends Shortcut {
   public int clickCount() {
     return numberOfClicks;
   }
+
+  @Override
+  public boolean matches(Shortcut other) {
+    if(other instanceof ClickShortcut)
+      return super.matches(other) && clickCount() == ((ClickShortcut) other).clickCount();
+    return false;
+  }
 }

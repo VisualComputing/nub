@@ -21,8 +21,6 @@ import remixlab.bias.event.KeyShortcut;
  *
  * @see Agent
  * @see remixlab.proscene.MouseAgent
- * @see remixlab.proscene.DroidKeyAgent
- * @see remixlab.proscene.DroidTouchAgent
  */
 public class KeyAgent extends Agent {
   public static final int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;

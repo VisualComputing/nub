@@ -629,8 +629,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   //id
 
   /**
-   * Internal use. Frame graphics color to use in the
-   * {@link remixlab.proscene.Scene#pickingBuffer()}.
+   * Internal use. Frame graphics color to be used for picking with a color buffer.
    */
   public int id() {
     // see here:

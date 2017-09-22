@@ -20,8 +20,6 @@ import remixlab.bias.event.*;
  *
  * @see Agent
  * @see remixlab.proscene.KeyAgent
- * @see remixlab.proscene.DroidKeyAgent
- * @see remixlab.proscene.DroidTouchAgent
  */
 public class MouseAgent extends Agent {
   public static final int LEFT_ID = MotionShortcut.registerID(37, 2, "LEFT"), CENTER_ID = MotionShortcut

@@ -1,6 +1,7 @@
 package frame;
 
 import processing.core.PApplet;
+import remixlab.bias.event.MotionEvent;
 import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.Vec;
 import remixlab.proscene.Scene;
@@ -15,18 +16,25 @@ public class Sphere {
   float r;
   int c;
 
-  public Sphere(Scene scn, InteractiveFrame iF) {
-    scene = scn;
-    parent = scn.pApplet();
-    iFrame = iF;
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
-    setRadius(10);
-  }
-
   public Sphere(Scene scn) {
     scene = scn;
     parent = scn.pApplet();
-    iFrame = new InteractiveFrame(scn);
+    iFrame = new InteractiveFrame(scene) {
+      @Override
+      public void performInteraction(MotionEvent event) {
+        switch (event.shortcut().id()) {
+          case PApplet.LEFT:
+            rotate(event);
+            break;
+          case PApplet.RIGHT:
+            translate(event);
+            break;
+          case processing.event.MouseEvent.WHEEL:
+            scale(event);
+            break;
+        }
+      }
+    };
     iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
