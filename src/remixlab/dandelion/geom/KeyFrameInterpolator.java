@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.core;
+package remixlab.dandelion.geom;
 
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.fpstiming.TimingTask;
 
 import java.util.ArrayList;
@@ -69,11 +69,11 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #interpolationTime()} is greater than the
  * {@link #lastTime()} (unless loopInterpolation() is {@code true}).
  * <p>
- * Note that an Eye has {@link remixlab.dandelion.core.Eye#keyFrameInterpolator(int)},
+ * Note that an Eye has {@link remixlab.dandelion.geom.Eye#keyFrameInterpolator(int)},
  * that can be used to drive the Eye along a path.
  * <p>
  * <b>Attention:</b> If a Constraint is attached to the {@link #frame()} (see
- * {@link remixlab.dandelion.geom.Frame#constraint()}), it should be deactivated before
+ * {@link remixlab.dandelion.primitives.Frame#constraint()}), it should be deactivated before
  * {@link #interpolationStarted()}, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
  */
@@ -721,7 +721,7 @@ public class KeyFrameInterpolator {
    * <p>
    * Use it in your KeyFrameInterpolator path drawing routine.
    *
-   * @see remixlab.dandelion.core.AbstractScene#drawPath(KeyFrameInterpolator, int, int, float)
+   * @see remixlab.dandelion.geom.AbstractScene#drawPath(KeyFrameInterpolator, int, int, float)
    */
   public List<Frame> path() {
     updatePath();

@@ -1,13 +1,11 @@
-package remixlab.dandelion.constraint;
+package remixlab.dandelion.primitives.constraint;
 
-import remixlab.dandelion.geom.Frame;
-import remixlab.dandelion.geom.Quat;
-import remixlab.dandelion.geom.Rotation;
-import remixlab.dandelion.geom.Vec;
+import remixlab.dandelion.primitives.Frame;
+import remixlab.dandelion.primitives.Quat;
+import remixlab.dandelion.primitives.Rotation;
+import remixlab.dandelion.primitives.Vec;
 
 import java.util.ArrayList;
-
-import static java.lang.Math.PI;
 
 /**
  * Created by sebchaparr on 19/08/17.

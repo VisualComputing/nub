@@ -8,11 +8,11 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.dandelion.primitives;
 
 /**
- * Interface for 2D {@link remixlab.dandelion.geom.Rot} and 3D
- * {@link remixlab.dandelion.geom.Quat} rotations.
+ * Interface for 2D {@link remixlab.dandelion.primitives.Rot} and 3D
+ * {@link remixlab.dandelion.primitives.Quat} rotations.
  */
 public interface Rotation {
   public boolean matches(Rotation other);

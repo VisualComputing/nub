@@ -16,8 +16,8 @@
 import remixlab.proscene.*;
 import remixlab.bias.*;
 import remixlab.bias.event.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.dandelion.geom.*;
-import remixlab.dandelion.core.*;
 
 import org.gamecontrolplus.*;
 import net.java.games.input.*;

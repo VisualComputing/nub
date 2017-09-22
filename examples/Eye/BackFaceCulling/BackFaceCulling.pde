@@ -12,8 +12,8 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 float            size        = 50;
 Scene            scene, auxScene;

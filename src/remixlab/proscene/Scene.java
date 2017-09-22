@@ -16,8 +16,8 @@ import processing.data.JSONObject;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.fpstiming.TimingTask;
 
 
@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing Scene. The Scene is a specialization of the
- * {@link remixlab.dandelion.core.AbstractScene}, providing an interface between Dandelion
+ * {@link remixlab.dandelion.geom.AbstractScene}, providing an interface between Dandelion
  * and Processing.
  * <p>
  * <h3>Usage</h3> To use a Scene you have two main choices:
@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
  * frame and scene key actions (such as
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
- * {@link remixlab.dandelion.core.Eye} and frame
+ * {@link remixlab.dandelion.geom.Eye} and frame
  * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
@@ -115,13 +115,13 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Main constructor defining a left-handed Processing compatible Scene. Calls
    * {@link #setMatrixHelper(MatrixHelper)} using a customized
-   * {@link remixlab.dandelion.core.MatrixHelper} depending on the {@code pg} type (see
+   * {@link remixlab.dandelion.geom.MatrixHelper} depending on the {@code pg} type (see
    * {@link remixlab.proscene.Java2DMatrixHelper} and
    * {@link remixlab.proscene.GLMatrixHelper}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
    * visual hint flags, instantiates the {@link #eye()} (a
-   * {@link remixlab.dandelion.core.Camera} if the Scene {@link #is3D()} or a
-   * {@link remixlab.dandelion.core.Window} if the Scene {@link #is2D()}). It also
+   * {@link remixlab.dandelion.geom.Camera} if the Scene {@link #is3D()} or a
+   * {@link remixlab.dandelion.geom.Window} if the Scene {@link #is2D()}). It also
    * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}, and finally
    * calls {@link #init()}.
    * <p>
@@ -134,7 +134,7 @@ public class Scene extends AbstractScene implements PConstants {
    * off-screen scene requires the drawing code to be enclose by {@link #beginDraw()} and
    * {@link #endDraw()}. To display an off-screen scene call {@link #display()}.
    *
-   * @see remixlab.dandelion.core.AbstractScene#AbstractScene()
+   * @see remixlab.dandelion.geom.AbstractScene#AbstractScene()
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
    */
@@ -369,21 +369,21 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /**
-   * Converts a {@link remixlab.dandelion.geom.Vec} to a PVec.
+   * Converts a {@link remixlab.dandelion.primitives.Vec} to a PVec.
    */
   public static PVector toPVector(Vec v) {
     return new PVector(v.x(), v.y(), v.z());
   }
 
   /**
-   * Converts a PVec to a {@link remixlab.dandelion.geom.Vec}.
+   * Converts a PVec to a {@link remixlab.dandelion.primitives.Vec}.
    */
   public static Vec toVec(PVector v) {
     return new Vec(v.x, v.y, v.z);
   }
 
   /**
-   * Converts a {@link remixlab.dandelion.geom.Mat} to a PMatrix3D.
+   * Converts a {@link remixlab.dandelion.primitives.Mat} to a PMatrix3D.
    */
   public static PMatrix3D toPMatrix(Mat m) {
     float[] a = m.getTransposed(new float[16]);
@@ -392,21 +392,21 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /**
-   * Converts a PMatrix3D to a {@link remixlab.dandelion.geom.Mat}.
+   * Converts a PMatrix3D to a {@link remixlab.dandelion.primitives.Mat}.
    */
   public static Mat toMat(PMatrix3D m) {
     return new Mat(m.get(new float[16]), true);
   }
 
   /**
-   * Converts a PMatrix2D to a {@link remixlab.dandelion.geom.Mat}.
+   * Converts a PMatrix2D to a {@link remixlab.dandelion.primitives.Mat}.
    */
   public static Mat toMat(PMatrix2D m) {
     return toMat(new PMatrix3D(m));
   }
 
   /**
-   * Converts a {@link remixlab.dandelion.geom.Mat} to a PMatrix2D.
+   * Converts a {@link remixlab.dandelion.primitives.Mat} to a PMatrix2D.
    */
   public static PMatrix2D toPMatrix2D(Mat m) {
     float[] a = m.getTransposed(new float[16]);
@@ -734,13 +734,13 @@ public class Scene extends AbstractScene implements PConstants {
    * <ol>
    * <li>Handles the {@link #avatar()}</li>
    * <li>Calls {@link #bindMatrices()}</li>
-   * <li>Calls {@link remixlab.dandelion.core.Eye#updateBoundaryEquations()} if
+   * <li>Calls {@link remixlab.dandelion.geom.Eye#updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
    * </ol>
    * <p>
    * <b>Note</b> that this method overloads
-   * {@link remixlab.dandelion.core.AbstractScene#preDraw()} where a call to
+   * {@link remixlab.dandelion.geom.AbstractScene#preDraw()} where a call to
    * {@link #displayVisualHints()} is done. Here, however, it needs to be bypassed for the
    * PApplet.background() method not to hide the display of the {@link #visualHints()}.
    * The {@link #displayVisualHints()} mostly happens then at the {@link #draw()} method,
@@ -769,7 +769,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
    * {@link #height()}, and calls
-   * {@link remixlab.dandelion.core.Eye#setScreenWidthAndHeight(int, int)}.
+   * {@link remixlab.dandelion.geom.Eye#setScreenWidthAndHeight(int, int)}.
    * <p>
    *
    * @see #draw()
@@ -841,7 +841,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
    * {@link #height()}, and calls
-   * {@link remixlab.dandelion.core.Eye#setScreenWidthAndHeight(int, int)}.
+   * {@link remixlab.dandelion.geom.Eye#setScreenWidthAndHeight(int, int)}.
    *
    * @see #draw()
    * @see #preDraw()
@@ -1143,8 +1143,8 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Saves the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link remixlab.dandelion.core.Camera#type()} and the
-   * {@link remixlab.dandelion.core.Camera#keyFrameInterpolatorArray()} into
+   * {@link remixlab.dandelion.geom.Camera#type()} and the
+   * {@link remixlab.dandelion.geom.Camera#keyFrameInterpolatorArray()} into
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1189,8 +1189,8 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Loads the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link remixlab.dandelion.core.Camera#type()} and the
-   * {@link remixlab.dandelion.core.Camera#keyFrameInterpolatorArray()} from
+   * {@link remixlab.dandelion.geom.Camera#type()} and the
+   * {@link remixlab.dandelion.geom.Camera#keyFrameInterpolatorArray()} from
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1325,7 +1325,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@link #pApplet()} draw() loop.
    * <p>
    * This method is implementing by simply calling
-   * {@link remixlab.dandelion.core.AbstractScene#traverseTree()}.
+   * {@link remixlab.dandelion.geom.AbstractScene#traverseTree()}.
    * <p>
    * <b>Attention:</b> this method should be called after {@link #bindMatrices()} (i.e.,
    * eye update which happens at {@link #preDraw()}) and before any other transformation
@@ -1386,8 +1386,8 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Same as {@code matrixHelper(pgraphics).bind(false)}. Set the {@code pgraphics}
    * matrices by calling
-   * {@link remixlab.dandelion.core.MatrixHelper#loadProjection(boolean)} and
-   * {@link remixlab.dandelion.core.MatrixHelper#loadModelView(boolean)} (only makes sense
+   * {@link remixlab.dandelion.geom.MatrixHelper#loadProjection(boolean)} and
+   * {@link remixlab.dandelion.geom.MatrixHelper#loadModelView(boolean)} (only makes sense
    * when {@link #pg()} is different than {@code pgraphics}).
    * <p>
    * This method doesn't perform any computation, but simple retrieve the current matrices

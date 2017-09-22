@@ -9,8 +9,8 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.dandelion.constraint.*;
 
 PFont font;

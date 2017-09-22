@@ -8,16 +8,16 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.core;
+package remixlab.dandelion.geom;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
-import remixlab.dandelion.constraint.Constraint;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.ik.Solver;
+import remixlab.dandelion.primitives.constraint.Constraint;
+import remixlab.dandelion.primitives.*;
+import remixlab.dandelion.geom.ik.Solver;
 import remixlab.fpstiming.Animator;
 import remixlab.fpstiming.AnimatorObject;
 import remixlab.fpstiming.TimingHandler;
@@ -45,9 +45,9 @@ import java.util.List;
  * <p>
  * Each AbstractScene provides the following main object instances:
  * <ol>
- * <li>An {@link #eye()} which represents the 2D ( {@link remixlab.dandelion.core.Window})
- * or 3D ( {@link remixlab.dandelion.core.Camera}) controlling object. For details please
- * refer to the {@link remixlab.dandelion.core.Eye} class.</li>
+ * <li>An {@link #eye()} which represents the 2D ( {@link remixlab.dandelion.geom.Window})
+ * or 3D ( {@link remixlab.dandelion.geom.Camera}) controlling object. For details please
+ * refer to the {@link remixlab.dandelion.geom.Eye} class.</li>
  * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For
  * details please refer to the {@link remixlab.fpstiming.TimingHandler} class.</li>
  * <li>An {@link #inputHandler()} which handles all user input through
@@ -56,9 +56,9 @@ import java.util.List;
  * (default) {@link #motionAgent()} and a (default) {@link #keyAgent()} which should
  * be instantiated by derived classes at construction time.</li>
  * <li>A {@link #matrixHelper()} which handles matrix operations either through the
- * {@link remixlab.dandelion.core.MatrixStackHelper} or through a third party matrix stack
+ * {@link remixlab.dandelion.geom.MatrixStackHelper} or through a third party matrix stack
  * (like it's done with Processing). For details please refer to the
- * {@link remixlab.dandelion.core.MatrixHelper} interface.</li>
+ * {@link remixlab.dandelion.geom.MatrixHelper} interface.</li>
  * </ol>
  * <h3>Animation mechanisms</h3> The AbstractScene provides two animation mechanisms to
  * define how your scene evolves over time:
@@ -152,7 +152,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
-   * {@link remixlab.dandelion.core.MatrixStackHelper}. The constructor also instantiates
+   * {@link remixlab.dandelion.geom.MatrixStackHelper}. The constructor also instantiates
    * the {@link #inputHandler()} and the {@link #timingHandler()}, and sets the AXES and
    * GRID visual hint flags.
    * <p>
@@ -302,7 +302,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Note that if frame is not reachable ({@link #isFrameReachable(InteractiveFrame)}) this
    * method returns {@code null}.
    * <p>
-   * When collected, pruned frames behave like {@link remixlab.dandelion.geom.Frame},
+   * When collected, pruned frames behave like {@link remixlab.dandelion.primitives.Frame},
    * otherwise they are eligible for garbage collection.
    *
    * @see #clearTree()
@@ -439,7 +439,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().addKeyFrameToPath(1)}.
    *
-   * @see remixlab.dandelion.core.Eye#addKeyFrameToPath(int)
+   * @see remixlab.dandelion.geom.Eye#addKeyFrameToPath(int)
    */
   public void addKeyFrameToPath1() {
     eye().addKeyFrameToPath(1);
@@ -448,7 +448,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().addKeyFrameToPath(2)}.
    *
-   * @see remixlab.dandelion.core.Eye#addKeyFrameToPath(int)
+   * @see remixlab.dandelion.geom.Eye#addKeyFrameToPath(int)
    */
   public void addKeyFrameToPath2() {
     eye().addKeyFrameToPath(2);
@@ -457,7 +457,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().addKeyFrameToPath(1)}.
    *
-   * @see remixlab.dandelion.core.Eye#addKeyFrameToPath(int)
+   * @see remixlab.dandelion.geom.Eye#addKeyFrameToPath(int)
    */
   public void addKeyFrameToPath3() {
     eye().addKeyFrameToPath(3);
@@ -466,7 +466,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().deletePath(1)}.
    *
-   * @see remixlab.dandelion.core.Eye#deletePath(int)
+   * @see remixlab.dandelion.geom.Eye#deletePath(int)
    */
   public void deletePath1() {
     eye().deletePath(1);
@@ -475,7 +475,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().deletePath(2)}.
    *
-   * @see remixlab.dandelion.core.Eye#deletePath(int)
+   * @see remixlab.dandelion.geom.Eye#deletePath(int)
    */
   public void deletePath2() {
     eye().deletePath(2);
@@ -484,7 +484,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().deletePath(3)}.
    *
-   * @see remixlab.dandelion.core.Eye#deletePath(int)
+   * @see remixlab.dandelion.geom.Eye#deletePath(int)
    */
   public void deletePath3() {
     eye().deletePath(3);
@@ -493,7 +493,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().playPath(1)}.
    *
-   * @see remixlab.dandelion.core.Eye#playPath(int)
+   * @see remixlab.dandelion.geom.Eye#playPath(int)
    */
   public void playPath1() {
     eye().playPath(1);
@@ -502,7 +502,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().playPath(2)}.
    *
-   * @see remixlab.dandelion.core.Eye#playPath(int)
+   * @see remixlab.dandelion.geom.Eye#playPath(int)
    */
   public void playPath2() {
     eye().playPath(2);
@@ -511,7 +511,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().playPath(3)}.
    *
-   * @see remixlab.dandelion.core.Eye#playPath(int)
+   * @see remixlab.dandelion.geom.Eye#playPath(int)
    */
   public void playPath3() {
     eye().playPath(3);
@@ -520,7 +520,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().interpolateToFitScene()}.
    *
-   * @see remixlab.dandelion.core.Eye#interpolateToFitScene()
+   * @see remixlab.dandelion.geom.Eye#interpolateToFitScene()
    */
   public void interpolateToFitScene() {
     eye().interpolateToFitScene();
@@ -529,7 +529,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().setAnchor(new Vec(0, 0, 0))}.
    *
-   * @see remixlab.dandelion.core.Eye#setAnchor(Vec)
+   * @see remixlab.dandelion.geom.Eye#setAnchor(Vec)
    */
   public void resetAnchor() {
     eye().setAnchor(new Vec(0, 0, 0));
@@ -938,7 +938,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // MATRIX and TRANSFORMATION STUFF
 
   /**
-   * Sets the {@link remixlab.dandelion.core.MatrixHelper} defining how dandelion matrices
+   * Sets the {@link remixlab.dandelion.geom.MatrixHelper} defining how dandelion matrices
    * are to be handled.
    *
    * @see #matrixHelper()
@@ -948,7 +948,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Returns the {@link remixlab.dandelion.core.MatrixHelper}.
+   * Returns the {@link remixlab.dandelion.geom.MatrixHelper}.
    *
    * @see #setMatrixHelper(MatrixHelper)
    */
@@ -957,11 +957,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#beginScreenDrawing()}. Adds
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#beginScreenDrawing()}. Adds
    * exception when no properly closing the screen drawing with a call to
    * {@link #endScreenDrawing()}.
    *
-   * @see remixlab.dandelion.core.MatrixHelper#beginScreenDrawing()
+   * @see remixlab.dandelion.geom.MatrixHelper#beginScreenDrawing()
    */
   public void beginScreenDrawing() {
     if (startCoordCalls != 0)
@@ -975,10 +975,10 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#endScreenDrawing()} . Adds
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#endScreenDrawing()} . Adds
    * exception if {@link #beginScreenDrawing()} wasn't properly called before
    *
-   * @see remixlab.dandelion.core.MatrixHelper#endScreenDrawing()
+   * @see remixlab.dandelion.geom.MatrixHelper#endScreenDrawing()
    */
   public void endScreenDrawing() {
     startCoordCalls--;
@@ -991,42 +991,42 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#bind()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#bind()}
    */
   protected void bindMatrices() {
     matrixHelper.bind();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#pushModelView()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#pushModelView()}
    */
   public void pushModelView() {
     matrixHelper.pushModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#popModelView()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#popModelView()}
    */
   public void popModelView() {
     matrixHelper.popModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#pushProjection()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#pushProjection()}
    */
   public void pushProjection() {
     matrixHelper.pushProjection();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#popProjection()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#popProjection()}
    */
   public void popProjection() {
     matrixHelper.popProjection();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#translate(float, float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#translate(float, float)}
    */
   public void translate(float tx, float ty) {
     matrixHelper.translate(tx, ty);
@@ -1034,35 +1034,35 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Wrapper for
-   * {@link remixlab.dandelion.core.MatrixHelper#translate(float, float, float)}
+   * {@link remixlab.dandelion.geom.MatrixHelper#translate(float, float, float)}
    */
   public void translate(float tx, float ty, float tz) {
     matrixHelper.translate(tx, ty, tz);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#rotate(float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#rotate(float)}
    */
   public void rotate(float angle) {
     matrixHelper.rotate(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#rotateX(float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#rotateX(float)}
    */
   public void rotateX(float angle) {
     matrixHelper.rotateX(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#rotateY(float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#rotateY(float)}
    */
   public void rotateY(float angle) {
     matrixHelper.rotateY(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#rotateZ(float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#rotateZ(float)}
    */
   public void rotateZ(float angle) {
     matrixHelper.rotateZ(angle);
@@ -1070,112 +1070,112 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Wrapper for
-   * {@link remixlab.dandelion.core.MatrixHelper#rotate(float, float, float, float)}
+   * {@link remixlab.dandelion.geom.MatrixHelper#rotate(float, float, float, float)}
    */
   public void rotate(float angle, float vx, float vy, float vz) {
     matrixHelper.rotate(angle, vx, vy, vz);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#scale(float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#scale(float)}
    */
   public void scale(float s) {
     matrixHelper.scale(s);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#scale(float, float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#scale(float, float)}
    */
   public void scale(float sx, float sy) {
     matrixHelper.scale(sx, sy);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#scale(float, float, float)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#scale(float, float, float)}
    */
   public void scale(float x, float y, float z) {
     matrixHelper.scale(x, y, z);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#resetModelView()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#resetModelView()}
    */
   public void resetModelView() {
     matrixHelper.resetModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#resetProjection()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#resetProjection()}
    */
   public void resetProjection() {
     matrixHelper.resetProjection();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#applyModelView(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#applyModelView(Mat)}
    */
   public void applyModelView(Mat source) {
     matrixHelper.applyModelView(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#applyProjection(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#applyProjection(Mat)}
    */
   public void applyProjection(Mat source) {
     matrixHelper.applyProjection(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#modelView()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#modelView()}
    */
   public Mat modelView() {
     return matrixHelper.modelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#projection()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#projection()}
    */
   public Mat projection() {
     return matrixHelper.projection();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#getModelView(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#getModelView(Mat)}
    */
   public Mat getModelView(Mat target) {
     return matrixHelper.getModelView(target);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#getProjection(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#getProjection(Mat)}
    */
   public Mat getProjection(Mat target) {
     return matrixHelper.getProjection(target);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#setModelView(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#setModelView(Mat)}
    */
   public void setModelView(Mat source) {
     matrixHelper.setModelView(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#setProjection(Mat)}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#setProjection(Mat)}
    */
   public void setProjection(Mat source) {
     matrixHelper.setProjection(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#printModelView()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#printModelView()}
    */
   public void printModelView() {
     matrixHelper.printModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.dandelion.core.MatrixHelper#printProjection()}
+   * Wrapper for {@link remixlab.dandelion.geom.MatrixHelper#printProjection()}
    */
   public void printProjection() {
     matrixHelper.printProjection();
@@ -1183,7 +1183,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Wrapper for
-   * {@link remixlab.dandelion.core.MatrixHelper#isProjectionViewInverseCached()} .
+   * {@link remixlab.dandelion.geom.MatrixHelper#isProjectionViewInverseCached()} .
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
    *
@@ -1196,7 +1196,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Wrapper for
-   * {@link remixlab.dandelion.core.MatrixHelper#cacheProjectionViewInverse(boolean)} .
+   * {@link remixlab.dandelion.geom.MatrixHelper#cacheProjectionViewInverse(boolean)} .
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
    *
@@ -1395,7 +1395,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <ol>
    * <li>Handles the {@link #avatar()}</li>
    * <li>Calls {@link #bindMatrices()}</li>
-   * <li>Calls {@link remixlab.dandelion.core.Eye#updateBoundaryEquations()} if
+   * <li>Calls {@link remixlab.dandelion.geom.Eye#updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
    * <li>Calls {@link #displayVisualHints()}.</li>
@@ -1807,7 +1807,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Draws the path used to interpolate the
-   * {@link remixlab.dandelion.core.KeyFrameInterpolator#frame()}
+   * {@link remixlab.dandelion.geom.KeyFrameInterpolator#frame()}
    * <p>
    * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
    * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
@@ -1857,11 +1857,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Draws visual hint (a cross on the screen) when the
-   * {@link remixlab.dandelion.core.Eye#anchor()} is being set.
+   * {@link remixlab.dandelion.geom.Eye#anchor()} is being set.
    * <p>
    * Simply calls {@link #drawCross(float, float, float)} on
-   * {@link remixlab.dandelion.core.Eye#projectedCoordinatesOf(Vec)}} from
-   * {@link remixlab.dandelion.core.Eye#anchor()}.
+   * {@link remixlab.dandelion.geom.Eye#projectedCoordinatesOf(Vec)}} from
+   * {@link remixlab.dandelion.geom.Eye#anchor()}.
    *
    * @see #drawCross(float, float, float)
    */
@@ -2119,7 +2119,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code return eye().pointIsVisible(point)}.
    *
-   * @see remixlab.dandelion.core.Eye#isPointVisible(Vec)
+   * @see remixlab.dandelion.geom.Eye#isPointVisible(Vec)
    */
   public boolean isPointVisible(Vec point) {
     return eye().isPointVisible(point);
@@ -2128,7 +2128,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code return eye().ballIsVisible(center, radius)}.
    *
-   * @see remixlab.dandelion.core.Eye#ballVisibility(Vec, float)
+   * @see remixlab.dandelion.geom.Eye#ballVisibility(Vec, float)
    */
   public Eye.Visibility ballVisibility(Vec center, float radius) {
     return eye().ballVisibility(center, radius);
@@ -2137,7 +2137,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code return eye().boxIsVisible(p1, p2)}.
    *
-   * @see remixlab.dandelion.core.Eye#boxVisibility(Vec, Vec)
+   * @see remixlab.dandelion.geom.Eye#boxVisibility(Vec, Vec)
    */
   public Eye.Visibility boxVisibility(Vec p1, Vec p2) {
     return eye().boxVisibility(p1, p2);
@@ -2152,7 +2152,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see remixlab.dandelion.core.Camera#updateBoundaryEquations()
+   * @see remixlab.dandelion.geom.Camera#updateBoundaryEquations()
    */
   public boolean areBoundaryEquationsEnabled() {
     return eye().areBoundaryEquationsEnabled();
@@ -2166,7 +2166,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see remixlab.dandelion.core.Camera#updateBoundaryEquations()
+   * @see remixlab.dandelion.geom.Camera#updateBoundaryEquations()
    */
   public void toggleBoundaryEquations() {
     if (areBoundaryEquationsEnabled())
@@ -2183,7 +2183,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see remixlab.dandelion.core.Camera#updateBoundaryEquations()
+   * @see remixlab.dandelion.geom.Camera#updateBoundaryEquations()
    */
   public void disableBoundaryEquations() {
     enableBoundaryEquations(false);
@@ -2197,7 +2197,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see remixlab.dandelion.core.Camera#updateBoundaryEquations()
+   * @see remixlab.dandelion.geom.Camera#updateBoundaryEquations()
    */
   public void enableBoundaryEquations() {
     enableBoundaryEquations(true);
@@ -2212,7 +2212,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
-   * @see remixlab.dandelion.core.Camera#updateBoundaryEquations()
+   * @see remixlab.dandelion.geom.Camera#updateBoundaryEquations()
    */
   public void enableBoundaryEquations(boolean flag) {
     eye().enableBoundaryEquations(flag);
@@ -2238,7 +2238,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * This method is only available in 3D.
    *
-   * @see remixlab.dandelion.core.Camera#isFaceBackFacing(Vec, Vec, Vec)
+   * @see remixlab.dandelion.geom.Camera#isFaceBackFacing(Vec, Vec, Vec)
    */
   public boolean isFaceBackFacing(Vec a, Vec b, Vec c) {
     if (this.is2D()) {
@@ -2253,7 +2253,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * This method is only available in 3D.
    *
-   * @see remixlab.dandelion.core.Camera#isConeBackFacing(Vec, Vec[])
+   * @see remixlab.dandelion.geom.Camera#isConeBackFacing(Vec, Vec[])
    */
   public boolean isConeBackFacing(Vec vertex, Vec[] normals) {
     if (this.is2D()) {
@@ -2268,7 +2268,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * This method is only available in 3D.
    *
-   * @see remixlab.dandelion.core.Camera#isConeBackFacing(Vec, Vec, float)
+   * @see remixlab.dandelion.geom.Camera#isConeBackFacing(Vec, Vec, float)
    */
   public boolean isConeBackFacing(Vec vertex, Vec axis, float angle) {
     if (this.is2D()) {
@@ -2302,11 +2302,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
    * value is not a linear interpolation between
-   * {@link remixlab.dandelion.core.Camera#zNear()} and
-   * {@link remixlab.dandelion.core.Camera#zFar()};
+   * {@link remixlab.dandelion.geom.Camera#zNear()} and
+   * {@link remixlab.dandelion.geom.Camera#zFar()};
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
    * the distance from the point you project to the camera, along the
-   * {@link remixlab.dandelion.core.Camera#viewDirection()}. See the {@code gluUnProject}
+   * {@link remixlab.dandelion.geom.Camera#viewDirection()}. See the {@code gluUnProject}
    * man page for details.
    */
   public abstract float pixelDepth(Point pixel);
@@ -2316,19 +2316,19 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Same as {@link remixlab.dandelion.core.Eye#projectedCoordinatesOf(Mat, Vec)}.
+   * Same as {@link remixlab.dandelion.geom.Eye#projectedCoordinatesOf(Mat, Vec)}.
    */
   public Vec projectedCoordinatesOf(Vec src) {
     return eye().projectedCoordinatesOf(this.matrixHelper().projectionView(), src);
   }
 
   /**
-   * If {@link remixlab.dandelion.core.MatrixHelper#isProjectionViewInverseCached()}
+   * If {@link remixlab.dandelion.geom.MatrixHelper#isProjectionViewInverseCached()}
    * (cache version) returns
-   * {@link remixlab.dandelion.core.Eye#unprojectedCoordinatesOf(Mat, Vec)} (Mat is
-   * {@link remixlab.dandelion.core.MatrixHelper#projectionViewInverse()}). Otherwise
+   * {@link remixlab.dandelion.geom.Eye#unprojectedCoordinatesOf(Mat, Vec)} (Mat is
+   * {@link remixlab.dandelion.geom.MatrixHelper#projectionViewInverse()}). Otherwise
    * (non-cache version) returns
-   * {@link remixlab.dandelion.core.Eye#unprojectedCoordinatesOf(Vec)}.
+   * {@link remixlab.dandelion.geom.Eye#unprojectedCoordinatesOf(Vec)}.
    */
   public Vec unprojectedCoordinatesOf(Vec src) {
     if (isUnprojectedCoordinatesOfOptimized())
@@ -2361,7 +2361,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Returns the {@link remixlab.dandelion.core.Eye#anchor()}.
+   * Returns the {@link remixlab.dandelion.geom.Eye#anchor()}.
    * <p>
    * Convenience wrapper function that simply returns {@code eye().anchor()}
    *
@@ -2372,7 +2372,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Same as {@link remixlab.dandelion.core.Eye#setAnchor(Vec)}.
+   * Same as {@link remixlab.dandelion.geom.Eye#setAnchor(Vec)}.
    */
   public void setAnchor(Vec anchor) {
     eye().setAnchor(anchor);
@@ -2428,7 +2428,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Convenience wrapper function that simply calls {@code camera().showEntireScene()}
    *
-   * @see remixlab.dandelion.core.Camera#showEntireScene()
+   * @see remixlab.dandelion.geom.Camera#showEntireScene()
    */
   public void showAll() {
     eye().showEntireScene();
@@ -2438,12 +2438,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Convenience wrapper function that simply returns
    * {@code eye().setAnchorFromPixel(pixel)}.
    * <p>
-   * Current implementation set no {@link remixlab.dandelion.core.Eye#anchor()}. Override
-   * {@link remixlab.dandelion.core.Camera#pointUnderPixel(Point)} in your openGL based
+   * Current implementation set no {@link remixlab.dandelion.geom.Eye#anchor()}. Override
+   * {@link remixlab.dandelion.geom.Camera#pointUnderPixel(Point)} in your openGL based
    * camera for this to work.
    *
-   * @see remixlab.dandelion.core.Eye#setAnchorFromPixel(Point)
-   * @see remixlab.dandelion.core.Camera#pointUnderPixel(Point)
+   * @see remixlab.dandelion.geom.Eye#setAnchorFromPixel(Point)
+   * @see remixlab.dandelion.geom.Camera#pointUnderPixel(Point)
    */
   public boolean setAnchorFromPixel(Point pixel) {
     return eye().setAnchorFromPixel(pixel);
@@ -2457,12 +2457,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Convenience wrapper function that simply returns
    * {@code camera().setSceneCenterFromPixel(pixel)}
    * <p>
-   * Current implementation set no {@link remixlab.dandelion.core.Camera#sceneCenter()}.
-   * Override {@link remixlab.dandelion.core.Camera#pointUnderPixel(Point)} in your openGL
+   * Current implementation set no {@link remixlab.dandelion.geom.Camera#sceneCenter()}.
+   * Override {@link remixlab.dandelion.geom.Camera#pointUnderPixel(Point)} in your openGL
    * based camera for this to work.
    *
-   * @see remixlab.dandelion.core.Camera#setSceneCenterFromPixel(Point)
-   * @see remixlab.dandelion.core.Camera#pointUnderPixel(Point)
+   * @see remixlab.dandelion.geom.Camera#setSceneCenterFromPixel(Point)
+   * @see remixlab.dandelion.geom.Camera#pointUnderPixel(Point)
    */
   public boolean setCenterFromPixel(Point pixel) {
     return eye().setSceneCenterFromPixel(pixel);
@@ -2573,7 +2573,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Apply the local transformation defined by {@code frame}, i.e., respect to the frame
-   * {@link remixlab.dandelion.geom.Frame#referenceFrame()}. The Frame is first translated
+   * {@link remixlab.dandelion.primitives.Frame#referenceFrame()}. The Frame is first translated
    * and then rotated around the new translated origin.
    * <p>
    * This method may be used to modify the modelview matrix from a Frame hierarchy. For

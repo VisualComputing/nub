@@ -34,8 +34,8 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 /*Some Global variables*/
 int id = 0;//Used to check if a given Fish must be added to another group

@@ -1,8 +1,8 @@
 import remixlab.bias.*;
 import remixlab.bias.event.*;
 import remixlab.dandelion.constraint.*;
-import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.fpstiming.*;
 import remixlab.proscene.*;
 import remixlab.util.*;

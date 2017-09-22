@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.constraint;
+package remixlab.dandelion.primitives.constraint;
 
-import remixlab.dandelion.geom.Rotation;
-import remixlab.dandelion.geom.Vec;
+import remixlab.dandelion.primitives.Rotation;
+import remixlab.dandelion.primitives.Vec;
 
 /**
  * An abstract class for Frame constraints defined by an axis or a plane.
@@ -72,7 +72,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
    * forced to stay into a plane ({@link Type#PLANE} ) or will not able to translate at
    * all ({@link Type#FORBIDDEN}).
    * <p>
-   * Use {@link remixlab.dandelion.geom.Frame#setPosition(Vec)} to define the position of
+   * Use {@link remixlab.dandelion.primitives.Frame#setPosition(Vec)} to define the position of
    * the constrained Frame before it gets constrained.
    */
   public Type translationConstraintType() {
@@ -183,7 +183,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
    * be able to rotate around an axis ({@link Type#AXIS}), or will not able to rotate at
    * all {@link Type#FORBIDDEN}.
    * <p>
-   * Use {@link remixlab.dandelion.geom.Frame#setOrientation(Rotation)} to define the
+   * Use {@link remixlab.dandelion.primitives.Frame#setOrientation(Rotation)} to define the
    * orientation of the constrained Frame before it gets constrained.
    * <p>
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational

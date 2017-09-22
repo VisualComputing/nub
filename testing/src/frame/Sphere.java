@@ -1,8 +1,8 @@
 package frame;
 
 import processing.core.PApplet;
+import remixlab.dandelion.primitives.*;
 import remixlab.dandelion.geom.*;
-import remixlab.dandelion.core.*;
 import remixlab.proscene.Scene;
 
 /**

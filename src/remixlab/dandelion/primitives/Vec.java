@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.dandelion.primitives;
 
 /**
  * A class to describe a two or three dimensional vector. This class API aims to conform

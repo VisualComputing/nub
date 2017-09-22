@@ -24,7 +24,7 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 Scene scene;
 InteractiveFrame f1, f2, f3, f4, f5;

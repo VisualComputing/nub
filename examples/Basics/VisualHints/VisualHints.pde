@@ -8,7 +8,7 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 Scene scene;
 InteractiveFrame iFrame;

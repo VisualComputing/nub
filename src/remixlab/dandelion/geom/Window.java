@@ -8,20 +8,20 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.core;
+package remixlab.dandelion.geom;
 
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 /**
- * 2D implementation of the {@link remixlab.dandelion.core.Eye} abstract class.
+ * 2D implementation of the {@link remixlab.dandelion.geom.Eye} abstract class.
  * <p>
  * <b>Attention: </b> the {@link #frame()}
- * {@link remixlab.dandelion.geom.Frame#magnitude()} is used to scale the view. The Window
+ * {@link remixlab.dandelion.primitives.Frame#magnitude()} is used to scale the view. The Window
  * magnitude is thus generally different from that of the scene. Use
  * {@link #eyeCoordinatesOf(Vec)} and {@link #worldCoordinatesOf(Vec)} (or any of the
  * powerful Frame transformations (
- * {@link remixlab.dandelion.geom.Frame#coordinatesOf(Vec)},
- * {@link remixlab.dandelion.geom.Frame#transformOf(Vec)}, ...)) to convert to and from
+ * {@link remixlab.dandelion.primitives.Frame#coordinatesOf(Vec)},
+ * {@link remixlab.dandelion.primitives.Frame#transformOf(Vec)}, ...)) to convert to and from
  * the Eye {@link #frame()} coordinate system.
  */
 public class Window extends Eye {

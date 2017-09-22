@@ -2,8 +2,8 @@ package basics;
 
 import processing.core.*;
 import remixlab.proscene.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.dandelion.geom.*;
-import remixlab.dandelion.core.*;
 
 /**
  * Created by pierre on 11/15/16.

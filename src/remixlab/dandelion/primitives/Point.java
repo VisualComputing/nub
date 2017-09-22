@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.dandelion.primitives;
 
 /**
  * Point class that provides a quick replacement for the java.awt.Point.

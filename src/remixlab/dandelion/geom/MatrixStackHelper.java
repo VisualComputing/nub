@@ -8,12 +8,12 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.core;
+package remixlab.dandelion.geom;
 
-import remixlab.dandelion.geom.Mat;
+import remixlab.dandelion.primitives.Mat;
 
 /**
- * Complete implementation of {@link remixlab.dandelion.core.MatrixHelper} which attaches
+ * Complete implementation of {@link remixlab.dandelion.geom.MatrixHelper} which attaches
  * to it a projection matrix stack and a modelview matrix stack.
  */
 public class MatrixStackHelper extends MatrixHelper {

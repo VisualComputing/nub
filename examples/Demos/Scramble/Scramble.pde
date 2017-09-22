@@ -10,7 +10,7 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 import remixlab.bias.event.*;
 
 Scene scene;

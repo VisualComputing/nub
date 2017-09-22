@@ -8,46 +8,27 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.constraint;
+package remixlab.dandelion.primitives.constraint;
 
-import remixlab.dandelion.core.Eye;
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 /**
- * An AxisPlaneConstraint defined in the Eye coordinate system.
+ * An AxisPlaneConstraint defined in the Frame local coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
- * {@link #rotationConstraintDirection()} are expressed in the associated {@link #eye()}
- * coordinate system.
+ * {@link #rotationConstraintDirection()} are expressed in the Frame local coordinate
+ * system (see {@link remixlab.dandelion.primitives.Frame#referenceFrame()} ).
  */
-public class EyeConstraint extends AxisPlaneConstraint {
-
-  private Eye eye;
-
-  /**
-   * Creates an EyeConstraint, whose constrained directions are defined in the
-   * {@link #eye()} coordinate system.
-   */
-  public EyeConstraint(Eye theEye) {
-    super();
-    eye = theEye;
-  }
-
-  /**
-   * Returns the associated Eye. Set using the EyeConstraint constructor.
-   */
-  public Eye eye() {
-    return eye;
-  }
+public class LocalConstraint extends AxisPlaneConstraint {
 
   /**
    * Depending on {@link #translationConstraintType()}, {@code constrain} translation to
-   * be along an axis or limited to a plane defined in the {@link #eye()} coordinate
-   * system by {@link #translationConstraintDirection()}.
+   * be along an axis or limited to a plane defined in the local coordinate system by
+   * {@link #translationConstraintDirection()}.
    */
   @Override
   public Vec constrainTranslation(Vec translation, Frame frame) {
-    Vec res = translation.get();
+    Vec res = new Vec(translation.vec[0], translation.vec[1], translation.vec[2]);
     Vec proj;
     switch (translationConstraintType()) {
       case FREE:
@@ -55,17 +36,15 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case PLANE:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = eye().frame().inverseTransformOf(translationConstraintDirection());
-        if (frame.referenceFrame() != null)
-          proj = frame.referenceFrame().transformOf(proj);
+        proj = frame.rotation().rotate(translationConstraintDirection());
+        // proj = frame.localInverseTransformOf(translationConstraintDirection());
         res = Vec.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = eye().frame().inverseTransformOf(translationConstraintDirection());
-        if (frame.referenceFrame() != null)
-          proj = frame.referenceFrame().transformOf(proj);
+        proj = frame.rotation().rotate(translationConstraintDirection());
+        // proj = frame.localInverseTransformOf(translationConstraintDirection());
         res = Vec.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
@@ -76,9 +55,9 @@ public class EyeConstraint extends AxisPlaneConstraint {
   }
 
   /**
-   * When {@link #rotationConstraintType()} is of type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the {@link #eye()}
-   * coordinate system by {@link #rotationConstraintDirection()}.
+   * When {@link #rotationConstraintType()} is of Type AXIS, constrain {@code rotation} to
+   * be a rotation around an axis whose direction is defined in the Frame local coordinate
+   * system by {@link #rotationConstraintDirection()}.
    */
   @Override
   public Rotation constrainRotation(Rotation rotation, Frame frame) {
@@ -92,7 +71,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         if (rotation instanceof Quat) {
-          Vec axis = frame.transformOf(eye().frame().inverseTransformOf(rotationConstraintDirection()));
+          Vec axis = rotationConstraintDirection();
           Vec quat = new Vec(((Quat) rotation).quat[0], ((Quat) rotation).quat[1], ((Quat) rotation).quat[2]);
           quat = Vec.projectVectorOnAxis(quat, axis);
           res = new Quat(quat, 2.0f * (float) Math.acos(((Quat) rotation).quat[3]));

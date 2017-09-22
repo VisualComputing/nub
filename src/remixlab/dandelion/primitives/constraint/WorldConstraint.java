@@ -8,22 +8,20 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.constraint;
+package remixlab.dandelion.primitives.constraint;
 
-import remixlab.dandelion.geom.*;
+import remixlab.dandelion.primitives.*;
 
 /**
- * An AxisPlaneConstraint defined in the Frame local coordinate system.
+ * An AxisPlaneConstraint defined in the world coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
- * {@link #rotationConstraintDirection()} are expressed in the Frame local coordinate
- * system (see {@link remixlab.dandelion.geom.Frame#referenceFrame()} ).
+ * {@link #rotationConstraintDirection()} are expressed in the world coordinate system.
  */
-public class LocalConstraint extends AxisPlaneConstraint {
-
+public class WorldConstraint extends AxisPlaneConstraint {
   /**
    * Depending on {@link #translationConstraintType()}, {@code constrain} translation to
-   * be along an axis or limited to a plane defined in the local coordinate system by
+   * be along an axis or limited to a plane defined in the world coordinate system by
    * {@link #translationConstraintDirection()}.
    */
   @Override
@@ -36,16 +34,20 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case PLANE:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame.localInverseTransformOf(translationConstraintDirection());
-        res = Vec.projectVectorOnPlane(translation, proj);
+        if (frame.referenceFrame() != null) {
+          proj = frame.referenceFrame().transformOf(translationConstraintDirection());
+          res = Vec.projectVectorOnPlane(translation, proj);
+        } else
+          res = Vec.projectVectorOnPlane(translation, translationConstraintDirection());
         break;
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame.localInverseTransformOf(translationConstraintDirection());
-        res = Vec.projectVectorOnAxis(translation, proj);
+        if (frame.referenceFrame() != null) {
+          proj = frame.referenceFrame().transformOf(translationConstraintDirection());
+          res = Vec.projectVectorOnAxis(translation, proj);
+        } else
+          res = Vec.projectVectorOnAxis(translation, translationConstraintDirection());
         break;
       case FORBIDDEN:
         res = new Vec(0.0f, 0.0f, 0.0f);
@@ -55,8 +57,8 @@ public class LocalConstraint extends AxisPlaneConstraint {
   }
 
   /**
-   * When {@link #rotationConstraintType()} is of Type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the Frame local coordinate
+   * When {@link #rotationConstraintType()} is of type AXIS, constrain {@code rotation} to
+   * be a rotation around an axis whose direction is defined in the Frame world coordinate
    * system by {@link #rotationConstraintDirection()}.
    */
   @Override
@@ -71,8 +73,8 @@ public class LocalConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         if (rotation instanceof Quat) {
-          Vec axis = rotationConstraintDirection();
           Vec quat = new Vec(((Quat) rotation).quat[0], ((Quat) rotation).quat[1], ((Quat) rotation).quat[2]);
+          Vec axis = frame.transformOf(rotationConstraintDirection());
           quat = Vec.projectVectorOnAxis(quat, axis);
           res = new Quat(quat, 2.0f * (float) Math.acos(((Quat) rotation).quat[3]));
         }
