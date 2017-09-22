@@ -11,6 +11,7 @@
 package remixlab.dandelion.geom;
 
 import remixlab.dandelion.constraint.Constraint;
+import remixlab.dandelion.core.InteractiveFrame;
 
 /**
  * A Frame is a 2D or 3D coordinate system, represented by a {@link #position()} , an
@@ -102,7 +103,7 @@ import remixlab.dandelion.constraint.Constraint;
  * <p>
  * <h3>Derived classes</h3>
  * <p>
- * The {@link remixlab.dandelion.core.GenericFrame} class inherits Frame and implements
+ * The {@link InteractiveFrame} class inherits Frame and implements
  * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
  * in the scene by whatever user interaction means you can imagine.
  */

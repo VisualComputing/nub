@@ -14,7 +14,7 @@ package remixlab.dandelion.ik;
 import remixlab.dandelion.constraint.BallAndSocket;
 import remixlab.dandelion.constraint.Hinge;
 import remixlab.dandelion.constraint.PlanarPolygon;
-import remixlab.dandelion.core.GenericFrame;
+import remixlab.dandelion.core.InteractiveFrame;
 import remixlab.dandelion.geom.*;
 import remixlab.fpstiming.TimingTask;
 
@@ -659,11 +659,11 @@ public  abstract class Solver {
         /*Tree structure that contains a list of Solvers that must be accessed in a BFS way*/
         private Node root;
 
-        public GenericFrame getHead(){
-            return (GenericFrame) root.getSolver().getHead();
+        public InteractiveFrame getHead(){
+            return (InteractiveFrame) root.getSolver().getHead();
         }
 
-        public void setup(Node parent, GenericFrame frame, ArrayList<GenericFrame> list){
+        public void setup(Node parent, InteractiveFrame frame, ArrayList<InteractiveFrame> list){
             if(frame == null) return;
             if(frame.children().isEmpty()){
                 list.add(frame);
@@ -675,8 +675,8 @@ public  abstract class Solver {
                 list.add(frame);
                 ChainSolver solver = new ChainSolver(list,null);
                 Node node = new Node(parent, solver);
-                for(GenericFrame child : frame.children()){
-                    ArrayList<GenericFrame> newList = new ArrayList<GenericFrame>();
+                for(InteractiveFrame child : frame.children()){
+                    ArrayList<InteractiveFrame> newList = new ArrayList<InteractiveFrame>();
                     newList.add(frame);
                     setup(node, child, newList);
                 }
@@ -686,9 +686,9 @@ public  abstract class Solver {
             }
         }
 
-        private boolean addTarget(Node node, GenericFrame endEffector, Frame target){
+        private boolean addTarget(Node node, InteractiveFrame endEffector, Frame target){
             if(node == null) return false;
-            if(((GenericFrame)node.getSolver().getEndEffector()).id() == endEffector.id()){
+            if(((InteractiveFrame)node.getSolver().getEndEffector()).id() == endEffector.id()){
                 node.getSolver().setTarget(target);
                 return true;
             }
@@ -698,14 +698,14 @@ public  abstract class Solver {
             return false;
         }
 
-        public boolean addTarget(GenericFrame endEffector, Frame target){
+        public boolean addTarget(InteractiveFrame endEffector, Frame target){
             return addTarget(root, endEffector, target);
         }
 
-        public TreeSolver(GenericFrame genericFrame){
+        public TreeSolver(InteractiveFrame interactiveFrame){
             super();
             Node dummy = new Node(); //Dummy Node to Keep Reference
-            setup(dummy, genericFrame, new ArrayList<GenericFrame>());
+            setup(dummy, interactiveFrame, new ArrayList<InteractiveFrame>());
             //dummy must have only a child,
             this.root = dummy.getChildren().get(0);
         }
@@ -822,9 +822,9 @@ public  abstract class Solver {
         }
 
         //Update Subtree that have associated Frame as root
-        public boolean updateTree(Node node, GenericFrame frame){
-            if(((GenericFrame)node.getSolver().getEndEffector()).id() == frame.id()){
-                setup(node, frame, new ArrayList<GenericFrame>());
+        public boolean updateTree(Node node, InteractiveFrame frame){
+            if(((InteractiveFrame)node.getSolver().getEndEffector()).id() == frame.id()){
+                setup(node, frame, new ArrayList<InteractiveFrame>());
                 return true;
             }
             for(Node child : node.getChildren()){

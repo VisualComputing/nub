@@ -1218,10 +1218,10 @@ public class Scene extends AbstractScene implements PConstants {
         eye().deletePath(id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
         for (int j = 0; j < keyFrames.size(); j++) {
-          GenericFrame keyFrame = new GenericFrame(this);
+          InteractiveFrame keyFrame = new InteractiveFrame(this);
           pruneBranch(keyFrame);
           keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
-          keyFrame.setPickingPrecision(GenericFrame.PickingPrecision.FIXED);
+          keyFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.FIXED);
           keyFrame.setGrabsInputThreshold(AbstractScene.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
@@ -1400,12 +1400,12 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   @Override
-  protected void visitFrame(GenericFrame frame) {
+  protected void visitFrame(InteractiveFrame frame) {
     targetPGraphics.pushMatrix();
     applyTransformation(targetPGraphics, frame);
-    if (frame instanceof GenericFrame)
+    if (frame instanceof InteractiveFrame)
       frame.visitCallback();
-    for (GenericFrame child : frame.children())
+    for (InteractiveFrame child : frame.children())
       visitFrame(child);
     targetPGraphics.popMatrix();
   }
@@ -2502,7 +2502,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   @Override
-  public void drawPickingTarget(GenericFrame iFrame) {
+  public void drawPickingTarget(InteractiveFrame iFrame) {
     if (iFrame.isEyeFrame()) {
       System.err.println("eye frames don't have a picking target");
       return;

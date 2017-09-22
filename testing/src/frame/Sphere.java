@@ -11,23 +11,23 @@ import remixlab.proscene.Scene;
 public class Sphere {
   Scene scene;
   PApplet parent;
-  GenericFrame iFrame;
+  InteractiveFrame iFrame;
   float r;
   int c;
 
-  public Sphere(Scene scn, GenericFrame iF) {
+  public Sphere(Scene scn, InteractiveFrame iF) {
     scene = scn;
     parent = scn.pApplet();
     iFrame = iF;
-    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
 
   public Sphere(Scene scn) {
     scene = scn;
     parent = scn.pApplet();
-    iFrame = new GenericFrame(scn);
-    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
+    iFrame = new InteractiveFrame(scn);
+    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
 

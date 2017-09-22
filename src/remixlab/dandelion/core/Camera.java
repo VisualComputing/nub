@@ -1182,7 +1182,7 @@ public class Camera extends Eye {
     interpolationKfi.deletePath();
     interpolationKfi.addKeyFrame(frame().detach());
 
-    GenericFrame frame = new GenericFrame(gScene,
+    InteractiveFrame frame = new InteractiveFrame(gScene,
         Vec.add(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target, 0.7f)), frame().orientation(),
         frame().magnitude());
     scene().pruneBranch(frame);
@@ -1191,8 +1191,8 @@ public class Camera extends Eye {
     // Vec.add(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target,
     // 0.7f)), frame().orientation(), frame().magnitude()).detach(), 0.4f);
 
-    GenericFrame originalFrame = frame();
-    GenericFrame tempFrame = frame().detach();
+    InteractiveFrame originalFrame = frame();
+    InteractiveFrame tempFrame = frame().detach();
     tempFrame.setPosition(Vec.add(Vec.multiply(frame().position(), coef), Vec.multiply(target, (1.0f - coef))));
     replaceFrame(tempFrame);
     lookAt(target);

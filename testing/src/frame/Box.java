@@ -10,14 +10,14 @@ import remixlab.proscene.Scene;
  */
 public class Box {
   Scene scene;
-  public GenericFrame iFrame;
+  public InteractiveFrame iFrame;
   float w, h, d;
   int c;
 
-  public Box(Scene scn, GenericFrame iF) {
+  public Box(Scene scn, InteractiveFrame iF) {
     scene = scn;
     iFrame = iF;
-    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     //iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();
@@ -25,8 +25,8 @@ public class Box {
 
   public Box(Scene scn) {
     scene = scn;
-    iFrame = new GenericFrame(scn);
-    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
+    iFrame = new InteractiveFrame(scn);
+    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     //iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();

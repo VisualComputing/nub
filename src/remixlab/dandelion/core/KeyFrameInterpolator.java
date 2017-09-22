@@ -110,9 +110,9 @@ public class KeyFrameInterpolator {
 
     protected Vec tgPVec;
     protected float tm;
-    protected GenericFrame frm;
+    protected InteractiveFrame frm;
 
-    KeyFrame(GenericFrame fr, float t) {
+    KeyFrame(InteractiveFrame fr, float t) {
       tm = t;
       frm = fr;
     }
@@ -138,7 +138,7 @@ public class KeyFrameInterpolator {
       return tm;
     }
 
-    GenericFrame frame() {
+    InteractiveFrame frame() {
       return frm;
     }
 
@@ -155,7 +155,7 @@ public class KeyFrameInterpolator {
   protected class KeyFrame3D extends KeyFrame {
     protected Quat tgQuat;
 
-    KeyFrame3D(GenericFrame fr, float t) {
+    KeyFrame3D(InteractiveFrame fr, float t) {
       super(fr, t);
     }
 
@@ -183,7 +183,7 @@ public class KeyFrameInterpolator {
    * 2D KeyFrame internal class.
    */
   protected class KeyFrame2D extends KeyFrame {
-    KeyFrame2D(GenericFrame fr, float t) {
+    KeyFrame2D(InteractiveFrame fr, float t) {
       super(fr, t);
     }
 
@@ -371,7 +371,7 @@ public class KeyFrameInterpolator {
 
   /**
    * Returns the number of keyFrames used by the interpolation. Use
-   * {@link #addKeyFrame(GenericFrame)} to add new keyFrames.
+   * {@link #addKeyFrame(InteractiveFrame)} to add new keyFrames.
    */
   public int numberOfKeyFrames() {
     return keyFrameList.size();
@@ -570,7 +570,7 @@ public class KeyFrameInterpolator {
    * starting {@link #interpolationTime()}.
    * <p>
    * <b>Attention:</b> The keyFrames must be defined (see
-   * {@link #addKeyFrame(GenericFrame, float)}) before you startInterpolation(), or else
+   * {@link #addKeyFrame(InteractiveFrame, float)}) before you startInterpolation(), or else
    * the interpolation will naturally immediately stop.
    */
   public void startInterpolation(int myPeriod) {
@@ -613,11 +613,11 @@ public class KeyFrameInterpolator {
   /**
    * Appends a new keyFrame to the path.
    * <p>
-   * Same as {@link #addKeyFrame(GenericFrame, float)}, except that the
+   * Same as {@link #addKeyFrame(InteractiveFrame, float)}, except that the
    * {@link #keyFrameTime(int)} is set to the previous {@link #keyFrameTime(int)} plus one
    * second (or 0.0 if there is no previous keyFrame).
    */
-  public void addKeyFrame(GenericFrame frame) {
+  public void addKeyFrame(InteractiveFrame frame) {
     float time;
 
     if (keyFrameList.isEmpty())
@@ -641,7 +641,7 @@ public class KeyFrameInterpolator {
    * references are silently ignored. The {@link #keyFrameTime(int)} has to be
    * monotonously increasing over keyFrames.
    */
-  public void addKeyFrame(GenericFrame frame, float time) {
+  public void addKeyFrame(InteractiveFrame frame, float time) {
     if (frame == null)
       return;
 
@@ -822,10 +822,10 @@ public class KeyFrameInterpolator {
    * {@link #numberOfKeyFrames()}-1.
    * <p>
    * <b>Note:</b> If this keyFrame was defined using a reference to a Frame (see
-   * {@link #addKeyFrame(GenericFrame, float)} the current referenced Frame state is
+   * {@link #addKeyFrame(InteractiveFrame, float)} the current referenced Frame state is
    * returned.
    */
-  public GenericFrame keyFrame(int index) {
+  public InteractiveFrame keyFrame(int index) {
     return keyFrameList.get(index).frame();
   }
 

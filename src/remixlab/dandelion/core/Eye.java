@@ -42,7 +42,7 @@ import java.util.List;
  * be implemented.
  * <p>
  * The {@link #position()} and {@link #orientation()} of the Eye are defined by an
- * {@link remixlab.dandelion.core.GenericFrame} (retrieved using {@link #frame()}). These
+ * {@link InteractiveFrame} (retrieved using {@link #frame()}). These
  * methods are just convenient wrappers to the equivalent Frame methods. This also means
  * that the Eye {@link #frame()} can be attached to a
  * {@link remixlab.dandelion.geom.Frame#referenceFrame()} which enables complex Eye
@@ -59,7 +59,7 @@ import java.util.List;
  * capabilities.
  */
 public abstract class Eye {
-  class GrabberEyeFrame extends GenericFrame {
+  class GrabberEyeFrame extends InteractiveFrame {
     public final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID, // 1.b. Keys
         LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
 
@@ -156,7 +156,7 @@ public abstract class Eye {
   ;
 
   // F r a m e
-  protected GenericFrame gFrame;
+  protected InteractiveFrame gFrame;
 
   // S C E N E O B J E C T
   protected AbstractScene gScene;
@@ -301,9 +301,9 @@ public abstract class Eye {
    * <p>
    * This GrabberFrame defines its {@link #position()}, {@link #orientation()} and can
    * translate bogus events into Eye displacement. Set using
-   * {@link #setFrame(GenericFrame)}.
+   * {@link #setFrame(InteractiveFrame)}.
    */
-  public GenericFrame frame() {
+  public InteractiveFrame frame() {
     return gFrame;
   }
 
@@ -368,7 +368,7 @@ public abstract class Eye {
   }
 
   /**
-   * Max between {@link remixlab.dandelion.core.GenericFrame#lastUpdate()} and
+   * Max between {@link InteractiveFrame#lastUpdate()} and
    * {@link #lastNonFrameUpdate()}.
    *
    * @return last frame the Eye was updated
@@ -401,7 +401,7 @@ public abstract class Eye {
    * Internal use. Temporarily attach a frame to the Eye which is useful to some
    * interpolation methods such as {@link #interpolateToFitScene()}.
    */
-  protected final void replaceFrame(GenericFrame g) {
+  protected final void replaceFrame(InteractiveFrame g) {
     if (g == null || g == frame())
       return;
     if (g.theeye == null) {// only detached frames which call pruneBranch on g
@@ -427,7 +427,7 @@ public abstract class Eye {
    * <p>
    * A {@code null} {@code icf} reference will silently be ignored.
    */
-  public final void setFrame(GenericFrame g) {
+  public final void setFrame(InteractiveFrame g) {
     if (g == null || g == frame())
       return;
     if (g.theeye == this) {
@@ -480,7 +480,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply returns
    * {@code frame().spinningSensitivity()}
    *
-   * @see remixlab.dandelion.core.GenericFrame#spinningSensitivity()
+   * @see InteractiveFrame#spinningSensitivity()
    */
   public final float spinningSensitivity() {
     return frame().spinningSensitivity();
@@ -490,7 +490,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply calls
    * {@code frame().setSpinningSensitivity(sensitivity)}
    *
-   * @see remixlab.dandelion.core.GenericFrame#setSpinningSensitivity(float)
+   * @see InteractiveFrame#setSpinningSensitivity(float)
    */
   public final void setSpinningSensitivity(float sensitivity) {
     frame().setSpinningSensitivity(sensitivity);
@@ -500,7 +500,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply returns
    * {@code frame().rotationSensitivity()}
    *
-   * @see remixlab.dandelion.core.GenericFrame#rotationSensitivity()
+   * @see InteractiveFrame#rotationSensitivity()
    */
   public final float rotationSensitivity() {
     return frame().rotationSensitivity();
@@ -510,7 +510,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply calls
    * {@code frame().setRotationSensitivity(sensitivity)}
    *
-   * @see remixlab.dandelion.core.GenericFrame#setRotationSensitivity(float)
+   * @see InteractiveFrame#setRotationSensitivity(float)
    */
   public final void setRotationSensitivity(float sensitivity) {
     frame().setRotationSensitivity(sensitivity);
@@ -520,7 +520,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply returns
    * {@code frame().translationSensitivity()}
    *
-   * @see remixlab.dandelion.core.GenericFrame#translationSensitivity()
+   * @see InteractiveFrame#translationSensitivity()
    */
   public final float translationSensitivity() {
     return frame().translationSensitivity();
@@ -530,7 +530,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply calls
    * {@code frame().setTranslationSensitivity(sensitivity)}
    *
-   * @see remixlab.dandelion.core.GenericFrame#setTranslationSensitivity(float)
+   * @see InteractiveFrame#setTranslationSensitivity(float)
    */
   public final void setTranslationSensitivity(float sensitivity) {
     frame().setTranslationSensitivity(sensitivity);
@@ -539,7 +539,7 @@ public abstract class Eye {
   /**
    * Convenience wrapper function that simply returns {@code frame().scalingSensitivity()}
    *
-   * @see remixlab.dandelion.core.GenericFrame#scalingSensitivity()
+   * @see InteractiveFrame#scalingSensitivity()
    */
   public final float scalingSensitivity() {
     return frame().scalingSensitivity();
@@ -549,7 +549,7 @@ public abstract class Eye {
    * Convenience wrapper function that simply calls
    * {@code frame().setScalingSensitivity(sensitivity)}
    *
-   * @see remixlab.dandelion.core.GenericFrame#setScalingSensitivity(float)
+   * @see InteractiveFrame#setScalingSensitivity(float)
    */
   public final void setScalingSensitivity(float sensitivity) {
     frame().setScalingSensitivity(sensitivity);
@@ -672,8 +672,8 @@ public abstract class Eye {
     scnRadius = radius;
     setFlySpeed(0.01f * sceneRadius());
     for (Grabber mg : gScene.motionAgent().grabbers()) {
-      if (mg instanceof GenericFrame)
-        ((GenericFrame) mg).setFlySpeed(0.01f * sceneRadius());
+      if (mg instanceof InteractiveFrame)
+        ((InteractiveFrame) mg).setFlySpeed(0.01f * sceneRadius());
     }
   }
 
@@ -689,7 +689,7 @@ public abstract class Eye {
    * Returns the fly speed of the Eye.
    * <p>
    * Simply returns {@code frame().flySpeed()}. See the
-   * {@link remixlab.dandelion.core.GenericFrame#flySpeed()} documentation. This value is
+   * {@link InteractiveFrame#flySpeed()} documentation. This value is
    * only meaningful when the action binding is MOVE_FORWARD or is MOVE_BACKWARD.
    * <p>
    * Set to 0.5% of the {@link #sceneRadius()} by {@link #setSceneRadius(float)} .
@@ -1540,8 +1540,8 @@ public abstract class Eye {
       info = false;
     }
 
-    GenericFrame keyFrame = frame().detach();
-    keyFrame.setPickingPrecision(GenericFrame.PickingPrecision.FIXED);
+    InteractiveFrame keyFrame = frame().detach();
+    keyFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.FIXED);
     keyFrame.setGrabsInputThreshold(AbstractScene.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
     if (gScene.pathsVisualHint())
       gScene.inputHandler().addGrabber(keyFrame);
@@ -1959,8 +1959,8 @@ public abstract class Eye {
 
     interpolationKfi.deletePath();
     interpolationKfi.addKeyFrame(frame().detach());
-    GenericFrame originalFrame = frame();
-    GenericFrame tempFrame = frame().detach();
+    InteractiveFrame originalFrame = frame();
+    InteractiveFrame tempFrame = frame().detach();
     replaceFrame(tempFrame);
     fitScreenRegion(rectangle);
     setFrame(originalFrame);
@@ -1985,8 +1985,8 @@ public abstract class Eye {
 
     interpolationKfi.deletePath();
     interpolationKfi.addKeyFrame(frame().detach());
-    GenericFrame originalFrame = frame();
-    GenericFrame tempFrame = frame().detach();
+    InteractiveFrame originalFrame = frame();
+    InteractiveFrame tempFrame = frame().detach();
     replaceFrame(tempFrame);
     showEntireScene();
     setFrame(originalFrame);
@@ -1997,9 +1997,9 @@ public abstract class Eye {
   /**
    * Convenience function that simply calls {@code interpolateTo(fr, 1)}.
    *
-   * @see #interpolateTo(GenericFrame, float)
+   * @see #interpolateTo(InteractiveFrame, float)
    */
-  public void interpolateTo(GenericFrame fr) {
+  public void interpolateTo(InteractiveFrame fr) {
     interpolateTo(fr, 1);
   }
 
@@ -2010,11 +2010,11 @@ public abstract class Eye {
    * {@code fr} is expressed in world coordinates. {@code duration} tunes the
    * interpolation speed.
    *
-   * @see #interpolateTo(GenericFrame)
+   * @see #interpolateTo(InteractiveFrame)
    * @see #interpolateToFitScene()
    * @see #interpolateToZoomOnPixel(Point)
    */
-  public void interpolateTo(GenericFrame fr, float duration) {
+  public void interpolateTo(InteractiveFrame fr, float duration) {
     if (anyInterpolationStarted())
       stopInterpolations();
 

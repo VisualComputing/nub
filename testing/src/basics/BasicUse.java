@@ -10,7 +10,7 @@ import remixlab.dandelion.core.*;
  */
 public class BasicUse extends PApplet {
   Scene scene;
-  GenericFrame iFrame;
+  InteractiveFrame iFrame;
   float length = 100;
 
   public void settings() {
@@ -23,7 +23,7 @@ public class BasicUse extends PApplet {
     scene.setPickingVisualHint(true);
     scene.setRadius(200);
 
-    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
     iFrame.rotate(new Rot(QUARTER_PI));

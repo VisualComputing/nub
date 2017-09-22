@@ -32,13 +32,13 @@ import java.util.List;
  * scene objects to control their motion using an {@link Agent}, such
  * as the {@link remixlab.dandelion.core.AbstractScene#motionAgent()} and the
  * {@link remixlab.dandelion.core.AbstractScene#keyAgent()} (see
- * {@link #GenericFrame(AbstractScene)} and all the constructors that take an scene
+ * {@link #InteractiveFrame(AbstractScene)} and all the constructors that take an scene
  * parameter). To attach a generic-frame to {@code MyObject} use code like this:
  * <p>
  * <pre>
  * {@code
  * public class MyObject {
- *   public GenericFrame gFrame;
+ *   public InteractiveFrame gFrame;
  *
  *   public void draw() {
  *     gFrame.scene().pushModelView();
@@ -61,10 +61,10 @@ import java.util.List;
  * For instance, with a move-to-the-right user gesture the
  * {@link remixlab.dandelion.core.AbstractScene#eyeFrame()} has to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A generic-frame can be attached to
- * an eye only at construction times (see {@link #GenericFrame(Eye)} and all the
+ * an eye only at construction times (see {@link #InteractiveFrame(Eye)} and all the
  * constructors that take an eye parameter). An eye may have more than one generic-frame
  * attached to it. To set one of them as the {@link remixlab.dandelion.core.Eye#frame()},
- * call {@link remixlab.dandelion.core.Eye#setFrame(GenericFrame)}.
+ * call {@link remixlab.dandelion.core.Eye#setFrame(InteractiveFrame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(DOF2Event, boolean)},
@@ -96,7 +96,7 @@ import java.util.List;
  * the transformation it represents may be applied to a different scene. See
  * {@link #applyTransformation()} and {@link #applyTransformation(AbstractScene)}.
  * <p>
- * Two generic-frames can be synced together ({@link #sync(GenericFrame, GenericFrame)}),
+ * Two generic-frames can be synced together ({@link #sync(InteractiveFrame, InteractiveFrame)}),
  * meaning that they will share their global parameters (position, orientation and
  * magnitude) taken the one that has been most recently updated. Syncing can be useful to
  * share frames among different off-screen scenes (see ProScene's CameraCrane and the
@@ -107,7 +107,7 @@ import java.util.List;
  * documentation. See also {@link #setTrackingEyeDistance(float)},
  * {@link #setTrackingEyeAzimuth(float)} and {@link #setTrackingEyeInclination(float)}.
  */
-public class GenericFrame extends Frame implements Grabber, Trackable {
+public class InteractiveFrame extends Frame implements Grabber, Trackable {
   // according to space-nav fine tuning it turned out that the space-nav is
   // right handed
   // we thus define our gesture physical space as right-handed as follows:
@@ -171,14 +171,14 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   public DOF2Event initEvent;
   private float flySpeedCache;
 
-  protected List<GenericFrame> childrenList;
+  protected List<InteractiveFrame> childrenList;
 
   /**
    * Same as {@code this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn) {
+  public InteractiveFrame(AbstractScene scn) {
     this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1);
   }
 
@@ -186,54 +186,54 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * Same as
    * {@code this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1)} .
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye) {
+  public InteractiveFrame(Eye eye) {
     this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Vec p) {
+  public InteractiveFrame(AbstractScene scn, Vec p) {
     this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), 1);
   }
 
   /**
    * Same as {@code this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), 1)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, Vec p) {
+  public InteractiveFrame(Eye eye, Vec p) {
     this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, Rotation r) {
     this(scn, null, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(eye, null, new Vec(), r, 1)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, Rotation r) {
+  public InteractiveFrame(Eye eye, Rotation r) {
     this(eye, null, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), s)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, float s) {
+  public InteractiveFrame(AbstractScene scn, float s) {
     this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), s);
   }
 
@@ -241,72 +241,72 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * Same as
    * {@code this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s)} .
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, float s) {
+  public InteractiveFrame(Eye eye, float s) {
     this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), s)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Vec p, float s) {
+  public InteractiveFrame(AbstractScene scn, Vec p, float s) {
     this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), s);
   }
 
   /**
    * Same as {@code this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), s)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, Vec p, float s) {
+  public InteractiveFrame(Eye eye, Vec p, float s) {
     this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Vec p, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, Vec p, Rotation r) {
     this(scn, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(eye, null, p, r, 1)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, Vec p, Rotation r) {
+  public InteractiveFrame(Eye eye, Vec p, Rotation r) {
     this(eye, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, s)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, Rotation r, float s) {
     this(scn, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(eye, null, new Vec(), r, s)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, Rotation r, float s) {
     this(eye, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, s)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, Vec p, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, Vec p, Rotation r, float s) {
     this(scn, null, p, r, s);
   }
 
@@ -315,13 +315,13 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * {@code this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame) {
     this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1);
   }
 
-  public GenericFrame(Eye eye, GenericFrame referenceFrame) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame) {
     this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1);
   }
 
@@ -329,9 +329,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * Same as {@code this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Vec p) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p) {
     this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), 1);
   }
 
@@ -340,27 +340,27 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * {@code this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Vec p) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p) {
     this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), 1);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Rotation r) {
     this(scn, referenceFrame, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Rotation r) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Rotation r) {
     this(eye, referenceFrame, new Vec(), r, 1);
   }
 
@@ -369,9 +369,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * {@code this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), s)}
    * .
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, float s) {
     this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), s);
   }
 
@@ -380,9 +380,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * {@code this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s)}
    * .
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, float s) {
     this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s);
   }
 
@@ -390,9 +390,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * Same as {@code this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), s)}
    * .
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Vec p, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, float s) {
     this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), s);
   }
 
@@ -401,45 +401,45 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * {@code this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), s)}
    * .
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Vec p, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, float s) {
     this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), s);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, p, r, 1)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Vec p, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Rotation r) {
     this(scn, referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, p, r, 1)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Vec p, Rotation r) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Rotation r) {
     this(eye, referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, new Vec(), r, s)}.
    *
-   * @see #GenericFrame(AbstractScene, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Rotation r, float s) {
     this(scn, referenceFrame, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, new Vec(), r, s)}.
    *
-   * @see #GenericFrame(Eye, GenericFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Rotation r, float s) {
     this(eye, referenceFrame, new Vec(), r, s);
   }
 
@@ -462,7 +462,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  public GenericFrame(AbstractScene scn, GenericFrame referenceFrame, Vec p, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Rotation r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
@@ -491,7 +491,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code true}.
    */
-  public GenericFrame(Eye eye, GenericFrame referenceFrame, Vec p, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Rotation r, float s) {
     super(referenceFrame, p, r, s);
     theeye = eye;
     init(theeye.scene());
@@ -511,7 +511,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     if (id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     visit = true;
-    childrenList = new ArrayList<GenericFrame>();
+    childrenList = new ArrayList<InteractiveFrame>();
     // scene().addLeadingFrame(this);
     setReferenceFrame(referenceFrame());// restorePath seems more robust
     setRotationSensitivity(1.0f);
@@ -540,7 +540,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     // end
   }
 
-  protected GenericFrame(GenericFrame otherFrame) {
+  protected InteractiveFrame(InteractiveFrame otherFrame) {
     super(otherFrame);
     this.gScene = otherFrame.gScene;
     this.id = ++scene().nodeCount;
@@ -552,7 +552,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     this.visit = otherFrame.visit;
     this.hint = otherFrame.hint;
 
-    this.childrenList = new ArrayList<GenericFrame>();
+    this.childrenList = new ArrayList<InteractiveFrame>();
     this.setReferenceFrame(referenceFrame());// restorePath
 
     this.spinningTimerTask = new TimingTask() {
@@ -608,8 +608,8 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * @return generic-frame copy
    */
   @Override
-  public GenericFrame get() {
-    return new GenericFrame(this);
+  public InteractiveFrame get() {
+    return new InteractiveFrame(this);
   }
 
   /**
@@ -619,8 +619,8 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * <p>
    * This method is useful to perform animations for all eye interpolation routines.
    */
-  protected GenericFrame detach() {
-    GenericFrame frame = new GenericFrame(scene());
+  protected InteractiveFrame detach() {
+    InteractiveFrame frame = new InteractiveFrame(scene());
     scene().pruneBranch(frame);
     frame.setWorldMatrix(this);
     return frame;
@@ -641,19 +641,19 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   // GRAPH
 
   @Override
-  public GenericFrame referenceFrame() {
-    return (GenericFrame) this.refFrame;
+  public InteractiveFrame referenceFrame() {
+    return (InteractiveFrame) this.refFrame;
   }
 
   @Override
   public void setReferenceFrame(Frame frame) {
-    if (frame instanceof GenericFrame || frame == null)
-      setReferenceFrame((GenericFrame) frame);
+    if (frame instanceof InteractiveFrame || frame == null)
+      setReferenceFrame((InteractiveFrame) frame);
     else
-      System.out.println("Warning: nothing done: Generic.referenceFrame() should be instanceof GenericFrame");
+      System.out.println("Warning: nothing done: Generic.referenceFrame() should be instanceof InteractiveFrame");
   }
 
-  public void setReferenceFrame(GenericFrame frame) {
+  public void setReferenceFrame(InteractiveFrame frame) {
     if (settingAsReferenceFrameWillCreateALoop(frame)) {
       System.out.println("Frame.setReferenceFrame would create a loop in Frame hierarchy. Nothing done.");
       return;
@@ -676,7 +676,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     modified();
   }
 
-  protected void restorePath(GenericFrame parent, GenericFrame child) {
+  protected void restorePath(InteractiveFrame parent, InteractiveFrame child) {
     if (parent == null) {
       if (scene() != null)
         scene().addLeadingFrame(child);
@@ -692,11 +692,11 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * Returns a list of the frame children, i.e., frame which {@link #referenceFrame()} is
    * this.
    */
-  public final List<GenericFrame> children() {
+  public final List<InteractiveFrame> children() {
     return childrenList;
   }
 
-  protected boolean addChild(GenericFrame frame) {
+  protected boolean addChild(InteractiveFrame frame) {
     if (frame == null)
       return false;
     if (hasChild(frame))
@@ -707,9 +707,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   /**
    * Removes the leading frame if present. Typically used when re-parenting the frame.
    */
-  protected boolean removeChild(GenericFrame frame) {
+  protected boolean removeChild(InteractiveFrame frame) {
     boolean result = false;
-    Iterator<GenericFrame> it = children().iterator();
+    Iterator<InteractiveFrame> it = children().iterator();
     while (it.hasNext()) {
       if (it.next() == frame) {
         it.remove();
@@ -720,8 +720,8 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     return result;
   }
 
-  protected boolean hasChild(GenericFrame gFrame) {
-    for (GenericFrame frame : children())
+  protected boolean hasChild(InteractiveFrame gFrame) {
+    for (InteractiveFrame frame : children())
       if (frame == gFrame)
         return true;
     return false;
@@ -1119,7 +1119,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   protected void modified() {
     lastUpdate = AbstractScene.frameCount;
     if (children() != null)
-      for (GenericFrame child : children())
+      for (InteractiveFrame child : children())
         child.modified();
   }
 
@@ -1135,9 +1135,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   /**
    * Same as {@code sync(this, otherFrame)}.
    *
-   * @see #sync(GenericFrame, GenericFrame)
+   * @see #sync(InteractiveFrame, InteractiveFrame)
    */
-  public void sync(GenericFrame otherFrame) {
+  public void sync(InteractiveFrame otherFrame) {
     sync(this, otherFrame);
   }
 
@@ -1153,13 +1153,13 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    *
    * @see #set(Frame)
    */
-  public static void sync(GenericFrame f1, GenericFrame f2) {
+  public static void sync(InteractiveFrame f1, InteractiveFrame f2) {
     if (f1 == null || f2 == null)
       return;
     if (f1.lastUpdate() == f2.lastUpdate())
       return;
-    GenericFrame source = (f1.lastUpdate() > f2.lastUpdate()) ? f1 : f2;
-    GenericFrame target = (f1.lastUpdate() > f2.lastUpdate()) ? f2 : f1;
+    InteractiveFrame source = (f1.lastUpdate() > f2.lastUpdate()) ? f1 : f2;
+    InteractiveFrame target = (f1.lastUpdate() > f2.lastUpdate()) ? f2 : f1;
     target.setWorldMatrix(source);
   }
 
@@ -2465,7 +2465,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     Vec pos = position();
     Quat o = (Quat) orientation();
     Frame oldRef = referenceFrame();
-    GenericFrame rFrame = new GenericFrame(gScene);
+    InteractiveFrame rFrame = new InteractiveFrame(gScene);
     rFrame.setPosition(eye().anchor());
     rFrame.setZAxis(Vec.subtract(pos, eye().anchor()));
     rFrame.setXAxis(xAxis());
@@ -2650,7 +2650,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * @see #screenToQuat(float, float, float)
    */
   public Vec eyeToReferenceFrame(Vec trns) {
-    GenericFrame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye().frame() /* : this */;
+    InteractiveFrame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye().frame() /* : this */;
     Vec t = gFrame.inverseTransformOf(trns);
     if (referenceFrame() != null)
       t = referenceFrame().transformOf(t);
@@ -2767,12 +2767,12 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
       Frame ref = frame.get();
-      if (ref instanceof GenericFrame)
-        gScene.pruneBranch((GenericFrame) ref);
+      if (ref instanceof InteractiveFrame)
+        gScene.pruneBranch((InteractiveFrame) ref);
       else if (ref instanceof Grabber) {
         gScene.inputHandler().removeGrabber((Grabber) ref);
       }
-      GenericFrame copy = get();
+      InteractiveFrame copy = get();
       gScene.pruneBranch(copy);
       copy.setReferenceFrame(ref);
       copy.setWorldMatrix(this);
@@ -3115,7 +3115,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
   // Trackable Interface implementation
 
-  protected GenericFrame eFrame;
+  protected InteractiveFrame eFrame;
   protected Rotation q;
   protected float trackingDist;
 
@@ -3233,7 +3233,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     if(q==null)
       q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
     if (eFrame == null) {
-      eFrame = new GenericFrame(scene(), this);
+      eFrame = new InteractiveFrame(scene(), this);
       scene().pruneBranch(eFrame);
     }
     if (scene().is3D()) {
@@ -3266,7 +3266,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * @see remixlab.dandelion.core.AbstractScene#setAvatar(Trackable)
    */
   @Override
-  public GenericFrame trackingEyeFrame() {
+  public InteractiveFrame trackingEyeFrame() {
     if (eFrame == null)
       updateTrackingEyeFrame();
     return eFrame;
@@ -3276,7 +3276,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
 
 
   /*Set the orientation of the parent when children has been translated*/
-  public void setRotation(GenericFrame children){
+  public void setRotation(InteractiveFrame children){
     setRotation(children.translation());
   }
 
@@ -3333,7 +3333,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     }
   }
 
-  protected void setReferenceFrame(GenericFrame parent, boolean setHierarchy){
+  protected void setReferenceFrame(InteractiveFrame parent, boolean setHierarchy){
     //TODO : Currently Working just with chains
     //TODO when remove also remove subBase if children size == 1
     //TODO Checkout ReferenceFrame to remove a Frame in the Tree
@@ -3343,7 +3343,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
     }
     /*Get number of joints related with the parent*/
     int siblings = 0;
-    for(GenericFrame f : parent.children()){
+    for(InteractiveFrame f : parent.children()){
       siblings = f != this ? siblings + 1 : siblings;
     }
     if(siblings == 0){
@@ -3355,10 +3355,10 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
       if(this.is3D())this.setTranslation(new Vec(0,0,magnitude));
       else this.setTranslation(new Vec(magnitude,0));
     }else if (siblings > 1){
-      GenericFrame grandpa = parent.referenceFrame();
+      InteractiveFrame grandpa = parent.referenceFrame();
       if(grandpa == null){
         //Copy parent and create a "new branch"
-        GenericFrame dummy = new GenericFrame(scene());
+        InteractiveFrame dummy = new InteractiveFrame(scene());
         dummy.setTranslation(parent.translation().get());
         dummy.setOrientation(parent.orientation().get());
         //Set parent orientation
@@ -3368,9 +3368,9 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
         setReferenceFrame(dummy);
         if(this.is3D())this.setTranslation(new Vec(0,0,magnitude));
         else this.setTranslation(new Vec(magnitude,0));
-      }else if(!(grandpa instanceof GenericFrame)){
+      }else if(!(grandpa instanceof InteractiveFrame)){
         //Copy parent and create a "new branch"
-        GenericFrame dummy = new GenericFrame(scene());
+        InteractiveFrame dummy = new InteractiveFrame(scene());
         dummy.setReferenceFrame(grandpa);
         dummy.setTranslation(parent.translation().get());
         dummy.setOrientation(parent.orientation().get());
@@ -3390,10 +3390,10 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    */
   public void setupHierarchy(){
     for(int i = 0; i < children().size(); i++){
-        GenericFrame f = children().get(i);
+        InteractiveFrame f = children().get(i);
         f.setReferenceFrame(this, true);
     }
-    for(GenericFrame f : children()) {
+    for(InteractiveFrame f : children()) {
         f.setupHierarchy();
     }
   }

@@ -35,12 +35,12 @@ import java.util.List;
  * For an introduction to DANDELION please refer to
  * <a href="http://nakednous.github.io/projects/dandelion">this</a>.
  * <p>
- * Instantiated scene {@link remixlab.dandelion.core.GenericFrame}s form a scene-tree of
+ * Instantiated scene {@link InteractiveFrame}s form a scene-tree of
  * transformations which may be traverse with {@link #traverseTree()}. The frame
  * collection belonging to the scene may be retrieved with {@link #frames(boolean)}. The
  * scene provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(GenericFrame)}, {@link #appendBranch(List)},
- * {@link #isFrameReachable(GenericFrame)}, {@link #branch(GenericFrame, boolean)}, and
+ * {@link #pruneBranch(InteractiveFrame)}, {@link #appendBranch(List)},
+ * {@link #isFrameReachable(InteractiveFrame)}, {@link #branch(InteractiveFrame, boolean)}, and
  * {@link #clearTree()}.
  * <p>
  * Each AbstractScene provides the following main object instances:
@@ -138,7 +138,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     PROCESSING_DESKTOP, PROCESSING_ANDROID, PROCESSING_JS
   }
 
-  protected List<GenericFrame> seeds;
+  protected List<InteractiveFrame> seeds;
 
   // iFrames
   public int nodeCount;
@@ -177,7 +177,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #setEye(Eye)
    */
   public AbstractScene() {
-    seeds = new ArrayList<GenericFrame>();
+    seeds = new ArrayList<InteractiveFrame>();
     solvers = new ArrayList<Solver.TreeSolver>();
     setPlatform();
     setTimingHandler(new TimingHandler(this));
@@ -196,18 +196,18 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * which they are the seeds.
    *
    * @see #frames(boolean)
-   * @see #isFrameReachable(GenericFrame)
-   * @see #pruneBranch(GenericFrame)
+   * @see #isFrameReachable(InteractiveFrame)
+   * @see #pruneBranch(InteractiveFrame)
    */
-  public List<GenericFrame> leadingFrames() {
+  public List<InteractiveFrame> leadingFrames() {
     return seeds;
   }
 
   /**
    * Returns {@code true} if the frame is top-level.
    */
-  protected boolean isLeadingFrame(GenericFrame gFrame) {
-    for (GenericFrame frame : leadingFrames())
+  protected boolean isLeadingFrame(InteractiveFrame gFrame) {
+    for (InteractiveFrame frame : leadingFrames())
       if (frame == gFrame)
         return true;
     return false;
@@ -216,7 +216,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Add the frame as top-level if its reference frame is null and it isn't already added.
    */
-  protected boolean addLeadingFrame(GenericFrame gFrame) {
+  protected boolean addLeadingFrame(InteractiveFrame gFrame) {
     if (gFrame == null || gFrame.referenceFrame() != null)
       return false;
     if (isLeadingFrame(gFrame))
@@ -227,9 +227,9 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Removes the leading frame if present. Typically used when re-parenting the frame.
    */
-  protected boolean removeLeadingFrame(GenericFrame iFrame) {
+  protected boolean removeLeadingFrame(InteractiveFrame iFrame) {
     boolean result = false;
-    Iterator<GenericFrame> it = leadingFrames().iterator();
+    Iterator<InteractiveFrame> it = leadingFrames().iterator();
     while (it.hasNext()) {
       if (it.next() == iFrame) {
         it.remove();
@@ -243,47 +243,47 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
    * by each traversed frame, and calling
-   * {@link remixlab.dandelion.core.GenericFrame#visit()} on it.
+   * {@link InteractiveFrame#visit()} on it.
    * <p>
    * Note that only reachable frames are visited by this algorithm.
    * <p>
    * <b>Attention:</b> this method should be called after {@link #bindMatrices()} (i.e.,
    * eye update) and before any other transformation of the modelview takes place.
    *
-   * @see #isFrameReachable(GenericFrame)
-   * @see #pruneBranch(GenericFrame)
+   * @see #isFrameReachable(InteractiveFrame)
+   * @see #pruneBranch(InteractiveFrame)
    */
   public void traverseTree() {
-    for (GenericFrame frame : leadingFrames())
+    for (InteractiveFrame frame : leadingFrames())
       visitFrame(frame);
   }
 
   /**
    * Used by the traverse frame tree algorithm.
    */
-  protected void visitFrame(GenericFrame frame) {
+  protected void visitFrame(InteractiveFrame frame) {
     pushModelView();
     applyTransformation(frame);
     frame.visitCallback();
-    for (GenericFrame child : frame.children())
+    for (InteractiveFrame child : frame.children())
       visitFrame(child);
     popModelView();
   }
 
   /**
-   * Same as {@code for(GenericFrame frame : leadingFrames()) pruneBranch(frame)}.
+   * Same as {@code for(InteractiveFrame frame : leadingFrames()) pruneBranch(frame)}.
    *
-   * @see #pruneBranch(GenericFrame)
+   * @see #pruneBranch(InteractiveFrame)
    */
   public void clearTree() {
-    for (GenericFrame frame : leadingFrames())
+    for (InteractiveFrame frame : leadingFrames())
       pruneBranch(frame);
   }
 
   /**
    * Make all the frames in the {@code frame} branch eligible for garbage collection.
    * <p>
-   * A call to {@link #isFrameReachable(GenericFrame)} on all {@code frame} descendants
+   * A call to {@link #isFrameReachable(InteractiveFrame)} on all {@code frame} descendants
    * (including {@code frame}) will return false, after issuing this method. It also means
    * that all frames in the {@code frame} branch will become unreachable by the
    * {@link #traverseTree()} algorithm.
@@ -294,12 +294,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * To make all the frames in the branch reachable again, first cache the frames
    * belonging to the branch (i.e., {@code branch=pruneBranch(frame)}) and then call
    * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link remixlab.dandelion.core.GenericFrame#setReferenceFrame(GenericFrame)} on a
+   * {@link InteractiveFrame#setReferenceFrame(InteractiveFrame)} on a
    * frame belonging to the pruned branch will become reachable again by the traversal
    * algorithm. In this case, the frame should be manually added to some agents to
    * interactively handle it.
    * <p>
-   * Note that if frame is not reachable ({@link #isFrameReachable(GenericFrame)}) this
+   * Note that if frame is not reachable ({@link #isFrameReachable(InteractiveFrame)}) this
    * method returns {@code null}.
    * <p>
    * When collected, pruned frames behave like {@link remixlab.dandelion.geom.Frame},
@@ -307,14 +307,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    *
    * @see #clearTree()
    * @see #appendBranch(List)
-   * @see #isFrameReachable(GenericFrame)
+   * @see #isFrameReachable(InteractiveFrame)
    */
-  public ArrayList<GenericFrame> pruneBranch(GenericFrame frame) {
+  public ArrayList<InteractiveFrame> pruneBranch(InteractiveFrame frame) {
     if (!isFrameReachable(frame))
       return null;
-    ArrayList<GenericFrame> list = new ArrayList<GenericFrame>();
+    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
     collectFrames(list, frame, true);
-    for (GenericFrame gFrame : list) {
+    for (InteractiveFrame gFrame : list) {
       inputHandler().removeGrabber(gFrame);
       if (gFrame.referenceFrame() != null)
         gFrame.referenceFrame().removeChild(gFrame);
@@ -326,16 +326,16 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Appends the branch which typically should come from the one pruned (and cached) with
-   * {@link #pruneBranch(GenericFrame)}.
+   * {@link #pruneBranch(InteractiveFrame)}.
    * <p>
    * All frames belonging to the branch are automatically added to all scene agents.
    * <p>
-   * {@link #pruneBranch(GenericFrame)}
+   * {@link #pruneBranch(InteractiveFrame)}
    */
-  public void appendBranch(List<GenericFrame> branch) {
+  public void appendBranch(List<InteractiveFrame> branch) {
     if (branch == null)
       return;
-    for (GenericFrame gFrame : branch) {
+    for (InteractiveFrame gFrame : branch) {
       inputHandler().addGrabber(gFrame);
       if (gFrame.referenceFrame() != null)
         gFrame.referenceFrame().addChild(gFrame);
@@ -348,14 +348,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Returns {@code true} if the frame is reachable by the {@link #traverseTree()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Frames are make unreachable with {@link #pruneBranch(GenericFrame)} and reachable
+   * Frames are make unreachable with {@link #pruneBranch(InteractiveFrame)} and reachable
    * again with
-   * {@link remixlab.dandelion.core.GenericFrame#setReferenceFrame(GenericFrame)}.
+   * {@link InteractiveFrame#setReferenceFrame(InteractiveFrame)}.
    *
    * @see #traverseTree()
    * @see #frames(boolean)
    */
-  public boolean isFrameReachable(GenericFrame frame) {
+  public boolean isFrameReachable(InteractiveFrame frame) {
     if (frame == null)
       return false;
     return frame.referenceFrame() == null ? isLeadingFrame(frame) : frame.referenceFrame().hasChild(frame);
@@ -365,12 +365,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Returns a list of all the frames that are reachable by the {@link #traverseTree()}
    * algorithm, including the EyeFrames (when {@code eyeframes} is {@code true}).
    *
-   * @see #isFrameReachable(GenericFrame)
-   * @see remixlab.dandelion.core.GenericFrame#isEyeFrame()
+   * @see #isFrameReachable(InteractiveFrame)
+   * @see InteractiveFrame#isEyeFrame()
    */
-  public ArrayList<GenericFrame> frames(boolean eyeframes) {
-    ArrayList<GenericFrame> list = new ArrayList<GenericFrame>();
-    for (GenericFrame gFrame : leadingFrames())
+  public ArrayList<InteractiveFrame> frames(boolean eyeframes) {
+    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
+    for (InteractiveFrame gFrame : leadingFrames())
       collectFrames(list, gFrame, eyeframes);
     return list;
   }
@@ -380,10 +380,10 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * {@code true} eye-frames will also be collected. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(GenericFrame)
+   * @see #isFrameReachable(InteractiveFrame)
    */
-  public ArrayList<GenericFrame> branch(GenericFrame frame, boolean eyeframes) {
-    ArrayList<GenericFrame> list = new ArrayList<GenericFrame>();
+  public ArrayList<InteractiveFrame> branch(InteractiveFrame frame, boolean eyeframes) {
+    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
     collectFrames(list, frame, eyeframes);
     return list;
   }
@@ -395,19 +395,19 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * If {@code tip} is descendant of {@code tail} the returned list will include both of them. Otherwise it will be empty.
    */
   //TODO decide me
-  public ArrayList<GenericFrame> branch(GenericFrame tail, GenericFrame tip, boolean eyeframes) {
-    ArrayList<GenericFrame> list = new ArrayList<GenericFrame>();
+  public ArrayList<InteractiveFrame> branch(InteractiveFrame tail, InteractiveFrame tip, boolean eyeframes) {
+    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
     //1. Check if tip is a tail descendant
     boolean desc = false;
-    ArrayList<GenericFrame> descList = branch(tail, eyeframes);
-    for(GenericFrame gFrame : descList)
+    ArrayList<InteractiveFrame> descList = branch(tail, eyeframes);
+    for(InteractiveFrame gFrame : descList)
       if(gFrame == tip) {
         desc = true;
         break;
       }
     //2. If so, return the path between the two
     if(desc) {
-      GenericFrame _tip = tip;
+      InteractiveFrame _tip = tip;
       while(_tip != tail) {
         if (!_tip.isEyeFrame() || eyeframes)
           list.add(0, _tip);
@@ -423,14 +423,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * {@code true} eye-frames will also be collected. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(GenericFrame)
+   * @see #isFrameReachable(InteractiveFrame)
    */
-  protected void collectFrames(List<GenericFrame> list, GenericFrame frame, boolean eyeframes) {
+  protected void collectFrames(List<InteractiveFrame> list, InteractiveFrame frame, boolean eyeframes) {
     if (frame == null)
       return;
     if (!frame.isEyeFrame() || eyeframes)
       list.add(frame);
-    for (GenericFrame child : frame.children())
+    for (InteractiveFrame child : frame.children())
       collectFrames(list, child, eyeframes);
   }
 
@@ -1472,7 +1472,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   protected void drawPickingTargets() {
-    for (GenericFrame frame : frames(false))
+    for (InteractiveFrame frame : frames(false))
       // if(inputHandler().hasGrabber(frame))
       if (frame.isVisualHintEnabled())
         drawPickingTarget(frame);
@@ -1907,13 +1907,13 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Draws all GrabberFrames' picking targets: a shooter target visual hint of
-   * {@link remixlab.dandelion.core.GenericFrame#grabsInputThreshold()} pixels size.
+   * {@link InteractiveFrame#grabsInputThreshold()} pixels size.
    * <p>
    * <b>Attention:</b> the target is drawn either if the iFrame is part of camera path and
    * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
    * {@code false}.
    */
-  public abstract void drawPickingTarget(GenericFrame gFrame);
+  public abstract void drawPickingTarget(InteractiveFrame gFrame);
 
   // end wrapper
 
@@ -1945,21 +1945,21 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     if (avatar() == null)
       return;
     eye().frame().stopSpinning();
-    if (avatar() instanceof GenericFrame)
-      ((GenericFrame) (avatar())).stopSpinning();
+    if (avatar() instanceof InteractiveFrame)
+      ((InteractiveFrame) (avatar())).stopSpinning();
 
     // perform small animation ;)
     if (eye().anyInterpolationStarted())
       eye().stopInterpolations();
     // eye().interpolateTo(avatar().eyeFrame());//works only when eyeFrame
     // scaling = magnitude
-    GenericFrame eyeFrameCopy = avatar().trackingEyeFrame().get();
+    InteractiveFrame eyeFrameCopy = avatar().trackingEyeFrame().get();
     eyeFrameCopy.setMagnitude(avatar().trackingEyeFrame().scaling());
     eye().interpolateTo(eyeFrameCopy);
     pruneBranch(eyeFrameCopy);
 
-    if (avatar() instanceof GenericFrame)
-      inputHandler().setDefaultGrabber((GenericFrame) avatar());
+    if (avatar() instanceof InteractiveFrame)
+      inputHandler().setDefaultGrabber((InteractiveFrame) avatar());
   }
 
   /**
@@ -1995,7 +1995,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     return eye;
   }
 
-  public GenericFrame eyeFrame() {
+  public InteractiveFrame eyeFrame() {
     return eye.frame();
   }
 
@@ -2110,7 +2110,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Same as {@code eye().frame().setConstraint(constraint)}.
    *
-   * @see remixlab.dandelion.core.GenericFrame#setConstraint(Constraint)
+   * @see InteractiveFrame#setConstraint(Constraint)
    */
   public void setEyeConstraint(Constraint constraint) {
     eye().frame().setConstraint(constraint);
@@ -2777,7 +2777,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Registers the given chain with the given name
    * to solve IK.
    */
-  public Solver.TreeSolver setIKStructure(GenericFrame branchRoot) {
+  public Solver.TreeSolver setIKStructure(InteractiveFrame branchRoot) {
     for(Solver.TreeSolver solver : solvers) {
       //If Head is Contained in any structure do nothing
       if(!branch(solver.getHead(), branchRoot, true).isEmpty())
@@ -2794,7 +2794,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Unregisters the IK Solver with the given Frame as branchRoot
    */
-  public boolean resetIKStructure(GenericFrame branchRoot) {
+  public boolean resetIKStructure(InteractiveFrame branchRoot) {
     Solver.TreeSolver toRemove = null;
     for(Solver.TreeSolver solver: solvers) {
       if (solver.getHead().id() == branchRoot.id()) {
@@ -2810,7 +2810,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Gets the IK Solver with the given name
    */
-  public Solver.TreeSolver getSolver(GenericFrame branchRoot){
+  public Solver.TreeSolver getSolver(InteractiveFrame branchRoot){
     for(Solver.TreeSolver solver: solvers) {
       if (solver.getHead().id() == branchRoot.id()) {
         return solver;
@@ -2819,7 +2819,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     return null;
   }
 
-  public boolean addIKTarget(GenericFrame endEffector, Frame target){
+  public boolean addIKTarget(InteractiveFrame endEffector, Frame target){
     for(Solver.TreeSolver solver: solvers) {
       if(solver.addTarget(endEffector, target)) return true;
     }
