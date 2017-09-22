@@ -28,7 +28,13 @@ public class CajasOrientadas extends PApplet {
       KeyShortcut a = new KeyShortcut('a');
       KeyShortcut g = new KeyShortcut('g');
       KeyShortcut f = new KeyShortcut('f');
-      List<Shortcut> l =  new ArrayList<Shortcut>(Arrays.asList(a, g, f));
+      KeyShortcut r = new KeyShortcut('r');
+      KeyShortcut s = new KeyShortcut('s');
+      KeyShortcut t = new KeyShortcut(Event.CTRL, '1');
+      KeyShortcut u = new KeyShortcut(Event.ALT, '1');
+      KeyShortcut v = new KeyShortcut('1');
+
+      List<Shortcut> l =  new ArrayList<Shortcut>(Arrays.asList(a, g, f, r, s, t, u, v));
 
       @Override
       public boolean checkIfGrabsInput(KeyEvent event) {
@@ -42,7 +48,17 @@ public class CajasOrientadas extends PApplet {
         if(event.shortcut().matches(g))
           toggleGridVisualHint();
         if(event.shortcut().matches(f))
-          this.togglePickingVisualhint();
+          togglePickingVisualhint();
+        if(event.shortcut().matches(r))
+          togglePathsVisualHint();
+        if(event.shortcut().matches(s))
+          interpolateToFitScene();
+        if(event.shortcut().matches(t))
+          addKeyFrameToPath1();
+        if(event.shortcut().matches(u))
+          deletePath1();
+        if(event.shortcut().matches(v))
+          playPath1();
       }
     };
     scene.setGridVisualHint(true);
@@ -60,6 +76,8 @@ public class CajasOrientadas extends PApplet {
     cajas = new Box[30];
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(scene);
+
+    //scene.keyAgent().setDefaultGrabber(null);
 
     if(scene.keyAgent().defaultGrabber() == scene.eyeFrame())
       println("is eyeFrame!");

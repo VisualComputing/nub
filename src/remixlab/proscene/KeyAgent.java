@@ -96,24 +96,43 @@ public class KeyAgent extends Agent {
         press ?
             (new KeyEvent(e.getModifiers(), e.getKeyCode())).fire() :
             (new KeyEvent(e.getModifiers(), e.getKeyCode())).flush();
+    if (press)
+      bypass = update(currentEvent);
+    if (type && !bypass)
+      update(currentEvent);
+    /*
     if (press) {
       bypass = updateTrackedGrabber(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
+      else if(defaultGrabber() != null)
+        handle(currentEvent);
     }
     if (type && !bypass) {
-      // if(updateTrackedGrabber(currentEvent) != null)
-      // handle(currentEvent);
       bypass = updateTrackedGrabber(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
+      else if(defaultGrabber() != null)
+        handle(currentEvent);
     }
+    */
     if (release)
       resetTrackedGrabber();
     // debug
     // System.out.println(press ? "pressed: " + printEvent(currentEvent) :
     // type ? "typed: " + printTypedEvent(currentEvent) :
     // release ? "released: " + printEvent(currentEvent) : "ooops! ");
+  }
+
+  //TODO experimental
+  protected boolean update(Event event) {
+    if(updateTrackedGrabber(event) != null)
+      return handle(event);
+    //if(defaultGrabber() != null)
+    //return handle(event);
+    if(defaultGrabber() != null)
+      handle(event);
+    return false;
   }
 
   // debug
