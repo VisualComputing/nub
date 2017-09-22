@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.geom;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
@@ -16,9 +16,9 @@ import remixlab.bias.Grabber;
 import remixlab.bias.event.ClickEvent;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
-import remixlab.dandelion.geom.AbstractScene.Platform;
-import remixlab.dandelion.primitives.*;
+import remixlab.geom.AbstractScene.Platform;
 import remixlab.fpstiming.TimingTask;
+import remixlab.primitives.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,8 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Abstract base class for 3D {@link remixlab.dandelion.geom.Camera}s and 2D
- * {@link remixlab.dandelion.geom.Window}s.
+ * Abstract base class for 3D {@link Camera}s and 2D
+ * {@link Window}s.
  * <p>
  * An Eye defines some intrinsic parameters ({@link #position()}, {@link #viewDirection()}
  * , {@link #upVector()}...) and useful positioning tools that ease its placement (
@@ -45,13 +45,13 @@ import java.util.List;
  * {@link InteractiveFrame} (retrieved using {@link #frame()}). These
  * methods are just convenient wrappers to the equivalent Frame methods. This also means
  * that the Eye {@link #frame()} can be attached to a
- * {@link remixlab.dandelion.primitives.Frame#referenceFrame()} which enables complex Eye
+ * {@link Frame#referenceFrame()} which enables complex Eye
  * setups. An Eye has its own magnitude, different from that of the scene (i.e.,
- * {@link remixlab.dandelion.primitives.Frame#magnitude()} doesn't necessarily equals {@code 1}
+ * {@link Frame#magnitude()} doesn't necessarily equals {@code 1}
  * ), which allows to scale the view. Use {@link #eyeCoordinatesOf(Vec)} and
  * {@link #worldCoordinatesOf(Vec)} (or any of the powerful Frame transformations, such as
- * {@link remixlab.dandelion.primitives.Frame#coordinatesOf(Vec)},
- * {@link remixlab.dandelion.primitives.Frame#transformOf(Vec)}, ...) to convert to and from the
+ * {@link Frame#coordinatesOf(Vec)},
+ * {@link Frame#transformOf(Vec)}, ...) to convert to and from the
  * Eye {@link #frame()} coordinate system. {@link #projectedCoordinatesOf(Vec)} and
  * {@link #unprojectedCoordinatesOf(Vec)} will convert from screen to 3D coordinates.
  * <p>
@@ -338,8 +338,8 @@ public abstract class Eye {
    * <p>
    * 3D Cameras return the projected Eye {@link #position()} to {@link #sceneCenter()}
    * distance along the Camera Z axis and use it in
-   * {@link remixlab.dandelion.geom.Camera#zNear()} and
-   * {@link remixlab.dandelion.geom.Camera#zFar()} to optimize the Z range.
+   * {@link Camera#zNear()} and
+   * {@link Camera#zFar()} to optimize the Z range.
    */
   public abstract float distanceToSceneCenter();
 
@@ -391,7 +391,7 @@ public abstract class Eye {
   /**
    * Same as {@code scene.flip()}.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#flip()
+   * @see AbstractScene#flip()
    */
   public void flip() {
     gScene.flip();
@@ -463,7 +463,7 @@ public abstract class Eye {
    * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
    * Cameras set {@link #orientation()}, so that it looks at point {@code target} defined
    * in the world coordinate system (The Camera {@link #position()} is not modified.
-   * Simply {@link remixlab.dandelion.geom.Camera#setViewDirection(Vec)}).
+   * Simply {@link Camera#setViewDirection(Vec)}).
    *
    * @see #at()
    * @see #setUpVector(Vec)
@@ -560,7 +560,7 @@ public abstract class Eye {
    * <p>
    * Use {@link #setPosition(Vec)} to set the Eye position. Other convenient methods are
    * showEntireScene() or fitSphere(). Actually returns
-   * {@link remixlab.dandelion.primitives.Frame#position()}.
+   * {@link Frame#position()}.
    */
   public final Vec position() {
     return frame().position();
@@ -641,12 +641,12 @@ public abstract class Eye {
    * <p>
    * In the case of a 3D Eye (a Camera) you need to provide such an approximation of the
    * scene dimensions so that the it can adapt its
-   * {@link remixlab.dandelion.geom.Camera#zNear()} and
-   * {@link remixlab.dandelion.geom.Camera#zFar()} values. See the {@link #sceneCenter()}
+   * {@link Camera#zNear()} and
+   * {@link Camera#zFar()} values. See the {@link #sceneCenter()}
    * documentation.
    * <p>
-   * Note that {@link remixlab.dandelion.geom.AbstractScene#radius()} (resp.
-   * {@link remixlab.dandelion.geom.AbstractScene#setRadius(float)} simply call this
+   * Note that {@link AbstractScene#radius()} (resp.
+   * {@link AbstractScene#setRadius(float)} simply call this
    * method on its associated Eye.
    *
    * @see #setSceneBoundingBox(Vec, Vec)
@@ -661,7 +661,7 @@ public abstract class Eye {
    * ignored. It also sets {@link #flySpeed()} to 1% of {@link #sceneRadius()}
    * <p>
    * <b>Attention:</b> 3d Camera also sets
-   * {@link remixlab.dandelion.geom.Camera#focusDistance()} to
+   * {@link Camera#focusDistance()} to
    * {@code sceneRadius() / tan(fieldOfView()/2)}.
    */
   public void setSceneRadius(float radius) {
@@ -732,8 +732,8 @@ public abstract class Eye {
    * Default value is the world origin. Use {@link #setSceneCenter(Vec)} to change it.
    *
    * @see #setSceneBoundingBox(Vec, Vec)
-   * @see remixlab.dandelion.geom.Camera#zNear()
-   * @see remixlab.dandelion.geom.Camera#zFar()
+   * @see Camera#zNear()
+   * @see Camera#zFar()
    */
   public Vec sceneCenter() {
     return scnCenter;
@@ -808,7 +808,7 @@ public abstract class Eye {
    * It actually sets the {@link #screenHeight()} to 100 and the {@link #screenWidth()}
    * accordingly.
    *
-   * @see remixlab.dandelion.geom.Camera#setFOVToFitScene()
+   * @see Camera#setFOVToFitScene()
    */
   public void setAspectRatio(float aspect) {
     setScreenWidthAndHeight((int) (100.0 * aspect), 100);
@@ -889,11 +889,11 @@ public abstract class Eye {
    * If {@code recompute} is {@code true} first calls {@link #computeProjection()} to
    * define the Eye projection matrix. Otherwise it returns the projection matrix
    * previously computed, e.g., as with
-   * {@link remixlab.dandelion.geom.MatrixHelper#loadProjection()}.
+   * {@link MatrixHelper#loadProjection()}.
    *
    * @see #getView(Mat, boolean)
-   * @see remixlab.dandelion.geom.MatrixHelper#loadProjection()
-   * @see remixlab.dandelion.geom.MatrixHelper#loadModelView()
+   * @see MatrixHelper#loadProjection()
+   * @see MatrixHelper#loadModelView()
    */
   public Mat getProjection(Mat m, boolean recompute) {
     if (m == null)
@@ -945,13 +945,13 @@ public abstract class Eye {
    * Computes the projection matrix associated with the Eye.
    * <p>
    * If Eye is a 3D PERSPECTIVE Camera, defines a projection matrix using the
-   * {@link remixlab.dandelion.geom.Camera#fieldOfView()}, {@link #aspectRatio()},
-   * {@link remixlab.dandelion.geom.Camera#zNear()} and
-   * {@link remixlab.dandelion.geom.Camera#zFar()} parameters. If Eye is a 3D ORTHOGRAPHIC
+   * {@link Camera#fieldOfView()}, {@link #aspectRatio()},
+   * {@link Camera#zNear()} and
+   * {@link Camera#zFar()} parameters. If Eye is a 3D ORTHOGRAPHIC
    * Camera, the frustum's width and height are set using
    * {@link #getBoundaryWidthHeight()}. Both types use
-   * {@link remixlab.dandelion.geom.Camera#zNear()} and
-   * {@link remixlab.dandelion.geom.Camera#zFar()} to place clipping planes. These values
+   * {@link Camera#zNear()} and
+   * {@link Camera#zFar()} to place clipping planes. These values
    * are determined from sceneRadius() and sceneCenter() so that they best fit the scene
    * size.
    * <p>
@@ -1124,7 +1124,7 @@ public abstract class Eye {
    * <p>
    * If {@code recompute} is {@code true} first calls {@link #computeView()} to define the
    * Eye view matrix. Otherwise it returns the view matrix previously computed, e.g., as
-   * with {@link remixlab.dandelion.geom.MatrixHelper#loadModelView()}.
+   * with {@link MatrixHelper#loadModelView()}.
    *
    * @see #getView()
    * @see #getView(boolean)
@@ -1204,7 +1204,7 @@ public abstract class Eye {
    * upper left corner of the window. The z coordinate ranges between 0.0 (near plane) and
    * 1.0 (excluded, far plane). See the {@code gluProject} man page for details.
    * <p>
-   * Use {@link remixlab.dandelion.geom.AbstractScene#projectedCoordinatesOf(Vec)} which
+   * Use {@link AbstractScene#projectedCoordinatesOf(Vec)} which
    * is simpler and has been optimized by caching the Projection x View matrix.
    * <p>
    * <b>Attention:</b> This method only uses the intrinsic Eye parameters (see
@@ -1262,8 +1262,8 @@ public abstract class Eye {
    * The {@code src.x} and {@code src.y} input values are expressed in pixels, (0,0) being
    * the upper left corner of the window. The {@code src.z} is a depth value ranging in
    * [0..1] (near and far plane respectively). In 3D Note that {@code src.z} is not a
-   * linear interpolation between {@link remixlab.dandelion.geom.Camera#zNear()} and
-   * {@link remixlab.dandelion.geom.Camera#zFar()};
+   * linear interpolation between {@link Camera#zNear()} and
+   * {@link Camera#zFar()};
    * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
    * is the distance from the point you project to the camera, along the
    * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
@@ -1271,7 +1271,7 @@ public abstract class Eye {
    * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
    * {@code null}, the result is expressed in the world coordinates system. The possible
    * {@code frame} hierarchy (i.e., when
-   * {@link remixlab.dandelion.primitives.Frame#referenceFrame()} is non-null) is taken into
+   * {@link Frame#referenceFrame()} is non-null) is taken into
    * account.
    * <p>
    * {@link #projectedCoordinatesOf(Vec, Frame)} performs the inverse transformation.
@@ -1558,7 +1558,7 @@ public abstract class Eye {
 
   /**
    * Removes all the Frames from all the pools of the agents registered at the
-   * {@link remixlab.dandelion.geom.AbstractScene#inputHandler()}.
+   * {@link AbstractScene#inputHandler()}.
    *
    * @see #attachPath(int)
    */
@@ -1579,7 +1579,7 @@ public abstract class Eye {
 
   /**
    * Re-adds all the Frames to all the pools of the agents registered at the
-   * {@link remixlab.dandelion.geom.AbstractScene#inputHandler()}.
+   * {@link AbstractScene#inputHandler()}.
    *
    * @see #detachPath(int)
    */
@@ -1634,9 +1634,9 @@ public abstract class Eye {
    * Resets the path of the {@link #keyFrameInterpolator(int)} number {@code key}.
    * <p>
    * If this path is not being played (see {@link #playPath(int)} and
-   * {@link remixlab.dandelion.geom.KeyFrameInterpolator#interpolationStarted()} ), resets
+   * {@link KeyFrameInterpolator#interpolationStarted()} ), resets
    * it to its starting position (see
-   * {@link remixlab.dandelion.geom.KeyFrameInterpolator#resetInterpolation()}). If the
+   * {@link KeyFrameInterpolator#resetInterpolation()}). If the
    * path is played, simply stops interpolation.
    */
   public void resetPath(int key) {
@@ -1685,7 +1685,7 @@ public abstract class Eye {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()} which
+   * {@link AbstractScene#enableBoundaryEquations()} which
    * automatically update the frustum equations every frame instead.
    *
    * @see #computeBoundaryEquations(float[][])
@@ -1726,7 +1726,7 @@ public abstract class Eye {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()} which
+   * {@link AbstractScene#enableBoundaryEquations()} which
    * automatically update the frustum equations every frame instead.
    *
    * @see #computeBoundaryEquations()
@@ -1761,7 +1761,7 @@ public abstract class Eye {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * boundary equations to be updated only occasionally (rare). Use
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()} which
+   * {@link AbstractScene#enableBoundaryEquations()} which
    * automatically update the boundary equations every frame instead.
    *
    * @see #distanceToBoundary(int, Vec)
@@ -1770,7 +1770,7 @@ public abstract class Eye {
    * @see #boxVisibility(Vec, Vec)
    * @see #computeBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public void updateBoundaryEquations() {
     if (lastUpdate() != lastFPCoeficientsUpdateIssued) {
@@ -1795,7 +1795,7 @@ public abstract class Eye {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()}).
+   * {@link AbstractScene#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #isPointVisible(Vec)
@@ -1803,7 +1803,7 @@ public abstract class Eye {
    * @see #boxVisibility(Vec, Vec)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public float[][] getBoundaryEquations() {
     if (!gScene.areBoundaryEquationsEnabled())
@@ -1824,7 +1824,7 @@ public abstract class Eye {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()}).
+   * {@link AbstractScene#enableBoundaryEquations()}).
    *
    * @see #isPointVisible(Vec)
    * @see #ballVisibility(Vec, float)
@@ -1832,7 +1832,7 @@ public abstract class Eye {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public float distanceToBoundary(int index, Vec pos) {
     if (!gScene.areBoundaryEquationsEnabled())
@@ -1850,7 +1850,7 @@ public abstract class Eye {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()}).
+   * {@link AbstractScene#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #ballVisibility(Vec, float)
@@ -1858,14 +1858,14 @@ public abstract class Eye {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public abstract boolean isPointVisible(Vec point);
 
   /**
-   * Returns {@link remixlab.dandelion.geom.Eye.Visibility#VISIBLE},
-   * {@link remixlab.dandelion.geom.Eye.Visibility#INVISIBLE}, or
-   * {@link remixlab.dandelion.geom.Eye.Visibility#SEMIVISIBLE}, depending whether the
+   * Returns {@link Eye.Visibility#VISIBLE},
+   * {@link Eye.Visibility#INVISIBLE}, or
+   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
    * sphere (of radius {@code radius} and center {@code center}) is visible, invisible, or
    * semi-visible, respectively.
    * <p>
@@ -1873,7 +1873,7 @@ public abstract class Eye {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()}).
+   * {@link AbstractScene#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #isPointVisible(Vec)
@@ -1881,14 +1881,14 @@ public abstract class Eye {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public abstract Visibility ballVisibility(Vec center, float radius);
 
   /**
-   * Returns {@link remixlab.dandelion.geom.Eye.Visibility#VISIBLE},
-   * {@link remixlab.dandelion.geom.Eye.Visibility#INVISIBLE}, or
-   * {@link remixlab.dandelion.geom.Eye.Visibility#SEMIVISIBLE}, depending whether the
+   * Returns {@link Eye.Visibility#VISIBLE},
+   * {@link Eye.Visibility#INVISIBLE}, or
+   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
    * axis aligned box (defined by corners {@code p1} and {@code p2}) is visible,
    * invisible, or semi-visible, respectively.
    * <p>
@@ -1896,7 +1896,7 @@ public abstract class Eye {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()}).
+   * {@link AbstractScene#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #isPointVisible(Vec)
@@ -1904,7 +1904,7 @@ public abstract class Eye {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see remixlab.dandelion.geom.AbstractScene#enableBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
    */
   public abstract Visibility boxVisibility(Vec p1, Vec p2);
 
@@ -2030,7 +2030,7 @@ public abstract class Eye {
    * <p>
    * In 3D the Camera is simply translated along its {@link #viewDirection()} so that the
    * sphere fits the screen. Its {@link #orientation()} and its
-   * {@link remixlab.dandelion.geom.Camera#fieldOfView()} are unchanged. You should
+   * {@link Camera#fieldOfView()} are unchanged. You should
    * therefore orientate the Camera before you call this method.
    *
    * @see #lookAt(Vec)
@@ -2073,7 +2073,7 @@ public abstract class Eye {
   /**
    * Moves the Eye so that its {@link #sceneCenter()} is projected on the center of the
    * window. The {@link #orientation()} (and in the case of perps 3d
-   * {@link remixlab.dandelion.geom.Camera#fieldOfView()}) is (are) unchanged.
+   * {@link Camera#fieldOfView()}) is (are) unchanged.
    * <p>
    * Simply projects the current position on a line passing through {@link #sceneCenter()}
    * .
@@ -2091,7 +2091,7 @@ public abstract class Eye {
    * (0,0,-1)
    * <p>
    * In 3D change this value using
-   * {@link remixlab.dandelion.geom.Camera#setViewDirection(Vec)}, {@link #lookAt(Vec)} or
+   * {@link Camera#setViewDirection(Vec)}, {@link #lookAt(Vec)} or
    * {@link #setOrientation(Rotation)} . It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
@@ -2111,12 +2111,12 @@ public abstract class Eye {
 
   /**
    * Makes the Eye smoothly zoom on the
-   * {@link remixlab.dandelion.geom.Camera#pointUnderPixel(Point)} {@code pixel} and
+   * {@link Camera#pointUnderPixel(Point)} {@code pixel} and
    * returns the world coordinates of the
-   * {@link remixlab.dandelion.geom.Camera#pointUnderPixel(Point)}.
+   * {@link Camera#pointUnderPixel(Point)}.
    * <p>
    * In 3D nothing happens if no
-   * {@link remixlab.dandelion.geom.Camera#pointUnderPixel(Point)} is found. Otherwise a
+   * {@link Camera#pointUnderPixel(Point)} is found. Otherwise a
    * KeyFrameInterpolator is created that animates the Camera on a one second path that
    * brings the Camera closer to the point under {@code pixel}.
    *

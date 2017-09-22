@@ -9,9 +9,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives.constraint;
+package remixlab.primitives.constraint;
 
-import remixlab.dandelion.primitives.*;
+import remixlab.primitives.*;
 
 import static java.lang.Math.PI;
 

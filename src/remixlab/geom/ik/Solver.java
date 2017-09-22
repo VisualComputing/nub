@@ -9,13 +9,13 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom.ik;
+package remixlab.geom.ik;
 
-import remixlab.dandelion.primitives.constraint.BallAndSocket;
-import remixlab.dandelion.primitives.constraint.Hinge;
-import remixlab.dandelion.primitives.constraint.PlanarPolygon;
-import remixlab.dandelion.geom.InteractiveFrame;
-import remixlab.dandelion.primitives.*;
+import remixlab.primitives.*;
+import remixlab.primitives.constraint.BallAndSocket;
+import remixlab.primitives.constraint.Hinge;
+import remixlab.primitives.constraint.PlanarPolygon;
+import remixlab.geom.InteractiveFrame;
 import remixlab.fpstiming.TimingTask;
 
 import java.util.ArrayList;

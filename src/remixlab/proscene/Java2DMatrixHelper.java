@@ -12,13 +12,13 @@ package remixlab.proscene;
 
 import processing.core.PGraphics;
 import processing.core.PMatrix2D;
-import remixlab.dandelion.geom.MatrixHelper;
-import remixlab.dandelion.primitives.Mat;
-import remixlab.dandelion.primitives.Rotation;
-import remixlab.dandelion.primitives.Vec;
+import remixlab.geom.MatrixHelper;
+import remixlab.primitives.Mat;
+import remixlab.primitives.Rotation;
+import remixlab.primitives.Vec;
 
 /**
- * Internal {@link remixlab.dandelion.geom.MatrixHelper} based on PGraphicsJava2D graphics
+ * Internal {@link MatrixHelper} based on PGraphicsJava2D graphics
  * transformations.
  */
 class Java2DMatrixHelper extends MatrixHelper {

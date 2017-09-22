@@ -12,11 +12,11 @@ package remixlab.proscene;
 
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.dandelion.geom.MatrixHelper;
-import remixlab.dandelion.primitives.Mat;
+import remixlab.geom.MatrixHelper;
+import remixlab.primitives.Mat;
 
 /**
- * Internal {@link remixlab.dandelion.geom.MatrixHelper} based on PGraphicsOpenGL graphics
+ * Internal {@link MatrixHelper} based on PGraphicsOpenGL graphics
  * transformation.
  */
 class GLMatrixHelper extends MatrixHelper {

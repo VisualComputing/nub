@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives.constraint;
+package remixlab.primitives.constraint;
 
-import remixlab.dandelion.geom.Eye;
-import remixlab.dandelion.primitives.*;
+import remixlab.geom.Eye;
+import remixlab.primitives.*;
 
 /**
  * An AxisPlaneConstraint defined in the Eye coordinate system.

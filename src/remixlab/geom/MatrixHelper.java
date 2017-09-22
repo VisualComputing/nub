@@ -8,14 +8,14 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.geom;
 
-import remixlab.dandelion.primitives.Mat;
-import remixlab.dandelion.primitives.Vec;
+import remixlab.primitives.Mat;
+import remixlab.primitives.Vec;
 
 /**
  * Various matrix operations dandelion should support either through a third-party
- * implementation or locally through the {@link remixlab.dandelion.geom.MatrixStackHelper}
+ * implementation or locally through the {@link MatrixStackHelper}
  * .
  */
 public abstract class MatrixHelper {
@@ -52,7 +52,7 @@ public abstract class MatrixHelper {
 
   /**
    * Load {@link #projection()} and {@link #modelView()} in
-   * {@link remixlab.dandelion.geom.AbstractScene#preDraw()}.
+   * {@link AbstractScene#preDraw()}.
    */
   public void bind() {
     bind(true);
@@ -83,7 +83,7 @@ public abstract class MatrixHelper {
 
   /**
    * Cache {@code inv (P x M)} (and also {@code (P x M)} ) so that
-   * {@link remixlab.dandelion.geom.AbstractScene#unprojectedCoordinatesOf(Vec)} is
+   * {@link AbstractScene#unprojectedCoordinatesOf(Vec)} is
    * optimized.
    *
    * @see #isProjectionViewInverseCached()
@@ -116,7 +116,7 @@ public abstract class MatrixHelper {
    * Same as {@code setProjection(gScene.eye().getProjection(recompute))}.
    *
    * @see #setProjection(Mat)
-   * @see remixlab.dandelion.geom.Eye#getProjection(boolean)
+   * @see Eye#getProjection(boolean)
    */
   public void loadProjection(boolean recompute) {
     setProjection(gScene.eye().getProjection(recompute));
@@ -124,10 +124,10 @@ public abstract class MatrixHelper {
 
   /**
    * Computes the projection matrix from
-   * {@link remixlab.dandelion.geom.AbstractScene#eye()} parameters and loads it into the
+   * {@link AbstractScene#eye()} parameters and loads it into the
    * matrix helper. Used in {@link #bind()}.
    *
-   * @see remixlab.dandelion.geom.Eye#getProjection(boolean)
+   * @see Eye#getProjection(boolean)
    */
   public void loadProjection() {
     loadProjection(true);
@@ -137,18 +137,18 @@ public abstract class MatrixHelper {
    * Same as {@code setModelView(gScene.eye().getView(recompute))}.
    *
    * @see #setModelView(Mat)
-   * @see remixlab.dandelion.geom.Eye#getView(boolean)
+   * @see Eye#getView(boolean)
    */
   public void loadModelView(boolean recompute) {
     setModelView(gScene.eye().getView(recompute));
   }
 
   /**
-   * Computes the view matrix from {@link remixlab.dandelion.geom.AbstractScene#eye()}
+   * Computes the view matrix from {@link AbstractScene#eye()}
    * parameters and loads it into the matrix helper. Used in {@link #bind()}. If
    * {@code includeView} is {@code false}
    *
-   * @see remixlab.dandelion.geom.Eye#getView(boolean)
+   * @see Eye#getView(boolean)
    */
   public void loadModelView() {
     loadModelView(true);

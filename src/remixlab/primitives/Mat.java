@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  ******************************************************************************/
 
-package remixlab.dandelion.primitives;
+package remixlab.primitives;
 
 /**
  * 4x4 matrix affine matrix implementation. Matrix is represented in column major order: |

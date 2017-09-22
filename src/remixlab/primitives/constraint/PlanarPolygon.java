@@ -1,9 +1,9 @@
-package remixlab.dandelion.primitives.constraint;
+package remixlab.primitives.constraint;
 
-import remixlab.dandelion.primitives.Frame;
-import remixlab.dandelion.primitives.Quat;
-import remixlab.dandelion.primitives.Rotation;
-import remixlab.dandelion.primitives.Vec;
+import remixlab.primitives.Frame;
+import remixlab.primitives.Quat;
+import remixlab.primitives.Rotation;
+import remixlab.primitives.Vec;
 
 import java.util.ArrayList;
 

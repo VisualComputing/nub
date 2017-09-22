@@ -8,14 +8,14 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.geom;
 
-import remixlab.dandelion.primitives.*;
+import remixlab.primitives.*;
 
 import java.util.ArrayList;
 
 /**
- * 3D implementation of the {@link remixlab.dandelion.geom.Eye} abstract class. This class
+ * 3D implementation of the {@link Eye} abstract class. This class
  * API aims to conform that of the great
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Camera.html">libQGLViewer
  * Camera</a>.
@@ -24,8 +24,8 @@ import java.util.ArrayList;
  * {@link #fieldOfView()} is meaningless in the latter case).
  * <p>
  * The near and far planes of the Camera are fitted to the scene and determined from the
- * {@link remixlab.dandelion.geom.AbstractScene#radius()},
- * {@link remixlab.dandelion.geom.AbstractScene#center()} and
+ * {@link AbstractScene#radius()},
+ * {@link AbstractScene#center()} and
  * {@link #zClippingCoefficient()} by the {@link #zNear()} and {@link #zFar()}. Reasonable
  * values on the scene extends thus have to be provided to the Scene in order for the
  * Camera to correctly display the scene. High level positioning methods also use this
@@ -35,14 +35,14 @@ import java.util.ArrayList;
  * {@code PERSPECTIVE} {@link #type()} only).
  * <p>
  * <b>Attention: </b> the {@link #frame()}
- * {@link remixlab.dandelion.primitives.Frame#magnitude()} is used to set the
+ * {@link Frame#magnitude()} is used to set the
  * {@link #fieldOfView()} or compute {@link #getBoundaryWidthHeight()} if the camera
  * {@link #type()} is {@code PERSPECTIVE} or {@code ORTHOGRAPHIC}, respectively. The
  * Camera magnitude is thus generally different from that of the scene. Use
  * {@link #eyeCoordinatesOf(Vec)} and {@link #worldCoordinatesOf(Vec)} (or any of the
  * powerful Frame transformations (
- * {@link remixlab.dandelion.primitives.Frame#coordinatesOf(Vec)},
- * {@link remixlab.dandelion.primitives.Frame#transformOf(Vec)}, ...)) to convert to and from
+ * {@link Frame#coordinatesOf(Vec)},
+ * {@link Frame#transformOf(Vec)}, ...)) to convert to and from
  * the Eye {@link #frame()} coordinate system.
  */
 public class Camera extends Eye {
@@ -263,10 +263,10 @@ public class Camera extends Eye {
    * <p>
    * Set by {@link #setType(Type)}.
    * <p>
-   * A {@link remixlab.dandelion.geom.Camera.Type#PERSPECTIVE} Camera uses a classical
+   * A {@link Camera.Type#PERSPECTIVE} Camera uses a classical
    * projection mainly defined by its {@link #fieldOfView()}.
    * <p>
-   * With a {@link remixlab.dandelion.geom.Camera.Type#ORTHOGRAPHIC} {@link #type()}, the
+   * With a {@link Camera.Type#ORTHOGRAPHIC} {@link #type()}, the
    * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
    * are inferred from the distance to the {@link #anchor()} using
    * {@link #getBoundaryWidthHeight()}.
@@ -298,7 +298,7 @@ public class Camera extends Eye {
    * <p>
    * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
    * This value is meaningless if the Camera {@link #type()} is
-   * {@link remixlab.dandelion.geom.Camera.Type#ORTHOGRAPHIC}.
+   * {@link Camera.Type#ORTHOGRAPHIC}.
    * <p>
    * The field of view corresponds the one used in {@code gluPerspective} (see manual). It
    * sets the Y (vertical) aperture of the Camera. The X (horizontal) angle is inferred
@@ -316,7 +316,7 @@ public class Camera extends Eye {
   /**
    * Sets the vertical {@link #fieldOfView()} of the Camera (in radians). The
    * {@link #fieldOfView()} is encapsulated as the camera
-   * {@link remixlab.dandelion.primitives.Frame#magnitude()} using the following expression:
+   * {@link Frame#magnitude()} using the following expression:
    * {@code frame().setMagnitude((float) Math.tan(fov / 2.0f))}.
    * <p>
    * Note that {@link #focusDistance()} is set to {@link #sceneRadius()} / tan(
@@ -332,8 +332,8 @@ public class Camera extends Eye {
 
   /**
    * Changes the Camera {@link #fieldOfView()} so that the entire scene (defined by
-   * {@link remixlab.dandelion.geom.AbstractScene#center()} and
-   * {@link remixlab.dandelion.geom.AbstractScene#radius()} is visible from the Camera
+   * {@link AbstractScene#center()} and
+   * {@link AbstractScene#radius()} is visible from the Camera
    * {@link #position()}.
    * <p>
    * The {@link #position()} and {@link #orientation()} of the Camera are not modified and
@@ -419,7 +419,7 @@ public class Camera extends Eye {
    * <p>
    * If you need a completely different zNear computation, overload the {@link #zNear()}
    * and {@link #zFar()} methods in a new class that publicly inherits from Camera and use
-   * {@link remixlab.dandelion.geom.AbstractScene#setEye(Eye)}.
+   * {@link AbstractScene#setEye(Eye)}.
    * <p>
    * <b>Attention:</b> The value is always positive although the clipping plane is
    * positioned at a negative z value in the Camera coordinate system. This follows the
@@ -700,8 +700,8 @@ public class Camera extends Eye {
    * {@code false}.
    * <p>
    * Vertices must given in clockwise order if
-   * {@link remixlab.dandelion.geom.AbstractScene#isLeftHanded()} or in counter-clockwise
-   * order if {@link remixlab.dandelion.geom.AbstractScene#isRightHanded()}.
+   * {@link AbstractScene#isLeftHanded()} or in counter-clockwise
+   * order if {@link AbstractScene#isRightHanded()}.
    *
    * @param a first face vertex
    * @param b second face vertex

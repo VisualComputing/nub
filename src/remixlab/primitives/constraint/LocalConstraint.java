@@ -8,16 +8,16 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives.constraint;
+package remixlab.primitives.constraint;
 
-import remixlab.dandelion.primitives.*;
+import remixlab.primitives.*;
 
 /**
  * An AxisPlaneConstraint defined in the Frame local coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
  * {@link #rotationConstraintDirection()} are expressed in the Frame local coordinate
- * system (see {@link remixlab.dandelion.primitives.Frame#referenceFrame()} ).
+ * system (see {@link Frame#referenceFrame()} ).
  */
 public class LocalConstraint extends AxisPlaneConstraint {
 

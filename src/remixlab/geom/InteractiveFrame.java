@@ -8,30 +8,30 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.geom;
+package remixlab.geom;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
-import remixlab.dandelion.geom.AbstractScene.Platform;
-import remixlab.dandelion.primitives.*;
+import remixlab.geom.AbstractScene.Platform;
 import remixlab.fpstiming.TimingTask;
+import remixlab.primitives.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 /**
- * A {@link remixlab.dandelion.primitives.Frame} implementing the
+ * A {@link Frame} implementing the
  * {@link Grabber} interface, which converts user gestures into
- * translation, rotation and scaling {@link remixlab.dandelion.primitives.Frame} updates (see
+ * translation, rotation and scaling {@link Frame} updates (see
  * {@link #translationSensitivity()}, {@link #rotationSensitivity()} and
  * {@link #scalingSensitivity()}). A generic-frame may thus be attached to some of your
  * scene objects to control their motion using an {@link Agent}, such
- * as the {@link remixlab.dandelion.geom.AbstractScene#motionAgent()} and the
- * {@link remixlab.dandelion.geom.AbstractScene#keyAgent()} (see
+ * as the {@link AbstractScene#motionAgent()} and the
+ * {@link AbstractScene#keyAgent()} (see
  * {@link #InteractiveFrame(AbstractScene)} and all the constructors that take an scene
  * parameter). To attach a generic-frame to {@code MyObject} use code like this:
  * <p>
@@ -51,20 +51,20 @@ import java.util.List;
  * </pre>
  * <p>
  * See {@link #applyTransformation()}, {@link #applyWorldTransformation()},
- * {@link #scene()}, {@link remixlab.dandelion.geom.AbstractScene#pushModelView()} and
- * {@link remixlab.dandelion.geom.AbstractScene#popModelView()}
+ * {@link #scene()}, {@link AbstractScene#pushModelView()} and
+ * {@link AbstractScene#popModelView()}
  * <p>
- * A generic-frame may also be attached to an {@link remixlab.dandelion.geom.Eye}, such as
- * the {@link remixlab.dandelion.geom.AbstractScene#eyeFrame()} which in turn is attached
- * to the {@link remixlab.dandelion.geom.AbstractScene#eye()} (see {@link #isEyeFrame()}).
+ * A generic-frame may also be attached to an {@link Eye}, such as
+ * the {@link AbstractScene#eyeFrame()} which in turn is attached
+ * to the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}).
  * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
  * For instance, with a move-to-the-right user gesture the
- * {@link remixlab.dandelion.geom.AbstractScene#eyeFrame()} has to go to the <i>left</i>,
+ * {@link AbstractScene#eyeFrame()} has to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A generic-frame can be attached to
  * an eye only at construction times (see {@link #InteractiveFrame(Eye)} and all the
  * constructors that take an eye parameter). An eye may have more than one generic-frame
- * attached to it. To set one of them as the {@link remixlab.dandelion.geom.Eye#frame()},
- * call {@link remixlab.dandelion.geom.Eye#setFrame(InteractiveFrame)}.
+ * attached to it. To set one of them as the {@link Eye#frame()},
+ * call {@link Eye#setFrame(InteractiveFrame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(DOF2Event, boolean)},
@@ -102,8 +102,8 @@ import java.util.List;
  * share frames among different off-screen scenes (see ProScene's CameraCrane and the
  * AuxiliarViewer examples).
  * <p>
- * Finally, a generic-frame can be followed by an {@link remixlab.dandelion.geom.Eye},
- * defining a 'third-person' eye mode, see {@link remixlab.dandelion.geom.Trackable}
+ * Finally, a generic-frame can be followed by an {@link Eye},
+ * defining a 'third-person' eye mode, see {@link Trackable}
  * documentation. See also {@link #setTrackingEyeDistance(float)},
  * {@link #setTrackingEyeAzimuth(float)} and {@link #setTrackingEyeInclination(float)}.
  */
@@ -448,10 +448,10 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * {@link #referenceFrame()}, and {@code p}, {@code r} and {@code s} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * The {@link remixlab.dandelion.geom.AbstractScene#inputHandler()} will attempt to add
+   * The {@link AbstractScene#inputHandler()} will attempt to add
    * the generic-frame to all its {@link InputHandler#agents()}, such
-   * as the {@link remixlab.dandelion.geom.AbstractScene#motionAgent()} and the
-   * {@link remixlab.dandelion.geom.AbstractScene#keyAgent()}.
+   * as the {@link AbstractScene#motionAgent()} and the
+   * {@link AbstractScene#keyAgent()}.
    * <p>
    * The generic-frame sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
@@ -480,9 +480,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
    * The generic-frame isn't added to any of the
-   * {@link remixlab.dandelion.geom.AbstractScene#inputHandler()}
+   * {@link AbstractScene#inputHandler()}
    * {@link InputHandler#agents()}. A call to
-   * {@link remixlab.dandelion.geom.AbstractScene#setEye(Eye)} will do it.
+   * {@link AbstractScene#setEye(Eye)} will do it.
    * <p>
    * The generic-frame sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
@@ -614,7 +614,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns a frame with this frame current parameters. The newly returned frame is
-   * detached from the scene {@link remixlab.dandelion.geom.AbstractScene#frames(boolean)}
+   * detached from the scene {@link AbstractScene#frames(boolean)}
    * list.
    * <p>
    * This method is useful to perform animations for all eye interpolation routines.
@@ -731,7 +731,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Procedure called by the scene frame traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#traverseTree()
+   * @see AbstractScene#traverseTree()
    */
   protected void visit() {
   }
@@ -743,7 +743,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Enables {@link #visit()} of this frame when performing the
-   * {@link remixlab.dandelion.geom.AbstractScene#traverseTree()}.
+   * {@link AbstractScene#traverseTree()}.
    *
    * @see #disableVisit()
    * @see #toggleVisit()
@@ -755,7 +755,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Disables {@link #visit()} of this frame when performing the
-   * {@link remixlab.dandelion.geom.AbstractScene#traverseTree()}.
+   * {@link AbstractScene#traverseTree()}.
    *
    * @see #enableVisit()
    * @see #toggleVisit()
@@ -767,7 +767,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Toggles {@link #visit()} of this frame when performing the
-   * {@link remixlab.dandelion.geom.AbstractScene#traverseTree()}.
+   * {@link AbstractScene#traverseTree()}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -779,7 +779,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns true if {@link #visit()} of this frame when performing the
-   * {@link remixlab.dandelion.geom.AbstractScene#traverseTree() is enabled}.
+   * {@link AbstractScene#traverseTree() is enabled}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -861,7 +861,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Note that if this {@link #isEyeFrame()} then returns {@code eye().scene()}.
    *
    * @see #eye()
-   * @see remixlab.dandelion.geom.Eye#scene()
+   * @see Eye#scene()
    */
   public AbstractScene scene() {
     return gScene;
@@ -1091,7 +1091,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see #applyTransformation()
    * @see #matrix()
-   * @see remixlab.dandelion.geom.AbstractScene#applyTransformation(Frame)
+   * @see AbstractScene#applyTransformation(Frame)
    */
   public void applyTransformation(AbstractScene scn) {
     scn.applyTransformation(this);
@@ -1104,7 +1104,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see #applyWorldTransformation()
    * @see #worldMatrix()
-   * @see remixlab.dandelion.geom.AbstractScene#applyWorldTransformation(Frame)
+   * @see AbstractScene#applyWorldTransformation(Frame)
    */
   public void applyWorldTransformation(AbstractScene scn) {
     scn.applyWorldTransformation(this);
@@ -1386,7 +1386,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * to change this value.
    * <p>
    * The {@link #spinningRotation()} axis is defined in the generic-frame coordinate
-   * system. You can use {@link remixlab.dandelion.primitives.Frame#transformOfFrom(Vec, Frame)}
+   * system. You can use {@link Frame#transformOfFrom(Vec, Frame)}
    * to convert this axis from another Frame coordinate system.
    * <p>
    * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
@@ -1491,8 +1491,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Rotates the scene-frame by its {@link #spinningRotation()} or around the
-   * {@link remixlab.dandelion.geom.Eye#anchor()} when this scene-frame is the
-   * {@link remixlab.dandelion.geom.AbstractScene#eye()}. Called by a timer when the
+   * {@link Eye#anchor()} when this scene-frame is the
+   * {@link AbstractScene#eye()}. Called by a timer when the
    * generic-frame {@link #isSpinning()}.
    * <p>
    * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
@@ -1885,7 +1885,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   public void zoomOnAnchor(MotionEvent event) {
     zoomOnAnchor(event, true);
@@ -1894,7 +1894,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   protected void zoomOnAnchor(MotionEvent event, boolean fromX) {
     DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
@@ -1905,7 +1905,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   protected void zoomOnAnchor(DOF1Event event, float sens) {
     Vec direction = Vec.subtract(gScene.eye().anchor(), position());
@@ -1919,7 +1919,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   public void zoomOnAnchorPos() {
     zoomOnAnchor(true);
@@ -1928,7 +1928,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   public void zoomOnAnchorNeg() {
     zoomOnAnchor(false);
@@ -1937,7 +1937,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see remixlab.dandelion.geom.Eye#anchor()
+   * @see Eye#anchor()
    */
   protected void zoomOnAnchor(boolean in) {
     Vec direction = Vec.subtract(gScene.eye().anchor(), position());
@@ -2729,7 +2729,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Reduces the screen (device)
    * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
-   * rotation</a> into a {@link remixlab.dandelion.primitives.Quat}.
+   * rotation</a> into a {@link Quat}.
    * <p>
    * It's worth noting that all gesture to generic-frame motion converting methods, are
    * implemented from just {@link #screenToEye(Vec)}, {@link #eyeToReferenceFrame(Vec)}
@@ -2738,7 +2738,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @param roll  Rotation angle in radians around the screen x-Axis
    * @param pitch Rotation angle in radians around the screen y-Axis
    * @param yaw   Rotation angle in radians around the screen z-Axis
-   * @see remixlab.dandelion.primitives.Quat#fromEulerAngles(float, float, float)
+   * @see Quat#fromEulerAngles(float, float, float)
    */
   public Quat screenToQuat(float roll, float pitch, float yaw) {
     if (gScene.is2D()) {
@@ -2792,9 +2792,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * rotate.
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link remixlab.dandelion.geom.Eye#frame()}.
-   * {@link remixlab.dandelion.geom.Eye#setOrientation(Rotation)} and
-   * {@link remixlab.dandelion.geom.Eye#setUpVector(Vec)} modify this value and should be
+   * {@link Eye#frame()}.
+   * {@link Eye#setOrientation(Rotation)} and
+   * {@link Eye#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
   public Vec sceneUpVector() {
@@ -2805,8 +2805,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link remixlab.dandelion.geom.Eye#frame()}. Use
-   * {@link remixlab.dandelion.geom.Eye#setUpVector(Vec)} instead in that case.
+   * {@link Eye#frame()}. Use
+   * {@link Eye#setUpVector(Vec)} instead in that case.
    */
   public void setSceneUpVector(Vec up) {
     scnUpVec = up;
@@ -2927,10 +2927,10 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * generic-frame by {@link #moveForward(MotionEvent, boolean)}.
    * <p>
    * <b>Attention:</b> When the generic-frame is set as the
-   * {@link remixlab.dandelion.geom.Eye#frame()} or when it is set as the
-   * {@link remixlab.dandelion.geom.AbstractScene#avatar()}, this value is set according
-   * to the {@link remixlab.dandelion.geom.AbstractScene#radius()} by
-   * {@link remixlab.dandelion.geom.AbstractScene#setRadius(float)}.
+   * {@link Eye#frame()} or when it is set as the
+   * {@link AbstractScene#avatar()}, this value is set according
+   * to the {@link AbstractScene#radius()} by
+   * {@link AbstractScene#setRadius(float)}.
    */
   public float flySpeed() {
     return flySpd;
@@ -2940,9 +2940,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the {@link #flySpeed()}, defined in virtual scene units.
    * <p>
    * Default value is 0.0, but it is modified according to the
-   * {@link remixlab.dandelion.geom.AbstractScene#radius()} when the generic-frame is set
-   * as the {@link remixlab.dandelion.geom.Eye#frame()} or when the generic-frame is set
-   * as the {@link remixlab.dandelion.geom.AbstractScene#avatar()}.
+   * {@link AbstractScene#radius()} when the generic-frame is set
+   * as the {@link Eye#frame()} or when the generic-frame is set
+   * as the {@link AbstractScene#avatar()}.
    */
   public void setFlySpeed(float speed) {
     flySpd = speed;
@@ -3060,13 +3060,13 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#FIXED}, the
    * {@code threshold} is expressed in pixels and directly defines the fixed length of the
-   * {@link remixlab.dandelion.geom.AbstractScene#drawShooterTarget(Vec, float)}, centered
+   * {@link AbstractScene#drawShooterTarget(Vec, float)}, centered
    * at the projection of the frame origin onto the screen.
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#ADAPTIVE}, the
    * {@code threshold} is expressed in object space (world units) and defines the edge
    * length of a squared bounding box that leads to an adaptive length of the
-   * {@link remixlab.dandelion.geom.AbstractScene#drawShooterTarget(Vec, float)} ,
+   * {@link AbstractScene#drawShooterTarget(Vec, float)} ,
    * centered at the projection of the frame origin onto the screen. Use this version only
    * if you have a good idea of the bounding box size of the object you are attaching to
    * the frame.
@@ -3076,7 +3076,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * for details.
    * <p>
    * Default behavior is to set the {@link #grabsInputThreshold()} (in a non-adaptive
-   * manner) to 20 length if {@link remixlab.dandelion.geom.AbstractScene#platform()} is
+   * manner) to 20 length if {@link AbstractScene#platform()} is
    * DESKTOP or to 50 pixels if it is ANDROID.
    * <p>
    * Negative {@code threshold} values are silently ignored.
@@ -3135,7 +3135,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns the distance between the frame and the tracking camera. Only meaningful when
    * this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public float trackingEyeDistance() {
     return trackingDist;
@@ -3145,7 +3145,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the distance between the frame and the tracking camera. Only meaningful when
    * this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public void setTrackingEyeDistance(float d) {
     trackingDist = d;
@@ -3156,7 +3156,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns the azimuth of the tracking camera measured respect to the frame's
    * {@link #zAxis()}. Only meaningful when this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public float trackingEyeAzimuth() {
     // azimuth <-> pitch
@@ -3174,7 +3174,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the {@link #trackingEyeAzimuth()} of the tracking camera. Only meaningful when
    * this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public void setTrackingEyeAzimuth(float a) {
     if (scene().is3D()) {
@@ -3191,7 +3191,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns the inclination of the tracking camera measured respect to the frame's
    * {@link #yAxis()}. Only meaningful when this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public float trackingEyeInclination() {
     // inclination <-> roll
@@ -3207,7 +3207,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the {@link #trackingEyeInclination()} of the tracking camera. Only meaningful
    * when this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   public void setTrackingEyeInclination(float i) {
     if (scene().is3D()) {
@@ -3227,7 +3227,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * {@link #trackingEyeDistance()}) respect to the Frame {@link #position()}. Only
    * meaningful when this frame has been set as the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   protected void updateTrackingEyeFrame() {
     if(q==null)
@@ -3258,12 +3258,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   // Interface implementation
 
   /**
-   * Overloading of {@link remixlab.dandelion.geom.Trackable#trackingEyeFrame()} . Returns
+   * Overloading of {@link Trackable#trackingEyeFrame()} . Returns
    * the world coordinates of the camera position computed in
    * {@link #updateTrackingEyeFrame()}. Only meaningful when this frame has been set as
    * the scene avatar.
    *
-   * @see remixlab.dandelion.geom.AbstractScene#setAvatar(Trackable)
+   * @see AbstractScene#setAvatar(Trackable)
    */
   @Override
   public InteractiveFrame trackingEyeFrame() {

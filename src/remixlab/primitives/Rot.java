@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  ******************************************************************************/
 
-package remixlab.dandelion.primitives;
+package remixlab.primitives;
 
 /**
- * A 2D {@link remixlab.dandelion.primitives.Rotation} represented by an {@link #angle()}.
+ * A 2D {@link Rotation} represented by an {@link #angle()}.
  */
 public class Rot implements Rotation {
   /**

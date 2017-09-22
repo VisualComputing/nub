@@ -1,9 +1,9 @@
 package basics;
 
 import processing.core.*;
+import remixlab.geom.InteractiveFrame;
+import remixlab.primitives.Rot;
 import remixlab.proscene.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.dandelion.geom.*;
 
 /**
  * Created by pierre on 11/15/16.

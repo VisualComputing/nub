@@ -8,11 +8,12 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives.constraint;
+package remixlab.primitives.constraint;
 
-import remixlab.dandelion.primitives.Frame;
-import remixlab.dandelion.primitives.Rotation;
-import remixlab.dandelion.primitives.Vec;
+import remixlab.primitives.Frame;
+import remixlab.primitives.Rotation;
+import remixlab.primitives.Vec;
+import remixlab.primitives.Quat;
 
 /**
  * An interface class for Frame constraints. This interface API aims to conform that of the
@@ -21,9 +22,9 @@ import remixlab.dandelion.primitives.Vec;
  * Constraint</a>.
  * <p>
  * This class defines the interface for the constraint that can be applied to a Frame to
- * limit its motion. Use {@link remixlab.dandelion.primitives.Frame#setConstraint(Constraint)}
+ * limit its motion. Use {@link Frame#setConstraint(Constraint)}
  * to associate a Constraint to a Frame (default is a {@code null}
- * {@link remixlab.dandelion.primitives.Frame#constraint()}.
+ * {@link Frame#constraint()}.
  */
 public abstract class Constraint {
   /**
@@ -33,11 +34,11 @@ public abstract class Constraint {
    * Overload this method in your own Constraint class to define a new translation
    * constraint. {@code frame} is the Frame to which is applied the translation. You
    * should refrain from directly changing its value in the constraint. Use its
-   * {@link remixlab.dandelion.primitives.Frame#position()} and update the translation
+   * {@link Frame#position()} and update the translation
    * accordingly instead.
    * <p>
    * {@code translation} is expressed in the local Frame coordinate system. Use
-   * {@link remixlab.dandelion.primitives.Frame#inverseTransformOf(Vec)} to express it in the
+   * {@link Frame#inverseTransformOf(Vec)} to express it in the
    * world coordinate system if needed.
    */
   public Vec constrainTranslation(Vec translation, Frame frame) {
@@ -51,8 +52,8 @@ public abstract class Constraint {
    * Overload this method in your own Constraint class to define a new rotation
    * constraint. See {@link #constrainTranslation(Vec, Frame)} for details.
    * <p>
-   * Use {@link remixlab.dandelion.primitives.Frame#inverseTransformOf(Vec)} on the
-   * {@code rotation} {@link remixlab.dandelion.primitives.Quat#axis()} to express
+   * Use {@link Frame#inverseTransformOf(Vec)} on the
+   * {@code rotation} {@link Quat#axis()} to express
    * {@code rotation} in the world coordinate system if needed.
    */
   public Rotation constrainRotation(Rotation rotation, Frame frame) {

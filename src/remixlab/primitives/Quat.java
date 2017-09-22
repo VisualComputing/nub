@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives;
+package remixlab.primitives;
 
 /**
- * A 3D {@link remixlab.dandelion.primitives.Rotation} is a 4 element unit quaternion
+ * A 3D {@link Rotation} is a 4 element unit quaternion
  * represented by single precision floating point x,y,z,w coordinates. This class API aims
  * to conform that of the great <a href=
  * "http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html">libQGLViewer

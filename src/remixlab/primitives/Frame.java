@@ -8,10 +8,11 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.dandelion.primitives;
+package remixlab.primitives;
 
-import remixlab.dandelion.primitives.constraint.Constraint;
-import remixlab.dandelion.geom.InteractiveFrame;
+import remixlab.geom.AbstractScene;
+import remixlab.primitives.constraint.Constraint;
+import remixlab.geom.InteractiveFrame;
 
 /**
  * A Frame is a 2D or 3D coordinate system, represented by a {@link #position()} , an
@@ -75,7 +76,7 @@ import remixlab.dandelion.geom.InteractiveFrame;
  * sufficient to prevent ambiguities. These notions are obviously identical when the
  * {@link #referenceFrame()} is {@code null}, i.e., when the Frame is defined in the world
  * coordinate system (the one you are left with after calling
- * {@link remixlab.dandelion.geom.AbstractScene#preDraw()}).
+ * {@link AbstractScene#preDraw()}).
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
@@ -89,16 +90,16 @@ import remixlab.dandelion.geom.InteractiveFrame;
  * <h3>Constraints</h3>
  * <p>
  * An interesting feature of Frames is that their displacements can be constrained. When a
- * {@link remixlab.dandelion.primitives.constraint.Constraint} is attached to a Frame, it filters the
+ * {@link remixlab.primitives.constraint.Constraint} is attached to a Frame, it filters the
  * input of {@link #translate(Vec)} and {@link #rotate(Rotation)}, and only the resulting
  * filtered motion is applied to the Frame. The default {@link #constraint()} {@code null}
  * resulting in no filtering. Use {@link #setConstraint(Constraint)} to attach a
  * Constraint to a frame.
  * <p>
  * Classical constraints are provided for convenience (see
- * {@link remixlab.dandelion.primitives.constraint.LocalConstraint},
- * {@link remixlab.dandelion.primitives.constraint.WorldConstraint} and
- * {@link remixlab.dandelion.primitives.constraint.EyeConstraint}) and new constraints can very
+ * {@link remixlab.primitives.constraint.LocalConstraint},
+ * {@link remixlab.primitives.constraint.WorldConstraint} and
+ * {@link remixlab.primitives.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <p>
  * <h3>Derived classes</h3>
@@ -299,7 +300,7 @@ public class Frame {
   // CONSTRAINT
 
   /**
-   * Returns the current {@link remixlab.dandelion.primitives.constraint.Constraint} applied to the
+   * Returns the current {@link remixlab.primitives.constraint.Constraint} applied to the
    * Frame.
    * <p>
    * A {@code null} value (default) means that no Constraint is used to filter the Frame
@@ -485,7 +486,7 @@ public class Frame {
   }
 
   /**
-   * Set the current rotation. See the different {@link remixlab.dandelion.primitives.Rotation}
+   * Set the current rotation. See the different {@link Rotation}
    * constructors.
    * <p>
    * Sets the {@link #rotation()} of the Frame, locally defined with respect to the
@@ -516,7 +517,7 @@ public class Frame {
   }
 
   /**
-   * Defines a 2D {@link remixlab.dandelion.primitives.Rotation}.
+   * Defines a 2D {@link Rotation}.
    *
    * @param a angle
    */
@@ -591,13 +592,13 @@ public class Frame {
    * axis is defined in the Frame coordinate system.
    * <p>
    * If the Frame has a {@link #constraint()}, {@code rotation} is first constrained using
-   * {@link remixlab.dandelion.primitives.constraint.Constraint#constrainRotation(Rotation, Frame)} .
+   * {@link remixlab.primitives.constraint.Constraint#constrainRotation(Rotation, Frame)} .
    * Hence the rotation actually applied to the Frame may differ from {@code rotation}
    * (since it can be filtered by the {@link #constraint()}).
    * <p>
    * The translation which results from the filtered rotation around {@code point} is then
    * computed and filtered using
-   * {@link remixlab.dandelion.primitives.constraint.Constraint#constrainTranslation(Vec, Frame)} .
+   * {@link remixlab.primitives.constraint.Constraint#constrainTranslation(Vec, Frame)} .
    */
   public void rotateAroundPoint(Rotation rotation, Vec point) {
     if (constraint() != null)
@@ -957,7 +958,7 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link remixlab.dandelion.primitives.Quat#fromTo(Vec, Vec)}.
+   * {@link Quat#fromTo(Vec, Vec)}.
    *
    * @see #xAxis()
    * @see #setYAxis(Vec)
@@ -975,7 +976,7 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link remixlab.dandelion.primitives.Quat#fromTo(Vec, Vec)}.
+   * {@link Quat#fromTo(Vec, Vec)}.
    *
    * @see #yAxis()
    * @see #setYAxis(Vec)
@@ -993,7 +994,7 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link remixlab.dandelion.primitives.Quat#fromTo(Vec, Vec)}.
+   * {@link Quat#fromTo(Vec, Vec)}.
    *
    * @see #zAxis()
    * @see #setYAxis(Vec)
@@ -1101,7 +1102,7 @@ public class Frame {
    * Returns the local transformation matrix represented by the Frame.
    * <p>
    * This method could be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link remixlab.dandelion.geom.AbstractScene#modelView()} matrix from a Frame
+   * {@link AbstractScene#modelView()} matrix from a Frame
    * hierarchy. For example, with this Frame hierarchy:
    * <p>
    * {@code Frame body = new Frame();} <br>
@@ -1170,7 +1171,7 @@ public class Frame {
    * Returns the global transformation matrix represented by the Frame.
    * <p>
    * This method should be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link remixlab.dandelion.geom.AbstractScene#modelView()} matrix from a Frame:
+   * {@link AbstractScene#modelView()} matrix from a Frame:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
    * {@code Frame fr = new Frame(pos, Rotation(from, to));} <br>
@@ -1316,7 +1317,7 @@ public class Frame {
    * Returns a Frame representing the inverse of the Frame space transformation.
    * <p>
    * The the new Frame {@link #rotation()} is the
-   * {@link remixlab.dandelion.primitives.Rotation#inverse()} of the original rotation. Its
+   * {@link Rotation#inverse()} of the original rotation. Its
    * {@link #translation()} is the negated inverse rotated image of the original
    * translation. Its {@link #scaling()} is 1 / original scaling.
    * <p>
@@ -1341,7 +1342,7 @@ public class Frame {
    * Returns the {@link #inverse()} of the Frame world transformation.
    * <p>
    * The {@link #orientation()} of the new Frame is the
-   * {@link remixlab.dandelion.primitives.Quat#inverse()} of the original orientation. Its
+   * {@link Quat#inverse()} of the original orientation. Its
    * {@link #position()} is the negated and inverse rotated image of the original
    * position. The {@link #magnitude()} is the the original magnitude multiplicative
    * inverse.
