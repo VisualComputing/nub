@@ -53,7 +53,7 @@ import java.util.List;
  * <li>An {@link #inputHandler()} which handles all user input through
  * {@link Agent}s (for details please refer to the
  * {@link InputHandler} class). The {@link #inputHandler()} holds a
- * (default) {@link #motionAgent()} and a (default) {@link #keyboardAgent()} which should
+ * (default) {@link #motionAgent()} and a (default) {@link #keyAgent()} which should
  * be instantiated by derived classes at construction time.</li>
  * <li>A {@link #matrixHelper()} which handles matrix operations either through the
  * {@link remixlab.dandelion.core.MatrixStackHelper} or through a third party matrix stack
@@ -70,7 +70,7 @@ import java.util.List;
  * </ol>
  * <p>
  * A grabber scene implements the {@link Grabber} interface and thus
- * can react to user (keyboard) gestures, (see {@link #performInteraction(KeyEvent)}
+ * can react to user (key) gestures, (see {@link #performInteraction(KeyEvent)}
  * and {@link #checkIfGrabsInput(KeyEvent)}). For example, with the following code:
  * <p>
  * <pre>
@@ -83,7 +83,7 @@ import java.util.List;
  * </pre>
  * <p>
  * your custom scene will {@link #toggleCameraType()} when the key 'z' is pressed
- * (provided that scene is the {@link #keyboardAgent()}
+ * (provided that scene is the {@link #keyAgent()}
  * {@link Agent#inputGrabber()}).
  */
 public abstract class AbstractScene extends AnimatorObject implements Grabber {
@@ -162,7 +162,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * (such as Processing) provides its own matrix handling.</li>
    * <li>Call {@link #setEye(Eye)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
-   * <li>Instantiate the {@link #motionAgent()} and the {@link #keyboardAgent()} and
+   * <li>Instantiate the {@link #motionAgent()} and the {@link #keyAgent()} and
    * enable them (register them at the {@link #inputHandler()}) and possibly some other
    * {@link Agent}s as well and .</li>
    * <li>Define whether or not the Scene {@link #isOffscreen()}.</li>
@@ -736,39 +736,39 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   // AGENTs
 
-  // Keyboard
+  // Keys
 
   /**
-   * Returns the default {@link Agent} keyboard agent.
+   * Returns the default {@link Agent} key agent.
    *
    * @see #motionAgent()
    */
-  public Agent keyboardAgent() {
+  public Agent keyAgent() {
     return defKeyboardAgent;
   }
 
   /**
-   * Returns {@code true} if the {@link #keyboardAgent()} is enabled and {@code false}
+   * Returns {@code true} if the {@link #keyAgent()} is enabled and {@code false}
    * otherwise.
    *
-   * @see #enableKeyboardAgent()
-   * @see #disableKeyboardAgent()
+   * @see #enableKeyAgent()
+   * @see #disableKeyAgent()
    * @see #isMotionAgentEnabled()
    */
-  public boolean isKeyboardAgentEnabled() {
-    return inputHandler().isAgentRegistered(keyboardAgent());
+  public boolean isKeyAgentEnabled() {
+    return inputHandler().isAgentRegistered(keyAgent());
   }
 
   /**
-   * Enables keyboard handling through the {@link #keyboardAgent()}.
+   * Enables key handling through the {@link #keyAgent()}.
    *
-   * @see #isKeyboardAgentEnabled()
-   * @see #disableKeyboardAgent()
+   * @see #isKeyAgentEnabled()
+   * @see #disableKeyAgent()
    * @see #enableMotionAgent()
    */
-  public void enableKeyboardAgent() {
-    if (!inputHandler().isAgentRegistered(keyboardAgent())) {
-      inputHandler().registerAgent(keyboardAgent());
+  public void enableKeyAgent() {
+    if (!inputHandler().isAgentRegistered(keyAgent())) {
+      inputHandler().registerAgent(keyAgent());
     }
   }
 
@@ -777,7 +777,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Returns the default motion agent.
    *
-   * @see #keyboardAgent()
+   * @see #keyAgent()
    */
   public Agent motionAgent() {
     return defMotionAgent;
@@ -789,7 +789,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    *
    * @see #enableMotionAgent()
    * @see #disableMotionAgent()
-   * @see #isKeyboardAgentEnabled()
+   * @see #isKeyAgentEnabled()
    */
   public boolean isMotionAgentEnabled() {
     return inputHandler().isAgentRegistered(motionAgent());
@@ -800,7 +800,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    *
    * @see #isMotionAgentEnabled()
    * @see #disableMotionAgent()
-   * @see #enableKeyboardAgent()
+   * @see #enableKeyAgent()
    */
   public void enableMotionAgent() {
     if (!inputHandler().isAgentRegistered(motionAgent())) {
@@ -811,12 +811,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Disables the default {@link Agent} and returns it.
    *
-   * @see #isKeyboardAgentEnabled()
-   * @see #enableKeyboardAgent()
+   * @see #isKeyAgentEnabled()
+   * @see #enableMotionAgent()
    * @see #disableMotionAgent()
    */
-  public boolean disableKeyboardAgent() {
-    return inputHandler().unregisterAgent(keyboardAgent());
+  public boolean disableKeyAgent() {
+    return inputHandler().unregisterAgent(keyAgent());
   }
 
   /**
@@ -824,7 +824,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    *
    * @see #isMotionAgentEnabled()
    * @see #enableMotionAgent()
-   * @see #enableKeyboardAgent()
+   * @see #enableKeyAgent()
    */
   public boolean disableMotionAgent() {
     return inputHandler().unregisterAgent(motionAgent());
@@ -2004,7 +2004,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * The {@link #inputHandler()} will attempt to add the {@link #eyeFrame()} to all its
    * {@link InputHandler#agents()}, such as the {@link #motionAgent()}
-   * and {@link #keyboardAgent()}.
+   * and {@link #keyAgent()}.
    */
   public void setEye(Eye vp) {
     if (vp == null)

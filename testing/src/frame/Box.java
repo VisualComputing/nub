@@ -1,9 +1,8 @@
 package frame;
 
 import processing.core.PApplet;
-import remixlab.dandelion.geom.Quat;
-import remixlab.dandelion.geom.Vec;
-import remixlab.proscene.InteractiveFrame;
+import remixlab.dandelion.core.*;
+import remixlab.dandelion.geom.*;
 import remixlab.proscene.Scene;
 
 /**
@@ -11,14 +10,14 @@ import remixlab.proscene.Scene;
  */
 public class Box {
   Scene scene;
-  public InteractiveFrame iFrame;
+  public GenericFrame iFrame;
   float w, h, d;
   int c;
 
-  public Box(Scene scn, InteractiveFrame iF) {
+  public Box(Scene scn, GenericFrame iF) {
     scene = scn;
     iFrame = iF;
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
     //iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();
@@ -26,8 +25,8 @@ public class Box {
 
   public Box(Scene scn) {
     scene = scn;
-    iFrame = new InteractiveFrame(scn);
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame = new GenericFrame(scn);
+    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
     //iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();

@@ -13,7 +13,6 @@ package remixlab.proscene;
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
-import remixlab.bias.Profile;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.KeyShortcut;
 
@@ -38,7 +37,6 @@ public class KeyAgent extends Agent {
    */
   public KeyAgent(Scene scn) {
     super(scn.inputHandler());
-    Profile.registerVKeys(KeyShortcut.class, java.awt.event.KeyEvent.class);
     scene = scn;
     addGrabber(scene);
   }
@@ -55,8 +53,7 @@ public class KeyAgent extends Agent {
   /**
    * Processing keyEvent method to be registered at the PApplet's instance.
    * <p>
-   * Current implementation requires grabber objects to have a
-   * {@link Profile} and to implement
+   * Current implementation requires grabber objects to implement
    * {@link Grabber#checkIfGrabsInput(Event)} on a
    * {@code KeyEvent} as follows:
    * <p>

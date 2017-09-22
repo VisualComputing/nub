@@ -31,7 +31,7 @@ import java.util.List;
  * {@link #scalingSensitivity()}). A generic-frame may thus be attached to some of your
  * scene objects to control their motion using an {@link Agent}, such
  * as the {@link remixlab.dandelion.core.AbstractScene#motionAgent()} and the
- * {@link remixlab.dandelion.core.AbstractScene#keyboardAgent()} (see
+ * {@link remixlab.dandelion.core.AbstractScene#keyAgent()} (see
  * {@link #GenericFrame(AbstractScene)} and all the constructors that take an scene
  * parameter). To attach a generic-frame to {@code MyObject} use code like this:
  * <p>
@@ -451,7 +451,7 @@ public class GenericFrame extends Frame implements Grabber, Trackable {
    * The {@link remixlab.dandelion.core.AbstractScene#inputHandler()} will attempt to add
    * the generic-frame to all its {@link InputHandler#agents()}, such
    * as the {@link remixlab.dandelion.core.AbstractScene#motionAgent()} and the
-   * {@link remixlab.dandelion.core.AbstractScene#keyboardAgent()}.
+   * {@link remixlab.dandelion.core.AbstractScene#keyAgent()}.
    * <p>
    * The generic-frame sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},

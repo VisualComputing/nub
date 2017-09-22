@@ -1,8 +1,8 @@
 package frame;
 
 import processing.core.PApplet;
-import remixlab.dandelion.geom.Vec;
-import remixlab.proscene.InteractiveFrame;
+import remixlab.dandelion.geom.*;
+import remixlab.dandelion.core.*;
 import remixlab.proscene.Scene;
 
 /**
@@ -11,23 +11,23 @@ import remixlab.proscene.Scene;
 public class Sphere {
   Scene scene;
   PApplet parent;
-  InteractiveFrame iFrame;
+  GenericFrame iFrame;
   float r;
   int c;
 
-  public Sphere(Scene scn, InteractiveFrame iF) {
+  public Sphere(Scene scn, GenericFrame iF) {
     scene = scn;
     parent = scn.pApplet();
     iFrame = iF;
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
 
   public Sphere(Scene scn) {
     scene = scn;
     parent = scn.pApplet();
-    iFrame = new InteractiveFrame(scn);
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame = new GenericFrame(scn);
+    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
 

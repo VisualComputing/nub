@@ -10,26 +10,18 @@
 
 package remixlab.proscene;
 
-import processing.awt.PGraphicsJava2D;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
-import processing.opengl.PShader;
-import remixlab.bias.*;
-import remixlab.bias.event.ClickShortcut;
-import remixlab.bias.event.KeyEvent;
-import remixlab.bias.event.KeyShortcut;
-import remixlab.bias.event.MotionShortcut;
 import remixlab.dandelion.core.*;
 import remixlab.dandelion.geom.*;
 import remixlab.fpstiming.TimingTask;
 
-import java.lang.reflect.Method;
+
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -40,10 +32,7 @@ import java.util.regex.Pattern;
 //*/
 
 /**
- * A 2D or 3D interactive, on-screen or off-screen, Processing Scene with a
- * {@link Profile} instance which allows {@link Shortcut} to
- * {@link java.lang.reflect.Method} bindings high-level customization (see all the
- * <b>*Binding*()</b> methods). The Scene is a specialization of the
+ * A 2D or 3D interactive, on-screen or off-screen, Processing Scene. The Scene is a specialization of the
  * {@link remixlab.dandelion.core.AbstractScene}, providing an interface between Dandelion
  * and Processing.
  * <p>
@@ -59,14 +48,14 @@ import java.util.regex.Pattern;
  * <h3>Interactivity mechanisms</h3> ProScene provides powerful interactivity mechanisms
  * allowing a wide range of scene setups ranging from very simple to complex ones. For
  * convenience, two interaction mechanisms are provided by default:
- * {@link #keyboardAgent()}, and {@link #motionAgent()} (which in the desktop version of
+ * {@link #keyAgent()}, and {@link #motionAgent()} (which in the desktop version of
  * proscene defaults to a {@link #mouseAgent()}):
  * <ol>
- * <li><b>The default keyboard agent</b> provides shortcuts to
- * {@link remixlab.proscene.InteractiveFrame}s and scene keyboard actions (such as
- * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyboardAgent()}.
+ * <li><b>The default key agent</b> provides shortcuts to
+ * frame and scene key actions (such as
+ * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
- * {@link remixlab.dandelion.core.Eye} and {@link remixlab.proscene.InteractiveFrame}
+ * {@link remixlab.dandelion.core.Eye} and frame
  * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
@@ -78,50 +67,18 @@ import java.util.regex.Pattern;
  * how your scene objects evolve over time. See the example <i>Animation</i>.
  * <li><b>By checking if the Dandelion AbstractScene's {@link #timer()} was triggered
  * within the frame.</b> See the example <i>Flock</i>.
- * <li><b>External animation handler registration.</b> In addition (not being part of
- * Dandelion), you can also declare an external animation method and then register it at
- * the Scene with {@link #addAnimationHandler(Object, String)}. That method should return
- * {@code void} and have one single {@code Scene} parameter. See the example
- * <i>AnimationHandler</i>.
- * </ol>
- * <h3>Scene frames</h3> Each scene has a collection of
- * {@link remixlab.proscene.InteractiveFrame}s (see {@link #frames()}). An
- * {@link remixlab.proscene.InteractiveFrame} is a high level
- * {@link remixlab.dandelion.geom.Frame} PSshape wrapper (a coordinate system related to a
- * PShape or an arbitrary graphics procedure) which may be manipulated by any
- * {@link Agent}) and for which the scene implements a
- * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a color
- * buffer technique for easy and precise object selection (see {@link #pickingBuffer()}
- * and {@link #drawFrames(PGraphics)}).
+ * </ol>.
  */
 public class Scene extends AbstractScene implements PConstants {
-  // begin: GWT-incompatible
-  // /*
-  // Animation
-  // The object to handle the animation
-  protected Object animateHandlerObject;
-  // The method in animateHandlerObject to execute
-  protected Method animateHandlerMethod;
-
   // Timing
   protected boolean javaTiming;
-  // end: GWT-incompatible
-  // */
-
   public static final String prettyVersion = "3.0.0";
-
   public static final String version = "32";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet parent;
   protected PGraphics mainPGraphics;
 
-  // pb : picking buffer
-  protected PGraphics pb;
-  protected boolean pickingBufferEnabled;
-  protected PShader pickingBufferShaderTriangle, pickingBufferShaderLine, pickingBufferShaderPoint;
-
-  protected Profile profile;
 
   // E X C E P T I O N H A N D L I N G
   protected int beginOffScreenDrawingCalls;
@@ -165,7 +122,7 @@ public class Scene extends AbstractScene implements PConstants {
    * visual hint flags, instantiates the {@link #eye()} (a
    * {@link remixlab.dandelion.core.Camera} if the Scene {@link #is3D()} or a
    * {@link remixlab.dandelion.core.Window} if the Scene {@link #is2D()}). It also
-   * instantiates the {@link #keyboardAgent()} and the {@link #mouseAgent()}, and finally
+   * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}, and finally
    * calls {@link #init()}.
    * <p>
    * An off-screen Processing Scene is defined if {@code pg != p.g}. In this case the
@@ -184,7 +141,6 @@ public class Scene extends AbstractScene implements PConstants {
   public Scene(PApplet p, PGraphics pg, int x, int y) {
     // 1. P5 objects
     parent = p;
-    Profile.context = pApplet();
     mainPGraphics = pg;
     offscreen = pg != p.g;
     upperLeftCorner = offscreen ? new Point(x, y) : new Point(0, 0);
@@ -192,32 +148,12 @@ public class Scene extends AbstractScene implements PConstants {
     // 2. Matrix helper
     setMatrixHelper(matrixHelper(pg));
 
-    // 3. Frames & picking buffer
-    pb = (pg() instanceof processing.opengl.PGraphicsOpenGL) ?
-        pApplet().createGraphics(pg().width, pg().height, pg() instanceof PGraphics3D ? P3D : P2D) :
-        null;
-    if (pb != null) {
-      enablePickingBuffer();
-      pickingBufferShaderTriangle = pApplet().loadShader("PickingBuffer.frag");
-      pickingBufferShaderLine = pApplet().loadShader("PickingBuffer.frag");
-      pickingBufferShaderPoint = pApplet().loadShader("PickingBuffer.frag");
-    }
+    // 3. Create agents and register P5 methods
+    defMotionAgent = new MouseAgent(this);
+    defKeyboardAgent = new KeyAgent(this);
+    parent.registerMethod("mouseEvent", motionAgent());
+    parent.registerMethod("keyEvent", keyAgent());
 
-    // 4. Create agents and register P5 methods
-    profile = new Profile(this);
-    if (platform() == Platform.PROCESSING_ANDROID) {
-      defMotionAgent = new DroidTouchAgent(this);
-      defKeyboardAgent = new DroidKeyAgent(this);
-    } else {
-      defMotionAgent = new MouseAgent(this);
-      defKeyboardAgent = new KeyAgent(this);
-      parent.registerMethod("mouseEvent", motionAgent());
-      // TODO DROID broke in Android so moved here
-      parent.registerMethod("keyEvent", keyboardAgent());
-      this.setDefaultKeyBindings();
-    }
-    // TODO DROID broke in Android
-    // parent.registerMethod("keyEvent", keyboardAgent());
     // this.setDefaultKeyBindings();
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
@@ -226,8 +162,8 @@ public class Scene extends AbstractScene implements PConstants {
       offScreenScenes++;
       enableAutoFocus();
     }
-    // TODO DROID buggy in desktop, should be tested in Android
-    if (platform() != Platform.PROCESSING_ANDROID)
+    // TODO buggy
+    if (platform() != Platform.PROCESSING_DESKTOP)
       pApplet().registerMethod("dispose", this);
 
     // 5. Eye
@@ -236,8 +172,9 @@ public class Scene extends AbstractScene implements PConstants {
     height = pg.height;
     // properly set the eye which is a 3 step process:
     eye = is3D() ? new Camera(this) : new Window(this);
-    eye.setFrame(new InteractiveFrame(eye));
     setEye(eye());// calls showAll();
+    //TODO testing
+    //showAll();
 
     // 6. Misc stuff:
     setDottedGrid(!(platform() == Platform.PROCESSING_ANDROID || is2D()));
@@ -247,86 +184,6 @@ public class Scene extends AbstractScene implements PConstants {
 
     // 7. Init should be called only once
     init();
-  }
-
-  @Override
-  public InteractiveFrame eyeFrame() {
-    return (InteractiveFrame) eye.frame();
-  }
-
-  /**
-   * Same as {@code return super.checkIfGrabsInput(event)}.
-   * <p>
-   * To use it, create a custom InteractiveFrame class, implement a
-   * {@code checkIfGrabsInput(CustomEvent)} method and override the
-   * {@link #checkIfGrabsInput(Event)} as follows:
-   * <pre>
-   * {@code
-   * @Override
-   * public boolean checkIfGrabsInput(Event event) {
-   *   if(event instanceof CustomEvent)
-   *     return checkIfGrabsInput(event);
-   *   else
-   *     return supercheckIfGrabsInput(event);
-   * }
-   * }
-   * </pre>
-   *
-   * @see remixlab.dandelion.core.GenericFrame#checkIfGrabsInput(Event)
-   * @see #checkIfGrabsInput(Event)
-   */
-  protected boolean supercheckIfGrabsInput(Event event) {
-    return super.checkIfGrabsInput(event);
-  }
-
-  /**
-   * Checks for the existence of the
-   * {@link Grabber#checkIfGrabsInput(Event)} condition at the
-   * {@link #pApplet()}, having
-   * {@code public boolean checkIfGrabsInput(Scene, CustomEvent)} as method
-   * prototype. If it doesn't find it there, looks for the condition at this instance,
-   * with a similar method prototype, but without the Scene parameter.
-   * You don't need to call this. Automatically called by agents handling this scene.
-   * <p>
-   * <b>Note: </b> Call {@link #supercheckIfGrabsInput(Event)} at your scene
-   * derived class, if you prefer to use inheritance to override the scene picking
-   * condition on a custom-event.
-   *
-   * @see #supercheckIfGrabsInput(Event)
-   */
-  @Override
-  public boolean checkIfGrabsInput(Event event) {
-    Method mth = null;
-    Object obj = pApplet();
-    boolean sceneParam = false;
-    // 1. Retrieving
-    try {
-      mth = obj.getClass().getMethod("checkIfGrabsInput", new Class<?>[]{Scene.class, event.getClass()});
-      sceneParam = true;
-    } catch (Exception e1) {
-      obj = this;
-      try {
-        mth = obj.getClass().getMethod("checkIfGrabsInput", new Class<?>[]{event.getClass()});
-      } catch (Exception e2) {
-        PApplet.println("Error: no picking condition for " + event.getClass().getName());
-      }
-    }
-    // 2. Invocation
-    try {
-      if (sceneParam)
-        return (boolean) mth.invoke(obj, new Object[]{this, event});
-      else
-        return (boolean) mth.invoke(obj, new Object[]{event});
-    } catch (Exception e) {
-      PApplet.println("Error: no picking condition found");
-      e.printStackTrace();
-    }
-    return false;
-  }
-
-  @Override
-  public boolean checkIfGrabsInput(KeyEvent event) {
-    return profile.hasBinding(event.shortcut());
   }
 
   // P5 STUFF
@@ -347,52 +204,6 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   // PICKING BUFFER
-
-  /**
-   * Returns the {@link #frames()}
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> color
-   * buffer.
-   *
-   * @see #drawFrames()
-   * @see #drawFrames(PGraphics)
-   */
-  public PGraphics pickingBuffer() {
-    return pb;
-  }
-
-  /**
-   * Enable the {@link #pickingBuffer()}.
-   */
-  public void enablePickingBuffer() {
-    if (!(pickingBufferEnabled = pb != null))
-      System.out.println("PickingBuffer can't be instantiated!");
-  }
-
-  /**
-   * Disable the {@link #pickingBuffer()}.
-   */
-  public void disablePickingBuffer() {
-    pickingBufferEnabled = false;
-  }
-
-  /**
-   * Returns {@code true} if {@link #pickingBuffer()} buffer is enabled and {@code false}
-   * otherwise.
-   */
-  public boolean isPickingBufferEnabled() {
-    return pickingBufferEnabled;
-  }
-
-  /**
-   * Toggles availability of the {@link #pickingBuffer()}.
-   */
-  public void togglePickingBuffer() {
-    if (isPickingBufferEnabled())
-      disablePickingBuffer();
-    else
-      enablePickingBuffer();
-  }
-
   @Override
   public int width() {
     return pg().width;
@@ -419,15 +230,6 @@ public class Scene extends AbstractScene implements PConstants {
       platform = Platform.PROCESSING_ANDROID;
     else
       platform = Platform.PROCESSING_DESKTOP;
-  }
-
-  /**
-   * Either returns {@link remixlab.proscene.KeyAgent#keyCode(char)} or
-   * {@link remixlab.proscene.DroidKeyAgent#keyCode(char)} depending on
-   * {@link #platform()}.
-   */
-  public static int keyCode(char key) {
-    return platform() == Platform.PROCESSING_ANDROID ? DroidKeyAgent.keyCode(key) : KeyAgent.keyCode(key);
   }
 
   // P5-WRAPPERS
@@ -620,14 +422,12 @@ public class Scene extends AbstractScene implements PConstants {
    *
    * @see #isMotionAgentEnabled()
    * @see #disableMotionAgent()
-   * @see #enableKeyboardAgent()
+   * @see #enableKeyAgent()
    */
   @Override
   public void enableMotionAgent() {
     if (platform() == Platform.PROCESSING_DESKTOP)
       enableMouseAgent();
-    if (platform() == Platform.PROCESSING_ANDROID)
-      enableDroidTouchAgent();
   }
 
   /**
@@ -635,50 +435,17 @@ public class Scene extends AbstractScene implements PConstants {
    *
    * @see #isMotionAgentEnabled()
    * @see #enableMotionAgent()
-   * @see #enableKeyboardAgent()
-   * @see #disableKeyboardAgent()
+   * @see #enableKeyAgent()
+   * @see #disableKeyAgent()
    */
   @Override
   public boolean disableMotionAgent() {
     if (platform() == Platform.PROCESSING_DESKTOP)
       return disableMouseAgent();
-    if (platform() == Platform.PROCESSING_ANDROID)
-      return disableDroidTouchAgent();
     return false;
   }
 
   // KEYBOARD
-
-  /**
-   * Enables Proscene keyboard handling through the {@link #keyboardAgent()}.
-   *
-   * @see #isKeyboardAgentEnabled()
-   * @see #disableKeyboardAgent()
-   * @see #enableMotionAgent()
-   */
-  @Override
-  public void enableKeyboardAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      enableKeyAgent();
-    if (platform() == Platform.PROCESSING_ANDROID)
-      enableDroidKeyAgent();
-  }
-
-  /**
-   * Disables the default keyboard agent and returns it.
-   *
-   * @see #isKeyboardAgentEnabled()
-   * @see #enableKeyboardAgent()
-   * @see #disableMotionAgent()
-   */
-  @Override
-  public boolean disableKeyboardAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      return disableKeyAgent();
-    if (platform() == Platform.PROCESSING_ANDROID)
-      return disableDroidKeyAgent();
-    return false;
-  }
 
   // Mouse
 
@@ -757,35 +524,18 @@ public class Scene extends AbstractScene implements PConstants {
   // keyAgent
 
   /**
-   * Returns the default key agent handling Processing key events. If you plan to
-   * customize your keyboard use this method.
-   *
-   * @see #enableKeyAgent()
-   * @see #isKeyAgentEnabled()
-   * @see #disableKeyAgent()
-   * @see #mouseAgent()
-   */
-  public KeyAgent keyAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID)
-      throw new RuntimeException("Proscene keyAgent() is not available in Android mode. Use droidKeyAgent() instead");
-    return (KeyAgent) defKeyboardAgent;
-  }
-
-  /**
-   * Enables keyboard handling through the {@link #keyAgent()}.
+   * Enables key handling through the {@link #keyAgent()}.
    *
    * @see #keyAgent()
    * @see #isKeyAgentEnabled()
    * @see #disableKeyAgent()
    * @see #enableMouseAgent()
    */
+  @Override
   public void enableKeyAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID)
-      throw new RuntimeException(
-          "Proscene enableKeyAgent() is not available in Android mode. Use enableDroidKeyAgent() instead");
-    if (!isKeyboardAgentEnabled()) {
-      inputHandler().registerAgent(keyboardAgent());
-      parent.registerMethod("keyEvent", keyboardAgent());
+    if (!isKeyAgentEnabled()) {
+      inputHandler().registerAgent(keyAgent());
+      parent.registerMethod("keyEvent", keyAgent());
     }
   }
 
@@ -797,13 +547,11 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #enableKeyAgent()
    * @see #disableMouseAgent()
    */
+  @Override
   public boolean disableKeyAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID)
-      throw new RuntimeException(
-          "Proscene disableKeyAgent() is not available in Android mode. Use disableDroidKeyAgent() instead");
-    if (inputHandler().isAgentRegistered(keyboardAgent())) {
-      parent.unregisterMethod("keyEvent", keyboardAgent());
-      return inputHandler().unregisterAgent(keyboardAgent());
+    if (inputHandler().isAgentRegistered(keyAgent())) {
+      parent.unregisterMethod("keyEvent", keyAgent());
+      return inputHandler().unregisterAgent(keyAgent());
     }
     return false;
   }
@@ -817,170 +565,22 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #disableKeyAgent()
    * @see #enableKeyAgent()
    */
+  @Override
   public boolean isKeyAgentEnabled() {
-    if (platform() == Platform.PROCESSING_ANDROID)
-      throw new RuntimeException(
-          "Proscene isKeyAgentEnabled() is not available in Android mode. Use isDroidKeyAgentEnabled() instead");
-    return isKeyboardAgentEnabled();
-  }
-
-  // droid touch
-
-  /**
-   * Returns the default droid touch agent handling touch events. If you plan to customize
-   * your touch use this method.
-   *
-   * @see #enableMouseAgent()
-   * @see #isMouseAgentEnabled()
-   * @see #disableMouseAgent()
-   * @see #droidKeyAgent()
-   */
-  public DroidTouchAgent droidTouchAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException("Proscene droidTouchAgent() is not available in Desktop mode. Use mouseAgent() instead");
-    return (DroidTouchAgent) motionAgent();
-  }
-
-  /**
-   * Enables motion handling through the {@link #droidTouchAgent()}.
-   *
-   * @see #droidTouchAgent()
-   * @see #isDroidTouchAgentEnabled()
-   * @see #disableDroidTouchAgent()
-   * @see #enableDroidKeyAgent()
-   */
-  public void enableDroidTouchAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException(
-          "Proscene enableDroidTouchAgent() is not available in Desktop mode. Use enableMouseAgent() instead");
-    super.enableMotionAgent();
-  }
-
-  /**
-   * Disables the default droid touch agent and returns it.
-   *
-   * @see #droidTouchAgent()
-   * @see #isDroidTouchAgentEnabled()
-   * @see #enableDroidTouchAgent()
-   * @see #disableDroidKeyAgent()
-   */
-  public boolean disableDroidTouchAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException(
-          "Proscene disableDroidTouchAgent() is not available in Desktop mode. Use disableMouseAgent() instead");
-    if (isMotionAgentEnabled())
-      return inputHandler().unregisterAgent(motionAgent());
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #droidTouchAgent()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #droidTouchAgent()
-   * @see #enableDroidTouchAgent()
-   * @see #disableDroidTouchAgent()
-   * @see #enableDroidKeyAgent()
-   */
-  public boolean isDroidTouchAgentEnabled() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException(
-          "Proscene isDroidTouchAgentEnabled() is not available in Android mode. Use isDroidKeyAgentEnabled() instead");
-    return isMotionAgentEnabled();
-  }
-
-  // droid key
-
-  /**
-   * Returns the default droid key agent handling touch events. If you plan to customize
-   * your touch use this method.
-   *
-   * @see #enableDroidKeyAgent()
-   * @see #isDroidKeyAgentEnabled()
-   * @see #disableDroidKeyAgent()
-   * @see #droidTouchAgent()
-   */
-  public DroidKeyAgent droidKeyAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException("Proscene droidKeyAgent() is not available in Desktop mode. Use keyAgent() instead");
-    return (DroidKeyAgent) defKeyboardAgent;
-  }
-
-  /**
-   * Enables keyboard handling through the {@link #droidKeyAgent()}.
-   *
-   * @see #droidKeyAgent()
-   * @see #isDroidKeyAgentEnabled()
-   * @see #disableDroidKeyAgent()
-   * @see #enableDroidTouchAgent()
-   */
-  public void enableDroidKeyAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP) {
-      throw new RuntimeException(
-          "Proscene enableDroidKeyAgent() is not available in Desktop mode. Use enableKeyAgent() instead");
-    }
-    super.enableKeyboardAgent();
-  }
-
-  /**
-   * Disables the droid key agent and returns it.
-   *
-   * @see #droidKeyAgent()
-   * @see #isDroidKeyAgentEnabled()
-   * @see #enableDroidKeyAgent()
-   * @see #disableDroidTouchAgent()
-   */
-  public boolean disableDroidKeyAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      throw new RuntimeException(
-          "Proscene disableDroidKeyAgent() is not available in Desktop mode. Use disableKeyAgent() instead");
-    if (inputHandler().isAgentRegistered(keyboardAgent())) {
-      // TODO DROID broke in Android
-      // parent.unregisterMethod("keyEvent", keyboardAgent());
-      return inputHandler().unregisterAgent(keyboardAgent());
-    }
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #droidKeyAgent()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #keyAgent()
-   * @see #enableKeyAgent()
-   * @see #disableKeyAgent()
-   * @see #enableKeyAgent()
-   */
-  public boolean isDroidKeyAgentEnabled() {
-    if (platform() == Platform.PROCESSING_DESKTOP) {
-      throw new RuntimeException(
-          "Proscene isDroidKeyAgentEnabled() is not available in Android mode. Use isDroidKeyAgentEnabled() instead");
-    }
-    return isKeyboardAgentEnabled();
+    return isKeyAgentEnabled();
   }
 
   // INFO
 
   @Override
   public String info() {
-    String result = new String();
-    String info = profile.info();
-    if (!info.isEmpty()) {
-      result = "1. Scene\n";
-      result += info;
-    }
-    info = eyeFrame().info(); // frame already parses info :P
-    if (!info.isEmpty()) {
-      result += "2. Eye\n";
-      result += info;
-    }
-    if (this.leadingFrames().size() > 1)
-      result += "3. For a specific frame bindings use: frame.info():\n";
-    return result;
+    return null;
+    //TODO decide me
   }
 
   @Override
   public void displayInfo(boolean onConsole) {
+    //TODO decide me
     if (onConsole)
       System.out.println(info());
     else { // on applet
@@ -1077,66 +677,6 @@ public class Scene extends AbstractScene implements PConstants {
       setNonSeqTimers();
     else
       setSeqTimers();
-  }
-
-  // ANIMATION METHOD REG
-
-  @Override
-  public boolean invokeAnimationHandler() {
-    if (animateHandlerObject != null) {
-      try {
-        animateHandlerMethod.invoke(animateHandlerObject, new Object[]{this});
-        return true;
-      } catch (Exception e) {
-        PApplet.println("Something went wrong when invoking your " + animateHandlerMethod.getName() + " method");
-        e.printStackTrace();
-        return false;
-      }
-    }
-    return false;
-  }
-
-  /**
-   * Attempt to add an 'animation' handler method to the Scene. The default event handler
-   * is a method that returns void and has one single Scene parameter.
-   *
-   * @param obj        the object to handle the event
-   * @param methodName the method to execute in the object handler class
-   * @see #animate()
-   * @see #removeAnimationHandler()
-   */
-  public void addAnimationHandler(Object obj, String methodName) {
-    try {
-      animateHandlerMethod = obj.getClass().getMethod(methodName, new Class<?>[]{Scene.class});
-      animateHandlerObject = obj;
-    } catch (Exception e) {
-      PApplet.println("Something went wrong when registering your " + methodName + " method");
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Unregisters the 'animation' handler method (if any has previously been added to the
-   * Scene).
-   *
-   * @see #addAnimationHandler(Object, String)
-   */
-  public void removeAnimationHandler() {
-    animateHandlerMethod = null;
-    animateHandlerObject = null;
-  }
-
-  /**
-   * Returns {@code true} if the user has registered an 'animation' handler method to the
-   * Scene and {@code false} otherwise.
-   *
-   * @see #addAnimationHandler(Object, String)
-   * @see #removeAnimationHandler()
-   */
-  public boolean hasAnimationHandler() {
-    if (animateHandlerMethod == null)
-      return false;
-    return true;
   }
 
   // OPENGL
@@ -1251,9 +791,8 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Calls
-   * {@link #proscenium()}, {@link #displayVisualHints()}, draws the scene into the
-   * {@link #pickingBuffer()} and {@link #postDraw()}. This method is registered at the
-   * PApplet and hence you don't need to call it. Only meaningful if the scene is
+   * {@link #proscenium()}, {@link #displayVisualHints()} and {@link #postDraw()}. This method is
+   * registered at the PApplet and hence you don't need to call it. Only meaningful if the scene is
    * on-screen (it the scene {@link #isOffscreen()} it even doesn't get registered at the
    * PApplet.
    * <p>
@@ -1270,7 +809,6 @@ public class Scene extends AbstractScene implements PConstants {
     proscenium();
     popModelView();
     displayVisualHints();
-    handlePickingBuffer();
     postDraw();
   }
 
@@ -1339,7 +877,6 @@ public class Scene extends AbstractScene implements PConstants {
    * <li>{@link #proscenium()}</li>
    * <li>{@link #displayVisualHints()}</li>
    * <li>{@code pg().endDraw()} and hence there's no need to explicitly call it</li>
-   * <li>{@link #handlePickingBuffer()}</li>
    * <li>{@link #handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * <li>{@link #postDraw()}</li>
    * </ol>
@@ -1366,30 +903,9 @@ public class Scene extends AbstractScene implements PConstants {
     popModelView();
     displayVisualHints();
     pg().endDraw();
-    handlePickingBuffer();
     if (hasAutoFocus())
       handleFocus();
     postDraw();
-  }
-
-  /**
-   * Internal use. Draws the contents of the scene (its {@link #frames()}) into the
-   * {@link #pickingBuffer()} to perform picking on the scene {@link #frames()}.
-   * <p>
-   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
-   * scenes).
-   */
-  protected void handlePickingBuffer() {
-    if (!this.isPickingBufferEnabled() || !unchachedBuffer)
-      return;
-    pickingBuffer().beginDraw();
-    pickingBuffer().pushStyle();
-    pickingBuffer().background(0);
-    drawFrames(pickingBuffer());
-    pickingBuffer().popStyle();
-    pickingBuffer().endDraw();
-    // if (frames().size() > 0)
-    pickingBuffer().loadPixels();
   }
 
   /**
@@ -1405,9 +921,6 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Same as {@code pApplet().image(pgraphics, originCorner().x(), originCorner().y())}.
    * Only meaningful if the scene {@link #isOffscreen()}.
-   * <p>
-   * Displays the contents of the pgraphics (typically {@link #pg()} or the
-   * {@link #pickingBuffer()}) into the scene {@link #pApplet()}.
    */
   public void display(PGraphics pgraphics) {
     if (!isOffscreen())
@@ -1466,18 +979,18 @@ public class Scene extends AbstractScene implements PConstants {
           available = false;
     if (hasFocus() && displayed() && available) {
       enableMotionAgent();
-      enableKeyboardAgent();
+      enableKeyAgent();
       lastScene = this;
     } else {
       disableMotionAgent();
-      disableKeyboardAgent();
+      disableKeyAgent();
     }
   }
 
   /**
    * When having multiple off-screen scenes displayed at once, one should decide which
    * scene will grab input from both, the {@link #motionAgent()} and the
-   * {@link #keyboardAgent()}, so that code like this:
+   * {@link #keyAgent()}, so that code like this:
    * <p>
    * <pre>
    * {@code
@@ -1705,7 +1218,7 @@ public class Scene extends AbstractScene implements PConstants {
         eye().deletePath(id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
         for (int j = 0; j < keyFrames.size(); j++) {
-          InteractiveFrame keyFrame = new InteractiveFrame(this);
+          GenericFrame keyFrame = new GenericFrame(this);
           pruneBranch(keyFrame);
           keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
           keyFrame.setPickingPrecision(GenericFrame.PickingPrecision.FIXED);
@@ -1800,61 +1313,11 @@ public class Scene extends AbstractScene implements PConstants {
     return jsonRot;
   }
 
-  /**
-   * Internal used. Applies the {@link #pickingBuffer()} shaders needed by iFrame picking.
-   */
-  protected void applyPickingBufferShaders() {
-    pickingBuffer().shader(pickingBufferShaderTriangle);
-    pickingBuffer().shader(pickingBufferShaderLine, LINES);
-    pickingBuffer().shader(pickingBufferShaderPoint, POINTS);
-  }
-
   protected boolean unchachedBuffer;
   protected PGraphics targetPGraphics;
 
-  @Override
-  protected boolean addLeadingFrame(GenericFrame gFrame) {
-    boolean result = super.addLeadingFrame(gFrame);
-    if (result)
-      if (gFrame instanceof InteractiveFrame)
-        // a bit weird but otherwise checkifgrabsinput throws a npe at sketch startup
-        // if(gFrame instanceof InteractiveFrame)// this line throws the npe too
-        if (isPickingBufferEnabled())
-          pickingBuffer().loadPixels();
-    return result;
-  }
-
   /**
-   * Returns the collection of interactive frames the scene handles, including eye-frames.
-   * <p>
-   * Note that iterating through the scene frames is not as efficient as simply calling
-   * {@link #drawFrames()}.
-   */
-  public ArrayList<InteractiveFrame> frames() {
-    ArrayList<InteractiveFrame> iFrames = new ArrayList<InteractiveFrame>();
-    for (GenericFrame frame : frames(true))
-      if (frame instanceof InteractiveFrame)
-        iFrames.add((InteractiveFrame) frame);
-    return iFrames;
-  }
-
-  /**
-   * Collects {@code frame} and all its descendant frames. When {@code eyeframes} is
-   * {@code true} eye-frames will also be collected. Note that for a frame to be collected
-   * it must be reachable.
-   *
-   * @see #isFrameReachable(GenericFrame)
-   */
-  public ArrayList<InteractiveFrame> branch(GenericFrame frame) {
-    ArrayList<InteractiveFrame> iFrames = new ArrayList<InteractiveFrame>();
-    for (GenericFrame gFrame : branch(frame, false))
-      if (gFrame instanceof InteractiveFrame)
-        iFrames.add((InteractiveFrame) gFrame);
-    return iFrames;
-  }
-
-  /**
-   * Draw all scene {@link #frames()} into the {@link #pg()} buffer. A similar (but
+   * Draw all scene {@link #frames(boolean)} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
    * {@code for (InteractiveFrame frame : frames()) frame.draw(pg());}.
    * <p>
@@ -1868,10 +1331,9 @@ public class Scene extends AbstractScene implements PConstants {
    * eye update which happens at {@link #preDraw()}) and before any other transformation
    * of the modelview takes place.
    *
-   * @see #frames()
+   * @see #frames(boolean)
    * @see #pg()
    * @see #drawFrames(PGraphics)
-   * @see remixlab.proscene.InteractiveFrame#draw(PGraphics)
    */
   public void drawFrames() {
     targetPGraphics = pg();
@@ -1879,7 +1341,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /**
-   * Draw all {@link #frames()} into the given pgraphics. No
+   * Draw all {@link #frames(boolean)} into the given pgraphics. No
    * {@code pgraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
@@ -1892,9 +1354,8 @@ public class Scene extends AbstractScene implements PConstants {
    * place.
    *
    * @param pgraphics
-   * @see #frames()
+   * @see #frames(boolean)
    * @see #drawFrames()
-   * @see remixlab.proscene.InteractiveFrame#draw(PGraphics)
    */
   public void drawFrames(PGraphics pgraphics) {
     // 1. Set pgraphics matrices using a custom MatrixHelper
@@ -1975,10 +1436,8 @@ public class Scene extends AbstractScene implements PConstants {
    * Apply the global transformation defined by the given {@code frame} on the given
    * {@code pgraphics}. This method doesn't call {@link #bindMatrices(PGraphics)} which
    * should be called manually (only makes sense when {@link #pg()} is different than
-   * {@code pgraphics}). Needed by
-   * {@link remixlab.proscene.InteractiveFrame#draw(PGraphics)}
+   * {@code pgraphics}).
    *
-   * @see remixlab.proscene.InteractiveFrame#draw(PGraphics)
    * @see #applyTransformation(PGraphics, Frame)
    * @see #bindMatrices(PGraphics)
    */
@@ -2069,9 +1528,6 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Same as {@code drawCylinder(pg, radius()/6, radius()/3)}.
-   * <p>
-   * Note that this method is useful for
-   * {@link remixlab.proscene.InteractiveFrame#setShape(String)}.
    */
   public void drawCylinder(PGraphics pg) {
     drawCylinder(pg, radius() / 6, radius() / 3);
@@ -2191,9 +1647,6 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Same as {@code drawCone(pg, 12, 0, 0, radius()/4, sqrt(3) * radius()/4)}.
-   * <p>
-   * Note that this method is useful for
-   * {@link remixlab.proscene.InteractiveFrame#setShape(String)}.
    */
   public void drawCone(PGraphics pg) {
     float r = radius() / 4;
@@ -2300,9 +1753,6 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Same as {@code drawAxes(pg, radius()/5)}.
-   * <p>
-   * Note that this method is useful for
-   * {@link remixlab.proscene.InteractiveFrame#setShape(String)}.
    */
   public void drawAxes(PGraphics pg) {
     drawAxes(pg, radius() / 5);
@@ -2402,9 +1852,6 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Same as {@code drawGrid(pg, radius()/4, 10)}.
-   * <p>
-   * Note that this method is useful for
-   * {@link remixlab.proscene.InteractiveFrame#setShape(String)}.
    */
   public void drawGrid(PGraphics pg) {
     drawGrid(pg, radius() / 4, 10);
@@ -2436,9 +1883,6 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Same as {@code drawDottedGrid(pg, radius()/4, 10)}.
-   * <p>
-   * Note that this method is useful for
-   * {@link remixlab.proscene.InteractiveFrame#setShape(String)}.
    */
   public void drawDottedGrid(PGraphics pg) {
     drawDottedGrid(pg, radius() / 4, 10);
@@ -3237,406 +2681,11 @@ public class Scene extends AbstractScene implements PConstants {
 
   @Override
   protected void drawScreenRotateHint() {
-    if (!(motionAgent() instanceof MouseAgent))
-      return;
-    if (!(motionAgent().inputGrabber() instanceof InteractiveFrame))
-      return;
-
-    pg().pushStyle();
-    float p1x = mouseAgent().currentEvent.x() /*- originCorner().x()*/;
-    float p1y = mouseAgent().currentEvent.y() /*- originCorner().y()*/;
-
-    Vec p2 = new Vec();
-    if (motionAgent().inputGrabber() instanceof GenericFrame) {
-      if (((GenericFrame) motionAgent().inputGrabber()).isEyeFrame())
-        p2 = eye().projectedCoordinatesOf(anchor());
-      else
-        p2 = eye().projectedCoordinatesOf(((GenericFrame) mouseAgent().inputGrabber()).position());
-    }
-    beginScreenDrawing();
-    pg().stroke(255, 255, 255);
-    pg().strokeWeight(2);
-    pg().noFill();
-    line(p2.x(), p2.y(), p1x, p1y);
-    endScreenDrawing();
-    pg().popStyle();
+    //TODO decide me
   }
 
   @Override
   protected void drawZoomWindowHint() {
-    if (!(motionAgent() instanceof MouseAgent))
-      return;
-    if (!(motionAgent().inputGrabber() instanceof InteractiveFrame))
-      return;
-    InteractiveFrame iFrame = (InteractiveFrame) motionAgent().inputGrabber();
-    pg().pushStyle();
-    float p1x = iFrame.initEvent.x() /*- originCorner().x()*/;
-    float p1y = iFrame.initEvent.y() /*- originCorner().y()*/;
-    float p2x = mouseAgent().currentEvent.x() /*- originCorner().x()*/;
-    float p2y = mouseAgent().currentEvent.y() /*- originCorner().y()*/;
-    beginScreenDrawing();
-    pg().stroke(255, 255, 255);
-    pg().strokeWeight(2);
-    pg().noFill();
-    pg().beginShape();
-    vertex(p1x, p1y);
-    vertex(p2x, p1y);
-    vertex(p2x, p2y);
-    vertex(p1x, p2y);
-    pg().endShape(CLOSE);
-    endScreenDrawing();
-    pg().popStyle();
+    //TODO decide me
   }
-
-  /**
-   * Same as {@code profile.handle(event)}.
-   *
-   * @see Profile#handle(Event)
-   */
-  @Override
-  public void performInteraction(Event event) {
-    profile.handle(event);
-  }
-
-  // Key
-
-  /**
-   * Same as {@code setBinding(new KeyShortcut(vkey), methodName)}.
-   *
-   * @see #setBinding(Shortcut, String)
-   */
-  public void setKeyBinding(int vkey, String methodName) {
-    setBinding(new KeyShortcut(vkey), methodName);
-  }
-
-  /**
-   * Same as {@code setBinding(new KeyShortcut(key), methodName)}.
-   *
-   * @see #setBinding(Shortcut, String)
-   */
-  public void setKeyBinding(char key, String methodName) {
-    setBinding(new KeyShortcut(key), methodName);
-  }
-
-  /**
-   * Same as {@code setBinding(object, new KeyShortcut(vkey), methodName)}.
-   *
-   * @see #setBinding(Object, Shortcut, String)
-   */
-  public void setKeyBinding(Object object, int vkey, String methodName) {
-    setBinding(object, new KeyShortcut(vkey), methodName);
-  }
-
-  /**
-   * Same as {@code setBinding(object, new KeyShortcut(key), methodName)}.
-   *
-   * @see #setBinding(Object, Shortcut, String)
-   */
-  public void setKeyBinding(Object object, char key, String methodName) {
-    setBinding(object, new KeyShortcut(key), methodName);
-  }
-
-  /**
-   * Same as {@code return hasBinding(new KeyShortcut(vkey))}.
-   *
-   * @see #hasBinding(Shortcut)
-   */
-  public boolean hasKeyBinding(int vkey) {
-    return hasBinding(new KeyShortcut(vkey));
-  }
-
-  /**
-   * Same as {@code return hasBinding(new KeyShortcut(key))}.
-   *
-   * @see #hasBinding(Shortcut)
-   */
-  public boolean hasKeyBinding(char key) {
-    return hasBinding(new KeyShortcut(key));
-  }
-
-  /**
-   * Same as {@code removeBinding(new KeyShortcut(vkey))}.
-   *
-   * @see #removeBinding(Shortcut)
-   */
-  public void removeKeyBinding(int vkey) {
-    removeBinding(new KeyShortcut(vkey));
-  }
-
-  /**
-   * Same as {@code removeBinding(new KeyShortcut(key))}.
-   *
-   * @see #removeBinding(Shortcut)
-   */
-  public void removeKeyBinding(char key) {
-    removeBinding(new KeyShortcut(key));
-  }
-
-  //
-
-  /**
-   * Same as {@code setBinding(new KeyShortcut(mask, vkey), methodName)}.
-   *
-   * @see #setBinding(Shortcut, String)
-   */
-  public void setKeyBinding(int mask, int vkey, String methodName) {
-    setBinding(new KeyShortcut(mask, vkey), methodName);
-  }
-
-  /**
-   * Same as {@code setBinding(object, new KeyShortcut(mask, vkey), methodName)} .
-   *
-   * @see #setBinding(Object, Shortcut, String)
-   */
-  public void setKeyBinding(Object object, int mask, int vkey, String methodName) {
-    setBinding(object, new KeyShortcut(mask, vkey), methodName);
-  }
-
-  /**
-   * Same as {@code return hasBinding(new KeyShortcut(mask, vkey))} .
-   *
-   * @see #hasBinding(Shortcut)
-   */
-  public boolean hasKeyBinding(int mask, int vkey) {
-    return hasBinding(new KeyShortcut(mask, vkey));
-  }
-
-  /**
-   * Same as {@code removeBinding(new KeyShortcut(mask, vkey))}.
-   *
-   * @see #removeBinding(Shortcut)
-   */
-  public void removeKeyBinding(int mask, int vkey) {
-    removeBinding(new KeyShortcut(mask, vkey));
-  }
-
-  /**
-   * Same as {@code setKeyBinding(mask, keyCode(key), methodName)}.
-   *
-   * @see #setKeyBinding(int, int, String)
-   */
-  public void setKeyBinding(int mask, char key, String methodName) {
-    setKeyBinding(mask, keyCode(key), methodName);
-  }
-
-  /**
-   * Same as {@code setKeyBinding(object, mask, keyCode(key), methodName)}.
-   *
-   * @see #setKeyBinding(Object, int, int, String)
-   */
-  public void setKeyBinding(Object object, int mask, char key, String methodName) {
-    setKeyBinding(object, mask, keyCode(key), methodName);
-  }
-
-  /**
-   * Same as {@code return hasKeyBinding(mask, keyCode(key))}.
-   *
-   * @see #hasKeyBinding(int, int)
-   */
-  public boolean hasKeyBinding(int mask, char key) {
-    return hasKeyBinding(mask, keyCode(key));
-  }
-
-  /**
-   * Same as {@code removeKeyBinding(mask, keyCode(key))}.
-   *
-   * @see #removeKeyBinding(int, int)
-   */
-  public void removeKeyBinding(int mask, char key) {
-    removeKeyBinding(mask, keyCode(key));
-  }
-
-  /**
-   * Same as {@code removeBindings(KeyShortcut.class)}.
-   *
-   * @see #removeBindings(Class)
-   */
-  public void removeKeyBindings() {
-    removeBindings(KeyShortcut.class);
-  }
-
-  /**
-   * Restores the default keyboard shortcuts:
-   * <p>
-   * {@code 'a' -> KeyboardAction.TOGGLE_AXES_VISUAL_HINT}<br>
-   * {@code 'f' -> KeyboardAction.TOGGLE_FRAME_VISUAL_HINT}<br>
-   * {@code 'g' -> KeyboardAction.TOGGLE_GRID_VISUAL_HINT}<br>
-   * {@code 'm' -> KeyboardAction.TOGGLE_ANIMATION}<br>
-   * {@code 'e' -> KeyboardAction.TOGGLE_CAMERA_TYPE}<br>
-   * {@code 'h' -> KeyboardAction.DISPLAY_INFO}<br>
-   * {@code 'r' -> KeyboardAction.TOGGLE_PATHS_VISUAL_HINT}<br>
-   * {@code 's' -> KeyboardAction.INTERPOLATE_TO_FIT}<br>
-   * {@code 'S' -> KeyboardAction.SHOW_ALL}<br>
-   * {@code left_arrow -> KeyboardAction.MOVE_LEFT}<br>
-   * {@code right_arrow -> KeyboardAction.MOVE_RIGHT}<br>
-   * {@code up_arrow -> KeyboardAction.MOVE_UP}<br>
-   * {@code down_arrow -> KeyboardAction.MOVE_DOWN }<br>
-   * {@code 'CTRL' + '1' -> KeyboardAction.ADD_KEYFRAME_TO_PATH_1}<br>
-   * {@code 'ALT' + '1' -> KeyboardAction.DELETE_PATH_1}<br>
-   * {@code '1' -> KeyboardAction.PLAY_PATH_1}<br>
-   * {@code 'CTRL' + '2' -> KeyboardAction.ADD_KEYFRAME_TO_PATH_2}<br>
-   * {@code 'ALT' + '2' -> KeyboardAction.DELETE_PATH_2}<br>
-   * {@code '2' -> KeyboardAction.PLAY_PATH_2}<br>
-   * {@code 'CTRL' + '3' -> KeyboardAction.ADD_KEYFRAME_TO_PATH_3}<br>
-   * {@code 'ALT' + '3' -> KeyboardAction.DELETE_PATH_3}<br>
-   * {@code '3' -> KeyboardAction.PLAY_PATH_3}<br>
-   */
-
-  /**
-   * Calls {@link #removeKeyBindings()} and sets the default frame key bindings which may
-   * be queried with {@link #info()}.
-   */
-  public void setDefaultKeyBindings() {
-    removeKeyBindings();
-    setKeyBinding('a', "toggleAxesVisualHint");
-    setKeyBinding('e', "toggleCameraType");
-    setKeyBinding('f', "togglePickingVisualhint");
-    setKeyBinding('g', "toggleGridVisualHint");
-    setKeyBinding('h', "displayInfo");
-    setKeyBinding('m', "toggleAnimation");
-    setKeyBinding('r', "togglePathsVisualHint");
-    setKeyBinding('s', "interpolateToFitScene");
-    setKeyBinding('S', "showAll");
-    setKeyBinding(Event.CTRL, '1', "addKeyFrameToPath1");
-    setKeyBinding(Event.ALT, '1', "deletePath1");
-    setKeyBinding('1', "playPath1");
-    setKeyBinding(Event.CTRL, '2', "addKeyFrameToPath2");
-    setKeyBinding(Event.ALT, '2', "deletePath2");
-    setKeyBinding('2', "playPath2");
-    setKeyBinding(Event.CTRL, '3', "addKeyFrameToPath3");
-    setKeyBinding(Event.ALT, '3', "deletePath3");
-    setKeyBinding('3', "playPath3");
-  }
-
-  // low-level
-
-  /**
-   * Hack to fix <a href="https://github.com/processing/processing/issues/1693">Processing MouseEvent.getModifiers()
-   * issue</a>
-   *
-   * @param shortcut
-   * @return shortcut fixed
-   */
-  protected Shortcut p5Java2DModifiersFix(Shortcut shortcut) {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      if ((shortcut instanceof MotionShortcut || shortcut instanceof ClickShortcut) && pg() instanceof PGraphicsJava2D && (shortcut.id() == PApplet.CENTER || shortcut.id() == PApplet.RIGHT))
-        if (shortcut instanceof MotionShortcut)
-          shortcut = new MotionShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id());
-        else
-          shortcut = new ClickShortcut(shortcut.id() == PApplet.CENTER ? (Event.ALT | shortcut.modifiers()) : (Event.META | shortcut.modifiers()), shortcut.id(), ((ClickShortcut) shortcut).clickCount());
-    return shortcut;
-  }
-
-  /**
-   * Same as {@code profile.setBinding(shortcut, action)}.
-   * <p>
-   * Low-level profile handling routine. Call this method to set a binding for a custom bogus event, like this:
-   * {@code scene.setBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
-   *
-   * @see Profile#setBinding(Shortcut, String)
-   * @see Event
-   * @see Shortcut
-   */
-  public void setBinding(Shortcut shortcut, String action) {
-    profile.setBinding(p5Java2DModifiersFix(shortcut), action);
-  }
-
-  /**
-   * Same as {@code profile.setBinding(object, shortcut, action)}.
-   * <p>
-   * Low-level profile handling routine. Call this method to set a binding for a custom bogus event, like this:
-   * {@code scene.setBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID), "customBehavior")}.
-   *
-   * @see Profile#setBinding(Object, Shortcut, String)
-   * @see Event
-   * @see Shortcut
-   */
-  public void setBinding(Object object, Shortcut shortcut, String action) {
-    profile.setBinding(object, p5Java2DModifiersFix(shortcut), action);
-  }
-
-  /**
-   * Same as {@code profile.set(otherScene.profile)}.
-   *
-   * @see Profile#set(Profile)
-   */
-  public void setBindings(Scene otherScene) {
-    profile.set(otherScene.profile);
-  }
-
-  /**
-   * Same as {@code return profile.hasBinding(shortcut)}.
-   * <p>
-   * <p>
-   * Low-level profile handling routine. Call this method to query for a binding from a custom bogus event, like this:
-   * {@code scene.hasBinding(object, new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
-   *
-   * @see Profile#hasBinding(Shortcut)
-   * @see Event
-   * @see Shortcut
-   */
-  public boolean hasBinding(Shortcut shortcut) {
-    return profile.hasBinding(p5Java2DModifiersFix(shortcut));
-  }
-
-  /**
-   * Same as {@code profile.removeBinding(shortcut)}.
-   * <p>
-   * Low-level profile handling routine. Call this method to remove a binding for a custom bogus event, like this:
-   * {@code scene.removeBinding(new CustomShortcut(mask, CustomAgent.CUSTOM_ID)}.
-   *
-   * @see Profile#removeBinding(Shortcut)
-   * @see Event
-   * @see Shortcut
-   */
-  public void removeBinding(Shortcut shortcut) {
-    profile.removeBinding(p5Java2DModifiersFix(shortcut));
-  }
-
-  /**
-   * Same as {@code profile.removeBindings()}.
-   *
-   * @see Profile#removeBindings()
-   */
-  public void removeBindings() {
-    profile.removeBindings();
-  }
-
-  /**
-   * Same as {@code profile.removeBindings(cls)}.
-   *
-   * @see Profile#removeBindings(Class)
-   */
-  public void removeBindings(Class<? extends Shortcut> cls) {
-    profile.removeBindings(cls);
-  }
-
-  /**
-   * Same as {@code profile.info(cls)}.
-   *
-   * @see Profile#info(Class)
-   */
-  public String info(Class<? extends Shortcut> cls) {
-    return profile.info(cls);
-  }
-
-  /**
-   * Same as {@code return profile.action(key)}.
-   *
-   * @see Profile#action(Shortcut)
-   */
-  public String action(Shortcut shortcut) {
-    return profile.action(p5Java2DModifiersFix(shortcut));
-  }
-
-  /**
-   * Same as {@code return profile.isActionBound(action)}.
-   *
-   * @see Profile#isActionBound(String)
-   */
-  public boolean isActionBound(String action) {
-    return profile.isActionBound(action);
-  }
-
-  // end low-level
 }

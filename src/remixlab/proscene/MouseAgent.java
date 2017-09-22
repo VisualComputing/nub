@@ -155,24 +155,4 @@ public class MouseAgent extends Agent {
   public float ySensitivity() {
     return ySens;
   }
-
-  /**
-   * Internal use. Other Agents should follow a similar pattern: 1. Register some motion
-   * ids within the MotionShortcut; and, 2. Define the default bindings on the frame parameter.
-   *
-   * @see remixlab.bias.event.MotionShortcut#registerID(int, String)
-   * @see remixlab.bias.event.MotionShortcut#registerID(int, int, String)
-   */
-  protected void setDefaultBindings(InteractiveFrame frame) {
-    frame.removeMotionBindings();
-    frame.removeClickBindings();
-
-    frame.setMotionBinding(LEFT_ID, "rotate");
-    frame.setMotionBinding(CENTER_ID, frame.isEyeFrame() ? "zoomOnRegion" : "screenRotate");
-    frame.setMotionBinding(RIGHT_ID, "translate");
-    frame.setMotionBinding(WHEEL_ID, scene().is3D() ? frame.isEyeFrame() ? "translateZ" : "scale" : "scale");
-
-    frame.setClickBinding(LEFT_CLICK_ID, 2, "align");
-    frame.setClickBinding(RIGHT_CLICK_ID, 2, "center");
-  }
 }

@@ -3,13 +3,14 @@ package basics;
 import processing.core.*;
 import remixlab.proscene.*;
 import remixlab.dandelion.geom.*;
+import remixlab.dandelion.core.*;
 
 /**
  * Created by pierre on 11/15/16.
  */
 public class BasicUse extends PApplet {
   Scene scene;
-  InteractiveFrame iFrame;
+  GenericFrame iFrame;
   float length = 100;
 
   public void settings() {
@@ -21,9 +22,8 @@ public class BasicUse extends PApplet {
     scene = new Scene(this);
     scene.setPickingVisualHint(true);
     scene.setRadius(200);
-    scene.disablePickingBuffer();
-    iFrame = new InteractiveFrame(scene, "graphics");
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+
+    iFrame.setPickingPrecision(GenericFrame.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
     iFrame.rotate(new Rot(QUARTER_PI));
