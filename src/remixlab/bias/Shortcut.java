@@ -11,7 +11,7 @@
 package remixlab.bias;
 
 /**
- * Every {@link Event} instance hasGrabber a shortcut which represents a
+ * Every {@link Event} instance has a shortcut which represents a
  * gesture-{@link #id()}. For instance, the button being dragged and the modifier key
  * pressed (see {@link #modifiers()}) at the very moment an user interaction takes place,
  * such as when she drags a giving mouse button while pressing the 'CTRL' modifier key.
