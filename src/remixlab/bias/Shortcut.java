@@ -10,8 +10,6 @@
 
 package remixlab.bias;
 
-import java.util.List;
-
 /**
  * Every {@link Event} instance has a shortcut which represents a
  * gesture-{@link #id()}. For instance, the button being dragged and the modifier key
@@ -84,13 +82,5 @@ public class Shortcut {
    */
   public boolean matches(Shortcut other) {
     return id() == other.id() && modifiers() == other.modifiers();
-  }
-
-  //TODO experimental
-  public static boolean matches(Shortcut shortcut, List<Shortcut> list) {
-    for(Shortcut s : list)
-      if(s.matches(shortcut))
-        return true;
-    return false;
   }
 }

@@ -19,6 +19,13 @@ public class CajasOrientadas extends PApplet {
   Box[] cajas;
   Sphere esfera;
 
+  public boolean matches(Shortcut shortcut, List<Shortcut> list) {
+    for(Shortcut s : list)
+      if(s.matches(shortcut))
+        return true;
+    return false;
+  }
+
   public void settings() {
     size(640, 360, P3D);
   }
@@ -38,7 +45,7 @@ public class CajasOrientadas extends PApplet {
 
       @Override
       public boolean checkIfGrabsInput(KeyEvent event) {
-        return Shortcut.matches(event.shortcut(), l);
+        return matches(event.shortcut(), l);
       }
 
       @Override
