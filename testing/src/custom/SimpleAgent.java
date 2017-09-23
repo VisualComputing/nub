@@ -2,7 +2,6 @@ package custom;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
-import remixlab.bias.Shortcut;
 import remixlab.proscene.Scene;
 
 /**

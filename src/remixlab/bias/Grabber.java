@@ -18,17 +18,17 @@ package remixlab.bias;
  */
 public interface Grabber {
   /**
-   * Defines the rules to set the grabber as an agent input-grabber.
+   * Defines the rules to set the grabber as an agent inputGrabber-grabber.
    *
-   * @see Agent#updateTrackedGrabber(Event)
+   * @see Agent#poll(Event)
    * @see Agent#inputGrabber()
    */
-  boolean checkIfGrabsInput(Event event);
+  boolean track(Event event);
 
   /**
    * Defines how the grabber should react according to the given event.
    *
    * @see Agent#handle(Event)
    */
-  void performInteraction(Event event);
+  void interact(Event event);
 }

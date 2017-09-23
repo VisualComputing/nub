@@ -19,7 +19,7 @@ import java.util.List;
  * of interface events ({@link Event} ) for third party objects (
  * {@link Grabber} objects) to consume them (
  * {@link #handle(Event)}). Agents thus effectively open up a channel between all
- * kinds of input data sources and user-space objects. To add/remove a grabber to/from the
+ * kinds of input data sources and user-space objects. To add/removeGrabbers a grabber to/from the
  * {@link #grabbers()} collection issue {@link #addGrabber(Grabber)} /
  * {@link #removeGrabber(Grabber)} calls. Derive from this agent and either call
  * {@link #handle(Event)} or override {@link #handleFeed()} .
@@ -27,8 +27,8 @@ import java.util.List;
  * The agent may send events to its {@link #inputGrabber()} which may be regarded as
  * the agent's grabber target. The {@link #inputGrabber()} may be set by querying each
  * grabber object in {@link #grabbers()} to check if its
- * {@link Grabber#checkIfGrabsInput(Event)}) condition is met (see
- * {@link #updateTrackedGrabber(Event)}, {@link #updateTrackedGrabberFeed()}). The
+ * {@link Grabber#track(Event)}) condition is met (see
+ * {@link #poll(Event)}, {@link #pollFeed()}). The
  * first grabber meeting the condition, namely the {@link #trackedGrabber()}), will then
  * be set as the {@link #inputGrabber()}. When no grabber meets the condition, the
  * {@link #trackedGrabber()} is then set to null. In this case, a non-null
@@ -127,9 +127,9 @@ public abstract class Agent {
   }
 
   /**
-   * Feeds {@link #updateTrackedGrabber(Event)} and {@link #handle(Event)} with
+   * Feeds {@link #poll(Event)} and {@link #handle(Event)} with
    * the returned event. Returns null by default. Use it in place of
-   * {@link #updateTrackedGrabberFeed()} and/or {@link #handleFeed()} which take
+   * {@link #pollFeed()} and/or {@link #handleFeed()} which take
    * higher-precedence.
    * <p>
    * Automatically call by the main event loop (
@@ -138,9 +138,9 @@ public abstract class Agent {
    *
    * @see InputHandler#handle()
    * @see #handleFeed()
-   * @see #updateTrackedGrabberFeed()
+   * @see #pollFeed()
    * @see #handle(Event)
-   * @see #updateTrackedGrabber(Event)
+   * @see #poll(Event)
    */
   protected Event feed() {
     return null;
@@ -156,16 +156,16 @@ public abstract class Agent {
    *
    * @see InputHandler#handle()
    * @see #feed()
-   * @see #updateTrackedGrabberFeed()
+   * @see #pollFeed()
    * @see #handle(Event)
-   * @see #updateTrackedGrabber(Event)
+   * @see #poll(Event)
    */
   protected Event handleFeed() {
     return null;
   }
 
   /**
-   * Feeds {@link #updateTrackedGrabber(Event)} with the returned event. Returns null
+   * Feeds {@link #poll(Event)} with the returned event. Returns null
    * by default. Use it in place of {@link #feed()} which takes lower-precedence.
    * <p>
    * Automatically call by the main event loop (
@@ -175,9 +175,9 @@ public abstract class Agent {
    * @see #feed()
    * @see #handleFeed()
    * @see #handle(Event)
-   * @see #updateTrackedGrabber(Event)
+   * @see #poll(Event)
    */
-  protected Event updateTrackedGrabberFeed() {
+  protected Event pollFeed() {
     return null;
   }
 
@@ -191,7 +191,7 @@ public abstract class Agent {
   /**
    * If {@link #isTracking()} and the agent is registered at the {@link #inputHandler()}
    * then queries each object in the {@link #grabbers()} to check if the
-   * {@link Grabber#checkIfGrabsInput(Event)}) condition is met.
+   * {@link Grabber#track(Event)}) condition is met.
    * The first object meeting the condition will be set as the {@link #inputGrabber()} and
    * returned. Note that a null grabber means that no object in the {@link #grabbers()}
    * met the condition. A {@link #inputGrabber()} may also be enforced simply with
@@ -206,28 +206,28 @@ public abstract class Agent {
    * @see #defaultGrabber()
    * @see #inputGrabber()
    */
-  protected Grabber updateTrackedGrabber(Event event) {
+  protected Grabber poll(Event event) {
     if (event == null || !inputHandler().isAgentRegistered(this) || !isTracking())
       return trackedGrabber();
-    // We first check if default grabber is tracked,
-    // i.e., default grabber has the highest priority (which is good for
+    // We first check if default grabber is trackedGrabber,
+    // i.e., default grabber hasGrabber the highest priority (which is good for
     // keyboards and doesn't hurt motion grabbers:
     Grabber dG = defaultGrabber();
     if (dG != null)
-      if (dG.checkIfGrabsInput(event)) {
+      if (dG.track(event)) {
         trackedGrabber = dG;
         return trackedGrabber();
       }
-    // then if tracked grabber remains the matches:
+    // then if trackedGrabber grabber remains the matches:
     Grabber tG = trackedGrabber();
     if (tG != null)
-      if (tG.checkIfGrabsInput(event))
+      if (tG.track(event))
         return trackedGrabber();
     // pick the first otherwise
     trackedGrabber = null;
     for (Grabber grabber : grabberList)
       if (grabber != dG && grabber != tG)
-        if (grabber.checkIfGrabsInput(event)) {
+        if (grabber.track(event)) {
           trackedGrabber = grabber;
           return trackedGrabber();
         }
@@ -235,16 +235,16 @@ public abstract class Agent {
   }
 
   /**
-   * Enqueues an EventGrabberTuple(event, inputGrabber()) on the
-   * {@link InputHandler#eventTupleQueue()}, thus enabling a call on
+   * Enqueues an Tuple(event, input()) on the
+   * {@link InputHandler#tupleQueue()}, thus enabling a call on
    * the {@link #inputGrabber()}
-   * {@link Grabber#performInteraction(Event)} method (which is
+   * {@link Grabber#interact(Event)} method (which is
    * scheduled for execution till the end of this main event loop iteration, see
-   * {@link InputHandler#enqueueEventTuple(EventGrabberTuple)} for
+   * {@link InputHandler#enqueueTuple(Tuple)} for
    * details).
    *
    * @see #inputGrabber()
-   * @see #updateTrackedGrabber(Event)
+   * @see #poll(Event)
    */
   protected boolean handle(Event event) {
     if (event == null || !handler.isAgentRegistered(this) || inputHandler() == null)
@@ -257,7 +257,7 @@ public abstract class Agent {
           return false;
     Grabber inputGrabber = inputGrabber();
     if (inputGrabber != null)
-      return inputHandler().enqueueEventTuple(new EventGrabberTuple(event, inputGrabber));
+      return inputHandler().enqueueTuple(new Tuple(event, inputGrabber));
     return false;
   }
 
@@ -289,7 +289,7 @@ public abstract class Agent {
 
   /**
    * Enables tracking so that the {@link #inputGrabber()} may be updated when calling
-   * {@link #updateTrackedGrabber(Event)}.
+   * {@link #poll(Event)}.
    *
    * @see #disableTracking()
    */
@@ -323,7 +323,7 @@ public abstract class Agent {
   }
 
   /**
-   * Returns the grabber set after {@link #updateTrackedGrabber(Event)} is called. It
+   * Returns the grabber set after {@link #poll(Event)} is called. It
    * may be null.
    */
   public Grabber trackedGrabber() {

@@ -17,10 +17,10 @@ import remixlab.bias.event.*;
  * {@link Grabber} interface.
  * <p>
  * Based on the concrete event type, this model object splits the
- * {@link #checkIfGrabsInput(Event)} and the {@link #performInteraction(Event)}
+ * {@link #track(Event)} and the {@link #interact(Event)}
  * methods into more specific versions of them, e.g.,
- * {@link #checkIfGrabsInput(ClickEvent)}, {@link #checkIfGrabsInput(DOF3Event)},
- * {@link #performInteraction(DOF6Event)} , {@link #performInteraction(KeyEvent)} and
+ * {@link #track(ClickEvent)}, {@link #track(DOF3Event)},
+ * {@link #interact(DOF6Event)} , {@link #interact(KeyEvent)} and
  * so on. Thus allowing implementations of this abstract GrabberObject to override only
  * those method signatures that might be of their interest.
  */
@@ -41,7 +41,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   /**
-   * Constructs and adds this grabber to all agents belonging to the input handler.
+   * Constructs and adds this grabber to all agents belonging to the inputGrabber handler.
    *
    * @see InputHandler#agents()
    */
@@ -58,7 +58,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   /**
-   * Checks if the frame grabs input from any agent registered at the given input handler.
+   * Checks if the frame grabs inputGrabber from any agent registered at the given inputGrabber handler.
    */
   public boolean grabsInput(InputHandler inputHandler) {
     for (Agent agent : inputHandler.agents()) {
@@ -69,104 +69,104 @@ public abstract class GrabberObject implements Grabber {
   }
 
   @Override
-  public void performInteraction(Event event) {
+  public void interact(Event event) {
     if (event instanceof KeyEvent)
-      performInteraction((KeyEvent) event);
+      interact((KeyEvent) event);
     if (event instanceof ClickEvent)
-      performInteraction((ClickEvent) event);
+      interact((ClickEvent) event);
     if (event instanceof MotionEvent)
-      performInteraction((MotionEvent) event);
+      interact((MotionEvent) event);
   }
 
   /**
-   * Calls performInteraction() on the proper motion event:
+   * Calls interact() on the proper motion event:
    * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
    * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
    * <p>
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
-  protected void performInteraction(MotionEvent event) {
+  protected void interact(MotionEvent event) {
     if (event instanceof DOF1Event)
-      performInteraction((DOF1Event) event);
+      interact((DOF1Event) event);
     if (event instanceof DOF2Event)
-      performInteraction((DOF2Event) event);
+      interact((DOF2Event) event);
     if (event instanceof DOF3Event)
-      performInteraction((DOF3Event) event);
+      interact((DOF3Event) event);
     if (event instanceof DOF6Event)
-      performInteraction((DOF6Event) event);
+      interact((DOF6Event) event);
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link KeyEvent}.
    */
-  protected void performInteraction(KeyEvent event) {
+  protected void interact(KeyEvent event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.ClickEvent}.
    */
-  protected void performInteraction(ClickEvent event) {
+  protected void interact(ClickEvent event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF1Event}.
    */
-  protected void performInteraction(DOF1Event event) {
+  protected void interact(DOF1Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF2Event}.
    */
-  protected void performInteraction(DOF2Event event) {
+  protected void interact(DOF2Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF3Event}.
    */
-  protected void performInteraction(DOF3Event event) {
+  protected void interact(DOF3Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF6Event}.
    */
-  protected void performInteraction(DOF6Event event) {
+  protected void interact(DOF6Event event) {
   }
 
   @Override
-  public boolean checkIfGrabsInput(Event event) {
+  public boolean track(Event event) {
     if (event instanceof KeyEvent)
-      return checkIfGrabsInput((KeyEvent) event);
+      return track((KeyEvent) event);
     if (event instanceof ClickEvent)
-      return checkIfGrabsInput((ClickEvent) event);
+      return track((ClickEvent) event);
     if (event instanceof MotionEvent)
-      return checkIfGrabsInput((MotionEvent) event);
+      return track((MotionEvent) event);
     return false;
   }
 
   /**
-   * Calls checkIfGrabsInput() on the proper motion event:
+   * Calls track() on the proper motion event:
    * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
    * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
    * <p>
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
-  public boolean checkIfGrabsInput(MotionEvent event) {
+  public boolean track(MotionEvent event) {
     if (event instanceof DOF1Event)
-      return checkIfGrabsInput((DOF1Event) event);
+      return track((DOF1Event) event);
     if (event instanceof DOF2Event)
-      return checkIfGrabsInput((DOF2Event) event);
+      return track((DOF2Event) event);
     if (event instanceof DOF3Event)
-      return checkIfGrabsInput((DOF3Event) event);
+      return track((DOF3Event) event);
     if (event instanceof DOF6Event)
-      return checkIfGrabsInput((DOF6Event) event);
+      return track((DOF6Event) event);
     return false;
   }
 
@@ -174,7 +174,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
-  protected boolean checkIfGrabsInput(KeyEvent event) {
+  protected boolean track(KeyEvent event) {
     return false;
   }
 
@@ -182,7 +182,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link remixlab.bias.event.ClickEvent}.
    */
-  protected boolean checkIfGrabsInput(ClickEvent event) {
+  protected boolean track(ClickEvent event) {
     return false;
   }
 
@@ -190,7 +190,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link remixlab.bias.event.DOF1Event}.
    */
-  protected boolean checkIfGrabsInput(DOF1Event event) {
+  protected boolean track(DOF1Event event) {
     return false;
   }
 
@@ -198,7 +198,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link remixlab.bias.event.DOF2Event}.
    */
-  protected boolean checkIfGrabsInput(DOF2Event event) {
+  protected boolean track(DOF2Event event) {
     return false;
   }
 
@@ -206,7 +206,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link remixlab.bias.event.DOF3Event}.
    */
-  protected boolean checkIfGrabsInput(DOF3Event event) {
+  protected boolean track(DOF3Event event) {
     return false;
   }
 
@@ -214,7 +214,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link remixlab.bias.event.DOF6Event}.
    */
-  protected boolean checkIfGrabsInput(DOF6Event event) {
+  protected boolean track(DOF6Event event) {
     return false;
   }
 }

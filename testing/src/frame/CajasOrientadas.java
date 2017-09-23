@@ -19,12 +19,14 @@ public class CajasOrientadas extends PApplet {
   Box[] cajas;
   Sphere esfera;
 
+  /*
   public boolean matches(Shortcut shortcut, List<Shortcut> list) {
     for(Shortcut s : list)
       if(s.matches(shortcut))
         return true;
     return false;
   }
+  */
 
   public void settings() {
     size(640, 360, P3D);
@@ -41,15 +43,17 @@ public class CajasOrientadas extends PApplet {
       KeyShortcut u = new KeyShortcut(Event.ALT, '1');
       KeyShortcut v = new KeyShortcut('1');
 
+      /*
       List<Shortcut> l =  new ArrayList<Shortcut>(Arrays.asList(a, g, f, r, s, t, u, v));
 
       @Override
       public boolean checkIfGrabsInput(KeyEvent event) {
         return matches(event.shortcut(), l);
       }
+      */
 
       @Override
-      public void performInteraction(Event event) {
+      public void interact(Event event) {
         if(event.shortcut().matches(a))
           toggleAxesVisualHint();
         if(event.shortcut().matches(g))
@@ -102,6 +106,9 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
+    if(key == ' ')
+      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
+      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
     if ((key == 'y') || (key == 'Y')) {
       scene.setDottedGrid(!scene.gridIsDotted());
     }

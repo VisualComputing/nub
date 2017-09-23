@@ -1188,7 +1188,7 @@ public class Camera extends Eye {
     scene().pruneBranch(frame);
     interpolationKfi.addKeyFrame(frame, 0.4f);
     // interpolationKfi.addKeyFrame(new InteractiveFrame(gScene,
-    // Vec.add(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target,
+    // Vec.addGrabber(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target,
     // 0.7f)), frame().orientation(), frame().magnitude()).detach(), 0.4f);
 
     InteractiveFrame originalFrame = frame();

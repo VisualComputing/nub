@@ -12,7 +12,6 @@ package remixlab.proscene;
 
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
-import remixlab.bias.Shortcut;
 import remixlab.bias.event.*;
 
 /**
@@ -88,7 +87,7 @@ public class MouseAgent extends Agent {
       currentEvent = new DOF2Event(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
           e.getModifiers(), move ? Event.NO_ID : e.getButton());
       if (move && (pickingMode() == PickingMode.MOVE))
-        updateTrackedGrabber(currentEvent);
+        poll(currentEvent);
       handle(press ? currentEvent.fire() : release ? currentEvent.flush() : currentEvent);
       prevEvent = currentEvent.get();
       return;
@@ -101,7 +100,7 @@ public class MouseAgent extends Agent {
       ClickEvent bogusClickEvent = new ClickEvent(e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
           e.getModifiers(), e.getButton(), e.getCount());
       if (pickingMode() == PickingMode.CLICK)
-        updateTrackedGrabber(bogusClickEvent);
+        poll(bogusClickEvent);
       handle(bogusClickEvent);
       return;
     }

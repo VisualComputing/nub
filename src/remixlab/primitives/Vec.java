@@ -17,7 +17,7 @@ package remixlab.primitives;
  * <p>
  * The result of all functions are applied to the vector itself, with the exception of
  * cross(), which returns a new Vec (or writes to a specified 'target' Vec). That is,
- * add() will add the contents of one vector to this one. Using add() with additional
+ * addGrabber() will addGrabber the contents of one vector to this one. Using addGrabber() with additional
  * parameters allows you to put the result into a new Vec. Functions that act on multiple
  * vectors also include static versions. Because creating new objects can be
  * computationally expensive, most functions include an optional 'target' Vec, so that a

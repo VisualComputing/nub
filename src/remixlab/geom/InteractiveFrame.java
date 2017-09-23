@@ -59,7 +59,7 @@ import java.util.List;
  * to the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}).
  * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
  * For instance, with a move-to-the-right user gesture the
- * {@link AbstractScene#eyeFrame()} has to go to the <i>left</i>,
+ * {@link AbstractScene#eyeFrame()} hasGrabber to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A generic-frame can be attached to
  * an eye only at construction times (see {@link #InteractiveFrame(Eye)} and all the
  * constructors that take an eye parameter). An eye may have more than one generic-frame
@@ -69,14 +69,14 @@ import java.util.List;
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(DOF2Event, boolean)},
  * {@link #translateX(boolean)}, etc. To use them, derive from this class and override the
- * version of {@code performInteraction} with the (bogus-event) parameter type you want to
- * customize (see {@link #performInteraction(MotionEvent)},
- * {@link #performInteraction(KeyEvent)}, etc.). For example, with the following
+ * version of {@code interact} with the (bogus-event) parameter type you want to
+ * customize (see {@link #interact(MotionEvent)},
+ * {@link #interact(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
  * {@code
- * protected void performInteraction(DOF2Event event) {
+ * protected void interact(DOF2Event event) {
  *   if(event.id() == LEFT)
  *     gestureArcball(event);
  *   if(event.id() == RIGHT)
@@ -98,7 +98,7 @@ import java.util.List;
  * <p>
  * Two generic-frames can be synced together ({@link #sync(InteractiveFrame, InteractiveFrame)}),
  * meaning that they will share their global parameters (position, orientation and
- * magnitude) taken the one that has been most recently updated. Syncing can be useful to
+ * magnitude) taken the one that hasGrabber been most recently updated. Syncing can be useful to
  * share frames among different off-screen scenes (see ProScene's CameraCrane and the
  * AuxiliarViewer examples).
  * <p>
@@ -448,7 +448,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * {@link #referenceFrame()}, and {@code p}, {@code r} and {@code s} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * The {@link AbstractScene#inputHandler()} will attempt to add
+   * The {@link AbstractScene#inputHandler()} will attempt to addGrabber
    * the generic-frame to all its {@link InputHandler#agents()}, such
    * as the {@link AbstractScene#motionAgent()} and the
    * {@link AbstractScene#keyAgent()}.
@@ -617,7 +617,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * detached from the scene {@link AbstractScene#frames(boolean)}
    * list.
    * <p>
-   * This method is useful to perform animations for all eye interpolation routines.
+   * This method is useful to interact animations for all eye interpolation routines.
    */
   protected InteractiveFrame detach() {
     InteractiveFrame frame = new InteractiveFrame(scene());
@@ -888,40 +888,40 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   @Override
-  public boolean checkIfGrabsInput(Event event) {
+  public boolean track(Event event) {
     if (event instanceof KeyEvent)
-      return checkIfGrabsInput((KeyEvent) event);
+      return track((KeyEvent) event);
     if (event instanceof ClickEvent)
-      return checkIfGrabsInput((ClickEvent) event);
+      return track((ClickEvent) event);
     if (event instanceof MotionEvent)
-      return checkIfGrabsInput((MotionEvent) event);
+      return track((MotionEvent) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(MotionEvent event) {
+  public boolean track(MotionEvent event) {
     if (isEyeFrame())
       return false;
     if (event instanceof DOF1Event)
-      return checkIfGrabsInput((DOF1Event) event);
+      return track((DOF1Event) event);
     if (event instanceof DOF2Event)
-      return checkIfGrabsInput((DOF2Event) event);
+      return track((DOF2Event) event);
     if (event instanceof DOF3Event)
-      return checkIfGrabsInput((DOF3Event) event);
+      return track((DOF3Event) event);
     if (event instanceof DOF6Event)
-      return checkIfGrabsInput((DOF6Event) event);
+      return track((DOF6Event) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(ClickEvent event) {
+  public boolean track(ClickEvent event) {
     if (isEyeFrame())
       return false;
-    return checkIfGrabsInput(event.x(), event.y());
+    return track(event.x(), event.y());
   }
 
   /**
@@ -929,8 +929,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
-  public boolean checkIfGrabsInput(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyEvent event)", this.getClass().getName());
+  public boolean track(KeyEvent event) {
+    AbstractScene.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -939,24 +939,24 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
    */
-  public boolean checkIfGrabsInput(DOF1Event event) {
+  public boolean track(DOF1Event event) {
     if (isEyeFrame())
       return false;
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(DOF1Event event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(DOF1Event event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(DOF2Event event) {
+  public boolean track(DOF2Event event) {
     if (isEyeFrame())
       return false;
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("checkIfGrabsInput");
+      AbstractScene.showEventVariationWarning("track");
       return false;
     }
-    return checkIfGrabsInput(event.x(), event.y());
+    return track(event.x(), event.y());
   }
 
   /**
@@ -965,7 +965,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #pickingPrecision()
    * @see #setPickingPrecision(PickingPrecision)
    */
-  public boolean checkIfGrabsInput(float x, float y) {
+  public boolean track(float x, float y) {
     Vec proj = gScene.eye().projectedCoordinatesOf(position());
     float halfThreshold = grabsInputThreshold() / 2;
     return ((Math.abs(x - proj.vec[0]) < halfThreshold) && (Math.abs(y - proj.vec[1]) < halfThreshold));
@@ -974,86 +974,86 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(DOF3Event event) {
-    return checkIfGrabsInput(event.dof2Event());
+  public boolean track(DOF3Event event) {
+    return track(event.dof2Event());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(DOF6Event event) {
-    return checkIfGrabsInput(event.dof3Event().dof2Event());
+  public boolean track(DOF6Event event) {
+    return track(event.dof3Event().dof2Event());
   }
 
   @Override
-  public void performInteraction(Event event) {
+  public void interact(Event event) {
     if (event instanceof ClickEvent)
-      performInteraction((ClickEvent) event);
+      interact((ClickEvent) event);
     if (event instanceof MotionEvent)
-      performInteraction((MotionEvent) event);
+      interact((MotionEvent) event);
     if (event instanceof KeyEvent)
-      performInteraction((KeyEvent) event);
+      interact((KeyEvent) event);
   }
 
   /**
-   * Calls performInteraction() on the proper motion event:
+   * Calls interact() on the proper motion event:
    * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
    * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
    * <p>
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
-  protected void performInteraction(MotionEvent event) {
+  protected void interact(MotionEvent event) {
     if (event instanceof DOF1Event)
-      performInteraction((DOF1Event) event);
+      interact((DOF1Event) event);
     if (event instanceof DOF2Event)
-      performInteraction((DOF2Event) event);
+      interact((DOF2Event) event);
     if (event instanceof DOF3Event)
-      performInteraction((DOF3Event) event);
+      interact((DOF3Event) event);
     if (event instanceof DOF6Event)
-      performInteraction((DOF6Event) event);
+      interact((DOF6Event) event);
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF1Event}.
    */
-  protected void performInteraction(DOF1Event event) {
+  protected void interact(DOF1Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF2Event}.
    */
-  protected void performInteraction(DOF2Event event) {
+  protected void interact(DOF2Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF3Event}.
    */
-  protected void performInteraction(DOF3Event event) {
+  protected void interact(DOF3Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF6Event}.
    */
-  protected void performInteraction(DOF6Event event) {
+  protected void interact(DOF6Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.ClickEvent}.
    */
-  protected void performInteraction(ClickEvent event) {
+  protected void interact(ClickEvent event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link KeyEvent}.
    */
-  protected void performInteraction(KeyEvent event) {
+  protected void interact(KeyEvent event) {
   }
 
   // APPLY TRANSFORMATION
@@ -1141,7 +1141,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * If {@code f1} has been more recently updated than {@code f2}, calls
+   * If {@code f1} hasGrabber been more recently updated than {@code f2}, calls
    * {@code f2.setWorldMatrix(f1)}, otherwise calls {@code f1.setWorldMatrix(f2)}. Does
    * nothing if both objects were updated at the same frame.
    * <p>
@@ -2991,8 +2991,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   // end decide
 
   /**
-   * Returns the grabs input threshold which is used by the interactive frame to
-   * {@link #checkIfGrabsInput(Event)}.
+   * Returns the grabs inputGrabber threshold which is used by the interactive frame to
+   * {@link #track(Event)}.
    *
    * @see #setGrabsInputThreshold(float)
    */
@@ -3054,7 +3054,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Sets the length of the squared area around the frame {@link #center()} screen
-   * projection that defined the {@link #checkIfGrabsInput(Event)} condition used for
+   * projection that defined the {@link #track(Event)} condition used for
    * frame picking.
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#FIXED}, the
@@ -3082,7 +3082,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see #pickingPrecision()
    * @see #grabsInputThreshold()
-   * @see #checkIfGrabsInput(Event)
+   * @see #track(Event)
    */
   public void setGrabsInputThreshold(float threshold) {
     if (isEyeFrame()) {
@@ -3102,7 +3102,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Checks if the frame grabs input from any agent registered at the scene input handler.
+   * Checks if the frame grabs inputGrabber from any agent registered at the scene inputGrabber handler.
    */
   public boolean grabsInput() {
     for (Agent agent : gScene.inputHandler().agents()) {
@@ -3132,7 +3132,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns the distance between the frame and the tracking camera. Only meaningful when
-   * this frame has been set as the scene avatar.
+   * this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3142,7 +3142,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Sets the distance between the frame and the tracking camera. Only meaningful when
-   * this frame has been set as the scene avatar.
+   * this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3153,7 +3153,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns the azimuth of the tracking camera measured respect to the frame's
-   * {@link #zAxis()}. Only meaningful when this frame has been set as the scene avatar.
+   * {@link #zAxis()}. Only meaningful when this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3171,7 +3171,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Sets the {@link #trackingEyeAzimuth()} of the tracking camera. Only meaningful when
-   * this frame has been set as the scene avatar.
+   * this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3188,7 +3188,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns the inclination of the tracking camera measured respect to the frame's
-   * {@link #yAxis()}. Only meaningful when this frame has been set as the scene avatar.
+   * {@link #yAxis()}. Only meaningful when this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3204,7 +3204,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Sets the {@link #trackingEyeInclination()} of the tracking camera. Only meaningful
-   * when this frame has been set as the scene avatar.
+   * when this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3224,7 +3224,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * documentation of the Trackable interface) is defined in spherical coordinates by
    * means of the {@link #trackingEyeAzimuth()}, the {@link #trackingEyeInclination()} and
    * {@link #trackingEyeDistance()}) respect to the Frame {@link #position()}. Only
-   * meaningful when this frame has been set as the scene avatar.
+   * meaningful when this frame hasGrabber been set as the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
    */
@@ -3259,7 +3259,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Overloading of {@link Trackable#trackingEyeFrame()} . Returns
    * the world coordinates of the camera position computed in
-   * {@link #updateTrackingEyeFrame()}. Only meaningful when this frame has been set as
+   * {@link #updateTrackingEyeFrame()}. Only meaningful when this frame hasGrabber been set as
    * the scene avatar.
    *
    * @see AbstractScene#setAvatar(Trackable)
@@ -3274,15 +3274,15 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   //SOME METHODS REQUIRED FOR IK
 
 
-  /*Set the orientation of the parent when children has been translated*/
+  /*Set the orientation of the parent when children hasGrabber been translated*/
   public void setRotation(InteractiveFrame children){
     setRotation(children.translation());
   }
 
   /*
    * TODO : Use Quat Methods
-   * Set orientation of a Joint when its children has been translated
-   * Returns a Quat that must be used by the rest of the chain to perform
+   * Set orientation of a Joint when its children hasGrabber been translated
+   * Returns a Quat that must be used by the rest of the chain to interact
    * inverse rotation.
    * */
   public Rotation setRotation(Vec newPos){
@@ -3334,8 +3334,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   protected void setReferenceFrame(InteractiveFrame parent, boolean setHierarchy){
     //TODO : Currently Working just with chains
-    //TODO when remove also remove subBase if children size == 1
-    //TODO Checkout ReferenceFrame to remove a Frame in the Tree
+    //TODO when removeGrabber also removeGrabber subBase if children size == 1
+    //TODO Checkout ReferenceFrame to removeGrabber a Frame in the Tree
     if(!setHierarchy || parent == null){
       setReferenceFrame(parent);
       return;

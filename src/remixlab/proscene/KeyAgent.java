@@ -14,7 +14,6 @@ import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.event.KeyEvent;
-import remixlab.bias.event.KeyShortcut;
 
 /**
  * Proscene key-agent. A Processing fully fledged key {@link Agent}.
@@ -52,18 +51,18 @@ public class KeyAgent extends Agent {
    * Processing keyEvent method to be registered at the PApplet's instance.
    * <p>
    * Current implementation requires grabber objects to implement
-   * {@link Grabber#checkIfGrabsInput(Event)} on a
+   * {@link Grabber#track(Event)} on a
    * {@code KeyEvent} as follows:
    * <p>
    * <pre>
    * {@code
-   * public boolean checkIfGrabsInput(KeyEvent event) {
+   * public boolean track(KeyEvent event) {
    *   return profile.hasBinding(event.shortcut());
    * }
    * }
    * </pre>
    * <p>
-   * in this way an agent grabber will grab input as long as it defines a binding for a
+   * in this way an agent grabber will grab inputGrabber as long as it defines a binding for a
    * given triggered key shortcut. The default grabber will just have the highest
    * precedence among all agent grabbers, provided that more than one grabber defines a
    * binding for the same key shortcut.
@@ -86,7 +85,7 @@ public class KeyAgent extends Agent {
     // released: mod: CTRL vkey: 49 description: VK_1
     // released: mod: CTRL vkey: 17 description: VK_CONTROL
     // pressed: mod: vkey: 27 description: VK_ESCAPE
-    // we need to bypass TYPE events when a press event generates an action on the tracked
+    // we need to bypass TYPE events when a press event generates an action on the trackedGrabber
     // grabber
     press = e.getAction() == processing.event.KeyEvent.PRESS;
     release = e.getAction() == processing.event.KeyEvent.RELEASE;
@@ -102,14 +101,14 @@ public class KeyAgent extends Agent {
       update(currentEvent);
     /*
     if (press) {
-      bypass = updateTrackedGrabber(currentEvent) != null;
+      bypass = poll(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
       else if(defaultGrabber() != null)
         handle(currentEvent);
     }
     if (type && !bypass) {
-      bypass = updateTrackedGrabber(currentEvent) != null;
+      bypass = poll(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
       else if(defaultGrabber() != null)
@@ -126,7 +125,7 @@ public class KeyAgent extends Agent {
 
   //TODO experimental
   protected boolean update(Event event) {
-    if(updateTrackedGrabber(event) != null)
+    if(poll(event) != null)
       return handle(event);
     //if(defaultGrabber() != null)
     //return handle(event);

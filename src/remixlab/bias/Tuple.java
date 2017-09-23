@@ -12,14 +12,14 @@ package remixlab.bias;
 
 /**
  * A [{@link Event},{@link Grabber}] tuple. An
- * enqueued tuple fires {@link Grabber#performInteraction(Event)}
+ * enqueued tuple fires {@link Grabber#interact(Event)}
  * call from the event in the tuple.
  * <p>
  * Tuples are typically enqueued by an agent (see
  * {@link Agent#handle(Event)}), but may be enqueued manually, see
- * {@link InputHandler#enqueueEventTuple(EventGrabberTuple)}.
+ * {@link InputHandler#enqueueTuple(Tuple)}.
  */
-public class EventGrabberTuple {
+public class Tuple {
   protected Event event;
   protected Grabber grabber;
 
@@ -30,20 +30,20 @@ public class EventGrabberTuple {
    * @param e {@link Event}
    * @param g {@link Grabber}
    */
-  public EventGrabberTuple(Event e, Grabber g) {
+  public Tuple(Event e, Grabber g) {
     event = e;
     grabber = g;
   }
 
   /**
-   * Calls {@link Grabber#performInteraction(Event)}.
+   * Calls {@link Grabber#interact(Event)}.
    *
    * @return true if succeeded and false otherwise.
    */
-  public boolean perform() {
+  public boolean interact() {
     if (grabber == null || event == null)
       return false;
-    grabber.performInteraction(event);
+    grabber.interact(event);
     return true;
   }
 

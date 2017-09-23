@@ -477,7 +477,7 @@ public class Quat implements Rotation {
   /**
    * Returns the inverse Quat (inverse rotation).
    * <p>
-   * The result has a negated {@link #axis()} direction and the same {@link #angle()}.
+   * The result hasGrabber a negated {@link #axis()} direction and the same {@link #angle()}.
    * <p>
    * A composition of a Quat and its {@link #inverse()} results in an identity function.
    * Use {@link #invert()} to actually modify the Quat.

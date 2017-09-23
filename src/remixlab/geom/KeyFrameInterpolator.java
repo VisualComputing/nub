@@ -371,7 +371,7 @@ public class KeyFrameInterpolator {
 
   /**
    * Returns the number of keyFrames used by the interpolation. Use
-   * {@link #addKeyFrame(InteractiveFrame)} to add new keyFrames.
+   * {@link #addKeyFrame(InteractiveFrame)} to addGrabber new keyFrames.
    */
   public int numberOfKeyFrames() {
     return keyFrameList.size();

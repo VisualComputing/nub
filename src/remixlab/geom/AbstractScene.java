@@ -75,7 +75,7 @@ import java.util.List;
  * <p>
  * <pre>
  * {@code
- * protected void performInteraction(KeyEvent event) {
+ * protected void interact(KeyEvent event) {
  *   if(event.key() == 'z')
  *     toggleCameraType();
  * }
@@ -541,7 +541,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // Grabber Implementation
 
   @Override
-  public boolean checkIfGrabsInput(Event event) {
+  public boolean track(Event event) {
     if (event instanceof KeyEvent)
       return checkIfGrabsInput((KeyEvent) event);
     if (event instanceof ClickEvent)
@@ -574,7 +574,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Automatically called by agents handling this frame.
    */
   public boolean checkIfGrabsInput(ClickEvent event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(clickEvent event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(clickEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -583,7 +583,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * {@link KeyEvent}.
    */
   public boolean checkIfGrabsInput(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(KeyEvent event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -593,7 +593,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
    */
   public boolean checkIfGrabsInput(DOF1Event event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(DOF1Event event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(DOF1Event event)", this.getClass().getName());
     return false;
   }
 
@@ -603,7 +603,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
    */
   public boolean checkIfGrabsInput(DOF2Event event) {
-    AbstractScene.showMissingImplementationWarning("checkIfGrabsInput(DOF2Event event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(DOF2Event event)", this.getClass().getName());
     return false;
   }
 
@@ -622,7 +622,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   @Override
-  public void performInteraction(Event event) {
+  public void interact(Event event) {
     if (event instanceof ClickEvent)
       performInteraction((ClickEvent) event);
     if (event instanceof MotionEvent)
@@ -632,11 +632,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Calls performInteraction() on the proper motion event:
+   * Calls interact() on the proper motion event:
    * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
    * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
    * <p>
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void performInteraction(MotionEvent event) {
@@ -651,46 +651,46 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF1Event}.
    */
   protected void performInteraction(DOF1Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF2Event}.
    */
   protected void performInteraction(DOF2Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF3Event}.
    */
   protected void performInteraction(DOF3Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.DOF6Event}.
    */
   protected void performInteraction(DOF6Event event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.ClickEvent}.
    */
   protected void performInteraction(ClickEvent event) {
   }
 
   /**
-   * Override this method when you want the object to perform an interaction from a
+   * Override this method when you want the object to interact an interaction from a
    * {@link KeyEvent}.
    */
   protected void performInteraction(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("performInteraction(KeyEvent event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("interact(KeyEvent event)", this.getClass().getName());
   }
 
   /**
@@ -702,7 +702,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Checks if the scene grabs input from any agent registered at the input handler.
+   * Checks if the scene grabs inputGrabber from any agent registered at the inputGrabber handler.
    */
   public boolean grabsInput() {
     for (Agent agent : inputHandler().agents()) {
@@ -1926,17 +1926,17 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // AVATAR STUFF
 
   /**
-   * Returns the avatar object to be tracked by the Camera when it is in Third Person
+   * Returns the avatar object to be trackedGrabber by the Camera when it is in Third Person
    * mode.
    * <p>
-   * Simply returns {@code null} if no avatar has been set.
+   * Simply returns {@code null} if no avatar hasGrabber been set.
    */
   public Trackable avatar() {
     return trck;
   }
 
   /**
-   * Sets the avatar object to be tracked by the Camera when it is in Third Person mode.
+   * Sets the avatar object to be trackedGrabber by the Camera when it is in Third Person mode.
    *
    * @see #resetAvatar()
    */
@@ -1948,7 +1948,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     if (avatar() instanceof InteractiveFrame)
       ((InteractiveFrame) (avatar())).stopSpinning();
 
-    // perform small animation ;)
+    // interact small animation ;)
     if (eye().anyInterpolationStarted())
       eye().stopInterpolations();
     // eye().interpolateTo(avatar().eyeFrame());//works only when eyeFrame
@@ -2002,7 +2002,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Replaces the current {@link #eye()} with {@code vp}.
    * <p>
-   * The {@link #inputHandler()} will attempt to add the {@link #eyeFrame()} to all its
+   * The {@link #inputHandler()} will attempt to addGrabber the {@link #eyeFrame()} to all its
    * {@link InputHandler#agents()}, such as the {@link #motionAgent()}
    * and {@link #keyAgent()}.
    */
@@ -2034,12 +2034,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
             agent.setDefaultGrabber(vp.frame());
           }
       // inputHandler().removeGrabber(eye.frame());
-      pruneBranch(eye.frame());// better than remove grabber
+      pruneBranch(eye.frame());// better than removeGrabber grabber
       // */
       // option 2
       // inputHandler().shiftDefaultGrabber(vp.frame(), eye.frame());
       // //inputHandler().removeGrabber(eye.frame());
-      // pruneBranch(eye.frame());// better than remove grabber
+      // pruneBranch(eye.frame());// better than removeGrabber grabber
       eye = vp;// eye() changed
       return true;
     }

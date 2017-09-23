@@ -32,7 +32,7 @@ package remixlab.bias;
  * the PApplet the so called mouseEvent and KeyEvent methods. Moreover, the
  * {@link Agent#handleFeed()} provides a callback alternative when none
  * of these mechanisms are available (as it often happens when dealing with specialized,
- * non-default input hardware).
+ * non-default inputGrabber hardware).
  */
 public class Event {
   // modifier keys

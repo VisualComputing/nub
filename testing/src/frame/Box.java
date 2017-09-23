@@ -21,7 +21,7 @@ public class Box {
     scene = scn;
     iFrame = new InteractiveFrame(scene) {
       @Override
-      public void performInteraction(MotionEvent event) {
+      public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             translate(event);
@@ -36,7 +36,7 @@ public class Box {
       }
 
       @Override
-      public void performInteraction(KeyEvent event) {
+      public void interact(KeyEvent event) {
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
           translateXPos();
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))

@@ -11,15 +11,15 @@
 package remixlab.geom;
 
 /**
- * Interface for objects that are to be tracked by a proscene Eye.
+ * Interface for objects that are to be trackedGrabber by a proscene Eye.
  * <p>
  * <h3>How does it work ?</h3>
  * <p>
- * All objects that are to be tracked by the
+ * All objects that are to be trackedGrabber by the
  * {@link AbstractScene#eye()} (known as avatars) should implement
  * this interface. To setup an avatar you should call
  * {@link AbstractScene#setAvatar(Trackable)}. The avatar will
- * then be tracked by the {@link AbstractScene#eye()}.
+ * then be trackedGrabber by the {@link AbstractScene#eye()}.
  */
 
 public interface Trackable {

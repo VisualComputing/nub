@@ -130,7 +130,7 @@ public  abstract class Solver {
         FRAMECOUNTER += TIMESPERFRAME;
 
         while(Math.floor(FRAMECOUNTER) > 0){
-            //Returns a boolean that indicates if a termination condition has been accomplished
+            //Returns a boolean that indicates if a termination condition hasGrabber been accomplished
             if(iterate()){
                 iterations = MAXITER;
                 break;
@@ -189,7 +189,7 @@ public  abstract class Solver {
          * If need some information of the Algorithm look at (https://sites.google.com/site/auraliusproject/ccd-algorithm)
          * */
         public boolean iterate(){
-            //As no target is specified there is no need to perform an iteration
+            //As no target is specified there is no need to interact an iteration
             if(target == null || chain.size() < 2) return true;
             Frame end   = chain.get(chain.size()-1);
             Vec target  = this.target.position().get();
@@ -522,7 +522,7 @@ public  abstract class Solver {
          *
          * */
         public boolean iterate(){
-            //As no target is specified there is no need to perform FABRIK
+            //As no target is specified there is no need to interact FABRIK
             if(target == null) return true;
             Frame root  = chain.get(0);
             Frame end   = chain.get(chain.size()-1);
@@ -586,7 +586,7 @@ public  abstract class Solver {
         public void reset(){
             prevTarget = target == null ? null : new Frame(target.position().get(), target.orientation().get());
             iterations = 0;
-            //We know that State has change but not where, then it is better to reset Global Positions and Orientations
+            //We know that State hasGrabber change but not where, then it is better to reset Global Positions and Orientations
             initialize();
         }
 
@@ -721,7 +721,7 @@ public  abstract class Solver {
             }
             //Stage 1: Forward Reaching
             ChainSolver solver = node.getSolver();
-            //TODO: add embedded target and enable to give it some weight - Weight/Target as an attribute of Chain or as Node attribute?
+            //TODO: addGrabber embedded target and enable to give it some weight - Weight/Target as an attribute of Chain or as Node attribute?
             //Update Target according to children Head new Position
             Vec newTarget = new Vec();
             for(Node child : node.getChildren()) {
@@ -759,7 +759,7 @@ public  abstract class Solver {
                  * its children) then an additional step must be done: A Weighted Average of Positions to establish
                  * new Frame orientation
                  * */
-                //TODO : Perhaps add an option to not execute this step
+                //TODO : Perhaps addGrabber an option to not execute this step
                 // (Last chain modified determines Sub Base orientation)
                 if(node.getChildren().size() > 1){
                     Vec centroid = new Vec();

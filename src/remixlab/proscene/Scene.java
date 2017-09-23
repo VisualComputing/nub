@@ -973,7 +973,7 @@ public class Scene extends AbstractScene implements PConstants {
         // in the previous frame and false otherwise (particularly, if it was assigned in
         // the current frame) which means both: 1. If scn1 gained focus on the current
         // frame it will lose it when the routine is run on scn2 in the current frame;
-        // and, 2. If scn2 has gained focus in the previous frame, it will prevent scn1
+        // and, 2. If scn2 hasGrabber gained focus in the previous frame, it will prevent scn1
         // from having it back in the current frame.
         if (lastScene.hasFocus() && lastScene.displayed())
           available = false;
@@ -989,7 +989,7 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * When having multiple off-screen scenes displayed at once, one should decide which
-   * scene will grab input from both, the {@link #motionAgent()} and the
+   * scene will grab inputGrabber from both, the {@link #motionAgent()} and the
    * {@link #keyAgent()}, so that code like this:
    * <p>
    * <pre>
@@ -1007,7 +1007,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * will behave according to a given focus policy. This property is enabled by default
    * and it implements a "focus follows mouse" policy, so that the scene under the cursor
-   * will grab input. If multiple scenes overlaps the scene on top will grab the input as
+   * will grab inputGrabber. If multiple scenes overlaps the scene on top will grab the inputGrabber as
    * expected.
    * <p>
    * To implement a different policy either:
@@ -1390,8 +1390,8 @@ public class Scene extends AbstractScene implements PConstants {
    * {@link MatrixHelper#loadModelView(boolean)} (only makes sense
    * when {@link #pg()} is different than {@code pgraphics}).
    * <p>
-   * This method doesn't perform any computation, but simple retrieve the current matrices
-   * whose actual computation has been updated in {@link #preDraw()}.
+   * This method doesn't interact any computation, but simple retrieve the current matrices
+   * whose actual computation hasGrabber been updated in {@link #preDraw()}.
    */
   public void bindMatrices(PGraphics pgraphics) {
     if (this.pg() == pgraphics)
@@ -1962,7 +1962,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    */
   public void drawEye(PGraphics pg, Eye eye, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight, zNear and zFar params
@@ -2127,7 +2127,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    */
   public void drawEyeNearPlane(PGraphics pg, Eye eye, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight and zNear params
@@ -2204,7 +2204,7 @@ public class Scene extends AbstractScene implements PConstants {
    * projector it should be used in conjunction with
    * {@link #drawEye(PGraphics, Eye, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    *
    * @see #drawProjector(PGraphics, Eye, Vec)
    * @see #drawProjectors(PGraphics, Eye, List)
@@ -2234,7 +2234,7 @@ public class Scene extends AbstractScene implements PConstants {
    * projector it should be used in conjunction with
    * {@link #drawEye(PGraphics, Eye, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    *
    * @see #drawProjectors(PGraphics, Eye, List)
    * @see #drawProjector(PGraphics, Eye, Vec)
@@ -2510,7 +2510,7 @@ public class Scene extends AbstractScene implements PConstants {
     if (!iFrame.isVisualHintEnabled())
       return;
     // if (!inputHandler().hasGrabber(iFrame)) {
-    // System.err.println("add iFrame to motionAgent before drawing picking target");
+    // System.err.println("addGrabber iFrame to motionAgent before drawing picking target");
     // return;
     // }
     Vec center = projectedCoordinatesOf(iFrame.position());
@@ -2606,7 +2606,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we add the style (color, stroke, etc) here.
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawAxesHint() {
@@ -2617,7 +2617,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we add the style (color, stroke, etc) here.
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawGridHint() {
@@ -2634,7 +2634,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we add the style (color, stroke, etc) here.
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawPathsHint() {
@@ -2647,7 +2647,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we add the style (color, stroke, etc) here.
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawPickingHint() {

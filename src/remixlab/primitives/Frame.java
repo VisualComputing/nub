@@ -91,7 +91,7 @@ import remixlab.geom.InteractiveFrame;
  * <p>
  * An interesting feature of Frames is that their displacements can be constrained. When a
  * {@link remixlab.primitives.constraint.Constraint} is attached to a Frame, it filters the
- * input of {@link #translate(Vec)} and {@link #rotate(Rotation)}, and only the resulting
+ * inputGrabber of {@link #translate(Vec)} and {@link #rotate(Rotation)}, and only the resulting
  * filtered motion is applied to the Frame. The default {@link #constraint()} {@code null}
  * resulting in no filtering. Use {@link #setConstraint(Constraint)} to attach a
  * Constraint to a frame.
@@ -857,7 +857,7 @@ public class Frame {
       }
       Frame old = new Frame(this); // correct line
       // VFrame old = this.get();// this call the get overloaded method and
-      // hence add the frame to the mouse grabber
+      // hence addGrabber the frame to the mouse grabber
 
       vec.set(directions[0][index[0]]);
       float coef = vec.dot(directions[1][index[1]]);

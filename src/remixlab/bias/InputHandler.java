@@ -17,13 +17,13 @@ import java.util.List;
 /**
  * The InputHandler object is the high level package handler which holds a collection of
  * {@link #agents()}, and an event dispatcher queue of
- * {@link EventGrabberTuple}s ({@link #eventTupleQueue()}). Such tuple
+ * {@link Tuple}s ({@link #tupleQueue()}). Such tuple
  * represents a message passing to application objects, allowing an object to be
- * instructed to perform a particular user-defined action from a given
+ * instructed to interact a particular user-defined action from a given
  * {@link Event}. For an introduction to BIAS please refer to
  * <a href="http://nakednous.github.io/projects/bias">this</a>.
  * <p>
- * At runtime, the input handler should continuously run the two loops defined in
+ * At runtime, the inputGrabber handler should continuously run the two loops defined in
  * {@link #handle()}. Therefore, simply attach a call to {@link #handle()} at the end of
  * your main event (drawing) loop for that to take effect (like it's done in
  * <b>dandelion</b> by the <b>AbstractScene.postDraw()</b> method).
@@ -31,13 +31,13 @@ import java.util.List;
 public class InputHandler {
   // D E V I C E S & E V E N T S
   protected List<Agent> agents;
-  protected LinkedList<EventGrabberTuple> eventTupleQueue;
+  protected LinkedList<Tuple> tupleQueue;
 
   public InputHandler() {
     // agents
     agents = new ArrayList<Agent>();
     // events
-    eventTupleQueue = new LinkedList<EventGrabberTuple>();
+    tupleQueue = new LinkedList<Tuple>();
   }
 
   /**
@@ -46,33 +46,32 @@ public class InputHandler {
    * <p>
    * The handle comprises the following two loops:
    * <p>
-   * 1. {@link EventGrabberTuple} producer loop which for each
+   * 1. {@link Tuple} producer loop which for each
    * registered agent calls: a.
-   * {@link Agent#updateTrackedGrabber(Event)}; and, b.
+   * {@link Agent#poll(Event)}; and, b.
    * {@link Agent#handle(Event)}. Note that the event are
    * obtained from the agents callback
-   * {@link Agent#updateTrackedGrabberFeed()} and
+   * {@link Agent#pollFeed()} and
    * {@link Agent#handleFeed()} methods, respectively. The event
    * may also be obtained from {@link Agent#handleFeed()} which may
    * replace both of the previous feeds when they are null.<br>
    * 2. User-defined action consumer loop: which for each
-   * {@link EventGrabberTuple} calls
-   * {@link EventGrabberTuple#perform()}.<br>
+   * {@link Tuple} calls
+   * {@link Tuple#interact()}.<br>
    *
    * @see Agent#feed()
-   * @see Agent#updateTrackedGrabberFeed()
+   * @see Agent#pollFeed()
    * @see Agent#handleFeed()
    */
   public void handle() {
     // 1. Agents
     for (Agent agent : agents()) {
-      agent.updateTrackedGrabber(
-          agent.updateTrackedGrabberFeed() != null ? agent.updateTrackedGrabberFeed() : agent.feed());
+      agent.poll(agent.pollFeed() != null ? agent.pollFeed() : agent.feed());
       agent.handle(agent.handleFeed() != null ? agent.handleFeed() : agent.feed());
     }
     // 2. Low level events
-    while (!eventTupleQueue.isEmpty())
-      eventTupleQueue.remove().perform();
+    while (!tupleQueue.isEmpty())
+      tupleQueue.remove().interact();
   }
 
   /**
@@ -192,8 +191,8 @@ public class InputHandler {
   /**
    * Returns the event tuple queue. Rarely needed.
    */
-  public LinkedList<EventGrabberTuple> eventTupleQueue() {
-    return eventTupleQueue;
+  public LinkedList<Tuple> tupleQueue() {
+    return tupleQueue;
   }
 
   /**
@@ -202,9 +201,9 @@ public class InputHandler {
    *
    * @see #handle()
    */
-  public boolean enqueueEventTuple(EventGrabberTuple eventTuple) {
-    if (!eventTupleQueue.contains(eventTuple))
-      return eventTupleQueue.add(eventTuple);
+  public boolean enqueueTuple(Tuple tuple) {
+    if (!tupleQueue.contains(tuple))
+      return tupleQueue.add(tuple);
     return false;
   }
 
@@ -213,14 +212,14 @@ public class InputHandler {
    *
    * @param event to be removed.
    */
-  public void removeEventTuple(Event event) {
-    eventTupleQueue.remove(event);
+  public void removeTuple(Event event) {
+    tupleQueue.remove(event);
   }
 
   /**
    * Clears the event queue. Nothing is executed.
    */
-  public void removeEventTuples() {
-    eventTupleQueue.clear();
+  public void removeTuples() {
+    tupleQueue.clear();
   }
 }

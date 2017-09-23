@@ -46,7 +46,7 @@ import java.util.List;
  * methods are just convenient wrappers to the equivalent Frame methods. This also means
  * that the Eye {@link #frame()} can be attached to a
  * {@link Frame#referenceFrame()} which enables complex Eye
- * setups. An Eye has its own magnitude, different from that of the scene (i.e.,
+ * setups. An Eye hasGrabber its own magnitude, different from that of the scene (i.e.,
  * {@link Frame#magnitude()} doesn't necessarily equals {@code 1}
  * ), which allows to scale the view. Use {@link #eyeCoordinatesOf(Vec)} and
  * {@link #worldCoordinatesOf(Vec)} (or any of the powerful Frame transformations, such as
@@ -89,7 +89,7 @@ public abstract class Eye {
     }
 
     @Override
-    public void performInteraction(MotionEvent event) {
+    public void interact(MotionEvent event) {
       switch (event.shortcut().id()) {
         case LEFT_ID:
           rotate(event);
@@ -110,7 +110,7 @@ public abstract class Eye {
     }
 
     @Override
-    public void performInteraction(ClickEvent event) {
+    public void interact(ClickEvent event) {
       if (event.clickCount() == 2) {
         if (event.id() == LEFT_ID)
           center();
@@ -120,7 +120,7 @@ public abstract class Eye {
     }
 
     @Override
-    public void performInteraction(KeyEvent event) {
+    public void interact(KeyEvent event) {
       if (event.isShiftDown()) {
         if (event.id() == UP_KEY)
           translateY(true);
@@ -439,12 +439,12 @@ public abstract class Eye {
             agent.setDefaultGrabber(g);
           }
       // scene().inputHandler().removeGrabber(frame());
-      scene().pruneBranch(frame());// better than remove grabber
+      scene().pruneBranch(frame());// better than removeGrabber grabber
       // */
       // option 2
       // scene().inputHandler().shiftDefaultGrabber(g, frame());
       // //scene().inputHandler().removeGrabber(frame());
-      // scene().pruneBranch(frame());// better than remove grabber
+      // scene().pruneBranch(frame());// better than removeGrabber grabber
       gFrame = g;// frame() is new
       if (gScene.is3D())
         ((Camera) this).setFocusDistance(sceneRadius() / (float) Math.tan(((Camera) this).fieldOfView() / 2.0f));
@@ -1158,7 +1158,7 @@ public abstract class Eye {
    * Sets the Eye {@link #position()} and {@link #orientation()} from an OpenGL-like View
    * matrix.
    * <p>
-   * After this method has been called, {@link #getView()} returns a matrix equivalent to
+   * After this method hasGrabber been called, {@link #getView()} returns a matrix equivalent to
    * {@code mv}. Only the {@link #position()} and {@link #orientation()} of the Eye are
    * modified.
    */
@@ -1205,7 +1205,7 @@ public abstract class Eye {
    * 1.0 (excluded, far plane). See the {@code gluProject} man page for details.
    * <p>
    * Use {@link AbstractScene#projectedCoordinatesOf(Vec)} which
-   * is simpler and has been optimized by caching the Projection x View matrix.
+   * is simpler and hasGrabber been optimized by caching the Projection x View matrix.
    * <p>
    * <b>Attention:</b> This method only uses the intrinsic Eye parameters (see
    * {@link #getView()}, {@link #getProjection()} and {@link #getViewport()}) and is
@@ -1259,7 +1259,7 @@ public abstract class Eye {
    * Returns the world unprojected coordinates of a point {@code src} defined in the
    * screen coordinate system.
    * <p>
-   * The {@code src.x} and {@code src.y} input values are expressed in pixels, (0,0) being
+   * The {@code src.x} and {@code src.y} inputGrabber values are expressed in pixels, (0,0) being
    * the upper left corner of the window. The {@code src.z} is a depth value ranging in
    * [0..1] (near and far plane respectively). In 3D Note that {@code src.z} is not a
    * linear interpolation between {@link Camera#zNear()} and
@@ -1921,7 +1921,7 @@ public abstract class Eye {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vec v = Vec.add(sceneCenter(), Vec.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
+   * {@code Vec v = Vec.addGrabber(sceneCenter(), Vec.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
    * <br>
    * {@code vertex(v.x, v.y, v.z);}<br>
    * {@code endShape();}<br>

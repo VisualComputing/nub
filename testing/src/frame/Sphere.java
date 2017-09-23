@@ -1,6 +1,7 @@
 package frame;
 
 import processing.core.PApplet;
+import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
 import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.Vec;
@@ -21,7 +22,7 @@ public class Sphere {
     parent = scn.pApplet();
     iFrame = new InteractiveFrame(scene) {
       @Override
-      public void performInteraction(MotionEvent event) {
+      public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             rotate(event);
@@ -33,6 +34,18 @@ public class Sphere {
             scale(event);
             break;
         }
+      }
+
+      @Override
+      public void interact(KeyEvent event) {
+        if (event.id() == PApplet.UP)
+          translateY(true);
+        if (event.id() == PApplet.DOWN)
+          translateY(false);
+        if (event.id() == PApplet.LEFT)
+          translateX(false);
+        if (event.id() == PApplet.RIGHT)
+          translateX(true);
       }
     };
     iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);

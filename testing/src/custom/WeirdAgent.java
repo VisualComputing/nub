@@ -41,6 +41,6 @@ public class WeirdAgent extends Agent {
     if (press || drag || release)
       handle(currentEvent);
     if (move)
-      updateTrackedGrabber(currentEvent);
+      poll(currentEvent);
   }
 }
