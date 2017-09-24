@@ -119,7 +119,7 @@ public class MotionEvent extends Event {
   /**
    * Sets the event's previous event to build a relative event.
    */
-  protected void setPreviousEvent(MotionEvent prevEvent) {
+  protected void setPrevious(MotionEvent prevEvent) {
     rel = true;
     // makes sense only if derived classes call it
     if (prevEvent != null)
@@ -133,89 +133,89 @@ public class MotionEvent extends Event {
   }
 
   /**
-   * Same as {@code return dof1Event(event, true)}.
+   * Same as {@code return event1(event, true)}.
    *
-   * @see #dof1Event(MotionEvent, boolean)
+   * @see #event1(MotionEvent, boolean)
    */
-  public static DOF1Event dof1Event(MotionEvent event) {
-    return dof1Event(event, true);
+  public static Event1 event1(MotionEvent event) {
+    return event1(event, true);
   }
 
   /**
-   * Returns a {@link remixlab.bias.event.DOF1Event} from the MotionEvent x-coordinate if
+   * Returns a {@link Event1} from the MotionEvent x-coordinate if
    * {@code fromX} is {@code true} and from the y-coordinate otherwise.
    */
-  public static DOF1Event dof1Event(MotionEvent event, boolean fromX) {
-    if (event instanceof DOF1Event)
-      return (DOF1Event) event;
-    if (event instanceof DOF2Event)
-      return ((DOF2Event) event).dof1Event(fromX);
-    if (event instanceof DOF3Event)
-      return ((DOF3Event) event).dof2Event().dof1Event(fromX);
-    if (event instanceof DOF6Event)
-      return ((DOF6Event) event).dof3Event(fromX).dof2Event().dof1Event(fromX);
+  public static Event1 event1(MotionEvent event, boolean fromX) {
+    if (event instanceof Event1)
+      return (Event1) event;
+    if (event instanceof Event2)
+      return ((Event2) event).event1(fromX);
+    if (event instanceof Event3)
+      return ((Event3) event).event2().event1(fromX);
+    if (event instanceof Event6)
+      return ((Event6) event).event3(fromX).event2().event1(fromX);
     return null;
   }
 
   /**
-   * Same as {@code return dof2Event(event, true)}.
+   * Same as {@code return event2(event, true)}.
    *
-   * @see #dof2Event(MotionEvent, boolean)
+   * @see #event2(MotionEvent, boolean)
    */
-  public static DOF2Event dof2Event(MotionEvent event) {
-    return dof2Event(event, true);
+  public static Event2 event2(MotionEvent event) {
+    return event2(event, true);
   }
 
   /**
-   * Returns a {@link remixlab.bias.event.DOF2Event} from the MotionEvent x-coordinate if
+   * Returns a {@link Event2} from the MotionEvent x-coordinate if
    * {@code fromX} is {@code true} and from the y-coordinate otherwise.
    */
-  public static DOF2Event dof2Event(MotionEvent event, boolean fromX) {
-    if (event instanceof DOF1Event)
+  public static Event2 event2(MotionEvent event, boolean fromX) {
+    if (event instanceof Event1)
       return null;
-    if (event instanceof DOF2Event)
-      // return ((DOF2Event) event).get();//TODO better?
-      return (DOF2Event) event;
-    if (event instanceof DOF3Event)
-      return ((DOF3Event) event).dof2Event();
-    if (event instanceof DOF6Event)
-      return ((DOF6Event) event).dof3Event(fromX).dof2Event();
+    if (event instanceof Event2)
+      // return ((Event2) event).get();//TODO better?
+      return (Event2) event;
+    if (event instanceof Event3)
+      return ((Event3) event).event2();
+    if (event instanceof Event6)
+      return ((Event6) event).event3(fromX).event2();
     return null;
   }
 
   /**
-   * Same as {@code return dof3Event(event, true)}.
+   * Same as {@code return event3(event, true)}.
    *
-   * @see #dof3Event(MotionEvent, boolean)
+   * @see #event3(MotionEvent, boolean)
    */
-  public static DOF3Event dof3Event(MotionEvent event) {
-    return dof3Event(event, true);
+  public static Event3 event3(MotionEvent event) {
+    return event3(event, true);
   }
 
   /**
-   * Returns a {@link remixlab.bias.event.DOF3Event} from the MotionEvent
+   * Returns a {@link Event3} from the MotionEvent
    * translation-coordinates if {@code fromTranslation} is {@code true} and from the
    * rotation-coordinate otherwise.
    */
-  public static DOF3Event dof3Event(MotionEvent event, boolean fromTranslation) {
-    if (event instanceof DOF1Event)
+  public static Event3 event3(MotionEvent event, boolean fromTranslation) {
+    if (event instanceof Event1)
       return null;
-    if (event instanceof DOF2Event)
+    if (event instanceof Event2)
       return null;
-    if (event instanceof DOF3Event)
-      return (DOF3Event) event;
-    if (event instanceof DOF6Event)
-      return ((DOF6Event) event).dof3Event(fromTranslation);
+    if (event instanceof Event3)
+      return (Event3) event;
+    if (event instanceof Event6)
+      return ((Event6) event).event3(fromTranslation);
     return null;
   }
 
   /**
-   * Returns a {@link remixlab.bias.event.DOF6Event} if the MotionEvent {@code instanceof}
-   * {@link remixlab.bias.event.DOF6Event} and null otherwise..
+   * Returns a {@link Event6} if the MotionEvent {@code instanceof}
+   * {@link Event6} and null otherwise..
    */
-  public static DOF6Event dof6Event(MotionEvent event) {
-    if (event instanceof DOF6Event)
-      return (DOF6Event) event;
+  public static Event6 event6(MotionEvent event) {
+    if (event instanceof Event6)
+      return (Event6) event;
     return null;
   }
 

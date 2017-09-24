@@ -27,7 +27,7 @@ public class MouseAgent extends Agent {
   protected float xSens = 1f;
   protected float ySens = 1f;
   protected Scene scene;
-  protected DOF2Event currentEvent, prevEvent;
+  protected Event2 currentEvent, prevEvent;
   protected boolean move, press, drag, release;
   protected PickingMode pMode;
 
@@ -84,7 +84,7 @@ public class MouseAgent extends Agent {
     drag = e.getAction() == processing.event.MouseEvent.DRAG;
     release = e.getAction() == processing.event.MouseEvent.RELEASE;
     if (move || press || drag || release) {
-      currentEvent = new DOF2Event(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
+      currentEvent = new Event2(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
           e.getModifiers(), move ? Event.NO_ID : e.getButton());
       if (move && (pickingMode() == PickingMode.MOVE))
         poll(currentEvent);
@@ -93,15 +93,15 @@ public class MouseAgent extends Agent {
       return;
     }
     if (e.getAction() == processing.event.MouseEvent.WHEEL) {
-      handle(new DOF1Event(e.getCount(), e.getModifiers(), WHEEL_ID));
+      handle(new Event1(e.getCount(), e.getModifiers(), WHEEL_ID));
       return;
     }
     if (e.getAction() == processing.event.MouseEvent.CLICK) {
-      ClickEvent bogusClickEvent = new ClickEvent(e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
+      TapEvent bogusTapEvent = new TapEvent(e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
           e.getModifiers(), e.getButton(), e.getCount());
       if (pickingMode() == PickingMode.CLICK)
-        poll(bogusClickEvent);
-      handle(bogusClickEvent);
+        poll(bogusTapEvent);
+      handle(bogusTapEvent);
       return;
     }
   }

@@ -67,7 +67,7 @@ import java.util.List;
  * call {@link Eye#setFrame(InteractiveFrame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
- * {@link #rotate(MotionEvent)}, {@link #moveForward(DOF2Event, boolean)},
+ * {@link #rotate(MotionEvent)}, {@link #moveForward(Event2, boolean)},
  * {@link #translateX(boolean)}, etc. To use them, derive from this class and override the
  * version of {@code interact} with the (bogus-event) parameter type you want to
  * customize (see {@link #interact(MotionEvent)},
@@ -76,7 +76,7 @@ import java.util.List;
  * <p>
  * <pre>
  * {@code
- * protected void interact(DOF2Event event) {
+ * protected void interact(Event2 event) {
  *   if(event.id() == LEFT)
  *     gestureArcball(event);
  *   if(event.id() == RIGHT)
@@ -168,7 +168,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   protected PickingPrecision pkgnPrecision;
 
-  public DOF2Event initEvent;
+  public Event2 initEvent;
   private float flySpeedCache;
 
   protected List<InteractiveFrame> childrenList;
@@ -891,8 +891,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
       return track((KeyEvent) event);
-    if (event instanceof ClickEvent)
-      return track((ClickEvent) event);
+    if (event instanceof TapEvent)
+      return track((TapEvent) event);
     if (event instanceof MotionEvent)
       return track((MotionEvent) event);
     return false;
@@ -904,21 +904,21 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public boolean track(MotionEvent event) {
     if (isEyeFrame())
       return false;
-    if (event instanceof DOF1Event)
-      return track((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      return track((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      return track((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      return track((DOF6Event) event);
+    if (event instanceof Event1)
+      return track((Event1) event);
+    if (event instanceof Event2)
+      return track((Event2) event);
+    if (event instanceof Event3)
+      return track((Event3) event);
+    if (event instanceof Event6)
+      return track((Event6) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean track(ClickEvent event) {
+  public boolean track(TapEvent event) {
     if (isEyeFrame())
       return false;
     return track(event.x(), event.y());
@@ -937,19 +937,19 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
+   * Override this method when you want the object to be picked from a {@link Event1}.
    */
-  public boolean track(DOF1Event event) {
+  public boolean track(Event1 event) {
     if (isEyeFrame())
       return false;
-    AbstractScene.showMissingImplementationWarning("track(DOF1Event event)", this.getClass().getName());
+    AbstractScene.showMissingImplementationWarning("track(Event1 event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean track(DOF2Event event) {
+  public boolean track(Event2 event) {
     if (isEyeFrame())
       return false;
     if (event.isAbsolute()) {
@@ -974,21 +974,21 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean track(DOF3Event event) {
-    return track(event.dof2Event());
+  public boolean track(Event3 event) {
+    return track(event.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean track(DOF6Event event) {
-    return track(event.dof3Event().dof2Event());
+  public boolean track(Event6 event) {
+    return track(event.event3().event2());
   }
 
   @Override
   public void interact(Event event) {
-    if (event instanceof ClickEvent)
-      interact((ClickEvent) event);
+    if (event instanceof TapEvent)
+      interact((TapEvent) event);
     if (event instanceof MotionEvent)
       interact((MotionEvent) event);
     if (event instanceof KeyEvent)
@@ -997,56 +997,56 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Calls interact() on the proper motion event:
-   * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
-   * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event1}, {@link Event2},
+   * {@link Event3} or {@link Event6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void interact(MotionEvent event) {
-    if (event instanceof DOF1Event)
-      interact((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      interact((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      interact((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      interact((DOF6Event) event);
+    if (event instanceof Event1)
+      interact((Event1) event);
+    if (event instanceof Event2)
+      interact((Event2) event);
+    if (event instanceof Event3)
+      interact((Event3) event);
+    if (event instanceof Event6)
+      interact((Event6) event);
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF1Event}.
+   * {@link Event1}.
    */
-  protected void interact(DOF1Event event) {
+  protected void interact(Event1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF2Event}.
+   * {@link Event2}.
    */
-  protected void interact(DOF2Event event) {
+  protected void interact(Event2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF3Event}.
+   * {@link Event3}.
    */
-  protected void interact(DOF3Event event) {
+  protected void interact(Event3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event6}.
    */
-  protected void interact(DOF6Event event) {
+  protected void interact(Event6 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.ClickEvent}.
+   * {@link TapEvent}.
    */
-  protected void interact(ClickEvent event) {
+  protected void interact(TapEvent event) {
   }
 
   /**
@@ -1529,9 +1529,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   protected int originalDirection(MotionEvent event, boolean fromX) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event, fromX);
-    if (dof2Event != null)
-      return originalDirection(dof2Event);
+    Event2 event2 = MotionEvent.event2(event, fromX);
+    if (event2 != null)
+      return originalDirection(event2);
     else {
       AbstractScene.showMinDOFsWarning("originalDirection", 2);
       return 0;
@@ -1542,7 +1542,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Return 1 if mouse motion was started horizontally and -1 if it was more vertical.
    * Returns 0 if this could not be determined yet (perfect diagonal motion, rare).
    */
-  protected int originalDirection(DOF2Event event) {
+  protected int originalDirection(Event2 event) {
     if (!dirIsFixed) {
       Point delta = new Point(event.dx(), event.dy());
       dirIsFixed = Math.abs(delta.x()) != Math.abs(delta.y());
@@ -1562,7 +1562,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Rotation computed according to the mouse motion. Mouse positions are
    * projected on a deformed ball, centered on ({@code center.x()}, {@code center.y()}).
    */
-  public Rotation deformedBallRotation(DOF2Event event, Vec center) {
+  public Rotation deformedBallRotation(Event2 event, Vec center) {
     if (event.isAbsolute()) {
       AbstractScene.showEventVariationWarning("deformedBallRotation");
       return null;
@@ -1620,7 +1620,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   // macro's
 
-  protected float computeAngle(DOF1Event e1) {
+  protected float computeAngle(Event1 e1) {
     return computeAngle(e1.dx());
   }
 
@@ -1633,7 +1633,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   protected boolean wheel(MotionEvent event) {
-    return event instanceof DOF1Event;
+    return event instanceof Event1;
   }
 
   /**
@@ -1668,22 +1668,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into x-translation conversion routine.
    */
   protected void translateX(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      translateX(dof1Event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      translateX(event1, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateX(DOF1Event event) {
+  public void translateX(Event1 event) {
     translateX(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  protected void translateX(DOF1Event event, float sens) {
+  protected void translateX(Event1 event, float sens) {
     translate(screenToVec(Vec.multiply(new Vec(isEyeFrame() ? -event.dx() : event.dx(), 0, 0), sens)));
   }
 
@@ -1720,22 +1720,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into y-translation conversion routine.
    */
   protected void translateY(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      translateY(dof1Event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      translateY(event1, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  public void translateY(DOF1Event event) {
+  public void translateY(Event1 event) {
     translateY(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  protected void translateY(DOF1Event event, float sens) {
+  protected void translateY(Event1 event, float sens) {
     translate(
         screenToVec(Vec.multiply(new Vec(0, isEyeFrame() ^ gScene.isRightHanded() ? -event.dx() : event.dx()), sens)));
   }
@@ -1773,22 +1773,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into z-translation conversion routine.
    */
   protected void translateZ(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      translateZ(dof1Event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      translateZ(event1, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  public void translateZ(DOF1Event event) {
+  public void translateZ(Event1 event) {
     translateZ(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  protected void translateZ(DOF1Event event, float sens) {
+  protected void translateZ(Event1 event, float sens) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("translateZ");
       return;
@@ -1833,9 +1833,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into xy-translation conversion routine.
    */
   protected void translate(MotionEvent event, boolean fromX) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event, fromX);
-    if (dof2Event != null)
-      translate(dof2Event);
+    Event2 event2 = MotionEvent.event2(event, fromX);
+    if (event2 != null)
+      translate(event2);
     else
       AbstractScene.showMinDOFsWarning("translate", 2);
   }
@@ -1843,7 +1843,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into xy-translation conversion routine.
    */
-  public void translate(DOF2Event event) {
+  public void translate(Event2 event) {
     translate(screenToVec(Vec.multiply(new Vec(isEyeFrame() ? -event.dx() : event.dx(),
         (gScene.isRightHanded() ^ isEyeFrame()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
   }
@@ -1852,9 +1852,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into xyz-translation conversion routine.
    */
   public void translateXYZ(MotionEvent event) {
-    DOF3Event dof3Event = MotionEvent.dof3Event(event, true);
-    if (dof3Event != null)
-      translateXYZ(dof3Event);
+    Event3 event3 = MotionEvent.event3(event, true);
+    if (event3 != null)
+      translateXYZ(event3);
     else
       AbstractScene.showMinDOFsWarning("translateXYZ", 3);
   }
@@ -1871,7 +1871,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into xyz-translation conversion routine.
    */
-  public void translateXYZ(DOF3Event event) {
+  public void translateXYZ(Event3 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("translateXYZ");
       return;
@@ -1896,9 +1896,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see Eye#anchor()
    */
   protected void zoomOnAnchor(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      zoomOnAnchor(dof1Event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      zoomOnAnchor(event1, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
@@ -1906,7 +1906,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see Eye#anchor()
    */
-  protected void zoomOnAnchor(DOF1Event event, float sens) {
+  protected void zoomOnAnchor(Event1 event, float sens) {
     Vec direction = Vec.subtract(gScene.eye().anchor(), position());
     if (referenceFrame() != null)
       direction = referenceFrame().transformOf(direction);
@@ -1951,7 +1951,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into zoom-on-region conversion routine.
    */
   public void zoomOnRegion(MotionEvent event) {
-    DOF2Event dof2 = MotionEvent.dof2Event(event);
+    Event2 dof2 = MotionEvent.event2(event);
     if (dof2 == null) {
       AbstractScene.showMinDOFsWarning("zoomOnRegion", 2);
       return;
@@ -1962,7 +1962,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-region conversion routine.
    */
-  public void zoomOnRegion(DOF2Event event) {
+  public void zoomOnRegion(Event2 event) {
     if (!isEyeFrame()) {
       AbstractScene.showOnlyEyeWarning("zoomOnRegion");
       return;
@@ -1975,7 +1975,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       initEvent = event.get();
       gScene.setZoomVisualHint(true);
     } else if (event.flushed()) {
-      DOF2Event e = new DOF2Event(initEvent.get(), event.x(), event.y(), event.modifiers(), event.id());
+      Event2 e = new Event2(initEvent.get(), event.x(), event.y(), event.modifiers(), event.id());
       gScene.setZoomVisualHint(false);
       int w = (int) Math.abs(e.dx());
       int tlX = (int) e.prevX() < (int) e.x() ? (int) e.prevX() : (int) e.x();
@@ -1996,22 +1996,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into x-rotation conversion routine.
    */
   protected void rotateX(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      rotateX(dof1Event, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      rotateX(event1, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  public void rotateX(DOF1Event event) {
+  public void rotateX(Event1 event) {
     rotateX(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  protected void rotateX(DOF1Event event, float sens) {
+  protected void rotateX(Event1 event, float sens) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rotateX");
       return;
@@ -2055,22 +2055,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into y-rotation conversion routine.
    */
   protected void rotateY(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event, fromX);
-    if (dof1Event != null)
-      rotateY(dof1Event, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+    Event1 event1 = MotionEvent.event1(event, fromX);
+    if (event1 != null)
+      rotateY(event1, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  public void rotateY(DOF1Event event) {
+  public void rotateY(Event1 event) {
     rotateY(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  protected void rotateY(DOF1Event event, float sens) {
+  protected void rotateY(Event1 event, float sens) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rotateY");
       return;
@@ -2115,22 +2115,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into z-rotation conversion routine.
    */
   protected void rotateZ(MotionEvent event, boolean fromX) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event);
-    if (dof1Event != null)
-      rotateZ(dof1Event, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+    Event1 event1 = MotionEvent.event1(event);
+    if (event1 != null)
+      rotateZ(event1, wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  public void rotateZ(DOF1Event event) {
+  public void rotateZ(Event1 event) {
     rotateZ(event, wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  protected void rotateZ(DOF1Event event, float sens) {
+  protected void rotateZ(Event1 event, float sens) {
     Rotation rt;
     if (isEyeFrame())
       if (is2D())
@@ -2174,9 +2174,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into xyz-rotation conversion routine.
    */
   protected void rotateXYZ(MotionEvent event) {
-    DOF3Event dof3Event = MotionEvent.dof3Event(event, false);
-    if (dof3Event != null)
-      rotateXYZ(dof3Event);
+    Event3 event3 = MotionEvent.event3(event, false);
+    if (event3 != null)
+      rotateXYZ(event3);
     else
       AbstractScene.showMinDOFsWarning("rotateXYZ", 3);
   }
@@ -2184,7 +2184,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into xyz-rotation conversion routine.
    */
-  public void rotateXYZ(DOF3Event event) {
+  public void rotateXYZ(Event3 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rotateXYZ");
       return;
@@ -2201,9 +2201,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into arcball-rotation conversion routine.
    */
   public void rotate(MotionEvent event) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      rotate(dof2Event);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      rotate(event2);
     else
       AbstractScene.showMinDOFsWarning("rotate", 2);
   }
@@ -2211,7 +2211,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into arcball-rotation conversion routine.
    */
-  public void rotate(DOF2Event event) {
+  public void rotate(Event2 event) {
     if (event.isAbsolute()) {
       AbstractScene.showEventVariationWarning("rotate");
       return;
@@ -2250,22 +2250,22 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into scaling conversion routine.
    */
   public void scale(MotionEvent event) {
-    DOF1Event dof1Event = MotionEvent.dof1Event(event);
-    if (dof1Event != null)
-      scale(dof1Event, wheel(event) ? wheelSensitivity() : scalingSensitivity());
+    Event1 event1 = MotionEvent.event1(event);
+    if (event1 != null)
+      scale(event1, wheel(event) ? wheelSensitivity() : scalingSensitivity());
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  public void scale(DOF1Event event) {
+  public void scale(Event1 event) {
     scale(event, wheel(event) ? wheelSensitivity() : scalingSensitivity());
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  protected void scale(DOF1Event event, float sens) {
+  protected void scale(Event1 event, float sens) {
     if (isEyeFrame()) {
       float delta = event.dx() * sens;
       float s = 1 + Math.abs(delta) / (float) -gScene.height();
@@ -2321,9 +2321,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into move-forward conversion routine.
    */
   protected void moveForward(MotionEvent event, boolean forward) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      moveForward(dof2Event, forward);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      moveForward(event2, forward);
     else
       AbstractScene.showMinDOFsWarning("moveForward", 2);
   }
@@ -2331,7 +2331,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into move-forward conversion routine.
    */
-  protected void moveForward(DOF2Event event, boolean forward) {
+  protected void moveForward(Event2 event, boolean forward) {
     if (event.fired())
       updateSceneUpVector();
     else if (event.flushed()) {
@@ -2357,9 +2357,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into drive conversion routine.
    */
   public void drive(MotionEvent event) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      drive(dof2Event);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      drive(event2);
     else
       AbstractScene.showMinDOFsWarning("drive", 2);
   }
@@ -2367,7 +2367,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into drive conversion routine.
    */
-  public void drive(DOF2Event event) {
+  public void drive(Event2 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("drive");
       return;
@@ -2383,7 +2383,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     setFlySpeed(0.01f * gScene.radius() * 0.01f * (event.y() - initEvent.y()));
     Vec trns;
-    rotate(turnQuaternion(event.dof1Event(), gScene.camera()));
+    rotate(turnQuaternion(event.event1(), gScene.camera()));
     flyDisp.set(0.0f, 0.0f, flySpeed());
     trns = rotation().rotate(flyDisp);
     startFlying(event, trns);
@@ -2393,9 +2393,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into CAD-rotation conversion routine.
    */
   public void rotateCAD(MotionEvent event) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      rotateCAD(dof2Event);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      rotateCAD(event2);
     else
       AbstractScene.showMinDOFsWarning("rotateCAD", 2);
   }
@@ -2403,7 +2403,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into CAD-rotation conversion routine.
    */
-  public void rotateCAD(DOF2Event event) {
+  public void rotateCAD(Event2 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rotateCAD");
       return;
@@ -2439,9 +2439,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into hinge conversion routine.
    */
   public void hinge(MotionEvent event) {
-    DOF6Event dof6Event = MotionEvent.dof6Event(event);
-    if (dof6Event != null)
-      hinge(dof6Event);
+    Event6 event6 = MotionEvent.event6(event);
+    if (event6 != null)
+      hinge(event6);
     else
       AbstractScene.showMinDOFsWarning("hinge", 6);
   }
@@ -2449,7 +2449,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into hinge conversion routine.
    */
-  public void hinge(DOF6Event event) {
+  public void hinge(Event6 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("hinge");
       return;
@@ -2505,9 +2505,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture screen-translate conversion routine.
    */
   public void screenTranslate(MotionEvent event) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      screenTranslate(dof2Event);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      screenTranslate(event2);
     else
       AbstractScene.showMinDOFsWarning("screenTranslate", 2);
   }
@@ -2515,7 +2515,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture screen-translate conversion routine.
    */
-  public void screenTranslate(DOF2Event event) {
+  public void screenTranslate(Event2 event) {
     if (event.fired())
       dirIsFixed = false;
     int dir = originalDirection(event);
@@ -2529,9 +2529,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture screen-rotation conversion routine.
    */
   public void screenRotate(MotionEvent event) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      screenRotate(dof2Event);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      screenRotate(event2);
     else
       AbstractScene.showMinDOFsWarning("screenRotate", 2);
   }
@@ -2539,7 +2539,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture screen-rotation conversion routine.
    */
-  public void screenRotate(DOF2Event event) {
+  public void screenRotate(Event2 event) {
     if (event.isAbsolute()) {
       AbstractScene.showEventVariationWarning("screenRotate");
       return;
@@ -2590,7 +2590,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into anchor from pixel conversion routine.
    */
-  public void anchorFromPixel(ClickEvent event) {
+  public void anchorFromPixel(TapEvent event) {
     if (isEyeFrame())
       eye().setAnchorFromPixel(new Point(event.x(), event.y()));
     else
@@ -2600,7 +2600,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom on pixel conversion routine.
    */
-  public void zoomOnPixel(ClickEvent event) {
+  public void zoomOnPixel(TapEvent event) {
     if (isEyeFrame())
       eye().interpolateToZoomOnPixel(new Point(event.x(), event.y()));
     else
@@ -2948,9 +2948,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   protected Quat rollPitchQuaternion(MotionEvent event, Camera camera) {
-    DOF2Event dof2Event = MotionEvent.dof2Event(event);
-    if (dof2Event != null)
-      return rollPitchQuaternion(dof2Event, camera);
+    Event2 event2 = MotionEvent.event2(event);
+    if (event2 != null)
+      return rollPitchQuaternion(event2, camera);
     else {
       AbstractScene.showMinDOFsWarning("rollPitchQuaternion", 2);
       return null;
@@ -2961,7 +2961,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * mouse roll (X axis) and pitch ( {@link #sceneUpVector()} axis).
    */
-  protected Quat rollPitchQuaternion(DOF2Event event, Camera camera) {
+  protected Quat rollPitchQuaternion(Event2 event, Camera camera) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rollPitchQuaternion");
       return null;
@@ -2983,7 +2983,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
    * event X-displacement.
    */
-  protected Quat turnQuaternion(DOF1Event event, Camera camera) {
+  protected Quat turnQuaternion(Event1 event, Camera camera) {
     float deltaX = event.dx();
     return new Quat(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / camera.screenWidth());
   }

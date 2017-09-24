@@ -13,7 +13,7 @@ package remixlab.bias.event;
 /**
  * A {@link remixlab.bias.event.MotionEvent} with one degree of freedom ( {@link #x()}).
  */
-public class DOF1Event extends MotionEvent {
+public class Event1 extends MotionEvent {
   protected float x, dx;
 
   /**
@@ -23,19 +23,19 @@ public class DOF1Event extends MotionEvent {
    * @param modifiers MotionShortcut modifiers
    * @param id        MotionShortcut gesture-id
    */
-  public DOF1Event(float dx, int modifiers, int id) {
+  public Event1(float dx, int modifiers, int id) {
     super(modifiers, id);
     this.dx = dx;
   }
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof DOF1Event ? (DOF1Event) prevEvent : null, x, modifiers, id)}.
+   * {@code this(prevEvent instanceof Event1 ? (Event1) prevEvent : null, x, modifiers, id)}.
    *
-   * @see #DOF1Event(DOF1Event, float, int, int)
+   * @see #Event1(Event1, float, int, int)
    */
-  public DOF1Event(MotionEvent prevEvent, float x, int modifiers, int id) {
-    this(prevEvent instanceof DOF1Event ? (DOF1Event) prevEvent : null, x, modifiers, id);
+  public Event1(MotionEvent prevEvent, float x, int modifiers, int id) {
+    this(prevEvent instanceof Event1 ? (Event1) prevEvent : null, x, modifiers, id);
   }
 
   /**
@@ -49,10 +49,10 @@ public class DOF1Event extends MotionEvent {
    * @param modifiers MotionShortcut modifiers
    * @param id        MotionShortcut gesture-id
    */
-  public DOF1Event(DOF1Event prevEvent, float x, int modifiers, int id) {
+  public Event1(Event1 prevEvent, float x, int modifiers, int id) {
     super(modifiers, id);
     this.x = x;
-    setPreviousEvent(prevEvent);
+    setPrevious(prevEvent);
   }
 
   /**
@@ -60,19 +60,19 @@ public class DOF1Event extends MotionEvent {
    *
    * @param dx 1-dof
    */
-  public DOF1Event(float dx) {
+  public Event1(float dx) {
     super();
     this.dx = dx;
   }
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof DOF1Event ? (DOF1Event) prevEvent : null, x)}.
+   * {@code this(prevEvent instanceof Event1 ? (Event1) prevEvent : null, x)}.
    *
-   * @see #DOF1Event(DOF1Event, float)
+   * @see #Event1(Event1, float)
    */
-  public DOF1Event(MotionEvent prevEvent, float x) {
-    this(prevEvent instanceof DOF1Event ? (DOF1Event) prevEvent : null, x);
+  public Event1(MotionEvent prevEvent, float x) {
+    this(prevEvent instanceof Event1 ? (Event1) prevEvent : null, x);
   }
 
   /**
@@ -84,40 +84,40 @@ public class DOF1Event extends MotionEvent {
    * @param prevEvent
    * @param x         1-dof
    */
-  public DOF1Event(DOF1Event prevEvent, float x) {
+  public Event1(Event1 prevEvent, float x) {
     super();
     this.x = x;
-    setPreviousEvent(prevEvent);
+    setPrevious(prevEvent);
   }
 
-  protected DOF1Event(DOF1Event other) {
+  protected Event1(Event1 other) {
     super(other);
     this.x = other.x;
     this.dx = other.dx;
   }
 
   @Override
-  public DOF1Event get() {
-    return new DOF1Event(this);
+  public Event1 get() {
+    return new Event1(this);
   }
 
   @Override
-  public DOF1Event flush() {
-    return (DOF1Event) super.flush();
+  public Event1 flush() {
+    return (Event1) super.flush();
   }
 
   @Override
-  public DOF1Event fire() {
-    return (DOF1Event) super.fire();
+  public Event1 fire() {
+    return (Event1) super.fire();
   }
 
   @Override
-  protected void setPreviousEvent(MotionEvent prevEvent) {
+  protected void setPrevious(MotionEvent prevEvent) {
     rel = true;
     if (prevEvent != null)
-      if (prevEvent instanceof DOF1Event && prevEvent.id() == this.id()) {
-        this.dx = this.x() - ((DOF1Event) prevEvent).x();
-        distance = this.x() - ((DOF1Event) prevEvent).x();
+      if (prevEvent instanceof Event1 && prevEvent.id() == this.id()) {
+        this.dx = this.x() - ((Event1) prevEvent).x();
+        distance = this.x() - ((Event1) prevEvent).x();
         delay = this.timestamp() - prevEvent.timestamp();
         if (delay == 0)
           speed = distance;

@@ -13,7 +13,7 @@ package remixlab.geom;
 import remixlab.bias.Agent;
 import remixlab.bias.Event;
 import remixlab.bias.Grabber;
-import remixlab.bias.event.ClickEvent;
+import remixlab.bias.event.TapEvent;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
 import remixlab.geom.AbstractScene.Platform;
@@ -110,8 +110,8 @@ public abstract class Eye {
     }
 
     @Override
-    public void interact(ClickEvent event) {
-      if (event.clickCount() == 2) {
+    public void interact(TapEvent event) {
+      if (event.count() == 2) {
         if (event.id() == LEFT_ID)
           center();
         if (event.id() == RIGHT_ID)

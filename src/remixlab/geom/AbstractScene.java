@@ -544,8 +544,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
       return checkIfGrabsInput((KeyEvent) event);
-    if (event instanceof ClickEvent)
-      return checkIfGrabsInput((ClickEvent) event);
+    if (event instanceof TapEvent)
+      return checkIfGrabsInput((TapEvent) event);
     if (event instanceof MotionEvent)
       return checkIfGrabsInput((MotionEvent) event);
     return false;
@@ -557,14 +557,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Automatically called by agents handling this frame.
    */
   public boolean checkIfGrabsInput(MotionEvent event) {
-    if (event instanceof DOF1Event)
-      return checkIfGrabsInput((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      return checkIfGrabsInput((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      return checkIfGrabsInput((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      return checkIfGrabsInput((DOF6Event) event);
+    if (event instanceof Event1)
+      return checkIfGrabsInput((Event1) event);
+    if (event instanceof Event2)
+      return checkIfGrabsInput((Event2) event);
+    if (event instanceof Event3)
+      return checkIfGrabsInput((Event3) event);
+    if (event instanceof Event6)
+      return checkIfGrabsInput((Event6) event);
     return false;
   }
 
@@ -573,7 +573,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(ClickEvent event) {
+  public boolean checkIfGrabsInput(TapEvent event) {
     AbstractScene.showMissingImplementationWarning("track(clickEvent event)", this.getClass().getName());
     return false;
   }
@@ -590,41 +590,41 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
+   * Override this method when you want the object to be picked from a {@link Event1}.
    */
-  public boolean checkIfGrabsInput(DOF1Event event) {
-    AbstractScene.showMissingImplementationWarning("track(DOF1Event event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(Event1 event) {
+    AbstractScene.showMissingImplementationWarning("track(Event1 event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link remixlab.bias.event.DOF1Event}.
+   * Override this method when you want the object to be picked from a {@link Event1}.
    */
-  public boolean checkIfGrabsInput(DOF2Event event) {
-    AbstractScene.showMissingImplementationWarning("track(DOF2Event event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(Event2 event) {
+    AbstractScene.showMissingImplementationWarning("track(Event2 event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(DOF3Event event) {
-    return checkIfGrabsInput(event.dof2Event());
+  public boolean checkIfGrabsInput(Event3 event) {
+    return checkIfGrabsInput(event.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(DOF6Event event) {
-    return checkIfGrabsInput(event.dof3Event().dof2Event());
+  public boolean checkIfGrabsInput(Event6 event) {
+    return checkIfGrabsInput(event.event3().event2());
   }
 
   @Override
   public void interact(Event event) {
-    if (event instanceof ClickEvent)
-      performInteraction((ClickEvent) event);
+    if (event instanceof TapEvent)
+      performInteraction((TapEvent) event);
     if (event instanceof MotionEvent)
       performInteraction((MotionEvent) event);
     if (event instanceof KeyEvent)
@@ -633,56 +633,56 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Calls interact() on the proper motion event:
-   * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
-   * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event1}, {@link Event2},
+   * {@link Event3} or {@link Event6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void performInteraction(MotionEvent event) {
-    if (event instanceof DOF1Event)
-      performInteraction((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      performInteraction((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      performInteraction((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      performInteraction((DOF6Event) event);
+    if (event instanceof Event1)
+      performInteraction((Event1) event);
+    if (event instanceof Event2)
+      performInteraction((Event2) event);
+    if (event instanceof Event3)
+      performInteraction((Event3) event);
+    if (event instanceof Event6)
+      performInteraction((Event6) event);
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF1Event}.
+   * {@link Event1}.
    */
-  protected void performInteraction(DOF1Event event) {
+  protected void performInteraction(Event1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF2Event}.
+   * {@link Event2}.
    */
-  protected void performInteraction(DOF2Event event) {
+  protected void performInteraction(Event2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF3Event}.
+   * {@link Event3}.
    */
-  protected void performInteraction(DOF3Event event) {
+  protected void performInteraction(Event3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event6}.
    */
-  protected void performInteraction(DOF6Event event) {
+  protected void performInteraction(Event6 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.ClickEvent}.
+   * {@link TapEvent}.
    */
-  protected void performInteraction(ClickEvent event) {
+  protected void performInteraction(TapEvent event) {
   }
 
   /**

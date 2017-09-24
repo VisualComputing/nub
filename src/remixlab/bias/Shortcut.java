@@ -10,6 +10,8 @@
 
 package remixlab.bias;
 
+import remixlab.bias.event.*;
+
 /**
  * Every {@link Event} instance has a shortcut which represents a
  * gesture-{@link #id()}. For instance, the button being dragged and the modifier key
@@ -21,10 +23,10 @@ package remixlab.bias;
  * <ol>
  * <li>{@link remixlab.bias.event.MotionEvent} /
  * {@link remixlab.bias.Shortcut}. Note that motion-event derived classes:
- * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
- * {@link remixlab.bias.event.DOF3Event}, {@link remixlab.bias.event.DOF6Event}, are also
+ * {@link Event1}, {@link Event2},
+ * {@link Event3}, {@link Event6}, are also
  * related to shortcuts.</li>
- * <li>{@link remixlab.bias.event.ClickEvent} / {@link remixlab.bias.event.ClickShortcut}
+ * <li>{@link TapEvent} / {@link TapShortcut}
  * </li>
  * </ol>
  */

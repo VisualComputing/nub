@@ -19,8 +19,8 @@ import remixlab.bias.event.*;
  * Based on the concrete event type, this model object splits the
  * {@link #track(Event)} and the {@link #interact(Event)}
  * methods into more specific versions of them, e.g.,
- * {@link #track(ClickEvent)}, {@link #track(DOF3Event)},
- * {@link #interact(DOF6Event)} , {@link #interact(KeyEvent)} and
+ * {@link #track(TapEvent)}, {@link #track(Event3)},
+ * {@link #interact(Event6)} , {@link #interact(KeyEvent)} and
  * so on. Thus allowing implementations of this abstract GrabberObject to override only
  * those method signatures that might be of their interest.
  */
@@ -72,29 +72,29 @@ public abstract class GrabberObject implements Grabber {
   public void interact(Event event) {
     if (event instanceof KeyEvent)
       interact((KeyEvent) event);
-    if (event instanceof ClickEvent)
-      interact((ClickEvent) event);
+    if (event instanceof TapEvent)
+      interact((TapEvent) event);
     if (event instanceof MotionEvent)
       interact((MotionEvent) event);
   }
 
   /**
    * Calls interact() on the proper motion event:
-   * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
-   * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event1}, {@link Event2},
+   * {@link Event3} or {@link Event6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void interact(MotionEvent event) {
-    if (event instanceof DOF1Event)
-      interact((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      interact((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      interact((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      interact((DOF6Event) event);
+    if (event instanceof Event1)
+      interact((Event1) event);
+    if (event instanceof Event2)
+      interact((Event2) event);
+    if (event instanceof Event3)
+      interact((Event3) event);
+    if (event instanceof Event6)
+      interact((Event6) event);
   }
 
   /**
@@ -106,45 +106,45 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.ClickEvent}.
+   * {@link TapEvent}.
    */
-  protected void interact(ClickEvent event) {
+  protected void interact(TapEvent event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF1Event}.
+   * {@link Event1}.
    */
-  protected void interact(DOF1Event event) {
+  protected void interact(Event1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF2Event}.
+   * {@link Event2}.
    */
-  protected void interact(DOF2Event event) {
+  protected void interact(Event2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF3Event}.
+   * {@link Event3}.
    */
-  protected void interact(DOF3Event event) {
+  protected void interact(Event3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event6}.
    */
-  protected void interact(DOF6Event event) {
+  protected void interact(Event6 event) {
   }
 
   @Override
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
       return track((KeyEvent) event);
-    if (event instanceof ClickEvent)
-      return track((ClickEvent) event);
+    if (event instanceof TapEvent)
+      return track((TapEvent) event);
     if (event instanceof MotionEvent)
       return track((MotionEvent) event);
     return false;
@@ -152,21 +152,21 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Calls track() on the proper motion event:
-   * {@link remixlab.bias.event.DOF1Event}, {@link remixlab.bias.event.DOF2Event},
-   * {@link remixlab.bias.event.DOF3Event} or {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event1}, {@link Event2},
+   * {@link Event3} or {@link Event6}.
    * <p>
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
   public boolean track(MotionEvent event) {
-    if (event instanceof DOF1Event)
-      return track((DOF1Event) event);
-    if (event instanceof DOF2Event)
-      return track((DOF2Event) event);
-    if (event instanceof DOF3Event)
-      return track((DOF3Event) event);
-    if (event instanceof DOF6Event)
-      return track((DOF6Event) event);
+    if (event instanceof Event1)
+      return track((Event1) event);
+    if (event instanceof Event2)
+      return track((Event2) event);
+    if (event instanceof Event3)
+      return track((Event3) event);
+    if (event instanceof Event6)
+      return track((Event6) event);
     return false;
   }
 
@@ -180,41 +180,41 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.ClickEvent}.
+   * {@link TapEvent}.
    */
-  protected boolean track(ClickEvent event) {
+  protected boolean track(TapEvent event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.DOF1Event}.
+   * {@link Event1}.
    */
-  protected boolean track(DOF1Event event) {
+  protected boolean track(Event1 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.DOF2Event}.
+   * {@link Event2}.
    */
-  protected boolean track(DOF2Event event) {
+  protected boolean track(Event2 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.DOF3Event}.
+   * {@link Event3}.
    */
-  protected boolean track(DOF3Event event) {
+  protected boolean track(Event3 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link remixlab.bias.event.DOF6Event}.
+   * {@link Event6}.
    */
-  protected boolean track(DOF6Event event) {
+  protected boolean track(Event6 event) {
     return false;
   }
 }

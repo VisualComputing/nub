@@ -13,88 +13,88 @@ package remixlab.bias.event;
 import remixlab.bias.Event;
 
 /**
- * A click event encapsulates a {@link remixlab.bias.event.ClickShortcut} and it's defined
- * by the number of clicks. A click event holds the position where the event occurred (
+ * A tap event encapsulates a {@link TapShortcut} and it's defined
+ * by the number of taps. A tap event holds the position where the event occurred (
  * {@link #x()} and {@link #y()}).
  */
-public class ClickEvent extends Event {
+public class TapEvent extends Event {
   protected float x, y;
-  protected final int numberOfClicks;
+  protected final int numberOfTaps;
 
   /**
-   * Constructs a single click ClickEvent at the given position and from the given
+   * Constructs a single TapEvent at the given position and from the given
    * gesture-id defining the events {@link #shortcut()}
    *
    * @param x
    * @param y
    * @param b
    */
-  public ClickEvent(float x, float y, int b) {
+  public TapEvent(float x, float y, int b) {
     super(NO_MODIFIER_MASK, b);
     this.x = x;
     this.y = y;
-    this.numberOfClicks = 1;
+    this.numberOfTaps = 1;
   }
 
   /**
-   * Constructs a ClickEvent at the given position, from the given gesture-id defining the
-   * events {@link #shortcut()}, and with the given number of clicks.
+   * Constructs a TapEvent at the given position, from the given gesture-id defining the
+   * events {@link #shortcut()}, and with the given number of taps.
    *
    * @param x
    * @param y
    * @param b
-   * @param clicks
+   * @param taps
    */
-  public ClickEvent(float x, float y, int b, int clicks) {
+  public TapEvent(float x, float y, int b, int taps) {
     super(NO_MODIFIER_MASK, b);
     this.x = x;
     this.y = y;
-    this.numberOfClicks = clicks;
+    this.numberOfTaps = taps;
   }
 
   /**
-   * Constructs a ClickEvent at the given position, from the given gesture-id and
+   * Constructs a TapEvent at the given position, from the given gesture-id and
    * modifiers which defines the events {@link #shortcut()}, and with the given number of
-   * clicks.
+   * taps.
    *
    * @param x
    * @param y
    * @param modifiers
    * @param b
-   * @param clicks
+   * @param taps
    */
-  public ClickEvent(float x, float y, int modifiers, int b, int clicks) {
+  public TapEvent(float x, float y, int modifiers, int b, int taps) {
     super(modifiers, b);
     this.x = x;
     this.y = y;
-    this.numberOfClicks = clicks;
+    this.numberOfTaps = taps;
   }
 
-  protected ClickEvent(ClickEvent other) {
+  protected TapEvent(TapEvent other) {
     super(other);
     this.x = other.x;
     this.y = other.y;
-    this.numberOfClicks = other.numberOfClicks;
+    this.numberOfTaps = other.numberOfTaps;
   }
 
   @Override
-  public ClickEvent get() {
-    return new ClickEvent(this);
+  public TapEvent get() {
+    return new TapEvent(this);
   }
 
   @Override
-  public ClickEvent flush() {
-    return (ClickEvent) super.flush();
+  public TapEvent flush() {
+    return (TapEvent) super.flush();
   }
 
   @Override
-  public ClickEvent fire() {
-    return (ClickEvent) super.fire();
+  public TapEvent fire() {
+    return (TapEvent) super.fire();
   }
 
   @Override
-  public ClickShortcut shortcut() {
-    return new ClickShortcut(modifiers(), id(), clickCount());
+  public TapShortcut shortcut() {
+    return new TapShortcut(modifiers(), id(), count());
   }
 
   /**
@@ -112,9 +112,9 @@ public class ClickEvent extends Event {
   }
 
   /**
-   * @return event number of clicks
+   * @return event number of taps
    */
-  public int clickCount() {
-    return numberOfClicks;
+  public int count() {
+    return numberOfTaps;
   }
 }

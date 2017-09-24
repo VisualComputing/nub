@@ -14,7 +14,7 @@ package remixlab.bias.event;
  * A {@link remixlab.bias.event.MotionEvent} with six degrees-of-freedom ( {@link #x()},
  * {@link #y()}, {@link #z()} , {@link #rx()}, {@link #ry()} and {@link #rz()}).
  */
-public class DOF6Event extends MotionEvent {
+public class Event6 extends MotionEvent {
   protected float x, dx;
   protected float y, dy;
   protected float z, dz;
@@ -35,7 +35,7 @@ public class DOF6Event extends MotionEvent {
    * @param modifiers
    * @param id
    */
-  public DOF6Event(float dx, float dy, float dz, float drx, float dry, float drz, int modifiers, int id) {
+  public Event6(float dx, float dy, float dz, float drx, float dry, float drz, int modifiers, int id) {
     super(modifiers, id);
     this.dx = dx;
     this.dy = dy;
@@ -47,13 +47,13 @@ public class DOF6Event extends MotionEvent {
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof DOF6Event ? (DOF6Event) prevEvent : null, x, y, z, rx, ry, rz, modifiers, id)}.
+   * {@code this(prevEvent instanceof Event6 ? (Event6) prevEvent : null, x, y, z, rx, ry, rz, modifiers, id)}.
    *
-   * @see #DOF6Event(DOF6Event, float, float, float, float, float, float, int, int)
+   * @see #Event6(Event6, float, float, float, float, float, float, int, int)
    */
-  public DOF6Event(MotionEvent prevEvent, float x, float y, float z, float rx, float ry, float rz, int modifiers,
-                   int id) {
-    this(prevEvent instanceof DOF6Event ? (DOF6Event) prevEvent : null, x, y, z, rx, ry, rz, modifiers, id);
+  public Event6(MotionEvent prevEvent, float x, float y, float z, float rx, float ry, float rz, int modifiers,
+                int id) {
+    this(prevEvent instanceof Event6 ? (Event6) prevEvent : null, x, y, z, rx, ry, rz, modifiers, id);
   }
 
   /**
@@ -72,7 +72,7 @@ public class DOF6Event extends MotionEvent {
    * @param modifiers
    * @param id
    */
-  public DOF6Event(DOF6Event prevEvent, float x, float y, float z, float rx, float ry, float rz, int modifiers, int id) {
+  public Event6(Event6 prevEvent, float x, float y, float z, float rx, float ry, float rz, int modifiers, int id) {
     super(modifiers, id);
     this.x = x;
     this.y = y;
@@ -80,7 +80,7 @@ public class DOF6Event extends MotionEvent {
     this.rx = rx;
     this.ry = ry;
     this.rz = rz;
-    setPreviousEvent(prevEvent);
+    setPrevious(prevEvent);
   }
 
   /**
@@ -93,7 +93,7 @@ public class DOF6Event extends MotionEvent {
    * @param dry
    * @param drz
    */
-  public DOF6Event(float dx, float dy, float dz, float drx, float dry, float drz) {
+  public Event6(float dx, float dy, float dz, float drx, float dry, float drz) {
     super();
     this.dx = dx;
     this.dy = dy;
@@ -105,12 +105,12 @@ public class DOF6Event extends MotionEvent {
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof DOF6Event ? (DOF6Event) prevEvent : null, x, y, z, rx, ry, rz)}.
+   * {@code this(prevEvent instanceof Event6 ? (Event6) prevEvent : null, x, y, z, rx, ry, rz)}.
    *
-   * @see #DOF6Event(DOF6Event, float, float, float, float, float, float)
+   * @see #Event6(Event6, float, float, float, float, float, float)
    */
-  public DOF6Event(MotionEvent prevEvent, float x, float y, float z, float rx, float ry, float rz) {
-    this(prevEvent instanceof DOF6Event ? (DOF6Event) prevEvent : null, x, y, z, rx, ry, rz);
+  public Event6(MotionEvent prevEvent, float x, float y, float z, float rx, float ry, float rz) {
+    this(prevEvent instanceof Event6 ? (Event6) prevEvent : null, x, y, z, rx, ry, rz);
   }
 
   /**
@@ -127,7 +127,7 @@ public class DOF6Event extends MotionEvent {
    * @param ry
    * @param rz
    */
-  public DOF6Event(DOF6Event prevEvent, float x, float y, float z, float rx, float ry, float rz) {
+  public Event6(Event6 prevEvent, float x, float y, float z, float rx, float ry, float rz) {
     super();
     this.x = x;
     this.y = y;
@@ -135,10 +135,10 @@ public class DOF6Event extends MotionEvent {
     this.rx = rx;
     this.ry = ry;
     this.rz = rz;
-    setPreviousEvent(prevEvent);
+    setPrevious(prevEvent);
   }
 
-  protected DOF6Event(DOF6Event other) {
+  protected Event6(Event6 other) {
     super(other);
     this.x = other.x;
     this.dx = other.dx;
@@ -155,34 +155,34 @@ public class DOF6Event extends MotionEvent {
   }
 
   @Override
-  public DOF6Event get() {
-    return new DOF6Event(this);
+  public Event6 get() {
+    return new Event6(this);
   }
 
   @Override
-  public DOF6Event flush() {
-    return (DOF6Event) super.flush();
+  public Event6 flush() {
+    return (Event6) super.flush();
   }
 
   @Override
-  public DOF6Event fire() {
-    return (DOF6Event) super.fire();
+  public Event6 fire() {
+    return (Event6) super.fire();
   }
 
   @Override
-  protected void setPreviousEvent(MotionEvent prevEvent) {
+  protected void setPrevious(MotionEvent prevEvent) {
     rel = true;
     if (prevEvent != null)
-      if (prevEvent instanceof DOF6Event && prevEvent.id() == this.id()) {
-        this.dx = this.x() - ((DOF6Event) prevEvent).x();
-        this.dy = this.y() - ((DOF6Event) prevEvent).y();
-        this.dz = this.z() - ((DOF6Event) prevEvent).z();
-        this.drx = this.rx() - ((DOF6Event) prevEvent).rx();
-        this.dry = this.ry() - ((DOF6Event) prevEvent).ry();
-        this.drz = this.rz() - ((DOF6Event) prevEvent).rz();
-        distance = MotionEvent.distance(x, y, z, rx, ry, rz, ((DOF6Event) prevEvent).x(), ((DOF6Event) prevEvent).y(),
-            ((DOF6Event) prevEvent).z(), ((DOF6Event) prevEvent).rx(), ((DOF6Event) prevEvent).ry(),
-            ((DOF6Event) prevEvent).rz());
+      if (prevEvent instanceof Event6 && prevEvent.id() == this.id()) {
+        this.dx = this.x() - ((Event6) prevEvent).x();
+        this.dy = this.y() - ((Event6) prevEvent).y();
+        this.dz = this.z() - ((Event6) prevEvent).z();
+        this.drx = this.rx() - ((Event6) prevEvent).rx();
+        this.dry = this.ry() - ((Event6) prevEvent).ry();
+        this.drz = this.rz() - ((Event6) prevEvent).rz();
+        distance = MotionEvent.distance(x, y, z, rx, ry, rz, ((Event6) prevEvent).x(), ((Event6) prevEvent).y(),
+            ((Event6) prevEvent).z(), ((Event6) prevEvent).rx(), ((Event6) prevEvent).ry(),
+            ((Event6) prevEvent).rz());
         delay = this.timestamp() - prevEvent.timestamp();
         if (delay == 0)
           speed = distance;
@@ -346,35 +346,35 @@ public class DOF6Event extends MotionEvent {
   }
 
   /**
-   * Convenience function that simply returns {@code return dof3Event(true)}
+   * Convenience function that simply returns {@code return event3(true)}
    *
-   * @see #dof3Event(boolean)
+   * @see #event3(boolean)
    */
-  public DOF3Event dof3Event() {
-    return dof3Event(true);
+  public Event3 event3() {
+    return event3(true);
   }
 
   /**
-   * Reduces the event to a {@link remixlab.bias.event.DOF3Event} (lossy reduction).
+   * Reduces the event to a {@link Event3} (lossy reduction).
    *
    * @param fromTranslation if true keeps dof1, dof2 and dof3; otherwise keeps dof4, dof4 and dof6.
    */
-  public DOF3Event dof3Event(boolean fromTranslation) {
-    DOF3Event pe3;
-    DOF3Event e3;
+  public Event3 event3(boolean fromTranslation) {
+    Event3 pe3;
+    Event3 e3;
     if (isRelative()) {
       if (fromTranslation) {
-        pe3 = new DOF3Event(null, prevX(), prevY(), prevZ(), modifiers(), id());
-        e3 = new DOF3Event(pe3, x(), y(), z(), modifiers(), id());
+        pe3 = new Event3(null, prevX(), prevY(), prevZ(), modifiers(), id());
+        e3 = new Event3(pe3, x(), y(), z(), modifiers(), id());
       } else {
-        pe3 = new DOF3Event(null, prevRX(), prevRY(), prevRZ(), modifiers(), id());
-        e3 = new DOF3Event(pe3, rx(), ry(), rz(), modifiers(), id());
+        pe3 = new Event3(null, prevRX(), prevRY(), prevRZ(), modifiers(), id());
+        e3 = new Event3(pe3, rx(), ry(), rz(), modifiers(), id());
       }
     } else {
       if (fromTranslation) {
-        e3 = new DOF3Event(dx(), dy(), dz(), modifiers(), id());
+        e3 = new Event3(dx(), dy(), dz(), modifiers(), id());
       } else {
-        e3 = new DOF3Event(drx(), dry(), drz(), modifiers(), id());
+        e3 = new Event3(drx(), dry(), drz(), modifiers(), id());
       }
     }
     e3.delay = this.delay();

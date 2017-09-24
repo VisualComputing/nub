@@ -14,7 +14,7 @@ import remixlab.bias.Event;
 import remixlab.bias.Shortcut;
 
 /**
- * This class represents {@link remixlab.bias.event.ClickEvent} shortcuts.
+ * This class represents {@link TapEvent} shortcuts.
  * <p>
  * Click shortcuts are defined with a specific number of clicks and can be of one out of
  * two forms: 1. A gesture-id; and, 2. A gesture-id plus a key-modifier (such as the CTRL
@@ -22,15 +22,15 @@ import remixlab.bias.Shortcut;
  * <p>
  * Note that click shortcuts should have at least one click.
  */
-public class ClickShortcut extends Shortcut {
-  protected final int numberOfClicks;
+public class TapShortcut extends Shortcut {
+  protected final int numberOfTaps;
 
   /**
    * Defines a single click shortcut from the given gesture-id.
    *
    * @param id id
    */
-  public ClickShortcut(int id) {
+  public TapShortcut(int id) {
     this(Event.NO_MODIFIER_MASK, id, 1);
   }
 
@@ -40,7 +40,7 @@ public class ClickShortcut extends Shortcut {
    * @param id id
    * @param c  number of clicks
    */
-  public ClickShortcut(int id, int c) {
+  public TapShortcut(int id, int c) {
     this(Event.NO_MODIFIER_MASK, id, c);
   }
 
@@ -52,25 +52,25 @@ public class ClickShortcut extends Shortcut {
    * @param id id
    * @param c  bumber of clicks
    */
-  public ClickShortcut(int m, int id, int c) {
+  public TapShortcut(int m, int id, int c) {
     super(m, id);
     if (c <= 0)
-      this.numberOfClicks = 1;
+      this.numberOfTaps = 1;
     else
-      this.numberOfClicks = c;
+      this.numberOfTaps = c;
   }
 
   /**
    * Returns the click-shortcut click count.
    */
-  public int clickCount() {
-    return numberOfClicks;
+  public int count() {
+    return numberOfTaps;
   }
 
   @Override
   public boolean matches(Shortcut other) {
-    if(other instanceof ClickShortcut)
-      return super.matches(other) && clickCount() == ((ClickShortcut) other).clickCount();
+    if(other instanceof TapShortcut)
+      return super.matches(other) && count() == ((TapShortcut) other).count();
     return false;
   }
 }
