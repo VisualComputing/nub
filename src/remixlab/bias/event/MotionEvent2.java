@@ -11,38 +11,35 @@
 package remixlab.bias.event;
 
 /**
- * A {@link remixlab.bias.event.MotionEvent} with three degrees-of-freedom ( {@link #x()},
- * {@link #y()} and {@link #z()} ).
+ * A {@link remixlab.bias.event.MotionEvent} with two degrees-of-freedom ({@link #x()}
+ * and {@link #y()}).
  */
-public class Event3 extends MotionEvent {
+public class MotionEvent2 extends MotionEvent {
   protected float x, dx;
   protected float y, dy;
-  protected float z, dz;
 
   /**
    * Construct an absolute event from the given dof's and modifiers.
    *
    * @param dx
    * @param dy
-   * @param dz
    * @param modifiers
    * @param id
    */
-  public Event3(float dx, float dy, float dz, int modifiers, int id) {
+  public MotionEvent2(float dx, float dy, int modifiers, int id) {
     super(modifiers, id);
     this.dx = dx;
     this.dy = dy;
-    this.dz = dz;
   }
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof Event3 ? (Event3) prevEvent : null, x, y, z, modifiers, id)}.
+   * {@code this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y, modifiers, id)}.
    *
-   * @see #Event3(Event3, float, float, float, int, int)
+   * @see #MotionEvent2(MotionEvent2, float, float, int, int)
    */
-  public Event3(MotionEvent prevEvent, float x, float y, float z, int modifiers, int id) {
-    this(prevEvent instanceof Event3 ? (Event3) prevEvent : null, x, y, z, modifiers, id);
+  public MotionEvent2(MotionEvent prevEvent, float x, float y, int modifiers, int id) {
+    this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y, modifiers, id);
   }
 
   /**
@@ -54,15 +51,13 @@ public class Event3 extends MotionEvent {
    * @param prevEvent
    * @param x
    * @param y
-   * @param z
    * @param modifiers
    * @param id
    */
-  public Event3(Event3 prevEvent, float x, float y, float z, int modifiers, int id) {
+  public MotionEvent2(MotionEvent2 prevEvent, float x, float y, int modifiers, int id) {
     super(modifiers, id);
     this.x = x;
     this.y = y;
-    this.z = z;
     setPrevious(prevEvent);
   }
 
@@ -71,23 +66,21 @@ public class Event3 extends MotionEvent {
    *
    * @param dx
    * @param dy
-   * @param dz
    */
-  public Event3(float dx, float dy, float dz) {
+  public MotionEvent2(float dx, float dy) {
     super();
     this.dx = dx;
     this.dy = dy;
-    this.dz = dz;
   }
 
   /**
    * Same as
-   * {@code this(prevEvent instanceof Event3 ? (Event3) prevEvent : null, x, y, z)}.
+   * {@code this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y)}.
    *
-   * @see #Event3(Event3, float, float, float)
+   * @see #MotionEvent2(MotionEvent2, float, float)
    */
-  public Event3(MotionEvent prevEvent, float x, float y, float z) {
-    this(prevEvent instanceof Event3 ? (Event3) prevEvent : null, x, y, z);
+  public MotionEvent2(MotionEvent prevEvent, float x, float y) {
+    this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y);
   }
 
   /**
@@ -99,51 +92,45 @@ public class Event3 extends MotionEvent {
    * @param prevEvent
    * @param x
    * @param y
-   * @param z
    */
-  public Event3(Event3 prevEvent, float x, float y, float z) {
+  public MotionEvent2(MotionEvent2 prevEvent, float x, float y) {
     super();
     this.x = x;
     this.y = y;
-    this.z = z;
     setPrevious(prevEvent);
   }
 
-  protected Event3(Event3 other) {
+  protected MotionEvent2(MotionEvent2 other) {
     super(other);
     this.x = other.x;
     this.dx = other.dx;
     this.y = other.y;
     this.dy = other.dy;
-    this.z = other.z;
-    this.dz = other.z;
   }
 
   @Override
-  public Event3 get() {
-    return new Event3(this);
+  public MotionEvent2 get() {
+    return new MotionEvent2(this);
   }
 
   @Override
-  public Event3 flush() {
-    return (Event3) super.flush();
+  public MotionEvent2 flush() {
+    return (MotionEvent2) super.flush();
   }
 
   @Override
-  public Event3 fire() {
-    return (Event3) super.fire();
+  public MotionEvent2 fire() {
+    return (MotionEvent2) super.fire();
   }
 
   @Override
   protected void setPrevious(MotionEvent prevEvent) {
     rel = true;
     if (prevEvent != null)
-      if (prevEvent instanceof Event3 && prevEvent.id() == this.id()) {
-        this.dx = this.x() - ((Event3) prevEvent).x();
-        this.dy = this.y() - ((Event3) prevEvent).y();
-        this.dz = this.z() - ((Event3) prevEvent).z();
-        distance = MotionEvent
-            .distance(x, y, z, ((Event3) prevEvent).x(), ((Event3) prevEvent).y(), ((Event3) prevEvent).z());
+      if (prevEvent instanceof MotionEvent2 && prevEvent.id() == this.id()) {
+        this.dx = this.x() - ((MotionEvent2) prevEvent).x();
+        this.dy = this.y() - ((MotionEvent2) prevEvent).y();
+        distance = MotionEvent.distance(x, y, ((MotionEvent2) prevEvent).x(), ((MotionEvent2) prevEvent).y());
         delay = this.timestamp() - prevEvent.timestamp();
         if (delay == 0)
           speed = distance;
@@ -194,54 +181,52 @@ public class Event3 extends MotionEvent {
     return y() - dy();
   }
 
-  /**
-   * @return dof-3, only meaningful if the event {@link #isRelative()}
-   */
-  public float z() {
-    return z;
-  }
-
-  /**
-   * @return dof-3 delta
-   */
-  public float dz() {
-    return dz;
-  }
-
-  /**
-   * @return previous dof-3, only meaningful if the event {@link #isRelative()}
-   */
-  public float prevZ() {
-    return z() - dz();
-  }
-
   @Override
   public boolean isNull() {
-    if (dx()==0 && dy()==0 && dz()==0)
+    if (dx()==0 && dy()==0)
       return true;
     return false;
   }
 
   /**
-   * Reduces the event to a {@link Event2} (lossy reduction). Keeps
-   * dof-1 and dof-2 and discards dof-3.
+   * Convenience function that simply returns {@code return event1(true)}
+   *
+   * @see #event1(boolean)
    */
-  public Event2 event2() {
-    Event2 pe2;
-    Event2 e2;
-    if (isRelative()) {
-      pe2 = new Event2(null, prevX(), prevY(), modifiers(), id());
-      e2 = new Event2(pe2, x(), y(), modifiers(), id());
+  public MotionEvent1 event1() {
+    return event1(true);
+  }
+
+  /**
+   * Reduces the event to a {@link MotionEvent1} (lossy reduction).
+   *
+   * @param fromX if true keeps dof-1, else keeps dof-2
+   */
+  public MotionEvent1 event1(boolean fromX) {
+    MotionEvent1 pe1;
+    MotionEvent1 e1;
+    if (fromX) {
+      if (isRelative()) {
+        pe1 = new MotionEvent1(null, prevX(), modifiers(), id());
+        e1 = new MotionEvent1(pe1, x(), modifiers(), id());
+      } else {
+        e1 = new MotionEvent1(dx(), modifiers(), id());
+      }
     } else {
-      e2 = new Event2(dx(), dy(), modifiers(), id());
+      if (isRelative()) {
+        pe1 = new MotionEvent1(null, prevY(), modifiers(), id());
+        e1 = new MotionEvent1(pe1, y(), modifiers(), id());
+      } else {
+        e1 = new MotionEvent1(dy(), modifiers(), id());
+      }
     }
-    e2.delay = this.delay();
-    e2.speed = this.speed();
-    e2.distance = this.distance();
+    e1.delay = this.delay();
+    e1.speed = this.speed();
+    e1.distance = this.distance();
     if (fired())
-      return e2.fire();
+      return e1.fire();
     else if (flushed())
-      return e2.flush();
-    return e2;
+      return e1.flush();
+    return e1;
   }
 }

@@ -23,8 +23,8 @@ import remixlab.bias.event.*;
  * <ol>
  * <li>{@link remixlab.bias.event.MotionEvent} /
  * {@link remixlab.bias.Shortcut}. Note that motion-event derived classes:
- * {@link Event1}, {@link Event2},
- * {@link Event3}, {@link Event6}, are also
+ * {@link MotionEvent1}, {@link MotionEvent2},
+ * {@link MotionEvent3}, {@link MotionEvent6}, are also
  * related to shortcuts.</li>
  * <li>{@link TapEvent} / {@link TapShortcut}
  * </li>

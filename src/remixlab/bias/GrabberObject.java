@@ -19,8 +19,8 @@ import remixlab.bias.event.*;
  * Based on the concrete event type, this model object splits the
  * {@link #track(Event)} and the {@link #interact(Event)}
  * methods into more specific versions of them, e.g.,
- * {@link #track(TapEvent)}, {@link #track(Event3)},
- * {@link #interact(Event6)} , {@link #interact(KeyEvent)} and
+ * {@link #track(TapEvent)}, {@link #track(MotionEvent3)},
+ * {@link #interact(MotionEvent6)} , {@link #interact(KeyEvent)} and
  * so on. Thus allowing implementations of this abstract GrabberObject to override only
  * those method signatures that might be of their interest.
  */
@@ -80,21 +80,21 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Calls interact() on the proper motion event:
-   * {@link Event1}, {@link Event2},
-   * {@link Event3} or {@link Event6}.
+   * {@link MotionEvent1}, {@link MotionEvent2},
+   * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void interact(MotionEvent event) {
-    if (event instanceof Event1)
-      interact((Event1) event);
-    if (event instanceof Event2)
-      interact((Event2) event);
-    if (event instanceof Event3)
-      interact((Event3) event);
-    if (event instanceof Event6)
-      interact((Event6) event);
+    if (event instanceof MotionEvent1)
+      interact((MotionEvent1) event);
+    if (event instanceof MotionEvent2)
+      interact((MotionEvent2) event);
+    if (event instanceof MotionEvent3)
+      interact((MotionEvent3) event);
+    if (event instanceof MotionEvent6)
+      interact((MotionEvent6) event);
   }
 
   /**
@@ -113,30 +113,30 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event1}.
+   * {@link MotionEvent1}.
    */
-  protected void interact(Event1 event) {
+  protected void interact(MotionEvent1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event2}.
+   * {@link MotionEvent2}.
    */
-  protected void interact(Event2 event) {
+  protected void interact(MotionEvent2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event3}.
+   * {@link MotionEvent3}.
    */
-  protected void interact(Event3 event) {
+  protected void interact(MotionEvent3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event6}.
+   * {@link MotionEvent6}.
    */
-  protected void interact(Event6 event) {
+  protected void interact(MotionEvent6 event) {
   }
 
   @Override
@@ -152,21 +152,21 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Calls track() on the proper motion event:
-   * {@link Event1}, {@link Event2},
-   * {@link Event3} or {@link Event6}.
+   * {@link MotionEvent1}, {@link MotionEvent2},
+   * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
   public boolean track(MotionEvent event) {
-    if (event instanceof Event1)
-      return track((Event1) event);
-    if (event instanceof Event2)
-      return track((Event2) event);
-    if (event instanceof Event3)
-      return track((Event3) event);
-    if (event instanceof Event6)
-      return track((Event6) event);
+    if (event instanceof MotionEvent1)
+      return track((MotionEvent1) event);
+    if (event instanceof MotionEvent2)
+      return track((MotionEvent2) event);
+    if (event instanceof MotionEvent3)
+      return track((MotionEvent3) event);
+    if (event instanceof MotionEvent6)
+      return track((MotionEvent6) event);
     return false;
   }
 
@@ -188,33 +188,33 @@ public abstract class GrabberObject implements Grabber {
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link Event1}.
+   * {@link MotionEvent1}.
    */
-  protected boolean track(Event1 event) {
+  protected boolean track(MotionEvent1 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link Event2}.
+   * {@link MotionEvent2}.
    */
-  protected boolean track(Event2 event) {
+  protected boolean track(MotionEvent2 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link Event3}.
+   * {@link MotionEvent3}.
    */
-  protected boolean track(Event3 event) {
+  protected boolean track(MotionEvent3 event) {
     return false;
   }
 
   /**
    * Override this method when you want the object to be picked from a
-   * {@link Event6}.
+   * {@link MotionEvent6}.
    */
-  protected boolean track(Event6 event) {
+  protected boolean track(MotionEvent6 event) {
     return false;
   }
 }

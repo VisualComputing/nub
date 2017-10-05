@@ -137,23 +137,23 @@ public class MotionEvent extends Event {
    *
    * @see #event1(MotionEvent, boolean)
    */
-  public static Event1 event1(MotionEvent event) {
+  public static MotionEvent1 event1(MotionEvent event) {
     return event1(event, true);
   }
 
   /**
-   * Returns a {@link Event1} from the MotionEvent x-coordinate if
+   * Returns a {@link MotionEvent1} from the MotionEvent x-coordinate if
    * {@code fromX} is {@code true} and from the y-coordinate otherwise.
    */
-  public static Event1 event1(MotionEvent event, boolean fromX) {
-    if (event instanceof Event1)
-      return (Event1) event;
-    if (event instanceof Event2)
-      return ((Event2) event).event1(fromX);
-    if (event instanceof Event3)
-      return ((Event3) event).event2().event1(fromX);
-    if (event instanceof Event6)
-      return ((Event6) event).event3(fromX).event2().event1(fromX);
+  public static MotionEvent1 event1(MotionEvent event, boolean fromX) {
+    if (event instanceof MotionEvent1)
+      return (MotionEvent1) event;
+    if (event instanceof MotionEvent2)
+      return ((MotionEvent2) event).event1(fromX);
+    if (event instanceof MotionEvent3)
+      return ((MotionEvent3) event).event2().event1(fromX);
+    if (event instanceof MotionEvent6)
+      return ((MotionEvent6) event).event3(fromX).event2().event1(fromX);
     return null;
   }
 
@@ -162,24 +162,24 @@ public class MotionEvent extends Event {
    *
    * @see #event2(MotionEvent, boolean)
    */
-  public static Event2 event2(MotionEvent event) {
+  public static MotionEvent2 event2(MotionEvent event) {
     return event2(event, true);
   }
 
   /**
-   * Returns a {@link Event2} from the MotionEvent x-coordinate if
+   * Returns a {@link MotionEvent2} from the MotionEvent x-coordinate if
    * {@code fromX} is {@code true} and from the y-coordinate otherwise.
    */
-  public static Event2 event2(MotionEvent event, boolean fromX) {
-    if (event instanceof Event1)
+  public static MotionEvent2 event2(MotionEvent event, boolean fromX) {
+    if (event instanceof MotionEvent1)
       return null;
-    if (event instanceof Event2)
-      // return ((Event2) event).get();//TODO better?
-      return (Event2) event;
-    if (event instanceof Event3)
-      return ((Event3) event).event2();
-    if (event instanceof Event6)
-      return ((Event6) event).event3(fromX).event2();
+    if (event instanceof MotionEvent2)
+      // return ((MotionEvent2) event).get();//TODO better?
+      return (MotionEvent2) event;
+    if (event instanceof MotionEvent3)
+      return ((MotionEvent3) event).event2();
+    if (event instanceof MotionEvent6)
+      return ((MotionEvent6) event).event3(fromX).event2();
     return null;
   }
 
@@ -188,34 +188,34 @@ public class MotionEvent extends Event {
    *
    * @see #event3(MotionEvent, boolean)
    */
-  public static Event3 event3(MotionEvent event) {
+  public static MotionEvent3 event3(MotionEvent event) {
     return event3(event, true);
   }
 
   /**
-   * Returns a {@link Event3} from the MotionEvent
+   * Returns a {@link MotionEvent3} from the MotionEvent
    * translation-coordinates if {@code fromTranslation} is {@code true} and from the
    * rotation-coordinate otherwise.
    */
-  public static Event3 event3(MotionEvent event, boolean fromTranslation) {
-    if (event instanceof Event1)
+  public static MotionEvent3 event3(MotionEvent event, boolean fromTranslation) {
+    if (event instanceof MotionEvent1)
       return null;
-    if (event instanceof Event2)
+    if (event instanceof MotionEvent2)
       return null;
-    if (event instanceof Event3)
-      return (Event3) event;
-    if (event instanceof Event6)
-      return ((Event6) event).event3(fromTranslation);
+    if (event instanceof MotionEvent3)
+      return (MotionEvent3) event;
+    if (event instanceof MotionEvent6)
+      return ((MotionEvent6) event).event3(fromTranslation);
     return null;
   }
 
   /**
-   * Returns a {@link Event6} if the MotionEvent {@code instanceof}
-   * {@link Event6} and null otherwise..
+   * Returns a {@link MotionEvent6} if the MotionEvent {@code instanceof}
+   * {@link MotionEvent6} and null otherwise..
    */
-  public static Event6 event6(MotionEvent event) {
-    if (event instanceof Event6)
-      return (Event6) event;
+  public static MotionEvent6 event6(MotionEvent event) {
+    if (event instanceof MotionEvent6)
+      return (MotionEvent6) event;
     return null;
   }
 

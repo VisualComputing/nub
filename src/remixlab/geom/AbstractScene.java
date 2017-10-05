@@ -557,14 +557,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Automatically called by agents handling this frame.
    */
   public boolean checkIfGrabsInput(MotionEvent event) {
-    if (event instanceof Event1)
-      return checkIfGrabsInput((Event1) event);
-    if (event instanceof Event2)
-      return checkIfGrabsInput((Event2) event);
-    if (event instanceof Event3)
-      return checkIfGrabsInput((Event3) event);
-    if (event instanceof Event6)
-      return checkIfGrabsInput((Event6) event);
+    if (event instanceof MotionEvent1)
+      return checkIfGrabsInput((MotionEvent1) event);
+    if (event instanceof MotionEvent2)
+      return checkIfGrabsInput((MotionEvent2) event);
+    if (event instanceof MotionEvent3)
+      return checkIfGrabsInput((MotionEvent3) event);
+    if (event instanceof MotionEvent6)
+      return checkIfGrabsInput((MotionEvent6) event);
     return false;
   }
 
@@ -590,34 +590,34 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link Event1}.
+   * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
-  public boolean checkIfGrabsInput(Event1 event) {
-    AbstractScene.showMissingImplementationWarning("track(Event1 event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(MotionEvent1 event) {
+    AbstractScene.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    * <p>
-   * Override this method when you want the object to be picked from a {@link Event1}.
+   * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
-  public boolean checkIfGrabsInput(Event2 event) {
-    AbstractScene.showMissingImplementationWarning("track(Event2 event)", this.getClass().getName());
+  public boolean checkIfGrabsInput(MotionEvent2 event) {
+    AbstractScene.showMissingImplementationWarning("track(MotionEvent2 event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(Event3 event) {
+  public boolean checkIfGrabsInput(MotionEvent3 event) {
     return checkIfGrabsInput(event.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
-  public boolean checkIfGrabsInput(Event6 event) {
+  public boolean checkIfGrabsInput(MotionEvent6 event) {
     return checkIfGrabsInput(event.event3().event2());
   }
 
@@ -633,49 +633,49 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Calls interact() on the proper motion event:
-   * {@link Event1}, {@link Event2},
-   * {@link Event3} or {@link Event6}.
+   * {@link MotionEvent1}, {@link MotionEvent2},
+   * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.bias.event.MotionEvent}.
    */
   protected void performInteraction(MotionEvent event) {
-    if (event instanceof Event1)
-      performInteraction((Event1) event);
-    if (event instanceof Event2)
-      performInteraction((Event2) event);
-    if (event instanceof Event3)
-      performInteraction((Event3) event);
-    if (event instanceof Event6)
-      performInteraction((Event6) event);
+    if (event instanceof MotionEvent1)
+      performInteraction((MotionEvent1) event);
+    if (event instanceof MotionEvent2)
+      performInteraction((MotionEvent2) event);
+    if (event instanceof MotionEvent3)
+      performInteraction((MotionEvent3) event);
+    if (event instanceof MotionEvent6)
+      performInteraction((MotionEvent6) event);
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event1}.
+   * {@link MotionEvent1}.
    */
-  protected void performInteraction(Event1 event) {
+  protected void performInteraction(MotionEvent1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event2}.
+   * {@link MotionEvent2}.
    */
-  protected void performInteraction(Event2 event) {
+  protected void performInteraction(MotionEvent2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event3}.
+   * {@link MotionEvent3}.
    */
-  protected void performInteraction(Event3 event) {
+  protected void performInteraction(MotionEvent3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
-   * {@link Event6}.
+   * {@link MotionEvent6}.
    */
-  protected void performInteraction(Event6 event) {
+  protected void performInteraction(MotionEvent6 event) {
   }
 
   /**

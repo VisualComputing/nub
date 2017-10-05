@@ -27,7 +27,7 @@ public class MouseAgent extends Agent {
   protected float xSens = 1f;
   protected float ySens = 1f;
   protected Scene scene;
-  protected Event2 currentEvent, prevEvent;
+  protected MotionEvent2 currentEvent, prevEvent;
   protected boolean move, press, drag, release;
   protected PickingMode pMode;
 
@@ -84,7 +84,7 @@ public class MouseAgent extends Agent {
     drag = e.getAction() == processing.event.MouseEvent.DRAG;
     release = e.getAction() == processing.event.MouseEvent.RELEASE;
     if (move || press || drag || release) {
-      currentEvent = new Event2(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
+      currentEvent = new MotionEvent2(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
           e.getModifiers(), move ? Event.NO_ID : e.getButton());
       if (move && (pickingMode() == PickingMode.MOVE))
         poll(currentEvent);
@@ -93,7 +93,7 @@ public class MouseAgent extends Agent {
       return;
     }
     if (e.getAction() == processing.event.MouseEvent.WHEEL) {
-      handle(new Event1(e.getCount(), e.getModifiers(), WHEEL_ID));
+      handle(new MotionEvent1(e.getCount(), e.getModifiers(), WHEEL_ID));
       return;
     }
     if (e.getAction() == processing.event.MouseEvent.CLICK) {
