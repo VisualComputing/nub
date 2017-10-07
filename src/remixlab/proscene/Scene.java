@@ -1314,7 +1314,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   protected boolean unchachedBuffer;
-  protected PGraphics targetPGraphics;
+  public PGraphics targetPGraphics;
 
   /**
    * Draw all scene {@link #frames(boolean)} into the {@link #pg()} buffer. A similar (but
