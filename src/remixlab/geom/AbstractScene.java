@@ -17,7 +17,6 @@ import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
 import remixlab.primitives.*;
 import remixlab.primitives.constraint.Constraint;
-import remixlab.geom.ik.Solver;
 import remixlab.fpstiming.Animator;
 import remixlab.fpstiming.AnimatorObject;
 import remixlab.fpstiming.TimingHandler;
@@ -145,9 +144,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // public final static int PUP = 1 << 6;
   // public final static int ARP = 1 << 7;
 
-  // IKinematics solvers
-  protected List<Solver.TreeSolver> solvers;
-
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
@@ -177,7 +173,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    */
   public AbstractScene() {
     seeds = new ArrayList<InteractiveFrame>();
-    solvers = new ArrayList<Solver.TreeSolver>();
     setPlatform();
     setTimingHandler(new TimingHandler(this));
     deltaCount = frameCount;
@@ -2705,79 +2700,4 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Enables z-buffer.
    */
   public abstract void enableDepthTest();
-
-  //TODO: high-level ik api handling
-
-  /**
-   * Return registered solvers
-   * */
-  public List<Solver.TreeSolver> solvers() {
-    return solvers;
-  }
-
-  /**
-   * Registers the given chain with the given name
-   * to solve IK.
-   */
-  public Solver.TreeSolver setIKStructure(InteractiveFrame branchRoot) {
-    for(Solver.TreeSolver solver : solvers) {
-      //If Head is Contained in any structure do nothing
-      if(!branch(solver.getHead(), branchRoot, true).isEmpty())
-        return null;
-    }
-    Solver.TreeSolver solver = new Solver.TreeSolver(branchRoot);
-    solvers.add(solver);
-    //Add task
-    registerTimingTask(solver.getExecutionTask());
-    solver.getExecutionTask().run(1);
-    return solver;
-  }
-
-  /**
-   * Unregisters the IK Solver with the given Frame as branchRoot
-   */
-  public boolean resetIKStructure(InteractiveFrame branchRoot) {
-    Solver.TreeSolver toRemove = null;
-    for(Solver.TreeSolver solver: solvers) {
-      if (solver.getHead().id() == branchRoot.id()) {
-        toRemove = solver;
-        break;
-      }
-    }
-    //Remove task
-    unregisterTimingTask(toRemove.getExecutionTask());
-    return solvers.remove(toRemove);
-  }
-
-  /**
-   * Gets the IK Solver with the given name
-   */
-  public Solver.TreeSolver getSolver(InteractiveFrame branchRoot){
-    for(Solver.TreeSolver solver: solvers) {
-      if (solver.getHead().id() == branchRoot.id()) {
-        return solver;
-      }
-    }
-    return null;
-  }
-
-  public boolean addIKTarget(InteractiveFrame endEffector, Frame target){
-    for(Solver.TreeSolver solver: solvers) {
-      if(solver.addTarget(endEffector, target)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Execute IK Task for a IK Solver that is not registered
-   */
-  public void executeIKSolver(Solver solver){
-    executeIKSolver(solver, 1);
-  }
-
-  public void executeIKSolver(Solver solver, long period){
-    registerTimingTask(solver.getExecutionTask());
-    solver.getExecutionTask().run(period);
-  }
-
 }
