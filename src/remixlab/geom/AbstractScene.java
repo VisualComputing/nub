@@ -45,8 +45,7 @@ import java.util.List;
  * <p>
  * Each AbstractScene provides the following main object instances:
  * <ol>
- * <li>An {@link #eye()} which represents the 2D ( {@link Window})
- * or 3D ( {@link Camera}) controlling object. For details please
+ * <li>An {@link #eye()} which represents the 2D controlling object. For details please
  * refer to the {@link Eye} class.</li>
  * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For
  * details please refer to the {@link remixlab.fpstiming.TimingHandler} class.</li>
@@ -1834,7 +1833,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * The near and far planes are drawn as quads, the frustum is drawn using lines and the
    * camera up vector is represented by an arrow to disambiguate the drawing.
    * <p>
-   * <b>Note:</b> The drawing of a Scene's own Scene.camera() should not be visible, but
+   * <b>Note:</b> The drawing of a Scene's own Scene.eye() should not be visible, but
    * may create artifacts due to numerical imprecisions.
    */
   public abstract void drawEye(Eye eye);
@@ -1981,15 +1980,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // 3. EYE STUFF
 
   /**
-   * Returns the associated Eye, never {@code null}. This is the high level version of
-   * {@link #window()} and {@link #camera()} which holds that which is common of the two.
-   * <p>
-   * 2D applications should simply use {@link #window()} and 3D applications should simply
-   * use {@link #camera()}. If you plan to implement two versions of the same application
-   * one in 2D and the other in 3D, use this method.
-   * <p>
-   * <b>Note</b> that not all methods defined in the Camera class are available in the Eye
-   * class and that all methods defined in the Window class are.
+   * TODO
+   * Returns the associated Eye. Maybe null (when returned type is converted to InteractiveFrame).
    */
   public Eye eye() {
     return eye;
@@ -2058,56 +2050,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * If {@link #is3D()} returns the associated Camera, never {@code null}. If
-   * {@link #is2D()} throws an exception.
-   *
-   * @see #eye()
-   */
-  public Camera camera() {
-    if (this.is3D())
-      return (Camera) eye;
-    else
-      throw new RuntimeException("Camera type is only available in 3D");
-  }
-
-  /**
-   * If {@link #is3D()} sets the Camera. If {@link #is2D()} throws an exception.
-   *
-   * @see #setEye(Eye)
-   */
-  public void setCamera(Camera cam) {
-    if (this.is2D()) {
-      System.out.println("Warning: Camera Type is only available in 3D");
-    } else
-      setEye(cam);
-  }
-
-  /**
-   * If {@link #is2D()} returns the associated Window, never {@code null}. If
-   * {@link #is3D()} throws an exception.
-   *
-   * @see #eye()
-   */
-  public Window window() {
-    if (this.is2D())
-      return (Window) eye;
-    else
-      throw new RuntimeException("Window type is only available in 2D");
-  }
-
-  /**
-   * If {@link #is2D()} sets the Window. If {@link #is3D()} throws an exception.
-   *
-   * @see #setEye(Eye)
-   */
-  public void setWindow(Window win) {
-    if (this.is3D()) {
-      System.out.println("Warning: Window Type is only available in 2D");
-    } else
-      setEye(win);
-  }
-
-  /**
    * Same as {@code eye().frame().setConstraint(constraint)}.
    *
    * @see InteractiveFrame#setConstraint(Constraint)
@@ -2152,7 +2094,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see Camera#updateBoundaryEquations()
+   * @see Eye#updateBoundaryEquations()
    */
   public boolean areBoundaryEquationsEnabled() {
     return eye().areBoundaryEquationsEnabled();
@@ -2166,7 +2108,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see Camera#updateBoundaryEquations()
+   * @see Eye#updateBoundaryEquations()
    */
   public void toggleBoundaryEquations() {
     if (areBoundaryEquationsEnabled())
@@ -2183,7 +2125,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see Camera#updateBoundaryEquations()
+   * @see Eye#updateBoundaryEquations()
    */
   public void disableBoundaryEquations() {
     enableBoundaryEquations(false);
@@ -2197,7 +2139,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
-   * @see Camera#updateBoundaryEquations()
+   * @see Eye#updateBoundaryEquations()
    */
   public void enableBoundaryEquations() {
     enableBoundaryEquations(true);
@@ -2212,7 +2154,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #toggleBoundaryEquations()
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations()
-   * @see Camera#updateBoundaryEquations()
+   * @see Eye#updateBoundaryEquations()
    */
   public void enableBoundaryEquations(boolean flag) {
     eye().enableBoundaryEquations(flag);
@@ -2226,56 +2168,56 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       AbstractScene.showDepthWarning("toggleCameraType");
       return;
     } else {
-      if (((Camera) eye()).type() == Camera.Type.PERSPECTIVE)
-        setCameraType(Camera.Type.ORTHOGRAPHIC);
+      if (eye().type() == Eye.Type.PERSPECTIVE)
+        setCameraType(Eye.Type.ORTHOGRAPHIC);
       else
-        setCameraType(Camera.Type.PERSPECTIVE);
+        setCameraType(Eye.Type.PERSPECTIVE);
     }
   }
 
   /**
-   * Same as {@code return camera().isFaceBackFacing(a, b, c)}.
+   * Same as {@code return eye().isFaceBackFacing(a, b, c)}.
    * <p>
    * This method is only available in 3D.
    *
-   * @see Camera#isFaceBackFacing(Vec, Vec, Vec)
+   * @see Eye#isFaceBackFacing(Vec, Vec, Vec)
    */
   public boolean isFaceBackFacing(Vec a, Vec b, Vec c) {
     if (this.is2D()) {
       AbstractScene.showDepthWarning("isFaceBackFacing");
       return false;
     }
-    return camera().isFaceBackFacing(a, b, c);
+    return eye().isFaceBackFacing(a, b, c);
   }
 
   /**
-   * Same as {@code return camera().isConeBackFacing(vertex, normals)}.
+   * Same as {@code return eye().isConeBackFacing(vertex, normals)}.
    * <p>
    * This method is only available in 3D.
    *
-   * @see Camera#isConeBackFacing(Vec, Vec[])
+   * @see Eye#isConeBackFacing(Vec, Vec[])
    */
   public boolean isConeBackFacing(Vec vertex, Vec[] normals) {
     if (this.is2D()) {
       AbstractScene.showDepthWarning("isConeBackFacing");
       return false;
     }
-    return camera().isConeBackFacing(vertex, normals);
+    return eye().isConeBackFacing(vertex, normals);
   }
 
   /**
-   * Same as {@code return camera().isConeBackFacing(vertex, axis, angle)}.
+   * Same as {@code return eye().isConeBackFacing(vertex, axis, angle)}.
    * <p>
    * This method is only available in 3D.
    *
-   * @see Camera#isConeBackFacing(Vec, Vec, float)
+   * @see Eye#isConeBackFacing(Vec, Vec, float)
    */
   public boolean isConeBackFacing(Vec vertex, Vec axis, float angle) {
     if (this.is2D()) {
       AbstractScene.showDepthWarning("isConeBackFacing");
       return false;
     }
-    return camera().isConeBackFacing(vertex, axis, angle);
+    return eye().isConeBackFacing(vertex, axis, angle);
   }
 
   /**
@@ -2302,11 +2244,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
    * value is not a linear interpolation between
-   * {@link Camera#zNear()} and
-   * {@link Camera#zFar()};
+   * {@link Eye#zNear()} and
+   * {@link Eye#zFar()};
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
    * the distance from the point you project to the camera, along the
-   * {@link Camera#viewDirection()}. See the {@code gluUnProject}
+   * {@link Eye#viewDirection()}. See the {@code gluUnProject}
    * man page for details.
    */
   public abstract float pixelDepth(Point pixel);
@@ -2340,7 +2282,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Returns the scene radius.
    * <p>
-   * Convenience wrapper function that simply calls {@code camera().sceneRadius()}
+   * Convenience wrapper function that simply calls {@code eye().sceneRadius()}
    *
    * @see #setRadius(float)
    * @see #center()
@@ -2352,7 +2294,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Returns the scene center.
    * <p>
-   * Convenience wrapper function that simply returns {@code camera().sceneCenter()}
+   * Convenience wrapper function that simply returns {@code eye().sceneCenter()}
    *
    * @see #setCenter(Vec) {@link #radius()}
    */
@@ -2382,7 +2324,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Sets the {@link #radius()} of the Scene.
    * <p>
    * Convenience wrapper function that simply calls
-   * {@code camera().setSceneRadius(radius)}.
+   * {@code eye().setSceneRadius(radius)}.
    *
    * @see #setCenter(Vec)
    */
@@ -2406,7 +2348,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * and {@code max} vectors.
    * <p>
    * Convenience wrapper function that simply calls
-   * {@code camera().setSceneBoundingBox(min,max)}
+   * {@code eye().setSceneBoundingBox(min,max)}
    *
    * @see #setRadius(float)
    * @see #setCenter(Vec)
@@ -2415,20 +2357,20 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     if (this.is2D())
       System.out.println("setBoundingBox is available only in 3D. Use setBoundingRect instead");
     else
-      ((Camera) eye()).setSceneBoundingBox(min, max);
+      eye().setSceneBoundingBox(min, max);
   }
 
   public void setBoundingRect(Vec min, Vec max) {
     if (this.is3D())
       System.out.println("setBoundingRect is available only in 2D. Use setBoundingBox instead");
     else
-      ((Window) eye()).setSceneBoundingBox(min, max);
+      eye().setSceneBoundingBox(min, max);
   }
 
   /**
-   * Convenience wrapper function that simply calls {@code camera().showEntireScene()}
+   * Convenience wrapper function that simply calls {@code eye().showEntireScene()}
    *
-   * @see Camera#showEntireScene()
+   * @see Eye#showEntireScene()
    */
   public void showAll() {
     eye().showEntireScene();
@@ -2439,11 +2381,11 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * {@code eye().setAnchorFromPixel(pixel)}.
    * <p>
    * Current implementation set no {@link Eye#anchor()}. Override
-   * {@link Camera#pointUnderPixel(Point)} in your openGL based
+   * {@link Eye#pointUnderPixel(Point)} in your openGL based
    * camera for this to work.
    *
    * @see Eye#setAnchorFromPixel(Point)
-   * @see Camera#pointUnderPixel(Point)
+   * @see Eye#pointUnderPixel(Point)
    */
   public boolean setAnchorFromPixel(Point pixel) {
     return eye().setAnchorFromPixel(pixel);
@@ -2455,14 +2397,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Convenience wrapper function that simply returns
-   * {@code camera().setSceneCenterFromPixel(pixel)}
+   * {@code eye().setSceneCenterFromPixel(pixel)}
    * <p>
-   * Current implementation set no {@link Camera#sceneCenter()}.
-   * Override {@link Camera#pointUnderPixel(Point)} in your openGL
+   * Current implementation set no {@link Eye#sceneCenter()}.
+   * Override {@link Eye#pointUnderPixel(Point)} in your openGL
    * based camera for this to work.
    *
-   * @see Camera#setSceneCenterFromPixel(Point)
-   * @see Camera#pointUnderPixel(Point)
+   * @see Eye#setSceneCenterFromPixel(Point)
+   * @see Eye#pointUnderPixel(Point)
    */
   public boolean setCenterFromPixel(Point pixel) {
     return eye().setSceneCenterFromPixel(pixel);
@@ -2475,22 +2417,22 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Returns the current {@link #eye()} type.
    */
-  public final Camera.Type cameraType() {
+  public final Eye.Type cameraType() {
     if (this.is2D()) {
       System.out.println("Warning: Camera Type is only available in 3D");
       return null;
     } else
-      return ((Camera) eye()).type();
+      return eye().type();
   }
 
   /**
    * Sets the {@link #eye()} type.
    */
-  public void setCameraType(Camera.Type type) {
+  public void setCameraType(Eye.Type type) {
     if (this.is2D()) {
       System.out.println("Warning: Camera Type is only available in 3D");
-    } else if (type != ((Camera) eye()).type())
-      ((Camera) eye()).setType(type);
+    } else if (type != eye().type())
+      eye().setType(type);
   }
 
   // WARNINGS and EXCEPTIONS STUFF

@@ -119,9 +119,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@link remixlab.proscene.Java2DMatrixHelper} and
    * {@link remixlab.proscene.GLMatrixHelper}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
-   * visual hint flags, instantiates the {@link #eye()} (a
-   * {@link Camera} if the Scene {@link #is3D()} or a
-   * {@link Window} if the Scene {@link #is2D()}). It also
+   * visual hint flags, instantiates the {@link #eye()}. It also
    * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}, and finally
    * calls {@link #init()}.
    * <p>
@@ -171,7 +169,7 @@ public class Scene extends AbstractScene implements PConstants {
     width = pg.width;
     height = pg.height;
     // properly set the eye which is a 3 step process:
-    eye = is3D() ? new Camera(this) : new Window(this);
+    eye = new Eye(this);
     setEye(eye());// calls showAll();
     //TODO testing
     //showAll();
@@ -690,7 +688,7 @@ public class Scene extends AbstractScene implements PConstants {
       throw new RuntimeException("pg() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixel.x(), (camera().screenHeight() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
+    pgl.readPixels(pixel.x(), (eye().screenHeight() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
         FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
@@ -1143,8 +1141,8 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Saves the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link Camera#type()} and the
-   * {@link Camera#keyFrameInterpolatorArray()} into
+   * {@link Eye#type()} and the
+   * {@link Eye#keyFrameInterpolatorArray()} into
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1155,7 +1153,7 @@ public class Scene extends AbstractScene implements PConstants {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
     json.setInt("visualHints", visualHints());
-    json.setBoolean("ortho", is2D() ? true : camera().type() == Camera.Type.ORTHOGRAPHIC ? true : false);
+    json.setBoolean("ortho", is2D() ? true : eye().type() == Eye.Type.ORTHOGRAPHIC ? true : false);
     json.setJSONObject("eye", toJSONObject(eyeFrame()));
     JSONArray jsonPaths = new JSONArray();
     // keyFrames
@@ -1189,8 +1187,8 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Loads the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link Camera#type()} and the
-   * {@link Camera#keyFrameInterpolatorArray()} from
+   * {@link Eye#type()} and the
+   * {@link Eye#keyFrameInterpolatorArray()} from
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1208,7 +1206,7 @@ public class Scene extends AbstractScene implements PConstants {
       setRadius(json.getFloat("radius"));
       setVisualHints(json.getInt("visualHints"));
       if (is3D())
-        camera().setType(json.getBoolean("ortho") ? Camera.Type.ORTHOGRAPHIC : Camera.Type.PERSPECTIVE);
+        eye().setType(json.getBoolean("ortho") ? Eye.Type.ORTHOGRAPHIC : Eye.Type.PERSPECTIVE);
       eyeFrame().setWorldMatrix(toFrame(json.getJSONObject("eye")));
       // keyFrames
       JSONArray paths = json.getJSONArray("paths");
@@ -1980,7 +1978,7 @@ public class Scene extends AbstractScene implements PConstants {
     int farIndex = is3D() ? 1 : 0;
     boolean ortho = false;
     if (is3D())
-      if (((Camera) eye).type() == Camera.Type.ORTHOGRAPHIC)
+      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
         ortho = true;
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
@@ -1997,18 +1995,18 @@ public class Scene extends AbstractScene implements PConstants {
     }
 
     if (is3D()) {
-      points[0].setZ(((Camera) eye).zNear() * 1 / eye.frame().magnitude());
-      points[1].setZ(((Camera) eye).zFar() * 1 / eye.frame().magnitude());
-      if (((Camera) eye).type() == Camera.Type.PERSPECTIVE) {
-        points[0].setY(points[0].z() * PApplet.tan(((Camera) eye).fieldOfView() / 2.0f));
-        points[0].setX(points[0].y() * ((Camera) eye).aspectRatio());
+      points[0].setZ(eye.zNear() * 1 / eye.frame().magnitude());
+      points[1].setZ(eye.zFar() * 1 / eye.frame().magnitude());
+      if (eye.type() == Eye.Type.PERSPECTIVE) {
+        points[0].setY(points[0].z() * PApplet.tan(eye.fieldOfView() / 2.0f));
+        points[0].setX(points[0].y() * eye.aspectRatio());
         float ratio = points[1].z() / points[0].z();
         points[1].setY(ratio * points[0].y());
         points[1].setX(ratio * points[0].x());
       }
 
       // Frustum lines
-      switch (((Camera) eye).type()) {
+      switch (eye.type()) {
         case PERSPECTIVE: {
           pg.beginShape(PApplet.LINES);
           Scene.vertex(pg, 0.0f, 0.0f, 0.0f);
@@ -2141,7 +2139,7 @@ public class Scene extends AbstractScene implements PConstants {
     pg.pushStyle();
     boolean ortho = false;
     if (is3D())
-      if (((Camera) eye).type() == Camera.Type.ORTHOGRAPHIC)
+      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
         ortho = true;
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vec corner = new Vec();
@@ -2151,10 +2149,10 @@ public class Scene extends AbstractScene implements PConstants {
       corner.setY(wh[1] * 1 / eye.frame().magnitude());
     }
     if (is3D()) {
-      corner.setZ(((Camera) eye).zNear() * 1 / eye.frame().magnitude());
-      if (((Camera) eye).type() == Camera.Type.PERSPECTIVE) {
-        corner.setY(corner.z() * PApplet.tan(((Camera) eye).fieldOfView() / 2.0f));
-        corner.setX(corner.y() * ((Camera) eye).aspectRatio());
+      corner.setZ(eye.zNear() * 1 / eye.frame().magnitude());
+      if (eye.type() == Eye.Type.PERSPECTIVE) {
+        corner.setY(corner.z() * PApplet.tan(eye.fieldOfView() / 2.0f));
+        corner.setX(corner.y() * eye.aspectRatio());
       }
     }
     drawPlane(pg, eye, corner, new Vec(0, 0, 1), texture);
@@ -2255,7 +2253,7 @@ public class Scene extends AbstractScene implements PConstants {
       // if ORTHOGRAPHIC: do it in the eye coordinate system
       // if PERSPECTIVE: do it in the world coordinate system
       Vec o = new Vec();
-      if (((Camera) eye).type() == Camera.Type.ORTHOGRAPHIC) {
+      if (eye.type() == Eye.Type.ORTHOGRAPHIC) {
         pg.pushMatrix();
         applyTransformation(eye.frame());
       }
@@ -2264,7 +2262,7 @@ public class Scene extends AbstractScene implements PConstants {
         o = eye.frame().inverseCoordinatesOf(new Vec());
       pg.beginShape(PApplet.LINES);
       for (Vec s : src) {
-        if (((Camera) eye).type() == Camera.Type.ORTHOGRAPHIC) {
+        if (eye.type() == Eye.Type.ORTHOGRAPHIC) {
           Vec v = eye.frame().coordinatesOf(s);
           Scene.vertex(pg, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
@@ -2272,14 +2270,14 @@ public class Scene extends AbstractScene implements PConstants {
           // Hence it should be multiplied by: 1 / eye.frame().magnitude()
           // The neg sign is because the zNear is positive but the eye view direction is
           // the negative Z-axis
-          Scene.vertex(pg, v.x(), v.y(), -((Camera) eye).zNear() * 1 / eye.frame().magnitude());
+          Scene.vertex(pg, v.x(), v.y(), -eye.zNear() * 1 / eye.frame().magnitude());
         } else {
           Scene.vertex(pg, s.x(), s.y(), s.z());
           Scene.vertex(pg, o.x(), o.y(), o.z());
         }
       }
       pg.endShape();
-      if (((Camera) eye).type() == Camera.Type.ORTHOGRAPHIC)
+      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
         pg.popMatrix();
     }
     pg.popStyle();

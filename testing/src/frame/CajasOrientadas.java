@@ -116,11 +116,11 @@ public class CajasOrientadas extends PApplet {
       println("papplet's frame count: " + frameCount);
       println("scene's frame count: " + scene.timingHandler().frameCount());
       Mat view = new Mat();
-      scene.camera().getView(view, false);
+      scene.eye().getView(view, false);
       println("reported view: ");
       view.print();
-      scene.camera().fromView(view, true);
-      scene.camera().getView(view, false);
+      scene.eye().fromView(view, true);
+      scene.eye().getView(view, false);
       println("after setting from external: ");
       view.print();
     }

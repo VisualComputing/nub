@@ -99,7 +99,7 @@ import java.util.List;
  * Two generic-frames can be synced together ({@link #sync(InteractiveFrame, InteractiveFrame)}),
  * meaning that they will share their global parameters (position, orientation and
  * magnitude) taken the one that hasGrabber been most recently updated. Syncing can be useful to
- * share frames among different off-screen scenes (see ProScene's CameraCrane and the
+ * share frames among different off-screen scenes (see ProScene's EyeCrane and the
  * AuxiliarViewer examples).
  * <p>
  * Finally, a generic-frame can be followed by an {@link Eye},
@@ -1584,12 +1584,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       float prevX = event.prevX();
       float prevY = event.prevY();
       // Points on the deformed ball
-      float px = rotationSensitivity() * ((int) prevX - cx) / gScene.camera().screenWidth();
+      float px = rotationSensitivity() * ((int) prevX - cx) / gScene.eye().screenWidth();
       float py =
-          rotationSensitivity() * (gScene.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / gScene.camera()
+          rotationSensitivity() * (gScene.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / gScene.eye()
               .screenHeight();
-      float dx = rotationSensitivity() * (x - cx) / gScene.camera().screenWidth();
-      float dy = rotationSensitivity() * (gScene.isLeftHanded() ? (y - cy) : (cy - y)) / gScene.camera().screenHeight();
+      float dx = rotationSensitivity() * (x - cx) / gScene.eye().screenWidth();
+      float dy = rotationSensitivity() * (gScene.isLeftHanded() ? (y - cy) : (cy - y)) / gScene.eye().screenHeight();
 
       Vec p1 = new Vec(px, py, projectOnBall(px, py));
       Vec p2 = new Vec(dx, dy, projectOnBall(dx, dy));
@@ -2190,8 +2190,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return;
     }
     if (event.fired() && gScene.is3D())
-      gScene.camera().cadRotationIsReversed =
-          gScene.camera().frame().transformOf(gScene.camera().frame().sceneUpVector()).y() < 0.0f;
+      gScene.eye().cadRotationIsReversed =
+          gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     rotate(screenToQuat(
         Vec.multiply(new Vec(computeAngle(event.dx()), computeAngle(-event.dy()), computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -2219,8 +2219,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.camera().cadRotationIsReversed =
-          gScene.camera().frame().transformOf(gScene.camera().frame().sceneUpVector()).y() < 0.0f;
+      gScene.eye().cadRotationIsReversed =
+          gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2232,12 +2232,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
         rt = deformedBallRotation(event, eye().projectedCoordinatesOf(eye().anchor()));
       else {
         if (is2D())
-          rt = deformedBallRotation(event, gScene.window().projectedCoordinatesOf(position()));
+          rt = deformedBallRotation(event, gScene.eye().projectedCoordinatesOf(position()));
         else {
-          trns = gScene.camera().projectedCoordinatesOf(position());
+          trns = gScene.eye().projectedCoordinatesOf(position());
           rt = deformedBallRotation(event, trns);
           trns = ((Quat) rt).axis();
-          trns = gScene.camera().frame().orientation().rotate(trns);
+          trns = gScene.eye().frame().orientation().rotate(trns);
           trns = transformOf(trns);
           rt = new Quat(trns, -rt.angle());
         }
@@ -2300,7 +2300,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   public void lookAround(MotionEvent event) {
-    rotate(rollPitchQuaternion(event, gScene.camera()));
+    rotate(rollPitchQuaternion(event, gScene.eye()));
   }
 
   /**
@@ -2341,12 +2341,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     Vec trns;
     float fSpeed = forward ? -flySpeed() : flySpeed();
     if (is2D()) {
-      rotate(deformedBallRotation(event, gScene.window().projectedCoordinatesOf(position())));
+      rotate(deformedBallRotation(event, gScene.eye().projectedCoordinatesOf(position())));
       flyDisp.set(-fSpeed, 0.0f, 0.0f);
       trns = localInverseTransformOf(flyDisp);
       startFlying(event, trns);
     } else {
-      rotate(rollPitchQuaternion(event, gScene.camera()));
+      rotate(rollPitchQuaternion(event, gScene.eye()));
       flyDisp.set(0.0f, 0.0f, fSpeed);
       trns = rotation().rotate(flyDisp);
       startFlying(event, trns);
@@ -2383,7 +2383,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     setFlySpeed(0.01f * gScene.radius() * 0.01f * (event.y() - initEvent.y()));
     Vec trns;
-    rotate(turnQuaternion(event.event1(), gScene.camera()));
+    rotate(turnQuaternion(event.event1(), gScene.eye()));
     flyDisp.set(0.0f, 0.0f, flySpeed());
     trns = rotation().rotate(flyDisp);
     startFlying(event, trns);
@@ -2415,17 +2415,17 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.camera().cadRotationIsReversed =
-          gScene.camera().frame().transformOf(gScene.camera().frame().sceneUpVector()).y() < 0.0f;
+      gScene.eye().cadRotationIsReversed =
+          gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
     } else {
       // Multiply by 2.0 to get on average about the same speed as with the
       // deformed ball
-      float dx = -2.0f * rotationSensitivity() * event.dx() / gScene.camera().screenWidth();
-      float dy = 2.0f * rotationSensitivity() * event.dy() / gScene.camera().screenHeight();
-      if (((Camera) eye()).cadRotationIsReversed)
+      float dx = -2.0f * rotationSensitivity() * event.dx() / gScene.eye().screenWidth();
+      float dy = 2.0f * rotationSensitivity() * event.dy() / gScene.eye().screenHeight();
+      if (((Eye) eye()).cadRotationIsReversed)
         dx = -dx;
       if (gScene.isRightHanded())
         dy = -dy;
@@ -2548,8 +2548,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       stopSpinning();
       gScene.setRotateVisualHint(true); // display visual hint
       if (gScene.is3D())
-        gScene.camera().cadRotationIsReversed =
-            gScene.camera().frame().transformOf(gScene.camera().frame().sceneUpVector()).y() < 0.0f;
+        gScene.eye().cadRotationIsReversed =
+            gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     }
     if (event.flushed()) {
       gScene.setRotateVisualHint(false);
@@ -2574,10 +2574,10 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
           angle = -angle;
         rt = new Quat(new Vec(0.0f, 0.0f, 1.0f), angle);
       } else {
-        trns = gScene.camera().projectedCoordinatesOf(position());
+        trns = gScene.eye().projectedCoordinatesOf(position());
         float prev_angle = (float) Math.atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]);
-        Vec axis = transformOf(gScene.camera().frame().orientation().rotate(new Vec(0.0f, 0.0f, -1.0f)));
+        Vec axis = transformOf(gScene.eye().frame().orientation().rotate(new Vec(0.0f, 0.0f, -1.0f)));
         if (gScene.isRightHanded())
           rt = new Quat(axis, angle - prev_angle);
         else
@@ -2682,19 +2682,19 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       // Quite excited to see how simple it's in 2d:
       return eyeVec;
     // ... and amazed as to how dirty it's in 3d:
-    switch (gScene.camera().type()) {
+    switch (gScene.eye().type()) {
       case PERSPECTIVE:
-        float k = (float) Math.tan(gScene.camera().fieldOfView() / 2.0f) * Math.abs(
-            gScene.camera().frame().coordinatesOf(isEyeFrame() ? eye().anchor() : position()).vec[2] * gScene.eye().frame()
+        float k = (float) Math.tan(gScene.eye().fieldOfView() / 2.0f) * Math.abs(
+            gScene.eye().frame().coordinatesOf(isEyeFrame() ? eye().anchor() : position()).vec[2] * gScene.eye().frame()
                 .magnitude());
-        // * Math.abs(scene.camera().frame().coordinatesOf(isEyeFrame() ?
+        // * Math.abs(scene.eye().frame().coordinatesOf(isEyeFrame() ?
         // scene.eye().anchor() : position()).vec[2]);
         eyeVec.vec[0] *= 2.0 * k / gScene.eye().screenHeight();
         eyeVec.vec[1] *= 2.0 * k / gScene.eye().screenHeight();
         break;
       case ORTHOGRAPHIC:
         float[] wh = gScene.eye().getBoundaryWidthHeight();
-        // float[] wh = scene.camera().getOrthoWidthHeight();
+        // float[] wh = scene.eye().getOrthoWidthHeight();
         eyeVec.vec[0] *= 2.0 * wh[0] / gScene.eye().screenWidth();
         eyeVec.vec[1] *= 2.0 * wh[1] / gScene.eye().screenHeight();
         break;
@@ -2708,8 +2708,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       // trns.vec[2] *= coef * 8E-4f;
       eyeVec.divide(eye().frame().magnitude());
     } else {
-      coef = Vec.subtract(gScene.camera().position(), position()).magnitude();
-      eyeVec.vec[2] *= coef / gScene.camera().screenHeight();
+      coef = Vec.subtract(gScene.eye().position(), position()).magnitude();
+      eyeVec.vec[2] *= coef / gScene.eye().screenHeight();
       eyeVec.divide(gScene.eye().frame().magnitude());
     }
     // if( isEyeFrame() )
@@ -2753,7 +2753,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       Vec trns = new Vec();
       Quat q = new Quat(gScene.isLeftHanded() ? roll : -roll, -pitch, gScene.isLeftHanded() ? yaw : -yaw);
       trns.set(-q.x(), -q.y(), -q.z());
-      trns = gScene.camera().frame().orientation().rotate(trns);
+      trns = gScene.eye().frame().orientation().rotate(trns);
       trns = transformOf(trns);
       q.setX(trns.x());
       q.setY(trns.y());
@@ -2792,7 +2792,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
    * {@link Eye#frame()}.
-   * {@link Eye#setOrientation(Rotation)} and
+   * {@link Eye#setOrientation(Quat)} and
    * {@link Eye#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
@@ -2947,7 +2947,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     flySpd = speed;
   }
 
-  protected Quat rollPitchQuaternion(MotionEvent event, Camera camera) {
+  protected Quat rollPitchQuaternion(MotionEvent event, Eye camera) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       return rollPitchQuaternion(motionEvent2, camera);
@@ -2961,7 +2961,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * mouse roll (X axis) and pitch ( {@link #sceneUpVector()} axis).
    */
-  protected Quat rollPitchQuaternion(MotionEvent2 event, Camera camera) {
+  protected Quat rollPitchQuaternion(MotionEvent2 event, Eye camera) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rollPitchQuaternion");
       return null;
@@ -2983,7 +2983,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
    * event X-displacement.
    */
-  protected Quat turnQuaternion(MotionEvent1 event, Camera camera) {
+  protected Quat turnQuaternion(MotionEvent1 event, Eye camera) {
     float deltaX = event.dx();
     return new Quat(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / camera.screenWidth());
   }

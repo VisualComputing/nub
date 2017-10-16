@@ -20,14 +20,10 @@ import remixlab.geom.AbstractScene.Platform;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
- * Abstract base class for 3D {@link Camera}s and 2D
- * {@link Window}s.
+ * A 2D /3D eye.
  * <p>
  * An Eye defines some intrinsic parameters ({@link #position()}, {@link #viewDirection()}
  * , {@link #upVector()}...) and useful positioning tools that ease its placement (
@@ -57,8 +53,15 @@ import java.util.List;
  * <p>
  * An Eye can also be used outside of an Scene for its coordinate system conversion
  * capabilities.
+ * <p>
+ * {@link #sceneCenter()} is set to (0,0,0) and {@link #sceneRadius()} is set to 100.
+ * {@link #type()} Camera.PERSPECTIVE, with a {@code PI/3} {@link #fieldOfView()} (same
+ * value used in P5 by default).
+ * <p>
+ * Camera matrices (projection and view) are created and computed according to remaining
+ * default Camera parameters.
  */
-public abstract class Eye {
+public class Eye {
   class GrabberEyeFrame extends InteractiveFrame {
     public final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID, // 1.b. Keys
         LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
@@ -237,6 +240,21 @@ public abstract class Eye {
     viewMat = new Mat();
     projectionMat = new Mat();
     projectionMat.set(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+    if(gScene.is3D()) {
+      //TODO only 3D
+      setType(Type.PERSPECTIVE);
+      setZNearCoefficient(0.005f);
+      setZClippingCoefficient((float) Math.sqrt(3.0f));
+
+      // TODO Stereo parameters
+      //setIODistance(0.062f);
+      //setPhysicalDistanceToScreen(0.5f);
+      //setPhysicalScreenWidth(0.4f);
+      // focusDistance is set from setFieldOfView()
+
+      computeProjection();
+    }
   }
 
   protected Eye(Eye oVP) {
@@ -292,9 +310,20 @@ public abstract class Eye {
     this.setScreenWidthAndHeight(oVP.screenWidth(), oVP.screenHeight());
     this.viewMat = oVP.viewMat.get();
     this.projectionMat = oVP.projectionMat.get();
+
+    //TODO only 3D
+    this.setType(oVP.type());
+    this.setZNearCoefficient(oVP.zNearCoefficient());
+    this.setZClippingCoefficient(oVP.zClippingCoefficient());
+    //this.setIODistance(oVP.IODistance());
+    //this.setPhysicalDistanceToScreen(oVP.physicalDistanceToScreen());
+    //this.setPhysicalScreenWidth(oVP.physicalScreenWidth());
+    this.rapK = oVP.rapK;
   }
 
-  public abstract Eye get();
+  public Eye get() {
+    return new Eye(this);
+  }
 
   /**
    * Returns the GrabberFrame attached to the Eye.
@@ -333,34 +362,13 @@ public abstract class Eye {
   }
 
   /**
-   * Returns the Eye {@link #position()} to {@link #sceneCenter()} distance in Scene
-   * units.
-   * <p>
-   * 3D Cameras return the projected Eye {@link #position()} to {@link #sceneCenter()}
-   * distance along the Camera Z axis and use it in
-   * {@link Camera#zNear()} and
-   * {@link Camera#zFar()} to optimize the Z range.
-   */
-  public abstract float distanceToSceneCenter();
-
-  /**
-   * Returns the Eye {@link #position()} to {@link #anchor()} distance in Scene units.
-   * <p>
-   * 3D Cameras return the projected Eye {@link #position()} to {@link #anchor()} distance
-   * along the Camera Z axis and use it in {@link #getBoundaryWidthHeight(float[])} so
-   * that when the Camera is translated forward then its frustum is narrowed, making the
-   * object appear bigger on screen, as intuitively expected.
-   */
-  public abstract float distanceToAnchor();
-
-  /**
    * Returns the Eye orientation, defined in the world coordinate system.
    * <p>
-   * Actually returns {@code frame().orientation()}. Use {@link #setOrientation(Rotation)}
+   * Actually returns {@code frame().orientation()}. Use {@link #setOrientation(Quat)}
    * , {@link #setUpVector(Vec)} or {@link #lookAt(Vec)} to set the Eye orientation.
    */
-  public Rotation orientation() {
-    return frame().orientation();
+  public Quat orientation() {
+    return (Quat)frame().orientation();
   }
 
   protected void modified() {
@@ -418,7 +426,7 @@ public abstract class Eye {
    * Sets the Eye {@link #frame()}.
    * <p>
    * If you want to move the Eye, use {@link #setPosition(Vec)} and
-   * {@link #setOrientation(Rotation)} or one of the Eye positioning methods (
+   * {@link #setOrientation(Quat)} or one of the Eye positioning methods (
    * {@link #lookAt(Vec)}, {@link #fitBall(Vec, float)}, {@link #showEntireScene()}...)
    * instead.
    * <p>
@@ -446,8 +454,9 @@ public abstract class Eye {
       // //scene().inputHandler().removeGrabber(frame());
       // scene().pruneBranch(frame());// better than removeGrabber grabber
       gFrame = g;// frame() is new
-      if (gScene.is3D())
-        ((Camera) this).setFocusDistance(sceneRadius() / (float) Math.tan(((Camera) this).fieldOfView() / 2.0f));
+      //TODO previous was:
+      //if (gScene.is3D())
+        //((Camera) this).setFocusDistance(sceneRadius() / (float) Math.tan(((Camera) this).fieldOfView() / 2.0f));
       interpolationKfi.setFrame(frame());
       Iterator<KeyFrameInterpolator> itr = kfi.values().iterator();
       while (itr.hasNext())
@@ -458,21 +467,6 @@ public abstract class Eye {
               + g.eye().getClass().getSimpleName() + ") are different");
     }
   }
-
-  /**
-   * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
-   * Cameras set {@link #orientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The Camera {@link #position()} is not modified.
-   * Simply {@link Camera#setViewDirection(Vec)}).
-   *
-   * @see #at()
-   * @see #setUpVector(Vec)
-   * @see #setOrientation(Rotation)
-   * @see #showEntireScene()
-   * @see #fitBall(Vec, float)
-   * @see #fitBoundingBox(Vec, Vec)
-   */
-  public abstract void lookAt(Vec target);
 
   // 6. ASSOCIATED FRAME AND FRAME WRAPPER FUNCTIONS
 
@@ -576,7 +570,7 @@ public abstract class Eye {
   /**
    * Returns the normalized up vector of the Eye, defined in the world coordinate system.
    * <p>
-   * Set using {@link #setUpVector(Vec)} or {@link #setOrientation(Rotation)}. It is
+   * Set using {@link #setUpVector(Vec)} or {@link #setOrientation(Quat)}. It is
    * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #frame()} (actually returns
@@ -596,34 +590,12 @@ public abstract class Eye {
   }
 
   /**
-   * Rotates the Eye so that its {@link #upVector()} becomes {@code up} (defined in the
-   * world coordinate system).
-   * <p>
-   * The Eye is rotated around an axis orthogonal to {@code up} and to the current
-   * {@link #upVector()} direction.
-   * <p>
-   * Use this method in order to define the Eye horizontal plane.
-   * <p>
-   * When {@code noMove} is set to {@code false}, the orientation modification is
-   * compensated by a translation, so that the {@link #anchor()} stays projected at the
-   * same position on screen. This is especially useful when the Eye is an observer of the
-   * scene (default action binding).
-   * <p>
-   * When {@code noMove} is true, the Eye {@link #position()} is left unchanged, which is
-   * an intuitive behavior when the Eye is in first person mode.
-   *
-   * @see #lookAt(Vec)
-   * @see #setOrientation(Rotation)
-   */
-  public abstract void setUpVector(Vec up, boolean noMove);
-
-  /**
    * Returns the normalized right vector of the Eye, defined in the world coordinate
    * system.
    * <p>
    * This vector lies in the Eye horizontal plane, directed along the X axis (orthogonal
    * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vec)}, {@link #lookAt(Vec)} or {@link #setOrientation(Rotation)}.
+   * {@link #setUpVector(Vec)}, {@link #lookAt(Vec)} or {@link #setOrientation(Quat)}.
    * <p>
    * Simply returns {@code frame().xAxis()}.
    */
@@ -632,17 +604,12 @@ public abstract class Eye {
   }
 
   /**
-   * Sets the Eye {@link #orientation()}, defined in the world coordinate system.
-   */
-  public abstract void setOrientation(Rotation q);
-
-  /**
    * Returns the radius of the scene observed by the Eye in scene (world) units.
    * <p>
-   * In the case of a 3D Eye (a Camera) you need to provide such an approximation of the
+   * In the case of a 3D Eye you need to provide such an approximation of the
    * scene dimensions so that the it can adapt its
-   * {@link Camera#zNear()} and
-   * {@link Camera#zFar()} values. See the {@link #sceneCenter()}
+   * {@link #zNear()} and
+   * {@link #zFar()} values. See the {@link #sceneCenter()}
    * documentation.
    * <p>
    * Note that {@link AbstractScene#radius()} (resp.
@@ -655,33 +622,6 @@ public abstract class Eye {
     return scnRadius;
 
   }
-
-  /**
-   * Sets the {@link #sceneRadius()} value in scene (world) units. Negative values are
-   * ignored. It also sets {@link #flySpeed()} to 1% of {@link #sceneRadius()}
-   * <p>
-   * <b>Attention:</b> 3d Camera also sets
-   * {@link Camera#focusDistance()} to
-   * {@code sceneRadius() / tan(fieldOfView()/2)}.
-   */
-  public void setSceneRadius(float radius) {
-    if (radius <= 0.0f) {
-      System.out.println("Warning: Scene radius must be positive - Ignoring value");
-      return;
-    }
-    scnRadius = radius;
-    setFlySpeed(0.01f * sceneRadius());
-    for (Grabber mg : gScene.motionAgent().grabbers()) {
-      if (mg instanceof InteractiveFrame)
-        ((InteractiveFrame) mg).setFlySpeed(0.01f * sceneRadius());
-    }
-  }
-
-  /**
-   * Similar to {@link #setSceneRadius(float)} and {@link #setSceneCenter(Vec)}, but the
-   * scene limits are defined by a (world axis aligned) bounding box.
-   */
-  public abstract void setSceneBoundingBox(Vec min, Vec max);
 
   // 11. FLYSPEED
 
@@ -709,16 +649,6 @@ public abstract class Eye {
     frame().setFlySpeed(speed);
   }
 
-  /**
-   * The {@link #sceneCenter()} is set to the point located under {@code pixel} on screen.
-   * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #sceneCenter()} is set).
-   */
-  public abstract boolean setSceneCenterFromPixel(Point pixel);
-
   public boolean setSceneCenterFromPixel(float x, float y) {
     return setSceneCenterFromPixel(new Point(x, y));
   }
@@ -732,8 +662,8 @@ public abstract class Eye {
    * Default value is the world origin. Use {@link #setSceneCenter(Vec)} to change it.
    *
    * @see #setSceneBoundingBox(Vec, Vec)
-   * @see Camera#zNear()
-   * @see Camera#zFar()
+   * @see #zNear()
+   * @see #zFar()
    */
   public Vec sceneCenter() {
     return scnCenter;
@@ -762,25 +692,6 @@ public abstract class Eye {
     return anchorPnt;
   }
 
-  /**
-   * Sets the {@link #anchor()}, defined in the world coordinate system.
-   */
-  public void setAnchor(Vec refP) {
-    anchorPnt = refP;
-    if (gScene.is2D())
-      anchorPnt.setZ(0);
-  }
-
-  /**
-   * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
-   * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #anchor()} is set).
-   */
-  public abstract boolean setAnchorFromPixel(Point pixel);
-
   public boolean setAnchorFromPixel(float x, float y) {
     return setAnchorFromPixel(new Point(x, y));
   }
@@ -808,7 +719,7 @@ public abstract class Eye {
    * It actually sets the {@link #screenHeight()} to 100 and the {@link #screenWidth()}
    * accordingly.
    *
-   * @see Camera#setFOVToFitScene()
+   * @see #setFOVToFitScene()
    */
   public void setAspectRatio(float aspect) {
     setScreenWidthAndHeight((int) (100.0 * aspect), 100);
@@ -942,30 +853,6 @@ public abstract class Eye {
   }
 
   /**
-   * Computes the projection matrix associated with the Eye.
-   * <p>
-   * If Eye is a 3D PERSPECTIVE Camera, defines a projection matrix using the
-   * {@link Camera#fieldOfView()}, {@link #aspectRatio()},
-   * {@link Camera#zNear()} and
-   * {@link Camera#zFar()} parameters. If Eye is a 3D ORTHOGRAPHIC
-   * Camera, the frustum's width and height are set using
-   * {@link #getBoundaryWidthHeight()}. Both types use
-   * {@link Camera#zNear()} and
-   * {@link Camera#zFar()} to place clipping planes. These values
-   * are determined from sceneRadius() and sceneCenter() so that they best fit the scene
-   * size.
-   * <p>
-   * Use {@link #getProjection()} to retrieve this matrix.
-   * <p>
-   * <b>Note:</b> You must call this method if your Eye is not associated with a Scene and
-   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
-   * instance).
-   *
-   * @see #setProjection(Mat)
-   */
-  public abstract void computeProjection();
-
-  /**
    * Convenience function that simply returns {@code getOrthoWidthHeight(new
    * float[2])}.
    *
@@ -1024,16 +911,6 @@ public abstract class Eye {
   }
 
   /**
-   * Simply returns {@code 1} which is valid for 2d Windows. Value is different for ortho
-   * Cameras and thus the method is overridden by the camera class.
-   *
-   * @see #getBoundaryWidthHeight(float[])
-   */
-  public float rescalingOrthoFactor() {
-    return 1.0f;
-  }
-
-  /**
    * Returns the Eye frame coordinates of a point {@code src} defined in world
    * coordinates.
    * <p>
@@ -1056,22 +933,6 @@ public abstract class Eye {
   public Vec worldCoordinatesOf(final Vec src) {
     return frame().inverseCoordinatesOf(src);
   }
-
-  /**
-   * Computes the View matrix associated with the Eye's {@link #position()} and
-   * {@link #orientation()}.
-   * <p>
-   * This matrix converts from the world coordinates system to the Eye coordinates system,
-   * so that coordinates can then be projected on screen using the projection matrix (see
-   * {@link #computeProjection()}).
-   * <p>
-   * Use {@link #getView()} to retrieve this matrix.
-   * <p>
-   * <b>Note:</b> You must call this method if your Eye is not associated with a Scene and
-   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
-   * instance).
-   */
-  public abstract void computeView();
 
   /**
    * Convenience function that simply returns {@code getViewMatrix(false)}
@@ -1153,16 +1014,6 @@ public abstract class Eye {
   public void fromView(Mat mv) {
     fromView(mv, true);
   }
-
-  /**
-   * Sets the Eye {@link #position()} and {@link #orientation()} from an OpenGL-like View
-   * matrix.
-   * <p>
-   * After this method hasGrabber been called, {@link #getView()} returns a matrix equivalent to
-   * {@code mv}. Only the {@link #position()} and {@link #orientation()} of the Eye are
-   * modified.
-   */
-  public abstract void fromView(Mat mv, boolean recompute);
 
   /**
    * Convenience function that simply returns {@code projectedCoordinatesOf(src, null)}.
@@ -1262,8 +1113,8 @@ public abstract class Eye {
    * The {@code src.x} and {@code src.y} inputGrabber values are expressed in pixels, (0,0) being
    * the upper left corner of the window. The {@code src.z} is a depth value ranging in
    * [0..1] (near and far plane respectively). In 3D Note that {@code src.z} is not a
-   * linear interpolation between {@link Camera#zNear()} and
-   * {@link Camera#zFar()};
+   * linear interpolation between {@link #zNear()} and
+   * {@link #zFar()};
    * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
    * is the distance from the point you project to the camera, along the
    * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
@@ -1679,61 +1530,6 @@ public abstract class Eye {
   }
 
   /**
-   * Convenience function that in 2D simply returns
-   * {@code computeFrustumPlanesCoefficients(new float [4][3])} and in 3D
-   * {@code computeFrustumPlanesCoefficients(new float [6][4])}.
-   * <p>
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * frustum equations to be updated only occasionally (rare). Use
-   * {@link AbstractScene#enableBoundaryEquations()} which
-   * automatically update the frustum equations every frame instead.
-   *
-   * @see #computeBoundaryEquations(float[][])
-   */
-  public abstract float[][] computeBoundaryEquations();
-
-  /**
-   * Fills {@code coef} with the 6 plane equations of the camera frustum and returns it.
-   * <p>
-   * In 2D the four 4-component vectors of {@code coef} respectively correspond to the
-   * left, right, top and bottom Window boundary lines. Each vector holds a plane equation
-   * of the form:
-   * <p>
-   * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
-   * components of each vector, in that order.
-   * <p>
-   * <p>
-   * In 3D the six 4-component vectors of {@code coef} respectively correspond to the
-   * left, right, near, far, top and bottom Camera frustum planes. Each vector holds a
-   * plane equation of the form:
-   * <p>
-   * {@code a*x + b*y + c*z + d = 0}
-   * <p>
-   * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
-   * vector, in that order.
-   * <p>
-   * This format is compatible with the {@code gl.glClipPlane()} function. One camera
-   * frustum plane can hence be applied in an other viewer to visualize the culling
-   * results:
-   * <p>
-   * {@code // Retrieve place equations}<br>
-   * {@code float [][] coef =
-   * mainViewer.camera().getFrustumPlanesCoefficients();}<br>
-   * {@code // These two additional clipping planes (which must have been enabled)} <br>
-   * {@code // will reproduce the mainViewer's near and far clipping.}<br>
-   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE0, coef[2]);}<br>
-   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE1, coef[3]);}<br>
-   * <p>
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * frustum equations to be updated only occasionally (rare). Use
-   * {@link AbstractScene#enableBoundaryEquations()} which
-   * automatically update the frustum equations every frame instead.
-   *
-   * @see #computeBoundaryEquations()
-   */
-  public abstract float[][] computeBoundaryEquations(float[][] coef);
-
-  /**
    * Enables or disables automatic update of the eye boundary plane equations every frame
    * according to {@code flag}. Computation of the equations is expensive and hence is
    * disabled by default.
@@ -1843,92 +1639,6 @@ public abstract class Eye {
   }
 
   /**
-   * Returns {@code true} if {@code point} is visible (i.e, lies within the Eye boundary)
-   * and {@code false} otherwise.
-   * <p>
-   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
-   *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #boxVisibility(Vec, Vec)
-   * @see #computeBoundaryEquations()
-   * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
-   * @see AbstractScene#enableBoundaryEquations()
-   */
-  public abstract boolean isPointVisible(Vec point);
-
-  /**
-   * Returns {@link Eye.Visibility#VISIBLE},
-   * {@link Eye.Visibility#INVISIBLE}, or
-   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
-   * sphere (of radius {@code radius} and center {@code center}) is visible, invisible, or
-   * semi-visible, respectively.
-   * <p>
-   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
-   *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #boxVisibility(Vec, Vec)
-   * @see #computeBoundaryEquations()
-   * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
-   * @see AbstractScene#enableBoundaryEquations()
-   */
-  public abstract Visibility ballVisibility(Vec center, float radius);
-
-  /**
-   * Returns {@link Eye.Visibility#VISIBLE},
-   * {@link Eye.Visibility#INVISIBLE}, or
-   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
-   * axis aligned box (defined by corners {@code p1} and {@code p2}) is visible,
-   * invisible, or semi-visible, respectively.
-   * <p>
-   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
-   *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #computeBoundaryEquations()
-   * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
-   * @see AbstractScene#enableBoundaryEquations()
-   */
-  public abstract Visibility boxVisibility(Vec p1, Vec p2);
-
-  /**
-   * Returns the ratio of scene (units) to pixel at {@code position}.
-   * <p>
-   * A line of {@code n * sceneToPixelRatio()} scene units, located at {@code position} in
-   * the world coordinates system, will be projected with a length of {@code n} pixels on
-   * screen.
-   * <p>
-   * Use this method to scale objects so that they have a constant pixel size on screen.
-   * The following code will draw a 20 pixel line, starting at {@link #sceneCenter()} and
-   * always directed along the screen vertical direction:
-   * <p>
-   * {@code beginShape(LINES);}<br>
-   * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vec v = Vec.addGrabber(sceneCenter(), Vec.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
-   * <br>
-   * {@code vertex(v.x, v.y, v.z);}<br>
-   * {@code endShape();}<br>
-   */
-  public abstract float sceneToPixelRatio(Vec position);
-
-  /**
    * Returns the pixel to scene (units) ratio at {@code position}.
    * <p>
    * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
@@ -2025,39 +1735,6 @@ public abstract class Eye {
   }
 
   /**
-   * Moves the Eye so that the ball defined by {@code center} and {@code radius} is
-   * visible and fits the window.
-   * <p>
-   * In 3D the Camera is simply translated along its {@link #viewDirection()} so that the
-   * sphere fits the screen. Its {@link #orientation()} and its
-   * {@link Camera#fieldOfView()} are unchanged. You should
-   * therefore orientate the Camera before you call this method.
-   *
-   * @see #lookAt(Vec)
-   * @see #setOrientation(Rotation)
-   * @see #setUpVector(Vec, boolean)
-   */
-  public abstract void fitBall(Vec center, float radius);
-
-  /**
-   * Moves the Eye so that the (world axis aligned) bounding box ({@code min} ,
-   * {@code max}) is entirely visible, using {@link #fitBall(Vec, float)}.
-   */
-  public abstract void fitBoundingBox(Vec min, Vec max);
-
-  /**
-   * Moves the Eye so that the rectangular screen region defined by {@code rectangle}
-   * (pixel units, with origin in the upper left corner) fits the screen.
-   * <p>
-   * in 3D the Camera is translated (its {@link #orientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
-   * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
-   * to the {@link #viewDirection()} and passing through the {@link #sceneCenter()}) that
-   * is used to define the 3D rectangle that is eventually fitted.
-   */
-  public abstract void fitScreenRegion(Rect rectangle);
-
-  /**
    * Moves the Eye so that the entire scene is visible.
    * <p>
    * Simply calls {@link #fitBall(Vec, float)} on a sphere defined by
@@ -2073,7 +1750,7 @@ public abstract class Eye {
   /**
    * Moves the Eye so that its {@link #sceneCenter()} is projected on the center of the
    * window. The {@link #orientation()} (and in the case of perps 3d
-   * {@link Camera#fieldOfView()}) is (are) unchanged.
+   * {@link #fieldOfView()}) is (are) unchanged.
    * <p>
    * Simply projects the current position on a line passing through {@link #sceneCenter()}
    * .
@@ -2084,19 +1761,601 @@ public abstract class Eye {
     frame().projectOnLine(sceneCenter(), viewDirection());
   }
 
+  public void interpolateToZoomOnPixel(float x, float y) {
+    interpolateToZoomOnPixel(new Point(x, y));
+  }
+
+  //TODO work in progress 2D and 3D
+
   /**
-   * Returns the normalized view direction of the Eye, defined in the world coordinate
-   * system. This corresponds to the negative Z axis of the {@link #frame()} (
-   * {@code frame().inverseTransformOf(new Vec(0.0f, 0.0f, -1.0f))} ) whih in 2D always is
-   * (0,0,-1)
+   * Returns the ratio of scene (units) to pixel at {@code position}.
    * <p>
-   * In 3D change this value using
-   * {@link Camera#setViewDirection(Vec)}, {@link #lookAt(Vec)} or
-   * {@link #setOrientation(Rotation)} . It is orthogonal to {@link #upVector()} and to
-   * {@link #rightVector()}.
+   * A line of {@code n * sceneToPixelRatio()} scene units, located at {@code position} in
+   * the world coordinates system, will be projected with a length of {@code n} pixels on
+   * screen.
+   * <p>
+   * Use this method to scale objects so that they have a constant pixel size on screen.
+   * The following code will draw a 20 pixel line, starting at {@link #sceneCenter()} and
+   * always directed along the screen vertical direction:
+   * <p>
+   * {@code beginShape(LINES);}<br>
+   * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
+   * {@code Vec v = Vec.addGrabber(sceneCenter(), Vec.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
+   * <br>
+   * {@code vertex(v.x, v.y, v.z);}<br>
+   * {@code endShape();}<br>
    */
-  public Vec viewDirection() {
-    return new Vec(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
+  public float sceneToPixelRatio(Vec position) {
+    switch (type()) {
+      case PERSPECTIVE:
+        return 2.0f * Math.abs((frame().coordinatesOf(position)).vec[2] * frame().magnitude()) * (float) Math
+                .tan(fieldOfView() / 2.0f) / screenHeight();
+      case ORTHOGRAPHIC:
+        float[] wh = getBoundaryWidthHeight();
+        return 2.0f * wh[1] / screenHeight();
+    }
+    return 1.0f;
+  }
+
+  /**
+   * Returns {@code true} if {@code point} is visible (i.e, lies within the Eye boundary)
+   * and {@code false} otherwise.
+   * <p>
+   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
+   * this method. You may compute them explicitly (by calling
+   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * Scene setup (with
+   * {@link AbstractScene#enableBoundaryEquations()}).
+   *
+   * @see #distanceToBoundary(int, Vec)
+   * @see #ballVisibility(Vec, float)
+   * @see #boxVisibility(Vec, Vec)
+   * @see #computeBoundaryEquations()
+   * @see #updateBoundaryEquations()
+   * @see #getBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
+   */
+  public boolean isPointVisible(Vec point) {
+    if (!gScene.areBoundaryEquationsEnabled())
+      System.out.println("The camera frustum plane equations (needed by pointIsVisible) may be outdated. Please "
+              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    for (int i = 0; i < 6; ++i)
+      if (distanceToBoundary(i, point) > 0)
+        return false;
+    return true;
+  }
+
+  /**
+   * Same as {@code return isPointVisible(new Vec(x, y, z))}.
+   *
+   * @see #isPointVisible(Vec)
+   */
+  public boolean isPointVisible(float x, float y, float z) {
+    return isPointVisible(new Vec(x, y, z));
+  }
+
+  /**
+   * Returns {@link Eye.Visibility#VISIBLE},
+   * {@link Eye.Visibility#INVISIBLE}, or
+   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
+   * sphere (of radius {@code radius} and center {@code center}) is visible, invisible, or
+   * semi-visible, respectively.
+   * <p>
+   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
+   * this method. You may compute them explicitly (by calling
+   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * Scene setup (with
+   * {@link AbstractScene#enableBoundaryEquations()}).
+   *
+   * @see #distanceToBoundary(int, Vec)
+   * @see #isPointVisible(Vec)
+   * @see #boxVisibility(Vec, Vec)
+   * @see #computeBoundaryEquations()
+   * @see #updateBoundaryEquations()
+   * @see #getBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
+   */
+  public Visibility ballVisibility(Vec center, float radius) {
+    if (!gScene.areBoundaryEquationsEnabled())
+      System.out.println("The camera frustum plane equations (needed by sphereIsVisible) may be outdated. Please "
+              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    boolean allInForAllPlanes = true;
+    for (int i = 0; i < 6; ++i) {
+      float d = distanceToBoundary(i, center);
+      if (d > radius)
+        return Visibility.INVISIBLE;
+      if ((d > 0) || (-d < radius))
+        allInForAllPlanes = false;
+    }
+    if (allInForAllPlanes)
+      return Visibility.VISIBLE;
+    return Visibility.SEMIVISIBLE;
+  }
+
+  /**
+   * Returns {@link Eye.Visibility#VISIBLE},
+   * {@link Eye.Visibility#INVISIBLE}, or
+   * {@link Eye.Visibility#SEMIVISIBLE}, depending whether the
+   * axis aligned box (defined by corners {@code p1} and {@code p2}) is visible,
+   * invisible, or semi-visible, respectively.
+   * <p>
+   * <b>Attention:</b> The Eye boundary plane equations should be updated before calling
+   * this method. You may compute them explicitly (by calling
+   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * Scene setup (with
+   * {@link AbstractScene#enableBoundaryEquations()}).
+   *
+   * @see #distanceToBoundary(int, Vec)
+   * @see #isPointVisible(Vec)
+   * @see #ballVisibility(Vec, float)
+   * @see #computeBoundaryEquations()
+   * @see #updateBoundaryEquations()
+   * @see #getBoundaryEquations()
+   * @see AbstractScene#enableBoundaryEquations()
+   */
+  public Visibility boxVisibility(Vec p1, Vec p2) {
+    if (!gScene.areBoundaryEquationsEnabled())
+      System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
+              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+    boolean allInForAllPlanes = true;
+    for (int i = 0; i < 6; ++i) {
+      boolean allOut = true;
+      for (int c = 0; c < 8; ++c) {
+        Vec pos = new Vec(((c & 4) != 0) ? p1.vec[0] : p2.vec[0], ((c & 2) != 0) ? p1.vec[1] : p2.vec[1],
+                ((c & 1) != 0) ? p1.vec[2] : p2.vec[2]);
+        if (distanceToBoundary(i, pos) > 0.0)
+          allInForAllPlanes = false;
+        else
+          allOut = false;
+      }
+      // The eight points are on the outside side of this plane
+      if (allOut)
+        return Visibility.INVISIBLE;
+    }
+
+    if (allInForAllPlanes)
+      return Visibility.VISIBLE;
+
+    // Too conservative, but tangent cases are too expensive to detect
+    return Visibility.SEMIVISIBLE;
+  }
+
+  /**
+   * Convenience function that in 2D simply returns
+   * {@code computeFrustumPlanesCoefficients(new float [4][3])} and in 3D
+   * {@code computeFrustumPlanesCoefficients(new float [6][4])}.
+   * <p>
+   * <b>Attention:</b> You should not call this method explicitly, unless you need the
+   * frustum equations to be updated only occasionally (rare). Use
+   * {@link AbstractScene#enableBoundaryEquations()} which
+   * automatically update the frustum equations every frame instead.
+   *
+   * @see #computeBoundaryEquations(float[][])
+   */
+  public float[][] computeBoundaryEquations() {
+    return computeBoundaryEquations(new float[6][4]);
+  }
+
+  /**
+   * Fills {@code coef} with the 6 plane equations of the camera frustum and returns it.
+   * <p>
+   * In 2D the four 4-component vectors of {@code coef} respectively correspond to the
+   * left, right, top and bottom Window boundary lines. Each vector holds a plane equation
+   * of the form:
+   * <p>
+   * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
+   * components of each vector, in that order.
+   * <p>
+   * <p>
+   * In 3D the six 4-component vectors of {@code coef} respectively correspond to the
+   * left, right, near, far, top and bottom Camera frustum planes. Each vector holds a
+   * plane equation of the form:
+   * <p>
+   * {@code a*x + b*y + c*z + d = 0}
+   * <p>
+   * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
+   * vector, in that order.
+   * <p>
+   * This format is compatible with the {@code gl.glClipPlane()} function. One camera
+   * frustum plane can hence be applied in an other viewer to visualize the culling
+   * results:
+   * <p>
+   * {@code // Retrieve place equations}<br>
+   * {@code float [][] coef =
+   * mainViewer.camera().getFrustumPlanesCoefficients();}<br>
+   * {@code // These two additional clipping planes (which must have been enabled)} <br>
+   * {@code // will reproduce the mainViewer's near and far clipping.}<br>
+   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE0, coef[2]);}<br>
+   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE1, coef[3]);}<br>
+   * <p>
+   * <b>Attention:</b> You should not call this method explicitly, unless you need the
+   * frustum equations to be updated only occasionally (rare). Use
+   * {@link AbstractScene#enableBoundaryEquations()} which
+   * automatically update the frustum equations every frame instead.
+   *
+   * @see #computeBoundaryEquations()
+   */
+  public float[][] computeBoundaryEquations(float[][] coef) {
+    // soft check:
+    if (coef == null || (coef.length == 0))
+      coef = new float[6][4];
+    else if ((coef.length != 6) || (coef[0].length != 4))
+      coef = new float[6][4];
+
+    // Computed once and for all
+    Vec pos = position();
+    Vec viewDir = viewDirection();
+    Vec up = upVector();
+    Vec right = rightVector();
+
+    float posViewDir = Vec.dot(pos, viewDir);
+
+    switch (type()) {
+      case PERSPECTIVE: {
+        float hhfov = horizontalFieldOfView() / 2.0f;
+        float chhfov = (float) Math.cos(hhfov);
+        float shhfov = (float) Math.sin(hhfov);
+        normal[0] = Vec.multiply(viewDir, -shhfov);
+        normal[1] = Vec.add(normal[0], Vec.multiply(right, chhfov));
+        normal[0] = Vec.add(normal[0], Vec.multiply(right, -chhfov));
+        normal[2] = Vec.multiply(viewDir, -1);
+        normal[3] = viewDir;
+
+        float hfov = fieldOfView() / 2.0f;
+        float chfov = (float) Math.cos(hfov);
+        float shfov = (float) Math.sin(hfov);
+        normal[4] = Vec.multiply(viewDir, -shfov);
+        normal[5] = Vec.add(normal[4], Vec.multiply(up, -chfov));
+        normal[4] = Vec.add(normal[4], Vec.multiply(up, chfov));
+
+        for (int i = 0; i < 2; ++i)
+          dist[i] = Vec.dot(pos, normal[i]);
+        for (int j = 4; j < 6; ++j)
+          dist[j] = Vec.dot(pos, normal[j]);
+
+        // Natural equations are:
+        // dist[0,1,4,5] = pos * normal[0,1,4,5];
+        // dist[2] = (pos + zNear() * viewDir) * normal[2];
+        // dist[3] = (pos + zFar() * viewDir) * normal[3];
+
+        // 2 times less computations using expanded/merged equations. Dir vectors
+        // are normalized.
+        float posRightCosHH = chhfov * Vec.dot(pos, right);
+        dist[0] = -shhfov * posViewDir;
+        dist[1] = dist[0] + posRightCosHH;
+        dist[0] = dist[0] - posRightCosHH;
+        float posUpCosH = chfov * Vec.dot(pos, up);
+        dist[4] = -shfov * posViewDir;
+        dist[5] = dist[4] - posUpCosH;
+        dist[4] = dist[4] + posUpCosH;
+        break;
+      }
+      case ORTHOGRAPHIC:
+        normal[0] = Vec.multiply(right, -1);
+        normal[1] = right;
+        normal[4] = up;
+        normal[5] = Vec.multiply(up, -1);
+
+        float[] wh = getBoundaryWidthHeight();
+        dist[0] = Vec.dot(Vec.subtract(pos, Vec.multiply(right, wh[0])), normal[0]);
+        dist[1] = Vec.dot(Vec.add(pos, Vec.multiply(right, wh[0])), normal[1]);
+        dist[4] = Vec.dot(Vec.add(pos, Vec.multiply(up, wh[1])), normal[4]);
+        dist[5] = Vec.dot(Vec.subtract(pos, Vec.multiply(up, wh[1])), normal[5]);
+        break;
+    }
+
+    // Front and far planes are identical for both camera types.
+    normal[2] = Vec.multiply(viewDir, -1);
+    normal[3] = viewDir;
+    dist[2] = -posViewDir - zNear();
+    dist[3] = posViewDir + zFar();
+
+    for (int i = 0; i < 6; ++i) {
+      coef[i][0] = normal[i].vec[0];
+      coef[i][1] = normal[i].vec[1];
+      coef[i][2] = normal[i].vec[2];
+      coef[i][3] = dist[i];
+    }
+
+    return coef;
+  }
+
+  // 4. SCENE RADIUS AND CENTER
+
+  /**
+   * Sets the {@link #sceneRadius()} value in scene (world) units. Negative values are
+   * ignored. It also sets {@link #flySpeed()} to 1% of {@link #sceneRadius()}.
+   */
+  public void setSceneRadius(float radius) {
+    if (radius <= 0.0f) {
+      System.out.println("Warning: Scene radius must be positive - Ignoring value");
+      return;
+    }
+    scnRadius = radius;
+    setFlySpeed(0.01f * sceneRadius());
+    for (Grabber mg : gScene.motionAgent().grabbers()) {
+      if (mg instanceof InteractiveFrame)
+        ((InteractiveFrame) mg).setFlySpeed(0.01f * sceneRadius());
+    }
+    // TODO previous was:
+    //if(gScene.is3D())
+      //setFocusDistance(sceneRadius() / (float) Math.tan(fieldOfView() / 2.0f));
+  }
+
+  /**
+   * Returns the Eye {@link #position()} to {@link #sceneCenter()} distance in Scene
+   * units.
+   * <p>
+   * 3D Cameras return the projected Eye {@link #position()} to {@link #sceneCenter()}
+   * distance along the Camera Z axis and use it in
+   * {@link #zNear()} and
+   * {@link #zFar()} to optimize the Z range.
+   */
+  public float distanceToSceneCenter() {
+    Vec zCam = frame().zAxis();
+    Vec cam2SceneCenter = Vec.subtract(position(), sceneCenter());
+    return Math.abs(Vec.dot(cam2SceneCenter, zCam));
+  }
+
+  /**
+   * Returns the Eye {@link #position()} to {@link #anchor()} distance in Scene units.
+   * <p>
+   * 3D Cameras return the projected Eye {@link #position()} to {@link #anchor()} distance
+   * along the Camera Z axis and use it in {@link #getBoundaryWidthHeight(float[])} so
+   * that when the Camera is translated forward then its frustum is narrowed, making the
+   * object appear bigger on screen, as intuitively expected.
+   */
+  public float distanceToAnchor() {
+    Vec zCam = frame().zAxis();
+    Vec cam2anchor = Vec.subtract(position(), anchor());
+    return Math.abs(Vec.dot(cam2anchor, zCam));
+  }
+
+  /**
+   * Similar to {@link #setSceneRadius(float)} and {@link #setSceneCenter(Vec)}, but the
+   * scene limits are defined by a (world axis aligned) bounding box.
+   */
+  public void setSceneBoundingBox(Vec min, Vec max) {
+    setSceneCenter(Vec.multiply(Vec.add(min, max), 1 / 2.0f));
+    setSceneRadius(0.5f * (Vec.subtract(max, min)).magnitude());
+  }
+
+  // 5. ANCHOR REFERENCE POINT
+
+  /**
+   * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
+   * <p>
+   * 2D windows always returns true.
+   * <p>
+   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * {@code false} if none was found (in this case no {@link #anchor()} is set).
+   */
+  public boolean setAnchorFromPixel(Point pixel) {
+    Vec pup = pointUnderPixel(pixel);
+    if (pup != null) {
+      setAnchor(pup);
+      // new animation
+      anchorFlag = true;
+      timerFx.runOnce(1000);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * The {@link #sceneCenter()} is set to the point located under {@code pixel} on screen.
+   * <p>
+   * 2D windows always returns true.
+   * <p>
+   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * {@code false} if none was found (in this case no {@link #sceneCenter()} is set).
+   */
+  public boolean setSceneCenterFromPixel(Point pixel) {
+    Vec pup = pointUnderPixel(pixel);
+    if (pup != null) {
+      setSceneCenter(pup);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Returns the coordinates of the 3D point located at {@code pixel} (x,y) on screen. May
+   * be null if no point is found under pixel.
+   * <p>
+   * Override this method in your jogl-based camera class.
+   * <p>
+   * Current implementation always returns {@code WorlPoint.found = false} (dummy value),
+   * meaning that no point was found under pixel.
+   */
+  public Vec pointUnderPixel(Point pixel) {
+    return gScene.pointUnderPixel(pixel);
+  }
+
+  // 8. MATRICES
+
+  /**
+   * Computes the View matrix associated with the Eye's {@link #position()} and
+   * {@link #orientation()}.
+   * <p>
+   * This matrix converts from the world coordinates system to the Eye coordinates system,
+   * so that coordinates can then be projected on screen using the projection matrix (see
+   * {@link #computeProjection()}).
+   * <p>
+   * Use {@link #getView()} to retrieve this matrix.
+   * <p>
+   * <b>Note:</b> You must call this method if your Eye is not associated with a Scene and
+   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
+   * instance).
+   */
+  public void computeView() {
+    //TODO remove cast
+    Quat q = (Quat)frame().orientation();
+
+    float q00 = 2.0f * q.quat[0] * q.quat[0];
+    float q11 = 2.0f * q.quat[1] * q.quat[1];
+    float q22 = 2.0f * q.quat[2] * q.quat[2];
+
+    float q01 = 2.0f * q.quat[0] * q.quat[1];
+    float q02 = 2.0f * q.quat[0] * q.quat[2];
+    float q03 = 2.0f * q.quat[0] * q.quat[3];
+
+    float q12 = 2.0f * q.quat[1] * q.quat[2];
+    float q13 = 2.0f * q.quat[1] * q.quat[3];
+    float q23 = 2.0f * q.quat[2] * q.quat[3];
+
+    viewMat.mat[0] = 1.0f - q11 - q22;
+    viewMat.mat[1] = q01 - q23;
+    viewMat.mat[2] = q02 + q13;
+    viewMat.mat[3] = 0.0f;
+
+    viewMat.mat[4] = q01 + q23;
+    viewMat.mat[5] = 1.0f - q22 - q00;
+    viewMat.mat[6] = q12 - q03;
+    viewMat.mat[7] = 0.0f;
+
+    viewMat.mat[8] = q02 - q13;
+    viewMat.mat[9] = q12 + q03;
+    viewMat.mat[10] = 1.0f - q11 - q00;
+    viewMat.mat[11] = 0.0f;
+
+    Vec t = q.inverseRotate(frame().position());
+
+    viewMat.mat[12] = -t.vec[0];
+    viewMat.mat[13] = -t.vec[1];
+    viewMat.mat[14] = -t.vec[2];
+    viewMat.mat[15] = 1.0f;
+  }
+
+  /**
+   * Simply returns {@code 1} which is valid for 2d Windows.
+   * <p>
+   * In 3D returns a value proportional to the Camera (z projected) distance to the
+   * {@link #anchor()} so that when zooming on the object, the ortho Camera is translated
+   * forward and its boundary is narrowed, making the object appear bigger on screen, as
+   * intuitively expected.
+   * <p>
+   * Value is computed as: {@code 2 * distanceToAnchor() / screenHeight()}.
+   *
+   * @see #getBoundaryWidthHeight(float[])
+   */
+  public float rescalingOrthoFactor() {
+    if(gScene.is2D())
+      return 1.0f;
+    float toAnchor = this.distanceToAnchor();
+    float epsilon = 0.0001f;
+    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * rapK / screenHeight());
+  }
+
+  /**
+   * Sets the {@link #anchor()}, defined in the world coordinate system.
+   */
+  public void setAnchor(Vec rap) {
+    if(gScene.is2D()) {
+      anchorPnt = rap;
+      anchorPnt.setZ(0);
+    }
+    else {
+      float prevDist = distanceToAnchor();
+      this.anchorPnt = rap;
+      float newDist = distanceToAnchor();
+      if (prevDist != 0 && newDist != 0)
+        rapK *= prevDist / newDist;
+    }
+  }
+
+  /**
+   * Same as {@code setAnchor(new Vec(x,y,z))}.
+   *
+   * @see AbstractScene#setAnchor(Vec)
+   */
+  public void setAnchor(float x, float y, float z) {
+    setAnchor(new Vec(x, y, z));
+  }
+
+  /**
+   * Computes the projection matrix associated with the Eye.
+   * <p>
+   * If Eye is a 3D PERSPECTIVE Camera, defines a projection matrix using the
+   * {@link #fieldOfView()}, {@link #aspectRatio()},
+   * {@link #zNear()} and
+   * {@link #zFar()} parameters. If Eye is a 3D ORTHOGRAPHIC
+   * Camera, the frustum's width and height are set using
+   * {@link #getBoundaryWidthHeight()}. Both types use
+   * {@link #zNear()} and
+   * {@link #zFar()} to place clipping planes. These values
+   * are determined from sceneRadius() and sceneCenter() so that they best fit the scene
+   * size.
+   * <p>
+   * Use {@link #getProjection()} to retrieve this matrix.
+   * <p>
+   * <b>Note:</b> You must call this method if your Eye is not associated with a Scene and
+   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
+   * instance).
+   *
+   * @see #setProjection(Mat)
+   */
+  public void computeProjection() {
+    float ZNear = zNear();
+    float ZFar = zFar();
+
+    switch (type()) {
+      case PERSPECTIVE:
+        // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
+        projectionMat.mat[0] = 1 / (frame().magnitude() * this.aspectRatio());
+        projectionMat.mat[5] = 1 / (gScene.isLeftHanded() ? -frame().magnitude() : frame().magnitude());
+        projectionMat.mat[10] = (ZNear + ZFar) / (ZNear - ZFar);
+        projectionMat.mat[11] = -1.0f;
+        projectionMat.mat[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
+        projectionMat.mat[15] = 0.0f;
+        // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(),
+        // zNear(), zFar() );
+        break;
+      case ORTHOGRAPHIC:
+        float[] wh = getBoundaryWidthHeight();
+        projectionMat.mat[0] = 1.0f / wh[0];
+        projectionMat.mat[5] = (gScene.isLeftHanded() ? -1.0f : 1.0f) / wh[1];
+        projectionMat.mat[10] = -2.0f / (ZFar - ZNear);
+        projectionMat.mat[11] = 0.0f;
+        projectionMat.mat[14] = -(ZFar + ZNear) / (ZFar - ZNear);
+        projectionMat.mat[15] = 1.0f;
+        // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
+        break;
+    }
+  }
+
+  /**
+   * Sets the Eye {@link #position()} and {@link #orientation()} from an OpenGL-like View
+   * matrix.
+   * <p>
+   * After this method hasGrabber been called, {@link #getView()} returns a matrix equivalent to
+   * {@code mv}. Only the {@link #position()} and {@link #orientation()} of the Eye are
+   * modified.
+   */
+  public void fromView(Mat mv, boolean recompute) {
+    Quat q = new Quat();
+    q.fromMatrix(mv);
+    setOrientation(q);
+    setPosition(Vec.multiply(q.rotate(new Vec(mv.mat[12], mv.mat[13], mv.mat[14])), -1));
+    if (recompute)
+      this.computeView();
+  }
+
+  /**
+   * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
+   * Cameras set {@link #orientation()}, so that it looks at point {@code target} defined
+   * in the world coordinate system (The Camera {@link #position()} is not modified.
+   * Simply {@link #setViewDirection(Vec)}).
+   *
+   * @see #at()
+   * @see #setUpVector(Vec)
+   * @see #setOrientation(Quat)
+   * @see #showEntireScene()
+   * @see #fitBall(Vec, float)
+   * @see #fitBoundingBox(Vec, Vec)
+   */
+  public void lookAt(Vec target) {
+    setViewDirection(Vec.subtract(target, position()));
   }
 
   /**
@@ -2107,24 +2366,912 @@ public abstract class Eye {
    *
    * @see #lookAt(Vec)
    */
-  public abstract Vec at();
+  public Vec at() {
+    return Vec.add(position(), viewDirection());
+  }
+
+  /**
+   * Moves the Eye so that the ball defined by {@code center} and {@code radius} is
+   * visible and fits the window.
+   * <p>
+   * In 3D the Camera is simply translated along its {@link #viewDirection()} so that the
+   * sphere fits the screen. Its {@link #orientation()} and its
+   * {@link #fieldOfView()} are unchanged. You should
+   * therefore orientate the Camera before you call this method.
+   *
+   * @see #lookAt(Vec)
+   * @see #setOrientation(Quat)
+   * @see #setUpVector(Vec, boolean)
+   */
+  public void fitBall(Vec center, float radius) {
+    float distance = 0.0f;
+    switch (type()) {
+      case PERSPECTIVE: {
+        float yview = radius / (float) Math.sin(fieldOfView() / 2.0f);
+        float xview = radius / (float) Math.sin(horizontalFieldOfView() / 2.0f);
+        distance = Math.max(xview, yview);
+        break;
+      }
+      case ORTHOGRAPHIC: {
+        distance = Vec.dot(Vec.subtract(center, anchor()), viewDirection()) + (radius / frame().magnitude());
+        break;
+      }
+    }
+
+    Vec newPos = Vec.subtract(center, Vec.multiply(viewDirection(), distance));
+    frame().setPositionWithConstraint(newPos);
+  }
+
+  /**
+   * Moves the Eye so that the (world axis aligned) bounding box ({@code min} ,
+   * {@code max}) is entirely visible, using {@link #fitBall(Vec, float)}.
+   */
+  public void fitBoundingBox(Vec min, Vec max) {
+    float diameter = Math.max(Math.abs(max.vec[1] - min.vec[1]), Math.abs(max.vec[0] - min.vec[0]));
+    diameter = Math.max(Math.abs(max.vec[2] - min.vec[2]), diameter);
+    fitBall(Vec.multiply(Vec.add(min, max), 0.5f), 0.5f * diameter);
+  }
+
+  /**
+   * Moves the Eye so that the rectangular screen region defined by {@code rectangle}
+   * (pixel units, with origin in the upper left corner) fits the screen.
+   * <p>
+   * in 3D the Camera is translated (its {@link #orientation()} is unchanged) so that
+   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
+   * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
+   * to the {@link #viewDirection()} and passing through the {@link #sceneCenter()}) that
+   * is used to define the 3D rectangle that is eventually fitted.
+   */
+  public void fitScreenRegion(Rect rectangle) {
+    Vec vd = viewDirection();
+    float distToPlane = distanceToSceneCenter();
+
+    Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
+
+    Vec orig = new Vec();
+    Vec dir = new Vec();
+    convertClickToLine(center, orig, dir);
+    Vec newCenter = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+
+    convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
+    final Vec pointX = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+
+    convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
+    final Vec pointY = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+
+    float distance = 0.0f;
+    float distX, distY;
+    switch (type()) {
+      case PERSPECTIVE:
+        distX = Vec.distance(pointX, newCenter) / (float) Math.sin(horizontalFieldOfView() / 2.0f);
+        distY = Vec.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
+        distance = Math.max(distX, distY);
+        break;
+      case ORTHOGRAPHIC:
+        float dist = Vec.dot(Vec.subtract(newCenter, anchor()), vd);
+        distX = Vec.distance(pointX, newCenter) / frame().magnitude() / aspectRatio();
+        distY = Vec.distance(pointY, newCenter) / frame().magnitude() / 1.0f;
+        distance = dist + Math.max(distX, distY);
+        break;
+    }
+
+    frame().setPositionWithConstraint(Vec.subtract(newCenter, Vec.multiply(vd, distance)));
+  }
 
   /**
    * Makes the Eye smoothly zoom on the
-   * {@link Camera#pointUnderPixel(Point)} {@code pixel} and
+   * {@link #pointUnderPixel(Point)} {@code pixel} and
    * returns the world coordinates of the
-   * {@link Camera#pointUnderPixel(Point)}.
+   * {@link #pointUnderPixel(Point)}.
    * <p>
    * In 3D nothing happens if no
-   * {@link Camera#pointUnderPixel(Point)} is found. Otherwise a
+   * {@link #pointUnderPixel(Point)} is found. Otherwise a
    * KeyFrameInterpolator is created that animates the Camera on a one second path that
    * brings the Camera closer to the point under {@code pixel}.
    *
    * @see #interpolateToFitScene()
    */
-  public abstract void interpolateToZoomOnPixel(Point pixel);
+  public void interpolateToZoomOnPixel(Point pixel) {
+    Vec target = pointUnderPixel(pixel);
 
-  public void interpolateToZoomOnPixel(float x, float y) {
-    interpolateToZoomOnPixel(new Point(x, y));
+    if (target == null) {
+      System.out.println("No object under pixel was found");
+      // return target;
+      return;
+    }
+
+    interpolateToZoomOnTarget(target);
+
+    // draw hint
+    pupVec = target;
+    pupFlag = true;
+    timerFx.runOnce(1000);
   }
+
+  /**
+   * Rotates the Eye so that its {@link #upVector()} becomes {@code up} (defined in the
+   * world coordinate system).
+   * <p>
+   * The Eye is rotated around an axis orthogonal to {@code up} and to the current
+   * {@link #upVector()} direction.
+   * <p>
+   * Use this method in order to define the Eye horizontal plane.
+   * <p>
+   * When {@code noMove} is set to {@code false}, the orientation modification is
+   * compensated by a translation, so that the {@link #anchor()} stays projected at the
+   * same position on screen. This is especially useful when the Eye is an observer of the
+   * scene (default action binding).
+   * <p>
+   * When {@code noMove} is true, the Eye {@link #position()} is left unchanged, which is
+   * an intuitive behavior when the Eye is in first person mode.
+   *
+   * @see #lookAt(Vec)
+   * @see #setOrientation(Quat)
+   */
+  public void setUpVector(Vec up, boolean noMove) {
+    Quat q = new Quat(new Vec(0.0f, 1.0f, 0.0f), frame().transformOf(up));
+
+    if (!noMove && gScene.is3D())
+      frame().setPosition(Vec.subtract(anchor(),
+              (Quat.multiply((Quat) frame().orientation(), q)).rotate(frame().coordinatesOf(anchor()))));
+
+    frame().rotate(q);
+
+    // Useful in fly mode to keep the horizontal direction.
+    frame().updateSceneUpVector();
+  }
+
+  /**
+   * Returns the normalized view direction of the Eye, defined in the world coordinate
+   * system. This corresponds to the negative Z axis of the {@link #frame()} (
+   * {@code frame().inverseTransformOf(new Vec(0.0f, 0.0f, -1.0f))} ) whih in 2D always is
+   * (0,0,-1)
+   * <p>
+   * In 3D change this value using
+   * {@link #setViewDirection(Vec)}, {@link #lookAt(Vec)} or
+   * {@link #setOrientation(Quat)} . It is orthogonal to {@link #upVector()} and to
+   * {@link #rightVector()}.
+   */
+  public Vec viewDirection() {
+    //TODO test me
+    //before it was:
+    //if(gScene.is2D())
+      //return new Vec(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
+    //bu now I think we should simply go something like this:
+    return frame().zAxis(false);
+  }
+
+  /**
+   * Sets the Eye {@link #orientation()}, defined in the world coordinate system.
+   */
+  public void setOrientation(Quat q) {
+    frame().setOrientation(q);
+    frame().updateSceneUpVector();
+  }
+
+  //TODO only 3D!
+
+  /**
+   * Enumerates the two possible types of Camera.
+   * <p>
+   * This type mainly defines different camera projection matrix. Many other methods take
+   * this Type into account.
+   */
+  public enum Type {
+    PERSPECTIVE, ORTHOGRAPHIC
+  }
+
+  // C a m e r a p a r a m e t e r s
+  private float zNearCoef;
+  private float zClippingCoef;
+  private Type tp; // PERSPECTIVE or ORTHOGRAPHIC
+
+  // rescale ortho when anchor changes
+  private float rapK = 1;
+
+  // Inverse the direction of an horizontal mouse motion. Depends on the
+  // projected
+  // screen orientation of the vertical axis when the mouse button is pressed.
+  public boolean cadRotationIsReversed;
+
+  /**
+   * Same as {@code setUpVector(new Vec(x,y,z))}.
+   *
+   * @see #setUpVector(Vec)
+   */
+  public void setUpVector(float x, float y, float z) {
+    setUpVector(new Vec(x, y, z));
+  }
+
+  /**
+   * Same as {@code setUpVector(new Vec(x,y,z), boolean noMove)}.
+   *
+   * @see #setUpVector(Vec, boolean)
+   */
+  public void setUpVector(float x, float y, float z, boolean noMove) {
+    setUpVector(new Vec(x, y, z), noMove);
+  }
+
+  /**
+   * Same as {@code setPosition(new Vec(x,y,z))}.
+   *
+   * @see #setPosition(Vec)
+   */
+  public void setPosition(float x, float y, float z) {
+    setPosition(new Vec(x, y, z));
+  }
+
+  /**
+   * Rotates the Camera so that its {@link #viewDirection()} is {@code direction} (defined
+   * in the world coordinate system).
+   * <p>
+   * The Camera {@link #position()} is not modified. The Camera is rotated so that the
+   * horizon (defined by its {@link #upVector()}) is preserved.
+   *
+   * @see #lookAt(Vec)
+   * @see #setUpVector(Vec)
+   */
+  public void setViewDirection(Vec direction) {
+    if (direction.squaredNorm() == 0)
+      return;
+
+    Vec xAxis = direction.cross(upVector());
+    if (xAxis.squaredNorm() == 0) {
+      // target is aligned with upVector, this means a rotation around X axis
+      // X axis is then unchanged, let's keep it !
+      xAxis = frame().xAxis();
+    }
+
+    Quat q = new Quat();
+    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vec.multiply(direction, -1));
+    frame().setOrientationWithConstraint(q);
+  }
+
+  /**
+   * Same as {@code setViewDirection(new Vec(x, y, z))}.
+   *
+   * @see #setViewDirection(Vec)
+   */
+  public void setViewDirection(float x, float y, float z) {
+    setViewDirection(new Vec(x, y, z));
+  }
+
+  /**
+   * Sets the {@link #orientation()} of the Camera using polar coordinates.
+   * <p>
+   * {@code theta} rotates the Camera around its Y axis, and then {@code phi} rotates it
+   * around its X axis.
+   * <p>
+   * The polar coordinates are defined in the world coordinates system:
+   * {@code theta = phi = 0} means that the Camera is directed towards the world Z axis.
+   * Both angles are expressed in radians.
+   * <p>
+   * The {@link #position()} of the Camera is unchanged, you may want to call
+   * {@link #showEntireScene()} after this method to move the Camera.
+   *
+   * @see #setUpVector(Vec)
+   */
+  public void setOrientation(float theta, float phi) {
+    // TODO: need check.
+    Vec axis = new Vec(0.0f, 1.0f, 0.0f);
+    Quat rot1 = new Quat(axis, theta);
+    axis.set(-(float) Math.cos(theta), 0.0f, (float) Math.sin(theta));
+    Quat rot2 = new Quat(axis, phi);
+    setOrientation(Quat.multiply(rot1, rot2));
+  }
+
+  // 3. FRUSTUM
+
+  /**
+   * Returns the Camera.Type.
+   * <p>
+   * Set by {@link #setType(Type)}.
+   * <p>
+   * A {@link Type#PERSPECTIVE} Camera uses a classical
+   * projection mainly defined by its {@link #fieldOfView()}.
+   * <p>
+   * With a {@link Type#ORTHOGRAPHIC} {@link #type()}, the
+   * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
+   * are inferred from the distance to the {@link #anchor()} using
+   * {@link #getBoundaryWidthHeight()}.
+   * <p>
+   * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
+   * and {@link #aspectRatio()} (for frustum shape).
+   */
+  public final Type type() {
+    return tp;
+  }
+
+  /**
+   * Defines the Camera {@link #type()}.
+   * <p>
+   * Changing the Camera Type alters the viewport and the objects' size can be changed.
+   * This method guarantees that the two frustum match in a plane normal to
+   * {@link #viewDirection()}, passing through the arcball reference point.
+   */
+  public final void setType(Type type) {
+    if (type != type()) {
+      modified();
+      this.tp = type;
+    }
+  }
+
+  /**
+   * Returns the vertical field of view of the Camera (in radians) computed as
+   * {@code 2.0f * (float) Math.atan(frame().magnitude())}.
+   * <p>
+   * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
+   * This value is meaningless if the Camera {@link #type()} is
+   * {@link Type#ORTHOGRAPHIC}.
+   * <p>
+   * The field of view corresponds the one used in {@code gluPerspective} (see manual). It
+   * sets the Y (vertical) aperture of the Camera. The X (horizontal) angle is inferred
+   * from the window aspect ratio (see {@link #aspectRatio()} and
+   * {@link #horizontalFieldOfView()}).
+   * <p>
+   * Use {@link #setFOVToFitScene()} to adapt the {@link #fieldOfView()} to a given scene.
+   *
+   * @see #setFieldOfView(float)
+   */
+  public float fieldOfView() {
+    return 2.0f * (float) Math.atan(frame().magnitude());
+  }
+
+  /**
+   * Sets the vertical {@link #fieldOfView()} of the Camera (in radians). The
+   * {@link #fieldOfView()} is encapsulated as the camera
+   * {@link Frame#magnitude()} using the following expression:
+   * {@code frame().setMagnitude((float) Math.tan(fov / 2.0f))}.
+   *
+   * @see #fieldOfView()
+   */
+  public void setFieldOfView(float fov) {
+    // fldOfView = fov;
+    frame().setMagnitude((float) Math.tan(fov / 2.0f));
+    //TODO decide after stereo params
+    //setFocusDistance(sceneRadius() / frame().magnitude());
+  }
+
+  /**
+   * Changes the Camera {@link #fieldOfView()} so that the entire scene (defined by
+   * {@link AbstractScene#center()} and
+   * {@link AbstractScene#radius()} is visible from the Camera
+   * {@link #position()}.
+   * <p>
+   * The {@link #position()} and {@link #orientation()} of the Camera are not modified and
+   * you first have to orientate the Camera in order to actually see the scene (see
+   * {@link #lookAt(Vec)}, {@link #showEntireScene()} or {@link #fitBall(Vec, float)}).
+   * <p>
+   * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
+   * positioning tools ( {@link #setPosition(Vec)}, {@link #lookAt(Vec)}) to position a
+   * Camera at the light position. Then use this method to define the
+   * {@link #fieldOfView()} so that the shadow map resolution is optimally used:
+   * <p>
+   * {@code // The light camera needs size hints in order to optimize its
+   * fieldOfView} <br>
+   * {@code lightCamera.setSceneRadius(sceneRadius());} <br>
+   * {@code lightCamera.setSceneCenter(sceneCenter());} <br>
+   * {@code // Place the light camera} <br>
+   * {@code lightCamera.setPosition(lightFrame.position());} <br>
+   * {@code lightCamera.lookAt(sceneCenter());} <br>
+   * {@code lightCamera.setFOVToFitScene();} <br>
+   * <p>
+   * <b>Attention:</b> The {@link #fieldOfView()} is clamped to M_PI/2.0. This happens
+   * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
+   * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
+   * parts of the scene.
+   */
+  public void setFOVToFitScene() {
+    if (distanceToSceneCenter() > (float) Math.sqrt(2.0f) * sceneRadius())
+      setFieldOfView(2.0f * (float) Math.asin(sceneRadius() / distanceToSceneCenter()));
+    else
+      setFieldOfView((float) Math.PI / 2.0f);
+  }
+
+  /**
+   * Returns the horizontal field of view of the Camera (in radians).
+   * <p>
+   * Value is set using {@link #setHorizontalFieldOfView(float)} or
+   * {@link #setFieldOfView(float)}. These values are always linked by:
+   * {@code horizontalFieldOfView() = 2.0 * atan ( tan(fieldOfView()/2.0) * aspectRatio() )}
+   * .
+   */
+  public float horizontalFieldOfView() {
+    // return 2.0f * (float) Math.atan((float) Math.tan(fieldOfView() / 2.0f) *
+    // aspectRatio());
+    return 2.0f * (float) Math.atan(frame().magnitude() * aspectRatio());
+  }
+
+  /**
+   * Sets the {@link #horizontalFieldOfView()} of the Camera (in radians).
+   * <p>
+   * {@link #horizontalFieldOfView()} and {@link #fieldOfView()} are linked by the
+   * {@link #aspectRatio()}. This method actually calls
+   * {@code setFieldOfView(( 2.0 * atan (tan(hfov / 2.0) / aspectRatio()) ))} so that a
+   * call to {@link #horizontalFieldOfView()} returns the expected value.
+   */
+  public void setHorizontalFieldOfView(float hfov) {
+    setFieldOfView(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()));
+  }
+
+  /**
+   * Returns the near clipping plane distance used by the Camera projection matrix in
+   * scene (world) units.
+   * <p>
+   * The clipping planes' positions depend on the {@link #sceneRadius()} and
+   * {@link #sceneCenter()} rather than being fixed small-enough and large-enough values.
+   * A good scene dimension approximation will hence result in an optimal precision of the
+   * z-buffer.
+   * <p>
+   * The near clipping plane is positioned at a distance equal to
+   * {@link #zClippingCoefficient()} * {@link #sceneRadius()} in front of the
+   * {@link #sceneCenter()}: {@code distanceToSceneCenter() -
+   * zClippingCoefficient() * sceneRadius()}
+   * <p>
+   * In order to prevent negative or too small {@link #zNear()} values (which would
+   * degrade the z precision), {@link #zNearCoefficient()} is used when the Camera is
+   * inside the {@link #sceneRadius()} sphere:
+   * <p>
+   * {@code zMin = zNearCoefficient() * zClippingCoefficient() * sceneRadius();} <br>
+   * {@code zNear = zMin;}<br>
+   * {@code // With an ORTHOGRAPHIC type, the value is simply clamped to 0.0} <br>
+   * <p>
+   * See also the {@link #zFar()}, {@link #zClippingCoefficient()} and
+   * {@link #zNearCoefficient()} documentations.
+   * <p>
+   * If you need a completely different zNear computation, overload the {@link #zNear()}
+   * and {@link #zFar()} methods in a new class that publicly inherits from Camera and use
+   * {@link AbstractScene#setEye(Eye)}.
+   * <p>
+   * <b>Attention:</b> The value is always positive although the clipping plane is
+   * positioned at a negative z value in the Camera coordinate system. This follows the
+   * {@code gluPerspective} standard.
+   *
+   * @see #zFar()
+   */
+  public float zNear() {
+    float z = distanceToSceneCenter() - zClippingCoefficient() * sceneRadius();
+
+    // Prevents negative or null zNear values.
+    final float zMin = zNearCoefficient() * zClippingCoefficient() * sceneRadius();
+    if (z < zMin)
+      switch (type()) {
+        case PERSPECTIVE:
+          z = zMin;
+          break;
+        case ORTHOGRAPHIC:
+          z = 0.0f;
+          break;
+      }
+    return z;
+  }
+
+  /**
+   * Returns the far clipping plane distance used by the Camera projection matrix in scene
+   * (world) units.
+   * <p>
+   * The far clipping plane is positioned at a distance equal to
+   * {@code zClippingCoefficient() * sceneRadius()} behind the {@link #sceneCenter()}:
+   * <p>
+   * {@code zFar = distanceToSceneCenter() + zClippingCoefficient()*sceneRadius()}
+   *
+   * @see #zNear()
+   */
+  public float zFar() {
+    return distanceToSceneCenter() + zClippingCoefficient() * sceneRadius();
+  }
+
+  /**
+   * Returns the coefficient which is used to set {@link #zNear()} when the Camera is
+   * inside the sphere defined by {@link #sceneCenter()} and
+   * {@link #zClippingCoefficient()} * {@link #sceneRadius()}.
+   * <p>
+   * In that case, the {@link #zNear()} value is set to
+   * {@code zNearCoefficient() * zClippingCoefficient() * sceneRadius()}. See the
+   * {@code zNear()} documentation for details.
+   * <p>
+   * Default value is 0.005, which is appropriate for most applications. In case you need
+   * a high dynamic ZBuffer precision, you can increase this value (~0.1). A lower value
+   * will prevent clipping of very close objects at the expense of a worst Z precision.
+   * <p>
+   * Only meaningful when Camera type is PERSPECTIVE.
+   */
+  public float zNearCoefficient() {
+    return zNearCoef;
+  }
+
+  /**
+   * Sets the {@link #zNearCoefficient()} value.
+   */
+  public void setZNearCoefficient(float coef) {
+    if (coef != zNearCoef)
+      modified();
+    zNearCoef = coef;
+  }
+
+  /**
+   * Returns the coefficient used to position the near and far clipping planes.
+   * <p>
+   * The near (resp. far) clipping plane is positioned at a distance equal to
+   * {@code zClippingCoefficient() * sceneRadius()} in front of (resp. behind) the
+   * {@link #sceneCenter()}. This guarantees an optimal use of the z-buffer range and
+   * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
+   * <p>
+   * Default value is square root of 3.0 (so that a cube of size 2*{@link #sceneRadius()}
+   * is not clipped).
+   * <p>
+   * However, since the {@link #sceneRadius()} is used for other purposes (see
+   * showEntireScene(), flySpeed(), ...) and you may want to change this value to define
+   * more precisely the location of the clipping planes. See also
+   * {@link #zNearCoefficient()}.
+   */
+  public float zClippingCoefficient() {
+    return zClippingCoef;
+  }
+
+  /**
+   * Sets the {@link #zClippingCoefficient()} value.
+   */
+  public void setZClippingCoefficient(float coef) {
+    if (coef != zClippingCoef)
+      modified();
+    zClippingCoef = coef;
+  }
+
+  /**
+   * Same as {@code return !isFaceBackFacing(a, b, c)}.
+   *
+   * @see #isFaceBackFacing(Vec, Vec, Vec)
+   */
+  public boolean isFaceFrontFacing(Vec a, Vec b, Vec c) {
+    return !isFaceBackFacing(a, b, c);
+  }
+
+  /**
+   * Returns {@code true} if the given face is back-facing the camera. Otherwise returns
+   * {@code false}.
+   * <p>
+   * Vertices must given in clockwise order if
+   * {@link AbstractScene#isLeftHanded()} or in counter-clockwise
+   * order if {@link AbstractScene#isRightHanded()}.
+   *
+   * @param a first face vertex
+   * @param b second face vertex
+   * @param c third face vertex
+   * @see #isFaceBackFacing(Vec, Vec)
+   * @see #isConeBackFacing(Vec, Vec, float)
+   */
+  public boolean isFaceBackFacing(Vec a, Vec b, Vec c) {
+    return isFaceBackFacing(a, gScene.isLeftHanded() ?
+            Vec.subtract(b, a).cross(Vec.subtract(c, a)) :
+            Vec.subtract(c, a).cross(Vec.subtract(b, a)));
+  }
+
+  /**
+   * Same as {@code return !isFaceBackFacing(vertex, normal)}.
+   *
+   * @see #isFaceBackFacing(Vec, Vec)
+   */
+  public boolean isFaceFrontFacing(Vec vertex, Vec normal) {
+    return !isFaceBackFacing(vertex, normal);
+  }
+
+  /**
+   * Returns {@code true} if the given face is back-facing the camera. Otherwise returns
+   * {@code false}.
+   *
+   * @param vertex belonging to the face
+   * @param normal face normal
+   * @see #isFaceBackFacing(Vec, Vec, Vec)
+   * @see #isConeBackFacing(Vec, Vec, float)
+   */
+  public boolean isFaceBackFacing(Vec vertex, Vec normal) {
+    return isConeBackFacing(vertex, normal, 0);
+  }
+
+  /**
+   * Same as {@code return !isConeBackFacing(vertex, normals)}.
+   *
+   * @see #isConeBackFacing(Vec, ArrayList)
+   */
+  public boolean isConeFrontFacing(Vec vertex, ArrayList<Vec> normals) {
+    return !isConeBackFacing(vertex, normals);
+  }
+
+  /**
+   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
+   * otherwise.
+   *
+   * @param vertex  Cone vertex
+   * @param normals ArrayList of normals defining the cone.
+   * @see #isConeBackFacing(Vec, Vec[])
+   * @see #isConeBackFacing(Vec, Vec, float)
+   */
+  public boolean isConeBackFacing(Vec vertex, ArrayList<Vec> normals) {
+    return isConeBackFacing(vertex, normals.toArray(new Vec[normals.size()]));
+  }
+
+  /**
+   * Same as {@code !isConeBackFacing(vertex, normals)}.
+   *
+   * @see #isConeBackFacing(Vec, Vec[])
+   */
+  public boolean isConeFrontFacing(Vec vertex, Vec[] normals) {
+    return !isConeBackFacing(vertex, normals);
+  }
+
+  /**
+   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
+   * otherwise.
+   *
+   * @param vertex  Cone vertex
+   * @param normals Array of normals defining the cone.
+   * @see #isConeBackFacing(Vec, ArrayList)
+   * @see #isConeBackFacing(Vec, Vec, float)
+   */
+  public boolean isConeBackFacing(Vec vertex, Vec[] normals) {
+    float angle;
+    Vec axis = new Vec(0, 0, 0);
+
+    if (normals.length == 0)
+      throw new RuntimeException("Normal array provided is empty");
+
+    Vec[] n = new Vec[normals.length];
+    for (int i = 0; i < normals.length; i++) {
+      n[i] = new Vec();
+      n[i].set(normals[i]);
+      n[i].normalize();
+      axis = Vec.add(axis, n[i]);
+    }
+
+    if (axis.magnitude() != 0)
+      axis.normalize();
+    else
+      axis.set(0, 0, 1);
+
+    angle = 0;
+    for (int i = 0; i < normals.length; i++)
+      angle = Math.max(angle, (float) Math.acos(Vec.dot(n[i], axis)));
+
+    return isConeBackFacing(vertex, axis, angle);
+  }
+
+  /**
+   * Same as {@code return !isConeBackFacing(vertex, axis, angle)}.
+   *
+   * @see #isConeBackFacing(Vec, Vec, float)
+   */
+  public boolean isConeFrontFacing(Vec vertex, Vec axis, float angle) {
+    return !isConeBackFacing(vertex, axis, angle);
+  }
+
+  /**
+   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
+   * otherwise.
+   *
+   * @param vertex Cone vertex
+   * @param axis   Cone axis
+   * @param angle  Cone angle
+   */
+  public boolean isConeBackFacing(Vec vertex, Vec axis, float angle) {
+    // more or less inspired by this:
+    // http://en.wikipedia.org/wiki/Back-face_culling (perspective case :P)
+    Vec camAxis;
+    if (type() == Type.ORTHOGRAPHIC)
+      camAxis = viewDirection();
+    else {
+      camAxis = Vec.subtract(vertex, position());
+      if (angle != 0)
+        camAxis.normalize();
+    }
+    if (angle == 0)
+      return Vec.dot(camAxis, axis) >= 0;
+    float absAngle = Math.abs(angle);
+    if (absAngle >= Math.PI / 2)
+      return true;
+    Vec faceNormal = axis.get();
+    faceNormal.normalize();
+    return Math.acos(Vec.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
+  }
+
+  // 9. WORLD -> CAMERA
+
+  // 10. 2D -> 3D
+
+  /**
+   * Gives the coefficients of a 3D half-line passing through the Camera eye and pixel
+   * (x,y). Origin in the upper left corner. Use {@link #screenHeight()} - y to locate the
+   * origin at the lower left corner.
+   * <p>
+   * The origin of the half line (eye position) is stored in {@code orig}, while
+   * {@code dir} contains the properly oriented and normalized direction of the half line.
+   * <p>
+   * This method is useful for analytical intersection in a selection method.
+   */
+  public void convertClickToLine(final Point pixelInput, Vec orig, Vec dir) {
+    Point pixel = new Point(pixelInput.x(), pixelInput.y());
+
+    // lef-handed coordinate system correction
+    if (gScene.isLeftHanded())
+      pixel.setY(screenHeight() - pixelInput.y());
+
+    switch (type()) {
+      case PERSPECTIVE:
+        orig.set(position());
+        dir.set(new Vec(((2.0f * pixel.x() / screenWidth()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
+                ((2.0f * (screenHeight() - pixel.y()) / screenHeight()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
+                -1.0f));
+        dir.set(Vec.subtract(frame().inverseCoordinatesOf(dir), orig));
+        dir.normalize();
+        break;
+
+      case ORTHOGRAPHIC: {
+        float[] wh = getBoundaryWidthHeight();
+        orig.set(
+                new Vec((2.0f * pixel.x() / screenWidth() - 1.0f) * wh[0], -(2.0f * pixel.y() / screenHeight() - 1.0f) * wh[1],
+                        0.0f));
+        orig.set(frame().inverseCoordinatesOf(orig));
+        dir.set(viewDirection());
+        break;
+      }
+    }
+  }
+
+  // 12. POSITION TOOLS
+
+  /**
+   * Same as {@code lookAt(new Vec(x,y,z))}.
+   *
+   * @see #lookAt(Vec)
+   */
+  public void lookAt(float x, float y, float z) {
+    lookAt(new Vec(x, y, z));
+  }
+
+  protected void interpolateToZoomOnTarget(Vec target) {
+    if (target == null)
+      return;
+
+    float coef = 0.1f;
+
+    if (anyInterpolationStarted())
+      stopInterpolations();
+
+    interpolationKfi.deletePath();
+    interpolationKfi.addKeyFrame(frame().detach());
+
+    InteractiveFrame frame = new InteractiveFrame(gScene,
+            Vec.add(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target, 0.7f)), frame().orientation(),
+            frame().magnitude());
+    scene().pruneBranch(frame);
+    interpolationKfi.addKeyFrame(frame, 0.4f);
+    // interpolationKfi.addKeyFrame(new InteractiveFrame(gScene,
+    // Vec.addGrabber(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target,
+    // 0.7f)), frame().orientation(), frame().magnitude()).detach(), 0.4f);
+
+    InteractiveFrame originalFrame = frame();
+    InteractiveFrame tempFrame = frame().detach();
+    tempFrame.setPosition(Vec.add(Vec.multiply(frame().position(), coef), Vec.multiply(target, (1.0f - coef))));
+    replaceFrame(tempFrame);
+    lookAt(target);
+    setFrame(originalFrame);
+
+    interpolationKfi.addKeyFrame(tempFrame, 1.0f);
+    interpolationKfi.startInterpolation();
+  }
+
+  // TODO maybe should simply not go in the lib
+
+  // 13. STEREO PARAMETERS
+
+  // S t e r e o p a r a m e t e r s
+  /*
+  private float IODist; // inter-ocular distance, in meters
+  private float focusDist; // in scene units
+  private float physicalDist2Scrn; // in meters
+  private float physicalScrnWidth; // in meters
+  */
+
+  /**
+   * Returns the user's inter-ocular distance (in meters). Default value is 0.062m, which
+   * fits most people.
+   *
+   * @see #setIODistance(float)
+   */
+  /*
+  public float IODistance() {
+    return IODist;
+  }
+  */
+
+  /**
+   * Sets the {@link #IODistance()}.
+   */
+  /*
+  public void setIODistance(float distance) {
+    IODist = distance;
+  }
+  */
+
+  /**
+   * Returns the physical distance between the user's eyes and the screen (in meters).
+   * <p>
+   * Default value is 0.5m.
+   * <p>
+   * Value is set using {@link #setPhysicalDistanceToScreen(float)}.
+   * <p>
+   * physicalDistanceToScreen() and {@link #focusDistance()} represent the same distance.
+   * The first one is expressed in physical real world units, while the latter is
+   * expressed in virtual world units. Use their ratio to convert distances between these
+   * worlds.
+   */
+  /*
+  public float physicalDistanceToScreen() {
+    return physicalDist2Scrn;
+  }
+  */
+
+  /**
+   * Sets the {@link #physicalDistanceToScreen()}.
+   */
+  /*
+  public void setPhysicalDistanceToScreen(float distance) {
+    physicalDist2Scrn = distance;
+  }
+  */
+
+  /**
+   * Returns the physical screen width, in meters. Default value is 0.4m (average
+   * monitor).
+   * <p>
+   * Used for stereo display only. Set using {@link #setPhysicalScreenWidth(float)}.
+   * <p>
+   * See {@link #physicalDistanceToScreen()} for reality center automatic configuration.
+   */
+  /*
+  public float physicalScreenWidth() {
+    return physicalScrnWidth;
+  }
+  */
+
+  /**
+   * Sets the physical screen (monitor or projected wall) width (in meters).
+   */
+  /*
+  public void setPhysicalScreenWidth(float width) {
+    physicalScrnWidth = width;
+  }
+  */
+
+  /**
+   * Returns the focus distance used by stereo display, expressed in virtual world units.
+   * <p>
+   * This is the distance in the virtual world between the Camera and the plane where the
+   * horizontal stereo parallax is null (the stereo left and right images are
+   * superimposed).
+   * <p>
+   * This distance is the virtual world equivalent of the real-world
+   * {@link #physicalDistanceToScreen()}.
+   * <p>
+   * <b>attention:</b> This value is modified by Scene.setSceneRadius(), setSceneRadius()
+   * and {@link #setFieldOfView(float)}. When one of these values is modified,
+   * {@link #focusDistance()} is set to {@link #sceneRadius()} / tan(
+   * {@link #fieldOfView()}/2), which provides good results.
+   */
+  /*
+  public float focusDistance() {
+    return focusDist;
+  }
+  */
+
+  /**
+   * Sets the focusDistance(), in virtual scene units.
+   */
+  /*
+  public void setFocusDistance(float distance) {
+    if (distance != focusDist)
+      modified();
+    focusDist = distance;
+  }
+  */
 }

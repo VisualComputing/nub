@@ -71,7 +71,7 @@ class Java2DMatrixHelper extends MatrixHelper {
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle());
-    scale(gScene.window().frame().magnitude(), gScene.window().frame().magnitude());
+    scale(gScene.eyeFrame().magnitude(), gScene.eyeFrame().magnitude());
     if (gScene.isRightHanded())
       scale(1, -1);
     translate(-gScene.width() / 2, -gScene.height() / 2);
