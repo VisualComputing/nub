@@ -10,7 +10,6 @@
 
 package remixlab.primitives.constraint;
 
-import remixlab.primitives.Rotation;
 import remixlab.primitives.Vec;
 import remixlab.primitives.Frame;
 

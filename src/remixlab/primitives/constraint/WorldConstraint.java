@@ -62,6 +62,30 @@ public class WorldConstraint extends AxisPlaneConstraint {
    * system by {@link #rotationConstraintDirection()}.
    */
   @Override
+  public Quat constrainRotation(Quat rotation, Frame frame) {
+    Quat res = rotation.get();
+    switch (rotationConstraintType()) {
+      case FREE:
+        break;
+      case PLANE:
+        break;
+      case AXIS:
+        if (frame.is2D())
+          break;
+        Vec quat = new Vec(((Quat) rotation).quat[0], ((Quat) rotation).quat[1], ((Quat) rotation).quat[2]);
+        Vec axis = frame.transformOf(rotationConstraintDirection());
+        quat = Vec.projectVectorOnAxis(quat, axis);
+        res = new Quat(quat, 2.0f * (float) Math.acos(((Quat) rotation).quat[3]));
+        break;
+      case FORBIDDEN:
+        res = new Quat(); // identity
+        break;
+    }
+    return res;
+  }
+  //TODO Restore 2D
+  /*
+  @Override
   public Rotation constrainRotation(Rotation rotation, Frame frame) {
     Rotation res = rotation.get();
     switch (rotationConstraintType()) {
@@ -88,4 +112,5 @@ public class WorldConstraint extends AxisPlaneConstraint {
     }
     return res;
   }
+  */
 }

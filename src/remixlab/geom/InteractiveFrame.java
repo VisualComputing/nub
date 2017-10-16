@@ -126,7 +126,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   // spinning stuff:
   private float spngSensitivity;
   private TimingTask spinningTimerTask;
-  private Rotation spngRotation;
+  private Quat spngRotation;
   protected float dampFriction; // new
   // toss and spin share the damp var:
   private float sFriction; // new
@@ -174,139 +174,139 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   protected List<InteractiveFrame> childrenList;
 
   /**
-   * Same as {@code this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}.
+   * Same as {@code this(scn, null, new Vec(), new Quat(), 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn) {
-    this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1);
+    this(scn, null, new Vec(), new Quat(), 1);
   }
 
   /**
    * Same as
-   * {@code this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1)} .
+   * {@code this(eye, null, new Vec(), new Quat(), 1)} .
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye) {
-    this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1);
+    this(eye, null, new Vec(), new Quat(), 1);
   }
 
   /**
-   * Same as {@code this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), 1)}.
+   * Same as {@code this(scn, null, p, new Quat(), 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, Vec p) {
-    this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), 1);
+    this(scn, null, p, new Quat(), 1);
   }
 
   /**
-   * Same as {@code this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), 1)}.
+   * Same as {@code this(eye, null, p, new Quat(), 1)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, Vec p) {
-    this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), 1);
+    this(eye, null, p, new Quat(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, Quat r) {
     this(scn, null, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(eye, null, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, Rotation r) {
+  public InteractiveFrame(Eye eye, Quat r) {
     this(eye, null, new Vec(), r, 1);
   }
 
   /**
-   * Same as {@code this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), s)}.
+   * Same as {@code this(scn, null, new Vec(), new Quat(), s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, float s) {
-    this(scn, null, new Vec(), scn.is3D() ? new Quat() : new Rot(), s);
+    this(scn, null, new Vec(), new Quat(), s);
   }
 
   /**
    * Same as
-   * {@code this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s)} .
+   * {@code this(eye, null, new Vec(), new Quat(), s)} .
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, float s) {
-    this(eye, null, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s);
+    this(eye, null, new Vec(), new Quat(), s);
   }
 
   /**
-   * Same as {@code this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), s)}.
+   * Same as {@code this(scn, null, p, new Quat(), s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, Vec p, float s) {
-    this(scn, null, p, scn.is3D() ? new Quat() : new Rot(), s);
+    this(scn, null, p, new Quat(), s);
   }
 
   /**
-   * Same as {@code this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), s)}.
+   * Same as {@code this(eye, null, p, new Quat(), s)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, Vec p, float s) {
-    this(eye, null, p, eye.scene().is3D() ? new Quat() : new Rot(), s);
+    this(eye, null, p, new Quat(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, Vec p, Quat r) {
     this(scn, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(eye, null, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, Vec p, Rotation r) {
+  public InteractiveFrame(Eye eye, Vec p, Quat r) {
     this(eye, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, Quat r, float s) {
     this(scn, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(eye, null, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, Quat r, float s) {
     this(eye, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, Vec p, Quat r, float s) {
     this(scn, null, p, r, s);
   }
 
@@ -315,131 +315,131 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * {@code this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame) {
-    this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1);
+    this(scn, referenceFrame, new Vec(), new Quat(), 1);
   }
 
   public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame) {
-    this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), 1);
+    this(eye, referenceFrame, new Vec(), new Quat(), 1);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), 1)}
+   * Same as {@code this(scn, referenceFrame, p, new Quat(), 1)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p) {
-    this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), 1);
+    this(scn, referenceFrame, p, new Quat(), 1);
   }
 
   /**
    * Same as
-   * {@code this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), 1)}
+   * {@code this(eye, referenceFrame, p, new Quat(), 1)}
    * .
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p) {
-    this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), 1);
+    this(eye, referenceFrame, p, new Quat(), 1);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Quat r) {
     this(scn, referenceFrame, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Rotation r) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Quat r) {
     this(eye, referenceFrame, new Vec(), r, 1);
   }
 
   /**
    * Same as
-   * {@code this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), s)}
+   * {@code this(scn, referenceFrame, new Vec(), new Quat(), s)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, float s) {
-    this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), s);
+    this(scn, referenceFrame, new Vec(),new Quat(), s);
   }
 
   /**
    * Same as
-   * {@code this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s)}
+   * {@code this(eye, referenceFrame, new Vec(), new Quat(), s)}
    * .
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, float s) {
-    this(eye, referenceFrame, new Vec(), eye.scene().is3D() ? new Quat() : new Rot(), s);
+    this(eye, referenceFrame, new Vec(), new Quat(), s);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), s)}
+   * Same as {@code this(scn, referenceFrame, p, new Quat(), s)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, float s) {
-    this(scn, referenceFrame, p, scn.is3D() ? new Quat() : new Rot(), s);
+    this(scn, referenceFrame, p, new Quat(), s);
   }
 
   /**
    * Same as
-   * {@code this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), s)}
+   * {@code this(eye, referenceFrame, p, new Quat(), s)}
    * .
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, float s) {
-    this(eye, referenceFrame, p, eye.scene().is3D() ? new Quat() : new Rot(), s);
+    this(eye, referenceFrame, p, new Quat(), s);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, p, r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Rotation r) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Quat r) {
     this(scn, referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Rotation r) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Quat r) {
     this(eye, referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, referenceFrame, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Quat r, float s) {
     this(scn, referenceFrame, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(eye, referenceFrame, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Rotation, float)
+   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Quat r, float s) {
     this(eye, referenceFrame, new Vec(), r, s);
   }
 
@@ -462,7 +462,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Rotation r, float s) {
+  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
@@ -491,7 +491,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code true}.
    */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Rotation r, float s) {
+  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
     super(referenceFrame, p, r, s);
     theeye = eye;
     init(theeye.scene());
@@ -1381,7 +1381,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns the incremental rotation that is applied by {@link #spin()} to the
    * generic-frame orientation when it {@link #isSpinning()}.
    * <p>
-   * Default value is a {@code null} rotation. Use {@link #setSpinningRotation(Rotation)}
+   * Default value is a {@code null} rotation. Use {@link #setSpinningRotation(Quat)}
    * to change this value.
    * <p>
    * The {@link #spinningRotation()} axis is defined in the generic-frame coordinate
@@ -1393,7 +1393,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see #flyDirection()
    */
-  public final Rotation spinningRotation() {
+  public final Quat spinningRotation() {
     return spngRotation;
   }
 
@@ -1403,12 +1403,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    *
    * @see #setFlyDirection(Vec)
    */
-  public final void setSpinningRotation(Rotation spinningRotation) {
+  public final void setSpinningRotation(Quat spinningRotation) {
     spngRotation = spinningRotation;
   }
 
   /**
-   * Stops the spinning motion started using {@link #startSpinning(MotionEvent, Rotation)}
+   * Stops the spinning motion started using {@link #startSpinning(MotionEvent, Quat)}
    * . {@link #isSpinning()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #spin()}, since spinning may be
@@ -1424,9 +1424,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Internal use. Same as {@code startSpinning(rt, event.speed(), event.delay())}.
    *
    * @see #startFlying(MotionEvent, Vec)
-   * @see #startSpinning(Rotation, float, long)
+   * @see #startSpinning(Quat, float, long)
    */
-  protected void startSpinning(MotionEvent event, Rotation rt) {
+  protected void startSpinning(MotionEvent event, Quat rt) {
     startSpinning(rt, event.speed(), event.delay());
   }
 
@@ -1443,7 +1443,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #damping()
    * @see #startFlying(Vec, float)
    */
-  public void startSpinning(Rotation rt, float speed, long delay) {
+  public void startSpinning(Quat rt, float speed, long delay) {
     setSpinningRotation(rt);
     eventSpeed = speed;
     eventDelay = delay;
@@ -1474,7 +1474,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
   }
 
-  protected void spin(Rotation rt, float speed, long delay) {
+  protected void spin(Quat rt, float speed, long delay) {
     if (damping() == 0) {
       spin(rt);
       eventSpeed = speed;
@@ -1483,7 +1483,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       startSpinning(rt, speed, delay);
   }
 
-  protected void spin(Rotation rt) {
+  protected void spin(Quat rt) {
     setSpinningRotation(rt);
     spin();
   }
@@ -1517,11 +1517,15 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (Math.abs(eventSpeed) < .001f)
       eventSpeed = 0;
     // float currSpeed = eventSpeed;
+    spinningRotation().fromAxisAngle(((Quat) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
+    //TODO Restore 2D
+    /*
     if (gScene.is3D())
       ((Quat) spinningRotation())
           .fromAxisAngle(((Quat) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
     else
       this.setSpinningRotation(new Rot(spinningRotation().angle() * (eventSpeed / prevSpeed)));
+    */
   }
 
   protected int originalDirection(MotionEvent event) {
@@ -1562,6 +1566,35 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Rotation computed according to the mouse motion. Mouse positions are
    * projected on a deformed ball, centered on ({@code center.x()}, {@code center.y()}).
    */
+  public Quat deformedBallRotation(MotionEvent2 event, Vec center) {
+    if (event.isAbsolute()) {
+      AbstractScene.showEventVariationWarning("deformedBallRotation");
+      return null;
+    }
+    float cx = center.x();
+    float cy = center.y();
+    float x = event.x();
+    float y = event.y();
+    float prevX = event.prevX();
+    float prevY = event.prevY();
+    // Points on the deformed ball
+    float px = rotationSensitivity() * ((int) prevX - cx) / gScene.eye().screenWidth();
+    float py =
+            rotationSensitivity() * (gScene.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / gScene.eye()
+                    .screenHeight();
+    float dx = rotationSensitivity() * (x - cx) / gScene.eye().screenWidth();
+    float dy = rotationSensitivity() * (gScene.isLeftHanded() ? (y - cy) : (cy - y)) / gScene.eye().screenHeight();
+
+    Vec p1 = new Vec(px, py, projectOnBall(px, py));
+    Vec p2 = new Vec(dx, dy, projectOnBall(dx, dy));
+    // Approximation of rotation angle Should be divided by the projectOnBall
+    // size, but it is 1.0
+    Vec axis = p2.cross(p1);
+    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    return new Quat(axis, angle);
+  }
+  //TODO Restore 2D
+  /*
   public Rotation deformedBallRotation(MotionEvent2 event, Vec center) {
     if (event.isAbsolute()) {
       AbstractScene.showEventVariationWarning("deformedBallRotation");
@@ -1600,6 +1633,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return new Quat(axis, angle);
     }
   }
+  */
 
   /**
    * Returns "pseudo-distance" from (x,y) to ball of radius size. For a point inside the
@@ -2100,7 +2134,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       AbstractScene.showDepthWarning("rotateY");
       return;
     }
-    Rotation rt = screenToQuat(0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
+    Quat rt = screenToQuat(0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
     rotate(rt);
   }
 
@@ -2131,6 +2165,11 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into z-rotation conversion routine.
    */
   protected void rotateZ(MotionEvent1 event, float sens) {
+    spin(screenToQuat(0, 0, sens * (isEyeFrame() ? -computeAngle(event) : computeAngle(event))), event.speed(), event.delay());
+  }
+  //TODO Restore 2D
+  /*
+  protected void rotateZ(MotionEvent1 event, float sens) {
     Rotation rt;
     if (isEyeFrame())
       if (is2D())
@@ -2143,6 +2182,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       rt = screenToQuat(0, 0, sens * computeAngle(event));
     spin(rt, event.speed(), event.delay());
   }
+  */
 
   /**
    * User gesture into z-rotation conversion routine.
@@ -2162,12 +2202,15 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * User gesture into z-rotation conversion routine.
    */
   protected void rotateZ(boolean up) {
+    //TODO Restore 2D
+    /*
     Rotation rt;
     if (is2D())
       rt = new Rot(computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
     else
       rt = screenToQuat(0, 0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
-    rotate(rt);
+    */
+    rotate(screenToQuat(0, 0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity())));
   }
 
   /**
@@ -2220,6 +2263,38 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       stopSpinning();
     if (event.fired() && gScene.is3D())
       gScene.eye().cadRotationIsReversed =
+              gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
+    if (event.flushed() && damping() == 0) {
+      startSpinning();
+      return;
+    }
+    if (!event.flushed()) {
+      Quat rt;
+      Vec trns;
+      if (isEyeFrame())
+        rt = deformedBallRotation(event, eye().projectedCoordinatesOf(eye().anchor()));
+      else {
+        trns = gScene.eye().projectedCoordinatesOf(position());
+        rt = deformedBallRotation(event, trns);
+        trns = ((Quat) rt).axis();
+        trns = gScene.eye().frame().orientation().rotate(trns);
+        trns = transformOf(trns);
+        rt = new Quat(trns, -rt.angle());
+      }
+      spin(rt, event.speed(), event.delay());
+    }
+  }
+  //TODO Restore 2D
+  /*
+  public void rotate(MotionEvent2 event) {
+    if (event.isAbsolute()) {
+      AbstractScene.showEventVariationWarning("rotate");
+      return;
+    }
+    if (event.fired())
+      stopSpinning();
+    if (event.fired() && gScene.is3D())
+      gScene.eye().cadRotationIsReversed =
           gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
@@ -2245,6 +2320,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       spin(rt, event.speed(), event.delay());
     }
   }
+  */
 
   /**
    * User gesture into scaling conversion routine.
@@ -3115,7 +3191,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   // Trackable Interface implementation
 
   protected InteractiveFrame eFrame;
-  protected Rotation q;
+  protected Quat q;
   protected float trackingDist;
 
   /**
@@ -3160,7 +3236,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public float trackingEyeAzimuth() {
     // azimuth <-> pitch
     if(q==null)
-      q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
+      q = new Quat((float) Math.PI / 4, 0, 0);
+      //TODO Restore 2D
+      //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
     if (scene().is3D())
       return ((Quat) q).taitBryanAngles().vec[1];
     else {
@@ -3178,7 +3256,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public void setTrackingEyeAzimuth(float a) {
     if (scene().is3D()) {
       if(q==null)
-        q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
+        q = new Quat((float) Math.PI / 4, 0, 0);
+        //TODO Restore 2D
+        //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
       float roll = ((Quat) q).taitBryanAngles().vec[0];
       ((Quat) q).fromTaitBryan(roll, a, 0);
       updateTrackingEyeFrame();
@@ -3195,7 +3275,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public float trackingEyeInclination() {
     // inclination <-> roll
     if(q==null)
-      q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
+      q = new Quat((float) Math.PI / 4, 0, 0);
+      //TODO Restore 2D
+      //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
     if (scene().is3D())
       return ((Quat) q).taitBryanAngles().vec[0];
     else
@@ -3211,11 +3293,17 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   public void setTrackingEyeInclination(float i) {
     if (scene().is3D()) {
       if(q==null)
-        q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
+        q = new Quat((float) Math.PI / 4, 0, 0);
+        //TODO Restore 2D
+        //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
       float pitch = ((Quat) q).taitBryanAngles().vec[1];
       ((Quat) q).fromTaitBryan(i, pitch, 0);
-    } else
+    }
+    //TODO Restore 2D
+    /*
+    else
       q = new Rot(i);
+    */
     updateTrackingEyeFrame();
   }
 
@@ -3230,7 +3318,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   protected void updateTrackingEyeFrame() {
     if(q==null)
-      q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
+      q = new Quat((float) Math.PI / 4, 0, 0);
+      //TODO Restore 2D
+      //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
     if (eFrame == null) {
       eFrame = new InteractiveFrame(scene(), this);
       scene().pruneBranch(eFrame);
@@ -3284,10 +3374,46 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Set orientation of a Joint when its children hasGrabber been translated
    * Returns a Quat that must be used by the rest of the chain to interact
    * inverse rotation.
-   * */
-  public Rotation setRotation(Vec newPos){
+   */
+  public Quat setRotation(Vec newPos) {
+    //First we set Z-Axis to be in the direction of the child new position
+    Vec z = new Vec(0,0,1);
+    float angle_z = Vec.angleBetween(z, newPos);
+    if(angle_z == 0) return new Quat();
+    Vec axis_z = new Vec();
+    Vec.cross(z, newPos, axis_z);
+    Quat qz = new Quat(axis_z, angle_z);
+    this.rotate(qz);
+    //Then we let Y-Axis to be Z_parent X Z
+    Vec new_y = new Vec();
+    Vec z_wp = referenceFrame() != null ?
+            referenceFrame().inverseTransformOf(new Vec(0,0,1))
+            : new Vec(0,0,1);
+    Vec z_w = inverseTransformOf(new Vec(0,0,1));
+    Vec y_w =	inverseTransformOf(new Vec(0,1,0));
+    Vec.cross(z_wp, z_w, new_y);
+    if(Math.abs(z_w.dot(z_wp) - 1) < Float.MIN_VALUE){
+      new_y = referenceFrame() != null ?
+              referenceFrame().inverseTransformOf(new Vec(0,1,0))
+              : new Vec(0,1,0);
+    }
+    float angle_y = Vec.angleBetween(new_y, y_w);
+    if(Vec.dot(Vec.cross(y_w, new_y, null), z_w) < 0) {
+      angle_y = -angle_y;
+    }
+    Quat qy = new Quat(new Vec(0,0,1), angle_y);
+    this.rotate(qy);
+    for(int i = 0; i < children().size(); i++) {
+      children().get(i).setRotation(Quat.compose((Quat) Quat.compose(qz, qy).inverse(), children().get(i).rotation()));
+      children().get(i).setTranslation(new Vec(0, 0, children().get(i).translation().magnitude()));
+    }
+    return (Quat) Quat.compose(qz, qy);
+  }
+  //TODO Restore 2D
+  /*
+  public Quat setRotation(Vec newPos){
     if(this.is3D()){
-      /*First we set Z-Axis to be in the direction of the child new position */
+      //First we set Z-Axis to be in the direction of the child new position
       Vec z = new Vec(0,0,1);
       float angle_z = Vec.angleBetween(z, newPos);
       if(angle_z == 0) return new Quat();
@@ -3295,7 +3421,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       Vec.cross(z, newPos, axis_z);
       Quat qz = new Quat(axis_z, angle_z);
       this.rotate(qz);
-      /*Then we let Y-Axis to be Z_parent X Z*/
+      //Then we let Y-Axis to be Z_parent X Z
       Vec new_y = new Vec();
       Vec z_wp = referenceFrame() != null ?
               referenceFrame().inverseTransformOf(new Vec(0,0,1))
@@ -3320,7 +3446,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       }
       return (Quat) Quat.compose(qz, qy);
     }else{
-      /*First we set X-Axis to be in the direction of the child new position */
+      //First we set X-Axis to be in the direction of the child new position
       Vec x = new Vec(1,0);
       Rot rot = new Rot(x, newPos);
       this.rotate(rot);
@@ -3331,70 +3457,5 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return rot.get();
     }
   }
-
-  protected void setReferenceFrame(InteractiveFrame parent, boolean setHierarchy){
-    //TODO : Currently Working just with chains
-    //TODO when removeGrabber also removeGrabber subBase if children size == 1
-    //TODO Checkout ReferenceFrame to removeGrabber a Frame in the Tree
-    if(!setHierarchy || parent == null){
-      setReferenceFrame(parent);
-      return;
-    }
-    /*Get number of joints related with the parent*/
-    int siblings = 0;
-    for(InteractiveFrame f : parent.children()){
-      siblings = f != this ? siblings + 1 : siblings;
-    }
-    if(siblings == 0){
-      //Set parent orientation
-      Vec translation = parent.coordinatesOfFrom(new Vec(), this);
-      float magnitude = translation.magnitude();
-      parent.setRotation(translation.get());
-      setReferenceFrame(parent);
-      if(this.is3D())this.setTranslation(new Vec(0,0,magnitude));
-      else this.setTranslation(new Vec(magnitude,0));
-    }else if (siblings > 1){
-      InteractiveFrame grandpa = parent.referenceFrame();
-      if(grandpa == null){
-        //Copy parent and create a "new branch"
-        InteractiveFrame dummy = new InteractiveFrame(scene());
-        dummy.setTranslation(parent.translation().get());
-        dummy.setOrientation(parent.orientation().get());
-        //Set parent orientation
-        Vec translation = dummy.coordinatesOfFrom(new Vec(), this);
-        float magnitude = translation.magnitude();
-        dummy.setRotation(translation.get());
-        setReferenceFrame(dummy);
-        if(this.is3D())this.setTranslation(new Vec(0,0,magnitude));
-        else this.setTranslation(new Vec(magnitude,0));
-      }else if(!(grandpa instanceof InteractiveFrame)){
-        //Copy parent and create a "new branch"
-        InteractiveFrame dummy = new InteractiveFrame(scene());
-        dummy.setReferenceFrame(grandpa);
-        dummy.setTranslation(parent.translation().get());
-        dummy.setOrientation(parent.orientation().get());
-        //Set parent orientation
-        Vec translation = dummy.coordinatesOfFrom(new Vec(), this);
-        float magnitude = translation.magnitude();
-        dummy.setRotation(translation.get());
-        setReferenceFrame(dummy);
-        if(this.is3D())this.setTranslation(new Vec(0,0,magnitude));
-        else this.setTranslation(new Vec(magnitude,0));
-      }
-    }
-  }
-  /**
-   * Taking this as Root reconstruct the Tree so
-   * Standard Notation for IK (Parent points to Children) is taking into account
-   */
-  public void setupHierarchy(){
-    for(int i = 0; i < children().size(); i++){
-        InteractiveFrame f = children().get(i);
-        f.setReferenceFrame(this, true);
-    }
-    for(InteractiveFrame f : children()) {
-        f.setupHierarchy();
-    }
-  }
-
+  */
 }

@@ -96,9 +96,7 @@ public class KeyFrameInterpolator {
   /**
    * Internal protected abstract base class for 2d and 3d KeyFrames
    */
-  protected abstract class KeyFrame {
-    public abstract KeyFrame get();
-
+  protected class KeyFrame {
     /**
      * Returns whether or not this KeyFrame matches other.
      *
@@ -108,6 +106,7 @@ public class KeyFrameInterpolator {
       return frame().matches(other.frame()) && time() == other.time();
     }
 
+    protected Quat tgQuat;
     protected Vec tgPVec;
     protected float tm;
     protected InteractiveFrame frm;
@@ -122,11 +121,27 @@ public class KeyFrameInterpolator {
       this.frm = otherKF.frm.get();
     }
 
+    public KeyFrame get() {
+      return new KeyFrame(this);
+    }
+
+    InteractiveFrame frame() {
+      return frm;
+    }
+
+    Quat tgQ() {
+      return tgQuat;
+    }
+
+    Vec tgP() {
+      return tgPVec;
+    }
+
     Vec position() {
       return frame().position();
     }
 
-    Rotation orientation() {
+    Quat orientation() {
       return frame().orientation();
     }
 
@@ -138,67 +153,9 @@ public class KeyFrameInterpolator {
       return tm;
     }
 
-    InteractiveFrame frame() {
-      return frm;
-    }
-
-    Vec tgP() {
-      return tgPVec;
-    }
-
-    abstract void computeTangent(KeyFrame prev, KeyFrame next);
-  }
-
-  /**
-   * 3D KeyFrame internal class.
-   */
-  protected class KeyFrame3D extends KeyFrame {
-    protected Quat tgQuat;
-
-    KeyFrame3D(InteractiveFrame fr, float t) {
-      super(fr, t);
-    }
-
-    protected KeyFrame3D(KeyFrame3D other) {
-      super(other);
-    }
-
-    @Override
-    public KeyFrame3D get() {
-      return new KeyFrame3D(this);
-    }
-
-    Quat tgQ() {
-      return tgQuat;
-    }
-
-    @Override
     void computeTangent(KeyFrame prev, KeyFrame next) {
       tgPVec = Vec.multiply(Vec.subtract(next.position(), prev.position()), 0.5f);
-      tgQuat = Quat.squadTangent((Quat) prev.orientation(), (Quat) orientation(), (Quat) next.orientation());
-    }
-  }
-
-  /**
-   * 2D KeyFrame internal class.
-   */
-  protected class KeyFrame2D extends KeyFrame {
-    KeyFrame2D(InteractiveFrame fr, float t) {
-      super(fr, t);
-    }
-
-    protected KeyFrame2D(KeyFrame2D other) {
-      super(other);
-    }
-
-    @Override
-    public KeyFrame2D get() {
-      return new KeyFrame2D(this);
-    }
-
-    @Override
-    void computeTangent(KeyFrame prev, KeyFrame next) {
-      tgPVec = Vec.multiply(Vec.subtract(next.position(), prev.position()), 0.5f);
+      tgQuat = Quat.squadTangent(prev.orientation(), orientation(), next.orientation());
     }
   }
 
@@ -650,12 +607,8 @@ public class KeyFrameInterpolator {
 
     if ((!keyFrameList.isEmpty()) && (keyFrameList.get(keyFrameList.size() - 1).time() > time))
       System.out.println("Error in KeyFrameInterpolator.addKeyFrame: time is not monotone");
-    else {
-      if (gScene.is3D())
-        keyFrameList.add(new KeyFrame3D(frame, time));
-      else
-        keyFrameList.add(new KeyFrame2D(frame, time));
-    }
+    else
+      keyFrameList.add(new KeyFrame(frame, time));
 
     valuesAreValid = false;
     pathIsValid = false;
@@ -770,13 +723,12 @@ public class KeyFrameInterpolator {
                 Vec.multiply(Vec.add(kf[1].tgP(), Vec.multiply(Vec.add(pvec1, Vec.multiply(pvec2, alpha)), alpha)), alpha)));
             if (gScene.is3D()) {
               frame.setOrientation(
-                  Quat.squad((Quat) kf[1].orientation(), ((KeyFrame3D) kf[1]).tgQ(), ((KeyFrame3D) kf[2]).tgQ(),
-                      (Quat) kf[2].orientation(), alpha));
+                  Quat.squad(kf[1].orientation(), kf[1].tgQ(), kf[2].tgQ(), kf[2].orientation(), alpha));
             } else {
               // linear interpolation
               float start = kf[1].orientation().angle();
               float stop = kf[2].orientation().angle();
-              frame.setOrientation(new Rot(start + (stop - start) * alpha));
+              frame.setOrientation(new Quat(new Vec(0,0,1), start + (stop - start) * alpha));
             }
             frame.setMagnitude(Vec.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             path.add(frame.get());
@@ -979,14 +931,14 @@ public class KeyFrameInterpolator {
     float mag = Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
         keyFrameList.get(currentFrame2.nextIndex()).magnitude(), alpha);
 
-    Rotation q;
+    Quat q;
     if (gScene.is3D()) {
       q = Quat.squad((Quat) keyFrameList.get(currentFrame1.nextIndex()).orientation(),
-          ((KeyFrame3D) keyFrameList.get(currentFrame1.nextIndex())).tgQ(),
-          ((KeyFrame3D) keyFrameList.get(currentFrame2.nextIndex())).tgQ(),
-          (Quat) keyFrameList.get(currentFrame2.nextIndex()).orientation(), alpha);
+          keyFrameList.get(currentFrame1.nextIndex()).tgQ(),
+          keyFrameList.get(currentFrame2.nextIndex()).tgQ(),
+          keyFrameList.get(currentFrame2.nextIndex()).orientation(), alpha);
     } else {
-      q = new Rot(Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
+      q = new Quat(new Vec(0,0,1), Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation().angle(), (alpha)));
     }
 

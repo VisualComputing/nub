@@ -5,7 +5,6 @@ import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.KeyShortcut;
 import remixlab.bias.event.MotionEvent;
 import remixlab.geom.InteractiveFrame;
-import remixlab.primitives.Rot;
 import remixlab.proscene.*;
 
 /**
@@ -62,7 +61,7 @@ public class BasicUse extends PApplet {
     iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
-    iFrame.rotate(new Rot(QUARTER_PI));
+    //iFrame.rotate(new Quat(QUARTER_PI));
     scene.showAll();
   }
 

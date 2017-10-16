@@ -91,7 +91,7 @@ import remixlab.geom.InteractiveFrame;
  * <p>
  * An interesting feature of Frames is that their displacements can be constrained. When a
  * {@link remixlab.primitives.constraint.Constraint} is attached to a Frame, it filters the
- * inputGrabber of {@link #translate(Vec)} and {@link #rotate(Rotation)}, and only the resulting
+ * inputGrabber of {@link #translate(Vec)} and {@link #rotate(Quat)}, and only the resulting
  * filtered motion is applied to the Frame. The default {@link #constraint()} {@code null}
  * resulting in no filtering. Use {@link #setConstraint(Constraint)} to attach a
  * Constraint to a frame.
@@ -120,65 +120,61 @@ public class Frame {
 
   protected Vec trans;
   protected float scl;
-  protected Rotation rot;
+  protected Quat rot;
   protected Frame refFrame;
   protected Constraint cnstrnt;
-
-  public Frame() {
-    this(true);
-  }
 
   /**
    * Same as {@code this(null, new Vec(), three_d ? new Quat() : new Rot(), 1)}.
    *
-   * @see #Frame(Vec, Rotation, float)
+   * @see #Frame(Vec, Quat, float)
    */
-  public Frame(boolean three_d) {
-    this(null, new Vec(), three_d ? new Quat() : new Rot(), 1);
+  public Frame() {
+    this(null, new Vec(), new Quat(), 1);
   }
 
   /**
    * Same as {@code this(null, new Vec(), r, s)}.
    *
-   * @see #Frame(Vec, Rotation, float)
+   * @see #Frame(Vec, Quat, float)
    */
-  public Frame(Rotation r, float s) {
+  public Frame(Quat r, float s) {
     this(null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(p, r, 1)}.
    *
-   * @see #Frame(Vec, Rotation, float)
+   * @see #Frame(Vec, Quat, float)
    */
-  public Frame(Vec p, Rotation r) {
+  public Frame(Vec p, Quat r) {
     this(p, r, 1);
   }
 
   /**
    * Same as {@code this(null, p, r, s)}.
    *
-   * @see #Frame(Frame, Vec, Rotation, float)
+   * @see #Frame(Frame, Vec, Quat, float)
    */
-  public Frame(Vec p, Rotation r, float s) {
+  public Frame(Vec p, Quat r, float s) {
     this(null, p, r, s);
   }
 
   /**
    * Same as {@code this(referenceFrame, p, r, 1)}.
    *
-   * @see #Frame(Frame, Vec, Rotation, float)
+   * @see #Frame(Frame, Vec, Quat, float)
    */
-  public Frame(Frame referenceFrame, Vec p, Rotation r) {
+  public Frame(Frame referenceFrame, Vec p, Quat r) {
     this(referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #Frame(Frame, Vec, Rotation, float)
+   * @see #Frame(Frame, Vec, Quat, float)
    */
-  public Frame(Frame referenceFrame, Rotation r, float s) {
+  public Frame(Frame referenceFrame, Quat r, float s) {
     this(referenceFrame, new Vec(), r, 1);
   }
 
@@ -187,7 +183,7 @@ public class Frame {
    * {@code p}, {@code r} and {@code s} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
-  public Frame(Frame referenceFrame, Vec p, Rotation r, float s) {
+  public Frame(Frame referenceFrame, Vec p, Quat r, float s) {
     setTranslation(p);
     setRotation(r);
     setScaling(s);
@@ -226,8 +222,9 @@ public class Frame {
   /**
    * @return true if frame is 3D.
    */
+  //TODO Restore 2D
   public boolean is3D() {
-    return rotation() instanceof Quat;
+    return true;
   }
 
   // REFERENCE_FRAME
@@ -353,7 +350,7 @@ public class Frame {
    * Same as {@link #setTranslation(Vec)}, but if there's a {@link #constraint()} it is
    * satisfied.
    *
-   * @see #setRotationWithConstraint(Rotation)
+   * @see #setRotationWithConstraint(Quat)
    * @see #setPositionWithConstraint(Vec)
    * @see #setScaling(float)
    */
@@ -402,7 +399,7 @@ public class Frame {
    * {@link #constraint()}). Use {@link #setTranslation(Vec)} to directly translate the
    * Frame without taking the {@link #constraint()} into account.
    *
-   * @see #rotate(Rotation)
+   * @see #rotate(Quat)
    * @see #scale(float)
    */
   public void translate(Vec t) {
@@ -459,7 +456,7 @@ public class Frame {
    * Same as {@link #setPosition(Vec)}, but if there's a {@link #constraint()} it is
    * satisfied (without modifying {@code position}).
    *
-   * @see #setOrientationWithConstraint(Rotation)
+   * @see #setOrientationWithConstraint(Quat)
    * @see #setTranslationWithConstraint(Vec)
    */
   public final void setPositionWithConstraint(Vec position) {
@@ -473,40 +470,40 @@ public class Frame {
 
   /**
    * Returns the Frame rotation, defined with respect to the {@link #referenceFrame()}
-   * (i.e, the current Rotation orientation).
+   * (i.e, the current Quat orientation).
    * <p>
    * Use {@link #orientation()} to get the result in world coordinates. These two values
    * are identical when the {@link #referenceFrame()} is {@code null} (default).
    *
-   * @see #setRotation(Rotation)
-   * @see #setRotationWithConstraint(Rotation)
+   * @see #setRotation(Quat)
+   * @see #setRotationWithConstraint(Quat)
    */
-  public final Rotation rotation() {
+  public final Quat rotation() {
     return rot;
   }
 
   /**
-   * Set the current rotation. See the different {@link Rotation}
+   * Set the current rotation. See the different {@link Quat}
    * constructors.
    * <p>
    * Sets the {@link #rotation()} of the Frame, locally defined with respect to the
    * {@link #referenceFrame()}.
    * <p>
-   * Use {@link #setOrientation(Rotation)} to define the world coordinates
+   * Use {@link #setOrientation(Quat)} to define the world coordinates
    * {@link #orientation()}. The potential {@link #constraint()} of the Frame is not taken
-   * into account, use {@link #setRotationWithConstraint(Rotation)} instead.
+   * into account, use {@link #setRotationWithConstraint(Quat)} instead.
    *
-   * @see #setRotationWithConstraint(Rotation)
+   * @see #setRotationWithConstraint(Quat)
    * @see #rotation()
    * @see #setTranslation(Vec)
    */
-  public final void setRotation(Rotation r) {
+  public final void setRotation(Quat r) {
     rot = r;
     modified();
   }
 
   /**
-   * Same as {@link #setRotation(Rotation)} but with {@code float} Rotation parameters.
+   * Same as {@link #setRotation(Quat)} but with {@code float} Quat parameters.
    */
   public final void setRotation(float x, float y, float z, float w) {
     if (is2D()) {
@@ -517,10 +514,12 @@ public class Frame {
   }
 
   /**
-   * Defines a 2D {@link Rotation}.
+   * Defines a 2D {@link Quat}.
    *
    * @param a angle
    */
+  //TODO Restore 2D
+  /*
   public final void setRotation(float a) {
     if (is3D()) {
       System.err.println("setRotation(float a) is not available in 3D");
@@ -528,22 +527,27 @@ public class Frame {
     }
     setRotation(new Rot(a));
   }
+  */
 
   /**
-   * Same as {@link #setRotation(Rotation)}, but if there's a {@link #constraint()} it's
+   * Same as {@link #setRotation(Quat)}, but if there's a {@link #constraint()} it's
    * satisfied.
    *
    * @see #setTranslationWithConstraint(Vec)
-   * @see #setOrientationWithConstraint(Rotation)
+   * @see #setOrientationWithConstraint(Quat)
    * @see #setScaling(float)
    */
-  public final void setRotationWithConstraint(Rotation rotation) {
-    Rotation deltaQ;
+  public final void setRotationWithConstraint(Quat rotation) {
+    Quat deltaQ;
 
+    deltaQ = Quat.compose(rotation().inverse(), rotation);
+    //TODO Restore 2D
+    /*
     if (is3D())
       deltaQ = Quat.compose(rotation().inverse(), rotation);
     else
       deltaQ = Rot.compose(rotation().inverse(), rotation);
+    */
 
     if (constraint() != null)
       deltaQ = constraint().constrainRotation(deltaQ, this);
@@ -559,23 +563,29 @@ public class Frame {
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the rotation actually
    * applied to the Frame may differ from {@code q} (since it can be filtered by the
-   * {@link #constraint()}). Use {@link #setRotation(Rotation)} to directly rotate the
+   * {@link #constraint()}). Use {@link #setRotation(Quat)} to directly rotate the
    * Frame without taking the {@link #constraint()} into account.
    *
    * @see #translate(Vec)
    */
-  public final void rotate(Rotation r) {
+  public final void rotate(Quat r) {
     if (constraint() != null)
       rotation().compose(constraint().constrainRotation(r, this));
     else
       rotation().compose(r);
+
+    rotation().normalize(); // Prevents numerical drift
+    //TODO Restore 2D
+    /*
     if (is3D())
       ((Quat) rotation()).normalize(); // Prevents numerical drift
+    */
+
     modified();
   }
 
   /**
-   * Same as {@link #rotate(Rotation)} but with {@code float} rotation parameters.
+   * Same as {@link #rotate(Quat)} but with {@code float} rotation parameters.
    */
   public final void rotate(float x, float y, float z, float w) {
     if (is2D()) {
@@ -586,13 +596,13 @@ public class Frame {
   }
 
   /**
-   * Makes the Frame {@link #rotate(Rotation)} by {@code rotation} around {@code point}.
+   * Makes the Frame {@link #rotate(Quat)} by {@code rotation} around {@code point}.
    * <p>
    * {@code point} is defined in the world coordinate system, while the {@code rotation}
    * axis is defined in the Frame coordinate system.
    * <p>
    * If the Frame has a {@link #constraint()}, {@code rotation} is first constrained using
-   * {@link remixlab.primitives.constraint.Constraint#constrainRotation(Rotation, Frame)} .
+   * {@link remixlab.primitives.constraint.Constraint#constrainRotation(Quat, Frame)} .
    * Hence the rotation actually applied to the Frame may differ from {@code rotation}
    * (since it can be filtered by the {@link #constraint()}).
    * <p>
@@ -600,7 +610,7 @@ public class Frame {
    * computed and filtered using
    * {@link remixlab.primitives.constraint.Constraint#constrainTranslation(Vec, Frame)} .
    */
-  public void rotateAroundPoint(Rotation rotation, Vec point) {
+  public void rotateAroundPoint(Quat rotation, Vec point) {
     if (constraint() != null)
       rotation = constraint().constrainRotation(rotation, this);
 
@@ -608,11 +618,17 @@ public class Frame {
     if (is3D())
       this.rotation().normalize(); // Prevents numerical drift
 
+    Quat q = new Quat(orientation().rotate(((Quat) rotation).axis()), rotation.angle());
+
+    //TODO Restore 2D
+    /*
     Rotation q;
     if (is3D())
       q = new Quat(orientation().rotate(((Quat) rotation).axis()), rotation.angle());
     else
       q = new Rot(rotation.angle());
+    */
+
     Vec t = Vec.add(point, q.rotate(Vec.subtract(position(), point)));
     t.subtract(translation());
     if (constraint() != null)
@@ -622,7 +638,7 @@ public class Frame {
   }
 
   // TODO this one needs testing, specially 2d case
-  public void rotateAroundFrame(Rotation rotation, Frame frame) {
+  public void rotateAroundFrame(Quat rotation, Frame frame) {
     if (is3D()) {
       Vec euler = ((Quat) rotation).eulerAngles();
       rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
@@ -649,12 +665,19 @@ public class Frame {
    *
    * @see #position()
    * @see #magnitude()
-   * @see #setOrientation(Rotation)
+   * @see #setOrientation(Quat)
    * @see #rotation()
    */
-  public final Rotation orientation() {
-    Rotation res = rotation().get();
+  public final Quat orientation() {
+    Quat res = rotation().get();
     Frame fr = referenceFrame();
+
+    while (fr != null) {
+        res = Quat.compose(fr.rotation(), res);
+      fr = fr.referenceFrame();
+    }
+    //TODO Restore 2D
+    /*
     while (fr != null) {
       if (is3D())
         res = Quat.compose(fr.rotation(), res);
@@ -662,18 +685,23 @@ public class Frame {
         res = Rot.compose(fr.rotation(), res);
       fr = fr.referenceFrame();
     }
+    */
+
     return res;
   }
 
   /**
    * Sets the {@link #orientation()} of the Frame, defined in the world coordinate system.
    * <p>
-   * Use {@link #setRotation(Rotation)} to define the local frame rotation (with respect
+   * Use {@link #setRotation(Quat)} to define the local frame rotation (with respect
    * to the {@link #referenceFrame()}). The potential {@link #constraint()} of the Frame
-   * is not taken into account, use {@link #setOrientationWithConstraint(Rotation)}
+   * is not taken into account, use {@link #setOrientationWithConstraint(Quat)}
    * instead.
    */
-  public final void setOrientation(Rotation q) {
+  public final void setOrientation(Quat q) {
+    setRotation(referenceFrame() != null ? Quat.compose(referenceFrame().orientation().inverse(), q) : q);
+    //TODO Restore 2D
+    /*
     if (referenceFrame() != null) {
       if (is3D())
         setRotation(Quat.compose(referenceFrame().orientation().inverse(), q));
@@ -681,29 +709,35 @@ public class Frame {
         setRotation(Rot.compose(referenceFrame().orientation().inverse(), q));
     } else
       setRotation(q);
+    */
   }
 
   /**
-   * Same as {@link #setOrientation(Rotation)}, but with {@code float} parameters.
+   * Same as {@link #setOrientation(Quat)}, but with {@code float} parameters.
    */
   public final void setOrientation(float x, float y, float z, float w) {
     setOrientation(new Quat(x, y, z, w));
   }
 
   /**
-   * Same as {@link #setOrientation(Rotation)}, but if there's a {@link #constraint()} it
+   * Same as {@link #setOrientation(Quat)}, but if there's a {@link #constraint()} it
    * is satisfied (without modifying {@code orientation}).
    *
    * @see #setPositionWithConstraint(Vec)
-   * @see #setRotationWithConstraint(Rotation)
+   * @see #setRotationWithConstraint(Quat)
    */
-  public final void setOrientationWithConstraint(Rotation orientation) {
+  public final void setOrientationWithConstraint(Quat orientation) {
+    if (referenceFrame() != null)
+      orientation = Quat.compose(referenceFrame().orientation().inverse(), orientation);
+    //TODO Restore 2D
+    /*
     if (referenceFrame() != null) {
       if (is3D())
         orientation = Quat.compose(referenceFrame().orientation().inverse(), orientation);
       else
         orientation = Rot.compose(referenceFrame().orientation().inverse(), orientation);
     }
+    */
 
     setRotationWithConstraint(orientation);
   }
@@ -741,7 +775,7 @@ public class Frame {
    * Scales the Frame according to {@code s}, locally defined with respect to the
    * {@link #referenceFrame()}.
    *
-   * @see #rotate(Rotation)
+   * @see #rotate(Quat)
    * @see #translate(Vec)
    */
   public void scale(float s) {
@@ -825,6 +859,95 @@ public class Frame {
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #referenceFrame()}).
    */
+  public final void alignWithFrame(Frame frame, boolean move, float threshold) {
+    Vec[][] directions = new Vec[2][3];
+
+    for (int d = 0; d < 3; ++d) {
+      Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+      if (frame != null)
+        directions[0][d] = frame.orientation().rotate(dir);
+      else
+        directions[0][d] = dir;
+      directions[1][d] = orientation().rotate(dir);
+    }
+
+    float maxProj = 0.0f;
+    float proj;
+    short[] index = new short[2];
+    index[0] = index[1] = 0;
+
+    Vec vec = new Vec(0.0f, 0.0f, 0.0f);
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        vec.set(directions[0][i]);
+        proj = Math.abs(vec.dot(directions[1][j]));
+        if ((proj) >= maxProj) {
+          index[0] = (short) i;
+          index[1] = (short) j;
+          maxProj = proj;
+        }
+      }
+    }
+    Frame old = new Frame(this); // correct line
+    // VFrame old = this.get();// this call the get overloaded method and
+    // hence addGrabber the frame to the mouse grabber
+
+    vec.set(directions[0][index[0]]);
+    float coef = vec.dot(directions[1][index[1]]);
+
+    if (Math.abs(coef) >= threshold) {
+      vec.set(directions[0][index[0]]);
+      Vec axis = vec.cross(directions[1][index[1]]);
+      float angle = (float) Math.asin(axis.magnitude());
+      if (coef >= 0.0)
+        angle = -angle;
+      // setOrientation(Quaternion(axis, angle) * orientation());
+      Quat q = new Quat(axis, angle);
+      q = Quat.multiply(((Quat) rotation()).inverse(), q);
+      q = Quat.multiply(q, (Quat) orientation());
+      rotate(q);
+
+      // Try to align an other axis direction
+      short d = (short) ((index[1] + 1) % 3);
+      Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+      dir = orientation().rotate(dir);
+
+      float max = 0.0f;
+      for (int i = 0; i < 3; ++i) {
+        vec.set(directions[0][i]);
+        proj = Math.abs(vec.dot(dir));
+        if (proj > max) {
+          index[0] = (short) i;
+          max = proj;
+        }
+      }
+
+      if (max >= threshold) {
+        vec.set(directions[0][index[0]]);
+        axis = vec.cross(dir);
+        angle = (float) Math.asin(axis.magnitude());
+        vec.set(directions[0][index[0]]);
+        if (vec.dot(dir) >= 0.0)
+          angle = -angle;
+        // setOrientation(Quaternion(axis, angle) * orientation());
+        q.fromAxisAngle(axis, angle);
+        q = Quat.multiply(((Quat) rotation()).inverse(), q);
+        q = Quat.multiply(q, (Quat) orientation());
+        rotate(q);
+      }
+    }
+    if (move) {
+      Vec center = new Vec(0.0f, 0.0f, 0.0f);
+      if (frame != null)
+        center = frame.position();
+
+      vec = Vec.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
+      vec.subtract(translation());
+      translate(vec);
+    }
+  }
+  //TODO Restore 2D
+  /*
   public final void alignWithFrame(Frame frame, boolean move, float threshold) {
     if (is3D()) {
       Vec[][] directions = new Vec[2][3];
@@ -937,6 +1060,7 @@ public class Frame {
       setOrientation(other);
     }
   }
+  */
 
   /**
    * Translates the Frame so that its {@link #position()} lies on the line defined by
@@ -965,10 +1089,7 @@ public class Frame {
    * @see #setZAxis(Vec)
    */
   public void setXAxis(Vec axis) {
-    if (is3D())
-      rotate(new Quat(new Vec(1.0f, 0.0f, 0.0f), transformOf(axis)));
-    else
-      rotate(new Rot(new Vec(1.0f, 0.0f, 0.0f), transformOf(axis)));
+    rotate(new Quat(new Vec(1.0f, 0.0f, 0.0f), transformOf(axis)));
   }
 
   /**
@@ -983,10 +1104,7 @@ public class Frame {
    * @see #setZAxis(Vec)
    */
   public void setYAxis(Vec axis) {
-    if (is3D())
-      rotate(new Quat(new Vec(0.0f, 1.0f, 0.0f), transformOf(axis)));
-    else
-      rotate(new Rot(new Vec(0.0f, 1.0f, 0.0f), transformOf(axis)));
+    rotate(new Quat(new Vec(0.0f, 1.0f, 0.0f), transformOf(axis)));
   }
 
   /**
@@ -1317,7 +1435,7 @@ public class Frame {
    * Returns a Frame representing the inverse of the Frame space transformation.
    * <p>
    * The the new Frame {@link #rotation()} is the
-   * {@link Rotation#inverse()} of the original rotation. Its
+   * {@link Quat#inverse()} of the original rotation. Its
    * {@link #translation()} is the negated inverse rotated image of the original
    * translation. Its {@link #scaling()} is 1 / original scaling.
    * <p>

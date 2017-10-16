@@ -1250,6 +1250,24 @@ public class Scene extends AbstractScene implements PConstants {
    * {@code frame}.
    */
   protected Frame toFrame(JSONObject jsonFrame) {
+    Frame frame = new Frame();
+    float x, y, z;
+    x = jsonFrame.getJSONArray("position").getFloat(0);
+    y = jsonFrame.getJSONArray("position").getFloat(1);
+    z = jsonFrame.getJSONArray("position").getFloat(2);
+    Vec pos = new Vec(x, y, z);
+    frame.setPosition(pos);
+    x = jsonFrame.getJSONArray("orientation").getFloat(0);
+    y = jsonFrame.getJSONArray("orientation").getFloat(1);
+    z = jsonFrame.getJSONArray("orientation").getFloat(2);
+    float w = jsonFrame.getJSONArray("orientation").getFloat(3);
+    frame.setOrientation(new Quat(x, y, z, w));
+    frame.setMagnitude(jsonFrame.getFloat("magnitude"));
+    return frame;
+  }
+  //TODO Restore 2D
+  /*
+  protected Frame toFrame(JSONObject jsonFrame) {
     Frame frame = new Frame(is3D());
     float x, y, z;
     x = jsonFrame.getJSONArray("position").getFloat(0);
@@ -1269,6 +1287,7 @@ public class Scene extends AbstractScene implements PConstants {
     frame.setMagnitude(jsonFrame.getFloat("magnitude"));
     return frame;
   }
+  */
 
   /**
    * Used internally by {@link #saveConfig(String)}. Converts {@code frame} into a P5
@@ -1298,6 +1317,17 @@ public class Scene extends AbstractScene implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code rot} into a P5
    * JSONArray.
    */
+  protected JSONArray toJSONArray(Quat rot) {
+    JSONArray jsonRot = new JSONArray();
+    Quat quat = (Quat) rot;
+    jsonRot.setFloat(0, quat.x());
+    jsonRot.setFloat(1, quat.y());
+    jsonRot.setFloat(2, quat.z());
+    jsonRot.setFloat(3, quat.w());
+    return jsonRot;
+  }
+  //TODO Restore 2D
+  /*
   protected JSONArray toJSONArray(Rotation rot) {
     JSONArray jsonRot = new JSONArray();
     if (is3D()) {
@@ -1310,6 +1340,7 @@ public class Scene extends AbstractScene implements PConstants {
       jsonRot.setFloat(0, rot.angle());
     return jsonRot;
   }
+  */
 
   protected boolean unchachedBuffer;
   public PGraphics targetPGraphics;

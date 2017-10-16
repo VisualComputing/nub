@@ -14,8 +14,8 @@ import processing.core.PGraphics;
 import processing.core.PMatrix2D;
 import remixlab.geom.MatrixHelper;
 import remixlab.primitives.Mat;
-import remixlab.primitives.Rotation;
 import remixlab.primitives.Vec;
+import remixlab.primitives.Quat;
 
 /**
  * Internal {@link MatrixHelper} based on PGraphicsJava2D graphics
@@ -36,6 +36,34 @@ class Java2DMatrixHelper extends MatrixHelper {
   // Comment the above line and uncomment this one to develop the driver:
   // public PGraphicsJava2D pg() { return (PGraphicsJava2D) pg; }
 
+  @Override
+  protected void cacheProjectionView() {
+    Mat.multiply(gScene.eye().getProjection(), gScene.eye().getView(), projectionViewMat);
+    if (isProjectionViewInverseCached()) {
+      if (projectionViewInverseMat == null)
+        projectionViewInverseMat = new Mat();
+      projectionViewMatHasInv = projectionViewMat.invert(projectionViewInverseMat);
+    }
+  }
+
+  @Override
+  public void bind(boolean recompute) {
+    if (recompute) {
+      gScene.eye().computeProjection();
+      gScene.eye().computeView();
+      cacheProjectionView();
+    }
+    Vec pos = gScene.eye().position();
+    Quat o = gScene.eye().frame().orientation();
+    translate(gScene.width() / 2, gScene.height() / 2);
+    if (gScene.isRightHanded())
+      scale(1, -1);
+    scale(1 / gScene.eye().frame().magnitude(), 1 / gScene.eye().frame().magnitude());
+    rotate(-o.angle());
+    translate(-pos.x(), -pos.y());
+  }
+  //TODO Restore 2D
+  /*
   @Override
   public void bind(boolean recompute) {
     if (recompute) {
@@ -62,7 +90,23 @@ class Java2DMatrixHelper extends MatrixHelper {
       projectionViewMatHasInv = projectionViewMat.invert(projectionViewInverseMat);
     }
   }
+  */
 
+  @Override
+  public void beginScreenDrawing() {
+    Vec pos = gScene.eye().position();
+    Quat o = gScene.eye().frame().orientation();
+
+    pushModelView();
+    translate(pos.x(), pos.y());
+    rotate(o.angle());
+    scale(gScene.eyeFrame().magnitude(), gScene.eyeFrame().magnitude());
+    if (gScene.isRightHanded())
+      scale(1, -1);
+    translate(-gScene.width() / 2, -gScene.height() / 2);
+  }
+  //TODO Restore 2D
+  /*
   @Override
   public void beginScreenDrawing() {
     Vec pos = gScene.eye().position();
@@ -76,6 +120,7 @@ class Java2DMatrixHelper extends MatrixHelper {
       scale(1, -1);
     translate(-gScene.width() / 2, -gScene.height() / 2);
   }
+  */
 
   @Override
   public void endScreenDrawing() {

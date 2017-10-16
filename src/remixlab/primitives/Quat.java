@@ -11,26 +11,23 @@
 package remixlab.primitives;
 
 /**
- * A 3D {@link Rotation} is a 4 element unit quaternion
+ * A 3D Quat is a 4 element unit quaternion
  * represented by single precision floating point x,y,z,w coordinates. This class API aims
  * to conform that of the great <a href=
  * "http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html">libQGLViewer
  * Quaternion</a>.
  */
-public class Quat implements Rotation {
+public class Quat {
   /**
    * Returns whether or not this Rot matches other.
    *
-   * @param other rot
+   * @param other quat
    */
-  @Override
-  public boolean matches(Rotation other) {
-    if(other instanceof Quat)
-      return quat[0] == ((Quat)other).quat[0]
-              && quat[1] == ((Quat)other).quat[1]
-              && quat[2] == ((Quat)other).quat[2]
-              && quat[3] == ((Quat)other).quat[3];
-    return false;
+  public boolean matches(Quat other) {
+    return quat[0] == ((Quat)other).quat[0]
+            && quat[1] == ((Quat)other).quat[1]
+            && quat[2] == ((Quat)other).quat[2]
+            && quat[3] == ((Quat)other).quat[3];
   }
 
   /**
@@ -191,7 +188,6 @@ public class Quat implements Rotation {
     set(q1);
   }
 
-  @Override
   public Quat get() {
     return new Quat(this);
   }
@@ -290,12 +286,6 @@ public class Quat implements Rotation {
     this.quat[3] = w;
   }
 
-  public void set(Rotation q) {
-    if (!(q instanceof Quat))
-      throw new RuntimeException("q should be an instance of Quat");
-    set((Quat) q);
-  }
-
   /**
    * Convenience function that simply calls {@code set(q1, true);}
    *
@@ -342,7 +332,6 @@ public class Quat implements Rotation {
   /**
    * Negates all the coefficients of the Quat.
    */
-  @Override
   public final void negate() {
     this.quat[0] = -this.quat[0];
     this.quat[1] = -this.quat[1];
@@ -373,14 +362,8 @@ public class Quat implements Rotation {
     return a.quat[0] * b.quat[0] + a.quat[1] * b.quat[1] + a.quat[2] * b.quat[2] + a.quat[3] * b.quat[3];
   }
 
-  @Override
-  public final void compose(Rotation q) {
-    if (q instanceof Quat)
-      multiply((Quat) q);
-    else {
-      Quat quat = new Quat(new Vec(0, 0, 1), q.angle());
-      multiply(quat);
-    }
+  public final void compose(Quat q) {
+    multiply(q);
   }
 
   /**
@@ -402,11 +385,8 @@ public class Quat implements Rotation {
     this.quat[1] = y;
   }
 
-  public final static Rotation compose(Rotation q1, Rotation q2) {
-    if (q1 instanceof Quat && q2 instanceof Quat)
-      return multiply((Quat) q1, (Quat) q2);
-    else
-      return multiply(new Quat(new Vec(0, 0, 1), q1.angle()), new Quat(new Vec(0, 0, 1), q2.angle()));
+  public final static Quat compose(Quat q1, Quat q2) {
+    return multiply(q1, q2);
   }
 
   /**
@@ -484,7 +464,6 @@ public class Quat implements Rotation {
    *
    * @see #invert()
    */
-  @Override
   public final Quat inverse() {
     Quat tempQuat = new Quat(this);
     tempQuat.invert();
@@ -520,7 +499,6 @@ public class Quat implements Rotation {
   /**
    * Normalizes the value of this Quat in place and return its {@code norm}.
    */
-  @Override
   public final float normalize() {
     float norm = (float) Math.sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]
         + this.quat[3] * this.quat[3]);
@@ -543,7 +521,6 @@ public class Quat implements Rotation {
    *
    * @param v the Vec
    */
-  @Override
   public final Vec rotate(Vec v) {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
@@ -570,7 +547,6 @@ public class Quat implements Rotation {
    *
    * @param v the Vec
    */
-  @Override
   public final Vec inverseRotate(Vec v) {
     Quat tempQuat = new Quat(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
     tempQuat.invert();
@@ -720,7 +696,6 @@ public class Quat implements Rotation {
    *
    * @see #fromAxisAngle(Vec, float)
    */
-  @Override
   public void fromTo(Vec from, Vec to) {
     float fromSqNorm = from.squaredNorm();
     float toSqNorm = to.squaredNorm();
@@ -762,7 +737,6 @@ public class Quat implements Rotation {
    *
    * @see #fromRotatedBasis(Vec, Vec, Vec)
    */
-  @Override
   public final void fromMatrix(Mat glMatrix) {
     Vec x = new Vec(glMatrix.mat[0], glMatrix.mat[4], glMatrix.mat[8]);
     Vec y = new Vec(glMatrix.mat[1], glMatrix.mat[5], glMatrix.mat[9]);
@@ -853,7 +827,6 @@ public class Quat implements Rotation {
    *
    * @see #axis()
    */
-  @Override
   public final float angle() {
     return 2.0f * (float) Math.acos(w());
   }
@@ -861,7 +834,6 @@ public class Quat implements Rotation {
   /**
    * Returns the Mat which represents the rotation matrix associated with the Quat.
    */
-  @Override
   public final Mat matrix() {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
@@ -907,7 +879,6 @@ public class Quat implements Rotation {
    * {@link #inverseMatrix()}. Use it immediately (as in
    * {@code applyMatrix(q.inverseMatrix())}).
    */
-  @Override
   public final Mat inverseMatrix() {
     Quat tempQuat = new Quat(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
     tempQuat.invert();
@@ -1085,7 +1056,6 @@ public class Quat implements Rotation {
     return (q.quat[0] * q.quat[0]) + (q.quat[1] * q.quat[1]) + (q.quat[2] * q.quat[2]) + (q.quat[3] * q.quat[3]);
   }
 
-  @Override
   public void print() {
     axis().print();
     System.out.println(angle());

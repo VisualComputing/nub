@@ -11,7 +11,6 @@
 package remixlab.primitives.constraint;
 
 import remixlab.primitives.Frame;
-import remixlab.primitives.Rotation;
 import remixlab.primitives.Vec;
 import remixlab.primitives.Quat;
 
@@ -56,7 +55,7 @@ public abstract class Constraint {
    * {@code rotation} {@link Quat#axis()} to express
    * {@code rotation} in the world coordinate system if needed.
    */
-  public Rotation constrainRotation(Rotation rotation, Frame frame) {
+  public Quat constrainRotation(Quat rotation, Frame frame) {
     return rotation.get();
   }
 }

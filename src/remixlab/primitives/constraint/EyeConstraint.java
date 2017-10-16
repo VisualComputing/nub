@@ -81,6 +81,30 @@ public class EyeConstraint extends AxisPlaneConstraint {
    * coordinate system by {@link #rotationConstraintDirection()}.
    */
   @Override
+  public Quat constrainRotation(Quat rotation, Frame frame) {
+    Quat res = rotation.get();
+    switch (rotationConstraintType()) {
+      case FREE:
+        break;
+      case PLANE:
+        break;
+      case AXIS:
+        if (frame.is2D())
+          break;
+        Vec axis = frame.transformOf(eye().frame().inverseTransformOf(rotationConstraintDirection()));
+        Vec quat = new Vec(((Quat) rotation).quat[0], ((Quat) rotation).quat[1], ((Quat) rotation).quat[2]);
+        quat = Vec.projectVectorOnAxis(quat, axis);
+        res = new Quat(quat, 2.0f * (float) Math.acos(((Quat) rotation).quat[3]));
+        break;
+      case FORBIDDEN:
+        res = new Quat(); // identity
+        break;
+    }
+    return res;
+  }
+  //TODO Restore 2D
+  /*
+  @Override
   public Rotation constrainRotation(Rotation rotation, Frame frame) {
     Rotation res = rotation.get();
     switch (rotationConstraintType()) {
@@ -107,4 +131,5 @@ public class EyeConstraint extends AxisPlaneConstraint {
     }
     return res;
   }
+  */
 }
