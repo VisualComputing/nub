@@ -191,10 +191,13 @@ public class Eye {
   protected Vec anchorPnt;
 
   // L O C A L T I M E R
+  //TODO restore
+  /*
   public boolean anchorFlag;
   public boolean pupFlag;
   public Vec pupVec;
   protected TimingTask timerFx;
+  */
 
   public Eye(AbstractScene scn) {
     gScene = scn;
@@ -216,12 +219,15 @@ public class Eye {
     enableBoundaryEquations(false);
     anchorPnt = new Vec(0.0f, 0.0f, 0.0f);
 
+    //TODO restore
+    /*
     this.timerFx = new TimingTask() {
       public void execute() {
         unSetTimerFlag();
       }
     };
     this.gScene.registerTimingTask(timerFx);
+    */
 
     setFrame(new GrabberEyeFrame(this));
     setSceneRadius(100);
@@ -279,12 +285,15 @@ public class Eye {
         this.dist[i] = oVP.dist[i];
     }
 
+    //TODO restore
+    /*
     this.timerFx = new TimingTask() {
       public void execute() {
         unSetTimerFlag();
       }
     };
     this.gScene.registerTimingTask(timerFx);
+    */
     this.gFrame = oVP.frame().get();
     this.setSceneRadius(oVP.sceneRadius());
     this.setSceneCenter(oVP.sceneCenter());
@@ -325,22 +334,6 @@ public class Eye {
   }
 
   // 2. Local timer
-
-  /**
-   * Internal use. Called from the timer to stop displaying the point under pixel and
-   * anchor visual hints.
-   */
-  protected void unSetTimerFlag() {
-    anchorFlag = false;
-    pupFlag = false;
-  }
-
-  /**
-   * Internal use. Run the reset anchor hint timer according to {@code period}.
-   */
-  protected void runResetAnchorHintTimer(long period) {
-    timerFx.runOnce(period);
-  }
 
   /**
    * Returns the Eye orientation, defined in the world coordinate system.
@@ -1793,8 +1786,9 @@ public class Eye {
     if (pup != null) {
       setAnchor(pup);
       // new animation
-      anchorFlag = true;
-      timerFx.runOnce(1000);
+      //TODO restore
+      //anchorFlag = true;
+      //timerFx.runOnce(1000);
       return true;
     }
     return false;

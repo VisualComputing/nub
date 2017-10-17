@@ -438,8 +438,9 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   public void resetAnchor() {
     eye().setAnchor(new Vec(0, 0, 0));
     // looks horrible, but works ;)
-    eye().anchorFlag = true;
-    eye().runResetAnchorHintTimer(1000);
+    //TODO restore
+    //eye().anchorFlag = true;
+    //eye().runResetAnchorHintTimer(1000);
   }
 
   // Grabber Implementation
@@ -1373,10 +1374,13 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       drawZoomWindowHint();
     if (rotateVisualHint())
       drawScreenRotateHint();
+    //TODO restore
+    /*
     if (eye().anchorFlag)
       drawAnchorHint();
     if (eye().pupFlag)
       drawPointUnderPixelHint();
+    */
   }
 
   /**
@@ -1786,7 +1790,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Internal use.
    */
-  protected abstract void drawPointUnderPixelHint();
+  //TODO restore
+  //protected abstract void drawPointUnderPixelHint();
 
   /**
    * Draws a cross on the screen centered under pixel {@code (px, py)}, and edge of size

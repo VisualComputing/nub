@@ -13,6 +13,7 @@ Scene is concrete and allows to set a ray-tracing scene.
 ### Methods to be restored
 
 1. add/play/delete/Path_n
+2. protected void drawPointUnderPixelHint() 
 
 ### Methods that were modified
 
@@ -22,12 +23,14 @@ Scene is concrete and allows to set a ray-tracing scene.
 4. protected void drawPaths()
 5. public void setAvatar(Trackable t)
 6. public Trackable resetAvatar()
+7. protected void displayVisualHints()
 
 ## Scene
 
 ### Methods to be restored
 
 1. protected JSONArray toJSONArray(int id)
+2. protected void drawPointUnderPixelHint()
 
 ### Methods that were modified
 
@@ -60,6 +63,8 @@ Scene is concrete and allows to set a ray-tracing scene.
 20. public void interpolateToZoomOnPixel(float x, float y)
 21. public void interpolateToZoomOnPixel(Point pixel)
 22. protected void interpolateToZoomOnTarget(Vec target)
+23. protected void unSetTimerFlag()
+24. protected void runResetAnchorHintTimer(long period)
 
 ### Methods that were modified
 
@@ -67,6 +72,7 @@ Scene is concrete and allows to set a ray-tracing scene.
 2. protected Eye
 3. protected final void replaceFrame(InteractiveFrame g)
 4. public final void setFrame(InteractiveFrame g)
+5. public boolean setAnchorFromPixel(Point pixel)
 
 ## InteractiveFrame
 

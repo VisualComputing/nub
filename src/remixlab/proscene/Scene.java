@@ -2708,6 +2708,8 @@ public class Scene extends AbstractScene implements PConstants {
     pg().popStyle();
   }
 
+  //TODO restore
+  /*
   @Override
   protected void drawPointUnderPixelHint() {
     pg().pushStyle();
@@ -2717,6 +2719,7 @@ public class Scene extends AbstractScene implements PConstants {
     drawCross(v.vec[0], v.vec[1], 30);
     pg().popStyle();
   }
+  */
 
   @Override
   protected void drawScreenRotateHint() {
