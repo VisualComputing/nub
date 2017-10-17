@@ -431,96 +431,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // Actions
 
   /**
-   * Same as {@code eye().addKeyFrameToPath(1)}.
-   *
-   * @see Eye#addKeyFrameToPath(int)
-   */
-  public void addKeyFrameToPath1() {
-    eye().addKeyFrameToPath(1);
-  }
-
-  /**
-   * Same as {@code eye().addKeyFrameToPath(2)}.
-   *
-   * @see Eye#addKeyFrameToPath(int)
-   */
-  public void addKeyFrameToPath2() {
-    eye().addKeyFrameToPath(2);
-  }
-
-  /**
-   * Same as {@code eye().addKeyFrameToPath(1)}.
-   *
-   * @see Eye#addKeyFrameToPath(int)
-   */
-  public void addKeyFrameToPath3() {
-    eye().addKeyFrameToPath(3);
-  }
-
-  /**
-   * Same as {@code eye().deletePath(1)}.
-   *
-   * @see Eye#deletePath(int)
-   */
-  public void deletePath1() {
-    eye().deletePath(1);
-  }
-
-  /**
-   * Same as {@code eye().deletePath(2)}.
-   *
-   * @see Eye#deletePath(int)
-   */
-  public void deletePath2() {
-    eye().deletePath(2);
-  }
-
-  /**
-   * Same as {@code eye().deletePath(3)}.
-   *
-   * @see Eye#deletePath(int)
-   */
-  public void deletePath3() {
-    eye().deletePath(3);
-  }
-
-  /**
-   * Same as {@code eye().playPath(1)}.
-   *
-   * @see Eye#playPath(int)
-   */
-  public void playPath1() {
-    eye().playPath(1);
-  }
-
-  /**
-   * Same as {@code eye().playPath(2)}.
-   *
-   * @see Eye#playPath(int)
-   */
-  public void playPath2() {
-    eye().playPath(2);
-  }
-
-  /**
-   * Same as {@code eye().playPath(3)}.
-   *
-   * @see Eye#playPath(int)
-   */
-  public void playPath3() {
-    eye().playPath(3);
-  }
-
-  /**
-   * Same as {@code eye().interpolateToFitScene()}.
-   *
-   * @see Eye#interpolateToFitScene()
-   */
-  public void interpolateToFitScene() {
-    eye().interpolateToFitScene();
-  }
-
-  /**
    * Same as {@code eye().setAnchor(new Vec(0, 0, 0))}.
    *
    * @see Eye#setAnchor(Vec)
@@ -1349,6 +1259,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * Sets the display of the camera key frame paths according to {@code draw}
    */
   public void setPathsVisualHint(boolean draw) {
+    if (draw)
+      visualHintMask |= PATHS;
+    else
+      visualHintMask &= ~PATHS;
+  }
+  //TODO restore
+  /*
+  public void setPathsVisualHint(boolean draw) {
     if (draw) {
       if (eye() != null) {
         visualHintMask |= PATHS;
@@ -1363,6 +1281,7 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
         System.err.println("Warning: null eye, no path dettached!");
     }
   }
+  */
 
   /**
    * Internal. Third parties should not call this.
@@ -1399,7 +1318,9 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    */
   public void preDraw() {
     // 1. Avatar
-    if (avatar() != null && (!eye().anyInterpolationStarted()))
+    //TODO define
+    //if (avatar() != null && (!eye().anyInterpolationStarted()))
+    if (avatar() != null)
       eye().frame().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye
     bindMatrices();
@@ -1503,7 +1424,8 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     // }
 
     // alternative:
-    // /*
+    //TODO restore
+    /*
     KeyFrameInterpolator[] k = eye.keyFrameInterpolatorArray();
     for (int i = 0; i < k.length; i++)
       drawPath(k[i], 3, 5, radius());
@@ -1943,13 +1865,16 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       ((InteractiveFrame) (avatar())).stopSpinning();
 
     // interact small animation ;)
-    if (eye().anyInterpolationStarted())
-      eye().stopInterpolations();
+    //TODO restore
+    //if (eye().anyInterpolationStarted())
+      //eye().stopInterpolations();
     // eye().interpolateTo(avatar().eyeFrame());//works only when eyeFrame
     // scaling = magnitude
     InteractiveFrame eyeFrameCopy = avatar().trackingEyeFrame().get();
     eyeFrameCopy.setMagnitude(avatar().trackingEyeFrame().scaling());
-    eye().interpolateTo(eyeFrameCopy);
+    //TODO experimental
+    //eye().interpolateTo(eyeFrameCopy);
+    eyeFrame().set(eyeFrameCopy);
     pruneBranch(eyeFrameCopy);
 
     if (avatar() instanceof InteractiveFrame)
@@ -1966,7 +1891,9 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     if (prev != null) {
       inputHandler().resetTrackedGrabber();
       inputHandler().setDefaultGrabber(eye().frame());
-      eye().interpolateToFitScene();
+      //TODO restore
+      //eye().interpolateToFitScene();
+      showAll();
     }
     trck = null;
     return prev;

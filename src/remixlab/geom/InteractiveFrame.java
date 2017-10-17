@@ -1307,7 +1307,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Spinning requires to set to {@link #damping()} to 0.
    * <p>
    * See {@link #spin()}, {@link #spinningRotation()} and
-   * {@link #startSpinning(MotionEvent, Rotation)} for details.
+   * {@link #startSpinning(MotionEvent, Quat)} for details.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -1366,9 +1366,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * During spinning, {@link #spin()} rotates the generic-frame by its
    * {@link #spinningRotation()} at a frequency defined when the generic-frame
-   * {@link #startSpinning(MotionEvent, Rotation)}.
+   * {@link #startSpinning(MotionEvent, Quat)}.
    * <p>
-   * Use {@link #startSpinning(MotionEvent, Rotation)} and {@link #stopSpinning()} to
+   * Use {@link #startSpinning(MotionEvent, Quat)} and {@link #stopSpinning()} to
    * change this state. Default value is {@code false}.
    *
    * @see #isFlying()
@@ -2015,7 +2015,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       int tlX = (int) e.prevX() < (int) e.x() ? (int) e.prevX() : (int) e.x();
       int h = (int) Math.abs(e.dy());
       int tlY = (int) e.prevY() < (int) e.y() ? (int) e.prevY() : (int) e.y();
-      eye().interpolateToZoomOnRegion(new Rect(tlX, tlY, w, h));
+      //TODO restore
+      //eye().interpolateToZoomOnRegion(new Rect(tlX, tlY, w, h));
+      eye().fitScreenRegion(new Rect(tlX, tlY, w, h));
     }
   }
 
@@ -2673,16 +2675,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       AbstractScene.showOnlyEyeWarning("anchorFromPixel");
   }
 
-  /**
-   * User gesture into zoom on pixel conversion routine.
-   */
-  public void zoomOnPixel(TapEvent event) {
-    if (isEyeFrame())
-      eye().interpolateToZoomOnPixel(new Point(event.x(), event.y()));
-    else
-      AbstractScene.showOnlyEyeWarning("zoomOnPixel");
-  }
-
   // Quite nice
 
   /**
@@ -2945,7 +2937,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * Defines the {@link #flyDirection()} in the reference frame coordinate system.
    *
-   * @see #setSpinningRotation(Rotation)
+   * @see #setSpinningRotation(Quat)
    */
   public final void setFlyDirection(Vec dir) {
     fDir = dir;
@@ -2955,7 +2947,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Internal use. Same as {@code startFlying(direction, event.speed())}.
    *
    * @see #startFlying(Vec, float)
-   * @see #startSpinning(MotionEvent, Rotation)
+   * @see #startSpinning(MotionEvent, Quat)
    */
   protected void startFlying(MotionEvent event, Vec direction) {
     startFlying(direction, event.speed());
@@ -2974,7 +2966,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #damping()
    * @see #spin()
    * @see #startFlying(MotionEvent, Vec)
-   * @see #startSpinning(Rotation, float, long)
+   * @see #startSpinning(Quat, float, long)
    */
   public void startFlying(Vec direction, float speed) {
     eventSpeed = speed;

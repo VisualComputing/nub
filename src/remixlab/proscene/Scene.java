@@ -749,7 +749,9 @@ public class Scene extends AbstractScene implements PConstants {
   @Override
   public void preDraw() {
     // 1. Avatar
-    if (avatar() != null && (!eye().anyInterpolationStarted()))
+    //TODO restore
+    //if (avatar() != null && (!eye().anyInterpolationStarted()))
+    if (avatar() != null)
       eye().frame().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye
     bindMatrices();
@@ -1142,7 +1144,7 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Saves the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
    * {@link Eye#type()} and the
-   * {@link Eye#keyFrameInterpolatorArray()} into
+   * keyFrameInterpolators into
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1156,7 +1158,9 @@ public class Scene extends AbstractScene implements PConstants {
     json.setBoolean("ortho", is2D() ? true : eye().type() == Eye.Type.ORTHOGRAPHIC ? true : false);
     json.setJSONObject("eye", toJSONObject(eyeFrame()));
     JSONArray jsonPaths = new JSONArray();
+    //TODO restore
     // keyFrames
+    /*
     int i = 0;
     for (int id : eye().keyFrameInterpolatorMap().keySet()) {
       JSONObject jsonPath = new JSONObject();
@@ -1165,6 +1169,7 @@ public class Scene extends AbstractScene implements PConstants {
       jsonPaths.setJSONObject(i++, jsonPath);
     }
     json.setJSONArray("paths", jsonPaths);
+    //*/
     pApplet().saveJSONObject(json, fileName);
   }
 
@@ -1188,7 +1193,7 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Loads the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
    * {@link Eye#type()} and the
-   * {@link Eye#keyFrameInterpolatorArray()} from
+   * keyFrameInterpolators from
    * {@code fileName}.
    *
    * @see #saveConfig()
@@ -1209,6 +1214,8 @@ public class Scene extends AbstractScene implements PConstants {
         eye().setType(json.getBoolean("ortho") ? Eye.Type.ORTHOGRAPHIC : Eye.Type.PERSPECTIVE);
       eyeFrame().setWorldMatrix(toFrame(json.getJSONObject("eye")));
       // keyFrames
+      //TODO restore
+      /*
       JSONArray paths = json.getJSONArray("paths");
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
@@ -1228,6 +1235,7 @@ public class Scene extends AbstractScene implements PConstants {
           eye().keyFrameInterpolator(id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
         }
       }
+      //*/
     }
   }
 
@@ -1235,6 +1243,7 @@ public class Scene extends AbstractScene implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts the {@code id} eye path into
    * a P5 JSONArray.
    */
+  /*
   protected JSONArray toJSONArray(int id) {
     JSONArray jsonKeyFrames = new JSONArray();
     for (int i = 0; i < eye().keyFrameInterpolator(id).numberOfKeyFrames(); i++) {
@@ -1244,6 +1253,7 @@ public class Scene extends AbstractScene implements PConstants {
     }
     return jsonKeyFrames;
   }
+  */
 
   /**
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a

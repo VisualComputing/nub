@@ -31,8 +31,7 @@ import java.util.*;
  * exports its associated projection and view matrices and it can interactively be
  * modified using any interaction mechanism you can think of.
  * <p>
- * An Eye holds a collection of paths ({@link #keyFrameInterpolator(int key)}) each of
- * which can be interpolated ( {@link #playPath}). It also provides visibility routines (
+ * An Eye provides visibility routines (
  * {@link #isPointVisible(Vec)}, {@link #ballVisibility(Vec, float)},
  * {@link #boxVisibility(Vec, Vec)}), from which advanced geometry culling techniques can
  * be implemented.
@@ -176,10 +175,6 @@ public class Eye {
   protected Mat viewMat;
   protected Mat projectionMat;
 
-  // P o i n t s o f V i e w s a n d K e y F r a m e s
-  protected HashMap<Integer, KeyFrameInterpolator> kfi;
-  protected KeyFrameInterpolator interpolationKfi;
-
   // F r u s t u m p l a n e c o e f f i c i e n t s
   protected float fpCoefficients[][];
   protected boolean fpCoefficientsUpdate;
@@ -219,8 +214,6 @@ public class Eye {
     }
 
     enableBoundaryEquations(false);
-    interpolationKfi = new KeyFrameInterpolator(gScene, frame());
-    kfi = new HashMap<Integer, KeyFrameInterpolator>();
     anchorPnt = new Vec(0.0f, 0.0f, 0.0f);
 
     this.timerFx = new TimingTask() {
@@ -292,17 +285,7 @@ public class Eye {
       }
     };
     this.gScene.registerTimingTask(timerFx);
-
     this.gFrame = oVP.frame().get();
-    this.interpolationKfi = oVP.interpolationKfi.get();
-    this.kfi = new HashMap<Integer, KeyFrameInterpolator>();
-
-    Iterator<Integer> itrtr = oVP.kfi.keySet().iterator();
-    while (itrtr.hasNext()) {
-      Integer key = itrtr.next();
-      this.kfi.put(new Integer(key.intValue()), oVP.kfi.get(key).get());
-    }
-
     this.setSceneRadius(oVP.sceneRadius());
     this.setSceneCenter(oVP.sceneCenter());
     this.setScreenWidthAndHeight(oVP.screenWidth(), oVP.screenHeight());
@@ -405,7 +388,7 @@ public class Eye {
 
   /**
    * Internal use. Temporarily attach a frame to the Eye which is useful to some
-   * interpolation methods such as {@link #interpolateToFitScene()}.
+   * interpolation methods.
    */
   protected final void replaceFrame(InteractiveFrame g) {
     if (g == null || g == frame())
@@ -413,10 +396,6 @@ public class Eye {
     if (g.theeye == null) {// only detached frames which call pruneBranch on g
       gFrame = g;
       frame().theeye = this;
-      interpolationKfi.setFrame(frame());
-      Iterator<KeyFrameInterpolator> itr = kfi.values().iterator();
-      while (itr.hasNext())
-        itr.next().setFrame(frame());
     }
   }
 
@@ -452,13 +431,6 @@ public class Eye {
       // //scene().inputHandler().removeGrabber(frame());
       // scene().pruneBranch(frame());// better than removeGrabber grabber
       gFrame = g;// frame() is new
-      //TODO previous was:
-      //if (gScene.is3D())
-        //((Camera) this).setFocusDistance(sceneRadius() / (float) Math.tan(((Camera) this).fieldOfView() / 2.0f));
-      interpolationKfi.setFrame(frame());
-      Iterator<KeyFrameInterpolator> itr = kfi.values().iterator();
-      while (itr.hasNext())
-        itr.next().setFrame(frame());
     } else {
       System.out.println(
           "Warning no eye frame set as the eye class (" + this.getClass().getSimpleName() + ") and the frame eye class ("
@@ -1304,229 +1276,6 @@ public class Eye {
     return true;
   }
 
-  // 7. KEYFRAMED PATHS
-
-  /**
-   * Returns the eye {@code <id, KeyFrameInterpolator>} map.
-   *
-   * @see #keyFrameInterpolatorArray()
-   * @see #keyFrameInterpolatorList()
-   */
-  public HashMap<Integer, KeyFrameInterpolator> keyFrameInterpolatorMap() {
-    return kfi;
-  }
-
-  /**
-   * Returns the eye {@code paths} as an array.
-   *
-   * @see #keyFrameInterpolatorMap()
-   * @see #keyFrameInterpolatorList()
-   */
-  public KeyFrameInterpolator[] keyFrameInterpolatorArray() {
-    return kfi.values().toArray(new KeyFrameInterpolator[0]);
-  }
-
-  /**
-   * Returns the eye {@code paths} as a list.
-   *
-   * @see #keyFrameInterpolatorArray()
-   * @see #keyFrameInterpolatorMap()
-   */
-  public List<KeyFrameInterpolator> keyFrameInterpolatorList() {
-    return Arrays.asList(keyFrameInterpolatorArray());
-  }
-
-  /**
-   * Returns the KeyFrameInterpolator that defines the Eye path number {@code key}.
-   * <p>
-   * The returned KeyFrameInterpolator may be null (if no path is defined for key
-   * {@code key}).
-   */
-  public KeyFrameInterpolator keyFrameInterpolator(int key) {
-    return kfi.get(key);
-  }
-
-  /**
-   * Sets the KeyFrameInterpolator that defines the Eye path of index {@code key}.
-   */
-  public void setKeyFrameInterpolator(int key, KeyFrameInterpolator keyFInterpolator) {
-    if (kfi.get(key) != null) {
-      deletePath(key);
-    }
-    if (keyFInterpolator != null) {
-      if (frame() != keyFInterpolator.frame())
-        keyFInterpolator.setFrame(frame());
-      if (keyFInterpolator.gScene != gScene) {
-        keyFInterpolator.gScene = gScene;
-        for (int i = 0; i < keyFInterpolator.numberOfKeyFrames(); ++i)
-          keyFInterpolator.keyFrame(i).gScene = gScene;
-      }
-      kfi.put(key, keyFInterpolator);
-      System.out.println("Path " + key + " set");
-    } else
-      deletePath(key);
-  }
-
-  /**
-   * Adds the current Eye {@link #position()} and {@link #orientation()} as a keyFrame to
-   * path {@code key}.
-   * <p>
-   * This method can also be used if you simply want to save an Eye point of view (a path
-   * made of a single keyFrame). Use {@link #playPath(int)} to make the Eye play the
-   * keyFrame path (resp. restore the point of view). Use {@link #deletePath(int)} to
-   * clear the path.
-   * <p>
-   * The default keyboard shortcuts for this method are keys [1-5].
-   * <p>
-   * If you use directly this method and the {@link #keyFrameInterpolator(int)} does not
-   * exist, a new one is created.
-   */
-  public void addKeyFrameToPath(int key) {
-    boolean info = true;
-    if (!kfi.containsKey(key)) {
-      setKeyFrameInterpolator(key, new KeyFrameInterpolator(gScene, frame()));
-      System.out.println("Position " + key + " saved");
-      info = false;
-    }
-
-    InteractiveFrame keyFrame = frame().detach();
-    keyFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.FIXED);
-    keyFrame.setGrabsInputThreshold(AbstractScene.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
-    if (gScene.pathsVisualHint())
-      gScene.inputHandler().addGrabber(keyFrame);
-    kfi.get(key).addKeyFrame(keyFrame);
-
-    if (info)
-      System.out.println("Path " + key + ", position " + kfi.get(key).numberOfKeyFrames() + " added");
-  }
-
-  protected void detachPaths() {
-    for (int key : keyFrameInterpolatorMap().keySet())
-      detachPath(key);
-  }
-
-  /**
-   * Removes all the Frames from all the pools of the agents registered at the
-   * {@link AbstractScene#inputHandler()}.
-   *
-   * @see #attachPath(int)
-   */
-  protected void detachPath(int key) {
-    if (kfi.containsKey(key)) {
-      KeyFrameInterpolator k = kfi.get(key);
-      for (int i = 0; i < k.keyFrames().size(); ++i)
-        gScene.inputHandler().removeGrabber(k.keyFrames().get(i).frame());
-      // Doesn't work since branch is already detached, i.e., frame is not reachable
-      // gScene.pruneBranch(k.keyFrames().get(i).frame());
-    }
-  }
-
-  protected void attachPaths() {
-    for (int key : keyFrameInterpolatorMap().keySet())
-      attachPath(key);
-  }
-
-  /**
-   * Re-adds all the Frames to all the pools of the agents registered at the
-   * {@link AbstractScene#inputHandler()}.
-   *
-   * @see #detachPath(int)
-   */
-  protected void attachPath(int key) {
-    if (kfi.containsKey(key)) {
-      KeyFrameInterpolator k = kfi.get(key);
-      for (int i = 0; i < k.keyFrames().size(); ++i)
-        gScene.inputHandler().addGrabber(k.keyFrames().get(i).frame());
-    }
-  }
-
-  /**
-   * Makes the Eye follow the path of keyFrameInterpolator() number {@code key}.
-   * <p>
-   * If the interpolation is started, it stops it instead.
-   * <p>
-   * This method silently ignores undefined (empty) paths (see keyFrameInterpolator()).
-   * <p>
-   * The default keyboard shortcuts for this method are keys [1-5].
-   */
-  public void playPath(int key) {
-    if (kfi.containsKey(key)) {
-      if (kfi.get(key).interpolationStarted()) {
-        kfi.get(key).stopInterpolation();
-        System.out.println("Path " + key + " stopped");
-      } else {
-        if (anyInterpolationStarted())
-          stopInterpolations();
-        kfi.get(key).startInterpolation();
-        if (kfi.get(key).numberOfKeyFrames() > 1)
-          System.out.println("Path " + key + " started");
-        else
-          System.out.println("Position " + key + " restored");
-      }
-    }
-  }
-
-  /**
-   * Deletes the {@link #keyFrameInterpolator(int)} of index {@code key}.
-   */
-  public void deletePath(int key) {
-    if (kfi.containsKey(key)) {
-      kfi.get(key).stopInterpolation();
-      detachPath(key);
-      kfi.get(key).deletePath();
-      kfi.remove(key);
-      System.out.println("Path " + key + " deleted");
-    }
-  }
-
-  /**
-   * Resets the path of the {@link #keyFrameInterpolator(int)} number {@code key}.
-   * <p>
-   * If this path is not being played (see {@link #playPath(int)} and
-   * {@link KeyFrameInterpolator#interpolationStarted()} ), resets
-   * it to its starting position (see
-   * {@link KeyFrameInterpolator#resetInterpolation()}). If the
-   * path is played, simply stops interpolation.
-   */
-  public void resetPath(int key) {
-    if (kfi.containsKey(key)) {
-      if ((kfi.get(key).interpolationStarted()))
-        kfi.get(key).stopInterpolation();
-      else {
-        kfi.get(key).resetInterpolation();
-        kfi.get(key).interpolateAtTime(kfi.get(key).interpolationTime());
-      }
-    }
-  }
-
-  /**
-   * Returns {@code true} if any interpolation associated with this Eye is currently being
-   * performed (and {@code false} otherwise).
-   */
-  public boolean anyInterpolationStarted() {
-    Iterator<Integer> itrtr = kfi.keySet().iterator();
-    while (itrtr.hasNext()) {
-      Integer key = itrtr.next();
-      if (kfi.get(key).interpolationStarted())
-        return true;
-    }
-    return interpolationKfi.interpolationStarted();
-  }
-
-  /**
-   * Stops all interpolations currently being performed associated with this Eye.
-   */
-  public void stopInterpolations() {
-    Iterator<Integer> itrtr = kfi.keySet().iterator();
-    while (itrtr.hasNext()) {
-      Integer key = itrtr.next();
-      if (kfi.get(key).interpolationStarted())
-        kfi.get(key).stopInterpolation();
-    }
-    if (interpolationKfi.interpolationStarted())
-      interpolationKfi.stopInterpolation();
-  }
-
   /**
    * Enables or disables automatic update of the eye boundary plane equations every frame
    * according to {@code flag}. Computation of the equations is expensive and hence is
@@ -1648,91 +1397,6 @@ public class Eye {
   }
 
   /**
-   * Smoothly moves the Eye so that the rectangular screen region defined by
-   * {@code rectangle} (pixel units, with origin in the upper left corner) fits the
-   * screen.
-   * <p>
-   * The Eye is translated (its {@link #orientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
-   * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
-   * (orthogonal to the {@link #viewDirection()} and passing through the
-   * {@link #sceneCenter()}) that is used to define the 3D rectangle that is eventually
-   * fitted.
-   *
-   * @see #fitScreenRegion(Rect)
-   */
-  public void interpolateToZoomOnRegion(Rect rectangle) {
-    if (anyInterpolationStarted())
-      stopInterpolations();
-
-    interpolationKfi.deletePath();
-    interpolationKfi.addKeyFrame(frame().detach());
-    InteractiveFrame originalFrame = frame();
-    InteractiveFrame tempFrame = frame().detach();
-    replaceFrame(tempFrame);
-    fitScreenRegion(rectangle);
-    setFrame(originalFrame);
-    interpolationKfi.addKeyFrame(tempFrame);
-    interpolationKfi.startInterpolation();
-  }
-
-  /**
-   * Interpolates the Eye on a one second KeyFrameInterpolator path so that the entire
-   * scene fits the screen at the end.
-   * <p>
-   * The scene is defined by its {@link #sceneCenter()} and its {@link #sceneRadius()}.
-   * See {@link #showEntireScene()}.
-   * <p>
-   * The {@link #orientation()} of the Eye is not modified.
-   *
-   * @see #interpolateToZoomOnPixel(Point)
-   */
-  public void interpolateToFitScene() {
-    if (anyInterpolationStarted())
-      stopInterpolations();
-
-    interpolationKfi.deletePath();
-    interpolationKfi.addKeyFrame(frame().detach());
-    InteractiveFrame originalFrame = frame();
-    InteractiveFrame tempFrame = frame().detach();
-    replaceFrame(tempFrame);
-    showEntireScene();
-    setFrame(originalFrame);
-    interpolationKfi.addKeyFrame(tempFrame);
-    interpolationKfi.startInterpolation();
-  }
-
-  /**
-   * Convenience function that simply calls {@code interpolateTo(fr, 1)}.
-   *
-   * @see #interpolateTo(InteractiveFrame, float)
-   */
-  public void interpolateTo(InteractiveFrame fr) {
-    interpolateTo(fr, 1);
-  }
-
-  /**
-   * Smoothly interpolates the Eye on a KeyFrameInterpolator path so that it goes to
-   * {@code fr}.
-   * <p>
-   * {@code fr} is expressed in world coordinates. {@code duration} tunes the
-   * interpolation speed.
-   *
-   * @see #interpolateTo(InteractiveFrame)
-   * @see #interpolateToFitScene()
-   * @see #interpolateToZoomOnPixel(Point)
-   */
-  public void interpolateTo(InteractiveFrame fr, float duration) {
-    if (anyInterpolationStarted())
-      stopInterpolations();
-
-    interpolationKfi.deletePath();
-    interpolationKfi.addKeyFrame(frame().detach());
-    interpolationKfi.addKeyFrame(fr, duration);
-    interpolationKfi.startInterpolation();
-  }
-
-  /**
    * Moves the Eye so that the entire scene is visible.
    * <p>
    * Simply calls {@link #fitBall(Vec, float)} on a sphere defined by
@@ -1757,10 +1421,6 @@ public class Eye {
    */
   public void centerScene() {
     frame().projectOnLine(sceneCenter(), viewDirection());
-  }
-
-  public void interpolateToZoomOnPixel(float x, float y) {
-    interpolateToZoomOnPixel(new Point(x, y));
   }
 
   //TODO work in progress 2D and 3D
@@ -2457,36 +2117,6 @@ public class Eye {
   }
 
   /**
-   * Makes the Eye smoothly zoom on the
-   * {@link #pointUnderPixel(Point)} {@code pixel} and
-   * returns the world coordinates of the
-   * {@link #pointUnderPixel(Point)}.
-   * <p>
-   * In 3D nothing happens if no
-   * {@link #pointUnderPixel(Point)} is found. Otherwise a
-   * KeyFrameInterpolator is created that animates the Camera on a one second path that
-   * brings the Camera closer to the point under {@code pixel}.
-   *
-   * @see #interpolateToFitScene()
-   */
-  public void interpolateToZoomOnPixel(Point pixel) {
-    Vec target = pointUnderPixel(pixel);
-
-    if (target == null) {
-      System.out.println("No object under pixel was found");
-      // return target;
-      return;
-    }
-
-    interpolateToZoomOnTarget(target);
-
-    // draw hint
-    pupVec = target;
-    pupFlag = true;
-    timerFx.runOnce(1000);
-  }
-
-  /**
    * Rotates the Eye so that its {@link #upVector()} becomes {@code up} (defined in the
    * world coordinate system).
    * <p>
@@ -3125,151 +2755,4 @@ public class Eye {
   public void lookAt(float x, float y, float z) {
     lookAt(new Vec(x, y, z));
   }
-
-  protected void interpolateToZoomOnTarget(Vec target) {
-    if (target == null)
-      return;
-
-    float coef = 0.1f;
-
-    if (anyInterpolationStarted())
-      stopInterpolations();
-
-    interpolationKfi.deletePath();
-    interpolationKfi.addKeyFrame(frame().detach());
-
-    InteractiveFrame frame = new InteractiveFrame(gScene,
-            Vec.add(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target, 0.7f)), frame().orientation(),
-            frame().magnitude());
-    scene().pruneBranch(frame);
-    interpolationKfi.addKeyFrame(frame, 0.4f);
-    // interpolationKfi.addKeyFrame(new InteractiveFrame(gScene,
-    // Vec.addGrabber(Vec.multiply(frame().position(), 0.3f), Vec.multiply(target,
-    // 0.7f)), frame().orientation(), frame().magnitude()).detach(), 0.4f);
-
-    InteractiveFrame originalFrame = frame();
-    InteractiveFrame tempFrame = frame().detach();
-    tempFrame.setPosition(Vec.add(Vec.multiply(frame().position(), coef), Vec.multiply(target, (1.0f - coef))));
-    replaceFrame(tempFrame);
-    lookAt(target);
-    setFrame(originalFrame);
-
-    interpolationKfi.addKeyFrame(tempFrame, 1.0f);
-    interpolationKfi.startInterpolation();
-  }
-
-  // TODO maybe should simply not go in the lib
-
-  // 13. STEREO PARAMETERS
-
-  // S t e r e o p a r a m e t e r s
-  /*
-  private float IODist; // inter-ocular distance, in meters
-  private float focusDist; // in scene units
-  private float physicalDist2Scrn; // in meters
-  private float physicalScrnWidth; // in meters
-  */
-
-  /**
-   * Returns the user's inter-ocular distance (in meters). Default value is 0.062m, which
-   * fits most people.
-   *
-   * @see #setIODistance(float)
-   */
-  /*
-  public float IODistance() {
-    return IODist;
-  }
-  */
-
-  /**
-   * Sets the {@link #IODistance()}.
-   */
-  /*
-  public void setIODistance(float distance) {
-    IODist = distance;
-  }
-  */
-
-  /**
-   * Returns the physical distance between the user's eyes and the screen (in meters).
-   * <p>
-   * Default value is 0.5m.
-   * <p>
-   * Value is set using {@link #setPhysicalDistanceToScreen(float)}.
-   * <p>
-   * physicalDistanceToScreen() and {@link #focusDistance()} represent the same distance.
-   * The first one is expressed in physical real world units, while the latter is
-   * expressed in virtual world units. Use their ratio to convert distances between these
-   * worlds.
-   */
-  /*
-  public float physicalDistanceToScreen() {
-    return physicalDist2Scrn;
-  }
-  */
-
-  /**
-   * Sets the {@link #physicalDistanceToScreen()}.
-   */
-  /*
-  public void setPhysicalDistanceToScreen(float distance) {
-    physicalDist2Scrn = distance;
-  }
-  */
-
-  /**
-   * Returns the physical screen width, in meters. Default value is 0.4m (average
-   * monitor).
-   * <p>
-   * Used for stereo display only. Set using {@link #setPhysicalScreenWidth(float)}.
-   * <p>
-   * See {@link #physicalDistanceToScreen()} for reality center automatic configuration.
-   */
-  /*
-  public float physicalScreenWidth() {
-    return physicalScrnWidth;
-  }
-  */
-
-  /**
-   * Sets the physical screen (monitor or projected wall) width (in meters).
-   */
-  /*
-  public void setPhysicalScreenWidth(float width) {
-    physicalScrnWidth = width;
-  }
-  */
-
-  /**
-   * Returns the focus distance used by stereo display, expressed in virtual world units.
-   * <p>
-   * This is the distance in the virtual world between the Camera and the plane where the
-   * horizontal stereo parallax is null (the stereo left and right images are
-   * superimposed).
-   * <p>
-   * This distance is the virtual world equivalent of the real-world
-   * {@link #physicalDistanceToScreen()}.
-   * <p>
-   * <b>attention:</b> This value is modified by Scene.setSceneRadius(), setSceneRadius()
-   * and {@link #setFieldOfView(float)}. When one of these values is modified,
-   * {@link #focusDistance()} is set to {@link #sceneRadius()} / tan(
-   * {@link #fieldOfView()}/2), which provides good results.
-   */
-  /*
-  public float focusDistance() {
-    return focusDist;
-  }
-  */
-
-  /**
-   * Sets the focusDistance(), in virtual scene units.
-   */
-  /*
-  public void setFocusDistance(float distance) {
-    if (distance != focusDist)
-      modified();
-    focusDist = distance;
-  }
-  */
 }

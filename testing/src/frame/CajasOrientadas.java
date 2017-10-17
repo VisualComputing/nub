@@ -62,6 +62,8 @@ public class CajasOrientadas extends PApplet {
           togglePickingVisualhint();
         if(event.shortcut().matches(r))
           togglePathsVisualHint();
+        //TODO restore
+        /*
         if(event.shortcut().matches(s))
           interpolateToFitScene();
         if(event.shortcut().matches(t))
@@ -70,6 +72,7 @@ public class CajasOrientadas extends PApplet {
           deletePath1();
         if(event.shortcut().matches(v))
           playPath1();
+        //*/
       }
     };
     scene.setGridVisualHint(true);
