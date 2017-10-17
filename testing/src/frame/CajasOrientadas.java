@@ -107,33 +107,8 @@ public class CajasOrientadas extends PApplet {
 
   public void keyPressed() {
     if(key == ' ')
-      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
-      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
-    if ((key == 'y') || (key == 'Y')) {
-      scene.setDottedGrid(!scene.gridIsDotted());
-    }
-    if ((key == 'u') || (key == 'U')) {
-      println("papplet's frame count: " + frameCount);
-      println("scene's frame count: " + scene.timingHandler().frameCount());
-      Mat view = new Mat();
-      scene.eye().getView(view, false);
-      println("reported view: ");
-      view.print();
-      scene.eye().fromView(view, true);
-      scene.eye().getView(view, false);
-      println("after setting from external: ");
-      view.print();
-    }
-    if ((key == 'v') || (key == 'V')) {
-      println("papplet's frame rate: " + frameRate);
-      println("scene's frame rate: " + scene.timingHandler().frameRate());
-    }
-    if (key == 't' || key == 'T')
-      scene.shiftTimers();
-    if (key == '+')
-      frameRate(frameRate + 10);
-    if (key == '-')
-      frameRate(frameRate - 10);
+      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
+      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
   }
 
   public static void main(String args[]) {

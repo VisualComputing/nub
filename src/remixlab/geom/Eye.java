@@ -178,9 +178,7 @@ public class Eye {
 
   // P o i n t s o f V i e w s a n d K e y F r a m e s
   protected HashMap<Integer, KeyFrameInterpolator> kfi;
-  // protected Iterator<Integer> itrtr;
   protected KeyFrameInterpolator interpolationKfi;
-  // protected GrabberFrame tempFrame;
 
   // F r u s t u m p l a n e c o e f f i c i e n t s
   protected float fpCoefficients[][];

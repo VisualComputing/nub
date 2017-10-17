@@ -204,6 +204,15 @@ public class KeyFrameInterpolator {
   }
 
   /**
+   * Same as {@code this(frame.scene(), frame)}.
+   *
+   * @see #KeyFrameInterpolator(AbstractScene, Frame)
+   */
+  public KeyFrameInterpolator(InteractiveFrame frame) {
+    this(frame.scene(), frame);
+  }
+
+  /**
    * Creates a KeyFrameInterpolator, with {@code frame} as associated {@link #frame()}.
    * <p>
    * The {@link #frame()} can be set or changed using {@link #setFrame(Frame)}.
@@ -215,7 +224,7 @@ public class KeyFrameInterpolator {
     gScene = scn;
     keyFrameList = new ArrayList<KeyFrame>();
     path = new ArrayList<Frame>();
-    mainFrame = null;
+    setFrame(mainFrame);
     period = 40;
     interpolationTm = 0.0f;
     interpolationSpd = 1.0f;
@@ -224,7 +233,6 @@ public class KeyFrameInterpolator {
     pathIsValid = false;
     valuesAreValid = true;
     currentFrmValid = false;
-    setFrame(frame);
 
     currentFrame0 = keyFrameList.listIterator();
     currentFrame1 = keyFrameList.listIterator();
