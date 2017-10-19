@@ -16,7 +16,6 @@ import remixlab.bias.Grabber;
 import remixlab.bias.event.TapEvent;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.AbstractScene.Platform;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
 
@@ -612,10 +611,6 @@ public class Eye {
     frame().setFlySpeed(speed);
   }
 
-  public boolean setSceneCenterFromPixel(float x, float y) {
-    return setSceneCenterFromPixel(new Point(x, y));
-  }
-
   /**
    * Returns the position of the scene center, defined in the world coordinate system.
    * <p>
@@ -653,10 +648,6 @@ public class Eye {
    */
   public Vec anchor() {
     return anchorPnt;
-  }
-
-  public boolean setAnchorFromPixel(float x, float y) {
-    return setAnchorFromPixel(new Point(x, y));
   }
 
   /**
@@ -1772,57 +1763,6 @@ public class Eye {
   }
 
   // 5. ANCHOR REFERENCE POINT
-
-  /**
-   * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
-   * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #anchor()} is set).
-   */
-  public boolean setAnchorFromPixel(Point pixel) {
-    Vec pup = pointUnderPixel(pixel);
-    if (pup != null) {
-      setAnchor(pup);
-      // new animation
-      //TODO restore
-      //anchorFlag = true;
-      //timerFx.runOnce(1000);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * The {@link #sceneCenter()} is set to the point located under {@code pixel} on screen.
-   * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
-   * {@code false} if none was found (in this case no {@link #sceneCenter()} is set).
-   */
-  public boolean setSceneCenterFromPixel(Point pixel) {
-    Vec pup = pointUnderPixel(pixel);
-    if (pup != null) {
-      setSceneCenter(pup);
-      return true;
-    }
-    return false;
-  }
-
-  /**
-   * Returns the coordinates of the 3D point located at {@code pixel} (x,y) on screen. May
-   * be null if no point is found under pixel.
-   * <p>
-   * Override this method in your jogl-based camera class.
-   * <p>
-   * Current implementation always returns {@code WorlPoint.found = false} (dummy value),
-   * meaning that no point was found under pixel.
-   */
-  public Vec pointUnderPixel(Point pixel) {
-    return gScene.pointUnderPixel(pixel);
-  }
 
   // 8. MATRICES
 

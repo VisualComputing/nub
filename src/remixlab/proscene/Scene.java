@@ -20,7 +20,6 @@ import remixlab.fpstiming.TimingTask;
 import remixlab.geom.*;
 import remixlab.primitives.*;
 
-
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
@@ -90,6 +89,10 @@ public class Scene extends AbstractScene implements PConstants {
   // just to make it compatible with previous versions of proscene
   protected static int offScreenScenes;
 
+  // offscreen
+  protected Point upperLeftCorner;
+  protected boolean offscreen;
+
   // CONSTRUCTORS
 
   /**
@@ -132,11 +135,12 @@ public class Scene extends AbstractScene implements PConstants {
    * off-screen scene requires the drawing code to be enclose by {@link #beginDraw()} and
    * {@link #endDraw()}. To display an off-screen scene call {@link #display()}.
    *
-   * @see AbstractScene#AbstractScene()
+   * @see AbstractScene#AbstractScene(int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
    */
   public Scene(PApplet p, PGraphics pg, int x, int y) {
+    super(pg.width, pg.height);
     // 1. P5 objects
     parent = p;
     mainPGraphics = pg;
@@ -161,13 +165,10 @@ public class Scene extends AbstractScene implements PConstants {
       enableAutoFocus();
     }
     // TODO buggy
-    if (platform() != Platform.PROCESSING_DESKTOP)
-      pApplet().registerMethod("dispose", this);
+    pApplet().registerMethod("dispose", this);
 
     // 5. Eye
     setLeftHanded();
-    width = pg.width;
-    height = pg.height;
     // properly set the eye which is a 3 step process:
     eye = new Eye(this);
     setEye(eye());// calls showAll();
@@ -175,13 +176,25 @@ public class Scene extends AbstractScene implements PConstants {
     //showAll();
 
     // 6. Misc stuff:
-    setDottedGrid(!(platform() == Platform.PROCESSING_ANDROID || is2D()));
-    if (platform() == Platform.PROCESSING_DESKTOP || platform() == Platform.PROCESSING_ANDROID)
-      this.setNonSeqTimers();
+    setDottedGrid(is2D());
+    //this.setNonSeqTimers();
     // pApplet().frameRate(100);
 
     // 7. Init should be called only once
     init();
+  }
+
+  @Override
+  public boolean is3D() {
+    return (mainPGraphics instanceof PGraphics3D);
+  }
+
+  /**
+   * Returns the upper left corner of the Scene window. It's always (0,0) for on-screen
+   * scenes, but off-screen scenes may be defined elsewhere on a canvas.
+   */
+  public Point originCorner() {
+    return upperLeftCorner;
   }
 
   // P5 STUFF
@@ -201,218 +214,6 @@ public class Scene extends AbstractScene implements PConstants {
     return mainPGraphics;
   }
 
-  // PICKING BUFFER
-  @Override
-  public int width() {
-    return pg().width;
-  }
-
-  @Override
-  public int height() {
-    return pg().height;
-  }
-
-  // DIM
-
-  @Override
-  public boolean is3D() {
-    return (mainPGraphics instanceof PGraphics3D);
-  }
-
-  // CHOOSE PLATFORM
-
-  @Override
-  protected void setPlatform() {
-    String value = System.getProperty("java.vm.vendor").toString();
-    if (Pattern.compile(Pattern.quote("Android"), Pattern.CASE_INSENSITIVE).matcher(value).find())
-      platform = Platform.PROCESSING_ANDROID;
-    else
-      platform = Platform.PROCESSING_DESKTOP;
-  }
-
-  // P5-WRAPPERS
-
-  /**
-   * Same as {@code vertex(pg(), v)}.
-   *
-   * @see #vertex(PGraphics, float[])
-   */
-  public void vertex(float[] v) {
-    vertex(pg(), v);
-  }
-
-  /**
-   * Wrapper for PGraphics.vertex(v)
-   */
-  public static void vertex(PGraphics pg, float[] v) {
-    pg.vertex(v);
-  }
-
-  /**
-   * Same as {@code if (this.is2D()) vertex(pg(), x, y); elsevertex(pg(), x, y, z)}.
-   *
-   * @see #vertex(PGraphics, float, float, float)
-   */
-  public void vertex(float x, float y, float z) {
-    if (this.is2D())
-      vertex(pg(), x, y);
-    else
-      vertex(pg(), x, y, z);
-  }
-
-  /**
-   * Wrapper for PGraphics.vertex(x,y,z)
-   */
-  public static void vertex(PGraphics pg, float x, float y, float z) {
-    if (pg instanceof PGraphics3D)
-      pg.vertex(x, y, z);
-    else
-      pg.vertex(x, y);
-  }
-
-  /**
-   * Same as
-   * {@code if (this.is2D()) vertex(pg(), x, y, u, v); else vertex(pg(), x, y, z, u, v);}.
-   *
-   * @see #vertex(PGraphics, float, float, float, float)
-   * @see #vertex(PGraphics, float, float, float, float, float)
-   */
-  public void vertex(float x, float y, float z, float u, float v) {
-    if (this.is2D())
-      vertex(pg(), x, y, u, v);
-    else
-      vertex(pg(), x, y, z, u, v);
-  }
-
-  /**
-   * Wrapper for PGraphics.vertex(x,y,z,u,v)
-   */
-  public static void vertex(PGraphics pg, float x, float y, float z, float u, float v) {
-    if (pg instanceof PGraphics3D)
-      pg.vertex(x, y, z, u, v);
-    else
-      pg.vertex(x, y, u, v);
-  }
-
-  /**
-   * Same as {@code vertex(pg(), x, y)}.
-   *
-   * @see #vertex(PGraphics, float, float)
-   */
-  public void vertex(float x, float y) {
-    vertex(pg(), x, y);
-  }
-
-  /**
-   * Wrapper for PGraphics.vertex(x,y)
-   */
-  public static void vertex(PGraphics pg, float x, float y) {
-    pg.vertex(x, y);
-  }
-
-  /**
-   * Same as {@code vertex(pg(), x, y, u, v)}.
-   *
-   * @see #vertex(PGraphics, float, float, float, float)
-   */
-  public void vertex(float x, float y, float u, float v) {
-    vertex(pg(), x, y, u, v);
-  }
-
-  /**
-   * Wrapper for PGraphics.vertex(x,y,u,v)
-   */
-  public static void vertex(PGraphics pg, float x, float y, float u, float v) {
-    pg.vertex(x, y, u, v);
-  }
-
-  /**
-   * Same as
-   * {@code if (this.is2D()) line(pg(), x1, y1, x2, y2); else line(pg(), x1, y1, z1, x2, y2, z2);}
-   * .
-   *
-   * @see #line(PGraphics, float, float, float, float, float, float)
-   */
-  public void line(float x1, float y1, float z1, float x2, float y2, float z2) {
-    if (this.is2D())
-      line(pg(), x1, y1, x2, y2);
-    else
-      line(pg(), x1, y1, z1, x2, y2, z2);
-  }
-
-  /**
-   * Wrapper for PGraphics.line(x1, y1, z1, x2, y2, z2)
-   */
-  public static void line(PGraphics pg, float x1, float y1, float z1, float x2, float y2, float z2) {
-    if (pg instanceof PGraphics3D)
-      pg.line(x1, y1, z1, x2, y2, z2);
-    else
-      pg.line(x1, y1, x2, y2);
-  }
-
-  /**
-   * Same as {@code pg().line(x1, y1, x2, y2)}.
-   *
-   * @see #line(PGraphics, float, float, float, float)
-   */
-  public void line(float x1, float y1, float x2, float y2) {
-    line(pg(), x1, y1, x2, y2);
-  }
-
-  /**
-   * Wrapper for PGraphics.line(x1, y1, x2, y2)
-   */
-  public static void line(PGraphics pg, float x1, float y1, float x2, float y2) {
-    pg.line(x1, y1, x2, y2);
-  }
-
-  /**
-   * Converts a {@link Vec} to a PVec.
-   */
-  public static PVector toPVector(Vec v) {
-    return new PVector(v.x(), v.y(), v.z());
-  }
-
-  /**
-   * Converts a PVec to a {@link Vec}.
-   */
-  public static Vec toVec(PVector v) {
-    return new Vec(v.x, v.y, v.z);
-  }
-
-  /**
-   * Converts a {@link Mat} to a PMatrix3D.
-   */
-  public static PMatrix3D toPMatrix(Mat m) {
-    float[] a = m.getTransposed(new float[16]);
-    return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
-        a[15]);
-  }
-
-  /**
-   * Converts a PMatrix3D to a {@link Mat}.
-   */
-  public static Mat toMat(PMatrix3D m) {
-    return new Mat(m.get(new float[16]), true);
-  }
-
-  /**
-   * Converts a PMatrix2D to a {@link Mat}.
-   */
-  public static Mat toMat(PMatrix2D m) {
-    return toMat(new PMatrix3D(m));
-  }
-
-  /**
-   * Converts a {@link Mat} to a PMatrix2D.
-   */
-  public static PMatrix2D toPMatrix2D(Mat m) {
-    float[] a = m.getTransposed(new float[16]);
-    return new PMatrix2D(a[0], a[1], a[3], a[4], a[5], a[7]);
-  }
-
-  // firstly, of course, dirty things that I used to love :P
-
   // DEFAULT MOTION-AGENT
 
   /**
@@ -424,8 +225,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   @Override
   public void enableMotionAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      enableMouseAgent();
+    enableMouseAgent();
   }
 
   /**
@@ -438,9 +238,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   @Override
   public boolean disableMotionAgent() {
-    if (platform() == Platform.PROCESSING_DESKTOP)
-      return disableMouseAgent();
-    return false;
+    return disableMouseAgent();
   }
 
   // KEYBOARD
@@ -457,9 +255,6 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #keyAgent()
    */
   public MouseAgent mouseAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID) {
-      throw new RuntimeException("Proscene mouseAgent() is not available in Android mode. Use droidTouchAgent() instead");
-    }
     return (MouseAgent) motionAgent();
   }
 
@@ -472,10 +267,6 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #enableKeyAgent()
    */
   public void enableMouseAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID) {
-      throw new RuntimeException(
-          "Proscene enableMouseAgent() is not available in Android mode. Use enableDroidTouchAgent() instead");
-    }
     if (!isMotionAgentEnabled()) {
       inputHandler().registerAgent(motionAgent());
       parent.registerMethod("mouseEvent", motionAgent());
@@ -491,10 +282,6 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #disableKeyAgent()
    */
   public boolean disableMouseAgent() {
-    if (platform() == Platform.PROCESSING_ANDROID) {
-      throw new RuntimeException(
-          "Proscene disableMouseAgent() is not available in Android mode. Use disableDroidTouchAgent() instead");
-    }
     if (isMotionAgentEnabled()) {
       parent.unregisterMethod("mouseEvent", motionAgent());
       return inputHandler().unregisterAgent(motionAgent());
@@ -512,10 +299,6 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #enableKeyAgent()
    */
   public boolean isMouseAgentEnabled() {
-    if (platform() == Platform.PROCESSING_ANDROID) {
-      throw new RuntimeException(
-          "Proscene isMouseAgentEnabled() is not available in Android mode. Use isDroidTouchAgentEnabled() instead");
-    }
     return isMotionAgentEnabled();
   }
 
@@ -568,31 +351,109 @@ public class Scene extends AbstractScene implements PConstants {
     return isKeyAgentEnabled();
   }
 
-  // INFO
+  // OPENGL
 
-  @Override
-  public String info() {
-    return null;
-    //TODO decide me
+  public boolean setCenterFromPixel(float x, float y) {
+    return setCenterFromPixel(new Point(x, y));
   }
 
-  @Override
-  public void displayInfo(boolean onConsole) {
-    //TODO decide me
-    if (onConsole)
-      System.out.println(info());
-    else { // on applet
-      pg().textFont(parent.createFont("Arial", 12));
-      beginScreenDrawing();
-      pg().fill(0, 255, 0);
-      pg().textLeading(20);
-      pg().text(info(), 10, 10, (pg().width - 20), (pg().height - 20));
-      endScreenDrawing();
+  /**
+   * The {@link #center()} is set to the point located under {@code pixel} on screen.
+   * <p>
+   * 2D windows always returns true.
+   * <p>
+   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * {@code false} if none was found (in this case no {@link #center()} is set).
+   */
+  public boolean setCenterFromPixel(Point pixel) {
+    Vec pup = pointUnderPixel(pixel);
+    if (pup != null) {
+      eye().setSceneCenter(pup);
+      return true;
     }
+    return false;
   }
 
-  // begin: GWT-incompatible
-  // /*
+  public float pixelDepth(Point pixel) {
+    PGraphicsOpenGL pggl;
+    if (pg() instanceof PGraphicsOpenGL)
+      pggl = (PGraphicsOpenGL) pg();
+    else
+      throw new RuntimeException("pg() is not instance of PGraphicsOpenGL");
+    float[] depth = new float[1];
+    PGL pgl = pggl.beginPGL();
+    pgl.readPixels(pixel.x(), (eye().screenHeight() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
+        FloatBuffer.wrap(depth));
+    pggl.endPGL();
+    return depth[0];
+  }
+
+  /**
+   * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
+   * screen. May be null if no pixel is under pixel.
+   */
+  public Vec pointUnderPixel(Point pixel) {
+    float depth = pixelDepth(pixel);
+    Vec point = unprojectedCoordinatesOf(new Vec(pixel.x(), pixel.y(), depth));
+    return (depth < 1.0f) ? point : null;
+  }
+
+  /**
+   * Same as {@code return pointUnderPixel(new Point(x, y))}.
+   *
+   * @see #pointUnderPixel(Point)
+   */
+  public Vec pointUnderPixel(float x, float y) {
+    return pointUnderPixel(new Point(x, y));
+  }
+
+  /**
+   * Returns the depth (z-value) of the object under the {@code pixel}.
+   * <p>
+   * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
+   * value is not a linear interpolation between
+   * {@link Eye#zNear()} and
+   * {@link Eye#zFar()};
+   * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
+   * the distance from the point you project to the camera, along the
+   * {@link Eye#viewDirection()}. See the {@code gluUnProject}
+   * man page for details.
+   */
+  public float pixelDepth(float x, float y) {
+    return pixelDepth(new Point(x, y));
+  }
+
+  /**
+   * Disables z-buffer.
+   */
+  public void disableDepthTest() {
+    disableDepthTest(pg());
+  }
+
+  /**
+   * Disables depth test on the PGraphics instance.
+   *
+   * @see #enableDepthTest(PGraphics)
+   */
+  public void disableDepthTest(PGraphics p) {
+    p.hint(PApplet.DISABLE_DEPTH_TEST);
+  }
+
+  /**
+   * Enables z-buffer.
+   */
+  public void enableDepthTest() {
+    enableDepthTest(pg());
+  }
+
+  /**
+   * Enables depth test on the PGraphics instance.
+   *
+   * @see #disableDepthTest(PGraphics)
+   */
+  public void enableDepthTest(PGraphics p) {
+    p.hint(PApplet.ENABLE_DEPTH_TEST);
+  }
 
   // TIMING
 
@@ -677,55 +538,101 @@ public class Scene extends AbstractScene implements PConstants {
       setSeqTimers();
   }
 
-  // OPENGL
-
-  @Override
-  public float pixelDepth(Point pixel) {
-    PGraphicsOpenGL pggl;
-    if (pg() instanceof PGraphicsOpenGL)
-      pggl = (PGraphicsOpenGL) pg();
-    else
-      throw new RuntimeException("pg() is not instance of PGraphicsOpenGL");
-    float[] depth = new float[1];
-    PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixel.x(), (eye().screenHeight() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
-        FloatBuffer.wrap(depth));
-    pggl.endPGL();
-    return depth[0];
-  }
-
-  @Override
-  public void disableDepthTest() {
-    disableDepthTest(pg());
-  }
-
-  /**
-   * Disables depth test on the PGraphics instance.
-   *
-   * @see #enableDepthTest(PGraphics)
-   */
-  public void disableDepthTest(PGraphics p) {
-    p.hint(PApplet.DISABLE_DEPTH_TEST);
-  }
-
-  @Override
-  public void enableDepthTest() {
-    enableDepthTest(pg());
-  }
-
-  /**
-   * Enables depth test on the PGraphics instance.
-   *
-   * @see #disableDepthTest(PGraphics)
-   */
-  public void enableDepthTest(PGraphics p) {
-    p.hint(PApplet.ENABLE_DEPTH_TEST);
-  }
-
-  // end: GWT-incompatible
-  // */
-
   // 3. Drawing methods
+
+  @Override
+  protected void drawGridHint() {
+    pg().pushStyle();
+    pg().stroke(170);
+    if (gridIsDotted()) {
+      pg().strokeWeight(2);
+      drawDottedGrid(eye().sceneRadius());
+    } else {
+      pg().strokeWeight(1);
+      drawGrid(eye().sceneRadius());
+    }
+    pg().popStyle();
+  }
+
+  /*
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
+   */
+  @Override
+  protected void drawAxesHint() {
+    pg().pushStyle();
+    pg().strokeWeight(2);
+    drawAxes(eye().sceneRadius());
+    pg().popStyle();
+  }
+
+  /*
+   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
+   */
+  @Override
+  protected void drawPickingHint() {
+    pg().pushStyle();
+    pg().colorMode(PApplet.RGB, 255);
+    pg().strokeWeight(1);
+    pg().stroke(220, 220, 220);
+    drawPickingTargets();
+    pg().popStyle();
+  }
+
+  protected void drawPickingTargets() {
+    for (InteractiveFrame frame : frames(false))
+      // if(inputHandler().hasGrabber(frame))
+      if (frame.isVisualHintEnabled())
+        drawPickingTarget(frame);
+  }
+
+  /*
+  @Override
+  protected void drawAnchorHint() {
+    pg().pushStyle();
+    Vec p = eye().projectedCoordinatesOf(anchor());
+    pg().stroke(255);
+    pg().strokeWeight(3);
+    drawCross(p.vec[0], p.vec[1]);
+    pg().popStyle();
+  }
+  */
+
+  /**
+   * Convenience function that simply calls:
+   * {@code return setAnchorFromPixel(new Point(x, y))}
+   *
+   * @see #setAnchorFromPixel(Point)
+   */
+  public boolean setAnchorFromPixel(float x, float y) {
+    return setAnchorFromPixel(new Point(x, y));
+  }
+
+  /**
+   * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
+   * <p>
+   * 2D windows always returns true.
+   * <p>
+   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * {@code false} if none was found (in this case no {@link #anchor()} is set).
+   */
+  public boolean setAnchorFromPixel(Point pixel) {
+    Vec pup = pointUnderPixel(pixel);
+    if (pup != null) {
+      setAnchor(pup);
+      // new animation
+      //TODO restore
+      //anchorFlag = true;
+      //timerFx.runOnce(1000);
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Internal use.
+   */
+  //TODO restore
+  //protected abstract void drawPointUnderPixelHint();
 
   /**
    * Called before your main drawing and performs the following:
@@ -813,6 +720,14 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   // Off-screen
+
+  /**
+   * Returns {@code true} if this Scene is associated to an off-screen renderer and
+   * {@code false} otherwise.
+   */
+  public boolean isOffscreen() {
+    return offscreen;
+  }
 
   /**
    * Same as {@code showOnlyOffScreenWarning(method, true)}.
@@ -1496,7 +1411,6 @@ public class Scene extends AbstractScene implements PConstants {
    * Need to override it because of this issue:
    * https://github.com/remixlab/proscene/issues/1
    */
-  @Override
   public void beginScreenDrawing() {
     beginScreenDrawing(pg());
   }
@@ -1529,7 +1443,6 @@ public class Scene extends AbstractScene implements PConstants {
    * Need to override it because of this issue:
    * https://github.com/remixlab/proscene/issues/1
    */
-  @Override
   public void endScreenDrawing() {
     endScreenDrawing(pg());
   }
@@ -1558,9 +1471,410 @@ public class Scene extends AbstractScene implements PConstants {
     p.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in AbstractScene.eS
   }
 
+  // TODO took from Abstract
+
+
+
+  // drawing
+
+  /**
+   * Same as {@code vertex(pg(), v)}.
+   *
+   * @see #vertex(PGraphics, float[])
+   */
+  public void vertex(float[] v) {
+    vertex(pg(), v);
+  }
+
+  /**
+   * Wrapper for PGraphics.vertex(v)
+   */
+  public static void vertex(PGraphics pg, float[] v) {
+    pg.vertex(v);
+  }
+
+  /**
+   * Same as {@code if (this.is2D()) vertex(pg(), x, y); elsevertex(pg(), x, y, z)}.
+   *
+   * @see #vertex(PGraphics, float, float, float)
+   */
+  public void vertex(float x, float y, float z) {
+    if (is2D())
+      vertex(pg(), x, y);
+    else
+      vertex(pg(), x, y, z);
+  }
+
+  /**
+   * Wrapper for PGraphics.vertex(x,y,z)
+   */
+  public static void vertex(PGraphics pg, float x, float y, float z) {
+    if (pg instanceof PGraphics3D)
+      pg.vertex(x, y, z);
+    else
+      pg.vertex(x, y);
+  }
+
+  /**
+   * Same as
+   * {@code if (this.is2D()) vertex(pg(), x, y, u, v); else vertex(pg(), x, y, z, u, v);}.
+   *
+   * @see #vertex(PGraphics, float, float, float, float)
+   * @see #vertex(PGraphics, float, float, float, float, float)
+   */
+  public void vertex(float x, float y, float z, float u, float v) {
+    if (is2D())
+      vertex(pg(), x, y, u, v);
+    else
+      vertex(pg(), x, y, z, u, v);
+  }
+
+  /**
+   * Wrapper for PGraphics.vertex(x,y,z,u,v)
+   */
+  public static void vertex(PGraphics pg, float x, float y, float z, float u, float v) {
+    if (pg instanceof PGraphics3D)
+      pg.vertex(x, y, z, u, v);
+    else
+      pg.vertex(x, y, u, v);
+  }
+
+  /**
+   * Same as {@code vertex(pg(), x, y)}.
+   *
+   * @see #vertex(PGraphics, float, float)
+   */
+  public void vertex(float x, float y) {
+    vertex(pg(), x, y);
+  }
+
+  /**
+   * Wrapper for PGraphics.vertex(x,y)
+   */
+  public static void vertex(PGraphics pg, float x, float y) {
+    pg.vertex(x, y);
+  }
+
+  /**
+   * Same as {@code vertex(pg(), x, y, u, v)}.
+   *
+   * @see #vertex(PGraphics, float, float, float, float)
+   */
+  public void vertex(float x, float y, float u, float v) {
+    vertex(pg(), x, y, u, v);
+  }
+
+  /**
+   * Wrapper for PGraphics.vertex(x,y,u,v)
+   */
+  public static void vertex(PGraphics pg, float x, float y, float u, float v) {
+    pg.vertex(x, y, u, v);
+  }
+
+  /**
+   * Same as
+   * {@code if (this.is2D()) line(pg(), x1, y1, x2, y2); else line(pg(), x1, y1, z1, x2, y2, z2);}
+   * .
+   *
+   * @see #line(PGraphics, float, float, float, float, float, float)
+   */
+  public void line(float x1, float y1, float z1, float x2, float y2, float z2) {
+    if (is2D())
+      line(pg(), x1, y1, x2, y2);
+    else
+      line(pg(), x1, y1, z1, x2, y2, z2);
+  }
+
+  /**
+   * Wrapper for PGraphics.line(x1, y1, z1, x2, y2, z2)
+   */
+  public static void line(PGraphics pg, float x1, float y1, float z1, float x2, float y2, float z2) {
+    if (pg instanceof PGraphics3D)
+      pg.line(x1, y1, z1, x2, y2, z2);
+    else
+      pg.line(x1, y1, x2, y2);
+  }
+
+  /**
+   * Same as {@code pg().line(x1, y1, x2, y2)}.
+   *
+   * @see #line(PGraphics, float, float, float, float)
+   */
+  public void line(float x1, float y1, float x2, float y2) {
+    line(pg(), x1, y1, x2, y2);
+  }
+
+  /**
+   * Wrapper for PGraphics.line(x1, y1, x2, y2)
+   */
+  public static void line(PGraphics pg, float x1, float y1, float x2, float y2) {
+    pg.line(x1, y1, x2, y2);
+  }
+
+  /**
+   * Converts a {@link Vec} to a PVec.
+   */
+  public static PVector toPVector(Vec v) {
+    return new PVector(v.x(), v.y(), v.z());
+  }
+
+  /**
+   * Converts a PVec to a {@link Vec}.
+   */
+  public static Vec toVec(PVector v) {
+    return new Vec(v.x, v.y, v.z);
+  }
+
+  /**
+   * Converts a {@link Mat} to a PMatrix3D.
+   */
+  public static PMatrix3D toPMatrix(Mat m) {
+    float[] a = m.getTransposed(new float[16]);
+    return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
+            a[15]);
+  }
+
+  /**
+   * Converts a PMatrix3D to a {@link Mat}.
+   */
+  public static Mat toMat(PMatrix3D m) {
+    return new Mat(m.get(new float[16]), true);
+  }
+
+  /**
+   * Converts a PMatrix2D to a {@link Mat}.
+   */
+  public static Mat toMat(PMatrix2D m) {
+    return toMat(new PMatrix3D(m));
+  }
+
+  /**
+   * Converts a {@link Mat} to a PMatrix2D.
+   */
+  public static PMatrix2D toPMatrix2D(Mat m) {
+    float[] a = m.getTransposed(new float[16]);
+    return new PMatrix2D(a[0], a[1], a[3], a[4], a[5], a[7]);
+  }
+
   // DRAWING
 
-  @Override
+  /**
+   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, 100)}.
+   *
+   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   */
+  public void drawPath(KeyFrameInterpolator kfi) {
+    drawPath(kfi, 1, 6, 100);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, scale)}
+   *
+   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   */
+  public void drawPath(KeyFrameInterpolator kfi, float scale) {
+    drawPath(kfi, 1, 6, scale);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawPath(kfi, mask, nbFrames, * 100)}
+   *
+   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   */
+  public void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames) {
+    drawPath(kfi, mask, nbFrames, 100);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawAxis(100)}.
+   */
+  public void drawAxes() {
+    drawAxes(100);
+  }
+
+  /**
+   * Convenience function that simplt calls {@code drawDottedGrid(100, 10)}.
+   */
+  public void drawDottedGrid() {
+    drawDottedGrid(100, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(100, 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid() {
+    drawGrid(100, 10);
+  }
+
+  /**
+   * Convenience function that simplt calls {@code drawDottedGrid(size, 10)}.
+   */
+  public void drawDottedGrid(float size) {
+    drawDottedGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(size, 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(float size) {
+    drawGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simplt calls {@code drawDottedGrid(100, nbSubdivisions)}.
+   */
+  public void drawDottedGrid(int nbSubdivisions) {
+    drawDottedGrid(100, nbSubdivisions);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(100, nbSubdivisions)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(int nbSubdivisions) {
+    drawGrid(100, nbSubdivisions);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6)}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid() {
+    drawTorusSolenoid(6);
+  }
+
+  /**
+   * Convenience function that simply calls
+   * {@code drawTorusSolenoid(faces, 0.07f * radius())}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid(int faces) {
+    drawTorusSolenoid(faces, 0.07f * radius());
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6, insideRadius)}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid(float insideRadius) {
+    drawTorusSolenoid(6, insideRadius);
+  }
+
+  /**
+   * Convenience function that simply calls
+   * {@code drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f)}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid(int faces, float insideRadius) {
+    drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f);
+  }
+
+  /**
+   * Same as {@code cone(det, 0, 0, r, h);}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(int det, float r, float h) {
+    drawCone(det, 0, 0, r, h);
+  }
+
+  /**
+   * Same as {@code cone(12, 0, 0, r, h);}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(float r, float h) {
+    drawCone(12, 0, 0, r, h);
+  }
+
+  /**
+   * Same as {@code cone(det, 0, 0, r1, r2, h);}
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(int det, float r1, float r2, float h) {
+    drawCone(det, 0, 0, r1, r2, h);
+  }
+
+  /**
+   * Same as {@code cone(18, 0, 0, r1, r2, h);}
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(float r1, float r2, float h) {
+    drawCone(18, 0, 0, r1, r2, h);
+  }
+
+  /**
+   * Simply calls {@code drawArrow(length, 0.05f * length)}
+   *
+   * @see #drawArrow(float, float)
+   */
+  public void drawArrow(float length) {
+    drawArrow(length, 0.05f * length);
+  }
+
+  /**
+   * Draws a 3D arrow along the positive Z axis.
+   * <p>
+   * {@code length} and {@code radius} define its geometry.
+   * <p>
+   * Use {@link #drawArrow(Vec, Vec, float)} to place the arrow in 3D.
+   */
+  public void drawArrow(float length, float radius) {
+    float head = 2.5f * (radius / length) + 0.1f;
+    float coneRadiusCoef = 4.0f - 5.0f * head;
+
+    drawCylinder(radius, length * (1.0f - head / coneRadiusCoef));
+    translate(0.0f, 0.0f, length * (1.0f - head));
+    drawCone(coneRadiusCoef * radius, head * length);
+    translate(0.0f, 0.0f, -length * (1.0f - head));
+  }
+
+  /**
+   * Draws a 3D arrow between the 3D point {@code from} and the 3D point {@code to}, both
+   * defined in the current world coordinate system.
+   *
+   * @see #drawArrow(float, float)
+   */
+  public void drawArrow(Vec from, Vec to, float radius) {
+    pushModelView();
+    translate(from.x(), from.y(), from.z());
+    applyModelView(new Quat(new Vec(0, 0, 1), Vec.subtract(to, from)).matrix());
+    drawArrow(Vec.subtract(to, from).magnitude(), radius);
+    popModelView();
+  }
+
+  /**
+   * Convenience function that simply calls
+   * {@code drawCross(pg3d.color(255, 255, 255), px, py, 15, 3)}.
+   */
+  public void drawCross(float px, float py) {
+    drawCross(px, py, 30);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
+   *
+   * @see #drawFilledCircle(int, Vec, float)
+   */
+  public void drawFilledCircle(Vec center, float radius) {
+    drawFilledCircle(40, center, radius);
+  }
+
+  /**
+   * Draws a cylinder of width {@code w} and height {@code h}, along the positive
+   * {@code z} axis.
+   */
   public void drawCylinder(float w, float h) {
     drawCylinder(pg(), w, h);
   }
@@ -1614,7 +1928,17 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a cylinder whose bases are formed by two cutting planes ({@code m} and
+   * {@code n}), along the Camera positive {@code z} axis.
+   *
+   * @param detail
+   * @param w      radius of the cylinder and h is its height
+   * @param h      height of the cylinder
+   * @param m      normal of the plane that intersects the cylinder at z=0
+   * @param n      normal of the plane that intersects the cylinder at z=h
+   * @see #drawCylinder(float, float)
+   */
   public void drawHollowCylinder(int detail, float w, float h, Vec m, Vec n) {
     drawHollowCylinder(pg(), detail, w, h, m, n);
   }
@@ -1661,7 +1985,12 @@ public class Scene extends AbstractScene implements PConstants {
 
   // Cone v1
 
-  @Override
+  /**
+   * Draws a cone along the positive {@code z} axis, with its base centered at
+   * {@code (x,y)}, height {@code h}, and radius {@code r}.
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
   public void drawCone(int detail, float x, float y, float r, float h) {
     drawCone(pg(), detail, x, y, r, h);
   }
@@ -1744,7 +2073,13 @@ public class Scene extends AbstractScene implements PConstants {
     drawCone(pg, 18, 0, 0, r1, r2, h);
   }
 
-  @Override
+  /**
+   * Draws a truncated cone along the positive {@code z} axis, with its base centered at
+   * {@code (x,y)}, height {@code h} , and radii {@code r1} and {@code r2} (basis and
+   * height respectively).
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
   public void drawCone(int detail, float x, float y, float r1, float r2, float h) {
     drawCone(pg(), detail, x, y, r1, r2, h);
   }
@@ -1785,7 +2120,12 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws axes of length {@code length} which origin correspond to the world coordinate
+   * system origin.
+   *
+   * @see #drawGrid(float, int)
+   */
   public void drawAxes(float length) {
     drawAxes(pg(), length);
   }
@@ -1877,16 +2217,16 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a grid in the XY plane, centered on (0,0,0) (defined in the current coordinate
+   * system).
+   * <p>
+   * {@code size} and {@code nbSubdivisions} define its geometry.
+   *
+   * @see #drawAxes(float)
+   */
   public void drawGrid(float size, int nbSubdivisions) {
     drawGrid(pg(), size, nbSubdivisions);
-  }
-
-  /**
-   * Same as {@code drawGrid(size, 10)}.
-   */
-  public void drawGrid(float size) {
-    drawGrid(size, 10);
   }
 
   /**
@@ -1915,7 +2255,14 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a dotted-grid in the XY plane, centered on (0,0,0) (defined in the current
+   * coordinate system).
+   * <p>
+   * {@code size} and {@code nbSubdivisions} define its geometry.
+   *
+   * @see #drawAxes(float)
+   */
   public void drawDottedGrid(float size, int nbSubdivisions) {
     drawDottedGrid(pg(), size, nbSubdivisions);
   }
@@ -1966,7 +2313,15 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a representation of the {@code eye} in the scene.
+   * <p>
+   * The near and far planes are drawn as quads, the frustum is drawn using lines and the
+   * camera up vector is represented by an arrow to disambiguate the drawing.
+   * <p>
+   * <b>Note:</b> The drawing of a Scene's own Scene.eye() should not be visible, but
+   * may create artifacts due to numerical imprecisions.
+   */
   public void drawEye(Eye eye) {
     drawEye(eye, false);
   }
@@ -2324,7 +2679,27 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws the path used to interpolate the
+   * {@link KeyFrameInterpolator#frame()}
+   * <p>
+   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
+   * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
+   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
+   * <p>
+   * {@code drawPath(); // Simply draws the interpolation path} <br>
+   * {@code drawPath(3); // Draws path and cameras} <br>
+   * {@code drawPath(5); // Draws path and axes} <br>
+   * <p>
+   * In the case where camera or axes are drawn, {@code nbFrames} controls the number of
+   * objects (axes or camera) drawn between two successive keyFrames. When
+   * {@code nbFrames = 1}, only the path KeyFrames are drawn. {@code nbFrames = 2} also
+   * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
+   * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
+   * <p>
+   * {@code scale} controls the scaling of the camera and axes drawing. A value of
+   * {@link #radius()} should give good results.
+   */
   public void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames, float scale) {
     pg().pushStyle();
     if (mask != 0) {
@@ -2367,7 +2742,9 @@ public class Scene extends AbstractScene implements PConstants {
     pg().popStyle();
   }
 
-  @Override
+  /**
+   * Internal use.
+   */
   protected void drawKFIEye(float scale) {
     pg().pushStyle();
     float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
@@ -2432,7 +2809,10 @@ public class Scene extends AbstractScene implements PConstants {
     pg().popStyle();
   }
 
-  @Override
+  /**
+   * Draws a cross on the screen centered under pixel {@code (px, py)}, and edge of size
+   * {@code size}.
+   */
   public void drawCross(float px, float py, float size) {
     drawCross(pg(), px, py, size);
   }
@@ -2452,7 +2832,13 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a filled circle using screen coordinates.
+   *
+   * @param subdivisions Number of triangles approximating the circle.
+   * @param center       Circle screen center.
+   * @param radius       Circle screen radius.
+   */
   public void drawFilledCircle(int subdivisions, Vec center, float radius) {
     drawFilledCircle(pg(), subdivisions, center, radius);
   }
@@ -2477,7 +2863,12 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws a filled square using screen coordinates.
+   *
+   * @param center Square screen center.
+   * @param edge   Square edge length.
+   */
   public void drawFilledSquare(Vec center, float edge) {
     drawFilledSquare(pg(), center, edge);
   }
@@ -2499,7 +2890,12 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws the classical shooter target on the screen.
+   *
+   * @param center Center of the target on the screen
+   * @param length Length of the target in pixels
+   */
   public void drawShooterTarget(Vec center, float length) {
     drawShooterTarget(pg(), center, length);
   }
@@ -2540,7 +2936,14 @@ public class Scene extends AbstractScene implements PConstants {
     pg.popStyle();
   }
 
-  @Override
+  /**
+   * Draws all GrabberFrames' picking targets: a shooter target visual hint of
+   * {@link InteractiveFrame#grabsInputThreshold()} pixels size.
+   * <p>
+   * <b>Attention:</b> the target is drawn either if the iFrame is part of camera path and
+   * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
+   * {@code false}.
+   */
   public void drawPickingTarget(InteractiveFrame iFrame) {
     if (iFrame.isEyeFrame()) {
       System.err.println("eye frames don't have a picking target");
@@ -2576,11 +2979,17 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /**
+   * Draws a torus solenoid. Dandelion logo.
+   *
    * Code contributed by Jacques Maire (http://www.alcys.com/) See also:
    * http://www.mathcurve.com/courbes3d/solenoidtoric/solenoidtoric.shtml
    * http://crazybiocomputing.blogspot.fr/2011/12/3d-curves-toric-solenoids.html
+   *
+   * @param faces
+   * @param detail
+   * @param insideRadius
+   * @param outsideRadius
    */
-  @Override
   public void drawTorusSolenoid(int faces, int detail, float insideRadius, float outsideRadius) {
     drawTorusSolenoid(pg(), faces, detail, insideRadius, outsideRadius);
   }
@@ -2632,102 +3041,15 @@ public class Scene extends AbstractScene implements PConstants {
         float ai = eps * jj;
         float alpha = a * PApplet.TWO_PI / faces + ai;
         v1 = new Vec((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
-            (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         alpha = b * PApplet.TWO_PI / faces + ai;
         v2 = new Vec((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
-            (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         vertex(pg, v1.x(), v1.y(), v1.z());
         vertex(pg, v2.x(), v2.y(), v2.z());
       }
       pg.endShape();
     }
     pg.popStyle();
-  }
-
-  /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawAxesHint() {
-    pg().pushStyle();
-    pg().strokeWeight(2);
-    drawAxes(eye().sceneRadius());
-    pg().popStyle();
-  }
-
-  /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawGridHint() {
-    pg().pushStyle();
-    pg().stroke(170);
-    if (gridIsDotted()) {
-      pg().strokeWeight(2);
-      drawDottedGrid(eye().sceneRadius());
-    } else {
-      pg().strokeWeight(1);
-      drawGrid(eye().sceneRadius());
-    }
-    pg().popStyle();
-  }
-
-  /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawPathsHint() {
-    pg().pushStyle();
-    pg().colorMode(PApplet.RGB, 255);
-    pg().strokeWeight(1);
-    pg().stroke(0, 220, 220);
-    drawPaths();
-    pg().popStyle();
-  }
-
-  /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawPickingHint() {
-    pg().pushStyle();
-    pg().colorMode(PApplet.RGB, 255);
-    pg().strokeWeight(1);
-    pg().stroke(220, 220, 220);
-    drawPickingTargets();
-    pg().popStyle();
-  }
-
-  @Override
-  protected void drawAnchorHint() {
-    pg().pushStyle();
-    Vec p = eye().projectedCoordinatesOf(anchor());
-    pg().stroke(255);
-    pg().strokeWeight(3);
-    drawCross(p.vec[0], p.vec[1]);
-    pg().popStyle();
-  }
-
-  //TODO restore
-  /*
-  @Override
-  protected void drawPointUnderPixelHint() {
-    pg().pushStyle();
-    Vec v = eye().projectedCoordinatesOf(eye().pupVec);
-    pg().stroke(255);
-    pg().strokeWeight(3);
-    drawCross(v.vec[0], v.vec[1], 30);
-    pg().popStyle();
-  }
-  */
-
-  @Override
-  protected void drawScreenRotateHint() {
-    //TODO decide me
-  }
-
-  @Override
-  protected void drawZoomWindowHint() {
-    //TODO decide me
   }
 }

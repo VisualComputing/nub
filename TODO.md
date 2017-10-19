@@ -13,7 +13,23 @@ Scene is concrete and allows to set a ray-tracing scene.
 ### Methods to be restored
 
 1. add/play/delete/Path_n
-2. protected void drawPointUnderPixelHint() 
+2. protected void drawPointUnderPixelHint()
+3. public abstract String info()
+4. public void displayInfo(boolean onConsole)
+5. public boolean pathsVisualHint()
+6. public boolean zoomVisualHint()
+7. public boolean rotateVisualHint()
+8. public void togglePathsVisualHint()
+9. protected void toggleZoomVisualHint()
+10. protected void toggleRotateVisualHint()
+11. public void setPathsVisualHint(boolean draw)
+12. public void setPathsVisualHint(boolean draw)
+13. public void setZoomVisualHint(boolean draw)
+14. public void setRotateVisualHint(boolean draw)
+15. protected void drawPathsHint()
+16. protected void drawPaths()
+17. protected abstract void drawZoomWindowHint()
+18. protected abstract void drawScreenRotateHint()
 
 ### Methods that were modified
 
@@ -79,6 +95,7 @@ Scene is concrete and allows to set a ray-tracing scene.
 ### Methods to be restored
 
 1. public void zoomOnPixel(TapEvent event)
+2. public void anchorFromPixel(TapEvent event)
 
 ## Foundation
 

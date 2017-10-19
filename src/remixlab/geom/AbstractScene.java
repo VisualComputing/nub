@@ -84,7 +84,7 @@ import java.util.List;
  * (provided that scene is the {@link #keyAgent()}
  * {@link Agent#inputGrabber()}).
  */
-public abstract class AbstractScene extends AnimatorObject implements Grabber {
+public class AbstractScene extends AnimatorObject implements Grabber {
   protected boolean dottedGrid;
 
   // O B J E C T S
@@ -110,9 +110,9 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   // S I Z E
   protected int width, height;
 
-  // offscreen
-  protected Point upperLeftCorner;
-  protected boolean offscreen;
+  // D I M
+  protected boolean twod;
+
   protected long lastEqUpdate;
 
   // FRAME SYNC requires this:
@@ -126,15 +126,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
   public final static int PICKING = 1 << 2;
+  //TODO restore
+  /*
   public final static int PATHS = 1 << 3;
   public final static int ZOOM = 1 << 4; // prosceneMouse.zoomOnRegion
   public final static int ROTATE = 1 << 5; // prosceneMouse.screenRotate
-
-  protected static Platform platform;
-
-  public enum Platform {
-    PROCESSING_DESKTOP, PROCESSING_ANDROID, PROCESSING_JS
-  }
+  */
 
   protected List<InteractiveFrame> seeds;
 
@@ -160,7 +157,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * <li>Instantiate the {@link #motionAgent()} and the {@link #keyAgent()} and
    * enable them (register them at the {@link #inputHandler()}) and possibly some other
    * {@link Agent}s as well and .</li>
-   * <li>Define whether or not the Scene {@link #isOffscreen()}.</li>
    * <li>Call {@link #init()} at the end of the constructor.</li>
    * </ol>
    *
@@ -171,16 +167,16 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    * @see #setVisualHints(int)
    * @see #setEye(Eye)
    */
-  public AbstractScene() {
+  public AbstractScene(int w, int h) {
+    width = w;
+    height = h;
     seeds = new ArrayList<InteractiveFrame>();
-    setPlatform();
     setTimingHandler(new TimingHandler(this));
     deltaCount = frameCount;
     iHandler = new InputHandler();
     setMatrixHelper(new MatrixStackHelper(this));
     setRightHanded();
     setVisualHints(AXES | GRID);
-    upperLeftCorner = new Point(0, 0);
   }
 
   /**
@@ -617,28 +613,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     return false;
   }
 
-  //
-
-  /**
-   * Returns the upper left corner of the Scene window. It's always (0,0) for on-screen
-   * scenes, but off-screen scenes may be defined elsewhere on a canvas.
-   */
-  public Point originCorner() {
-    return upperLeftCorner;
-  }
-
-  /**
-   * Determines under which platform dandelion is running. Either DESKTOP, ANDROID or JS.
-   */
-  protected abstract void setPlatform();
-
-  /**
-   * Returns the platform where dandelion is running. Either DESKTOP, ANDROID or JS.
-   */
-  public static Platform platform() {
-    return platform;
-  }
-
   // AGENTs
 
   // Keys
@@ -810,34 +784,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
     return iHandler;
   }
 
-  /**
-   * Convenience function that simply returns {@code inputHandler().info()}.
-   *
-   * @see #displayInfo(boolean)
-   */
-  public abstract String info();
-
-  /**
-   * Convenience function that simply calls {@code displayInfo(true)}.
-   */
-  public void displayInfo() {
-    displayInfo(true);
-  }
-
-  /**
-   * Displays the {@link #info()} bindings.
-   *
-   * @param onConsole if this flag is true displays the help on console. Otherwise displays it on
-   *                  the applet
-   * @see #info()
-   */
-  public void displayInfo(boolean onConsole) {
-    if (onConsole)
-      System.out.println(info());
-    else
-      AbstractScene.showMissingImplementationWarning("displayInfo", getClass().getName());
-  }
-
   // 1. Scene overloaded
 
   // MATRIX and TRANSFORMATION STUFF
@@ -859,40 +805,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
    */
   public MatrixHelper matrixHelper() {
     return matrixHelper;
-  }
-
-  /**
-   * Wrapper for {@link MatrixHelper#beginScreenDrawing()}. Adds
-   * exception when no properly closing the screen drawing with a call to
-   * {@link #endScreenDrawing()}.
-   *
-   * @see MatrixHelper#beginScreenDrawing()
-   */
-  public void beginScreenDrawing() {
-    if (startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-
-    startCoordCalls++;
-
-    disableDepthTest();
-    matrixHelper.beginScreenDrawing();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHelper#endScreenDrawing()} . Adds
-   * exception if {@link #beginScreenDrawing()} wasn't properly called before
-   *
-   * @see MatrixHelper#endScreenDrawing()
-   */
-  public void endScreenDrawing() {
-    startCoordCalls--;
-    if (startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-
-    matrixHelper.endScreenDrawing();
-    enableDepthTest();
   }
 
   /**
@@ -1123,12 +1035,21 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
 
   /**
    * Low level setting of visual flags. You'd prefer {@link #setAxesVisualHint(boolean)},
-   * {@link #setGridVisualHint(boolean)}, {@link #setPathsVisualHint(boolean)} and
+   * {@link #setGridVisualHint(boolean)}, and
    * {@link #setPickingVisualHint(boolean)}, unless you want to set them all at once,
    * e.g., {@code setVisualHints(Scene.AXES | Scene.GRID | Scene.PATHS | Scene.PICKING)}.
    */
   public void setVisualHints(int flag) {
     visualHintMask = flag;
+  }
+
+  /**
+   * Toggles the state of {@link #gridVisualHint()}.
+   *
+   * @see #setGridVisualHint(boolean)
+   */
+  public void toggleGridVisualHint() {
+    setGridVisualHint(!gridVisualHint());
   }
 
   /**
@@ -1142,51 +1063,12 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Toggles the state of {@link #gridVisualHint()}.
-   *
-   * @see #setGridVisualHint(boolean)
-   */
-  public void toggleGridVisualHint() {
-    setGridVisualHint(!gridVisualHint());
-  }
-
-  /**
    * Toggles the state of {@link #pickingVisualHint()}.
    *
    * @see #setPickingVisualHint(boolean)
    */
   public void togglePickingVisualhint() {
     setPickingVisualHint(!pickingVisualHint());
-  }
-
-  /**
-   * Toggles the state of {@link #pathsVisualHint()}.
-   *
-   * @see #setPathsVisualHint(boolean)
-   */
-  public void togglePathsVisualHint() {
-    setPathsVisualHint(!pathsVisualHint());
-  }
-
-  /**
-   * Internal :p
-   */
-  protected void toggleZoomVisualHint() {
-    setZoomVisualHint(!zoomVisualHint());
-  }
-
-  /**
-   * Internal :p
-   */
-  protected void toggleRotateVisualHint() {
-    setRotateVisualHint(!rotateVisualHint());
-  }
-
-  /**
-   * Returns {@code true} if axes are currently being drawn and {@code false} otherwise.
-   */
-  public boolean axesVisualHint() {
-    return ((visualHintMask & AXES) != 0);
   }
 
   /**
@@ -1197,43 +1079,18 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
+   * Returns {@code true} if axes are currently being drawn and {@code false} otherwise.
+   */
+  public boolean axesVisualHint() {
+    return ((visualHintMask & AXES) != 0);
+  }
+
+  /**
    * Returns {@code true} if the picking selection visual hint is currently being drawn
    * and {@code false} otherwise.
    */
   public boolean pickingVisualHint() {
     return ((visualHintMask & PICKING) != 0);
-  }
-
-  /**
-   * Returns {@code true} if the eye paths visual hints are currently being drawn and
-   * {@code false} otherwise.
-   */
-  public boolean pathsVisualHint() {
-    return ((visualHintMask & PATHS) != 0);
-  }
-
-  /**
-   * Internal. Third parties should not call this.
-   */
-  public boolean zoomVisualHint() {
-    return ((visualHintMask & ZOOM) != 0);
-  }
-
-  /**
-   * Internal. Third parties should not call this.
-   */
-  public boolean rotateVisualHint() {
-    return ((visualHintMask & ROTATE) != 0);
-  }
-
-  /**
-   * Sets the display of the axes according to {@code draw}
-   */
-  public void setAxesVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= AXES;
-    else
-      visualHintMask &= ~AXES;
   }
 
   /**
@@ -1247,6 +1104,16 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
+   * Sets the display of the axes according to {@code draw}
+   */
+  public void setAxesVisualHint(boolean draw) {
+    if (draw)
+      visualHintMask |= AXES;
+    else
+      visualHintMask &= ~AXES;
+  }
+
+  /**
    * Sets the display of the interactive frames' selection hints according to {@code draw}
    */
   public void setPickingVisualHint(boolean draw) {
@@ -1254,54 +1121,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       visualHintMask |= PICKING;
     else
       visualHintMask &= ~PICKING;
-  }
-
-  /**
-   * Sets the display of the camera key frame paths according to {@code draw}
-   */
-  public void setPathsVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= PATHS;
-    else
-      visualHintMask &= ~PATHS;
-  }
-  //TODO restore
-  /*
-  public void setPathsVisualHint(boolean draw) {
-    if (draw) {
-      if (eye() != null) {
-        visualHintMask |= PATHS;
-        eye().attachPaths();
-      } else
-        System.err.println("Warning: null eye, no path attached!");
-    } else {
-      if (eye() != null) {
-        visualHintMask &= ~PATHS;
-        eye().detachPaths();
-      } else
-        System.err.println("Warning: null eye, no path dettached!");
-    }
-  }
-  */
-
-  /**
-   * Internal. Third parties should not call this.
-   */
-  public void setZoomVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= ZOOM;
-    else
-      visualHintMask &= ~ZOOM;
-  }
-
-  /**
-   * Internal. Third parties should not call this.
-   */
-  public void setRotateVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= ROTATE;
-    else
-      visualHintMask &= ~ROTATE;
   }
 
   /**
@@ -1368,14 +1187,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       drawAxesHint();
     if (pickingVisualHint())
       drawPickingHint();
+    //TODO restore
+    /*
     if (pathsVisualHint())
       drawPathsHint();
     if (zoomVisualHint())
       drawZoomWindowHint();
     if (rotateVisualHint())
       drawScreenRotateHint();
-    //TODO restore
-    /*
     if (eye().anchorFlag)
       drawAnchorHint();
     if (eye().pupFlag)
@@ -1386,457 +1205,29 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * Internal use.
    */
-  protected void drawPickingHint() {
-    drawPickingTargets();
-  }
-
-  protected void drawPickingTargets() {
-    for (InteractiveFrame frame : frames(false))
-      // if(inputHandler().hasGrabber(frame))
-      if (frame.isVisualHintEnabled())
-        drawPickingTarget(frame);
+  protected void drawGridHint() {
+    System.out.println("implement me");
   }
 
   /**
    * Internal use.
    */
   protected void drawAxesHint() {
-    drawAxes(eye().sceneRadius());
+    System.out.println("implement me");
   }
 
   /**
    * Internal use.
    */
-  protected void drawGridHint() {
-    if (gridIsDotted())
-      drawDottedGrid(eye().sceneRadius());
-    else
-      drawGrid(eye().sceneRadius());
+  protected void drawPickingHint() {
+    System.out.println("implement me");
   }
-
-  /**
-   * Internal use.
-   */
-  protected void drawPathsHint() {
-    drawPaths();
-  }
-
-  protected void drawPaths() {
-    // Iterator<Integer> itrtr = eye.kfi.keySet().iterator(); while (itrtr.hasNext()) {
-    // Integer key = itrtr.next();
-    // drawPath(eye.keyFrameInterpolatorMap().get(key), 3, is3D() ? 5 : 2, radius());
-    // }
-
-    // alternative:
-    //TODO restore
-    /*
-    KeyFrameInterpolator[] k = eye.keyFrameInterpolatorArray();
-    for (int i = 0; i < k.length; i++)
-      drawPath(k[i], 3, 5, radius());
-    // */
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, 100)}.
-   *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
-   */
-  public void drawPath(KeyFrameInterpolator kfi) {
-    drawPath(kfi, 1, 6, 100);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, scale)}
-   *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
-   */
-  public void drawPath(KeyFrameInterpolator kfi, float scale) {
-    drawPath(kfi, 1, 6, scale);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawPath(kfi, mask, nbFrames, * 100)}
-   *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
-   */
-  public void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames) {
-    drawPath(kfi, mask, nbFrames, 100);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawAxis(100)}.
-   */
-  public void drawAxes() {
-    drawAxes(100);
-  }
-
-  /**
-   * Convenience function that simplt calls {@code drawDottedGrid(100, 10)}.
-   */
-  public void drawDottedGrid() {
-    drawDottedGrid(100, 10);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawGrid(100, 10)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid() {
-    drawGrid(100, 10);
-  }
-
-  /**
-   * Convenience function that simplt calls {@code drawDottedGrid(size, 10)}.
-   */
-  public void drawDottedGrid(float size) {
-    drawDottedGrid(size, 10);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawGrid(size, 10)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid(float size) {
-    drawGrid(size, 10);
-  }
-
-  /**
-   * Convenience function that simplt calls {@code drawDottedGrid(100, nbSubdivisions)}.
-   */
-  public void drawDottedGrid(int nbSubdivisions) {
-    drawDottedGrid(100, nbSubdivisions);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawGrid(100, nbSubdivisions)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid(int nbSubdivisions) {
-    drawGrid(100, nbSubdivisions);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(6)}.
-   *
-   * @see #drawTorusSolenoid(int, int, float, float)
-   */
-  public void drawTorusSolenoid() {
-    drawTorusSolenoid(6);
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code drawTorusSolenoid(faces, 0.07f * radius())}.
-   *
-   * @see #drawTorusSolenoid(int, int, float, float)
-   */
-  public void drawTorusSolenoid(int faces) {
-    drawTorusSolenoid(faces, 0.07f * radius());
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(6, insideRadius)}.
-   *
-   * @see #drawTorusSolenoid(int, int, float, float)
-   */
-  public void drawTorusSolenoid(float insideRadius) {
-    drawTorusSolenoid(6, insideRadius);
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f)}.
-   *
-   * @see #drawTorusSolenoid(int, int, float, float)
-   */
-  public void drawTorusSolenoid(int faces, float insideRadius) {
-    drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f);
-  }
-
-  /**
-   * Draws a torus solenoid. Dandelion logo.
-   *
-   * @param faces
-   * @param detail
-   * @param insideRadius
-   * @param outsideRadius
-   */
-  public abstract void drawTorusSolenoid(int faces, int detail, float insideRadius, float outsideRadius);
-
-  /**
-   * Same as {@code cone(det, 0, 0, r, h);}
-   *
-   * @see #drawCone(int, float, float, float, float)
-   */
-  public void drawCone(int det, float r, float h) {
-    drawCone(det, 0, 0, r, h);
-  }
-
-  /**
-   * Same as {@code cone(12, 0, 0, r, h);}
-   *
-   * @see #drawCone(int, float, float, float, float)
-   */
-  public void drawCone(float r, float h) {
-    drawCone(12, 0, 0, r, h);
-  }
-
-  /**
-   * Same as {@code cone(det, 0, 0, r1, r2, h);}
-   *
-   * @see #drawCone(int, float, float, float, float, float)
-   */
-  public void drawCone(int det, float r1, float r2, float h) {
-    drawCone(det, 0, 0, r1, r2, h);
-  }
-
-  /**
-   * Same as {@code cone(18, 0, 0, r1, r2, h);}
-   *
-   * @see #drawCone(int, float, float, float, float, float)
-   */
-  public void drawCone(float r1, float r2, float h) {
-    drawCone(18, 0, 0, r1, r2, h);
-  }
-
-  /**
-   * Simply calls {@code drawArrow(length, 0.05f * length)}
-   *
-   * @see #drawArrow(float, float)
-   */
-  public void drawArrow(float length) {
-    drawArrow(length, 0.05f * length);
-  }
-
-  /**
-   * Draws a 3D arrow along the positive Z axis.
-   * <p>
-   * {@code length} and {@code radius} define its geometry.
-   * <p>
-   * Use {@link #drawArrow(Vec, Vec, float)} to place the arrow in 3D.
-   */
-  public void drawArrow(float length, float radius) {
-    float head = 2.5f * (radius / length) + 0.1f;
-    float coneRadiusCoef = 4.0f - 5.0f * head;
-
-    drawCylinder(radius, length * (1.0f - head / coneRadiusCoef));
-    translate(0.0f, 0.0f, length * (1.0f - head));
-    drawCone(coneRadiusCoef * radius, head * length);
-    translate(0.0f, 0.0f, -length * (1.0f - head));
-  }
-
-  /**
-   * Draws a 3D arrow between the 3D point {@code from} and the 3D point {@code to}, both
-   * defined in the current world coordinate system.
-   *
-   * @see #drawArrow(float, float)
-   */
-  public void drawArrow(Vec from, Vec to, float radius) {
-    pushModelView();
-    translate(from.x(), from.y(), from.z());
-    applyModelView(new Quat(new Vec(0, 0, 1), Vec.subtract(to, from)).matrix());
-    drawArrow(Vec.subtract(to, from).magnitude(), radius);
-    popModelView();
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code drawCross(pg3d.color(255, 255, 255), px, py, 15, 3)}.
-   */
-  public void drawCross(float px, float py) {
-    drawCross(px, py, 30);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
-   *
-   * @see #drawFilledCircle(int, Vec, float)
-   */
-  public void drawFilledCircle(Vec center, float radius) {
-    drawFilledCircle(40, center, radius);
-  }
-
-  // abstract drawing methods
-
-  /**
-   * Draws a cylinder of width {@code w} and height {@code h}, along the positive
-   * {@code z} axis.
-   */
-  public abstract void drawCylinder(float w, float h);
-
-  /**
-   * Draws a cylinder whose bases are formed by two cutting planes ({@code m} and
-   * {@code n}), along the Camera positive {@code z} axis.
-   *
-   * @param detail
-   * @param w      radius of the cylinder and h is its height
-   * @param h      height of the cylinder
-   * @param m      normal of the plane that intersects the cylinder at z=0
-   * @param n      normal of the plane that intersects the cylinder at z=h
-   * @see #drawCylinder(float, float)
-   */
-  public abstract void drawHollowCylinder(int detail, float w, float h, Vec m, Vec n);
-
-  /**
-   * Draws a cone along the positive {@code z} axis, with its base centered at
-   * {@code (x,y)}, height {@code h}, and radius {@code r}.
-   *
-   * @see #drawCone(int, float, float, float, float, float)
-   */
-  public abstract void drawCone(int detail, float x, float y, float r, float h);
-
-  /**
-   * Draws a truncated cone along the positive {@code z} axis, with its base centered at
-   * {@code (x,y)}, height {@code h} , and radii {@code r1} and {@code r2} (basis and
-   * height respectively).
-   *
-   * @see #drawCone(int, float, float, float, float)
-   */
-  public abstract void drawCone(int detail, float x, float y, float r1, float r2, float h);
-
-  /**
-   * Draws axes of length {@code length} which origin correspond to the world coordinate
-   * system origin.
-   *
-   * @see #drawGrid(float, int)
-   */
-  public abstract void drawAxes(float length);
-
-  /**
-   * Draws a grid in the XY plane, centered on (0,0,0) (defined in the current coordinate
-   * system).
-   * <p>
-   * {@code size} and {@code nbSubdivisions} define its geometry.
-   *
-   * @see #drawAxes(float)
-   */
-  public abstract void drawGrid(float size, int nbSubdivisions);
-
-  /**
-   * Draws a dotted-grid in the XY plane, centered on (0,0,0) (defined in the current
-   * coordinate system).
-   * <p>
-   * {@code size} and {@code nbSubdivisions} define its geometry.
-   *
-   * @see #drawAxes(float)
-   */
-  public abstract void drawDottedGrid(float size, int nbSubdivisions);
-
-  /**
-   * Draws the path used to interpolate the
-   * {@link KeyFrameInterpolator#frame()}
-   * <p>
-   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
-   * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
-   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
-   * <p>
-   * {@code drawPath(); // Simply draws the interpolation path} <br>
-   * {@code drawPath(3); // Draws path and cameras} <br>
-   * {@code drawPath(5); // Draws path and axes} <br>
-   * <p>
-   * In the case where camera or axes are drawn, {@code nbFrames} controls the number of
-   * objects (axes or camera) drawn between two successive keyFrames. When
-   * {@code nbFrames = 1}, only the path KeyFrames are drawn. {@code nbFrames = 2} also
-   * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
-   * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
-   * <p>
-   * {@code scale} controls the scaling of the camera and axes drawing. A value of
-   * {@link #radius()} should give good results.
-   */
-  public abstract void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames, float scale);
-
-  /**
-   * Draws a representation of the {@code eye} in the scene.
-   * <p>
-   * The near and far planes are drawn as quads, the frustum is drawn using lines and the
-   * camera up vector is represented by an arrow to disambiguate the drawing.
-   * <p>
-   * <b>Note:</b> The drawing of a Scene's own Scene.eye() should not be visible, but
-   * may create artifacts due to numerical imprecisions.
-   */
-  public abstract void drawEye(Eye eye);
-
-  /**
-   * Internal use.
-   */
-  protected abstract void drawKFIEye(float scale);
-
-  /**
-   * Draws a rectangle on the screen showing the region where a zoom operation is taking
-   * place.
-   */
-  protected abstract void drawZoomWindowHint();
-
-  /**
-   * Draws visual hint (a line on the screen) when a screen rotation is taking place.
-   */
-  protected abstract void drawScreenRotateHint();
 
   /**
    * Draws visual hint (a cross on the screen) when the
    * {@link Eye#anchor()} is being set.
-   * <p>
-   * Simply calls {@link #drawCross(float, float, float)} on
-   * {@link Eye#projectedCoordinatesOf(Vec)}} from
-   * {@link Eye#anchor()}.
-   *
-   * @see #drawCross(float, float, float)
    */
-  protected abstract void drawAnchorHint();
-
-  /**
-   * Internal use.
-   */
-  //TODO restore
-  //protected abstract void drawPointUnderPixelHint();
-
-  /**
-   * Draws a cross on the screen centered under pixel {@code (px, py)}, and edge of size
-   * {@code size}.
-   *
-   * @see #drawAnchorHint()
-   */
-  public abstract void drawCross(float px, float py, float size);
-
-  /**
-   * Draws a filled circle using screen coordinates.
-   *
-   * @param subdivisions Number of triangles approximating the circle.
-   * @param center       Circle screen center.
-   * @param radius       Circle screen radius.
-   */
-  public abstract void drawFilledCircle(int subdivisions, Vec center, float radius);
-
-  /**
-   * Draws a filled square using screen coordinates.
-   *
-   * @param center Square screen center.
-   * @param edge   Square edge length.
-   */
-  public abstract void drawFilledSquare(Vec center, float edge);
-
-  /**
-   * Draws the classical shooter target on the screen.
-   *
-   * @param center Center of the target on the screen
-   * @param length Length of the target in pixels
-   */
-  public abstract void drawShooterTarget(Vec center, float length);
-
-  /**
-   * Draws all GrabberFrames' picking targets: a shooter target visual hint of
-   * {@link InteractiveFrame#grabsInputThreshold()} pixels size.
-   * <p>
-   * <b>Attention:</b> the target is drawn either if the iFrame is part of camera path and
-   * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
-   * {@code false}.
-   */
-  public abstract void drawPickingTarget(InteractiveFrame gFrame);
-
-  // end wrapper
+  //protected abstract void drawAnchorHint();
 
   // 0. Optimization stuff
 
@@ -2148,43 +1539,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
-   * screen. May be null if no pixel is under pixel.
-   */
-  public Vec pointUnderPixel(Point pixel) {
-    float depth = pixelDepth(pixel);
-    Vec point = unprojectedCoordinatesOf(new Vec(pixel.x(), pixel.y(), depth));
-    return (depth < 1.0f) ? point : null;
-  }
-
-  /**
-   * Same as {@code return pointUnderPixel(new Point(x, y))}.
-   *
-   * @see #pointUnderPixel(Point)
-   */
-  public Vec pointUnderPixel(float x, float y) {
-    return pointUnderPixel(new Point(x, y));
-  }
-
-  /**
-   * Returns the depth (z-value) of the object under the {@code pixel}.
-   * <p>
-   * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
-   * value is not a linear interpolation between
-   * {@link Eye#zNear()} and
-   * {@link Eye#zFar()};
-   * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
-   * the distance from the point you project to the camera, along the
-   * {@link Eye#viewDirection()}. See the {@code gluUnProject}
-   * man page for details.
-   */
-  public abstract float pixelDepth(Point pixel);
-
-  public float pixelDepth(float x, float y) {
-    return pixelDepth(new Point(x, y));
-  }
-
-  /**
    * Same as {@link Eye#projectedCoordinatesOf(Mat, Vec)}.
    */
   public Vec projectedCoordinatesOf(Vec src) {
@@ -2304,44 +1658,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Convenience wrapper function that simply returns
-   * {@code eye().setAnchorFromPixel(pixel)}.
-   * <p>
-   * Current implementation set no {@link Eye#anchor()}. Override
-   * {@link Eye#pointUnderPixel(Point)} in your openGL based
-   * camera for this to work.
-   *
-   * @see Eye#setAnchorFromPixel(Point)
-   * @see Eye#pointUnderPixel(Point)
-   */
-  public boolean setAnchorFromPixel(Point pixel) {
-    return eye().setAnchorFromPixel(pixel);
-  }
-
-  public boolean setAnchorFromPixel(float x, float y) {
-    return setAnchorFromPixel(new Point(x, y));
-  }
-
-  /**
-   * Convenience wrapper function that simply returns
-   * {@code eye().setSceneCenterFromPixel(pixel)}
-   * <p>
-   * Current implementation set no {@link Eye#sceneCenter()}.
-   * Override {@link Eye#pointUnderPixel(Point)} in your openGL
-   * based camera for this to work.
-   *
-   * @see Eye#setSceneCenterFromPixel(Point)
-   * @see Eye#pointUnderPixel(Point)
-   */
-  public boolean setCenterFromPixel(Point pixel) {
-    return eye().setSceneCenterFromPixel(pixel);
-  }
-
-  public boolean setCenterFromPixel(float x, float y) {
-    return setCenterFromPixel(new Point(x, y));
-  }
-
-  /**
    * Returns the current {@link #eye()} type.
    */
   public final Eye.Type cameraType() {
@@ -2424,14 +1740,6 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
       showWarning(method + "() is meaningful only when frame is attached to an eye.");
     else
       showWarning(method + "() is meaningful only when frame is detached from an eye.");
-  }
-
-  /**
-   * Display a warning that the specified method is not available under the specified
-   * platform.
-   */
-  static public void showPlatformVariationWarning(String themethod, Platform platform) {
-    showWarning(themethod + " is not available under the " + platform + " platform.");
   }
 
   static public void showMinDOFsWarning(String themethod, int dofs) {
@@ -2569,24 +1877,18 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   }
 
   /**
-   * Returns {@code true} if this Scene is associated to an off-screen renderer and
-   * {@code false} otherwise.
-   */
-  public boolean isOffscreen() {
-    return offscreen;
-  }
-
-  /**
    * @return true if the scene is 2D.
    */
   public boolean is2D() {
-    return !is3D();
+    return twod;
   }
 
   /**
    * @return true if the scene is 3D.
    */
-  public abstract boolean is3D();
+  public boolean is3D() {
+    return !is2D();
+  }
 
   // dimensions
 
@@ -2616,20 +1918,14 @@ public abstract class AbstractScene extends AnimatorObject implements Grabber {
   /**
    * @return width of the screen window.
    */
-  public abstract int width();
+  public int width() {
+    return width;
+  }
 
   /**
    * @return height of the screen window.
    */
-  public abstract int height();
-
-  /**
-   * Disables z-buffer.
-   */
-  public abstract void disableDepthTest();
-
-  /**
-   * Enables z-buffer.
-   */
-  public abstract void enableDepthTest();
+  public int height() {
+    return height;
+  }
 }

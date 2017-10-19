@@ -15,7 +15,6 @@ import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
-import remixlab.geom.AbstractScene.Platform;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
 
@@ -470,7 +469,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     // setGrabsInputThreshold(Math.round(scn.radius()/4));
     scene().inputHandler().addGrabber(this);
     pkgnPrecision = PickingPrecision.FIXED;
-    setGrabsInputThreshold(AbstractScene.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
+    setGrabsInputThreshold(20);
     setFlySpeed(0.01f * scene().eye().sceneRadius());
   }
 
@@ -2007,10 +2006,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     if (event.fired()) {
       initEvent = event.get();
-      gScene.setZoomVisualHint(true);
+      //TODO handle me
+      //gScene.setZoomVisualHint(true);
     } else if (event.flushed()) {
       MotionEvent2 e = new MotionEvent2(initEvent.get(), event.x(), event.y(), event.modifiers(), event.id());
-      gScene.setZoomVisualHint(false);
+      //TODO handle me
+      //gScene.setZoomVisualHint(false);
       int w = (int) Math.abs(e.dx());
       int tlX = (int) e.prevX() < (int) e.x() ? (int) e.prevX() : (int) e.x();
       int h = (int) Math.abs(e.dy());
@@ -2624,13 +2625,15 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     if (event.fired()) {
       stopSpinning();
-      gScene.setRotateVisualHint(true); // display visual hint
+      //TODO handle me
+      //gScene.setRotateVisualHint(true); // display visual hint
       if (gScene.is3D())
         gScene.eye().cadRotationIsReversed =
             gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
     }
     if (event.flushed()) {
-      gScene.setRotateVisualHint(false);
+      //TODO handle me
+      //gScene.setRotateVisualHint(false);
       if (damping() == 0) {
         startSpinning();
         return;
@@ -2668,12 +2671,15 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into anchor from pixel conversion routine.
    */
+  //TODO missed
+  /*
   public void anchorFromPixel(TapEvent event) {
     if (isEyeFrame())
-      eye().setAnchorFromPixel(new Point(event.x(), event.y()));
+      scene().setAnchorFromPixel(new Point(event.x(), event.y()));
     else
       AbstractScene.showOnlyEyeWarning("anchorFromPixel");
   }
+  */
 
   // Quite nice
 
@@ -3126,14 +3132,14 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * frame picking.
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#FIXED}, the
-   * {@code threshold} is expressed in pixels and directly defines the fixed length of the
-   * {@link AbstractScene#drawShooterTarget(Vec, float)}, centered
+   * {@code threshold} is expressed in pixels and directly defines the fixed length of a
+   * 'shooter target', centered
    * at the projection of the frame origin onto the screen.
    * <p>
    * If {@link #pickingPrecision()} is {@link PickingPrecision#ADAPTIVE}, the
    * {@code threshold} is expressed in object space (world units) and defines the edge
-   * length of a squared bounding box that leads to an adaptive length of the
-   * {@link AbstractScene#drawShooterTarget(Vec, float)} ,
+   * length of a squared bounding box that leads to an adaptive length of a
+   * 'shooter target',
    * centered at the projection of the frame origin onto the screen. Use this version only
    * if you have a good idea of the bounding box size of the object you are attaching to
    * the frame.
@@ -3143,8 +3149,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * for details.
    * <p>
    * Default behavior is to set the {@link #grabsInputThreshold()} (in a non-adaptive
-   * manner) to 20 length if {@link AbstractScene#platform()} is
-   * DESKTOP or to 50 pixels if it is ANDROID.
+   * manner) to 20.
    * <p>
    * Negative {@code threshold} values are silently ignored.
    *

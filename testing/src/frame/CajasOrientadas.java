@@ -60,8 +60,8 @@ public class CajasOrientadas extends PApplet {
           toggleGridVisualHint();
         if(event.shortcut().matches(f))
           togglePickingVisualhint();
-        if(event.shortcut().matches(r))
-          togglePathsVisualHint();
+        //if(event.shortcut().matches(r))
+          //togglePathsVisualHint();
         //TODO restore
         /*
         if(event.shortcut().matches(s))
