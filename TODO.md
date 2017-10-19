@@ -1,5 +1,9 @@
 # Next release: 4.0.0
 
+## WArning
+
+Remember to properly instantiate the twod boolean flag in AbstractScene!
+
 ## Key ideas
 
 1. Remove Eye: Move functionality to Scene
