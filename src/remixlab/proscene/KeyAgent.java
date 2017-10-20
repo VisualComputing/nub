@@ -35,7 +35,6 @@ public class KeyAgent extends Agent {
   public KeyAgent(Scene scn) {
     super(scn.inputHandler());
     scene = scn;
-    addGrabber(scene);
   }
 
   /**

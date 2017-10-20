@@ -58,33 +58,8 @@ import java.util.List;
  * (like it's done with Processing). For details please refer to the
  * {@link MatrixHelper} interface.</li>
  * </ol>
- * <h3>Animation mechanisms</h3> The AbstractScene provides two animation mechanisms to
- * define how your scene evolves over time:
- * <ol>
- * <li>Overriding the Dandelion {@link #animate()} method. In this case, once you declare
- * a Scene derived class, you should implement {@link #animate()} which defines how your
- * scene objects evolve over time.
- * <li>By checking if the scene's {@link #timer()} was triggered within the frame.
- * </ol>
- * <p>
- * A grabber scene implements the {@link Grabber} interface and thus
- * can react to user (key) gestures, (see {@link #performInteraction(KeyEvent)}
- * and {@link #checkIfGrabsInput(KeyEvent)}). For example, with the following code:
- * <p>
- * <pre>
- * {@code
- * protected void interact(KeyEvent event) {
- *   if(event.key() == 'z')
- *     toggleCameraType();
- * }
- * }
- * </pre>
- * <p>
- * your custom scene will {@link #toggleCameraType()} when the key 'z' is pressed
- * (provided that scene is the {@link #keyAgent()}
- * {@link Agent#inputGrabber()}).
  */
-public class AbstractScene extends AnimatorObject implements Grabber {
+public class AbstractScene {
   protected boolean dottedGrid;
 
   // O B J E C T S
@@ -99,6 +74,7 @@ public class AbstractScene extends AnimatorObject implements Grabber {
   static public long frameCount;
 
   // InputHandler
+  protected TimingHandler tHandler;
   protected InputHandler iHandler;
 
   // D I S P L A Y F L A G S
@@ -171,7 +147,7 @@ public class AbstractScene extends AnimatorObject implements Grabber {
     width = w;
     height = h;
     seeds = new ArrayList<InteractiveFrame>();
-    setTimingHandler(new TimingHandler(this));
+    tHandler = new TimingHandler();
     deltaCount = frameCount;
     iHandler = new InputHandler();
     setMatrixHelper(new MatrixStackHelper(this));
@@ -439,180 +415,6 @@ public class AbstractScene extends AnimatorObject implements Grabber {
     //eye().runResetAnchorHintTimer(1000);
   }
 
-  // Grabber Implementation
-
-  @Override
-  public boolean track(Event event) {
-    if (event instanceof KeyEvent)
-      return checkIfGrabsInput((KeyEvent) event);
-    if (event instanceof TapEvent)
-      return checkIfGrabsInput((TapEvent) event);
-    if (event instanceof MotionEvent)
-      return checkIfGrabsInput((MotionEvent) event);
-    return false;
-  }
-
-  /**
-   * Internal use. You don't need to call this.
-   * <p>
-   * Automatically called by agents handling this frame.
-   */
-  public boolean checkIfGrabsInput(MotionEvent event) {
-    if (event instanceof MotionEvent1)
-      return checkIfGrabsInput((MotionEvent1) event);
-    if (event instanceof MotionEvent2)
-      return checkIfGrabsInput((MotionEvent2) event);
-    if (event instanceof MotionEvent3)
-      return checkIfGrabsInput((MotionEvent3) event);
-    if (event instanceof MotionEvent6)
-      return checkIfGrabsInput((MotionEvent6) event);
-    return false;
-  }
-
-  /**
-   * Internal use. You don't need to call this.
-   * <p>
-   * Automatically called by agents handling this frame.
-   */
-  public boolean checkIfGrabsInput(TapEvent event) {
-    AbstractScene.showMissingImplementationWarning("track(clickEvent event)", this.getClass().getName());
-    return false;
-  }
-
-  /**
-   * Override this method when you want the object to be picked from a
-   * {@link KeyEvent}.
-   */
-  public boolean checkIfGrabsInput(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
-    return false;
-  }
-
-  /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
-   * <p>
-   * Override this method when you want the object to be picked from a {@link MotionEvent1}.
-   */
-  public boolean checkIfGrabsInput(MotionEvent1 event) {
-    AbstractScene.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
-    return false;
-  }
-
-  /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
-   * <p>
-   * Override this method when you want the object to be picked from a {@link MotionEvent1}.
-   */
-  public boolean checkIfGrabsInput(MotionEvent2 event) {
-    AbstractScene.showMissingImplementationWarning("track(MotionEvent2 event)", this.getClass().getName());
-    return false;
-  }
-
-  /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
-   */
-  public boolean checkIfGrabsInput(MotionEvent3 event) {
-    return checkIfGrabsInput(event.event2());
-  }
-
-  /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
-   */
-  public boolean checkIfGrabsInput(MotionEvent6 event) {
-    return checkIfGrabsInput(event.event3().event2());
-  }
-
-  @Override
-  public void interact(Event event) {
-    if (event instanceof TapEvent)
-      performInteraction((TapEvent) event);
-    if (event instanceof MotionEvent)
-      performInteraction((MotionEvent) event);
-    if (event instanceof KeyEvent)
-      performInteraction((KeyEvent) event);
-  }
-
-  /**
-   * Calls interact() on the proper motion event:
-   * {@link MotionEvent1}, {@link MotionEvent2},
-   * {@link MotionEvent3} or {@link MotionEvent6}.
-   * <p>
-   * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.MotionEvent}.
-   */
-  protected void performInteraction(MotionEvent event) {
-    if (event instanceof MotionEvent1)
-      performInteraction((MotionEvent1) event);
-    if (event instanceof MotionEvent2)
-      performInteraction((MotionEvent2) event);
-    if (event instanceof MotionEvent3)
-      performInteraction((MotionEvent3) event);
-    if (event instanceof MotionEvent6)
-      performInteraction((MotionEvent6) event);
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link MotionEvent1}.
-   */
-  protected void performInteraction(MotionEvent1 event) {
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link MotionEvent2}.
-   */
-  protected void performInteraction(MotionEvent2 event) {
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link MotionEvent3}.
-   */
-  protected void performInteraction(MotionEvent3 event) {
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link MotionEvent6}.
-   */
-  protected void performInteraction(MotionEvent6 event) {
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link TapEvent}.
-   */
-  protected void performInteraction(TapEvent event) {
-  }
-
-  /**
-   * Override this method when you want the object to interact an interaction from a
-   * {@link KeyEvent}.
-   */
-  protected void performInteraction(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("interact(KeyEvent event)", this.getClass().getName());
-  }
-
-  /**
-   * Check if this object is the {@link Agent#inputGrabber()} . Returns
-   * {@code true} if this object grabs the agent and {@code false} otherwise.
-   */
-  public boolean grabsInput(Agent agent) {
-    return agent.inputGrabber() == this;
-  }
-
-  /**
-   * Checks if the scene grabs inputGrabber from any agent registered at the inputGrabber handler.
-   */
-  public boolean grabsInput() {
-    for (Agent agent : inputHandler().agents()) {
-      if (agent.inputGrabber() == this)
-        return true;
-    }
-    return false;
-  }
-
   // AGENTs
 
   // Keys
@@ -782,6 +584,13 @@ public class AbstractScene extends AnimatorObject implements Grabber {
    */
   public InputHandler inputHandler() {
     return iHandler;
+  }
+
+  /**
+   * Returns the scene {@link TimingHandler}.
+   */
+  public TimingHandler timingHandler() {
+    return tHandler;
   }
 
   // 1. Scene overloaded

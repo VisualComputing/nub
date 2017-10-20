@@ -58,15 +58,6 @@ import java.util.regex.Pattern;
  * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
- * <h3>Animation mechanisms</h3> ProScene provides three animation mechanisms to define
- * how your scene evolves over time:
- * <ol>
- * <li><b>Overriding the Dandelion {@link #animate()} method.</b> In this case, once you
- * declare a Scene derived class, you should implement {@link #animate()} which defines
- * how your scene objects evolve over time. See the example <i>Animation</i>.
- * <li><b>By checking if the Dandelion AbstractScene's {@link #timer()} was triggered
- * within the frame.</b> See the example <i>Flock</i>.
- * </ol>.
  */
 public class Scene extends AbstractScene implements PConstants {
   // Timing

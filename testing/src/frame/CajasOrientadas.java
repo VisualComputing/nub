@@ -33,48 +33,7 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this) {
-      KeyShortcut a = new KeyShortcut('a');
-      KeyShortcut g = new KeyShortcut('g');
-      KeyShortcut f = new KeyShortcut('f');
-      KeyShortcut r = new KeyShortcut('r');
-      KeyShortcut s = new KeyShortcut('s');
-      KeyShortcut t = new KeyShortcut(Event.CTRL, '1');
-      KeyShortcut u = new KeyShortcut(Event.ALT, '1');
-      KeyShortcut v = new KeyShortcut('1');
-
-      /*
-      List<Shortcut> l =  new ArrayList<Shortcut>(Arrays.asList(a, g, f, r, s, t, u, v));
-
-      @Override
-      public boolean checkIfGrabsInput(KeyEvent event) {
-        return matches(event.shortcut(), l);
-      }
-      */
-
-      @Override
-      public void interact(Event event) {
-        if(event.shortcut().matches(a))
-          toggleAxesVisualHint();
-        if(event.shortcut().matches(g))
-          toggleGridVisualHint();
-        if(event.shortcut().matches(f))
-          togglePickingVisualhint();
-        //if(event.shortcut().matches(r))
-          //togglePathsVisualHint();
-        //TODO restore
-        /*
-        if(event.shortcut().matches(s))
-          interpolateToFitScene();
-        if(event.shortcut().matches(t))
-          addKeyFrameToPath1();
-        if(event.shortcut().matches(u))
-          deletePath1();
-        if(event.shortcut().matches(v))
-          playPath1();
-        //*/
-      }
-    };
+    scene = new Scene(this);
     scene.setGridVisualHint(true);
     //scene.setCameraType(Camera.Type.ORTHOGRAPHIC);
     scene.setRadius(160);
@@ -110,8 +69,14 @@ public class CajasOrientadas extends PApplet {
 
   public void keyPressed() {
     if(key == ' ')
-      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
-      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
+      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
+      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
+    if(key == 'a')
+      scene.toggleAxesVisualHint();
+    if(key == 'g')
+      scene.toggleGridVisualHint();
+    if(key == 'f')
+      scene.togglePickingVisualhint();
   }
 
   public static void main(String args[]) {

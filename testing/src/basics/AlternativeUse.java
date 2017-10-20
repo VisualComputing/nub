@@ -35,12 +35,6 @@ public class AlternativeUse extends PApplet {
       super(p);
     }
 
-    @Override
-    public boolean checkIfGrabsInput(KeyEvent event) {
-      println("scene picking condition overridden called!");
-      return super.checkIfGrabsInput(event);
-    }
-
     // Initialization stuff could have also been performed at
     // setup(), once after the Scene object have been instantiated
     public void init() {
