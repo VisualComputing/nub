@@ -69,7 +69,6 @@ public class Scene extends AbstractScene implements PConstants {
   protected PApplet parent;
   protected PGraphics mainPGraphics;
 
-
   // E X C E P T I O N H A N D L I N G
   protected int beginOffScreenDrawingCalls;
 
@@ -83,6 +82,8 @@ public class Scene extends AbstractScene implements PConstants {
   // offscreen
   protected Point upperLeftCorner;
   protected boolean offscreen;
+
+  protected boolean dottedGrid;
 
   // CONSTRUCTORS
 
@@ -530,6 +531,20 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   // 3. Drawing methods
+
+  /**
+   * Returns true grid is dotted.
+   */
+  public boolean gridIsDotted() {
+    return dottedGrid;
+  }
+
+  /**
+   * Sets the drawing of the grid visual hint as dotted or not.
+   */
+  public void setDottedGrid(boolean dotted) {
+    dottedGrid = dotted;
+  }
 
   @Override
   protected void drawGridHint() {
@@ -1402,6 +1417,7 @@ public class Scene extends AbstractScene implements PConstants {
    * Need to override it because of this issue:
    * https://github.com/remixlab/proscene/issues/1
    */
+  @Override
   public void beginScreenDrawing() {
     beginScreenDrawing(pg());
   }
@@ -1434,6 +1450,7 @@ public class Scene extends AbstractScene implements PConstants {
    * Need to override it because of this issue:
    * https://github.com/remixlab/proscene/issues/1
    */
+  @Override
   public void endScreenDrawing() {
     endScreenDrawing(pg());
   }

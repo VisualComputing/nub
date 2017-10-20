@@ -60,45 +60,38 @@ import java.util.List;
  * </ol>
  */
 public class AbstractScene {
-  protected boolean dottedGrid;
-
-  // O B J E C T S
-  protected MatrixHelper matrixHelper;
+  // eye
   protected Eye eye;
+  protected long lastEqUpdate;
+
+  // matrix helper
+  protected MatrixHelper matrixHelper;
+
+  //avatar
   protected Trackable trck;
 
-  // E X C E P T I O N H A N D L I N G
-  protected int startCoordCalls;
-
-  // NUMBER OF FRAMES SINCE THE FIRST SCENE WAS INSTANTIATED
-  static public long frameCount;
-
-  // InputHandler
+  // handlers
   protected TimingHandler tHandler;
   protected InputHandler iHandler;
 
-  // D I S P L A Y F L A G S
-  protected int visualHintMask;
-
-  // LEFT vs RIGHT_HAND
+  // handed and screen drawing
   protected boolean rightHanded;
+  protected int startCoordCalls;
 
-  // S I Z E
+  // size and dim
   protected int width, height;
-
-  // D I M
   protected boolean twod;
-
-  protected long lastEqUpdate;
-
-  // FRAME SYNC requires this:
-  protected final long deltaCount;
-
+  // agents
   protected Agent defMotionAgent, defKeyboardAgent;
 
-  /**
-   * Visual hints as "the last shall be first"
-   */
+  // frames
+  protected List<InteractiveFrame> seeds;
+  public int nodeCount;
+  static public long frameCount;
+  protected final long deltaCount;
+
+  // display flags
+  protected int visualHintMask;
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
   public final static int PICKING = 1 << 2;
@@ -108,15 +101,8 @@ public class AbstractScene {
   public final static int ZOOM = 1 << 4; // prosceneMouse.zoomOnRegion
   public final static int ROTATE = 1 << 5; // prosceneMouse.screenRotate
   */
-
-  protected List<InteractiveFrame> seeds;
-
-  // iFrames
-  public int nodeCount;
-
   // public final static int PUP = 1 << 6;
   // public final static int ARP = 1 << 7;
-
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
@@ -596,6 +582,38 @@ public class AbstractScene {
   // 1. Scene overloaded
 
   // MATRIX and TRANSFORMATION STUFF
+
+  /**
+   * Wrapper for {@link remixlab.geom.MatrixHelper#beginScreenDrawing()}. Adds
+   * exception when no properly closing the screen drawing with a call to
+   * {@link #endScreenDrawing()}.
+   *
+   * @see remixlab.geom.MatrixHelper#beginScreenDrawing()
+   */
+  public void beginScreenDrawing() {
+    if (startCoordCalls != 0)
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+              + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+
+    startCoordCalls++;
+    matrixHelper.beginScreenDrawing();
+  }
+
+  /**
+   * Wrapper for {@link remixlab.geom.MatrixHelper#endScreenDrawing()} . Adds
+   * exception if {@link #beginScreenDrawing()} wasn't properly called before
+   *
+   * @see remixlab.geom.MatrixHelper#endScreenDrawing()
+   */
+  public void endScreenDrawing() {
+    startCoordCalls--;
+    if (startCoordCalls != 0)
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+              + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+
+    matrixHelper.endScreenDrawing();
+  }
+
 
   /**
    * Sets the {@link MatrixHelper} defining how dandelion matrices
@@ -1707,22 +1725,6 @@ public class AbstractScene {
   public float aspectRatio() {
     return (float) width() / (float) height();
   }
-
-  /**
-   * Returns true grid is dotted.
-   */
-  public boolean gridIsDotted() {
-    return dottedGrid;
-  }
-
-  /**
-   * Sets the drawing of the grid visual hint as dotted or not.
-   */
-  public void setDottedGrid(boolean dotted) {
-    dottedGrid = dotted;
-  }
-
-  // ABSTRACT STUFF
 
   /**
    * @return width of the screen window.
