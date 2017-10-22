@@ -14,11 +14,11 @@ import processing.core.PGraphics;
 import processing.core.PMatrix2D;
 import remixlab.geom.MatrixHelper;
 import remixlab.primitives.Mat;
-import remixlab.primitives.Vec;
 import remixlab.primitives.Quat;
+import remixlab.primitives.Vec;
 
 /**
- * Internal {@link MatrixHelper} based on PGraphicsJava2D graphics
+ * Internal {@link remixlab.geom.MatrixHelper} based on PGraphicsJava2D graphics
  * transformations.
  */
 class Java2DMatrixHelper extends MatrixHelper {
@@ -37,90 +37,40 @@ class Java2DMatrixHelper extends MatrixHelper {
   // public PGraphicsJava2D pg() { return (PGraphicsJava2D) pg; }
 
   @Override
-  protected void cacheProjectionView() {
-    Mat.multiply(gScene.eye().getProjection(), gScene.eye().getView(), projectionViewMat);
-    if (isProjectionViewInverseCached()) {
-      if (projectionViewInverseMat == null)
-        projectionViewInverseMat = new Mat();
-      projectionViewMatHasInv = projectionViewMat.invert(projectionViewInverseMat);
-    }
-  }
-
-  @Override
-  public void bind(boolean recompute) {
-    if (recompute) {
-      gScene.eye().computeProjection();
-      gScene.eye().computeView();
-      cacheProjectionView();
-    }
+  public void bind() {
+    cacheProjection(scene().computeProjection());
+    cacheView(scene().computeView());
+    cacheProjectionView(Mat.multiply(cacheProjection(), cacheView()));
     Vec pos = gScene.eye().position();
-    Quat o = gScene.eye().frame().orientation();
+    //TODO needs test
+    Quat o = gScene.eye().orientation();
     translate(gScene.width() / 2, gScene.height() / 2);
     if (gScene.isRightHanded())
       scale(1, -1);
-    scale(1 / gScene.eye().frame().magnitude(), 1 / gScene.eye().frame().magnitude());
-    rotate(-o.angle());
-    translate(-pos.x(), -pos.y());
-  }
-  //TODO Restore 2D
-  /*
-  @Override
-  public void bind(boolean recompute) {
-    if (recompute) {
-      gScene.eye().computeProjection();
-      gScene.eye().computeView();
-      cacheProjectionView();
-    }
-    Vec pos = gScene.eye().position();
-    Rotation o = gScene.eye().frame().orientation();
-    translate(gScene.width() / 2, gScene.height() / 2);
-    if (gScene.isRightHanded())
-      scale(1, -1);
-    scale(1 / gScene.eye().frame().magnitude(), 1 / gScene.eye().frame().magnitude());
+    scale(1 / gScene.eye().magnitude(), 1 / gScene.eye().magnitude());
     rotate(-o.angle());
     translate(-pos.x(), -pos.y());
   }
 
   @Override
-  protected void cacheProjectionView() {
-    Mat.multiply(gScene.eye().getProjection(), gScene.eye().getView(), projectionViewMat);
-    if (isProjectionViewInverseCached()) {
-      if (projectionViewInverseMat == null)
-        projectionViewInverseMat = new Mat();
-      projectionViewMatHasInv = projectionViewMat.invert(projectionViewInverseMat);
-    }
+  public void applyModelView(Mat source) {
+    pg().applyMatrix(Scene.toPMatrix2D(source));
   }
-  */
 
   @Override
   public void beginScreenDrawing() {
     Vec pos = gScene.eye().position();
-    Quat o = gScene.eye().frame().orientation();
+    //TODO needs test
+    Quat o = gScene.eye().orientation();
 
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle());
-    scale(gScene.eyeFrame().magnitude(), gScene.eyeFrame().magnitude());
+    scale(gScene.eye().magnitude(), gScene.eye().magnitude());
     if (gScene.isRightHanded())
       scale(1, -1);
     translate(-gScene.width() / 2, -gScene.height() / 2);
   }
-  //TODO Restore 2D
-  /*
-  @Override
-  public void beginScreenDrawing() {
-    Vec pos = gScene.eye().position();
-    Rotation o = gScene.eye().frame().orientation();
-
-    pushModelView();
-    translate(pos.x(), pos.y());
-    rotate(o.angle());
-    scale(gScene.eyeFrame().magnitude(), gScene.eyeFrame().magnitude());
-    if (gScene.isRightHanded())
-      scale(1, -1);
-    translate(-gScene.width() / 2, -gScene.height() / 2);
-  }
-  */
 
   @Override
   public void endScreenDrawing() {
@@ -138,42 +88,13 @@ class Java2DMatrixHelper extends MatrixHelper {
   }
 
   @Override
-  public void resetModelView() {
-    pg().resetMatrix();
-  }
-
-  @Override
   public Mat modelView() {
     return Scene.toMat(new PMatrix2D(pg().getMatrix()));
   }
 
   @Override
-  public Mat getModelView(Mat target) {
-    if (target == null)
-      target = Scene.toMat((PMatrix2D) pg().getMatrix()).get();
-    else
-      target.set(Scene.toMat((PMatrix2D) pg().getMatrix()));
-    return target;
-  }
-
-  @Override
-  public void setModelView(Mat source) {
+  public void bindModelView(Mat source) {
     pg().setMatrix(Scene.toPMatrix2D(source));
-  }
-
-  @Override
-  public void printModelView() {
-    pg().printMatrix();
-  }
-
-  @Override
-  public void printProjection() {
-    pg().printProjection();
-  }
-
-  @Override
-  public void applyModelView(Mat source) {
-    pg().applyMatrix(Scene.toPMatrix2D(source));
   }
 
   @Override

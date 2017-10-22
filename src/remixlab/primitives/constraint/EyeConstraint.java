@@ -10,7 +10,7 @@
 
 package remixlab.primitives.constraint;
 
-import remixlab.geom.Eye;
+import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.*;
 
 /**
@@ -21,14 +21,13 @@ import remixlab.primitives.*;
  * coordinate system.
  */
 public class EyeConstraint extends AxisPlaneConstraint {
-
-  private Eye eye;
+  private InteractiveFrame eye;
 
   /**
    * Creates an EyeConstraint, whose constrained directions are defined in the
    * {@link #eye()} coordinate system.
    */
-  public EyeConstraint(Eye theEye) {
+  public EyeConstraint(InteractiveFrame theEye) {
     super();
     eye = theEye;
   }
@@ -36,7 +35,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
   /**
    * Returns the associated Eye. Set using the EyeConstraint constructor.
    */
-  public Eye eye() {
+  public InteractiveFrame eye() {
     return eye;
   }
 
@@ -55,7 +54,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case PLANE:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = eye().frame().inverseTransformOf(translationConstraintDirection());
+        proj = eye().inverseTransformOf(translationConstraintDirection());
         if (frame.referenceFrame() != null)
           proj = frame.referenceFrame().transformOf(proj);
         res = Vec.projectVectorOnPlane(translation, proj);
@@ -63,7 +62,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        proj = eye().frame().inverseTransformOf(translationConstraintDirection());
+        proj = eye().inverseTransformOf(translationConstraintDirection());
         if (frame.referenceFrame() != null)
           proj = frame.referenceFrame().transformOf(proj);
         res = Vec.projectVectorOnAxis(translation, proj);
@@ -91,7 +90,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case AXIS:
         if (frame.is2D())
           break;
-        Vec axis = frame.transformOf(eye().frame().inverseTransformOf(rotationConstraintDirection()));
+        Vec axis = frame.transformOf(eye().inverseTransformOf(rotationConstraintDirection()));
         Vec quat = new Vec(((Quat) rotation).quat[0], ((Quat) rotation).quat[1], ((Quat) rotation).quat[2]);
         quat = Vec.projectVectorOnAxis(quat, axis);
         res = new Quat(quat, 2.0f * (float) Math.acos(((Quat) rotation).quat[3]));

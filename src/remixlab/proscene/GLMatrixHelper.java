@@ -16,7 +16,7 @@ import remixlab.geom.MatrixHelper;
 import remixlab.primitives.Mat;
 
 /**
- * Internal {@link MatrixHelper} based on PGraphicsOpenGL graphics
+ * Internal {@link remixlab.geom.MatrixHelper} based on PGraphicsOpenGL graphics
  * transformation.
  */
 class GLMatrixHelper extends MatrixHelper {
@@ -42,27 +42,13 @@ class GLMatrixHelper extends MatrixHelper {
   }
 
   @Override
-  public void resetProjection() {
-    pggl().resetProjection();
-  }
-
-  @Override
-  public void printProjection() {
-    pggl().printProjection();
-  }
-
-  @Override
   public Mat projection() {
     return Scene.toMat(pggl().projection.get());
   }
 
   @Override
-  public Mat getProjection(Mat target) {
-    if (target == null)
-      target = Scene.toMat(pggl().projection.get()).get();
-    else
-      target.set(Scene.toMat(pggl().projection.get()));
-    return target;
+  public void bindProjection(Mat source) {
+    pggl().setProjection(Scene.toPMatrix(source));
   }
 
   @Override
@@ -81,27 +67,18 @@ class GLMatrixHelper extends MatrixHelper {
   }
 
   @Override
-  public void resetModelView() {
-    pggl().resetMatrix();
-  }
-
-  @Override
   public Mat modelView() {
     return Scene.toMat((PMatrix3D) pggl().getMatrix());
   }
 
   @Override
-  public Mat getModelView(Mat target) {
-    if (target == null)
-      target = Scene.toMat((PMatrix3D) pggl().getMatrix()).get();
-    else
-      target.set(Scene.toMat((PMatrix3D) pggl().getMatrix()));
-    return target;
-  }
-
-  @Override
-  public void printModelView() {
-    pggl().printMatrix();
+  public void bindModelView(Mat source) {
+    if (gScene.is3D())
+      pggl().setMatrix(Scene.toPMatrix(source));// in P5 this caches projmodelview
+    else {
+      pggl().modelview.set(Scene.toPMatrix(source));
+      pggl().projmodelview.set(Mat.multiply(projection(), view()).getTransposed(new float[16]));
+    }
   }
 
   @Override
@@ -157,21 +134,5 @@ class GLMatrixHelper extends MatrixHelper {
   @Override
   public void scale(float x, float y, float z) {
     pggl().scale(x, y, z);
-  }
-
-  @Override
-  public void setProjection(Mat source) {
-    pggl().setProjection(Scene.toPMatrix(source));
-  }
-
-  @Override
-  public void setModelView(Mat source) {
-    if (gScene.is3D())
-      pggl().setMatrix(Scene.toPMatrix(source));// in P5 this caches projmodelview
-    else {
-      pggl().modelview.set(Scene.toPMatrix(source));
-      pggl().projmodelview
-          .set(Mat.multiply(gScene.eye().getProjection(false), gScene.eye().getView(false)).getTransposed(new float[16]));
-    }
   }
 }

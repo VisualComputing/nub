@@ -17,7 +17,10 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.fpstiming.TimingTask;
-import remixlab.geom.*;
+import remixlab.geom.AbstractScene;
+import remixlab.geom.InteractiveFrame;
+import remixlab.geom.KeyFrameInterpolator;
+import remixlab.geom.MatrixHelper;
 import remixlab.primitives.*;
 
 import java.nio.FloatBuffer;
@@ -54,7 +57,7 @@ import java.util.regex.Pattern;
  * frame and scene key actions (such as
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
- * {@link Eye} and frame
+ * eye and frame
  * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
@@ -159,13 +162,8 @@ public class Scene extends AbstractScene implements PConstants {
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
-    // 5. Eye
+    // 5. Handed
     setLeftHanded();
-    // properly set the eye which is a 3 step process:
-    eye = new Eye(this);
-    setEye(eye());// calls showAll();
-    //TODO testing
-    //showAll();
 
     // 6. Misc stuff:
     setDottedGrid(is2D());
@@ -360,7 +358,7 @@ public class Scene extends AbstractScene implements PConstants {
   public boolean setCenterFromPixel(Point pixel) {
     Vec pup = pointUnderPixel(pixel);
     if (pup != null) {
-      eye().setSceneCenter(pup);
+      setCenter(pup);
       return true;
     }
     return false;
@@ -374,7 +372,7 @@ public class Scene extends AbstractScene implements PConstants {
       throw new RuntimeException("pg() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
-    pgl.readPixels(pixel.x(), (eye().screenHeight() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
+    pgl.readPixels(pixel.x(), (height() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
         FloatBuffer.wrap(depth));
     pggl.endPGL();
     return depth[0];
@@ -404,11 +402,11 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
    * value is not a linear interpolation between
-   * {@link Eye#zNear()} and
-   * {@link Eye#zFar()};
+   * {@link #zNear()} and
+   * {@link #zFar()};
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
    * the distance from the point you project to the camera, along the
-   * {@link Eye#viewDirection()}. See the {@code gluUnProject}
+   * {@link #viewDirection()}. See the {@code gluUnProject}
    * man page for details.
    */
   public float pixelDepth(float x, float y) {
@@ -552,10 +550,10 @@ public class Scene extends AbstractScene implements PConstants {
     pg().stroke(170);
     if (gridIsDotted()) {
       pg().strokeWeight(2);
-      drawDottedGrid(eye().sceneRadius());
+      drawDottedGrid(radius());
     } else {
       pg().strokeWeight(1);
-      drawGrid(eye().sceneRadius());
+      drawGrid(radius());
     }
     pg().popStyle();
   }
@@ -567,7 +565,7 @@ public class Scene extends AbstractScene implements PConstants {
   protected void drawAxesHint() {
     pg().pushStyle();
     pg().strokeWeight(2);
-    drawAxes(eye().sceneRadius());
+    drawAxes(radius());
     pg().popStyle();
   }
 
@@ -644,8 +642,8 @@ public class Scene extends AbstractScene implements PConstants {
    * Called before your main drawing and performs the following:
    * <ol>
    * <li>Handles the {@link #avatar()}</li>
-   * <li>Calls {@link #bindMatrices()}</li>
-   * <li>Calls {@link Eye#updateBoundaryEquations()} if
+   * <li>Calls {@link MatrixHelper#bind()}</li>
+   * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
    * </ol>
@@ -665,11 +663,11 @@ public class Scene extends AbstractScene implements PConstants {
     //TODO restore
     //if (avatar() != null && (!eye().anyInterpolationStarted()))
     if (avatar() != null)
-      eye().frame().setWorldMatrix(avatar().trackingEyeFrame());
-    // 2. Eye
-    bindMatrices();
+      eye().setWorldMatrix(avatar().trackingEyeFrame());
+    // 2. Eye, raster scene
+    matrixHelper().bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
-      eye().updateBoundaryEquations();
+      updateBoundaryEquations();
       lastEqUpdate = frameCount;
     }
   }
@@ -682,7 +680,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
    * {@link #height()}, and calls
-   * {@link Eye#setScreenWidthAndHeight(int, int)}.
+   * {@link #setWidth(int)} and {@link #setHeight(int)}.
    * <p>
    *
    * @see #draw()
@@ -693,10 +691,9 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #isOffscreen()
    */
   public void pre() {
-    if ((width != pg().width) || (height != pg().height)) {
-      width = pg().width;
-      height = pg().height;
-      eye().setScreenWidthAndHeight(width, height);
+    if ((width() != pg().width) || (height() != pg().height)) {
+      setWidth(pg().width);
+      setHeight(pg().height);
     }
     preDraw();
     pushModelView();
@@ -762,7 +759,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
    * {@link #height()}, and calls
-   * {@link Eye#setScreenWidthAndHeight(int, int)}.
+   * {@link #setWidth(int)} and {@link #setHeight(int)}.
    *
    * @see #draw()
    * @see #preDraw()
@@ -783,7 +780,8 @@ public class Scene extends AbstractScene implements PConstants {
     if ((width != pg().width) || (height != pg().height)) {
       width = pg().width;
       height = pg().height;
-      eye().setScreenWidthAndHeight(width, height);
+      setWidth(width);
+      setHeight(height);
     }
     // open off-screen pgraphics for drawing:
     pg().beginDraw();
@@ -1064,7 +1062,7 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Saves the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link Eye#type()} and the
+   * {@link #type()} and the
    * keyFrameInterpolators into
    * {@code fileName}.
    *
@@ -1076,8 +1074,8 @@ public class Scene extends AbstractScene implements PConstants {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
     json.setInt("visualHints", visualHints());
-    json.setBoolean("ortho", is2D() ? true : eye().type() == Eye.Type.ORTHOGRAPHIC ? true : false);
-    json.setJSONObject("eye", toJSONObject(eyeFrame()));
+    json.setBoolean("ortho", is2D() ? true : type() == Type.ORTHOGRAPHIC ? true : false);
+    json.setJSONObject("eye", toJSONObject(eye()));
     JSONArray jsonPaths = new JSONArray();
     //TODO restore
     // keyFrames
@@ -1113,7 +1111,7 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Loads the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
-   * {@link Eye#type()} and the
+   * {@link #type()} and the
    * keyFrameInterpolators from
    * {@code fileName}.
    *
@@ -1132,8 +1130,8 @@ public class Scene extends AbstractScene implements PConstants {
       setRadius(json.getFloat("radius"));
       setVisualHints(json.getInt("visualHints"));
       if (is3D())
-        eye().setType(json.getBoolean("ortho") ? Eye.Type.ORTHOGRAPHIC : Eye.Type.PERSPECTIVE);
-      eyeFrame().setWorldMatrix(toFrame(json.getJSONObject("eye")));
+        setType(json.getBoolean("ortho") ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      eye().setWorldMatrix(toFrame(json.getJSONObject("eye")));
       // keyFrames
       //TODO restore
       /*
@@ -1287,7 +1285,7 @@ public class Scene extends AbstractScene implements PConstants {
    * This method is implementing by simply calling
    * {@link AbstractScene#traverseTree()}.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link #bindMatrices()} (i.e.,
+   * <b>Attention:</b> this method should be called after {@link MatrixHelper#bind()} (i.e.,
    * eye update which happens at {@link #preDraw()}) and before any other transformation
    * of the modelview takes place.
    *
@@ -1346,17 +1344,21 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Same as {@code matrixHelper(pgraphics).bind(false)}. Set the {@code pgraphics}
    * matrices by calling
-   * {@link MatrixHelper#loadProjection(boolean)} and
-   * {@link MatrixHelper#loadModelView(boolean)} (only makes sense
+   * {@link remixlab.geom.MatrixHelper#bindProjection(Mat)} and
+   * {@link remixlab.geom.MatrixHelper#bindModelView(Mat)} (only makes sense
    * when {@link #pg()} is different than {@code pgraphics}).
    * <p>
-   * This method doesn't interact any computation, but simple retrieve the current matrices
-   * whose actual computation hasGrabber been updated in {@link #preDraw()}.
+   * This method doesn't perform any computation, but simple retrieve the current matrices
+   * whose actual computation has been updated in {@link #preDraw()}.
    */
   public void bindMatrices(PGraphics pgraphics) {
     if (this.pg() == pgraphics)
       return;
-    matrixHelper(pgraphics).bind(false);
+    MatrixHelper mh = matrixHelper(pgraphics);
+    mh.bindProjection(projection());
+    mh.bindView(view());
+    mh.cacheProjectionView();
+    mh.bindModelView(view());
   }
 
   @Override
@@ -2330,51 +2332,50 @@ public class Scene extends AbstractScene implements PConstants {
    * <b>Note:</b> The drawing of a Scene's own Scene.eye() should not be visible, but
    * may create artifacts due to numerical imprecisions.
    */
-  public void drawEye(Eye eye) {
-    drawEye(eye, false);
+  public void drawEye() {
+    drawEye(false);
   }
 
   /**
    * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, Eye, boolean)} on the scene {@link #pg()}. If
+   * {@link #drawEye(PGraphics, boolean)} on the scene {@link #pg()}. If
    * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, Eye, boolean)
+   * @see #drawEye(PGraphics, boolean)
    */
-  public void drawEye(Eye eye, boolean texture) {
+  public void drawEye(boolean texture) {
     pg().pushMatrix();
-    applyTransformation(eye.frame());
-    drawEye(pg(), eye, texture);
+    applyTransformation(eye());
+    drawEye(pg(), texture);
     pg().popMatrix();
   }
 
   /**
    * Same as {@code drawEye(pg, eye, false)}.
    *
-   * @see #drawEye(PGraphics, Eye, boolean)
+   * @see #drawEye(PGraphics, boolean)
    */
-  public void drawEye(PGraphics pg, Eye eye) {
-    drawEye(pg, eye, false);
+  public void drawEye(PGraphics pg) {
+    drawEye(pg, false);
   }
 
   /**
-   * Implementation of {@link #drawEye(Eye)}. If {@code texture} draws the projected scene
+   * Implementation of {@link #drawEye()}. If {@code texture} draws the projected scene
    * on the near plane.
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
    * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    */
-  public void drawEye(PGraphics pg, Eye eye, boolean texture) {
+  public void drawEye(PGraphics pg, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight, zNear and zFar params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.frame().magnitude()
-    if (eye.scene() instanceof Scene)
-      if (((Scene) eye.scene()).pg() == pg) {
-        System.out.println("Warning: No drawEye done, eye.scene()).pg() and pg are the same!");
-        return;
-      }
+    if (pg() == pg) {
+      System.out.println("Warning: No drawEye done, eye.scene()).pg() and pg are the same!");
+      return;
+    }
     pg.pushStyle();
 
     // boolean drawFarPlane = true;
@@ -2382,7 +2383,7 @@ public class Scene extends AbstractScene implements PConstants {
     int farIndex = is3D() ? 1 : 0;
     boolean ortho = false;
     if (is3D())
-      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
+      if (type() == Type.ORTHOGRAPHIC)
         ortho = true;
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
@@ -2391,26 +2392,26 @@ public class Scene extends AbstractScene implements PConstants {
     points[1] = new Vec();
 
     if (is2D() || ortho) {
-      float[] wh = eye.getBoundaryWidthHeight();
-      points[0].setX(wh[0] * 1 / eye.frame().magnitude());
-      points[1].setX(wh[0] * 1 / eye.frame().magnitude());
-      points[0].setY(wh[1] * 1 / eye.frame().magnitude());
-      points[1].setY(wh[1] * 1 / eye.frame().magnitude());
+      float[] wh = getBoundaryWidthHeight();
+      points[0].setX(wh[0] * 1 / eye().magnitude());
+      points[1].setX(wh[0] * 1 / eye().magnitude());
+      points[0].setY(wh[1] * 1 / eye().magnitude());
+      points[1].setY(wh[1] * 1 / eye().magnitude());
     }
 
     if (is3D()) {
-      points[0].setZ(eye.zNear() * 1 / eye.frame().magnitude());
-      points[1].setZ(eye.zFar() * 1 / eye.frame().magnitude());
-      if (eye.type() == Eye.Type.PERSPECTIVE) {
-        points[0].setY(points[0].z() * PApplet.tan(eye.fieldOfView() / 2.0f));
-        points[0].setX(points[0].y() * eye.aspectRatio());
+      points[0].setZ(zNear() * 1 / eye().magnitude());
+      points[1].setZ(zFar() * 1 / eye().magnitude());
+      if (type() == Type.PERSPECTIVE) {
+        points[0].setY(points[0].z() * PApplet.tan(fieldOfView() / 2.0f));
+        points[0].setX(points[0].y() * aspectRatio());
         float ratio = points[1].z() / points[0].z();
         points[1].setY(ratio * points[0].y());
         points[1].setX(ratio * points[0].x());
       }
 
       // Frustum lines
-      switch (eye.type()) {
+      switch (type()) {
         case PERSPECTIVE: {
           pg.beginShape(PApplet.LINES);
           Scene.vertex(pg, 0.0f, 0.0f, 0.0f);
@@ -2489,39 +2490,39 @@ public class Scene extends AbstractScene implements PConstants {
 
     // Planes
     // far plane
-    drawPlane(pg, eye, points[1], new Vec(0, 0, -1), false);
+    drawPlane(pg, points[1], new Vec(0, 0, -1), false);
     // near plane
-    drawPlane(pg, eye, points[0], new Vec(0, 0, 1), texture);
+    drawPlane(pg, points[0], new Vec(0, 0, 1), texture);
 
     pg.popStyle();
   }
 
-  public void drawEyeNearPlane(Eye eye) {
-    drawEyeNearPlane(eye, false);
+  public void drawEyeNearPlane() {
+    drawEyeNearPlane(false);
   }
 
   /**
    * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, Eye, boolean)} on the scene {@link #pg()}. If
+   * {@link #drawEye(PGraphics, boolean)} on the scene {@link #pg()}. If
    * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, Eye, boolean)
+   * @see #drawEye(PGraphics, boolean)
    */
-  public void drawEyeNearPlane(Eye eye, boolean texture) {
+  public void drawEyeNearPlane(boolean texture) {
     pg().pushMatrix();
-    applyTransformation(eye.frame());
-    drawEyeNearPlane(pg(), eye, texture);
+    applyTransformation(eye());
+    drawEyeNearPlane(pg(), texture);
     pg().popMatrix();
   }
 
   /**
    * Same as {@code drawEyeNearPlane(pg, eye, false)}.
    *
-   * @see #drawEyeNearPlane(PGraphics, Eye, boolean)
+   * @see #drawEyeNearPlane(PGraphics, boolean)
    */
-  public void drawEyeNearPlane(PGraphics pg, Eye eye) {
-    drawEyeNearPlane(pg, eye, false);
+  public void drawEyeNearPlane(PGraphics pg) {
+    drawEyeNearPlane(pg, false);
   }
 
   /**
@@ -2531,7 +2532,7 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    */
-  public void drawEyeNearPlane(PGraphics pg, Eye eye, boolean texture) {
+  public void drawEyeNearPlane(PGraphics pg, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.frame().magnitude()
@@ -2543,26 +2544,26 @@ public class Scene extends AbstractScene implements PConstants {
     pg.pushStyle();
     boolean ortho = false;
     if (is3D())
-      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
+      if (type() == Type.ORTHOGRAPHIC)
         ortho = true;
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vec corner = new Vec();
     if (is2D() || ortho) {
-      float[] wh = eye.getBoundaryWidthHeight();
-      corner.setX(wh[0] * 1 / eye.frame().magnitude());
-      corner.setY(wh[1] * 1 / eye.frame().magnitude());
+      float[] wh = getBoundaryWidthHeight();
+      corner.setX(wh[0] * 1 / eye().magnitude());
+      corner.setY(wh[1] * 1 / eye().magnitude());
     }
     if (is3D()) {
-      corner.setZ(eye.zNear() * 1 / eye.frame().magnitude());
-      if (eye.type() == Eye.Type.PERSPECTIVE) {
-        corner.setY(corner.z() * PApplet.tan(eye.fieldOfView() / 2.0f));
-        corner.setX(corner.y() * eye.aspectRatio());
+      corner.setZ(zNear() * 1 / eye().magnitude());
+      if (type() == Type.PERSPECTIVE) {
+        corner.setY(corner.z() * PApplet.tan(fieldOfView() / 2.0f));
+        corner.setX(corner.y() * aspectRatio());
       }
     }
-    drawPlane(pg, eye, corner, new Vec(0, 0, 1), texture);
+    drawPlane(pg, corner, new Vec(0, 0, 1), texture);
   }
 
-  protected void drawPlane(PGraphics pg, Eye eye, Vec corner, Vec normal, boolean texture) {
+  protected void drawPlane(PGraphics pg, Vec corner, Vec normal, boolean texture) {
     pg.pushStyle();
     // near plane
     pg.beginShape(PApplet.QUAD);
@@ -2570,7 +2571,7 @@ public class Scene extends AbstractScene implements PConstants {
     if (pg instanceof PGraphicsOpenGL && texture) {
       pg.textureMode(NORMAL);
       pg.tint(255, 126); // Apply transparency without changing color
-      pg.texture(((Scene) eye.scene()).pg());
+      pg.texture(pg());
       Scene.vertex(pg, corner.x(), corner.y(), -corner.z(), 1, 1);
       Scene.vertex(pg, -corner.x(), corner.y(), -corner.z(), 0, 1);
       Scene.vertex(pg, -corner.x(), -corner.y(), -corner.z(), 0, 0);
@@ -2586,16 +2587,16 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjector(PGraphics, Eye, Vec)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjector(PGraphics, Vec)} on the scene {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
-   * projector it should be used in conjunction with {@link #drawEye(PGraphics, Eye)}.
+   * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
    *
-   * @see #drawProjector(PGraphics, Eye, Vec)
-   * @see #drawProjectors(Eye, List)
+   * @see #drawProjector(PGraphics, Vec)
+   * @see #drawProjectors(List)
    */
-  public void drawProjector(Eye eye, Vec src) {
-    drawProjector(pg(), eye, src);
+  public void drawProjector(Vec src) {
+    drawProjector(pg(), src);
   }
 
   /**
@@ -2604,28 +2605,28 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with
-   * {@link #drawEye(PGraphics, Eye, boolean)}.
+   * {@link #drawEye(PGraphics, boolean)}.
    * <p>
    * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    *
-   * @see #drawProjector(PGraphics, Eye, Vec)
-   * @see #drawProjectors(PGraphics, Eye, List)
+   * @see #drawProjector(PGraphics, Vec)
+   * @see #drawProjectors(PGraphics, List)
    */
-  public void drawProjector(PGraphics pg, Eye eye, Vec src) {
-    drawProjectors(pg, eye, Arrays.asList(src));
+  public void drawProjector(PGraphics pg, Vec src) {
+    drawProjectors(pg, Arrays.asList(src));
   }
 
   /**
-   * Calls {@link #drawProjectors(PGraphics, Eye, List)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjectors(PGraphics, List)} on the scene {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
-   * projector it should be used in conjunction with {@link #drawEye(PGraphics, Eye)}.
+   * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
    *
-   * @see #drawProjectors(PGraphics, Eye, List)
-   * @see #drawProjector(Eye, Vec)
+   * @see #drawProjectors(PGraphics, List)
+   * @see #drawProjector(Vec)
    */
-  public void drawProjectors(Eye eye, List<Vec> src) {
-    drawProjectors(pg(), eye, src);
+  public void drawProjectors(List<Vec> src) {
+    drawProjectors(pg(), src);
   }
 
   /**
@@ -2634,19 +2635,18 @@ public class Scene extends AbstractScene implements PConstants {
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with
-   * {@link #drawEye(PGraphics, Eye, boolean)}.
+   * {@link #drawEye(PGraphics, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code pg() == pg} this method has not effect at all.
    *
-   * @see #drawProjectors(PGraphics, Eye, List)
-   * @see #drawProjector(PGraphics, Eye, Vec)
+   * @see #drawProjectors(PGraphics, List)
+   * @see #drawProjector(PGraphics, Vec)
    */
-  public void drawProjectors(PGraphics pg, Eye eye, List<Vec> src) {
-    if (eye.scene() instanceof Scene)
-      if (((Scene) eye.scene()).pg() == pg) {
-        System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
-        return;
-      }
+  public void drawProjectors(PGraphics pg, List<Vec> src) {
+    if (pg() == pg) {
+      System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
+      return;
+    }
     pg.pushStyle();
     if (is2D()) {
       pg.beginShape(PApplet.POINTS);
@@ -2657,31 +2657,31 @@ public class Scene extends AbstractScene implements PConstants {
       // if ORTHOGRAPHIC: do it in the eye coordinate system
       // if PERSPECTIVE: do it in the world coordinate system
       Vec o = new Vec();
-      if (eye.type() == Eye.Type.ORTHOGRAPHIC) {
+      if (type() == Type.ORTHOGRAPHIC) {
         pg.pushMatrix();
-        applyTransformation(eye.frame());
+        applyTransformation(eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = eye.frame().inverseCoordinatesOf(new Vec());
+        o = eye().inverseCoordinatesOf(new Vec());
       pg.beginShape(PApplet.LINES);
       for (Vec s : src) {
-        if (eye.type() == Eye.Type.ORTHOGRAPHIC) {
-          Vec v = eye.frame().coordinatesOf(s);
+        if (type() == Type.ORTHOGRAPHIC) {
+          Vec v = eye().coordinatesOf(s);
           Scene.vertex(pg, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
           // Hence it should be multiplied by: 1 / eye.frame().magnitude()
           // The neg sign is because the zNear is positive but the eye view direction is
           // the negative Z-axis
-          Scene.vertex(pg, v.x(), v.y(), -eye.zNear() * 1 / eye.frame().magnitude());
+          Scene.vertex(pg, v.x(), v.y(), -zNear() * 1 / eye().magnitude());
         } else {
           Scene.vertex(pg, s.x(), s.y(), s.z());
           Scene.vertex(pg, o.x(), o.y(), o.z());
         }
       }
       pg.endShape();
-      if (eye.type() == Eye.Type.ORTHOGRAPHIC)
+      if (type() == Type.ORTHOGRAPHIC)
         pg.popMatrix();
     }
     pg.popStyle();

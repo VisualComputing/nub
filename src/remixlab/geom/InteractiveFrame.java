@@ -53,17 +53,13 @@ import java.util.List;
  * {@link #scene()}, {@link AbstractScene#pushModelView()} and
  * {@link AbstractScene#popModelView()}
  * <p>
- * A generic-frame may also be attached to an {@link Eye}, such as
- * the {@link AbstractScene#eyeFrame()} which in turn is attached
- * to the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}).
+ * A frame may also be defined as the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}
+ * and {@link AbstractScene#setEye(InteractiveFrame)}).
  * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
  * For instance, with a move-to-the-right user gesture the
- * {@link AbstractScene#eyeFrame()} hasGrabber to go to the <i>left</i>,
- * so that the <i>scene</i> seems to move to the right. A generic-frame can be attached to
- * an eye only at construction times (see {@link #InteractiveFrame(Eye)} and all the
- * constructors that take an eye parameter). An eye may have more than one generic-frame
- * attached to it. To set one of them as the {@link Eye#frame()},
- * call {@link Eye#setFrame(InteractiveFrame)}.
+ * {@link AbstractScene#eye()} hasGrabber to go to the <i>left</i>,
+ * so that the <i>scene</i> seems to move to the right. A interactive-frame can be set
+ * as the {@link AbstractScene#eye()}, see {@link AbstractScene#setEye(InteractiveFrame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent2, boolean)},
@@ -101,7 +97,7 @@ import java.util.List;
  * share frames among different off-screen scenes (see ProScene's EyeCrane and the
  * AuxiliarViewer examples).
  * <p>
- * Finally, a generic-frame can be followed by an {@link Eye},
+ * Finally, a frame can be followed by another frame,
  * defining a 'third-person' eye mode, see {@link Trackable}
  * documentation. See also {@link #setTrackingEyeDistance(float)},
  * {@link #setTrackingEyeAzimuth(float)} and {@link #setTrackingEyeInclination(float)}.
@@ -147,7 +143,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   protected long lastUpdate;
   protected AbstractScene gScene;
-  protected Eye theeye;
 
   private float grabsInputThreshold;
 
@@ -182,31 +177,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as
-   * {@code this(eye, null, new Vec(), new Quat(), 1)} .
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye) {
-    this(eye, null, new Vec(), new Quat(), 1);
-  }
-
-  /**
    * Same as {@code this(scn, null, p, new Quat(), 1)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, Vec p) {
     this(scn, null, p, new Quat(), 1);
-  }
-
-  /**
-   * Same as {@code this(eye, null, p, new Quat(), 1)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, Vec p) {
-    this(eye, null, p, new Quat(), 1);
   }
 
   /**
@@ -219,31 +195,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as {@code this(eye, null, new Vec(), r, 1)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, Quat r) {
-    this(eye, null, new Vec(), r, 1);
-  }
-
-  /**
    * Same as {@code this(scn, null, new Vec(), new Quat(), s)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, float s) {
     this(scn, null, new Vec(), new Quat(), s);
-  }
-
-  /**
-   * Same as
-   * {@code this(eye, null, new Vec(), new Quat(), s)} .
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, float s) {
-    this(eye, null, new Vec(), new Quat(), s);
   }
 
   /**
@@ -256,15 +213,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as {@code this(eye, null, p, new Quat(), s)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, Vec p, float s) {
-    this(eye, null, p, new Quat(), s);
-  }
-
-  /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
@@ -274,30 +222,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as {@code this(eye, null, p, r, 1)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, Vec p, Quat r) {
-    this(eye, null, p, r, 1);
-  }
-
-  /**
    * Same as {@code this(scn, null, new Vec(), r, s)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, Quat r, float s) {
     this(scn, null, new Vec(), r, s);
-  }
-
-  /**
-   * Same as {@code this(eye, null, new Vec(), r, s)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, Quat r, float s) {
-    this(eye, null, new Vec(), r, s);
   }
 
   /**
@@ -320,10 +250,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     this(scn, referenceFrame, new Vec(), new Quat(), 1);
   }
 
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame) {
-    this(eye, referenceFrame, new Vec(), new Quat(), 1);
-  }
-
   /**
    * Same as {@code this(scn, referenceFrame, p, new Quat(), 1)}
    * .
@@ -332,17 +258,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p) {
     this(scn, referenceFrame, p, new Quat(), 1);
-  }
-
-  /**
-   * Same as
-   * {@code this(eye, referenceFrame, p, new Quat(), 1)}
-   * .
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p) {
-    this(eye, referenceFrame, p, new Quat(), 1);
   }
 
   /**
@@ -355,34 +270,13 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as {@code this(eye, referenceFrame, new Vec(), r, 1)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Quat r) {
-    this(eye, referenceFrame, new Vec(), r, 1);
-  }
-
-  /**
    * Same as
-   * {@code this(scn, referenceFrame, new Vec(), new Quat(), s)}
-   * .
+   * {@code this(scn, referenceFrame, new Vec(), new Quat(), s)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, float s) {
     this(scn, referenceFrame, new Vec(),new Quat(), s);
-  }
-
-  /**
-   * Same as
-   * {@code this(eye, referenceFrame, new Vec(), new Quat(), s)}
-   * .
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, float s) {
-    this(eye, referenceFrame, new Vec(), new Quat(), s);
   }
 
   /**
@@ -396,17 +290,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as
-   * {@code this(eye, referenceFrame, p, new Quat(), s)}
-   * .
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, float s) {
-    this(eye, referenceFrame, p, new Quat(), s);
-  }
-
-  /**
    * Same as {@code this(scn, referenceFrame, p, r, 1)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
@@ -416,30 +299,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Same as {@code this(eye, referenceFrame, p, r, 1)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Quat r) {
-    this(eye, referenceFrame, p, r, 1);
-  }
-
-  /**
    * Same as {@code this(scn, referenceFrame, new Vec(), r, s)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Quat r, float s) {
     this(scn, referenceFrame, new Vec(), r, s);
-  }
-
-  /**
-   * Same as {@code this(eye, referenceFrame, new Vec(), r, s)}.
-   *
-   * @see #InteractiveFrame(Eye, InteractiveFrame, Vec, Quat, float)
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Quat r, float s) {
-    this(eye, referenceFrame, new Vec(), r, s);
   }
 
   /**
@@ -470,37 +335,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     scene().inputHandler().addGrabber(this);
     pkgnPrecision = PickingPrecision.FIXED;
     setGrabsInputThreshold(20);
-    setFlySpeed(0.01f * scene().eye().sceneRadius());
-  }
-
-  /**
-   * Creates an eye generic-frame with {@code referenceFrame} as {@link #referenceFrame()}
-   * , and {@code p}, {@code r} and {@code s} as the frame {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()}, respectively.
-   * <p>
-   * The generic-frame isn't added to any of the
-   * {@link AbstractScene#inputHandler()}
-   * {@link InputHandler#agents()}. A call to
-   * {@link AbstractScene#setEye(Eye)} will do it.
-   * <p>
-   * The generic-frame sensitivities are set to their default values, see
-   * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
-   * {@link #keyboardSensitivity()}, {@link #rotationSensitivity()},
-   * {@link #translationSensitivity()} and {@link #scalingSensitivity()}.
-   * <p>
-   * After object creation a call to {@link #isEyeFrame()} will return {@code true}.
-   */
-  public InteractiveFrame(Eye eye, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
-    super(referenceFrame, p, r, s);
-    theeye = eye;
-    init(theeye.scene());
-    hint = false;
-    // dummy value:
-    pkgnPrecision = PickingPrecision.FIXED;
-    setFlySpeed(0.01f * eye().sceneRadius());
-    // fov = Math.PI / 3.0f
-    if (scene().is3D())
-      setMagnitude((float) Math.tan(((float) Math.PI / 3.0f) / 2.0f));
+    setFlySpeed(0.01f * scene().radius());
   }
 
   protected void init(AbstractScene scn) {
@@ -546,7 +381,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     // unlikely but theoretically possible
     if (this.id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
-    this.theeye = otherFrame.theeye;
 
     this.visit = otherFrame.visit;
     this.hint = otherFrame.hint;
@@ -858,21 +692,10 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * Note that if this {@link #isEyeFrame()} then returns {@code eye().scene()}.
    *
-   * @see #eye()
-   * @see Eye#scene()
+   * @see AbstractScene#eye()
    */
   public AbstractScene scene() {
     return gScene;
-  }
-
-  /**
-   * Returns the eye object this generic-frame is attached to. May be null if the
-   * generic-frame is not attach to an eye.
-   *
-   * @see #isEyeFrame()
-   */
-  public Eye eye() {
-    return theeye;
   }
 
   /**
@@ -880,10 +703,10 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * generic-frames can only be attached to an eye at construction times. Refer to the
    * generic-frame constructors that take an eye parameter.
    *
-   * @see #eye()
+   * @see AbstractScene#eye()
    */
   public boolean isEyeFrame() {
-    return theeye != null;
+    return scene().eye() == this;
   }
 
   @Override
@@ -965,7 +788,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #setPickingPrecision(PickingPrecision)
    */
   public boolean track(float x, float y) {
-    Vec proj = gScene.eye().projectedCoordinatesOf(position());
+    Vec proj = gScene.projectedCoordinatesOf(position());
     float halfThreshold = grabsInputThreshold() / 2;
     return ((Math.abs(x - proj.vec[0]) < halfThreshold) && (Math.abs(y - proj.vec[1]) < halfThreshold));
   }
@@ -1489,7 +1312,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Rotates the scene-frame by its {@link #spinningRotation()} or around the
-   * {@link Eye#anchor()} when this scene-frame is the
+   * {@link AbstractScene#anchor()} when this scene-frame is the
    * {@link AbstractScene#eye()}. Called by a timer when the
    * generic-frame {@link #isSpinning()}.
    * <p>
@@ -1500,7 +1323,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   protected void spin() {
     if (isEyeFrame())
-      rotateAroundPoint(spinningRotation(), eye().anchor());
+      rotateAroundPoint(spinningRotation(), scene().anchor());
     else
       rotate(spinningRotation());
   }
@@ -1577,12 +1400,11 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     float prevX = event.prevX();
     float prevY = event.prevY();
     // Points on the deformed ball
-    float px = rotationSensitivity() * ((int) prevX - cx) / gScene.eye().screenWidth();
+    float px = rotationSensitivity() * ((int) prevX - cx) / gScene.width();
     float py =
-            rotationSensitivity() * (gScene.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / gScene.eye()
-                    .screenHeight();
-    float dx = rotationSensitivity() * (x - cx) / gScene.eye().screenWidth();
-    float dy = rotationSensitivity() * (gScene.isLeftHanded() ? (y - cy) : (cy - y)) / gScene.eye().screenHeight();
+            rotationSensitivity() * (gScene.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / gScene.height();
+    float dx = rotationSensitivity() * (x - cx) / gScene.width();
+    float dy = rotationSensitivity() * (gScene.isLeftHanded() ? (y - cy) : (cy - y)) / gScene.height();
 
     Vec p1 = new Vec(px, py, projectOnBall(px, py));
     Vec p2 = new Vec(dx, dy, projectOnBall(dx, dy));
@@ -1662,7 +1484,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   protected float computeAngle(float dx) {
-    return dx * (float) Math.PI / gScene.eye().screenWidth();
+    return dx * (float) Math.PI / gScene.width();
   }
 
   protected boolean wheel(MotionEvent event) {
@@ -1677,7 +1499,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (isEyeFrame())
       alignWithFrame(null, true);
     else
-      alignWithFrame(gScene.eye().frame());
+      alignWithFrame(gScene.eye());
   }
 
   /**
@@ -1685,9 +1507,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   public void center() {
     if (isEyeFrame())
-      eye().centerScene();
+      scene().center();
     else
-      projectOnLine(gScene.eye().position(), gScene.eye().viewDirection());
+      projectOnLine(gScene.eye().position(), gScene.eye().zAxis(false));
   }
 
   /**
@@ -1917,7 +1739,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   public void zoomOnAnchor(MotionEvent event) {
     zoomOnAnchor(event, true);
@@ -1926,7 +1748,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   protected void zoomOnAnchor(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
@@ -1937,13 +1759,13 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   protected void zoomOnAnchor(MotionEvent1 event, float sens) {
-    Vec direction = Vec.subtract(gScene.eye().anchor(), position());
+    Vec direction = Vec.subtract(gScene.anchor(), position());
     if (referenceFrame() != null)
       direction = referenceFrame().transformOf(direction);
-    float delta = event.dx() * sens / gScene.eye().screenHeight();
+    float delta = event.dx() * sens / gScene.height();
     if (direction.magnitude() > 0.02f * gScene.radius() || delta > 0.0f)
       translate(Vec.multiply(direction, delta));
   }
@@ -1951,7 +1773,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   public void zoomOnAnchorPos() {
     zoomOnAnchor(true);
@@ -1960,7 +1782,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   public void zoomOnAnchorNeg() {
     zoomOnAnchor(false);
@@ -1969,13 +1791,13 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see Eye#anchor()
+   * @see AbstractScene#anchor()
    */
   protected void zoomOnAnchor(boolean in) {
-    Vec direction = Vec.subtract(gScene.eye().anchor(), position());
+    Vec direction = Vec.subtract(gScene.anchor(), position());
     if (referenceFrame() != null)
       direction = referenceFrame().transformOf(direction);
-    float delta = (in ? keyboardSensitivity() : -keyboardSensitivity()) / gScene.eye().screenHeight();
+    float delta = (in ? keyboardSensitivity() : -keyboardSensitivity()) / gScene.height();
     if (direction.magnitude() > 0.02f * gScene.radius() || delta > 0.0f)
       translate(Vec.multiply(direction, delta));
   }
@@ -2018,7 +1840,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       int tlY = (int) e.prevY() < (int) e.y() ? (int) e.prevY() : (int) e.y();
       //TODO restore
       //eye().interpolateToZoomOnRegion(new Rect(tlX, tlY, w, h));
-      eye().fitScreenRegion(new Rect(tlX, tlY, w, h));
+      scene().fitScreenRegion(new Rect(tlX, tlY, w, h));
     }
   }
 
@@ -2236,8 +2058,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return;
     }
     if (event.fired() && gScene.is3D())
-      gScene.eye().cadRotationIsReversed =
-          gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
     rotate(screenToQuat(
         Vec.multiply(new Vec(computeAngle(event.dx()), computeAngle(-event.dy()), computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -2265,8 +2086,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.eye().cadRotationIsReversed =
-              gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2275,12 +2095,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       Quat rt;
       Vec trns;
       if (isEyeFrame())
-        rt = deformedBallRotation(event, eye().projectedCoordinatesOf(eye().anchor()));
+        rt = deformedBallRotation(event, scene().projectedCoordinatesOf(scene().anchor()));
       else {
-        trns = gScene.eye().projectedCoordinatesOf(position());
+        trns = gScene.projectedCoordinatesOf(position());
         rt = deformedBallRotation(event, trns);
         trns = ((Quat) rt).axis();
-        trns = gScene.eye().frame().orientation().rotate(trns);
+        trns = gScene.eye().orientation().rotate(trns);
         trns = transformOf(trns);
         rt = new Quat(trns, -rt.angle());
       }
@@ -2379,7 +2199,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   public void lookAround(MotionEvent event) {
-    rotate(rollPitchQuaternion(event, gScene.eye()));
+    rotate(rollPitchQuaternion(event));
   }
 
   /**
@@ -2420,12 +2240,12 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     Vec trns;
     float fSpeed = forward ? -flySpeed() : flySpeed();
     if (is2D()) {
-      rotate(deformedBallRotation(event, gScene.eye().projectedCoordinatesOf(position())));
+      rotate(deformedBallRotation(event, gScene.projectedCoordinatesOf(position())));
       flyDisp.set(-fSpeed, 0.0f, 0.0f);
       trns = localInverseTransformOf(flyDisp);
       startFlying(event, trns);
     } else {
-      rotate(rollPitchQuaternion(event, gScene.eye()));
+      rotate(rollPitchQuaternion(event));
       flyDisp.set(0.0f, 0.0f, fSpeed);
       trns = rotation().rotate(flyDisp);
       startFlying(event, trns);
@@ -2462,7 +2282,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     setFlySpeed(0.01f * gScene.radius() * 0.01f * (event.y() - initEvent.y()));
     Vec trns;
-    rotate(turnQuaternion(event.event1(), gScene.eye()));
+    rotate(turnQuaternion(event.event1()));
     flyDisp.set(0.0f, 0.0f, flySpeed());
     trns = rotation().rotate(flyDisp);
     startFlying(event, trns);
@@ -2494,17 +2314,16 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.eye().cadRotationIsReversed =
-          gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
     } else {
       // Multiply by 2.0 to get on average about the same speed as with the
       // deformed ball
-      float dx = -2.0f * rotationSensitivity() * event.dx() / gScene.eye().screenWidth();
-      float dy = 2.0f * rotationSensitivity() * event.dy() / gScene.eye().screenHeight();
-      if (((Eye) eye()).cadRotationIsReversed)
+      float dx = -2.0f * rotationSensitivity() * event.dx() / gScene.width();
+      float dy = 2.0f * rotationSensitivity() * event.dy() / gScene.height();
+      if (gScene.cadRotationIsReversed)
         dx = -dx;
       if (gScene.isRightHanded())
         dy = -dy;
@@ -2544,8 +2363,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     Quat o = (Quat) orientation();
     Frame oldRef = referenceFrame();
     InteractiveFrame rFrame = new InteractiveFrame(gScene);
-    rFrame.setPosition(eye().anchor());
-    rFrame.setZAxis(Vec.subtract(pos, eye().anchor()));
+    rFrame.setPosition(scene().anchor());
+    rFrame.setZAxis(Vec.subtract(pos, scene().anchor()));
     rFrame.setXAxis(xAxis());
     setReferenceFrame(rFrame);
     setPosition(pos);
@@ -2628,8 +2447,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       //TODO handle me
       //gScene.setRotateVisualHint(true); // display visual hint
       if (gScene.is3D())
-        gScene.eye().cadRotationIsReversed =
-            gScene.eye().frame().transformOf(gScene.eye().frame().sceneUpVector()).y() < 0.0f;
+        gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
     }
     if (event.flushed()) {
       //TODO handle me
@@ -2648,17 +2466,17 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       Vec trns;
       float angle;
       if (isEyeFrame()) {
-        trns = eye().projectedCoordinatesOf(eye().anchor());
+        trns = scene().projectedCoordinatesOf(scene().anchor());
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]) - (float) Math
             .atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
         if (gScene.isLeftHanded())
           angle = -angle;
         rt = new Quat(new Vec(0.0f, 0.0f, 1.0f), angle);
       } else {
-        trns = gScene.eye().projectedCoordinatesOf(position());
+        trns = gScene.projectedCoordinatesOf(position());
         float prev_angle = (float) Math.atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]);
-        Vec axis = transformOf(gScene.eye().frame().orientation().rotate(new Vec(0.0f, 0.0f, -1.0f)));
+        Vec axis = transformOf(gScene.eye().orientation().rotate(new Vec(0.0f, 0.0f, -1.0f)));
         if (gScene.isRightHanded())
           rt = new Quat(axis, angle - prev_angle);
         else
@@ -2723,7 +2541,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #screenToQuat(float, float, float)
    */
   public Vec eyeToReferenceFrame(Vec trns) {
-    InteractiveFrame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye().frame() /* : this */;
+    InteractiveFrame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye() /* : this */;
     Vec t = gFrame.inverseTransformOf(trns);
     if (referenceFrame() != null)
       t = referenceFrame().transformOf(t);
@@ -2756,35 +2574,35 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       // Quite excited to see how simple it's in 2d:
       return eyeVec;
     // ... and amazed as to how dirty it's in 3d:
-    switch (gScene.eye().type()) {
+    switch (gScene.type()) {
       case PERSPECTIVE:
-        float k = (float) Math.tan(gScene.eye().fieldOfView() / 2.0f) * Math.abs(
-            gScene.eye().frame().coordinatesOf(isEyeFrame() ? eye().anchor() : position()).vec[2] * gScene.eye().frame()
-                .magnitude());
+        float k = (float) Math.tan(gScene.fieldOfView() / 2.0f) * Math.abs(
+            gScene.eye().coordinatesOf(isEyeFrame() ? scene().anchor() : position()).vec[2] * gScene.eye().magnitude());
         // * Math.abs(scene.eye().frame().coordinatesOf(isEyeFrame() ?
         // scene.eye().anchor() : position()).vec[2]);
-        eyeVec.vec[0] *= 2.0 * k / gScene.eye().screenHeight();
-        eyeVec.vec[1] *= 2.0 * k / gScene.eye().screenHeight();
+        //TODO check me wierd to find height instead of width working (may it has to do with fov?)
+        eyeVec.vec[0] *= 2.0 * k / gScene.height();
+        eyeVec.vec[1] *= 2.0 * k / gScene.height();
         break;
       case ORTHOGRAPHIC:
-        float[] wh = gScene.eye().getBoundaryWidthHeight();
+        float[] wh = gScene.getBoundaryWidthHeight();
         // float[] wh = scene.eye().getOrthoWidthHeight();
-        eyeVec.vec[0] *= 2.0 * wh[0] / gScene.eye().screenWidth();
-        eyeVec.vec[1] *= 2.0 * wh[1] / gScene.eye().screenHeight();
+        eyeVec.vec[0] *= 2.0 * wh[0] / gScene.width();
+        eyeVec.vec[1] *= 2.0 * wh[1] / gScene.height();
         break;
     }
     float coef;
     if (isEyeFrame()) {
       // float coef = 8E-4f;
-      coef = Math.max(Math.abs((coordinatesOf(eye().anchor())).vec[2] * magnitude()), 0.2f * eye().sceneRadius());
-      eyeVec.vec[2] *= coef / eye().screenHeight();
+      coef = Math.max(Math.abs((coordinatesOf(scene().anchor())).vec[2] * magnitude()), 0.2f * scene().radius());
+      eyeVec.vec[2] *= coef / scene().height();
       // eye wheel seems different
       // trns.vec[2] *= coef * 8E-4f;
-      eyeVec.divide(eye().frame().magnitude());
+      eyeVec.divide(scene().eye().magnitude());
     } else {
       coef = Vec.subtract(gScene.eye().position(), position()).magnitude();
-      eyeVec.vec[2] *= coef / gScene.eye().screenHeight();
-      eyeVec.divide(gScene.eye().frame().magnitude());
+      eyeVec.vec[2] *= coef / gScene.height();
+      eyeVec.divide(gScene.eye().magnitude());
     }
     // if( isEyeFrame() )
     return eyeVec;
@@ -2827,7 +2645,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       Vec trns = new Vec();
       Quat q = new Quat(gScene.isLeftHanded() ? roll : -roll, -pitch, gScene.isLeftHanded() ? yaw : -yaw);
       trns.set(-q.x(), -q.y(), -q.z());
-      trns = gScene.eye().frame().orientation().rotate(trns);
+      trns = gScene.eye().orientation().rotate(trns);
       trns = transformOf(trns);
       q.setX(trns.x());
       q.setY(trns.y());
@@ -2865,9 +2683,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * rotate.
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link Eye#frame()}.
-   * {@link Eye#setOrientation(Quat)} and
-   * {@link Eye#setUpVector(Vec)} modify this value and should be
+   * {@link AbstractScene#eye()} and
+   * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
   public Vec sceneUpVector() {
@@ -2878,8 +2695,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link Eye#frame()}. Use
-   * {@link Eye#setUpVector(Vec)} instead in that case.
+   * {@link AbstractScene#eye()}. Use
+   * {@link AbstractScene#setUpVector(Vec)} instead in that case.
    */
   public void setSceneUpVector(Vec up) {
     scnUpVec = up;
@@ -3000,7 +2817,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * generic-frame by {@link #moveForward(MotionEvent, boolean)}.
    * <p>
    * <b>Attention:</b> When the generic-frame is set as the
-   * {@link Eye#frame()} or when it is set as the
+   * {@link AbstractScene#eye()} or when it is set as the
    * {@link AbstractScene#avatar()}, this value is set according
    * to the {@link AbstractScene#radius()} by
    * {@link AbstractScene#setRadius(float)}.
@@ -3014,17 +2831,17 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * <p>
    * Default value is 0.0, but it is modified according to the
    * {@link AbstractScene#radius()} when the generic-frame is set
-   * as the {@link Eye#frame()} or when the generic-frame is set
+   * as the {@link AbstractScene#eye()} or when the generic-frame is set
    * as the {@link AbstractScene#avatar()}.
    */
   public void setFlySpeed(float speed) {
     flySpd = speed;
   }
 
-  protected Quat rollPitchQuaternion(MotionEvent event, Eye camera) {
+  protected Quat rollPitchQuaternion(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
-      return rollPitchQuaternion(motionEvent2, camera);
+      return rollPitchQuaternion(motionEvent2);
     else {
       AbstractScene.showMinDOFsWarning("rollPitchQuaternion", 2);
       return null;
@@ -3035,7 +2852,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * mouse roll (X axis) and pitch ( {@link #sceneUpVector()} axis).
    */
-  protected Quat rollPitchQuaternion(MotionEvent2 event, Eye camera) {
+  protected Quat rollPitchQuaternion(MotionEvent2 event) {
     if (gScene.is2D()) {
       AbstractScene.showDepthWarning("rollPitchQuaternion");
       return null;
@@ -3046,8 +2863,8 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (gScene.isRightHanded())
       deltaY = -deltaY;
 
-    Quat rotX = new Quat(new Vec(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / camera.screenHeight());
-    Quat rotY = new Quat(transformOf(sceneUpVector()), rotationSensitivity() * (-deltaX) / camera.screenWidth());
+    Quat rotX = new Quat(new Vec(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / scene().height());
+    Quat rotY = new Quat(transformOf(sceneUpVector()), rotationSensitivity() * (-deltaX) / scene().width());
     return Quat.multiply(rotY, rotX);
   }
 
@@ -3057,9 +2874,9 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
    * event X-displacement.
    */
-  protected Quat turnQuaternion(MotionEvent1 event, Eye camera) {
+  protected Quat turnQuaternion(MotionEvent1 event) {
     float deltaX = event.dx();
-    return new Quat(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / camera.screenWidth());
+    return new Quat(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / scene().width());
   }
 
   // end decide
@@ -3076,7 +2893,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return 0;
     }
     if (pickingPrecision() == PickingPrecision.ADAPTIVE)
-      return grabsInputThreshold * scaling() * gScene.eye().pixelToSceneRatio(position());
+      return grabsInputThreshold * scaling() * gScene.pixelToSceneRatio(position());
     return grabsInputThreshold;
   }
 
@@ -3328,7 +3145,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       eFrame.setTranslation(p);
       eFrame.setYAxis(yAxis());
       eFrame.setZAxis(inverseTransformOf(p));
-      eFrame.setScaling(scene().eye().frame().scaling());
+      eFrame.setScaling(scene().eye().scaling());
     } else {
       Vec p = q.rotate(new Vec(0, 1));
       p.multiply(trackingEyeDistance() / magnitude());

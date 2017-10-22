@@ -17,8 +17,8 @@ public class WeirdAgent extends Agent {
     super(scn.inputHandler());
     scene = scn;
     register();
-    addGrabber(scene.eyeFrame());
-    setDefaultGrabber(scene.eyeFrame());
+    addGrabber(scene.eye());
+    setDefaultGrabber(scene.eye());
   }
 
   public void register() {

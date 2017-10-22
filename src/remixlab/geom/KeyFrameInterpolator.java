@@ -69,9 +69,6 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #interpolationTime()} is greater than the
  * {@link #lastTime()} (unless loopInterpolation() is {@code true}).
  * <p>
- * Note that an Eye has {@link Eye#keyFrameInterpolator(int)},
- * that can be used to drive the Eye along a path.
- * <p>
  * <b>Attention:</b> If a Constraint is attached to the {@link #frame()} (see
  * {@link Frame#constraint()}), it should be deactivated before
  * {@link #interpolationStarted()}, otherwise the interpolated motion (computed as if

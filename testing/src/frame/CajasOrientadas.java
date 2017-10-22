@@ -52,7 +52,7 @@ public class CajasOrientadas extends PApplet {
 
     //scene.keyAgent().setDefaultGrabber(null);
 
-    if(scene.keyAgent().defaultGrabber() == scene.eyeFrame())
+    if(scene.keyAgent().defaultGrabber() == scene.eye())
       println("is eyeFrame!");
     //frameRate(500);
   }
@@ -69,7 +69,7 @@ public class CajasOrientadas extends PApplet {
 
   public void keyPressed() {
     if(key == ' ')
-      scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), esfera.iFrame);
+      scene.keyAgent().shiftDefaultGrabber(scene.eye(), esfera.iFrame);
       //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
     if(key == 'a')
       scene.toggleAxesVisualHint();
