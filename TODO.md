@@ -85,6 +85,10 @@ Scene is concrete and allows to set a ray-tracing scene.
 22. protected void interpolateToZoomOnTarget(Vec target)
 23. protected void unSetTimerFlag()
 24. protected void runResetAnchorHintTimer(long period)
+25. public abstract boolean setSceneCenterFromPixel(Point pixel)
+26. public boolean setSceneCenterFromPixel(float x, float y)
+27. public abstract boolean setAnchorFromPixel(Point pixel)
+28. public boolean setAnchorFromPixel(float x, float y)
 
 ### Methods that were modified
 
