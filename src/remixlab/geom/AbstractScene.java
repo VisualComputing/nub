@@ -13,6 +13,7 @@ package remixlab.geom;
 import remixlab.bias.Agent;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
+import remixlab.bias.event.MotionEvent;
 import remixlab.primitives.*;
 import remixlab.primitives.constraint.Constraint;
 import remixlab.fpstiming.Animator;
@@ -79,6 +80,8 @@ public class AbstractScene {
   // size and dim
   protected int width, height;
   protected boolean twod;
+  //fly
+  protected Vec scnUpVec;
 
   // 2. Matrix helper
   protected MatrixHelper matrixHelper;
@@ -208,6 +211,7 @@ public class AbstractScene {
 
       //computeProjection();
     }
+    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
   }
 
   // dimensions
@@ -255,6 +259,44 @@ public class AbstractScene {
 
   //TODO missing
   public void modified() {}
+
+  /**
+   * Returns the up vector used in {@link InteractiveFrame#moveForward(MotionEvent)} in which horizontal
+   * displacements of the motion device (e.g., mouse) rotate generic-frame around this
+   * vector. Vertical displacements rotate always around the generic-frame {@code X} axis.
+   * <p>
+   * This value is also used within {@link InteractiveFrame#rotateCAD(MotionEvent)} to define the up
+   * vector (and incidentally the 'horizon' plane) around which the generic-frame will
+   * rotate.
+   * <p>
+   * Default value is (0,1,0), but it is updated by the Eye when set as its
+   * {@link AbstractScene#eye()} and
+   * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
+   * used instead.
+   */
+  public Vec sceneUpVector() {
+    return scnUpVec;
+  }
+
+  /**
+   * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
+   * <p>
+   * Default value is (0,1,0), but it is updated by the Eye when set as its
+   * {@link AbstractScene#eye()}. Use
+   * {@link AbstractScene#setUpVector(Vec)} instead in that case.
+   */
+  public void setSceneUpVector(Vec up) {
+    scnUpVec = up;
+  }
+
+  /**
+   * This method will be called by the Eye when its orientation is changed, so that the
+   * {@link #sceneUpVector()} is changed accordingly. You should not need to call this
+   * method.
+   */
+  public final void updateSceneUpVector() {
+    scnUpVec = eye().orientation().rotate(new Vec(0.0f, 1.0f, 0.0f));
+  }
 
   // 1. type
 
@@ -2743,7 +2785,7 @@ public class AbstractScene {
     eye().rotate(q);
 
     // Useful in fly mode to keep the horizontal direction.
-    eye().updateSceneUpVector();
+    updateSceneUpVector();
   }
 
   /**

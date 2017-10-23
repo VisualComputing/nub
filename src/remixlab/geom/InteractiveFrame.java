@@ -137,7 +137,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   protected Vec fDir;
   protected float flySpd;
   protected TimingTask flyTimerTask;
-  protected Vec scnUpVec;
   protected Vec flyDisp;
   protected static final long FLY_UPDATE_PERDIOD = 20;
 
@@ -363,7 +362,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     };
     scene().registerTimingTask(spinningTimerTask);
 
-    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
     flyDisp = new Vec(0.0f, 0.0f, 0.0f);
     flyTimerTask = new TimingTask() {
       public void execute() {
@@ -396,8 +394,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
     this.gScene.registerTimingTask(spinningTimerTask);
 
-    this.scnUpVec = new Vec();
-    this.scnUpVec.set(otherFrame.sceneUpVector());
     this.flyDisp = new Vec();
     this.flyDisp.set(otherFrame.flyDisp.get());
     this.flyTimerTask = new TimingTask() {
@@ -2058,7 +2054,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       return;
     }
     if (event.fired() && gScene.is3D())
-      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.sceneUpVector()).y() < 0.0f;
     rotate(screenToQuat(
         Vec.multiply(new Vec(computeAngle(event.dx()), computeAngle(-event.dy()), computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -2086,7 +2082,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2232,7 +2228,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   protected void moveForward(MotionEvent2 event, boolean forward) {
     if (event.fired())
-      updateSceneUpVector();
+      scene().updateSceneUpVector();
     else if (event.flushed()) {
       stopFlying();
       return;
@@ -2273,7 +2269,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     }
     if (event.fired()) {
       initEvent = event.get();
-      updateSceneUpVector();
+      scene().updateSceneUpVector();
       flySpeedCache = flySpeed();
     } else if (event.flushed()) {
       setFlySpeed(flySpeedCache);
@@ -2314,7 +2310,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     if (event.fired())
       stopSpinning();
     if (event.fired() && gScene.is3D())
-      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
+      gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.sceneUpVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2327,7 +2323,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
         dx = -dx;
       if (gScene.isRightHanded())
         dy = -dy;
-      Vec verticalAxis = transformOf(sceneUpVector());
+      Vec verticalAxis = transformOf(scene().sceneUpVector());
       spin(Quat.multiply(new Quat(verticalAxis, dx), new Quat(new Vec(1.0f, 0.0f, 0.0f), dy)), event.speed(),
           event.delay());
     }
@@ -2447,7 +2443,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       //TODO handle me
       //gScene.setRotateVisualHint(true); // display visual hint
       if (gScene.is3D())
-        gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.eye().sceneUpVector()).y() < 0.0f;
+        gScene.cadRotationIsReversed = gScene.eye().transformOf(gScene.sceneUpVector()).y() < 0.0f;
     }
     if (event.flushed()) {
       //TODO handle me
@@ -2674,44 +2670,6 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
   }
 
   /**
-   * Returns the up vector used in {@link #moveForward(MotionEvent)} in which horizontal
-   * displacements of the motion device (e.g., mouse) rotate generic-frame around this
-   * vector. Vertical displacements rotate always around the generic-frame {@code X} axis.
-   * <p>
-   * This value is also used within {@link #rotateCAD(MotionEvent)} to define the up
-   * vector (and incidentally the 'horizon' plane) around which the generic-frame will
-   * rotate.
-   * <p>
-   * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link AbstractScene#eye()} and
-   * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
-   * used instead.
-   */
-  public Vec sceneUpVector() {
-    return scnUpVec;
-  }
-
-  /**
-   * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
-   * <p>
-   * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link AbstractScene#eye()}. Use
-   * {@link AbstractScene#setUpVector(Vec)} instead in that case.
-   */
-  public void setSceneUpVector(Vec up) {
-    scnUpVec = up;
-  }
-
-  /**
-   * This method will be called by the Eye when its orientation is changed, so that the
-   * {@link #sceneUpVector()} is changed accordingly. You should not need to call this
-   * method.
-   */
-  public final void updateSceneUpVector() {
-    scnUpVec = orientation().rotate(new Vec(0.0f, 1.0f, 0.0f));
-  }
-
-  /**
    * Returns {@code true} when the generic-frame is tossing.
    * <p>
    * During tossing, {@link #damping()} translates the generic-frame by its
@@ -2864,7 +2822,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       deltaY = -deltaY;
 
     Quat rotX = new Quat(new Vec(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / scene().height());
-    Quat rotY = new Quat(transformOf(sceneUpVector()), rotationSensitivity() * (-deltaX) / scene().width());
+    Quat rotY = new Quat(transformOf(scene().sceneUpVector()), rotationSensitivity() * (-deltaX) / scene().width());
     return Quat.multiply(rotY, rotX);
   }
 
