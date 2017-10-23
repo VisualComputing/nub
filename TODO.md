@@ -1,6 +1,6 @@
 # Next release: 4.0.0
 
-## WArning
+## Warning
 
 Remember to properly instantiate the twod boolean flag in AbstractScene!
 
@@ -11,6 +11,9 @@ Remember to properly instantiate the twod boolean flag in AbstractScene!
 Scene -> RasterScene -> P5Scene
 Scene is concrete and allows to set a ray-tracing scene.
 3. Remove drawing methods from scene: move functionality to Utility drawing class.
+4. Rethink EyeConstraint: A constraint defined in terms of an arbitrary frame.
+5. Rethink Trackable: idem. Scene.preDraw needs proper handling: eye().setWorldMatrix().
+6. Implement Eye.modified()! (Scene.preDraw again)
 
 ## AbstractScene
 
