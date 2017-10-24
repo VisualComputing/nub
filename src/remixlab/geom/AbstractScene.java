@@ -167,10 +167,24 @@ public class AbstractScene {
   public AbstractScene(int w, int h) {
     setWidth(w);
     setHeight(h);
-    anchorPnt = new Vec(0.0f, 0.0f, 0.0f);
-    //setFrame(new GrabberEyeFrame(this));
+
+    //order of the following lines matter
+    //1st try: working
+    /*
+    anchorPnt = new Vec();
+    scnCenter = new Vec();
+    //setRadius(100);
+    //setCenter(new Vec(0.0f, 0.0f, 0.0f));
+    setEye(new Frame());
+    showAll();
+    */
+
+    //2nd try: working
+    anchorPnt = new Vec();
+    eye = new Frame();
     setRadius(100);
     setCenter(new Vec(0.0f, 0.0f, 0.0f));
+    showAll();
 
     seeds = new ArrayList<InteractiveFrame>();
     tHandler = new TimingHandler();
@@ -1710,33 +1724,28 @@ public class AbstractScene {
   // 3. EYE STUFF
 
   /**
-   * Returns the associated eye. Null by default, i.e., the eye and the world frames match.
+   * Returns the associated eye. Never null.
    *
    * @see #setEye(Frame)
    */
   public Frame eye() {
-    if(eye == null)
-      return new Frame();
     return eye;
   }
 
   /**
-   * Replaces the current {@link #eye()} with {@code vp}.
-   * <p>
-   * The {@link #inputHandler()} will attempt to addGrabber the {@link #eye()} to all its
-   * {@link InputHandler#agents()}, such as the {@link #motionAgent()}
-   * and {@link #keyAgent()}.
+   * Replaces the current {@link #eye()} with {@code e}.
+   *
+   * @see #eye()
    */
   public void setEye(Frame e) {
-    if (eye == e)
+    if (e == null || eye == e)
       return;
     eye = e;
-    if(eye != null) {
-      //inputHandler().setDefaultGrabber(eye());
-      setRadius(radius());
-      setCenter(center());
-      showAll();
-    }
+    //TODO decide me, but I dont think it should go in new minimalistic design
+    //if(eye instanceof InteractiveFrame)
+      //inputHandler().setDefaultGrabber((InteractiveFrame)eye());
+    setRadius(radius());
+    setCenter(center());
   }
 
   /**
