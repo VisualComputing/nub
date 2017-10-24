@@ -136,7 +136,8 @@ public class AbstractScene {
 
   private float zNearCoef;
   private float zClippingCoef;
-  private Type tp; // PERSPECTIVE or ORTHOGRAPHIC
+  //TODO fix me
+  private Type tp = Type.PERSPECTIVE; // PERSPECTIVE or ORTHOGRAPHIC
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
@@ -166,10 +167,10 @@ public class AbstractScene {
   public AbstractScene(int w, int h) {
     setWidth(w);
     setHeight(h);
+    anchorPnt = new Vec(0.0f, 0.0f, 0.0f);
     //setFrame(new GrabberEyeFrame(this));
     setRadius(100);
     setCenter(new Vec(0.0f, 0.0f, 0.0f));
-    anchorPnt = new Vec(0.0f, 0.0f, 0.0f);
 
     seeds = new ArrayList<InteractiveFrame>();
     tHandler = new TimingHandler();
@@ -2658,10 +2659,11 @@ public class AbstractScene {
     scnRadius = radius;
     if(eye() instanceof InteractiveFrame)
       ((InteractiveFrame)eye()).setFlySpeed(0.01f * radius());
-    for (Grabber mg : motionAgent().grabbers()) {
-      if (mg instanceof InteractiveFrame)
-        ((InteractiveFrame) mg).setFlySpeed(0.01f * radius());
-    }
+    if(motionAgent() != null)
+      for (Grabber mg : motionAgent().grabbers()) {
+        if (mg instanceof InteractiveFrame)
+          ((InteractiveFrame) mg).setFlySpeed(0.01f * radius());
+      }
     // TODO previous was:
     //if(is3D())
     //setFocusDistance(sceneRadius() / (float) Math.tan(fieldOfView() / 2.0f));
