@@ -289,18 +289,18 @@ public class AbstractScene {
    * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
-  private Vec sceneUpVector() {
+  public Vec sceneUpVector() {
     return scnUpVec;
   }
 
   /**
    * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
    * <p>
-   * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link AbstractScene#eye()}. Use
-   * {@link AbstractScene#setUpVector(Vec)} instead in that case.
+   * Default value is (0,1,0), but it is updated by the {@link #eye() when performing
+   * {@link InteractiveFrame#moveForward(MotionEvent)} or {@link InteractiveFrame#drive(MotionEvent)}
+   * actions.
    */
-  private void setSceneUpVector(Vec up) {
+  public void setSceneUpVector(Vec up) {
     scnUpVec = up;
   }
 
@@ -309,7 +309,7 @@ public class AbstractScene {
    * {@link #sceneUpVector()} is changed accordingly. You should not need to call this
    * method.
    */
-  private final void updateSceneUpVector() {
+  final void updateSceneUpVector() {
     scnUpVec = eye().orientation().rotate(new Vec(0.0f, 1.0f, 0.0f));
   }
 
@@ -588,7 +588,7 @@ public class AbstractScene {
    *
    * @see #getBoundaryWidthHeight(float[])
    */
-  private float[] getBoundaryWidthHeight() {
+  public float[] getBoundaryWidthHeight() {
     return getBoundaryWidthHeight(new float[2]);
   }
 
@@ -612,30 +612,15 @@ public class AbstractScene {
    *
    * @see #rescalingOrthoFactor()
    */
-  private float[] getBoundaryWidthHeight(float[] target) {
+  public float[] getBoundaryWidthHeight(float[] target) {
     if ((target == null) || (target.length != 2)) {
       target = new float[2];
     }
 
     float orthoCoef = this.rescalingOrthoFactor();
 
-    target[0] = (orthoCoef) * (eye().magnitude() * width() / 2);
-    target[1] = (orthoCoef) * (eye().magnitude() * height() / 2);
-
-    return target;
-  }
-
-  public float[] getOrthoWidthHeight() {
-    return getBoundaryWidthHeight(new float[2]);
-  }
-
-  public float[] getOrthoWidthHeight(float[] target) {
-    if ((target == null) || (target.length != 2)) {
-      target = new float[2];
-    }
-
-    target[0] = (eye().magnitude() * width() / 2);
-    target[1] = (eye().magnitude() * height() / 2);
+    target[0] = orthoCoef * (eye().magnitude() * width() / 2);
+    target[1] = orthoCoef * (eye().magnitude() * height() / 2);
 
     return target;
   }
