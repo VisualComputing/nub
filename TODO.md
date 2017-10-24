@@ -17,6 +17,16 @@ Scene is concrete and allows to set a ray-tracing scene.
 
 ## AbstractScene
 
+### Ambiguous methods (modified some eye() params)
+
+1. public void setFieldOfView(float fov)
+2. public void lookAt(Vec target)
+3. public void setViewDirection(Vec direction)
+4. public void fitBall(Vec center, float radius)
+5. public void fitBoundingBox(Vec min, Vec max)
+6. public void fitScreenRegion(Rect rectangle) 
+
+
 ### Methods to be restored
 
 1. add/play/delete/Path_n

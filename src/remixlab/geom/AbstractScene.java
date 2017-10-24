@@ -171,6 +171,7 @@ public class AbstractScene {
     //order of the following lines matter
     //1st try: working
     /*
+    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
     anchorPnt = new Vec();
     scnCenter = new Vec();
     //setRadius(100);
@@ -180,6 +181,7 @@ public class AbstractScene {
     */
 
     //2nd try: working
+    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
     anchorPnt = new Vec();
     eye = new Frame();
     setRadius(100);
@@ -212,7 +214,7 @@ public class AbstractScene {
 
     // eye stuff
     //TODO is3D() is missing above
-    if(is3D()) {
+    //if(is3D()) {
       //TODO only 3D
       setType(Type.PERSPECTIVE);
       setZNearCoefficient(0.005f);
@@ -225,8 +227,7 @@ public class AbstractScene {
       // focusDistance is set from setFieldOfView()
 
       //computeProjection();
-    }
-    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
+    //}
   }
 
   // dimensions
@@ -289,7 +290,7 @@ public class AbstractScene {
    * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
-  public Vec sceneUpVector() {
+  private Vec sceneUpVector() {
     return scnUpVec;
   }
 
@@ -300,7 +301,7 @@ public class AbstractScene {
    * {@link AbstractScene#eye()}. Use
    * {@link AbstractScene#setUpVector(Vec)} instead in that case.
    */
-  public void setSceneUpVector(Vec up) {
+  private void setSceneUpVector(Vec up) {
     scnUpVec = up;
   }
 
@@ -309,7 +310,7 @@ public class AbstractScene {
    * {@link #sceneUpVector()} is changed accordingly. You should not need to call this
    * method.
    */
-  public final void updateSceneUpVector() {
+  private final void updateSceneUpVector() {
     scnUpVec = eye().orientation().rotate(new Vec(0.0f, 1.0f, 0.0f));
   }
 
@@ -367,7 +368,7 @@ public class AbstractScene {
    * @see #setFieldOfView(float)
    */
   public float fieldOfView() {
-    return 2.0f * ( (float) Math.atan(eye() == null ? 1 : eye().magnitude()) );
+    return 2.0f * (float) Math.atan(eye().magnitude());
   }
 
   /**
@@ -415,8 +416,7 @@ public class AbstractScene {
    * @see #fieldOfView()
    */
   public void setFieldOfView(float fov) {
-    if(eye() != null)
-      eye().setMagnitude((float) Math.tan(fov / 2.0f));
+    eye().setMagnitude((float) Math.tan(fov / 2.0f));
   }
 
   /**
@@ -589,7 +589,7 @@ public class AbstractScene {
    *
    * @see #getBoundaryWidthHeight(float[])
    */
-  public float[] getBoundaryWidthHeight() {
+  private float[] getBoundaryWidthHeight() {
     return getBoundaryWidthHeight(new float[2]);
   }
 
@@ -613,7 +613,7 @@ public class AbstractScene {
    *
    * @see #rescalingOrthoFactor()
    */
-  public float[] getBoundaryWidthHeight(float[] target) {
+  private float[] getBoundaryWidthHeight(float[] target) {
     if ((target == null) || (target.length != 2)) {
       target = new float[2];
     }
@@ -1757,15 +1757,6 @@ public class AbstractScene {
       setRightHanded();
     else
       setLeftHanded();
-  }
-
-  /**
-   * Same as {@code eye().setConstraint(constraint)}.
-   *
-   * @see InteractiveFrame#setConstraint(Constraint)
-   */
-  public void setEyeConstraint(Constraint constraint) {
-    eye().setConstraint(constraint);
   }
 
   /**
