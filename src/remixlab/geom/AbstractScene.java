@@ -15,7 +15,6 @@ import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.MotionEvent;
 import remixlab.primitives.*;
-import remixlab.primitives.constraint.Constraint;
 import remixlab.fpstiming.Animator;
 import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
@@ -50,10 +49,10 @@ import java.util.List;
  * {@link InputHandler} class). The {@link #inputHandler()} holds a
  * (default) {@link #motionAgent()} and a (default) {@link #keyAgent()} which should
  * be instantiated by derived classes at construction time.</li>
- * <li>A {@link #matrixHelper()} which handles matrix operations either through the
- * {@link MatrixHelper} or through a third party matrix stack
+ * <li>A {@link #matrixHandler()} which handles matrix operations either through the
+ * {@link MatrixHandler} or through a third party matrix stack
  * (like it's done with Processing). For details please refer to the
- * {@link MatrixHelper} interface.</li>
+ * {@link MatrixHandler} interface.</li>
  * </ol>
  */
 public class AbstractScene {
@@ -84,7 +83,7 @@ public class AbstractScene {
   protected Vec scnUpVec;
 
   // 2. Matrix helper
-  protected MatrixHelper matrixHelper;
+  protected MatrixHandler matrixHandler;
 
   // 3. Avatar
   protected Trackable trck;
@@ -141,13 +140,13 @@ public class AbstractScene {
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
-   * {@link MatrixHelper}. The constructor also instantiates
+   * {@link MatrixHandler}. The constructor also instantiates
    * the {@link #inputHandler()} and the {@link #timingHandler()}, and sets the AXES and
    * GRID visual hint flags.
    * <p>
    * Third party (concrete) Scenes should additionally:
    * <ol>
-   * <li>(Optionally) Define a custom {@link #matrixHelper()}. Only if the target platform
+   * <li>(Optionally) Define a custom {@link #matrixHandler()}. Only if the target platform
    * (such as Processing) provides its own matrix handling.</li>
    * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
@@ -159,7 +158,7 @@ public class AbstractScene {
    *
    * @see #timingHandler()
    * @see #inputHandler()
-   * @see #setMatrixHelper(MatrixHelper)
+   * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
    * @see #setVisualHints(int)
    * @see #setEye(Frame)
@@ -193,7 +192,7 @@ public class AbstractScene {
     deltaCount = frameCount;
     iHandler = new InputHandler();
 
-    setMatrixHelper(new MatrixHelper(this));
+    setMatrixHandler(new MatrixHandler(this));
     setRightHanded();
     setVisualHints(AXES | GRID);
 
@@ -721,7 +720,7 @@ public class AbstractScene {
    * <p>
    * Note that only reachable frames are visited by this algorithm.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link MatrixHelper#bind()} (i.e.,
+   * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
    * eye update) and before any other transformation of the modelview takes place.
    *
    * @see #isFrameReachable(InteractiveFrame)
@@ -1104,11 +1103,11 @@ public class AbstractScene {
   // MATRIX and TRANSFORMATION STUFF
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#beginScreenDrawing()}. Adds
+   * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds
    * exception when no properly closing the screen drawing with a call to
    * {@link #endScreenDrawing()}.
    *
-   * @see remixlab.geom.MatrixHelper#beginScreenDrawing()
+   * @see MatrixHandler#beginScreenDrawing()
    */
   public void beginScreenDrawing() {
     if (startCoordCalls != 0)
@@ -1116,14 +1115,14 @@ public class AbstractScene {
               + "endScreenDrawing() and they cannot be nested. Check your implementation!");
 
     startCoordCalls++;
-    matrixHelper.beginScreenDrawing();
+    matrixHandler.beginScreenDrawing();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#endScreenDrawing()} . Adds
+   * Wrapper for {@link MatrixHandler#endScreenDrawing()} . Adds
    * exception if {@link #beginScreenDrawing()} wasn't properly called before
    *
-   * @see remixlab.geom.MatrixHelper#endScreenDrawing()
+   * @see MatrixHandler#endScreenDrawing()
    */
   public void endScreenDrawing() {
     startCoordCalls--;
@@ -1131,7 +1130,7 @@ public class AbstractScene {
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
               + "endScreenDrawing() and they cannot be nested. Check your implementation!");
 
-    matrixHelper.endScreenDrawing();
+    matrixHandler.endScreenDrawing();
   }
 
   /**
@@ -1238,176 +1237,176 @@ public class AbstractScene {
   }
 
   /**
-   * Sets the {@link MatrixHelper} defining how dandelion matrices
+   * Sets the {@link MatrixHandler} defining how dandelion matrices
    * are to be handled.
    *
-   * @see #matrixHelper()
+   * @see #matrixHandler()
    */
-  public void setMatrixHelper(MatrixHelper r) {
-    matrixHelper = r;
+  public void setMatrixHandler(MatrixHandler r) {
+    matrixHandler = r;
   }
 
   /**
-   * Returns the {@link MatrixHelper}.
+   * Returns the {@link MatrixHandler}.
    *
-   * @see #setMatrixHelper(MatrixHelper)
+   * @see #setMatrixHandler(MatrixHandler)
    */
-  public MatrixHelper matrixHelper() {
-    return matrixHelper;
+  public MatrixHandler matrixHandler() {
+    return matrixHandler;
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#pushModelView()}
+   * Wrapper for {@link MatrixHandler#pushModelView()}
    */
   public void pushModelView() {
-    matrixHelper.pushModelView();
+    matrixHandler.pushModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#popModelView()}
+   * Wrapper for {@link MatrixHandler#popModelView()}
    */
   public void popModelView() {
-    matrixHelper.popModelView();
+    matrixHandler.popModelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#pushProjection()}
+   * Wrapper for {@link MatrixHandler#pushProjection()}
    */
   public void pushProjection() {
-    matrixHelper.pushProjection();
+    matrixHandler.pushProjection();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#popProjection()}
+   * Wrapper for {@link MatrixHandler#popProjection()}
    */
   public void popProjection() {
-    matrixHelper.popProjection();
+    matrixHandler.popProjection();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#translate(float, float)}
+   * Wrapper for {@link MatrixHandler#translate(float, float)}
    */
   public void translate(float tx, float ty) {
-    matrixHelper.translate(tx, ty);
+    matrixHandler.translate(tx, ty);
   }
 
   /**
    * Wrapper for
-   * {@link remixlab.geom.MatrixHelper#translate(float, float, float)}
+   * {@link MatrixHandler#translate(float, float, float)}
    */
   public void translate(float tx, float ty, float tz) {
-    matrixHelper.translate(tx, ty, tz);
+    matrixHandler.translate(tx, ty, tz);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#rotate(float)}
+   * Wrapper for {@link MatrixHandler#rotate(float)}
    */
   public void rotate(float angle) {
-    matrixHelper.rotate(angle);
+    matrixHandler.rotate(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#rotateX(float)}
+   * Wrapper for {@link MatrixHandler#rotateX(float)}
    */
   public void rotateX(float angle) {
-    matrixHelper.rotateX(angle);
+    matrixHandler.rotateX(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#rotateY(float)}
+   * Wrapper for {@link MatrixHandler#rotateY(float)}
    */
   public void rotateY(float angle) {
-    matrixHelper.rotateY(angle);
+    matrixHandler.rotateY(angle);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#rotateZ(float)}
+   * Wrapper for {@link MatrixHandler#rotateZ(float)}
    */
   public void rotateZ(float angle) {
-    matrixHelper.rotateZ(angle);
+    matrixHandler.rotateZ(angle);
   }
 
   /**
    * Wrapper for
-   * {@link remixlab.geom.MatrixHelper#rotate(float, float, float, float)}
+   * {@link MatrixHandler#rotate(float, float, float, float)}
    */
   public void rotate(float angle, float vx, float vy, float vz) {
-    matrixHelper.rotate(angle, vx, vy, vz);
+    matrixHandler.rotate(angle, vx, vy, vz);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#scale(float)}
+   * Wrapper for {@link MatrixHandler#scale(float)}
    */
   public void scale(float s) {
-    matrixHelper.scale(s);
+    matrixHandler.scale(s);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#scale(float, float)}
+   * Wrapper for {@link MatrixHandler#scale(float, float)}
    */
   public void scale(float sx, float sy) {
-    matrixHelper.scale(sx, sy);
+    matrixHandler.scale(sx, sy);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#scale(float, float, float)}
+   * Wrapper for {@link MatrixHandler#scale(float, float, float)}
    */
   public void scale(float x, float y, float z) {
-    matrixHelper.scale(x, y, z);
+    matrixHandler.scale(x, y, z);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#modelView()}
+   * Wrapper for {@link MatrixHandler#modelView()}
    */
   public Mat modelView() {
-    return matrixHelper.modelView();
+    return matrixHandler.modelView();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#projection()}
+   * Wrapper for {@link MatrixHandler#projection()}
    */
   public Mat projection() {
-    return matrixHelper.projection();
+    return matrixHandler.projection();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#projection()}
+   * Wrapper for {@link MatrixHandler#projection()}
    */
   public Mat view() {
-    return matrixHelper.view();
+    return matrixHandler.view();
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#bindModelView(Mat)}
+   * Wrapper for {@link MatrixHandler#bindModelView(Mat)}
    */
   public void setModelView(Mat source) {
-    matrixHelper.bindModelView(source);
+    matrixHandler.bindModelView(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#bindProjection(Mat)}
+   * Wrapper for {@link MatrixHandler#bindProjection(Mat)}
    */
   public void setProjection(Mat source) {
-    matrixHelper.bindProjection(source);
+    matrixHandler.bindProjection(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#applyModelView(Mat)}
+   * Wrapper for {@link MatrixHandler#applyModelView(Mat)}
    */
   public void applyModelView(Mat source) {
-    matrixHelper.applyModelView(source);
+    matrixHandler.applyModelView(source);
   }
 
   /**
-   * Wrapper for {@link remixlab.geom.MatrixHelper#applyProjection(Mat)}
+   * Wrapper for {@link MatrixHandler#applyProjection(Mat)}
    */
   public void applyProjection(Mat source) {
-    matrixHelper.applyProjection(source);
+    matrixHandler.applyProjection(source);
   }
 
   /**
    * Wrapper for
-   * {@link remixlab.geom.MatrixHelper#isProjectionViewInverseCached()} .
+   * {@link MatrixHandler#isProjectionViewInverseCached()} .
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
    *
@@ -1415,12 +1414,12 @@ public class AbstractScene {
    * @see #unprojectedCoordinatesOf(Vec)
    */
   public boolean isUnprojectedCoordinatesOfOptimized() {
-    return matrixHelper.isProjectionViewInverseCached();
+    return matrixHandler.isProjectionViewInverseCached();
   }
 
   /**
    * Wrapper for
-   * {@link MatrixHelper#cacheProjectionViewInverse(boolean)} .
+   * {@link MatrixHandler#cacheProjectionViewInverse(boolean)} .
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
    *
@@ -1428,7 +1427,7 @@ public class AbstractScene {
    * @see #unprojectedCoordinatesOf(Vec)
    */
   public void optimizeUnprojectedCoordinatesOf(boolean optimise) {
-    matrixHelper.cacheProjectionViewInverse(optimise);
+    matrixHandler.cacheProjectionViewInverse(optimise);
   }
 
   // DRAWING STUFF
@@ -1534,7 +1533,7 @@ public class AbstractScene {
    * Called before your main drawing and performs the following:
    * <ol>
    * <li>Handles the {@link #avatar()}</li>
-   * <li>Calls {@link MatrixHelper#bind()}</li>
+   * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
@@ -1550,7 +1549,7 @@ public class AbstractScene {
     if (avatar() != null)
       eye().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye, raster scene
-    matrixHelper().bind();
+    matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof InteractiveFrame) {
         if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
@@ -2406,7 +2405,7 @@ public class AbstractScene {
 
   // cached version
   protected boolean project(float objx, float objy, float objz, float[] windowCoordinate) {
-    Mat projectionViewMat = matrixHelper().cacheProjectionView();
+    Mat projectionViewMat = matrixHandler().cacheProjectionView();
 
     float in[] = new float[4];
     float out[] = new float[4];
@@ -2524,10 +2523,10 @@ public class AbstractScene {
    */
   public boolean unproject(float winx, float winy, float winz, float[] objCoordinate) {
     Mat projectionViewInverseMat;
-    if(matrixHelper().isProjectionViewInverseCached())
-      projectionViewInverseMat = matrixHelper().cacheProjectionViewInverse();
+    if(matrixHandler().isProjectionViewInverseCached())
+      projectionViewInverseMat = matrixHandler().cacheProjectionViewInverse();
     else {
-      projectionViewInverseMat = Mat.multiply(matrixHelper().cacheProjection(), matrixHelper().cacheView());
+      projectionViewInverseMat = Mat.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
       projectionViewInverseMat.invert();
     }
 
@@ -3142,7 +3141,7 @@ public class AbstractScene {
    * overload, but no if you instantiate your own Scene object (for instance, in
    * Processing you should just overload {@code PApplet.draw()} to define your scene).
    * <p>
-   * The eye matrices set in {@link MatrixHelper#bind()} converts from the world to the camera
+   * The eye matrices set in {@link MatrixHandler#bind()} converts from the world to the camera
    * coordinate systems. Thus vertices given here can then be considered as being given in
    * the world coordinate system. The eye is moved in this world using the mouse. This
    * representation is much more intuitive than a camera-centric system (which for

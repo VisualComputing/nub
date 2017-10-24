@@ -2,15 +2,9 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
-import remixlab.bias.*;
 import remixlab.geom.InteractiveFrame;
-import remixlab.primitives.Mat;
 import remixlab.primitives.Vec;
 import remixlab.proscene.Scene;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by pierre on 11/15/16.
@@ -43,9 +37,9 @@ public class CajasOrientadas extends PApplet {
     println("dist to scn center: " + scene.distanceToSceneCenter());
     println(scene.zNear());
     println(scene.zFar());
-    scene.matrixHelper().projection().print();
-    scene.matrixHelper().view().print();
-    scene.matrixHelper().modelView().print();
+    scene.matrixHandler().projection().print();
+    scene.matrixHandler().view().print();
+    scene.matrixHandler().modelView().print();
   }
 
   public void setup() {

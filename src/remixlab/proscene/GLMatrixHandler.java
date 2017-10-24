@@ -12,17 +12,17 @@ package remixlab.proscene;
 
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.geom.MatrixHelper;
+import remixlab.geom.MatrixHandler;
 import remixlab.primitives.Mat;
 
 /**
- * Internal {@link remixlab.geom.MatrixHelper} based on PGraphicsOpenGL graphics
+ * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics
  * transformation.
  */
-class GLMatrixHelper extends MatrixHelper {
+class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL pg;
 
-  public GLMatrixHelper(Scene scn, PGraphicsOpenGL renderer) {
+  public GLMatrixHandler(Scene scn, PGraphicsOpenGL renderer) {
     super(scn);
     pg = renderer;
   }

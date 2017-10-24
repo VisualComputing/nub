@@ -20,13 +20,12 @@ import remixlab.fpstiming.TimingTask;
 import remixlab.geom.AbstractScene;
 import remixlab.geom.InteractiveFrame;
 import remixlab.geom.KeyFrameInterpolator;
-import remixlab.geom.MatrixHelper;
+import remixlab.geom.MatrixHandler;
 import remixlab.primitives.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 // begin: GWT-incompatible
 ///*
@@ -112,10 +111,10 @@ public class Scene extends AbstractScene implements PConstants {
 
   /**
    * Main constructor defining a left-handed Processing compatible Scene. Calls
-   * {@link #setMatrixHelper(MatrixHelper)} using a customized
-   * {@link MatrixHelper} depending on the {@code pg} type (see
-   * {@link remixlab.proscene.Java2DMatrixHelper} and
-   * {@link remixlab.proscene.GLMatrixHelper}). The constructor instantiates the
+   * {@link #setMatrixHandler(MatrixHandler)} using a customized
+   * {@link MatrixHandler} depending on the {@code pg} type (see
+   * {@link Java2DMatrixHandler} and
+   * {@link GLMatrixHandler}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
    * visual hint flags, instantiates the {@link #eye()}. It also
    * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}, and finally
@@ -143,7 +142,7 @@ public class Scene extends AbstractScene implements PConstants {
     upperLeftCorner = offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix helper
-    setMatrixHelper(matrixHelper(pg));
+    setMatrixHandler(matrixHelper(pg));
 
     // 3. Create agents and register P5 methods
     defMotionAgent = new MouseAgent(this);
@@ -642,7 +641,7 @@ public class Scene extends AbstractScene implements PConstants {
    * Called before your main drawing and performs the following:
    * <ol>
    * <li>Handles the {@link #avatar()}</li>
-   * <li>Calls {@link MatrixHelper#bind()}</li>
+   * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
@@ -665,7 +664,7 @@ public class Scene extends AbstractScene implements PConstants {
     if (avatar() != null)
       eye().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye, raster scene
-    matrixHelper().bind();
+    matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof InteractiveFrame) {
         if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
@@ -1300,7 +1299,7 @@ public class Scene extends AbstractScene implements PConstants {
    * This method is implementing by simply calling
    * {@link AbstractScene#traverseTree()}.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link MatrixHelper#bind()} (i.e.,
+   * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
    * eye update which happens at {@link #preDraw()}) and before any other transformation
    * of the modelview takes place.
    *
@@ -1331,7 +1330,7 @@ public class Scene extends AbstractScene implements PConstants {
    * @see #drawFrames()
    */
   public void drawFrames(PGraphics pgraphics) {
-    // 1. Set pgraphics matrices using a custom MatrixHelper
+    // 1. Set pgraphics matrices using a custom MatrixHandler
     bindMatrices(pgraphics);
     // 2. Draw all frames into pgraphics
     targetPGraphics = pgraphics;
@@ -1341,26 +1340,26 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Returns a new matrix helper for the given {@code pgraphics}. Rarely needed.
    * <p>
-   * Note that the current scene matrix helper may be retrieved by {@link #matrixHelper()}
+   * Note that the current scene matrix helper may be retrieved by {@link #matrixHandler()}
    * .
    *
-   * @see #matrixHelper()
-   * @see #setMatrixHelper(MatrixHelper)
+   * @see #matrixHandler()
+   * @see #setMatrixHandler(MatrixHandler)
    * @see #drawFrames()
    * @see #drawFrames(PGraphics)
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
-  public MatrixHelper matrixHelper(PGraphics pgraphics) {
+  public MatrixHandler matrixHelper(PGraphics pgraphics) {
     return (pgraphics instanceof processing.opengl.PGraphicsOpenGL) ?
-        new GLMatrixHelper(this, (PGraphicsOpenGL) pgraphics) :
-        new Java2DMatrixHelper(this, pgraphics);
+        new GLMatrixHandler(this, (PGraphicsOpenGL) pgraphics) :
+        new Java2DMatrixHandler(this, pgraphics);
   }
 
   /**
-   * Same as {@code matrixHelper(pgraphics).bind(false)}. Set the {@code pgraphics}
+   * Same as {@code matrixHandler(pgraphics).bind(false)}. Set the {@code pgraphics}
    * matrices by calling
-   * {@link remixlab.geom.MatrixHelper#bindProjection(Mat)} and
-   * {@link remixlab.geom.MatrixHelper#bindModelView(Mat)} (only makes sense
+   * {@link MatrixHandler#bindProjection(Mat)} and
+   * {@link MatrixHandler#bindModelView(Mat)} (only makes sense
    * when {@link #pg()} is different than {@code pgraphics}).
    * <p>
    * This method doesn't perform any computation, but simple retrieve the current matrices
@@ -1369,7 +1368,7 @@ public class Scene extends AbstractScene implements PConstants {
   public void bindMatrices(PGraphics pgraphics) {
     if (this.pg() == pgraphics)
       return;
-    MatrixHelper mh = matrixHelper(pgraphics);
+    MatrixHandler mh = matrixHelper(pgraphics);
     mh.bindProjection(projection());
     mh.bindView(view());
     mh.cacheProjectionView();
@@ -1455,10 +1454,10 @@ public class Scene extends AbstractScene implements PConstants {
     p.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in AbstractScene.bS
     disableDepthTest(p);
     // if-else same as:
-    // matrixHelper(p).beginScreenDrawing();
+    // matrixHandler(p).beginScreenDrawing();
     // but perhaps a bit more efficient
     if (p == pg())
-      matrixHelper().beginScreenDrawing();
+      matrixHandler().beginScreenDrawing();
     else
       matrixHelper(p).beginScreenDrawing();
   }
@@ -1486,10 +1485,10 @@ public class Scene extends AbstractScene implements PConstants {
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
           + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHelper(p).endScreenDrawing();
+    // matrixHandler(p).endScreenDrawing();
     // but perhaps a bit more efficient
     if (p == pg())
-      matrixHelper().endScreenDrawing();
+      matrixHandler().endScreenDrawing();
     else
       matrixHelper(p).endScreenDrawing();
     enableDepthTest(p);

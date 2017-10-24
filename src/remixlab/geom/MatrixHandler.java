@@ -17,7 +17,7 @@ import remixlab.primitives.Vec;
  * Various matrix operations dandelion should support either through a third-party
  * implementation or locally.
  */
-public class MatrixHelper {
+public class MatrixHandler {
   protected AbstractScene gScene;
   protected Mat projection, view, modelview;
   protected Mat projectionViewMat, projectionViewInverseMat;
@@ -37,7 +37,7 @@ public class MatrixHelper {
    *
    * @param scn
    */
-  public MatrixHelper(AbstractScene scn) {
+  public MatrixHandler(AbstractScene scn) {
     gScene = scn;
     projection = new Mat();
     view = new Mat();

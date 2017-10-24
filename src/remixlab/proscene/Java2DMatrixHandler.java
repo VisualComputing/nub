@@ -12,19 +12,19 @@ package remixlab.proscene;
 
 import processing.core.PGraphics;
 import processing.core.PMatrix2D;
-import remixlab.geom.MatrixHelper;
+import remixlab.geom.MatrixHandler;
 import remixlab.primitives.Mat;
 import remixlab.primitives.Quat;
 import remixlab.primitives.Vec;
 
 /**
- * Internal {@link remixlab.geom.MatrixHelper} based on PGraphicsJava2D graphics
+ * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics
  * transformations.
  */
-class Java2DMatrixHelper extends MatrixHelper {
+class Java2DMatrixHandler extends MatrixHandler {
   protected PGraphics pgr;
 
-  public Java2DMatrixHelper(Scene scn, PGraphics renderer) {
+  public Java2DMatrixHandler(Scene scn, PGraphics renderer) {
     super(scn);
     pgr = renderer;
   }
