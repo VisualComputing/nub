@@ -666,10 +666,25 @@ public class Scene extends AbstractScene implements PConstants {
       eye().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye, raster scene
     matrixHelper().bind();
+    if (areBoundaryEquationsEnabled()) {
+      if(eye() instanceof InteractiveFrame) {
+        if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
+          updateBoundaryEquations();
+          lastEqUpdate = frameCount;
+        }
+      }
+      else {
+        updateBoundaryEquations();
+        lastEqUpdate = frameCount;
+      }
+    }
+    //TODO really needs checking. Previously we went like this:
+    /*
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
       updateBoundaryEquations();
       lastEqUpdate = frameCount;
     }
+    */
   }
 
   /**
@@ -2536,11 +2551,10 @@ public class Scene extends AbstractScene implements PConstants {
     // Key here is to represent the eye getBoundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.frame().magnitude()
-    if (eye.scene() instanceof Scene)
-      if (((Scene) eye.scene()).pg() == pg) {
-        System.out.println("Warning: No drawEyeNearPlane done, eye.scene()).pg() and pg are the same!");
-        return;
-      }
+    if (pg() == pg) {
+      System.out.println("Warning: No drawEyeNearPlane done, eye.scene()).pg() and pg are the same!");
+      return;
+    }
     pg.pushStyle();
     boolean ortho = false;
     if (is3D())

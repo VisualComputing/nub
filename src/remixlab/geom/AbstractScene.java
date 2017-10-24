@@ -58,7 +58,7 @@ import java.util.List;
  */
 public class AbstractScene {
   // 1. Eye
-  protected InteractiveFrame eye;
+  protected Frame eye;
   protected long lastEqUpdate;
   protected Vec scnCenter;
   protected float scnRadius;
@@ -148,7 +148,7 @@ public class AbstractScene {
    * <ol>
    * <li>(Optionally) Define a custom {@link #matrixHelper()}. Only if the target platform
    * (such as Processing) provides its own matrix handling.</li>
-   * <li>Call {@link #setEye(InteractiveFrame)} to set the {@link #eye()}, once it's known if the Scene
+   * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
    * <li>Instantiate the {@link #motionAgent()} and the {@link #keyAgent()} and
    * enable them (register them at the {@link #inputHandler()}) and possibly some other
@@ -161,7 +161,7 @@ public class AbstractScene {
    * @see #setMatrixHelper(MatrixHelper)
    * @see #setRightHanded()
    * @see #setVisualHints(int)
-   * @see #setEye(InteractiveFrame)
+   * @see #setEye(Frame)
    */
   public AbstractScene(int w, int h) {
     setWidth(w);
@@ -1536,10 +1536,25 @@ public class AbstractScene {
       eye().setWorldMatrix(avatar().trackingEyeFrame());
     // 2. Eye, raster scene
     matrixHelper().bind();
+    if (areBoundaryEquationsEnabled()) {
+      if(eye() instanceof InteractiveFrame) {
+        if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
+          updateBoundaryEquations();
+          lastEqUpdate = frameCount;
+        }
+      }
+      else {
+        updateBoundaryEquations();
+        lastEqUpdate = frameCount;
+      }
+    }
+    //TODO really needs checking. Previously we went like this:
+    /*
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
       updateBoundaryEquations();
       lastEqUpdate = frameCount;
     }
+    */
     // 3. Alternative use only
     proscenium();
     // 4. Display visual hints
@@ -1648,7 +1663,9 @@ public class AbstractScene {
     trck = t;
     if (avatar() == null)
       return;
-    eye().stopSpinning();
+    //TODO experimental
+    if(eye() instanceof InteractiveFrame)
+      ((InteractiveFrame)eye()).stopSpinning();
     if (avatar() instanceof InteractiveFrame)
       ((InteractiveFrame) (avatar())).stopSpinning();
 
@@ -1678,7 +1695,9 @@ public class AbstractScene {
     Trackable prev = trck;
     if (prev != null) {
       inputHandler().resetTrackedGrabber();
-      inputHandler().setDefaultGrabber(eye());
+      //TODO experimental
+      if(eye() instanceof InteractiveFrame)
+      inputHandler().setDefaultGrabber((InteractiveFrame)eye());
       //TODO restore
       //eye().interpolateToFitScene();
       showAll();
@@ -1692,9 +1711,11 @@ public class AbstractScene {
   /**
    * Returns the associated eye. Null by default, i.e., the eye and the world frames match.
    *
-   * @see #setEye(InteractiveFrame)
+   * @see #setEye(Frame)
    */
-  public InteractiveFrame eye() {
+  public Frame eye() {
+    if(eye == null)
+      return new Frame();
     return eye;
   }
 
@@ -1705,7 +1726,7 @@ public class AbstractScene {
    * {@link InputHandler#agents()}, such as the {@link #motionAgent()}
    * and {@link #keyAgent()}.
    */
-  public void setEye(InteractiveFrame e) {
+  public void setEye(Frame e) {
     if (eye == e)
       return;
     eye = e;
@@ -2635,7 +2656,8 @@ public class AbstractScene {
       return;
     }
     scnRadius = radius;
-    eye().setFlySpeed(0.01f * radius());
+    if(eye() instanceof InteractiveFrame)
+      ((InteractiveFrame)eye()).setFlySpeed(0.01f * radius());
     for (Grabber mg : motionAgent().grabbers()) {
       if (mg instanceof InteractiveFrame)
         ((InteractiveFrame) mg).setFlySpeed(0.01f * radius());

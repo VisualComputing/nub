@@ -68,8 +68,9 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
-    if(key == ' ')
-      scene.keyAgent().shiftDefaultGrabber(scene.eye(), esfera.iFrame);
+    //TODO restore
+    //if(key == ' ')
+      //scene.keyAgent().shiftDefaultGrabber(scene.eye(), esfera.iFrame);
       //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
     if(key == 'a')
       scene.toggleAxesVisualHint();

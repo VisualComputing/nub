@@ -18,8 +18,9 @@ public class SimpleAgent extends Agent {
     super(scn.inputHandler());
     scene = scn;
     register();
-    addGrabber(scene.eye());
-    setDefaultGrabber(scene.eye());
+    //TODO restore
+    //addGrabber(scene.eye());
+    //setDefaultGrabber(scene.eye());
   }
 
   public void register() {

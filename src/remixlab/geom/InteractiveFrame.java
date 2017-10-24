@@ -54,12 +54,12 @@ import java.util.List;
  * {@link AbstractScene#popModelView()}
  * <p>
  * A frame may also be defined as the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}
- * and {@link AbstractScene#setEye(InteractiveFrame)}).
+ * and {@link AbstractScene#setEye(Frame)}).
  * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
  * For instance, with a move-to-the-right user gesture the
  * {@link AbstractScene#eye()} hasGrabber to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A interactive-frame can be set
- * as the {@link AbstractScene#eye()}, see {@link AbstractScene#setEye(InteractiveFrame)}.
+ * as the {@link AbstractScene#eye()}, see {@link AbstractScene#setEye(Frame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent2, boolean)},
@@ -2537,7 +2537,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    * @see #screenToQuat(float, float, float)
    */
   public Vec eyeToReferenceFrame(Vec trns) {
-    InteractiveFrame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye() /* : this */;
+    Frame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye() /* : this */;
     Vec t = gFrame.inverseTransformOf(trns);
     if (referenceFrame() != null)
       t = referenceFrame().transformOf(t);
@@ -2808,7 +2808,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * mouse roll (X axis) and pitch ( {@link #sceneUpVector()} axis).
+   * mouse roll (X axis) and pitch ( {@link AbstractScene#sceneUpVector()} axis).
    */
   protected Quat rollPitchQuaternion(MotionEvent2 event) {
     if (gScene.is2D()) {
