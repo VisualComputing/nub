@@ -240,70 +240,69 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
 
   /**
    * Same as
-   * {@code this(scn, referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
+   * {@code this(referenceFrame.scene(), referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame) {
-    this(scn, referenceFrame, new Vec(), new Quat(), 1);
+  public InteractiveFrame(InteractiveFrame referenceFrame) {
+    this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), 1);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, p, new Quat(), 1)}
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1)}
    * .
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p) {
-    this(scn, referenceFrame, p, new Quat(), 1);
+  public InteractiveFrame(InteractiveFrame referenceFrame, Vec p) {
+    this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, new Vec(), r, 1)}.
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Quat r) {
-    this(scn, referenceFrame, new Vec(), r, 1);
+  public InteractiveFrame(InteractiveFrame referenceFrame, Quat r) {
+    this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1);
   }
 
   /**
-   * Same as
-   * {@code this(scn, referenceFrame, new Vec(), new Quat(), s)}.
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), s)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, float s) {
-    this(scn, referenceFrame, new Vec(),new Quat(), s);
+  public InteractiveFrame(InteractiveFrame referenceFrame, float s) {
+    this(referenceFrame.scene(), referenceFrame, new Vec(),new Quat(), s);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, p, new Quat(), s)}
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), s)}
    * .
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, float s) {
-    this(scn, referenceFrame, p, new Quat(), s);
+  public InteractiveFrame(InteractiveFrame referenceFrame, Vec p, float s) {
+    this(referenceFrame.scene(), referenceFrame, p, new Quat(), s);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, p, r, 1)}.
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, r, 1)}.
    *
    * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Quat r) {
-    this(scn, referenceFrame, p, r, 1);
+    this(referenceFrame.scene(), referenceFrame, p, r, 1);
   }
 
   /**
-   * Same as {@code this(scn, referenceFrame, new Vec(), r, s)}.
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(AbstractScene, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Quat r, float s) {
-    this(scn, referenceFrame, new Vec(), r, s);
+  public InteractiveFrame(InteractiveFrame referenceFrame, Quat r, float s) {
+    this(referenceFrame.scene(), referenceFrame, new Vec(), r, s);
   }
 
   /**
@@ -372,7 +371,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
     // end
   }
 
-  protected InteractiveFrame(InteractiveFrame otherFrame) {
+  protected InteractiveFrame(InteractiveFrame otherFrame, boolean dummy) {
     super(otherFrame);
     this.gScene = otherFrame.gScene;
     this.id = ++scene().nodeCount;
@@ -438,7 +437,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
    */
   @Override
   public InteractiveFrame get() {
-    return new InteractiveFrame(this);
+    return new InteractiveFrame(this, true);
   }
 
   /**
@@ -3094,7 +3093,7 @@ public class InteractiveFrame extends Frame implements Grabber, Trackable {
       //TODO Restore 2D
       //q = scene().is3D() ? new Quat((float) Math.PI / 4, 0, 0) : new Rot((float) Math.PI / 4);
     if (eFrame == null) {
-      eFrame = new InteractiveFrame(scene(), this);
+      eFrame = new InteractiveFrame(this);
       scene().pruneBranch(eFrame);
     }
     if (scene().is3D()) {
