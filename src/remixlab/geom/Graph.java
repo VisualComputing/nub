@@ -59,13 +59,13 @@ public class Graph {
   // 1. Eye
   protected Frame eye;
   protected long lastEqUpdate;
-  protected Vec scnCenter;
+  protected Vector scnCenter;
   protected float scnRadius;
-  protected Vec anchorPnt;
+  protected Vector anchorPnt;
   //boundary eqns
   protected float fpCoefficients[][];
   protected boolean fpCoefficientsUpdate;
-  protected Vec normal[];
+  protected Vector normal[];
   protected float dist[];
   // rescale ortho when anchor changes
   private float rapK = 1;
@@ -80,7 +80,7 @@ public class Graph {
   protected int width, height;
   protected boolean twod;
   //fly
-  protected Vec scnUpVec;
+  protected Vector scnUpVector;
 
   // 2. Matrix helper
   protected MatrixHandler matrixHandler;
@@ -167,21 +167,21 @@ public class Graph {
     //order of the following lines matter
     //1st try: working
     /*
-    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
-    anchorPnt = new Vec();
-    scnCenter = new Vec();
+    scnUpVector = new Vector(0.0f, 1.0f, 0.0f);
+    anchorPnt = new Vector();
+    scnCenter = new Vector();
     //setRadius(100);
-    //setCenter(new Vec(0.0f, 0.0f, 0.0f));
+    //setCenter(new Vector(0.0f, 0.0f, 0.0f));
     setEye(new Frame());
     showAll();
     */
 
     //2nd try: working
-    scnUpVec = new Vec(0.0f, 1.0f, 0.0f);
-    anchorPnt = new Vec();
+    scnUpVector = new Vector(0.0f, 1.0f, 0.0f);
+    anchorPnt = new Vector();
     eye = new Frame();
     setRadius(100);
-    setCenter(new Vec(0.0f, 0.0f, 0.0f));
+    setCenter(new Vector(0.0f, 0.0f, 0.0f));
     showAll();
 
     seeds = new ArrayList<InteractiveFrame>();
@@ -195,15 +195,15 @@ public class Graph {
 
     if (is2D()) {
       fpCoefficients = new float[4][3];
-      normal = new Vec[4];
+      normal = new Vector[4];
       for (int i = 0; i < normal.length; i++)
-        normal[i] = new Vec();
+        normal[i] = new Vector();
       dist = new float[4];
     } else {
       fpCoefficients = new float[6][4];
-      normal = new Vec[6];
+      normal = new Vector[6];
       for (int i = 0; i < normal.length; i++)
-        normal[i] = new Vec();
+        normal[i] = new Vector();
       dist = new float[6];
     }
     enableBoundaryEquations(false);
@@ -283,11 +283,11 @@ public class Graph {
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
    * {@link Graph#eye()} and
-   * {@link Graph#setUpVector(Vec)} modify this value and should be
+   * {@link Graph#setUpVector(Vector)} modify this value and should be
    * used instead.
    */
-  public Vec sceneUpVector() {
-    return scnUpVec;
+  public Vector sceneUpVector() {
+    return scnUpVector;
   }
 
   /**
@@ -297,8 +297,8 @@ public class Graph {
    * {@link InteractiveFrame#moveForward(MotionEvent)} or {@link InteractiveFrame#drive(MotionEvent)}
    * actions.
    */
-  public void setSceneUpVector(Vec up) {
-    scnUpVec = up;
+  public void setSceneUpVector(Vector up) {
+    scnUpVector = up;
   }
 
   /**
@@ -307,7 +307,7 @@ public class Graph {
    * method.
    */
   final void updateSceneUpVector() {
-    scnUpVec = eye().orientation().rotate(new Vec(0.0f, 1.0f, 0.0f));
+    scnUpVector = eye().orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
   // 1. type
@@ -375,10 +375,10 @@ public class Graph {
    * <p>
    * The eye position and orientation of the Camera are not modified and
    * you first have to orientate the Camera in order to actually see the scene (see
-   * {@link #lookAt(Vec)}, {@link #showAll()} or {@link #fitBall(Vec, float)}).
+   * {@link #lookAt(Vector)}, {@link #showAll()} or {@link #fitBall(Vector, float)}).
    * <p>
    * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
-   * positioning tools ({@link #lookAt(Vec)}) to position a
+   * positioning tools ({@link #lookAt(Vector)}) to position a
    * Camera at the light position. Then use this method to define the
    * {@link #fieldOfView()} so that the shadow map resolution is optimally used:
    * <p>
@@ -517,9 +517,9 @@ public class Graph {
    * {@link #zFar()} to optimize the Z range.
    */
   public float distanceToSceneCenter() {
-    Vec zCam = eye().zAxis();
-    Vec cam2SceneCenter = Vec.subtract(eye().position(), center());
-    return Math.abs(Vec.dot(cam2SceneCenter, zCam));
+    Vector zCam = eye().zAxis();
+    Vector cam2SceneCenter = Vector.subtract(eye().position(), center());
+    return Math.abs(Vector.dot(cam2SceneCenter, zCam));
   }
 
   /**
@@ -892,10 +892,10 @@ public class Graph {
   // Actions
 
   /**
-   * Same as {@code eye().setAnchor(new Vec(0, 0, 0))}.
+   * Same as {@code eye().setAnchor(new Vector(0, 0, 0))}.
    */
   public void resetAnchor() {
-    setAnchor(new Vec(0, 0, 0));
+    setAnchor(new Vector(0, 0, 0));
     // looks horrible, but works ;)
     //TODO restore
     //eye().anchorFlag = true;
@@ -1208,7 +1208,7 @@ public class Graph {
     m.mat[10] = 1.0f - q11 - q00;
     m.mat[11] = 0.0f;
 
-    Vec t = q.inverseRotate(eye().position());
+    Vector t = q.inverseRotate(eye().position());
 
     m.mat[12] = -t.vec[0];
     m.mat[13] = -t.vec[1];
@@ -1390,10 +1390,10 @@ public class Graph {
    * Wrapper for
    * {@link MatrixHandler#isProjectionViewInverseCached()} .
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
+   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
    * @see #optimizeUnprojectedCoordinatesOf(boolean)
-   * @see #unprojectedCoordinatesOf(Vec)
+   * @see #unprojectedCoordinatesOf(Vector)
    */
   public boolean isUnprojectedCoordinatesOfOptimized() {
     return matrixHandler.isProjectionViewInverseCached();
@@ -1403,10 +1403,10 @@ public class Graph {
    * Wrapper for
    * {@link MatrixHandler#cacheProjectionViewInverse(boolean)} .
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vec)}.
+   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
    * @see #isUnprojectedCoordinatesOfOptimized()
-   * @see #unprojectedCoordinatesOf(Vec)
+   * @see #unprojectedCoordinatesOf(Vector)
    */
   public void optimizeUnprojectedCoordinatesOf(boolean optimise) {
     matrixHandler.cacheProjectionViewInverse(optimise);
@@ -1669,12 +1669,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return isPointVisible(new Vec(x, y, z))}.
+   * Same as {@code return isPointVisible(new Vector(x, y, z))}.
    *
-   * @see #isPointVisible(Vec)
+   * @see #isPointVisible(Vector)
    */
   public boolean isPointVisible(float x, float y, float z) {
-    return isPointVisible(new Vec(x, y, z));
+    return isPointVisible(new Vector(x, y, z));
   }
 
   /**
@@ -1687,15 +1687,15 @@ public class Graph {
    * Scene setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #boxVisibility(Vec, Vec)
+   * @see #distanceToBoundary(int, Vector)
+   * @see #ballVisibility(Vector, float)
+   * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
-  public boolean isPointVisible(Vec point) {
+  public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by pointIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
@@ -1718,15 +1718,15 @@ public class Graph {
    * Scene setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #boxVisibility(Vec, Vec)
+   * @see #distanceToBoundary(int, Vector)
+   * @see #isPointVisible(Vector)
+   * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
-  public Visibility ballVisibility(Vec center, float radius) {
+  public Visibility ballVisibility(Vector center, float radius) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by sphereIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
@@ -1756,15 +1756,15 @@ public class Graph {
    * Scene setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #ballVisibility(Vec, float)
+   * @see #distanceToBoundary(int, Vector)
+   * @see #isPointVisible(Vector)
+   * @see #ballVisibility(Vector, float)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
-  public Visibility boxVisibility(Vec p1, Vec p2) {
+  public Visibility boxVisibility(Vector p1, Vector p2) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
@@ -1772,7 +1772,7 @@ public class Graph {
     for (int i = 0; i < 6; ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
-        Vec pos = new Vec(((c & 4) != 0) ? p1.vec[0] : p2.vec[0], ((c & 2) != 0) ? p1.vec[1] : p2.vec[1],
+        Vector pos = new Vector(((c & 4) != 0) ? p1.vec[0] : p2.vec[0], ((c & 2) != 0) ? p1.vec[1] : p2.vec[1],
                 ((c & 1) != 0) ? p1.vec[2] : p2.vec[2]);
         if (distanceToBoundary(i, pos) > 0.0)
           allInForAllPlanes = false;
@@ -1854,35 +1854,35 @@ public class Graph {
       coef = new float[6][4];
 
     // Computed once and for all
-    Vec pos = eye().position();
-    Vec viewDir = viewDirection();
-    Vec up = upVector();
-    Vec right = rightVector();
+    Vector pos = eye().position();
+    Vector viewDir = viewDirection();
+    Vector up = upVector();
+    Vector right = rightVector();
 
-    float posViewDir = Vec.dot(pos, viewDir);
+    float posViewDir = Vector.dot(pos, viewDir);
 
     switch (type()) {
       case PERSPECTIVE: {
         float hhfov = horizontalFieldOfView() / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
-        normal[0] = Vec.multiply(viewDir, -shhfov);
-        normal[1] = Vec.add(normal[0], Vec.multiply(right, chhfov));
-        normal[0] = Vec.add(normal[0], Vec.multiply(right, -chhfov));
-        normal[2] = Vec.multiply(viewDir, -1);
+        normal[0] = Vector.multiply(viewDir, -shhfov);
+        normal[1] = Vector.add(normal[0], Vector.multiply(right, chhfov));
+        normal[0] = Vector.add(normal[0], Vector.multiply(right, -chhfov));
+        normal[2] = Vector.multiply(viewDir, -1);
         normal[3] = viewDir;
 
         float hfov = fieldOfView() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
-        normal[4] = Vec.multiply(viewDir, -shfov);
-        normal[5] = Vec.add(normal[4], Vec.multiply(up, -chfov));
-        normal[4] = Vec.add(normal[4], Vec.multiply(up, chfov));
+        normal[4] = Vector.multiply(viewDir, -shfov);
+        normal[5] = Vector.add(normal[4], Vector.multiply(up, -chfov));
+        normal[4] = Vector.add(normal[4], Vector.multiply(up, chfov));
 
         for (int i = 0; i < 2; ++i)
-          dist[i] = Vec.dot(pos, normal[i]);
+          dist[i] = Vector.dot(pos, normal[i]);
         for (int j = 4; j < 6; ++j)
-          dist[j] = Vec.dot(pos, normal[j]);
+          dist[j] = Vector.dot(pos, normal[j]);
 
         // Natural equations are:
         // dist[0,1,4,5] = pos * normal[0,1,4,5];
@@ -1891,32 +1891,32 @@ public class Graph {
 
         // 2 times less computations using expanded/merged equations. Dir vectors
         // are normalized.
-        float posRightCosHH = chhfov * Vec.dot(pos, right);
+        float posRightCosHH = chhfov * Vector.dot(pos, right);
         dist[0] = -shhfov * posViewDir;
         dist[1] = dist[0] + posRightCosHH;
         dist[0] = dist[0] - posRightCosHH;
-        float posUpCosH = chfov * Vec.dot(pos, up);
+        float posUpCosH = chfov * Vector.dot(pos, up);
         dist[4] = -shfov * posViewDir;
         dist[5] = dist[4] - posUpCosH;
         dist[4] = dist[4] + posUpCosH;
         break;
       }
       case ORTHOGRAPHIC:
-        normal[0] = Vec.multiply(right, -1);
+        normal[0] = Vector.multiply(right, -1);
         normal[1] = right;
         normal[4] = up;
-        normal[5] = Vec.multiply(up, -1);
+        normal[5] = Vector.multiply(up, -1);
 
         float[] wh = getBoundaryWidthHeight();
-        dist[0] = Vec.dot(Vec.subtract(pos, Vec.multiply(right, wh[0])), normal[0]);
-        dist[1] = Vec.dot(Vec.add(pos, Vec.multiply(right, wh[0])), normal[1]);
-        dist[4] = Vec.dot(Vec.add(pos, Vec.multiply(up, wh[1])), normal[4]);
-        dist[5] = Vec.dot(Vec.subtract(pos, Vec.multiply(up, wh[1])), normal[5]);
+        dist[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), normal[0]);
+        dist[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), normal[1]);
+        dist[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), normal[4]);
+        dist[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), normal[5]);
         break;
     }
 
     // Front and far planes are identical for both camera types.
-    normal[2] = Vec.multiply(viewDir, -1);
+    normal[2] = Vector.multiply(viewDir, -1);
     normal[3] = viewDir;
     dist[2] = -posViewDir - zNear();
     dist[3] = posViewDir + zFar();
@@ -2007,10 +2007,10 @@ public class Graph {
    * {@link #enableBoundaryEquations()} which
    * automatically update the boundary equations every frame instead.
    *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #boxVisibility(Vec, Vec)
+   * @see #distanceToBoundary(int, Vector)
+   * @see #isPointVisible(Vector)
+   * @see #ballVisibility(Vector, float)
+   * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #getBoundaryEquations()
    * @see #enableBoundaryEquations()
@@ -2037,10 +2037,10 @@ public class Graph {
    * Scene setup (with
    * {@link #enableBoundaryEquations()}).
    *
-   * @see #distanceToBoundary(int, Vec)
-   * @see #isPointVisible(Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #boxVisibility(Vec, Vec)
+   * @see #distanceToBoundary(int, Vector)
+   * @see #isPointVisible(Vector)
+   * @see #ballVisibility(Vector, float)
+   * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #enableBoundaryEquations()
@@ -2066,20 +2066,20 @@ public class Graph {
    * Scene setup (with
    * {@link #enableBoundaryEquations()}).
    *
-   * @see #isPointVisible(Vec)
-   * @see #ballVisibility(Vec, float)
-   * @see #boxVisibility(Vec, Vec)
+   * @see #isPointVisible(Vector)
+   * @see #ballVisibility(Vector, float)
+   * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
-  public float distanceToBoundary(int index, Vec pos) {
+  public float distanceToBoundary(int index, Vector pos) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
-    Vec myVec = new Vec(fpCoefficients[index][0], fpCoefficients[index][1], fpCoefficients[index][2]);
-    return Vec.dot(pos, myVec) - fpCoefficients[index][3];
+    Vector myVector = new Vector(fpCoefficients[index][0], fpCoefficients[index][1], fpCoefficients[index][2]);
+    return Vector.dot(pos, myVector) - fpCoefficients[index][3];
   }
 
   /**
@@ -2087,9 +2087,9 @@ public class Graph {
    * <p>
    * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
    *
-   * @see #sceneToPixelRatio(Vec)
+   * @see #sceneToPixelRatio(Vector)
    */
-  public float pixelToSceneRatio(Vec position) {
+  public float pixelToSceneRatio(Vector position) {
     return 1 / sceneToPixelRatio(position);
   }
 
@@ -2106,12 +2106,12 @@ public class Graph {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vec v = Vec.addGrabber(sceneCenter(), Vec.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
+   * {@code Vector v = Vector.addGrabber(sceneCenter(), Vector.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
    * <br>
    * {@code vertex(v.x, v.y, v.z);}<br>
    * {@code endShape();}<br>
    */
-  public float sceneToPixelRatio(Vec position) {
+  public float sceneToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().coordinatesOf(position)).vec[2] * eye().magnitude()) * (float) Math
@@ -2126,9 +2126,9 @@ public class Graph {
   /**
    * Same as {@code return !isFaceBackFacing(a, b, c)}.
    *
-   * @see #isFaceBackFacing(Vec, Vec, Vec)
+   * @see #isFaceBackFacing(Vector, Vector, Vector)
    */
-  public boolean isFaceFrontFacing(Vec a, Vec b, Vec c) {
+  public boolean isFaceFrontFacing(Vector a, Vector b, Vector c) {
     return !isFaceBackFacing(a, b, c);
   }
 
@@ -2143,21 +2143,21 @@ public class Graph {
    * @param a first face vertex
    * @param b second face vertex
    * @param c third face vertex
-   * @see #isFaceBackFacing(Vec, Vec)
-   * @see #isConeBackFacing(Vec, Vec, float)
+   * @see #isFaceBackFacing(Vector, Vector)
+   * @see #isConeBackFacing(Vector, Vector, float)
    */
-  public boolean isFaceBackFacing(Vec a, Vec b, Vec c) {
+  public boolean isFaceBackFacing(Vector a, Vector b, Vector c) {
     return isFaceBackFacing(a, isLeftHanded() ?
-            Vec.subtract(b, a).cross(Vec.subtract(c, a)) :
-            Vec.subtract(c, a).cross(Vec.subtract(b, a)));
+            Vector.subtract(b, a).cross(Vector.subtract(c, a)) :
+            Vector.subtract(c, a).cross(Vector.subtract(b, a)));
   }
 
   /**
    * Same as {@code return !isFaceBackFacing(vertex, normal)}.
    *
-   * @see #isFaceBackFacing(Vec, Vec)
+   * @see #isFaceBackFacing(Vector, Vector)
    */
-  public boolean isFaceFrontFacing(Vec vertex, Vec normal) {
+  public boolean isFaceFrontFacing(Vector vertex, Vector normal) {
     return !isFaceBackFacing(vertex, normal);
   }
 
@@ -2167,19 +2167,19 @@ public class Graph {
    *
    * @param vertex belonging to the face
    * @param normal face normal
-   * @see #isFaceBackFacing(Vec, Vec, Vec)
-   * @see #isConeBackFacing(Vec, Vec, float)
+   * @see #isFaceBackFacing(Vector, Vector, Vector)
+   * @see #isConeBackFacing(Vector, Vector, float)
    */
-  public boolean isFaceBackFacing(Vec vertex, Vec normal) {
+  public boolean isFaceBackFacing(Vector vertex, Vector normal) {
     return isConeBackFacing(vertex, normal, 0);
   }
 
   /**
    * Same as {@code return !isConeBackFacing(vertex, normals)}.
    *
-   * @see #isConeBackFacing(Vec, ArrayList)
+   * @see #isConeBackFacing(Vector, ArrayList)
    */
-  public boolean isConeFrontFacing(Vec vertex, ArrayList<Vec> normals) {
+  public boolean isConeFrontFacing(Vector vertex, ArrayList<Vector> normals) {
     return !isConeBackFacing(vertex, normals);
   }
 
@@ -2189,19 +2189,19 @@ public class Graph {
    *
    * @param vertex  Cone vertex
    * @param normals ArrayList of normals defining the cone.
-   * @see #isConeBackFacing(Vec, Vec[])
-   * @see #isConeBackFacing(Vec, Vec, float)
+   * @see #isConeBackFacing(Vector, Vector[])
+   * @see #isConeBackFacing(Vector, Vector, float)
    */
-  public boolean isConeBackFacing(Vec vertex, ArrayList<Vec> normals) {
-    return isConeBackFacing(vertex, normals.toArray(new Vec[normals.size()]));
+  public boolean isConeBackFacing(Vector vertex, ArrayList<Vector> normals) {
+    return isConeBackFacing(vertex, normals.toArray(new Vector[normals.size()]));
   }
 
   /**
    * Same as {@code !isConeBackFacing(vertex, normals)}.
    *
-   * @see #isConeBackFacing(Vec, Vec[])
+   * @see #isConeBackFacing(Vector, Vector[])
    */
-  public boolean isConeFrontFacing(Vec vertex, Vec[] normals) {
+  public boolean isConeFrontFacing(Vector vertex, Vector[] normals) {
     return !isConeBackFacing(vertex, normals);
   }
 
@@ -2211,22 +2211,22 @@ public class Graph {
    *
    * @param vertex  Cone vertex
    * @param normals Array of normals defining the cone.
-   * @see #isConeBackFacing(Vec, ArrayList)
-   * @see #isConeBackFacing(Vec, Vec, float)
+   * @see #isConeBackFacing(Vector, ArrayList)
+   * @see #isConeBackFacing(Vector, Vector, float)
    */
-  public boolean isConeBackFacing(Vec vertex, Vec[] normals) {
+  public boolean isConeBackFacing(Vector vertex, Vector[] normals) {
     float angle;
-    Vec axis = new Vec(0, 0, 0);
+    Vector axis = new Vector(0, 0, 0);
 
     if (normals.length == 0)
       throw new RuntimeException("Normal array provided is empty");
 
-    Vec[] n = new Vec[normals.length];
+    Vector[] n = new Vector[normals.length];
     for (int i = 0; i < normals.length; i++) {
-      n[i] = new Vec();
+      n[i] = new Vector();
       n[i].set(normals[i]);
       n[i].normalize();
-      axis = Vec.add(axis, n[i]);
+      axis = Vector.add(axis, n[i]);
     }
 
     if (axis.magnitude() != 0)
@@ -2236,7 +2236,7 @@ public class Graph {
 
     angle = 0;
     for (int i = 0; i < normals.length; i++)
-      angle = Math.max(angle, (float) Math.acos(Vec.dot(n[i], axis)));
+      angle = Math.max(angle, (float) Math.acos(Vector.dot(n[i], axis)));
 
     return isConeBackFacing(vertex, axis, angle);
   }
@@ -2244,9 +2244,9 @@ public class Graph {
   /**
    * Same as {@code return !isConeBackFacing(vertex, axis, angle)}.
    *
-   * @see #isConeBackFacing(Vec, Vec, float)
+   * @see #isConeBackFacing(Vector, Vector, float)
    */
-  public boolean isConeFrontFacing(Vec vertex, Vec axis, float angle) {
+  public boolean isConeFrontFacing(Vector vertex, Vector axis, float angle) {
     return !isConeBackFacing(vertex, axis, angle);
   }
 
@@ -2258,33 +2258,33 @@ public class Graph {
    * @param axis   Cone axis
    * @param angle  Cone angle
    */
-  public boolean isConeBackFacing(Vec vertex, Vec axis, float angle) {
+  public boolean isConeBackFacing(Vector vertex, Vector axis, float angle) {
     // more or less inspired by this:
     // http://en.wikipedia.org/wiki/Back-face_culling (perspective case :P)
-    Vec camAxis;
+    Vector camAxis;
     if (type() == Type.ORTHOGRAPHIC)
       camAxis = viewDirection();
     else {
-      camAxis = Vec.subtract(vertex, eye().position());
+      camAxis = Vector.subtract(vertex, eye().position());
       if (angle != 0)
         camAxis.normalize();
     }
     if (angle == 0)
-      return Vec.dot(camAxis, axis) >= 0;
+      return Vector.dot(camAxis, axis) >= 0;
     float absAngle = Math.abs(angle);
     if (absAngle >= Math.PI / 2)
       return true;
-    Vec faceNormal = axis.get();
+    Vector faceNormal = axis.get();
     faceNormal.normalize();
-    return Math.acos(Vec.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
+    return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
   }
 
   /**
    * Convenience function that simply returns {@code projectedCoordinatesOf(src, null)}.
    *
-   * @see #projectedCoordinatesOf(Vec, Frame)
+   * @see #projectedCoordinatesOf(Vector, Frame)
    */
-  public final Vec projectedCoordinatesOf(Vec src) {
+  public final Vector projectedCoordinatesOf(Vector src) {
     return projectedCoordinatesOf(src, null);
   }
 
@@ -2293,24 +2293,24 @@ public class Graph {
    * {@code frame} coordinate system.
    * <p>
    * When {@code frame} is {@code null}, {@code src} is expressed in the world coordinate
-   * system. See {@link #projectedCoordinatesOf(Vec)}.
+   * system. See {@link #projectedCoordinatesOf(Vector)}.
    * <p>
-   * The x and y coordinates of the returned Vec are expressed in pixel, (0,0) being the
+   * The x and y coordinates of the returned Vector are expressed in pixel, (0,0) being the
    * upper left corner of the window. The z coordinate ranges between 0.0 (near plane) and
    * 1.0 (excluded, far plane). See the {@code gluProject} man page for details.
    *
-   * @see #unprojectedCoordinatesOf(Vec, Frame)
+   * @see #unprojectedCoordinatesOf(Vector, Frame)
    */
-  public final Vec projectedCoordinatesOf(Vec src, Frame frame) {
+  public final Vector projectedCoordinatesOf(Vector src, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vec tmp = frame.inverseCoordinatesOf(src);
+      Vector tmp = frame.inverseCoordinatesOf(src);
       project(tmp.vec[0], tmp.vec[1], tmp.vec[2], xyz);
     } else
       project(src.vec[0], src.vec[1], src.vec[2], xyz);
 
-    return new Vec(xyz[0], xyz[1], xyz[2]);
+    return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   // cached version
@@ -2366,9 +2366,9 @@ public class Graph {
   /**
    * Convenience function that simply returns {@code unprojectedCoordinatesOf(src, null)}.
    * <p>
-   * #see {@link #unprojectedCoordinatesOf(Vec, Frame)}
+   * #see {@link #unprojectedCoordinatesOf(Vector, Frame)}
    */
-  public final Vec unprojectedCoordinatesOf(Vec src) {
+  public final Vector unprojectedCoordinatesOf(Vector src) {
     return this.unprojectedCoordinatesOf(src, null);
   }
 
@@ -2391,7 +2391,7 @@ public class Graph {
    * {@link Frame#referenceFrame()} is non-null) is taken into
    * account.
    * <p>
-   * {@link #projectedCoordinatesOf(Vec, Frame)} performs the inverse transformation.
+   * {@link #projectedCoordinatesOf(Vector, Frame)} performs the inverse transformation.
    * <p>
    * This method only uses the intrinsic eye parameters (see {@link #view()},
    * {@link #projection()}, {@link #width()} and {@link #height()}) and is completely independent of
@@ -2407,20 +2407,20 @@ public class Graph {
    * projection and then viewport) to speed-up the queries. See the gluUnProject man page
    * for details.
    *
-   * @see #projectedCoordinatesOf(Vec, Frame)
+   * @see #projectedCoordinatesOf(Vector, Frame)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public final Vec unprojectedCoordinatesOf(Vec src, Frame frame) {
+  public final Vector unprojectedCoordinatesOf(Vector src, Frame frame) {
     float xyz[] = new float[3];
     // unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
     unproject(src.vec[0], src.vec[1], src.vec[2], xyz);
     if (frame != null)
-      return frame.coordinatesOf(new Vec(xyz[0], xyz[1], xyz[2]));
+      return frame.coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
     else
-      return new Vec(xyz[0], xyz[1], xyz[2]);
+      return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   /**
@@ -2491,7 +2491,7 @@ public class Graph {
    * {@link Graph#setRadius(float)} simply call this
    * method on its associated eye.
    *
-   * @see #setBoundingBox(Vec, Vec)
+   * @see #setBoundingBox(Vector, Vector)
    */
   public float radius() {
     return scnRadius;
@@ -2503,13 +2503,13 @@ public class Graph {
    * The scene observed by the eye should be roughly centered on this position, and
    * included in a {@link #radius()} ball.
    * <p>
-   * Default value is the world origin. Use {@link #setCenter(Vec)} to change it.
+   * Default value is the world origin. Use {@link #setCenter(Vector)} to change it.
    *
-   * @see #setBoundingBox(Vec, Vec)
+   * @see #setBoundingBox(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
    */
-  public Vec center() {
+  public Vector center() {
     return scnCenter;
   }
 
@@ -2519,16 +2519,16 @@ public class Graph {
    * <p>
    * Default value is the {@link #center()}.
    * <p>
-   * <b>Attention:</b> {@link #setCenter(Vec)} changes this value.
+   * <b>Attention:</b> {@link #setCenter(Vector)} changes this value.
    */
-  public Vec anchor() {
+  public Vector anchor() {
     return anchorPnt;
   }
 
   /**
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
-  public void setAnchor(Vec rap) {
+  public void setAnchor(Vector rap) {
     if(is2D()) {
       anchorPnt = rap;
       anchorPnt.setZ(0);
@@ -2551,9 +2551,9 @@ public class Graph {
    * object appear bigger on screen, as intuitively expected.
    */
   public float distanceToAnchor() {
-    Vec zCam = eye().zAxis();
-    Vec cam2anchor = Vec.subtract(eye().position(), anchor());
-    return Math.abs(Vec.dot(cam2anchor, zCam));
+    Vector zCam = eye().zAxis();
+    Vector cam2anchor = Vector.subtract(eye().position(), anchor());
+    return Math.abs(Vector.dot(cam2anchor, zCam));
   }
 
   /**
@@ -2585,25 +2585,25 @@ public class Graph {
    *
    * @see #setRadius(float)
    */
-  public void setCenter(Vec center) {
+  public void setCenter(Vector center) {
     scnCenter = center;
     setAnchor(center());
   }
 
   /**
-   * Similar to {@link #setRadius(float)} and {@link #setCenter(Vec)}, but the
+   * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
    * scene limits are defined by a (world axis aligned) bounding box.
    */
-  public void setBoundingBox(Vec min, Vec max) {
+  public void setBoundingBox(Vector min, Vector max) {
     //TODO check 2d case
-    setCenter(Vec.multiply(Vec.add(min, max), 1 / 2.0f));
-    setRadius(0.5f * (Vec.subtract(max, min)).magnitude());
+    setCenter(Vector.multiply(Vector.add(min, max), 1 / 2.0f));
+    setRadius(0.5f * (Vector.subtract(max, min)).magnitude());
   }
 
   /**
    * Moves the eye so that the entire scene is visible.
    * <p>
-   * Simply calls {@link #fitBall(Vec, float)} on a sphere defined by
+   * Simply calls {@link #fitBall(Vector, float)} on a sphere defined by
    * {@link #center()} and {@link #radius()}.
    * <p>
    * You will typically use this method at init time after you defined a new
@@ -2637,19 +2637,19 @@ public class Graph {
   /**
    * Returns the normalized view direction of the eye, defined in the world coordinate
    * system. This corresponds to the negative Z axis of the {@link #eye()} (
-   * {@code frame().inverseTransformOf(new Vec(0.0f, 0.0f, -1.0f))} ) whih in 2D always is
+   * {@code frame().inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))} ) whih in 2D always is
    * (0,0,-1)
    * <p>
    * In 3D change this value using
-   * {@link #setViewDirection(Vec)}, {@link #lookAt(Vec)} or
+   * {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
    * {@link InteractiveFrame#setOrientation(Quaternion)} . It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
-  public Vec viewDirection() {
+  public Vector viewDirection() {
     //TODO test me
     //before it was:
     //if(gScene.is2D())
-    //return new Vec(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
+    //return new Vector(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
     //bu now I think we should simply go something like this:
     return eye().zAxis(false);
   }
@@ -2661,14 +2661,14 @@ public class Graph {
    * The Camera {@link InteractiveFrame#position()} is not modified. The Camera is rotated so that the
    * horizon (defined by its {@link #upVector()}) is preserved.
    *
-   * @see #lookAt(Vec)
-   * @see #setUpVector(Vec)
+   * @see #lookAt(Vector)
+   * @see #setUpVector(Vector)
    */
-  public void setViewDirection(Vec direction) {
+  public void setViewDirection(Vector direction) {
     if (direction.squaredNorm() == 0)
       return;
 
-    Vec xAxis = direction.cross(upVector());
+    Vector xAxis = direction.cross(upVector());
     if (xAxis.squaredNorm() == 0) {
       // target is aligned with upVector, this means a rotation around X axis
       // X axis is then unchanged, let's keep it !
@@ -2676,16 +2676,16 @@ public class Graph {
     }
 
     Quaternion q = new Quaternion();
-    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vec.multiply(direction, -1));
+    q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vector.multiply(direction, -1));
     eye().setOrientationWithConstraint(q);
   }
 
   /**
    * Convenience function that simply calls {@code setUpVector(up, true)}.
    *
-   * @see #setUpVector(Vec, boolean)
+   * @see #setUpVector(Vector, boolean)
    */
-  public void setUpVector(Vec up) {
+  public void setUpVector(Vector up) {
     setUpVector(up, true);
   }
 
@@ -2706,13 +2706,13 @@ public class Graph {
    * When {@code noMove} is true, the Eye {@link InteractiveFrame#position()} is left unchanged, which is
    * an intuitive behavior when the Eye is in first person mode.
    *
-   * @see #lookAt(Vec)
+   * @see #lookAt(Vector)
    */
-  public void setUpVector(Vec up, boolean noMove) {
-    Quaternion q = new Quaternion(new Vec(0.0f, 1.0f, 0.0f), eye().transformOf(up));
+  public void setUpVector(Vector up, boolean noMove) {
+    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().transformOf(up));
 
     if (!noMove && is3D())
-      eye().setPosition(Vec.subtract(anchor(),
+      eye().setPosition(Vector.subtract(anchor(),
               (Quaternion.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
 
     eye().rotate(q);
@@ -2724,13 +2724,13 @@ public class Graph {
   /**
    * Returns the normalized up vector of the eye, defined in the world coordinate system.
    * <p>
-   * Set using {@link #setUpVector(Vec)} or {@link InteractiveFrame#setOrientation(Quaternion)}. It is
+   * Set using {@link #setUpVector(Vector)} or {@link InteractiveFrame#setOrientation(Quaternion)}. It is
    * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #eye()} (actually returns
    * {@code frame().yAxis()}
    */
-  public Vec upVector() {
+  public Vector upVector() {
     return eye().yAxis();
   }
 
@@ -2738,16 +2738,16 @@ public class Graph {
    * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
    * Cameras set {@link InteractiveFrame#orientation()}, so that it looks at point {@code target} defined
    * in the world coordinate system (The Camera {@link InteractiveFrame#position()} is not modified.
-   * Simply {@link #setViewDirection(Vec)}).
+   * Simply {@link #setViewDirection(Vector)}).
    *
    * @see #at()
-   * @see #setUpVector(Vec)
+   * @see #setUpVector(Vector)
    * @see #showAll()
-   * @see #fitBall(Vec, float)
-   * @see #fitBoundingBox(Vec, Vec)
+   * @see #fitBall(Vector, float)
+   * @see #fitBoundingBox(Vector, Vector)
    */
-  public void lookAt(Vec target) {
-    setViewDirection(Vec.subtract(target, eye().position()));
+  public void lookAt(Vector target) {
+    setViewDirection(Vector.subtract(target, eye().position()));
   }
 
   /**
@@ -2756,11 +2756,11 @@ public class Graph {
    * <p>
    * This vector lies in the eye horizontal plane, directed along the X axis (orthogonal
    * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vec)}, {@link #lookAt(Vec)} or {@link InteractiveFrame#setOrientation(Quaternion)}.
+   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link InteractiveFrame#setOrientation(Quaternion)}.
    * <p>
    * Simply returns {@code frame().xAxis()}.
    */
-  public Vec rightVector() {
+  public Vector rightVector() {
     return eye().xAxis();
   }
 
@@ -2770,10 +2770,10 @@ public class Graph {
    * {@link #viewDirection()}). Useful for setting the Processing camera() which uses a
    * similar approach of that found in gluLookAt.
    *
-   * @see #lookAt(Vec)
+   * @see #lookAt(Vector)
    */
-  public Vec at() {
-    return Vec.add(eye().position(), viewDirection());
+  public Vector at() {
+    return Vector.add(eye().position(), viewDirection());
   }
 
   /**
@@ -2785,10 +2785,10 @@ public class Graph {
    * {@link #fieldOfView()} are unchanged. You should
    * therefore orientate the Camera before you call this method.
    *
-   * @see #lookAt(Vec)
-   * @see #setUpVector(Vec, boolean)
+   * @see #lookAt(Vector)
+   * @see #setUpVector(Vector, boolean)
    */
-  public void fitBall(Vec center, float radius) {
+  public void fitBall(Vector center, float radius) {
     float distance = 0.0f;
     switch (type()) {
       case PERSPECTIVE: {
@@ -2798,23 +2798,23 @@ public class Graph {
         break;
       }
       case ORTHOGRAPHIC: {
-        distance = Vec.dot(Vec.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
+        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
         break;
       }
     }
 
-    Vec newPos = Vec.subtract(center, Vec.multiply(viewDirection(), distance));
+    Vector newPos = Vector.subtract(center, Vector.multiply(viewDirection(), distance));
     eye().setPositionWithConstraint(newPos);
   }
 
   /**
    * Moves the eye so that the (world axis aligned) bounding box ({@code min} ,
-   * {@code max}) is entirely visible, using {@link #fitBall(Vec, float)}.
+   * {@code max}) is entirely visible, using {@link #fitBall(Vector, float)}.
    */
-  public void fitBoundingBox(Vec min, Vec max) {
+  public void fitBoundingBox(Vector min, Vector max) {
     float diameter = Math.max(Math.abs(max.vec[1] - min.vec[1]), Math.abs(max.vec[0] - min.vec[0]));
     diameter = Math.max(Math.abs(max.vec[2] - min.vec[2]), diameter);
-    fitBall(Vec.multiply(Vec.add(min, max), 0.5f), 0.5f * diameter);
+    fitBall(Vector.multiply(Vector.add(min, max), 0.5f), 0.5f * diameter);
   }
 
   /**
@@ -2827,40 +2827,40 @@ public class Graph {
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
    */
-  public void fitScreenRegion(Rect rectangle) {
-    Vec vd = viewDirection();
+  public void fitScreenRegion(Rectangle rectangle) {
+    Vector vd = viewDirection();
     float distToPlane = distanceToSceneCenter();
 
     Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
 
-    Vec orig = new Vec();
-    Vec dir = new Vec();
+    Vector orig = new Vector();
+    Vector dir = new Vector();
     convertClickToLine(center, orig, dir);
-    Vec newCenter = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+    Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
 
     convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
-    final Vec pointX = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+    final Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
 
     convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
-    final Vec pointY = Vec.add(orig, Vec.multiply(dir, (distToPlane / Vec.dot(dir, vd))));
+    final Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
 
     float distance = 0.0f;
     float distX, distY;
     switch (type()) {
       case PERSPECTIVE:
-        distX = Vec.distance(pointX, newCenter) / (float) Math.sin(horizontalFieldOfView() / 2.0f);
-        distY = Vec.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
+        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(horizontalFieldOfView() / 2.0f);
+        distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
-        float dist = Vec.dot(Vec.subtract(newCenter, anchor()), vd);
-        distX = Vec.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
-        distY = Vec.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
+        float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
+        distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
+        distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
         distance = dist + Math.max(distX, distY);
         break;
     }
 
-    eye().setPositionWithConstraint(Vec.subtract(newCenter, Vec.multiply(vd, distance)));
+    eye().setPositionWithConstraint(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
   }
 
   /**
@@ -2873,7 +2873,7 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(final Point pixelInput, Vec orig, Vec dir) {
+  public void convertClickToLine(final Point pixelInput, Vector orig, Vector dir) {
     Point pixel = new Point(pixelInput.x(), pixelInput.y());
 
     // lef-handed coordinate system correction
@@ -2883,17 +2883,17 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         orig.set(eye().position());
-        dir.set(new Vec(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
+        dir.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
                 ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
                 -1.0f));
-        dir.set(Vec.subtract(eye().inverseCoordinatesOf(dir), orig));
+        dir.set(Vector.subtract(eye().inverseCoordinatesOf(dir), orig));
         dir.normalize();
         break;
 
       case ORTHOGRAPHIC: {
         float[] wh = getBoundaryWidthHeight();
         orig.set(
-                new Vec((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
+                new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
                         0.0f));
         orig.set(eye().inverseCoordinatesOf(orig));
         dir.set(viewDirection());

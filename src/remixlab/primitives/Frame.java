@@ -28,26 +28,26 @@ import remixlab.geom.InteractiveFrame;
  * {@code // Builds a Frame at position (0.5,0,0) and oriented such that its Y axis is along the (1,1,1) }
  * <br>
  * {@code // direction. One could also have used setPosition() and setOrientation().} <br>
- * {@code Frame fr(new Vec(0.5,0,0), new Quaternion(new Vec(0,1,0), new Vec(1,1,1)));} <br>
+ * {@code Frame fr(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0), new Vector(1,1,1)));} <br>
  * {@code scene.pushModelView();} <br>
  * {@code scene.applyModelView(fr.matrix());} <br>
  * {@code // Draw your object here, in the local fr coordinate system.} <br>
  * {@code scene.popModelView();} <br>
  * <p>
  * Many functions are provided to transform a point from one coordinate system (Frame) to
- * an other: see {@link #coordinatesOf(Vec)}, {@link #inverseCoordinatesOf(Vec)},
- * {@link #coordinatesOfIn(Vec, Frame)}, {@link #coordinatesOfFrom(Vec, Frame)}...
+ * an other: see {@link #coordinatesOf(Vector)}, {@link #inverseCoordinatesOf(Vector)},
+ * {@link #coordinatesOfIn(Vector, Frame)}, {@link #coordinatesOfFrom(Vector, Frame)}...
  * <p>
  * You may also want to transform a vector (such as a normal), which corresponds to
  * applying only the rotational part of the frame transformation: see
- * {@link #transformOf(Vec)} and {@link #inverseTransformOf(Vec)}.
+ * {@link #transformOf(Vector)} and {@link #inverseTransformOf(Vector)}.
  * <p>
  * The {@link #translation()}, {@link #rotation()} and uniform positive {@link #scaling()}
  * that are encapsulated in a Frame can also be used to represent an angle preserving
  * transformation of space. Such a transformation can also be interpreted as a change of
  * coordinate system, and the coordinate system conversion functions actually allow you to
  * use a Frame as an angle preserving transformation. Use
- * {@link #inverseCoordinatesOf(Vec)} (resp. {@link #coordinatesOf(Vec)}) to apply the
+ * {@link #inverseCoordinatesOf(Vector)} (resp. {@link #coordinatesOf(Vector)}) to apply the
  * transformation (resp. its inverse). Note the inversion.
  * <p>
  * <p>
@@ -83,15 +83,15 @@ import remixlab.geom.InteractiveFrame;
  * Frame definition. Therefore {@link #settingAsReferenceFrameWillCreateALoop(Frame)}
  * checks this and prevents {@link #referenceFrame()} from creating such a loop.
  * <p>
- * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vec, Frame)},
- * {@link #coordinatesOfFrom(Vec, Frame)} ... which allow coordinates (or vector)
+ * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vector, Frame)},
+ * {@link #coordinatesOfFrom(Vector, Frame)} ... which allow coordinates (or vector)
  * conversions from a Frame to any other one (including the world coordinate system).
  * <p>
  * <h3>Constraints</h3>
  * <p>
  * An interesting feature of Frames is that their displacements can be constrained. When a
  * {@link remixlab.primitives.constraint.Constraint} is attached to a Frame, it filters the
- * inputGrabber of {@link #translate(Vec)} and {@link #rotate(Quaternion)}, and only the resulting
+ * inputGrabber of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the resulting
  * filtered motion is applied to the Frame. The default {@link #constraint()} {@code null}
  * resulting in no filtering. Use {@link #setConstraint(Constraint)} to attach a
  * Constraint to a frame.
@@ -118,64 +118,64 @@ public class Frame {
     return translation().matches(other.translation()) && rotation().matches(other.rotation()) && scaling() == other.scaling();
   }
 
-  protected Vec trans;
+  protected Vector trans;
   protected float scl;
   protected Quaternion rot;
   protected Frame refFrame;
   protected Constraint cnstrnt;
 
   /**
-   * Same as {@code this(null, new Vec(), three_d ? new Quaternion() : new Rot(), 1)}.
+   * Same as {@code this(null, new Vector(), three_d ? new Quaternion() : new Rot(), 1)}.
    *
-   * @see #Frame(Vec, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
    */
   public Frame() {
-    this(null, new Vec(), new Quaternion(), 1);
+    this(null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, new Vec(), r, s)}.
+   * Same as {@code this(null, new Vector(), r, s)}.
    *
-   * @see #Frame(Vec, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
    */
   public Frame(Quaternion r, float s) {
-    this(null, new Vec(), r, s);
+    this(null, new Vector(), r, s);
   }
 
   /**
    * Same as {@code this(p, r, 1)}.
    *
-   * @see #Frame(Vec, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
    */
-  public Frame(Vec p, Quaternion r) {
+  public Frame(Vector p, Quaternion r) {
     this(p, r, 1);
   }
 
   /**
    * Same as {@code this(null, p, r, s)}.
    *
-   * @see #Frame(Frame, Vec, Quaternion, float)
+   * @see #Frame(Frame, Vector, Quaternion, float)
    */
-  public Frame(Vec p, Quaternion r, float s) {
+  public Frame(Vector p, Quaternion r, float s) {
     this(null, p, r, s);
   }
 
   /**
    * Same as {@code this(referenceFrame, p, r, 1)}.
    *
-   * @see #Frame(Frame, Vec, Quaternion, float)
+   * @see #Frame(Frame, Vector, Quaternion, float)
    */
-  public Frame(Frame referenceFrame, Vec p, Quaternion r) {
+  public Frame(Frame referenceFrame, Vector p, Quaternion r) {
     this(referenceFrame, p, r, 1);
   }
 
   /**
-   * Same as {@code this(referenceFrame, new Vec(), r, 1)}.
+   * Same as {@code this(referenceFrame, new Vector(), r, 1)}.
    *
-   * @see #Frame(Frame, Vec, Quaternion, float)
+   * @see #Frame(Frame, Vector, Quaternion, float)
    */
   public Frame(Frame referenceFrame, Quaternion r, float s) {
-    this(referenceFrame, new Vec(), r, 1);
+    this(referenceFrame, new Vector(), r, 1);
   }
 
   /**
@@ -183,7 +183,7 @@ public class Frame {
    * {@code p}, {@code r} and {@code s} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
-  public Frame(Frame referenceFrame, Vec p, Quaternion r, float s) {
+  public Frame(Frame referenceFrame, Vector p, Quaternion r, float s) {
     setTranslation(p);
     setRotation(r);
     setScaling(s);
@@ -244,11 +244,11 @@ public class Frame {
    * <p>
    * Use {@link #setReferenceFrame(Frame)} to set this value and create a Frame hierarchy.
    * Convenient functions allow you to convert coordinates from one Frame to another: see
-   * {@link #coordinatesOf(Vec)}, {@link #localCoordinatesOf(Vec)} ,
-   * {@link #coordinatesOfIn(Vec, Frame)} and their inverse functions.
+   * {@link #coordinatesOf(Vector)}, {@link #localCoordinatesOf(Vector)} ,
+   * {@link #coordinatesOfIn(Vector, Frame)} and their inverse functions.
    * <p>
-   * Vectors can also be converted using {@link #transformOf(Vec)},
-   * {@link #transformOfIn(Vec, Frame)}, {@link #localTransformOf(Vec)} and their inverse
+   * Vectors can also be converted using {@link #transformOf(Vector)},
+   * {@link #transformOfIn(Vector, Frame)}, {@link #localTransformOf(Vector)} and their inverse
    * functions.
    */
   public Frame referenceFrame() {
@@ -326,10 +326,10 @@ public class Frame {
    * Use {@link #position()} to get the result in world coordinates. These two values are
    * identical when the {@link #referenceFrame()} is {@code null} (default).
    *
-   * @see #setTranslation(Vec)
-   * @see #setTranslationWithConstraint(Vec)
+   * @see #setTranslation(Vector)
+   * @see #setTranslationWithConstraint(Vector)
    */
-  public final Vec translation() {
+  public final Vector translation() {
     return trans;
   }
 
@@ -337,25 +337,25 @@ public class Frame {
    * Sets the {@link #translation()} of the frame, locally defined with respect to the
    * {@link #referenceFrame()}.
    * <p>
-   * Use {@link #setPosition(Vec)} to define the world coordinates {@link #position()}.
-   * Use {@link #setTranslationWithConstraint(Vec)} to take into account the potential
+   * Use {@link #setPosition(Vector)} to define the world coordinates {@link #position()}.
+   * Use {@link #setTranslationWithConstraint(Vector)} to take into account the potential
    * {@link #constraint()} of the Frame.
    */
-  public final void setTranslation(Vec t) {
+  public final void setTranslation(Vector t) {
     trans = t;
     modified();
   }
 
   /**
-   * Same as {@link #setTranslation(Vec)}, but if there's a {@link #constraint()} it is
+   * Same as {@link #setTranslation(Vector)}, but if there's a {@link #constraint()} it is
    * satisfied.
    *
    * @see #setRotationWithConstraint(Quaternion)
-   * @see #setPositionWithConstraint(Vec)
+   * @see #setPositionWithConstraint(Vector)
    * @see #setScaling(float)
    */
-  public final void setTranslationWithConstraint(Vec translation) {
-    Vec deltaT = Vec.subtract(translation, this.translation());
+  public final void setTranslationWithConstraint(Vector translation) {
+    Vector deltaT = Vector.subtract(translation, this.translation());
     if (constraint() != null)
       deltaT = constraint().constrainTranslation(deltaT, this);
 
@@ -363,31 +363,31 @@ public class Frame {
   }
 
   /**
-   * Same as {@link #setTranslation(Vec)}, but with {@code float} parameters.
+   * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
    */
   public final void setTranslation(float x, float y) {
-    setTranslation(new Vec(x, y));
+    setTranslation(new Vector(x, y));
   }
 
   /**
-   * Same as {@link #setTranslation(Vec)}, but with {@code float} parameters.
+   * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
    */
   public final void setTranslation(float x, float y, float z) {
-    setTranslation(new Vec(x, y, z));
+    setTranslation(new Vector(x, y, z));
   }
 
   /**
-   * Same as {@link #translate(Vec)} but with {@code float} parameters.
+   * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
   public final void translate(float x, float y, float z) {
-    translate(new Vec(x, y, z));
+    translate(new Vector(x, y, z));
   }
 
   /**
-   * Same as {@link #translate(Vec)} but with {@code float} parameters.
+   * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
   public final void translate(float x, float y) {
-    translate(new Vec(x, y));
+    translate(new Vector(x, y));
   }
 
   /**
@@ -396,13 +396,13 @@ public class Frame {
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the Frame may differ from {@code t} (since it can be filtered by the
-   * {@link #constraint()}). Use {@link #setTranslation(Vec)} to directly translate the
+   * {@link #constraint()}). Use {@link #setTranslation(Vector)} to directly translate the
    * Frame without taking the {@link #constraint()} into account.
    *
    * @see #rotate(Quaternion)
    * @see #scale(float)
    */
-  public void translate(Vec t) {
+  public void translate(Vector t) {
     if (constraint() != null)
       translation().add(constraint().constrainTranslation(t, this));
     else
@@ -417,21 +417,21 @@ public class Frame {
    *
    * @see #orientation()
    * @see #magnitude()
-   * @see #setPosition(Vec)
+   * @see #setPosition(Vector)
    * @see #translation()
    */
-  public final Vec position() {
-    return inverseCoordinatesOf(new Vec(0, 0, 0));
+  public final Vector position() {
+    return inverseCoordinatesOf(new Vector(0, 0, 0));
   }
 
   /**
    * Sets the {@link #position()} of the Frame, defined in the world coordinate system.
    * <p>
-   * Use {@link #setTranslation(Vec)} to define the local Frame translation (with respect
+   * Use {@link #setTranslation(Vector)} to define the local Frame translation (with respect
    * to the {@link #referenceFrame()}). The potential {@link #constraint()} of the Frame
-   * is not taken into account, use {@link #setPositionWithConstraint(Vec)} instead.
+   * is not taken into account, use {@link #setPositionWithConstraint(Vector)} instead.
    */
-  public final void setPosition(Vec p) {
+  public final void setPosition(Vector p) {
     if (referenceFrame() != null)
       setTranslation(referenceFrame().coordinatesOf(p));
     else
@@ -439,27 +439,27 @@ public class Frame {
   }
 
   /**
-   * Same as {@link #setPosition(Vec)}, but with {@code float} parameters.
+   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
   public final void setPosition(float x, float y) {
-    setPosition(new Vec(x, y));
+    setPosition(new Vector(x, y));
   }
 
   /**
-   * Same as {@link #setPosition(Vec)}, but with {@code float} parameters.
+   * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
   public final void setPosition(float x, float y, float z) {
-    setPosition(new Vec(x, y, z));
+    setPosition(new Vector(x, y, z));
   }
 
   /**
-   * Same as {@link #setPosition(Vec)}, but if there's a {@link #constraint()} it is
+   * Same as {@link #setPosition(Vector)}, but if there's a {@link #constraint()} it is
    * satisfied (without modifying {@code position}).
    *
    * @see #setOrientationWithConstraint(Quaternion)
-   * @see #setTranslationWithConstraint(Vec)
+   * @see #setTranslationWithConstraint(Vector)
    */
-  public final void setPositionWithConstraint(Vec position) {
+  public final void setPositionWithConstraint(Vector position) {
     if (referenceFrame() != null)
       position = referenceFrame().coordinatesOf(position);
 
@@ -495,7 +495,7 @@ public class Frame {
    *
    * @see #setRotationWithConstraint(Quaternion)
    * @see #rotation()
-   * @see #setTranslation(Vec)
+   * @see #setTranslation(Vector)
    */
   public final void setRotation(Quaternion r) {
     rot = r;
@@ -533,7 +533,7 @@ public class Frame {
    * Same as {@link #setRotation(Quaternion)}, but if there's a {@link #constraint()} it's
    * satisfied.
    *
-   * @see #setTranslationWithConstraint(Vec)
+   * @see #setTranslationWithConstraint(Vector)
    * @see #setOrientationWithConstraint(Quaternion)
    * @see #setScaling(float)
    */
@@ -566,7 +566,7 @@ public class Frame {
    * {@link #constraint()}). Use {@link #setRotation(Quaternion)} to directly rotate the
    * Frame without taking the {@link #constraint()} into account.
    *
-   * @see #translate(Vec)
+   * @see #translate(Vector)
    */
   public final void rotate(Quaternion r) {
     if (constraint() != null)
@@ -608,9 +608,9 @@ public class Frame {
    * <p>
    * The translation which results from the filtered rotation around {@code point} is then
    * computed and filtered using
-   * {@link remixlab.primitives.constraint.Constraint#constrainTranslation(Vec, Frame)} .
+   * {@link remixlab.primitives.constraint.Constraint#constrainTranslation(Vector, Frame)} .
    */
-  public void rotateAroundPoint(Quaternion rotation, Vec point) {
+  public void rotateAroundPoint(Quaternion rotation, Vector point) {
     if (constraint() != null)
       rotation = constraint().constrainRotation(rotation, this);
 
@@ -629,7 +629,7 @@ public class Frame {
       q = new Rot(rotation.angle());
     */
 
-    Vec t = Vec.add(point, q.rotate(Vec.subtract(position(), point)));
+    Vector t = Vector.add(point, q.rotate(Vector.subtract(position(), point)));
     t.subtract(translation());
     if (constraint() != null)
       translate(constraint().constrainTranslation(t, this));
@@ -640,7 +640,7 @@ public class Frame {
   // TODO this one needs testing, specially 2d case
   public void rotateAroundFrame(Quaternion rotation, Frame frame) {
     if (is3D()) {
-      Vec euler = ((Quaternion) rotation).eulerAngles();
+      Vector euler = ((Quaternion) rotation).eulerAngles();
       rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
     } else
       rotateAroundFrame(0, 0, rotation.angle(), frame);
@@ -723,7 +723,7 @@ public class Frame {
    * Same as {@link #setOrientation(Quaternion)}, but if there's a {@link #constraint()} it
    * is satisfied (without modifying {@code orientation}).
    *
-   * @see #setPositionWithConstraint(Vec)
+   * @see #setPositionWithConstraint(Vector)
    * @see #setRotationWithConstraint(Quaternion)
    */
   public final void setOrientationWithConstraint(Quaternion orientation) {
@@ -776,7 +776,7 @@ public class Frame {
    * {@link #referenceFrame()}.
    *
    * @see #rotate(Quaternion)
-   * @see #translate(Vec)
+   * @see #translate(Vector)
    */
   public void scale(float s) {
     setScaling(scaling() * s);
@@ -789,7 +789,7 @@ public class Frame {
    *
    * @see #orientation()
    * @see #position()
-   * @see #setPosition(Vec)
+   * @see #setPosition(Vector)
    * @see #translation()
    */
   public float magnitude() {
@@ -853,17 +853,17 @@ public class Frame {
    * <p>
    * When {@code move} is set to {@code true}, the Frame {@link #position()} is also
    * affected by the alignment. The new Frame {@link #position()} is such that the
-   * {@code frame} frame position (computed with {@link #coordinatesOf(Vec)}, in the Frame
+   * {@code frame} frame position (computed with {@link #coordinatesOf(Vector)}, in the Frame
    * coordinates system) does not change.
    * <p>
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #referenceFrame()}).
    */
   public final void alignWithFrame(Frame frame, boolean move, float threshold) {
-    Vec[][] directions = new Vec[2][3];
+    Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
-      Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+      Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       if (frame != null)
         directions[0][d] = frame.orientation().rotate(dir);
       else
@@ -876,11 +876,11 @@ public class Frame {
     short[] index = new short[2];
     index[0] = index[1] = 0;
 
-    Vec vec = new Vec(0.0f, 0.0f, 0.0f);
+    Vector vector = new Vector(0.0f, 0.0f, 0.0f);
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
-        vec.set(directions[0][i]);
-        proj = Math.abs(vec.dot(directions[1][j]));
+        vector.set(directions[0][i]);
+        proj = Math.abs(vector.dot(directions[1][j]));
         if ((proj) >= maxProj) {
           index[0] = (short) i;
           index[1] = (short) j;
@@ -892,12 +892,12 @@ public class Frame {
     // VFrame old = this.get();// this call the get overloaded method and
     // hence addGrabber the frame to the mouse grabber
 
-    vec.set(directions[0][index[0]]);
-    float coef = vec.dot(directions[1][index[1]]);
+    vector.set(directions[0][index[0]]);
+    float coef = vector.dot(directions[1][index[1]]);
 
     if (Math.abs(coef) >= threshold) {
-      vec.set(directions[0][index[0]]);
-      Vec axis = vec.cross(directions[1][index[1]]);
+      vector.set(directions[0][index[0]]);
+      Vector axis = vector.cross(directions[1][index[1]]);
       float angle = (float) Math.asin(axis.magnitude());
       if (coef >= 0.0)
         angle = -angle;
@@ -909,13 +909,13 @@ public class Frame {
 
       // Try to align an other axis direction
       short d = (short) ((index[1] + 1) % 3);
-      Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+      Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
       dir = orientation().rotate(dir);
 
       float max = 0.0f;
       for (int i = 0; i < 3; ++i) {
-        vec.set(directions[0][i]);
-        proj = Math.abs(vec.dot(dir));
+        vector.set(directions[0][i]);
+        proj = Math.abs(vector.dot(dir));
         if (proj > max) {
           index[0] = (short) i;
           max = proj;
@@ -923,11 +923,11 @@ public class Frame {
       }
 
       if (max >= threshold) {
-        vec.set(directions[0][index[0]]);
-        axis = vec.cross(dir);
+        vector.set(directions[0][index[0]]);
+        axis = vector.cross(dir);
         angle = (float) Math.asin(axis.magnitude());
-        vec.set(directions[0][index[0]]);
-        if (vec.dot(dir) >= 0.0)
+        vector.set(directions[0][index[0]]);
+        if (vector.dot(dir) >= 0.0)
           angle = -angle;
         // setOrientation(Quaternion(axis, angle) * orientation());
         q.fromAxisAngle(axis, angle);
@@ -937,23 +937,23 @@ public class Frame {
       }
     }
     if (move) {
-      Vec center = new Vec(0.0f, 0.0f, 0.0f);
+      Vector center = new Vector(0.0f, 0.0f, 0.0f);
       if (frame != null)
         center = frame.position();
 
-      vec = Vec.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
-      vec.subtract(translation());
-      translate(vec);
+      vector = Vector.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
+      vector.subtract(translation());
+      translate(vector);
     }
   }
   //TODO Restore 2D
   /*
   public final void alignWithFrame(Frame frame, boolean move, float threshold) {
     if (is3D()) {
-      Vec[][] directions = new Vec[2][3];
+      Vector[][] directions = new Vector[2][3];
 
       for (int d = 0; d < 3; ++d) {
-        Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+        Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
         if (frame != null)
           directions[0][d] = frame.orientation().rotate(dir);
         else
@@ -966,7 +966,7 @@ public class Frame {
       short[] index = new short[2];
       index[0] = index[1] = 0;
 
-      Vec vec = new Vec(0.0f, 0.0f, 0.0f);
+      Vector vec = new Vector(0.0f, 0.0f, 0.0f);
       for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
           vec.set(directions[0][i]);
@@ -987,7 +987,7 @@ public class Frame {
 
       if (Math.abs(coef) >= threshold) {
         vec.set(directions[0][index[0]]);
-        Vec axis = vec.cross(directions[1][index[1]]);
+        Vector axis = vec.cross(directions[1][index[1]]);
         float angle = (float) Math.asin(axis.magnitude());
         if (coef >= 0.0)
           angle = -angle;
@@ -999,7 +999,7 @@ public class Frame {
 
         // Try to align an other axis direction
         short d = (short) ((index[1] + 1) % 3);
-        Vec dir = new Vec((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
+        Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
         dir = orientation().rotate(dir);
 
         float max = 0.0f;
@@ -1027,11 +1027,11 @@ public class Frame {
         }
       }
       if (move) {
-        Vec center = new Vec(0.0f, 0.0f, 0.0f);
+        Vector center = new Vector(0.0f, 0.0f, 0.0f);
         if (frame != null)
           center = frame.position();
 
-        vec = Vec.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
+        vec = Vector.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
         vec.subtract(translation());
         translate(vec);
       }
@@ -1069,12 +1069,12 @@ public class Frame {
    * Simply uses an orthogonal projection. {@code direction} does not need to be
    * normalized.
    */
-  public final void projectOnLine(Vec origin, Vec direction) {
-    Vec position = position();
-    Vec shift = Vec.subtract(origin, position);
-    Vec proj = shift;
-    proj = Vec.projectVectorOnAxis(proj, direction);
-    setPosition(Vec.add(position, Vec.subtract(shift, proj)));
+  public final void projectOnLine(Vector origin, Vector direction) {
+    Vector position = position();
+    Vector shift = Vector.subtract(origin, position);
+    Vector proj = shift;
+    proj = Vector.projectVectorOnAxis(proj, direction);
+    setPosition(Vector.add(position, Vector.subtract(shift, proj)));
   }
 
   /**
@@ -1082,14 +1082,14 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vec, Vec)}.
+   * {@link Quaternion#fromTo(Vector, Vector)}.
    *
    * @see #xAxis()
-   * @see #setYAxis(Vec)
-   * @see #setZAxis(Vec)
+   * @see #setYAxis(Vector)
+   * @see #setZAxis(Vector)
    */
-  public void setXAxis(Vec axis) {
-    rotate(new Quaternion(new Vec(1.0f, 0.0f, 0.0f), transformOf(axis)));
+  public void setXAxis(Vector axis) {
+    rotate(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), transformOf(axis)));
   }
 
   /**
@@ -1097,14 +1097,14 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vec, Vec)}.
+   * {@link Quaternion#fromTo(Vector, Vector)}.
    *
    * @see #yAxis()
-   * @see #setYAxis(Vec)
-   * @see #setZAxis(Vec)
+   * @see #setYAxis(Vector)
+   * @see #setZAxis(Vector)
    */
-  public void setYAxis(Vec axis) {
-    rotate(new Quaternion(new Vec(0.0f, 1.0f, 0.0f), transformOf(axis)));
+  public void setYAxis(Vector axis) {
+    rotate(new Quaternion(new Vector(0.0f, 1.0f, 0.0f), transformOf(axis)));
   }
 
   /**
@@ -1112,15 +1112,15 @@ public class Frame {
    * world coordinate system.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. See
-   * {@link Quaternion#fromTo(Vec, Vec)}.
+   * {@link Quaternion#fromTo(Vector, Vector)}.
    *
    * @see #zAxis()
-   * @see #setYAxis(Vec)
-   * @see #setZAxis(Vec)
+   * @see #setYAxis(Vector)
+   * @see #setZAxis(Vector)
    */
-  public void setZAxis(Vec axis) {
+  public void setZAxis(Vector axis) {
     if (is3D())
-      rotate(new Quaternion(new Vec(0.0f, 0.0f, 1.0f), transformOf(axis)));
+      rotate(new Quaternion(new Vector(0.0f, 0.0f, 1.0f), transformOf(axis)));
     else
       System.out.println("There's no point in setting the Z axis in 2D");
   }
@@ -1130,7 +1130,7 @@ public class Frame {
    *
    * @see #xAxis(boolean)
    */
-  public Vec xAxis() {
+  public Vector xAxis() {
     return xAxis(true);
   }
 
@@ -1138,18 +1138,18 @@ public class Frame {
    * Returns the x-axis of the frame, represented as a normalized vector defined in the
    * world coordinate system.
    *
-   * @see #setXAxis(Vec)
+   * @see #setXAxis(Vector)
    * @see #yAxis()
    * @see #zAxis()
    */
-  public Vec xAxis(boolean positive) {
-    Vec res;
+  public Vector xAxis(boolean positive) {
+    Vector res;
     if (is3D()) {
-      res = inverseTransformOf(new Vec(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
+      res = inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
       if (magnitude() != 1)
         res.normalize();
     } else {
-      res = inverseTransformOf(new Vec(positive ? 1.0f : -1.0f, 0.0f));
+      res = inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f));
       if (magnitude() != 1)
         res.normalize();
     }
@@ -1161,7 +1161,7 @@ public class Frame {
    *
    * @see #yAxis(boolean)
    */
-  public Vec yAxis() {
+  public Vector yAxis() {
     return yAxis(true);
   }
 
@@ -1169,18 +1169,18 @@ public class Frame {
    * Returns the y-axis of the frame, represented as a normalized vector defined in the
    * world coordinate system.
    *
-   * @see #setYAxis(Vec)
+   * @see #setYAxis(Vector)
    * @see #xAxis()
    * @see #zAxis()
    */
-  public Vec yAxis(boolean positive) {
-    Vec res;
+  public Vector yAxis(boolean positive) {
+    Vector res;
     if (is3D()) {
-      res = inverseTransformOf(new Vec(0.0f, positive ? 1.0f : -1.0f, 0.0f));
+      res = inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
       if (magnitude() != 1)
         res.normalize();
     } else {
-      res = inverseTransformOf(new Vec(0.0f, positive ? 1.0f : -1.0f));
+      res = inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f));
       if (magnitude() != 1)
         res.normalize();
     }
@@ -1192,7 +1192,7 @@ public class Frame {
    *
    * @see #zAxis(boolean)
    */
-  public Vec zAxis() {
+  public Vector zAxis() {
     return zAxis(true);
   }
 
@@ -1200,14 +1200,14 @@ public class Frame {
    * Returns the z-axis of the frame, represented as a normalized vector defined in the
    * world coordinate system.
    *
-   * @see #setZAxis(Vec)
+   * @see #setZAxis(Vector)
    * @see #xAxis()
    * @see #yAxis()
    */
-  public Vec zAxis(boolean positive) {
-    Vec res = new Vec();
+  public Vector zAxis(boolean positive) {
+    Vector res = new Vector();
     if (is3D()) {
-      res = inverseTransformOf(new Vec(0.0f, 0.0f, positive ? 1.0f : -1.0f));
+      res = inverseTransformOf(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
       if (magnitude() != 1)
         res.normalize();
     }
@@ -1342,7 +1342,7 @@ public class Frame {
    * Using this conversion, you can benefit from the powerful Frame transformation methods
    * to translate points and vectors to and from the Frame coordinate system to any other
    * Frame coordinate system (including the world coordinate system). See
-   * {@link #coordinatesOf(Vec)} and {@link #transformOf(Vec)}.
+   * {@link #coordinatesOf(Vector)} and {@link #transformOf(Vector)}.
    */
   public final void fromMatrix(Matrix pM, float scl) {
     if (pM.mat[15] == 0) {
@@ -1384,9 +1384,9 @@ public class Frame {
       }
     }
 
-    Vec x = new Vec(r[0][0], r[1][0], r[2][0]);
-    Vec y = new Vec(r[0][1], r[1][1], r[2][1]);
-    Vec z = new Vec(r[0][2], r[1][2], r[2][2]);
+    Vector x = new Vector(r[0][0], r[1][0], r[2][0]);
+    Vector y = new Vector(r[0][1], r[1][1], r[2][1]);
+    Vector z = new Vector(r[0][2], r[1][2], r[2][2]);
 
     rotation().fromRotatedBasis(x, y, z);
   }
@@ -1451,7 +1451,7 @@ public class Frame {
    * {@code null} {@link #constraint()}.
    */
   public final Frame inverse() {
-    Frame fr = new Frame(Vec.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    Frame fr = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
     fr.setReferenceFrame(referenceFrame());
     return fr;
   }
@@ -1472,7 +1472,7 @@ public class Frame {
    * transformation inverse.
    */
   public final Frame worldInverse() {
-    return (new Frame(Vec.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
+    return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
         1 / magnitude()));
   }
 
@@ -1482,9 +1482,9 @@ public class Frame {
    * Returns the Frame coordinates of the point whose position in the {@code from}
    * coordinate system is {@code src} (converts from {@code from} to Frame).
    * <p>
-   * {@link #coordinatesOfIn(Vec, Frame)} performs the inverse transformation.
+   * {@link #coordinatesOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vec coordinatesOfFrom(Vec src, Frame from) {
+  public final Vector coordinatesOfFrom(Vector src, Frame from) {
     if (this == from)
       return src;
     else if (referenceFrame() != null)
@@ -1497,11 +1497,11 @@ public class Frame {
    * Returns the {@code in} coordinates of the point whose position in the Frame
    * coordinate system is {@code src} (converts from Frame to {@code in}).
    * <p>
-   * {@link #coordinatesOfFrom(Vec, Frame)} performs the inverse transformation.
+   * {@link #coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vec coordinatesOfIn(Vec src, Frame in) {
+  public final Vector coordinatesOfIn(Vector src, Frame in) {
     Frame fr = this;
-    Vec res = src;
+    Vector res = src;
     while ((fr != null) && (fr != in)) {
       res = fr.localInverseCoordinatesOf(res);
       fr = fr.referenceFrame();
@@ -1521,22 +1521,22 @@ public class Frame {
    * {@link #referenceFrame()} coordinate system (converts from {@link #referenceFrame()}
    * to Frame).
    * <p>
-   * {@link #localInverseCoordinatesOf(Vec)} performs the inverse conversion.
+   * {@link #localInverseCoordinatesOf(Vector)} performs the inverse conversion.
    *
-   * @see #localTransformOf(Vec)
+   * @see #localTransformOf(Vector)
    */
-  public final Vec localCoordinatesOf(Vec src) {
-    return Vec.divide(rotation().inverseRotate(Vec.subtract(src, translation())), scaling());
+  public final Vector localCoordinatesOf(Vector src) {
+    return Vector.divide(rotation().inverseRotate(Vector.subtract(src, translation())), scaling());
   }
 
   /**
    * Returns the Frame coordinates of a point {@code src} defined in the world coordinate
    * system (converts from world to Frame).
    * <p>
-   * {@link #inverseCoordinatesOf(Vec)} performs the inverse conversion.
-   * {@link #transformOf(Vec)} converts vectors instead of coordinates.
+   * {@link #inverseCoordinatesOf(Vector)} performs the inverse conversion.
+   * {@link #transformOf(Vector)} converts vectors instead of coordinates.
    */
-  public final Vec coordinatesOf(Vec src) {
+  public final Vector coordinatesOf(Vector src) {
     if (referenceFrame() != null)
       return localCoordinatesOf(referenceFrame().coordinatesOf(src));
     else
@@ -1549,9 +1549,9 @@ public class Frame {
    * Returns the Frame transform of the vector whose coordinates in the {@code from}
    * coordinate system is {@code src} (converts vectors from {@code from} to Frame).
    * <p>
-   * {@link #transformOfIn(Vec, Frame)} performs the inverse transformation.
+   * {@link #transformOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vec transformOfFrom(Vec src, Frame from) {
+  public final Vector transformOfFrom(Vector src, Frame from) {
     if (this == from)
       return src;
     else if (referenceFrame() != null)
@@ -1564,11 +1564,11 @@ public class Frame {
    * Returns the {@code in} transform of the vector whose coordinates in the Frame
    * coordinate system is {@code src} (converts vectors from Frame to {@code in}).
    * <p>
-   * {@link #transformOfFrom(Vec, Frame)} performs the inverse transformation.
+   * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vec transformOfIn(Vec src, Frame in) {
+  public final Vector transformOfIn(Vector src, Frame in) {
     Frame fr = this;
-    Vec res = src;
+    Vector res = src;
     while ((fr != null) && (fr != in)) {
       res = fr.localInverseTransformOf(res);
       fr = fr.referenceFrame();
@@ -1586,24 +1586,24 @@ public class Frame {
    * Returns the {@link #referenceFrame()} coordinates of a point {@code src} defined in
    * the Frame coordinate system (converts from Frame to {@link #referenceFrame()}).
    * <p>
-   * {@link #localCoordinatesOf(Vec)} performs the inverse conversion.
+   * {@link #localCoordinatesOf(Vector)} performs the inverse conversion.
    *
-   * @see #localInverseTransformOf(Vec)
+   * @see #localInverseTransformOf(Vector)
    */
-  public final Vec localInverseCoordinatesOf(Vec src) {
-    return Vec.add(rotation().rotate(Vec.multiply(src, scaling())), translation());
+  public final Vector localInverseCoordinatesOf(Vector src) {
+    return Vector.add(rotation().rotate(Vector.multiply(src, scaling())), translation());
   }
 
   /**
    * Returns the world coordinates of the point whose position in the Frame coordinate
    * system is {@code src} (converts from Frame to world).
    * <p>
-   * {@link #coordinatesOf(Vec)} performs the inverse conversion. Use
-   * {@link #inverseTransformOf(Vec)} to transform vectors instead of coordinates.
+   * {@link #coordinatesOf(Vector)} performs the inverse conversion. Use
+   * {@link #inverseTransformOf(Vector)} to transform vectors instead of coordinates.
    */
-  public final Vec inverseCoordinatesOf(Vec src) {
+  public final Vector inverseCoordinatesOf(Vector src) {
     Frame fr = this;
-    Vec res = src;
+    Vector res = src;
     while (fr != null) {
       res = fr.localInverseCoordinatesOf(res);
       fr = fr.referenceFrame();
@@ -1615,11 +1615,11 @@ public class Frame {
    * Returns the Frame transform of a vector {@code src} defined in the world coordinate
    * system (converts vectors from world to Frame).
    * <p>
-   * {@link #inverseTransformOf(Vec)} performs the inverse transformation.
-   * {@link #coordinatesOf(Vec)} converts coordinates instead of vectors (here only the
+   * {@link #inverseTransformOf(Vector)} performs the inverse transformation.
+   * {@link #coordinatesOf(Vector)} converts coordinates instead of vectors (here only the
    * rotational part of the transformation is taken into account).
    */
-  public final Vec transformOf(Vec src) {
+  public final Vector transformOf(Vector src) {
     if (referenceFrame() != null)
       return localTransformOf(referenceFrame().transformOf(src));
     else
@@ -1630,12 +1630,12 @@ public class Frame {
    * Returns the world transform of the vector whose coordinates in the Frame coordinate
    * system is {@code src} (converts vectors from Frame to world).
    * <p>
-   * {@link #transformOf(Vec)} performs the inverse transformation. Use
-   * {@link #inverseCoordinatesOf(Vec)} to transform coordinates instead of vectors.
+   * {@link #transformOf(Vector)} performs the inverse transformation. Use
+   * {@link #inverseCoordinatesOf(Vector)} to transform coordinates instead of vectors.
    */
-  public final Vec inverseTransformOf(Vec src) {
+  public final Vector inverseTransformOf(Vector src) {
     Frame fr = this;
-    Vec res = src;
+    Vector res = src;
     while (fr != null) {
       res = fr.localInverseTransformOf(res);
       fr = fr.referenceFrame();
@@ -1648,12 +1648,12 @@ public class Frame {
    * {@link #referenceFrame()} coordinate system (converts vectors from
    * {@link #referenceFrame()} to Frame).
    * <p>
-   * {@link #localInverseTransformOf(Vec)} performs the inverse transformation.
+   * {@link #localInverseTransformOf(Vector)} performs the inverse transformation.
    *
-   * @see #localCoordinatesOf(Vec)
+   * @see #localCoordinatesOf(Vector)
    */
-  public final Vec localTransformOf(Vec src) {
-    return Vec.divide(rotation().inverseRotate(src), scaling());
+  public final Vector localTransformOf(Vector src) {
+    return Vector.divide(rotation().inverseRotate(src), scaling());
   }
 
   /**
@@ -1661,11 +1661,11 @@ public class Frame {
    * the Frame coordinate system (converts vectors from Frame to {@link #referenceFrame()}
    * ).
    * <p>
-   * {@link #localTransformOf(Vec)} performs the inverse transformation.
+   * {@link #localTransformOf(Vector)} performs the inverse transformation.
    *
-   * @see #localInverseCoordinatesOf(Vec)
+   * @see #localInverseCoordinatesOf(Vector)
    */
-  public final Vec localInverseTransformOf(Vec src) {
-    return rotation().rotate(Vec.multiply(src, scaling()));
+  public final Vector localInverseTransformOf(Vector src) {
+    return rotation().rotate(Vector.multiply(src, scaling()));
   }
 }

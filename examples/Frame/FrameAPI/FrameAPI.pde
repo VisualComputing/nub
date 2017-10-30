@@ -29,7 +29,7 @@ import remixlab.dandelion.primitives.*;
 Scene scene;
 InteractiveFrame f1, f2, f3, f4, f5;
 Vec pnt = new Vec(40, 30, 20);
-Vec vec	= new Vec(50, 50, 50);
+Vec vector	= new Vec(50, 50, 50);
 PFont font16, font13;
 Mode mode;
 color wColor = color(255, 255, 255);
@@ -148,28 +148,28 @@ void drawMode() {
   fill(125);
   switch (mode) {
   case m1: // f2 -> world
-    drawVector(f2, vec);
-    drawVector(f2.inverseTransformOf(vec));
+    drawVector(f2, vector);
+    drawVector(f2.inverseTransformOf(vector));
     break;
   case m2: // f2 -> f1
-    drawVector(f2, vec);
-    drawVector(f1, f2.transformOfIn(vec, f1));
+    drawVector(f2, vector);
+    drawVector(f1, f2.transformOfIn(vector, f1));
     break;
   case m3: // f1 -> f2
-    drawVector(f1, vec);
-    drawVector(f2, f2.localTransformOf(vec));
+    drawVector(f1, vector);
+    drawVector(f2, f2.localTransformOf(vector));
     break;
   case m4: // f3 -> f4
-    drawVector(f3, vec);
-    drawVector(f4, f4.transformOfFrom(vec, f3));
+    drawVector(f3, vector);
+    drawVector(f4, f4.transformOfFrom(vector, f3));
     break;
   case m5: // f4 -> f3
-    drawVector(f4, vec);
-    drawVector(f3, f4.transformOfIn(vec, f3));
+    drawVector(f4, vector);
+    drawVector(f3, f4.transformOfIn(vector, f3));
     break;
   case m6: // f5 -> f4
-    drawVector(f5, vec);
-    drawVector(f4, f5.transformOfIn(vec, f4));
+    drawVector(f5, vector);
+    drawVector(f4, f5.transformOfIn(vector, f4));
     break;
   }
   popStyle();

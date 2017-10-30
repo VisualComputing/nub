@@ -3,7 +3,7 @@ package frame;
 import processing.core.PApplet;
 import remixlab.bias.event.*;
 import remixlab.geom.InteractiveFrame;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
 /**
@@ -52,7 +52,7 @@ public class CajasOrientadas extends PApplet {
     scene.showAll();
     //scene.disableBackgroundHanddling();
     esfera = new Sphere(scene);
-    esfera.setPosition(new Vec(0.0f, 1.4f, 0.0f));
+    esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
     esfera.setColor(color(0, 0, 255));
 
     cajas = new Box[30];
@@ -132,7 +132,7 @@ public class CajasOrientadas extends PApplet {
       println("Scene is 3D");
     else
       println("Scene is 2D");
-    //scene.lookAt(new Vec());
+    //scene.lookAt(new Vector());
     //info();
   }
 

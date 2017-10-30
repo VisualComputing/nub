@@ -15,11 +15,11 @@ package remixlab.primitives;
  */
 public class Point {
   /**
-   * Returns whether or not this Rect matches other.
+   * Returns whether or not this Rectangle matches other.
    *
    * @param other rect
    */
-  public boolean matches(Rect other) {
+  public boolean matches(Rectangle other) {
     return this.x == other.x && this.y == other.y;
   }
 

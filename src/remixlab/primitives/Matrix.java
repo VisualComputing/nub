@@ -934,19 +934,19 @@ public class Matrix {
   /**
    * Same as {@code return multiply(source, null)}.
    *
-   * @see #multiply(Vec, Vec)
+   * @see #multiply(Vector, Vector)
    */
-  public Vec multiply(Vec source) {
+  public Vector multiply(Vector source) {
     return multiply(source, null);
   }
 
   /**
-   * Multiply this matrix by the {@code source} Vec and stores the result in the
-   * {@code target} Vec which is then returned.
+   * Multiply this matrix by the {@code source} Vector and stores the result in the
+   * {@code target} Vector which is then returned.
    */
-  public Vec multiply(Vec source, Vec target) {
+  public Vector multiply(Vector source, Vector target) {
     if (target == null) {
-      target = new Vec();
+      target = new Vector();
     }
     target.set(mat[0] * source.x() + mat[4] * source.y() + mat[8] * source.z() + mat[12],
         mat[1] * source.x() + mat[5] * source.y() + mat[9] * source.z() + mat[13],

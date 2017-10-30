@@ -13,13 +13,13 @@ package remixlab.primitives;
 /**
  * Rectangle class that provides a quick replacement for the java.awt.Rectangle.
  */
-public class Rect {
+public class Rectangle {
   /**
-   * Returns whether or not this Rect matches other.
+   * Returns whether or not this Rectangle matches other.
    *
    * @param other rect
    */
-  public boolean matches(Rect other) {
+  public boolean matches(Rectangle other) {
     return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
   }
 
@@ -47,7 +47,7 @@ public class Rect {
    * Constructs a new Rectangle whose upper-left corner is at (0, 0) in the coordinate
    * space, and whose width and height are both zero.
    */
-  public Rect() {
+  public Rectangle() {
     this(0, 0, 0, 0);
   }
 
@@ -56,7 +56,7 @@ public class Rect {
    *
    * @param r the rectangle to be copied
    */
-  public Rect(Rect r) {
+  public Rectangle(Rectangle r) {
     this(r.x, r.y, r.width, r.height);
   }
 
@@ -64,7 +64,7 @@ public class Rect {
    * Constructs a new Rectangle whose upper-left corner is specified as (x,y) and whose
    * width and height are specified by the arguments of the same name.
    */
-  public Rect(int x, int y, int width, int height) {
+  public Rectangle(int x, int y, int width, int height) {
     this.x = x;
     this.y = y;
     this.width = width;

@@ -129,11 +129,11 @@ public class Quaternion {
    * Constructs and initializes a Quaternion from the specified rotation {@link #axis() axis}
    * (non null) and {@link #angle() angle} (in radians).
    *
-   * @param axis  the Vec representing the axis
+   * @param axis  the Vector representing the axis
    * @param angle the angle in radians
-   * @see #fromAxisAngle(Vec, float)
+   * @see #fromAxisAngle(Vector, float)
    */
-  public Quaternion(Vec axis, float angle) {
+  public Quaternion(Vector axis, float angle) {
     fromAxisAngle(axis, angle);
   }
 
@@ -141,11 +141,11 @@ public class Quaternion {
    * Constructs a Quaternion that will rotate from the {@code from} direction to the {@code to}
    * direction.
    *
-   * @param from the first Vec
-   * @param to   the second Vec
-   * @see #fromTo(Vec, Vec)
+   * @param from the first Vector
+   * @param to   the second Vector
+   * @see #fromTo(Vector, Vector)
    */
-  public Quaternion(Vec from, Vec to) {
+  public Quaternion(Vector from, Vector to) {
     fromTo(from, to);
   }
 
@@ -175,12 +175,12 @@ public class Quaternion {
   /**
    * Constructs a Quaternion from the three rotated vectors of an orthogonal basis.
    *
-   * @param X 1st Orthogonal Vec
-   * @param Y 2nd Orthogonal Vec
-   * @param Z 3rd Orthogonal Vec
-   * @see #fromRotatedBasis(Vec, Vec, Vec)
+   * @param X 1st Orthogonal Vector
+   * @param Y 2nd Orthogonal Vector
+   * @param Z 3rd Orthogonal Vector
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
    */
-  public Quaternion(Vec X, Vec Y, Vec Z) {
+  public Quaternion(Vector X, Vector Y, Vector Z) {
     fromRotatedBasis(X, Y, Z);
   }
 
@@ -408,11 +408,11 @@ public class Quaternion {
    * Returns the image of {@code v} by the rotation of this vector. Same as
    * {@code this.rotate(v).}
    *
-   * @param v the Vec
-   * @see #rotate(Vec)
-   * @see #inverseRotate(Vec)
+   * @param v the Vector
+   * @see #rotate(Vector)
+   * @see #inverseRotate(Vector)
    */
-  public final Vec multiply(Vec v) {
+  public final Vector multiply(Vector v) {
     return this.rotate(v);
   }
 
@@ -421,11 +421,11 @@ public class Quaternion {
    * {@code q1.rotate(v).}
    *
    * @param q1 the Quaternion
-   * @param v  the Vec
-   * @see #rotate(Vec)
-   * @see #inverseRotate(Vec)
+   * @param v  the Vector
+   * @see #rotate(Vector)
+   * @see #inverseRotate(Vector)
    */
-  public static final Vec multiply(Quaternion q1, Vec v) {
+  public static final Vector multiply(Quaternion q1, Vector v) {
     return q1.rotate(v);
   }
 
@@ -519,9 +519,9 @@ public class Quaternion {
   /**
    * Returns the image of {@code v} by the Quaternion rotation.
    *
-   * @param v the Vec
+   * @param v the Vector
    */
-  public final Vec rotate(Vec v) {
+  public final Vector rotate(Vector v) {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
     float q22 = 2.0f * this.quat[2] * this.quat[2];
@@ -535,7 +535,7 @@ public class Quaternion {
 
     float q23 = 2.0f * this.quat[2] * this.quat[3];
 
-    return new Vec((1.0f - q11 - q22) * v.vec[0] + (q01 - q23) * v.vec[1] + (q02 + q13) * v.vec[2],
+    return new Vector((1.0f - q11 - q22) * v.vec[0] + (q01 - q23) * v.vec[1] + (q02 + q13) * v.vec[2],
         (q01 + q23) * v.vec[0] + (1.0f - q22 - q00) * v.vec[1] + (q12 - q03) * v.vec[2],
         (q02 - q13) * v.vec[0] + (q12 + q03) * v.vec[1] + (1.0f - q11 - q00) * v.vec[2]);
   }
@@ -543,11 +543,11 @@ public class Quaternion {
   /**
    * Returns the image of {@code v} by the Quaternion {@link #inverse()} rotation.
    * <p>
-   * {@link #rotate(Vec)} performs an inverse transformation.
+   * {@link #rotate(Vector)} performs an inverse transformation.
    *
-   * @param v the Vec
+   * @param v the Vector
    */
-  public final Vec inverseRotate(Vec v) {
+  public final Vector inverseRotate(Vector v) {
     Quaternion tempQuaternion = new Quaternion(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
     tempQuaternion.invert();
     return tempQuaternion.rotate(v);
@@ -560,10 +560,10 @@ public class Quaternion {
    * The {@code axis} does not need to be normalized. A null {@code axis} will result in
    * an identity Quaternion.
    *
-   * @param axis  the Vec representing the axis
+   * @param axis  the Vector representing the axis
    * @param angle the angle in radians
    */
-  public void fromAxisAngle(Vec axis, float angle) {
+  public void fromAxisAngle(Vector axis, float angle) {
     float norm = axis.magnitude();
     if (norm == 0) {
       // Null rotation
@@ -581,18 +581,18 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code fromAxisAngle(new Vec(x,y,z), angle)}.
+   * Same as {@code fromAxisAngle(new Vector(x,y,z), angle)}.
    *
-   * @see #fromAxisAngle(Vec, float)
+   * @see #fromAxisAngle(Vector, float)
    */
   public void fromAxisAngle(float x, float y, float z, float angle) {
-    fromAxisAngle(new Vec(x, y, z), angle);
+    fromAxisAngle(new Vector(x, y, z), angle);
   }
 
   /**
-   * Same as {@link #fromEulerAngles(Vec)}.
+   * Same as {@link #fromEulerAngles(Vector)}.
    */
-  public void fromTaitBryan(Vec angles) {
+  public void fromTaitBryan(Vector angles) {
     fromEulerAngles(angles);
   }
 
@@ -610,7 +610,7 @@ public class Quaternion {
    * @see #fromEulerAngles(float, float, float)
    * @see #eulerAngles()
    */
-  public void fromEulerAngles(Vec angles) {
+  public void fromEulerAngles(Vector angles) {
     fromEulerAngles(angles.vec[0], angles.vec[1], angles.vec[2]);
   }
 
@@ -632,9 +632,9 @@ public class Quaternion {
    * @see #eulerAngles()
    */
   public void fromEulerAngles(float roll, float pitch, float yaw) {
-    Quaternion qx = new Quaternion(new Vec(1, 0, 0), roll);
-    Quaternion qy = new Quaternion(new Vec(0, 1, 0), pitch);
-    Quaternion qz = new Quaternion(new Vec(0, 0, 1), yaw);
+    Quaternion qx = new Quaternion(new Vector(1, 0, 0), roll);
+    Quaternion qy = new Quaternion(new Vector(0, 1, 0), pitch);
+    Quaternion qz = new Quaternion(new Vector(0, 0, 1), yaw);
     set(qy);
     multiply(qz);
     multiply(qx);
@@ -643,7 +643,7 @@ public class Quaternion {
   /**
    * Same as {@link #eulerAngles()}.
    */
-  public Vec taitBryanAngles() {
+  public Vector taitBryanAngles() {
     return eulerAngles();
   }
 
@@ -656,26 +656,26 @@ public class Quaternion {
    * <p>
    * <b>Attention:</b> This method assumes that this Quaternion is normalized.
    *
-   * @return the Vec holding the roll (x coordinate of the vector), pitch (y coordinate of
+   * @return the Vector holding the roll (x coordinate of the vector), pitch (y coordinate of
    * the vector) and yaw angles (z coordinate of the vector). <b>Note:</b> The
    * order of the rotations that would produce this Quaternion (i.e., as with
    * {@code fromEulerAngles(roll, pitch, yaw)}) is: y,z,x.
    * @see #fromEulerAngles(float, float, float)
    */
-  public Vec eulerAngles() {
+  public Vector eulerAngles() {
     float roll, pitch, yaw;
     float test = this.quat[0] * this.quat[1] + this.quat[2] * this.quat[3];
     if (test > 0.499) { // singularity at north pole
       pitch = 2 * (float) Math.atan2(this.quat[0], this.quat[3]);
       yaw = (float) Math.PI / 2;
       roll = 0;
-      return new Vec(roll, pitch, yaw);
+      return new Vector(roll, pitch, yaw);
     }
     if (test < -0.499) { // singularity at south pole
       pitch = -2 * (float) Math.atan2(this.quat[0], this.quat[3]);
       yaw = -(float) Math.PI / 2;
       roll = 0;
-      return new Vec(roll, pitch, yaw);
+      return new Vector(roll, pitch, yaw);
     }
     float sqx = this.quat[0] * this.quat[0];
     float sqy = this.quat[1] * this.quat[1];
@@ -683,7 +683,7 @@ public class Quaternion {
     pitch = (float) Math.atan2(2 * this.quat[1] * this.quat[3] - 2 * this.quat[0] * this.quat[2], 1 - 2 * sqy - 2 * sqz);
     yaw = (float) Math.asin(2 * test);
     roll = (float) Math.atan2(2 * this.quat[0] * this.quat[3] - 2 * this.quat[1] * this.quat[2], 1 - 2 * sqx - 2 * sqz);
-    return new Vec(roll, pitch, yaw);
+    return new Vector(roll, pitch, yaw);
   }
 
   /**
@@ -694,9 +694,9 @@ public class Quaternion {
    * orthogonal to {@code from} and {@code to}, minimizing the rotation angle. This method
    * is robust and can handle small or almost identical vectors.
    *
-   * @see #fromAxisAngle(Vec, float)
+   * @see #fromAxisAngle(Vector, float)
    */
-  public void fromTo(Vec from, Vec to) {
+  public void fromTo(Vector from, Vector to) {
     float fromSqNorm = from.squaredNorm();
     float toSqNorm = to.squaredNorm();
     // Identity Quaternion when one vector is null
@@ -705,7 +705,7 @@ public class Quaternion {
       this.quat[3] = 1.0f;
     } else {
 
-      Vec axis = from.cross(to);
+      Vector axis = from.cross(to);
 
       float axisSqNorm = axis.squaredNorm();
 
@@ -723,24 +723,24 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code fromTo(new Vec(x1,y1,z1), new Vec(x2,y2,z2))}.
+   * Same as {@code fromTo(new Vector(x1,y1,z1), new Vector(x2,y2,z2))}.
    *
-   * @see #fromTo(Vec, Vec)
+   * @see #fromTo(Vector, Vector)
    */
   public void fromTo(float x1, float y1, float z1, float x2, float y2, float z2) {
-    fromTo(new Vec(x1, y1, z1), new Vec(x2, y2, z2));
+    fromTo(new Vector(x1, y1, z1), new Vector(x2, y2, z2));
   }
 
   /**
    * Set the Quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
    * 3x3 sub-matrix of the Matrix.
    *
-   * @see #fromRotatedBasis(Vec, Vec, Vec)
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
    */
   public final void fromMatrix(Matrix glMatrix) {
-    Vec x = new Vec(glMatrix.mat[0], glMatrix.mat[4], glMatrix.mat[8]);
-    Vec y = new Vec(glMatrix.mat[1], glMatrix.mat[5], glMatrix.mat[9]);
-    Vec z = new Vec(glMatrix.mat[2], glMatrix.mat[6], glMatrix.mat[10]);
+    Vector x = new Vector(glMatrix.mat[0], glMatrix.mat[4], glMatrix.mat[8]);
+    Vector y = new Vector(glMatrix.mat[1], glMatrix.mat[5], glMatrix.mat[9]);
+    Vector z = new Vector(glMatrix.mat[2], glMatrix.mat[6], glMatrix.mat[10]);
     fromRotatedBasis(x, y, z);
   }
 
@@ -750,13 +750,13 @@ public class Quaternion {
    * The three vectors do not have to be normalized but must be orthogonal and direct
    * (i,e., {@code X^Y=k*Z, with k>0}).
    *
-   * @param X the first Vec
-   * @param Y the second Vec
-   * @param Z the third Vec
-   * @see #fromRotatedBasis(Vec, Vec, Vec)
-   * @see #Quaternion(Vec, Vec)
+   * @param X the first Vector
+   * @param Y the second Vector
+   * @param Z the third Vector
+   * @see #fromRotatedBasis(Vector, Vector, Vector)
+   * @see #Quaternion(Vector, Vector)
    */
-  public final void fromRotatedBasis(Vec X, Vec Y, Vec Z) {
+  public final void fromRotatedBasis(Vector X, Vector Y, Vector Z) {
     float threeXthree[][] = new float[3][3];
     float normX = X.magnitude();
     float normY = Y.magnitude();
@@ -811,8 +811,8 @@ public class Quaternion {
    *
    * @see #angle()
    */
-  public final Vec axis() {
-    Vec res = new Vec(x(), y(), z());
+  public final Vector axis() {
+    Vector res = new Vector(x(), y(), z());
     float sinus = res.magnitude();
     if (sinus != 0)
       res.divide(sinus);
@@ -925,7 +925,7 @@ public class Quaternion {
    * <p>
    * You can create a randomly directed unit vector using:
    * <p>
-   * {@code Vec randomDir = new Vec(1.0f, 0.0f, 0.0f);} <br>
+   * {@code Vector randomDir = new Vector(1.0f, 0.0f, 0.0f);} <br>
    * {@code randomDir = Quaternion.multiply(Quaternion.randomQuat(),
    * randomDir);}
    */

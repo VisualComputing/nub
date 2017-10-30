@@ -11,7 +11,7 @@
 package remixlab.geom;
 
 import remixlab.primitives.Matrix;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 
 /**
  * Various matrix operations dandelion should support either through a third-party
@@ -168,7 +168,7 @@ public class MatrixHandler {
 
   /**
    * Cache {@code inv (P x M)} (and also {@code (P x M)} ) so that
-   * {@link Graph#unprojectedCoordinatesOf(Vec)} is
+   * {@link Graph#unprojectedCoordinatesOf(Vector)} is
    * optimized.
    *
    * @see #isProjectionViewInverseCached()

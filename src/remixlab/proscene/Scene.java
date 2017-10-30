@@ -355,7 +355,7 @@ public class Scene extends Graph implements PConstants {
    * {@code false} if none was found (in this case no {@link #center()} is set).
    */
   public boolean setCenterFromPixel(Point pixel) {
-    Vec pup = pointUnderPixel(pixel);
+    Vector pup = pointUnderPixel(pixel);
     if (pup != null) {
       setCenter(pup);
       return true;
@@ -381,9 +381,9 @@ public class Scene extends Graph implements PConstants {
    * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
    * screen. May be null if no pixel is under pixel.
    */
-  public Vec pointUnderPixel(Point pixel) {
+  public Vector pointUnderPixel(Point pixel) {
     float depth = pixelDepth(pixel);
-    Vec point = unprojectedCoordinatesOf(new Vec(pixel.x(), pixel.y(), depth));
+    Vector point = unprojectedCoordinatesOf(new Vector(pixel.x(), pixel.y(), depth));
     return (depth < 1.0f) ? point : null;
   }
 
@@ -392,7 +392,7 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #pointUnderPixel(Point)
    */
-  public Vec pointUnderPixel(float x, float y) {
+  public Vector pointUnderPixel(float x, float y) {
     return pointUnderPixel(new Point(x, y));
   }
 
@@ -592,7 +592,7 @@ public class Scene extends Graph implements PConstants {
   @Override
   protected void drawAnchorHint() {
     pg().pushStyle();
-    Vec p = eye().projectedCoordinatesOf(anchor());
+    Vector p = eye().projectedCoordinatesOf(anchor());
     pg().stroke(255);
     pg().strokeWeight(3);
     drawCross(p.vec[0], p.vec[1]);
@@ -619,7 +619,7 @@ public class Scene extends Graph implements PConstants {
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
   public boolean setAnchorFromPixel(Point pixel) {
-    Vec pup = pointUnderPixel(pixel);
+    Vector pup = pointUnderPixel(pixel);
     if (pup != null) {
       setAnchor(pup);
       // new animation
@@ -1192,7 +1192,7 @@ public class Scene extends Graph implements PConstants {
     x = jsonFrame.getJSONArray("position").getFloat(0);
     y = jsonFrame.getJSONArray("position").getFloat(1);
     z = jsonFrame.getJSONArray("position").getFloat(2);
-    Vec pos = new Vec(x, y, z);
+    Vector pos = new Vector(x, y, z);
     frame.setPosition(pos);
     x = jsonFrame.getJSONArray("orientation").getFloat(0);
     y = jsonFrame.getJSONArray("orientation").getFloat(1);
@@ -1210,7 +1210,7 @@ public class Scene extends Graph implements PConstants {
     x = jsonFrame.getJSONArray("position").getFloat(0);
     y = jsonFrame.getJSONArray("position").getFloat(1);
     z = jsonFrame.getJSONArray("position").getFloat(2);
-    Vec pos = new Vec(x, y, z);
+    Vector pos = new Vector(x, y, z);
     frame.setPosition(pos);
     if (is2D())
       frame.setOrientation(new Rot(jsonFrame.getJSONArray("orientation").getFloat(0)));
@@ -1239,14 +1239,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Used internally by {@link #saveConfig(String)}. Converts {@code vec} into a P5
+   * Used internally by {@link #saveConfig(String)}. Converts {@code vector} into a P5
    * JSONArray.
    */
-  protected JSONArray toJSONArray(Vec vec) {
+  protected JSONArray toJSONArray(Vector vector) {
     JSONArray jsonVec = new JSONArray();
-    jsonVec.setFloat(0, vec.x());
-    jsonVec.setFloat(1, vec.y());
-    jsonVec.setFloat(2, vec.z());
+    jsonVec.setFloat(0, vector.x());
+    jsonVec.setFloat(1, vector.y());
+    jsonVec.setFloat(2, vector.z());
     return jsonVec;
   }
 
@@ -1630,17 +1630,17 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Converts a {@link Vec} to a PVec.
+   * Converts a {@link Vector} to a PVec.
    */
-  public static PVector toPVector(Vec v) {
+  public static PVector toPVector(Vector v) {
     return new PVector(v.x(), v.y(), v.z());
   }
 
   /**
-   * Converts a PVec to a {@link Vec}.
+   * Converts a PVec to a {@link Vector}.
    */
-  public static Vec toVec(PVector v) {
-    return new Vec(v.x, v.y, v.z);
+  public static Vector toVec(PVector v) {
+    return new Vector(v.x, v.y, v.z);
   }
 
   /**
@@ -1846,7 +1846,7 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * {@code length} and {@code radius} define its geometry.
    * <p>
-   * Use {@link #drawArrow(Vec, Vec, float)} to place the arrow in 3D.
+   * Use {@link #drawArrow(Vector, Vector, float)} to place the arrow in 3D.
    */
   public void drawArrow(float length, float radius) {
     float head = 2.5f * (radius / length) + 0.1f;
@@ -1864,11 +1864,11 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #drawArrow(float, float)
    */
-  public void drawArrow(Vec from, Vec to, float radius) {
+  public void drawArrow(Vector from, Vector to, float radius) {
     pushModelView();
     translate(from.x(), from.y(), from.z());
-    applyModelView(new Quaternion(new Vec(0, 0, 1), Vec.subtract(to, from)).matrix());
-    drawArrow(Vec.subtract(to, from).magnitude(), radius);
+    applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
+    drawArrow(Vector.subtract(to, from).magnitude(), radius);
     popModelView();
   }
 
@@ -1883,9 +1883,9 @@ public class Scene extends Graph implements PConstants {
   /**
    * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
    *
-   * @see #drawFilledCircle(int, Vec, float)
+   * @see #drawFilledCircle(int, Vector, float)
    */
-  public void drawFilledCircle(Vec center, float radius) {
+  public void drawFilledCircle(Vector center, float radius) {
     drawFilledCircle(40, center, radius);
   }
 
@@ -1957,27 +1957,27 @@ public class Scene extends Graph implements PConstants {
    * @param n      normal of the plane that intersects the cylinder at z=h
    * @see #drawCylinder(float, float)
    */
-  public void drawHollowCylinder(int detail, float w, float h, Vec m, Vec n) {
+  public void drawHollowCylinder(int detail, float w, float h, Vector m, Vector n) {
     drawHollowCylinder(pg(), detail, w, h, m, n);
   }
 
   /**
-   * Low-level version of {@link #drawHollowCylinder(int, float, float, Vec, Vec)}.
+   * Low-level version of {@link #drawHollowCylinder(int, float, float, Vector, Vector)}.
    * <p>
-   * Calls {@link #drawHollowCylinder(int, float, float, Vec, Vec)} on {@code pg}.
+   * Calls {@link #drawHollowCylinder(int, float, float, Vector, Vector)} on {@code pg}.
    */
-  public static void drawHollowCylinder(PGraphics pg, int detail, float w, float h, Vec m, Vec n) {
+  public static void drawHollowCylinder(PGraphics pg, int detail, float w, float h, Vector m, Vector n) {
     if (!(pg instanceof PGraphics3D)) {
       Graph.showDepthWarning("drawHollowCylinder");
       return;
     }
     pg.pushStyle();
     // eqs taken from: http://en.wikipedia.org/wiki/Line-plane_intersection
-    Vec pm0 = new Vec(0, 0, 0);
-    Vec pn0 = new Vec(0, 0, h);
-    Vec l0 = new Vec();
-    Vec l = new Vec(0, 0, 1);
-    Vec p = new Vec();
+    Vector pm0 = new Vector(0, 0, 0);
+    Vector pn0 = new Vector(0, 0, h);
+    Vector l0 = new Vector();
+    Vector l = new Vector(0, 0, 1);
+    Vector p = new Vector();
     float x, y, d;
 
     pg.noStroke();
@@ -1988,13 +1988,13 @@ public class Scene extends Graph implements PConstants {
       y = w * PApplet.sin(t * PApplet.TWO_PI / detail);
       l0.set(x, y, 0);
 
-      d = (m.dot(Vec.subtract(pm0, l0))) / (l.dot(m));
-      p = Vec.add(Vec.multiply(l, d), l0);
+      d = (m.dot(Vector.subtract(pm0, l0))) / (l.dot(m));
+      p = Vector.add(Vector.multiply(l, d), l0);
       vertex(pg, p.x(), p.y(), p.z());
 
       l0.setZ(h);
-      d = (n.dot(Vec.subtract(pn0, l0))) / (l.dot(n));
-      p = Vec.add(Vec.multiply(l, d), l0);
+      d = (n.dot(Vector.subtract(pn0, l0))) / (l.dot(n));
+      p = Vector.add(Vector.multiply(l, d), l0);
       vertex(pg, p.x(), p.y(), p.z());
     }
     pg.endShape();
@@ -2395,9 +2395,9 @@ public class Scene extends Graph implements PConstants {
         ortho = true;
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
-    Vec[] points = new Vec[2];
-    points[0] = new Vec();
-    points[1] = new Vec();
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
 
     if (is2D() || ortho) {
       float[] wh = getBoundaryWidthHeight();
@@ -2498,9 +2498,9 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    drawPlane(pg, points[1], new Vec(0, 0, -1), false);
+    drawPlane(pg, points[1], new Vector(0, 0, -1), false);
     // near plane
-    drawPlane(pg, points[0], new Vec(0, 0, 1), texture);
+    drawPlane(pg, points[0], new Vector(0, 0, 1), texture);
 
     pg.popStyle();
   }
@@ -2554,7 +2554,7 @@ public class Scene extends Graph implements PConstants {
       if (type() == Type.ORTHOGRAPHIC)
         ortho = true;
     // 0 is the upper left coordinates of the near corner, 1 for the far one
-    Vec corner = new Vec();
+    Vector corner = new Vector();
     if (is2D() || ortho) {
       float[] wh = getBoundaryWidthHeight();
       corner.setX(wh[0] * 1 / eye().magnitude());
@@ -2567,10 +2567,10 @@ public class Scene extends Graph implements PConstants {
         corner.setX(corner.y() * aspectRatio());
       }
     }
-    drawPlane(pg, corner, new Vec(0, 0, 1), texture);
+    drawPlane(pg, corner, new Vector(0, 0, 1), texture);
   }
 
-  protected void drawPlane(PGraphics pg, Vec corner, Vec normal, boolean texture) {
+  protected void drawPlane(PGraphics pg, Vector corner, Vector normal, boolean texture) {
     pg.pushStyle();
     // near plane
     pg.beginShape(PApplet.QUAD);
@@ -2594,15 +2594,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjector(PGraphics, Vec)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjector(PGraphics, Vector)} on the scene {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
    *
-   * @see #drawProjector(PGraphics, Vec)
+   * @see #drawProjector(PGraphics, Vector)
    * @see #drawProjectors(List)
    */
-  public void drawProjector(Vec src) {
+  public void drawProjector(Vector src) {
     drawProjector(pg(), src);
   }
 
@@ -2616,10 +2616,10 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
    *
-   * @see #drawProjector(PGraphics, Vec)
+   * @see #drawProjector(PGraphics, Vector)
    * @see #drawProjectors(PGraphics, List)
    */
-  public void drawProjector(PGraphics pg, Vec src) {
+  public void drawProjector(PGraphics pg, Vector src) {
     drawProjectors(pg, Arrays.asList(src));
   }
 
@@ -2630,9 +2630,9 @@ public class Scene extends Graph implements PConstants {
    * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
    *
    * @see #drawProjectors(PGraphics, List)
-   * @see #drawProjector(Vec)
+   * @see #drawProjector(Vector)
    */
-  public void drawProjectors(List<Vec> src) {
+  public void drawProjectors(List<Vector> src) {
     drawProjectors(pg(), src);
   }
 
@@ -2647,9 +2647,9 @@ public class Scene extends Graph implements PConstants {
    * Note that if {@code pg() == pg} this method has not effect at all.
    *
    * @see #drawProjectors(PGraphics, List)
-   * @see #drawProjector(PGraphics, Vec)
+   * @see #drawProjector(PGraphics, Vector)
    */
-  public void drawProjectors(PGraphics pg, List<Vec> src) {
+  public void drawProjectors(PGraphics pg, List<Vector> src) {
     if (pg() == pg) {
       System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
       return;
@@ -2657,24 +2657,24 @@ public class Scene extends Graph implements PConstants {
     pg.pushStyle();
     if (is2D()) {
       pg.beginShape(PApplet.POINTS);
-      for (Vec s : src)
+      for (Vector s : src)
         Scene.vertex(pg, s.x(), s.y());
       pg.endShape();
     } else {
       // if ORTHOGRAPHIC: do it in the eye coordinate system
       // if PERSPECTIVE: do it in the world coordinate system
-      Vec o = new Vec();
+      Vector o = new Vector();
       if (type() == Type.ORTHOGRAPHIC) {
         pg.pushMatrix();
         applyTransformation(eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = eye().inverseCoordinatesOf(new Vec());
+        o = eye().inverseCoordinatesOf(new Vector());
       pg.beginShape(PApplet.LINES);
-      for (Vec s : src) {
+      for (Vector s : src) {
         if (type() == Type.ORTHOGRAPHIC) {
-          Vec v = eye().coordinatesOf(s);
+          Vector v = eye().coordinatesOf(s);
           Scene.vertex(pg, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
@@ -2854,11 +2854,11 @@ public class Scene extends Graph implements PConstants {
    * @param center       Circle screen center.
    * @param radius       Circle screen radius.
    */
-  public void drawFilledCircle(int subdivisions, Vec center, float radius) {
+  public void drawFilledCircle(int subdivisions, Vector center, float radius) {
     drawFilledCircle(pg(), subdivisions, center, radius);
   }
 
-  public void drawFilledCircle(PGraphics pg, int subdivisions, Vec center, float radius) {
+  public void drawFilledCircle(PGraphics pg, int subdivisions, Vector center, float radius) {
     pg.pushStyle();
     float precision = PApplet.TWO_PI / subdivisions;
     float x = center.x();
@@ -2884,11 +2884,11 @@ public class Scene extends Graph implements PConstants {
    * @param center Square screen center.
    * @param edge   Square edge length.
    */
-  public void drawFilledSquare(Vec center, float edge) {
+  public void drawFilledSquare(Vector center, float edge) {
     drawFilledSquare(pg(), center, edge);
   }
 
-  public void drawFilledSquare(PGraphics pg, Vec center, float edge) {
+  public void drawFilledSquare(PGraphics pg, Vector center, float edge) {
     float half_edge = edge / 2f;
     pg.pushStyle();
     float x = center.x();
@@ -2911,11 +2911,11 @@ public class Scene extends Graph implements PConstants {
    * @param center Center of the target on the screen
    * @param length Length of the target in pixels
    */
-  public void drawShooterTarget(Vec center, float length) {
+  public void drawShooterTarget(Vector center, float length) {
     drawShooterTarget(pg(), center, length);
   }
 
-  public void drawShooterTarget(PGraphics pg, Vec center, float length) {
+  public void drawShooterTarget(PGraphics pg, Vector center, float length) {
     float half_length = length / 2f;
     pg.pushStyle();
     float x = center.x();
@@ -2970,7 +2970,7 @@ public class Scene extends Graph implements PConstants {
     // System.err.println("addGrabber iFrame to motionAgent before drawing picking target");
     // return;
     // }
-    Vec center = projectedCoordinatesOf(iFrame.position());
+    Vector center = projectedCoordinatesOf(iFrame.position());
     if (inputHandler().isInputGrabber(iFrame)) {
       pg().pushStyle();
       pg().strokeWeight(2 * pg().strokeWeight);
@@ -3044,7 +3044,7 @@ public class Scene extends Graph implements PConstants {
   public static void drawTorusSolenoid(PGraphics pg, int faces, int detail, float insideRadius, float outsideRadius) {
     pg.pushStyle();
     pg.noStroke();
-    Vec v1, v2;
+    Vector v1, v2;
     int b, ii, jj, a;
     float eps = PApplet.TWO_PI / detail;
     for (a = 0; a < faces; a += 2) {
@@ -3055,10 +3055,10 @@ public class Scene extends Graph implements PConstants {
         jj = ii + 1;
         float ai = eps * jj;
         float alpha = a * PApplet.TWO_PI / faces + ai;
-        v1 = new Vec((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
+        v1 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
                 (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         alpha = b * PApplet.TWO_PI / faces + ai;
-        v2 = new Vec((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
+        v2 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
                 (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         vertex(pg, v1.x(), v1.y(), v1.z());
         vertex(pg, v2.x(), v2.y(), v2.z());

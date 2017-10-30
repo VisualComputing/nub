@@ -12,7 +12,7 @@ package remixlab.primitives.constraint;
 
 import remixlab.primitives.Frame;
 import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 
 /**
  * An interface class for Frame constraints. This interface API aims to conform that of the
@@ -37,10 +37,10 @@ public abstract class Constraint {
    * accordingly instead.
    * <p>
    * {@code translation} is expressed in the local Frame coordinate system. Use
-   * {@link Frame#inverseTransformOf(Vec)} to express it in the
+   * {@link Frame#inverseTransformOf(Vector)} to express it in the
    * world coordinate system if needed.
    */
-  public Vec constrainTranslation(Vec translation, Frame frame) {
+  public Vector constrainTranslation(Vector translation, Frame frame) {
     return translation.get();
   }
 
@@ -49,9 +49,9 @@ public abstract class Constraint {
    * empty (no filtering).
    * <p>
    * Overload this method in your own Constraint class to define a new rotation
-   * constraint. See {@link #constrainTranslation(Vec, Frame)} for details.
+   * constraint. See {@link #constrainTranslation(Vector, Frame)} for details.
    * <p>
-   * Use {@link Frame#inverseTransformOf(Vec)} on the
+   * Use {@link Frame#inverseTransformOf(Vector)} on the
    * {@code rotation} {@link Quaternion#axis()} to express
    * {@code rotation} in the world coordinate system if needed.
    */

@@ -35,8 +35,8 @@ import java.util.ListIterator;
  * {@code kfi = new KeyFrameInterpolator( myScene, myFrame );}<br>
  * {@code // With an anonymous frame would look like this: kfi = new KeyFrameInterpolator( myScene );}
  * <br>
- * {@code kfi.addKeyFrame( new Frame( new Vec(1,0,0), new Quaternion() ) );}<br>
- * {@code kfi.addKeyFrame( new Frame( new Vec(2,1,0), new Quaternion() ) );}<br>
+ * {@code kfi.addKeyFrame( new Frame( new Vector(1,0,0), new Quaternion() ) );}<br>
+ * {@code kfi.addKeyFrame( new Frame( new Vector(2,1,0), new Quaternion() ) );}<br>
  * {@code // ...and so on for all the keyFrames.}<br>
  * {@code kfi.startInterpolation();}<br>
  * <p>
@@ -104,7 +104,7 @@ public class KeyFrameInterpolator {
     }
 
     protected Quaternion tgQuaternion;
-    protected Vec tgPVec;
+    protected Vector tgPVector;
     protected float tm;
     protected InteractiveFrame frm;
 
@@ -130,11 +130,11 @@ public class KeyFrameInterpolator {
       return tgQuaternion;
     }
 
-    Vec tgP() {
-      return tgPVec;
+    Vector tgP() {
+      return tgPVector;
     }
 
-    Vec position() {
+    Vector position() {
       return frame().position();
     }
 
@@ -151,7 +151,7 @@ public class KeyFrameInterpolator {
     }
 
     void computeTangent(KeyFrame prev, KeyFrame next) {
-      tgPVec = Vec.multiply(Vec.subtract(next.position(), prev.position()), 0.5f);
+      tgPVector = Vector.multiply(Vector.subtract(next.position(), prev.position()), 0.5f);
       tgQuaternion = Quaternion.squadTangent(prev.orientation(), orientation(), next.orientation());
     }
   }
@@ -181,9 +181,9 @@ public class KeyFrameInterpolator {
   private boolean valuesAreValid;
   private boolean currentFrmValid;
   private boolean splineCacheIsValid;
-  private Vec pv1, pv2;
+  private Vector pv1, pv2;
   // Option 2 (interpolate magnitude using a spline)
-  // private Vec sv1, sv2;
+  // private Vector sv1, sv2;
 
   // S C E N E
   protected Graph gScene;
@@ -713,17 +713,17 @@ public class KeyFrameInterpolator {
         kf[3] = (index < keyFrameList.size()) ? keyFrameList.get(index) : null;
 
         while (kf[2] != null) {
-          Vec pdiff = Vec.subtract(kf[2].position(), kf[1].position());
-          Vec pvec1 = Vec.add(Vec.multiply(pdiff, 3.0f), Vec.multiply(kf[1].tgP(), (-2.0f)));
-          pvec1 = Vec.subtract(pvec1, kf[2].tgP());
-          Vec pvec2 = Vec.add(Vec.multiply(pdiff, (-2.0f)), kf[1].tgP());
-          pvec2 = Vec.add(pvec2, kf[2].tgP());
+          Vector pdiff = Vector.subtract(kf[2].position(), kf[1].position());
+          Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(kf[1].tgP(), (-2.0f)));
+          pvec1 = Vector.subtract(pvec1, kf[2].tgP());
+          Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), kf[1].tgP());
+          pvec2 = Vector.add(pvec2, kf[2].tgP());
 
           for (int step = 0; step < nbSteps; ++step) {
             Frame frame = new Frame();
             float alpha = step / (float) nbSteps;
-            frame.setPosition(Vec.add(kf[1].position(),
-                Vec.multiply(Vec.add(kf[1].tgP(), Vec.multiply(Vec.add(pvec1, Vec.multiply(pvec2, alpha)), alpha)), alpha)));
+            frame.setPosition(Vector.add(kf[1].position(),
+                Vector.multiply(Vector.add(kf[1].tgP(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)));
             if (gScene.is3D()) {
               frame.setOrientation(
                   Quaternion.squad(kf[1].orientation(), kf[1].tgQ(), kf[2].tgQ(), kf[2].orientation(), alpha));
@@ -731,9 +731,9 @@ public class KeyFrameInterpolator {
               // linear interpolation
               float start = kf[1].orientation().angle();
               float stop = kf[2].orientation().angle();
-              frame.setOrientation(new Quaternion(new Vec(0,0,1), start + (stop - start) * alpha));
+              frame.setOrientation(new Quaternion(new Vector(0,0,1), start + (stop - start) * alpha));
             }
-            frame.setMagnitude(Vec.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
+            frame.setMagnitude(Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             path.add(frame.get());
           }
 
@@ -888,12 +888,12 @@ public class KeyFrameInterpolator {
   }
 
   protected void updateSplineCache() {
-    Vec deltaP = Vec.subtract(keyFrameList.get(currentFrame2.nextIndex()).position(),
+    Vector deltaP = Vector.subtract(keyFrameList.get(currentFrame2.nextIndex()).position(),
         keyFrameList.get(currentFrame1.nextIndex()).position());
-    pv1 = Vec.add(Vec.multiply(deltaP, 3.0f), Vec.multiply(keyFrameList.get(currentFrame1.nextIndex()).tgP(), (-2.0f)));
-    pv1 = Vec.subtract(pv1, keyFrameList.get(currentFrame2.nextIndex()).tgP());
-    pv2 = Vec.add(Vec.multiply(deltaP, (-2.0f)), keyFrameList.get(currentFrame1.nextIndex()).tgP());
-    pv2 = Vec.add(pv2, keyFrameList.get(currentFrame2.nextIndex()).tgP());
+    pv1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(keyFrameList.get(currentFrame1.nextIndex()).tgP(), (-2.0f)));
+    pv1 = Vector.subtract(pv1, keyFrameList.get(currentFrame2.nextIndex()).tgP());
+    pv2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), keyFrameList.get(currentFrame1.nextIndex()).tgP());
+    pv2 = Vector.add(pv2, keyFrameList.get(currentFrame2.nextIndex()).tgP());
     splineCacheIsValid = true;
   }
 
@@ -927,11 +927,11 @@ public class KeyFrameInterpolator {
     else
       alpha = (time - keyFrameList.get(currentFrame1.nextIndex()).time()) / dt;
 
-    Vec pos = Vec.add(keyFrameList.get(currentFrame1.nextIndex()).position(), Vec.multiply(
-        Vec.add(keyFrameList.get(currentFrame1.nextIndex()).tgP(),
-            Vec.multiply(Vec.add(pv1, Vec.multiply(pv2, alpha)), alpha)), alpha));
+    Vector pos = Vector.add(keyFrameList.get(currentFrame1.nextIndex()).position(), Vector.multiply(
+        Vector.add(keyFrameList.get(currentFrame1.nextIndex()).tgP(),
+            Vector.multiply(Vector.add(pv1, Vector.multiply(pv2, alpha)), alpha)), alpha));
 
-    float mag = Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
+    float mag = Vector.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
         keyFrameList.get(currentFrame2.nextIndex()).magnitude(), alpha);
 
     Quaternion q;
@@ -941,7 +941,7 @@ public class KeyFrameInterpolator {
           keyFrameList.get(currentFrame2.nextIndex()).tgQ(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation(), alpha);
     } else {
-      q = new Quaternion(new Vec(0,0,1), Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
+      q = new Quaternion(new Vector(0,0,1), Vector.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation().angle(), (alpha)));
     }
 

@@ -4,7 +4,7 @@ import processing.core.PApplet;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
 import remixlab.geom.InteractiveFrame;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
 /**
@@ -95,11 +95,11 @@ public class Sphere {
     c = myC;
   }
 
-  public void setPosition(Vec pos) {
+  public void setPosition(Vector pos) {
     iFrame.setPosition(pos);
   }
 
-  public Vec getPosition() {
+  public Vector getPosition() {
     return iFrame.position();
   }
 }

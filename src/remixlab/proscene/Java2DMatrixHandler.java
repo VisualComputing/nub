@@ -15,7 +15,7 @@ import processing.core.PMatrix2D;
 import remixlab.geom.MatrixHandler;
 import remixlab.primitives.Matrix;
 import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 
 /**
  * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics
@@ -41,7 +41,7 @@ class Java2DMatrixHandler extends MatrixHandler {
     cacheProjection(scene().computeProjection());
     cacheView(scene().computeView());
     cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
-    Vec pos = gScene.eye().position();
+    Vector pos = gScene.eye().position();
     //TODO needs test
     Quaternion o = gScene.eye().orientation();
     translate(gScene.width() / 2, gScene.height() / 2);
@@ -59,7 +59,7 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void beginScreenDrawing() {
-    Vec pos = gScene.eye().position();
+    Vector pos = gScene.eye().position();
     //TODO needs test
     Quaternion o = gScene.eye().orientation();
 

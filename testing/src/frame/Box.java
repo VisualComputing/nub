@@ -4,7 +4,7 @@ import processing.core.PApplet;
 import remixlab.bias.event.*;
 import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vec;
+import remixlab.primitives.Vector;
 import remixlab.proscene.*;
 
 /**
@@ -107,17 +107,17 @@ public class Box {
     c = myC;
   }
 
-  public Vec getPosition() {
+  public Vector getPosition() {
     return iFrame.position();
   }
 
   public void setPosition() {
     float low = -100;
     float high = 100;
-    iFrame.setPosition(new Vec(scene.pApplet().random(low, high), scene.pApplet().random(low, high), scene.pApplet().random(low, high)));
+    iFrame.setPosition(new Vector(scene.pApplet().random(low, high), scene.pApplet().random(low, high), scene.pApplet().random(low, high)));
   }
 
-  public void setPosition(Vec pos) {
+  public void setPosition(Vector pos) {
     iFrame.setPosition(pos);
   }
 
@@ -125,8 +125,8 @@ public class Box {
     return (Quaternion) iFrame.orientation();
   }
 
-  public void setOrientation(Vec v) {
-    Vec to = Vec.subtract(v, iFrame.position());
-    iFrame.setOrientation(new Quaternion(new Vec(0, 1, 0), to));
+  public void setOrientation(Vector v) {
+    Vector to = Vector.subtract(v, iFrame.position());
+    iFrame.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
   }
 }

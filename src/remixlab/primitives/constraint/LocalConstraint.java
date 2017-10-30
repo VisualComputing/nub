@@ -26,9 +26,9 @@ public class LocalConstraint extends AxisPlaneConstraint {
    * {@link #translationConstraintDirection()}.
    */
   @Override
-  public Vec constrainTranslation(Vec translation, Frame frame) {
-    Vec res = new Vec(translation.vec[0], translation.vec[1], translation.vec[2]);
-    Vec proj;
+  public Vector constrainTranslation(Vector translation, Frame frame) {
+    Vector res = new Vector(translation.vec[0], translation.vec[1], translation.vec[2]);
+    Vector proj;
     switch (translationConstraintType()) {
       case FREE:
         break;
@@ -37,17 +37,17 @@ public class LocalConstraint extends AxisPlaneConstraint {
           break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());
-        res = Vec.projectVectorOnPlane(translation, proj);
+        res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());
-        res = Vec.projectVectorOnAxis(translation, proj);
+        res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
-        res = new Vec(0.0f, 0.0f, 0.0f);
+        res = new Vector(0.0f, 0.0f, 0.0f);
         break;
     }
     return res;
@@ -69,9 +69,9 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case AXIS:
         if (frame.is2D())
           break;
-        Vec axis = rotationConstraintDirection();
-        Vec quat = new Vec(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
-        quat = Vec.projectVectorOnAxis(quat, axis);
+        Vector axis = rotationConstraintDirection();
+        Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+        quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
         break;
       case FORBIDDEN:
@@ -94,9 +94,9 @@ public class LocalConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         if (rotation instanceof Quaternion) {
-          Vec axis = rotationConstraintDirection();
-          Vec quat = new Vec(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
-          quat = Vec.projectVectorOnAxis(quat, axis);
+          Vector axis = rotationConstraintDirection();
+          Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+          quat = Vector.projectVectorOnAxis(quat, axis);
           res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
         }
         break;

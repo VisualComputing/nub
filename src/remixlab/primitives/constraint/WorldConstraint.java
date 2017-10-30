@@ -25,9 +25,9 @@ public class WorldConstraint extends AxisPlaneConstraint {
    * {@link #translationConstraintDirection()}.
    */
   @Override
-  public Vec constrainTranslation(Vec translation, Frame frame) {
-    Vec res = new Vec(translation.vec[0], translation.vec[1], translation.vec[2]);
-    Vec proj;
+  public Vector constrainTranslation(Vector translation, Frame frame) {
+    Vector res = new Vector(translation.vec[0], translation.vec[1], translation.vec[2]);
+    Vector proj;
     switch (translationConstraintType()) {
       case FREE:
         break;
@@ -36,21 +36,21 @@ public class WorldConstraint extends AxisPlaneConstraint {
           break;
         if (frame.referenceFrame() != null) {
           proj = frame.referenceFrame().transformOf(translationConstraintDirection());
-          res = Vec.projectVectorOnPlane(translation, proj);
+          res = Vector.projectVectorOnPlane(translation, proj);
         } else
-          res = Vec.projectVectorOnPlane(translation, translationConstraintDirection());
+          res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
         break;
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         if (frame.referenceFrame() != null) {
           proj = frame.referenceFrame().transformOf(translationConstraintDirection());
-          res = Vec.projectVectorOnAxis(translation, proj);
+          res = Vector.projectVectorOnAxis(translation, proj);
         } else
-          res = Vec.projectVectorOnAxis(translation, translationConstraintDirection());
+          res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());
         break;
       case FORBIDDEN:
-        res = new Vec(0.0f, 0.0f, 0.0f);
+        res = new Vector(0.0f, 0.0f, 0.0f);
         break;
     }
     return res;
@@ -72,9 +72,9 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case AXIS:
         if (frame.is2D())
           break;
-        Vec quat = new Vec(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
-        Vec axis = frame.transformOf(rotationConstraintDirection());
-        quat = Vec.projectVectorOnAxis(quat, axis);
+        Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+        Vector axis = frame.transformOf(rotationConstraintDirection());
+        quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
         break;
       case FORBIDDEN:
@@ -97,9 +97,9 @@ public class WorldConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         if (rotation instanceof Quaternion) {
-          Vec quat = new Vec(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
-          Vec axis = frame.transformOf(rotationConstraintDirection());
-          quat = Vec.projectVectorOnAxis(quat, axis);
+          Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+          Vector axis = frame.transformOf(rotationConstraintDirection());
+          quat = Vector.projectVectorOnAxis(quat, axis);
           res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
         }
         break;
