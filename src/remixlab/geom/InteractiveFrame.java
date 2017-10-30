@@ -29,9 +29,9 @@ import java.util.List;
  * {@link #translationSensitivity()}, {@link #rotationSensitivity()} and
  * {@link #scalingSensitivity()}). A generic-frame may thus be attached to some of your
  * scene objects to control their motion using an {@link Agent}, such
- * as the {@link AbstractScene#motionAgent()} and the
- * {@link AbstractScene#keyAgent()} (see
- * {@link #InteractiveFrame(AbstractScene)} and all the constructors that take an scene
+ * as the {@link Graph#motionAgent()} and the
+ * {@link Graph#keyAgent()} (see
+ * {@link #InteractiveFrame(Graph)} and all the constructors that take an scene
  * parameter). To attach a generic-frame to {@code MyObject} use code like this:
  * <p>
  * <pre>
@@ -50,16 +50,16 @@ import java.util.List;
  * </pre>
  * <p>
  * See {@link #applyTransformation()}, {@link #applyWorldTransformation()},
- * {@link #scene()}, {@link AbstractScene#pushModelView()} and
- * {@link AbstractScene#popModelView()}
+ * {@link #scene()}, {@link Graph#pushModelView()} and
+ * {@link Graph#popModelView()}
  * <p>
- * A frame may also be defined as the {@link AbstractScene#eye()} (see {@link #isEyeFrame()}
- * and {@link AbstractScene#setEye(Frame)}).
+ * A frame may also be defined as the {@link Graph#eye()} (see {@link #isEyeFrame()}
+ * and {@link Graph#setEye(Frame)}).
  * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
  * For instance, with a move-to-the-right user gesture the
- * {@link AbstractScene#eye()} hasGrabber to go to the <i>left</i>,
+ * {@link Graph#eye()} hasGrabber to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A interactive-frame can be set
- * as the {@link AbstractScene#eye()}, see {@link AbstractScene#setEye(Frame)}.
+ * as the {@link Graph#eye()}, see {@link Graph#setEye(Frame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent2, boolean)},
@@ -89,7 +89,7 @@ import java.util.List;
  * <p>
  * A generic-frame is loosely-coupled with the scene object used to instantiate it, i.e.,
  * the transformation it represents may be applied to a different scene. See
- * {@link #applyTransformation()} and {@link #applyTransformation(AbstractScene)}.
+ * {@link #applyTransformation()} and {@link #applyTransformation(Graph)}.
  * <p>
  * Two generic-frames can be synced together ({@link #sync(InteractiveFrame, InteractiveFrame)}),
  * meaning that they will share their global parameters (position, orientation and
@@ -136,7 +136,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   protected static final long FLY_UPDATE_PERDIOD = 20;
 
   protected long lastUpdate;
-  protected AbstractScene gScene;
+  protected Graph gScene;
 
   private float grabsInputThreshold;
 
@@ -164,72 +164,72 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Same as {@code this(scn, null, new Vec(), new Quat(), 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn) {
+  public InteractiveFrame(Graph scn) {
     this(scn, null, new Vec(), new Quat(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, p, new Quat(), 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p) {
+  public InteractiveFrame(Graph scn, Vec p) {
     this(scn, null, p, new Quat(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Quat r) {
+  public InteractiveFrame(Graph scn, Quat r) {
     this(scn, null, new Vec(), r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), new Quat(), s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, float s) {
+  public InteractiveFrame(Graph scn, float s) {
     this(scn, null, new Vec(), new Quat(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, new Quat(), s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p, float s) {
+  public InteractiveFrame(Graph scn, Vec p, float s) {
     this(scn, null, p, new Quat(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p, Quat r) {
+  public InteractiveFrame(Graph scn, Vec p, Quat r) {
     this(scn, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Quat r, float s) {
+  public InteractiveFrame(Graph scn, Quat r, float s) {
     this(scn, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, Vec p, Quat r, float s) {
+  public InteractiveFrame(Graph scn, Vec p, Quat r, float s) {
     this(scn, null, p, r, s);
   }
 
@@ -238,7 +238,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * {@code this(referenceFrame.scene(), referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame) {
     this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), 1);
@@ -248,7 +248,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Vec p) {
     this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1);
@@ -257,7 +257,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Quat r) {
     this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1);
@@ -266,7 +266,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, float s) {
     this(referenceFrame.scene(), referenceFrame, new Vec(),new Quat(), s);
@@ -276,7 +276,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), s)}
    * .
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Vec p, float s) {
     this(referenceFrame.scene(), referenceFrame, p, new Quat(), s);
@@ -285,16 +285,16 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, r, 1)}.
    *
-   * @see #InteractiveFrame(AbstractScene, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Quat r) {
+  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quat r) {
     this(referenceFrame.scene(), referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(AbstractScene, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, Vec, Quat, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Quat r, float s) {
     this(referenceFrame.scene(), referenceFrame, new Vec(), r, s);
@@ -305,10 +305,10 @@ public class InteractiveFrame extends Frame implements Grabber {
    * {@link #referenceFrame()}, and {@code p}, {@code r} and {@code s} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * The {@link AbstractScene#inputHandler()} will attempt to addGrabber
+   * The {@link Graph#inputHandler()} will attempt to addGrabber
    * the generic-frame to all its {@link InputHandler#agents()}, such
-   * as the {@link AbstractScene#motionAgent()} and the
-   * {@link AbstractScene#keyAgent()}.
+   * as the {@link Graph#motionAgent()} and the
+   * {@link Graph#keyAgent()}.
    * <p>
    * The generic-frame sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
@@ -319,7 +319,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  public InteractiveFrame(AbstractScene scn, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
+  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
@@ -331,7 +331,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     setFlySpeed(0.01f * scene().radius());
   }
 
-  protected void init(AbstractScene scn) {
+  protected void init(Graph scn) {
     gScene = scn;
     id = ++scene().nodeCount;
     // unlikely but theoretically possible
@@ -437,7 +437,7 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Returns a frame with this frame current parameters. The newly returned frame is
-   * detached from the scene {@link AbstractScene#frames(boolean)}
+   * detached from the scene {@link Graph#frames(boolean)}
    * list.
    * <p>
    * This method is useful to interact animations for all eye interpolation routines.
@@ -553,7 +553,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Procedure called by the scene frame traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes.
    *
-   * @see AbstractScene#traverseTree()
+   * @see Graph#traverseTree()
    */
   protected void visit() {
   }
@@ -565,7 +565,7 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Enables {@link #visit()} of this frame when performing the
-   * {@link AbstractScene#traverseTree()}.
+   * {@link Graph#traverseTree()}.
    *
    * @see #disableVisit()
    * @see #toggleVisit()
@@ -577,7 +577,7 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Disables {@link #visit()} of this frame when performing the
-   * {@link AbstractScene#traverseTree()}.
+   * {@link Graph#traverseTree()}.
    *
    * @see #enableVisit()
    * @see #toggleVisit()
@@ -589,7 +589,7 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Toggles {@link #visit()} of this frame when performing the
-   * {@link AbstractScene#traverseTree()}.
+   * {@link Graph#traverseTree()}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -601,7 +601,7 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Returns true if {@link #visit()} of this frame when performing the
-   * {@link AbstractScene#traverseTree() is enabled}.
+   * {@link Graph#traverseTree() is enabled}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -615,14 +615,14 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Enables drawing of the frame picking hint. Only meaningful if frame is not
    * an eye frame.
    *
-   * @see AbstractScene#pickingVisualHint()
+   * @see Graph#pickingVisualHint()
    * @see #disableVisualHint()
    * @see #toggleVisualHint()
    * @see #isVisualHintEnabled()
    */
   public void enableVisualHint() {
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("enableVisualHint", false);
+      Graph.showOnlyEyeWarning("enableVisualHint", false);
       return;
     }
     hint = true;
@@ -632,14 +632,14 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Disables drawing of the frame picking hint. Only meaningful if frame is not
    * an eye frame.
    *
-   * @see AbstractScene#pickingVisualHint()
+   * @see Graph#pickingVisualHint()
    * @see #enableVisualHint()
    * @see #toggleVisualHint()
    * @see #isVisualHintEnabled()
    */
   public void disableVisualHint() {
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("disableVisualHint", false);
+      Graph.showOnlyEyeWarning("disableVisualHint", false);
       return;
     }
     hint = false;
@@ -649,14 +649,14 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Toggles drawing of the frame picking hint. Only meaningful if frame is not
    * an eye frame.
    *
-   * @see AbstractScene#pickingVisualHint()
+   * @see Graph#pickingVisualHint()
    * @see #enableVisualHint()
    * @see #disableVisualHint()
    * @see #isVisualHintEnabled()
    */
   public void toggleVisualHint() {
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("toggleVisualHint", false);
+      Graph.showOnlyEyeWarning("toggleVisualHint", false);
       return;
     }
     hint = !hint;
@@ -666,14 +666,14 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns {@code true} if drawing of the frame picking hint is enabled and
    * {@code false} otherwise. Always returns {@code false} if frame is an eye frame.
    *
-   * @see AbstractScene#pickingVisualHint()
+   * @see Graph#pickingVisualHint()
    * @see #enableVisualHint()
    * @see #disableVisualHint()
    * @see #toggleVisualHint()
    */
   public boolean isVisualHintEnabled() {
     if (isEyeFrame())
-      AbstractScene.showOnlyEyeWarning("isVisualHintEnabled", false);
+      Graph.showOnlyEyeWarning("isVisualHintEnabled", false);
     return hint;
   }
 
@@ -682,9 +682,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * Note that if this {@link #isEyeFrame()} then returns {@code eye().scene()}.
    *
-   * @see AbstractScene#eye()
+   * @see Graph#eye()
    */
-  public AbstractScene scene() {
+  public Graph scene() {
     return gScene;
   }
 
@@ -693,7 +693,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * generic-frames can only be attached to an eye at construction times. Refer to the
    * generic-frame constructors that take an eye parameter.
    *
-   * @see AbstractScene#eye()
+   * @see Graph#eye()
    */
   public boolean isEyeFrame() {
     return scene().eye() == this;
@@ -742,7 +742,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
   public boolean track(KeyEvent event) {
-    AbstractScene.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
     return false;
   }
 
@@ -754,7 +754,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   public boolean track(MotionEvent1 event) {
     if (isEyeFrame())
       return false;
-    AbstractScene.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
     return false;
   }
 
@@ -765,7 +765,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (isEyeFrame())
       return false;
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("track");
+      Graph.showEventVariationWarning("track");
       return false;
     }
     return track(event.x(), event.y());
@@ -874,7 +874,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Convenience function that simply calls {@code applyTransformation(scene)}. It applies
    * the transformation defined by the frame to the scene used to instantiated.
    *
-   * @see #applyTransformation(AbstractScene)
+   * @see #applyTransformation(Graph)
    * @see #matrix()
    */
   public void applyTransformation() {
@@ -886,7 +886,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * applies the world transformation defined by the frame to the scene used to
    * instantiated.
    *
-   * @see #applyWorldTransformation(AbstractScene)
+   * @see #applyWorldTransformation(Graph)
    * @see #worldMatrix()
    */
   public void applyWorldTransformation() {
@@ -902,9 +902,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #applyTransformation()
    * @see #matrix()
-   * @see AbstractScene#applyTransformation(Frame)
+   * @see Graph#applyTransformation(Frame)
    */
-  public void applyTransformation(AbstractScene scn) {
+  public void applyTransformation(Graph scn) {
     scn.applyTransformation(this);
   }
 
@@ -915,9 +915,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #applyWorldTransformation()
    * @see #worldMatrix()
-   * @see AbstractScene#applyWorldTransformation(Frame)
+   * @see Graph#applyWorldTransformation(Frame)
    */
-  public void applyWorldTransformation(AbstractScene scn) {
+  public void applyWorldTransformation(Graph scn) {
     scn.applyWorldTransformation(this);
   }
 
@@ -928,7 +928,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   @Override
   protected void modified() {
-    lastUpdate = AbstractScene.frameCount;
+    lastUpdate = Graph.frameCount;
     if (children() != null)
       for (InteractiveFrame child : children())
         child.modified();
@@ -1302,8 +1302,8 @@ public class InteractiveFrame extends Frame implements Grabber {
 
   /**
    * Rotates the scene-frame by its {@link #spinningRotation()} or around the
-   * {@link AbstractScene#anchor()} when this scene-frame is the
-   * {@link AbstractScene#eye()}. Called by a timer when the
+   * {@link Graph#anchor()} when this scene-frame is the
+   * {@link Graph#eye()}. Called by a timer when the
    * generic-frame {@link #isSpinning()}.
    * <p>
    * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
@@ -1349,7 +1349,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       return originalDirection(motionEvent2);
     else {
-      AbstractScene.showMinDOFsWarning("originalDirection", 2);
+      Graph.showMinDOFsWarning("originalDirection", 2);
       return 0;
     }
   }
@@ -1380,7 +1380,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public Quat deformedBallRotation(MotionEvent2 event, Vec center) {
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("deformedBallRotation");
+      Graph.showEventVariationWarning("deformedBallRotation");
       return null;
     }
     float cx = center.x();
@@ -1408,7 +1408,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /*
   public Rotation deformedBallRotation(MotionEvent2 event, Vec center) {
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("deformedBallRotation");
+      Graph.showEventVariationWarning("deformedBallRotation");
       return null;
     }
     if (gScene.is2D()) {
@@ -1635,7 +1635,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void translateZ(MotionEvent1 event, float sens) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("translateZ");
+      Graph.showDepthWarning("translateZ");
       return;
     }
     translate(screenToVec(Vec.multiply(new Vec(0.0f, 0.0f, isEyeFrame() ? -event.dx() : event.dx()), sens)));
@@ -1660,7 +1660,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void translateZ(boolean up) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("translateZ");
+      Graph.showDepthWarning("translateZ");
       return;
     }
     translate(screenToVec(
@@ -1682,7 +1682,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       translate(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("translate", 2);
+      Graph.showMinDOFsWarning("translate", 2);
   }
 
   /**
@@ -1701,7 +1701,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent3 != null)
       translateXYZ(motionEvent3);
     else
-      AbstractScene.showMinDOFsWarning("translateXYZ", 3);
+      Graph.showMinDOFsWarning("translateXYZ", 3);
   }
 
   /**
@@ -1718,7 +1718,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void translateXYZ(MotionEvent3 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("translateXYZ");
+      Graph.showDepthWarning("translateXYZ");
       return;
     }
     translate(screenToVec(
@@ -1729,7 +1729,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   public void zoomOnAnchor(MotionEvent event) {
     zoomOnAnchor(event, true);
@@ -1738,7 +1738,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   protected void zoomOnAnchor(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
@@ -1749,7 +1749,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   protected void zoomOnAnchor(MotionEvent1 event, float sens) {
     Vec direction = Vec.subtract(gScene.anchor(), position());
@@ -1763,7 +1763,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   public void zoomOnAnchorPos() {
     zoomOnAnchor(true);
@@ -1772,7 +1772,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   public void zoomOnAnchorNeg() {
     zoomOnAnchor(false);
@@ -1781,7 +1781,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-anchor conversion routine.
    *
-   * @see AbstractScene#anchor()
+   * @see Graph#anchor()
    */
   protected void zoomOnAnchor(boolean in) {
     Vec direction = Vec.subtract(gScene.anchor(), position());
@@ -1798,7 +1798,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   public void zoomOnRegion(MotionEvent event) {
     MotionEvent2 dof2 = MotionEvent.event2(event);
     if (dof2 == null) {
-      AbstractScene.showMinDOFsWarning("zoomOnRegion", 2);
+      Graph.showMinDOFsWarning("zoomOnRegion", 2);
       return;
     }
     zoomOnRegion(dof2);
@@ -1809,11 +1809,11 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void zoomOnRegion(MotionEvent2 event) {
     if (!isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("zoomOnRegion");
+      Graph.showOnlyEyeWarning("zoomOnRegion");
       return;
     }
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("zoomOnRegion");
+      Graph.showEventVariationWarning("zoomOnRegion");
       return;
     }
     if (event.fired()) {
@@ -1862,7 +1862,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void rotateX(MotionEvent1 event, float sens) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateX");
+      Graph.showDepthWarning("rotateX");
       return;
     }
     spin(screenToQuat(computeAngle(event) * (isEyeFrame() ? -sens : sens), 0, 0), event.speed(), event.delay());
@@ -1887,7 +1887,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void rotateX(boolean up) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateX");
+      Graph.showDepthWarning("rotateX");
       return;
     }
     rotate(screenToQuat(computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0, 0));
@@ -1921,7 +1921,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void rotateY(MotionEvent1 event, float sens) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateY");
+      Graph.showDepthWarning("rotateY");
       return;
     }
     spin(screenToQuat(0, computeAngle(event) * (isEyeFrame() ? -sens : sens), 0), event.speed(), event.delay());
@@ -1946,7 +1946,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   protected void rotateY(boolean up) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateY");
+      Graph.showDepthWarning("rotateY");
       return;
     }
     Quat rt = screenToQuat(0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
@@ -2036,7 +2036,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent3 != null)
       rotateXYZ(motionEvent3);
     else
-      AbstractScene.showMinDOFsWarning("rotateXYZ", 3);
+      Graph.showMinDOFsWarning("rotateXYZ", 3);
   }
 
   /**
@@ -2044,7 +2044,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void rotateXYZ(MotionEvent3 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateXYZ");
+      Graph.showDepthWarning("rotateXYZ");
       return;
     }
     if (event.fired() && gScene.is3D())
@@ -2062,7 +2062,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       rotate(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("rotate", 2);
+      Graph.showMinDOFsWarning("rotate", 2);
   }
 
   /**
@@ -2070,7 +2070,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void rotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("rotate");
+      Graph.showEventVariationWarning("rotate");
       return;
     }
     if (event.fired())
@@ -2101,7 +2101,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /*
   public void rotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("rotate");
+      Graph.showEventVariationWarning("rotate");
       return;
     }
     if (event.fired())
@@ -2214,7 +2214,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       moveForward(motionEvent2, forward);
     else
-      AbstractScene.showMinDOFsWarning("moveForward", 2);
+      Graph.showMinDOFsWarning("moveForward", 2);
   }
 
   /**
@@ -2250,7 +2250,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       drive(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("drive", 2);
+      Graph.showMinDOFsWarning("drive", 2);
   }
 
   /**
@@ -2258,7 +2258,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void drive(MotionEvent2 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("drive");
+      Graph.showDepthWarning("drive");
       return;
     }
     if (event.fired()) {
@@ -2286,7 +2286,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       rotateCAD(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("rotateCAD", 2);
+      Graph.showMinDOFsWarning("rotateCAD", 2);
   }
 
   /**
@@ -2294,11 +2294,11 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void rotateCAD(MotionEvent2 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rotateCAD");
+      Graph.showDepthWarning("rotateCAD");
       return;
     }
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("rotateCAD");
+      Graph.showEventVariationWarning("rotateCAD");
       return;
     }
     if (event.fired())
@@ -2331,7 +2331,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent6 != null)
       hinge(motionEvent6);
     else
-      AbstractScene.showMinDOFsWarning("hinge", 6);
+      Graph.showMinDOFsWarning("hinge", 6);
   }
 
   /**
@@ -2339,11 +2339,11 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void hinge(MotionEvent6 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("hinge");
+      Graph.showDepthWarning("hinge");
       return;
     }
     if (!isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("hinge");
+      Graph.showOnlyEyeWarning("hinge");
       return;
     }
     // aka google earth navigation
@@ -2397,7 +2397,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       screenTranslate(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("screenTranslate", 2);
+      Graph.showMinDOFsWarning("screenTranslate", 2);
   }
 
   /**
@@ -2421,7 +2421,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       screenRotate(motionEvent2);
     else
-      AbstractScene.showMinDOFsWarning("screenRotate", 2);
+      Graph.showMinDOFsWarning("screenRotate", 2);
   }
 
   /**
@@ -2429,7 +2429,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void screenRotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      AbstractScene.showEventVariationWarning("screenRotate");
+      Graph.showEventVariationWarning("screenRotate");
       return;
     }
     if (event.fired()) {
@@ -2485,7 +2485,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (isEyeFrame())
       scene().setAnchorFromPixel(new Point(event.x(), event.y()));
     else
-      AbstractScene.showOnlyEyeWarning("anchorFromPixel");
+      Graph.showOnlyEyeWarning("anchorFromPixel");
   }
   */
 
@@ -2623,7 +2623,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public Quat screenToQuat(float roll, float pitch, float yaw) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("screenToQuat");
+      Graph.showDepthWarning("screenToQuat");
       return null;
     }
 
@@ -2769,9 +2769,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * generic-frame by {@link #moveForward(MotionEvent, boolean)}.
    * <p>
    * <b>Attention:</b> When frame is set as the
-   * {@link AbstractScene#eye()}, this value is set according
-   * to the {@link AbstractScene#radius()} by
-   * {@link AbstractScene#setRadius(float)}.
+   * {@link Graph#eye()}, this value is set according
+   * to the {@link Graph#radius()} by
+   * {@link Graph#setRadius(float)}.
    */
   public float flySpeed() {
     return flySpd;
@@ -2781,8 +2781,8 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Sets the {@link #flySpeed()}, defined in virtual scene units.
    * <p>
    * Default value is 0.0, but it is modified according to the
-   * {@link AbstractScene#radius()} when the generic-frame is set
-   * as the {@link AbstractScene#eye()}.
+   * {@link Graph#radius()} when the generic-frame is set
+   * as the {@link Graph#eye()}.
    */
   public void setFlySpeed(float speed) {
     flySpd = speed;
@@ -2793,18 +2793,18 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (motionEvent2 != null)
       return rollPitchQuaternion(motionEvent2);
     else {
-      AbstractScene.showMinDOFsWarning("rollPitchQuaternion", 2);
+      Graph.showMinDOFsWarning("rollPitchQuaternion", 2);
       return null;
     }
   }
 
   /**
    * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * mouse roll (X axis) and pitch ( {@link AbstractScene#sceneUpVector()} axis).
+   * mouse roll (X axis) and pitch ( {@link Graph#sceneUpVector()} axis).
    */
   protected Quat rollPitchQuaternion(MotionEvent2 event) {
     if (gScene.is2D()) {
-      AbstractScene.showDepthWarning("rollPitchQuaternion");
+      Graph.showDepthWarning("rollPitchQuaternion");
       return null;
     }
     float deltaX = event.dx();
@@ -2839,7 +2839,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public float grabsInputThreshold() {
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("grabsInputThreshold", false);
+      Graph.showOnlyEyeWarning("grabsInputThreshold", false);
       return 0;
     }
     if (pickingPrecision() == PickingPrecision.ADAPTIVE)
@@ -2856,7 +2856,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public PickingPrecision pickingPrecision() {
     if (isEyeFrame())
-      AbstractScene.showOnlyEyeWarning("pickingPrecision", false);
+      Graph.showOnlyEyeWarning("pickingPrecision", false);
     return pkgnPrecision;
   }
 
@@ -2888,7 +2888,7 @@ public class InteractiveFrame extends Frame implements Grabber {
           "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived feneric frames and scenes that support a pickingBuffer.");
     pkgnPrecision = precision;
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("setPickingPrecision", false);
+      Graph.showOnlyEyeWarning("setPickingPrecision", false);
       return;
     }
   }
@@ -2926,7 +2926,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    */
   public void setGrabsInputThreshold(float threshold) {
     if (isEyeFrame()) {
-      AbstractScene.showOnlyEyeWarning("setGrabsInputThreshold", false);
+      Graph.showOnlyEyeWarning("setGrabsInputThreshold", false);
       return;
     }
     if (threshold >= 0)

@@ -39,7 +39,7 @@ import java.util.List;
  * {@link #isFrameReachable(InteractiveFrame)}, {@link #branch(InteractiveFrame, boolean)}, and
  * {@link #clearTree()}.
  * <p>
- * Each AbstractScene provides the following main object instances:
+ * Each Graph provides the following main object instances:
  * <ol>
  * <li>An {@link #eye()} which represents the 2D/3D controlling object.</li>
  * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For
@@ -55,7 +55,7 @@ import java.util.List;
  * {@link MatrixHandler} interface.</li>
  * </ol>
  */
-public class AbstractScene {
+public class Graph {
   // 1. Eye
   protected Frame eye;
   protected long lastEqUpdate;
@@ -160,7 +160,7 @@ public class AbstractScene {
    * @see #setVisualHints(int)
    * @see #setEye(Frame)
    */
-  public AbstractScene(int w, int h) {
+  public Graph(int w, int h) {
     setWidth(w);
     setHeight(h);
 
@@ -282,8 +282,8 @@ public class AbstractScene {
    * rotate.
    * <p>
    * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link AbstractScene#eye()} and
-   * {@link AbstractScene#setUpVector(Vec)} modify this value and should be
+   * {@link Graph#eye()} and
+   * {@link Graph#setUpVector(Vec)} modify this value and should be
    * used instead.
    */
   public Vec sceneUpVector() {
@@ -1003,7 +1003,7 @@ public class AbstractScene {
   /**
    * Returns the number of frames displayed since the scene was instantiated.
    * <p>
-   * Use {@code AbstractScene.frameCount} to retrieve the number of frames displayed since
+   * Use {@code Graph.frameCount} to retrieve the number of frames displayed since
    * the first scene was instantiated.
    */
   public long frameCount() {
@@ -1685,7 +1685,7 @@ public class AbstractScene {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
+   * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #ballVisibility(Vec, float)
@@ -1716,7 +1716,7 @@ public class AbstractScene {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
+   * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #isPointVisible(Vec)
@@ -1724,7 +1724,7 @@ public class AbstractScene {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see AbstractScene#enableBoundaryEquations()
+   * @see Graph#enableBoundaryEquations()
    */
   public Visibility ballVisibility(Vec center, float radius) {
     if (!areBoundaryEquationsEnabled())
@@ -1754,7 +1754,7 @@ public class AbstractScene {
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
    * Scene setup (with
-   * {@link AbstractScene#enableBoundaryEquations()}).
+   * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vec)
    * @see #isPointVisible(Vec)
@@ -1762,7 +1762,7 @@ public class AbstractScene {
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #getBoundaryEquations()
-   * @see AbstractScene#enableBoundaryEquations()
+   * @see Graph#enableBoundaryEquations()
    */
   public Visibility boxVisibility(Vec p1, Vec p2) {
     if (!areBoundaryEquationsEnabled())
@@ -1798,7 +1798,7 @@ public class AbstractScene {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
-   * {@link AbstractScene#enableBoundaryEquations()} which
+   * {@link Graph#enableBoundaryEquations()} which
    * automatically update the frustum equations every frame instead.
    *
    * @see #computeBoundaryEquations(float[][])
@@ -1841,7 +1841,7 @@ public class AbstractScene {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
-   * {@link AbstractScene#enableBoundaryEquations()} which
+   * {@link Graph#enableBoundaryEquations()} which
    * automatically update the frustum equations every frame instead.
    *
    * @see #computeBoundaryEquations()
@@ -2137,8 +2137,8 @@ public class AbstractScene {
    * {@code false}.
    * <p>
    * Vertices must given in clockwise order if
-   * {@link AbstractScene#isLeftHanded()} or in counter-clockwise
-   * order if {@link AbstractScene#isRightHanded()}.
+   * {@link Graph#isLeftHanded()} or in counter-clockwise
+   * order if {@link Graph#isRightHanded()}.
    *
    * @param a first face vertex
    * @param b second face vertex
@@ -2487,8 +2487,8 @@ public class AbstractScene {
    * {@link #zFar()} values. See the {@link #center()}
    * documentation.
    * <p>
-   * Note that {@link AbstractScene#radius()} (resp.
-   * {@link AbstractScene#setRadius(float)} simply call this
+   * Note that {@link Graph#radius()} (resp.
+   * {@link Graph#setRadius(float)} simply call this
    * method on its associated eye.
    *
    * @see #setBoundingBox(Vec, Vec)

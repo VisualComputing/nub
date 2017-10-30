@@ -18,7 +18,7 @@ import remixlab.primitives.Vec;
  * implementation or locally.
  */
 public class MatrixHandler {
-  protected AbstractScene gScene;
+  protected Graph gScene;
   protected Mat projection, view, modelview;
   protected Mat projectionViewMat, projectionViewInverseMat;
   protected boolean isProjViwInvCached, projectionViewMatHasInv;
@@ -37,7 +37,7 @@ public class MatrixHandler {
    *
    * @param scn
    */
-  public MatrixHandler(AbstractScene scn) {
+  public MatrixHandler(Graph scn) {
     gScene = scn;
     projection = new Mat();
     view = new Mat();
@@ -49,7 +49,7 @@ public class MatrixHandler {
   /**
    * Returns the scene this object belongs to
    */
-  public AbstractScene scene() {
+  public Graph scene() {
     return gScene;
   }
 
@@ -168,7 +168,7 @@ public class MatrixHandler {
 
   /**
    * Cache {@code inv (P x M)} (and also {@code (P x M)} ) so that
-   * {@link remixlab.geom.AbstractScene#unprojectedCoordinatesOf(Vec)} is
+   * {@link Graph#unprojectedCoordinatesOf(Vec)} is
    * optimized.
    *
    * @see #isProjectionViewInverseCached()

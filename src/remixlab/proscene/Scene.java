@@ -17,7 +17,7 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.fpstiming.TimingTask;
-import remixlab.geom.AbstractScene;
+import remixlab.geom.Graph;
 import remixlab.geom.InteractiveFrame;
 import remixlab.geom.KeyFrameInterpolator;
 import remixlab.geom.MatrixHandler;
@@ -34,7 +34,7 @@ import java.util.List;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing Scene. The Scene is a specialization of the
- * {@link AbstractScene}, providing an interface between Dandelion
+ * {@link Graph}, providing an interface between Dandelion
  * and Processing.
  * <p>
  * <h3>Usage</h3> To use a Scene you have two main choices:
@@ -61,7 +61,7 @@ import java.util.List;
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
  */
-public class Scene extends AbstractScene implements PConstants {
+public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean javaTiming;
   public static final String prettyVersion = "3.0.0";
@@ -129,7 +129,7 @@ public class Scene extends AbstractScene implements PConstants {
    * off-screen scene requires the drawing code to be enclose by {@link #beginDraw()} and
    * {@link #endDraw()}. To display an off-screen scene call {@link #display()}.
    *
-   * @see AbstractScene#AbstractScene(int, int)
+   * @see Graph#Graph(int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
    */
@@ -558,7 +558,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
+   * Copy paste from Graph but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawAxesHint() {
@@ -569,7 +569,7 @@ public class Scene extends AbstractScene implements PConstants {
   }
 
   /*
-   * Copy paste from AbstractScene but we addGrabber the style (color, stroke, etc) here.
+   * Copy paste from Graph but we addGrabber the style (color, stroke, etc) here.
    */
   @Override
   protected void drawPickingHint() {
@@ -647,7 +647,7 @@ public class Scene extends AbstractScene implements PConstants {
    * </ol>
    * <p>
    * <b>Note</b> that this method overloads
-   * {@link AbstractScene#preDraw()} where a call to
+   * {@link Graph#preDraw()} where a call to
    * {@link #displayVisualHints()} is done. Here, however, it needs to be bypassed for the
    * PApplet.background() method not to hide the display of the {@link #visualHints()}.
    * The {@link #displayVisualHints()} mostly happens then at the {@link #draw()} method,
@@ -1154,7 +1154,7 @@ public class Scene extends AbstractScene implements PConstants {
           pruneBranch(keyFrame);
           keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
           keyFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.FIXED);
-          keyFrame.setGrabsInputThreshold(AbstractScene.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
+          keyFrame.setGrabsInputThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
           if (!eye().keyFrameInterpolatorMap().containsKey(id))
@@ -1291,7 +1291,7 @@ public class Scene extends AbstractScene implements PConstants {
    * {@link #pApplet()} draw() loop.
    * <p>
    * This method is implementing by simply calling
-   * {@link AbstractScene#traverseTree()}.
+   * {@link Graph#traverseTree()}.
    * <p>
    * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
    * eye update which happens at {@link #preDraw()}) and before any other transformation
@@ -1445,7 +1445,7 @@ public class Scene extends AbstractScene implements PConstants {
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
           + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     startCoordCalls++;
-    p.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in AbstractScene.bS
+    p.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
     disableDepthTest(p);
     // if-else same as:
     // matrixHandler(p).beginScreenDrawing();
@@ -1486,7 +1486,7 @@ public class Scene extends AbstractScene implements PConstants {
     else
       matrixHelper(p).endScreenDrawing();
     enableDepthTest(p);
-    p.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in AbstractScene.eS
+    p.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
 
   // TODO took from Abstract
@@ -1911,7 +1911,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   public static void drawCylinder(PGraphics pg, float w, float h) {
     if (!(pg instanceof PGraphics3D)) {
-      AbstractScene.showDepthWarning("drawCylinder");
+      Graph.showDepthWarning("drawCylinder");
       return;
     }
     pg.pushStyle();
@@ -1968,7 +1968,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   public static void drawHollowCylinder(PGraphics pg, int detail, float w, float h, Vec m, Vec n) {
     if (!(pg instanceof PGraphics3D)) {
-      AbstractScene.showDepthWarning("drawHollowCylinder");
+      Graph.showDepthWarning("drawHollowCylinder");
       return;
     }
     pg.pushStyle();
@@ -2046,7 +2046,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   public static void drawCone(PGraphics pg, int detail, float x, float y, float r, float h) {
     if (!(pg instanceof PGraphics3D)) {
-      AbstractScene.showDepthWarning("drawCone");
+      Graph.showDepthWarning("drawCone");
       return;
     }
     pg.pushStyle();
@@ -2109,7 +2109,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   public static void drawCone(PGraphics pg, int detail, float x, float y, float r1, float r2, float h) {
     if (!(pg instanceof PGraphics3D)) {
-      AbstractScene.showDepthWarning("drawCone");
+      Graph.showDepthWarning("drawCone");
       return;
     }
     pg.pushStyle();

@@ -10,7 +10,7 @@
 
 package remixlab.primitives;
 
-import remixlab.geom.AbstractScene;
+import remixlab.geom.Graph;
 import remixlab.primitives.constraint.Constraint;
 import remixlab.geom.InteractiveFrame;
 
@@ -76,7 +76,7 @@ import remixlab.geom.InteractiveFrame;
  * sufficient to prevent ambiguities. These notions are obviously identical when the
  * {@link #referenceFrame()} is {@code null}, i.e., when the Frame is defined in the world
  * coordinate system (the one you are left with after calling
- * {@link AbstractScene#preDraw()}).
+ * {@link Graph#preDraw()}).
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
@@ -1220,7 +1220,7 @@ public class Frame {
    * Returns the local transformation matrix represented by the Frame.
    * <p>
    * This method could be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link AbstractScene#modelView()} matrix from a Frame
+   * {@link Graph#modelView()} matrix from a Frame
    * hierarchy. For example, with this Frame hierarchy:
    * <p>
    * {@code Frame body = new Frame();} <br>
@@ -1289,7 +1289,7 @@ public class Frame {
    * Returns the global transformation matrix represented by the Frame.
    * <p>
    * This method should be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link AbstractScene#modelView()} matrix from a Frame:
+   * {@link Graph#modelView()} matrix from a Frame:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
    * {@code Frame fr = new Frame(pos, Rotation(from, to));} <br>

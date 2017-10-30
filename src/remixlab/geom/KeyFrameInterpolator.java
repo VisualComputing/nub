@@ -186,7 +186,7 @@ public class KeyFrameInterpolator {
   // private Vec sv1, sv2;
 
   // S C E N E
-  protected AbstractScene gScene;
+  protected Graph gScene;
 
   /**
    * Convenience constructor that simply calls {@code this(scn, new Frame())}.
@@ -194,16 +194,16 @@ public class KeyFrameInterpolator {
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * KeyFrameInterpolator.
    *
-   * @see #KeyFrameInterpolator(AbstractScene, Frame)
+   * @see #KeyFrameInterpolator(Graph, Frame)
    */
-  public KeyFrameInterpolator(AbstractScene scn) {
+  public KeyFrameInterpolator(Graph scn) {
     this(scn, new Frame());
   }
 
   /**
    * Same as {@code this(frame.scene(), frame)}.
    *
-   * @see #KeyFrameInterpolator(AbstractScene, Frame)
+   * @see #KeyFrameInterpolator(Graph, Frame)
    */
   public KeyFrameInterpolator(InteractiveFrame frame) {
     this(frame.scene(), frame);
@@ -217,7 +217,7 @@ public class KeyFrameInterpolator {
    * {@link #interpolationTime()}, {@link #interpolationSpeed()} and
    * {@link #interpolationPeriod()} are set to their default values.
    */
-  public KeyFrameInterpolator(AbstractScene scn, Frame frame) {
+  public KeyFrameInterpolator(Graph scn, Frame frame) {
     gScene = scn;
     keyFrameList = new ArrayList<KeyFrame>();
     path = new ArrayList<Frame>();
@@ -292,7 +292,7 @@ public class KeyFrameInterpolator {
   /**
    * Returns the scene this object belongs to
    */
-  public AbstractScene scene() {
+  public Graph scene() {
     return gScene;
   }
 
@@ -301,7 +301,7 @@ public class KeyFrameInterpolator {
    * {@link #checkValidity()}.
    */
   protected void checked() {
-    lUpdate = AbstractScene.frameCount;
+    lUpdate = Graph.frameCount;
   }
 
   /**

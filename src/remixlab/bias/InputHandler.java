@@ -26,7 +26,7 @@ import java.util.List;
  * At runtime, the inputGrabber handler should continuously run the two loops defined in
  * {@link #handle()}. Therefore, simply attach a call to {@link #handle()} at the end of
  * your main event (drawing) loop for that to take effect (like it's done in
- * <b>dandelion</b> by the <b>AbstractScene.postDraw()</b> method).
+ * <b>dandelion</b> by the <b>Graph.postDraw()</b> method).
  */
 public class InputHandler {
   // D E V I C E S & E V E N T S
@@ -42,7 +42,7 @@ public class InputHandler {
 
   /**
    * Main handler method. Call it at the end of your main event (drawing) loop (like it's
-   * done in <b>dandelion</b> by the <b>AbstractScene.postDraw()</b> method)
+   * done in <b>dandelion</b> by the <b>Graph.postDraw()</b> method)
    * <p>
    * The handle comprises the following two loops:
    * <p>
