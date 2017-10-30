@@ -640,7 +640,6 @@ public class Scene extends AbstractScene implements PConstants {
   /**
    * Called before your main drawing and performs the following:
    * <ol>
-   * <li>Handles the {@link #avatar()}</li>
    * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
@@ -658,12 +657,7 @@ public class Scene extends AbstractScene implements PConstants {
    */
   @Override
   public void preDraw() {
-    // 1. Avatar
-    //TODO restore
-    //if (avatar() != null && (!eye().anyInterpolationStarted()))
-    if (avatar() != null)
-      eye().setWorldMatrix(avatar().trackingEyeFrame());
-    // 2. Eye, raster scene
+    // 1. Eye, raster scene
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof InteractiveFrame) {

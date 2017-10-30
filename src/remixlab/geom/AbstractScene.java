@@ -85,23 +85,20 @@ public class AbstractScene {
   // 2. Matrix helper
   protected MatrixHandler matrixHandler;
 
-  // 3. Avatar
-  protected Trackable trck;
-
-  // 4. Handlers
+  // 3. Handlers
   protected TimingHandler tHandler;
   protected InputHandler iHandler;
 
-  // 5. Agents
+  // 4. Agents
   protected Agent defMotionAgent, defKeyboardAgent;
 
-  // 6. Graphs
+  // 5. Graph
   protected List<InteractiveFrame> seeds;
   public int nodeCount;
   static public long frameCount;
   protected final long deltaCount;
 
-  // 7. Display flags
+  // 6. Display flags
   protected int visualHintMask;
   public final static int AXES = 1 << 0;
   public final static int GRID = 1 << 1;
@@ -1517,7 +1514,6 @@ public class AbstractScene {
   /**
    * Called before your main drawing and performs the following:
    * <ol>
-   * <li>Handles the {@link #avatar()}</li>
    * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
@@ -1528,12 +1524,7 @@ public class AbstractScene {
    * @see #postDraw()
    */
   public void preDraw() {
-    // 1. Avatar
-    //TODO define
-    //if (avatar() != null && (!eye().anyInterpolationStarted()))
-    if (avatar() != null)
-      eye().setWorldMatrix(avatar().trackingEyeFrame());
-    // 2. Eye, raster scene
+    // 1. Eye, raster scene
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof InteractiveFrame) {
@@ -1638,72 +1629,6 @@ public class AbstractScene {
   // 0. Optimization stuff
 
   // public abstract long frameCount();
-
-  // 1. Associated objects
-
-  // AVATAR STUFF
-
-  /**
-   * Returns the avatar object to be trackedGrabber by the Camera when it is in Third Person
-   * mode.
-   * <p>
-   * Simply returns {@code null} if no avatar hasGrabber been set.
-   */
-  public Trackable avatar() {
-    return trck;
-  }
-
-  /**
-   * Sets the avatar object to be trackedGrabber by the Camera when it is in Third Person mode.
-   *
-   * @see #resetAvatar()
-   */
-  public void setAvatar(Trackable t) {
-    trck = t;
-    if (avatar() == null)
-      return;
-    //TODO experimental
-    if(eye() instanceof InteractiveFrame)
-      ((InteractiveFrame)eye()).stopSpinning();
-    if (avatar() instanceof InteractiveFrame)
-      ((InteractiveFrame) (avatar())).stopSpinning();
-
-    // interact small animation ;)
-    //TODO restore
-    //if (eye().anyInterpolationStarted())
-      //eye().stopInterpolations();
-    // eye().interpolateTo(avatar().eyeFrame());//works only when eyeFrame
-    // scaling = magnitude
-    InteractiveFrame eyeFrameCopy = avatar().trackingEyeFrame().get();
-    eyeFrameCopy.setMagnitude(avatar().trackingEyeFrame().scaling());
-    //TODO experimental
-    //eye().interpolateTo(eyeFrameCopy);
-    eye().set(eyeFrameCopy);
-    pruneBranch(eyeFrameCopy);
-
-    if (avatar() instanceof InteractiveFrame)
-      inputHandler().setDefaultGrabber((InteractiveFrame) avatar());
-  }
-
-  /**
-   * Returns the current avatar before resetting it (i.e., setting it to null).
-   *
-   * @see #setAvatar(Trackable)
-   */
-  public Trackable resetAvatar() {
-    Trackable prev = trck;
-    if (prev != null) {
-      inputHandler().resetTrackedGrabber();
-      //TODO experimental
-      if(eye() instanceof InteractiveFrame)
-      inputHandler().setDefaultGrabber((InteractiveFrame)eye());
-      //TODO restore
-      //eye().interpolateToFitScene();
-      showAll();
-    }
-    trck = null;
-    return prev;
-  }
 
   // 3. EYE STUFF
 
