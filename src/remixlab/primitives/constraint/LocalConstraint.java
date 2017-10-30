@@ -20,7 +20,6 @@ import remixlab.primitives.*;
  * system (see {@link Frame#referenceFrame()} ).
  */
 public class LocalConstraint extends AxisPlaneConstraint {
-
   /**
    * Depending on {@link #translationConstraintType()}, {@code constrain} translation to
    * be along an axis or limited to a plane defined in the local coordinate system by

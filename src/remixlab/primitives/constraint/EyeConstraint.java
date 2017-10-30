@@ -10,6 +10,7 @@
 
 package remixlab.primitives.constraint;
 
+import remixlab.geom.AbstractScene;
 import remixlab.geom.InteractiveFrame;
 import remixlab.primitives.*;
 
@@ -21,22 +22,22 @@ import remixlab.primitives.*;
  * coordinate system.
  */
 public class EyeConstraint extends AxisPlaneConstraint {
-  private InteractiveFrame eye;
+  private AbstractScene scene;
 
   /**
    * Creates an EyeConstraint, whose constrained directions are defined in the
    * {@link #eye()} coordinate system.
    */
-  public EyeConstraint(InteractiveFrame theEye) {
+  public EyeConstraint(AbstractScene scn) {
     super();
-    eye = theEye;
+    scene = scn;
   }
 
   /**
    * Returns the associated Eye. Set using the EyeConstraint constructor.
    */
-  public InteractiveFrame eye() {
-    return eye;
+  public Frame eye() {
+    return scene.eye();
   }
 
   /**
