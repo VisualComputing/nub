@@ -10,6 +10,7 @@
 
 package remixlab.primitives.constraint;
 
+import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vec;
 import remixlab.primitives.Frame;
 
@@ -181,7 +182,7 @@ public class AxisPlaneConstraint extends Constraint {
    * be able to rotate around an axis ({@link Type#AXIS}), or will not able to rotate at
    * all {@link Type#FORBIDDEN}.
    * <p>
-   * Use {@link Frame#setOrientation(remixlab.primitives.Quat)} to define the
+   * Use {@link Frame#setOrientation(Quaternion)} to define the
    * orientation of the constrained Frame before it gets constrained.
    * <p>
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational

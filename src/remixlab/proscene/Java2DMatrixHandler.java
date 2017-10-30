@@ -13,8 +13,8 @@ package remixlab.proscene;
 import processing.core.PGraphics;
 import processing.core.PMatrix2D;
 import remixlab.geom.MatrixHandler;
-import remixlab.primitives.Mat;
-import remixlab.primitives.Quat;
+import remixlab.primitives.Matrix;
+import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vec;
 
 /**
@@ -40,10 +40,10 @@ class Java2DMatrixHandler extends MatrixHandler {
   public void bind() {
     cacheProjection(scene().computeProjection());
     cacheView(scene().computeView());
-    cacheProjectionView(Mat.multiply(cacheProjection(), cacheView()));
+    cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vec pos = gScene.eye().position();
     //TODO needs test
-    Quat o = gScene.eye().orientation();
+    Quaternion o = gScene.eye().orientation();
     translate(gScene.width() / 2, gScene.height() / 2);
     if (gScene.isRightHanded())
       scale(1, -1);
@@ -53,7 +53,7 @@ class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void applyModelView(Mat source) {
+  public void applyModelView(Matrix source) {
     pg().applyMatrix(Scene.toPMatrix2D(source));
   }
 
@@ -61,7 +61,7 @@ class Java2DMatrixHandler extends MatrixHandler {
   public void beginScreenDrawing() {
     Vec pos = gScene.eye().position();
     //TODO needs test
-    Quat o = gScene.eye().orientation();
+    Quaternion o = gScene.eye().orientation();
 
     pushModelView();
     translate(pos.x(), pos.y());
@@ -88,12 +88,12 @@ class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public Mat modelView() {
+  public Matrix modelView() {
     return Scene.toMat(new PMatrix2D(pg().getMatrix()));
   }
 
   @Override
-  public void bindModelView(Mat source) {
+  public void bindModelView(Matrix source) {
     pg().setMatrix(Scene.toPMatrix2D(source));
   }
 

@@ -11,55 +11,55 @@
 package remixlab.primitives;
 
 /**
- * A 3D Quat is a 4 element unit quaternion
+ * A 3D Quaternion is a 4 element unit quaternion
  * represented by single precision floating point x,y,z,w coordinates. This class API aims
  * to conform that of the great <a href=
  * "http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html">libQGLViewer
  * Quaternion</a>.
  */
-public class Quat {
+public class Quaternion {
   /**
    * Returns whether or not this Rot matches other.
    *
    * @param other quat
    */
-  public boolean matches(Quat other) {
-    return quat[0] == ((Quat)other).quat[0]
-            && quat[1] == ((Quat)other).quat[1]
-            && quat[2] == ((Quat)other).quat[2]
-            && quat[3] == ((Quat)other).quat[3];
+  public boolean matches(Quaternion other) {
+    return quat[0] == ((Quaternion)other).quat[0]
+            && quat[1] == ((Quaternion)other).quat[1]
+            && quat[2] == ((Quaternion)other).quat[2]
+            && quat[3] == ((Quaternion)other).quat[3];
   }
 
   /**
-   * The x, y, z, and w coordinates of the Quat represented as a public array.
+   * The x, y, z, and w coordinates of the Quaternion represented as a public array.
    */
   public float quat[] = new float[4];
 
   /**
-   * Constructs and initializes a Quat to (0.0,0.0,0.0,1.0), i.e., an identity rotation.
+   * Constructs and initializes a Quaternion to (0.0,0.0,0.0,1.0), i.e., an identity rotation.
    */
-  public Quat() {
+  public Quaternion() {
     reset();
   }
 
   /**
-   * Default constructor for Quat(float x, float y, float z, float w, boolean normalize),
+   * Default constructor for Quaternion(float x, float y, float z, float w, boolean normalize),
    * with {@code normalize=true}.
    */
-  public Quat(float x, float y, float z, float w) {
+  public Quaternion(float x, float y, float z, float w) {
     this(x, y, z, w, true);
   }
 
   /**
-   * Constructs and initializes a Quat from the specified xyzw coordinates.
+   * Constructs and initializes a Quaternion from the specified xyzw coordinates.
    *
    * @param x         the x coordinate
    * @param y         the y coordinate
    * @param z         the z coordinate
    * @param w         the w scalar component
-   * @param normalize tells whether or not the constructed Quat should be normalized.
+   * @param normalize tells whether or not the constructed Quaternion should be normalized.
    */
-  public Quat(float x, float y, float z, float w, boolean normalize) {
+  public Quaternion(float x, float y, float z, float w, boolean normalize) {
     if (normalize) {
       float mag = (float) Math.sqrt(x * x + y * y + z * z + w * w);
       if (mag > 0.0f) {
@@ -84,16 +84,16 @@ public class Quat {
   /**
    * Convenience constructor that simply calls {@code this(q, true)}
    */
-  public Quat(float[] q) {
+  public Quaternion(float[] q) {
     this(q, true);
   }
 
   /**
-   * Constructs and initializes a Quat from the array of length 4.
+   * Constructs and initializes a Quaternion from the array of length 4.
    *
    * @param q the array of length 4 containing xyzw in order
    */
-  public Quat(float[] q, boolean normalize) {
+  public Quaternion(float[] q, boolean normalize) {
     if (normalize) {
       float mag = (float) Math.sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
       if (mag > 0.0f) {
@@ -116,80 +116,80 @@ public class Quat {
   }
 
   /**
-   * Copy constructor. If {@code normalize} is {@code true} this Quat is
+   * Copy constructor. If {@code normalize} is {@code true} this Quaternion is
    * {@link #normalize()}.
    *
-   * @param q1 the Quat containing the initialization x y z w data
+   * @param q1 the Quaternion containing the initialization x y z w data
    */
-  public Quat(Quat q1, boolean normalize) {
+  public Quaternion(Quaternion q1, boolean normalize) {
     set(q1, normalize);
   }
 
   /**
-   * Constructs and initializes a Quat from the specified rotation {@link #axis() axis}
+   * Constructs and initializes a Quaternion from the specified rotation {@link #axis() axis}
    * (non null) and {@link #angle() angle} (in radians).
    *
    * @param axis  the Vec representing the axis
    * @param angle the angle in radians
    * @see #fromAxisAngle(Vec, float)
    */
-  public Quat(Vec axis, float angle) {
+  public Quaternion(Vec axis, float angle) {
     fromAxisAngle(axis, angle);
   }
 
   /**
-   * Constructs a Quat that will rotate from the {@code from} direction to the {@code to}
+   * Constructs a Quaternion that will rotate from the {@code from} direction to the {@code to}
    * direction.
    *
    * @param from the first Vec
    * @param to   the second Vec
    * @see #fromTo(Vec, Vec)
    */
-  public Quat(Vec from, Vec to) {
+  public Quaternion(Vec from, Vec to) {
     fromTo(from, to);
   }
 
   /**
-   * Constructs a Quat from the given Euler angles.
+   * Constructs a Quaternion from the given Euler angles.
    *
    * @param roll  Rotation angle in radians around the x-Axis
    * @param pitch Rotation angle in radians around the y-Axis
    * @param yaw   Rotation angle in radians around the z-Axis
    * @see #fromEulerAngles(float, float, float)
    */
-  public Quat(float roll, float pitch, float yaw) {
+  public Quaternion(float roll, float pitch, float yaw) {
     fromEulerAngles(roll, pitch, yaw);
   }
 
   /**
-   * Constructs a Quat from a (supposedly correct) 3x3 rotation matrix given in the upper
-   * left 3x3 sub-matrix of the Mat.
+   * Constructs a Quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper
+   * left 3x3 sub-matrix of the Matrix.
    *
-   * @param glMat
-   * @see #fromMatrix(Mat)
+   * @param glMatrix
+   * @see #fromMatrix(Matrix)
    */
-  public Quat(Mat glMat) {
-    fromMatrix(glMat);
+  public Quaternion(Matrix glMatrix) {
+    fromMatrix(glMatrix);
   }
 
   /**
-   * Constructs a Quat from the three rotated vectors of an orthogonal basis.
+   * Constructs a Quaternion from the three rotated vectors of an orthogonal basis.
    *
    * @param X 1st Orthogonal Vec
    * @param Y 2nd Orthogonal Vec
    * @param Z 3rd Orthogonal Vec
    * @see #fromRotatedBasis(Vec, Vec, Vec)
    */
-  public Quat(Vec X, Vec Y, Vec Z) {
+  public Quaternion(Vec X, Vec Y, Vec Z) {
     fromRotatedBasis(X, Y, Z);
   }
 
-  protected Quat(Quat q1) {
+  protected Quaternion(Quaternion q1) {
     set(q1);
   }
 
-  public Quat get() {
-    return new Quat(this);
+  public Quaternion get() {
+    return new Quaternion(this);
   }
 
   public void reset() {
@@ -231,56 +231,56 @@ public class Quat {
   }
 
   /**
-   * @return Quat x component
+   * @return Quaternion x component
    */
   public float x() {
     return this.quat[0];
   }
 
   /**
-   * @return Quat y component
+   * @return Quaternion y component
    */
   public float y() {
     return this.quat[1];
   }
 
   /**
-   * @return Quat z component
+   * @return Quaternion z component
    */
   public float z() {
     return this.quat[2];
   }
 
   /**
-   * @return Quat w component
+   * @return Quaternion w component
    */
   public float w() {
     return this.quat[3];
   }
 
   /**
-   * Sets the Quat x component
+   * Sets the Quaternion x component
    */
   public void setX(float x) {
     this.quat[0] = x;
   }
 
   /**
-   * Sets the Quat y component
+   * Sets the Quaternion y component
    */
   public void setY(float y) {
     this.quat[1] = y;
   }
 
   /**
-   * Sets the Quat z component
+   * Sets the Quaternion z component
    */
   public void setZ(float z) {
     this.quat[2] = z;
   }
 
   /**
-   * Sets the Quat w component
+   * Sets the Quaternion w component
    */
   public void setW(float w) {
     this.quat[3] = w;
@@ -289,17 +289,17 @@ public class Quat {
   /**
    * Convenience function that simply calls {@code set(q1, true);}
    *
-   * @see #set(Quat, boolean)
+   * @see #set(Quaternion, boolean)
    */
-  public void set(Quat q1) {
+  public void set(Quaternion q1) {
     set(q1, true);
   }
 
   /**
-   * Set this Quat from quaternion {@code q1}. If {@code normalize} is {@code true} this
-   * Quat is {@link #normalize()}.
+   * Set this Quaternion from quaternion {@code q1}. If {@code normalize} is {@code true} this
+   * Quaternion is {@link #normalize()}.
    */
-  public void set(Quat q1, boolean normalize) {
+  public void set(Quaternion q1, boolean normalize) {
     this.quat[0] = q1.quat[0];
     this.quat[1] = q1.quat[1];
     this.quat[2] = q1.quat[2];
@@ -309,7 +309,7 @@ public class Quat {
   }
 
   /**
-   * Sets the value of this Quat to the conjugate of itself.
+   * Sets the value of this Quaternion to the conjugate of itself.
    */
   public final void conjugate() {
     this.quat[0] = -this.quat[0];
@@ -318,11 +318,11 @@ public class Quat {
   }
 
   /**
-   * Sets the value of this Quat to the conjugate of Quat q1.
+   * Sets the value of this Quaternion to the conjugate of Quaternion q1.
    *
    * @param q1 the source vector
    */
-  public final void conjugate(Quat q1) {
+  public final void conjugate(Quaternion q1) {
     this.quat[0] = -q1.quat[0];
     this.quat[1] = -q1.quat[1];
     this.quat[2] = -q1.quat[2];
@@ -330,7 +330,7 @@ public class Quat {
   }
 
   /**
-   * Negates all the coefficients of the Quat.
+   * Negates all the coefficients of the Quaternion.
    */
   public final void negate() {
     this.quat[0] = -this.quat[0];
@@ -340,13 +340,13 @@ public class Quat {
   }
 
   /**
-   * Returns the "dot" product of this Quat and {@code b}:
+   * Returns the "dot" product of this Quaternion and {@code b}:
    * <p>
    * {@code this.quat[0] * b.x + this.quat[1] * b.y + this.quat[2] * b.z + this.quat[3] * b.quat[3]}
    *
-   * @param b the Quat
+   * @param b the Quaternion
    */
-  public final float dotProduct(Quat b) {
+  public final float dotProduct(Quaternion b) {
     return this.quat[0] * b.quat[0] + this.quat[1] * b.quat[1] + this.quat[2] * b.quat[2] + this.quat[3] * b.quat[3];
   }
 
@@ -355,24 +355,24 @@ public class Quat {
    * <p>
    * {@code a.x * b.x + a.y * b.y + a.z * b.z + a.quat[3] * b.quat[3]}
    *
-   * @param a the first Quat
-   * @param b the second Quat
+   * @param a the first Quaternion
+   * @param b the second Quaternion
    */
-  public final static float dot(Quat a, Quat b) {
+  public final static float dot(Quaternion a, Quaternion b) {
     return a.quat[0] * b.quat[0] + a.quat[1] * b.quat[1] + a.quat[2] * b.quat[2] + a.quat[3] * b.quat[3];
   }
 
-  public final void compose(Quat q) {
+  public final void compose(Quaternion q) {
     multiply(q);
   }
 
   /**
-   * Sets the value of this Quat to the Quat product of itself and {@code q1}, (i.e.,
+   * Sets the value of this Quaternion to the Quaternion product of itself and {@code q1}, (i.e.,
    * {@code this = this * q1}).
    *
-   * @param q1 the other Quat
+   * @param q1 the other Quaternion
    */
-  public final void multiply(Quat q1) {
+  public final void multiply(Quaternion q1) {
     float x, y, w;
 
     w = this.quat[3] * q1.quat[3] - this.quat[0] * q1.quat[0] - this.quat[1] * q1.quat[1] - this.quat[2] * q1.quat[2];
@@ -385,23 +385,23 @@ public class Quat {
     this.quat[1] = y;
   }
 
-  public final static Quat compose(Quat q1, Quat q2) {
+  public final static Quaternion compose(Quaternion q1, Quaternion q2) {
     return multiply(q1, q2);
   }
 
   /**
-   * Returns the Quat which is product of quaternions {@code q1} and {@code q2}.
+   * Returns the Quaternion which is product of quaternions {@code q1} and {@code q2}.
    *
-   * @param q1 the first Quat
-   * @param q2 the second Quat
+   * @param q1 the first Quaternion
+   * @param q2 the second Quaternion
    */
-  public final static Quat multiply(Quat q1, Quat q2) {
+  public final static Quaternion multiply(Quaternion q1, Quaternion q2) {
     float x, y, z, w;
     w = q1.quat[3] * q2.quat[3] - q1.quat[0] * q2.quat[0] - q1.quat[1] * q2.quat[1] - q1.quat[2] * q2.quat[2];
     x = q1.quat[3] * q2.quat[0] + q2.quat[3] * q1.quat[0] + q1.quat[1] * q2.quat[2] - q1.quat[2] * q2.quat[1];
     y = q1.quat[3] * q2.quat[1] + q2.quat[3] * q1.quat[1] - q1.quat[0] * q2.quat[2] + q1.quat[2] * q2.quat[0];
     z = q1.quat[3] * q2.quat[2] + q2.quat[3] * q1.quat[2] + q1.quat[0] * q2.quat[1] - q1.quat[1] * q2.quat[0];
-    return new Quat(x, y, z, w);
+    return new Quaternion(x, y, z, w);
   }
 
   /**
@@ -420,58 +420,58 @@ public class Quat {
    * Returns the image of {@code v} by the rotation {@code q1}. Same as
    * {@code q1.rotate(v).}
    *
-   * @param q1 the Quat
+   * @param q1 the Quaternion
    * @param v  the Vec
    * @see #rotate(Vec)
    * @see #inverseRotate(Vec)
    */
-  public static final Vec multiply(Quat q1, Vec v) {
+  public static final Vec multiply(Quaternion q1, Vec v) {
     return q1.rotate(v);
   }
 
   /**
-   * Multiplies this Quat by the inverse of Quat {@code q1} and places the value into this
-   * Quat (i.e., {@code this = this * q^-1}). The value of the argument Quat is preserved.
+   * Multiplies this Quaternion by the inverse of Quaternion {@code q1} and places the value into this
+   * Quaternion (i.e., {@code this = this * q^-1}). The value of the argument Quaternion is preserved.
    *
-   * @param q1 the other Quat
+   * @param q1 the other Quaternion
    */
-  public final void multiplyInverse(Quat q1) {
-    Quat tempQuat = new Quat(q1);
-    tempQuat.invert();
-    this.multiply(tempQuat);
+  public final void multiplyInverse(Quaternion q1) {
+    Quaternion tempQuaternion = new Quaternion(q1);
+    tempQuaternion.invert();
+    this.multiply(tempQuaternion);
   }
 
   /**
-   * Returns the product of Quat {@code q1} by the inverse of Quat {@code q2} (i.e.,
+   * Returns the product of Quaternion {@code q1} by the inverse of Quaternion {@code q2} (i.e.,
    * {@code q1 * q2^-1}). The value of both argument quaternions is preserved.
    *
-   * @param q1 the first Quat
-   * @param q2 the second Quat
+   * @param q1 the first Quaternion
+   * @param q2 the second Quaternion
    */
-  public static final Quat multiplyInverse(Quat q1, Quat q2) {
-    Quat tempQuat = new Quat(q2);
-    tempQuat.invert();
-    return Quat.multiply(q1, tempQuat);
+  public static final Quaternion multiplyInverse(Quaternion q1, Quaternion q2) {
+    Quaternion tempQuaternion = new Quaternion(q2);
+    tempQuaternion.invert();
+    return Quaternion.multiply(q1, tempQuaternion);
   }
 
   /**
-   * Returns the inverse Quat (inverse rotation).
+   * Returns the inverse Quaternion (inverse rotation).
    * <p>
    * The result hasGrabber a negated {@link #axis()} direction and the same {@link #angle()}.
    * <p>
-   * A composition of a Quat and its {@link #inverse()} results in an identity function.
-   * Use {@link #invert()} to actually modify the Quat.
+   * A composition of a Quaternion and its {@link #inverse()} results in an identity function.
+   * Use {@link #invert()} to actually modify the Quaternion.
    *
    * @see #invert()
    */
-  public final Quat inverse() {
-    Quat tempQuat = new Quat(this);
-    tempQuat.invert();
-    return tempQuat;
+  public final Quaternion inverse() {
+    Quaternion tempQuaternion = new Quaternion(this);
+    tempQuaternion.invert();
+    return tempQuaternion;
   }
 
   /**
-   * Sets the value of this Quat to the inverse of itself.
+   * Sets the value of this Quaternion to the inverse of itself.
    *
    * @see #inverse()
    */
@@ -484,11 +484,11 @@ public class Quat {
   }
 
   /**
-   * Sets the value of this Quat to the Quat inverse of {@code q1}.
+   * Sets the value of this Quaternion to the Quaternion inverse of {@code q1}.
    *
-   * @param q1 the Quat to be inverted
+   * @param q1 the Quaternion to be inverted
    */
-  public final void invert(Quat q1) {
+  public final void invert(Quaternion q1) {
     float sqNorm = squaredNorm(q1);
     this.quat[3] = q1.quat[3] / sqNorm;
     this.quat[0] = -q1.quat[0] / sqNorm;
@@ -497,7 +497,7 @@ public class Quat {
   }
 
   /**
-   * Normalizes the value of this Quat in place and return its {@code norm}.
+   * Normalizes the value of this Quaternion in place and return its {@code norm}.
    */
   public final float normalize() {
     float norm = (float) Math.sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]
@@ -517,7 +517,7 @@ public class Quat {
   }
 
   /**
-   * Returns the image of {@code v} by the Quat rotation.
+   * Returns the image of {@code v} by the Quaternion rotation.
    *
    * @param v the Vec
    */
@@ -541,24 +541,24 @@ public class Quat {
   }
 
   /**
-   * Returns the image of {@code v} by the Quat {@link #inverse()} rotation.
+   * Returns the image of {@code v} by the Quaternion {@link #inverse()} rotation.
    * <p>
    * {@link #rotate(Vec)} performs an inverse transformation.
    *
    * @param v the Vec
    */
   public final Vec inverseRotate(Vec v) {
-    Quat tempQuat = new Quat(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
-    tempQuat.invert();
-    return tempQuat.rotate(v);
+    Quaternion tempQuaternion = new Quaternion(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
+    tempQuaternion.invert();
+    return tempQuaternion.rotate(v);
   }
 
   /**
-   * Sets the Quat as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
+   * Sets the Quaternion as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
    * radians).
    * <p>
    * The {@code axis} does not need to be normalized. A null {@code axis} will result in
-   * an identity Quat.
+   * an identity Quaternion.
    *
    * @param axis  the Vec representing the axis
    * @param angle the angle in radians
@@ -616,7 +616,7 @@ public class Quat {
 
   /**
    * Converts Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
-   * respectively defined to the x, y and z axes, to this Quat. In the convention used
+   * respectively defined to the x, y and z axes, to this Quaternion. In the convention used
    * here these angles represent a composition of extrinsic rotations (rotations about the
    * reference frame axes), which is also known as {@link #taitBryanAngles()} (See
    * http://en.wikipedia.org/wiki/Euler_angles and
@@ -632,9 +632,9 @@ public class Quat {
    * @see #eulerAngles()
    */
   public void fromEulerAngles(float roll, float pitch, float yaw) {
-    Quat qx = new Quat(new Vec(1, 0, 0), roll);
-    Quat qy = new Quat(new Vec(0, 1, 0), pitch);
-    Quat qz = new Quat(new Vec(0, 0, 1), yaw);
+    Quaternion qx = new Quaternion(new Vec(1, 0, 0), roll);
+    Quaternion qy = new Quaternion(new Vec(0, 1, 0), pitch);
+    Quaternion qz = new Quaternion(new Vec(0, 0, 1), yaw);
     set(qy);
     multiply(qz);
     multiply(qx);
@@ -648,17 +648,17 @@ public class Quat {
   }
 
   /**
-   * Converts this Quat to Euler rotation angles {@code roll}, {@code pitch} and
+   * Converts this Quaternion to Euler rotation angles {@code roll}, {@code pitch} and
    * {@code yaw} in radians. {@link #fromEulerAngles(float, float, float)} performs the
    * inverse operation. The code was adapted from:
    * http://www.euclideanspace.com/maths/geometry/rotations/conversions/
    * quaternionToEuler/index.htm.
    * <p>
-   * <b>Attention:</b> This method assumes that this Quat is normalized.
+   * <b>Attention:</b> This method assumes that this Quaternion is normalized.
    *
    * @return the Vec holding the roll (x coordinate of the vector), pitch (y coordinate of
    * the vector) and yaw angles (z coordinate of the vector). <b>Note:</b> The
-   * order of the rotations that would produce this Quat (i.e., as with
+   * order of the rotations that would produce this Quaternion (i.e., as with
    * {@code fromEulerAngles(roll, pitch, yaw)}) is: y,z,x.
    * @see #fromEulerAngles(float, float, float)
    */
@@ -687,7 +687,7 @@ public class Quat {
   }
 
   /**
-   * Sets the Quat as a rotation from the {@code from} direction to the {@code to}
+   * Sets the Quaternion as a rotation from the {@code from} direction to the {@code to}
    * direction.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. The selected axis is usually
@@ -699,7 +699,7 @@ public class Quat {
   public void fromTo(Vec from, Vec to) {
     float fromSqNorm = from.squaredNorm();
     float toSqNorm = to.squaredNorm();
-    // Identity Quat when one vector is null
+    // Identity Quaternion when one vector is null
     if (fromSqNorm == 0 || toSqNorm == 0) {
       this.quat[0] = this.quat[1] = this.quat[2] = 0.0f;
       this.quat[3] = 1.0f;
@@ -732,12 +732,12 @@ public class Quat {
   }
 
   /**
-   * Set the Quat from a (supposedly correct) 3x3 rotation matrix given in the upper left
-   * 3x3 sub-matrix of the Mat.
+   * Set the Quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
+   * 3x3 sub-matrix of the Matrix.
    *
    * @see #fromRotatedBasis(Vec, Vec, Vec)
    */
-  public final void fromMatrix(Mat glMatrix) {
+  public final void fromMatrix(Matrix glMatrix) {
     Vec x = new Vec(glMatrix.mat[0], glMatrix.mat[4], glMatrix.mat[8]);
     Vec y = new Vec(glMatrix.mat[1], glMatrix.mat[5], glMatrix.mat[9]);
     Vec z = new Vec(glMatrix.mat[2], glMatrix.mat[6], glMatrix.mat[10]);
@@ -745,7 +745,7 @@ public class Quat {
   }
 
   /**
-   * Sets the Quat from the three rotated vectors of an orthogonal basis.
+   * Sets the Quaternion from the three rotated vectors of an orthogonal basis.
    * <p>
    * The three vectors do not have to be normalized but must be orthogonal and direct
    * (i,e., {@code X^Y=k*Z, with k>0}).
@@ -754,7 +754,7 @@ public class Quat {
    * @param Y the second Vec
    * @param Z the third Vec
    * @see #fromRotatedBasis(Vec, Vec, Vec)
-   * @see #Quat(Vec, Vec)
+   * @see #Quaternion(Vec, Vec)
    */
   public final void fromRotatedBasis(Vec X, Vec Y, Vec Z) {
     float threeXthree[][] = new float[3][3];
@@ -805,9 +805,9 @@ public class Quat {
   }
 
   /**
-   * Returns the normalized axis direction of the rotation represented by the Quat.
+   * Returns the normalized axis direction of the rotation represented by the Quaternion.
    * <p>
-   * The result is null for an identity Quat.
+   * The result is null for an identity Quaternion.
    *
    * @see #angle()
    */
@@ -820,7 +820,7 @@ public class Quat {
   }
 
   /**
-   * Returns the {@code angle} (in radians) of the rotation represented by the Quat.
+   * Returns the {@code angle} (in radians) of the rotation represented by the Quaternion.
    * <p>
    * This value is always in the range {@code [0-pi]}. Larger rotational angles are
    * obtained by inverting the {@link #axis()} direction.
@@ -832,9 +832,9 @@ public class Quat {
   }
 
   /**
-   * Returns the Mat which represents the rotation matrix associated with the Quat.
+   * Returns the Matrix which represents the rotation matrix associated with the Quaternion.
    */
-  public final Mat matrix() {
+  public final Matrix matrix() {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
     float q22 = 2.0f * this.quat[2] * this.quat[2];
@@ -868,85 +868,85 @@ public class Quat {
     float m32 = 0.0f;
     float m33 = 1.0f;
 
-    return new Mat(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33);
+    return new Matrix(m00, m01, m02, m03, m10, m11, m12, m13, m20, m21, m22, m23, m30, m31, m32, m33);
   }
 
   /**
-   * Returns the associated inverse rotation Mat. This is simply {@link #matrix()} of the
+   * Returns the associated inverse rotation Matrix. This is simply {@link #matrix()} of the
    * {@link #inverse()}.
    * <p>
    * <b>Attention:</b> The result is only valid until the next call to
    * {@link #inverseMatrix()}. Use it immediately (as in
    * {@code applyMatrix(q.inverseMatrix())}).
    */
-  public final Mat inverseMatrix() {
-    Quat tempQuat = new Quat(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
-    tempQuat.invert();
-    return tempQuat.matrix();
+  public final Matrix inverseMatrix() {
+    Quaternion tempQuaternion = new Quaternion(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
+    tempQuaternion.invert();
+    return tempQuaternion.matrix();
   }
 
   /**
-   * Returns the logarithm of the Quat.
+   * Returns the logarithm of the Quaternion.
    *
    * @see #exp()
    */
-  public final Quat log() {
-    // Warning: this method should not normalize the Quat
+  public final Quaternion log() {
+    // Warning: this method should not normalize the Quaternion
     float len = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
 
     if (len == 0)
-      return new Quat(this.quat[0], this.quat[1], this.quat[2], 0.0f, false);
+      return new Quaternion(this.quat[0], this.quat[1], this.quat[2], 0.0f, false);
     else {
       float coef = (float) Math.acos(this.quat[3]) / len;
-      return new Quat(this.quat[0] * coef, this.quat[1] * coef, this.quat[2] * coef, 0.0f, false);
+      return new Quaternion(this.quat[0] * coef, this.quat[1] * coef, this.quat[2] * coef, 0.0f, false);
     }
   }
 
   /**
-   * Returns the exponential of the Quat.
+   * Returns the exponential of the Quaternion.
    *
    * @see #log()
    */
-  public final Quat exp() {
+  public final Quaternion exp() {
     float theta = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
 
     if (theta == 0)
-      return new Quat(this.quat[0], this.quat[1], this.quat[2], (float) Math.cos(theta));
+      return new Quaternion(this.quat[0], this.quat[1], this.quat[2], (float) Math.cos(theta));
     else {
       float coef = (float) Math.sin(theta) / theta;
-      return new Quat(this.quat[0] * coef, this.quat[1] * coef, this.quat[2] * coef, (float) Math.cos(theta));
+      return new Quaternion(this.quat[0] * coef, this.quat[1] * coef, this.quat[2] * coef, (float) Math.cos(theta));
     }
   }
 
   /**
-   * Returns a random unit Quat.
+   * Returns a random unit Quaternion.
    * <p>
    * You can create a randomly directed unit vector using:
    * <p>
    * {@code Vec randomDir = new Vec(1.0f, 0.0f, 0.0f);} <br>
-   * {@code randomDir = Quat.multiply(Quat.randomQuat(),
+   * {@code randomDir = Quaternion.multiply(Quaternion.randomQuat(),
    * randomDir);}
    */
-  public final static Quat randomQuat() {
+  public final static Quaternion randomQuat() {
     float seed = (float) Math.random();
     float r1 = (float) Math.sqrt(1.0f - seed);
     float r2 = (float) Math.sqrt(seed);
     float t1 = 2.0f * (float) Math.PI * (float) Math.random();
     float t2 = 2.0f * (float) Math.PI * (float) Math.random();
 
-    return new Quat((float) Math.sin(t1) * r1, (float) Math.cos(t1) * r1, (float) Math.sin(t2) * r2,
+    return new Quaternion((float) Math.sin(t1) * r1, (float) Math.cos(t1) * r1, (float) Math.sin(t2) * r2,
         (float) Math.cos(t2) * r2);
   }
 
   /**
    * Wrapper function that simply calls {@code slerp(a, b, t, true)}.
    * <p>
-   * See {@link #slerp(Quat, Quat, float, boolean)} for details.
+   * See {@link #slerp(Quaternion, Quaternion, float, boolean)} for details.
    */
-  public static final Quat slerp(Quat a, Quat b, float t) {
-    return Quat.slerp(a, b, t, true);
+  public static final Quaternion slerp(Quaternion a, Quaternion b, float t) {
+    return Quaternion.slerp(a, b, t, true);
   }
 
   /**
@@ -957,17 +957,17 @@ public class Quat {
    * {@code b} when {@code t=1}.
    * <p>
    * When {@code allowFlip} is true (default) the slerp interpolation will always use the
-   * "shortest path" between the quaternions' orientations, by "flipping" the source Quat
+   * "shortest path" between the quaternions' orientations, by "flipping" the source Quaternion
    * if needed (see {@link #negate()}).
    *
-   * @param a         the first Quat
-   * @param b         the second Quat
+   * @param a         the first Quaternion
+   * @param b         the second Quaternion
    * @param t         the t interpolation parameter
    * @param allowFlip tells whether or not the interpolation allows axis flip
    */
-  public static final Quat slerp(Quat a, Quat b, float t, boolean allowFlip) {
-    // Warning: this method should not normalize the Quat
-    float cosAngle = Quat.dot(a, b);
+  public static final Quaternion slerp(Quaternion a, Quaternion b, float t, boolean allowFlip) {
+    // Warning: this method should not normalize the Quaternion
+    float cosAngle = Quaternion.dot(a, b);
 
     float c1, c2;
     // Linear interpolation for close orientations
@@ -986,7 +986,7 @@ public class Quat {
     if (allowFlip && (cosAngle < 0.0))
       c1 = -c1;
 
-    return new Quat(c1 * a.quat[0] + c2 * b.quat[0], c1 * a.quat[1] + c2 * b.quat[1], c1 * a.quat[2] + c2 * b.quat[2],
+    return new Quaternion(c1 * a.quat[0] + c2 * b.quat[0], c1 * a.quat[1] + c2 * b.quat[1], c1 * a.quat[2] + c2 * b.quat[2],
         c1 * a.quat[3] + c2 * b.quat[3], false);
   }
 
@@ -994,34 +994,34 @@ public class Quat {
    * Returns the slerp interpolation of the two quaternions {@code a} and {@code b}, at
    * time {@code t}, using tangents {@code tgA} and {@code tgB}.
    * <p>
-   * The resulting Quat is "between" {@code a} and {@code b} (result is {@code a} when
+   * The resulting Quaternion is "between" {@code a} and {@code b} (result is {@code a} when
    * {@code t=0} and {@code b} for {@code t=1}).
    * <p>
-   * Use {@link #squadTangent(Quat, Quat, Quat)} to define the Quat tangents {@code tgA}
+   * Use {@link #squadTangent(Quaternion, Quaternion, Quaternion)} to define the Quaternion tangents {@code tgA}
    * and {@code tgB}.
    *
-   * @param a   the first Quat
-   * @param tgA the first tangent Quat
-   * @param tgB the second tangent Quat
-   * @param b   the second Quat
+   * @param a   the first Quaternion
+   * @param tgA the first tangent Quaternion
+   * @param tgB the second tangent Quaternion
+   * @param b   the second Quaternion
    * @param t   the t interpolation parameter
    */
-  public static final Quat squad(Quat a, Quat tgA, Quat tgB, Quat b, float t) {
-    Quat ab = Quat.slerp(a, b, t);
-    Quat tg = Quat.slerp(tgA, tgB, t, false);
-    return Quat.slerp(ab, tg, 2.0f * t * (1.0f - t), false);
+  public static final Quaternion squad(Quaternion a, Quaternion tgA, Quaternion tgB, Quaternion b, float t) {
+    Quaternion ab = Quaternion.slerp(a, b, t);
+    Quaternion tg = Quaternion.slerp(tgA, tgB, t, false);
+    return Quaternion.slerp(ab, tg, 2.0f * t * (1.0f - t), false);
   }
 
   /**
    * Simply returns {@code log(a. inverse() * b)}.
    * <p>
-   * Useful for {@link #squadTangent(Quat, Quat, Quat)}.
+   * Useful for {@link #squadTangent(Quaternion, Quaternion, Quaternion)}.
    *
-   * @param a the first Quat
-   * @param b the second Quat
+   * @param a the first Quaternion
+   * @param b the second Quaternion
    */
-  public static final Quat lnDif(Quat a, Quat b) {
-    Quat dif = a.inverse();
+  public static final Quaternion lnDif(Quaternion a, Quaternion b) {
+    Quaternion dif = a.inverse();
     dif.multiply(b);
 
     dif.normalize();
@@ -1029,30 +1029,30 @@ public class Quat {
   }
 
   /**
-   * Returns a tangent Quat for {@code center}, defined by {@code before} and
+   * Returns a tangent Quaternion for {@code center}, defined by {@code before} and
    * {@code after} quaternions.
    *
-   * @param before the first Quat
-   * @param center the second Quat
-   * @param after  the third Quat
+   * @param before the first Quaternion
+   * @param center the second Quaternion
+   * @param after  the third Quaternion
    */
-  public static final Quat squadTangent(Quat before, Quat center, Quat after) {
-    Quat l1 = Quat.lnDif(center, before);
-    Quat l2 = Quat.lnDif(center, after);
-    Quat e = new Quat();
+  public static final Quaternion squadTangent(Quaternion before, Quaternion center, Quaternion after) {
+    Quaternion l1 = Quaternion.lnDif(center, before);
+    Quaternion l2 = Quaternion.lnDif(center, after);
+    Quaternion e = new Quaternion();
 
     e.quat[0] = -0.25f * (l1.quat[0] + l2.quat[0]);
     e.quat[1] = -0.25f * (l1.quat[1] + l2.quat[1]);
     e.quat[2] = -0.25f * (l1.quat[2] + l2.quat[2]);
     e.quat[3] = -0.25f * (l1.quat[3] + l2.quat[3]);
 
-    return Quat.multiply(center, e.exp());
+    return Quaternion.multiply(center, e.exp());
   }
 
   /**
-   * Utility function that returns the squared norm of the Quat.
+   * Utility function that returns the squared norm of the Quaternion.
    */
-  public static float squaredNorm(Quat q) {
+  public static float squaredNorm(Quaternion q) {
     return (q.quat[0] * q.quat[0]) + (q.quat[1] * q.quat[1]) + (q.quat[2] * q.quat[2]) + (q.quat[3] * q.quat[3]);
   }
 

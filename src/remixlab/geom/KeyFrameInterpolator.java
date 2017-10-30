@@ -35,8 +35,8 @@ import java.util.ListIterator;
  * {@code kfi = new KeyFrameInterpolator( myScene, myFrame );}<br>
  * {@code // With an anonymous frame would look like this: kfi = new KeyFrameInterpolator( myScene );}
  * <br>
- * {@code kfi.addKeyFrame( new Frame( new Vec(1,0,0), new Quat() ) );}<br>
- * {@code kfi.addKeyFrame( new Frame( new Vec(2,1,0), new Quat() ) );}<br>
+ * {@code kfi.addKeyFrame( new Frame( new Vec(1,0,0), new Quaternion() ) );}<br>
+ * {@code kfi.addKeyFrame( new Frame( new Vec(2,1,0), new Quaternion() ) );}<br>
  * {@code // ...and so on for all the keyFrames.}<br>
  * {@code kfi.startInterpolation();}<br>
  * <p>
@@ -103,7 +103,7 @@ public class KeyFrameInterpolator {
       return frame().matches(other.frame()) && time() == other.time();
     }
 
-    protected Quat tgQuat;
+    protected Quaternion tgQuaternion;
     protected Vec tgPVec;
     protected float tm;
     protected InteractiveFrame frm;
@@ -126,8 +126,8 @@ public class KeyFrameInterpolator {
       return frm;
     }
 
-    Quat tgQ() {
-      return tgQuat;
+    Quaternion tgQ() {
+      return tgQuaternion;
     }
 
     Vec tgP() {
@@ -138,7 +138,7 @@ public class KeyFrameInterpolator {
       return frame().position();
     }
 
-    Quat orientation() {
+    Quaternion orientation() {
       return frame().orientation();
     }
 
@@ -152,7 +152,7 @@ public class KeyFrameInterpolator {
 
     void computeTangent(KeyFrame prev, KeyFrame next) {
       tgPVec = Vec.multiply(Vec.subtract(next.position(), prev.position()), 0.5f);
-      tgQuat = Quat.squadTangent(prev.orientation(), orientation(), next.orientation());
+      tgQuaternion = Quaternion.squadTangent(prev.orientation(), orientation(), next.orientation());
     }
   }
 
@@ -726,12 +726,12 @@ public class KeyFrameInterpolator {
                 Vec.multiply(Vec.add(kf[1].tgP(), Vec.multiply(Vec.add(pvec1, Vec.multiply(pvec2, alpha)), alpha)), alpha)));
             if (gScene.is3D()) {
               frame.setOrientation(
-                  Quat.squad(kf[1].orientation(), kf[1].tgQ(), kf[2].tgQ(), kf[2].orientation(), alpha));
+                  Quaternion.squad(kf[1].orientation(), kf[1].tgQ(), kf[2].tgQ(), kf[2].orientation(), alpha));
             } else {
               // linear interpolation
               float start = kf[1].orientation().angle();
               float stop = kf[2].orientation().angle();
-              frame.setOrientation(new Quat(new Vec(0,0,1), start + (stop - start) * alpha));
+              frame.setOrientation(new Quaternion(new Vec(0,0,1), start + (stop - start) * alpha));
             }
             frame.setMagnitude(Vec.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             path.add(frame.get());
@@ -934,14 +934,14 @@ public class KeyFrameInterpolator {
     float mag = Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).magnitude(),
         keyFrameList.get(currentFrame2.nextIndex()).magnitude(), alpha);
 
-    Quat q;
+    Quaternion q;
     if (gScene.is3D()) {
-      q = Quat.squad((Quat) keyFrameList.get(currentFrame1.nextIndex()).orientation(),
+      q = Quaternion.squad((Quaternion) keyFrameList.get(currentFrame1.nextIndex()).orientation(),
           keyFrameList.get(currentFrame1.nextIndex()).tgQ(),
           keyFrameList.get(currentFrame2.nextIndex()).tgQ(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation(), alpha);
     } else {
-      q = new Quat(new Vec(0,0,1), Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
+      q = new Quaternion(new Vec(0,0,1), Vec.lerp(keyFrameList.get(currentFrame1.nextIndex()).orientation().angle(),
           keyFrameList.get(currentFrame2.nextIndex()).orientation().angle(), (alpha)));
     }
 

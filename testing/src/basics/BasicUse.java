@@ -61,7 +61,7 @@ public class BasicUse extends PApplet {
     iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
-    //iFrame.rotate(new Quat(QUARTER_PI));
+    //iFrame.rotate(new Quaternion(QUARTER_PI));
     scene.showAll();
   }
 

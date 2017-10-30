@@ -13,7 +13,7 @@ package remixlab.proscene;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.geom.MatrixHandler;
-import remixlab.primitives.Mat;
+import remixlab.primitives.Matrix;
 
 /**
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics
@@ -42,17 +42,17 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public Mat projection() {
+  public Matrix projection() {
     return Scene.toMat(pggl().projection.get());
   }
 
   @Override
-  public void bindProjection(Mat source) {
+  public void bindProjection(Matrix source) {
     pggl().setProjection(Scene.toPMatrix(source));
   }
 
   @Override
-  public void applyProjection(Mat source) {
+  public void applyProjection(Matrix source) {
     pggl().applyProjection(Scene.toPMatrix(source));
   }
 
@@ -67,22 +67,22 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public Mat modelView() {
+  public Matrix modelView() {
     return Scene.toMat((PMatrix3D) pggl().getMatrix());
   }
 
   @Override
-  public void bindModelView(Mat source) {
+  public void bindModelView(Matrix source) {
     if (gScene.is3D())
       pggl().setMatrix(Scene.toPMatrix(source));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(source));
-      pggl().projmodelview.set(Mat.multiply(projection(), view()).getTransposed(new float[16]));
+      pggl().projmodelview.set(Matrix.multiply(projection(), view()).getTransposed(new float[16]));
     }
   }
 
   @Override
-  public void applyModelView(Mat source) {
+  public void applyModelView(Matrix source) {
     pggl().applyMatrix(Scene.toPMatrix(source));
   }
 

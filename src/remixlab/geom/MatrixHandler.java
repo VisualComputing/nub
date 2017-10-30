@@ -10,7 +10,7 @@
 
 package remixlab.geom;
 
-import remixlab.primitives.Mat;
+import remixlab.primitives.Matrix;
 import remixlab.primitives.Vec;
 
 /**
@@ -19,8 +19,8 @@ import remixlab.primitives.Vec;
  */
 public class MatrixHandler {
   protected Graph gScene;
-  protected Mat projection, view, modelview;
-  protected Mat projectionViewMat, projectionViewInverseMat;
+  protected Matrix projection, view, modelview;
+  protected Matrix projectionViewMatrix, projectionViewInverseMatrix;
   protected boolean isProjViwInvCached, projectionViewMatHasInv;
 
   static final int MATRIX_STACK_DEPTH = 32;
@@ -39,10 +39,10 @@ public class MatrixHandler {
    */
   public MatrixHandler(Graph scn) {
     gScene = scn;
-    projection = new Mat();
-    view = new Mat();
-    modelview = new Mat();
-    projectionViewMat = new Mat();
+    projection = new Matrix();
+    view = new Matrix();
+    modelview = new Matrix();
+    projectionViewMatrix = new Matrix();
     isProjViwInvCached = false;
   }
 
@@ -59,7 +59,7 @@ public class MatrixHandler {
   public void bind() {
     cacheProjection(scene().computeProjection());
     cacheView(scene().computeView());
-    cacheProjectionView(Mat.multiply(cacheProjection(), cacheView()));
+    cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     bindProjection(cacheProjection());
     bindModelView(cacheView());
   }
@@ -67,70 +67,70 @@ public class MatrixHandler {
   /**
    * @return projection matrix
    */
-  public Mat projection() {
+  public Matrix projection() {
     return cacheProjection();
   }
 
   /**
    * Binds the projection matrix to the renderer.
    */
-  public void bindProjection(Mat m) {
+  public void bindProjection(Matrix m) {
     cacheProjection(m);
   }
 
   /**
    * Caches the projection matrix.
    */
-  public final void cacheProjection(Mat m) {
+  public final void cacheProjection(Matrix m) {
     projection.set(m);
   }
 
   /**
    * Returns the cached projection matrix.
    */
-  public final Mat cacheProjection() {
+  public final Matrix cacheProjection() {
     return projection;
   }
 
   /**
    * @return view matrix
    */
-  public Mat view() {
+  public Matrix view() {
     return cacheView();
   }
 
   /**
    * Binds the view matrix to the renderer.
    */
-  public void bindView(Mat m) {
+  public void bindView(Matrix m) {
     cacheView(m);
   }
 
   /**
    * Caches the view matrix.
    */
-  public final void cacheView(Mat m) {
+  public final void cacheView(Matrix m) {
     view.set(m);
   }
 
   /**
    * Returns the cached view matrix.
    */
-  public final Mat cacheView() {
+  public final Matrix cacheView() {
     return view;
   }
 
   /**
    * @return modelview matrix
    */
-  public Mat modelView() {
+  public Matrix modelView() {
     return modelview;
   }
 
   /**
    * Binds the modelview matrix to the renderer.
    */
-  public void bindModelView(Mat m) {
+  public void bindModelView(Matrix m) {
     modelview.set(m);
   }
 
@@ -139,20 +139,20 @@ public class MatrixHandler {
    *
    * @see #isProjectionViewInverseCached()
    */
-  public final void cacheProjectionView(Mat pv) {
-    projectionViewMat.set(pv);
+  public final void cacheProjectionView(Matrix pv) {
+    projectionViewMatrix.set(pv);
     if (isProjectionViewInverseCached()) {
-      if (projectionViewInverseMat == null)
-        projectionViewInverseMat = new Mat();
-      projectionViewMatHasInv = projectionViewMat.invert(projectionViewInverseMat);
+      if (projectionViewInverseMatrix == null)
+        projectionViewInverseMatrix = new Matrix();
+      projectionViewMatHasInv = projectionViewMatrix.invert(projectionViewInverseMatrix);
     }
   }
 
   /**
    * Returns the cached projection times view matrix.
    */
-  public final Mat cacheProjectionView() {
-    return projectionViewMat;
+  public final Matrix cacheProjectionView() {
+    return projectionViewMatrix;
   }
 
   /**
@@ -181,23 +181,23 @@ public class MatrixHandler {
   /**
    * Returns the cached projection times view inverse matrix.
    */
-  public final Mat cacheProjectionViewInverse() {
+  public final Matrix cacheProjectionViewInverse() {
     if (!isProjectionViewInverseCached())
       throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
-    return projectionViewInverseMat;
+    return projectionViewInverseMatrix;
   }
 
   /**
    * Multiplies the current modelview matrix by the one specified through the parameters.
    */
-  public void applyModelView(Mat source) {
+  public void applyModelView(Matrix source) {
     modelview.apply(source);
   }
 
   /**
    * Multiplies the current projection matrix by the one specified through the parameters.
    */
-  public void applyProjection(Mat source) {
+  public void applyProjection(Matrix source) {
     projection.apply(source);
   }
 
@@ -377,7 +377,7 @@ public class MatrixHandler {
     float tz = -(far + near) / (far - near);
 
     // The minus sign is needed to invert the Y axis.
-    bindProjection(new Mat(x, 0, 0, 0, 0, -y, 0, 0, 0, 0, z, 0, tx, ty, tz, 1));
+    bindProjection(new Matrix(x, 0, 0, 0, 0, -y, 0, 0, 0, 0, z, 0, tx, ty, tz, 1));
   }
 
   // as it's done in P5:
@@ -434,7 +434,7 @@ public class MatrixHandler {
       y2 /= mag;
     }
 
-    Mat mv = new Mat(x0, y0, z0, 0, x1, y1, z1, 0, x2, y2, z2, 0, 0, 0, 0, 1);
+    Matrix mv = new Matrix(x0, y0, z0, 0, x1, y1, z1, 0, x2, y2, z2, 0, 0, 0, 0, 1);
 
     float tx = -eyeX;
     float ty = -eyeY;

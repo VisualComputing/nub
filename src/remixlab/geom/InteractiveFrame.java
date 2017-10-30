@@ -116,7 +116,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   // spinning stuff:
   private float spngSensitivity;
   private TimingTask spinningTimerTask;
-  private Quat spngRotation;
+  private Quaternion spngRotation;
   protected float dampFriction; // new
   // toss and spin share the damp var:
   private float sFriction; // new
@@ -162,141 +162,141 @@ public class InteractiveFrame extends Frame implements Grabber {
   protected List<InteractiveFrame> childrenList;
 
   /**
-   * Same as {@code this(scn, null, new Vec(), new Quat(), 1)}.
+   * Same as {@code this(scn, null, new Vec(), new Quaternion(), 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(Graph scn) {
-    this(scn, null, new Vec(), new Quat(), 1);
+    this(scn, null, new Vec(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(scn, null, p, new Quat(), 1)}.
+   * Same as {@code this(scn, null, p, new Quaternion(), 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(Graph scn, Vec p) {
-    this(scn, null, p, new Quat(), 1);
+    this(scn, null, p, new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Quat r) {
+  public InteractiveFrame(Graph scn, Quaternion r) {
     this(scn, null, new Vec(), r, 1);
   }
 
   /**
-   * Same as {@code this(scn, null, new Vec(), new Quat(), s)}.
+   * Same as {@code this(scn, null, new Vec(), new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(Graph scn, float s) {
-    this(scn, null, new Vec(), new Quat(), s);
+    this(scn, null, new Vec(), new Quaternion(), s);
   }
 
   /**
-   * Same as {@code this(scn, null, p, new Quat(), s)}.
+   * Same as {@code this(scn, null, p, new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(Graph scn, Vec p, float s) {
-    this(scn, null, p, new Quat(), s);
+    this(scn, null, p, new Quaternion(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vec p, Quat r) {
+  public InteractiveFrame(Graph scn, Vec p, Quaternion r) {
     this(scn, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Quat r, float s) {
+  public InteractiveFrame(Graph scn, Quaternion r, float s) {
     this(scn, null, new Vec(), r, s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vec p, Quat r, float s) {
+  public InteractiveFrame(Graph scn, Vec p, Quaternion r, float s) {
     this(scn, null, p, r, s);
   }
 
   /**
    * Same as
-   * {@code this(referenceFrame.scene(), referenceFrame, new Vec(), scn.is3D() ? new Quat() : new Rot(), 1)}
+   * {@code this(referenceFrame.scene(), referenceFrame, new Vec(), scn.is3D() ? new Quaternion() : new Rot(), 1)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame) {
-    this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), 1);
+    this(referenceFrame.scene(), referenceFrame, new Vec(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1)}
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), 1)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Vec p) {
-    this(referenceFrame.scene(), referenceFrame, p, new Quat(), 1);
+    this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Quat r) {
+  public InteractiveFrame(InteractiveFrame referenceFrame, Quaternion r) {
     this(referenceFrame.scene(), referenceFrame, new Vec(), r, 1);
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), new Quat(), s)}.
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, float s) {
-    this(referenceFrame.scene(), referenceFrame, new Vec(),new Quat(), s);
+    this(referenceFrame.scene(), referenceFrame, new Vec(),new Quaternion(), s);
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quat(), s)}
+   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), s)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
   public InteractiveFrame(InteractiveFrame referenceFrame, Vec p, float s) {
-    this(referenceFrame.scene(), referenceFrame, p, new Quat(), s);
+    this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), s);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, InteractiveFrame, Vec, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quat r) {
+  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quaternion r) {
     this(referenceFrame.scene(), referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vec(), r, s)}.
    *
-   * @see #InteractiveFrame(Graph, Vec, Quat, float)
+   * @see #InteractiveFrame(Graph, Vec, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Quat r, float s) {
+  public InteractiveFrame(InteractiveFrame referenceFrame, Quaternion r, float s) {
     this(referenceFrame.scene(), referenceFrame, new Vec(), r, s);
   }
 
@@ -319,7 +319,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quat r, float s) {
+  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vec p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
@@ -1119,7 +1119,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Spinning requires to set to {@link #damping()} to 0.
    * <p>
    * See {@link #spin()}, {@link #spinningRotation()} and
-   * {@link #startSpinning(MotionEvent, Quat)} for details.
+   * {@link #startSpinning(MotionEvent, Quaternion)} for details.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -1178,9 +1178,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * During spinning, {@link #spin()} rotates the generic-frame by its
    * {@link #spinningRotation()} at a frequency defined when the generic-frame
-   * {@link #startSpinning(MotionEvent, Quat)}.
+   * {@link #startSpinning(MotionEvent, Quaternion)}.
    * <p>
-   * Use {@link #startSpinning(MotionEvent, Quat)} and {@link #stopSpinning()} to
+   * Use {@link #startSpinning(MotionEvent, Quaternion)} and {@link #stopSpinning()} to
    * change this state. Default value is {@code false}.
    *
    * @see #isFlying()
@@ -1193,7 +1193,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns the incremental rotation that is applied by {@link #spin()} to the
    * generic-frame orientation when it {@link #isSpinning()}.
    * <p>
-   * Default value is a {@code null} rotation. Use {@link #setSpinningRotation(Quat)}
+   * Default value is a {@code null} rotation. Use {@link #setSpinningRotation(Quaternion)}
    * to change this value.
    * <p>
    * The {@link #spinningRotation()} axis is defined in the generic-frame coordinate
@@ -1205,7 +1205,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #flyDirection()
    */
-  public final Quat spinningRotation() {
+  public final Quaternion spinningRotation() {
     return spngRotation;
   }
 
@@ -1215,12 +1215,12 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #setFlyDirection(Vec)
    */
-  public final void setSpinningRotation(Quat spinningRotation) {
+  public final void setSpinningRotation(Quaternion spinningRotation) {
     spngRotation = spinningRotation;
   }
 
   /**
-   * Stops the spinning motion started using {@link #startSpinning(MotionEvent, Quat)}
+   * Stops the spinning motion started using {@link #startSpinning(MotionEvent, Quaternion)}
    * . {@link #isSpinning()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #spin()}, since spinning may be
@@ -1236,9 +1236,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Internal use. Same as {@code startSpinning(rt, event.speed(), event.delay())}.
    *
    * @see #startFlying(MotionEvent, Vec)
-   * @see #startSpinning(Quat, float, long)
+   * @see #startSpinning(Quaternion, float, long)
    */
-  protected void startSpinning(MotionEvent event, Quat rt) {
+  protected void startSpinning(MotionEvent event, Quaternion rt) {
     startSpinning(rt, event.speed(), event.delay());
   }
 
@@ -1255,7 +1255,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * @see #damping()
    * @see #startFlying(Vec, float)
    */
-  public void startSpinning(Quat rt, float speed, long delay) {
+  public void startSpinning(Quaternion rt, float speed, long delay) {
     setSpinningRotation(rt);
     eventSpeed = speed;
     eventDelay = delay;
@@ -1286,7 +1286,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     }
   }
 
-  protected void spin(Quat rt, float speed, long delay) {
+  protected void spin(Quaternion rt, float speed, long delay) {
     if (damping() == 0) {
       spin(rt);
       eventSpeed = speed;
@@ -1295,7 +1295,7 @@ public class InteractiveFrame extends Frame implements Grabber {
       startSpinning(rt, speed, delay);
   }
 
-  protected void spin(Quat rt) {
+  protected void spin(Quaternion rt) {
     setSpinningRotation(rt);
     spin();
   }
@@ -1329,12 +1329,12 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (Math.abs(eventSpeed) < .001f)
       eventSpeed = 0;
     // float currSpeed = eventSpeed;
-    spinningRotation().fromAxisAngle(((Quat) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
+    spinningRotation().fromAxisAngle(((Quaternion) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
     //TODO Restore 2D
     /*
     if (gScene.is3D())
-      ((Quat) spinningRotation())
-          .fromAxisAngle(((Quat) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
+      ((Quaternion) spinningRotation())
+          .fromAxisAngle(((Quaternion) spinningRotation()).axis(), spinningRotation().angle() * (eventSpeed / prevSpeed));
     else
       this.setSpinningRotation(new Rot(spinningRotation().angle() * (eventSpeed / prevSpeed)));
     */
@@ -1378,7 +1378,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns a Rotation computed according to the mouse motion. Mouse positions are
    * projected on a deformed ball, centered on ({@code center.x()}, {@code center.y()}).
    */
-  public Quat deformedBallRotation(MotionEvent2 event, Vec center) {
+  public Quaternion deformedBallRotation(MotionEvent2 event, Vec center) {
     if (event.isAbsolute()) {
       Graph.showEventVariationWarning("deformedBallRotation");
       return null;
@@ -1402,7 +1402,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     // size, but it is 1.0
     Vec axis = p2.cross(p1);
     float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-    return new Quat(axis, angle);
+    return new Quaternion(axis, angle);
   }
   //TODO Restore 2D
   /*
@@ -1441,7 +1441,7 @@ public class InteractiveFrame extends Frame implements Grabber {
       // size, but it is 1.0
       Vec axis = p2.cross(p1);
       float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-      return new Quat(axis, angle);
+      return new Quaternion(axis, angle);
     }
   }
   */
@@ -1949,7 +1949,7 @@ public class InteractiveFrame extends Frame implements Grabber {
       Graph.showDepthWarning("rotateY");
       return;
     }
-    Quat rt = screenToQuat(0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
+    Quaternion rt = screenToQuat(0, computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
     rotate(rt);
   }
 
@@ -2082,17 +2082,17 @@ public class InteractiveFrame extends Frame implements Grabber {
       return;
     }
     if (!event.flushed()) {
-      Quat rt;
+      Quaternion rt;
       Vec trns;
       if (isEyeFrame())
         rt = deformedBallRotation(event, scene().projectedCoordinatesOf(scene().anchor()));
       else {
         trns = gScene.projectedCoordinatesOf(position());
         rt = deformedBallRotation(event, trns);
-        trns = ((Quat) rt).axis();
+        trns = ((Quaternion) rt).axis();
         trns = gScene.eye().orientation().rotate(trns);
         trns = transformOf(trns);
-        rt = new Quat(trns, -rt.angle());
+        rt = new Quaternion(trns, -rt.angle());
       }
       spin(rt, event.speed(), event.delay());
     }
@@ -2124,10 +2124,10 @@ public class InteractiveFrame extends Frame implements Grabber {
         else {
           trns = gScene.eye().projectedCoordinatesOf(position());
           rt = deformedBallRotation(event, trns);
-          trns = ((Quat) rt).axis();
+          trns = ((Quaternion) rt).axis();
           trns = gScene.eye().frame().orientation().rotate(trns);
           trns = transformOf(trns);
-          rt = new Quat(trns, -rt.angle());
+          rt = new Quaternion(trns, -rt.angle());
         }
       }
       spin(rt, event.speed(), event.delay());
@@ -2318,7 +2318,7 @@ public class InteractiveFrame extends Frame implements Grabber {
       if (gScene.isRightHanded())
         dy = -dy;
       Vec verticalAxis = transformOf(scene().sceneUpVector());
-      spin(Quat.multiply(new Quat(verticalAxis, dx), new Quat(new Vec(1.0f, 0.0f, 0.0f), dy)), event.speed(),
+      spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vec(1.0f, 0.0f, 0.0f), dy)), event.speed(),
           event.delay());
     }
   }
@@ -2350,7 +2350,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     // 1. Relate the eye reference frame:
     Vec trns = new Vec();
     Vec pos = position();
-    Quat o = (Quat) orientation();
+    Quaternion o = (Quaternion) orientation();
     Frame oldRef = referenceFrame();
     InteractiveFrame rFrame = new InteractiveFrame(gScene);
     rFrame.setPosition(scene().anchor());
@@ -2368,21 +2368,21 @@ public class InteractiveFrame extends Frame implements Grabber {
     // 3. Rotate the refFrame around its X-axis -> translate forward-backward
     // the frame on the sphere surface
     float deltaY = computeAngle(event.dy());
-    rFrame.rotate(new Quat(new Vec(1, 0, 0), gScene.isRightHanded() ? deltaY : -deltaY));
+    rFrame.rotate(new Quaternion(new Vec(1, 0, 0), gScene.isRightHanded() ? deltaY : -deltaY));
     // 4. Rotate the refFrame around its Y-axis -> translate left-right the
     // frame on the sphere surface
     float deltaX = computeAngle(event.dx());
-    rFrame.rotate(new Quat(new Vec(0, 1, 0), deltaX));
+    rFrame.rotate(new Quaternion(new Vec(0, 1, 0), deltaX));
     // 5. Rotate the refFrame around its Z-axis -> look around
     float rZ = computeAngle(event.drz());
-    rFrame.rotate(new Quat(new Vec(0, 0, 1), gScene.isRightHanded() ? -rZ : rZ));
+    rFrame.rotate(new Quaternion(new Vec(0, 0, 1), gScene.isRightHanded() ? -rZ : rZ));
     // 6. Rotate the frame around x-axis -> move head up and down :P
     float rX = computeAngle(event.drx());
-    Quat q = new Quat(new Vec(1, 0, 0), gScene.isRightHanded() ? rX : -rX);
+    Quaternion q = new Quaternion(new Vec(1, 0, 0), gScene.isRightHanded() ? rX : -rX);
     rotate(q);
     // 7. Unrelate the frame and restore state:
     pos = position();
-    o = (Quat) orientation();
+    o = (Quaternion) orientation();
     setReferenceFrame(oldRef);
     scene().pruneBranch(rFrame);
     setPosition(pos);
@@ -2452,7 +2452,7 @@ public class InteractiveFrame extends Frame implements Grabber {
         rotate(event);
         return;
       }
-      Quat rt;
+      Quaternion rt;
       Vec trns;
       float angle;
       if (isEyeFrame()) {
@@ -2461,16 +2461,16 @@ public class InteractiveFrame extends Frame implements Grabber {
             .atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
         if (gScene.isLeftHanded())
           angle = -angle;
-        rt = new Quat(new Vec(0.0f, 0.0f, 1.0f), angle);
+        rt = new Quaternion(new Vec(0.0f, 0.0f, 1.0f), angle);
       } else {
         trns = gScene.projectedCoordinatesOf(position());
         float prev_angle = (float) Math.atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]);
         Vec axis = transformOf(gScene.eye().orientation().rotate(new Vec(0.0f, 0.0f, -1.0f)));
         if (gScene.isRightHanded())
-          rt = new Quat(axis, angle - prev_angle);
+          rt = new Quaternion(axis, angle - prev_angle);
         else
-          rt = new Quat(axis, prev_angle - angle);
+          rt = new Quaternion(axis, prev_angle - angle);
       }
       spin(rt, event.speed(), event.delay());
     }
@@ -2603,14 +2603,14 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #screenToQuat(float, float, float)
    */
-  public Quat screenToQuat(Vec angles) {
+  public Quaternion screenToQuat(Vec angles) {
     return screenToQuat(angles.vec[0], angles.vec[1], angles.vec[2]);
   }
 
   /**
    * Reduces the screen (device)
    * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
-   * rotation</a> into a {@link Quat}.
+   * rotation</a> into a {@link Quaternion}.
    * <p>
    * It's worth noting that all gesture to generic-frame motion converting methods, are
    * implemented from just {@link #screenToEye(Vec)}, {@link #eyeToReferenceFrame(Vec)}
@@ -2619,9 +2619,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * @param roll  Rotation angle in radians around the screen x-Axis
    * @param pitch Rotation angle in radians around the screen y-Axis
    * @param yaw   Rotation angle in radians around the screen z-Axis
-   * @see Quat#fromEulerAngles(float, float, float)
+   * @see Quaternion#fromEulerAngles(float, float, float)
    */
-  public Quat screenToQuat(float roll, float pitch, float yaw) {
+  public Quaternion screenToQuat(float roll, float pitch, float yaw) {
     if (gScene.is2D()) {
       Graph.showDepthWarning("screenToQuat");
       return null;
@@ -2630,10 +2630,10 @@ public class InteractiveFrame extends Frame implements Grabber {
     // don't really need to differentiate among the two cases, but eyeFrame can
     // be speeded up
     if (isEyeFrame() /* || (!isEyeFrame() && !this.respectToEye()) */) {
-      return new Quat(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw);
+      return new Quaternion(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw);
     } else {
       Vec trns = new Vec();
-      Quat q = new Quat(gScene.isLeftHanded() ? roll : -roll, -pitch, gScene.isLeftHanded() ? yaw : -yaw);
+      Quaternion q = new Quaternion(gScene.isLeftHanded() ? roll : -roll, -pitch, gScene.isLeftHanded() ? yaw : -yaw);
       trns.set(-q.x(), -q.y(), -q.z());
       trns = gScene.eye().orientation().rotate(trns);
       trns = transformOf(trns);
@@ -2657,7 +2657,7 @@ public class InteractiveFrame extends Frame implements Grabber {
       gScene.pruneBranch(copy);
       copy.setReferenceFrame(ref);
       copy.setWorldMatrix(this);
-      ref.rotate(new Quat(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw));
+      ref.rotate(new Quaternion(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw));
       setWorldMatrix(copy);
       return;
     }
@@ -2712,7 +2712,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Defines the {@link #flyDirection()} in the reference frame coordinate system.
    *
-   * @see #setSpinningRotation(Quat)
+   * @see #setSpinningRotation(Quaternion)
    */
   public final void setFlyDirection(Vec dir) {
     fDir = dir;
@@ -2722,7 +2722,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Internal use. Same as {@code startFlying(direction, event.speed())}.
    *
    * @see #startFlying(Vec, float)
-   * @see #startSpinning(MotionEvent, Quat)
+   * @see #startSpinning(MotionEvent, Quaternion)
    */
   protected void startFlying(MotionEvent event, Vec direction) {
     startFlying(direction, event.speed());
@@ -2741,7 +2741,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * @see #damping()
    * @see #spin()
    * @see #startFlying(MotionEvent, Vec)
-   * @see #startSpinning(Quat, float, long)
+   * @see #startSpinning(Quaternion, float, long)
    */
   public void startFlying(Vec direction, float speed) {
     eventSpeed = speed;
@@ -2788,7 +2788,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     flySpd = speed;
   }
 
-  protected Quat rollPitchQuaternion(MotionEvent event) {
+  protected Quaternion rollPitchQuaternion(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       return rollPitchQuaternion(motionEvent2);
@@ -2802,7 +2802,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * mouse roll (X axis) and pitch ( {@link Graph#sceneUpVector()} axis).
    */
-  protected Quat rollPitchQuaternion(MotionEvent2 event) {
+  protected Quaternion rollPitchQuaternion(MotionEvent2 event) {
     if (gScene.is2D()) {
       Graph.showDepthWarning("rollPitchQuaternion");
       return null;
@@ -2813,9 +2813,9 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (gScene.isRightHanded())
       deltaY = -deltaY;
 
-    Quat rotX = new Quat(new Vec(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / scene().height());
-    Quat rotY = new Quat(transformOf(scene().sceneUpVector()), rotationSensitivity() * (-deltaX) / scene().width());
-    return Quat.multiply(rotY, rotX);
+    Quaternion rotX = new Quaternion(new Vec(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / scene().height());
+    Quaternion rotY = new Quaternion(transformOf(scene().sceneUpVector()), rotationSensitivity() * (-deltaX) / scene().width());
+    return Quaternion.multiply(rotY, rotX);
   }
 
   // drive:
@@ -2824,9 +2824,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
    * event X-displacement.
    */
-  protected Quat turnQuaternion(MotionEvent1 event) {
+  protected Quaternion turnQuaternion(MotionEvent1 event) {
     float deltaX = event.dx();
-    return new Quat(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / scene().width());
+    return new Quaternion(new Vec(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / scene().width());
   }
 
   // end decide

@@ -14,13 +14,13 @@ package remixlab.primitives;
  * 4x4 matrix affine matrix implementation. Matrix is represented in column major order: |
  * m0 m4 m8 m12 | | m1 m5 m9 m13 | | m2 m6 m10 m14 | | m3 m7 m11 m15 |
  */
-public class Mat {
+public class Matrix {
   /**
-   * Returns whether or not this Mat matches other.
+   * Returns whether or not this Matrix matches other.
    *
    * @param other rect
    */
-  public boolean matches(Mat other) {
+  public boolean matches(Matrix other) {
     boolean result = true;
     for(int i = 0; i < mat.length; i++) {
       if(mat[i] != other.mat[i])
@@ -35,28 +35,28 @@ public class Mat {
   /**
    * Constructor for an identity matrix.
    */
-  public Mat() {
+  public Matrix() {
     reset();
   }
 
   /**
    * 16 consecutive values that are used as the elements of a 4 x 4 column-major matrix.
    */
-  public Mat(float _m0, float _m1, float _m2, float _m3, float _m4, float _m5, float _m6, float _m7, float _m8,
-             float _m9, float _m10, float _m11, float _m12, float _m13, float _m14, float _m15) {
+  public Matrix(float _m0, float _m1, float _m2, float _m3, float _m4, float _m5, float _m6, float _m7, float _m8,
+                float _m9, float _m10, float _m11, float _m12, float _m13, float _m14, float _m15) {
     set(_m0, _m1, _m2, _m3, _m4, _m5, _m6, _m7, _m8, _m9, _m10, _m11, _m12, _m13, _m14, _m15);
   }
 
-  protected Mat(Mat matrix) {
+  protected Matrix(Matrix matrix) {
     set(matrix);
   }
 
   /**
    * Same as {@code this(data, false)}.
    *
-   * @see #Mat(float[], boolean)
+   * @see #Matrix(float[], boolean)
    */
-  public Mat(float[] data) {
+  public Matrix(float[] data) {
     this(data, false);
   }
 
@@ -65,7 +65,7 @@ public class Mat {
    * the matrix contents are set in column major order, otherwise they're set in row-major
    * order.
    */
-  public Mat(float[] data, boolean transposed) {
+  public Matrix(float[] data, boolean transposed) {
     if (transposed)
       setTransposed(data);
     else
@@ -323,8 +323,8 @@ public class Mat {
   /**
    * Returns a copy of this Matrix.
    */
-  public Mat get() {
-    return new Mat(this);
+  public Matrix get() {
+    return new Matrix(this);
   }
 
   /**
@@ -392,7 +392,7 @@ public class Mat {
   /**
    * Sets the matrix contents from the {@code src} matrix contents.
    */
-  public void set(Mat src) {
+  public void set(Matrix src) {
     set(src.mat[0], src.mat[1], src.mat[2], src.mat[3], src.mat[4], src.mat[5], src.mat[6], src.mat[7], src.mat[8],
         src.mat[9], src.mat[10], src.mat[11], src.mat[12], src.mat[13], src.mat[14], src.mat[15]);
   }
@@ -670,7 +670,7 @@ public class Mat {
   /**
    * Multiply this matrix by the one defined from {@code source}.
    */
-  public void apply(Mat source) {
+  public void apply(Matrix source) {
     // applyTranspose(source.mat[0], source.mat[4], source.mat[8],
     // source.mat[12], source.mat[1], source.mat[5],
     // source.mat[9], source.mat[13], source.mat[2], source.mat[6],
@@ -685,8 +685,8 @@ public class Mat {
   /**
    * Returns {@code a x b}.
    */
-  public static Mat multiply(Mat a, Mat b) {
-    Mat c = new Mat();
+  public static Matrix multiply(Matrix a, Matrix b) {
+    Matrix c = new Matrix();
     multiply(a, b, c);
     return c;
   }
@@ -694,7 +694,7 @@ public class Mat {
   /**
    * Define {@code c} as {@code a x b}.
    */
-  public static void multiply(Mat a, Mat b, Mat c) {
+  public static void multiply(Matrix a, Matrix b, Matrix c) {
     c.mat[0] = a.mat[0] * b.mat[0] + a.mat[4] * b.mat[1] + a.mat[8] * b.mat[2] + a.mat[12] * b.mat[3];
     c.mat[4] = a.mat[0] * b.mat[4] + a.mat[4] * b.mat[5] + a.mat[8] * b.mat[6] + a.mat[12] * b.mat[7];
     c.mat[8] = a.mat[0] * b.mat[8] + a.mat[4] * b.mat[9] + a.mat[8] * b.mat[10] + a.mat[12] * b.mat[11];
@@ -836,7 +836,7 @@ public class Mat {
   /**
    * Pre-multiply this matrix by the one defined from {@code source}.
    */
-  public void preApply(Mat left) {
+  public void preApply(Matrix left) {
     preApply(left.mat[0], left.mat[1], left.mat[2], left.mat[3], left.mat[4], left.mat[5], left.mat[6], left.mat[7],
         left.mat[8], left.mat[9], left.mat[10], left.mat[11], left.mat[12], left.mat[13], left.mat[14], left.mat[15]);
   }
@@ -967,7 +967,7 @@ public class Mat {
       target = new float[3];
     }
     if (source == target) {
-      throw new RuntimeException("The source and target vectors used in " + "Mat.mult() cannot be identical.");
+      throw new RuntimeException("The source and target vectors used in " + "Matrix.mult() cannot be identical.");
     }
     if (target.length == 3) {
       target[0] = mat[0] * source[0] + mat[4] * source[1] + mat[8] * source[2] + mat[12];
@@ -1017,7 +1017,7 @@ public class Mat {
    * <p>
    * {@code m} should be non-null.
    */
-  public boolean invert(Mat m) {
+  public boolean invert(Matrix m) {
     float determinant = determinant();
     if (determinant == 0) {
       return false;

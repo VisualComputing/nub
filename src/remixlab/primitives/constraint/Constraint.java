@@ -11,8 +11,8 @@
 package remixlab.primitives.constraint;
 
 import remixlab.primitives.Frame;
+import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vec;
-import remixlab.primitives.Quat;
 
 /**
  * An interface class for Frame constraints. This interface API aims to conform that of the
@@ -52,10 +52,10 @@ public abstract class Constraint {
    * constraint. See {@link #constrainTranslation(Vec, Frame)} for details.
    * <p>
    * Use {@link Frame#inverseTransformOf(Vec)} on the
-   * {@code rotation} {@link Quat#axis()} to express
+   * {@code rotation} {@link Quaternion#axis()} to express
    * {@code rotation} in the world coordinate system if needed.
    */
-  public Quat constrainRotation(Quat rotation, Frame frame) {
+  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     return rotation.get();
   }
 }

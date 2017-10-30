@@ -1198,7 +1198,7 @@ public class Scene extends Graph implements PConstants {
     y = jsonFrame.getJSONArray("orientation").getFloat(1);
     z = jsonFrame.getJSONArray("orientation").getFloat(2);
     float w = jsonFrame.getJSONArray("orientation").getFloat(3);
-    frame.setOrientation(new Quat(x, y, z, w));
+    frame.setOrientation(new Quaternion(x, y, z, w));
     frame.setMagnitude(jsonFrame.getFloat("magnitude"));
     return frame;
   }
@@ -1219,7 +1219,7 @@ public class Scene extends Graph implements PConstants {
       y = jsonFrame.getJSONArray("orientation").getFloat(1);
       z = jsonFrame.getJSONArray("orientation").getFloat(2);
       float w = jsonFrame.getJSONArray("orientation").getFloat(3);
-      frame.setOrientation(new Quat(x, y, z, w));
+      frame.setOrientation(new Quaternion(x, y, z, w));
     }
     frame.setMagnitude(jsonFrame.getFloat("magnitude"));
     return frame;
@@ -1254,13 +1254,13 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code rot} into a P5
    * JSONArray.
    */
-  protected JSONArray toJSONArray(Quat rot) {
+  protected JSONArray toJSONArray(Quaternion rot) {
     JSONArray jsonRot = new JSONArray();
-    Quat quat = (Quat) rot;
-    jsonRot.setFloat(0, quat.x());
-    jsonRot.setFloat(1, quat.y());
-    jsonRot.setFloat(2, quat.z());
-    jsonRot.setFloat(3, quat.w());
+    Quaternion quaternion = (Quaternion) rot;
+    jsonRot.setFloat(0, quaternion.x());
+    jsonRot.setFloat(1, quaternion.y());
+    jsonRot.setFloat(2, quaternion.z());
+    jsonRot.setFloat(3, quaternion.w());
     return jsonRot;
   }
   //TODO Restore 2D
@@ -1268,7 +1268,7 @@ public class Scene extends Graph implements PConstants {
   protected JSONArray toJSONArray(Rotation rot) {
     JSONArray jsonRot = new JSONArray();
     if (is3D()) {
-      Quat quat = (Quat) rot;
+      Quaternion quat = (Quaternion) rot;
       jsonRot.setFloat(0, quat.x());
       jsonRot.setFloat(1, quat.y());
       jsonRot.setFloat(2, quat.z());
@@ -1352,8 +1352,8 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code matrixHandler(pgraphics).bind(false)}. Set the {@code pgraphics}
    * matrices by calling
-   * {@link MatrixHandler#bindProjection(Mat)} and
-   * {@link MatrixHandler#bindModelView(Mat)} (only makes sense
+   * {@link MatrixHandler#bindProjection(Matrix)} and
+   * {@link MatrixHandler#bindModelView(Matrix)} (only makes sense
    * when {@link #pg()} is different than {@code pgraphics}).
    * <p>
    * This method doesn't perform any computation, but simple retrieve the current matrices
@@ -1392,8 +1392,8 @@ public class Scene extends Graph implements PConstants {
   public static void applyTransformation(PGraphics pgraphics, Frame frame) {
     if (pgraphics instanceof PGraphics3D) {
       pgraphics.translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
-      pgraphics.rotate(frame.rotation().angle(), ((Quat) frame.rotation()).axis().vec[0],
-          ((Quat) frame.rotation()).axis().vec[1], ((Quat) frame.rotation()).axis().vec[2]);
+      pgraphics.rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis().vec[0],
+          ((Quaternion) frame.rotation()).axis().vec[1], ((Quaternion) frame.rotation()).axis().vec[2]);
       pgraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
     } else {
       pgraphics.translate(frame.translation().x(), frame.translation().y());
@@ -1644,32 +1644,32 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Converts a {@link Mat} to a PMatrix3D.
+   * Converts a {@link Matrix} to a PMatrix3D.
    */
-  public static PMatrix3D toPMatrix(Mat m) {
+  public static PMatrix3D toPMatrix(Matrix m) {
     float[] a = m.getTransposed(new float[16]);
     return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
             a[15]);
   }
 
   /**
-   * Converts a PMatrix3D to a {@link Mat}.
+   * Converts a PMatrix3D to a {@link Matrix}.
    */
-  public static Mat toMat(PMatrix3D m) {
-    return new Mat(m.get(new float[16]), true);
+  public static Matrix toMat(PMatrix3D m) {
+    return new Matrix(m.get(new float[16]), true);
   }
 
   /**
-   * Converts a PMatrix2D to a {@link Mat}.
+   * Converts a PMatrix2D to a {@link Matrix}.
    */
-  public static Mat toMat(PMatrix2D m) {
+  public static Matrix toMat(PMatrix2D m) {
     return toMat(new PMatrix3D(m));
   }
 
   /**
-   * Converts a {@link Mat} to a PMatrix2D.
+   * Converts a {@link Matrix} to a PMatrix2D.
    */
-  public static PMatrix2D toPMatrix2D(Mat m) {
+  public static PMatrix2D toPMatrix2D(Matrix m) {
     float[] a = m.getTransposed(new float[16]);
     return new PMatrix2D(a[0], a[1], a[3], a[4], a[5], a[7]);
   }
@@ -1867,7 +1867,7 @@ public class Scene extends Graph implements PConstants {
   public void drawArrow(Vec from, Vec to, float radius) {
     pushModelView();
     translate(from.x(), from.y(), from.z());
-    applyModelView(new Quat(new Vec(0, 0, 1), Vec.subtract(to, from)).matrix());
+    applyModelView(new Quaternion(new Vec(0, 0, 1), Vec.subtract(to, from)).matrix());
     drawArrow(Vec.subtract(to, from).magnitude(), radius);
     popModelView();
   }

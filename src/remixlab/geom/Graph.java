@@ -1134,8 +1134,8 @@ public class Graph {
    * instance).
    */
   //TODO pass a Matrix param!
-  public Mat computeProjection() {
-    Mat m = new Mat();
+  public Matrix computeProjection() {
+    Matrix m = new Matrix();
     float ZNear = zNear();
     float ZFar = zFar();
     switch (type()) {
@@ -1176,10 +1176,10 @@ public class Graph {
    * instance).
    */
   //TODO pass a Matrix param!
-  public Mat computeView() {
-    Mat m = new Mat();
+  public Matrix computeView() {
+    Matrix m = new Matrix();
 
-    Quat q = eye().orientation();
+    Quaternion q = eye().orientation();
 
     float q00 = 2.0f * q.quat[0] * q.quat[0];
     float q11 = 2.0f * q.quat[1] * q.quat[1];
@@ -1340,49 +1340,49 @@ public class Graph {
   /**
    * Wrapper for {@link MatrixHandler#modelView()}
    */
-  public Mat modelView() {
+  public Matrix modelView() {
     return matrixHandler.modelView();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#projection()}
    */
-  public Mat projection() {
+  public Matrix projection() {
     return matrixHandler.projection();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#projection()}
    */
-  public Mat view() {
+  public Matrix view() {
     return matrixHandler.view();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#bindModelView(Mat)}
+   * Wrapper for {@link MatrixHandler#bindModelView(Matrix)}
    */
-  public void setModelView(Mat source) {
+  public void setModelView(Matrix source) {
     matrixHandler.bindModelView(source);
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#bindProjection(Mat)}
+   * Wrapper for {@link MatrixHandler#bindProjection(Matrix)}
    */
-  public void setProjection(Mat source) {
+  public void setProjection(Matrix source) {
     matrixHandler.bindProjection(source);
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#applyModelView(Mat)}
+   * Wrapper for {@link MatrixHandler#applyModelView(Matrix)}
    */
-  public void applyModelView(Mat source) {
+  public void applyModelView(Matrix source) {
     matrixHandler.applyModelView(source);
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#applyProjection(Mat)}
+   * Wrapper for {@link MatrixHandler#applyProjection(Matrix)}
    */
-  public void applyProjection(Mat source) {
+  public void applyProjection(Matrix source) {
     matrixHandler.applyProjection(source);
   }
 
@@ -2315,7 +2315,7 @@ public class Graph {
 
   // cached version
   protected boolean project(float objx, float objy, float objz, float[] windowCoordinate) {
-    Mat projectionViewMat = matrixHandler().cacheProjectionView();
+    Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
 
     float in[] = new float[4];
     float out[] = new float[4];
@@ -2325,14 +2325,14 @@ public class Graph {
     in[2] = objz;
     in[3] = 1.0f;
 
-    out[0] = projectionViewMat.mat[0] * in[0] + projectionViewMat.mat[4] * in[1] + projectionViewMat.mat[8] * in[2]
-            + projectionViewMat.mat[12] * in[3];
-    out[1] = projectionViewMat.mat[1] * in[0] + projectionViewMat.mat[5] * in[1] + projectionViewMat.mat[9] * in[2]
-            + projectionViewMat.mat[13] * in[3];
-    out[2] = projectionViewMat.mat[2] * in[0] + projectionViewMat.mat[6] * in[1] + projectionViewMat.mat[10] * in[2]
-            + projectionViewMat.mat[14] * in[3];
-    out[3] = projectionViewMat.mat[3] * in[0] + projectionViewMat.mat[7] * in[1] + projectionViewMat.mat[11] * in[2]
-            + projectionViewMat.mat[15] * in[3];
+    out[0] = projectionViewMatrix.mat[0] * in[0] + projectionViewMatrix.mat[4] * in[1] + projectionViewMatrix.mat[8] * in[2]
+            + projectionViewMatrix.mat[12] * in[3];
+    out[1] = projectionViewMatrix.mat[1] * in[0] + projectionViewMatrix.mat[5] * in[1] + projectionViewMatrix.mat[9] * in[2]
+            + projectionViewMatrix.mat[13] * in[3];
+    out[2] = projectionViewMatrix.mat[2] * in[0] + projectionViewMatrix.mat[6] * in[1] + projectionViewMatrix.mat[10] * in[2]
+            + projectionViewMatrix.mat[14] * in[3];
+    out[3] = projectionViewMatrix.mat[3] * in[0] + projectionViewMatrix.mat[7] * in[1] + projectionViewMatrix.mat[11] * in[2]
+            + projectionViewMatrix.mat[15] * in[3];
 
     if (out[3] == 0.0)
       return false;
@@ -2432,12 +2432,12 @@ public class Graph {
    * @param objCoordinate            Return the computed object coordinates.
    */
   public boolean unproject(float winx, float winy, float winz, float[] objCoordinate) {
-    Mat projectionViewInverseMat;
+    Matrix projectionViewInverseMatrix;
     if(matrixHandler().isProjectionViewInverseCached())
-      projectionViewInverseMat = matrixHandler().cacheProjectionViewInverse();
+      projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
     else {
-      projectionViewInverseMat = Mat.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
-      projectionViewInverseMat.invert();
+      projectionViewInverseMatrix = Matrix.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
+      projectionViewInverseMatrix.invert();
     }
 
     int[] viewport = new int[4];
@@ -2463,7 +2463,7 @@ public class Graph {
     in[1] = in[1] * 2 - 1;
     in[2] = in[2] * 2 - 1;
 
-    projectionViewInverseMat.multiply(in, out);
+    projectionViewInverseMatrix.multiply(in, out);
     if (out[3] == 0)
       return false;
 
@@ -2642,7 +2642,7 @@ public class Graph {
    * <p>
    * In 3D change this value using
    * {@link #setViewDirection(Vec)}, {@link #lookAt(Vec)} or
-   * {@link InteractiveFrame#setOrientation(Quat)} . It is orthogonal to {@link #upVector()} and to
+   * {@link InteractiveFrame#setOrientation(Quaternion)} . It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
   public Vec viewDirection() {
@@ -2675,7 +2675,7 @@ public class Graph {
       xAxis = eye().xAxis();
     }
 
-    Quat q = new Quat();
+    Quaternion q = new Quaternion();
     q.fromRotatedBasis(xAxis, xAxis.cross(direction), Vec.multiply(direction, -1));
     eye().setOrientationWithConstraint(q);
   }
@@ -2709,11 +2709,11 @@ public class Graph {
    * @see #lookAt(Vec)
    */
   public void setUpVector(Vec up, boolean noMove) {
-    Quat q = new Quat(new Vec(0.0f, 1.0f, 0.0f), eye().transformOf(up));
+    Quaternion q = new Quaternion(new Vec(0.0f, 1.0f, 0.0f), eye().transformOf(up));
 
     if (!noMove && is3D())
       eye().setPosition(Vec.subtract(anchor(),
-              (Quat.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
+              (Quaternion.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
 
     eye().rotate(q);
 
@@ -2724,7 +2724,7 @@ public class Graph {
   /**
    * Returns the normalized up vector of the eye, defined in the world coordinate system.
    * <p>
-   * Set using {@link #setUpVector(Vec)} or {@link InteractiveFrame#setOrientation(Quat)}. It is
+   * Set using {@link #setUpVector(Vec)} or {@link InteractiveFrame#setOrientation(Quaternion)}. It is
    * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #eye()} (actually returns
@@ -2756,7 +2756,7 @@ public class Graph {
    * <p>
    * This vector lies in the eye horizontal plane, directed along the X axis (orthogonal
    * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vec)}, {@link #lookAt(Vec)} or {@link InteractiveFrame#setOrientation(Quat)}.
+   * {@link #setUpVector(Vec)}, {@link #lookAt(Vec)} or {@link InteractiveFrame#setOrientation(Quaternion)}.
    * <p>
    * Simply returns {@code frame().xAxis()}.
    */
@@ -3017,8 +3017,8 @@ public class Graph {
       scale(frame.scaling(), frame.scaling());
     } else {
       translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
-      rotate(frame.rotation().angle(), ((Quat) frame.rotation()).axis().vec[0], ((Quat) frame.rotation()).axis().vec[1],
-          ((Quat) frame.rotation()).axis().vec[2]);
+      rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis().vec[0], ((Quaternion) frame.rotation()).axis().vec[1],
+          ((Quaternion) frame.rotation()).axis().vec[2]);
       scale(frame.scaling(), frame.scaling(), frame.scaling());
     }
   }

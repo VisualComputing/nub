@@ -1,10 +1,9 @@
 package frame;
 
 import processing.core.PApplet;
-import remixlab.bias.*;
 import remixlab.bias.event.*;
 import remixlab.geom.InteractiveFrame;
-import remixlab.primitives.Quat;
+import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vec;
 import remixlab.proscene.*;
 
@@ -60,7 +59,7 @@ public class Box {
     /**
      PMatrix3D pM3d =  new PMatrix3D();
      float [] m = new float [16];
-     Mat m3d = iFrame.matrix();
+     Matrix m3d = iFrame.matrix();
      m = m3d.getTransposed(m);
      pM3d.set(m);
      scene.pg().applyMatrix(pM3d);
@@ -122,12 +121,12 @@ public class Box {
     iFrame.setPosition(pos);
   }
 
-  public Quat getOrientation() {
-    return (Quat) iFrame.orientation();
+  public Quaternion getOrientation() {
+    return (Quaternion) iFrame.orientation();
   }
 
   public void setOrientation(Vec v) {
     Vec to = Vec.subtract(v, iFrame.position());
-    iFrame.setOrientation(new Quat(new Vec(0, 1, 0), to));
+    iFrame.setOrientation(new Quaternion(new Vec(0, 1, 0), to));
   }
 }
