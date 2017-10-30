@@ -25,7 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D {@link Grabber} scene.
+ * A 2D or 3D scene graph.
  * <p>
  * Main package class representing an interface between Dandelion and the outside world.
  * For an introduction to DANDELION please refer to

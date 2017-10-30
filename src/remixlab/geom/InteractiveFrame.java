@@ -319,7 +319,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vector p, Quaternion r, float s) {
+  protected InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vector p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
