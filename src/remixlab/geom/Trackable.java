@@ -24,7 +24,7 @@ package remixlab.geom;
 
 public interface Trackable {
   /**
-   * Returns the eye frame that will track the object. This frame (position and
+   * Returns the frame frame that will track the object. This frame (position and
    * orientation) will represent the {@link AbstractScene#eye()} once
    * {@link AbstractScene#setAvatar(Trackable)} is called.
    *

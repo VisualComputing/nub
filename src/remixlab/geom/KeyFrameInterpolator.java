@@ -678,8 +678,6 @@ public class KeyFrameInterpolator {
    * KeyFrameInterpolator path.
    * <p>
    * Use it in your KeyFrameInterpolator path drawing routine.
-   *
-   * @see AbstractScene#drawPath(KeyFrameInterpolator, int, int, float)
    */
   public List<Frame> path() {
     updatePath();

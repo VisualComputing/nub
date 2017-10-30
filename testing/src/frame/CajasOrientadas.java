@@ -13,7 +13,7 @@ public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
   Sphere esfera;
-  InteractiveFrame eye;
+  InteractiveFrame eye1, eye2;
 
   /*
   public boolean matches(Shortcut shortcut, List<Shortcut> list) {
@@ -61,11 +61,11 @@ public class CajasOrientadas extends PApplet {
 
     //scene.keyAgent().setDefaultGrabber(null);
 
-    //if(scene.keyAgent().defaultGrabber() == scene.eye())
+    //if(scene.keyAgent().defaultGrabber() == scene.frame())
       //println("is eyeFrame!");
     //frameRate(500);
 
-    eye = new InteractiveFrame(scene) {
+    eye1 = new InteractiveFrame(scene) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -93,9 +93,39 @@ public class CajasOrientadas extends PApplet {
           translateX(true);
       }
     };
-    scene.setEye(eye);
+
+    eye2 = new InteractiveFrame(scene) {
+      @Override
+      public void interact(MotionEvent event) {
+        switch (event.shortcut().id()) {
+          case PApplet.LEFT:
+            translate(event);
+            break;
+          case PApplet.RIGHT:
+            rotate(event);
+            break;
+          case processing.event.MouseEvent.WHEEL:
+            scale(event);
+            break;
+        }
+      }
+
+      @Override
+      public void interact(KeyEvent event) {
+        if (event.id() == PApplet.UP)
+          translateY(true);
+        if (event.id() == PApplet.DOWN)
+          translateY(false);
+        if (event.id() == PApplet.LEFT)
+          translateX(false);
+        if (event.id() == PApplet.RIGHT)
+          translateX(true);
+      }
+    };
+
+    scene.setEye(eye1);
     scene.setFieldOfView((float)Math.PI/3);
-    scene.inputHandler().setDefaultGrabber(eye);
+    scene.inputHandler().setDefaultGrabber(eye1);
     scene.showAll();
 
     if(scene.is3D())
@@ -117,9 +147,23 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
+    if(key == ' ') {
+      if(eye1 == scene.eye()) {
+        scene.setEye(eye2);
+        scene.setFieldOfView((float)Math.PI/3);
+        scene.inputHandler().setDefaultGrabber(eye2);
+        scene.showAll();
+      }
+      else {
+        scene.setEye(eye1);
+        scene.setFieldOfView((float)Math.PI/3);
+        scene.inputHandler().setDefaultGrabber(eye1);
+        scene.showAll();
+      }
+    }
     //TODO restore
     //if(key == ' ')
-      //scene.keyAgent().shiftDefaultGrabber(scene.eye(), esfera.iFrame);
+      //scene.keyAgent().shiftDefaultGrabber(scene.frame(), esfera.iFrame);
       //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
     if(key ==' ')
       info();

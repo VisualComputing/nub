@@ -14,7 +14,7 @@ import remixlab.primitives.Vec;
 import remixlab.primitives.Frame;
 
 /**
- * An abstract class for Frame constraints defined by an axis or a plane.
+ * Base class for Frame constraints defined by an axis or a plane.
  * <p>
  * AxisPlaneConstraint is an interface for (translation and/or rotation) Constraint that
  * are defined by a direction. {@link #translationConstraintType()} and
@@ -24,7 +24,7 @@ import remixlab.primitives.Frame;
  * The three implementations of this class: LocalConstraint, WorldConstraint and
  * EyeConstraint differ by the coordinate system in which this direction is expressed.
  */
-public abstract class AxisPlaneConstraint extends Constraint {
+public class AxisPlaneConstraint extends Constraint {
   /**
    * Type lists the different types of translation and rotation constraints that are
    * available.
@@ -41,8 +41,6 @@ public abstract class AxisPlaneConstraint extends Constraint {
   public enum Type {
     FREE, AXIS, PLANE, FORBIDDEN
   }
-
-  ;
 
   private Type transConstraintType;
   private Type rotConstraintType;
@@ -87,7 +85,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
    * undefined for ({@link Type#FREE}) or ({@link Type#FORBIDDEN}).
    * <p>
    * The AxisPlaneConstraint derived classes express this direction in different
-   * coordinate system (eye for EyeConstraint, local for LocalConstraint, and world for
+   * coordinate system (frame for EyeConstraint, local for LocalConstraint, and world for
    * WorldConstraint). This value can be modified with
    * {@link #setRotationConstraintDirection(Vec)}.
    */
@@ -109,7 +107,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
    * {@link Type#AXIS}.
    * <p>
    * The AxisPlaneConstraint derived classes express this direction in different
-   * coordinate system (eye for EyeConstraint, local for LocalConstraint, and world for
+   * coordinate system (frame for EyeConstraint, local for LocalConstraint, and world for
    * WorldConstraint). This value can be modified with
    * {@link #setRotationConstraintDirection(Vec)}.
    */
@@ -183,7 +181,7 @@ public abstract class AxisPlaneConstraint extends Constraint {
    * be able to rotate around an axis ({@link Type#AXIS}), or will not able to rotate at
    * all {@link Type#FORBIDDEN}.
    * <p>
-   * Use {@link Frame#setOrientation(Rotation)} to define the
+   * Use {@link Frame#setOrientation(remixlab.primitives.Quat)} to define the
    * orientation of the constrained Frame before it gets constrained.
    * <p>
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational
