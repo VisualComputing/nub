@@ -20,20 +20,20 @@ import java.util.ListIterator;
 /**
  * A keyFrame Catmull-Rom Frame interpolator.
  * <p>
- * A KeyFrameInterpolator holds keyFrames (that define a path) and, optionally, a
+ * A Interpolator holds keyFrames (that define a path) and, optionally, a
  * reference to a Frame of your application (which will be interpolated). In this case,
- * when the user {@link #startInterpolation()}, the KeyFrameInterpolator regularly updates
+ * when the user {@link #startInterpolation()}, the Interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
  * Here is a typical utilization example (see also ProScene's FrameInterpolation and
  * CameraInterpolation examples):
  * <p>
  * {@code //init() should look like:}<br>
- * {@code // The KeyFrameInterpolator kfi is given the Frame that it will drive over time.}
+ * {@code // The Interpolator kfi is given the Frame that it will drive over time.}
  * <br>
  * {@code myFrame = new Frame());}<br>
- * {@code kfi = new KeyFrameInterpolator( myScene, myFrame );}<br>
- * {@code // With an anonymous frame would look like this: kfi = new KeyFrameInterpolator( myScene );}
+ * {@code kfi = new Interpolator( myScene, myFrame );}<br>
+ * {@code // With an anonymous frame would look like this: kfi = new Interpolator( myScene );}
  * <br>
  * {@code kfi.addKeyFrame( new Frame( new Vector(1,0,0), new Quaternion() ) );}<br>
  * {@code kfi.addKeyFrame( new Frame( new Vector(2,1,0), new Quaternion() ) );}<br>
@@ -74,13 +74,13 @@ import java.util.ListIterator;
  * {@link #interpolationStarted()}, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
  */
-public class KeyFrameInterpolator {
+public class Interpolator {
   /**
-   * Returns whether or not this KeyFrameInterpolator matches other.
+   * Returns whether or not this Interpolator matches other.
    *
    * @param other keyFrameInterpolator
    */
-  public boolean matches(KeyFrameInterpolator other) {
+  public boolean matches(Interpolator other) {
     boolean result = true;
     for(int i = 0; i < keyFrameList.size(); i++) {
       if(!keyFrameList.get(i).matches(other.keyFrameList.get(i)))
@@ -192,32 +192,32 @@ public class KeyFrameInterpolator {
    * Convenience constructor that simply calls {@code this(scn, new Frame())}.
    * <p>
    * Creates an anonymous {@link #frame()} to be interpolated by this
-   * KeyFrameInterpolator.
+   * Interpolator.
    *
-   * @see #KeyFrameInterpolator(Graph, Frame)
+   * @see #Interpolator(Graph, Frame)
    */
-  public KeyFrameInterpolator(Graph scn) {
+  public Interpolator(Graph scn) {
     this(scn, new Frame());
   }
 
   /**
    * Same as {@code this(frame.scene(), frame)}.
    *
-   * @see #KeyFrameInterpolator(Graph, Frame)
+   * @see #Interpolator(Graph, Frame)
    */
-  public KeyFrameInterpolator(InteractiveFrame frame) {
+  public Interpolator(InteractiveFrame frame) {
     this(frame.scene(), frame);
   }
 
   /**
-   * Creates a KeyFrameInterpolator, with {@code frame} as associated {@link #frame()}.
+   * Creates a Interpolator, with {@code frame} as associated {@link #frame()}.
    * <p>
    * The {@link #frame()} can be set or changed using {@link #setFrame(Frame)}.
    * <p>
    * {@link #interpolationTime()}, {@link #interpolationSpeed()} and
    * {@link #interpolationPeriod()} are set to their default values.
    */
-  public KeyFrameInterpolator(Graph scn, Frame frame) {
+  public Interpolator(Graph scn, Frame frame) {
     gScene = scn;
     keyFrameList = new ArrayList<KeyFrame>();
     path = new ArrayList<Frame>();
@@ -244,7 +244,7 @@ public class KeyFrameInterpolator {
     gScene.registerTimingTask(interpolationTimerTask);
   }
 
-  protected KeyFrameInterpolator(KeyFrameInterpolator otherKFI) {
+  protected Interpolator(Interpolator otherKFI) {
     this.gScene = otherKFI.gScene;
     this.path = new ArrayList<Frame>();
     ListIterator<Frame> frameIt = otherKFI.path.listIterator();
@@ -285,8 +285,8 @@ public class KeyFrameInterpolator {
     this.invalidateValues();
   }
 
-  public KeyFrameInterpolator get() {
-    return new KeyFrameInterpolator(this);
+  public Interpolator get() {
+    return new Interpolator(this);
   }
 
   /**
@@ -312,20 +312,20 @@ public class KeyFrameInterpolator {
   }
 
   /**
-   * Sets the {@link #frame()} associated to the KeyFrameInterpolator.
+   * Sets the {@link #frame()} associated to the Interpolator.
    */
   public void setFrame(Frame f) {
     mainFrame = f;
   }
 
   /**
-   * Returns the associated Frame that is interpolated by the KeyFrameInterpolator.
+   * Returns the associated Frame that is interpolated by the Interpolator.
    * <p>
    * When {@link #interpolationStarted()}, this Frame's position, orientation and
    * magnitude will regularly be updated by a timer, so that they follow the
-   * KeyFrameInterpolator path.
+   * Interpolator path.
    * <p>
-   * Set using {@link #setFrame(Frame)} or with the KeyFrameInterpolator constructor.
+   * Set using {@link #setFrame(Frame)} or with the Interpolator constructor.
    */
   public Frame frame() {
     return mainFrame;
@@ -340,7 +340,7 @@ public class KeyFrameInterpolator {
   }
 
   /**
-   * Returns the current interpolation time (in seconds) along the KeyFrameInterpolator
+   * Returns the current interpolation time (in seconds) along the Interpolator
    * path.
    * <p>
    * This time is regularly updated when {@link #interpolationStarted()}. Can be set
@@ -597,8 +597,8 @@ public class KeyFrameInterpolator {
    * path will use the current {@code frame} state.
    * <p>
    * When {@code setRef} is {@code true} the keyFrame is given as a reference to a Frame,
-   * which will be connected to the KeyFrameInterpolator: when {@code frame} is modified,
-   * the KeyFrameInterpolator path is updated accordingly. This allows for dynamic paths,
+   * which will be connected to the Interpolator: when {@code frame} is modified,
+   * the Interpolator path is updated accordingly. This allows for dynamic paths,
    * where keyFrame can be edited, even during the interpolation. {@code null} frame
    * references are silently ignored. The {@link #keyFrameTime(int)} has to be
    * monotonously increasing over keyFrames.
@@ -611,7 +611,7 @@ public class KeyFrameInterpolator {
       interpolationTm = time;
 
     if ((!keyFrameList.isEmpty()) && (keyFrameList.get(keyFrameList.size() - 1).time() > time))
-      System.out.println("Error in KeyFrameInterpolator.addKeyFrame: time is not monotone");
+      System.out.println("Error in Interpolator.addKeyFrame: time is not monotone");
     else
       keyFrameList.add(new KeyFrame(frame, time));
 
@@ -675,9 +675,9 @@ public class KeyFrameInterpolator {
 
   /**
    * Calls {@link #updatePath()} and then returns a list of Frames defining the
-   * KeyFrameInterpolator path.
+   * Interpolator path.
    * <p>
-   * Use it in your KeyFrameInterpolator path drawing routine.
+   * Use it in your Interpolator path drawing routine.
    */
   public List<Frame> path() {
     updatePath();
@@ -795,7 +795,7 @@ public class KeyFrameInterpolator {
   }
 
   /**
-   * Returns the duration of the KeyFrameInterpolator path, expressed in seconds.
+   * Returns the duration of the Interpolator path, expressed in seconds.
    * <p>
    * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0.0 if the
    * path has less than 2 keyFrames.

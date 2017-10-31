@@ -19,7 +19,7 @@ import processing.opengl.PGraphicsOpenGL;
 import remixlab.fpstiming.TimingTask;
 import remixlab.geom.Graph;
 import remixlab.geom.InteractiveFrame;
-import remixlab.geom.KeyFrameInterpolator;
+import remixlab.geom.Interpolator;
 import remixlab.geom.MatrixHandler;
 import remixlab.primitives.*;
 
@@ -1158,7 +1158,7 @@ public class Scene extends Graph implements PConstants {
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
           if (!eye().keyFrameInterpolatorMap().containsKey(id))
-            eye().setKeyFrameInterpolator(id, new KeyFrameInterpolator(this, eyeFrame()));
+            eye().setKeyFrameInterpolator(id, new Interpolator(this, eyeFrame()));
           eye().keyFrameInterpolator(id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
         }
       }
@@ -1679,27 +1679,27 @@ public class Scene extends Graph implements PConstants {
   /**
    * Convenience function that simply calls {@code drawPath(kfi, 1, 6, 100)}.
    *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   * @see #drawPath(Interpolator, int, int, float)
    */
-  public void drawPath(KeyFrameInterpolator kfi) {
+  public void drawPath(Interpolator kfi) {
     drawPath(kfi, 1, 6, 100);
   }
 
   /**
    * Convenience function that simply calls {@code drawPath(kfi, 1, 6, scale)}
    *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   * @see #drawPath(Interpolator, int, int, float)
    */
-  public void drawPath(KeyFrameInterpolator kfi, float scale) {
+  public void drawPath(Interpolator kfi, float scale) {
     drawPath(kfi, 1, 6, scale);
   }
 
   /**
    * Convenience function that simply calls {@code drawPath(kfi, mask, nbFrames, * 100)}
    *
-   * @see #drawPath(KeyFrameInterpolator, int, int, float)
+   * @see #drawPath(Interpolator, int, int, float)
    */
-  public void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames) {
+  public void drawPath(Interpolator kfi, int mask, int nbFrames) {
     drawPath(kfi, mask, nbFrames, 100);
   }
 
@@ -2696,7 +2696,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Draws the path used to interpolate the
-   * {@link KeyFrameInterpolator#frame()}
+   * {@link Interpolator#frame()}
    * <p>
    * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
    * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
@@ -2715,7 +2715,7 @@ public class Scene extends Graph implements PConstants {
    * {@code scale} controls the scaling of the camera and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
-  public void drawPath(KeyFrameInterpolator kfi, int mask, int nbFrames, float scale) {
+  public void drawPath(Interpolator kfi, int mask, int nbFrames, float scale) {
     pg().pushStyle();
     if (mask != 0) {
       int nbSteps = 30;
