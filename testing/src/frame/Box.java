@@ -2,7 +2,7 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
-import remixlab.geom.InteractiveFrame;
+import remixlab.geom.Node;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
 import remixlab.proscene.*;
@@ -12,13 +12,13 @@ import remixlab.proscene.*;
  */
 public class Box {
   Scene scene;
-  public InteractiveFrame iFrame;
+  public Node iFrame;
   float w, h, d;
   int c;
 
   public Box(Scene scn) {
     scene = scn;
-    iFrame = new InteractiveFrame(scene) {
+    iFrame = new Node(scene) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -42,7 +42,7 @@ public class Box {
           translateXNeg();
       }
     };
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(25);
     setSize();
     setColor();

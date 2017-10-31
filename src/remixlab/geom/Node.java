@@ -31,13 +31,13 @@ import java.util.List;
  * scene objects to control their motion using an {@link Agent}, such
  * as the {@link Graph#motionAgent()} and the
  * {@link Graph#keyAgent()} (see
- * {@link #InteractiveFrame(Graph)} and all the constructors that take an scene
+ * {@link #Node(Graph)} and all the constructors that take an scene
  * parameter). To attach a generic-frame to {@code MyObject} use code like this:
  * <p>
  * <pre>
  * {@code
  * public class MyObject {
- *   public InteractiveFrame gFrame;
+ *   public Node gFrame;
  *
  *   public void draw() {
  *     gFrame.scene().pushModelView();
@@ -91,13 +91,13 @@ import java.util.List;
  * the transformation it represents may be applied to a different scene. See
  * {@link #applyTransformation()} and {@link #applyTransformation(Graph)}.
  * <p>
- * Two generic-frames can be synced together ({@link #sync(InteractiveFrame, InteractiveFrame)}),
+ * Two generic-frames can be synced together ({@link #sync(Node, Node)}),
  * meaning that they will share their global parameters (position, orientation and
  * magnitude) taken the one that hasGrabber been most recently updated. Syncing can be useful to
  * share frames among different off-screen scenes (see ProScene's EyeCrane and the
  * AuxiliarViewer examples).
  */
-public class InteractiveFrame extends Frame implements Grabber {
+public class Node extends Frame implements Grabber {
   // according to space-nav fine tuning it turned out that the space-nav is
   // right handed
   // we thus define our gesture physical space as right-handed as follows:
@@ -159,77 +159,77 @@ public class InteractiveFrame extends Frame implements Grabber {
   public MotionEvent2 initEvent;
   private float flySpeedCache;
 
-  protected List<InteractiveFrame> childrenList;
+  protected List<Node> childrenList;
 
   /**
    * Same as {@code this(scn, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn) {
+  public Node(Graph scn) {
     this(scn, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, p, new Quaternion(), 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vector p) {
+  public Node(Graph scn, Vector p) {
     this(scn, null, p, new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vector(), r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Quaternion r) {
+  public Node(Graph scn, Quaternion r) {
     this(scn, null, new Vector(), r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vector(), new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, float s) {
+  public Node(Graph scn, float s) {
     this(scn, null, new Vector(), new Quaternion(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vector p, float s) {
+  public Node(Graph scn, Vector p, float s) {
     this(scn, null, p, new Quaternion(), s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vector p, Quaternion r) {
+  public Node(Graph scn, Vector p, Quaternion r) {
     this(scn, null, p, r, 1);
   }
 
   /**
    * Same as {@code this(scn, null, new Vector(), r, s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Quaternion r, float s) {
+  public Node(Graph scn, Quaternion r, float s) {
     this(scn, null, new Vector(), r, s);
   }
 
   /**
    * Same as {@code this(scn, null, p, r, s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, Vector p, Quaternion r, float s) {
+  public Node(Graph scn, Vector p, Quaternion r, float s) {
     this(scn, null, p, r, s);
   }
 
@@ -238,9 +238,9 @@ public class InteractiveFrame extends Frame implements Grabber {
    * {@code this(referenceFrame.scene(), referenceFrame, new Vector(), scn.is3D() ? new Quaternion() : new Rot(), 1)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame) {
+  public Node(Node referenceFrame) {
     this(referenceFrame.scene(), referenceFrame, new Vector(), new Quaternion(), 1);
   }
 
@@ -248,27 +248,27 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), 1)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Vector p) {
+  public Node(Node referenceFrame, Vector p) {
     this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Quaternion r) {
+  public Node(Node referenceFrame, Quaternion r) {
     this(referenceFrame.scene(), referenceFrame, new Vector(), r, 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), new Quaternion(), s)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, float s) {
+  public Node(Node referenceFrame, float s) {
     this(referenceFrame.scene(), referenceFrame, new Vector(),new Quaternion(), s);
   }
 
@@ -276,27 +276,27 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), s)}
    * .
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Vector p, float s) {
+  public Node(Node referenceFrame, Vector p, float s) {
     this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), s);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, p, r, 1)}.
    *
-   * @see #InteractiveFrame(Graph, InteractiveFrame, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
-  public InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vector p, Quaternion r) {
+  public Node(Graph scn, Node referenceFrame, Vector p, Quaternion r) {
     this(referenceFrame.scene(), referenceFrame, p, r, 1);
   }
 
   /**
    * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), r, s)}.
    *
-   * @see #InteractiveFrame(Graph, Vector, Quaternion, float)
+   * @see #Node(Graph, Vector, Quaternion, float)
    */
-  public InteractiveFrame(InteractiveFrame referenceFrame, Quaternion r, float s) {
+  public Node(Node referenceFrame, Quaternion r, float s) {
     this(referenceFrame.scene(), referenceFrame, new Vector(), r, s);
   }
 
@@ -319,7 +319,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
    */
-  protected InteractiveFrame(Graph scn, InteractiveFrame referenceFrame, Vector p, Quaternion r, float s) {
+  protected Node(Graph scn, Node referenceFrame, Vector p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
     init(scn);
     hint = true;
@@ -338,7 +338,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     if (id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     visit = true;
-    childrenList = new ArrayList<InteractiveFrame>();
+    childrenList = new ArrayList<Node>();
     // scene().addLeadingFrame(this);
     setReferenceFrame(referenceFrame());// restorePath seems more robust
     setRotationSensitivity(1.0f);
@@ -366,7 +366,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     // end
   }
 
-  protected InteractiveFrame(InteractiveFrame otherFrame, boolean dummy) {
+  protected Node(Node otherFrame, boolean dummy) {
     super(otherFrame);
     this.gScene = otherFrame.gScene;
     this.id = ++scene().nodeCount;
@@ -377,7 +377,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     this.visit = otherFrame.visit;
     this.hint = otherFrame.hint;
 
-    this.childrenList = new ArrayList<InteractiveFrame>();
+    this.childrenList = new ArrayList<Node>();
     this.setReferenceFrame(referenceFrame());// restorePath
 
     this.spinningTimerTask = new TimingTask() {
@@ -431,8 +431,8 @@ public class InteractiveFrame extends Frame implements Grabber {
    * @return generic-frame copy
    */
   @Override
-  public InteractiveFrame get() {
-    return new InteractiveFrame(this, true);
+  public Node get() {
+    return new Node(this, true);
   }
 
   /**
@@ -442,8 +442,8 @@ public class InteractiveFrame extends Frame implements Grabber {
    * <p>
    * This method is useful to interact animations for all eye interpolation routines.
    */
-  protected InteractiveFrame detach() {
-    InteractiveFrame frame = new InteractiveFrame(scene());
+  protected Node detach() {
+    Node frame = new Node(scene());
     scene().pruneBranch(frame);
     frame.setWorldMatrix(this);
     return frame;
@@ -463,19 +463,19 @@ public class InteractiveFrame extends Frame implements Grabber {
   // GRAPH
 
   @Override
-  public InteractiveFrame referenceFrame() {
-    return (InteractiveFrame) this.refFrame;
+  public Node referenceFrame() {
+    return (Node) this.refFrame;
   }
 
   @Override
   public void setReferenceFrame(Frame frame) {
-    if (frame instanceof InteractiveFrame || frame == null)
-      setReferenceFrame((InteractiveFrame) frame);
+    if (frame instanceof Node || frame == null)
+      setReferenceFrame((Node) frame);
     else
-      System.out.println("Warning: nothing done: Generic.referenceFrame() should be instanceof InteractiveFrame");
+      System.out.println("Warning: nothing done: Generic.referenceFrame() should be instanceof Node");
   }
 
-  public void setReferenceFrame(InteractiveFrame frame) {
+  public void setReferenceFrame(Node frame) {
     if (settingAsReferenceFrameWillCreateALoop(frame)) {
       System.out.println("Frame.setReferenceFrame would create a loop in Frame hierarchy. Nothing done.");
       return;
@@ -498,7 +498,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     modified();
   }
 
-  protected void restorePath(InteractiveFrame parent, InteractiveFrame child) {
+  protected void restorePath(Node parent, Node child) {
     if (parent == null) {
       if (scene() != null)
         scene().addLeadingFrame(child);
@@ -514,11 +514,11 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Returns a list of the frame children, i.e., frame which {@link #referenceFrame()} is
    * this.
    */
-  public final List<InteractiveFrame> children() {
+  public final List<Node> children() {
     return childrenList;
   }
 
-  protected boolean addChild(InteractiveFrame frame) {
+  protected boolean addChild(Node frame) {
     if (frame == null)
       return false;
     if (hasChild(frame))
@@ -529,9 +529,9 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Removes the leading frame if present. Typically used when re-parenting the frame.
    */
-  protected boolean removeChild(InteractiveFrame frame) {
+  protected boolean removeChild(Node frame) {
     boolean result = false;
-    Iterator<InteractiveFrame> it = children().iterator();
+    Iterator<Node> it = children().iterator();
     while (it.hasNext()) {
       if (it.next() == frame) {
         it.remove();
@@ -542,8 +542,8 @@ public class InteractiveFrame extends Frame implements Grabber {
     return result;
   }
 
-  protected boolean hasChild(InteractiveFrame gFrame) {
-    for (InteractiveFrame frame : children())
+  protected boolean hasChild(Node gFrame) {
+    for (Node frame : children())
       if (frame == gFrame)
         return true;
     return false;
@@ -930,7 +930,7 @@ public class InteractiveFrame extends Frame implements Grabber {
   protected void modified() {
     lastUpdate = Graph.frameCount;
     if (children() != null)
-      for (InteractiveFrame child : children())
+      for (Node child : children())
         child.modified();
   }
 
@@ -946,9 +946,9 @@ public class InteractiveFrame extends Frame implements Grabber {
   /**
    * Same as {@code sync(this, otherFrame)}.
    *
-   * @see #sync(InteractiveFrame, InteractiveFrame)
+   * @see #sync(Node, Node)
    */
-  public void sync(InteractiveFrame otherFrame) {
+  public void sync(Node otherFrame) {
     sync(this, otherFrame);
   }
 
@@ -964,13 +964,13 @@ public class InteractiveFrame extends Frame implements Grabber {
    *
    * @see #set(Frame)
    */
-  public static void sync(InteractiveFrame f1, InteractiveFrame f2) {
+  public static void sync(Node f1, Node f2) {
     if (f1 == null || f2 == null)
       return;
     if (f1.lastUpdate() == f2.lastUpdate())
       return;
-    InteractiveFrame source = (f1.lastUpdate() > f2.lastUpdate()) ? f1 : f2;
-    InteractiveFrame target = (f1.lastUpdate() > f2.lastUpdate()) ? f2 : f1;
+    Node source = (f1.lastUpdate() > f2.lastUpdate()) ? f1 : f2;
+    Node target = (f1.lastUpdate() > f2.lastUpdate()) ? f2 : f1;
     target.setWorldMatrix(source);
   }
 
@@ -2352,7 +2352,7 @@ public class InteractiveFrame extends Frame implements Grabber {
     Vector pos = position();
     Quaternion o = (Quaternion) orientation();
     Frame oldRef = referenceFrame();
-    InteractiveFrame rFrame = new InteractiveFrame(gScene);
+    Node rFrame = new Node(gScene);
     rFrame.setPosition(scene().anchor());
     rFrame.setZAxis(Vector.subtract(pos, scene().anchor()));
     rFrame.setXAxis(xAxis());
@@ -2648,12 +2648,12 @@ public class InteractiveFrame extends Frame implements Grabber {
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
       Frame ref = frame.get();
-      if (ref instanceof InteractiveFrame)
-        gScene.pruneBranch((InteractiveFrame) ref);
+      if (ref instanceof Node)
+        gScene.pruneBranch((Node) ref);
       else if (ref instanceof Grabber) {
         gScene.inputHandler().removeGrabber((Grabber) ref);
       }
-      InteractiveFrame copy = get();
+      Node copy = get();
       gScene.pruneBranch(copy);
       copy.setReferenceFrame(ref);
       copy.setWorldMatrix(this);
@@ -2876,7 +2876,7 @@ public class InteractiveFrame extends Frame implements Grabber {
    * Scene</a> class for a possible implementation) and the frame to implement means to
    * attach graphics to it (see the proscene <a href=
    * "http://remixlab.github.io/proscene-javadocs/remixlab/proscene/InteractiveFrame.html">
-   * InteractiveFrame</a> class for a possible implementation). Default implementation of
+   * Node</a> class for a possible implementation). Default implementation of
    * this policy will behave like {@link PickingPrecision#FIXED}.
    *
    * @see #pickingPrecision()

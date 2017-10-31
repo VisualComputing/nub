@@ -6,7 +6,7 @@ import remixlab.geom.*;
 
 public class FrameInterpolation extends PApplet {
     Scene scene;
-    InteractiveFrame keyFrame[];
+    Node keyFrame[];
     Interpolator kfi;
     int nbKeyFrames;
 
@@ -25,10 +25,10 @@ public class FrameInterpolation extends PApplet {
         kfi.setLoopInterpolation();
 
         // An array of interactive (key) frames.
-        keyFrame = new InteractiveFrame[nbKeyFrames];
+        keyFrame = new Node[nbKeyFrames];
         // Create an initial path
         for (int i=0; i<nbKeyFrames; i++) {
-            keyFrame[i] = new InteractiveFrame(scene);
+            keyFrame[i] = new Node(scene);
             keyFrame[i].setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
             keyFrame[i].setScaling(random(0.25f, 4.0f));
             kfi.addKeyFrame(keyFrame[i]);

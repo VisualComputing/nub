@@ -18,7 +18,7 @@ import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.fpstiming.TimingTask;
 import remixlab.geom.Graph;
-import remixlab.geom.InteractiveFrame;
+import remixlab.geom.Node;
 import remixlab.geom.Interpolator;
 import remixlab.geom.MatrixHandler;
 import remixlab.primitives.*;
@@ -582,7 +582,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   protected void drawPickingTargets() {
-    for (InteractiveFrame frame : frames(false))
+    for (Node frame : frames(false))
       // if(inputHandler().hasGrabber(frame))
       if (frame.isVisualHintEnabled())
         drawPickingTarget(frame);
@@ -660,8 +660,8 @@ public class Scene extends Graph implements PConstants {
     // 1. Eye, raster scene
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
-      if(eye() instanceof InteractiveFrame) {
-        if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
+      if(eye() instanceof Node) {
+        if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
           updateBoundaryEquations();
           lastEqUpdate = frameCount;
         }
@@ -1150,10 +1150,10 @@ public class Scene extends Graph implements PConstants {
         eye().deletePath(id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
         for (int j = 0; j < keyFrames.size(); j++) {
-          InteractiveFrame keyFrame = new InteractiveFrame(this);
+          Node keyFrame = new Node(this);
           pruneBranch(keyFrame);
           keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
-          keyFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.FIXED);
+          keyFrame.setPickingPrecision(Node.PickingPrecision.FIXED);
           keyFrame.setGrabsInputThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
@@ -1285,7 +1285,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draw all scene {@link #frames(boolean)} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
-   * {@code for (InteractiveFrame frame : frames()) frame.draw(pg());}.
+   * {@code for (Node frame : frames()) frame.draw(pg());}.
    * <p>
    * Note that {@code drawFrames()} is typically called from within your sketch
    * {@link #pApplet()} draw() loop.
@@ -1370,12 +1370,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void visitFrame(InteractiveFrame frame) {
+  protected void visitFrame(Node frame) {
     targetPGraphics.pushMatrix();
     applyTransformation(targetPGraphics, frame);
-    if (frame instanceof InteractiveFrame)
+    if (frame instanceof Node)
       frame.visitCallback();
-    for (InteractiveFrame child : frame.children())
+    for (Node child : frame.children())
       visitFrame(child);
     targetPGraphics.popMatrix();
   }
@@ -2953,13 +2953,13 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Draws all GrabberFrames' picking targets: a shooter target visual hint of
-   * {@link InteractiveFrame#grabsInputThreshold()} pixels size.
+   * {@link Node#grabsInputThreshold()} pixels size.
    * <p>
    * <b>Attention:</b> the target is drawn either if the iFrame is part of camera path and
    * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
    * {@code false}.
    */
-  public void drawPickingTarget(InteractiveFrame iFrame) {
+  public void drawPickingTarget(Node iFrame) {
     if (iFrame.isEyeFrame()) {
       System.err.println("eye frames don't have a picking target");
       return;

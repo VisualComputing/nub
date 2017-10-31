@@ -4,7 +4,7 @@ import processing.core.*;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.KeyShortcut;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.InteractiveFrame;
+import remixlab.geom.Node;
 import remixlab.proscene.*;
 
 /**
@@ -12,7 +12,7 @@ import remixlab.proscene.*;
  */
 public class BasicUse extends PApplet {
   Scene scene;
-  InteractiveFrame iFrame;
+  Node iFrame;
   float length = 100;
   PGraphics pg;
 
@@ -27,7 +27,7 @@ public class BasicUse extends PApplet {
     scene.setPickingVisualHint(true);
     scene.setRadius(200);
 
-    iFrame = new InteractiveFrame(scene) {
+    iFrame = new Node(scene) {
       @Override
       public void visit() {
         graphics(pg);
@@ -58,7 +58,7 @@ public class BasicUse extends PApplet {
       }
     };
 
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
     //iFrame.rotate(new Quaternion(QUARTER_PI));

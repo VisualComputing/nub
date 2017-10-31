@@ -2,7 +2,7 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
-import remixlab.geom.InteractiveFrame;
+import remixlab.geom.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
@@ -13,7 +13,7 @@ public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
   Sphere esfera;
-  InteractiveFrame eye1, eye2;
+  Node eye1, eye2;
 
   /*
   public boolean matches(Shortcut shortcut, List<Shortcut> list) {
@@ -65,7 +65,7 @@ public class CajasOrientadas extends PApplet {
       //println("is eyeFrame!");
     //frameRate(500);
 
-    eye1 = new InteractiveFrame(scene) {
+    eye1 = new Node(scene) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -94,7 +94,7 @@ public class CajasOrientadas extends PApplet {
       }
     };
 
-    eye2 = new InteractiveFrame(scene) {
+    eye2 = new Node(scene) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {

@@ -3,7 +3,7 @@ package frame;
 import processing.core.PApplet;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.InteractiveFrame;
+import remixlab.geom.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
@@ -13,14 +13,14 @@ import remixlab.proscene.Scene;
 public class Sphere {
   Scene scene;
   PApplet parent;
-  InteractiveFrame iFrame;
+  Node iFrame;
   float r;
   int c;
 
   public Sphere(Scene scn) {
     scene = scn;
     parent = scn.pApplet();
-    iFrame = new InteractiveFrame(scene) {
+    iFrame = new Node(scene) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -48,7 +48,7 @@ public class Sphere {
           translateX(true);
       }
     };
-    iFrame.setPickingPrecision(InteractiveFrame.PickingPrecision.ADAPTIVE);
+    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
     setRadius(10);
   }
 

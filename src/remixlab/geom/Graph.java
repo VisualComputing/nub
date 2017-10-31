@@ -31,12 +31,12 @@ import java.util.List;
  * For an introduction to DANDELION please refer to
  * <a href="http://nakednous.github.io/projects/dandelion">this</a>.
  * <p>
- * Instantiated scene {@link InteractiveFrame}s form a scene-tree of
+ * Instantiated scene {@link Node}s form a scene-tree of
  * transformations which may be traverse with {@link #traverseTree()}. The frame
  * collection belonging to the scene may be retrieved with {@link #frames(boolean)}. The
  * scene provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(InteractiveFrame)}, {@link #appendBranch(List)},
- * {@link #isFrameReachable(InteractiveFrame)}, {@link #branch(InteractiveFrame, boolean)}, and
+ * {@link #pruneBranch(Node)}, {@link #appendBranch(List)},
+ * {@link #isFrameReachable(Node)}, {@link #branch(Node, boolean)}, and
  * {@link #clearTree()}.
  * <p>
  * Each Graph provides the following main object instances:
@@ -93,7 +93,7 @@ public class Graph {
   protected Agent defMotionAgent, defKeyboardAgent;
 
   // 5. Graph
-  protected List<InteractiveFrame> seeds;
+  protected List<Node> seeds;
   public int nodeCount;
   static public long frameCount;
   protected final long deltaCount;
@@ -184,7 +184,7 @@ public class Graph {
     setCenter(new Vector(0.0f, 0.0f, 0.0f));
     showAll();
 
-    seeds = new ArrayList<InteractiveFrame>();
+    seeds = new ArrayList<Node>();
     tHandler = new TimingHandler();
     deltaCount = frameCount;
     iHandler = new InputHandler();
@@ -273,11 +273,11 @@ public class Graph {
   public void modified() {}
 
   /**
-   * Returns the up vector used in {@link InteractiveFrame#moveForward(MotionEvent)} in which horizontal
+   * Returns the up vector used in {@link Node#moveForward(MotionEvent)} in which horizontal
    * displacements of the motion device (e.g., mouse) rotate generic-frame around this
    * vector. Vertical displacements rotate always around the generic-frame {@code X} axis.
    * <p>
-   * This value is also used within {@link InteractiveFrame#rotateCAD(MotionEvent)} to define the up
+   * This value is also used within {@link Node#rotateCAD(MotionEvent)} to define the up
    * vector (and incidentally the 'horizon' plane) around which the generic-frame will
    * rotate.
    * <p>
@@ -294,7 +294,7 @@ public class Graph {
    * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
    * <p>
    * Default value is (0,1,0), but it is updated by the {@link #eye() when performing
-   * {@link InteractiveFrame#moveForward(MotionEvent)} or {@link InteractiveFrame#drive(MotionEvent)}
+   * {@link Node#moveForward(MotionEvent)} or {@link Node#drive(MotionEvent)}
    * actions.
    */
   public void setSceneUpVector(Vector up) {
@@ -371,7 +371,7 @@ public class Graph {
    * Changes the Camera {@link #fieldOfView()} so that the entire scene (defined by
    * {@link #center()} and
    * {@link #radius()} is visible from the Camera
-   * {@link InteractiveFrame#position()}.
+   * {@link Node#position()}.
    * <p>
    * The eye position and orientation of the Camera are not modified and
    * you first have to orientate the Camera in order to actually see the scene (see
@@ -651,18 +651,18 @@ public class Graph {
    * which they are the seeds.
    *
    * @see #frames(boolean)
-   * @see #isFrameReachable(InteractiveFrame)
-   * @see #pruneBranch(InteractiveFrame)
+   * @see #isFrameReachable(Node)
+   * @see #pruneBranch(Node)
    */
-  public List<InteractiveFrame> leadingFrames() {
+  public List<Node> leadingFrames() {
     return seeds;
   }
 
   /**
    * Returns {@code true} if the frame is top-level.
    */
-  protected boolean isLeadingFrame(InteractiveFrame gFrame) {
-    for (InteractiveFrame frame : leadingFrames())
+  protected boolean isLeadingFrame(Node gFrame) {
+    for (Node frame : leadingFrames())
       if (frame == gFrame)
         return true;
     return false;
@@ -671,7 +671,7 @@ public class Graph {
   /**
    * Add the frame as top-level if its reference frame is null and it isn't already added.
    */
-  protected boolean addLeadingFrame(InteractiveFrame gFrame) {
+  protected boolean addLeadingFrame(Node gFrame) {
     if (gFrame == null || gFrame.referenceFrame() != null)
       return false;
     if (isLeadingFrame(gFrame))
@@ -682,9 +682,9 @@ public class Graph {
   /**
    * Removes the leading frame if present. Typically used when re-parenting the frame.
    */
-  protected boolean removeLeadingFrame(InteractiveFrame iFrame) {
+  protected boolean removeLeadingFrame(Node iFrame) {
     boolean result = false;
-    Iterator<InteractiveFrame> it = leadingFrames().iterator();
+    Iterator<Node> it = leadingFrames().iterator();
     while (it.hasNext()) {
       if (it.next() == iFrame) {
         it.remove();
@@ -698,47 +698,47 @@ public class Graph {
   /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
    * by each traversed frame, and calling
-   * {@link InteractiveFrame#visit()} on it.
+   * {@link Node#visit()} on it.
    * <p>
    * Note that only reachable frames are visited by this algorithm.
    * <p>
    * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
    * eye update) and before any other transformation of the modelview takes place.
    *
-   * @see #isFrameReachable(InteractiveFrame)
-   * @see #pruneBranch(InteractiveFrame)
+   * @see #isFrameReachable(Node)
+   * @see #pruneBranch(Node)
    */
   public void traverseTree() {
-    for (InteractiveFrame frame : leadingFrames())
+    for (Node frame : leadingFrames())
       visitFrame(frame);
   }
 
   /**
    * Used by the traverse frame tree algorithm.
    */
-  protected void visitFrame(InteractiveFrame frame) {
+  protected void visitFrame(Node frame) {
     pushModelView();
     applyTransformation(frame);
     frame.visitCallback();
-    for (InteractiveFrame child : frame.children())
+    for (Node child : frame.children())
       visitFrame(child);
     popModelView();
   }
 
   /**
-   * Same as {@code for(InteractiveFrame frame : leadingFrames()) pruneBranch(frame)}.
+   * Same as {@code for(Node frame : leadingFrames()) pruneBranch(frame)}.
    *
-   * @see #pruneBranch(InteractiveFrame)
+   * @see #pruneBranch(Node)
    */
   public void clearTree() {
-    for (InteractiveFrame frame : leadingFrames())
+    for (Node frame : leadingFrames())
       pruneBranch(frame);
   }
 
   /**
    * Make all the frames in the {@code frame} branch eligible for garbage collection.
    * <p>
-   * A call to {@link #isFrameReachable(InteractiveFrame)} on all {@code frame} descendants
+   * A call to {@link #isFrameReachable(Node)} on all {@code frame} descendants
    * (including {@code frame}) will return false, after issuing this method. It also means
    * that all frames in the {@code frame} branch will become unreachable by the
    * {@link #traverseTree()} algorithm.
@@ -749,12 +749,12 @@ public class Graph {
    * To make all the frames in the branch reachable again, first cache the frames
    * belonging to the branch (i.e., {@code branch=pruneBranch(frame)}) and then call
    * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link InteractiveFrame#setReferenceFrame(InteractiveFrame)} on a
+   * {@link Node#setReferenceFrame(Node)} on a
    * frame belonging to the pruned branch will become reachable again by the traversal
    * algorithm. In this case, the frame should be manually added to some agents to
    * interactively handle it.
    * <p>
-   * Note that if frame is not reachable ({@link #isFrameReachable(InteractiveFrame)}) this
+   * Note that if frame is not reachable ({@link #isFrameReachable(Node)}) this
    * method returns {@code null}.
    * <p>
    * When collected, pruned frames behave like {@link Frame},
@@ -762,14 +762,14 @@ public class Graph {
    *
    * @see #clearTree()
    * @see #appendBranch(List)
-   * @see #isFrameReachable(InteractiveFrame)
+   * @see #isFrameReachable(Node)
    */
-  public ArrayList<InteractiveFrame> pruneBranch(InteractiveFrame frame) {
+  public ArrayList<Node> pruneBranch(Node frame) {
     if (!isFrameReachable(frame))
       return null;
-    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
+    ArrayList<Node> list = new ArrayList<Node>();
     collectFrames(list, frame, true);
-    for (InteractiveFrame gFrame : list) {
+    for (Node gFrame : list) {
       inputHandler().removeGrabber(gFrame);
       if (gFrame.referenceFrame() != null)
         gFrame.referenceFrame().removeChild(gFrame);
@@ -781,16 +781,16 @@ public class Graph {
 
   /**
    * Appends the branch which typically should come from the one pruned (and cached) with
-   * {@link #pruneBranch(InteractiveFrame)}.
+   * {@link #pruneBranch(Node)}.
    * <p>
    * All frames belonging to the branch are automatically added to all scene agents.
    * <p>
-   * {@link #pruneBranch(InteractiveFrame)}
+   * {@link #pruneBranch(Node)}
    */
-  public void appendBranch(List<InteractiveFrame> branch) {
+  public void appendBranch(List<Node> branch) {
     if (branch == null)
       return;
-    for (InteractiveFrame gFrame : branch) {
+    for (Node gFrame : branch) {
       inputHandler().addGrabber(gFrame);
       if (gFrame.referenceFrame() != null)
         gFrame.referenceFrame().addChild(gFrame);
@@ -803,14 +803,14 @@ public class Graph {
    * Returns {@code true} if the frame is reachable by the {@link #traverseTree()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Frames are make unreachable with {@link #pruneBranch(InteractiveFrame)} and reachable
+   * Frames are make unreachable with {@link #pruneBranch(Node)} and reachable
    * again with
-   * {@link InteractiveFrame#setReferenceFrame(InteractiveFrame)}.
+   * {@link Node#setReferenceFrame(Node)}.
    *
    * @see #traverseTree()
    * @see #frames(boolean)
    */
-  public boolean isFrameReachable(InteractiveFrame frame) {
+  public boolean isFrameReachable(Node frame) {
     if (frame == null)
       return false;
     return frame.referenceFrame() == null ? isLeadingFrame(frame) : frame.referenceFrame().hasChild(frame);
@@ -820,12 +820,12 @@ public class Graph {
    * Returns a list of all the frames that are reachable by the {@link #traverseTree()}
    * algorithm, including the eye frames (when {@code eyeframes} is {@code true}).
    *
-   * @see #isFrameReachable(InteractiveFrame)
-   * @see InteractiveFrame#isEyeFrame()
+   * @see #isFrameReachable(Node)
+   * @see Node#isEyeFrame()
    */
-  public ArrayList<InteractiveFrame> frames(boolean eyeframes) {
-    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
-    for (InteractiveFrame gFrame : leadingFrames())
+  public ArrayList<Node> frames(boolean eyeframes) {
+    ArrayList<Node> list = new ArrayList<Node>();
+    for (Node gFrame : leadingFrames())
       collectFrames(list, gFrame, eyeframes);
     return list;
   }
@@ -835,10 +835,10 @@ public class Graph {
    * {@code true} eye-frames will also be collected. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(InteractiveFrame)
+   * @see #isFrameReachable(Node)
    */
-  public ArrayList<InteractiveFrame> branch(InteractiveFrame frame, boolean eyeframes) {
-    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
+  public ArrayList<Node> branch(Node frame, boolean eyeframes) {
+    ArrayList<Node> list = new ArrayList<Node>();
     collectFrames(list, frame, eyeframes);
     return list;
   }
@@ -850,19 +850,19 @@ public class Graph {
    * If {@code tip} is descendant of {@code tail} the returned list will include both of them. Otherwise it will be empty.
    */
   //TODO decide me
-  public ArrayList<InteractiveFrame> branch(InteractiveFrame tail, InteractiveFrame tip, boolean eyeframes) {
-    ArrayList<InteractiveFrame> list = new ArrayList<InteractiveFrame>();
+  public ArrayList<Node> branch(Node tail, Node tip, boolean eyeframes) {
+    ArrayList<Node> list = new ArrayList<Node>();
     //1. Check if tip is a tail descendant
     boolean desc = false;
-    ArrayList<InteractiveFrame> descList = branch(tail, eyeframes);
-    for(InteractiveFrame gFrame : descList)
+    ArrayList<Node> descList = branch(tail, eyeframes);
+    for(Node gFrame : descList)
       if(gFrame == tip) {
         desc = true;
         break;
       }
     //2. If so, return the path between the two
     if(desc) {
-      InteractiveFrame _tip = tip;
+      Node _tip = tip;
       while(_tip != tail) {
         if (!_tip.isEyeFrame() || eyeframes)
           list.add(0, _tip);
@@ -878,14 +878,14 @@ public class Graph {
    * {@code true} eye-frames will also be collected. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(InteractiveFrame)
+   * @see #isFrameReachable(Node)
    */
-  protected void collectFrames(List<InteractiveFrame> list, InteractiveFrame frame, boolean eyeframes) {
+  protected void collectFrames(List<Node> list, Node frame, boolean eyeframes) {
     if (frame == null)
       return;
     if (!frame.isEyeFrame() || eyeframes)
       list.add(frame);
-    for (InteractiveFrame child : frame.children())
+    for (Node child : frame.children())
       collectFrames(list, child, eyeframes);
   }
 
@@ -1527,8 +1527,8 @@ public class Graph {
     // 1. Eye, raster scene
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
-      if(eye() instanceof InteractiveFrame) {
-        if(( ((InteractiveFrame)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
+      if(eye() instanceof Node) {
+        if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
           updateBoundaryEquations();
           lastEqUpdate = frameCount;
         }
@@ -1651,8 +1651,8 @@ public class Graph {
       return;
     eye = e;
     //TODO decide me, but I dont think it should go in new minimalistic design
-    //if(eye instanceof InteractiveFrame)
-      //inputHandler().setDefaultGrabber((InteractiveFrame)eye());
+    //if(eye instanceof Node)
+      //inputHandler().setDefaultGrabber((Node)eye());
     setRadius(radius());
     setCenter(center());
   }
@@ -2558,7 +2558,7 @@ public class Graph {
 
   /**
    * Sets the {@link #radius()} value in scene (world) units. Negative values are
-   * ignored. It also sets {@link InteractiveFrame#flySpeed()} to 1% of {@link #radius()}.
+   * ignored. It also sets {@link Node#flySpeed()} to 1% of {@link #radius()}.
    */
   public void setRadius(float radius) {
     if (radius <= 0.0f) {
@@ -2566,12 +2566,12 @@ public class Graph {
       return;
     }
     scnRadius = radius;
-    if(eye() instanceof InteractiveFrame)
-      ((InteractiveFrame)eye()).setFlySpeed(0.01f * radius());
+    if(eye() instanceof Node)
+      ((Node)eye()).setFlySpeed(0.01f * radius());
     if(motionAgent() != null)
       for (Grabber mg : motionAgent().grabbers()) {
-        if (mg instanceof InteractiveFrame)
-          ((InteractiveFrame) mg).setFlySpeed(0.01f * radius());
+        if (mg instanceof Node)
+          ((Node) mg).setFlySpeed(0.01f * radius());
       }
     // TODO previous was:
     //if(is3D())
@@ -2642,7 +2642,7 @@ public class Graph {
    * <p>
    * In 3D change this value using
    * {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
-   * {@link InteractiveFrame#setOrientation(Quaternion)} . It is orthogonal to {@link #upVector()} and to
+   * {@link Node#setOrientation(Quaternion)} . It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
   public Vector viewDirection() {
@@ -2658,7 +2658,7 @@ public class Graph {
    * Rotates the Camera so that its {@link #viewDirection()} is {@code direction} (defined
    * in the world coordinate system).
    * <p>
-   * The Camera {@link InteractiveFrame#position()} is not modified. The Camera is rotated so that the
+   * The Camera {@link Node#position()} is not modified. The Camera is rotated so that the
    * horizon (defined by its {@link #upVector()}) is preserved.
    *
    * @see #lookAt(Vector)
@@ -2703,7 +2703,7 @@ public class Graph {
    * same position on screen. This is especially useful when the Eye is an observer of the
    * scene (default action binding).
    * <p>
-   * When {@code noMove} is true, the Eye {@link InteractiveFrame#position()} is left unchanged, which is
+   * When {@code noMove} is true, the Eye {@link Node#position()} is left unchanged, which is
    * an intuitive behavior when the Eye is in first person mode.
    *
    * @see #lookAt(Vector)
@@ -2724,7 +2724,7 @@ public class Graph {
   /**
    * Returns the normalized up vector of the eye, defined in the world coordinate system.
    * <p>
-   * Set using {@link #setUpVector(Vector)} or {@link InteractiveFrame#setOrientation(Quaternion)}. It is
+   * Set using {@link #setUpVector(Vector)} or {@link Node#setOrientation(Quaternion)}. It is
    * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #eye()} (actually returns
@@ -2736,8 +2736,8 @@ public class Graph {
 
   /**
    * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
-   * Cameras set {@link InteractiveFrame#orientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The Camera {@link InteractiveFrame#position()} is not modified.
+   * Cameras set {@link Node#orientation()}, so that it looks at point {@code target} defined
+   * in the world coordinate system (The Camera {@link Node#position()} is not modified.
    * Simply {@link #setViewDirection(Vector)}).
    *
    * @see #at()
@@ -2756,7 +2756,7 @@ public class Graph {
    * <p>
    * This vector lies in the eye horizontal plane, directed along the X axis (orthogonal
    * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link InteractiveFrame#setOrientation(Quaternion)}.
+   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link Node#setOrientation(Quaternion)}.
    * <p>
    * Simply returns {@code frame().xAxis()}.
    */
@@ -2781,7 +2781,7 @@ public class Graph {
    * visible and fits the window.
    * <p>
    * In 3D the Camera is simply translated along its {@link #viewDirection()} so that the
-   * sphere fits the screen. Its {@link InteractiveFrame#orientation()} and its
+   * sphere fits the screen. Its {@link Node#orientation()} and its
    * {@link #fieldOfView()} are unchanged. You should
    * therefore orientate the Camera before you call this method.
    *
@@ -2821,7 +2821,7 @@ public class Graph {
    * Moves the eye so that the rectangular screen region defined by {@code rectangle}
    * (pixel units, with origin in the upper left corner) fits the screen.
    * <p>
-   * in 3D the Camera is translated (its {@link InteractiveFrame#orientation()} is unchanged) so that
+   * in 3D the Camera is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
    * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that

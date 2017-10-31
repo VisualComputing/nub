@@ -106,9 +106,9 @@ public class Interpolator {
     protected Quaternion tgQuaternion;
     protected Vector tgPVector;
     protected float tm;
-    protected InteractiveFrame frm;
+    protected Node frm;
 
-    KeyFrame(InteractiveFrame fr, float t) {
+    KeyFrame(Node fr, float t) {
       tm = t;
       frm = fr;
     }
@@ -122,7 +122,7 @@ public class Interpolator {
       return new KeyFrame(this);
     }
 
-    InteractiveFrame frame() {
+    Node frame() {
       return frm;
     }
 
@@ -205,7 +205,7 @@ public class Interpolator {
    *
    * @see #Interpolator(Graph, Frame)
    */
-  public Interpolator(InteractiveFrame frame) {
+  public Interpolator(Node frame) {
     this(frame.scene(), frame);
   }
 
@@ -333,7 +333,7 @@ public class Interpolator {
 
   /**
    * Returns the number of keyFrames used by the interpolation. Use
-   * {@link #addKeyFrame(InteractiveFrame)} to addGrabber new keyFrames.
+   * {@link #addKeyFrame(Node)} to addGrabber new keyFrames.
    */
   public int numberOfKeyFrames() {
     return keyFrameList.size();
@@ -532,7 +532,7 @@ public class Interpolator {
    * starting {@link #interpolationTime()}.
    * <p>
    * <b>Attention:</b> The keyFrames must be defined (see
-   * {@link #addKeyFrame(InteractiveFrame, float)}) before you startInterpolation(), or else
+   * {@link #addKeyFrame(Node, float)}) before you startInterpolation(), or else
    * the interpolation will naturally immediately stop.
    */
   public void startInterpolation(int myPeriod) {
@@ -575,11 +575,11 @@ public class Interpolator {
   /**
    * Appends a new keyFrame to the path.
    * <p>
-   * Same as {@link #addKeyFrame(InteractiveFrame, float)}, except that the
+   * Same as {@link #addKeyFrame(Node, float)}, except that the
    * {@link #keyFrameTime(int)} is set to the previous {@link #keyFrameTime(int)} plus one
    * second (or 0.0 if there is no previous keyFrame).
    */
-  public void addKeyFrame(InteractiveFrame frame) {
+  public void addKeyFrame(Node frame) {
     float time;
 
     if (keyFrameList.isEmpty())
@@ -603,7 +603,7 @@ public class Interpolator {
    * references are silently ignored. The {@link #keyFrameTime(int)} has to be
    * monotonously increasing over keyFrames.
    */
-  public void addKeyFrame(InteractiveFrame frame, float time) {
+  public void addKeyFrame(Node frame, float time) {
     if (frame == null)
       return;
 
@@ -777,10 +777,10 @@ public class Interpolator {
    * {@link #numberOfKeyFrames()}-1.
    * <p>
    * <b>Note:</b> If this keyFrame was defined using a reference to a Frame (see
-   * {@link #addKeyFrame(InteractiveFrame, float)} the current referenced Frame state is
+   * {@link #addKeyFrame(Node, float)} the current referenced Frame state is
    * returned.
    */
-  public InteractiveFrame keyFrame(int index) {
+  public Node keyFrame(int index) {
     return keyFrameList.get(index).frame();
   }
 

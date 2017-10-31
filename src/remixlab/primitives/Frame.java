@@ -11,8 +11,8 @@
 package remixlab.primitives;
 
 import remixlab.geom.Graph;
+import remixlab.geom.Node;
 import remixlab.primitives.constraint.Constraint;
-import remixlab.geom.InteractiveFrame;
 
 /**
  * A Frame is a 2D or 3D coordinate system, represented by a {@link #position()} , an
@@ -104,7 +104,7 @@ import remixlab.geom.InteractiveFrame;
  * <p>
  * <h3>Derived classes</h3>
  * <p>
- * The {@link InteractiveFrame} class inherits Frame and implements
+ * The {@link Node} class inherits Frame and implements
  * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
  * in the scene by whatever user interaction means you can imagine.
  */
