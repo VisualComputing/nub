@@ -2401,14 +2401,9 @@ public class Graph {
    * the Processing matrices. You can hence define a virtual eye and use this method to
    * compute un-projections out of a classical rendering context.
    * <p>
-   * <b>Attention:</b> However, if your eye is not attached to a Scene (used for offscreen
-   * computations for instance), make sure the eye matrices are updated before calling
-   * this method (use {@link #computeView()}, {@link #computeProjection()}).
-   * <p>
-   * This method is not computationally optimized. If you call it several times with no
+   * This method is not computationally optimized by default. If you call it several times with no
    * change in the matrices, you should buffer the entire inverse projection matrix (view,
-   * projection and then viewport) to speed-up the queries. See the gluUnProject man page
-   * for details.
+   * projection) to speed-up the queries. See {@link #optimizeUnprojectedCoordinatesOf(boolean)}.
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    * @see #setWidth(int)

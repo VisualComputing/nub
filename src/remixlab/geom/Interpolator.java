@@ -217,11 +217,11 @@ public class Interpolator {
    * {@link #interpolationTime()}, {@link #interpolationSpeed()} and
    * {@link #interpolationPeriod()} are set to their default values.
    */
-  public Interpolator(Graph scn, Frame frame) {
-    graph = scn;
+  public Interpolator(Graph g, Frame frame) {
+    graph = g;
     keyFrameList = new ArrayList<KeyFrame>();
     path = new ArrayList<Frame>();
-    setFrame(mainFrame);
+    setFrame(frame);
     period = 40;
     interpolationTm = 0.0f;
     interpolationSpd = 1.0f;
@@ -579,7 +579,7 @@ public class Interpolator {
    * {@link #keyFrameTime(int)} is set to the previous {@link #keyFrameTime(int)} plus one
    * second (or 0.0 if there is no previous keyFrame).
    */
-  public void addKeyFrame(Node frame) {
+  public void addKeyFrame(Node node) {
     float time;
 
     if (keyFrameList.isEmpty())
@@ -587,7 +587,7 @@ public class Interpolator {
     else
       time = keyFrameList.get(keyFrameList.size() - 1).time() + 1.0f;
 
-    addKeyFrame(frame, time);
+    addKeyFrame(node, time);
   }
 
   /**
@@ -603,8 +603,8 @@ public class Interpolator {
    * references are silently ignored. The {@link #keyFrameTime(int)} has to be
    * monotonously increasing over keyFrames.
    */
-  public void addKeyFrame(Node frame, float time) {
-    if (frame == null)
+  public void addKeyFrame(Node node, float time) {
+    if (node == null)
       return;
 
     if (keyFrameList.isEmpty())
@@ -613,7 +613,7 @@ public class Interpolator {
     if ((!keyFrameList.isEmpty()) && (keyFrameList.get(keyFrameList.size() - 1).time() > time))
       System.out.println("Error in Interpolator.addKeyFrame: time is not monotone");
     else
-      keyFrameList.add(new KeyFrame(frame, time));
+      keyFrameList.add(new KeyFrame(node, time));
 
     valuesAreValid = false;
     pathIsValid = false;
