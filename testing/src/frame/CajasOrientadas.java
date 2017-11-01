@@ -45,12 +45,12 @@ public class CajasOrientadas extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setGridVisualHint(true);
-    //scene.setCameraType(Camera.Type.ORTHOGRAPHIC);
+    //graph.setCameraType(Camera.Type.ORTHOGRAPHIC);
     scene.setRadius(160);
-    //scene.camera().setPosition(new PVector(10,0,0));
-    //scene.camera().lookAt( scene.center() );
+    //graph.camera().setPosition(new PVector(10,0,0));
+    //graph.camera().lookAt( graph.center() );
     scene.showAll();
-    //scene.disableBackgroundHanddling();
+    //graph.disableBackgroundHanddling();
     esfera = new Sphere(scene);
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
     esfera.setColor(color(0, 0, 255));
@@ -59,9 +59,9 @@ public class CajasOrientadas extends PApplet {
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(scene);
 
-    //scene.keyAgent().setDefaultGrabber(null);
+    //graph.keyAgent().setDefaultGrabber(null);
 
-    //if(scene.keyAgent().defaultGrabber() == scene.frame())
+    //if(graph.keyAgent().defaultGrabber() == graph.frame())
       //println("is eyeFrame!");
     //frameRate(500);
 
@@ -132,7 +132,7 @@ public class CajasOrientadas extends PApplet {
       println("Scene is 3D");
     else
       println("Scene is 2D");
-    //scene.lookAt(new Vector());
+    //graph.lookAt(new Vector());
     //info();
   }
 
@@ -163,8 +163,8 @@ public class CajasOrientadas extends PApplet {
     }
     //TODO restore
     //if(key == ' ')
-      //scene.keyAgent().shiftDefaultGrabber(scene.frame(), esfera.iFrame);
-      //scene.keyAgent().shiftDefaultGrabber(scene.eyeFrame(), scene);
+      //graph.keyAgent().shiftDefaultGrabber(graph.frame(), esfera.iFrame);
+      //graph.keyAgent().shiftDefaultGrabber(graph.eyeFrame(), graph);
     if(key ==' ')
       info();
     if(key == 'a')

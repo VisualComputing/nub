@@ -73,7 +73,7 @@ class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void bindModelView(Matrix source) {
-    if (gScene.is3D())
+    if (graph.is3D())
       pggl().setMatrix(Scene.toPMatrix(source));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(source));

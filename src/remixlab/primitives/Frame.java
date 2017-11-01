@@ -29,10 +29,10 @@ import remixlab.primitives.constraint.Constraint;
  * <br>
  * {@code // direction. One could also have used setPosition() and setOrientation().} <br>
  * {@code Frame fr(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0), new Vector(1,1,1)));} <br>
- * {@code scene.pushModelView();} <br>
- * {@code scene.applyModelView(fr.matrix());} <br>
+ * {@code graph.pushModelView();} <br>
+ * {@code graph.applyModelView(fr.matrix());} <br>
  * {@code // Draw your object here, in the local fr coordinate system.} <br>
- * {@code scene.popModelView();} <br>
+ * {@code graph.popModelView();} <br>
  * <p>
  * Many functions are provided to transform a point from one coordinate system (Frame) to
  * an other: see {@link #coordinatesOf(Vector)}, {@link #inverseCoordinatesOf(Vector)},
@@ -106,7 +106,7 @@ import remixlab.primitives.constraint.Constraint;
  * <p>
  * The {@link Node} class inherits Frame and implements
  * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
- * in the scene by whatever user interaction means you can imagine.
+ * in the graph by whatever user interaction means you can imagine.
  */
 public class Frame {
   /**
@@ -1231,18 +1231,18 @@ public class Frame {
    * <p>
    * The associated drawing code should look like:
    * <p>
-   * {@code scene.pushModelView();}<br>
-   * {@code scene.applyMatrix(body.matrix());} <br>
+   * {@code graph.pushModelView();}<br>
+   * {@code graph.applyMatrix(body.matrix());} <br>
    * {@code drawBody();} <br>
-   * {@code scene.pushModelView();} <br>
-   * {@code scene.applyMatrix(leftArm.matrix());} <br>
+   * {@code graph.pushModelView();} <br>
+   * {@code graph.applyMatrix(leftArm.matrix());} <br>
    * {@code drawArm();} <br>
-   * {@code scene.popModelView();} <br>
-   * {@code scene.pushModelView();} <br>
-   * {@code scene.applyMatrix(rightArm.matrix());} <br>
+   * {@code graph.popModelView();} <br>
+   * {@code graph.pushModelView();} <br>
+   * {@code graph.applyMatrix(rightArm.matrix());} <br>
    * {@code drawArm();} <br>
-   * {@code scene.popModelView();} <br>
-   * {@code scene.popModelView();} <br>
+   * {@code graph.popModelView();} <br>
+   * {@code graph.popModelView();} <br>
    * <p>
    * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
    * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
@@ -1293,10 +1293,10 @@ public class Frame {
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
    * {@code Frame fr = new Frame(pos, Rotation(from, to));} <br>
-   * {@code scene.pushModelView();} <br>
-   * {@code scene.applyMatrix(worldMatrix());} <br>
+   * {@code graph.pushModelView();} <br>
+   * {@code graph.applyMatrix(worldMatrix());} <br>
    * {@code // draw object in the fr coordinate system.} <br>
-   * {@code scene.popModelView();} <br>
+   * {@code graph.popModelView();} <br>
    * <p>
    * This matrix represents the global Frame transformation: the entire
    * {@link #reference()} hierarchy is taken into account to define the Frame

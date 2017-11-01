@@ -41,11 +41,11 @@ import java.util.ListIterator;
  * {@code kfi.startInterpolation();}<br>
  * <p>
  * {@code //mainDrawingLoop() should look like:}<br>
- * {@code scene.pushModelView();}<br>
+ * {@code graph.pushModelView();}<br>
  * {@code kfi.frame().applyTransformation(this);}<br>
  * {@code // Draw your object here. Its position, orientation and magnitude are interpolated.}
  * <br>
- * {@code scene.popModelView();}<br>
+ * {@code graph.popModelView();}<br>
  * <p>
  * The keyFrames are defined by a Frame and a time, expressed in seconds. The time has to
  * be monotonously increasing over keyFrames. When {@link #interpolationSpeed()} equals
@@ -186,7 +186,7 @@ public class Interpolator {
   // private Vector sv1, sv2;
 
   // S C E N E
-  protected Graph gScene;
+  protected Graph graph;
 
   /**
    * Convenience constructor that simply calls {@code this(scn, new Frame())}.
@@ -196,17 +196,17 @@ public class Interpolator {
    *
    * @see #Interpolator(Graph, Frame)
    */
-  public Interpolator(Graph scn) {
-    this(scn, new Frame());
+  public Interpolator(Graph graph) {
+    this(graph, new Frame());
   }
 
   /**
-   * Same as {@code this(frame.scene(), frame)}.
+   * Same as {@code this(frame.graph(), frame)}.
    *
    * @see #Interpolator(Graph, Frame)
    */
-  public Interpolator(Node frame) {
-    this(frame.scene(), frame);
+  public Interpolator(Node node) {
+    this(node.graph(), node);
   }
 
   /**
@@ -218,7 +218,7 @@ public class Interpolator {
    * {@link #interpolationPeriod()} are set to their default values.
    */
   public Interpolator(Graph scn, Frame frame) {
-    gScene = scn;
+    graph = scn;
     keyFrameList = new ArrayList<KeyFrame>();
     path = new ArrayList<Frame>();
     setFrame(mainFrame);
@@ -241,11 +241,11 @@ public class Interpolator {
         update();
       }
     };
-    gScene.registerTimingTask(interpolationTimerTask);
+    graph.registerTimingTask(interpolationTimerTask);
   }
 
   protected Interpolator(Interpolator otherKFI) {
-    this.gScene = otherKFI.gScene;
+    this.graph = otherKFI.graph;
     this.path = new ArrayList<Frame>();
     ListIterator<Frame> frameIt = otherKFI.path.listIterator();
     while (frameIt.hasNext()) {
@@ -280,7 +280,7 @@ public class Interpolator {
         update();
       }
     };
-    gScene.registerTimingTask(interpolationTimerTask);
+    graph.registerTimingTask(interpolationTimerTask);
 
     this.invalidateValues();
   }
@@ -290,10 +290,10 @@ public class Interpolator {
   }
 
   /**
-   * Returns the scene this object belongs to
+   * Returns the graph this object belongs to
    */
-  public Graph scene() {
-    return gScene;
+  public Graph graph() {
+    return graph;
   }
 
   /**
@@ -635,7 +635,7 @@ public class Interpolator {
     if (interpolationStarted())
       stopInterpolation();
     KeyFrame kf = keyFrameList.remove(index);
-    gScene.pruneBranch(kf.frm);
+    graph.pruneBranch(kf.frm);
     setInterpolationTime(firstTime());
   }
 
@@ -724,7 +724,7 @@ public class Interpolator {
             float alpha = step / (float) nbSteps;
             frame.setPosition(Vector.add(kf[1].position(),
                 Vector.multiply(Vector.add(kf[1].tgP(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)));
-            if (gScene.is3D()) {
+            if (graph.is3D()) {
               frame.setOrientation(
                   Quaternion.squad(kf[1].orientation(), kf[1].tgQ(), kf[2].tgQ(), kf[2].orientation(), alpha));
             } else {
@@ -935,7 +935,7 @@ public class Interpolator {
         keyFrameList.get(currentFrame2.nextIndex()).magnitude(), alpha);
 
     Quaternion q;
-    if (gScene.is3D()) {
+    if (graph.is3D()) {
       q = Quaternion.squad((Quaternion) keyFrameList.get(currentFrame1.nextIndex()).orientation(),
           keyFrameList.get(currentFrame1.nextIndex()).tgQ(),
           keyFrameList.get(currentFrame2.nextIndex()).tgQ(),

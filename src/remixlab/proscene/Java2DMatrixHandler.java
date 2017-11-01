@@ -38,16 +38,16 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void bind() {
-    cacheProjection(scene().computeProjection());
-    cacheView(scene().computeView());
+    cacheProjection(graph().computeProjection());
+    cacheView(graph().computeView());
     cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
-    Vector pos = gScene.eye().position();
+    Vector pos = graph.eye().position();
     //TODO needs test
-    Quaternion o = gScene.eye().orientation();
-    translate(gScene.width() / 2, gScene.height() / 2);
-    if (gScene.isRightHanded())
+    Quaternion o = graph.eye().orientation();
+    translate(graph.width() / 2, graph.height() / 2);
+    if (graph.isRightHanded())
       scale(1, -1);
-    scale(1 / gScene.eye().magnitude(), 1 / gScene.eye().magnitude());
+    scale(1 / graph.eye().magnitude(), 1 / graph.eye().magnitude());
     rotate(-o.angle());
     translate(-pos.x(), -pos.y());
   }
@@ -59,17 +59,17 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void beginScreenDrawing() {
-    Vector pos = gScene.eye().position();
+    Vector pos = graph.eye().position();
     //TODO needs test
-    Quaternion o = gScene.eye().orientation();
+    Quaternion o = graph.eye().orientation();
 
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle());
-    scale(gScene.eye().magnitude(), gScene.eye().magnitude());
-    if (gScene.isRightHanded())
+    scale(graph.eye().magnitude(), graph.eye().magnitude());
+    if (graph.isRightHanded())
       scale(1, -1);
-    translate(-gScene.width() / 2, -gScene.height() / 2);
+    translate(-graph.width() / 2, -graph.height() / 2);
   }
 
   @Override

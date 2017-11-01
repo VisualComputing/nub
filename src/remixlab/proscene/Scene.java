@@ -42,18 +42,18 @@ import java.util.List;
  * <li><b>Direct instantiation</b>. In this case you should instantiate your own Scene
  * object at the {@code PApplet.setup()} function. See the example <i>BasicUse</i>.
  * <li><b>Inheritance</b>. In this case, once you declare a Scene derived class, you
- * should implement {@link #proscenium()} which defines the objects in your scene. Just
+ * should implement {@link #proscenium()} which defines the objects in your graph. Just
  * make sure to define the {@code PApplet.draw()} method, even if it's empty. See the
  * example <i>AlternativeUse</i>.
  * </ol>
  * <h3>Interactivity mechanisms</h3> ProScene provides powerful interactivity mechanisms
- * allowing a wide range of scene setups ranging from very simple to complex ones. For
+ * allowing a wide range of graph setups ranging from very simple to complex ones. For
  * convenience, two interaction mechanisms are provided by default:
  * {@link #keyAgent()}, and {@link #motionAgent()} (which in the desktop version of
  * proscene defaults to a {@link #mouseAgent()}):
  * <ol>
  * <li><b>The default key agent</b> provides shortcuts to
- * frame and scene key actions (such as
+ * frame and graph key actions (such as
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
  * eye and frame
@@ -126,8 +126,8 @@ public class Scene extends Graph implements PConstants {
    * Processing the {@code image(img, x, y)} function. If {@code pg == p.g}) (which
    * defines an on-screen Scene, see also {@link #isOffscreen()}), the values of x and y
    * are meaningless (both are set to 0 to be taken as dummy values). Render into an
-   * off-screen scene requires the drawing code to be enclose by {@link #beginDraw()} and
-   * {@link #endDraw()}. To display an off-screen scene call {@link #display()}.
+   * off-screen graph requires the drawing code to be enclose by {@link #beginDraw()} and
+   * {@link #endDraw()}. To display an off-screen graph call {@link #display()}.
    *
    * @see Graph#Graph(int, int)
    * @see #Scene(PApplet)
@@ -651,13 +651,13 @@ public class Scene extends Graph implements PConstants {
    * {@link #displayVisualHints()} is done. Here, however, it needs to be bypassed for the
    * PApplet.background() method not to hide the display of the {@link #visualHints()}.
    * The {@link #displayVisualHints()} mostly happens then at the {@link #draw()} method,
-   * if the scene is on-screen, or at the {@link #endDraw()} if it is off-screen.
+   * if the graph is on-screen, or at the {@link #endDraw()} if it is off-screen.
    *
    * @see #postDraw()
    */
   @Override
   public void preDraw() {
-    // 1. Eye, raster scene
+    // 1. Eye, raster graph
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof Node) {
@@ -683,10 +683,10 @@ public class Scene extends Graph implements PConstants {
   /**
    * Paint method which is called just before your {@code PApplet.draw()} method. Simply
    * calls {@link #preDraw()}. This method is registered at the PApplet and hence you
-   * don't need to call it. Only meaningful if the scene is on-screen (it the scene
+   * don't need to call it. Only meaningful if the graph is on-screen (it the graph
    * {@link #isOffscreen()} it even doesn't get registered at the PApplet.
    * <p>
-   * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
+   * If {@link #pg()} is resized then (re)sets the graph {@link #width()} and
    * {@link #height()}, and calls
    * {@link #setWidth(int)} and {@link #setHeight(int)}.
    * <p>
@@ -710,8 +710,8 @@ public class Scene extends Graph implements PConstants {
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Calls
    * {@link #proscenium()}, {@link #displayVisualHints()} and {@link #postDraw()}. This method is
-   * registered at the PApplet and hence you don't need to call it. Only meaningful if the scene is
-   * on-screen (it the scene {@link #isOffscreen()} it even doesn't get registered at the
+   * registered at the PApplet and hence you don't need to call it. Only meaningful if the graph is
+   * on-screen (it the graph {@link #isOffscreen()} it even doesn't get registered at the
    * PApplet.
    * <p>
    * If {@link #isOffscreen()} does nothing.
@@ -765,7 +765,7 @@ public class Scene extends Graph implements PConstants {
    * Only if the Scene {@link #isOffscreen()}. Calls {@code pg().beginDraw()} (hence
    * there's no need to explicitly call it) and then {@link #preDraw()} .
    * <p>
-   * If {@link #pg()} is resized then (re)sets the scene {@link #width()} and
+   * If {@link #pg()} is resized then (re)sets the graph {@link #width()} and
    * {@link #height()}, and calls
    * {@link #setWidth(int)} and {@link #setHeight(int)}.
    *
@@ -836,7 +836,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code display(pg())}. Only meaningful if the scene {@link #isOffscreen()}.
+   * Same as {@code display(pg())}. Only meaningful if the graph {@link #isOffscreen()}.
    *
    * @see #display(PGraphics)
    * @see #pg()
@@ -847,7 +847,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Same as {@code pApplet().image(pgraphics, originCorner().x(), originCorner().y())}.
-   * Only meaningful if the scene {@link #isOffscreen()}.
+   * Only meaningful if the graph {@link #isOffscreen()}.
    */
   public void display(PGraphics pgraphics) {
     if (!isOffscreen())
@@ -916,15 +916,15 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * When having multiple off-screen scenes displayed at once, one should decide which
-   * scene will grab inputGrabber from both, the {@link #motionAgent()} and the
+   * graph will grab inputGrabber from both, the {@link #motionAgent()} and the
    * {@link #keyAgent()}, so that code like this:
    * <p>
    * <pre>
    * {@code
    * scene1.beginDraw();
    * drawScene1();
-   * scene.endDraw();
-   * scene.display();
+   * graph.endDraw();
+   * graph.display();
    * scene2.beginDraw();
    * drawScene2();
    * scene2.endDraw();
@@ -933,8 +933,8 @@ public class Scene extends Graph implements PConstants {
    * </pre>
    * <p>
    * will behave according to a given focus policy. This property is enabled by default
-   * and it implements a "focus follows mouse" policy, so that the scene under the cursor
-   * will grab inputGrabber. If multiple scenes overlaps the scene on top will grab the inputGrabber as
+   * and it implements a "focus follows mouse" policy, so that the graph under the cursor
+   * will grab inputGrabber. If multiple scenes overlaps the graph on top will grab the inputGrabber as
    * expected.
    * <p>
    * To implement a different policy either:
@@ -962,7 +962,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Toggles the off-screen scene auto-focus property.
+   * Toggles the off-screen graph auto-focus property.
    *
    * @see #hasAutoFocus()
    * @see #enableAutoFocus(boolean)
@@ -981,7 +981,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Disables the off-screen scene auto-focus property.
+   * Disables the off-screen graph auto-focus property.
    *
    * @see #hasAutoFocus()
    * @see #enableAutoFocus(boolean)
@@ -997,7 +997,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Enables the off-screen scene auto-focus property.
+   * Enables the off-screen graph auto-focus property.
    *
    * @see #hasAutoFocus()
    * @see #enableAutoFocus(boolean)
@@ -1013,7 +1013,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Turns on or off the off-screen scene auto-focus property according to {@code flag}.
+   * Turns on or off the off-screen graph auto-focus property according to {@code flag}.
    * <p>
    * The {@link #hasAutoFocus()} property for off-screen scenes is {@code true} by
    * default.
@@ -1031,7 +1031,7 @@ public class Scene extends Graph implements PConstants {
     autofocus = flag;
   }
 
-  // TODO: Future work should include the eye and scene profiles.
+  // TODO: Future work should include the eye and graph profiles.
   // Probably related with iFrame.fromFrame
 
   /**
@@ -1063,7 +1063,7 @@ public class Scene extends Graph implements PConstants {
   public void saveConfig() {
     if (this.isOffscreen())
       System.out
-          .println("Warning: no config saved! Off-screen scene config requires saveConfig(String fileName) to be called");
+          .println("Warning: no config saved! Off-screen graph config requires saveConfig(String fileName) to be called");
     else
       saveConfig("data/config.json");
   }
@@ -1112,7 +1112,7 @@ public class Scene extends Graph implements PConstants {
   public void loadConfig() {
     if (this.isOffscreen())
       System.out
-          .println("Warning: no config loaded! Off-screen scene config requires loadConfig(String fileName) to be called");
+          .println("Warning: no config loaded! Off-screen graph config requires loadConfig(String fileName) to be called");
     else
       loadConfig("config.json");
   }
@@ -1283,7 +1283,7 @@ public class Scene extends Graph implements PConstants {
   public PGraphics targetPGraphics;
 
   /**
-   * Draw all scene {@link #nodes(boolean)} into the {@link #pg()} buffer. A similar (but
+   * Draw all graph {@link #nodes(boolean)} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
    * {@code for (Node frame : frames()) frame.draw(pg());}.
    * <p>
@@ -1334,7 +1334,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Returns a new matrix helper for the given {@code pgraphics}. Rarely needed.
    * <p>
-   * Note that the current scene matrix helper may be retrieved by {@link #matrixHandler()}
+   * Note that the current graph matrix helper may be retrieved by {@link #matrixHandler()}
    * .
    *
    * @see #matrixHandler()
@@ -2332,7 +2332,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws a representation of the {@code eye} in the scene.
+   * Draws a representation of the {@code eye} in the graph.
    * <p>
    * The near and far planes are drawn as quads, the frustum is drawn using lines and the
    * camera up vector is represented by an arrow to disambiguate the drawing.
@@ -2346,8 +2346,8 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, boolean)} on the scene {@link #pg()}. If
-   * {@code texture} draws the projected scene on the near plane.
+   * {@link #drawEye(PGraphics, boolean)} on the graph {@link #pg()}. If
+   * {@code texture} draws the projected graph on the near plane.
    *
    * @see #applyTransformation(Frame)
    * @see #drawEye(PGraphics, boolean)
@@ -2369,19 +2369,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Implementation of {@link #drawEye()}. If {@code texture} draws the projected scene
+   * Implementation of {@link #drawEye()}. If {@code texture} draws the projected graph
    * on the near plane.
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
    */
   public void drawEye(PGraphics pg, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight, zNear and zFar params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.frame().magnitude()
     if (pg() == pg) {
-      System.out.println("Warning: No drawEye done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawEye done, eye.graph()).pg() and pg are the same!");
       return;
     }
     pg.pushStyle();
@@ -2511,8 +2511,8 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, boolean)} on the scene {@link #pg()}. If
-   * {@code texture} draws the projected scene on the near plane.
+   * {@link #drawEye(PGraphics, boolean)} on the graph {@link #pg()}. If
+   * {@code texture} draws the projected graph on the near plane.
    *
    * @see #applyTransformation(Frame)
    * @see #drawEye(PGraphics, boolean)
@@ -2534,18 +2534,18 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws the eye near plane. If {@code texture} draws the projected scene on the plane.
+   * Draws the eye near plane. If {@code texture} draws the projected graph on the plane.
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
    */
   public void drawEyeNearPlane(PGraphics pg, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.frame().magnitude()
     if (pg() == pg) {
-      System.out.println("Warning: No drawEyeNearPlane done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawEyeNearPlane done, eye.graph()).pg() and pg are the same!");
       return;
     }
     pg.pushStyle();
@@ -2594,7 +2594,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjector(PGraphics, Vector)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjector(PGraphics, Vector)} on the graph {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
@@ -2614,7 +2614,7 @@ public class Scene extends Graph implements PConstants {
    * projector it should be used in conjunction with
    * {@link #drawEye(PGraphics, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
    *
    * @see #drawProjector(PGraphics, Vector)
    * @see #drawProjectors(PGraphics, List)
@@ -2624,7 +2624,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjectors(PGraphics, List)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjectors(PGraphics, List)} on the graph {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
@@ -2651,7 +2651,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawProjectors(PGraphics pg, List<Vector> src) {
     if (pg() == pg) {
-      System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawProjectors done, eye.graph()).pg() and pg are the same!");
       return;
     }
     pg.pushStyle();

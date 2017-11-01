@@ -18,8 +18,8 @@ public class WeirdAgent extends Agent {
     scene = scn;
     register();
     //TODO restore
-    //addGrabber(scene.eye());
-    //setDefaultGrabber(scene.eye());
+    //addGrabber(graph.eye());
+    //setDefaultGrabber(graph.eye());
   }
 
   public void register() {

@@ -25,16 +25,16 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D scene graph.
+ * A 2D or 3D graph graph.
  * <p>
  * Main package class representing an interface between Dandelion and the outside world.
  * For an introduction to DANDELION please refer to
  * <a href="http://nakednous.github.io/projects/dandelion">this</a>.
  * <p>
- * Instantiated scene {@link Node}s form a scene-tree of
+ * Instantiated graph {@link Node}s form a graph-tree of
  * transformations which may be traverse with {@link #traverse()}. The node
- * collection belonging to the scene may be retrieved with {@link #nodes(boolean)}. The
- * scene provides other useful routines to handle the hierarchy, such as
+ * collection belonging to the graph may be retrieved with {@link #nodes(boolean)}. The
+ * graph provides other useful routines to handle the hierarchy, such as
  * {@link #pruneBranch(Node)}, {@link #appendBranch(List)},
  * {@link #isNodeReachable(Node)}, {@link #branch(Node, boolean)}, and
  * {@link #clear()}.
@@ -359,7 +359,7 @@ public class Graph {
    * from the window aspect ratio (see {@link #aspectRatio()} and
    * {@link #horizontalFieldOfView()}).
    * <p>
-   * Use {@link #setFOVToFitScene()} to adapt the {@link #fieldOfView()} to a given scene.
+   * Use {@link #setFOVToFitScene()} to adapt the {@link #fieldOfView()} to a given graph.
    *
    * @see #setFieldOfView(float)
    */
@@ -368,13 +368,13 @@ public class Graph {
   }
 
   /**
-   * Changes the Camera {@link #fieldOfView()} so that the entire scene (defined by
+   * Changes the Camera {@link #fieldOfView()} so that the entire graph (defined by
    * {@link #center()} and
    * {@link #radius()} is visible from the Camera
    * {@link Node#position()}.
    * <p>
    * The eye position and orientation of the Camera are not modified and
-   * you first have to orientate the Camera in order to actually see the scene (see
+   * you first have to orientate the Camera in order to actually see the graph (see
    * {@link #lookAt(Vector)}, {@link #showAll()} or {@link #fitBall(Vector, float)}).
    * <p>
    * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
@@ -394,7 +394,7 @@ public class Graph {
    * <b>Attention:</b> The {@link #fieldOfView()} is clamped to M_PI/2.0. This happens
    * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
    * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
-   * parts of the scene.
+   * parts of the graph.
    */
   public void setFOVToFitScene() {
     if (distanceToSceneCenter() > (float) Math.sqrt(2.0f) * radius())
@@ -443,11 +443,11 @@ public class Graph {
 
   /**
    * Returns the near clipping plane distance used by the Camera projection matrix in
-   * scene (world) units.
+   * graph (world) units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and
    * {@link #center()} rather than being fixed small-enough and large-enough values.
-   * A good scene dimension approximation will hence result in an optimal precision of the
+   * A good graph dimension approximation will hence result in an optimal precision of the
    * z-buffer.
    * <p>
    * The near clipping plane is positioned at a distance equal to
@@ -493,7 +493,7 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the Camera projection matrix in scene
+   * Returns the far clipping plane distance used by the Camera projection matrix in graph
    * (world) units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
@@ -598,7 +598,7 @@ public class Graph {
    * .
    * <p>
    * These values are valid for 2d Windows and ortho Cameras (but not persp) and they are
-   * expressed in virtual scene units.
+   * expressed in virtual graph units.
    * <p>
    * In the case of ortho Cameras these values are proportional to the Camera (z
    * projected) distance to the {@link #anchor()}. When zooming on the object, the Camera
@@ -783,7 +783,7 @@ public class Graph {
    * Appends the branch which typically should come from the one pruned (and cached) with
    * {@link #pruneBranch(Node)}.
    * <p>
-   * All nodes belonging to the branch are automatically added to all scene agents.
+   * All nodes belonging to the branch are automatically added to all graph agents.
    * <p>
    * {@link #pruneBranch(Node)}
    */
@@ -1004,10 +1004,10 @@ public class Graph {
   // FPSTiming STUFF
 
   /**
-   * Returns the number of nodes displayed since the scene was instantiated.
+   * Returns the number of nodes displayed since the graph was instantiated.
    * <p>
    * Use {@code Graph.frameCount} to retrieve the number of nodes displayed since
-   * the first scene was instantiated.
+   * the first graph was instantiated.
    */
   public long frameCount() {
     return timingHandler().frameCount();
@@ -1070,14 +1070,14 @@ public class Graph {
   // E V E N T H A N D L I N G
 
   /**
-   * Returns the scene {@link InputHandler}.
+   * Returns the graph {@link InputHandler}.
    */
   public InputHandler inputHandler() {
     return iHandler;
   }
 
   /**
-   * Returns the scene {@link TimingHandler}.
+   * Returns the graph {@link TimingHandler}.
    */
   public TimingHandler timingHandler() {
     return tHandler;
@@ -1129,7 +1129,7 @@ public class Graph {
    * {@link #getBoundaryWidthHeight()}. Both types use
    * {@link #zNear()} and
    * {@link #zFar()} to place clipping planes. These values
-   * are determined from sceneRadius() and sceneCenter() so that they best fit the scene
+   * are determined from sceneRadius() and sceneCenter() so that they best fit the graph
    * size.
    * <p>
    * <b>Note:</b> You must call this method if your eye is not associated with a Scene and
@@ -1527,7 +1527,7 @@ public class Graph {
    * @see #postDraw()
    */
   public void preDraw() {
-    // 1. Eye, raster scene
+    // 1. Eye, raster graph
     matrixHandler().bind();
     if (areBoundaryEquationsEnabled()) {
       if(eye() instanceof Node) {
@@ -2086,7 +2086,7 @@ public class Graph {
   }
 
   /**
-   * Returns the pixel to scene (units) ratio at {@code position}.
+   * Returns the pixel to graph (units) ratio at {@code position}.
    * <p>
    * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
    *
@@ -2097,9 +2097,9 @@ public class Graph {
   }
 
   /**
-   * Returns the ratio of scene (units) to pixel at {@code position}.
+   * Returns the ratio of graph (units) to pixel at {@code position}.
    * <p>
-   * A line of {@code n * sceneToPixelRatio()} scene units, located at {@code position} in
+   * A line of {@code n * sceneToPixelRatio()} graph units, located at {@code position} in
    * the world coordinates system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
@@ -2482,10 +2482,10 @@ public class Graph {
   }
 
   /**
-   * Returns the radius of the scene observed by the eye in scene (world) units.
+   * Returns the radius of the graph observed by the eye in graph (world) units.
    * <p>
    * In the case of a 3D eye you need to provide such an approximation of the
-   * scene dimensions so that the it can adapt its
+   * graph dimensions so that the it can adapt its
    * {@link #zNear()} and
    * {@link #zFar()} values. See the {@link #center()}
    * documentation.
@@ -2501,9 +2501,9 @@ public class Graph {
   }
 
   /**
-   * Returns the position of the scene center, defined in the world coordinate system.
+   * Returns the position of the graph center, defined in the world coordinate system.
    * <p>
-   * The scene observed by the eye should be roughly centered on this position, and
+   * The graph observed by the eye should be roughly centered on this position, and
    * included in a {@link #radius()} ball.
    * <p>
    * Default value is the world origin. Use {@link #setCenter(Vector)} to change it.
@@ -2560,7 +2560,7 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #radius()} value in scene (world) units. Negative values are
+   * Sets the {@link #radius()} value in graph (world) units. Negative values are
    * ignored. It also sets {@link Node#flySpeed()} to 1% of {@link #radius()}.
    */
   public void setRadius(float radius) {
@@ -2595,7 +2595,7 @@ public class Graph {
 
   /**
    * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
-   * scene limits are defined by a (world axis aligned) bounding box.
+   * graph limits are defined by a (world axis aligned) bounding box.
    */
   public void setBoundingBox(Vector min, Vector max) {
     //TODO check 2d case
@@ -2604,7 +2604,7 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the entire scene is visible.
+   * Moves the eye so that the entire graph is visible.
    * <p>
    * Simply calls {@link #fitBall(Vector, float)} on a sphere defined by
    * {@link #center()} and {@link #radius()}.
@@ -2651,7 +2651,7 @@ public class Graph {
   public Vector viewDirection() {
     //TODO test me
     //before it was:
-    //if(gScene.is2D())
+    //if(graph.is2D())
     //return new Vector(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
     //bu now I think we should simply go something like this:
     return eye().zAxis(false);
@@ -2704,7 +2704,7 @@ public class Graph {
    * When {@code noMove} is set to {@code false}, the orientation modification is
    * compensated by a translation, so that the {@link #anchor()} stays projected at the
    * same position on screen. This is especially useful when the Eye is an observer of the
-   * scene (default action binding).
+   * graph (default action binding).
    * <p>
    * When {@code noMove} is true, the Eye {@link Node#position()} is left unchanged, which is
    * an intuitive behavior when the Eye is in first person mode.
@@ -3048,11 +3048,11 @@ public class Graph {
   }
 
   /**
-   * The method that actually defines the scene.
+   * The method that actually defines the graph.
    * <p>
    * If you build a class that inherits from Scene, this is the method you should
    * overload, but no if you instantiate your own Scene object (for instance, in
-   * Processing you should just overload {@code PApplet.draw()} to define your scene).
+   * Processing you should just overload {@code PApplet.draw()} to define your graph).
    * <p>
    * The eye matrices set in {@link MatrixHandler#bind()} converts from the world to the camera
    * coordinate systems. Thus vertices given here can then be considered as being given in
@@ -3066,7 +3066,7 @@ public class Graph {
   // GENERAL STUFF
 
   /**
-   * Returns true if scene is left handed. Note that the scene is right handed by default.
+   * Returns true if graph is left handed. Note that the graph is right handed by default.
    * However in proscene we set it as right handed (same as with P5).
    *
    * @see #setLeftHanded()
@@ -3076,7 +3076,7 @@ public class Graph {
   }
 
   /**
-   * Returns true if scene is right handed. Note that the scene is right handed by
+   * Returns true if graph is right handed. Note that the graph is right handed by
    * default. However in proscene we set it as right handed (same as with P5).
    *
    * @see #setRightHanded()
@@ -3086,7 +3086,7 @@ public class Graph {
   }
 
   /**
-   * Set the scene as right handed.
+   * Set the graph as right handed.
    *
    * @see #isRightHanded()
    */
@@ -3095,7 +3095,7 @@ public class Graph {
   }
 
   /**
-   * Set the scene as left handed.
+   * Set the graph as left handed.
    *
    * @see #isLeftHanded()
    */
@@ -3104,14 +3104,14 @@ public class Graph {
   }
 
   /**
-   * @return true if the scene is 2D.
+   * @return true if the graph is 2D.
    */
   public boolean is2D() {
     return twod;
   }
 
   /**
-   * @return true if the scene is 3D.
+   * @return true if the graph is 3D.
    */
   public boolean is3D() {
     return !is2D();

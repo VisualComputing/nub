@@ -62,7 +62,7 @@ public class Box {
      Matrix m3d = iFrame.matrix();
      m = m3d.getTransposed(m);
      pM3d.set(m);
-     scene.pg().applyMatrix(pM3d);
+     graph.pg().applyMatrix(pM3d);
      // */
     //Same as the previous commented lines, but a lot more efficient:
     iFrame.applyWorldTransformation();

@@ -49,7 +49,7 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Returns the scene this object belongs to.
+   * Returns the graph this object belongs to.
    */
   public Scene scene() {
     return scene;

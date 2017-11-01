@@ -18,7 +18,7 @@ import remixlab.primitives.Vector;
  * implementation or locally.
  */
 public class MatrixHandler {
-  protected Graph gScene;
+  protected Graph graph;
   protected Matrix projection, view, modelview;
   protected Matrix projectionViewMatrix, projectionViewInverseMatrix;
   protected boolean isProjViwInvCached, projectionViewMatHasInv;
@@ -38,7 +38,7 @@ public class MatrixHandler {
    * @param scn
    */
   public MatrixHandler(Graph scn) {
-    gScene = scn;
+    graph = scn;
     projection = new Matrix();
     view = new Matrix();
     modelview = new Matrix();
@@ -47,18 +47,18 @@ public class MatrixHandler {
   }
 
   /**
-   * Returns the scene this object belongs to
+   * Returns the graph this object belongs to
    */
-  public Graph scene() {
-    return gScene;
+  public Graph graph() {
+    return graph;
   }
 
   /**
    * Binds matrices to (raster) renderer.
    */
   public void bind() {
-    cacheProjection(scene().computeProjection());
-    cacheView(scene().computeView());
+    cacheProjection(graph().computeProjection());
+    cacheView(graph().computeView());
     cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     bindProjection(cacheProjection());
     bindModelView(cacheView());
@@ -330,7 +330,7 @@ public class MatrixHandler {
    * <p>
    * All screen drawing should be enclosed between {@link #beginScreenDrawing()} and
    * {@link #endScreenDrawing()}. Then you can just begin drawing your screen shapes.
-   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d scene
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
    * then draw first all your 3d before doing any call to a {@link #beginScreenDrawing()}
    * and {@link #endScreenDrawing()} pair.
    *
@@ -357,14 +357,14 @@ public class MatrixHandler {
   // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
   // "9.030 How do I draw 2D controls over my 3D rendering?"
   protected void ortho2D() {
-    float cameraZ = (gScene.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
+    float cameraZ = (graph.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
     float cameraNear = cameraZ / 2.0f;
     float cameraFar = cameraZ * 2.0f;
 
-    float left = -gScene.width() / 2;
-    float right = gScene.width() / 2;
-    float bottom = -gScene.height() / 2;
-    float top = gScene.height() / 2;
+    float left = -graph.width() / 2;
+    float right = graph.width() / 2;
+    float bottom = -graph.height() / 2;
+    float top = graph.height() / 2;
     float near = cameraNear;
     float far = cameraFar;
 
@@ -382,11 +382,11 @@ public class MatrixHandler {
 
   // as it's done in P5:
   protected void resetViewPoint() {
-    float eyeX = gScene.width() / 2f;
-    float eyeY = gScene.height() / 2f;
-    float eyeZ = (gScene.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
-    float centerX = gScene.width() / 2f;
-    float centerY = gScene.height() / 2f;
+    float eyeX = graph.width() / 2f;
+    float eyeY = graph.height() / 2f;
+    float eyeZ = (graph.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
+    float centerX = graph.width() / 2f;
+    float centerY = graph.height() / 2f;
     float centerZ = 0;
     float upX = 0;
     float upY = 1;
