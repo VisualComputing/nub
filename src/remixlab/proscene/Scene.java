@@ -27,11 +27,6 @@ import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
 
-// begin: GWT-incompatible
-///*
-// end: GWT-incompatible
-//*/
-
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing Scene. The Scene is a specialization of the
  * {@link Graph}, providing an interface between Dandelion
@@ -53,10 +48,10 @@ import java.util.List;
  * proscene defaults to a {@link #mouseAgent()}):
  * <ol>
  * <li><b>The default key agent</b> provides shortcuts to
- * frame and graph key actions (such as
+ * node and graph key actions (such as
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
- * eye and frame
+ * eye and node
  * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
  * {@link remixlab.proscene.KeyAgent} API's.
  * </ol>
@@ -582,10 +577,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   protected void drawPickingTargets() {
-    for (Node frame : nodes(false))
+    for (Node node : nodes(false))
       // if(inputHandler().hasGrabber(frame))
-      if (frame.isVisualHintEnabled())
-        drawPickingTarget(frame);
+      if (node.isVisualHintEnabled())
+        drawPickingTarget(node);
   }
 
   /*
@@ -1285,9 +1280,9 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draw all graph {@link #nodes(boolean)} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
-   * {@code for (Node frame : frames()) frame.draw(pg());}.
+   * {@code for (Node frame : nodes()) frame.draw(pg());}.
    * <p>
-   * Note that {@code drawFrames()} is typically called from within your sketch
+   * Note that {@code drawNodes()} is typically called from within your sketch
    * {@link #pApplet()} draw() loop.
    * <p>
    * This method is implementing by simply calling
@@ -1299,9 +1294,9 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #nodes(boolean)
    * @see #pg()
-   * @see #drawFrames(PGraphics)
+   * @see #drawNodes(PGraphics)
    */
-  public void drawFrames() {
+  public void drawNodes() {
     targetPGraphics = pg();
     traverse();
   }
@@ -1311,7 +1306,7 @@ public class Scene extends Graph implements PConstants {
    * {@code pgraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
-   * Note that {@code drawFrames(pickingBuffer())} (which enables 'picking' of the frames
+   * Note that {@code drawNodes(pickingBuffer())} (which enables 'picking' of the nodes
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
    * <p>
@@ -1321,9 +1316,9 @@ public class Scene extends Graph implements PConstants {
    *
    * @param pgraphics
    * @see #nodes(boolean)
-   * @see #drawFrames()
+   * @see #drawNodes()
    */
-  public void drawFrames(PGraphics pgraphics) {
+  public void drawNodes(PGraphics pgraphics) {
     // 1. Set pgraphics matrices using a custom MatrixHandler
     bindMatrices(pgraphics);
     // 2. Draw all nodes into pgraphics
@@ -1339,8 +1334,8 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #matrixHandler()
    * @see #setMatrixHandler(MatrixHandler)
-   * @see #drawFrames()
-   * @see #drawFrames(PGraphics)
+   * @see #drawNodes()
+   * @see #drawNodes(PGraphics)
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
   public MatrixHandler matrixHelper(PGraphics pgraphics) {
