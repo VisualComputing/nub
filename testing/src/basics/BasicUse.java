@@ -73,9 +73,9 @@ public class BasicUse extends PApplet {
   public void draw() {
     background(0);
     scene.drawFrames();
-    //TODO decide to just leave scene.traverseTree(); throws a npe on scene.targetPGraphics though. The 'hack' would be somethng like:
+    //TODO decide to just leave scene.traverse(); throws a npe on scene.targetPGraphics though. The 'hack' would be somethng like:
     //scene.targetPGraphics = pg;
-    //scene.traverseTree();
+    //scene.traverse();
   }
 
   public static void main(String args[]) {

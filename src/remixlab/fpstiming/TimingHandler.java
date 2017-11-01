@@ -137,14 +137,14 @@ public class TimingHandler {
   /**
    * Returns the approximate frame rate of the software as it executes. The initial value
    * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
+   * several nodes. As such, this value won't be valid until after 5-10 nodes.
    */
   public float frameRate() {
     return frameRate;
   }
 
   /**
-   * Returns the number of frames displayed since the program started.
+   * Returns the number of nodes displayed since the program started.
    */
   public long frameCount() {
     return fCount;

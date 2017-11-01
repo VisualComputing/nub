@@ -34,8 +34,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case PLANE:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        if (frame.referenceFrame() != null) {
-          proj = frame.referenceFrame().transformOf(translationConstraintDirection());
+        if (frame.reference() != null) {
+          proj = frame.reference().transformOf(translationConstraintDirection());
           res = Vector.projectVectorOnPlane(translation, proj);
         } else
           res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
@@ -43,8 +43,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
-        if (frame.referenceFrame() != null) {
-          proj = frame.referenceFrame().transformOf(translationConstraintDirection());
+        if (frame.reference() != null) {
+          proj = frame.reference().transformOf(translationConstraintDirection());
           res = Vector.projectVectorOnAxis(translation, proj);
         } else
           res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());

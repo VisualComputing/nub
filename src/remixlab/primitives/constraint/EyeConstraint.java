@@ -55,16 +55,16 @@ public class EyeConstraint extends AxisPlaneConstraint {
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = eye().inverseTransformOf(translationConstraintDirection());
-        if (frame.referenceFrame() != null)
-          proj = frame.referenceFrame().transformOf(proj);
+        if (frame.reference() != null)
+          proj = frame.reference().transformOf(proj);
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
         if (frame.is2D() && translationConstraintDirection().z() != 0)
           break;
         proj = eye().inverseTransformOf(translationConstraintDirection());
-        if (frame.referenceFrame() != null)
-          proj = frame.referenceFrame().transformOf(proj);
+        if (frame.reference() != null)
+          proj = frame.reference().transformOf(proj);
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:

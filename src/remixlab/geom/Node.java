@@ -53,9 +53,9 @@ import java.util.List;
  * {@link #scene()}, {@link Graph#pushModelView()} and
  * {@link Graph#popModelView()}
  * <p>
- * A frame may also be defined as the {@link Graph#eye()} (see {@link #isEyeFrame()}
+ * A frame may also be defined as the {@link Graph#eye()} (see {@link #isEye()}
  * and {@link Graph#setEye(Frame)}).
- * Some user gestures are then interpreted in a negated way, respect to non-eye frames.
+ * Some user gestures are then interpreted in a negated way, respect to non-eye nodes.
  * For instance, with a move-to-the-right user gesture the
  * {@link Graph#eye()} hasGrabber to go to the <i>left</i>,
  * so that the <i>scene</i> seems to move to the right. A interactive-frame can be set
@@ -91,10 +91,10 @@ import java.util.List;
  * the transformation it represents may be applied to a different scene. See
  * {@link #applyTransformation()} and {@link #applyTransformation(Graph)}.
  * <p>
- * Two generic-frames can be synced together ({@link #sync(Node, Node)}),
+ * Two generic-nodes can be synced together ({@link #sync(Node, Node)}),
  * meaning that they will share their global parameters (position, orientation and
  * magnitude) taken the one that hasGrabber been most recently updated. Syncing can be useful to
- * share frames among different off-screen scenes (see ProScene's EyeCrane and the
+ * share nodes among different off-screen scenes (see ProScene's EyeCrane and the
  * AuxiliarViewer examples).
  */
 public class Node extends Frame implements Grabber {
@@ -124,7 +124,7 @@ public class Node extends Frame implements Grabber {
   // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or
   // not.
   public boolean dirIsFixed;
-  private boolean horiz = true; // Two simultaneous frames require two mice!
+  private boolean horiz = true; // Two simultaneous nodes require two mice!
 
   protected float eventSpeed; // spnning and tossing
   protected long eventDelay;
@@ -235,7 +235,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Same as
-   * {@code this(referenceFrame.scene(), referenceFrame, new Vector(), scn.is3D() ? new Quaternion() : new Rot(), 1)}
+   * {@code this(reference.scene(), reference, new Vector(), scn.is3D() ? new Quaternion() : new Rot(), 1)}
    * .
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
@@ -245,7 +245,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), 1)}
+   * Same as {@code this(reference.scene(), reference, p, new Quaternion(), 1)}
    * .
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
@@ -255,7 +255,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), r, 1)}.
+   * Same as {@code this(reference.scene(), reference, new Vector(), r, 1)}.
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
@@ -264,7 +264,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), new Quaternion(), s)}.
+   * Same as {@code this(reference.scene(), reference, new Vector(), new Quaternion(), s)}.
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
@@ -273,7 +273,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, new Quaternion(), s)}
+   * Same as {@code this(reference.scene(), reference, p, new Quaternion(), s)}
    * .
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
@@ -283,7 +283,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, p, r, 1)}.
+   * Same as {@code this(reference.scene(), reference, p, r, 1)}.
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
@@ -292,7 +292,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code this(referenceFrame.scene(), referenceFrame, new Vector(), r, s)}.
+   * Same as {@code this(reference.scene(), reference, new Vector(), r, s)}.
    *
    * @see #Node(Graph, Vector, Quaternion, float)
    */
@@ -301,8 +301,8 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Creates a scene generic-frame with {@code referenceFrame} as
-   * {@link #referenceFrame()}, and {@code p}, {@code r} and {@code s} as the frame
+   * Creates a scene generic-frame with {@code reference} as
+   * {@link #reference()}, and {@code p}, {@code r} and {@code s} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
    * The {@link Graph#inputHandler()} will attempt to addGrabber
@@ -317,7 +317,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Sets the {@link #pickingPrecision()} to {@link PickingPrecision#FIXED}.
    * <p>
-   * After object creation a call to {@link #isEyeFrame()} will return {@code false}.
+   * After object creation a call to {@link #isEye()} will return {@code false}.
    */
   protected Node(Graph scn, Node referenceFrame, Vector p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
@@ -339,8 +339,8 @@ public class Node extends Frame implements Grabber {
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     visit = true;
     childrenList = new ArrayList<Node>();
-    // scene().addLeadingFrame(this);
-    setReferenceFrame(referenceFrame());// restorePath seems more robust
+    // scene().addLeadingNode(this);
+    setReference(reference());// restorePath seems more robust
     setRotationSensitivity(1.0f);
     setScalingSensitivity(1.0f);
     setTranslationSensitivity(1.0f);
@@ -378,7 +378,7 @@ public class Node extends Frame implements Grabber {
     this.hint = otherFrame.hint;
 
     this.childrenList = new ArrayList<Node>();
-    this.setReferenceFrame(referenceFrame());// restorePath
+    this.setReference(reference());// restorePath
 
     this.spinningTimerTask = new TimingTask() {
       public void execute() {
@@ -416,7 +416,7 @@ public class Node extends Frame implements Grabber {
     //
     this.setFlySpeed(otherFrame.flySpeed());
 
-    if (!this.isEyeFrame())
+    if (!this.isEye())
       for (Agent agent : gScene.inputHandler().agents())
         if (agent.hasGrabber(otherFrame))
           agent.addGrabber(this);
@@ -425,7 +425,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Perform a deep, non-recursive copy of this generic-frame.
    * <p>
-   * The copied frame will keep this frame {@link #referenceFrame()}, but its children
+   * The copied frame will keep this frame {@link #reference()}, but its children
    * aren't copied.
    *
    * @return generic-frame copy
@@ -437,7 +437,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a frame with this frame current parameters. The newly returned frame is
-   * detached from the scene {@link Graph#frames(boolean)}
+   * detached from the scene {@link Graph#nodes(boolean)}
    * list.
    * <p>
    * This method is useful to interact animations for all eye interpolation routines.
@@ -463,55 +463,55 @@ public class Node extends Frame implements Grabber {
   // GRAPH
 
   @Override
-  public Node referenceFrame() {
+  public Node reference() {
     return (Node) this.refFrame;
   }
 
   @Override
-  public void setReferenceFrame(Frame frame) {
+  public void setReference(Frame frame) {
     if (frame instanceof Node || frame == null)
-      setReferenceFrame((Node) frame);
+      setReference((Node) frame);
     else
-      System.out.println("Warning: nothing done: Generic.referenceFrame() should be instanceof Node");
+      System.out.println("Warning: nothing done: Generic.reference() should be instanceof Node");
   }
 
-  public void setReferenceFrame(Node frame) {
-    if (settingAsReferenceFrameWillCreateALoop(frame)) {
-      System.out.println("Frame.setReferenceFrame would create a loop in Frame hierarchy. Nothing done.");
+  public void setReference(Node node) {
+    if (settingAsReferenceWillCreateALoop(node)) {
+      System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
       return;
     }
     // 1. no need to re-parent, just check this needs to be added as leadingFrame
-    if (referenceFrame() == frame) {
-      restorePath(referenceFrame(), this);
+    if (reference() == node) {
+      restorePath(reference(), this);
       return;
     }
     // 2. else re-parenting
     // 2a. before assigning new reference frame
-    if (referenceFrame() != null) // old
-      referenceFrame().removeChild(this);
+    if (reference() != null) // old
+      reference().removeChild(this);
     else if (scene() != null)
-      scene().removeLeadingFrame(this);
+      scene().removeLeadingNode(this);
     // finally assign the reference frame
-    refFrame = frame;// referenceFrame() returns now the new value
+    refFrame = node;// reference() returns now the new value
     // 2b. after assigning new reference frame
-    restorePath(referenceFrame(), this);
+    restorePath(reference(), this);
     modified();
   }
 
   protected void restorePath(Node parent, Node child) {
     if (parent == null) {
       if (scene() != null)
-        scene().addLeadingFrame(child);
+        scene().addLeadingNode(child);
     } else {
       if (!parent.hasChild(child)) {
         parent.addChild(child);
-        restorePath(parent.referenceFrame(), parent);
+        restorePath(parent.reference(), parent);
       }
     }
   }
 
   /**
-   * Returns a list of the frame children, i.e., frame which {@link #referenceFrame()} is
+   * Returns a list of the frame children, i.e., frame which {@link #reference()} is
    * this.
    */
   public final List<Node> children() {
@@ -553,7 +553,7 @@ public class Node extends Frame implements Grabber {
    * Procedure called by the scene frame traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes.
    *
-   * @see Graph#traverseTree()
+   * @see Graph#traverse()
    */
   protected void visit() {
   }
@@ -565,7 +565,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Enables {@link #visit()} of this frame when performing the
-   * {@link Graph#traverseTree()}.
+   * {@link Graph#traverse()}.
    *
    * @see #disableVisit()
    * @see #toggleVisit()
@@ -577,7 +577,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Disables {@link #visit()} of this frame when performing the
-   * {@link Graph#traverseTree()}.
+   * {@link Graph#traverse()}.
    *
    * @see #enableVisit()
    * @see #toggleVisit()
@@ -589,7 +589,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Toggles {@link #visit()} of this frame when performing the
-   * {@link Graph#traverseTree()}.
+   * {@link Graph#traverse()}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -601,7 +601,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns true if {@link #visit()} of this frame when performing the
-   * {@link Graph#traverseTree() is enabled}.
+   * {@link Graph#traverse() is enabled}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -621,7 +621,7 @@ public class Node extends Frame implements Grabber {
    * @see #isVisualHintEnabled()
    */
   public void enableVisualHint() {
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("enableVisualHint", false);
       return;
     }
@@ -638,7 +638,7 @@ public class Node extends Frame implements Grabber {
    * @see #isVisualHintEnabled()
    */
   public void disableVisualHint() {
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("disableVisualHint", false);
       return;
     }
@@ -655,7 +655,7 @@ public class Node extends Frame implements Grabber {
    * @see #isVisualHintEnabled()
    */
   public void toggleVisualHint() {
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("toggleVisualHint", false);
       return;
     }
@@ -672,7 +672,7 @@ public class Node extends Frame implements Grabber {
    * @see #toggleVisualHint()
    */
   public boolean isVisualHintEnabled() {
-    if (isEyeFrame())
+    if (isEye())
       Graph.showOnlyEyeWarning("isVisualHintEnabled", false);
     return hint;
   }
@@ -680,7 +680,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns the scene this object belongs to.
    * <p>
-   * Note that if this {@link #isEyeFrame()} then returns {@code eye().scene()}.
+   * Note that if this {@link #isEye()} then returns {@code eye().scene()}.
    *
    * @see Graph#eye()
    */
@@ -690,12 +690,12 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns true if the generic-frame is attached to an eye, and false otherwise.
-   * generic-frames can only be attached to an eye at construction times. Refer to the
+   * generic-nodes can only be attached to an eye at construction times. Refer to the
    * generic-frame constructors that take an eye parameter.
    *
    * @see Graph#eye()
    */
-  public boolean isEyeFrame() {
+  public boolean isEye() {
     return scene().eye() == this;
   }
 
@@ -714,7 +714,7 @@ public class Node extends Frame implements Grabber {
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
   public boolean track(MotionEvent event) {
-    if (isEyeFrame())
+    if (isEye())
       return false;
     if (event instanceof MotionEvent1)
       return track((MotionEvent1) event);
@@ -731,7 +731,7 @@ public class Node extends Frame implements Grabber {
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
   public boolean track(TapEvent event) {
-    if (isEyeFrame())
+    if (isEye())
       return false;
     return track(event.x(), event.y());
   }
@@ -752,7 +752,7 @@ public class Node extends Frame implements Grabber {
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
   public boolean track(MotionEvent1 event) {
-    if (isEyeFrame())
+    if (isEye())
       return false;
     Graph.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
     return false;
@@ -762,7 +762,7 @@ public class Node extends Frame implements Grabber {
    * Internal use. You don't need to call this. Automatically called by agents handling this frame.
    */
   public boolean track(MotionEvent2 event) {
-    if (isEyeFrame())
+    if (isEye())
       return false;
     if (event.isAbsolute()) {
       Graph.showEventVariationWarning("track");
@@ -958,8 +958,8 @@ public class Node extends Frame implements Grabber {
    * nothing if both objects were updated at the same frame.
    * <p>
    * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two frames. The
-   * {@link #referenceFrame()} and {@link #constraint()} (if any) of each frame are kept
+   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
+   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
    * separately.
    *
    * @see #set(Frame)
@@ -1312,7 +1312,7 @@ public class Node extends Frame implements Grabber {
    * @see #damping()
    */
   protected void spin() {
-    if (isEyeFrame())
+    if (isEye())
       rotateAroundPoint(spinningRotation(), scene().anchor());
     else
       rotate(spinningRotation());
@@ -1417,7 +1417,7 @@ public class Node extends Frame implements Grabber {
       Point curPos = new Point(event.x(), event.y());
       rt = new Rot(new Point(center.x(), center.y()), prevPos, curPos);
       rt = new Rot(rt.angle() * rotationSensitivity());
-      if ((gScene.isRightHanded() && !isEyeFrame()) || (gScene.isLeftHanded() && isEyeFrame()))
+      if ((gScene.isRightHanded() && !isEye()) || (gScene.isLeftHanded() && isEye()))
         rt.negate();
       return rt;
     } else {
@@ -1483,10 +1483,10 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye frames.
+   * between eye and non-eye nodes.
    */
   public void align() {
-    if (isEyeFrame())
+    if (isEye())
       alignWithFrame(null, true);
     else
       alignWithFrame(gScene.eye());
@@ -1496,7 +1496,7 @@ public class Node extends Frame implements Grabber {
    * Centers the generic-frame into the scene.
    */
   public void center() {
-    if (isEyeFrame())
+    if (isEye())
       scene().center();
     else
       projectOnLine(gScene.eye().position(), gScene.eye().zAxis(false));
@@ -1529,7 +1529,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void translateX(MotionEvent1 event, float sens) {
-    translate(screenToVec(Vector.multiply(new Vector(isEyeFrame() ? -event.dx() : event.dx(), 0, 0), sens)));
+    translate(screenToVec(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sens)));
   }
 
   /**
@@ -1551,7 +1551,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void translateX(boolean right) {
     translate(screenToVec(
-        Vector.multiply(new Vector(1, 0), (right ^ this.isEyeFrame()) ? keyboardSensitivity() : -keyboardSensitivity())));
+        Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keyboardSensitivity() : -keyboardSensitivity())));
   }
 
   /**
@@ -1582,7 +1582,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void translateY(MotionEvent1 event, float sens) {
     translate(
-        screenToVec(Vector.multiply(new Vector(0, isEyeFrame() ^ gScene.isRightHanded() ? -event.dx() : event.dx()), sens)));
+        screenToVec(Vector.multiply(new Vector(0, isEye() ^ gScene.isRightHanded() ? -event.dx() : event.dx()), sens)));
   }
 
   /**
@@ -1604,7 +1604,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void translateY(boolean up) {
     translate(screenToVec(
-        Vector.multiply(new Vector(0, (up ^ this.isEyeFrame() ^ gScene.isLeftHanded()) ? 1 : -1), this.keyboardSensitivity())));
+        Vector.multiply(new Vector(0, (up ^ this.isEye() ^ gScene.isLeftHanded()) ? 1 : -1), this.keyboardSensitivity())));
   }
 
   /**
@@ -1638,7 +1638,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("translateZ");
       return;
     }
-    translate(screenToVec(Vector.multiply(new Vector(0.0f, 0.0f, isEyeFrame() ? -event.dx() : event.dx()), sens)));
+    translate(screenToVec(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sens)));
   }
 
   /**
@@ -1664,7 +1664,7 @@ public class Node extends Frame implements Grabber {
       return;
     }
     translate(screenToVec(
-        Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEyeFrame()) ? -keyboardSensitivity() : keyboardSensitivity())));
+        Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keyboardSensitivity() : keyboardSensitivity())));
   }
 
   /**
@@ -1689,8 +1689,8 @@ public class Node extends Frame implements Grabber {
    * User gesture into xy-translation conversion routine.
    */
   public void translate(MotionEvent2 event) {
-    translate(screenToVec(Vector.multiply(new Vector(isEyeFrame() ? -event.dx() : event.dx(),
-        (gScene.isRightHanded() ^ isEyeFrame()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
+    translate(screenToVec(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
+        (gScene.isRightHanded() ^ isEye()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
   }
 
   /**
@@ -1753,8 +1753,8 @@ public class Node extends Frame implements Grabber {
    */
   protected void zoomOnAnchor(MotionEvent1 event, float sens) {
     Vector direction = Vector.subtract(gScene.anchor(), position());
-    if (referenceFrame() != null)
-      direction = referenceFrame().transformOf(direction);
+    if (reference() != null)
+      direction = reference().transformOf(direction);
     float delta = event.dx() * sens / gScene.height();
     if (direction.magnitude() > 0.02f * gScene.radius() || delta > 0.0f)
       translate(Vector.multiply(direction, delta));
@@ -1785,8 +1785,8 @@ public class Node extends Frame implements Grabber {
    */
   protected void zoomOnAnchor(boolean in) {
     Vector direction = Vector.subtract(gScene.anchor(), position());
-    if (referenceFrame() != null)
-      direction = referenceFrame().transformOf(direction);
+    if (reference() != null)
+      direction = reference().transformOf(direction);
     float delta = (in ? keyboardSensitivity() : -keyboardSensitivity()) / gScene.height();
     if (direction.magnitude() > 0.02f * gScene.radius() || delta > 0.0f)
       translate(Vector.multiply(direction, delta));
@@ -1808,7 +1808,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into zoom-on-region conversion routine.
    */
   public void zoomOnRegion(MotionEvent2 event) {
-    if (!isEyeFrame()) {
+    if (!isEye()) {
       Graph.showOnlyEyeWarning("zoomOnRegion");
       return;
     }
@@ -1865,7 +1865,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("rotateX");
       return;
     }
-    spin(screenToQuat(computeAngle(event) * (isEyeFrame() ? -sens : sens), 0, 0), event.speed(), event.delay());
+    spin(screenToQuat(computeAngle(event) * (isEye() ? -sens : sens), 0, 0), event.speed(), event.delay());
   }
 
   /**
@@ -1924,7 +1924,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("rotateY");
       return;
     }
-    spin(screenToQuat(0, computeAngle(event) * (isEyeFrame() ? -sens : sens), 0), event.speed(), event.delay());
+    spin(screenToQuat(0, computeAngle(event) * (isEye() ? -sens : sens), 0), event.speed(), event.delay());
   }
 
   /**
@@ -1980,13 +1980,13 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-rotation conversion routine.
    */
   protected void rotateZ(MotionEvent1 event, float sens) {
-    spin(screenToQuat(0, 0, sens * (isEyeFrame() ? -computeAngle(event) : computeAngle(event))), event.speed(), event.delay());
+    spin(screenToQuat(0, 0, sens * (isEye() ? -computeAngle(event) : computeAngle(event))), event.speed(), event.delay());
   }
   //TODO Restore 2D
   /*
   protected void rotateZ(MotionEvent1 event, float sens) {
     Rotation rt;
-    if (isEyeFrame())
+    if (isEye())
       if (is2D())
         rt = new Rot(sens * (gScene.isRightHanded() ? computeAngle(event) : -computeAngle(event)));
       else
@@ -2084,7 +2084,7 @@ public class Node extends Frame implements Grabber {
     if (!event.flushed()) {
       Quaternion rt;
       Vector trns;
-      if (isEyeFrame())
+      if (isEye())
         rt = deformedBallRotation(event, scene().projectedCoordinatesOf(scene().anchor()));
       else {
         trns = gScene.projectedCoordinatesOf(position());
@@ -2116,7 +2116,7 @@ public class Node extends Frame implements Grabber {
     if (!event.flushed()) {
       Rotation rt;
       Vector trns;
-      if (isEyeFrame())
+      if (isEye())
         rt = deformedBallRotation(event, eye().projectedCoordinatesOf(eye().anchor()));
       else {
         if (is2D())
@@ -2155,7 +2155,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into scaling conversion routine.
    */
   protected void scale(MotionEvent1 event, float sens) {
-    if (isEyeFrame()) {
+    if (isEye()) {
       float delta = event.dx() * sens;
       float s = 1 + Math.abs(delta) / (float) -gScene.height();
       scale(delta >= 0 ? s : 1 / s);
@@ -2184,7 +2184,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into scaling conversion routine.
    */
   protected void scale(boolean up) {
-    float s = 1 + Math.abs(keyboardSensitivity()) / (isEyeFrame() ? (float) -gScene.height() : (float) gScene.height());
+    float s = 1 + Math.abs(keyboardSensitivity()) / (isEye() ? (float) -gScene.height() : (float) gScene.height());
     scale(up ? s : 1 / s);
   }
 
@@ -2342,7 +2342,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("hinge");
       return;
     }
-    if (!isEyeFrame()) {
+    if (!isEye()) {
       Graph.showOnlyEyeWarning("hinge");
       return;
     }
@@ -2351,12 +2351,12 @@ public class Node extends Frame implements Grabber {
     Vector trns = new Vector();
     Vector pos = position();
     Quaternion o = (Quaternion) orientation();
-    Frame oldRef = referenceFrame();
+    Frame oldRef = reference();
     Node rFrame = new Node(gScene);
     rFrame.setPosition(scene().anchor());
     rFrame.setZAxis(Vector.subtract(pos, scene().anchor()));
     rFrame.setXAxis(xAxis());
-    setReferenceFrame(rFrame);
+    setReference(rFrame);
     setPosition(pos);
     setOrientation(o);
     // 2. Translate the refFrame along its Z-axis:
@@ -2383,7 +2383,7 @@ public class Node extends Frame implements Grabber {
     // 7. Unrelate the frame and restore state:
     pos = position();
     o = (Quaternion) orientation();
-    setReferenceFrame(oldRef);
+    setReference(oldRef);
     scene().pruneBranch(rFrame);
     setPosition(pos);
     setOrientation(o);
@@ -2455,7 +2455,7 @@ public class Node extends Frame implements Grabber {
       Quaternion rt;
       Vector trns;
       float angle;
-      if (isEyeFrame()) {
+      if (isEye()) {
         trns = scene().projectedCoordinatesOf(scene().anchor());
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]) - (float) Math
             .atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
@@ -2482,7 +2482,7 @@ public class Node extends Frame implements Grabber {
   //TODO missed
   /*
   public void anchorFromPixel(TapEvent event) {
-    if (isEyeFrame())
+    if (isEye())
       scene().setAnchorFromPixel(new Point(event.x(), event.y()));
     else
       Graph.showOnlyEyeWarning("anchorFromPixel");
@@ -2502,7 +2502,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Same as {@code return eyeToReferenceFrame(screenToEye(trns))}. Transforms the vector
-   * from screen (device) coordinates to {@link #referenceFrame()} coordinates.
+   * from screen (device) coordinates to {@link #reference()} coordinates.
    *
    * @see #screenToEye(Vector)
    * @see #eyeToReferenceFrame(Vector)
@@ -2521,7 +2521,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Converts the vector from eye coordinates to {@link #referenceFrame()} coordinates.
+   * Converts the vector from eye coordinates to {@link #reference()} coordinates.
    * <p>
    * It's worth noting that all gesture to generic-frame motion converting methods, are
    * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
@@ -2531,10 +2531,10 @@ public class Node extends Frame implements Grabber {
    * @see #screenToQuat(float, float, float)
    */
   public Vector eyeToReferenceFrame(Vector trns) {
-    Frame gFrame = isEyeFrame() ? this : /* respectToEye() ? */gScene.eye() /* : this */;
+    Frame gFrame = isEye() ? this : /* respectToEye() ? */gScene.eye() /* : this */;
     Vector t = gFrame.inverseTransformOf(trns);
-    if (referenceFrame() != null)
-      t = referenceFrame().transformOf(t);
+    if (reference() != null)
+      t = reference().transformOf(t);
     return t;
   }
 
@@ -2567,8 +2567,8 @@ public class Node extends Frame implements Grabber {
     switch (gScene.type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(gScene.fieldOfView() / 2.0f) * Math.abs(
-            gScene.eye().coordinatesOf(isEyeFrame() ? scene().anchor() : position()).vec[2] * gScene.eye().magnitude());
-        // * Math.abs(scene.eye().frame().coordinatesOf(isEyeFrame() ?
+            gScene.eye().coordinatesOf(isEye() ? scene().anchor() : position()).vec[2] * gScene.eye().magnitude());
+        // * Math.abs(scene.eye().frame().coordinatesOf(isEye() ?
         // scene.eye().anchor() : position()).vec[2]);
         //TODO check me wierd to find height instead of width working (may it has to do with fov?)
         eyeVector.vec[0] *= 2.0 * k / gScene.height();
@@ -2582,7 +2582,7 @@ public class Node extends Frame implements Grabber {
         break;
     }
     float coef;
-    if (isEyeFrame()) {
+    if (isEye()) {
       // float coef = 8E-4f;
       coef = Math.max(Math.abs((coordinatesOf(scene().anchor())).vec[2] * magnitude()), 0.2f * scene().radius());
       eyeVector.vec[2] *= coef / scene().height();
@@ -2594,7 +2594,7 @@ public class Node extends Frame implements Grabber {
       eyeVector.vec[2] *= coef / gScene.height();
       eyeVector.divide(gScene.eye().magnitude());
     }
-    // if( isEyeFrame() )
+    // if( isEye() )
     return eyeVector;
   }
 
@@ -2629,7 +2629,7 @@ public class Node extends Frame implements Grabber {
 
     // don't really need to differentiate among the two cases, but eyeFrame can
     // be speeded up
-    if (isEyeFrame() /* || (!isEyeFrame() && !this.respectToEye()) */) {
+    if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
       return new Quaternion(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw);
     } else {
       Vector trns = new Vector();
@@ -2655,7 +2655,7 @@ public class Node extends Frame implements Grabber {
       }
       Node copy = get();
       gScene.pruneBranch(copy);
-      copy.setReferenceFrame(ref);
+      copy.setReference(ref);
       copy.setWorldMatrix(this);
       ref.rotate(new Quaternion(gScene.isLeftHanded() ? -roll : roll, pitch, gScene.isLeftHanded() ? -yaw : yaw));
       setWorldMatrix(copy);
@@ -2838,7 +2838,7 @@ public class Node extends Frame implements Grabber {
    * @see #setGrabsInputThreshold(float)
    */
   public float grabsInputThreshold() {
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("grabsInputThreshold", false);
       return 0;
     }
@@ -2855,7 +2855,7 @@ public class Node extends Frame implements Grabber {
    * @see #setGrabsInputThreshold(float)
    */
   public PickingPrecision pickingPrecision() {
-    if (isEyeFrame())
+    if (isEye())
       Graph.showOnlyEyeWarning("pickingPrecision", false);
     return pkgnPrecision;
   }
@@ -2885,9 +2885,9 @@ public class Node extends Frame implements Grabber {
   public void setPickingPrecision(PickingPrecision precision) {
     if (precision == PickingPrecision.EXACT)
       System.out.println(
-          "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived feneric frames and scenes that support a pickingBuffer.");
+          "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived feneric nodes and scenes that support a pickingBuffer.");
     pkgnPrecision = precision;
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("setPickingPrecision", false);
       return;
     }
@@ -2925,7 +2925,7 @@ public class Node extends Frame implements Grabber {
    * @see #track(Event)
    */
   public void setGrabsInputThreshold(float threshold) {
-    if (isEyeFrame()) {
+    if (isEye()) {
       Graph.showOnlyEyeWarning("setGrabsInputThreshold", false);
       return;
     }

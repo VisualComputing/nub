@@ -582,7 +582,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   protected void drawPickingTargets() {
-    for (Node frame : frames(false))
+    for (Node frame : nodes(false))
       // if(inputHandler().hasGrabber(frame))
       if (frame.isVisualHintEnabled())
         drawPickingTarget(frame);
@@ -1283,7 +1283,7 @@ public class Scene extends Graph implements PConstants {
   public PGraphics targetPGraphics;
 
   /**
-   * Draw all scene {@link #frames(boolean)} into the {@link #pg()} buffer. A similar (but
+   * Draw all scene {@link #nodes(boolean)} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
    * {@code for (Node frame : frames()) frame.draw(pg());}.
    * <p>
@@ -1291,23 +1291,23 @@ public class Scene extends Graph implements PConstants {
    * {@link #pApplet()} draw() loop.
    * <p>
    * This method is implementing by simply calling
-   * {@link Graph#traverseTree()}.
+   * {@link Graph#traverse()}.
    * <p>
    * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
    * eye update which happens at {@link #preDraw()}) and before any other transformation
    * of the modelview takes place.
    *
-   * @see #frames(boolean)
+   * @see #nodes(boolean)
    * @see #pg()
    * @see #drawFrames(PGraphics)
    */
   public void drawFrames() {
     targetPGraphics = pg();
-    traverseTree();
+    traverse();
   }
 
   /**
-   * Draw all {@link #frames(boolean)} into the given pgraphics. No
+   * Draw all {@link #nodes(boolean)} into the given pgraphics. No
    * {@code pgraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
@@ -1320,15 +1320,15 @@ public class Scene extends Graph implements PConstants {
    * place.
    *
    * @param pgraphics
-   * @see #frames(boolean)
+   * @see #nodes(boolean)
    * @see #drawFrames()
    */
   public void drawFrames(PGraphics pgraphics) {
     // 1. Set pgraphics matrices using a custom MatrixHandler
     bindMatrices(pgraphics);
-    // 2. Draw all frames into pgraphics
+    // 2. Draw all nodes into pgraphics
     targetPGraphics = pgraphics;
-    traverseTree();
+    traverse();
   }
 
   /**
@@ -1370,13 +1370,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void visitFrame(Node frame) {
+  protected void visitNode(Node node) {
     targetPGraphics.pushMatrix();
-    applyTransformation(targetPGraphics, frame);
-    if (frame instanceof Node)
-      frame.visitCallback();
-    for (Node child : frame.children())
-      visitFrame(child);
+    applyTransformation(targetPGraphics, node);
+    if (node instanceof Node)
+      node.visitCallback();
+    for (Node child : node.children())
+      visitNode(child);
     targetPGraphics.popMatrix();
   }
 
@@ -1412,7 +1412,7 @@ public class Scene extends Graph implements PConstants {
    * @see #bindMatrices(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pgraphics, Frame frame) {
-    Frame refFrame = frame.referenceFrame();
+    Frame refFrame = frame.reference();
     if (refFrame != null) {
       applyWorldTransformation(pgraphics, refFrame);
       applyTransformation(pgraphics, frame);
@@ -2960,8 +2960,8 @@ public class Scene extends Graph implements PConstants {
    * {@code false}.
    */
   public void drawPickingTarget(Node iFrame) {
-    if (iFrame.isEyeFrame()) {
-      System.err.println("eye frames don't have a picking target");
+    if (iFrame.isEye()) {
+      System.err.println("eye nodes don't have a picking target");
       return;
     }
     if (!iFrame.isVisualHintEnabled())

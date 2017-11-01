@@ -17,7 +17,7 @@ import remixlab.primitives.*;
  * <p>
  * The {@link #translationConstraintDirection()} and
  * {@link #rotationConstraintDirection()} are expressed in the Frame local coordinate
- * system (see {@link Frame#referenceFrame()} ).
+ * system (see {@link Frame#reference()} ).
  */
 public class LocalConstraint extends AxisPlaneConstraint {
   /**
