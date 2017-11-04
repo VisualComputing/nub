@@ -826,7 +826,7 @@ public class Graph {
     for (Node child : node.children())
       collectNodes(list, child);
   }
-  
+
   // Keys
 
   /**
@@ -1315,10 +1315,10 @@ public class Graph {
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
-   * @see #optimizeUnprojectedCoordinatesOf(boolean)
+   * @see #cacheProjectionViewInverse(boolean)
    * @see #unprojectedCoordinatesOf(Vector)
    */
-  public boolean isUnprojectedCoordinatesOfOptimized() {
+  public boolean isProjectionViewInverseCached() {
     return matrixHandler.isProjectionViewInverseCached();
   }
 
@@ -1328,10 +1328,10 @@ public class Graph {
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
-   * @see #isUnprojectedCoordinatesOfOptimized()
+   * @see #isProjectionViewInverseCached()
    * @see #unprojectedCoordinatesOf(Vector)
    */
-  public void optimizeUnprojectedCoordinatesOf(boolean optimise) {
+  public void cacheProjectionViewInverse(boolean optimise) {
     matrixHandler.cacheProjectionViewInverse(optimise);
   }
 
@@ -2323,7 +2323,7 @@ public class Graph {
    * <p>
    * This method is not computationally optimized by default. If you call it several times with no
    * change in the matrices, you should buffer the entire inverse projection matrix (view,
-   * projection) to speed-up the queries. See {@link #optimizeUnprojectedCoordinatesOf(boolean)}.
+   * projection) to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    * @see #setWidth(int)

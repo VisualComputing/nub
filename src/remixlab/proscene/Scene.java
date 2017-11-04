@@ -1484,10 +1484,6 @@ public class Scene extends Graph implements PConstants {
     p.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
 
-  // TODO took from Abstract
-
-
-
   // drawing
 
   /**
