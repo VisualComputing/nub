@@ -813,18 +813,6 @@ public class Frame {
       setScaling(m);
   }
 
-  /**
-   * Same as {@code setMagnitude((float) Math.tan(fov / 2.0f))}.
-   * <p>
-   * Sets the so called vertical field-of-view of an eye provided this frame
-   * is set as a Graph eye.
-   *
-   * @see #setMagnitude(float)
-   */
-  public void setFieldOfView(float fov) {
-    setMagnitude((float) Math.tan(fov / 2.0f));
-  }
-
   // ALIGNMENT
 
   /**

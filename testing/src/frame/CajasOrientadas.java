@@ -124,7 +124,7 @@ public class CajasOrientadas extends PApplet {
     };
 
     scene.setEye(eye1);
-    eye1.setFieldOfView((float)Math.PI/3);
+    scene.setFieldOfView((float)Math.PI/3);
     scene.inputHandler().setDefaultGrabber(eye1);
     scene.showAll();
 
@@ -150,14 +150,14 @@ public class CajasOrientadas extends PApplet {
     if(key == ' ') {
       if(eye1 == scene.eye()) {
         scene.setEye(eye2);
-        eye2.setFieldOfView(1);
+        scene.setFieldOfView(1);
         scene.inputHandler().setDefaultGrabber(eye2);
         //scene.showAll();
         println("Eye2 set " + scene.fieldOfView());
       }
       else {
         scene.setEye(eye1);
-        eye1.setFieldOfView((float)Math.PI/4);
+        scene.setFieldOfView((float)Math.PI/4);
         scene.inputHandler().setDefaultGrabber(eye1);
         //scene.showAll();
         println("Eye1 set " + scene.fieldOfView());
