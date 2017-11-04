@@ -135,8 +135,6 @@ public class Node extends Frame implements Grabber {
   protected Vector flyDisp;
   protected static final long FLY_UPDATE_PERDIOD = 20;
   protected Vector upVector;
-
-  protected long lastUpdate;
   protected Graph graph;
 
   private float grabsInputThreshold;
@@ -316,21 +314,6 @@ public class Node extends Frame implements Grabber {
   @Override
   public Node get() {
     return new Node(this, true);
-  }
-
-  /**
-   * Returns a frame with this frame current parameters. The newly returned frame is
-   * detached from the graph {@link Graph#nodes()}
-   * list.
-   * <p>
-   * This method is useful to interact animations for all eye interpolation routines.
-   */
-  @Override
-  public Node detach() {
-    Node frame = new Node(graph());
-    graph().pruneBranch(frame);
-    frame.setWorldMatrix(this);
-    return frame;
   }
 
   //id
@@ -816,13 +799,6 @@ public class Node extends Frame implements Grabber {
     if (children() != null)
       for (Node child : children())
         child.modified();
-  }
-
-  /**
-   * @return the last frame the Frame was updated.
-   */
-  public long lastUpdate() {
-    return lastUpdate;
   }
 
   // SYNC

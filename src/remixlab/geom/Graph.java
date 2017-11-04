@@ -815,6 +815,8 @@ public class Graph {
       collectNodes(list, child);
   }
 
+  // TODO decide whether or not the following methods can take a Frame
+  // param instead of Node. It allows to manipulate the eye() instance more easily sometimes
   public void setDefaultNode(Node node) {
     inputHandler().setDefaultGrabber(node);
   }
@@ -924,7 +926,7 @@ public class Graph {
   // FPSTiming STUFF
 
   /**
-   * Returns the number of nodes displayed since the graph was instantiated.
+   * Returns the number of frames displayed since the graph was instantiated.
    * <p>
    * Use {@code Graph.frameCount} to retrieve the number of nodes displayed since
    * the first graph was instantiated.
@@ -2658,20 +2660,18 @@ public class Graph {
    * <p>
    * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
    */
-  /*
   public void fitBallInterpolation() {
     interpolator.stopInterpolation();
     interpolator.deletePath();
     interpolator.addKeyFrame(eye().detach());
     Frame originalFrame = eye();
-    Node tempFrame = eye().detach();
+    Frame tempFrame = eye().detach();
     setEye(tempFrame);
     fitBall();
     setEye(originalFrame);
     interpolator.addKeyFrame(tempFrame);
     interpolator.startInterpolation();
   }
-  */
 
   /**
    * Moves the eye so that the ball defined by {@code center} and {@code radius} is

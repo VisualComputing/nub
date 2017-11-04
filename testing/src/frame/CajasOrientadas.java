@@ -16,15 +16,6 @@ public class CajasOrientadas extends PApplet {
   Sphere esfera;
   Node eye1, eye2;
 
-  /*
-  public boolean matches(Shortcut shortcut, List<Shortcut> list) {
-    for(Shortcut s : list)
-      if(s.matches(shortcut))
-        return true;
-    return false;
-  }
-  */
-
   public void settings() {
     size(640, 360, P3D);
   }
@@ -45,12 +36,8 @@ public class CajasOrientadas extends PApplet {
   public void setup() {
     graph = new Scene(this);
     graph.setGridVisualHint(true);
-    //graph.setCameraType(Camera.Type.ORTHOGRAPHIC);
     graph.setRadius(200);
-    //graph.camera().setPosition(new PVector(10,0,0));
-    //graph.camera().lookAt( graph.center() );
     graph.fitBall();
-    //graph.disableBackgroundHanddling();
     esfera = new Sphere(graph);
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
     esfera.setColor(color(0, 0, 255));
@@ -58,12 +45,6 @@ public class CajasOrientadas extends PApplet {
     cajas = new Box[30];
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(graph);
-
-    //graph.keyAgent().setDefaultGrabber(null);
-
-    //if(graph.keyAgent().defaultGrabber() == graph.frame())
-      //println("is eyeFrame!");
-    //frameRate(500);
 
     eye1 = new Node(graph) {
       @Override
@@ -171,13 +152,13 @@ public class CajasOrientadas extends PApplet {
       }
     }
     if(key == 's')
+      graph.fitBallInterpolation();
+    if(key == 'S')
       graph.fitBall();
-    //TODO restore
-    //if(key == ' ')
-      //graph.keyAgent().shiftDefaultGrabber(graph.frame(), esfera.iFrame);
-      //graph.keyAgent().shiftDefaultGrabber(graph.eyeFrame(), graph);
-    //if(key ==' ')
-      //info();
+    if(key == 'u')
+      graph.shiftDefaultNode((Node)graph.eye(), esfera.iFrame);
+    if(key == 't')
+      info();
     if(key == 'a')
       graph.toggleAxesVisualHint();
     if(key == 'g')

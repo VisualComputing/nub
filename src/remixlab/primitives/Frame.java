@@ -10,8 +10,10 @@
 
 package remixlab.primitives;
 
+//TODO discard Graph dependency which is used by modified()
+//Solution may be to implement it from InputHandler.frameCount
+//which ideally should be made static
 import remixlab.geom.Graph;
-import remixlab.geom.Node;
 import remixlab.primitives.constraint.Constraint;
 
 /**
@@ -104,7 +106,7 @@ import remixlab.primitives.constraint.Constraint;
  * <p>
  * <h3>Derived classes</h3>
  * <p>
- * The {@link Node} class inherits Frame and implements
+ * The Node class inherits Frame and implements
  * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
  * in the graph by whatever user interaction means you can imagine.
  */
@@ -123,6 +125,7 @@ public class Frame {
   protected Quaternion rot;
   protected Frame refFrame;
   protected Constraint cnstrnt;
+  protected long lastUpdate;
 
   /**
    * Same as {@code this(null, new Vector(), three_d ? new Quaternion() : new Rot(), 1)}.
@@ -214,6 +217,14 @@ public class Frame {
    * Internal use. Automatically call by all methods which change the Frame state.
    */
   protected void modified() {
+    lastUpdate = Graph.frameCount;
+  }
+
+  /**
+   * @return the last frame the Frame was updated.
+   */
+  public long lastUpdate() {
+    return lastUpdate;
   }
 
   // DIM

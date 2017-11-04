@@ -2744,7 +2744,8 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (int index = 0; index < kfi.numberOfKeyFrames(); index++)
-      drawPickingTarget(kfi.keyFrame(index));
+      if(kfi.keyFrame(index) instanceof Node)
+        drawPickingTarget((Node)kfi.keyFrame(index));
     pg().popStyle();
   }
 
@@ -2950,6 +2951,7 @@ public class Scene extends Graph implements PConstants {
    * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
    * {@code false}.
    */
+  //TODO better to implement it from Frame param, but I'm just too lazy to do that ;)
   public void drawPickingTarget(Node iFrame) {
     if (iFrame.isEye()) {
       System.err.println("eye nodes don't have a picking target");
