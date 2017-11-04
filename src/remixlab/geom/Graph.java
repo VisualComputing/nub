@@ -350,7 +350,7 @@ public class Graph {
    * Returns the vertical field of view of the Camera (in radians) computed as
    * {@code 2.0f * (float) Math.atan(frame().magnitude())}.
    * <p>
-   * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
+   * Value is set using {@link Frame#setFieldOfView(float)}. Default value is pi/3 radians.
    * This value is meaningless if the Camera {@link #type()} is
    * {@link Type#ORTHOGRAPHIC}.
    * <p>
@@ -359,67 +359,19 @@ public class Graph {
    * from the window aspect ratio (see {@link #aspectRatio()} and
    * {@link #horizontalFieldOfView()}).
    * <p>
-   * Use {@link #setFOVToFitScene()} to adapt the {@link #fieldOfView()} to a given graph.
+   * Use {@link Node#setFieldOfView} to adapt the {@link #fieldOfView()} to a given graph.
    *
-   * @see #setFieldOfView(float)
+   * @see Frame#setFieldOfView(float)
    */
   public float fieldOfView() {
     return 2.0f * (float) Math.atan(eye().magnitude());
   }
 
   /**
-   * Changes the Camera {@link #fieldOfView()} so that the entire graph (defined by
-   * {@link #center()} and
-   * {@link #radius()} is visible from the Camera
-   * {@link Node#position()}.
-   * <p>
-   * The eye position and orientation of the Camera are not modified and
-   * you first have to orientate the Camera in order to actually see the graph (see
-   * {@link #lookAt(Vector)}, {@link #showAll()} or {@link #fitBall(Vector, float)}).
-   * <p>
-   * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
-   * positioning tools ({@link #lookAt(Vector)}) to position a
-   * Camera at the light position. Then use this method to define the
-   * {@link #fieldOfView()} so that the shadow map resolution is optimally used:
-   * <p>
-   * {@code // The light camera needs size hints in order to optimize its
-   * fieldOfView} <br>
-   * {@code lightCamera.setSceneRadius(sceneRadius());} <br>
-   * {@code lightCamera.setSceneCenter(sceneCenter());} <br>
-   * {@code // Place the light camera} <br>
-   * {@code lightCamera.setPosition(lightFrame.position());} <br>
-   * {@code lightCamera.lookAt(sceneCenter());} <br>
-   * {@code lightCamera.setFOVToFitScene();} <br>
-   * <p>
-   * <b>Attention:</b> The {@link #fieldOfView()} is clamped to M_PI/2.0. This happens
-   * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
-   * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
-   * parts of the graph.
-   */
-  public void setFOVToFitScene() {
-    if (distanceToSceneCenter() > (float) Math.sqrt(2.0f) * radius())
-      setFieldOfView(2.0f * (float) Math.asin(radius() / distanceToSceneCenter()));
-    else
-      setFieldOfView((float) Math.PI / 2.0f);
-  }
-
-  /**
-   * Sets the vertical {@link #fieldOfView()} of the Camera (in radians). The
-   * {@link #fieldOfView()} is encapsulated as the camera
-   * {@link Frame#magnitude()} using the following expression:
-   * {@code frame().setMagnitude((float) Math.tan(fov / 2.0f))}.
-   *
-   * @see #fieldOfView()
-   */
-  public void setFieldOfView(float fov) {
-    eye().setMagnitude((float) Math.tan(fov / 2.0f));
-  }
-
-  /**
    * Returns the horizontal field of view of the Camera (in radians).
    * <p>
-   * Value is set using {@link #setHorizontalFieldOfView(float)} or
-   * {@link #setFieldOfView(float)}. These values are always linked by:
+   * Value is set using {@link Node#setHorizontalFieldOfView(float)} or
+   * {@link Frame#setFieldOfView(float)}. These values are always linked by:
    * {@code horizontalFieldOfView() = 2.0 * atan ( tan(fieldOfView()/2.0) * aspectRatio() )}
    * .
    */
@@ -427,18 +379,6 @@ public class Graph {
     // return 2.0f * (float) Math.atan((float) Math.tan(fieldOfView() / 2.0f) *
     // aspectRatio());
     return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude() )* aspectRatio());
-  }
-
-  /**
-   * Sets the {@link #horizontalFieldOfView()} of the Camera (in radians).
-   * <p>
-   * {@link #horizontalFieldOfView()} and {@link #fieldOfView()} are linked by the
-   * {@link #aspectRatio()}. This method actually calls
-   * {@code setFieldOfView(( 2.0 * atan (tan(hfov / 2.0) / aspectRatio()) ))} so that a
-   * call to {@link #horizontalFieldOfView()} returns the expected value.
-   */
-  public void setHorizontalFieldOfView(float hfov) {
-    setFieldOfView(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()));
   }
 
   /**
@@ -452,7 +392,7 @@ public class Graph {
    * <p>
    * The near clipping plane is positioned at a distance equal to
    * {@link #zClippingCoefficient()} * {@link #radius()} in front of the
-   * {@link #center()}: {@code distanceToSceneCenter() -
+   * {@link #center()}: {@code Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) -
    * zClippingCoefficient() * sceneRadius()}
    * <p>
    * In order to prevent negative or too small {@link #zNear()} values (which would
@@ -476,7 +416,7 @@ public class Graph {
    * @see #zFar()
    */
   public float zNear() {
-    float z = distanceToSceneCenter() - zClippingCoefficient() * radius();
+    float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius();
 
     // Prevents negative or null zNear values.
     final float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
@@ -499,27 +439,12 @@ public class Graph {
    * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * sceneRadius()} behind the {@link #center()}:
    * <p>
-   * {@code zFar = distanceToSceneCenter() + zClippingCoefficient()*sceneRadius()}
+   * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient()*sceneRadius()}
    *
    * @see #zNear()
    */
   public float zFar() {
-    return distanceToSceneCenter() + zClippingCoefficient() * radius();
-  }
-
-  /**
-   * Returns the eye position to {@link #center()} distance in Scene
-   * units.
-   * <p>
-   * 3D Cameras return the projected eye position to {@link #center()}
-   * distance along the Camera Z axis and use it in
-   * {@link #zNear()} and
-   * {@link #zFar()} to optimize the Z range.
-   */
-  public float distanceToSceneCenter() {
-    Vector zCam = eye().zAxis();
-    Vector cam2SceneCenter = Vector.subtract(eye().position(), center());
-    return Math.abs(Vector.dot(cam2SceneCenter, zCam));
+    return Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient() * radius();
   }
 
   /**
@@ -2827,7 +2752,7 @@ public class Graph {
    */
   public void fitScreenRegion(Rectangle rectangle) {
     Vector vd = viewDirection();
-    float distToPlane = distanceToSceneCenter();
+    float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
 
     Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
 

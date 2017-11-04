@@ -129,16 +129,31 @@ public class Vector {
   }
 
   /**
+   * Returns the vector projection of a onto b. Vector b should be normalized. See:
+   * https://en.wikipedia.org/wiki/Vector_projection
+   */
+  public static Vector vectorProjection(Vector a, Vector b) {
+    return Vector.multiply(b, scalarProjection(a,b));
+  }
+
+  /**
+   * Returns the scalar projection of a onto b. Vector b should be normalized. See:
+   * https://en.wikipedia.org/wiki/Scalar_projection
+   */
+  public static float scalarProjection(Vector a, Vector b) {
+    return Vector.dot(a,b);
+  }
+
+  /**
    * Projects the {@code src} Vector on the axis defined by {@code direction} (which does not
    * need to be normalized, but must be non null) that passes through the origin.
    */
   public static Vector projectVectorOnAxis(Vector src, Vector direction) {
-    float directionSquaredNorm = squaredNorm(direction);
-    if (directionSquaredNorm == 0)
+    Vector b = direction.get();
+    b.normalize();
+    if (b.magnitude() == 0)
       throw new RuntimeException("Direction squared norm is nearly 0");
-
-    float modulation = src.dot(direction) / directionSquaredNorm;
-    return Vector.multiply(direction, modulation);
+    return Vector.vectorProjection(src, b);
   }
 
   /**

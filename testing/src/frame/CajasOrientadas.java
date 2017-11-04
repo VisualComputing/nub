@@ -34,7 +34,6 @@ public class CajasOrientadas extends PApplet {
     println(scene.fieldOfView());
     println(scene.zNearCoefficient());
     println(scene.zClippingCoefficient());
-    println("dist to scn center: " + scene.distanceToSceneCenter());
     println(scene.zNear());
     println(scene.zFar());
     scene.matrixHandler().projection().print();
@@ -46,7 +45,7 @@ public class CajasOrientadas extends PApplet {
     scene = new Scene(this);
     scene.setGridVisualHint(true);
     //graph.setCameraType(Camera.Type.ORTHOGRAPHIC);
-    scene.setRadius(160);
+    scene.setRadius(200);
     //graph.camera().setPosition(new PVector(10,0,0));
     //graph.camera().lookAt( graph.center() );
     scene.showAll();
@@ -76,7 +75,8 @@ public class CajasOrientadas extends PApplet {
             translate(event);
             break;
           case processing.event.MouseEvent.WHEEL:
-            scale(event);
+            //scale(event);
+            translateZ(event);
             break;
         }
       }
@@ -124,7 +124,7 @@ public class CajasOrientadas extends PApplet {
     };
 
     scene.setEye(eye1);
-    scene.setFieldOfView((float)Math.PI/3);
+    eye1.setFieldOfView((float)Math.PI/3);
     scene.inputHandler().setDefaultGrabber(eye1);
     scene.showAll();
 
@@ -150,29 +150,37 @@ public class CajasOrientadas extends PApplet {
     if(key == ' ') {
       if(eye1 == scene.eye()) {
         scene.setEye(eye2);
-        scene.setFieldOfView((float)Math.PI/3);
+        eye2.setFieldOfView(1);
         scene.inputHandler().setDefaultGrabber(eye2);
-        scene.showAll();
+        //scene.showAll();
+        println("Eye2 set " + scene.fieldOfView());
       }
       else {
         scene.setEye(eye1);
-        scene.setFieldOfView((float)Math.PI/3);
+        eye1.setFieldOfView((float)Math.PI/4);
         scene.inputHandler().setDefaultGrabber(eye1);
-        scene.showAll();
+        //scene.showAll();
+        println("Eye1 set " + scene.fieldOfView());
       }
     }
+    if(key == 's')
+      scene.showAll();
     //TODO restore
     //if(key == ' ')
       //graph.keyAgent().shiftDefaultGrabber(graph.frame(), esfera.iFrame);
       //graph.keyAgent().shiftDefaultGrabber(graph.eyeFrame(), graph);
-    if(key ==' ')
-      info();
+    //if(key ==' ')
+      //info();
     if(key == 'a')
       scene.toggleAxesVisualHint();
     if(key == 'g')
       scene.toggleGridVisualHint();
     if(key == 'f')
       scene.togglePickingVisualhint();
+    if(key == 'v') {
+      println(Vector.scalarProjection(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()));
+      Vector.projectVectorOnAxis(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()).print();
+    }
   }
 
   public static void main(String args[]) {
