@@ -32,10 +32,10 @@ import java.util.List;
  * <p>
  * Instantiated graph {@link Node}s form a graph-tree of
  * transformations which may be traverse with {@link #traverse()}. The node
- * collection belonging to the graph may be retrieved with {@link #nodes(boolean)}. The
+ * collection belonging to the graph may be retrieved with {@link #nodes()}. The
  * graph provides other useful routines to handle the hierarchy, such as
  * {@link #pruneBranch(Node)}, {@link #appendBranch(List)},
- * {@link #isNodeReachable(Node)}, {@link #branch(Node, boolean)}, and
+ * {@link #isNodeReachable(Node)}, {@link #branch(Node)}, and
  * {@link #clear()}.
  * <p>
  * Each Graph provides the following main object instances:
@@ -591,7 +591,7 @@ public class Graph {
    * All leading nodes are also reachable by the {@link #traverse()} algorithm for
    * which they are the seeds.
    *
-   * @see #nodes(boolean)
+   * @see #nodes()
    * @see #isNodeReachable(Node)
    * @see #pruneBranch(Node)
    */
@@ -709,7 +709,7 @@ public class Graph {
     if (!isNodeReachable(node))
       return null;
     ArrayList<Node> list = new ArrayList<Node>();
-    collectNodes(list, node, true);
+    collectNodes(list, node);
     for (Node _node : list) {
       inputHandler().removeGrabber(_node);
       if (_node.reference() != null)
@@ -749,7 +749,7 @@ public class Graph {
    * {@link Node#setReference(Node)}.
    *
    * @see #traverse()
-   * @see #nodes(boolean)
+   * @see #nodes()
    */
   public boolean isNodeReachable(Node node) {
     if (node == null)
@@ -764,11 +764,10 @@ public class Graph {
    * @see #isNodeReachable(Node)
    * @see Node#isEye()
    */
-  //TODO discard boolean param
-  public ArrayList<Node> nodes(boolean eyeNodes) {
+  public ArrayList<Node> nodes() {
     ArrayList<Node> list = new ArrayList<Node>();
     for (Node node : leadingNodes())
-      collectNodes(list, node, eyeNodes);
+      collectNodes(list, node);
     return list;
   }
 
@@ -779,10 +778,9 @@ public class Graph {
    *
    * @see #isNodeReachable(Node)
    */
-  //TODO decide param
-  public ArrayList<Node> branch(Node node, boolean eyeNodes) {
+  public ArrayList<Node> branch(Node node) {
     ArrayList<Node> list = new ArrayList<Node>();
-    collectNodes(list, node, eyeNodes);
+    collectNodes(list, node);
     return list;
   }
 
@@ -792,12 +790,11 @@ public class Graph {
    * <p>
    * If {@code tip} is descendant of {@code tail} the returned list will include both of them. Otherwise it will be empty.
    */
-  //TODO decide me
-  public ArrayList<Node> branch(Node tail, Node tip, boolean eyeNodes) {
+  public ArrayList<Node> branch(Node tail, Node tip) {
     ArrayList<Node> list = new ArrayList<Node>();
     //1. Check if tip is a tail descendant
     boolean desc = false;
-    ArrayList<Node> descList = branch(tail, eyeNodes);
+    ArrayList<Node> descList = branch(tail);
     for(Node node : descList)
       if(node == tip) {
         desc = true;
@@ -807,9 +804,8 @@ public class Graph {
     if(desc) {
       Node _tip = tip;
       while(_tip != tail) {
-        if (!_tip.isEye() || eyeNodes)
-          list.add(0, _tip);
-          _tip = _tip.reference();
+        list.add(0, _tip);
+        _tip = _tip.reference();
       }
       list.add(0, tail);
     }
@@ -823,31 +819,14 @@ public class Graph {
    *
    * @see #isNodeReachable(Node)
    */
-  //TODO check boolean param
-  protected void collectNodes(List<Node> list, Node node, boolean eyeNodes) {
+  protected void collectNodes(List<Node> list, Node node) {
     if (node == null)
       return;
-    if (!node.isEye() || eyeNodes)
-      list.add(node);
+    list.add(node);
     for (Node child : node.children())
-      collectNodes(list, child, eyeNodes);
+      collectNodes(list, child);
   }
-
-  // Actions
-
-  /**
-   * Same as {@code eye().setAnchor(new Vector(0, 0, 0))}.
-   */
-  public void resetAnchor() {
-    setAnchor(new Vector(0, 0, 0));
-    // looks horrible, but works ;)
-    //TODO restore
-    //eye().anchorFlag = true;
-    //eye().runResetAnchorHintTimer(1000);
-  }
-
-  // AGENTs
-
+  
   // Keys
 
   /**

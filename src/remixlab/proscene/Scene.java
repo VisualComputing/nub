@@ -577,9 +577,9 @@ public class Scene extends Graph implements PConstants {
   }
 
   protected void drawPickingTargets() {
-    for (Node node : nodes(false))
+    for (Node node : nodes())
       // if(inputHandler().hasGrabber(frame))
-      if (node.isVisualHintEnabled())
+      if (node.isVisualHintEnabled() && !node.isEye())
         drawPickingTarget(node);
   }
 
@@ -1278,7 +1278,7 @@ public class Scene extends Graph implements PConstants {
   public PGraphics targetPGraphics;
 
   /**
-   * Draw all graph {@link #nodes(boolean)} into the {@link #pg()} buffer. A similar (but
+   * Draw all graph {@link #nodes()} into the {@link #pg()} buffer. A similar (but
    * slightly less efficient) effect may be achieved with
    * {@code for (Node frame : nodes()) frame.draw(pg());}.
    * <p>
@@ -1292,7 +1292,7 @@ public class Scene extends Graph implements PConstants {
    * eye update which happens at {@link #preDraw()}) and before any other transformation
    * of the modelview takes place.
    *
-   * @see #nodes(boolean)
+   * @see #nodes()
    * @see #pg()
    * @see #drawNodes(PGraphics)
    */
@@ -1302,7 +1302,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draw all {@link #nodes(boolean)} into the given pgraphics. No
+   * Draw all {@link #nodes()} into the given pgraphics. No
    * {@code pgraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
@@ -1315,7 +1315,7 @@ public class Scene extends Graph implements PConstants {
    * place.
    *
    * @param pgraphics
-   * @see #nodes(boolean)
+   * @see #nodes()
    * @see #drawNodes()
    */
   public void drawNodes(PGraphics pgraphics) {
