@@ -2642,14 +2642,56 @@ public class Graph {
   }
 
   /**
-   * Same as {@code fitBall(center(), radius())}.
+   * Convenience function that simply calls {@code interpolateTo(fr, 1)}.
    *
-   * @see #fitBall(Vector, float)
-   * @see #center()
-   * @see #radius()
+   * @see #interpolateTo(Frame, float)
    */
-  public void fitBall() {
-    fitBall(center(), radius());
+  //TODO needs testing, e.g., setAvatar
+  public void interpolateTo(Frame fr) {
+    interpolateTo(fr, 1);
+  }
+
+  /**
+   * Smoothly interpolates the Eye on a KeyFrameInterpolator path so that it goes to
+   * {@code fr}.
+   * <p>
+   * {@code fr} is expressed in world coordinates. {@code duration} tunes the
+   * interpolation speed.
+   *
+   * @see #interpolateTo(Frame)
+   * @see #fitBallInterpolation()
+   */
+  public void interpolateTo(Frame fr, float duration) {
+    interpolator.stopInterpolation();
+    interpolator.deletePath();
+    interpolator.addKeyFrame(eye().detach());
+    interpolator.addKeyFrame(fr, duration);
+    interpolator.startInterpolation();
+  }
+
+  /**
+   * Smoothly moves the Eye so that the rectangular screen region defined by
+   * {@code rectangle} (pixel units, with origin in the upper left corner) fits the
+   * screen.
+   * <p>
+   * The eye is translated (its {@link Frame#orientation()} is unchanged) so that
+   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
+   * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
+   * (orthogonal to the {@link #viewDirection()} and passing through the
+   * {@link #center()}) that is used to define the 3D rectangle that is eventually
+   * fitted.
+   */
+  public void fitScreenRegionInterpolation(Rectangle rectangle) {
+    interpolator.stopInterpolation();
+    interpolator.deletePath();
+    interpolator.addKeyFrame(eye().detach());
+    Frame originalFrame = eye();
+    Frame tempFrame = eye().detach();
+    setEye(tempFrame);
+    fitScreenRegion(rectangle);
+    setEye(originalFrame);
+    interpolator.addKeyFrame(tempFrame);
+    interpolator.startInterpolation();
   }
 
   /**
@@ -2671,6 +2713,17 @@ public class Graph {
     setEye(originalFrame);
     interpolator.addKeyFrame(tempFrame);
     interpolator.startInterpolation();
+  }
+
+  /**
+   * Same as {@code fitBall(center(), radius())}.
+   *
+   * @see #fitBall(Vector, float)
+   * @see #center()
+   * @see #radius()
+   */
+  public void fitBall() {
+    fitBall(center(), radius());
   }
 
   /**

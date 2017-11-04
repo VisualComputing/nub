@@ -51,7 +51,12 @@ public class CajasOrientadas extends PApplet {
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
+            zoomOnRegion(event);
+            //rotate(event);
+            break;
+          case PApplet.CENTER:
             rotate(event);
+            //zoomOnRegion(event);
             break;
           case PApplet.RIGHT:
             translate(event);

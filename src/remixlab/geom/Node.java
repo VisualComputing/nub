@@ -1689,8 +1689,8 @@ public class Node extends Frame implements Grabber {
       int h = (int) Math.abs(e.dy());
       int tlY = (int) e.prevY() < (int) e.y() ? (int) e.prevY() : (int) e.y();
       //TODO restore
-      //eye().interpolateToZoomOnRegion(new Rectangle(tlX, tlY, w, h));
-      graph().fitScreenRegion(new Rectangle(tlX, tlY, w, h));
+      graph().fitScreenRegionInterpolation(new Rectangle(tlX, tlY, w, h));
+      //graph().fitScreenRegion(new Rectangle(tlX, tlY, w, h));
     }
   }
 

@@ -10,6 +10,8 @@
 
 package remixlab.bias;
 
+import remixlab.bias.event.MotionEvent;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -251,10 +253,15 @@ public abstract class Agent {
       return false;
     //Just trying to get rid of the nasty MotionEvent dependency
     //TODO: really needs testing everywhere, -jp
-    //if (event instanceof MotionEvent)
-      //if (((MotionEvent) event).isAbsolute())
+    if (event instanceof MotionEvent)
+      if (((MotionEvent) event).isAbsolute())
         if (event.isNull() && !event.flushed())
           return false;
+
+    //TODO I always wanno go like this, but fired and flushed get broken then
+    //if (event.isNull())
+      //return false;
+
     Grabber inputGrabber = inputGrabber();
     if (inputGrabber != null)
       return inputHandler().enqueueTuple(new Tuple(event, inputGrabber));
