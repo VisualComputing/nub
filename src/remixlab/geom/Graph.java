@@ -94,6 +94,7 @@ public class Graph {
   public int nodeCount;
   static public long frameCount;
   protected final long deltaCount;
+  public long lastNonEyeUpdate = 0;
 
   // 6. Display flags
   protected int visualHintMask;
@@ -161,23 +162,10 @@ public class Graph {
     setWidth(w);
     setHeight(h);
 
-    //order of the following lines matter
-    //1st try: working
-    /*
-    upVector = new Vector(0.0f, 1.0f, 0.0f);
-    anchorPnt = new Vector();
-    scnCenter = new Vector();
-    //setRadius(100);
-    //setCenter(new Vector(0.0f, 0.0f, 0.0f));
-    setEye(new Frame());
-    fitBall();
-    */
-
-    //2nd try: working
-    anchorPnt = new Vector();
-    eye = new Frame();
     setRadius(100);
-    setCenter(new Vector(0.0f, 0.0f, 0.0f));
+    setCenter(new Vector());
+    anchorPnt = center().get();
+    setEye(new Frame());
     fitBall();
 
     seeds = new ArrayList<Node>();
@@ -264,9 +252,6 @@ public class Graph {
       modified();
     height = h > 0 ? h : 1;
   }
-
-  //TODO missing
-  public void modified() {}
 
   // 1. type
 
@@ -1585,6 +1570,7 @@ public class Graph {
     if (e == null || eye == e)
       return;
     eye = e;
+    modified();
     //if(eye instanceof Node)
       //inputHandler().setDefaultGrabber((Node)eye());
     setRadius(radius());
@@ -2481,28 +2467,15 @@ public class Graph {
       return;
     }
     scnRadius = radius;
-    if(eye() instanceof Node)
-      ((Node)eye()).setFlySpeed(0.01f * radius());
-    if(motionAgent() != null)
-      for (Grabber mg : motionAgent().grabbers()) {
-        if (mg instanceof Node)
-          ((Node) mg).setFlySpeed(0.01f * radius());
-      }
-    // TODO previous was:
-    //if(is3D())
-    //setFocusDistance(sceneRadius() / (float) Math.tan(fieldOfView() / 2.0f));
   }
 
   /**
    * Sets the {@link #center()} of the Scene.
-   * <p>
-   * Convenience wrapper function that simply calls {@code }
    *
    * @see #setRadius(float)
    */
   public void setCenter(Vector center) {
     scnCenter = center;
-    setAnchor(center());
   }
 
   /**
@@ -2520,20 +2493,6 @@ public class Graph {
    */
   public final Type eyeType() {
     return tp;
-  }
-
-  /**
-   * Defines the Camera {@link #type()}.
-   * <p>
-   * Changing the Camera Type alters the viewport and the objects' size can be changed.
-   * This method guarantees that the two frustum match in a plane normal to
-   * {@link #viewDirection()}, passing through the arcball reference point.
-   */
-  public final void setEyeType(Type type) {
-    if (type != type()) {
-      modified();
-      this.tp = type;
-    }
   }
 
   /**
@@ -2717,7 +2676,6 @@ public class Graph {
         break;
       }
     }
-
     Vector newPos = Vector.subtract(center, Vector.multiply(viewDirection(), distance));
     eye().setPositionWithConstraint(newPos);
   }
@@ -2745,20 +2703,15 @@ public class Graph {
   public void fitScreenRegion(Rectangle rectangle) {
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-
     Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
-
     Vector orig = new Vector();
     Vector dir = new Vector();
     convertClickToLine(center, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-
     convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
     final Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-
     convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
     final Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-
     float distance = 0.0f;
     float distX, distY;
     switch (type()) {
@@ -2774,7 +2727,6 @@ public class Graph {
         distance = dist + Math.max(distX, distY);
         break;
     }
-
     eye().setPositionWithConstraint(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
   }
 
@@ -3027,5 +2979,30 @@ public class Graph {
    */
   public boolean is3D() {
     return !is2D();
+  }
+
+  protected void modified() {
+    lastNonEyeUpdate = frameCount;
+  }
+
+  /**
+   * Max between {@link Node#lastUpdate()} and
+   * {@link #lastNonEyeUpdate()}.
+   *
+   * @return last frame the Eye was updated
+   * @see #lastNonEyeUpdate()
+   */
+  public long lastUpdate() {
+    if(eye() instanceof Node)
+      return Math.max(((Node)eye()).lastUpdate(), lastNonEyeUpdate());
+    return lastNonEyeUpdate();
+  }
+
+  /**
+   * @return last frame a local Eye parameter (different than the Frame) was updated.
+   * @see #lastUpdate()
+   */
+  protected long lastNonEyeUpdate() {
+    return lastNonEyeUpdate;
   }
 }

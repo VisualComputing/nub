@@ -203,22 +203,13 @@ public class Node extends Frame implements Grabber {
    */
   protected Node(Graph scn, Node referenceFrame, Vector p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
-    init(scn);
-    hint = true;
-    // pkgnPrecision = PickingPrecision.ADAPTIVE;
-    // setGrabsInputThreshold(Math.round(scn.radius()/4));
-    graph().inputHandler().addGrabber(this);
-    pkgnPrecision = PickingPrecision.FIXED;
-    setGrabsInputThreshold(20);
-    setFlySpeed(0.01f * graph().radius());
-  }
 
-  protected void init(Graph scn) {
     graph = scn;
     id = ++graph().nodeCount;
     // unlikely but theoretically possible
     if (id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+    setFlySpeed(0.01f * graph().radius());
     upVector = new Vector(0.0f, 1.0f, 0.0f);
     visit = true;
     childrenList = new ArrayList<Node>();
@@ -247,6 +238,14 @@ public class Node extends Frame implements Grabber {
     };
     graph().registerTimingTask(flyTimerTask);
     // end
+
+    hint = true;
+    // pkgnPrecision = PickingPrecision.ADAPTIVE;
+    // setGrabsInputThreshold(Math.round(scn.radius()/4));
+    graph().inputHandler().addGrabber(this);
+    pkgnPrecision = PickingPrecision.FIXED;
+    setGrabsInputThreshold(20);
+    setFlySpeed(0.01f * graph().radius());
   }
 
   protected Node(Node otherFrame, boolean dummy) {
@@ -321,7 +320,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a frame with this frame current parameters. The newly returned frame is
-   * detached from the graph {@link Graph#nodes(boolean)}
+   * detached from the graph {@link Graph#nodes()}
    * list.
    * <p>
    * This method is useful to interact animations for all eye interpolation routines.
