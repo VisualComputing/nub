@@ -11,7 +11,6 @@
 package remixlab.geom;
 
 import remixlab.bias.Agent;
-import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.primitives.*;
 import remixlab.fpstiming.Animator;
@@ -61,6 +60,8 @@ public class Graph {
   protected Vector scnCenter;
   protected float scnRadius;
   protected Vector anchorPnt;
+  //Interpolator
+  protected Interpolator interpolator;
   //boundary eqns
   protected float fpCoefficients[][];
   protected boolean fpCoefficientsUpdate;
@@ -158,20 +159,22 @@ public class Graph {
    * @see #setVisualHints(int)
    * @see #setEye(Frame)
    */
+  //TODO graph.get()
   public Graph(int w, int h) {
     setWidth(w);
     setHeight(h);
-
-    setRadius(100);
-    setCenter(new Vector());
-    anchorPnt = center().get();
-    setEye(new Frame());
-    fitBall();
 
     seeds = new ArrayList<Node>();
     tHandler = new TimingHandler();
     deltaCount = frameCount;
     iHandler = new InputHandler();
+
+    setRadius(100);
+    setCenter(new Vector());
+    anchorPnt = center().get();
+    interpolator = new Interpolator(this);
+    setEye(new Frame());
+    fitBall();
 
     setMatrixHandler(new MatrixHandler(this));
     setRightHanded();
@@ -1570,11 +1573,8 @@ public class Graph {
     if (e == null || eye == e)
       return;
     eye = e;
+    interpolator.setFrame(e);
     modified();
-    //if(eye instanceof Node)
-      //inputHandler().setDefaultGrabber((Node)eye());
-    setRadius(radius());
-    setCenter(center());
   }
 
   /**
@@ -2649,6 +2649,29 @@ public class Graph {
   public void fitBall() {
     fitBall(center(), radius());
   }
+
+  /**
+   * Interpolates the eye so that the entire graph fits the screen at the end.
+   * <p>
+   * The graph is defined by its {@link #center()} and its {@link #radius()}.
+   * See {@link #fitBall()}.
+   * <p>
+   * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
+   */
+  /*
+  public void fitBallInterpolation() {
+    interpolator.stopInterpolation();
+    interpolator.deletePath();
+    interpolator.addKeyFrame(eye().detach());
+    Frame originalFrame = eye();
+    Node tempFrame = eye().detach();
+    setEye(tempFrame);
+    fitBall();
+    setEye(originalFrame);
+    interpolator.addKeyFrame(tempFrame);
+    interpolator.startInterpolation();
+  }
+  */
 
   /**
    * Moves the eye so that the ball defined by {@code center} and {@code radius} is

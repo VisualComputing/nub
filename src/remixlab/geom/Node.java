@@ -325,7 +325,8 @@ public class Node extends Frame implements Grabber {
    * <p>
    * This method is useful to interact animations for all eye interpolation routines.
    */
-  protected Node detach() {
+  @Override
+  public Node detach() {
     Node frame = new Node(graph());
     graph().pruneBranch(frame);
     frame.setWorldMatrix(this);

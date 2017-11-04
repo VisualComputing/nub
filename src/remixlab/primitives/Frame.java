@@ -198,6 +198,12 @@ public class Frame {
     cnstrnt = other.constraint();
   }
 
+  public Frame detach() {
+    Frame frame = new Frame();
+    frame.setWorldMatrix(this);
+    return frame;
+  }
+
   public Frame get() {
     return new Frame(this);
   }
