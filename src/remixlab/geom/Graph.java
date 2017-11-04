@@ -827,6 +827,18 @@ public class Graph {
       collectNodes(list, child);
   }
 
+  public void setDefaultNode(Node node) {
+    inputHandler().setDefaultGrabber(node);
+  }
+
+  public void shiftDefaultNode(Node node1, Node node2) {
+    inputHandler().shiftDefaultGrabber(node1, node2);
+  }
+
+  public boolean isInputNode(Node node) {
+    return inputHandler().isInputGrabber(node);
+  }
+
   // Keys
 
   /**
@@ -1573,7 +1585,6 @@ public class Graph {
     if (e == null || eye == e)
       return;
     eye = e;
-    //TODO decide me, but I dont think it should go in new minimalistic design
     //if(eye instanceof Node)
       //inputHandler().setDefaultGrabber((Node)eye());
     setRadius(radius());
