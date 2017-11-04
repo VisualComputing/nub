@@ -13,7 +13,6 @@ package remixlab.geom;
 import remixlab.bias.Agent;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
-import remixlab.bias.event.MotionEvent;
 import remixlab.primitives.*;
 import remixlab.fpstiming.Animator;
 import remixlab.fpstiming.TimingHandler;
@@ -79,8 +78,6 @@ public class Graph {
   // size and dim
   protected int width, height;
   protected boolean twod;
-  //fly
-  protected Vector scnUpVector;
 
   // 2. Matrix helper
   protected MatrixHandler matrixHandler;
@@ -167,7 +164,7 @@ public class Graph {
     //order of the following lines matter
     //1st try: working
     /*
-    scnUpVector = new Vector(0.0f, 1.0f, 0.0f);
+    upVector = new Vector(0.0f, 1.0f, 0.0f);
     anchorPnt = new Vector();
     scnCenter = new Vector();
     //setRadius(100);
@@ -177,7 +174,6 @@ public class Graph {
     */
 
     //2nd try: working
-    scnUpVector = new Vector(0.0f, 1.0f, 0.0f);
     anchorPnt = new Vector();
     eye = new Frame();
     setRadius(100);
@@ -272,44 +268,6 @@ public class Graph {
   //TODO missing
   public void modified() {}
 
-  /**
-   * Returns the up vector used in {@link Node#moveForward(MotionEvent)} in which horizontal
-   * displacements of the motion device (e.g., mouse) rotate the {@link #eye()} around this
-   * vector. Vertical displacements rotate always around the {@link #eye()} {@code X} axis.
-   * <p>
-   * This value is also used within {@link Node#rotateCAD(MotionEvent)} to define the up
-   * vector (and incidentally the 'horizon' plane) around which the {@link #eye()} will
-   * rotate.
-   * <p>
-   * Default value is (0,1,0), but it is updated by the Eye when set as its
-   * {@link Graph#eye()} and
-   * {@link Graph#setUpVector(Vector)} modify this value and should be
-   * used instead.
-   */
-  public Vector sceneUpVector() {
-    return scnUpVector;
-  }
-
-  /**
-   * Sets the {@link #sceneUpVector()}, defined in the world coordinate system.
-   * <p>
-   * Default value is (0,1,0), but it is updated by the {@link #eye() when performing
-   * {@link Node#moveForward(MotionEvent)} or {@link Node#drive(MotionEvent)}
-   * actions.
-   */
-  public void setSceneUpVector(Vector up) {
-    scnUpVector = up;
-  }
-
-  /**
-   * This method will be called by the Eye when its orientation is changed, so that the
-   * {@link #sceneUpVector()} is changed accordingly. You should not need to call this
-   * method.
-   */
-  final void updateSceneUpVector() {
-    scnUpVector = eye().orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-  }
-
   // 1. type
 
   /**
@@ -388,8 +346,6 @@ public class Graph {
    * .
    */
   public float horizontalFieldOfView() {
-    // return 2.0f * (float) Math.atan((float) Math.tan(fieldOfView() / 2.0f) *
-    // aspectRatio());
     return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude() )* aspectRatio());
   }
 
@@ -615,14 +571,14 @@ public class Graph {
    * forward and its boundary is narrowed, making the object appear bigger on screen, as
    * intuitively expected.
    * <p>
-   * Value is computed as: {@code 2 * distanceToAnchor() / screenHeight()}.
+   * Value is computed as: {@code 2 * Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis()) / screenHeight()}.
    *
    * @see #getBoundaryWidthHeight(float[])
    */
-  public float rescalingOrthoFactor() {
+  protected float rescalingOrthoFactor() {
     if(is2D())
       return 1.0f;
-    float toAnchor = this.distanceToAnchor();
+    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;
     return (2 * (toAnchor == 0 ? epsilon : toAnchor) * rapK / height());
   }
@@ -2517,26 +2473,12 @@ public class Graph {
       anchorPnt.setZ(0);
     }
     else {
-      float prevDist = distanceToAnchor();
+      float prevDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
       this.anchorPnt = rap;
-      float newDist = distanceToAnchor();
+      float newDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
       if (prevDist != 0 && newDist != 0)
         rapK *= prevDist / newDist;
     }
-  }
-
-  /**
-   * Returns the eye position to {@link #anchor()} distance in Scene units.
-   * <p>
-   * 3D Cameras return the projected eye position() to {@link #anchor()} distance
-   * along the Camera Z axis and use it in {@link #getBoundaryWidthHeight(float[])} so
-   * that when the Camera is translated forward then its frustum is narrowed, making the
-   * object appear bigger on screen, as intuitively expected.
-   */
-  public float distanceToAnchor() {
-    Vector zCam = eye().zAxis();
-    Vector cam2anchor = Vector.subtract(eye().position(), anchor());
-    return Math.abs(Vector.dot(cam2anchor, zCam));
   }
 
   /**
@@ -2688,7 +2630,8 @@ public class Graph {
     eye().rotate(q);
 
     // Useful in fly mode to keep the horizontal direction.
-    updateSceneUpVector();
+    if(eye() instanceof Node)
+      ((Node)eye()).updateUpVector();
   }
 
   /**
@@ -2733,6 +2676,7 @@ public class Graph {
   public Vector rightVector() {
     return eye().xAxis();
   }
+
 
   /**
    * 2D Windows return the postion. 3D Cameras return a point defined in the world

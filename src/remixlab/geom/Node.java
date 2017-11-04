@@ -121,19 +121,20 @@ public class Node extends Frame implements Grabber {
   // toss and spin share the damp var:
   private float sFriction; // new
 
-  // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or
-  // not.
+  // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or not
   public boolean dirIsFixed;
   private boolean horiz = true; // Two simultaneous nodes require two mice!
 
   protected float eventSpeed; // spnning and tossing
   protected long eventDelay;
 
+  // fly
   protected Vector fDir;
   protected float flySpd;
   protected TimingTask flyTimerTask;
   protected Vector flyDisp;
   protected static final long FLY_UPDATE_PERDIOD = 20;
+  protected Vector upVector;
 
   protected long lastUpdate;
   protected Graph graph;
@@ -218,6 +219,7 @@ public class Node extends Frame implements Grabber {
     // unlikely but theoretically possible
     if (id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+    upVector = new Vector(0.0f, 1.0f, 0.0f);
     visit = true;
     childrenList = new ArrayList<Node>();
     // graph().addLeadingNode(this);
@@ -255,6 +257,7 @@ public class Node extends Frame implements Grabber {
     if (this.id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
 
+    this.upVector = otherFrame.upVector.get();
     this.visit = otherFrame.visit;
     this.hint = otherFrame.hint;
 
@@ -1929,7 +1932,7 @@ public class Node extends Frame implements Grabber {
       return;
     }
     if (event.fired() && graph.is3D())
-      graph.cadRotationIsReversed = graph.eye().transformOf(graph.sceneUpVector()).y() < 0.0f;
+      graph.cadRotationIsReversed = graph.eye().transformOf(upVector).y() < 0.0f;
     rotate(screenToQuat(
         Vector.multiply(new Vector(computeAngle(event.dx()), computeAngle(-event.dy()), computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -1957,7 +1960,7 @@ public class Node extends Frame implements Grabber {
     if (event.fired())
       stopSpinning();
     if (event.fired() && graph.is3D())
-      graph.cadRotationIsReversed = graph.eye().transformOf(graph.sceneUpVector()).y() < 0.0f;
+      graph.cadRotationIsReversed = graph.eye().transformOf(upVector).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -1989,7 +1992,7 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
     if (event.fired() && graph.is3D())
       graph.eye().cadRotationIsReversed =
-          graph.eye().frame().transformOf(graph.eye().frame().sceneUpVector()).y() < 0.0f;
+          graph.eye().frame().transformOf(graph.eye().frame().upVector()).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2069,6 +2072,13 @@ public class Node extends Frame implements Grabber {
     scale(up ? s : 1 / s);
   }
 
+  /**
+   * Use for first person (move forward/backward, lookAround) and cad motion actions.
+   */
+  protected final void updateUpVector() {
+    upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
+  }
+
   public void lookAround(MotionEvent event) {
     rotate(rollPitchQuaternion(event));
   }
@@ -2103,7 +2113,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void moveForward(MotionEvent2 event, boolean forward) {
     if (event.fired())
-      graph().updateSceneUpVector();
+      updateUpVector();
     else if (event.flushed()) {
       stopFlying();
       return;
@@ -2144,7 +2154,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       initEvent = event.get();
-      graph().updateSceneUpVector();
+      updateUpVector();
       flySpeedCache = flySpeed();
     } else if (event.flushed()) {
       setFlySpeed(flySpeedCache);
@@ -2185,7 +2195,7 @@ public class Node extends Frame implements Grabber {
     if (event.fired())
       stopSpinning();
     if (event.fired() && graph.is3D())
-      graph.cadRotationIsReversed = graph.eye().transformOf(graph.sceneUpVector()).y() < 0.0f;
+      graph.cadRotationIsReversed = graph.eye().transformOf(upVector).y() < 0.0f;
     if (event.flushed() && damping() == 0) {
       startSpinning();
       return;
@@ -2198,7 +2208,7 @@ public class Node extends Frame implements Grabber {
         dx = -dx;
       if (graph.isRightHanded())
         dy = -dy;
-      Vector verticalAxis = transformOf(graph().sceneUpVector());
+      Vector verticalAxis = transformOf(upVector);
       spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event.speed(),
           event.delay());
     }
@@ -2318,7 +2328,7 @@ public class Node extends Frame implements Grabber {
       //TODO handle me
       //graph.setRotateVisualHint(true); // display visual hint
       if (graph.is3D())
-        graph.cadRotationIsReversed = graph.eye().transformOf(graph.sceneUpVector()).y() < 0.0f;
+        graph.cadRotationIsReversed = graph.eye().transformOf(upVector).y() < 0.0f;
     }
     if (event.flushed()) {
       //TODO handle me
@@ -2681,7 +2691,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * mouse roll (X axis) and pitch ( {@link Graph#sceneUpVector()} axis).
+   * mouse roll (X axis) and pitch.
    */
   protected Quaternion rollPitchQuaternion(MotionEvent2 event) {
     if (graph.is2D()) {
@@ -2695,7 +2705,7 @@ public class Node extends Frame implements Grabber {
       deltaY = -deltaY;
 
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
-    Quaternion rotY = new Quaternion(transformOf(graph().sceneUpVector()), rotationSensitivity() * (-deltaX) / graph().width());
+    Quaternion rotY = new Quaternion(transformOf(upVector), rotationSensitivity() * (-deltaX) / graph().width());
     return Quaternion.multiply(rotY, rotX);
   }
 

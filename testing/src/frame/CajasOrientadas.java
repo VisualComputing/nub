@@ -2,6 +2,7 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
+import remixlab.geom.Graph;
 import remixlab.geom.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
@@ -10,7 +11,7 @@ import remixlab.proscene.Scene;
  * Created by pierre on 11/15/16.
  */
 public class CajasOrientadas extends PApplet {
-  Scene scene;
+  Scene graph;
   Box[] cajas;
   Sphere esfera;
   Node eye1, eye2;
@@ -29,34 +30,34 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void info() {
-    println(scene.radius());
-    scene.center().print();
-    println(scene.fieldOfView());
-    println(scene.zNearCoefficient());
-    println(scene.zClippingCoefficient());
-    println(scene.zNear());
-    println(scene.zFar());
-    scene.matrixHandler().projection().print();
-    scene.matrixHandler().view().print();
-    scene.matrixHandler().modelView().print();
+    println(graph.radius());
+    graph.center().print();
+    println(graph.fieldOfView());
+    println(graph.zNearCoefficient());
+    println(graph.zClippingCoefficient());
+    println(graph.zNear());
+    println(graph.zFar());
+    graph.matrixHandler().projection().print();
+    graph.matrixHandler().view().print();
+    graph.matrixHandler().modelView().print();
   }
 
   public void setup() {
-    scene = new Scene(this);
-    scene.setGridVisualHint(true);
+    graph = new Scene(this);
+    graph.setGridVisualHint(true);
     //graph.setCameraType(Camera.Type.ORTHOGRAPHIC);
-    scene.setRadius(200);
+    graph.setRadius(200);
     //graph.camera().setPosition(new PVector(10,0,0));
     //graph.camera().lookAt( graph.center() );
-    scene.fitBall();
+    graph.fitBall();
     //graph.disableBackgroundHanddling();
-    esfera = new Sphere(scene);
+    esfera = new Sphere(graph);
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
     esfera.setColor(color(0, 0, 255));
 
     cajas = new Box[30];
     for (int i = 0; i < cajas.length; i++)
-      cajas[i] = new Box(scene);
+      cajas[i] = new Box(graph);
 
     //graph.keyAgent().setDefaultGrabber(null);
 
@@ -64,7 +65,7 @@ public class CajasOrientadas extends PApplet {
       //println("is eyeFrame!");
     //frameRate(500);
 
-    eye1 = new Node(scene) {
+    eye1 = new Node(graph) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -94,7 +95,7 @@ public class CajasOrientadas extends PApplet {
       }
     };
 
-    eye2 = new Node(scene) {
+    eye2 = new Node(graph) {
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -123,12 +124,12 @@ public class CajasOrientadas extends PApplet {
       }
     };
 
-    scene.setEye(eye1);
-    scene.setFieldOfView((float)Math.PI/3);
-    scene.inputHandler().setDefaultGrabber(eye1);
-    scene.fitBall();
+    graph.setEye(eye1);
+    graph.setFieldOfView((float)Math.PI/3);
+    graph.inputHandler().setDefaultGrabber(eye1);
+    graph.fitBall();
 
-    if(scene.is3D())
+    if(graph.is3D())
       println("Scene is 3D");
     else
       println("Scene is 2D");
@@ -147,24 +148,30 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
+    if(key == 'e') {
+      graph.setType(Graph.Type.ORTHOGRAPHIC);
+    }
+    if(key == 'E') {
+      graph.setType(Graph.Type.PERSPECTIVE);
+    }
     if(key == ' ') {
-      if(eye1 == scene.eye()) {
-        scene.setEye(eye2);
-        scene.setFieldOfView(1);
-        scene.inputHandler().setDefaultGrabber(eye2);
-        //scene.fitBall();
-        println("Eye2 set " + scene.fieldOfView());
+      if(eye1 == graph.eye()) {
+        graph.setEye(eye2);
+        graph.setFieldOfView(1);
+        graph.inputHandler().setDefaultGrabber(eye2);
+        //graph.fitBall();
+        println("Eye2 set " + graph.fieldOfView());
       }
       else {
-        scene.setEye(eye1);
-        scene.setFieldOfView((float)Math.PI/4);
-        scene.inputHandler().setDefaultGrabber(eye1);
-        //scene.fitBall();
-        println("Eye1 set " + scene.fieldOfView());
+        graph.setEye(eye1);
+        graph.setFieldOfView((float)Math.PI/4);
+        graph.inputHandler().setDefaultGrabber(eye1);
+        //graph.fitBall();
+        println("Eye1 set " + graph.fieldOfView());
       }
     }
     if(key == 's')
-      scene.fitBall();
+      graph.fitBall();
     //TODO restore
     //if(key == ' ')
       //graph.keyAgent().shiftDefaultGrabber(graph.frame(), esfera.iFrame);
@@ -172,14 +179,14 @@ public class CajasOrientadas extends PApplet {
     //if(key ==' ')
       //info();
     if(key == 'a')
-      scene.toggleAxesVisualHint();
+      graph.toggleAxesVisualHint();
     if(key == 'g')
-      scene.toggleGridVisualHint();
+      graph.toggleGridVisualHint();
     if(key == 'f')
-      scene.togglePickingVisualhint();
+      graph.togglePickingVisualhint();
     if(key == 'v') {
-      println(Vector.scalarProjection(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()));
-      Vector.projectVectorOnAxis(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()).print();
+      println(Vector.scalarProjection(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()));
+      Vector.projectVectorOnAxis(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()).print();
     }
   }
 
