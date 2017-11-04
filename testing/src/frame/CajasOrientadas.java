@@ -48,7 +48,7 @@ public class CajasOrientadas extends PApplet {
     scene.setRadius(200);
     //graph.camera().setPosition(new PVector(10,0,0));
     //graph.camera().lookAt( graph.center() );
-    scene.showAll();
+    scene.fitBall();
     //graph.disableBackgroundHanddling();
     esfera = new Sphere(scene);
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
@@ -126,7 +126,7 @@ public class CajasOrientadas extends PApplet {
     scene.setEye(eye1);
     scene.setFieldOfView((float)Math.PI/3);
     scene.inputHandler().setDefaultGrabber(eye1);
-    scene.showAll();
+    scene.fitBall();
 
     if(scene.is3D())
       println("Scene is 3D");
@@ -152,19 +152,19 @@ public class CajasOrientadas extends PApplet {
         scene.setEye(eye2);
         scene.setFieldOfView(1);
         scene.inputHandler().setDefaultGrabber(eye2);
-        //scene.showAll();
+        //scene.fitBall();
         println("Eye2 set " + scene.fieldOfView());
       }
       else {
         scene.setEye(eye1);
         scene.setFieldOfView((float)Math.PI/4);
         scene.inputHandler().setDefaultGrabber(eye1);
-        //scene.showAll();
+        //scene.fitBall();
         println("Eye1 set " + scene.fieldOfView());
       }
     }
     if(key == 's')
-      scene.showAll();
+      scene.fitBall();
     //TODO restore
     //if(key == ' ')
       //graph.keyAgent().shiftDefaultGrabber(graph.frame(), esfera.iFrame);

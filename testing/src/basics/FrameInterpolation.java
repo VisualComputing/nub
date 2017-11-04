@@ -20,7 +20,7 @@ public class FrameInterpolation extends PApplet {
         //unsets grid and axis altogether
         scene.setVisualHints( Scene.PICKING );
         scene.setRadius(70);
-        scene.showAll();
+        scene.fitBall();
         kfi = new Interpolator(scene);
         kfi.setLoopInterpolation();
 

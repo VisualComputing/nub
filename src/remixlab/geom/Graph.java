@@ -173,7 +173,7 @@ public class Graph {
     //setRadius(100);
     //setCenter(new Vector(0.0f, 0.0f, 0.0f));
     setEye(new Frame());
-    showAll();
+    fitBall();
     */
 
     //2nd try: working
@@ -182,7 +182,7 @@ public class Graph {
     eye = new Frame();
     setRadius(100);
     setCenter(new Vector(0.0f, 0.0f, 0.0f));
-    showAll();
+    fitBall();
 
     seeds = new ArrayList<Node>();
     tHandler = new TimingHandler();
@@ -401,7 +401,7 @@ public class Graph {
    * <p>
    * The eye position and orientation of the Camera are not modified and
    * you first have to orientate the Camera in order to actually see the graph (see
-   * {@link Graph#lookAt(Vector)}, {@link Graph#showAll()} or {@link Graph#fitBall(Vector, float)}).
+   * {@link Graph#lookAt(Vector)}, {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
    * <p>
    * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
    * positioning tools ({@link Graph#lookAt(Vector)}) to position a
@@ -415,14 +415,14 @@ public class Graph {
    * {@code // Place the light camera} <br>
    * {@code lightCamera.setPosition(lightFrame.position());} <br>
    * {@code lightCamera.lookAt(sceneCenter());} <br>
-   * {@code lightCamera.setFOVToFitScene();} <br>
+   * {@code lightCamera.setFieldOfView();} <br>
    * <p>
    * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to M_PI/2.0. This happens
    * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
    * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
    * parts of the graph.
    */
-  public void setFOVToFitScene() {
+  public void setFieldOfView() {
     if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2.0f) * radius())
       setFieldOfView(2.0f * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
     else
@@ -2584,19 +2584,6 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the entire graph is visible.
-   * <p>
-   * Simply calls {@link #fitBall(Vector, float)} on a sphere defined by
-   * {@link #center()} and {@link #radius()}.
-   * <p>
-   * You will typically use this method at init time after you defined a new
-   * {@link #radius()}.
-   */
-  public void showAll() {
-    fitBall(center(), radius());
-  }
-
-  /**
    * Returns the current {@link #eye()} type.
    */
   public final Type eyeType() {
@@ -2725,7 +2712,7 @@ public class Graph {
    *
    * @see #at()
    * @see #setUpVector(Vector)
-   * @see #showAll()
+   * @see #fitBall()
    * @see #fitBall(Vector, float)
    * @see #fitBoundingBox(Vector, Vector)
    */
@@ -2757,6 +2744,17 @@ public class Graph {
    */
   public Vector at() {
     return Vector.add(eye().position(), viewDirection());
+  }
+
+  /**
+   * Same as {@code fitBall(center(), radius())}.
+   *
+   * @see #fitBall(Vector, float)
+   * @see #center()
+   * @see #radius()
+   */
+  public void fitBall() {
+    fitBall(center(), radius());
   }
 
   /**
