@@ -93,7 +93,6 @@ public class Graph {
   // 5. Graph
   protected List<Node> seeds;
   public int nodeCount;
-  protected final long deltaCount;
   public long lastNonEyeUpdate = 0;
 
   // 6. Display flags
@@ -165,7 +164,6 @@ public class Graph {
 
     seeds = new ArrayList<Node>();
     tHandler = new TimingHandler();
-    deltaCount = TimingHandler.frameCount;
     iHandler = new InputHandler();
 
     setRadius(100);
@@ -1489,10 +1487,6 @@ public class Graph {
   public void postDraw() {
     // 1. timers (include IK Solvers' execution in the order they were registered)
     timingHandler().handle();
-    if (TimingHandler.frameCount < timingHandler().frameCount())
-      TimingHandler.frameCount = timingHandler().frameCount();
-    if (TimingHandler.frameCount < timingHandler().frameCount() + deltaCount)
-      TimingHandler.frameCount = timingHandler().frameCount() + deltaCount;
     // 2. Agents
     inputHandler().handle();
   }

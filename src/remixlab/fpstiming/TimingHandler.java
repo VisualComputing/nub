@@ -21,6 +21,7 @@ import java.util.ArrayList;
  */
 public class TimingHandler {
   static public long frameCount;
+  protected long dCount;
     // T i m e r P o o l
   protected ArrayList<TimingTask> tPool;
   protected long frameRateLastMillis;
@@ -35,6 +36,7 @@ public class TimingHandler {
    */
   public TimingHandler() {
     fCount = 0;
+    dCount = frameCount;
     frameRate = 10;
     frameRateLastMillis = System.currentTimeMillis();
     tPool = new ArrayList<TimingTask>();
@@ -133,6 +135,10 @@ public class TimingHandler {
     }
     frameRateLastMillis = now;
     fCount++;
+    //if (TimingHandler.frameCount < frameCount())
+      //TimingHandler.frameCount = frameCount();
+    if (frameCount < frameCount() + dCount)
+      frameCount = frameCount() + dCount;
   }
 
   /**
@@ -145,7 +151,7 @@ public class TimingHandler {
   }
 
   /**
-   * Returns the number of nodes displayed since the program started.
+   * Returns the number of frames displayed since this timing handler was instantiated.
    */
   public long frameCount() {
     return fCount;
