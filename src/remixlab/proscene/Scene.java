@@ -16,6 +16,7 @@ import processing.data.JSONObject;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
+import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
 import remixlab.geom.Graph;
 import remixlab.geom.Node;
@@ -658,12 +659,12 @@ public class Scene extends Graph implements PConstants {
       if(eye() instanceof Node) {
         if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
           updateBoundaryEquations();
-          lastEqUpdate = frameCount;
+          lastEqUpdate = TimingHandler.frameCount;
         }
       }
       else {
         updateBoundaryEquations();
-        lastEqUpdate = frameCount;
+        lastEqUpdate = TimingHandler.frameCount;
       }
     }
     //TODO really needs checking. Previously we went like this:

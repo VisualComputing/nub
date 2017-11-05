@@ -20,7 +20,8 @@ import java.util.ArrayList;
  * <a href="http://nakednous.github.io/projects/fpstiming">this</a>.
  */
 public class TimingHandler {
-  // T i m e r P o o l
+  static public long frameCount;
+    // T i m e r P o o l
   protected ArrayList<TimingTask> tPool;
   protected long frameRateLastMillis;
   public float frameRate;

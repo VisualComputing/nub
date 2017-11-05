@@ -15,6 +15,7 @@ import remixlab.bias.Event;
 import remixlab.bias.Grabber;
 import remixlab.bias.InputHandler;
 import remixlab.bias.event.*;
+import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
 
@@ -795,7 +796,7 @@ public class Node extends Frame implements Grabber {
    */
   @Override
   protected void modified() {
-    lastUpdate = Graph.frameCount;
+    lastUpdate = TimingHandler.frameCount;
     if (children() != null)
       for (Node child : children())
         child.modified();

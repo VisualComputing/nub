@@ -93,7 +93,6 @@ public class Graph {
   // 5. Graph
   protected List<Node> seeds;
   public int nodeCount;
-  static public long frameCount;
   protected final long deltaCount;
   public long lastNonEyeUpdate = 0;
 
@@ -166,7 +165,7 @@ public class Graph {
 
     seeds = new ArrayList<Node>();
     tHandler = new TimingHandler();
-    deltaCount = frameCount;
+    deltaCount = TimingHandler.frameCount;
     iHandler = new InputHandler();
 
     setRadius(100);
@@ -928,7 +927,7 @@ public class Graph {
   /**
    * Returns the number of frames displayed since the graph was instantiated.
    * <p>
-   * Use {@code Graph.frameCount} to retrieve the number of nodes displayed since
+   * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
    * the first graph was instantiated.
    */
   public long frameCount() {
@@ -1455,12 +1454,12 @@ public class Graph {
       if(eye() instanceof Node) {
         if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
           updateBoundaryEquations();
-          lastEqUpdate = frameCount;
+          lastEqUpdate = TimingHandler.frameCount;
         }
       }
       else {
         updateBoundaryEquations();
-        lastEqUpdate = frameCount;
+        lastEqUpdate = TimingHandler.frameCount;
       }
     }
     //TODO really needs checking. Previously we went like this:
@@ -1490,10 +1489,10 @@ public class Graph {
   public void postDraw() {
     // 1. timers (include IK Solvers' execution in the order they were registered)
     timingHandler().handle();
-    if (frameCount < timingHandler().frameCount())
-      frameCount = timingHandler().frameCount();
-    if (frameCount < timingHandler().frameCount() + deltaCount)
-      frameCount = timingHandler().frameCount() + deltaCount;
+    if (TimingHandler.frameCount < timingHandler().frameCount())
+      TimingHandler.frameCount = timingHandler().frameCount();
+    if (TimingHandler.frameCount < timingHandler().frameCount() + deltaCount)
+      TimingHandler.frameCount = timingHandler().frameCount() + deltaCount;
     // 2. Agents
     inputHandler().handle();
   }
@@ -3058,7 +3057,7 @@ public class Graph {
   }
 
   protected void modified() {
-    lastNonEyeUpdate = frameCount;
+    lastNonEyeUpdate = TimingHandler.frameCount;
   }
 
   /**

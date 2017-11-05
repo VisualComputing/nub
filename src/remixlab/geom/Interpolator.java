@@ -10,6 +10,7 @@
 
 package remixlab.geom;
 
+import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
 
@@ -296,7 +297,7 @@ public class Interpolator {
    * {@link #checkValidity()}.
    */
   protected void checked() {
-    lUpdate = Graph.frameCount;
+    lUpdate = TimingHandler.frameCount;
   }
 
   /**

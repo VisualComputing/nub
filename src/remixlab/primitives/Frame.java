@@ -10,9 +10,7 @@
 
 package remixlab.primitives;
 
-//TODO discard Graph dependency which is used by modified()
-//Solution may be to implement it from InputHandler.frameCount
-//which ideally should be made static
+import remixlab.fpstiming.TimingHandler;
 import remixlab.geom.Graph;
 import remixlab.primitives.constraint.Constraint;
 
@@ -217,7 +215,7 @@ public class Frame {
    * Internal use. Automatically call by all methods which change the Frame state.
    */
   protected void modified() {
-    lastUpdate = Graph.frameCount;
+    lastUpdate = TimingHandler.frameCount;
   }
 
   /**
