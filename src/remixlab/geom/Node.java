@@ -142,8 +142,6 @@ public class Node extends Frame implements Grabber {
 
   private boolean visit;
 
-  private boolean hint;
-
   // id
   protected int id;
 
@@ -238,7 +236,6 @@ public class Node extends Frame implements Grabber {
     graph().registerTimingTask(flyTimerTask);
     // end
 
-    hint = true;
     // pkgnPrecision = PickingPrecision.ADAPTIVE;
     // setGrabsInputThreshold(Math.round(scn.radius()/4));
     graph().inputHandler().addGrabber(this);
@@ -263,7 +260,6 @@ public class Node extends Frame implements Grabber {
 
     this.upVector = otherNode.upVector.get();
     this.visit = otherNode.visit;
-    this.hint = otherNode.hint;
 
     this.childrenList = new ArrayList<Node>();
     if(this.graph() == otherNode.graph()) {
@@ -489,72 +485,6 @@ public class Node extends Frame implements Grabber {
    */
   public boolean isVisitEnabled() {
     return visit;
-  }
-
-  /**
-   * Enables drawing of the frame picking hint. Only meaningful if frame is not
-   * an eye frame.
-   *
-   * @see Graph#pickingVisualHint()
-   * @see #disableVisualHint()
-   * @see #toggleVisualHint()
-   * @see #isVisualHintEnabled()
-   */
-  public void enableVisualHint() {
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("enableVisualHint", false);
-      return;
-    }
-    hint = true;
-  }
-
-  /**
-   * Disables drawing of the frame picking hint. Only meaningful if frame is not
-   * an eye frame.
-   *
-   * @see Graph#pickingVisualHint()
-   * @see #enableVisualHint()
-   * @see #toggleVisualHint()
-   * @see #isVisualHintEnabled()
-   */
-  public void disableVisualHint() {
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("disableVisualHint", false);
-      return;
-    }
-    hint = false;
-  }
-
-  /**
-   * Toggles drawing of the frame picking hint. Only meaningful if frame is not
-   * an eye frame.
-   *
-   * @see Graph#pickingVisualHint()
-   * @see #enableVisualHint()
-   * @see #disableVisualHint()
-   * @see #isVisualHintEnabled()
-   */
-  public void toggleVisualHint() {
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("toggleVisualHint", false);
-      return;
-    }
-    hint = !hint;
-  }
-
-  /**
-   * Returns {@code true} if drawing of the frame picking hint is enabled and
-   * {@code false} otherwise. Always returns {@code false} if frame is an eye frame.
-   *
-   * @see Graph#pickingVisualHint()
-   * @see #enableVisualHint()
-   * @see #disableVisualHint()
-   * @see #toggleVisualHint()
-   */
-  public boolean isVisualHintEnabled() {
-    if (isEye())
-      Graph.showOnlyEyeWarning("isVisualHintEnabled", false);
-    return hint;
   }
 
   /**

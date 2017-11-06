@@ -1376,27 +1376,6 @@ public class Graph {
   }
 
   /**
-   * Internal use.
-   */
-  protected void drawGridHint() {
-    System.out.println("implement me");
-  }
-
-  /**
-   * Internal use.
-   */
-  protected void drawAxesHint() {
-    System.out.println("implement me");
-  }
-
-  /**
-   * Internal use.
-   */
-  protected void drawPickingHint() {
-    System.out.println("implement me");
-  }
-
-  /**
    * Draws visual hint (a cross on the screen) when the
    * {@link #anchor()} is being set.
    */

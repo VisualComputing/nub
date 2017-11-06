@@ -81,8 +81,6 @@ public class Scene extends Graph implements PConstants {
   protected Point upperLeftCorner;
   protected boolean offscreen;
 
-  protected boolean dottedGrid;
-
   // CONSTRUCTORS
 
   /**
@@ -160,12 +158,7 @@ public class Scene extends Graph implements PConstants {
     // 5. Handed
     setLeftHanded();
 
-    // 6. Misc stuff:
-    setDottedGrid(is2D());
-    //this.setNonSeqTimers();
-    // pApplet().frameRate(100);
-
-    // 7. Init should be called only once
+    // 6. Init should be called only once
     init();
   }
 
@@ -524,77 +517,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   // 3. Drawing methods
-
-  /**
-   * Returns true grid is dotted.
-   */
-  public boolean gridIsDotted() {
-    return dottedGrid;
-  }
-
-  /**
-   * Sets the drawing of the grid visual hint as dotted or not.
-   */
-  public void setDottedGrid(boolean dotted) {
-    dottedGrid = dotted;
-  }
-
-  @Override
-  protected void drawGridHint() {
-    pg().pushStyle();
-    pg().stroke(170);
-    if (gridIsDotted()) {
-      pg().strokeWeight(2);
-      drawDottedGrid(radius());
-    } else {
-      pg().strokeWeight(1);
-      drawGrid(radius());
-    }
-    pg().popStyle();
-  }
-
-  /*
-   * Copy paste from Graph but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawAxesHint() {
-    pg().pushStyle();
-    pg().strokeWeight(2);
-    drawAxes(radius());
-    pg().popStyle();
-  }
-
-  /*
-   * Copy paste from Graph but we addGrabber the style (color, stroke, etc) here.
-   */
-  @Override
-  protected void drawPickingHint() {
-    pg().pushStyle();
-    pg().colorMode(PApplet.RGB, 255);
-    pg().strokeWeight(1);
-    pg().stroke(220, 220, 220);
-    drawPickingTargets();
-    pg().popStyle();
-  }
-
-  protected void drawPickingTargets() {
-    for (Node node : nodes())
-      // if(inputHandler().hasGrabber(frame))
-      if (node.isVisualHintEnabled() && !node.isEye())
-        drawPickingTarget(node);
-  }
-
-  /*
-  @Override
-  protected void drawAnchorHint() {
-    pg().pushStyle();
-    Vector p = eye().projectedCoordinatesOf(anchor());
-    pg().stroke(255);
-    pg().strokeWeight(3);
-    drawCross(p.vec[0], p.vec[1]);
-    pg().popStyle();
-  }
-  */
 
   /**
    * Convenience function that simply calls:
@@ -1317,6 +1239,7 @@ public class Scene extends Graph implements PConstants {
     mh.bindModelView(view());
   }
 
+  //TODO really needs overloading??
   @Override
   protected void visitNode(Node node) {
     targetPGraphics.pushMatrix();
@@ -2910,8 +2833,6 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye nodes don't have a picking target");
       return;
     }
-    if (!iFrame.isVisualHintEnabled())
-      return;
     // if (!inputHandler().hasGrabber(iFrame)) {
     // System.err.println("addGrabber iFrame to motionAgent before drawing picking target");
     // return;
