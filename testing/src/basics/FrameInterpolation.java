@@ -11,6 +11,7 @@ public class FrameInterpolation extends PApplet {
     Node keyFrame[];
     Interpolator kfi;
     int nbKeyFrames;
+    Interpolator interpolator;
 
     public void settings() {
         size(640, 360, P3D);
@@ -26,6 +27,9 @@ public class FrameInterpolation extends PApplet {
         scene.setDefaultNode(eye);
         scene.setRadius(70);
         scene.fitBallInterpolation();
+
+        interpolator = new Interpolator(scene, scene.eye());
+
         kfi = new Interpolator(scene);
         kfi.setLoopInterpolation();
 
@@ -69,6 +73,12 @@ public class FrameInterpolation extends PApplet {
     }
 
     public void keyPressed() {
+        if(key == 'l')
+            interpolator.addKeyFrame(scene.eye().get());
+        if(key == 'm')
+            interpolator.startInterpolation();
+        if(key == 'n')
+            interpolator.deletePath();
         if ((key == ENTER) || (key == RETURN))
             kfi.toggleInterpolation();
         if ( key == 'u')
@@ -81,14 +91,24 @@ public class FrameInterpolation extends PApplet {
         public InteractiveFrame() {
             super(scene);
         }
+
+        protected InteractiveFrame(InteractiveFrame otherFrame, boolean dummy) {
+            super(otherFrame, dummy);
+        }
+
+        @Override
+        public InteractiveFrame get() {
+            return new InteractiveFrame(this, true);
+        }
+
         @Override
         public void interact(MotionEvent event) {
             switch (event.shortcut().id()) {
                 case PApplet.LEFT:
-                    rotate(event);
+                    translate(event);
                     break;
                 case PApplet.RIGHT:
-                    translate(event);
+                    rotate(event);
                     break;
                 case processing.event.MouseEvent.WHEEL:
                     if(isEye())

@@ -298,10 +298,9 @@ public class Node extends Frame implements Grabber {
     //
     this.setFlySpeed(otherFrame.flySpeed());
 
-    if (!this.isEye())
-      for (Agent agent : graph.inputHandler().agents())
-        if (agent.hasGrabber(otherFrame))
-          agent.addGrabber(this);
+    for (Agent agent : this.graph.inputHandler().agents())
+      if (agent.hasGrabber(otherFrame))
+        agent.addGrabber(this);
   }
 
   /**
@@ -1689,7 +1688,6 @@ public class Node extends Frame implements Grabber {
       int tlX = (int) e.prevX() < (int) e.x() ? (int) e.prevX() : (int) e.x();
       int h = (int) Math.abs(e.dy());
       int tlY = (int) e.prevY() < (int) e.y() ? (int) e.prevY() : (int) e.y();
-      //TODO restore
       graph().fitScreenRegionInterpolation(new Rectangle(tlX, tlY, w, h));
       //graph().fitScreenRegion(new Rectangle(tlX, tlY, w, h));
     }

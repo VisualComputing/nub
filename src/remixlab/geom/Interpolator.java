@@ -530,6 +530,8 @@ public class Interpolator {
    * the interpolation will naturally immediately stop.
    */
   public void startInterpolation(int myPeriod) {
+    if(interpolationStarted())
+      stopInterpolation();
     if (myPeriod >= 0)
       setInterpolationPeriod(myPeriod);
 
@@ -639,6 +641,12 @@ public class Interpolator {
    */
   public void deletePath() {
     stopInterpolation();
+    ListIterator<KeyFrame> it = keyFrameList.listIterator();
+    while (it.hasNext()) {
+      KeyFrame keyFrame = it.next();
+      if(keyFrame.frame() instanceof Node)
+        graph.pruneBranch((Node)keyFrame.frm);
+    }
     keyFrameList.clear();
     pathIsValid = false;
     valuesAreValid = false;

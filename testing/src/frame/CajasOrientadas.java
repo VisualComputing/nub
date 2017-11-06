@@ -3,6 +3,7 @@ package frame;
 import processing.core.PApplet;
 import remixlab.bias.event.*;
 import remixlab.geom.Graph;
+import remixlab.geom.Interpolator;
 import remixlab.geom.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
@@ -51,12 +52,12 @@ public class CajasOrientadas extends PApplet {
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
-            zoomOnRegion(event);
-            //rotate(event);
+            //zoomOnRegion(event);
+            rotate(event);
             break;
           case PApplet.CENTER:
-            rotate(event);
-            //zoomOnRegion(event);
+            //rotate(event);
+            zoomOnRegion(event);
             break;
           case PApplet.RIGHT:
             translate(event);
@@ -114,6 +115,7 @@ public class CajasOrientadas extends PApplet {
     graph.setFieldOfView((float)Math.PI/3);
     graph.setDefaultNode(eye1);
     graph.fitBall();
+    println(graph.inputHandler().hasGrabber(eye1) ? "has eye1" : "has NOT eye1");
 
     if(graph.is3D())
       println("Scene is 3D");
