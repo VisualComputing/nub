@@ -247,20 +247,28 @@ public class Node extends Frame implements Grabber {
     setFlySpeed(0.01f * graph().radius());
   }
 
-  protected Node(Node otherFrame, boolean dummy) {
-    super(otherFrame);
-    this.graph = otherFrame.graph;
-    this.id = ++graph().nodeCount;
-    // unlikely but theoretically possible
-    if (this.id == 16777216)
-      throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+  protected Node(Graph grp, Node otherNode) {
+    super(otherNode);
+    this.graph = grp;
+    if(this.graph() == otherNode.graph()) {
+      this.id = ++graph().nodeCount;
+      // unlikely but theoretically possible
+      if (this.id == 16777216)
+        throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+    }
+    else {
+      this.id = otherNode.id();
+      this.setWorldMatrix(otherNode);
+    }
 
-    this.upVector = otherFrame.upVector.get();
-    this.visit = otherFrame.visit;
-    this.hint = otherFrame.hint;
+    this.upVector = otherNode.upVector.get();
+    this.visit = otherNode.visit;
+    this.hint = otherNode.hint;
 
     this.childrenList = new ArrayList<Node>();
-    this.setReference(reference());// restorePath
+    if(this.graph() == otherNode.graph()) {
+      this.setReference(reference());// restorePath
+    }
 
     this.spinningTimerTask = new TimingTask() {
       public void execute() {
@@ -271,36 +279,41 @@ public class Node extends Frame implements Grabber {
     this.graph.registerTimingTask(spinningTimerTask);
 
     this.flyDisp = new Vector();
-    this.flyDisp.set(otherFrame.flyDisp.get());
+    this.flyDisp.set(otherNode.flyDisp.get());
     this.flyTimerTask = new TimingTask() {
       public void execute() {
         fly();
       }
     };
     this.graph.registerTimingTask(flyTimerTask);
-    lastUpdate = otherFrame.lastUpdate();
+    lastUpdate = otherNode.lastUpdate();
     // end
     // this.isInCamPath = otherFrame.isInCamPath;
     //
     // this.setGrabsInputThreshold(otherFrame.grabsInputThreshold(),
     // otherFrame.adaptiveGrabsInputThreshold());
-    this.pkgnPrecision = otherFrame.pkgnPrecision;
-    this.grabsInputThreshold = otherFrame.grabsInputThreshold;
+    this.pkgnPrecision = otherNode.pkgnPrecision;
+    this.grabsInputThreshold = otherNode.grabsInputThreshold;
 
-    this.setRotationSensitivity(otherFrame.rotationSensitivity());
-    this.setScalingSensitivity(otherFrame.scalingSensitivity());
-    this.setTranslationSensitivity(otherFrame.translationSensitivity());
-    this.setWheelSensitivity(otherFrame.wheelSensitivity());
-    this.setKeyboardSensitivity(otherFrame.keyboardSensitivity());
+    this.setRotationSensitivity(otherNode.rotationSensitivity());
+    this.setScalingSensitivity(otherNode.scalingSensitivity());
+    this.setTranslationSensitivity(otherNode.translationSensitivity());
+    this.setWheelSensitivity(otherNode.wheelSensitivity());
+    this.setKeyboardSensitivity(otherNode.keyboardSensitivity());
     //
-    this.setSpinningSensitivity(otherFrame.spinningSensitivity());
-    this.setDamping(otherFrame.damping());
+    this.setSpinningSensitivity(otherNode.spinningSensitivity());
+    this.setDamping(otherNode.damping());
     //
-    this.setFlySpeed(otherFrame.flySpeed());
+    this.setFlySpeed(otherNode.flySpeed());
 
-    for (Agent agent : this.graph.inputHandler().agents())
-      if (agent.hasGrabber(otherFrame))
-        agent.addGrabber(this);
+    if(this.graph() == otherNode.graph()) {
+      for (Agent agent : this.graph.inputHandler().agents())
+        if (agent.hasGrabber(otherNode))
+          agent.addGrabber(this);
+    }
+    else {
+      this.graph().inputHandler().addGrabber(this);
+    }
   }
 
   /**
@@ -313,7 +326,7 @@ public class Node extends Frame implements Grabber {
    */
   @Override
   public Node get() {
-    return new Node(this, true);
+    return new Node(this.graph(), this);
   }
 
   //id

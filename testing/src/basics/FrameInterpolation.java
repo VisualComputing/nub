@@ -92,13 +92,13 @@ public class FrameInterpolation extends PApplet {
             super(scene);
         }
 
-        protected InteractiveFrame(InteractiveFrame otherFrame, boolean dummy) {
-            super(otherFrame, dummy);
+        protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
+            super(otherGraph, otherFrame);
         }
 
         @Override
         public InteractiveFrame get() {
-            return new InteractiveFrame(this, true);
+            return new InteractiveFrame(this.graph(), this);
         }
 
         @Override
