@@ -21,12 +21,12 @@ import java.util.ArrayList;
  */
 public class TimingHandler {
   static public long frameCount;
-  protected long dCount;
+  protected long deltaCount;
     // T i m e r P o o l
   protected ArrayList<TimingTask> tPool;
   protected long frameRateLastMillis;
   public float frameRate;
-  protected long fCount;
+  protected long localCount;
 
   // A N I M A T I O N
   protected ArrayList<Animator> aPool;
@@ -35,8 +35,8 @@ public class TimingHandler {
    * Main constructor.
    */
   public TimingHandler() {
-    fCount = 0;
-    dCount = frameCount;
+    localCount = 0;
+    deltaCount = frameCount;
     frameRate = 10;
     frameRateLastMillis = System.currentTimeMillis();
     tPool = new ArrayList<TimingTask>();
@@ -127,18 +127,19 @@ public class TimingHandler {
    */
   protected void updateFrameRate() {
     long now = System.currentTimeMillis();
-    if (fCount > 1) {
+    if (localCount > 1) {
       // update the current frameRate
       double rate = 1000.0 / ((now - frameRateLastMillis) / 1000.0);
       float instantaneousRate = (float) rate / 1000.0f;
       frameRate = (frameRate * 0.9f) + (instantaneousRate * 0.1f);
     }
     frameRateLastMillis = now;
-    fCount++;
+    localCount++;
+    //TODO needs testing but I think is also safe but simpler
     //if (TimingHandler.frameCount < frameCount())
       //TimingHandler.frameCount = frameCount();
-    if (frameCount < frameCount() + dCount)
-      frameCount = frameCount() + dCount;
+    if (frameCount < frameCount() + deltaCount)
+      frameCount = frameCount() + deltaCount;
   }
 
   /**
@@ -154,7 +155,7 @@ public class TimingHandler {
    * Returns the number of frames displayed since this timing handler was instantiated.
    */
   public long frameCount() {
-    return fCount;
+    return localCount;
   }
 
   /**
