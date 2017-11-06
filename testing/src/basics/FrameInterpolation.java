@@ -12,6 +12,7 @@ public class FrameInterpolation extends PApplet {
     Interpolator kfi;
     int nbKeyFrames;
     Interpolator interpolator;
+    boolean showEyePath;
 
     public void settings() {
         size(640, 360, P3D);
@@ -21,7 +22,6 @@ public class FrameInterpolation extends PApplet {
         nbKeyFrames = 4;
         scene = new Scene(this);
         //unsets grid and axis altogether
-        scene.setVisualHints( Scene.PICKING );
         InteractiveFrame eye = new InteractiveFrame();
         scene.setEye(eye);
         scene.setDefaultNode(eye);
@@ -31,7 +31,7 @@ public class FrameInterpolation extends PApplet {
         interpolator = new Interpolator(scene, scene.eye());
 
         kfi = new Interpolator(scene);
-        kfi.setLoopInterpolation();
+        kfi.setLoop();
 
         // An array of interactive (key) frames.
         keyFrame = new Node[nbKeyFrames];
@@ -43,7 +43,7 @@ public class FrameInterpolation extends PApplet {
             kfi.addKeyFrame(keyFrame[i]);
         }
 
-        kfi.startInterpolation();
+        kfi.start();
     }
 
     public void draw() {
@@ -55,7 +55,8 @@ public class FrameInterpolation extends PApplet {
 
         pushStyle();
         stroke(255);
-        scene.drawPath(kfi, 5, 10);
+        //scene.drawPath(kfi);
+        scene.drawPath(kfi, 5);
         popStyle();
 
         for (int i=0; i<nbKeyFrames; ++i) {
@@ -70,21 +71,33 @@ public class FrameInterpolation extends PApplet {
 
             popMatrix();
         }
+
+        if(showEyePath) {
+            pushStyle();
+            fill(255,0,0);
+            stroke(0,255,0);
+            scene.drawPath(interpolator, 3);
+            popStyle();
+        }
     }
 
     public void keyPressed() {
+        if(key == ' ')
+            showEyePath = !showEyePath;
         if(key == 'l')
             interpolator.addKeyFrame(scene.eye().get());
-        if(key == 'm')
-            interpolator.startInterpolation();
+        if(key == 'm') {
+            if(interpolator.started())
+                interpolator.stop();
+            else
+                interpolator.start();
+        }
         if(key == 'n')
-            interpolator.deletePath();
-        if ((key == ENTER) || (key == RETURN))
-            kfi.toggleInterpolation();
+            interpolator.clear();
         if ( key == 'u')
-            kfi.setInterpolationSpeed(kfi.interpolationSpeed()-0.25f);
+            kfi.setSpeed(kfi.speed()-0.25f);
         if ( key == 'v')
-            kfi.setInterpolationSpeed(kfi.interpolationSpeed()+0.25f);
+            kfi.setSpeed(kfi.speed()+0.25f);
     }
 
     public class InteractiveFrame extends Node {

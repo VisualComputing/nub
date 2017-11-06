@@ -36,7 +36,6 @@ public class CajasOrientadas extends PApplet {
 
   public void setup() {
     graph = new Scene(this);
-    graph.setGridVisualHint(true);
     graph.setRadius(200);
     graph.fitBall();
     esfera = new Sphere(graph);
@@ -166,12 +165,6 @@ public class CajasOrientadas extends PApplet {
       graph.shiftDefaultNode((Node)graph.eye(), esfera.iFrame);
     if(key == 't')
       info();
-    if(key == 'a')
-      graph.toggleAxesVisualHint();
-    if(key == 'g')
-      graph.toggleGridVisualHint();
-    if(key == 'f')
-      graph.togglePickingVisualhint();
     if(key == 'v') {
       println(Vector.scalarProjection(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()));
       Vector.projectVectorOnAxis(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()).print();

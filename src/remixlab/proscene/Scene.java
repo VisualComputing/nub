@@ -634,49 +634,6 @@ public class Scene extends Graph implements PConstants {
   //protected abstract void drawPointUnderPixelHint();
 
   /**
-   * Called before your main drawing and performs the following:
-   * <ol>
-   * <li>Calls {@link MatrixHandler#bind()}</li>
-   * <li>Calls {@link #updateBoundaryEquations()} if
-   * {@link #areBoundaryEquationsEnabled()}</li>
-   * <li>Calls {@link #proscenium()}</li>
-   * </ol>
-   * <p>
-   * <b>Note</b> that this method overloads
-   * {@link Graph#preDraw()} where a call to
-   * {@link #displayVisualHints()} is done. Here, however, it needs to be bypassed for the
-   * PApplet.background() method not to hide the display of the {@link #visualHints()}.
-   * The {@link #displayVisualHints()} mostly happens then at the {@link #draw()} method,
-   * if the graph is on-screen, or at the {@link #endDraw()} if it is off-screen.
-   *
-   * @see #postDraw()
-   */
-  @Override
-  public void preDraw() {
-    // 1. Eye, raster graph
-    matrixHandler().bind();
-    if (areBoundaryEquationsEnabled()) {
-      if(eye() instanceof Node) {
-        if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
-          updateBoundaryEquations();
-          lastEqUpdate = TimingHandler.frameCount;
-        }
-      }
-      else {
-        updateBoundaryEquations();
-        lastEqUpdate = TimingHandler.frameCount;
-      }
-    }
-    //TODO really needs checking. Previously we went like this:
-    /*
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
-      updateBoundaryEquations();
-      lastEqUpdate = frameCount;
-    }
-    */
-  }
-
-  /**
    * Paint method which is called just before your {@code PApplet.draw()} method. Simply
    * calls {@link #preDraw()}. This method is registered at the PApplet and hence you
    * don't need to call it. Only meaningful if the graph is on-screen (it the graph
@@ -705,7 +662,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Calls
-   * {@link #proscenium()}, {@link #displayVisualHints()} and {@link #postDraw()}. This method is
+   * {@link #proscenium()} and {@link #postDraw()}. This method is
    * registered at the PApplet and hence you don't need to call it. Only meaningful if the graph is
    * on-screen (it the graph {@link #isOffscreen()} it even doesn't get registered at the
    * PApplet.
@@ -722,7 +679,6 @@ public class Scene extends Graph implements PConstants {
   public void draw() {
     proscenium();
     popModelView();
-    displayVisualHints();
     postDraw();
   }
 
@@ -798,7 +754,6 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * <ol>
    * <li>{@link #proscenium()}</li>
-   * <li>{@link #displayVisualHints()}</li>
    * <li>{@code pg().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@link #handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * <li>{@link #postDraw()}</li>
@@ -824,7 +779,6 @@ public class Scene extends Graph implements PConstants {
           + "endDraw() and they cannot be nested. Check your implementation!");
     proscenium();
     popModelView();
-    displayVisualHints();
     pg().endDraw();
     if (hasAutoFocus())
       handleFocus();
@@ -1065,7 +1019,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Saves the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
+   * Saves the {@link #eye()}, the {@link #radius()}, the
    * {@link #type()} and the
    * keyFrameInterpolators into
    * {@code fileName}.
@@ -1077,7 +1031,6 @@ public class Scene extends Graph implements PConstants {
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
-    json.setInt("visualHints", visualHints());
     json.setBoolean("ortho", is2D() ? true : type() == Type.ORTHOGRAPHIC ? true : false);
     json.setJSONObject("eye", toJSONObject(eye()));
     JSONArray jsonPaths = new JSONArray();
@@ -1114,7 +1067,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Loads the {@link #eye()}, the {@link #radius()}, the {@link #visualHints()}, the
+   * Loads the {@link #eye()}, the {@link #radius()}, the
    * {@link #type()} and the
    * keyFrameInterpolators from
    * {@code fileName}.
@@ -1132,7 +1085,6 @@ public class Scene extends Graph implements PConstants {
     }
     if (json != null) {
       setRadius(json.getFloat("radius"));
-      setVisualHints(json.getInt("visualHints"));
       if (is3D())
         setType(json.getBoolean("ortho") ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       eye().setWorldMatrix(toFrame(json.getJSONObject("eye")));
@@ -1143,7 +1095,7 @@ public class Scene extends Graph implements PConstants {
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
         int id = path.getInt("key");
-        eye().deletePath(id);
+        eye().clear(id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
         for (int j = 0; j < keyFrames.size(); j++) {
           Node keyFrame = new Node(this);
@@ -1674,16 +1626,16 @@ public class Scene extends Graph implements PConstants {
    * @see #drawPath(Interpolator, int, int, float)
    */
   public void drawPath(Interpolator kfi) {
-    drawPath(kfi, 1, 6, 100);
+    drawPath(kfi, 1, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, scale)}
+   * Convenience function that simply calls {@code drawPath(kfi, mask, 6, radius())}
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
-  public void drawPath(Interpolator kfi, float scale) {
-    drawPath(kfi, 1, 6, scale);
+  public void drawPath(Interpolator kfi, int mask) {
+    drawPath(kfi, mask, 6, radius());
   }
 
   /**
@@ -1692,7 +1644,71 @@ public class Scene extends Graph implements PConstants {
    * @see #drawPath(Interpolator, int, int, float)
    */
   public void drawPath(Interpolator kfi, int mask, int nbFrames) {
-    drawPath(kfi, mask, nbFrames, 100);
+    drawPath(kfi, mask, nbFrames, radius());
+  }
+
+  /**
+   * Draws the path used to interpolate the
+   * {@link Interpolator#frame()}
+   * <p>
+   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
+   * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
+   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
+   * <p>
+   * {@code drawPath(1); // Simply draws the interpolation path} <br>
+   * {@code drawPath(3); // Draws path and eyes} <br>
+   * {@code drawPath(5); // Draws path and axes} <br>
+   * <p>
+   * In the case where camera or axes are drawn, {@code nbFrames} controls the number of
+   * objects (axes or camera) drawn between two successive keyFrames. When
+   * {@code nbFrames = 1}, only the path KeyFrames are drawn. {@code nbFrames = 2} also
+   * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
+   * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
+   * <p>
+   * {@code scale} controls the scaling of the camera and axes drawing. A value of
+   * {@link #radius()} should give good results.
+   */
+  public void drawPath(Interpolator kfi, int mask, int nbFrames, float scale) {
+    pg().pushStyle();
+    if (mask != 0) {
+      int nbSteps = 30;
+      pg().strokeWeight(2 * pg().strokeWeight);
+      pg().noFill();
+      List<Frame> path = kfi.path();
+      if (((mask & 1) != 0) && path.size() > 1) {
+        pg().beginShape();
+        for (Frame myFr : path)
+          vertex(myFr.position().x(), myFr.position().y(), myFr.position().z());
+        pg().endShape();
+      }
+      if ((mask & 6) != 0) {
+        int count = 0;
+        if (nbFrames > nbSteps)
+          nbFrames = nbSteps;
+        float goal = 0.0f;
+
+        for (Frame myFr : path)
+          if ((count++) >= goal) {
+            goal += nbSteps / (float) nbFrames;
+            pushModelView();
+
+            applyTransformation(myFr);
+
+            if ((mask & 2) != 0)
+              drawKFIEye(scale);
+            if ((mask & 4) != 0)
+              drawAxes(scale / 10.0f);
+
+            popModelView();
+          }
+      }
+      pg().strokeWeight(pg().strokeWeight / 2f);
+    }
+    // draw the picking targets:
+    for (int index = 0; index < kfi.numberOfKeyFrames(); index++)
+      if(kfi.keyFrame(index) instanceof Node)
+        drawPickingTarget((Node)kfi.keyFrame(index));
+    pg().popStyle();
   }
 
   /**
@@ -2684,70 +2700,6 @@ public class Scene extends Graph implements PConstants {
         pg.popMatrix();
     }
     pg.popStyle();
-  }
-
-  /**
-   * Draws the path used to interpolate the
-   * {@link Interpolator#frame()}
-   * <p>
-   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
-   * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
-   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
-   * <p>
-   * {@code drawPath(); // Simply draws the interpolation path} <br>
-   * {@code drawPath(3); // Draws path and cameras} <br>
-   * {@code drawPath(5); // Draws path and axes} <br>
-   * <p>
-   * In the case where camera or axes are drawn, {@code nbFrames} controls the number of
-   * objects (axes or camera) drawn between two successive keyFrames. When
-   * {@code nbFrames = 1}, only the path KeyFrames are drawn. {@code nbFrames = 2} also
-   * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
-   * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
-   * <p>
-   * {@code scale} controls the scaling of the camera and axes drawing. A value of
-   * {@link #radius()} should give good results.
-   */
-  public void drawPath(Interpolator kfi, int mask, int nbFrames, float scale) {
-    pg().pushStyle();
-    if (mask != 0) {
-      int nbSteps = 30;
-      pg().strokeWeight(2 * pg().strokeWeight);
-      pg().noFill();
-      List<Frame> path = kfi.path();
-      if (((mask & 1) != 0) && path.size() > 1) {
-        pg().beginShape();
-        for (Frame myFr : path)
-          vertex(myFr.position().x(), myFr.position().y(), myFr.position().z());
-        pg().endShape();
-      }
-      if ((mask & 6) != 0) {
-        int count = 0;
-        if (nbFrames > nbSteps)
-          nbFrames = nbSteps;
-        float goal = 0.0f;
-
-        for (Frame myFr : path)
-          if ((count++) >= goal) {
-            goal += nbSteps / (float) nbFrames;
-            pushModelView();
-
-            applyTransformation(myFr);
-
-            if ((mask & 2) != 0)
-              drawKFIEye(scale);
-            if ((mask & 4) != 0)
-              drawAxes(scale / 10.0f);
-
-            popModelView();
-          }
-      }
-      pg().strokeWeight(pg().strokeWeight / 2f);
-    }
-    // draw the picking targets:
-    for (int index = 0; index < kfi.numberOfKeyFrames(); index++)
-      if(kfi.keyFrame(index) instanceof Node)
-        drawPickingTarget((Node)kfi.keyFrame(index));
-    pg().popStyle();
   }
 
   /**

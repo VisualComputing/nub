@@ -38,7 +38,7 @@ public class AlternativeUse extends PApplet {
     // Initialization stuff could have also been performed at
     // setup(), once after the Scene object have been instantiated
     public void init() {
-      setGridVisualHint(false);
+      //setGridVisualHint(false);
     }
 
     //Define here what is actually going to be drawn.

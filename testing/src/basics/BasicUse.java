@@ -24,7 +24,6 @@ public class BasicUse extends PApplet {
     pg = this.g;
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setPickingVisualHint(true);
     scene.setRadius(200);
 
     iFrame = new Node(scene) {

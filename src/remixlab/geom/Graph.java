@@ -95,20 +95,6 @@ public class Graph {
   public int nodeCount;
   public long lastNonEyeUpdate = 0;
 
-  // 6. Display flags
-  protected int visualHintMask;
-  public final static int AXES = 1 << 0;
-  public final static int GRID = 1 << 1;
-  public final static int PICKING = 1 << 2;
-  //TODO restore
-  /*
-  public final static int PATHS = 1 << 3;
-  public final static int ZOOM = 1 << 4; // prosceneMouse.zoomOnRegion
-  public final static int ROTATE = 1 << 5; // prosceneMouse.screenRotate
-  */
-  // public final static int PUP = 1 << 6;
-  // public final static int ARP = 1 << 7;
-
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -154,7 +140,6 @@ public class Graph {
    * @see #inputHandler()
    * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
-   * @see #setVisualHints(int)
    * @see #setEye(Frame)
    */
   //TODO graph.get()
@@ -175,7 +160,6 @@ public class Graph {
 
     setMatrixHandler(new MatrixHandler(this));
     setRightHanded();
-    setVisualHints(AXES | GRID);
 
     if (is2D()) {
       fpCoefficients = new float[4][3];
@@ -1337,110 +1321,12 @@ public class Graph {
   // DRAWING STUFF
 
   /**
-   * Returns the visual hints flag.
-   */
-  public int visualHints() {
-    return this.visualHintMask;
-  }
-
-  /**
-   * Low level setting of visual flags. You'd prefer {@link #setAxesVisualHint(boolean)},
-   * {@link #setGridVisualHint(boolean)}, and
-   * {@link #setPickingVisualHint(boolean)}, unless you want to set them all at once,
-   * e.g., {@code setVisualHints(Scene.AXES | Scene.GRID | Scene.PATHS | Scene.PICKING)}.
-   */
-  public void setVisualHints(int flag) {
-    visualHintMask = flag;
-  }
-
-  /**
-   * Toggles the state of {@link #gridVisualHint()}.
-   *
-   * @see #setGridVisualHint(boolean)
-   */
-  public void toggleGridVisualHint() {
-    setGridVisualHint(!gridVisualHint());
-  }
-
-  /**
-   * Toggles the state of {@link #axesVisualHint()}.
-   *
-   * @see #axesVisualHint()
-   * @see #setAxesVisualHint(boolean)
-   */
-  public void toggleAxesVisualHint() {
-    setAxesVisualHint(!axesVisualHint());
-  }
-
-  /**
-   * Toggles the state of {@link #pickingVisualHint()}.
-   *
-   * @see #setPickingVisualHint(boolean)
-   */
-  public void togglePickingVisualhint() {
-    setPickingVisualHint(!pickingVisualHint());
-  }
-
-  /**
-   * Returns {@code true} if grid is currently being drawn and {@code false} otherwise.
-   */
-  public boolean gridVisualHint() {
-    return ((visualHintMask & GRID) != 0);
-  }
-
-  /**
-   * Returns {@code true} if axes are currently being drawn and {@code false} otherwise.
-   */
-  public boolean axesVisualHint() {
-    return ((visualHintMask & AXES) != 0);
-  }
-
-  /**
-   * Returns {@code true} if the picking selection visual hint is currently being drawn
-   * and {@code false} otherwise.
-   */
-  public boolean pickingVisualHint() {
-    return ((visualHintMask & PICKING) != 0);
-  }
-
-  /**
-   * Sets the display of the grid according to {@code draw}
-   */
-  public void setGridVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= GRID;
-    else
-      visualHintMask &= ~GRID;
-  }
-
-  /**
-   * Sets the display of the axes according to {@code draw}
-   */
-  public void setAxesVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= AXES;
-    else
-      visualHintMask &= ~AXES;
-  }
-
-  /**
-   * Sets the display of the interactive nodes' selection hints according to {@code draw}
-   */
-  public void setPickingVisualHint(boolean draw) {
-    if (draw)
-      visualHintMask |= PICKING;
-    else
-      visualHintMask &= ~PICKING;
-  }
-
-  /**
    * Called before your main drawing and performs the following:
    * <ol>
    * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Calls {@link #proscenium()}</li>
-   * <li>Calls {@link #displayVisualHints()}.</li>
    * </ol>
    *
    * @see #postDraw()
@@ -1467,10 +1353,8 @@ public class Graph {
       lastEqUpdate = frameCount;
     }
     */
-    // 3. Alternative use only
+    // 2. Alternative use only
     proscenium();
-    // 4. Display visual hints
-    displayVisualHints(); // abstract
   }
 
   /**
@@ -1489,32 +1373,6 @@ public class Graph {
     timingHandler().handle();
     // 2. Agents
     inputHandler().handle();
-  }
-
-  /**
-   * Internal use. Display various on-screen visual hints to be called from
-   * {@link #postDraw()}.
-   */
-  protected void displayVisualHints() {
-    if (gridVisualHint())
-      drawGridHint();
-    if (axesVisualHint())
-      drawAxesHint();
-    if (pickingVisualHint())
-      drawPickingHint();
-    //TODO restore
-    /*
-    if (pathsVisualHint())
-      drawPathsHint();
-    if (zoomVisualHint())
-      drawZoomWindowHint();
-    if (rotateVisualHint())
-      drawScreenRotateHint();
-    if (eye().anchorFlag)
-      drawAnchorHint();
-    if (eye().pupFlag)
-      drawPointUnderPixelHint();
-    */
   }
 
   /**
@@ -2655,11 +2513,11 @@ public class Graph {
    * @see #fitBallInterpolation()
    */
   public void interpolateTo(Frame fr, float duration) {
-    interpolator.stopInterpolation();
-    interpolator.deletePath();
+    interpolator.stop();
+    interpolator.clear();
     interpolator.addKeyFrame(eye().detach());
     interpolator.addKeyFrame(fr, duration);
-    interpolator.startInterpolation();
+    interpolator.start();
   }
 
   /**
@@ -2675,8 +2533,8 @@ public class Graph {
    * fitted.
    */
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
-    interpolator.stopInterpolation();
-    interpolator.deletePath();
+    interpolator.stop();
+    interpolator.clear();
     interpolator.addKeyFrame(eye().detach());
     Frame originalFrame = eye();
     Frame tempFrame = eye().detach();
@@ -2684,7 +2542,7 @@ public class Graph {
     fitScreenRegion(rectangle);
     setEye(originalFrame);
     interpolator.addKeyFrame(tempFrame);
-    interpolator.startInterpolation();
+    interpolator.start();
   }
 
   /**
@@ -2696,8 +2554,8 @@ public class Graph {
    * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
    */
   public void fitBallInterpolation() {
-    interpolator.stopInterpolation();
-    interpolator.deletePath();
+    interpolator.stop();
+    interpolator.clear();
     interpolator.addKeyFrame(eye().detach());
     Frame originalFrame = eye();
     Frame tempFrame = eye().detach();
@@ -2705,7 +2563,7 @@ public class Graph {
     fitBall();
     setEye(originalFrame);
     interpolator.addKeyFrame(tempFrame);
-    interpolator.startInterpolation();
+    interpolator.start();
   }
 
   /**

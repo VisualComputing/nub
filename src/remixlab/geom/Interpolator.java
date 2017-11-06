@@ -23,7 +23,7 @@ import java.util.ListIterator;
  * <p>
  * A Interpolator holds keyFrames (that define a path) and, optionally, a
  * reference to a Frame of your application (which will be interpolated). In this case,
- * when the user {@link #startInterpolation()}, the Interpolator regularly updates
+ * when the user {@link #start()}, the Interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
  * Here is a typical utilization example (see also ProScene's FrameInterpolation and
@@ -39,7 +39,7 @@ import java.util.ListIterator;
  * {@code kfi.addKeyFrame( new Frame( new Vector(1,0,0), new Quaternion() ) );}<br>
  * {@code kfi.addKeyFrame( new Frame( new Vector(2,1,0), new Quaternion() ) );}<br>
  * {@code // ...and so on for all the keyFrames.}<br>
- * {@code kfi.startInterpolation();}<br>
+ * {@code kfi.start();}<br>
  * <p>
  * {@code //mainDrawingLoop() should look like:}<br>
  * {@code graph.pushModelView();}<br>
@@ -49,30 +49,30 @@ import java.util.ListIterator;
  * {@code graph.popModelView();}<br>
  * <p>
  * The keyFrames are defined by a Frame and a time, expressed in seconds. The time has to
- * be monotonously increasing over keyFrames. When {@link #interpolationSpeed()} equals
+ * be monotonously increasing over keyFrames. When {@link #speed()} equals
  * 1.0 (default value), these times correspond to actual user's seconds during
  * interpolation (provided that your main loop is fast enough). The interpolation is then
  * real-time: the keyFrames will be reached at their {@link #keyFrameTime(int)}.
  * <p>
  * <h3>Interpolation details</h3>
  * <p>
- * When the user {@link #startInterpolation()}, a timer is started which will update the
+ * When the user {@link #start()}, a timer is started which will update the
  * {@link #frame()}'s position, orientation and magnitude every
- * {@link #interpolationPeriod()} milliseconds. This update increases the
- * {@link #interpolationTime()} by {@link #interpolationPeriod()} *
- * {@link #interpolationSpeed()} milliseconds.
+ * {@link #period()} milliseconds. This update increases the
+ * {@link #time()} by {@link #period()} *
+ * {@link #speed()} milliseconds.
  * <p>
  * Note that this mechanism ensures that the number of interpolation steps is constant and
  * equal to the total path {@link #duration()} divided by the
- * {@link #interpolationPeriod()} * {@link #interpolationSpeed()}. This is especially
+ * {@link #period()} * {@link #speed()}. This is especially
  * useful for benchmarking or movie creation (constant number of snapshots).
  * <p>
- * The interpolation is stopped when {@link #interpolationTime()} is greater than the
- * {@link #lastTime()} (unless loopInterpolation() is {@code true}).
+ * The interpolation is stopped when {@link #time()} is greater than the
+ * {@link #lastTime()} (unless loop() is {@code true}).
  * <p>
  * <b>Attention:</b> If a Constraint is attached to the {@link #frame()} (see
  * {@link Frame#constraint()}), it should be deactivated before
- * {@link #interpolationStarted()}, otherwise the interpolated motion (computed as if
+ * {@link #started()}, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
  */
 public class Interpolator {
@@ -210,8 +210,8 @@ public class Interpolator {
    * <p>
    * The {@link #frame()} can be set or changed using {@link #setFrame(Frame)}.
    * <p>
-   * {@link #interpolationTime()}, {@link #interpolationSpeed()} and
-   * {@link #interpolationPeriod()} are set to their default values.
+   * {@link #time()}, {@link #speed()} and
+   * {@link #period()} are set to their default values.
    */
   public Interpolator(Graph g, Frame frame) {
     graph = g;
@@ -317,7 +317,7 @@ public class Interpolator {
   /**
    * Returns the associated Frame that is interpolated by the Interpolator.
    * <p>
-   * When {@link #interpolationStarted()}, this Frame's position, orientation and
+   * When {@link #started()}, this Frame's position, orientation and
    * magnitude will regularly be updated by a timer, so that they follow the
    * Interpolator path.
    * <p>
@@ -339,11 +339,11 @@ public class Interpolator {
    * Returns the current interpolation time (in seconds) along the Interpolator
    * path.
    * <p>
-   * This time is regularly updated when {@link #interpolationStarted()}. Can be set
-   * directly with {@link #setInterpolationTime(float)} or
+   * This time is regularly updated when {@link #started()}. Can be set
+   * directly with {@link #setTime(float)} or
    * {@link #interpolateAtTime(float)}.
    */
-  public float interpolationTime() {
+  public float time() {
     return interpolationTm;
   }
 
@@ -355,25 +355,25 @@ public class Interpolator {
    * <p>
    * A negative value will result in a reverse interpolation of the keyFrames.
    *
-   * @see #interpolationPeriod()
+   * @see #period()
    */
-  public float interpolationSpeed() {
+  public float speed() {
     return interpolationSpd;
   }
 
   /**
    * Returns the current interpolation period, expressed in milliseconds. The update of
    * the {@link #frame()} state will be done by a timer at this period when
-   * {@link #interpolationStarted()}.
+   * {@link #started()}.
    * <p>
-   * This period (multiplied by {@link #interpolationSpeed()}) is added to the
-   * {@link #interpolationTime()} at each update, and the {@link #frame()} state is
+   * This period (multiplied by {@link #speed()}) is added to the
+   * {@link #time()} at each update, and the {@link #frame()} state is
    * modified accordingly (see {@link #interpolateAtTime(float)}). Default value is 40
    * milliseconds.
    *
-   * @see #setInterpolationPeriod(int)
+   * @see #setPeriod(int)
    */
-  public int interpolationPeriod() {
+  public int period() {
     return period;
   }
 
@@ -381,110 +381,98 @@ public class Interpolator {
    * Returns {@code true} when the interpolation is played in an infinite loop.
    * <p>
    * When {@code false} (default), the interpolation stops when
-   * {@link #interpolationTime()} reaches {@link #firstTime()} (with negative
-   * {@link #interpolationSpeed()}) or {@link #lastTime()}.
+   * {@link #time()} reaches {@link #firstTime()} (with negative
+   * {@link #speed()}) or {@link #lastTime()}.
    * <p>
-   * {@link #interpolationTime()} is otherwise reset to {@link #firstTime()} (+
-   * {@link #interpolationTime()} - {@link #lastTime()}) (and inversely for negative
-   * {@link #interpolationSpeed()}) and interpolation continues.
+   * {@link #time()} is otherwise reset to {@link #firstTime()} (+
+   * {@link #time()} - {@link #lastTime()}) (and inversely for negative
+   * {@link #speed()}) and interpolation continues.
    */
-  public boolean loopInterpolation() {
+  public boolean loop() {
     return lpInterpolation;
   }
 
   /**
-   * Sets the {@link #interpolationTime()}.
+   * Sets the {@link #time()}.
    * <p>
    * <b>Attention:</b> The {@link #frame()} state is not affected by this method. Use this
    * function to define the starting time of a future interpolation (see
-   * {@link #startInterpolation()}). Use {@link #interpolateAtTime(float)} to actually
+   * {@link #start()}). Use {@link #interpolateAtTime(float)} to actually
    * interpolate at a given time.
    */
-  public void setInterpolationTime(float time) {
+  public void setTime(float time) {
     interpolationTm = time;
   }
 
   /**
-   * Sets the {@link #interpolationSpeed()}. Negative or null values are allowed.
+   * Sets the {@link #speed()}. Negative or null values are allowed.
    */
-  public void setInterpolationSpeed(float speed) {
+  public void setSpeed(float speed) {
     interpolationSpd = speed;
   }
 
   /**
-   * Sets the {@link #interpolationPeriod()}. Should positive.
+   * Sets the {@link #period()}. Should positive.
    */
-  public void setInterpolationPeriod(int myPeriod) {
+  public void setPeriod(int myPeriod) {
     if (myPeriod > 0)
       period = myPeriod;
   }
 
   /**
-   * Convenience function that simply calls {@code setLoopInterpolation(true)}.
+   * Convenience function that simply calls {@code setLoop(true)}.
    */
-  public void setLoopInterpolation() {
-    setLoopInterpolation(true);
+  public void setLoop() {
+    setLoop(true);
   }
 
   /**
-   * Sets the {@link #loopInterpolation()} value.
+   * Sets the {@link #loop()} value.
    */
-  public void setLoopInterpolation(boolean loop) {
+  public void setLoop(boolean loop) {
     lpInterpolation = loop;
   }
 
   /**
    * Returns {@code true} when the interpolation is being performed. Use
-   * {@link #startInterpolation()}, {@link #stopInterpolation()} or
-   * {@link #toggleInterpolation()} to modify this state.
+   * {@link #start()} or {@link #stop()} to modify this state.
    */
-  public boolean interpolationStarted() {
+  public boolean started() {
     return interpolationStrt;
   }
 
   /**
-   * Calls {@link #startInterpolation()} or {@link #stopInterpolation()}, depending on
-   * {@link #interpolationStarted()} .
-   */
-  public void toggleInterpolation() {
-    if (interpolationStarted())
-      stopInterpolation();
-    else
-      startInterpolation();
-  }
-
-  /**
-   * Updates {@link #frame()} state according to current {@link #interpolationTime()}.
-   * Then adds {@link #interpolationPeriod()}* {@link #interpolationSpeed()} to
-   * {@link #interpolationTime()}.
+   * Updates {@link #frame()} state according to current {@link #time()}.
+   * Then adds {@link #period()}* {@link #speed()} to
+   * {@link #time()}.
    * <p>
-   * This internal method is called by a timer when {@link #interpolationStarted()}. It
-   * can be used for debugging purpose. {@link #stopInterpolation()} is called when
-   * {@link #interpolationTime()} reaches {@link #firstTime()} or {@link #lastTime()},
-   * unless {@link #loopInterpolation()} is {@code true}.
+   * This internal method is called by a timer when {@link #started()}. It
+   * can be used for debugging purpose. {@link #stop()} is called when
+   * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
+   * unless {@link #loop()} is {@code true}.
    */
   protected void update() {
-    interpolateAtTime(interpolationTime());
+    interpolateAtTime(time());
 
-    interpolationTm += interpolationSpeed() * interpolationPeriod() / 1000.0f;
+    interpolationTm += speed() * period() / 1000.0f;
 
-    if (interpolationTime() > keyFrameList.get(keyFrameList.size() - 1).time()) {
-      if (loopInterpolation())
-        setInterpolationTime(
+    if (time() > keyFrameList.get(keyFrameList.size() - 1).time()) {
+      if (loop())
+        setTime(
             keyFrameList.get(0).time() + interpolationTm - keyFrameList.get(keyFrameList.size() - 1).time());
       else {
         // Make sure last KeyFrame is reached and displayed
         interpolateAtTime(keyFrameList.get(keyFrameList.size() - 1).time());
-        stopInterpolation();
+        stop();
       }
-    } else if (interpolationTime() < keyFrameList.get(0).time()) {
-      if (loopInterpolation())
-        setInterpolationTime(
+    } else if (time() < keyFrameList.get(0).time()) {
+      if (loop())
+        setTime(
             keyFrameList.get(keyFrameList.size() - 1).time() - keyFrameList.get(0).time() + interpolationTm);
       else {
         // Make sure first KeyFrame is reached and displayed
         interpolateAtTime(keyFrameList.get(0).time());
-        stopInterpolation();
+        stop();
       }
     }
   }
@@ -499,73 +487,73 @@ public class Interpolator {
   }
 
   /**
-   * Convenience function that simply calls {@code startInterpolation(-1)}.
+   * Convenience function that simply calls {@code start(-1)}.
    *
-   * @see #startInterpolation(int)
+   * @see #start(int)
    */
-  public void startInterpolation() {
-    startInterpolation(-1);
+  public void start() {
+    start(-1);
   }
 
   /**
    * Starts the interpolation process.
    * <p>
-   * A timer is started with an {@link #interpolationPeriod()} period that updates the
+   * A timer is started with an {@link #period()} period that updates the
    * {@link #frame()}'s position, orientation and magnitude.
-   * {@link #interpolationStarted()} will return {@code true} until
-   * {@link #stopInterpolation()} or {@link #toggleInterpolation()} is called.
+   * {@link #started()} will return {@code true} until
+   * {@link #stop()} is called.
    * <p>
-   * If {@code period} is positive, it is set as the new {@link #interpolationPeriod()}.
-   * The previous {@link #interpolationPeriod()} is used otherwise (default).
+   * If {@code period} is positive, it is set as the new {@link #period()}.
+   * The previous {@link #period()} is used otherwise (default).
    * <p>
-   * If {@link #interpolationTime()} is larger than {@link #lastTime()},
-   * {@link #interpolationTime()} is reset to {@link #firstTime()} before interpolation
-   * starts (and inversely for negative {@link #interpolationSpeed()}.
+   * If {@link #time()} is larger than {@link #lastTime()},
+   * {@link #time()} is reset to {@link #firstTime()} before interpolation
+   * starts (and inversely for negative {@link #speed()}.
    * <p>
-   * Use {@link #setInterpolationTime(float)} before calling this method to change the
-   * starting {@link #interpolationTime()}.
+   * Use {@link #setTime(float)} before calling this method to change the
+   * starting {@link #time()}.
    * <p>
    * <b>Attention:</b> The keyFrames must be defined (see
-   * {@link #addKeyFrame(Frame, float)}) before you startInterpolation(), or else
+   * {@link #addKeyFrame(Frame, float)}) before you start(), or else
    * the interpolation will naturally immediately stop.
    */
-  public void startInterpolation(int myPeriod) {
-    if(interpolationStarted())
-      stopInterpolation();
+  public void start(int myPeriod) {
+    if(started())
+      stop();
     if (myPeriod >= 0)
-      setInterpolationPeriod(myPeriod);
+      setPeriod(myPeriod);
 
     if (!keyFrameList.isEmpty()) {
-      if ((interpolationSpeed() > 0.0) && (interpolationTime() >= keyFrameList.get(keyFrameList.size() - 1).time()))
-        setInterpolationTime(keyFrameList.get(0).time());
-      if ((interpolationSpeed() < 0.0) && (interpolationTime() <= keyFrameList.get(0).time()))
-        setInterpolationTime(keyFrameList.get(keyFrameList.size() - 1).time());
+      if ((speed() > 0.0) && (time() >= keyFrameList.get(keyFrameList.size() - 1).time()))
+        setTime(keyFrameList.get(0).time());
+      if ((speed() < 0.0) && (time() <= keyFrameList.get(0).time()))
+        setTime(keyFrameList.get(keyFrameList.size() - 1).time());
       if (keyFrameList.size() > 1)
-        interpolationTimerTask.run(interpolationPeriod());
+        interpolationTimerTask.run(period());
       interpolationStrt = true;
       update();
     }
   }
 
   /**
-   * Stops an interpolation started with {@link #startInterpolation()}. See
-   * {@link #interpolationStarted()} and {@link #toggleInterpolation()}.
+   * Stops an interpolation started with {@link #start()}. See
+   * {@link #started()}.
    */
-  public void stopInterpolation() {
+  public void stop() {
     interpolationTimerTask.stop();
     interpolationStrt = false;
   }
 
   /**
-   * Stops the interpolation and resets {@link #interpolationTime()} to the
+   * Stops the interpolation and resets {@link #time()} to the
    * {@link #firstTime()}.
    * <p>
    * If desired, call {@link #interpolateAtTime(float)} after this method to actually move
    * the {@link #frame()} to {@link #firstTime()}.
    */
-  public void resetInterpolation() {
-    stopInterpolation();
-    setInterpolationTime(firstTime());
+  public void reset() {
+    stop();
+    setTime(firstTime());
   }
 
   /**
@@ -614,12 +602,12 @@ public class Interpolator {
     valuesAreValid = false;
     pathIsValid = false;
     currentFrmValid = false;
-    resetInterpolation();
+    reset();
   }
 
   /**
    * Remove KeyFrame according to {@code index} in the list and
-   * {@link #stopInterpolation()} if {@link #interpolationStarted()}. If
+   * {@link #stop()} if {@link #started()}. If
    * {@code index < 0 || index >= keyFr.size()} the call is silently ignored.
    */
   public void removeKeyFrame(int index) {
@@ -628,19 +616,19 @@ public class Interpolator {
     valuesAreValid = false;
     pathIsValid = false;
     currentFrmValid = false;
-    if (interpolationStarted())
-      stopInterpolation();
+    if (started())
+      stop();
     KeyFrame kf = keyFrameList.remove(index);
     if(kf.frame() instanceof Node)
       graph.pruneBranch((Node)kf.frm);
-    setInterpolationTime(firstTime());
+    setTime(firstTime());
   }
 
   /**
    * Removes all keyFrames from the path. The {@link #numberOfKeyFrames()} is set to 0.
    */
-  public void deletePath() {
-    stopInterpolation();
+  public void clear() {
+    stop();
     ListIterator<KeyFrame> it = keyFrameList.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
@@ -902,15 +890,16 @@ public class Interpolator {
 
   /**
    * Interpolate {@link #frame()} at time {@code time} (expressed in seconds).
-   * {@link #interpolationTime()} is set to {@code time} and {@link #frame()} is set
+   * {@link #time()} is set to {@code time} and {@link #frame()} is set
    * accordingly.
    * <p>
-   * If you simply want to change {@link #interpolationTime()} but not the
-   * {@link #frame()} state, use {@link #setInterpolationTime(float)} instead.
+   * If you simply want to change {@link #time()} but not the
+   * {@link #frame()} state, use {@link #setTime(float)} instead.
    */
+  //TODO rename me as atTime() ??
   public void interpolateAtTime(float time) {
     this.checkValidity();
-    setInterpolationTime(time);
+    setTime(time);
 
     if ((keyFrameList.isEmpty()) || (frame() == null))
       return;
