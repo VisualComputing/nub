@@ -135,6 +135,7 @@ public class Node extends Frame implements Grabber {
   protected TimingTask flyTimerTask;
   protected Vector flyDisp;
   protected static final long FLY_UPDATE_PERDIOD = 20;
+  //TODO move to Frame? see Graph.setUpVector
   protected Vector upVector;
   protected Graph graph;
 

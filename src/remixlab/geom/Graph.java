@@ -1334,25 +1334,11 @@ public class Graph {
   public void preDraw() {
     // 1. Eye, raster graph
     matrixHandler().bind();
-    if (areBoundaryEquationsEnabled()) {
-      if(eye() instanceof Node) {
-        if(( ((Node)eye()).lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
-          updateBoundaryEquations();
-          lastEqUpdate = TimingHandler.frameCount;
-        }
-      }
-      else {
-        updateBoundaryEquations();
-        lastEqUpdate = TimingHandler.frameCount;
-      }
-    }
-    //TODO really needs checking. Previously we went like this:
-    /*
+    //TODO really needs checking
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
       updateBoundaryEquations();
-      lastEqUpdate = frameCount;
+      lastEqUpdate = TimingHandler.frameCount;
     }
-    */
     // 2. Alternative use only
     proscenium();
   }
@@ -2899,9 +2885,7 @@ public class Graph {
    * @see #lastNonEyeUpdate()
    */
   public long lastUpdate() {
-    if(eye() instanceof Node)
-      return Math.max(((Node)eye()).lastUpdate(), lastNonEyeUpdate());
-    return lastNonEyeUpdate();
+    return Math.max(eye().lastUpdate(), lastNonEyeUpdate());
   }
 
   /**
