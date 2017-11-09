@@ -71,7 +71,7 @@ public class Box {
       //DrawingUtils.drawAxes(parent, PApplet.max(w,h,d)*1.3f);
       scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
     scene.pg().noStroke();
-    if (iFrame.grabsInput(scene.motionAgent()))
+    if (iFrame.grabsInput(scene.mouseAgent()))
       scene.pg().fill(255, 0, 0);
     else
       scene.pg().fill(getColor());

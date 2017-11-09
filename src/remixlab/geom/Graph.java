@@ -10,7 +10,6 @@
 
 package remixlab.geom;
 
-import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
 import remixlab.bias.Agent;
 import remixlab.bias.InputHandler;
 import remixlab.primitives.*;
@@ -45,8 +44,7 @@ import java.util.List;
  * details please refer to the {@link remixlab.fpstiming.TimingHandler} class.</li>
  * <li>An {@link #inputHandler()} which handles all user input through
  * {@link Agent}s (for details please refer to the
- * {@link InputHandler} class). The {@link #inputHandler()} holds a
- * (default) {@link #motionAgent()} and a (default) {@link #keyAgent()} which should
+ * {@link InputHandler} class). The {@link #inputHandler()} holds agents which should
  * be instantiated by derived classes at construction time.</li>
  * <li>A {@link #matrixHandler()} which handles matrix operations either through the
  * {@link MatrixHandler} or through a third party matrix stack
@@ -87,10 +85,7 @@ public class Graph {
   protected TimingHandler tHandler;
   protected InputHandler iHandler;
 
-  // 4. Agents
-  protected Agent defMotionAgent, defKeyboardAgent;
-
-  // 5. Graph
+  // 4. Graph
   protected List<Node> seeds;
   public int nodeCount;
   public long lastNonEyeUpdate = 0;
@@ -139,9 +134,8 @@ public class Graph {
    * (such as Processing) provides its own matrix handling.</li>
    * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
-   * <li>Instantiate the {@link #motionAgent()} and the {@link #keyAgent()} and
-   * enable them (register them at the {@link #inputHandler()}) and possibly some other
-   * {@link Agent}s as well and .</li>
+   * <li>Instantiate some agents and enable them (register them at the
+   * {@link #inputHandler()}).</li>
    * <li>Call {@link #init()} at the end of the constructor.</li>
    * </ol>
    *
@@ -816,98 +810,22 @@ public class Graph {
     return inputHandler().isInputGrabber(node);
   }
 
-  // Keys
+  // Agent wrappers
 
-  /**
-   * Returns the default {@link Agent} key agent.
-   *
-   * @see #motionAgent()
-   */
-  public Agent keyAgent() {
-    return defKeyboardAgent;
+  public boolean registerAgent(Agent agent) {
+    return inputHandler().registerAgent(agent);
   }
 
-  /**
-   * Returns {@code true} if the {@link #keyAgent()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #enableKeyAgent()
-   * @see #disableKeyAgent()
-   * @see #isMotionAgentEnabled()
-   */
-  public boolean isKeyAgentEnabled() {
-    return inputHandler().isAgentRegistered(keyAgent());
+  public boolean isAgentRegistered(Agent agent) {
+    return inputHandler().isAgentRegistered(agent);
   }
 
-  /**
-   * Enables key handling through the {@link #keyAgent()}.
-   *
-   * @see #isKeyAgentEnabled()
-   * @see #disableKeyAgent()
-   * @see #enableMotionAgent()
-   */
-  public void enableKeyAgent() {
-    if (!inputHandler().isAgentRegistered(keyAgent())) {
-      inputHandler().registerAgent(keyAgent());
-    }
+  public boolean unregisterAgent(Agent agent) {
+    return inputHandler().unregisterAgent(agent);
   }
 
-  // Motion agent
-
-  /**
-   * Returns the default motion agent.
-   *
-   * @see #keyAgent()
-   */
-  public Agent motionAgent() {
-    return defMotionAgent;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #motionAgent()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #enableMotionAgent()
-   * @see #disableMotionAgent()
-   * @see #isKeyAgentEnabled()
-   */
-  public boolean isMotionAgentEnabled() {
-    return inputHandler().isAgentRegistered(motionAgent());
-  }
-
-  /**
-   * Enables motion handling through the {@link #motionAgent()}.
-   *
-   * @see #isMotionAgentEnabled()
-   * @see #disableMotionAgent()
-   * @see #enableKeyAgent()
-   */
-  public void enableMotionAgent() {
-    if (!inputHandler().isAgentRegistered(motionAgent())) {
-      inputHandler().registerAgent(motionAgent());
-    }
-  }
-
-  /**
-   * Disables the default {@link Agent} and returns it.
-   *
-   * @see #isKeyAgentEnabled()
-   * @see #enableMotionAgent()
-   * @see #disableMotionAgent()
-   */
-  public boolean disableKeyAgent() {
-    return inputHandler().unregisterAgent(keyAgent());
-  }
-
-  /**
-   * Disables the default motion agent and returns it.
-   *
-   * @see #isMotionAgentEnabled()
-   * @see #enableMotionAgent()
-   * @see #enableKeyAgent()
-   */
-  public boolean disableMotionAgent() {
-    return inputHandler().unregisterAgent(motionAgent());
+  public void unregisterAgents() {
+    inputHandler().unregisterAgents();
   }
 
   // FPSTiming STUFF
