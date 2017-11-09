@@ -18,6 +18,8 @@ import remixlab.bias.event.*;
 import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
 import remixlab.primitives.*;
+import remixlab.primitives.constraint.AxisPlaneConstraint;
+import remixlab.primitives.constraint.LocalConstraint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -201,12 +203,19 @@ public class Node extends Frame implements Grabber {
    */
   protected Node(Graph scn, Node referenceFrame, Vector p, Quaternion r, float s) {
     super(referenceFrame, p, r, s);
-
     graph = scn;
     id = ++graph().nodeCount;
     // unlikely but theoretically possible
     if (id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+
+    if(graph().is2D()) {
+      LocalConstraint constraint2D = new LocalConstraint();
+      //constraint2D.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
+      constraint2D.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(0, 0, 1));
+      setConstraint(constraint2D);
+    }
+
     setFlySpeed(0.01f * graph().radius());
     upVector = new Vector(0.0f, 1.0f, 0.0f);
     visit = true;

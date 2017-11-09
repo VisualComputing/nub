@@ -10,6 +10,7 @@
 
 package remixlab.geom;
 
+import com.sun.org.apache.bcel.internal.generic.BREAKPOINT;
 import remixlab.bias.Agent;
 import remixlab.bias.InputHandler;
 import remixlab.primitives.*;
@@ -78,7 +79,6 @@ public class Graph {
   protected int startCoordCalls;
   // size and dim
   protected int width, height;
-  protected boolean twod;
 
   // 2. Matrix helper
   protected MatrixHandler matrixHandler;
@@ -103,6 +103,8 @@ public class Graph {
     VISIBLE, SEMIVISIBLE, INVISIBLE
   }
 
+  Type tp;
+
   /**
    * Enumerates the two possible types of Camera.
    * <p>
@@ -110,13 +112,20 @@ public class Graph {
    * this Type into account.
    */
   public enum Type {
-    PERSPECTIVE, ORTHOGRAPHIC
+    PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
   }
 
   private float zNearCoef;
   private float zClippingCoef;
-  //TODO fix me
-  private Type tp = Type.PERSPECTIVE; // PERSPECTIVE or ORTHOGRAPHIC
+
+  /**
+   * Same as {@code this(Type.PERSPECTIVE, w, h)}
+   *
+   * @see #Graph(Type, int, int)
+   */
+  public Graph(int w, int h) {
+    this(Type.PERSPECTIVE, w, h);
+  }
 
   /**
    * Default constructor which defines a right-handed OpenGL compatible Scene with its own
@@ -143,7 +152,8 @@ public class Graph {
    * @see #setEye(Frame)
    */
   //TODO graph.get()
-  public Graph(int w, int h) {
+  public Graph(Type t, int w, int h) {
+    setType(t);
     setWidth(w);
     setHeight(h);
 
@@ -177,9 +187,7 @@ public class Graph {
     enableBoundaryEquations(false);
 
     // eye stuff
-    //TODO is3D() is missing above
-    //if(is3D()) {
-      //TODO only 3D
+    if(is3D()) {
       setType(Type.PERSPECTIVE);
       setZNearCoefficient(0.005f);
       setZClippingCoefficient((float) Math.sqrt(3.0f));
@@ -189,9 +197,7 @@ public class Graph {
       //setPhysicalDistanceToScreen(0.5f);
       //setPhysicalScreenWidth(0.4f);
       // focusDistance is set from setFieldOfView()
-
-      //computeProjection();
-    //}
+    }
   }
 
   // dimensions
@@ -1042,8 +1048,12 @@ public class Graph {
   //TODO pass a Matrix param!
   public Matrix computeProjection() {
     Matrix m = new Matrix();
-    float ZNear = zNear();
-    float ZFar = zFar();
+    //float ZNear = zNear();
+    //float ZFar = zFar();
+
+    float ZNear = is2D() ? -10 : zNear();
+    float ZFar = is2D() ? 10 : zFar();
+
     switch (type()) {
       case PERSPECTIVE:
         // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
@@ -1053,9 +1063,9 @@ public class Graph {
         m.mat[11] = -1.0f;
         m.mat[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
         m.mat[15] = 0.0f;
-        // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(),
-        // zNear(), zFar() );
+        // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(), zNear(), zFar() );
         break;
+      case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = getBoundaryWidthHeight();
         m.mat[0] = 1.0f / wh[0];
@@ -1066,8 +1076,14 @@ public class Graph {
         m.mat[15] = 1.0f;
         // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
         break;
+      case CUSTOM:
+        return computeCustomProjection();
     }
     return m;
+  }
+
+  protected Matrix computeCustomProjection() {
+    return new Matrix();
   }
 
   /**
@@ -2164,7 +2180,7 @@ public class Graph {
    * @param winz                     Specify the window z coordinate.
    * @param objCoordinate            Return the computed object coordinates.
    */
-  public boolean unproject(float winx, float winy, float winz, float[] objCoordinate) {
+  protected boolean unproject(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
     if(matrixHandler().isProjectionViewInverseCached())
       projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
@@ -2772,12 +2788,11 @@ public class Graph {
   public void applyTransformation(Frame frame) {
     if (is2D()) {
       translate(frame.translation().x(), frame.translation().y());
-      rotate(frame.rotation().angle());
+      rotate(frame.rotation().axis().vec[2] > 0 ? frame.rotation().angle() : -frame.rotation().angle());
       scale(frame.scaling(), frame.scaling());
     } else {
       translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
-      rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis().vec[0], ((Quaternion) frame.rotation()).axis().vec[1],
-          ((Quaternion) frame.rotation()).axis().vec[2]);
+      rotate(frame.rotation().angle(), (frame.rotation()).axis().vec[0], (frame.rotation()).axis().vec[1], (frame.rotation()).axis().vec[2]);
       scale(frame.scaling(), frame.scaling(), frame.scaling());
     }
   }
@@ -2791,9 +2806,8 @@ public class Graph {
     if (refFrame != null) {
       applyWorldTransformation(refFrame);
       applyTransformation(frame);
-    } else {
+    } else
       applyTransformation(frame);
-    }
   }
 
   /**
@@ -2863,7 +2877,7 @@ public class Graph {
    * @return true if the graph is 2D.
    */
   public boolean is2D() {
-    return twod;
+    return type() == Type.TWO_D;
   }
 
   /**
