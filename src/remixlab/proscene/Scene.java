@@ -128,7 +128,7 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, PGraphics)
    */
   public Scene(PApplet p, PGraphics pg, int x, int y) {
-    super(pg.width, pg.height);
+    super(pg instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pg.width, pg.height);
     // 1. P5 objects
     parent = p;
     mainPGraphics = pg;
@@ -160,11 +160,6 @@ public class Scene extends Graph implements PConstants {
 
     // 6. Init should be called only once
     init();
-  }
-
-  @Override
-  public boolean is3D() {
-    return (mainPGraphics instanceof PGraphics3D);
   }
 
   /**

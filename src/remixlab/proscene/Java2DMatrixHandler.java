@@ -42,13 +42,12 @@ class Java2DMatrixHandler extends MatrixHandler {
     cacheView(graph().computeView());
     cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vector pos = graph.eye().position();
-    //TODO needs test
     Quaternion o = graph.eye().orientation();
     translate(graph.width() / 2, graph.height() / 2);
     if (graph.isRightHanded())
       scale(1, -1);
     scale(1 / graph.eye().magnitude(), 1 / graph.eye().magnitude());
-    rotate(-o.angle());
+    rotate(o.axis().vec[2] > 0 ? -o.angle() : o.angle());
     translate(-pos.x(), -pos.y());
   }
 
@@ -60,12 +59,11 @@ class Java2DMatrixHandler extends MatrixHandler {
   @Override
   public void beginScreenDrawing() {
     Vector pos = graph.eye().position();
-    //TODO needs test
     Quaternion o = graph.eye().orientation();
 
     pushModelView();
     translate(pos.x(), pos.y());
-    rotate(o.angle());
+    rotate(o.axis().vec[2] > 0 ? o.angle() : -o.angle());
     scale(graph.eye().magnitude(), graph.eye().magnitude());
     if (graph.isRightHanded())
       scale(1, -1);
