@@ -9,7 +9,7 @@ import remixlab.proscene.Scene;
 
 public class TwoD extends PApplet {
     Scene scene;
-    Node node, frame;
+    Node eye, node;
     boolean target = true;
 
     @Override
@@ -24,11 +24,11 @@ public class TwoD extends PApplet {
 
         //scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        frame = new InteractiveFrame();
         node = new InteractiveFrame();
+        eye = new InteractiveFrame();
 
-        scene.setEye(node);
-        scene.setDefaultNode(node);
+        scene.setEye(eye);
+        scene.setDefaultNode(eye);
         scene.setRadius(200);
         scene.fitBallInterpolation();
     }
@@ -37,21 +37,23 @@ public class TwoD extends PApplet {
     public void draw() {
         background(0);
         scene.drawAxes(scene.radius());
-        if(target) {
-            pushStyle();
-            stroke(255);
-            strokeWeight(2);
-            scene.drawPickingTarget(frame);
-            popStyle();
-        }
         pushMatrix();
-        scene.applyTransformation(frame);
-        if (frame.grabsInput(scene.motionAgent()))
+        scene.applyTransformation(node);
+        if (node.grabsInput())
             fill(255, 0, 0);
         else
             fill(0,255,0);
         rect(0,0,50,100);
         popMatrix();
+
+        if(target) {
+            pushStyle();
+            stroke(255);
+            strokeWeight(2);
+            scene.drawPickingTarget(node);
+            popStyle();
+        }
+
         scene.beginScreenDrawing();
         fill(0, 0, 255);
         rect(80,80,50,100);
