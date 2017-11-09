@@ -10,11 +10,11 @@ import remixlab.proscene.Scene;
 public class TwoD extends PApplet {
     Scene scene;
     Node node, frame;
-    boolean target;
+    boolean target = true;
 
     @Override
     public void settings() {
-        size(800, 800, JAVA2D);
+        size(800, 800, P2D);
     }
 
     @Override
@@ -37,8 +37,13 @@ public class TwoD extends PApplet {
     public void draw() {
         background(0);
         scene.drawAxes(scene.radius());
-        if(target)
+        if(target) {
+            pushStyle();
+            stroke(255);
+            strokeWeight(2);
             scene.drawPickingTarget(frame);
+            popStyle();
+        }
         pushMatrix();
         scene.applyTransformation(frame);
         if (frame.grabsInput(scene.motionAgent()))
