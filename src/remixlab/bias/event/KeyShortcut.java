@@ -19,8 +19,8 @@ import remixlab.bias.Shortcut;
  * Virtual keys (e.g., right arrow key); or, 2. Key combinations (e.g., CTRL key + virtual
  * key representing 'a').
  */
-public final class KeyShortcut extends Shortcut {
-  protected final char key;
+public class KeyShortcut extends Shortcut {
+  protected char key;
 
   /**
    * Defines a key shortcut from the given character.

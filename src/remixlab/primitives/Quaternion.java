@@ -311,7 +311,7 @@ public class Quaternion {
   /**
    * Sets the value of this Quaternion to the conjugate of itself.
    */
-  public final void conjugate() {
+  public void conjugate() {
     this.quat[0] = -this.quat[0];
     this.quat[1] = -this.quat[1];
     this.quat[2] = -this.quat[2];
@@ -322,7 +322,7 @@ public class Quaternion {
    *
    * @param q1 the source vector
    */
-  public final void conjugate(Quaternion q1) {
+  public void conjugate(Quaternion q1) {
     this.quat[0] = -q1.quat[0];
     this.quat[1] = -q1.quat[1];
     this.quat[2] = -q1.quat[2];
@@ -332,7 +332,7 @@ public class Quaternion {
   /**
    * Negates all the coefficients of the Quaternion.
    */
-  public final void negate() {
+  public void negate() {
     this.quat[0] = -this.quat[0];
     this.quat[1] = -this.quat[1];
     this.quat[2] = -this.quat[2];
@@ -346,7 +346,7 @@ public class Quaternion {
    *
    * @param b the Quaternion
    */
-  public final float dotProduct(Quaternion b) {
+  public float dotProduct(Quaternion b) {
     return this.quat[0] * b.quat[0] + this.quat[1] * b.quat[1] + this.quat[2] * b.quat[2] + this.quat[3] * b.quat[3];
   }
 
@@ -358,11 +358,11 @@ public class Quaternion {
    * @param a the first Quaternion
    * @param b the second Quaternion
    */
-  public final static float dot(Quaternion a, Quaternion b) {
+  public static float dot(Quaternion a, Quaternion b) {
     return a.quat[0] * b.quat[0] + a.quat[1] * b.quat[1] + a.quat[2] * b.quat[2] + a.quat[3] * b.quat[3];
   }
 
-  public final void compose(Quaternion q) {
+  public void compose(Quaternion q) {
     multiply(q);
   }
 
@@ -372,7 +372,7 @@ public class Quaternion {
    *
    * @param q1 the other Quaternion
    */
-  public final void multiply(Quaternion q1) {
+  public void multiply(Quaternion q1) {
     float x, y, w;
 
     w = this.quat[3] * q1.quat[3] - this.quat[0] * q1.quat[0] - this.quat[1] * q1.quat[1] - this.quat[2] * q1.quat[2];
@@ -385,7 +385,7 @@ public class Quaternion {
     this.quat[1] = y;
   }
 
-  public final static Quaternion compose(Quaternion q1, Quaternion q2) {
+  public static Quaternion compose(Quaternion q1, Quaternion q2) {
     return multiply(q1, q2);
   }
 
@@ -395,7 +395,7 @@ public class Quaternion {
    * @param q1 the first Quaternion
    * @param q2 the second Quaternion
    */
-  public final static Quaternion multiply(Quaternion q1, Quaternion q2) {
+  public static Quaternion multiply(Quaternion q1, Quaternion q2) {
     float x, y, z, w;
     w = q1.quat[3] * q2.quat[3] - q1.quat[0] * q2.quat[0] - q1.quat[1] * q2.quat[1] - q1.quat[2] * q2.quat[2];
     x = q1.quat[3] * q2.quat[0] + q2.quat[3] * q1.quat[0] + q1.quat[1] * q2.quat[2] - q1.quat[2] * q2.quat[1];
@@ -412,7 +412,7 @@ public class Quaternion {
    * @see #rotate(Vector)
    * @see #inverseRotate(Vector)
    */
-  public final Vector multiply(Vector v) {
+  public Vector multiply(Vector v) {
     return this.rotate(v);
   }
 
@@ -425,7 +425,7 @@ public class Quaternion {
    * @see #rotate(Vector)
    * @see #inverseRotate(Vector)
    */
-  public static final Vector multiply(Quaternion q1, Vector v) {
+  public static Vector multiply(Quaternion q1, Vector v) {
     return q1.rotate(v);
   }
 
@@ -435,7 +435,7 @@ public class Quaternion {
    *
    * @param q1 the other Quaternion
    */
-  public final void multiplyInverse(Quaternion q1) {
+  public void multiplyInverse(Quaternion q1) {
     Quaternion tempQuaternion = new Quaternion(q1);
     tempQuaternion.invert();
     this.multiply(tempQuaternion);
@@ -448,7 +448,7 @@ public class Quaternion {
    * @param q1 the first Quaternion
    * @param q2 the second Quaternion
    */
-  public static final Quaternion multiplyInverse(Quaternion q1, Quaternion q2) {
+  public static Quaternion multiplyInverse(Quaternion q1, Quaternion q2) {
     Quaternion tempQuaternion = new Quaternion(q2);
     tempQuaternion.invert();
     return Quaternion.multiply(q1, tempQuaternion);
@@ -464,7 +464,7 @@ public class Quaternion {
    *
    * @see #invert()
    */
-  public final Quaternion inverse() {
+  public Quaternion inverse() {
     Quaternion tempQuaternion = new Quaternion(this);
     tempQuaternion.invert();
     return tempQuaternion;
@@ -475,7 +475,7 @@ public class Quaternion {
    *
    * @see #inverse()
    */
-  public final void invert() {
+  public void invert() {
     float sqNorm = squaredNorm(this);
     this.quat[3] /= sqNorm;
     this.quat[0] /= -sqNorm;
@@ -488,7 +488,7 @@ public class Quaternion {
    *
    * @param q1 the Quaternion to be inverted
    */
-  public final void invert(Quaternion q1) {
+  public void invert(Quaternion q1) {
     float sqNorm = squaredNorm(q1);
     this.quat[3] = q1.quat[3] / sqNorm;
     this.quat[0] = -q1.quat[0] / sqNorm;
@@ -499,7 +499,7 @@ public class Quaternion {
   /**
    * Normalizes the value of this Quaternion in place and return its {@code norm}.
    */
-  public final float normalize() {
+  public float normalize() {
     float norm = (float) Math.sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]
         + this.quat[3] * this.quat[3]);
     if (norm > 0.0f) {
@@ -521,7 +521,7 @@ public class Quaternion {
    *
    * @param v the Vector
    */
-  public final Vector rotate(Vector v) {
+  public Vector rotate(Vector v) {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
     float q22 = 2.0f * this.quat[2] * this.quat[2];
@@ -547,7 +547,7 @@ public class Quaternion {
    *
    * @param v the Vector
    */
-  public final Vector inverseRotate(Vector v) {
+  public Vector inverseRotate(Vector v) {
     Quaternion tempQuaternion = new Quaternion(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
     tempQuaternion.invert();
     return tempQuaternion.rotate(v);
@@ -737,7 +737,7 @@ public class Quaternion {
    *
    * @see #fromRotatedBasis(Vector, Vector, Vector)
    */
-  public final void fromMatrix(Matrix glMatrix) {
+  public void fromMatrix(Matrix glMatrix) {
     Vector x = new Vector(glMatrix.mat[0], glMatrix.mat[4], glMatrix.mat[8]);
     Vector y = new Vector(glMatrix.mat[1], glMatrix.mat[5], glMatrix.mat[9]);
     Vector z = new Vector(glMatrix.mat[2], glMatrix.mat[6], glMatrix.mat[10]);
@@ -756,7 +756,7 @@ public class Quaternion {
    * @see #fromRotatedBasis(Vector, Vector, Vector)
    * @see #Quaternion(Vector, Vector)
    */
-  public final void fromRotatedBasis(Vector X, Vector Y, Vector Z) {
+  public void fromRotatedBasis(Vector X, Vector Y, Vector Z) {
     float threeXthree[][] = new float[3][3];
     float normX = X.magnitude();
     float normY = Y.magnitude();
@@ -811,7 +811,7 @@ public class Quaternion {
    *
    * @see #angle()
    */
-  public final Vector axis() {
+  public Vector axis() {
     Vector res = new Vector(x(), y(), z());
     float sinus = res.magnitude();
     if (sinus != 0)
@@ -827,7 +827,7 @@ public class Quaternion {
    *
    * @see #axis()
    */
-  public final float angle() {
+  public float angle() {
     return 2.0f * (float) Math.acos(w());
   }
 
@@ -838,7 +838,7 @@ public class Quaternion {
   /**
    * Returns the Matrix which represents the rotation matrix associated with the Quaternion.
    */
-  public final Matrix matrix() {
+  public Matrix matrix() {
     float q00 = 2.0f * this.quat[0] * this.quat[0];
     float q11 = 2.0f * this.quat[1] * this.quat[1];
     float q22 = 2.0f * this.quat[2] * this.quat[2];
@@ -883,7 +883,7 @@ public class Quaternion {
    * {@link #inverseMatrix()}. Use it immediately (as in
    * {@code applyMatrix(q.inverseMatrix())}).
    */
-  public final Matrix inverseMatrix() {
+  public Matrix inverseMatrix() {
     Quaternion tempQuaternion = new Quaternion(this.quat[0], this.quat[1], this.quat[2], this.quat[3]);
     tempQuaternion.invert();
     return tempQuaternion.matrix();
@@ -894,7 +894,7 @@ public class Quaternion {
    *
    * @see #exp()
    */
-  public final Quaternion log() {
+  public Quaternion log() {
     // Warning: this method should not normalize the Quaternion
     float len = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
@@ -912,7 +912,7 @@ public class Quaternion {
    *
    * @see #log()
    */
-  public final Quaternion exp() {
+  public Quaternion exp() {
     float theta = (float) Math
         .sqrt(this.quat[0] * this.quat[0] + this.quat[1] * this.quat[1] + this.quat[2] * this.quat[2]);
 
@@ -933,7 +933,7 @@ public class Quaternion {
    * {@code randomDir = Quaternion.multiply(Quaternion.randomQuat(),
    * randomDir);}
    */
-  public final static Quaternion randomQuat() {
+  public static Quaternion randomQuat() {
     float seed = (float) Math.random();
     float r1 = (float) Math.sqrt(1.0f - seed);
     float r2 = (float) Math.sqrt(seed);
@@ -949,7 +949,7 @@ public class Quaternion {
    * <p>
    * See {@link #slerp(Quaternion, Quaternion, float, boolean)} for details.
    */
-  public static final Quaternion slerp(Quaternion a, Quaternion b, float t) {
+  public static Quaternion slerp(Quaternion a, Quaternion b, float t) {
     return Quaternion.slerp(a, b, t, true);
   }
 
@@ -969,7 +969,7 @@ public class Quaternion {
    * @param t         the t interpolation parameter
    * @param allowFlip tells whether or not the interpolation allows axis flip
    */
-  public static final Quaternion slerp(Quaternion a, Quaternion b, float t, boolean allowFlip) {
+  public static Quaternion slerp(Quaternion a, Quaternion b, float t, boolean allowFlip) {
     // Warning: this method should not normalize the Quaternion
     float cosAngle = Quaternion.dot(a, b);
 
@@ -1010,7 +1010,7 @@ public class Quaternion {
    * @param b   the second Quaternion
    * @param t   the t interpolation parameter
    */
-  public static final Quaternion squad(Quaternion a, Quaternion tgA, Quaternion tgB, Quaternion b, float t) {
+  public static Quaternion squad(Quaternion a, Quaternion tgA, Quaternion tgB, Quaternion b, float t) {
     Quaternion ab = Quaternion.slerp(a, b, t);
     Quaternion tg = Quaternion.slerp(tgA, tgB, t, false);
     return Quaternion.slerp(ab, tg, 2.0f * t * (1.0f - t), false);
@@ -1024,7 +1024,7 @@ public class Quaternion {
    * @param a the first Quaternion
    * @param b the second Quaternion
    */
-  public static final Quaternion lnDif(Quaternion a, Quaternion b) {
+  public static Quaternion lnDif(Quaternion a, Quaternion b) {
     Quaternion dif = a.inverse();
     dif.multiply(b);
 
@@ -1040,7 +1040,7 @@ public class Quaternion {
    * @param center the second Quaternion
    * @param after  the third Quaternion
    */
-  public static final Quaternion squadTangent(Quaternion before, Quaternion center, Quaternion after) {
+  public static Quaternion squadTangent(Quaternion before, Quaternion center, Quaternion after) {
     Quaternion l1 = Quaternion.lnDif(center, before);
     Quaternion l2 = Quaternion.lnDif(center, after);
     Quaternion e = new Quaternion();

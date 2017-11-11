@@ -31,8 +31,8 @@ import remixlab.bias.event.*;
  * </ol>
  */
 public class Shortcut {
-  protected final int mask;
-  protected final int id;
+  protected int mask;
+  protected int id;
 
   /**
    * Constructs an "empty" shortcut. Same as: {@link #Shortcut(int)} with the integer

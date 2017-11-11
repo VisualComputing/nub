@@ -22,7 +22,7 @@ import remixlab.bias.event.*;
  * @see remixlab.proscene.KeyAgent
  */
 public class MouseAgent extends Agent {
-  public static final int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
+  public static int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
           LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
   protected float xSens = 1f;
   protected float ySens = 1f;

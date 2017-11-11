@@ -53,8 +53,8 @@ import java.util.List;
 public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean javaTiming;
-  public static final String prettyVersion = "3.0.0";
-  public static final String version = "32";
+  public static String prettyVersion = "3.0.0";
+  public static String version = "32";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet parent;
@@ -2153,7 +2153,7 @@ public class Scene extends Graph implements PConstants {
     pg.pushStyle();
     pg.beginShape(LINES);
     for (int i = 0; i <= nbSubdivisions; ++i) {
-      final float pos = size * (2.0f * i / nbSubdivisions - 1.0f);
+      float pos = size * (2.0f * i / nbSubdivisions - 1.0f);
       vertex(pg, pos, -size);
       vertex(pg, pos, +size);
       vertex(pg, -size, pos);

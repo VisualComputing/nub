@@ -27,7 +27,7 @@ import remixlab.bias.Event;
  * the platform where the framework is running.
  */
 public class KeyEvent extends Event {
-  protected final char key;
+  protected char key;
 
   /**
    * Constructs a keyevent with the <b>modifiers</b> and <b>vk</b> defining its

@@ -23,9 +23,9 @@ public class MatrixHandler {
   protected Matrix projectionViewMatrix, projectionViewInverseMatrix;
   protected boolean isProjViwInvCached, projectionViewMatHasInv;
 
-  static final int MATRIX_STACK_DEPTH = 32;
-  static final String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
-  static final String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
+  static int MATRIX_STACK_DEPTH = 32;
+  static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
+  static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
   float[][] matrixStack = new float[MATRIX_STACK_DEPTH][16];
   int matrixStackDepth;
   float[][] pmatrixStack = new float[MATRIX_STACK_DEPTH][16];
@@ -81,14 +81,14 @@ public class MatrixHandler {
   /**
    * Caches the projection matrix.
    */
-  public final void cacheProjection(Matrix m) {
+  public void cacheProjection(Matrix m) {
     projection.set(m);
   }
 
   /**
    * Returns the cached projection matrix.
    */
-  public final Matrix cacheProjection() {
+  public Matrix cacheProjection() {
     return projection;
   }
 
@@ -109,14 +109,14 @@ public class MatrixHandler {
   /**
    * Caches the view matrix.
    */
-  public final void cacheView(Matrix m) {
+  public void cacheView(Matrix m) {
     view.set(m);
   }
 
   /**
    * Returns the cached view matrix.
    */
-  public final Matrix cacheView() {
+  public Matrix cacheView() {
     return view;
   }
 
@@ -139,7 +139,7 @@ public class MatrixHandler {
    *
    * @see #isProjectionViewInverseCached()
    */
-  public final void cacheProjectionView(Matrix pv) {
+  public void cacheProjectionView(Matrix pv) {
     projectionViewMatrix.set(pv);
     if (isProjectionViewInverseCached()) {
       if (projectionViewInverseMatrix == null)
@@ -151,7 +151,7 @@ public class MatrixHandler {
   /**
    * Returns the cached projection times view matrix.
    */
-  public final Matrix cacheProjectionView() {
+  public Matrix cacheProjectionView() {
     return projectionViewMatrix;
   }
 
@@ -181,7 +181,7 @@ public class MatrixHandler {
   /**
    * Returns the cached projection times view inverse matrix.
    */
-  public final Matrix cacheProjectionViewInverse() {
+  public Matrix cacheProjectionViewInverse() {
     if (!isProjectionViewInverseCached())
       throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
     return projectionViewInverseMatrix;

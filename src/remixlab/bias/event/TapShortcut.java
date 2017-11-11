@@ -23,7 +23,7 @@ import remixlab.bias.Shortcut;
  * Note that click shortcuts should have at least one click.
  */
 public class TapShortcut extends Shortcut {
-  protected final int numberOfTaps;
+  protected int numberOfTaps;
 
   /**
    * Defines a single click shortcut from the given gesture-id.

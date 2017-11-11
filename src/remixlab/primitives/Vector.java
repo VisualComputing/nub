@@ -679,7 +679,7 @@ public class Vector {
    * first point, 0.1 is very near the first point, 0.5 is half-way in between, etc.
    */
   //TODO decide where to leave me
-  public static final float lerp(float start, float stop, float amt) {
+  public static float lerp(float start, float stop, float amt) {
     return start + (stop - start) * amt;
   }
 

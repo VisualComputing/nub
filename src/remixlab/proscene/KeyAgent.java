@@ -22,7 +22,7 @@ import remixlab.bias.event.KeyEvent;
  * @see remixlab.proscene.MouseAgent
  */
 public class KeyAgent extends Agent {
-  public static final int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
+  public static int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
   // public static int LEFT_KEY = PApplet.LEFT, RIGHT_KEY = PApplet.RIGHT,
   // UP_KEY = PApplet.UP, DOWN_KEY = PApplet.DOWN;
   protected Scene scene;

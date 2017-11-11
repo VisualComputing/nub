@@ -136,7 +136,7 @@ public class Node extends Frame implements Grabber {
   protected float flySpd;
   protected TimingTask flyTimerTask;
   protected Vector flyDisp;
-  protected static final long FLY_UPDATE_PERDIOD = 20;
+  protected static long FLY_UPDATE_PERDIOD = 20;
   //TODO move to Frame? see Graph.setUpVector
   protected Vector upVector;
   protected Graph graph;
@@ -400,7 +400,7 @@ public class Node extends Frame implements Grabber {
    * Returns a list of the frame children, i.e., frame which {@link #reference()} is
    * this.
    */
-  public final List<Node> children() {
+  public List<Node> children() {
     return childrenList;
   }
 
@@ -832,42 +832,42 @@ public class Node extends Frame implements Grabber {
   /**
    * Defines the {@link #rotationSensitivity()}.
    */
-  public final void setRotationSensitivity(float sensitivity) {
+  public void setRotationSensitivity(float sensitivity) {
     rotSensitivity = sensitivity;
   }
 
   /**
    * Defines the {@link #scalingSensitivity()}.
    */
-  public final void setScalingSensitivity(float sensitivity) {
+  public void setScalingSensitivity(float sensitivity) {
     sclSensitivity = sensitivity;
   }
 
   /**
    * Defines the {@link #translationSensitivity()}.
    */
-  public final void setTranslationSensitivity(float sensitivity) {
+  public void setTranslationSensitivity(float sensitivity) {
     transSensitivity = sensitivity;
   }
 
   /**
    * Defines the {@link #spinningSensitivity()}.
    */
-  public final void setSpinningSensitivity(float sensitivity) {
+  public void setSpinningSensitivity(float sensitivity) {
     spngSensitivity = sensitivity;
   }
 
   /**
    * Defines the {@link #wheelSensitivity()}.
    */
-  public final void setWheelSensitivity(float sensitivity) {
+  public void setWheelSensitivity(float sensitivity) {
     wheelSensitivity = sensitivity;
   }
 
   /**
    * Defines the {@link #keyboardSensitivity()}.
    */
-  public final void setKeyboardSensitivity(float sensitivity) {
+  public void setKeyboardSensitivity(float sensitivity) {
     keySensitivity = sensitivity;
   }
 
@@ -885,7 +885,7 @@ public class Node extends Frame implements Grabber {
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
-  public final float rotationSensitivity() {
+  public float rotationSensitivity() {
     return rotSensitivity;
   }
 
@@ -902,7 +902,7 @@ public class Node extends Frame implements Grabber {
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
-  public final float scalingSensitivity() {
+  public float scalingSensitivity() {
     return sclSensitivity;
   }
 
@@ -923,7 +923,7 @@ public class Node extends Frame implements Grabber {
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
-  public final float translationSensitivity() {
+  public float translationSensitivity() {
     return transSensitivity;
   }
 
@@ -947,7 +947,7 @@ public class Node extends Frame implements Grabber {
    * @see #wheelSensitivity()
    * @see #setDamping(float)
    */
-  public final float spinningSensitivity() {
+  public float spinningSensitivity() {
     return spngSensitivity;
   }
 
@@ -998,7 +998,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #isFlying()
    */
-  public final boolean isSpinning() {
+  public boolean isSpinning() {
     return spinningTimerTask.isActive();
   }
 
@@ -1018,7 +1018,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #flyDirection()
    */
-  public final Quaternion spinningRotation() {
+  public Quaternion spinningRotation() {
     return spngRotation;
   }
 
@@ -1028,7 +1028,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #setFlyDirection(Vector)
    */
-  public final void setSpinningRotation(Quaternion spinningRotation) {
+  public void setSpinningRotation(Quaternion spinningRotation) {
     spngRotation = spinningRotation;
   }
 
@@ -1041,7 +1041,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #damping()
    */
-  public final void stopSpinning() {
+  public void stopSpinning() {
     spinningTimerTask.stop();
   }
 
@@ -2003,7 +2003,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Use for first person (move forward/backward, lookAround) and cad motion actions.
    */
-  protected final void updateUpVector() {
+  protected void updateUpVector() {
     upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
@@ -2494,7 +2494,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * {@link #isSpinning()}
    */
-  public final boolean isFlying() {
+  public boolean isFlying() {
     return flyTimerTask.isActive();
   }
 
@@ -2508,7 +2508,7 @@ public class Node extends Frame implements Grabber {
    * @see #damping()
    * @see #spin()
    */
-  public final void stopFlying() {
+  public void stopFlying() {
     flyTimerTask.stop();
   }
 
@@ -2524,7 +2524,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #spinningRotation()
    */
-  public final Vector flyDirection() {
+  public Vector flyDirection() {
     return fDir;
   }
 
@@ -2533,7 +2533,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #setSpinningRotation(Quaternion)
    */
-  public final void setFlyDirection(Vector dir) {
+  public void setFlyDirection(Vector dir) {
     fDir = dir;
   }
 

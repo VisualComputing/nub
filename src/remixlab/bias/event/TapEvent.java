@@ -19,7 +19,7 @@ import remixlab.bias.Event;
  */
 public class TapEvent extends Event {
   protected float x, y;
-  protected final int numberOfTaps;
+  protected int numberOfTaps;
 
   /**
    * Constructs a single TapEvent at the given position and from the given

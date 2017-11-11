@@ -299,7 +299,7 @@ public class Frame {
    * Returns {@code true} if setting {@code frame} as the Frame's
    * {@link #reference()} would create a loop in the Frame hierarchy.
    */
-  public final boolean settingAsReferenceWillCreateALoop(Frame frame) {
+  public boolean settingAsReferenceWillCreateALoop(Frame frame) {
     Frame f = frame;
     while (f != null) {
       if (f == Frame.this)
@@ -344,7 +344,7 @@ public class Frame {
    * @see #setTranslation(Vector)
    * @see #setTranslationWithConstraint(Vector)
    */
-  public final Vector translation() {
+  public Vector translation() {
     return trans;
   }
 
@@ -356,7 +356,7 @@ public class Frame {
    * Use {@link #setTranslationWithConstraint(Vector)} to take into account the potential
    * {@link #constraint()} of the Frame.
    */
-  public final void setTranslation(Vector t) {
+  public void setTranslation(Vector t) {
     trans = t;
     modified();
   }
@@ -369,7 +369,7 @@ public class Frame {
    * @see #setPositionWithConstraint(Vector)
    * @see #setScaling(float)
    */
-  public final void setTranslationWithConstraint(Vector translation) {
+  public void setTranslationWithConstraint(Vector translation) {
     Vector deltaT = Vector.subtract(translation, this.translation());
     if (constraint() != null)
       deltaT = constraint().constrainTranslation(deltaT, this);
@@ -380,28 +380,28 @@ public class Frame {
   /**
    * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
    */
-  public final void setTranslation(float x, float y) {
+  public void setTranslation(float x, float y) {
     setTranslation(new Vector(x, y));
   }
 
   /**
    * Same as {@link #setTranslation(Vector)}, but with {@code float} parameters.
    */
-  public final void setTranslation(float x, float y, float z) {
+  public void setTranslation(float x, float y, float z) {
     setTranslation(new Vector(x, y, z));
   }
 
   /**
    * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
-  public final void translate(float x, float y, float z) {
+  public void translate(float x, float y, float z) {
     translate(new Vector(x, y, z));
   }
 
   /**
    * Same as {@link #translate(Vector)} but with {@code float} parameters.
    */
-  public final void translate(float x, float y) {
+  public void translate(float x, float y) {
     translate(new Vector(x, y));
   }
 
@@ -435,7 +435,7 @@ public class Frame {
    * @see #setPosition(Vector)
    * @see #translation()
    */
-  public final Vector position() {
+  public Vector position() {
     return inverseCoordinatesOf(new Vector(0, 0, 0));
   }
 
@@ -446,7 +446,7 @@ public class Frame {
    * to the {@link #reference()}). The potential {@link #constraint()} of the Frame
    * is not taken into account, use {@link #setPositionWithConstraint(Vector)} instead.
    */
-  public final void setPosition(Vector p) {
+  public void setPosition(Vector p) {
     if (reference() != null)
       setTranslation(reference().coordinatesOf(p));
     else
@@ -456,14 +456,14 @@ public class Frame {
   /**
    * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
-  public final void setPosition(float x, float y) {
+  public void setPosition(float x, float y) {
     setPosition(new Vector(x, y));
   }
 
   /**
    * Same as {@link #setPosition(Vector)}, but with {@code float} parameters.
    */
-  public final void setPosition(float x, float y, float z) {
+  public void setPosition(float x, float y, float z) {
     setPosition(new Vector(x, y, z));
   }
 
@@ -474,7 +474,7 @@ public class Frame {
    * @see #setOrientationWithConstraint(Quaternion)
    * @see #setTranslationWithConstraint(Vector)
    */
-  public final void setPositionWithConstraint(Vector position) {
+  public void setPositionWithConstraint(Vector position) {
     if (reference() != null)
       position = reference().coordinatesOf(position);
 
@@ -493,7 +493,7 @@ public class Frame {
    * @see #setRotation(Quaternion)
    * @see #setRotationWithConstraint(Quaternion)
    */
-  public final Quaternion rotation() {
+  public Quaternion rotation() {
     return rot;
   }
 
@@ -512,7 +512,7 @@ public class Frame {
    * @see #rotation()
    * @see #setTranslation(Vector)
    */
-  public final void setRotation(Quaternion r) {
+  public void setRotation(Quaternion r) {
     rot = r;
     modified();
   }
@@ -520,7 +520,7 @@ public class Frame {
   /**
    * Same as {@link #setRotation(Quaternion)} but with {@code float} Quaternion parameters.
    */
-  public final void setRotation(float x, float y, float z, float w) {
+  public void setRotation(float x, float y, float z, float w) {
     if (is2D()) {
       System.err.println("setRotation(float x, float y, float z, float w) is not available in 2D");
       return;
@@ -535,7 +535,7 @@ public class Frame {
    */
   //TODO Restore 2D
   /*
-  public final void setRotation(float a) {
+  public void setRotation(float a) {
     if (is3D()) {
       System.err.println("setRotation(float a) is not available in 3D");
       return;
@@ -552,7 +552,7 @@ public class Frame {
    * @see #setOrientationWithConstraint(Quaternion)
    * @see #setScaling(float)
    */
-  public final void setRotationWithConstraint(Quaternion rotation) {
+  public void setRotationWithConstraint(Quaternion rotation) {
     Quaternion deltaQ;
 
     deltaQ = Quaternion.compose(rotation().inverse(), rotation);
@@ -583,7 +583,7 @@ public class Frame {
    *
    * @see #translate(Vector)
    */
-  public final void rotate(Quaternion r) {
+  public void rotate(Quaternion r) {
     if (constraint() != null)
       rotation().compose(constraint().constrainRotation(r, this));
     else
@@ -602,7 +602,7 @@ public class Frame {
   /**
    * Same as {@link #rotate(Quaternion)} but with {@code float} rotation parameters.
    */
-  public final void rotate(float x, float y, float z, float w) {
+  public void rotate(float x, float y, float z, float w) {
     if (is2D()) {
       System.err.println("rotate(float x, float y, float z, float w) is not available in 2D");
       return;
@@ -683,7 +683,7 @@ public class Frame {
    * @see #setOrientation(Quaternion)
    * @see #rotation()
    */
-  public final Quaternion orientation() {
+  public Quaternion orientation() {
     Quaternion res = rotation().get();
     Frame fr = reference();
 
@@ -713,7 +713,7 @@ public class Frame {
    * is not taken into account, use {@link #setOrientationWithConstraint(Quaternion)}
    * instead.
    */
-  public final void setOrientation(Quaternion q) {
+  public void setOrientation(Quaternion q) {
     setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), q) : q);
     //TODO Restore 2D
     /*
@@ -730,7 +730,7 @@ public class Frame {
   /**
    * Same as {@link #setOrientation(Quaternion)}, but with {@code float} parameters.
    */
-  public final void setOrientation(float x, float y, float z, float w) {
+  public void setOrientation(float x, float y, float z, float w) {
     setOrientation(new Quaternion(x, y, z, w));
   }
 
@@ -741,7 +741,7 @@ public class Frame {
    * @see #setPositionWithConstraint(Vector)
    * @see #setRotationWithConstraint(Quaternion)
    */
-  public final void setOrientationWithConstraint(Quaternion orientation) {
+  public void setOrientationWithConstraint(Quaternion orientation) {
     if (reference() != null)
       orientation = Quaternion.compose(reference().orientation().inverse(), orientation);
     //TODO Restore 2D
@@ -767,7 +767,7 @@ public class Frame {
    *
    * @see #setScaling(float)
    */
-  public final float scaling() {
+  public float scaling() {
     return scl;
   }
 
@@ -778,7 +778,7 @@ public class Frame {
    * Use {@link #setMagnitude(float)} to define the world coordinates {@link #magnitude()}
    * .
    */
-  public final void setScaling(float s) {
+  public void setScaling(float s) {
     if (s > 0) {
       scl = s;
       modified();
@@ -820,7 +820,7 @@ public class Frame {
    * Use {@link #setScaling(float)} to define the local Frame scaling (with respect to the
    * {@link #reference()}).
    */
-  public final void setMagnitude(float m) {
+  public void setMagnitude(float m) {
     Frame refFrame = reference();
     if (refFrame != null)
       setScaling(m / refFrame.magnitude());
@@ -833,14 +833,14 @@ public class Frame {
   /**
    * Convenience function that simply calls {@code alignWithFrame(frame, false, 0.85f)}
    */
-  public final void alignWithFrame(Frame frame) {
+  public void alignWithFrame(Frame frame) {
     alignWithFrame(frame, false, 0.85f);
   }
 
   /**
    * Convenience function that simply calls {@code alignWithFrame(frame, move, 0.85f)}
    */
-  public final void alignWithFrame(Frame frame, boolean move) {
+  public void alignWithFrame(Frame frame, boolean move) {
     alignWithFrame(frame, move, 0.85f);
   }
 
@@ -848,7 +848,7 @@ public class Frame {
    * Convenience function that simply calls
    * {@code alignWithFrame(frame, false, threshold)}
    */
-  public final void alignWithFrame(Frame frame, float threshold) {
+  public void alignWithFrame(Frame frame, float threshold) {
     alignWithFrame(frame, false, threshold);
   }
 
@@ -874,7 +874,7 @@ public class Frame {
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #reference()}).
    */
-  public final void alignWithFrame(Frame frame, boolean move, float threshold) {
+  public void alignWithFrame(Frame frame, boolean move, float threshold) {
     Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
@@ -963,7 +963,7 @@ public class Frame {
   }
   //TODO Restore 2D
   /*
-  public final void alignWithFrame(Frame frame, boolean move, float threshold) {
+  public void alignWithFrame(Frame frame, boolean move, float threshold) {
     if (is3D()) {
       Vector[][] directions = new Vector[2][3];
 
@@ -1084,7 +1084,7 @@ public class Frame {
    * Simply uses an orthogonal projection. {@code direction} does not need to be
    * normalized.
    */
-  public final void projectOnLine(Vector origin, Vector direction) {
+  public void projectOnLine(Vector origin, Vector direction) {
     Vector position = position();
     Vector shift = Vector.subtract(origin, position);
     Vector proj = shift;
@@ -1274,7 +1274,7 @@ public class Frame {
    * The result is only valid until the next call to {@code matrix()} or
    * {@link #worldMatrix()}. Use it immediately (as above).
    */
-  public final Matrix matrix() {
+  public Matrix matrix() {
     Matrix pM = new Matrix();
 
     pM = rotation().matrix();
@@ -1323,7 +1323,7 @@ public class Frame {
    * <b>Attention:</b> The result is only valid until the next call to {@link #matrix()}
    * or {@code worldMatrix()}. Use it immediately (as above).
    */
-  public final Matrix worldMatrix() {
+  public Matrix worldMatrix() {
     if (reference() != null)
       return new Frame(position(), orientation(), magnitude()).matrix();
     else
@@ -1335,7 +1335,7 @@ public class Frame {
    *
    * @see #fromMatrix(Matrix, float)
    */
-  public final void fromMatrix(Matrix pM) {
+  public void fromMatrix(Matrix pM) {
     fromMatrix(pM, 1);
   }
 
@@ -1359,7 +1359,7 @@ public class Frame {
    * Frame coordinate system (including the world coordinate system). See
    * {@link #coordinatesOf(Vector)} and {@link #transformOf(Vector)}.
    */
-  public final void fromMatrix(Matrix pM, float scl) {
+  public void fromMatrix(Matrix pM, float scl) {
     if (pM.mat[15] == 0) {
       System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
       return;
@@ -1465,7 +1465,7 @@ public class Frame {
    * The resulting Frame has the same {@link #reference()} as the Frame and a
    * {@code null} {@link #constraint()}.
    */
-  public final Frame inverse() {
+  public Frame inverse() {
     Frame fr = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
     fr.setReference(reference());
     return fr;
@@ -1486,7 +1486,7 @@ public class Frame {
    * Use {@link #inverse()} for a local (i.e., with respect to {@link #reference()})
    * transformation inverse.
    */
-  public final Frame worldInverse() {
+  public Frame worldInverse() {
     return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
         1 / magnitude()));
   }
@@ -1499,7 +1499,7 @@ public class Frame {
    * <p>
    * {@link #coordinatesOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vector coordinatesOfFrom(Vector src, Frame from) {
+  public Vector coordinatesOfFrom(Vector src, Frame from) {
     if (this == from)
       return src;
     else if (reference() != null)
@@ -1514,7 +1514,7 @@ public class Frame {
    * <p>
    * {@link #coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vector coordinatesOfIn(Vector src, Frame in) {
+  public Vector coordinatesOfIn(Vector src, Frame in) {
     Frame fr = this;
     Vector res = src;
     while ((fr != null) && (fr != in)) {
@@ -1540,7 +1540,7 @@ public class Frame {
    *
    * @see #localTransformOf(Vector)
    */
-  public final Vector localCoordinatesOf(Vector src) {
+  public Vector localCoordinatesOf(Vector src) {
     return Vector.divide(rotation().inverseRotate(Vector.subtract(src, translation())), scaling());
   }
 
@@ -1551,7 +1551,7 @@ public class Frame {
    * {@link #inverseCoordinatesOf(Vector)} performs the inverse conversion.
    * {@link #transformOf(Vector)} converts vectors instead of coordinates.
    */
-  public final Vector coordinatesOf(Vector src) {
+  public Vector coordinatesOf(Vector src) {
     if (reference() != null)
       return localCoordinatesOf(reference().coordinatesOf(src));
     else
@@ -1566,7 +1566,7 @@ public class Frame {
    * <p>
    * {@link #transformOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vector transformOfFrom(Vector src, Frame from) {
+  public Vector transformOfFrom(Vector src, Frame from) {
     if (this == from)
       return src;
     else if (reference() != null)
@@ -1581,7 +1581,7 @@ public class Frame {
    * <p>
    * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public final Vector transformOfIn(Vector src, Frame in) {
+  public Vector transformOfIn(Vector src, Frame in) {
     Frame fr = this;
     Vector res = src;
     while ((fr != null) && (fr != in)) {
@@ -1605,7 +1605,7 @@ public class Frame {
    *
    * @see #localInverseTransformOf(Vector)
    */
-  public final Vector localInverseCoordinatesOf(Vector src) {
+  public Vector localInverseCoordinatesOf(Vector src) {
     return Vector.add(rotation().rotate(Vector.multiply(src, scaling())), translation());
   }
 
@@ -1616,7 +1616,7 @@ public class Frame {
    * {@link #coordinatesOf(Vector)} performs the inverse conversion. Use
    * {@link #inverseTransformOf(Vector)} to transform vectors instead of coordinates.
    */
-  public final Vector inverseCoordinatesOf(Vector src) {
+  public Vector inverseCoordinatesOf(Vector src) {
     Frame fr = this;
     Vector res = src;
     while (fr != null) {
@@ -1634,7 +1634,7 @@ public class Frame {
    * {@link #coordinatesOf(Vector)} converts coordinates instead of vectors (here only the
    * rotational part of the transformation is taken into account).
    */
-  public final Vector transformOf(Vector src) {
+  public Vector transformOf(Vector src) {
     if (reference() != null)
       return localTransformOf(reference().transformOf(src));
     else
@@ -1648,7 +1648,7 @@ public class Frame {
    * {@link #transformOf(Vector)} performs the inverse transformation. Use
    * {@link #inverseCoordinatesOf(Vector)} to transform coordinates instead of vectors.
    */
-  public final Vector inverseTransformOf(Vector src) {
+  public Vector inverseTransformOf(Vector src) {
     Frame fr = this;
     Vector res = src;
     while (fr != null) {
@@ -1667,7 +1667,7 @@ public class Frame {
    *
    * @see #localCoordinatesOf(Vector)
    */
-  public final Vector localTransformOf(Vector src) {
+  public Vector localTransformOf(Vector src) {
     return Vector.divide(rotation().inverseRotate(src), scaling());
   }
 
@@ -1680,7 +1680,7 @@ public class Frame {
    *
    * @see #localInverseCoordinatesOf(Vector)
    */
-  public final Vector localInverseTransformOf(Vector src) {
+  public Vector localInverseTransformOf(Vector src) {
     return rotation().rotate(Vector.multiply(src, scaling()));
   }
 }

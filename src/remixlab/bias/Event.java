@@ -38,17 +38,17 @@ import remixlab.bias.event.TapEvent;
  */
 public class Event {
   // modifier keys
-  public static final int NO_MODIFIER_MASK = 0;
-  public static final int NO_ID = 0;
-  public static final int SHIFT = 1 << 0;
-  public static final int CTRL = 1 << 1;
-  public static final int META = 1 << 2;
-  public static final int ALT = 1 << 3;
-  public static final int ALT_GRAPH = 1 << 4;
+  public static int NO_MODIFIER_MASK = 0;
+  public static int NO_ID = 0;
+  public static int SHIFT = 1 << 0;
+  public static int CTRL = 1 << 1;
+  public static int META = 1 << 2;
+  public static int ALT = 1 << 3;
+  public static int ALT_GRAPH = 1 << 4;
 
   private boolean fire, flush;
 
-  protected final int modifiers;
+  protected int modifiers;
   protected long timestamp;
   protected int id;
 

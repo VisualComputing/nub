@@ -254,7 +254,7 @@ public class Graph {
    * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
    * and {@link #aspectRatio()} (for frustum shape).
    */
-  public final Type type() {
+  public Type type() {
     return tp;
   }
 
@@ -265,7 +265,7 @@ public class Graph {
    * This method guarantees that the two frustum match in a plane normal to
    * {@link #viewDirection()}, passing through the arcball reference point.
    */
-  public final void setType(Type type) {
+  public void setType(Type type) {
     if (type != type()) {
       modified();
       this.tp = type;
@@ -403,7 +403,7 @@ public class Graph {
     float z = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius();
 
     // Prevents negative or null zNear values.
-    final float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
+    float zMin = zNearCoefficient() * zClippingCoefficient() * radius();
     if (z < zMin)
       switch (type()) {
         case PERSPECTIVE:
@@ -1952,7 +1952,7 @@ public class Graph {
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    */
-  public final Vector projectedCoordinatesOf(Vector src) {
+  public Vector projectedCoordinatesOf(Vector src) {
     return projectedCoordinatesOf(src, null);
   }
 
@@ -1969,7 +1969,7 @@ public class Graph {
    *
    * @see #unprojectedCoordinatesOf(Vector, Frame)
    */
-  public final Vector projectedCoordinatesOf(Vector src, Frame frame) {
+  public Vector projectedCoordinatesOf(Vector src, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
@@ -2036,7 +2036,7 @@ public class Graph {
    * <p>
    * #see {@link #unprojectedCoordinatesOf(Vector, Frame)}
    */
-  public final Vector unprojectedCoordinatesOf(Vector src) {
+  public Vector unprojectedCoordinatesOf(Vector src) {
     return this.unprojectedCoordinatesOf(src, null);
   }
 
@@ -2074,7 +2074,7 @@ public class Graph {
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public final Vector unprojectedCoordinatesOf(Vector src, Frame frame) {
+  public Vector unprojectedCoordinatesOf(Vector src, Frame frame) {
     float xyz[] = new float[3];
     // unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
@@ -2239,7 +2239,7 @@ public class Graph {
   /**
    * Returns the current {@link #eye()} type.
    */
-  public final Type eyeType() {
+  public Type eyeType() {
     return tp;
   }
 
@@ -2531,9 +2531,9 @@ public class Graph {
     convertClickToLine(center, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
-    final Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
+    Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
-    final Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
+    Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
     switch (type()) {
@@ -2562,7 +2562,7 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(final Point pixelInput, Vector orig, Vector dir) {
+  public void convertClickToLine(Point pixelInput, Vector orig, Vector dir) {
     Point pixel = new Point(pixelInput.x(), pixelInput.y());
 
     // lef-handed coordinate system correction
