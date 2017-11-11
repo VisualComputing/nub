@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The InputHandler object is the high level package handler which holds a collection of
+ * The InputHandler object is the high level package _handler which holds a collection of
  * {@link #agents()}, and an event dispatcher queue of
  * {@link Tuple}s ({@link #tupleQueue()}). Such tuple
  * represents a message passing to application objects, allowing an object to be
@@ -23,7 +23,7 @@ import java.util.List;
  * {@link Event}. For an introduction to BIAS please refer to
  * <a href="http://nakednous.github.io/projects/bias">this</a>.
  * <p>
- * At runtime, the inputGrabber handler should continuously run the two loops defined in
+ * At runtime, the inputGrabber _handler should continuously run the two loops defined in
  * {@link #handle()}. Therefore, simply attach a call to {@link #handle()} at the end of
  * your main event (drawing) loop for that to take effect.
  */
@@ -40,7 +40,7 @@ public class InputHandler {
   }
 
   /**
-   * Main handler method. Call it at the end of your main event (drawing) loop.
+   * Main _handler method. Call it at the end of your main event (drawing) loop.
    * <p>
    * The handle comprises the following two loops:
    * <p>
@@ -180,7 +180,7 @@ public class InputHandler {
   }
 
   /**
-   * Unregisters all agents from the handler.
+   * Unregisters all agents from the _handler.
    */
   public void unregisterAgents() {
     agents.clear();

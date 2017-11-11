@@ -41,7 +41,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   /**
-   * Constructs and adds this grabber to all agents belonging to the inputGrabber handler.
+   * Constructs and adds this grabber to all agents belonging to the inputGrabber _handler.
    *
    * @see InputHandler#agents()
    */
@@ -58,7 +58,7 @@ public abstract class GrabberObject implements Grabber {
   }
 
   /**
-   * Checks if the frame grabs inputGrabber from any agent registered at the given inputGrabber handler.
+   * Checks if the frame grabs inputGrabber from any agent registered at the given inputGrabber _handler.
    */
   public boolean grabsInput(InputHandler inputHandler) {
     for (Agent agent : inputHandler.agents()) {

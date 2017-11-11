@@ -1028,7 +1028,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the spinning motion started using {@link #startSpinning(MotionEvent, Quaternion)}
+   * Stops the spinning motion _started using {@link #startSpinning(MotionEvent, Quaternion)}
    * . {@link #isSpinning()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #spin()}, since spinning may be
@@ -1163,7 +1163,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Return 1 if mouse motion was started horizontally and -1 if it was more vertical.
+   * Return 1 if mouse motion was _started horizontally and -1 if it was more vertical.
    * Returns 0 if this could not be determined yet (perfect diagonal motion, rare).
    */
   protected int originalDirection(MotionEvent2 event) {
@@ -2494,7 +2494,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the tossing motion started using {@link #startFlying(MotionEvent, Vector)}.
+   * Stops the tossing motion _started using {@link #startFlying(MotionEvent, Vector)}.
    * {@link #isFlying()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #damping()}, since tossing may
@@ -2756,7 +2756,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Checks if the frame grabs inputGrabber from any agent registered at the graph inputGrabber handler.
+   * Checks if the frame grabs inputGrabber from any agent registered at the graph inputGrabber _handler.
    */
   public boolean grabsInput() {
     for (Agent agent : graph.inputHandler().agents()) {

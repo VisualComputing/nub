@@ -16,20 +16,20 @@ package remixlab.fpstiming;
  * implement.
  */
 public abstract class TimingTask implements Taskable {
-  protected Timer tmr;
+  protected Timer _timer;
 
   /**
    * Returns the timer instance.
    */
   public Timer timer() {
-    return tmr;
+    return _timer;
   }
 
   /**
    * Sets the timer instance.
    */
   public void setTimer(Timer t) {
-    tmr = t;
+    _timer = t;
   }
 
   // Wrappers

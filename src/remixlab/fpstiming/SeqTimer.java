@@ -14,18 +14,18 @@ package remixlab.fpstiming;
  * Sequential timers are single-threaded timers handled by a TimingHandler.
  */
 public class SeqTimer implements Timer {
-  protected Taskable task;
-  protected TimingHandler handler;
-  protected boolean active;
-  protected boolean runOnlyOnce;
-  private long counter;
-  private long prd;
-  private long startTime;
+  protected Taskable _task;
+  protected TimingHandler _handler;
+  protected boolean _active;
+  protected boolean _once;
+  private long _counter;
+  private long _period;
+  private long _startTime;
 
   /**
    * Defines a single shot sequential (single-threaded) timer.
    *
-   * @param h timing handler owner
+   * @param h timing _handler owner
    */
   public SeqTimer(TimingHandler h) {
     this(h, false, null);
@@ -34,7 +34,7 @@ public class SeqTimer implements Timer {
   /**
    * Defines a sequential (single-threaded) timer.
    *
-   * @param h          timing handler owner
+   * @param h          timing _handler owner
    * @param singleShot
    */
   public SeqTimer(TimingHandler h, boolean singleShot) {
@@ -46,28 +46,28 @@ public class SeqTimer implements Timer {
   }
 
   public SeqTimer(TimingHandler h, boolean singleShot, Taskable t) {
-    handler = h;
-    runOnlyOnce = singleShot;
-    task = t;
+    _handler = h;
+    _once = singleShot;
+    _task = t;
     create();
   }
 
   @Override
   public Taskable timingTask() {
-    return task;
+    return _task;
   }
 
   /**
    * Executes the callback method defined by the {@link #timingTask()}.
    * <p>
-   * <b>Note:</b> You should not call this method since it's done by the timing handler
+   * <b>Note:</b> You should not call this method since it's done by the timing _handler
    * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
    */
   protected boolean execute() {
     boolean result = trigggered();
     if (result) {
       timingTask().execute();
-      if (runOnlyOnce)
+      if (_once)
         inactivate();
     }
     return result;
@@ -76,7 +76,7 @@ public class SeqTimer implements Timer {
   @Override
   public void cancel() {
     stop();
-    handler.unregisterTask(this);
+    _handler.unregisterTask(this);
   }
 
   @Override
@@ -92,12 +92,12 @@ public class SeqTimer implements Timer {
 
   @Override
   public void run() {
-    if (prd <= 0)
+    if (_period <= 0)
       return;
     inactivate();
-    counter = 1;
-    active = true;
-    startTime = System.currentTimeMillis();
+    _counter = 1;
+    _active = true;
+    _startTime = System.currentTimeMillis();
   }
 
   @Override
@@ -107,7 +107,7 @@ public class SeqTimer implements Timer {
 
   @Override
   public boolean isActive() {
-    return active;
+    return _active;
   }
 
   // others
@@ -116,23 +116,23 @@ public class SeqTimer implements Timer {
    * Deactivates the SeqTimer.
    */
   public void inactivate() {
-    active = false;
+    _active = false;
   }
 
   /**
    * Returns {@code true} if the timer was triggered at the given frame.
    * <p>
-   * <b>Note:</b> You should not call this method since it's done by the timing handler
+   * <b>Note:</b> You should not call this method since it's done by the timing _handler
    * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
    */
   public boolean trigggered() {
-    if (!active)
+    if (!_active)
       return false;
 
-    long elapsedTime = System.currentTimeMillis() - startTime;
+    long elapsedTime = System.currentTimeMillis() - _startTime;
 
-    float timePerFrame = (1 / handler.frameRate()) * 1000;
-    long threshold = counter * prd;
+    float timePerFrame = (1 / _handler.frameRate()) * 1000;
+    long threshold = _counter * _period;
 
     boolean result = false;
     if (threshold >= elapsedTime) {
@@ -147,15 +147,15 @@ public class SeqTimer implements Timer {
     }
 
     if (result) {
-      counter++;
-      // if (prd < timePerFrame)
-      // System.out.println("Your current frame rate (~" + handler.frameRate() +
+      _counter++;
+      // if (_period < timePerFrame)
+      // System.out.println("Your current frame rate (~" + _handler.frameRate() +
       // " fps) is not high enough " + "to run the timer and reach the specified
-      // " + prd + " ms period, "
+      // " + _period + " ms period, "
       // + timePerFrame
       // + " ms period will be used instead. If you want to sustain a lower
       // timer " +
-      // "period, define a higher frame rate (minimum of " + 1000f / prd + "
+      // "period, define a higher frame rate (minimum of " + 1000f / _period + "
       // fps) " +
       // "before running the timer (you may need to simplify your drawing to
       // achieve it.)");
@@ -167,21 +167,21 @@ public class SeqTimer implements Timer {
 
   @Override
   public long period() {
-    return prd;
+    return _period;
   }
 
   @Override
   public void setPeriod(long period) {
-    prd = period;
+    _period = period;
   }
 
   @Override
   public boolean isSingleShot() {
-    return runOnlyOnce;
+    return _once;
   }
 
   @Override
   public void setSingleShot(boolean singleShot) {
-    runOnlyOnce = singleShot;
+    _once = singleShot;
   }
 }

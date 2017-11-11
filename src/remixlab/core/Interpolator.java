@@ -56,7 +56,7 @@ import java.util.ListIterator;
  * <p>
  * <h3>Interpolation details</h3>
  * <p>
- * When the user {@link #start()}, a timer is started which will update the
+ * When the user {@link #start()}, a timer is _started which will update the
  * {@link #frame()}'s position, orientation and magnitude every
  * {@link #period()} milliseconds. This update increases the
  * {@link #time()} by {@link #period()} *
@@ -442,7 +442,7 @@ public class Interpolator {
   }
 
   /**
-   * Same as {@code if(started()) stop(); else start();}
+   * Same as {@code if(_started()) stop(); else start();}
    *
    * @see #start()
    * @see #stop()
@@ -511,7 +511,7 @@ public class Interpolator {
   /**
    * Starts the interpolation process.
    * <p>
-   * A timer is started with an {@link #period()} period that updates the
+   * A timer is _started with an {@link #period()} period that updates the
    * {@link #frame()}'s position, orientation and magnitude.
    * {@link #started()} will return {@code true} until
    * {@link #stop()} is called.
@@ -549,7 +549,7 @@ public class Interpolator {
   }
 
   /**
-   * Stops an interpolation started with {@link #start()}. See
+   * Stops an interpolation _started with {@link #start()}. See
    * {@link #started()}.
    */
   public void stop() {

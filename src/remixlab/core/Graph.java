@@ -841,7 +841,7 @@ public class Graph {
 
   /**
    * Convenience wrapper function that simply calls
-   * {@code timingHandler().registerTask(task)}.
+   * {@code timingHandler().registerTask(_task)}.
    *
    * @see remixlab.fpstiming.TimingHandler#registerTask(TimingTask)
    */
@@ -851,7 +851,7 @@ public class Graph {
 
   /**
    * Convenience wrapper function that simply calls
-   * {@code timingHandler().unregisterTask(task)}.
+   * {@code timingHandler().unregisterTask(_task)}.
    */
   public void unregisterTimingTask(TimingTask task) {
     timingHandler().unregisterTask(task);
@@ -859,7 +859,7 @@ public class Graph {
 
   /**
    * Convenience wrapper function that simply returns
-   * {@code timingHandler().isTaskRegistered(task)}.
+   * {@code timingHandler().isTaskRegistered(_task)}.
    */
   public boolean isTimingTaskRegistered(TimingTask task) {
     return timingHandler().isTaskRegistered(task);

@@ -62,17 +62,17 @@ public interface Animator {
   void toggleAnimation();
 
   /**
-   * Returns {@code true} if animation was started and {@code false} otherwise.
+   * Returns {@code true} if animation was _started and {@code false} otherwise.
    */
   boolean animationStarted();
 
   /**
-   * Sets the timing handler.
+   * Sets the timing _handler.
    */
   void setTimingHandler(TimingHandler h);
 
   /**
-   * Returns the timing handler.
+   * Returns the timing _handler.
    */
   TimingHandler timingHandler();
 
