@@ -84,7 +84,7 @@ public class KeyAgent extends Agent {
     // released: mod: CTRL vkey: 49 description: VK_1
     // released: mod: CTRL vkey: 17 description: VK_CONTROL
     // pressed: mod: vkey: 27 description: VK_ESCAPE
-    // we need to bypass TYPE events when a press event generates an action on the trackedGrabber
+    // we need to bypass TYPE events when a press event generates an action on the _trackedGrabber
     // grabber
     press = e.getAction() == processing.event.KeyEvent.PRESS;
     release = e.getAction() == processing.event.KeyEvent.RELEASE;
@@ -103,14 +103,14 @@ public class KeyAgent extends Agent {
       bypass = poll(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
-      else if(defaultGrabber() != null)
+      else if(_defaultGrabber() != null)
         handle(currentEvent);
     }
     if (type && !bypass) {
       bypass = poll(currentEvent) != null;
       if (bypass)
         handle(currentEvent);
-      else if(defaultGrabber() != null)
+      else if(_defaultGrabber() != null)
         handle(currentEvent);
     }
     */
@@ -126,7 +126,7 @@ public class KeyAgent extends Agent {
   protected boolean update(Event event) {
     if(poll(event) != null)
       return handle(event);
-    //if(defaultGrabber() != null)
+    //if(_defaultGrabber() != null)
     //return handle(event);
     if(defaultGrabber() != null)
       handle(event);

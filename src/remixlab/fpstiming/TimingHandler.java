@@ -64,7 +64,7 @@ public class TimingHandler {
       if (task.timer() != null)
         if (task.timer() instanceof SeqTimer)
           if (((SeqTimer) task.timer()).timingTask() != null)
-            ((SeqTimer) task.timer()).execute();
+            ((SeqTimer) task.timer())._execute();
     // Animation
     for (Animator aObj : _animatorPool)
       if (aObj.animationStarted())

@@ -60,10 +60,10 @@ public class SeqTimer implements Timer {
   /**
    * Executes the callback method defined by the {@link #timingTask()}.
    * <p>
-   * <b>Note:</b> You should not call this method since it's done by the timing _handler
+   * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
    */
-  protected boolean execute() {
+  protected boolean _execute() {
     boolean result = trigggered();
     if (result) {
       timingTask().execute();
