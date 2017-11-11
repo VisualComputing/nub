@@ -252,6 +252,8 @@ public abstract class Agent {
   protected boolean handle(Event event) {
     if (event == null || !_handler.isAgentRegistered(this) || inputHandler() == null)
       return false;
+    if (event.isNull())
+      return false;
     Grabber inputGrabber = inputGrabber();
     if (inputGrabber != null)
       return inputHandler().enqueueTuple(new Tuple(event, inputGrabber));

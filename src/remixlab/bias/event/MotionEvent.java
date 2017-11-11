@@ -13,8 +13,7 @@ package remixlab.bias.event;
 import remixlab.bias.Event;
 
 /**
- * Base class of all DOF_n_Events: {@link Event}s defined from
- * DOFs (degrees-of-freedom).
+ * Base class of all motion events defined from DOFs (degrees-of-freedom).
  * <p>
  * MotionEvents may be relative or absolute (see {@link #isRelative()}, {@link #isAbsolute()})
  * depending whether or not they're constructed from a previous MotionEvent. While

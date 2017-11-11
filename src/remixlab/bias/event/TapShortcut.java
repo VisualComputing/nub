@@ -16,17 +16,17 @@ import remixlab.bias.Shortcut;
 /**
  * This class represents {@link TapEvent} shortcuts.
  * <p>
- * Click shortcuts are defined with a specific number of clicks and can be of one out of
+ * Click shortcuts are defined with a specific number of taps and can be of one out of
  * two forms: 1. A gesture-id; and, 2. A gesture-id plus a key-modifier (such as the CTRL
  * key).
  * <p>
- * Note that click shortcuts should have at least one click.
+ * Note that tap shortcuts should have at least one tap.
  */
 public class TapShortcut extends Shortcut {
   protected int _count;
 
   /**
-   * Defines a single click shortcut from the given gesture-id.
+   * Defines a single tap shortcut from the given gesture-id.
    *
    * @param id id
    */
@@ -35,7 +35,7 @@ public class TapShortcut extends Shortcut {
   }
 
   /**
-   * Defines a click shortcut from the given gesture-id and number of taps.
+   * Defines a tap shortcut from the given gesture-id and number of taps.
    *
    * @param id id
    * @param count  number of taps
@@ -45,8 +45,8 @@ public class TapShortcut extends Shortcut {
   }
 
   /**
-   * Defines a click shortcut from the given gesture-id, modifier mask, and number of
-   * clicks.
+   * Defines a tap shortcut from the given gesture-id, modifier mask, and number of
+   * taps.
    *
    * @param modifiers  modifier mask
    * @param id id
@@ -61,7 +61,7 @@ public class TapShortcut extends Shortcut {
   }
 
   /**
-   * Returns the click-shortcut click count.
+   * Returns the tap-shortcut tap count.
    */
   public int count() {
     return _count;

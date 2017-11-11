@@ -17,7 +17,7 @@ public class MotionEvent1 extends MotionEvent {
   protected float _x, _dx;
 
   /**
-   * Construct an absolute DOF1 event.
+   * Construct an absolute DOF1 motion event.
    *
    * @param dx        1-dof
    * @param modifiers MotionShortcut modifiers
@@ -39,7 +39,7 @@ public class MotionEvent1 extends MotionEvent {
   }
 
   /**
-   * Construct a relative DOF1 event.
+   * Construct a relative DOF1 motion event.
    * <p>
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
@@ -56,7 +56,7 @@ public class MotionEvent1 extends MotionEvent {
   }
 
   /**
-   * Construct an absolute DOF1 event.
+   * Construct an absolute DOF1 motion event.
    *
    * @param dx 1-dof
    */
@@ -76,7 +76,7 @@ public class MotionEvent1 extends MotionEvent {
   }
 
   /**
-   * Construct a relative DOF1 event.
+   * Construct a relative DOF1 motion event.
    * <p>
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
@@ -149,7 +149,7 @@ public class MotionEvent1 extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (dx()==0)
+    if (dx()==0 && !fired() && !flushed())
       return true;
     return false;
   }
