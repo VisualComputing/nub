@@ -356,7 +356,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #zNear()} and
    * {@link #zFar()};
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
-   * the _distance from the point you project to the camera, along the
+   * the _distance from the point you _project to the camera, along the
    * {@link #viewDirection()}. See the {@code gluUnProject}
    * man page for details.
    */
@@ -620,11 +620,11 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     beginOffScreenDrawingCalls++;
-    if ((width != pg().width) || (height != pg().height)) {
-      width = pg().width;
-      height = pg().height;
-      setWidth(width);
-      setHeight(height);
+    if ((_width != pg().width) || (_height != pg().height)) {
+      _width = pg().width;
+      _height = pg().height;
+      setWidth(_width);
+      setHeight(_height);
     }
     // open off-screen pgraphics for drawing:
     pg().beginDraw();
@@ -1200,13 +1200,13 @@ public class Scene extends Graph implements PConstants {
 
   //TODO really needs overloading??
   @Override
-  protected void visitNode(Node node) {
+  protected void _visitNode(Node node) {
     targetPGraphics.pushMatrix();
     applyTransformation(targetPGraphics, node);
     if (node instanceof Node)
       node.visitCallback();
     for (Node child : node.children())
-      visitNode(child);
+      _visitNode(child);
     targetPGraphics.popMatrix();
   }
 
@@ -1271,10 +1271,10 @@ public class Scene extends Graph implements PConstants {
    * @see #beginScreenDrawing()
    */
   public void beginScreenDrawing(PGraphics p) {
-    if (startCoordCalls != 0)
+    if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
           + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    startCoordCalls++;
+    _startCoordCalls++;
     p.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
     disableDepthTest(p);
     // if-else same as:
@@ -1304,8 +1304,8 @@ public class Scene extends Graph implements PConstants {
    * @see #endScreenDrawing()
    */
   public void endScreenDrawing(PGraphics p) {
-    startCoordCalls--;
-    if (startCoordCalls != 0)
+    _startCoordCalls--;
+    if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
           + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     // if-else same as:
@@ -1547,7 +1547,7 @@ public class Scene extends Graph implements PConstants {
    * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
    * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
    * <p>
-   * {@code scale} controls the scaling of the camera and axes drawing. A value of
+   * {@code _scale} controls the scaling of the camera and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
   public void drawPath(Interpolator kfi, int mask, int nbFrames, float scale) {

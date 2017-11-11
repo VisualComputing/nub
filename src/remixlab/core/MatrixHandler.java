@@ -18,18 +18,18 @@ import remixlab.primitives.Vector;
  * implementation or locally.
  */
 public class MatrixHandler {
-  protected Graph graph;
-  protected Matrix projection, view, modelview;
-  protected Matrix projectionViewMatrix, projectionViewInverseMatrix;
-  protected boolean isProjViwInvCached, projectionViewMatHasInv;
+  protected Graph _graph;
+  protected Matrix _projection, _view, _modelview;
+  protected Matrix _projectionView, _projectionViewInverse;
+  protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
 
-  static int MATRIX_STACK_DEPTH = 32;
-  static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
-  static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
-  float[][] matrixStack = new float[MATRIX_STACK_DEPTH][16];
-  int matrixStackDepth;
-  float[][] pmatrixStack = new float[MATRIX_STACK_DEPTH][16];
-  int pmatrixStackDepth;
+  public static int STACK_DEPTH = 32;
+  public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
+  public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
+  protected float[][] _stack = new float[STACK_DEPTH][16];
+  protected int _stackDepth;
+  protected float[][] pmatrixStack = new float[STACK_DEPTH][16];
+  protected int pmatrixStackDepth;
 
   /**
    * Instantiates matrices and sets
@@ -38,19 +38,19 @@ public class MatrixHandler {
    * @param scn
    */
   public MatrixHandler(Graph scn) {
-    graph = scn;
-    projection = new Matrix();
-    view = new Matrix();
-    modelview = new Matrix();
-    projectionViewMatrix = new Matrix();
-    isProjViwInvCached = false;
+    _graph = scn;
+    _projection = new Matrix();
+    _view = new Matrix();
+    _modelview = new Matrix();
+    _projectionView = new Matrix();
+    _isProjectionViewInverseCached = false;
   }
 
   /**
    * Returns the graph this object belongs to
    */
   public Graph graph() {
-    return graph;
+    return _graph;
   }
 
   /**
@@ -74,22 +74,22 @@ public class MatrixHandler {
   /**
    * Binds the projection matrix to the renderer.
    */
-  public void bindProjection(Matrix m) {
-    cacheProjection(m);
+  public void bindProjection(Matrix matrix) {
+    cacheProjection(matrix);
   }
 
   /**
    * Caches the projection matrix.
    */
-  public void cacheProjection(Matrix m) {
-    projection.set(m);
+  public void cacheProjection(Matrix matrix) {
+    _projection.set(matrix);
   }
 
   /**
    * Returns the cached projection matrix.
    */
   public Matrix cacheProjection() {
-    return projection;
+    return _projection;
   }
 
   /**
@@ -102,36 +102,36 @@ public class MatrixHandler {
   /**
    * Binds the view matrix to the renderer.
    */
-  public void bindView(Matrix m) {
-    cacheView(m);
+  public void bindView(Matrix matrix) {
+    cacheView(matrix);
   }
 
   /**
    * Caches the view matrix.
    */
-  public void cacheView(Matrix m) {
-    view.set(m);
+  public void cacheView(Matrix matrix) {
+    _view.set(matrix);
   }
 
   /**
    * Returns the cached view matrix.
    */
   public Matrix cacheView() {
-    return view;
+    return _view;
   }
 
   /**
    * @return modelview matrix
    */
   public Matrix modelView() {
-    return modelview;
+    return _modelview;
   }
 
   /**
    * Binds the modelview matrix to the renderer.
    */
-  public void bindModelView(Matrix m) {
-    modelview.set(m);
+  public void bindModelView(Matrix matrix) {
+    _modelview.set(matrix);
   }
 
   /**
@@ -139,12 +139,12 @@ public class MatrixHandler {
    *
    * @see #isProjectionViewInverseCached()
    */
-  public void cacheProjectionView(Matrix pv) {
-    projectionViewMatrix.set(pv);
+  public void cacheProjectionView(Matrix matrix) {
+    _projectionView.set(matrix);
     if (isProjectionViewInverseCached()) {
-      if (projectionViewInverseMatrix == null)
-        projectionViewInverseMatrix = new Matrix();
-      projectionViewMatHasInv = projectionViewMatrix.invert(projectionViewInverseMatrix);
+      if (_projectionViewInverse == null)
+        _projectionViewInverse = new Matrix();
+      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
     }
   }
 
@@ -152,7 +152,7 @@ public class MatrixHandler {
    * Returns the cached projection times view matrix.
    */
   public Matrix cacheProjectionView() {
-    return projectionViewMatrix;
+    return _projectionView;
   }
 
   /**
@@ -163,7 +163,7 @@ public class MatrixHandler {
    * @see #cacheProjectionViewInverse(boolean)
    */
   public boolean isProjectionViewInverseCached() {
-    return isProjViwInvCached;
+    return _isProjectionViewInverseCached;
   }
 
   /**
@@ -175,7 +175,7 @@ public class MatrixHandler {
    * @see #cacheProjectionView()
    */
   public void cacheProjectionViewInverse(boolean optimise) {
-    isProjViwInvCached = optimise;
+    _isProjectionViewInverseCached = optimise;
   }
 
   /**
@@ -184,43 +184,43 @@ public class MatrixHandler {
   public Matrix cacheProjectionViewInverse() {
     if (!isProjectionViewInverseCached())
       throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
-    return projectionViewInverseMatrix;
+    return _projectionViewInverse;
   }
 
   /**
    * Multiplies the current modelview matrix by the one specified through the parameters.
    */
   public void applyModelView(Matrix source) {
-    modelview.apply(source);
+    _modelview.apply(source);
   }
 
   /**
    * Multiplies the current projection matrix by the one specified through the parameters.
    */
   public void applyProjection(Matrix source) {
-    projection.apply(source);
+    _projection.apply(source);
   }
 
   /**
    * Push a copy of the modelview matrix onto the stack.
    */
   public void pushModelView() {
-    if (matrixStackDepth == MATRIX_STACK_DEPTH) {
+    if (_stackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    modelview.get(matrixStack[matrixStackDepth]);
-    matrixStackDepth++;
+    _modelview.get(_stack[_stackDepth]);
+    _stackDepth++;
   }
 
   /**
    * Replace the current modelview matrix with the top of the stack.
    */
   public void popModelView() {
-    if (matrixStackDepth == 0) {
+    if (_stackDepth == 0) {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
-    matrixStackDepth--;
-    modelview.set(matrixStack[matrixStackDepth]);
+    _stackDepth--;
+    _modelview.set(_stack[_stackDepth]);
   }
 
   /**
@@ -234,14 +234,14 @@ public class MatrixHandler {
    * Translate in X, Y, and Z.
    */
   public void translate(float tx, float ty, float tz) {
-    modelview.translate(tx, ty, tz);
+    _modelview.translate(tx, ty, tz);
   }
 
   /**
    * Two dimensional rotation.
    * <p>
-   * Same as rotateZ (this is identical to a 3D rotation along the z-axis) but included
-   * for clarity. It'd be weird for people drawing 2D graphics to be using rotateZ. And
+   * Same as _rotateZ (this is identical to a 3D rotation along the z-axis) but included
+   * for clarity. It'd be weird for people drawing 2D graphics to be using _rotateZ. And
    * they might kick our a-- for the confusion.
    * <p>
    * <A HREF="http://www.xkcd.com/c184.html">Additional background</A>.
@@ -254,28 +254,28 @@ public class MatrixHandler {
    * Rotate around the X axis.
    */
   public void rotateX(float angle) {
-    modelview.rotateX(angle);
+    _modelview.rotateX(angle);
   }
 
   /**
    * Rotate around the Y axis.
    */
   public void rotateY(float angle) {
-    modelview.rotateY(angle);
+    _modelview.rotateY(angle);
   }
 
   /**
    * Rotate around the Z axis.
    */
   public void rotateZ(float angle) {
-    modelview.rotateZ(angle);
+    _modelview.rotateZ(angle);
   }
 
   /**
    * Rotate about a vector in space. Same as the glRotatef() function.
    */
   public void rotate(float angle, float v0, float v1, float v2) {
-    modelview.rotate(angle, v0, v1, v2);
+    _modelview.rotate(angle, v0, v1, v2);
   }
 
   /**
@@ -286,10 +286,10 @@ public class MatrixHandler {
   }
 
   /**
-   * Scale in X and Y. Equivalent to scale(sx, sy, 1).
+   * Scale in X and Y. Equivalent to _scale(sx, sy, 1).
    * <p>
    * Not recommended for use in 3D, because the z-dimension is just scaled by 1, since
-   * there's no way to know what else to scale it by.
+   * there's no way to know what else to _scale it by.
    */
   public void scale(float sx, float sy) {
     scale(sx, sy, 1);
@@ -299,17 +299,17 @@ public class MatrixHandler {
    * Scale in X, Y, and Z.
    */
   public void scale(float x, float y, float z) {
-    modelview.scale(x, y, z);
+    _modelview.scale(x, y, z);
   }
 
   /**
    * Push a copy of the projection matrix onto the stack.
    */
   public void pushProjection() {
-    if (pmatrixStackDepth == MATRIX_STACK_DEPTH) {
+    if (pmatrixStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    projection.get(pmatrixStack[pmatrixStackDepth]);
+    _projection.get(pmatrixStack[pmatrixStackDepth]);
     pmatrixStackDepth++;
   }
 
@@ -321,7 +321,7 @@ public class MatrixHandler {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
     pmatrixStackDepth--;
-    projection.set(pmatrixStack[pmatrixStackDepth]);
+    _projection.set(pmatrixStack[pmatrixStackDepth]);
   }
 
   /**
@@ -357,14 +357,14 @@ public class MatrixHandler {
   // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
   // "9.030 How do I draw 2D controls over my 3D rendering?"
   protected void ortho2D() {
-    float cameraZ = (graph.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
+    float cameraZ = (_graph.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
     float cameraNear = cameraZ / 2.0f;
     float cameraFar = cameraZ * 2.0f;
 
-    float left = -graph.width() / 2;
-    float right = graph.width() / 2;
-    float bottom = -graph.height() / 2;
-    float top = graph.height() / 2;
+    float left = -_graph.width() / 2;
+    float right = _graph.width() / 2;
+    float bottom = -_graph.height() / 2;
+    float top = _graph.height() / 2;
     float near = cameraNear;
     float far = cameraFar;
 
@@ -382,11 +382,11 @@ public class MatrixHandler {
 
   // as it's done in P5:
   protected void resetViewPoint() {
-    float eyeX = graph.width() / 2f;
-    float eyeY = graph.height() / 2f;
-    float eyeZ = (graph.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
-    float centerX = graph.width() / 2f;
-    float centerY = graph.height() / 2f;
+    float eyeX = _graph.width() / 2f;
+    float eyeY = _graph.height() / 2f;
+    float eyeZ = (_graph.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
+    float centerX = _graph.width() / 2f;
+    float centerY = _graph.height() / 2f;
     float centerZ = 0;
     float upX = 0;
     float upY = 1;

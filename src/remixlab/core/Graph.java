@@ -54,41 +54,41 @@ import java.util.List;
  */
 public class Graph {
   // 1. Eye
-  protected Frame eye;
-  protected long lastEqUpdate;
-  protected Vector scnCenter;
-  protected float scnRadius;
-  protected Vector anchorPnt;
+  protected Frame _eye;
+  protected long _lastEqUpdate;
+  protected Vector _center;
+  protected float _radius;
+  protected Vector _anchor;
   //Interpolator
-  protected Interpolator interpolator;
+  protected Interpolator _interpolator;
   //boundary eqns
-  protected float fpCoefficients[][];
-  protected boolean fpCoefficientsUpdate;
-  protected Vector normal[];
-  protected float dist[];
+  protected float _coefficients[][];
+  protected boolean _coefficientsUpdate;
+  protected Vector _normal[];
+  protected float _dist[];
   // rescale ortho when anchor changes
-  private float rapK = 1;
+  protected float _rapK = 1;
   // Inverse the direction of an horizontal mouse motion. Depends on the
   // projected
   // screen orientation of the vertical axis when the mouse button is pressed.
-  public boolean cadRotationIsReversed;
+  public boolean _cadRotationIsReversed;
   // handed and screen drawing
-  protected boolean rightHanded;
-  protected int startCoordCalls;
+  protected boolean _rightHanded;
+  protected int _startCoordCalls;
   // size and dim
-  protected int width, height;
+  protected int _width, _height;
 
   // 2. Matrix helper
-  protected MatrixHandler matrixHandler;
+  protected MatrixHandler _matrixHandler;
 
   // 3. Handlers
-  protected TimingHandler tHandler;
-  protected InputHandler iHandler;
+  protected TimingHandler _timingHandler;
+  protected InputHandler _inputHandler;
 
   // 4. Graph
-  protected List<Node> seeds;
-  public int nodeCount;
-  public long lastNonEyeUpdate = 0;
+  protected List<Node> _seeds;
+  protected int _nodeCount;
+  protected long _lastNonEyeUpdate = 0;
 
   /**
    * Enumerates the different visibility states an object may have respect to the eye
@@ -98,7 +98,7 @@ public class Graph {
     VISIBLE, SEMIVISIBLE, INVISIBLE
   }
 
-  Type tp;
+  Type _type;
 
   /**
    * Enumerates the two possible types of Camera.
@@ -110,16 +110,16 @@ public class Graph {
     PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
   }
 
-  private float zNearCoef;
-  private float zClippingCoef;
+  private float _zNearCoefficient;
+  private float _zClippingCoefficient;
 
   /**
    * Same as {@code this(Type.PERSPECTIVE, w, h)}
    *
    * @see #Graph(Type, int, int)
    */
-  public Graph(int w, int h) {
-    this(Type.PERSPECTIVE, w, h);
+  public Graph(int width, int height) {
+    this(Type.PERSPECTIVE, width, height);
   }
 
   /**
@@ -145,19 +145,19 @@ public class Graph {
    * @see #setEye(Frame)
    */
   //TODO graph.get()
-  public Graph(Type t, int w, int h) {
-    setType(t);
-    setWidth(w);
-    setHeight(h);
+  public Graph(Type type, int width, int height) {
+    setType(type);
+    setWidth(width);
+    setHeight(height);
 
-    seeds = new ArrayList<Node>();
-    tHandler = new TimingHandler();
-    iHandler = new InputHandler();
+    _seeds = new ArrayList<Node>();
+    _timingHandler = new TimingHandler();
+    _inputHandler = new InputHandler();
 
     setRadius(100);
     setCenter(new Vector());
-    anchorPnt = center().get();
-    interpolator = new Interpolator(this);
+    _anchor = center().get();
+    _interpolator = new Interpolator(this);
     setEye(new Frame());
     fitBall();
 
@@ -165,17 +165,17 @@ public class Graph {
     setRightHanded();
 
     if (is2D()) {
-      fpCoefficients = new float[4][3];
-      normal = new Vector[4];
-      for (int i = 0; i < normal.length; i++)
-        normal[i] = new Vector();
-      dist = new float[4];
+      _coefficients = new float[4][3];
+      _normal = new Vector[4];
+      for (int i = 0; i < _normal.length; i++)
+        _normal[i] = new Vector();
+      _dist = new float[4];
     } else {
-      fpCoefficients = new float[6][4];
-      normal = new Vector[6];
-      for (int i = 0; i < normal.length; i++)
-        normal[i] = new Vector();
-      dist = new float[6];
+      _coefficients = new float[6][4];
+      _normal = new Vector[6];
+      for (int i = 0; i < _normal.length; i++)
+        _normal[i] = new Vector();
+      _dist = new float[6];
     }
     enableBoundaryEquations(false);
 
@@ -206,14 +206,14 @@ public class Graph {
    * @return width of the screen window.
    */
   public int width() {
-    return width;
+    return _width;
   }
 
   /**
    * @return height of the screen window.
    */
   public int height() {
-    return height;
+    return _height;
   }
 
   /**
@@ -222,18 +222,18 @@ public class Graph {
    * Non-positive dimension are silently replaced by a 1 pixel value to ensure boundary
    * coherence.
    */
-  public void setWidth(int w) {
+  public void setWidth(int width) {
     // Prevent negative and zero dimensions that would cause divisions by zero.
-    if ((w != width()))
-      modified();
-    width = w > 0 ? w : 1;
+    if ((width != width()))
+      _modified();
+    _width = width > 0 ? width : 1;
   }
 
-  public void setHeight(int h) {
+  public void setHeight(int height) {
     // Prevent negative and zero dimensions that would cause divisions by zero.
-    if (h != height())
-      modified();
-    height = h > 0 ? h : 1;
+    if (height != height())
+      _modified();
+    _height = height > 0 ? height : 1;
   }
 
   // 1. type
@@ -255,7 +255,7 @@ public class Graph {
    * and {@link #aspectRatio()} (for frustum shape).
    */
   public Type type() {
-    return tp;
+    return _type;
   }
 
   /**
@@ -267,8 +267,8 @@ public class Graph {
    */
   public void setType(Type type) {
     if (type != type()) {
-      modified();
-      this.tp = type;
+      _modified();
+      this._type = type;
     }
   }
 
@@ -323,7 +323,7 @@ public class Graph {
    * {@link Graph#radius()} is visible from the Camera
    * {@link Node#position()}.
    * <p>
-   * The eye position and orientation of the Camera are not modified and
+   * The eye position and orientation of the Camera are not _modified and
    * you first have to orientate the Camera in order to actually see the graph (see
    * {@link Graph#lookAt(Vector)}, {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
    * <p>
@@ -447,16 +447,16 @@ public class Graph {
    * Only meaningful when Camera type is PERSPECTIVE.
    */
   public float zNearCoefficient() {
-    return zNearCoef;
+    return _zNearCoefficient;
   }
 
   /**
    * Sets the {@link #zNearCoefficient()} value.
    */
   public void setZNearCoefficient(float coef) {
-    if (coef != zNearCoef)
-      modified();
-    zNearCoef = coef;
+    if (coef != _zNearCoefficient)
+      _modified();
+    _zNearCoefficient = coef;
   }
 
   /**
@@ -476,16 +476,16 @@ public class Graph {
    * {@link #zNearCoefficient()}.
    */
   public float zClippingCoefficient() {
-    return zClippingCoef;
+    return _zClippingCoefficient;
   }
 
   /**
    * Sets the {@link #zClippingCoefficient()} value.
    */
   public void setZClippingCoefficient(float coef) {
-    if (coef != zClippingCoef)
-      modified();
-    zClippingCoef = coef;
+    if (coef != _zClippingCoefficient)
+      _modified();
+    _zClippingCoefficient = coef;
   }
 
   /**
@@ -502,8 +502,8 @@ public class Graph {
    * Fills in {@code target} with the {@code halfWidth} and {@code halfHeight} of the eye
    * boundary and returns it. While {@code target[0]} holds {@code halfWidth},
    * {@code target[1]} holds {@code halfHeight}. Values are computed as:
-   * {@code target[0] = rescalingOrthoFactor() * (frame().magnitude() * this.screenWidth() / 2)}
-   * and {@code rescalingOrthoFactor() * (frame().magnitude() * this.screenHeight() / 2)}
+   * {@code target[0] = _rescalingOrthoFactor() * (frame().magnitude() * this.screenWidth() / 2)}
+   * and {@code _rescalingOrthoFactor() * (frame().magnitude() * this.screenHeight() / 2)}
    * .
    * <p>
    * These values are valid for 2d Windows and ortho Cameras (but not persp) and they are
@@ -516,14 +516,14 @@ public class Graph {
    * <p>
    * Overload this method to change this behavior if desired.
    *
-   * @see #rescalingOrthoFactor()
+   * @see #_rescalingOrthoFactor()
    */
   public float[] getBoundaryWidthHeight(float[] target) {
     if ((target == null) || (target.length != 2)) {
       target = new float[2];
     }
 
-    float orthoCoef = this.rescalingOrthoFactor();
+    float orthoCoef = this._rescalingOrthoFactor();
 
     target[0] = orthoCoef * (eye().magnitude() * width() / 2);
     target[1] = orthoCoef * (eye().magnitude() * height() / 2);
@@ -543,12 +543,12 @@ public class Graph {
    *
    * @see #getBoundaryWidthHeight(float[])
    */
-  protected float rescalingOrthoFactor() {
+  protected float _rescalingOrthoFactor() {
     if(is2D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;
-    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * rapK / height());
+    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
   }
 
   // nodes
@@ -564,13 +564,13 @@ public class Graph {
    * @see #pruneBranch(Node)
    */
   public List<Node> leadingNodes() {
-    return seeds;
+    return _seeds;
   }
 
   /**
    * Returns {@code true} if the node is top-level.
    */
-  protected boolean isLeadingNode(Node node) {
+  protected boolean _isLeadingNode(Node node) {
     for (Node _node : leadingNodes())
       if (_node == node)
         return true;
@@ -580,10 +580,10 @@ public class Graph {
   /**
    * Add the node as top-level if its reference node is null and it isn't already added.
    */
-  protected boolean addLeadingNode(Node node) {
+  protected boolean _addLeadingNode(Node node) {
     if (node == null || node.reference() != null)
       return false;
-    if (isLeadingNode(node))
+    if (_isLeadingNode(node))
       return false;
     return leadingNodes().add(node);
   }
@@ -591,7 +591,7 @@ public class Graph {
   /**
    * Removes the leading node if present. Typically used when re-parenting the node.
    */
-  protected boolean removeLeadingNode(Node node) {
+  protected boolean _removeLeadingNode(Node node) {
     boolean result = false;
     Iterator<Node> it = leadingNodes().iterator();
     while (it.hasNext()) {
@@ -619,18 +619,18 @@ public class Graph {
    */
   public void traverse() {
     for (Node node : leadingNodes())
-      visitNode(node);
+      _visitNode(node);
   }
 
   /**
    * Used by the traverse node tree algorithm.
    */
-  protected void visitNode(Node node) {
+  protected void _visitNode(Node node) {
     pushModelView();
     applyTransformation(node);
     node.visitCallback();
     for (Node child : node.children())
-      visitNode(child);
+      _visitNode(child);
     popModelView();
   }
 
@@ -677,13 +677,13 @@ public class Graph {
     if (!isNodeReachable(node))
       return null;
     ArrayList<Node> list = new ArrayList<Node>();
-    collectNodes(list, node);
+    _collectNodes(list, node);
     for (Node _node : list) {
       inputHandler().removeGrabber(_node);
       if (_node.reference() != null)
-        _node.reference().removeChild(_node);
+        _node.reference()._removeChild(_node);
       else
-        removeLeadingNode(_node);
+        _removeLeadingNode(_node);
     }
     return list;
   }
@@ -702,9 +702,9 @@ public class Graph {
     for (Node node : branch) {
       inputHandler().addGrabber(node);
       if (node.reference() != null)
-        node.reference().addChild(node);
+        node.reference()._addChild(node);
       else
-        addLeadingNode(node);
+        _addLeadingNode(node);
     }
   }
 
@@ -722,7 +722,7 @@ public class Graph {
   public boolean isNodeReachable(Node node) {
     if (node == null)
       return false;
-    return node.reference() == null ? isLeadingNode(node) : node.reference().hasChild(node);
+    return node.reference() == null ? _isLeadingNode(node) : node.reference()._hasChild(node);
   }
 
   /**
@@ -735,7 +735,7 @@ public class Graph {
   public ArrayList<Node> nodes() {
     ArrayList<Node> list = new ArrayList<Node>();
     for (Node node : leadingNodes())
-      collectNodes(list, node);
+      _collectNodes(list, node);
     return list;
   }
 
@@ -748,7 +748,7 @@ public class Graph {
    */
   public ArrayList<Node> branch(Node node) {
     ArrayList<Node> list = new ArrayList<Node>();
-    collectNodes(list, node);
+    _collectNodes(list, node);
     return list;
   }
 
@@ -787,12 +787,12 @@ public class Graph {
    *
    * @see #isNodeReachable(Node)
    */
-  protected void collectNodes(List<Node> list, Node node) {
+  protected void _collectNodes(List<Node> list, Node node) {
     if (node == null)
       return;
     list.add(node);
     for (Node child : node.children())
-      collectNodes(list, child);
+      _collectNodes(list, child);
   }
 
   // TODO decide whether or not the following methods can take a Frame
@@ -869,8 +869,8 @@ public class Graph {
    * Convenience wrapper function that simply calls
    * {@code timingHandler().registerAnimator(object)}.
    */
-  public void registerAnimator(Animator object) {
-    timingHandler().registerAnimator(object);
+  public void registerAnimator(Animator animator) {
+    timingHandler().registerAnimator(animator);
   }
 
   /**
@@ -879,8 +879,8 @@ public class Graph {
    *
    * @see remixlab.fpstiming.TimingHandler#unregisterAnimator(Animator)
    */
-  public void unregisterAnimator(Animator object) {
-    timingHandler().unregisterAnimator(object);
+  public void unregisterAnimator(Animator animator) {
+    timingHandler().unregisterAnimator(animator);
   }
 
   /**
@@ -889,8 +889,8 @@ public class Graph {
    *
    * @see remixlab.fpstiming.TimingHandler#isAnimatorRegistered(Animator)
    */
-  public boolean isAnimatorRegistered(Animator object) {
-    return timingHandler().isAnimatorRegistered(object);
+  public boolean isAnimatorRegistered(Animator animator) {
+    return timingHandler().isAnimatorRegistered(animator);
   }
 
   // E V E N T H A N D L I N G
@@ -899,14 +899,14 @@ public class Graph {
    * Returns the graph {@link InputHandler}.
    */
   public InputHandler inputHandler() {
-    return iHandler;
+    return _inputHandler;
   }
 
   /**
    * Returns the graph {@link TimingHandler}.
    */
   public TimingHandler timingHandler() {
-    return tHandler;
+    return _timingHandler;
   }
 
   // 1. Scene overloaded
@@ -921,12 +921,12 @@ public class Graph {
    * @see MatrixHandler#beginScreenDrawing()
    */
   public void beginScreenDrawing() {
-    if (startCoordCalls != 0)
+    if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
               + "endScreenDrawing() and they cannot be nested. Check your implementation!");
 
-    startCoordCalls++;
-    matrixHandler.beginScreenDrawing();
+    _startCoordCalls++;
+    _matrixHandler.beginScreenDrawing();
   }
 
   /**
@@ -936,12 +936,12 @@ public class Graph {
    * @see MatrixHandler#endScreenDrawing()
    */
   public void endScreenDrawing() {
-    startCoordCalls--;
-    if (startCoordCalls != 0)
+    _startCoordCalls--;
+    if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
               + "endScreenDrawing() and they cannot be nested. Check your implementation!");
 
-    matrixHandler.endScreenDrawing();
+    _matrixHandler.endScreenDrawing();
   }
 
   /**
@@ -1063,8 +1063,8 @@ public class Graph {
    *
    * @see #matrixHandler()
    */
-  public void setMatrixHandler(MatrixHandler r) {
-    matrixHandler = r;
+  public void setMatrixHandler(MatrixHandler matrixHandler) {
+    _matrixHandler = matrixHandler;
   }
 
   /**
@@ -1073,42 +1073,42 @@ public class Graph {
    * @see #setMatrixHandler(MatrixHandler)
    */
   public MatrixHandler matrixHandler() {
-    return matrixHandler;
+    return _matrixHandler;
   }
 
   /**
    * Wrapper for {@link MatrixHandler#pushModelView()}
    */
   public void pushModelView() {
-    matrixHandler.pushModelView();
+    _matrixHandler.pushModelView();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#popModelView()}
    */
   public void popModelView() {
-    matrixHandler.popModelView();
+    _matrixHandler.popModelView();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#pushProjection()}
    */
   public void pushProjection() {
-    matrixHandler.pushProjection();
+    _matrixHandler.pushProjection();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#popProjection()}
    */
   public void popProjection() {
-    matrixHandler.popProjection();
+    _matrixHandler.popProjection();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#translate(float, float)}
    */
   public void translate(float tx, float ty) {
-    matrixHandler.translate(tx, ty);
+    _matrixHandler.translate(tx, ty);
   }
 
   /**
@@ -1116,35 +1116,35 @@ public class Graph {
    * {@link MatrixHandler#translate(float, float, float)}
    */
   public void translate(float tx, float ty, float tz) {
-    matrixHandler.translate(tx, ty, tz);
+    _matrixHandler.translate(tx, ty, tz);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#rotate(float)}
    */
   public void rotate(float angle) {
-    matrixHandler.rotate(angle);
+    _matrixHandler.rotate(angle);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#rotateX(float)}
    */
   public void rotateX(float angle) {
-    matrixHandler.rotateX(angle);
+    _matrixHandler.rotateX(angle);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#rotateY(float)}
    */
   public void rotateY(float angle) {
-    matrixHandler.rotateY(angle);
+    _matrixHandler.rotateY(angle);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#rotateZ(float)}
    */
   public void rotateZ(float angle) {
-    matrixHandler.rotateZ(angle);
+    _matrixHandler.rotateZ(angle);
   }
 
   /**
@@ -1152,77 +1152,77 @@ public class Graph {
    * {@link MatrixHandler#rotate(float, float, float, float)}
    */
   public void rotate(float angle, float vx, float vy, float vz) {
-    matrixHandler.rotate(angle, vx, vy, vz);
+    _matrixHandler.rotate(angle, vx, vy, vz);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#scale(float)}
    */
   public void scale(float s) {
-    matrixHandler.scale(s);
+    _matrixHandler.scale(s);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#scale(float, float)}
    */
   public void scale(float sx, float sy) {
-    matrixHandler.scale(sx, sy);
+    _matrixHandler.scale(sx, sy);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#scale(float, float, float)}
    */
   public void scale(float x, float y, float z) {
-    matrixHandler.scale(x, y, z);
+    _matrixHandler.scale(x, y, z);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#modelView()}
    */
   public Matrix modelView() {
-    return matrixHandler.modelView();
+    return _matrixHandler.modelView();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#projection()}
    */
   public Matrix projection() {
-    return matrixHandler.projection();
+    return _matrixHandler.projection();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#projection()}
    */
   public Matrix view() {
-    return matrixHandler.view();
+    return _matrixHandler.view();
   }
 
   /**
    * Wrapper for {@link MatrixHandler#bindModelView(Matrix)}
    */
   public void setModelView(Matrix source) {
-    matrixHandler.bindModelView(source);
+    _matrixHandler.bindModelView(source);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#bindProjection(Matrix)}
    */
   public void setProjection(Matrix source) {
-    matrixHandler.bindProjection(source);
+    _matrixHandler.bindProjection(source);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#applyModelView(Matrix)}
    */
   public void applyModelView(Matrix source) {
-    matrixHandler.applyModelView(source);
+    _matrixHandler.applyModelView(source);
   }
 
   /**
    * Wrapper for {@link MatrixHandler#applyProjection(Matrix)}
    */
   public void applyProjection(Matrix source) {
-    matrixHandler.applyProjection(source);
+    _matrixHandler.applyProjection(source);
   }
 
   /**
@@ -1235,7 +1235,7 @@ public class Graph {
    * @see #unprojectedCoordinatesOf(Vector)
    */
   public boolean isProjectionViewInverseCached() {
-    return matrixHandler.isProjectionViewInverseCached();
+    return _matrixHandler.isProjectionViewInverseCached();
   }
 
   /**
@@ -1248,7 +1248,7 @@ public class Graph {
    * @see #unprojectedCoordinatesOf(Vector)
    */
   public void cacheProjectionViewInverse(boolean optimise) {
-    matrixHandler.cacheProjectionViewInverse(optimise);
+    _matrixHandler.cacheProjectionViewInverse(optimise);
   }
 
   // DRAWING STUFF
@@ -1267,9 +1267,9 @@ public class Graph {
     // 1. Eye, raster graph
     matrixHandler().bind();
     //TODO really needs checking
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > lastEqUpdate || lastEqUpdate == 0)) {
+    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
-      lastEqUpdate = TimingHandler.frameCount;
+      _lastEqUpdate = TimingHandler.frameCount;
     }
   }
 
@@ -1309,7 +1309,7 @@ public class Graph {
    * @see #setEye(Frame)
    */
   public Frame eye() {
-    return eye;
+    return _eye;
   }
 
   /**
@@ -1318,11 +1318,11 @@ public class Graph {
    * @see #eye()
    */
   public void setEye(Frame e) {
-    if (e == null || eye == e)
+    if (e == null || _eye == e)
       return;
-    eye = e;
-    interpolator.setFrame(e);
-    modified();
+    _eye = e;
+    _interpolator.setFrame(e);
+    _modified();
   }
 
   /**
@@ -1432,7 +1432,7 @@ public class Graph {
    * @see #getBoundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
-  public Visibility boxVisibility(Vector p1, Vector p2) {
+  public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
@@ -1440,8 +1440,8 @@ public class Graph {
     for (int i = 0; i < 6; ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
-        Vector pos = new Vector(((c & 4) != 0) ? p1.vec[0] : p2.vec[0], ((c & 2) != 0) ? p1.vec[1] : p2.vec[1],
-                ((c & 1) != 0) ? p1.vec[2] : p2.vec[2]);
+        Vector pos = new Vector(((c & 4) != 0) ? corner1.vec[0] : corner2.vec[0], ((c & 2) != 0) ? corner1.vec[1] : corner2.vec[1],
+                ((c & 1) != 0) ? corner1.vec[2] : corner2.vec[2]);
         if (distanceToBoundary(i, pos) > 0.0)
           allInForAllPlanes = false;
         else
@@ -1514,12 +1514,12 @@ public class Graph {
    *
    * @see #computeBoundaryEquations()
    */
-  public float[][] computeBoundaryEquations(float[][] coef) {
+  public float[][] computeBoundaryEquations(float[][] coefficients) {
     // soft check:
-    if (coef == null || (coef.length == 0))
-      coef = new float[6][4];
-    else if ((coef.length != 6) || (coef[0].length != 4))
-      coef = new float[6][4];
+    if (coefficients == null || (coefficients.length == 0))
+      coefficients = new float[6][4];
+    else if ((coefficients.length != 6) || (coefficients[0].length != 4))
+      coefficients = new float[6][4];
 
     // Computed once and for all
     Vector pos = eye().position();
@@ -1534,23 +1534,23 @@ public class Graph {
         float hhfov = horizontalFieldOfView() / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
-        normal[0] = Vector.multiply(viewDir, -shhfov);
-        normal[1] = Vector.add(normal[0], Vector.multiply(right, chhfov));
-        normal[0] = Vector.add(normal[0], Vector.multiply(right, -chhfov));
-        normal[2] = Vector.multiply(viewDir, -1);
-        normal[3] = viewDir;
+        _normal[0] = Vector.multiply(viewDir, -shhfov);
+        _normal[1] = Vector.add(_normal[0], Vector.multiply(right, chhfov));
+        _normal[0] = Vector.add(_normal[0], Vector.multiply(right, -chhfov));
+        _normal[2] = Vector.multiply(viewDir, -1);
+        _normal[3] = viewDir;
 
         float hfov = fieldOfView() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
-        normal[4] = Vector.multiply(viewDir, -shfov);
-        normal[5] = Vector.add(normal[4], Vector.multiply(up, -chfov));
-        normal[4] = Vector.add(normal[4], Vector.multiply(up, chfov));
+        _normal[4] = Vector.multiply(viewDir, -shfov);
+        _normal[5] = Vector.add(_normal[4], Vector.multiply(up, -chfov));
+        _normal[4] = Vector.add(_normal[4], Vector.multiply(up, chfov));
 
         for (int i = 0; i < 2; ++i)
-          dist[i] = Vector.dot(pos, normal[i]);
+          _dist[i] = Vector.dot(pos, _normal[i]);
         for (int j = 4; j < 6; ++j)
-          dist[j] = Vector.dot(pos, normal[j]);
+          _dist[j] = Vector.dot(pos, _normal[j]);
 
         // Natural equations are:
         // dist[0,1,4,5] = pos * normal[0,1,4,5];
@@ -1560,43 +1560,43 @@ public class Graph {
         // 2 times less computations using expanded/merged equations. Dir vectors
         // are normalized.
         float posRightCosHH = chhfov * Vector.dot(pos, right);
-        dist[0] = -shhfov * posViewDir;
-        dist[1] = dist[0] + posRightCosHH;
-        dist[0] = dist[0] - posRightCosHH;
+        _dist[0] = -shhfov * posViewDir;
+        _dist[1] = _dist[0] + posRightCosHH;
+        _dist[0] = _dist[0] - posRightCosHH;
         float posUpCosH = chfov * Vector.dot(pos, up);
-        dist[4] = -shfov * posViewDir;
-        dist[5] = dist[4] - posUpCosH;
-        dist[4] = dist[4] + posUpCosH;
+        _dist[4] = -shfov * posViewDir;
+        _dist[5] = _dist[4] - posUpCosH;
+        _dist[4] = _dist[4] + posUpCosH;
         break;
       }
       case ORTHOGRAPHIC:
-        normal[0] = Vector.multiply(right, -1);
-        normal[1] = right;
-        normal[4] = up;
-        normal[5] = Vector.multiply(up, -1);
+        _normal[0] = Vector.multiply(right, -1);
+        _normal[1] = right;
+        _normal[4] = up;
+        _normal[5] = Vector.multiply(up, -1);
 
         float[] wh = getBoundaryWidthHeight();
-        dist[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), normal[0]);
-        dist[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), normal[1]);
-        dist[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), normal[4]);
-        dist[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), normal[5]);
+        _dist[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
+        _dist[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
+        _dist[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[4]);
+        _dist[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[5]);
         break;
     }
 
     // Front and far planes are identical for both camera types.
-    normal[2] = Vector.multiply(viewDir, -1);
-    normal[3] = viewDir;
-    dist[2] = -posViewDir - zNear();
-    dist[3] = posViewDir + zFar();
+    _normal[2] = Vector.multiply(viewDir, -1);
+    _normal[3] = viewDir;
+    _dist[2] = -posViewDir - zNear();
+    _dist[3] = posViewDir + zFar();
 
     for (int i = 0; i < 6; ++i) {
-      coef[i][0] = normal[i].vec[0];
-      coef[i][1] = normal[i].vec[1];
-      coef[i][2] = normal[i].vec[2];
-      coef[i][3] = dist[i];
+      coefficients[i][0] = _normal[i].vec[0];
+      coefficients[i][1] = _normal[i].vec[1];
+      coefficients[i][2] = _normal[i].vec[2];
+      coefficients[i][3] = _dist[i];
     }
 
-    return coef;
+    return coefficients;
   }
 
   /**
@@ -1652,7 +1652,7 @@ public class Graph {
    * @see #updateBoundaryEquations()
    */
   public void enableBoundaryEquations(boolean flag) {
-    fpCoefficientsUpdate = flag;
+    _coefficientsUpdate = flag;
   }
 
   /**
@@ -1663,7 +1663,7 @@ public class Graph {
    * @see #updateBoundaryEquations()
    */
   public boolean areBoundaryEquationsEnabled() {
-    return fpCoefficientsUpdate;
+    return _coefficientsUpdate;
   }
 
   /**
@@ -1684,7 +1684,7 @@ public class Graph {
    * @see #enableBoundaryEquations()
    */
   public void updateBoundaryEquations() {
-    computeBoundaryEquations(fpCoefficients);
+    computeBoundaryEquations(_coefficients);
   }
 
   /**
@@ -1717,7 +1717,7 @@ public class Graph {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
-    return fpCoefficients;
+    return _coefficients;
   }
 
   /**
@@ -1742,12 +1742,12 @@ public class Graph {
    * @see #getBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
-  public float distanceToBoundary(int index, Vector pos) {
+  public float distanceToBoundary(int index, Vector position) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
-    Vector myVector = new Vector(fpCoefficients[index][0], fpCoefficients[index][1], fpCoefficients[index][2]);
-    return Vector.dot(pos, myVector) - fpCoefficients[index][3];
+    Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
+    return Vector.dot(position, myVector) - _coefficients[index][3];
   }
 
   /**
@@ -1768,7 +1768,7 @@ public class Graph {
    * the world coordinates system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
-   * Use this method to scale objects so that they have a constant pixel size on screen.
+   * Use this method to _scale objects so that they have a constant pixel size on screen.
    * The following code will draw a 20 pixel line, starting at {@link #center()} and
    * always directed along the screen vertical direction:
    * <p>
@@ -1952,8 +1952,8 @@ public class Graph {
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    */
-  public Vector projectedCoordinatesOf(Vector src) {
-    return projectedCoordinatesOf(src, null);
+  public Vector projectedCoordinatesOf(Vector vector) {
+    return projectedCoordinatesOf(vector, null);
   }
 
   /**
@@ -1969,20 +1969,20 @@ public class Graph {
    *
    * @see #unprojectedCoordinatesOf(Vector, Frame)
    */
-  public Vector projectedCoordinatesOf(Vector src, Frame frame) {
+  public Vector projectedCoordinatesOf(Vector vector, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vector tmp = frame.inverseCoordinatesOf(src);
-      project(tmp.vec[0], tmp.vec[1], tmp.vec[2], xyz);
+      Vector tmp = frame.inverseCoordinatesOf(vector);
+      _project(tmp.vec[0], tmp.vec[1], tmp.vec[2], xyz);
     } else
-      project(src.vec[0], src.vec[1], src.vec[2], xyz);
+      _project(vector.vec[0], vector.vec[1], vector.vec[2], xyz);
 
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   // cached version
-  protected boolean project(float objx, float objy, float objz, float[] windowCoordinate) {
+  protected boolean _project(float objx, float objy, float objz, float[] windowCoordinate) {
     Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
 
     float in[] = new float[4];
@@ -2036,8 +2036,8 @@ public class Graph {
    * <p>
    * #see {@link #unprojectedCoordinatesOf(Vector, Frame)}
    */
-  public Vector unprojectedCoordinatesOf(Vector src) {
-    return this.unprojectedCoordinatesOf(src, null);
+  public Vector unprojectedCoordinatesOf(Vector vector) {
+    return this.unprojectedCoordinatesOf(vector, null);
   }
 
   /**
@@ -2050,7 +2050,7 @@ public class Graph {
    * linear interpolation between {@link #zNear()} and
    * {@link #zFar()};
    * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
-   * is the _distance from the point you project to the camera, along the
+   * is the _distance from the point you _project to the camera, along the
    * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
    * <p>
    * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
@@ -2074,12 +2074,12 @@ public class Graph {
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector unprojectedCoordinatesOf(Vector src, Frame frame) {
+  public Vector unprojectedCoordinatesOf(Vector vector, Frame frame) {
     float xyz[] = new float[3];
-    // unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
+    // _unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
-    unproject(src.vec[0], src.vec[1], src.vec[2], xyz);
+    _unproject(vector.vec[0], vector.vec[1], vector.vec[2], xyz);
     if (frame != null)
       return frame.coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
     else
@@ -2094,7 +2094,7 @@ public class Graph {
    * @param winz                     Specify the window z coordinate.
    * @param objCoordinate            Return the computed object coordinates.
    */
-  protected boolean unproject(float winx, float winy, float winz, float[] objCoordinate) {
+  protected boolean _unproject(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
     if(matrixHandler().isProjectionViewInverseCached())
       projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
@@ -2157,7 +2157,7 @@ public class Graph {
    * @see #setBoundingBox(Vector, Vector)
    */
   public float radius() {
-    return scnRadius;
+    return _radius;
   }
 
   /**
@@ -2173,7 +2173,7 @@ public class Graph {
    * @see #zFar()
    */
   public Vector center() {
-    return scnCenter;
+    return _center;
   }
 
   /**
@@ -2185,23 +2185,23 @@ public class Graph {
    * <b>Attention:</b> {@link #setCenter(Vector)} changes this value.
    */
   public Vector anchor() {
-    return anchorPnt;
+    return _anchor;
   }
 
   /**
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
-  public void setAnchor(Vector rap) {
+  public void setAnchor(Vector anchor) {
     if(is2D()) {
-      anchorPnt = rap;
-      anchorPnt.setZ(0);
+      _anchor = anchor;
+      _anchor.setZ(0);
     }
     else {
       float prevDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-      this.anchorPnt = rap;
+      this._anchor = anchor;
       float newDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
       if (prevDist != 0 && newDist != 0)
-        rapK *= prevDist / newDist;
+        _rapK *= prevDist / newDist;
     }
   }
 
@@ -2214,7 +2214,7 @@ public class Graph {
       System.out.println("Warning: Scene radius must be positive - Ignoring value");
       return;
     }
-    scnRadius = radius;
+    _radius = radius;
   }
 
   /**
@@ -2223,24 +2223,17 @@ public class Graph {
    * @see #setRadius(float)
    */
   public void setCenter(Vector center) {
-    scnCenter = center;
+    _center = center;
   }
 
   /**
    * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
    * graph limits are defined by a (world axis aligned) bounding box.
    */
-  public void setBoundingBox(Vector min, Vector max) {
+  public void setBoundingBox(Vector corner1, Vector corner2) {
     //TODO check 2d case
-    setCenter(Vector.multiply(Vector.add(min, max), 1 / 2.0f));
-    setRadius(0.5f * (Vector.subtract(max, min)).magnitude());
-  }
-
-  /**
-   * Returns the current {@link #eye()} type.
-   */
-  public Type eyeType() {
-    return tp;
+    setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
+    setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
 
   /**
@@ -2267,7 +2260,7 @@ public class Graph {
    * Rotates the Camera so that its {@link #viewDirection()} is {@code direction} (defined
    * in the world coordinate system).
    * <p>
-   * The Camera {@link Node#position()} is not modified. The Camera is rotated so that the
+   * The Camera {@link Node#position()} is not _modified. The Camera is rotated so that the
    * horizon (defined by its {@link #upVector()}) is preserved.
    *
    * @see #lookAt(Vector)
@@ -2326,9 +2319,9 @@ public class Graph {
 
     eye().rotate(q);
 
-    // Useful in fly mode to keep the horizontal direction.
+    // Useful in _fly mode to keep the horizontal direction.
     if(eye() instanceof Node)
-      ((Node)eye()).updateUpVector();
+      ((Node)eye())._updateUpVector();
   }
 
   /**
@@ -2347,7 +2340,7 @@ public class Graph {
   /**
    * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
    * Cameras set {@link Node#orientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The Camera {@link Node#position()} is not modified.
+   * in the world coordinate system (The Camera {@link Node#position()} is not _modified.
    * Simply {@link #setViewDirection(Vector)}).
    *
    * @see #at()
@@ -2393,8 +2386,8 @@ public class Graph {
    * @see #interpolateTo(Frame, float)
    */
   //TODO needs testing, e.g., setAvatar
-  public void interpolateTo(Frame fr) {
-    interpolateTo(fr, 1);
+  public void interpolateTo(Frame frame) {
+    interpolateTo(frame, 1);
   }
 
   /**
@@ -2407,12 +2400,12 @@ public class Graph {
    * @see #interpolateTo(Frame)
    * @see #fitBallInterpolation()
    */
-  public void interpolateTo(Frame fr, float duration) {
-    interpolator.stop();
-    interpolator.clear();
-    interpolator.addKeyFrame(eye().detach());
-    interpolator.addKeyFrame(fr, duration);
-    interpolator.start();
+  public void interpolateTo(Frame frame, float duration) {
+    _interpolator.stop();
+    _interpolator.clear();
+    _interpolator.addKeyFrame(eye().detach());
+    _interpolator.addKeyFrame(frame, duration);
+    _interpolator.start();
   }
 
   /**
@@ -2428,16 +2421,16 @@ public class Graph {
    * fitted.
    */
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
-    interpolator.stop();
-    interpolator.clear();
-    interpolator.addKeyFrame(eye().detach());
+    _interpolator.stop();
+    _interpolator.clear();
+    _interpolator.addKeyFrame(eye().detach());
     Frame originalFrame = eye();
     Frame tempFrame = eye().detach();
     setEye(tempFrame);
     fitScreenRegion(rectangle);
     setEye(originalFrame);
-    interpolator.addKeyFrame(tempFrame);
-    interpolator.start();
+    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.start();
   }
 
   /**
@@ -2446,19 +2439,19 @@ public class Graph {
    * The graph is defined by its {@link #center()} and its {@link #radius()}.
    * See {@link #fitBall()}.
    * <p>
-   * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
+   * The {@link Frame#orientation()} of the {@link #eye()} is not _modified.
    */
   public void fitBallInterpolation() {
-    interpolator.stop();
-    interpolator.clear();
-    interpolator.addKeyFrame(eye().detach());
+    _interpolator.stop();
+    _interpolator.clear();
+    _interpolator.addKeyFrame(eye().detach());
     Frame originalFrame = eye();
     Frame tempFrame = eye().detach();
     setEye(tempFrame);
     fitBall();
     setEye(originalFrame);
-    interpolator.addKeyFrame(tempFrame);
-    interpolator.start();
+    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.start();
   }
 
   /**
@@ -2506,10 +2499,10 @@ public class Graph {
    * Moves the eye so that the (world axis aligned) bounding box ({@code min} ,
    * {@code max}) is entirely visible, using {@link #fitBall(Vector, float)}.
    */
-  public void fitBoundingBox(Vector min, Vector max) {
-    float diameter = Math.max(Math.abs(max.vec[1] - min.vec[1]), Math.abs(max.vec[0] - min.vec[0]));
-    diameter = Math.max(Math.abs(max.vec[2] - min.vec[2]), diameter);
-    fitBall(Vector.multiply(Vector.add(min, max), 0.5f), 0.5f * diameter);
+  public void fitBoundingBox(Vector corner1, Vector corner2) {
+    float diameter = Math.max(Math.abs(corner2.vec[1] - corner1.vec[1]), Math.abs(corner2.vec[0] - corner1.vec[0]));
+    diameter = Math.max(Math.abs(corner2.vec[2] - corner1.vec[2]), diameter);
+    fitBall(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
   }
 
   /**
@@ -2562,7 +2555,7 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(Point pixelInput, Vector orig, Vector dir) {
+  public void convertClickToLine(Point pixelInput, Vector origin, Vector direction) {
     Point pixel = new Point(pixelInput.x(), pixelInput.y());
 
     // lef-handed coordinate system correction
@@ -2571,21 +2564,21 @@ public class Graph {
 
     switch (type()) {
       case PERSPECTIVE:
-        orig.set(eye().position());
-        dir.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
+        origin.set(eye().position());
+        direction.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
                 ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
                 -1.0f));
-        dir.set(Vector.subtract(eye().inverseCoordinatesOf(dir), orig));
-        dir.normalize();
+        direction.set(Vector.subtract(eye().inverseCoordinatesOf(direction), origin));
+        direction.normalize();
         break;
 
       case ORTHOGRAPHIC: {
         float[] wh = getBoundaryWidthHeight();
-        orig.set(
+        origin.set(
                 new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
                         0.0f));
-        orig.set(eye().inverseCoordinatesOf(orig));
-        dir.set(viewDirection());
+        origin.set(eye().inverseCoordinatesOf(origin));
+        direction.set(viewDirection());
         break;
       }
     }
@@ -2593,20 +2586,20 @@ public class Graph {
 
   // WARNINGS and EXCEPTIONS STUFF
 
-  static protected HashMap<String, Object> warnings;
+  static protected HashMap<String, Object> _warnings;
 
   /**
    * Show warning, and keep track of it so that it's only shown once.
    *
-   * @param msg the error message (which will be stored for later comparison)
+   * @param message the error message (which will be stored for later comparison)
    */
-  static public void showWarning(String msg) { // ignore
-    if (warnings == null) {
-      warnings = new HashMap<String, Object>();
+  static public void showWarning(String message) { // ignore
+    if (_warnings == null) {
+      _warnings = new HashMap<String, Object>();
     }
-    if (!warnings.containsKey(msg)) {
-      System.err.println(msg);
-      warnings.put(msg, new Object());
+    if (!_warnings.containsKey(message)) {
+      System.err.println(message);
+      _warnings.put(message, new Object());
     }
   }
 
@@ -2733,7 +2726,7 @@ public class Graph {
    * @see #setLeftHanded()
    */
   public boolean isLeftHanded() {
-    return !rightHanded;
+    return !_rightHanded;
   }
 
   /**
@@ -2743,7 +2736,7 @@ public class Graph {
    * @see #setRightHanded()
    */
   public boolean isRightHanded() {
-    return rightHanded;
+    return _rightHanded;
   }
 
   /**
@@ -2752,7 +2745,7 @@ public class Graph {
    * @see #isRightHanded()
    */
   public void setRightHanded() {
-    rightHanded = true;
+    _rightHanded = true;
   }
 
   /**
@@ -2761,7 +2754,7 @@ public class Graph {
    * @see #isLeftHanded()
    */
   public void setLeftHanded() {
-    rightHanded = false;
+    _rightHanded = false;
   }
 
   /**
@@ -2778,26 +2771,26 @@ public class Graph {
     return !is2D();
   }
 
-  protected void modified() {
-    lastNonEyeUpdate = TimingHandler.frameCount;
+  protected void _modified() {
+    _lastNonEyeUpdate = TimingHandler.frameCount;
   }
 
   /**
    * Max between {@link Node#lastUpdate()} and
-   * {@link #lastNonEyeUpdate()}.
+   * {@link #_lastNonEyeUpdate()}.
    *
    * @return last frame the Eye was updated
-   * @see #lastNonEyeUpdate()
+   * @see #_lastNonEyeUpdate()
    */
   public long lastUpdate() {
-    return Math.max(eye().lastUpdate(), lastNonEyeUpdate());
+    return Math.max(eye().lastUpdate(), _lastNonEyeUpdate());
   }
 
   /**
    * @return last frame a local Eye parameter (different than the Frame) was updated.
    * @see #lastUpdate()
    */
-  protected long lastNonEyeUpdate() {
-    return lastNonEyeUpdate;
+  protected long _lastNonEyeUpdate() {
+    return _lastNonEyeUpdate;
   }
 }
