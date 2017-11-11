@@ -17,12 +17,11 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.bias.Agent;
-import remixlab.fpstiming.TimingHandler;
 import remixlab.fpstiming.TimingTask;
-import remixlab.geom.Graph;
-import remixlab.geom.Node;
-import remixlab.geom.Interpolator;
-import remixlab.geom.MatrixHandler;
+import remixlab.core.Graph;
+import remixlab.core.Node;
+import remixlab.core.Interpolator;
+import remixlab.core.MatrixHandler;
 import remixlab.primitives.*;
 
 import java.nio.FloatBuffer;
@@ -34,15 +33,8 @@ import java.util.List;
  * {@link Graph}, providing an interface between Dandelion
  * and Processing.
  * <p>
- * <h3>Usage</h3> To use a Scene you have two main choices:
- * <ol>
- * <li><b>Direct instantiation</b>. In this case you should instantiate your own Scene
+ * <h3>Usage</h3> To use a Scene you should instantiate your own Scene
  * object at the {@code PApplet.setup()} function. See the example <i>BasicUse</i>.
- * <li><b>Inheritance</b>. In this case, once you declare a Scene derived class, you
- * should implement {@link #proscenium()} which defines the objects in your graph. Just
- * make sure to define the {@code PApplet.draw()} method, even if it's empty. See the
- * example <i>AlternativeUse</i>.
- * </ol>
  * <h3>Interactivity mechanisms</h3> ProScene provides powerful interactivity mechanisms
  * allowing a wide range of graph setups ranging from very simple to complex ones. For
  * convenience, two interaction mechanisms are provided by default:
@@ -116,8 +108,7 @@ public class Scene extends Graph implements PConstants {
    * {@link GLMatrixHandler}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
    * visual hint flags, instantiates the {@link #eye()}. It also
-   * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}, and finally
-   * calls {@link #init()}.
+   * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}.
    * <p>
    * An off-screen Processing Scene is defined if {@code pg != p.g}. In this case the
    * {@code x} and {@code y} parameters define the position of the upper-left corner where
@@ -162,9 +153,6 @@ public class Scene extends Graph implements PConstants {
 
     // 5. Handed
     setLeftHanded();
-
-    // 6. Init should be called only once
-    init();
   }
 
   /**
@@ -558,8 +546,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Paint method which is called just after your {@code PApplet.draw()} method. Calls
-   * {@link #proscenium()} and {@link #postDraw()}. This method is
+   * Paint method which is called just after your {@code PApplet.draw()} method. This method is
    * registered at the PApplet and hence you don't need to call it. Only meaningful if the graph is
    * on-screen (it the graph {@link #isOffscreen()} it even doesn't get registered at the
    * PApplet.
@@ -574,7 +561,6 @@ public class Scene extends Graph implements PConstants {
    * @see #isOffscreen()
    */
   public void draw() {
-    proscenium();
     popModelView();
     postDraw();
   }
@@ -650,7 +636,6 @@ public class Scene extends Graph implements PConstants {
    * Only if the Scene {@link #isOffscreen()}. Calls
    * <p>
    * <ol>
-   * <li>{@link #proscenium()}</li>
    * <li>{@code pg().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@link #handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * <li>{@link #postDraw()}</li>
@@ -674,7 +659,6 @@ public class Scene extends Graph implements PConstants {
     if (beginOffScreenDrawingCalls != 0)
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
-    proscenium();
     popModelView();
     pg().endDraw();
     if (hasAutoFocus())

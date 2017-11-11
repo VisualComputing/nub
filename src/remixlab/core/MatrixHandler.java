@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.geom;
+package remixlab.core;
 
 import remixlab.primitives.Matrix;
 import remixlab.primitives.Vector;

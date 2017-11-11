@@ -4,7 +4,7 @@ import processing.core.*;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.KeyShortcut;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.Node;
+import remixlab.core.Node;
 import remixlab.proscene.*;
 
 /**

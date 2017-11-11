@@ -12,7 +12,7 @@ package remixlab.proscene;
 
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.geom.MatrixHandler;
+import remixlab.core.MatrixHandler;
 import remixlab.primitives.Matrix;
 
 /**

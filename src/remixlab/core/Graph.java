@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.geom;
+package remixlab.core;
 
 import remixlab.bias.Agent;
 import remixlab.bias.InputHandler;
@@ -136,7 +136,6 @@ public class Graph {
    * {@link #is2D()} or {@link #is3D()}.</li>
    * <li>Instantiate some agents and enable them (register them at the
    * {@link #inputHandler()}).</li>
-   * <li>Call {@link #init()} at the end of the constructor.</li>
    * </ol>
    *
    * @see #timingHandler()
@@ -1260,7 +1259,6 @@ public class Graph {
    * <li>Calls {@link MatrixHandler#bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if
    * {@link #areBoundaryEquationsEnabled()}</li>
-   * <li>Calls {@link #proscenium()}</li>
    * </ol>
    *
    * @see #postDraw()
@@ -1273,8 +1271,6 @@ public class Graph {
       updateBoundaryEquations();
       lastEqUpdate = TimingHandler.frameCount;
     }
-    // 2. Alternative use only
-    proscenium();
   }
 
   /**
@@ -2726,29 +2722,6 @@ public class Graph {
       applyTransformation(frame);
     } else
       applyTransformation(frame);
-  }
-
-  /**
-   * This method is called before the first drawing happen and should be overloaded to
-   * initialize stuff. The default implementation is empty.
-   */
-  public void init() {
-  }
-
-  /**
-   * The method that actually defines the graph.
-   * <p>
-   * If you build a class that inherits from Scene, this is the method you should
-   * overload, but no if you instantiate your own Scene object (for instance, in
-   * Processing you should just overload {@code PApplet.draw()} to define your graph).
-   * <p>
-   * The eye matrices set in {@link MatrixHandler#bind()} converts from the world to the camera
-   * coordinate systems. Thus vertices given here can then be considered as being given in
-   * the world coordinate system. The eye is moved in this world using the mouse. This
-   * representation is much more intuitive than a camera-centric system (which for
-   * instance is the standard in OpenGL).
-   */
-  public void proscenium() {
   }
 
   // GENERAL STUFF

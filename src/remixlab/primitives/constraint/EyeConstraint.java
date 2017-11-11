@@ -10,7 +10,7 @@
 
 package remixlab.primitives.constraint;
 
-import remixlab.geom.Graph;
+import remixlab.core.Graph;
 import remixlab.primitives.*;
 
 /**

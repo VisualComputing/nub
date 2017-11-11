@@ -11,7 +11,7 @@
 package remixlab.primitives;
 
 import remixlab.fpstiming.TimingHandler;
-import remixlab.geom.Graph;
+import remixlab.core.Graph;
 import remixlab.primitives.constraint.Constraint;
 
 /**

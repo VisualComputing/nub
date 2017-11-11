@@ -2,9 +2,8 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
-import remixlab.geom.Graph;
-import remixlab.geom.Interpolator;
-import remixlab.geom.Node;
+import remixlab.core.Graph;
+import remixlab.core.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 

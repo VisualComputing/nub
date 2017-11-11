@@ -4,7 +4,7 @@ import processing.core.PApplet;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
 import remixlab.proscene.*;
-import remixlab.geom.*;
+import remixlab.core.*;
 
 public class FrameInterpolation extends PApplet {
     Scene scene;

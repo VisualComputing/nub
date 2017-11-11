@@ -3,8 +3,8 @@ package basics;
 import processing.core.PApplet;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.Graph;
-import remixlab.geom.Node;
+import remixlab.core.Graph;
+import remixlab.core.Node;
 import remixlab.proscene.Scene;
 
 public class TwoD extends PApplet {

@@ -3,7 +3,7 @@ package frame;
 import processing.core.PApplet;
 import remixlab.bias.event.KeyEvent;
 import remixlab.bias.event.MotionEvent;
-import remixlab.geom.Node;
+import remixlab.core.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 

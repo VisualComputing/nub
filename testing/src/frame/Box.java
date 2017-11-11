@@ -2,7 +2,7 @@ package frame;
 
 import processing.core.PApplet;
 import remixlab.bias.event.*;
-import remixlab.geom.Node;
+import remixlab.core.Node;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
 import remixlab.proscene.*;
