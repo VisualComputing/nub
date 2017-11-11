@@ -240,8 +240,8 @@ public class MatrixHandler {
   /**
    * Two dimensional rotation.
    * <p>
-   * Same as _rotateZ (this is identical to a 3D rotation along the z-axis) but included
-   * for clarity. It'd be weird for people drawing 2D graphics to be using _rotateZ. And
+   * Same as rotateZ (this is identical to a 3D rotation along the z-axis) but included
+   * for clarity. It'd be weird for people drawing 2D graphics to be using rotateZ. And
    * they might kick our a-- for the confusion.
    * <p>
    * <A HREF="http://www.xkcd.com/c184.html">Additional background</A>.
@@ -286,10 +286,10 @@ public class MatrixHandler {
   }
 
   /**
-   * Scale in X and Y. Equivalent to _scale(sx, sy, 1).
+   * Scale in X and Y. Equivalent to scale(sx, sy, 1).
    * <p>
    * Not recommended for use in 3D, because the z-dimension is just scaled by 1, since
-   * there's no way to know what else to _scale it by.
+   * there's no way to know what else to scale it by.
    */
   public void scale(float sx, float sy) {
     scale(sx, sy, 1);

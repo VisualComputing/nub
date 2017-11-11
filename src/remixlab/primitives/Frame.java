@@ -411,7 +411,7 @@ public class Frame {
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the Frame may differ from {@code t} (since it can be filtered by the
-   * {@link #constraint()}). Use {@link #setTranslation(Vector)} to directly _translate the
+   * {@link #constraint()}). Use {@link #setTranslation(Vector)} to directly translate the
    * Frame without taking the {@link #constraint()} into account.
    *
    * @see #rotate(Quaternion)
@@ -1048,7 +1048,7 @@ public class Frame {
 
         vec = Vector.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
         vec.subtract(translation());
-        _translate(vec);
+        translate(vec);
       }
     } else {
       Rot o;
@@ -1355,7 +1355,7 @@ public class Frame {
    * {@code applyMatrix(fr.matrix());} <br>
    * <p>
    * Using this conversion, you can benefit from the powerful Frame transformation methods
-   * to _translate points and vectors to and from the Frame coordinate system to any other
+   * to translate points and vectors to and from the Frame coordinate system to any other
    * Frame coordinate system (including the world coordinate system). See
    * {@link #coordinatesOf(Vector)} and {@link #transformOf(Vector)}.
    */

@@ -499,7 +499,7 @@ public class Matrix {
   }
 
   /**
-   * Same as {@code _translate(tx, ty, 0}.
+   * Same as {@code translate(tx, ty, 0}.
    */
   public void translate(float tx, float ty) {
     translate(tx, ty, 0);
@@ -517,7 +517,7 @@ public class Matrix {
   }
 
   /**
-   * Same as {@code _rotateZ(angle)}.
+   * Same as {@code rotateZ(angle)}.
    *
    * @see #rotateZ(float)
    */

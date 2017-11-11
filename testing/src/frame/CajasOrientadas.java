@@ -61,7 +61,7 @@ public class CajasOrientadas extends PApplet {
             translate(event);
             break;
           case processing.event.MouseEvent.WHEEL:
-            //_scale(_event);
+            //scale(_event);
             translateZ(event);
             break;
         }
@@ -70,13 +70,13 @@ public class CajasOrientadas extends PApplet {
       @Override
       public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
-          _translateY(true);
+          translateY(true);
         if (event.id() == PApplet.DOWN)
-          _translateY(false);
+          translateY(false);
         if (event.id() == PApplet.LEFT)
-          _translateX(false);
+          translateX(false);
         if (event.id() == PApplet.RIGHT)
-          _translateX(true);
+          translateX(true);
       }
     };
 
@@ -99,13 +99,13 @@ public class CajasOrientadas extends PApplet {
       @Override
       public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
-          _translateY(true);
+          translateY(true);
         if (event.id() == PApplet.DOWN)
-          _translateY(false);
+          translateY(false);
         if (event.id() == PApplet.LEFT)
-          _translateX(false);
+          translateX(false);
         if (event.id() == PApplet.RIGHT)
-          _translateX(true);
+          translateX(true);
       }
     };
 

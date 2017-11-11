@@ -1749,7 +1749,7 @@ public class Graph {
    * the world coordinates system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
-   * Use this method to _scale objects so that they have a constant pixel size on screen.
+   * Use this method to scale objects so that they have a constant pixel size on screen.
    * The following code will draw a 20 pixel line, starting at {@link #center()} and
    * always directed along the screen vertical direction:
    * <p>

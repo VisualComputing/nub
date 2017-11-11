@@ -66,9 +66,9 @@ public class AxisPlaneConstraint extends Constraint {
   /**
    * Returns the translation constraint Type.
    * <p>
-   * Depending on this value, the Frame will freely _translate ({@link Type#FREE} ), will
-   * only be able to _translate along an axis direction ( {@link Type#AXIS}), will be
-   * forced to stay into a plane ({@link Type#PLANE} ) or will not able to _translate at
+   * Depending on this value, the Frame will freely translate ({@link Type#FREE} ), will
+   * only be able to translate along an axis direction ( {@link Type#AXIS}), will be
+   * forced to stay into a plane ({@link Type#PLANE} ) or will not able to translate at
    * all ({@link Type#FORBIDDEN}).
    * <p>
    * Use {@link Frame#setPosition(Vector)} to define the position of

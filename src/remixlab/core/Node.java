@@ -62,8 +62,8 @@ import java.util.List;
  * as the {@link Graph#eye()}, see {@link Graph#setEye(Frame)}.
  * <p>
  * This class provides several gesture-to-motion converting methods, such as:
- * {@link #rotate(MotionEvent)}, {@link #_moveForward(MotionEvent2, boolean)},
- * {@link #_translateX(boolean)}, etc. To use them, derive from this class and override the
+ * {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent2, boolean)},
+ * {@link #translateX(boolean)}, etc. To use them, derive from this class and override the
  * version of {@code interact} with the (bogus-_event) parameter type you want to
  * customize (see {@link #interact(MotionEvent)},
  * {@link #interact(KeyEvent)}, etc.). For example, with the following
@@ -773,7 +773,7 @@ public class Node extends Frame implements Grabber {
    * Internal use.
    * <p>
    * Returns the cached value of the spinning friction used in
-   * {@link #_recomputeSpinninQuaternion()}.
+   * {@link #_recomputeSpinningQuaternion()}.
    */
   protected float _dampingFx() {
     return _spiningFriction;
@@ -803,7 +803,7 @@ public class Node extends Frame implements Grabber {
    * Internal use.
    * <p>
    * Computes and caches the value of the spinning friction used in
-   * {@link #_recomputeSpinninQuaternion()}.
+   * {@link #_recomputeSpinningQuaternion()}.
    */
   protected void _setDampingFx(float friction) {
     _spiningFriction = friction * friction * friction;
@@ -1075,7 +1075,7 @@ public class Node extends Frame implements Grabber {
         return;
       }
       _spin();
-      _recomputeSpinninQuaternion();
+      _recomputeSpinningQuaternion();
     }
   }
 
@@ -1115,7 +1115,7 @@ public class Node extends Frame implements Grabber {
    * Internal method. Recomputes the {@link #spinningRotation()} according to
    * {@link #damping()}.
    */
-  protected void _recomputeSpinninQuaternion() {
+  protected void _recomputeSpinningQuaternion() {
     float prevSpeed = _eventSpeed;
     float damping = 1.0f - _dampingFx();
     _eventSpeed *= damping;
@@ -1171,9 +1171,9 @@ public class Node extends Frame implements Grabber {
    * Returns a Rotation computed according to the mouse motion. Mouse positions are
    * projected on a deformed ball, centered on ({@code center.x()}, {@code center.y()}).
    */
-  public Quaternion deformedBallRotation(MotionEvent2 event, Vector center) {
+  public Quaternion deformedBallQuaternion(MotionEvent2 event, Vector center) {
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("deformedBallRotation");
+      Graph.showEventVariationWarning("deformedBallQuaternion");
       return null;
     }
     float cx = center.x();
@@ -1199,9 +1199,9 @@ public class Node extends Frame implements Grabber {
   }
   //TODO Restore 2D
   /*
-  public Rotation deformedBallRotation(MotionEvent2 _event, Vector center) {
+  public Rotation deformedBallQuaternion(MotionEvent2 _event, Vector center) {
     if (_event.isAbsolute()) {
-      Graph.showEventVariationWarning("deformedBallRotation");
+      Graph.showEventVariationWarning("deformedBallQuaternion");
       return null;
     }
     if (graph.is2D()) {
@@ -1298,198 +1298,198 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateX(MotionEvent event) {
-    _translateX(event, true);
+  protected void translateX(MotionEvent event) {
+    translateX(event, true);
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  protected void _translateX(MotionEvent event, boolean fromX) {
+  protected void translateX(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _translateX(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+      translateX(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateX(MotionEvent1 event) {
-    _translateX(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void translateX(MotionEvent1 event) {
+    translateX(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  protected void _translateX(MotionEvent1 event, float sensitivity) {
-    translate(screenToVec(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
+  protected void translateX(MotionEvent1 event, float sensitivity) {
+    translate(screenToVector(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateXPos() {
-    _translateX(true);
+  protected void translateXPos() {
+    translateX(true);
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateXNeg() {
-    _translateX(false);
+  protected void translateXNeg() {
+    translateX(false);
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  protected void _translateX(boolean right) {
-    translate(screenToVec(
+  protected void translateX(boolean right) {
+    translate(screenToVector(
         Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keyboardSensitivity() : -keyboardSensitivity())));
   }
 
   /**
    * User gesture into x-translation conversion routine.
    */
-  public void translateY(MotionEvent event) {
-    _translateY(event, false);
+  protected void translateY(MotionEvent event) {
+    translateY(event, false);
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  protected void _translateY(MotionEvent event, boolean fromX) {
+  protected void translateY(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _translateY(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+      translateY(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  public void translateY(MotionEvent1 event) {
-    _translateY(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void translateY(MotionEvent1 event) {
+    translateY(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  protected void _translateY(MotionEvent1 event, float sensitivity) {
+  protected void translateY(MotionEvent1 event, float sensitivity) {
     translate(
-        screenToVec(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
+        screenToVector(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  public void translateYPos() {
-    _translateY(true);
+  protected void translateYPos() {
+    translateY(true);
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  public void translateYNeg() {
-    _translateY(false);
+  protected void translateYNeg() {
+    translateY(false);
   }
 
   /**
    * User gesture into y-translation conversion routine.
    */
-  protected void _translateY(boolean up) {
-    translate(screenToVec(
+  protected void translateY(boolean up) {
+    translate(screenToVector(
         Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keyboardSensitivity())));
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  public void translateZ(MotionEvent event) {
-    _translateZ(event, true);
+  protected void translateZ(MotionEvent event) {
+    translateZ(event, true);
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  protected void _translateZ(MotionEvent event, boolean fromX) {
+  protected void translateZ(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _translateZ(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+      translateZ(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  public void translateZ(MotionEvent1 event) {
-    _translateZ(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void translateZ(MotionEvent1 event) {
+    translateZ(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  protected void _translateZ(MotionEvent1 event, float sensitivity) {
+  protected void translateZ(MotionEvent1 event, float sensitivity) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_translateZ");
+      Graph.showDepthWarning("translateZ");
       return;
     }
-    translate(screenToVec(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
+    translate(screenToVector(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  public void translateZPos() {
-    _translateZ(true);
+  protected void translateZPos() {
+    translateZ(true);
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  public void translateZNeg() {
-    _translateZ(false);
+  protected void translateZNeg() {
+    translateZ(false);
   }
 
   /**
    * User gesture into z-translation conversion routine.
    */
-  protected void _translateZ(boolean up) {
+  protected void translateZ(boolean up) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_translateZ");
+      Graph.showDepthWarning("translateZ");
       return;
     }
-    translate(screenToVec(
+    translate(screenToVector(
         Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keyboardSensitivity() : keyboardSensitivity())));
   }
 
   /**
    * User gesture into xy-translation conversion routine.
    */
-  public void translate(MotionEvent event) {
-    _translate(event, true);
+  protected void translate(MotionEvent event) {
+    translate(event, true);
   }
 
   /**
    * User gesture into xy-translation conversion routine.
    */
-  protected void _translate(MotionEvent event, boolean fromX) {
+  protected void translate(MotionEvent event, boolean fromX) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event, fromX);
     if (motionEvent2 != null)
       translate(motionEvent2);
     else
-      Graph.showMinDOFsWarning("_translate", 2);
+      Graph.showMinDOFsWarning("translate", 2);
   }
 
   /**
    * User gesture into xy-translation conversion routine.
    */
-  public void translate(MotionEvent2 event) {
-    translate(screenToVec(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
+  protected void translate(MotionEvent2 event) {
+    translate(screenToVector(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
         (_graph.isRightHanded() ^ isEye()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
   }
 
   /**
    * User gesture into xyz-translation conversion routine.
    */
-  public void translateXYZ(MotionEvent event) {
+  protected void translateXYZ(MotionEvent event) {
     MotionEvent3 motionEvent3 = MotionEvent.event3(event, true);
     if (motionEvent3 != null)
       translateXYZ(motionEvent3);
@@ -1500,21 +1500,21 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into xyz-translation and rotation conversion routine.
    */
-  public void translateRotateXYZ(MotionEvent event) {
+  protected void translateRotateXYZ(MotionEvent event) {
     translateXYZ(event);
     // B. Rotate the iFrame
-    _rotateXYZ(event);
+    rotateXYZ(event);
   }
 
   /**
    * User gesture into xyz-translation conversion routine.
    */
-  public void translateXYZ(MotionEvent3 event) {
+  protected void translateXYZ(MotionEvent3 event) {
     if (_graph.is2D()) {
       Graph.showDepthWarning("translateXYZ");
       return;
     }
-    translate(screenToVec(
+    translate(screenToVector(
         Vector.multiply(new Vector(event.dx(), _graph.isRightHanded() ? -event.dy() : event.dy(), -event.dz()),
             this.translationSensitivity())));
   }
@@ -1524,8 +1524,8 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  public void zoomOnAnchor(MotionEvent event) {
-    _zoomOnAnchor(event, true);
+  protected void zoomOnAnchor(MotionEvent event) {
+    zoomOnAnchor(event, true);
   }
 
   /**
@@ -1533,10 +1533,10 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  protected void _zoomOnAnchor(MotionEvent event, boolean fromX) {
+  protected void zoomOnAnchor(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _zoomOnAnchor(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+      zoomOnAnchor(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
@@ -1544,7 +1544,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  protected void _zoomOnAnchor(MotionEvent1 event, float sensitivity) {
+  protected void zoomOnAnchor(MotionEvent1 event, float sensitivity) {
     Vector direction = Vector.subtract(_graph.anchor(), position());
     if (reference() != null)
       direction = reference().transformOf(direction);
@@ -1558,8 +1558,8 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  public void zoomOnAnchorPos() {
-    _zoomOnAnchor(true);
+  protected void zoomOnAnchorPos() {
+    zoomOnAnchor(true);
   }
 
   /**
@@ -1567,8 +1567,8 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  public void zoomOnAnchorNeg() {
-    _zoomOnAnchor(false);
+  protected void zoomOnAnchorNeg() {
+    zoomOnAnchor(false);
   }
 
   /**
@@ -1576,7 +1576,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see Graph#anchor()
    */
-  protected void _zoomOnAnchor(boolean in) {
+  protected void zoomOnAnchor(boolean in) {
     Vector direction = Vector.subtract(_graph.anchor(), position());
     if (reference() != null)
       direction = reference().transformOf(direction);
@@ -1588,7 +1588,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-region conversion routine.
    */
-  public void zoomOnRegion(MotionEvent event) {
+  protected void zoomOnRegion(MotionEvent event) {
     MotionEvent2 dof2 = MotionEvent.event2(event);
     if (dof2 == null) {
       Graph.showMinDOFsWarning("zoomOnRegion", 2);
@@ -1600,7 +1600,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into zoom-on-region conversion routine.
    */
-  public void zoomOnRegion(MotionEvent2 event) {
+  protected void zoomOnRegion(MotionEvent2 event) {
     if (!isEye()) {
       Graph.showOnlyEyeWarning("zoomOnRegion");
       return;
@@ -1629,164 +1629,164 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into x-rotation conversion routine.
    */
-  public void rotateX(MotionEvent event) {
-    _rotateX(event, false);
+  protected void rotateX(MotionEvent event) {
+    rotateX(event, false);
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  protected void _rotateX(MotionEvent event, boolean fromX) {
+  protected void rotateX(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _rotateX(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+      rotateX(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  public void rotateX(MotionEvent1 event) {
-    _rotateX(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void rotateX(MotionEvent1 event) {
+    rotateX(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  protected void _rotateX(MotionEvent1 event, float sensitivity) {
+  protected void rotateX(MotionEvent1 event, float sensitivity) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_rotateX");
+      Graph.showDepthWarning("rotateX");
       return;
     }
-    _spin(screenToQuat(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event.speed(), event.delay());
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  public void rotateXPos() {
-    _rotateX(true);
+  protected void rotateXPos() {
+    rotateX(true);
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  public void rotateXNeg() {
-    _rotateX(false);
+  protected void rotateXNeg() {
+    rotateX(false);
   }
 
   /**
    * User gesture into x-rotation conversion routine.
    */
-  protected void _rotateX(boolean up) {
+  protected void rotateX(boolean up) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_rotateX");
+      Graph.showDepthWarning("rotateX");
       return;
     }
-    rotate(screenToQuat(_computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0, 0));
+    rotate(screenToQuaternion(_computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0, 0));
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  public void rotateY(MotionEvent event) {
-    _rotateY(event, true);
+  protected void rotateY(MotionEvent event) {
+    rotateY(event, true);
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  protected void _rotateY(MotionEvent event, boolean fromX) {
+  protected void rotateY(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event, fromX);
     if (motionEvent1 != null)
-      _rotateY(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+      rotateY(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  public void rotateY(MotionEvent1 event) {
-    _rotateY(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void rotateY(MotionEvent1 event) {
+    rotateY(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  protected void _rotateY(MotionEvent1 event, float sensitivity) {
+  protected void rotateY(MotionEvent1 event, float sensitivity) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_rotateY");
+      Graph.showDepthWarning("rotateY");
       return;
     }
-    _spin(screenToQuat(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event.speed(), event.delay());
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  public void rotateYPos() {
-    _rotateY(true);
+  protected void rotateYPos() {
+    rotateY(true);
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  public void rotateYNeg() {
-    _rotateY(false);
+  protected void rotateYNeg() {
+    rotateY(false);
   }
 
   /**
    * User gesture into y-rotation conversion routine.
    */
-  protected void _rotateY(boolean up) {
+  protected void rotateY(boolean up) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_rotateY");
+      Graph.showDepthWarning("rotateY");
       return;
     }
-    Quaternion rt = screenToQuat(0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
+    Quaternion rt = screenToQuaternion(0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
     rotate(rt);
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  public void rotateZ(MotionEvent event) {
-    _rotateZ(event, false);
+  protected void rotateZ(MotionEvent event) {
+    rotateZ(event, false);
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  protected void _rotateZ(MotionEvent event, boolean fromX) {
+  protected void rotateZ(MotionEvent event, boolean fromX) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event);
     if (motionEvent1 != null)
-      _rotateZ(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
+      rotateZ(motionEvent1, _wheel(event) ? this.wheelSensitivity() : this.rotationSensitivity());
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  public void rotateZ(MotionEvent1 event) {
-    _rotateZ(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
+  protected void rotateZ(MotionEvent1 event) {
+    rotateZ(event, _wheel(event) ? this.wheelSensitivity() : this.translationSensitivity());
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  protected void _rotateZ(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuat(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event.speed(), event.delay());
+  protected void rotateZ(MotionEvent1 event, float sensitivity) {
+    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event.speed(), event.delay());
   }
   //TODO Restore 2D
   /*
-  protected void _rotateZ(MotionEvent1 _event, float sens) {
+  protected void rotateZ(MotionEvent1 _event, float sens) {
     Rotation rt;
     if (isEye())
       if (is2D())
         rt = new Rot(sens * (graph.isRightHanded() ? _computeAngle(_event) : -_computeAngle(_event)));
       else
-        rt = screenToQuat(0, 0, sens * -_computeAngle(_event));
+        rt = screenToQuaternion(0, 0, sens * -_computeAngle(_event));
     else if (is2D())
       rt = new Rot(sens * (graph.isRightHanded() ? -_computeAngle(_event) : _computeAngle(_event)));
     else
-      rt = screenToQuat(0, 0, sens * _computeAngle(_event));
+      rt = screenToQuaternion(0, 0, sens * _computeAngle(_event));
     _spin(rt, _event._speed(), _event._delay());
   }
   */
@@ -1794,54 +1794,54 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into z-rotation conversion routine.
    */
-  public void rotateZPos() {
-    _rotateZ(true);
+  protected void rotateZPos() {
+    rotateZ(true);
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  public void rotateZNeg() {
-    _rotateZ(false);
+  protected void rotateZNeg() {
+    rotateZ(false);
   }
 
   /**
    * User gesture into z-rotation conversion routine.
    */
-  protected void _rotateZ(boolean up) {
+  protected void rotateZ(boolean up) {
     //TODO Restore 2D
     /*
     Rotation rt;
     if (is2D())
       rt = new Rot(_computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
     else
-      rt = screenToQuat(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
+      rt = screenToQuaternion(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
     */
-    rotate(screenToQuat(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity())));
+    rotate(screenToQuaternion(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity())));
   }
 
   /**
    * User gesture into xyz-rotation conversion routine.
    */
-  protected void _rotateXYZ(MotionEvent event) {
+  protected void rotateXYZ(MotionEvent event) {
     MotionEvent3 motionEvent3 = MotionEvent.event3(event, false);
     if (motionEvent3 != null)
       rotateXYZ(motionEvent3);
     else
-      Graph.showMinDOFsWarning("_rotateXYZ", 3);
+      Graph.showMinDOFsWarning("rotateXYZ", 3);
   }
 
   /**
    * User gesture into xyz-rotation conversion routine.
    */
-  public void rotateXYZ(MotionEvent3 event) {
+  protected void rotateXYZ(MotionEvent3 event) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("_rotateXYZ");
+      Graph.showDepthWarning("rotateXYZ");
       return;
     }
     if (event.fired() && _graph.is3D())
       _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
-    rotate(screenToQuat(
+    rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
   }
@@ -1849,7 +1849,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into arcball-rotation conversion routine.
    */
-  public void rotate(MotionEvent event) {
+  protected void rotate(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       rotate(motionEvent2);
@@ -1860,7 +1860,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into arcball-rotation conversion routine.
    */
-  public void rotate(MotionEvent2 event) {
+  protected void rotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
       Graph.showEventVariationWarning("rotate");
       return;
@@ -1877,10 +1877,10 @@ public class Node extends Frame implements Grabber {
       Quaternion rt;
       Vector trns;
       if (isEye())
-        rt = deformedBallRotation(event, graph().projectedCoordinatesOf(graph().anchor()));
+        rt = deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
       else {
         trns = _graph.projectedCoordinatesOf(position());
-        rt = deformedBallRotation(event, trns);
+        rt = deformedBallQuaternion(event, trns);
         trns = ((Quaternion) rt).axis();
         trns = _graph.eye().orientation().rotate(trns);
         trns = transformOf(trns);
@@ -1909,13 +1909,13 @@ public class Node extends Frame implements Grabber {
       Rotation rt;
       Vector trns;
       if (isEye())
-        rt = deformedBallRotation(_event, eye().projectedCoordinatesOf(eye().anchor()));
+        rt = deformedBallQuaternion(_event, eye().projectedCoordinatesOf(eye().anchor()));
       else {
         if (is2D())
-          rt = deformedBallRotation(_event, graph.eye().projectedCoordinatesOf(position()));
+          rt = deformedBallQuaternion(_event, graph.eye().projectedCoordinatesOf(position()));
         else {
           trns = graph.eye().projectedCoordinatesOf(position());
-          rt = deformedBallRotation(_event, trns);
+          rt = deformedBallQuaternion(_event, trns);
           trns = ((Quaternion) rt).axis();
           trns = graph.eye().frame().orientation().rotate(trns);
           trns = transformOf(trns);
@@ -1930,23 +1930,23 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into scaling conversion routine.
    */
-  public void scale(MotionEvent event) {
+  protected void scale(MotionEvent event) {
     MotionEvent1 motionEvent1 = MotionEvent.event1(event);
     if (motionEvent1 != null)
-      _scale(motionEvent1, _wheel(event) ? wheelSensitivity() : scalingSensitivity());
+      scale(motionEvent1, _wheel(event) ? wheelSensitivity() : scalingSensitivity());
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  public void scale(MotionEvent1 event) {
-    _scale(event, _wheel(event) ? wheelSensitivity() : scalingSensitivity());
+  protected void scale(MotionEvent1 event) {
+    scale(event, _wheel(event) ? wheelSensitivity() : scalingSensitivity());
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  protected void _scale(MotionEvent1 event, float sensitivity) {
+  protected void scale(MotionEvent1 event, float sensitivity) {
     if (isEye()) {
       float delta = event.dx() * sensitivity;
       float s = 1 + Math.abs(delta) / (float) -_graph.height();
@@ -1961,21 +1961,21 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into scaling conversion routine.
    */
-  public void scalePos() {
-    _scale(true);
+  protected void scalePos() {
+    scale(true);
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  public void scaleNeg() {
-    _scale(false);
+  protected void scaleNeg() {
+    scale(false);
   }
 
   /**
    * User gesture into scaling conversion routine.
    */
-  protected void _scale(boolean up) {
+  protected void scale(boolean up) {
     float s = 1 + Math.abs(keyboardSensitivity()) / (isEye() ? (float) -_graph.height() : (float) _graph.height());
     scale(up ? s : 1 / s);
   }
@@ -1987,39 +1987,39 @@ public class Node extends Frame implements Grabber {
     _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
-  public void lookAround(MotionEvent event) {
+  protected void lookAround(MotionEvent event) {
     rotate(_rollPitchQuaternion(event));
   }
 
   /**
    * User gesture into move-backward conversion routine.
    */
-  public void moveBackward(MotionEvent event) {
-    _moveForward(event, false);
+  protected void moveBackward(MotionEvent event) {
+    moveForward(event, false);
   }
 
   /**
    * User gesture into move-forward conversion routine.
    */
-  public void moveForward(MotionEvent event) {
-    _moveForward(event, true);
+  protected void moveForward(MotionEvent event) {
+    moveForward(event, true);
   }
 
   /**
    * User gesture into move-forward conversion routine.
    */
-  protected void _moveForward(MotionEvent event, boolean forward) {
+  protected void moveForward(MotionEvent event, boolean forward) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
-      _moveForward(motionEvent2, forward);
+      moveForward(motionEvent2, forward);
     else
-      Graph.showMinDOFsWarning("_moveForward", 2);
+      Graph.showMinDOFsWarning("moveForward", 2);
   }
 
   /**
    * User gesture into move-forward conversion routine.
    */
-  protected void _moveForward(MotionEvent2 event, boolean forward) {
+  protected void moveForward(MotionEvent2 event, boolean forward) {
     if (event.fired())
       _updateUpVector();
     else if (event.flushed()) {
@@ -2029,7 +2029,7 @@ public class Node extends Frame implements Grabber {
     Vector trns;
     float fSpeed = forward ? -flySpeed() : flySpeed();
     if (is2D()) {
-      rotate(deformedBallRotation(event, _graph.projectedCoordinatesOf(position())));
+      rotate(deformedBallQuaternion(event, _graph.projectedCoordinatesOf(position())));
       _fly.set(-fSpeed, 0.0f, 0.0f);
       trns = localInverseTransformOf(_fly);
       _startFlying(event, trns);
@@ -2044,7 +2044,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into drive conversion routine.
    */
-  public void drive(MotionEvent event) {
+  protected void drive(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       drive(motionEvent2);
@@ -2055,7 +2055,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into drive conversion routine.
    */
-  public void drive(MotionEvent2 event) {
+  protected void drive(MotionEvent2 event) {
     if (_graph.is2D()) {
       Graph.showDepthWarning("drive");
       return;
@@ -2080,7 +2080,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into CAD-rotation conversion routine.
    */
-  public void rotateCAD(MotionEvent event) {
+  protected void rotateCAD(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       rotateCAD(motionEvent2);
@@ -2091,7 +2091,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into CAD-rotation conversion routine.
    */
-  public void rotateCAD(MotionEvent2 event) {
+  protected void rotateCAD(MotionEvent2 event) {
     if (_graph.is2D()) {
       Graph.showDepthWarning("rotateCAD");
       return;
@@ -2125,7 +2125,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into hinge conversion routine.
    */
-  public void hinge(MotionEvent event) {
+  protected void hinge(MotionEvent event) {
     MotionEvent6 motionEvent6 = MotionEvent.event6(event);
     if (motionEvent6 != null)
       hinge(motionEvent6);
@@ -2136,7 +2136,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture into hinge conversion routine.
    */
-  public void hinge(MotionEvent6 event) {
+  protected void hinge(MotionEvent6 event) {
     if (_graph.is2D()) {
       Graph.showDepthWarning("hinge");
       return;
@@ -2164,11 +2164,11 @@ public class Node extends Frame implements Grabber {
     screenToEye(trns);
     float pmag = trns.magnitude();
     translate(0, 0, (deltaZ > 0) ? -pmag : pmag);
-    // 3. Rotate the refFrame around its X-axis -> _translate forward-backward
+    // 3. Rotate the refFrame around its X-axis -> translate forward-backward
     // the frame on the sphere surface
     float deltaY = _computeAngle(event.dy());
     rFrame.rotate(new Quaternion(new Vector(1, 0, 0), _graph.isRightHanded() ? deltaY : -deltaY));
-    // 4. Rotate the refFrame around its Y-axis -> _translate left-right the
+    // 4. Rotate the refFrame around its Y-axis -> translate left-right the
     // frame on the sphere surface
     float deltaX = _computeAngle(event.dx());
     rFrame.rotate(new Quaternion(new Vector(0, 1, 0), deltaX));
@@ -2189,9 +2189,9 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture screen-_translate conversion routine.
+   * User gesture screen-translate conversion routine.
    */
-  public void screenTranslate(MotionEvent event) {
+  protected void screenTranslate(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       screenTranslate(motionEvent2);
@@ -2200,22 +2200,22 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture screen-_translate conversion routine.
+   * User gesture screen-translate conversion routine.
    */
-  public void screenTranslate(MotionEvent2 event) {
+  protected void screenTranslate(MotionEvent2 event) {
     if (event.fired())
       _directionIsFixed = false;
     int dir = _originalDirection(event);
     if (dir == 1)
-      _translateX(event, true);
+      translateX(event, true);
     else if (dir == -1)
-      _translateY(event, false);
+      translateY(event, false);
   }
 
   /**
    * User gesture screen-rotation conversion routine.
    */
-  public void screenRotate(MotionEvent event) {
+  protected void screenRotate(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
     if (motionEvent2 != null)
       screenRotate(motionEvent2);
@@ -2226,7 +2226,7 @@ public class Node extends Frame implements Grabber {
   /**
    * User gesture screen-rotation conversion routine.
    */
-  public void screenRotate(MotionEvent2 event) {
+  protected void screenRotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
       Graph.showEventVariationWarning("screenRotate");
       return;
@@ -2291,12 +2291,12 @@ public class Node extends Frame implements Grabber {
   // Quite nice
 
   /**
-   * Same as {@code return screenToVec(new Vector(x, y, z))}.
+   * Same as {@code return screenToVector(new Vector(x, y, z))}.
    *
-   * @see #screenToVec(Vector)
+   * @see #screenToVector(Vector)
    */
-  public Vector screenToVec(float x, float y, float z) {
-    return screenToVec(new Vector(x, y, z));
+  public Vector screenToVector(float x, float y, float z) {
+    return screenToVector(new Vector(x, y, z));
   }
 
   /**
@@ -2306,7 +2306,7 @@ public class Node extends Frame implements Grabber {
    * @see #screenToEye(Vector)
    * @see #eyeToReferenceFrame(Vector)
    */
-  public Vector screenToVec(Vector vector) {
+  public Vector screenToVector(Vector vector) {
     return eyeToReferenceFrame(screenToEye(vector));
   }
 
@@ -2324,10 +2324,10 @@ public class Node extends Frame implements Grabber {
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
    * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuat(float, float, float)}.
+   * and {@link #screenToQuaternion(float, float, float)}.
    *
    * @see #screenToEye(Vector)
-   * @see #screenToQuat(float, float, float)
+   * @see #screenToQuaternion(float, float, float)
    */
   public Vector eyeToReferenceFrame(Vector vector) {
     Frame gFrame = isEye() ? this : /* respectToEye() ? */_graph.eye() /* : this */;
@@ -2351,10 +2351,10 @@ public class Node extends Frame implements Grabber {
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
    * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuat(float, float, float)}.
+   * and {@link #screenToQuaternion(float, float, float)}.
    *
    * @see #eyeToReferenceFrame(Vector)
-   * @see #screenToQuat(float, float, float)
+   * @see #screenToQuaternion(float, float, float)
    */
   public Vector screenToEye(Vector vector) {
     Vector eyeVector = vector.get();
@@ -2398,12 +2398,12 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code return screenToQuat(angles.vec[0], angles.vec[1], angles.vec[2])}.
+   * Same as {@code return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2])}.
    *
-   * @see #screenToQuat(float, float, float)
+   * @see #screenToQuaternion(float, float, float)
    */
-  public Quaternion screenToQuat(Vector angles) {
-    return screenToQuat(angles.vec[0], angles.vec[1], angles.vec[2]);
+  public Quaternion screenToQuaternion(Vector angles) {
+    return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2]);
   }
 
   /**
@@ -2413,16 +2413,16 @@ public class Node extends Frame implements Grabber {
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
    * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuat(float, float, float)}.
+   * and {@link #screenToQuaternion(float, float, float)}.
    *
    * @param roll  Rotation angle in radians around the screen x-Axis
    * @param pitch Rotation angle in radians around the screen y-Axis
    * @param yaw   Rotation angle in radians around the screen z-Axis
    * @see Quaternion#fromEulerAngles(float, float, float)
    */
-  public Quaternion screenToQuat(float roll, float pitch, float yaw) {
+  public Quaternion screenToQuaternion(float roll, float pitch, float yaw) {
     if (_graph.is2D()) {
-      Graph.showDepthWarning("screenToQuat");
+      Graph.showDepthWarning("screenToQuaternion");
       return null;
     }
 
@@ -2550,7 +2550,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Translates the node by its {@link #flyDirection()}. Invoked by
-   * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
+   * {@link #moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
    * <p>
    * <b>Attention: </b>Tossing may be decelerated according to {@link #damping()} till it
    * stops completely.
@@ -2565,7 +2565,7 @@ public class Node extends Frame implements Grabber {
    * Returns the _fly _speed, expressed in virtual graph units.
    * <p>
    * It corresponds to the incremental displacement that is periodically applied to the
-   * node by {@link #_moveForward(MotionEvent, boolean)}.
+   * node by {@link #moveForward(MotionEvent, boolean)}.
    * <p>
    * <b>Attention:</b> When frame is set as the
    * {@link Graph#eye()}, this value is set according
