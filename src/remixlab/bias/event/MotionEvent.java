@@ -24,9 +24,9 @@ import remixlab.bias.Event;
 public class MotionEvent extends Event {
   // defaulting to zero:
   // http://stackoverflow.com/questions/3426843/what-is-the-default-initialization-of-an-array-in-java
-  protected long delay;
-  protected float distance, speed;
-  protected boolean rel;
+  protected long _delay;
+  protected float _distance, _speed;
+  protected boolean _relative;
 
   /**
    * Constructs an absolute MotionEvent with an "empty"
@@ -54,10 +54,10 @@ public class MotionEvent extends Event {
 
   protected MotionEvent(MotionEvent other) {
     super(other);
-    this.delay = other.delay;
-    this.distance = other.distance;
-    this.speed = other.speed;
-    this.rel = other.rel;
+    this._delay = other._delay;
+    this._distance = other._distance;
+    this._speed = other._speed;
+    this._relative = other._relative;
   }
 
   @Override
@@ -80,7 +80,7 @@ public class MotionEvent extends Event {
    * {@link #isRelative()}.
    */
   public long delay() {
-    return delay;
+    return _delay;
   }
 
   /**
@@ -88,7 +88,7 @@ public class MotionEvent extends Event {
    * event {@link #isRelative()}.
    */
   public float distance() {
-    return distance;
+    return _distance;
   }
 
   /**
@@ -96,7 +96,7 @@ public class MotionEvent extends Event {
    * {@link #isRelative()}.
    */
   public float speed() {
-    return speed;
+    return _speed;
   }
 
   /**
@@ -104,8 +104,8 @@ public class MotionEvent extends Event {
    * motion event.
    */
   public boolean isRelative() {
-    // return distance() != 0;
-    return rel;
+    // return _distance() != 0;
+    return _relative;
   }
 
   /**
@@ -119,16 +119,16 @@ public class MotionEvent extends Event {
   /**
    * Sets the event's previous event to build a relative event.
    */
-  protected void setPrevious(MotionEvent prevEvent) {
-    rel = true;
+  protected void _setPrevious(MotionEvent previous) {
+    _relative = true;
     // makes sense only if derived classes call it
-    if (prevEvent != null)
-      if (prevEvent.id() == this.id()) {
-        delay = this.timestamp() - prevEvent.timestamp();
-        if (delay == 0)
-          speed = distance;
+    if (previous != null)
+      if (previous.id() == this.id()) {
+        _delay = this.timestamp() - previous.timestamp();
+        if (_delay == 0)
+          _speed = _distance;
         else
-          speed = distance / (float) delay;
+          _speed = _distance / (float) _delay;
       }
   }
 
@@ -174,7 +174,7 @@ public class MotionEvent extends Event {
     if (event instanceof MotionEvent1)
       return null;
     if (event instanceof MotionEvent2)
-      // return ((MotionEvent2) event).get();//TODO better?
+      // return ((MotionEvent2) _event).get();//TODO better?
       return (MotionEvent2) event;
     if (event instanceof MotionEvent3)
       return ((MotionEvent3) event).event2();

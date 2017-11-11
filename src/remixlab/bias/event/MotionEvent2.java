@@ -15,8 +15,8 @@ package remixlab.bias.event;
  * and {@link #y()}).
  */
 public class MotionEvent2 extends MotionEvent {
-  protected float x, dx;
-  protected float y, dy;
+  protected float _x, _dx;
+  protected float _y, _dy;
 
   /**
    * Construct an absolute event from the given dof's and modifiers.
@@ -28,8 +28,8 @@ public class MotionEvent2 extends MotionEvent {
    */
   public MotionEvent2(float dx, float dy, int modifiers, int id) {
     super(modifiers, id);
-    this.dx = dx;
-    this.dy = dy;
+    this._dx = dx;
+    this._dy = dy;
   }
 
   /**
@@ -38,8 +38,8 @@ public class MotionEvent2 extends MotionEvent {
    *
    * @see #MotionEvent2(MotionEvent2, float, float, int, int)
    */
-  public MotionEvent2(MotionEvent prevEvent, float x, float y, int modifiers, int id) {
-    this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y, modifiers, id);
+  public MotionEvent2(MotionEvent previous, float x, float y, int modifiers, int id) {
+    this(previous instanceof MotionEvent2 ? (MotionEvent2) previous : null, x, y, modifiers, id);
   }
 
   /**
@@ -48,17 +48,17 @@ public class MotionEvent2 extends MotionEvent {
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
    *
-   * @param prevEvent
+   * @param previous
    * @param x
    * @param y
    * @param modifiers
    * @param id
    */
-  public MotionEvent2(MotionEvent2 prevEvent, float x, float y, int modifiers, int id) {
+  public MotionEvent2(MotionEvent2 previous, float x, float y, int modifiers, int id) {
     super(modifiers, id);
-    this.x = x;
-    this.y = y;
-    setPrevious(prevEvent);
+    this._x = x;
+    this._y = y;
+    _setPrevious(previous);
   }
 
   /**
@@ -69,8 +69,8 @@ public class MotionEvent2 extends MotionEvent {
    */
   public MotionEvent2(float dx, float dy) {
     super();
-    this.dx = dx;
-    this.dy = dy;
+    this._dx = dx;
+    this._dy = dy;
   }
 
   /**
@@ -79,8 +79,8 @@ public class MotionEvent2 extends MotionEvent {
    *
    * @see #MotionEvent2(MotionEvent2, float, float)
    */
-  public MotionEvent2(MotionEvent prevEvent, float x, float y) {
-    this(prevEvent instanceof MotionEvent2 ? (MotionEvent2) prevEvent : null, x, y);
+  public MotionEvent2(MotionEvent previous, float x, float y) {
+    this(previous instanceof MotionEvent2 ? (MotionEvent2) previous : null, x, y);
   }
 
   /**
@@ -89,23 +89,23 @@ public class MotionEvent2 extends MotionEvent {
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
    *
-   * @param prevEvent
+   * @param previous
    * @param x
    * @param y
    */
-  public MotionEvent2(MotionEvent2 prevEvent, float x, float y) {
+  public MotionEvent2(MotionEvent2 previous, float x, float y) {
     super();
-    this.x = x;
-    this.y = y;
-    setPrevious(prevEvent);
+    this._x = x;
+    this._y = y;
+    _setPrevious(previous);
   }
 
   protected MotionEvent2(MotionEvent2 other) {
     super(other);
-    this.x = other.x;
-    this.dx = other.dx;
-    this.y = other.y;
-    this.dy = other.dy;
+    this._x = other._x;
+    this._dx = other._dx;
+    this._y = other._y;
+    this._dy = other._dy;
   }
 
   @Override
@@ -124,18 +124,18 @@ public class MotionEvent2 extends MotionEvent {
   }
 
   @Override
-  protected void setPrevious(MotionEvent prevEvent) {
-    rel = true;
-    if (prevEvent != null)
-      if (prevEvent instanceof MotionEvent2 && prevEvent.id() == this.id()) {
-        this.dx = this.x() - ((MotionEvent2) prevEvent).x();
-        this.dy = this.y() - ((MotionEvent2) prevEvent).y();
-        distance = MotionEvent.distance(x, y, ((MotionEvent2) prevEvent).x(), ((MotionEvent2) prevEvent).y());
-        delay = this.timestamp() - prevEvent.timestamp();
-        if (delay == 0)
-          speed = distance;
+  protected void _setPrevious(MotionEvent previous) {
+    _relative = true;
+    if (previous != null)
+      if (previous instanceof MotionEvent2 && previous.id() == this.id()) {
+        this._dx = this.x() - ((MotionEvent2) previous).x();
+        this._dy = this.y() - ((MotionEvent2) previous).y();
+        _distance = MotionEvent.distance(_x, _y, ((MotionEvent2) previous).x(), ((MotionEvent2) previous).y());
+        _delay = this.timestamp() - previous.timestamp();
+        if (_delay == 0)
+          _speed = _distance;
         else
-          speed = distance / (float) delay;
+          _speed = _distance / (float) _delay;
       }
   }
 
@@ -143,20 +143,20 @@ public class MotionEvent2 extends MotionEvent {
    * @return dof-1, only meaningful if the event {@link #isRelative()}
    */
   public float x() {
-    return x;
+    return _x;
   }
 
   /**
    * @return dof-1 delta
    */
   public float dx() {
-    return dx;
+    return _dx;
   }
 
   /**
    * @return previous dof-1, only meaningful if the event {@link #isRelative()}
    */
-  public float prevX() {
+  public float previousX() {
     return x() - dx();
   }
 
@@ -164,20 +164,20 @@ public class MotionEvent2 extends MotionEvent {
    * @return dof-2, only meaningful if the event {@link #isRelative()}
    */
   public float y() {
-    return y;
+    return _y;
   }
 
   /**
    * @return dof-2 delta
    */
   public float dy() {
-    return dy;
+    return _dy;
   }
 
   /**
    * @return previous dof-2, only meaningful if the event {@link #isRelative()}
    */
-  public float prevY() {
+  public float previousY() {
     return y() - dy();
   }
 
@@ -207,22 +207,22 @@ public class MotionEvent2 extends MotionEvent {
     MotionEvent1 e1;
     if (fromX) {
       if (isRelative()) {
-        pe1 = new MotionEvent1(null, prevX(), modifiers(), id());
+        pe1 = new MotionEvent1(null, previousX(), modifiers(), id());
         e1 = new MotionEvent1(pe1, x(), modifiers(), id());
       } else {
         e1 = new MotionEvent1(dx(), modifiers(), id());
       }
     } else {
       if (isRelative()) {
-        pe1 = new MotionEvent1(null, prevY(), modifiers(), id());
+        pe1 = new MotionEvent1(null, previousY(), modifiers(), id());
         e1 = new MotionEvent1(pe1, y(), modifiers(), id());
       } else {
         e1 = new MotionEvent1(dy(), modifiers(), id());
       }
     }
-    e1.delay = this.delay();
-    e1.speed = this.speed();
-    e1.distance = this.distance();
+    e1._delay = this.delay();
+    e1._speed = this.speed();
+    e1._distance = this.distance();
     if (fired())
       return e1.fire();
     else if (flushed())

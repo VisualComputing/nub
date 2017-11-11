@@ -36,7 +36,7 @@ public class BasicUse extends PApplet {
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
-            //translate(event);
+            //translate(_event);
             rotate(event);
             break;
           case PApplet.RIGHT:

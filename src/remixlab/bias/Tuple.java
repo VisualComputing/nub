@@ -20,19 +20,19 @@ package remixlab.bias;
  * {@link InputHandler#enqueueTuple(Tuple)}.
  */
 public class Tuple {
-  protected Event event;
-  protected Grabber grabber;
+  protected Event _event;
+  protected Grabber _grabber;
 
   /**
    * Constructs a {@link Event},
    * {@link Grabber} tuple.
    *
-   * @param e {@link Event}
-   * @param g {@link Grabber}
+   * @param event {@link Event}
+   * @param grabber {@link Grabber}
    */
-  public Tuple(Event e, Grabber g) {
-    event = e;
-    grabber = g;
+  public Tuple(Event event, Grabber grabber) {
+    _event = event;
+    _grabber = grabber;
   }
 
   /**
@@ -41,9 +41,9 @@ public class Tuple {
    * @return true if succeeded and false otherwise.
    */
   public boolean interact() {
-    if (grabber == null || event == null)
+    if (_grabber == null || _event == null)
       return false;
-    grabber.interact(event);
+    _grabber.interact(_event);
     return true;
   }
 
@@ -51,13 +51,13 @@ public class Tuple {
    * Returns the event from the tuple.
    */
   public Event event() {
-    return event;
+    return _event;
   }
 
   /**
    * Returns the object Grabber in the tuple.
    */
   public Grabber grabber() {
-    return grabber;
+    return _grabber;
   }
 }

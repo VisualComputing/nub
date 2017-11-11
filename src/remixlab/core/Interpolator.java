@@ -348,7 +348,7 @@ public class Interpolator {
   }
 
   /**
-   * Returns the current interpolation speed.
+   * Returns the current interpolation _speed.
    * <p>
    * Default value is 1.0f, which means {@link #keyFrameTime(int)} will be matched during
    * the interpolation (provided that your main loop is fast enough).

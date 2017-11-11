@@ -44,10 +44,10 @@ public abstract class Agent {
   /**
    * Constructs an Agent and registers is at the given inputHandler.
    */
-  public Agent(InputHandler inputHandler) {
+  public Agent(InputHandler handler) {
     _grabberPool = new ArrayList<Grabber>();
     setTracking(true);
-    _handler = inputHandler;
+    _handler = handler;
     _handler.registerAgent(this);
   }
 
@@ -128,9 +128,10 @@ public abstract class Agent {
 
   /**
    * Feeds {@link #poll(Event)} and {@link #handle(Event)} with
-   * the returned event. Returns null by default. Use it in place of
-   * {@link #pollFeed()} and/or {@link #handleFeed()} which take
-   * higher-precedence.
+   * the returned event. Returns null by default,
+   * i.e., it should be implemented by your Agent derived classes.
+   * Use it in place of {@link #pollFeed()} and/or {@link #handleFeed()}
+   * which take higher-precedence.
    * <p>
    * Automatically call by the main event loop (
    * {@link InputHandler#handle()}). See ProScene's Space-Navigator
@@ -147,7 +148,8 @@ public abstract class Agent {
   }
 
   /**
-   * Feeds {@link #handle(Event)} with the returned event. Returns null by default.
+   * Feeds {@link #handle(Event)} with the returned event. Returns null by default,
+   * i.e., it should be implemented by your Agent derived classes.
    * Use it in place of {@link #feed()} which takes lower-precedence.
    * <p>
    * Automatically call by the main event loop (
@@ -166,7 +168,8 @@ public abstract class Agent {
 
   /**
    * Feeds {@link #poll(Event)} with the returned event. Returns null
-   * by default. Use it in place of {@link #feed()} which takes lower-precedence.
+   * by default,i.e., it should be implemented by your Agent derived classes.
+   * Use it in place of {@link #feed()} which takes lower-precedence.
    * <p>
    * Automatically call by the main event loop (
    * {@link InputHandler#handle()}).
@@ -209,7 +212,7 @@ public abstract class Agent {
   protected Grabber poll(Event event) {
     if (event == null || !inputHandler().isAgentRegistered(this) || !isTracking())
       return trackedGrabber();
-    // We first check if default grabber is _trackedGrabber,
+    // We first check if default grabber is trackedGrabber,
     // i.e., default grabber has the highest priority (which is good for
     // keyboards and doesn't hurt motion grabbers:
     Grabber dG = defaultGrabber();
@@ -218,7 +221,7 @@ public abstract class Agent {
         _trackedGrabber = dG;
         return trackedGrabber();
       }
-    // then if _trackedGrabber grabber remains the matches:
+    // then if trackedGrabber grabber remains the matches:
     Grabber tG = trackedGrabber();
     if (tG != null)
       if (tG.track(event))
@@ -337,13 +340,13 @@ public abstract class Agent {
 
   /**
    * Same as
-   * {@code _defaultGrabber() != g1 ? setDefaultGrabber(g1) ? true : setDefaultGrabber(g2) : setDefaultGrabber(g2)}
+   * {@code defaultGrabber() != g1 ? setDefaultGrabber(g1) ? true : setDefaultGrabber(g2) : setDefaultGrabber(g2)}
    * which is ubiquitous among the examples.
    */
   public boolean shiftDefaultGrabber(Grabber g1, Grabber g2) {
     return defaultGrabber() != g1 ? setDefaultGrabber(g1) ? true : setDefaultGrabber(g2) : setDefaultGrabber(g2);
-    // return _defaultGrabber() == g1 ? setDefaultGrabber(g2) ? true : false :
-    // _defaultGrabber() == g2 ? setDefaultGrabber(g1) : false;
+    // return defaultGrabber() == g1 ? setDefaultGrabber(g2) ? true : false :
+    // defaultGrabber() == g2 ? setDefaultGrabber(g1) : false;
   }
 
   /**

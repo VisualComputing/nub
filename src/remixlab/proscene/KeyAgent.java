@@ -16,7 +16,7 @@ import remixlab.bias.Grabber;
 import remixlab.bias.event.KeyEvent;
 
 /**
- * Proscene key-agent. A Processing fully fledged key {@link Agent}.
+ * Proscene _key-agent. A Processing fully fledged _key {@link Agent}.
  *
  * @see Agent
  * @see remixlab.proscene.MouseAgent
@@ -49,25 +49,25 @@ public class KeyAgent extends Agent {
   /**
    * Processing keyEvent method to be registered at the PApplet's instance.
    * <p>
-   * Current implementation requires grabber objects to implement
+   * Current implementation requires _grabber objects to implement
    * {@link Grabber#track(Event)} on a
    * {@code KeyEvent} as follows:
    * <p>
    * <pre>
    * {@code
-   * public boolean track(KeyEvent event) {
-   *   return profile.hasBinding(event.shortcut());
+   * public boolean track(KeyEvent _event) {
+   *   return profile.hasBinding(_event.shortcut());
    * }
    * }
    * </pre>
    * <p>
-   * in this way an agent grabber will grab inputGrabber as long as it defines a binding for a
-   * given triggered key shortcut. The default grabber will just have the highest
-   * precedence among all agent grabbers, provided that more than one grabber defines a
-   * binding for the same key shortcut.
+   * in this way an agent _grabber will grab inputGrabber as long as it defines a binding for a
+   * given triggered _key shortcut. The default _grabber will just have the highest
+   * precedence among all agent grabbers, provided that more than one _grabber defines a
+   * binding for the same _key shortcut.
    */
   public void keyEvent(processing.event.KeyEvent e) {
-    // According to Processing key event flow .e.g.,
+    // According to Processing _key _event flow .e.g.,
     // RIGHT_ARROW
     // pressed: mod: vkey: 39 description: VK_RIGHT
     // released: mod: vkey: 39 description: VK_RIGHT
@@ -84,8 +84,8 @@ public class KeyAgent extends Agent {
     // released: mod: CTRL vkey: 49 description: VK_1
     // released: mod: CTRL vkey: 17 description: VK_CONTROL
     // pressed: mod: vkey: 27 description: VK_ESCAPE
-    // we need to bypass TYPE events when a press event generates an action on the _trackedGrabber
-    // grabber
+    // we need to bypass TYPE events when a press _event generates an action on the _trackedGrabber
+    // _grabber
     press = e.getAction() == processing.event.KeyEvent.PRESS;
     release = e.getAction() == processing.event.KeyEvent.RELEASE;
     type = e.getAction() == processing.event.KeyEvent.TYPE;
@@ -127,7 +127,7 @@ public class KeyAgent extends Agent {
     if(poll(event) != null)
       return handle(event);
     //if(_defaultGrabber() != null)
-    //return handle(event);
+    //return handle(_event);
     if(defaultGrabber() != null)
       handle(event);
     return false;
@@ -135,17 +135,17 @@ public class KeyAgent extends Agent {
 
   // debug
 
-  // protected String printEvent(KeyEvent event) {
-  // return " mod: " + KeyEvent.modifiersText(event.modifiers()) + " vkey: " +
-  // event.id() + " description: " + KeyShortcut.description(event.id());
+  // protected String printEvent(KeyEvent _event) {
+  // return " mod: " + KeyEvent.modifiersText(_event._modifiers()) + " vkey: " +
+  // _event._id() + " description: " + KeyShortcut.description(_event._id());
   // }
   //
-  // protected String printTypedEvent(KeyEvent event) {
-  // return " char: " + event.key();
+  // protected String printTypedEvent(KeyEvent _event) {
+  // return " char: " + _event._key();
   // }
 
   /**
-   * Same as {@code return java.awt.event.KeyEvent.getExtendedKeyCodeForChar(key)}.
+   * Same as {@code return java.awt._event.KeyEvent.getExtendedKeyCodeForChar(_key)}.
    */
   public static int keyCode(char key) {
     return java.awt.event.KeyEvent.getExtendedKeyCodeForChar(key);

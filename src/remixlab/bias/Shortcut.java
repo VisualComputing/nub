@@ -31,50 +31,50 @@ import remixlab.bias.event.*;
  * </ol>
  */
 public class Shortcut {
-  protected int mask;
-  protected int id;
+  protected int _modifiers;
+  protected int _id;
 
   /**
    * Constructs an "empty" shortcut. Same as: {@link #Shortcut(int)} with the integer
    * parameter being NO_NOMODIFIER_MASK.
    */
   public Shortcut() {
-    mask = Event.NO_MODIFIER_MASK;
-    id = Event.NO_ID;
+    _modifiers = Event.NO_MODIFIER_MASK;
+    _id = Event.NO_ID;
   }
 
   /**
    * Defines a shortcut from the given id.
    *
-   * @param _id gesture-id
+   * @param id gesture-id
    */
-  public Shortcut(int _id) {
-    mask = Event.NO_MODIFIER_MASK;
-    id = _id;
+  public Shortcut(int id) {
+    _modifiers = Event.NO_MODIFIER_MASK;
+    this._id = id;
   }
 
   /**
    * Defines a shortcut from the given modifier mask and id
    *
-   * @param m modifier mask defining the shortcut
+   * @param modifiers modifier mask defining the shortcut
    */
-  public Shortcut(int m, int i) {
-    mask = m;
-    id = i;
+  public Shortcut(int modifiers, int id) {
+    _modifiers = modifiers;
+    _id = id;
   }
 
   /**
    * Returns the shortcut's modifiers mask.
    */
   public int modifiers() {
-    return mask;
+    return _modifiers;
   }
 
   /**
    * Returns the shortcut's id.
    */
   public int id() {
-    return id;
+    return _id;
   }
 
   /**

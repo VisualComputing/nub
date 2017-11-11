@@ -41,8 +41,8 @@ import java.util.List;
  * {@link #keyAgent()}, and {@link #mouseAgent()} (which in the desktop version of
  * proscene defaults to a {@link #mouseAgent()}):
  * <ol>
- * <li><b>The default key agent</b> provides shortcuts to
- * node and graph key actions (such as
+ * <li><b>The default _key agent</b> provides shortcuts to
+ * node and graph _key actions (such as
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
  * eye and node
@@ -134,7 +134,7 @@ public class Scene extends Graph implements PConstants {
     // 2. Matrix helper
     setMatrixHandler(matrixHelper(pg));
 
-    // 3. Create agents and register P5 methods
+    // 3. Create _agents and register P5 methods
     defMotionAgent = new MouseAgent(this);
     defKeyboardAgent = new KeyAgent(this);
     parent.registerMethod("mouseEvent", mouseAgent());
@@ -242,7 +242,7 @@ public class Scene extends Graph implements PConstants {
   // keyAgent
 
   /**
-   * Returns the default {@link Agent} key agent.
+   * Returns the default {@link Agent} _key agent.
    *
    * @see #mouseAgent()
    */
@@ -251,7 +251,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Enables key handling through the {@link #keyAgent()}.
+   * Enables _key handling through the {@link #keyAgent()}.
    *
    * @see #keyAgent()
    * @see #isKeyAgentEnabled()
@@ -266,7 +266,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Disables the key agent and returns it.
+   * Disables the _key agent and returns it.
    *
    * @see #keyAgent()
    * @see #isKeyAgentEnabled()
@@ -356,7 +356,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #zNear()} and
    * {@link #zFar()};
    * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
-   * the distance from the point you project to the camera, along the
+   * the _distance from the point you project to the camera, along the
    * {@link #viewDirection()}. See the {@code gluUnProject}
    * man page for details.
    */
@@ -720,7 +720,7 @@ public class Scene extends Graph implements PConstants {
       return;
     // Handling focus of non-overlapping scenes is trivial.
     // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
-    // scn2.display() is to be called after scn1.display() (which is the key observation).
+    // scn2.display() is to be called after scn1.display() (which is the _key observation).
     // Then, for a given frame either only scn1 hasFocus() (which is handled trivially);
     // or, both, scn1 and scn2 hasFocus(), which means only scn2 should retain focus
     // (while scn1 lose it).
@@ -919,10 +919,10 @@ public class Scene extends Graph implements PConstants {
     // keyFrames
     /*
     int i = 0;
-    for (int id : eye().keyFrameInterpolatorMap().keySet()) {
+    for (int _id : eye().keyFrameInterpolatorMap().keySet()) {
       JSONObject jsonPath = new JSONObject();
-      jsonPath.setInt("key", id);
-      jsonPath.setJSONArray("keyFrames", toJSONArray(id));
+      jsonPath.setInt("_key", _id);
+      jsonPath.setJSONArray("keyFrames", toJSONArray(_id));
       jsonPaths.setJSONObject(i++, jsonPath);
     }
     json.setJSONArray("paths", jsonPaths);
@@ -975,8 +975,8 @@ public class Scene extends Graph implements PConstants {
       JSONArray paths = json.getJSONArray("paths");
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
-        int id = path.getInt("key");
-        eye().clear(id);
+        int _id = path.getInt("_key");
+        eye().clear(_id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
         for (int j = 0; j < keyFrames.size(); j++) {
           Node keyFrame = new Node(this);
@@ -986,9 +986,9 @@ public class Scene extends Graph implements PConstants {
           keyFrame.setGrabsInputThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
-          if (!eye().keyFrameInterpolatorMap().containsKey(id))
-            eye().setKeyFrameInterpolator(id, new Interpolator(this, eyeFrame()));
-          eye().keyFrameInterpolator(id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
+          if (!eye().keyFrameInterpolatorMap().containsKey(_id))
+            eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
+          eye().keyFrameInterpolator(_id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
         }
       }
       //*/
@@ -996,15 +996,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Used internally by {@link #saveConfig(String)}. Converts the {@code id} eye path into
+   * Used internally by {@link #saveConfig(String)}. Converts the {@code _id} eye path into
    * a P5 JSONArray.
    */
   /*
-  protected JSONArray toJSONArray(int id) {
+  protected JSONArray toJSONArray(int _id) {
     JSONArray jsonKeyFrames = new JSONArray();
-    for (int i = 0; i < eye().keyFrameInterpolator(id).numberOfKeyFrames(); i++) {
-      JSONObject jsonKeyFrame = toJSONObject(eye().keyFrameInterpolator(id).keyFrame(i));
-      jsonKeyFrame.setFloat("time", eye().keyFrameInterpolator(id).keyFrameTime(i));
+    for (int i = 0; i < eye().keyFrameInterpolator(_id).numberOfKeyFrames(); i++) {
+      JSONObject jsonKeyFrame = toJSONObject(eye().keyFrameInterpolator(_id).keyFrame(i));
+      jsonKeyFrame.setFloat("time", eye().keyFrameInterpolator(_id).keyFrameTime(i));
       jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
     }
     return jsonKeyFrames;
@@ -1338,7 +1338,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code if (this.is2D()) vertex(pg(), x, y); elsevertex(pg(), x, y, z)}.
+   * Same as {@code if (this.is2D()) vertex(pg(), x, y); elsevertex(pg(), x, _y, z)}.
    *
    * @see #vertex(PGraphics, float, float, float)
    */
@@ -1361,7 +1361,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Same as
-   * {@code if (this.is2D()) vertex(pg(), x, y, u, v); else vertex(pg(), x, y, z, u, v);}.
+   * {@code if (this.is2D()) vertex(pg(), x, y, u, v); else vertex(pg(), x, _y, z, u, v);}.
    *
    * @see #vertex(PGraphics, float, float, float, float)
    * @see #vertex(PGraphics, float, float, float, float, float)
@@ -1512,7 +1512,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, mask, 6, radius())}
+   * Convenience function that simply calls {@code drawPath(kfi, _mask, 6, radius())}
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
@@ -1521,7 +1521,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, mask, nbFrames, * 100)}
+   * Convenience function that simply calls {@code drawPath(kfi, _mask, nbFrames, * 100)}
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
@@ -1533,9 +1533,9 @@ public class Scene extends Graph implements PConstants {
    * Draws the path used to interpolate the
    * {@link Interpolator#frame()}
    * <p>
-   * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
-   * drawn. If ( (mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
-   * ( (mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
+   * {@code _mask} controls what is drawn: If ( (_mask &amp; 1) != 0 ), the position path is
+   * drawn. If ( (_mask &amp; 2) != 0 ), a camera representation is regularly drawn and if
+   * ( (_mask &amp; 4) != 0 ), oriented axes are regularly drawn. Examples:
    * <p>
    * {@code drawPath(1); // Simply draws the interpolation path} <br>
    * {@code drawPath(3); // Draws path and eyes} <br>

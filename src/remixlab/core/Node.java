@@ -64,18 +64,18 @@ import java.util.List;
  * This class provides several gesture-to-motion converting methods, such as:
  * {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent2, boolean)},
  * {@link #translateX(boolean)}, etc. To use them, derive from this class and override the
- * version of {@code interact} with the (bogus-event) parameter type you want to
+ * version of {@code interact} with the (bogus-_event) parameter type you want to
  * customize (see {@link #interact(MotionEvent)},
  * {@link #interact(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
  * {@code
- * protected void interact(MotionEvent2 event) {
- *   if(event.id() == LEFT)
- *     gestureArcball(event);
- *   if(event.id() == RIGHT)
- *     gestureTranslateXY(event);
+ * protected void interact(MotionEvent2 _event) {
+ *   if(_event._id() == LEFT)
+ *     gestureArcball(_event);
+ *   if(_event._id() == RIGHT)
+ *     gestureTranslateXY(_event);
  * }
  * }
  * </pre>
@@ -142,7 +142,7 @@ public class Node extends Frame implements Grabber {
 
   private boolean visit;
 
-  // id
+  // _id
   protected int id;
 
   /**
@@ -330,7 +330,7 @@ public class Node extends Frame implements Grabber {
     return new Node(this.graph(), this);
   }
 
-  //id
+  //_id
 
   /**
    * Internal use. Frame graphics color to be used for picking with a color buffer.
@@ -526,7 +526,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
   public boolean track(MotionEvent event) {
     if (isEye())
@@ -543,7 +543,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
   public boolean track(TapEvent event) {
     if (isEye())
@@ -552,29 +552,29 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
   public boolean track(KeyEvent event) {
-    Graph.showMissingImplementationWarning("track(KeyEvent event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(KeyEvent _event)", this.getClass().getName());
     return false;
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    * <p>
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
   public boolean track(MotionEvent1 event) {
     if (isEye())
       return false;
-    Graph.showMissingImplementationWarning("track(MotionEvent1 event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(MotionEvent1 _event)", this.getClass().getName());
     return false;
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
   public boolean track(MotionEvent2 event) {
     if (isEye())
@@ -599,14 +599,14 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
   public boolean track(MotionEvent3 event) {
     return track(event.event2());
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
   public boolean track(MotionEvent6 event) {
     return track(event.event3().event2());
@@ -623,7 +623,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Calls interact() on the proper motion event:
+   * Calls interact() on the proper motion _event:
    * {@link MotionEvent1}, {@link MotionEvent2},
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
@@ -923,13 +923,13 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the minimum gesture speed required to make the node {@link #spin()}.
+   * Returns the minimum gesture _speed required to make the node {@link #spin()}.
    * Spinning requires to set to {@link #damping()} to 0.
    * <p>
    * See {@link #spin()}, {@link #spinningRotation()} and
    * {@link #startSpinning(MotionEvent, Quaternion)} for details.
    * <p>
-   * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
+   * Gesture _speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
    * higher value will make spinning more difficult (a value of 100.0 forbids spinning in
    * practice).
@@ -1041,7 +1041,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. Same as {@code startSpinning(rt, event.speed(), event.delay())}.
+   * Internal use. Same as {@code startSpinning(rt, _event._speed(), _event._delay())}.
    *
    * @see #startFlying(MotionEvent, Vector)
    * @see #startSpinning(Quaternion, float, long)
@@ -1195,8 +1195,8 @@ public class Node extends Frame implements Grabber {
     float cy = center.y();
     float x = event.x();
     float y = event.y();
-    float prevX = event.prevX();
-    float prevY = event.prevY();
+    float prevX = event.previousX();
+    float prevY = event.previousY();
     // Points on the deformed ball
     float px = rotationSensitivity() * ((int) prevX - cx) / graph.width();
     float py =
@@ -1214,15 +1214,15 @@ public class Node extends Frame implements Grabber {
   }
   //TODO Restore 2D
   /*
-  public Rotation deformedBallRotation(MotionEvent2 event, Vector center) {
-    if (event.isAbsolute()) {
+  public Rotation deformedBallRotation(MotionEvent2 _event, Vector center) {
+    if (_event.isAbsolute()) {
       Graph.showEventVariationWarning("deformedBallRotation");
       return null;
     }
     if (graph.is2D()) {
       Rot rt;
-      Point prevPos = new Point(event.prevX(), event.prevY());
-      Point curPos = new Point(event.x(), event.y());
+      Point prevPos = new Point(_event.previousX(), _event.previousY());
+      Point curPos = new Point(_event.x(), _event.y());
       rt = new Rot(new Point(center.x(), center.y()), prevPos, curPos);
       rt = new Rot(rt.angle() * rotationSensitivity());
       if ((graph.isRightHanded() && !isEye()) || (graph.isLeftHanded() && isEye()))
@@ -1231,20 +1231,20 @@ public class Node extends Frame implements Grabber {
     } else {
       float cx = center.x();
       float cy = center.y();
-      float x = event.x();
-      float y = event.y();
-      float prevX = event.prevX();
-      float prevY = event.prevY();
+      float x = _event.x();
+      float y = _event._y();
+      float previousX = _event.previousX();
+      float previousY = _event.previousY();
       // Points on the deformed ball
-      float px = rotationSensitivity() * ((int) prevX - cx) / graph.eye().screenWidth();
+      float px = rotationSensitivity() * ((int) previousX - cx) / graph.eye().screenWidth();
       float py =
-          rotationSensitivity() * (graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / graph.eye()
+          rotationSensitivity() * (graph.isLeftHanded() ? ((int) previousY - cy) : (cy - (int) previousY)) / graph.eye()
               .screenHeight();
       float dx = rotationSensitivity() * (x - cx) / graph.eye().screenWidth();
-      float dy = rotationSensitivity() * (graph.isLeftHanded() ? (y - cy) : (cy - y)) / graph.eye().screenHeight();
+      float dy = rotationSensitivity() * (graph.isLeftHanded() ? (y - cy) : (cy - _y)) / graph.eye().screenHeight();
 
       Vector p1 = new Vector(px, py, projectOnBall(px, py));
-      Vector p2 = new Vector(dx, dy, projectOnBall(dx, dy));
+      Vector p2 = new Vector(dx, dy, projectOnBall(_dx, _dy));
       // Approximation of rotation angle Should be divided by the projectOnBall
       // size, but it is 1.0
       Vector axis = p2.cross(p1);
@@ -1255,9 +1255,9 @@ public class Node extends Frame implements Grabber {
   */
 
   /**
-   * Returns "pseudo-distance" from (x,y) to ball of radius size. For a point inside the
-   * ball, it is proportional to the euclidean distance to the ball. For a point outside
-   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
+   * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
+   * ball, it is proportional to the euclidean _distance to the ball. For a point outside
+   * the ball, it is proportional to the inverse of this _distance (tends to zero) on the
    * ball, the function is continuous.
    */
   protected float projectOnBall(float x, float y) {
@@ -1633,9 +1633,9 @@ public class Node extends Frame implements Grabber {
       //TODO handle me
       //graph.setZoomVisualHint(false);
       int w = (int) Math.abs(e.dx());
-      int tlX = (int) e.prevX() < (int) e.x() ? (int) e.prevX() : (int) e.x();
+      int tlX = (int) e.previousX() < (int) e.x() ? (int) e.previousX() : (int) e.x();
       int h = (int) Math.abs(e.dy());
-      int tlY = (int) e.prevY() < (int) e.y() ? (int) e.prevY() : (int) e.y();
+      int tlY = (int) e.previousY() < (int) e.y() ? (int) e.previousY() : (int) e.y();
       graph().fitScreenRegionInterpolation(new Rectangle(tlX, tlY, w, h));
       //graph().fitScreenRegion(new Rectangle(tlX, tlY, w, h));
     }
@@ -1791,18 +1791,18 @@ public class Node extends Frame implements Grabber {
   }
   //TODO Restore 2D
   /*
-  protected void rotateZ(MotionEvent1 event, float sens) {
+  protected void rotateZ(MotionEvent1 _event, float sens) {
     Rotation rt;
     if (isEye())
       if (is2D())
-        rt = new Rot(sens * (graph.isRightHanded() ? computeAngle(event) : -computeAngle(event)));
+        rt = new Rot(sens * (graph.isRightHanded() ? computeAngle(_event) : -computeAngle(_event)));
       else
-        rt = screenToQuat(0, 0, sens * -computeAngle(event));
+        rt = screenToQuat(0, 0, sens * -computeAngle(_event));
     else if (is2D())
-      rt = new Rot(sens * (graph.isRightHanded() ? -computeAngle(event) : computeAngle(event)));
+      rt = new Rot(sens * (graph.isRightHanded() ? -computeAngle(_event) : computeAngle(_event)));
     else
-      rt = screenToQuat(0, 0, sens * computeAngle(event));
-    spin(rt, event.speed(), event.delay());
+      rt = screenToQuat(0, 0, sens * computeAngle(_event));
+    spin(rt, _event._speed(), _event._delay());
   }
   */
 
@@ -1906,38 +1906,38 @@ public class Node extends Frame implements Grabber {
   }
   //TODO Restore 2D
   /*
-  public void rotate(MotionEvent2 event) {
-    if (event.isAbsolute()) {
+  public void rotate(MotionEvent2 _event) {
+    if (_event.isAbsolute()) {
       Graph.showEventVariationWarning("rotate");
       return;
     }
-    if (event.fired())
+    if (_event.fired())
       stopSpinning();
-    if (event.fired() && graph.is3D())
+    if (_event.fired() && graph.is3D())
       graph.eye().cadRotationIsReversed =
           graph.eye().frame().transformOf(graph.eye().frame().upVector()).y() < 0.0f;
-    if (event.flushed() && damping() == 0) {
+    if (_event.flushed() && damping() == 0) {
       startSpinning();
       return;
     }
-    if (!event.flushed()) {
+    if (!_event.flushed()) {
       Rotation rt;
       Vector trns;
       if (isEye())
-        rt = deformedBallRotation(event, eye().projectedCoordinatesOf(eye().anchor()));
+        rt = deformedBallRotation(_event, eye().projectedCoordinatesOf(eye().anchor()));
       else {
         if (is2D())
-          rt = deformedBallRotation(event, graph.eye().projectedCoordinatesOf(position()));
+          rt = deformedBallRotation(_event, graph.eye().projectedCoordinatesOf(position()));
         else {
           trns = graph.eye().projectedCoordinatesOf(position());
-          rt = deformedBallRotation(event, trns);
+          rt = deformedBallRotation(_event, trns);
           trns = ((Quaternion) rt).axis();
           trns = graph.eye().frame().orientation().rotate(trns);
           trns = transformOf(trns);
           rt = new Quaternion(trns, -rt.angle());
         }
       }
-      spin(rt, event.speed(), event.delay());
+      spin(rt, _event._speed(), _event._delay());
     }
   }
   */
@@ -2123,7 +2123,7 @@ public class Node extends Frame implements Grabber {
       startSpinning();
       return;
     } else {
-      // Multiply by 2.0 to get on average about the same speed as with the
+      // Multiply by 2.0 to get on average about the same _speed as with the
       // deformed ball
       float dx = -2.0f * rotationSensitivity() * event.dx() / graph.width();
       float dy = 2.0f * rotationSensitivity() * event.dy() / graph.height();
@@ -2272,13 +2272,13 @@ public class Node extends Frame implements Grabber {
       if (isEye()) {
         trns = graph().projectedCoordinatesOf(graph().anchor());
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]) - (float) Math
-            .atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
+            .atan2(event.previousY() - trns.vec[1], event.previousX() - trns.vec[0]);
         if (graph.isLeftHanded())
           angle = -angle;
         rt = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
       } else {
         trns = graph.projectedCoordinatesOf(position());
-        float prev_angle = (float) Math.atan2(event.prevY() - trns.vec[1], event.prevX() - trns.vec[0]);
+        float prev_angle = (float) Math.atan2(event.previousY() - trns.vec[1], event.previousX() - trns.vec[0]);
         angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]);
         Vector axis = transformOf(graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
         if (graph.isRightHanded())
@@ -2295,9 +2295,9 @@ public class Node extends Frame implements Grabber {
    */
   //TODO missed
   /*
-  public void anchorFromPixel(TapEvent event) {
+  public void anchorFromPixel(TapEvent _event) {
     if (isEye())
-      graph().setAnchorFromPixel(new Point(event.x(), event.y()));
+      graph().setAnchorFromPixel(new Point(_event.x(), _event.y()));
     else
       Graph.showOnlyEyeWarning("anchorFromPixel");
   }
@@ -2373,7 +2373,7 @@ public class Node extends Frame implements Grabber {
    */
   public Vector screenToEye(Vector trns) {
     Vector eyeVector = trns.get();
-    // Scale to fit the screen relative event displacement
+    // Scale to fit the screen relative _event displacement
     if (graph.is2D())
       // Quite excited to see how simple it's in 2d:
       return eyeVector;
@@ -2533,7 +2533,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. Same as {@code startFlying(direction, event.speed())}.
+   * Internal use. Same as {@code startFlying(direction, _event._speed())}.
    *
    * @see #startFlying(Vector, float)
    * @see #startSpinning(MotionEvent, Quaternion)
@@ -2577,7 +2577,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the fly speed, expressed in virtual graph units.
+   * Returns the fly _speed, expressed in virtual graph units.
    * <p>
    * It corresponds to the incremental displacement that is periodically applied to the
    * node by {@link #moveForward(MotionEvent, boolean)}.
@@ -2636,7 +2636,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
-   * event X-displacement.
+   * _event X-displacement.
    */
   protected Quaternion turnQuaternion(MotionEvent1 event) {
     float deltaX = event.dx();

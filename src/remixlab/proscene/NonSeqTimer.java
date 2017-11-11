@@ -14,39 +14,39 @@ import remixlab.fpstiming.Taskable;
 import remixlab.fpstiming.Timer;
 
 /**
- * Non-seq timer based on java.util.Timer and java.util.TimerTask.
+ * Non-seq _timer based on java.util.Timer and java.util.TimerTask.
  */
 class NonSeqTimer implements Timer {
-  Scene scene;
-  java.util.Timer timer;
-  java.util.TimerTask timerTask;
-  Taskable tmnTask;
-  boolean runOnlyOnce;
-  boolean active;
-  long prd;
+  Scene _scene;
+  java.util.Timer _timer;
+  java.util.TimerTask _timerTask;
+  Taskable _task;
+  boolean _once;
+  boolean _active;
+  long _period;
 
   public NonSeqTimer(Scene scn, Taskable o) {
     this(scn, o, false);
   }
 
   public NonSeqTimer(Scene scn, Taskable o, boolean singleShot) {
-    scene = scn;
-    runOnlyOnce = singleShot;
-    tmnTask = o;
+    _scene = scn;
+    _once = singleShot;
+    _task = o;
   }
 
   @Override
   public Taskable timingTask() {
-    return tmnTask;
+    return _task;
   }
 
   @Override
   public void create() {
     stop();
-    timer = new java.util.Timer();
-    timerTask = new java.util.TimerTask() {
+    _timer = new java.util.Timer();
+    _timerTask = new java.util.TimerTask() {
       public void run() {
-        tmnTask.execute();
+        _task.execute();
       }
     };
   }
@@ -61,10 +61,10 @@ class NonSeqTimer implements Timer {
   public void run() {
     create();
     if (isSingleShot())
-      timer.schedule(timerTask, prd);
+      _timer.schedule(_timerTask, _period);
     else
-      timer.scheduleAtFixedRate(timerTask, 0, prd);
-    active = true;
+      _timer.scheduleAtFixedRate(_timerTask, 0, _period);
+    _active = true;
   }
 
   @Override
@@ -74,35 +74,35 @@ class NonSeqTimer implements Timer {
 
   @Override
   public void stop() {
-    if (timer != null) {
-      timer.cancel();
-      timer.purge();
+    if (_timer != null) {
+      _timer.cancel();
+      _timer.purge();
     }
-    active = false;
+    _active = false;
   }
 
   @Override
   public boolean isActive() {
-    return timer != null && active;
+    return _timer != null && _active;
   }
 
   @Override
   public long period() {
-    return prd;
+    return _period;
   }
 
   @Override
   public void setPeriod(long period) {
-    prd = period;
+    _period = period;
   }
 
   @Override
   public boolean isSingleShot() {
-    return runOnlyOnce;
+    return _once;
   }
 
   @Override
   public void setSingleShot(boolean singleShot) {
-    runOnlyOnce = singleShot;
+    _once = singleShot;
   }
 }

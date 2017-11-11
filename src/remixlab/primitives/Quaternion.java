@@ -353,7 +353,7 @@ public class Quaternion {
   /**
    * Returns the "dot" product of {@code a} and {@code b}:
    * <p>
-   * {@code a.x * b.x + a.y * b.y + a.z * b.z + a.quat[3] * b.quat[3]}
+   * {@code a.x * b.x + a.y * b._y + a.z * b.z + a.quat[3] * b.quat[3]}
    *
    * @param a the first Quaternion
    * @param b the second Quaternion

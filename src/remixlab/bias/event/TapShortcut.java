@@ -23,7 +23,7 @@ import remixlab.bias.Shortcut;
  * Note that click shortcuts should have at least one click.
  */
 public class TapShortcut extends Shortcut {
-  protected int numberOfTaps;
+  protected int _count;
 
   /**
    * Defines a single click shortcut from the given gesture-id.
@@ -35,36 +35,36 @@ public class TapShortcut extends Shortcut {
   }
 
   /**
-   * Defines a click shortcut from the given gesture-id and number of clicks.
+   * Defines a click shortcut from the given gesture-id and number of taps.
    *
    * @param id id
-   * @param c  number of clicks
+   * @param count  number of taps
    */
-  public TapShortcut(int id, int c) {
-    this(Event.NO_MODIFIER_MASK, id, c);
+  public TapShortcut(int id, int count) {
+    this(Event.NO_MODIFIER_MASK, id, count);
   }
 
   /**
    * Defines a click shortcut from the given gesture-id, modifier mask, and number of
    * clicks.
    *
-   * @param m  modifier mask
+   * @param modifiers  modifier mask
    * @param id id
-   * @param c  bumber of clicks
+   * @param count  number of taps
    */
-  public TapShortcut(int m, int id, int c) {
-    super(m, id);
-    if (c <= 0)
-      this.numberOfTaps = 1;
+  public TapShortcut(int modifiers, int id, int count) {
+    super(modifiers, id);
+    if (count <= 0)
+      this._count = 1;
     else
-      this.numberOfTaps = c;
+      this._count = count;
   }
 
   /**
    * Returns the click-shortcut click count.
    */
   public int count() {
-    return numberOfTaps;
+    return _count;
   }
 
   @Override

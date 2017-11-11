@@ -27,29 +27,29 @@ import remixlab.bias.Event;
  * the platform where the framework is running.
  */
 public class KeyEvent extends Event {
-  protected char key;
+  protected char _key;
 
   /**
    * Constructs a keyevent with the <b>modifiers</b> and <b>vk</b> defining its
    * {@link KeyShortcut}.
    */
-  public KeyEvent(int modifiers, int vk) {
-    super(modifiers, vk);
-    key = '\0';
+  public KeyEvent(int modifiers, int virtualKey) {
+    super(modifiers, virtualKey);
+    _key = '\0';
   }
 
   /**
    * Constructs a keyevent with <b>c</b> defining its
    * {@link KeyShortcut}.
    */
-  public KeyEvent(int vk) {
-    super(NO_MODIFIER_MASK, vk);
-    key = '\0';
+  public KeyEvent(int virtualKey) {
+    super(NO_MODIFIER_MASK, virtualKey);
+    _key = '\0';
   }
 
   public KeyEvent(char _key) {
     super();
-    key = _key;
+    this._key = _key;
   }
 
   /**
@@ -57,7 +57,7 @@ public class KeyEvent extends Event {
    */
   protected KeyEvent(KeyEvent other) {
     super(other);
-    this.key = other.key;
+    this._key = other._key;
   }
 
   @Override
@@ -77,13 +77,13 @@ public class KeyEvent extends Event {
 
   @Override
   public KeyShortcut shortcut() {
-    if (key == '\0')
+    if (_key == '\0')
       return new KeyShortcut(modifiers(), id());
     else
       return new KeyShortcut(key());
   }
 
   public char key() {
-    return key;
+    return _key;
   }
 }

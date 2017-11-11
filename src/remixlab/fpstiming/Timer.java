@@ -17,7 +17,7 @@ public interface Timer {
   /**
    * Calls {@link #setPeriod(long)} followed by {@link #run()}.
    *
-   * @param period time in milliseconds between successive _task executions
+   * @param period time in milliseconds between successive task executions
    */
   public void run(long period);
 
@@ -48,7 +48,7 @@ public interface Timer {
   public void create();
 
   /**
-   * Tells whether or not the timer is _active.
+   * Tells whether or not the timer is active.
    */
   public boolean isActive();
 

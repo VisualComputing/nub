@@ -905,7 +905,7 @@ public class Frame {
     }
     Frame old = new Frame(this); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
-    // hence addGrabber the frame to the mouse grabber
+    // hence addGrabber the frame to the mouse _grabber
 
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
@@ -995,7 +995,7 @@ public class Frame {
       }
       Frame old = new Frame(this); // correct line
       // VFrame old = this.get();// this call the get overloaded method and
-      // hence addGrabber the frame to the mouse grabber
+      // hence addGrabber the frame to the mouse _grabber
 
       vec.set(directions[0][index[0]]);
       float coef = vec.dot(directions[1][index[1]]);

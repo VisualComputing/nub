@@ -18,8 +18,8 @@ import remixlab.bias.Event;
  * {@link #x()} and {@link #y()}).
  */
 public class TapEvent extends Event {
-  protected float x, y;
-  protected int numberOfTaps;
+  protected float _x, _y;
+  protected int _count;
 
   /**
    * Constructs a single TapEvent at the given position and from the given
@@ -27,13 +27,13 @@ public class TapEvent extends Event {
    *
    * @param x
    * @param y
-   * @param b
+   * @param id
    */
-  public TapEvent(float x, float y, int b) {
-    super(NO_MODIFIER_MASK, b);
-    this.x = x;
-    this.y = y;
-    this.numberOfTaps = 1;
+  public TapEvent(float x, float y, int id) {
+    super(NO_MODIFIER_MASK, id);
+    this._x = x;
+    this._y = y;
+    this._count = 1;
   }
 
   /**
@@ -42,14 +42,14 @@ public class TapEvent extends Event {
    *
    * @param x
    * @param y
-   * @param b
-   * @param taps
+   * @param id
+   * @param count
    */
-  public TapEvent(float x, float y, int b, int taps) {
-    super(NO_MODIFIER_MASK, b);
-    this.x = x;
-    this.y = y;
-    this.numberOfTaps = taps;
+  public TapEvent(float x, float y, int id, int count) {
+    super(NO_MODIFIER_MASK, id);
+    this._x = x;
+    this._y = y;
+    this._count = count;
   }
 
   /**
@@ -60,21 +60,21 @@ public class TapEvent extends Event {
    * @param x
    * @param y
    * @param modifiers
-   * @param b
-   * @param taps
+   * @param id
+   * @param count
    */
-  public TapEvent(float x, float y, int modifiers, int b, int taps) {
-    super(modifiers, b);
-    this.x = x;
-    this.y = y;
-    this.numberOfTaps = taps;
+  public TapEvent(float x, float y, int modifiers, int id, int count) {
+    super(modifiers, id);
+    this._x = x;
+    this._y = y;
+    this._count = count;
   }
 
   protected TapEvent(TapEvent other) {
     super(other);
-    this.x = other.x;
-    this.y = other.y;
-    this.numberOfTaps = other.numberOfTaps;
+    this._x = other._x;
+    this._y = other._y;
+    this._count = other._count;
   }
 
   @Override
@@ -101,20 +101,20 @@ public class TapEvent extends Event {
    * @return event x coordinate
    */
   public float x() {
-    return x;
+    return _x;
   }
 
   /**
    * @return event y coordinate
    */
   public float y() {
-    return y;
+    return _y;
   }
 
   /**
    * @return event number of taps
    */
   public int count() {
-    return numberOfTaps;
+    return _count;
   }
 }

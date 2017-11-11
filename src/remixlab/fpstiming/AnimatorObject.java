@@ -21,7 +21,7 @@ public class AnimatorObject implements Animator {
 
   /**
    * Constructs an animated object with a default {@link #animationPeriod()} of 40
-   * milliseconds (25Hz). The _handler should explicitly be defined afterwards (
+   * milliseconds (25Hz). The handler should explicitly be defined afterwards (
    * {@link #setTimingHandler(TimingHandler)}).
    */
   public AnimatorObject() {
@@ -57,9 +57,9 @@ public class AnimatorObject implements Animator {
   }
 
   /**
-   * Return {@code true} when the animation loop is _started.
+   * Return {@code true} when the animation loop is started.
    * <p>
-   * The timing _handler will check when {@link #animationStarted()} and then called the
+   * The timing handler will check when {@link #animationStarted()} and then called the
    * animation callback method every {@link #animationPeriod()} milliseconds.
    * <p>
    * Use {@link #startAnimation()}, {@link #stopAnimation()} or {@link #toggleAnimation()}

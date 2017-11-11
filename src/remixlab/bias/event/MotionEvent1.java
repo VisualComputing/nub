@@ -14,7 +14,7 @@ package remixlab.bias.event;
  * A {@link remixlab.bias.event.MotionEvent} with one degree of freedom ({@link #x()}).
  */
 public class MotionEvent1 extends MotionEvent {
-  protected float x, dx;
+  protected float _x, _dx;
 
   /**
    * Construct an absolute DOF1 event.
@@ -25,7 +25,7 @@ public class MotionEvent1 extends MotionEvent {
    */
   public MotionEvent1(float dx, int modifiers, int id) {
     super(modifiers, id);
-    this.dx = dx;
+    this._dx = dx;
   }
 
   /**
@@ -34,8 +34,8 @@ public class MotionEvent1 extends MotionEvent {
    *
    * @see #MotionEvent1(MotionEvent1, float, int, int)
    */
-  public MotionEvent1(MotionEvent prevEvent, float x, int modifiers, int id) {
-    this(prevEvent instanceof MotionEvent1 ? (MotionEvent1) prevEvent : null, x, modifiers, id);
+  public MotionEvent1(MotionEvent previous, float x, int modifiers, int id) {
+    this(previous instanceof MotionEvent1 ? (MotionEvent1) previous : null, x, modifiers, id);
   }
 
   /**
@@ -44,15 +44,15 @@ public class MotionEvent1 extends MotionEvent {
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
    *
-   * @param prevEvent
+   * @param previous
    * @param x         1-dof
    * @param modifiers MotionShortcut modifiers
    * @param id        MotionShortcut gesture-id
    */
-  public MotionEvent1(MotionEvent1 prevEvent, float x, int modifiers, int id) {
+  public MotionEvent1(MotionEvent1 previous, float x, int modifiers, int id) {
     super(modifiers, id);
-    this.x = x;
-    setPrevious(prevEvent);
+    this._x = x;
+    _setPrevious(previous);
   }
 
   /**
@@ -62,7 +62,7 @@ public class MotionEvent1 extends MotionEvent {
    */
   public MotionEvent1(float dx) {
     super();
-    this.dx = dx;
+    this._dx = dx;
   }
 
   /**
@@ -71,8 +71,8 @@ public class MotionEvent1 extends MotionEvent {
    *
    * @see #MotionEvent1(MotionEvent1, float)
    */
-  public MotionEvent1(MotionEvent prevEvent, float x) {
-    this(prevEvent instanceof MotionEvent1 ? (MotionEvent1) prevEvent : null, x);
+  public MotionEvent1(MotionEvent previous, float x) {
+    this(previous instanceof MotionEvent1 ? (MotionEvent1) previous : null, x);
   }
 
   /**
@@ -81,19 +81,19 @@ public class MotionEvent1 extends MotionEvent {
    * If the {@link #id()} of the {@code prevEvent} is different then {@link #id()}, sets
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
    *
-   * @param prevEvent
+   * @param previous
    * @param x         1-dof
    */
-  public MotionEvent1(MotionEvent1 prevEvent, float x) {
+  public MotionEvent1(MotionEvent1 previous, float x) {
     super();
-    this.x = x;
-    setPrevious(prevEvent);
+    this._x = x;
+    _setPrevious(previous);
   }
 
   protected MotionEvent1(MotionEvent1 other) {
     super(other);
-    this.x = other.x;
-    this.dx = other.dx;
+    this._x = other._x;
+    this._dx = other._dx;
   }
 
   @Override
@@ -112,17 +112,17 @@ public class MotionEvent1 extends MotionEvent {
   }
 
   @Override
-  protected void setPrevious(MotionEvent prevEvent) {
-    rel = true;
-    if (prevEvent != null)
-      if (prevEvent instanceof MotionEvent1 && prevEvent.id() == this.id()) {
-        this.dx = this.x() - ((MotionEvent1) prevEvent).x();
-        distance = this.x() - ((MotionEvent1) prevEvent).x();
-        delay = this.timestamp() - prevEvent.timestamp();
-        if (delay == 0)
-          speed = distance;
+  protected void _setPrevious(MotionEvent previous) {
+    _relative = true;
+    if (previous != null)
+      if (previous instanceof MotionEvent1 && previous.id() == this.id()) {
+        this._dx = this.x() - ((MotionEvent1) previous).x();
+        _distance = this.x() - ((MotionEvent1) previous).x();
+        _delay = this.timestamp() - previous.timestamp();
+        if (_delay == 0)
+          _speed = _distance;
         else
-          speed = distance / (float) delay;
+          _speed = _distance / (float) _delay;
       }
   }
 
@@ -130,20 +130,20 @@ public class MotionEvent1 extends MotionEvent {
    * @return dof-1, only meaningful if the event {@link #isRelative()}
    */
   public float x() {
-    return x;
+    return _x;
   }
 
   /**
    * @return dof-1 delta
    */
   public float dx() {
-    return dx;
+    return _dx;
   }
 
   /**
    * @return previous dof-1, only meaningful if the event {@link #isRelative()}
    */
-  public float prevX() {
+  public float previousX() {
     return x() - dx();
   }
 

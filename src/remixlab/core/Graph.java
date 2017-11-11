@@ -44,7 +44,7 @@ import java.util.List;
  * details please refer to the {@link remixlab.fpstiming.TimingHandler} class.</li>
  * <li>An {@link #inputHandler()} which handles all user input through
  * {@link Agent}s (for details please refer to the
- * {@link InputHandler} class). The {@link #inputHandler()} holds agents which should
+ * {@link InputHandler} class). The {@link #inputHandler()} holds _agents which should
  * be instantiated by derived classes at construction time.</li>
  * <li>A {@link #matrixHandler()} which handles matrix operations either through the
  * {@link MatrixHandler} or through a third party matrix stack
@@ -134,7 +134,7 @@ public class Graph {
    * (such as Processing) provides its own matrix handling.</li>
    * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
-   * <li>Instantiate some agents and enable them (register them at the
+   * <li>Instantiate some _agents and enable them (register them at the
    * {@link #inputHandler()}).</li>
    * </ol>
    *
@@ -248,7 +248,7 @@ public class Graph {
    * <p>
    * With a {@link Type#ORTHOGRAPHIC} {@link #type()}, the
    * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
-   * are inferred from the distance to the {@link #anchor()} using
+   * are inferred from the _distance to the {@link #anchor()} using
    * {@link #getBoundaryWidthHeight()}.
    * <p>
    * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
@@ -342,7 +342,7 @@ public class Graph {
    * {@code lightCamera.setFieldOfView();} <br>
    * <p>
    * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to M_PI/2.0. This happens
-   * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
+   * when the Camera is at a _distance lower than sqrt(2.0) * sceneRadius() from the
    * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
    * parts of the graph.
    */
@@ -366,7 +366,7 @@ public class Graph {
   }
 
   /**
-   * Returns the near clipping plane distance used by the Camera projection matrix in
+   * Returns the near clipping plane _distance used by the Camera projection matrix in
    * graph (world) units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and
@@ -374,7 +374,7 @@ public class Graph {
    * A good graph dimension approximation will hence result in an optimal precision of the
    * z-buffer.
    * <p>
-   * The near clipping plane is positioned at a distance equal to
+   * The near clipping plane is positioned at a _distance equal to
    * {@link #zClippingCoefficient()} * {@link #radius()} in front of the
    * {@link #center()}: {@code Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) -
    * zClippingCoefficient() * sceneRadius()}
@@ -417,10 +417,10 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the Camera projection matrix in graph
+   * Returns the far clipping plane _distance used by the Camera projection matrix in graph
    * (world) units.
    * <p>
-   * The far clipping plane is positioned at a distance equal to
+   * The far clipping plane is positioned at a _distance equal to
    * {@code zClippingCoefficient() * sceneRadius()} behind the {@link #center()}:
    * <p>
    * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient()*sceneRadius()}
@@ -462,7 +462,7 @@ public class Graph {
   /**
    * Returns the coefficient used to position the near and far clipping planes.
    * <p>
-   * The near (resp. far) clipping plane is positioned at a distance equal to
+   * The near (resp. far) clipping plane is positioned at a _distance equal to
    * {@code zClippingCoefficient() * sceneRadius()} in front of (resp. behind) the
    * {@link #center()}. This guarantees an optimal use of the z-buffer range and
    * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
@@ -510,7 +510,7 @@ public class Graph {
    * expressed in virtual graph units.
    * <p>
    * In the case of ortho Cameras these values are proportional to the Camera (z
-   * projected) distance to the {@link #anchor()}. When zooming on the object, the Camera
+   * projected) _distance to the {@link #anchor()}. When zooming on the object, the Camera
    * is translated forward and its boundary is narrowed, making the object appear bigger
    * on screen, as intuitively expected.
    * <p>
@@ -534,7 +534,7 @@ public class Graph {
   /**
    * Simply returns {@code 1} which is valid for 2d Windows.
    * <p>
-   * In 3D returns a value proportional to the Camera (z projected) distance to the
+   * In 3D returns a value proportional to the Camera (z projected) _distance to the
    * {@link #anchor()} so that when zooming on the object, the ortho Camera is translated
    * forward and its boundary is narrowed, making the object appear bigger on screen, as
    * intuitively expected.
@@ -652,7 +652,7 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #traverse()} algorithm.
    * <p>
-   * nodes in the {@code node} branch will also be removed from all the agents currently
+   * nodes in the {@code node} branch will also be removed from all the _agents currently
    * registered in the {@link #inputHandler()}.
    * <p>
    * To make all the nodes in the branch reachable again, first cache the nodes
@@ -660,7 +660,7 @@ public class Graph {
    * {@link #appendBranch(List)} on the cached branch. Note that calling
    * {@link Node#setReference(Node)} on a
    * node belonging to the pruned branch will become reachable again by the traversal
-   * algorithm. In this case, the node should be manually added to some agents to
+   * algorithm. In this case, the node should be manually added to some _agents to
    * interactively handle it.
    * <p>
    * Note that if node is not reachable ({@link #isNodeReachable(Node)}) this
@@ -692,7 +692,7 @@ public class Graph {
    * Appends the branch which typically should come from the one pruned (and cached) with
    * {@link #pruneBranch(Node)}.
    * <p>
-   * All nodes belonging to the branch are automatically added to all graph agents.
+   * All nodes belonging to the branch are automatically added to all graph _agents.
    * <p>
    * {@link #pruneBranch(Node)}
    */
@@ -1721,8 +1721,8 @@ public class Graph {
   }
 
   /**
-   * Returns the signed distance between point {@code pos} and plane {@code index} in
-   * Scene units. The distance is negative if the point lies in the planes's boundary
+   * Returns the signed _distance between point {@code pos} and plane {@code index} in
+   * Scene units. The _distance is negative if the point lies in the planes's boundary
    * halfspace, and positive otherwise.
    * <p>
    * {@code index} is a value between {@code 0} and {@code 5} which respectively
@@ -2050,7 +2050,7 @@ public class Graph {
    * linear interpolation between {@link #zNear()} and
    * {@link #zFar()};
    * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
-   * is the distance from the point you project to the camera, along the
+   * is the _distance from the point you project to the camera, along the
    * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
    * <p>
    * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
@@ -2068,7 +2068,7 @@ public class Graph {
    * <p>
    * This method is not computationally optimized by default. If you call it several times with no
    * change in the matrices, you should buffer the entire inverse projection matrix (view,
-   * projection) to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
+   * projection) to _speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    * @see #setWidth(int)
@@ -2402,7 +2402,7 @@ public class Graph {
    * {@code fr}.
    * <p>
    * {@code fr} is expressed in world coordinates. {@code duration} tunes the
-   * interpolation speed.
+   * interpolation _speed.
    *
    * @see #interpolateTo(Frame)
    * @see #fitBallInterpolation()
@@ -2554,7 +2554,7 @@ public class Graph {
 
   /**
    * Gives the coefficients of a 3D half-line passing through the Camera eye and pixel
-   * (x,y). Origin in the upper left corner. Use {@link #height()} - y to locate the
+   * (x,y). Origin in the upper left corner. Use {@link #height()} - _y to locate the
    * origin at the lower left corner.
    * <p>
    * The origin of the half line (eye position) is stored in {@code orig}, while
@@ -2628,10 +2628,10 @@ public class Graph {
 
   /**
    * Display a warning that the specified method can only be implemented from a relative
-   * bogus event.
+   * bogus _event.
    */
   static public void showEventVariationWarning(String method) {
-    showWarning(method + " can only be performed using a relative event.");
+    showWarning(method + " can only be performed using a relative _event.");
   }
 
   /**

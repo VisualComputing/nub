@@ -20,44 +20,44 @@ import remixlab.bias.Shortcut;
  * key representing 'a').
  */
 public class KeyShortcut extends Shortcut {
-  protected char key;
+  protected char _key;
 
   /**
    * Defines a key shortcut from the given character.
    *
-   * @param k the character that defines the key shortcut.
+   * @param key the character that defines the key shortcut.
    */
-  public KeyShortcut(char k) {
+  public KeyShortcut(char key) {
     super();
-    key = k;
+    _key = key;
   }
 
   /**
    * Defines a key shortcut from the given modifier mask and virtual key combination.
    *
-   * @param m  the mask
-   * @param vk the virtual key that defines the key shortcut.
+   * @param modifiers  the mask
+   * @param virtualKey the virtual key that defines the key shortcut.
    */
-  public KeyShortcut(int m, int vk) {
-    super(m, vk);
-    key = '\0';
+  public KeyShortcut(int modifiers, int virtualKey) {
+    super(modifiers, virtualKey);
+    _key = '\0';
   }
 
   /**
    * Defines a key shortcut from the given virtual key.
    *
-   * @param vk the virtual key that defines the key shortcut.
+   * @param virtualKey the virtual key that defines the key shortcut.
    */
-  public KeyShortcut(int vk) {
-    super(vk);
-    key = '\0';
+  public KeyShortcut(int virtualKey) {
+    super(virtualKey);
+    _key = '\0';
   }
 
   /**
    * Returns the key-shortcut key.
    */
   public char getKey() {
-    return key;
+    return _key;
   }
 
   @Override

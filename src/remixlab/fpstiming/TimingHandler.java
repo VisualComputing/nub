@@ -13,7 +13,7 @@ package remixlab.fpstiming;
 import java.util.ArrayList;
 
 /**
- * A timing _handler holds a {@link #timerPool()} and an {@link #animatorPool()}. The timer
+ * A timing handler holds a {@link #timerPool()} and an {@link #animatorPool()}. The timer
  * pool are all the tasks scheduled to be performed in the future (one single time or
  * periodically). The animation pool are all the objects that implement an animation
  * callback function. For an introduction to FPSTiming please refer to
@@ -81,7 +81,7 @@ public class TimingHandler {
   }
 
   /**
-   * Register a _task in the timer pool and creates a sequential timer for it.
+   * Register a task in the timer pool and creates a sequential timer for it.
    */
   public void registerTask(TimingTask task) {
     task.setTimer(new SeqTimer(this, task));
@@ -89,7 +89,7 @@ public class TimingHandler {
   }
 
   /**
-   * Register a _task in the timer pool with the given timer.
+   * Register a task in the timer pool with the given timer.
    */
   public void registerTask(TimingTask task, Timer timer) {
     task.setTimer(timer);
@@ -97,7 +97,7 @@ public class TimingHandler {
   }
 
   /**
-   * Unregisters the timer. You may also unregister the _task this timer is attached to.
+   * Unregisters the timer. You may also unregister the task this timer is attached to.
    *
    * @see #unregisterTask(TimingTask)
    */
@@ -106,7 +106,7 @@ public class TimingHandler {
   }
 
   /**
-   * Unregisters the timer _task.
+   * Unregisters the timer task.
    *
    * @see #unregisterTask(SeqTimer)
    */
@@ -115,7 +115,7 @@ public class TimingHandler {
   }
 
   /**
-   * Returns {@code true} if the _task is registered and {@code false} otherwise.
+   * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
   public boolean isTaskRegistered(TimingTask task) {
     return _taskPool.contains(task);
@@ -153,7 +153,7 @@ public class TimingHandler {
   }
 
   /**
-   * Returns the number of frames displayed since this timing _handler was instantiated.
+   * Returns the number of frames displayed since this timing handler was instantiated.
    */
   public long frameCount() {
     return _localCount;
@@ -189,7 +189,7 @@ public class TimingHandler {
   // Animation -->
 
   /**
-   * Returns all the animated objects registered at the _handler.
+   * Returns all the animated objects registered at the handler.
    */
   public ArrayList<Animator> animatorPool() {
     return _animatorPool;

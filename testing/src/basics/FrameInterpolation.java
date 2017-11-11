@@ -33,7 +33,7 @@ public class FrameInterpolation extends PApplet {
         kfi = new Interpolator(scene);
         kfi.setLoop();
 
-        // An array of interactive (key) frames.
+        // An array of interactive (_key) frames.
         keyFrame = new Node[nbKeyFrames];
         // Create an initial path
         for (int i=0; i<nbKeyFrames; i++) {

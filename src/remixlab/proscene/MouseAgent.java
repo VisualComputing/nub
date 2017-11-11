@@ -116,7 +116,7 @@ public class MouseAgent extends Agent {
   /**
    * Returns the x sensitivity.
    * <p>
-   * Default value is 1. A higher value will make the event more efficient (usually
+   * Default value is 1. A higher value will make the _event more efficient (usually
    * meaning a faster motion). Use a negative value to invert the along x-Axis motion
    * direction.
    */
@@ -134,7 +134,7 @@ public class MouseAgent extends Agent {
   /**
    * Returns the y sensitivity.
    * <p>
-   * Default value is 1. A higher value will make the event more efficient (usually
+   * Default value is 1. A higher value will make the _event more efficient (usually
    * meaning a faster motion). Use a negative value to invert the along y-Axis motion
    * direction.
    */

@@ -15,7 +15,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * The InputHandler object is the high level package _handler which holds a collection of
+ * The InputHandler object is the high level package handler which holds a collection of
  * {@link #agents()}, and an event dispatcher queue of
  * {@link Tuple}s ({@link #tupleQueue()}). Such tuple
  * represents a message passing to application objects, allowing an object to be
@@ -23,24 +23,24 @@ import java.util.List;
  * {@link Event}. For an introduction to BIAS please refer to
  * <a href="http://nakednous.github.io/projects/bias">this</a>.
  * <p>
- * At runtime, the inputGrabber _handler should continuously run the two loops defined in
+ * At runtime, the inputGrabber handler should continuously run the two loops defined in
  * {@link #handle()}. Therefore, simply attach a call to {@link #handle()} at the end of
  * your main event (drawing) loop for that to take effect.
  */
 public class InputHandler {
   // D E V I C E S & E V E N T S
-  protected List<Agent> agents;
-  protected LinkedList<Tuple> tupleQueue;
+  protected List<Agent> _agents;
+  protected LinkedList<Tuple> _tupleQueue;
 
   public InputHandler() {
     // agents
-    agents = new ArrayList<Agent>();
+    _agents = new ArrayList<Agent>();
     // events
-    tupleQueue = new LinkedList<Tuple>();
+    _tupleQueue = new LinkedList<Tuple>();
   }
 
   /**
-   * Main _handler method. Call it at the end of your main event (drawing) loop.
+   * Main handler method. Call it at the end of your main event (drawing) loop.
    * <p>
    * The handle comprises the following two loops:
    * <p>
@@ -68,8 +68,8 @@ public class InputHandler {
       agent.handle(agent.handleFeed() != null ? agent.handleFeed() : agent.feed());
     }
     // 2. Low level events
-    while (!tupleQueue.isEmpty())
-      tupleQueue.remove().interact();
+    while (!_tupleQueue.isEmpty())
+      _tupleQueue.remove().interact();
   }
 
   /**
@@ -112,18 +112,18 @@ public class InputHandler {
    * Calls {@link Agent#shiftDefaultGrabber(Grabber, Grabber)} on
    * registered {@link #agents()}.
    */
-  public void shiftDefaultGrabber(Grabber g1, Grabber g2) {
+  public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
     for (Agent agent : agents())
-      agent.shiftDefaultGrabber(g1, g2);
+      agent.shiftDefaultGrabber(grabber1, grabber2);
   }
 
   /**
    * Returns {@code true} if {@link Agent#isInputGrabber(Grabber)} is
    * {@code true} for at least one agent in {@link #agents()}.
    */
-  public boolean isInputGrabber(Grabber g) {
+  public boolean isInputGrabber(Grabber grabber) {
     for (Agent agent : agents())
-      if (agent.isInputGrabber(g))
+      if (agent.isInputGrabber(grabber))
         return true;
     return false;
   }
@@ -132,9 +132,9 @@ public class InputHandler {
    * Returns {@code true} if {@link Agent#hasGrabber(Grabber)} is
    * {@code true} for at least one agent in {@link #agents()}.
    */
-  public boolean hasGrabber(Grabber g) {
+  public boolean hasGrabber(Grabber grabber) {
     for (Agent agent : agents())
-      if (agent.hasGrabber(g))
+      if (agent.hasGrabber(grabber))
         return true;
     return false;
   }
@@ -152,7 +152,7 @@ public class InputHandler {
    * Returns a list of the registered agents.
    */
   public List<Agent> agents() {
-    return agents;
+    return _agents;
   }
 
   /**
@@ -180,17 +180,17 @@ public class InputHandler {
   }
 
   /**
-   * Unregisters all agents from the _handler.
+   * Unregisters all agents from the handler.
    */
   public void unregisterAgents() {
-    agents.clear();
+    _agents.clear();
   }
 
   /**
    * Returns the event tuple queue. Rarely needed.
    */
   public LinkedList<Tuple> tupleQueue() {
-    return tupleQueue;
+    return _tupleQueue;
   }
 
   /**
@@ -200,8 +200,8 @@ public class InputHandler {
    * @see #handle()
    */
   public boolean enqueueTuple(Tuple tuple) {
-    if (!tupleQueue.contains(tuple))
-      return tupleQueue.add(tuple);
+    if (!_tupleQueue.contains(tuple))
+      return _tupleQueue.add(tuple);
     return false;
   }
 
@@ -211,13 +211,13 @@ public class InputHandler {
    * @param event to be removed.
    */
   public void removeTuple(Event event) {
-    tupleQueue.remove(event);
+    _tupleQueue.remove(event);
   }
 
   /**
    * Clears the event queue. Nothing is executed.
    */
   public void removeTuples() {
-    tupleQueue.clear();
+    _tupleQueue.clear();
   }
 }

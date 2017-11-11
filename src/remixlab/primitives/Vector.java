@@ -491,11 +491,11 @@ public class Vector {
   }
 
   /**
-   * Calculate the Euclidean distance between two points (considering a point as a vector
+   * Calculate the Euclidean _distance between two points (considering a point as a vector
    * object)
    *
    * @param v another vector
-   * @return the Euclidean distance between
+   * @return the Euclidean _distance between
    */
   public float distance(Vector v) {
     float dx = this.vec[0] - v.vec[0];
@@ -505,12 +505,12 @@ public class Vector {
   }
 
   /**
-   * Calculate the Euclidean distance between two points (considering a point as a vector
+   * Calculate the Euclidean _distance between two points (considering a point as a vector
    * object)
    *
    * @param v1 a vector
    * @param v2 another vector
-   * @return the Euclidean distance between v1 and v2
+   * @return the Euclidean _distance between v1 and v2
    */
   static public float distance(Vector v1, Vector v2) {
     float dx = v1.vec[0] - v2.vec[0];
@@ -739,10 +739,10 @@ public class Vector {
       return 0.0f;
 
     // as in P5:
-    // double dot = v1.x() * v2.x() + v1.y() * v2.y() + v1.z() * v2.z();
-    // double v1mag = Math.sqrt(v1.x() * v1.x() + v1.y() * v1.y() + v1.z() *
+    // double dot = v1.x() * v2.x() + v1.y() * v2._y() + v1.z() * v2.z();
+    // double v1mag = Math.sqrt(v1.x() * v1.x() + v1.y() * v1._y() + v1.z() *
     // v1.z());
-    // double v2mag = Math.sqrt(v2.x() * v2.x() + v2.y() * v2.y() + v2.z() *
+    // double v2mag = Math.sqrt(v2.x() * v2.x() + v2.y() * v2._y() + v2.z() *
     // v2.z());
     // double amt = dot / (v1mag * v2mag);
     // if (amt <= -1) return (float) Math.PI; else if (amt >= 1) return 0;

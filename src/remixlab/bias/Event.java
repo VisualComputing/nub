@@ -46,19 +46,18 @@ public class Event {
   public static int ALT = 1 << 3;
   public static int ALT_GRAPH = 1 << 4;
 
-  private boolean fire, flush;
-
-  protected int modifiers;
-  protected long timestamp;
-  protected int id;
+  protected boolean _fire, _flush;
+  protected int _modifiers;
+  protected long _timestamp;
+  protected int _id;
 
   /**
    * Constructs an event with an "empty" {@link Shortcut}.
    */
   public Event() {
-    this.modifiers = NO_MODIFIER_MASK;
-    this.id = NO_ID;
-    timestamp = System.currentTimeMillis();
+    this._modifiers = NO_MODIFIER_MASK;
+    this._id = NO_ID;
+    _timestamp = System.currentTimeMillis();
   }
 
   /**
@@ -66,17 +65,17 @@ public class Event {
    * {@link Shortcut}.
    */
   public Event(int modifiers, int id) {
-    this.modifiers = modifiers;
-    this.id = id;
-    timestamp = System.currentTimeMillis();
+    this._modifiers = modifiers;
+    this._id = id;
+    _timestamp = System.currentTimeMillis();
   }
 
   protected Event(Event other) {
-    this.modifiers = other.modifiers;
-    this.id = other.id;
-    this.timestamp = System.currentTimeMillis();
-    this.fire = other.fire;
-    this.flush = other.flush;
+    this._modifiers = other._modifiers;
+    this._id = other._id;
+    this._timestamp = System.currentTimeMillis();
+    this._fire = other._fire;
+    this._flush = other._flush;
   }
 
   public Event get() {
@@ -95,7 +94,7 @@ public class Event {
       return this;
     }
     Event event = this.get();
-    event.flush = true;
+    event._flush = true;
     return event;
   }
 
@@ -111,7 +110,7 @@ public class Event {
       return this;
     }
     Event event = this.get();
-    event.fire = true;
+    event._fire = true;
     return event;
   }
 
@@ -122,7 +121,7 @@ public class Event {
    * @see #fired()
    */
   public boolean flushed() {
-    return flush;
+    return _flush;
   }
 
   /**
@@ -132,7 +131,7 @@ public class Event {
    * @see #flushed()
    */
   public boolean fired() {
-    return fire;
+    return _fire;
   }
 
   /**
@@ -147,21 +146,21 @@ public class Event {
    * @return the modifiers defining the event {@link Shortcut}.
    */
   public int modifiers() {
-    return modifiers;
+    return _modifiers;
   }
 
   /**
    * Returns the id defining the event's {@link Shortcut}.
    */
   public int id() {
-    return id;
+    return _id;
   }
 
   /**
    * @return the time at which the event occurs
    */
   public long timestamp() {
-    return timestamp;
+    return _timestamp;
   }
 
   /**
@@ -175,35 +174,35 @@ public class Event {
    * @return true if Shift was down when the event occurs
    */
   public boolean isShiftDown() {
-    return (modifiers & SHIFT) != 0;
+    return (_modifiers & SHIFT) != 0;
   }
 
   /**
    * @return true if Ctrl was down when the event occurs
    */
   public boolean isControlDown() {
-    return (modifiers & CTRL) != 0;
+    return (_modifiers & CTRL) != 0;
   }
 
   /**
    * @return true if Meta was down when the event occurs
    */
   public boolean isMetaDown() {
-    return (modifiers & META) != 0;
+    return (_modifiers & META) != 0;
   }
 
   /**
    * @return true if Alt was down when the event occurs
    */
   public boolean isAltDown() {
-    return (modifiers & ALT) != 0;
+    return (_modifiers & ALT) != 0;
   }
 
   /**
    * @return true if AltGraph was down when the event occurs
    */
   public boolean isAltGraph() {
-    return (modifiers & ALT_GRAPH) != 0;
+    return (_modifiers & ALT_GRAPH) != 0;
   }
 
   /**

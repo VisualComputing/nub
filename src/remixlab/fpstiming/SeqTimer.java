@@ -25,7 +25,7 @@ public class SeqTimer implements Timer {
   /**
    * Defines a single shot sequential (single-threaded) timer.
    *
-   * @param h timing _handler owner
+   * @param h timing handler owner
    */
   public SeqTimer(TimingHandler h) {
     this(h, false, null);
@@ -34,7 +34,7 @@ public class SeqTimer implements Timer {
   /**
    * Defines a sequential (single-threaded) timer.
    *
-   * @param h          timing _handler owner
+   * @param h          timing handler owner
    * @param singleShot
    */
   public SeqTimer(TimingHandler h, boolean singleShot) {
@@ -122,7 +122,7 @@ public class SeqTimer implements Timer {
   /**
    * Returns {@code true} if the timer was triggered at the given frame.
    * <p>
-   * <b>Note:</b> You should not call this method since it's done by the timing _handler
+   * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
    */
   public boolean trigggered() {
