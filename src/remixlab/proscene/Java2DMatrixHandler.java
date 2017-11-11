@@ -47,7 +47,7 @@ class Java2DMatrixHandler extends MatrixHandler {
     if (graph.isRightHanded())
       scale(1, -1);
     scale(1 / graph.eye().magnitude(), 1 / graph.eye().magnitude());
-    rotate(o.axis().vec[2] > 0 ? -o.angle() : o.angle());
+    rotate(-o.angle2D());
     translate(-pos.x(), -pos.y());
   }
 
@@ -63,7 +63,7 @@ class Java2DMatrixHandler extends MatrixHandler {
 
     pushModelView();
     translate(pos.x(), pos.y());
-    rotate(o.axis().vec[2] > 0 ? o.angle() : -o.angle());
+    rotate(o.angle2D());
     scale(graph.eye().magnitude(), graph.eye().magnitude());
     if (graph.isRightHanded())
       scale(1, -1);

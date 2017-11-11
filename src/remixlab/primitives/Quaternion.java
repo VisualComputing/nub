@@ -831,6 +831,10 @@ public class Quaternion {
     return 2.0f * (float) Math.acos(w());
   }
 
+  public float angle2D() {
+    return axis().vec[2] > 0 ? angle() : -angle();
+  }
+
   /**
    * Returns the Matrix which represents the rotation matrix associated with the Quaternion.
    */

@@ -2702,7 +2702,7 @@ public class Graph {
   public void applyTransformation(Frame frame) {
     if (is2D()) {
       translate(frame.translation().x(), frame.translation().y());
-      rotate(frame.rotation().axis().vec[2] > 0 ? frame.rotation().angle() : -frame.rotation().angle());
+      rotate(frame.rotation().angle2D());
       scale(frame.scaling(), frame.scaling());
     } else {
       translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
