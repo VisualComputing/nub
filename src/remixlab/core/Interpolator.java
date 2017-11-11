@@ -442,19 +442,6 @@ public class Interpolator {
   }
 
   /**
-   * Same as {@code if(_started()) stop(); else start();}
-   *
-   * @see #start()
-   * @see #stop()
-   */
-  public void toggle() {
-    if(started())
-      stop();
-    else
-      start();
-  }
-
-  /**
    * Updates {@link #frame()} state according to current {@link #time()}.
    * Then adds {@link #period()}* {@link #speed()} to
    * {@link #time()}.

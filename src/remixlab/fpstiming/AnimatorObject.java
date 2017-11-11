@@ -62,8 +62,7 @@ public class AnimatorObject implements Animator {
    * The timing handler will check when {@link #animationStarted()} and then called the
    * animation callback method every {@link #animationPeriod()} milliseconds.
    * <p>
-   * Use {@link #startAnimation()}, {@link #stopAnimation()} or {@link #toggleAnimation()}
-   * to change this value.
+   * Use {@link #startAnimation()} and {@link #stopAnimation()}.
    *
    * @see #startAnimation()
    * @see #animate()
@@ -152,18 +151,6 @@ public class AnimatorObject implements Animator {
   public void restartAnimation() {
     stopAnimation();
     startAnimation();
-  }
-
-  /**
-   * Calls {@link #startAnimation()} or {@link #stopAnimation()}, depending on
-   * {@link #animationStarted()}.
-   */
-  @Override
-  public void toggleAnimation() {
-    if (animationStarted())
-      stopAnimation();
-    else
-      startAnimation();
   }
 
   @Override

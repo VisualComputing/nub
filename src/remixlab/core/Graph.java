@@ -1600,28 +1600,10 @@ public class Graph {
   }
 
   /**
-   * Toggles automatic update of the camera frustum plane equations every frame.
-   * Computation of the equations is expensive and hence is disabled by default.
-   *
-   * @see #areBoundaryEquationsEnabled()
-   * @see #disableBoundaryEquations()
-   * @see #enableBoundaryEquations()
-   * @see #enableBoundaryEquations(boolean)
-   * @see #updateBoundaryEquations()
-   */
-  public void toggleBoundaryEquations() {
-    if (areBoundaryEquationsEnabled())
-      disableBoundaryEquations();
-    else
-      enableBoundaryEquations();
-  }
-
-  /**
    * Disables automatic update of the camera frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
-   * @see #toggleBoundaryEquations()
    * @see #enableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
    * @see #updateBoundaryEquations()
@@ -1635,7 +1617,6 @@ public class Graph {
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
-   * @see #toggleBoundaryEquations()
    * @see #disableBoundaryEquations()
    * @see #enableBoundaryEquations(boolean)
    * @see #updateBoundaryEquations()

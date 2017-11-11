@@ -315,13 +315,6 @@ public abstract class Agent {
   }
 
   /**
-   * Calls {@link #setTracking(boolean)} to toggle the {@link #isTracking()} value.
-   */
-  public void toggleTracking() {
-    setTracking(!isTracking());
-  }
-
-  /**
    * Returns the grabber set after {@link #poll(Event)} is called. It
    * may be null.
    */

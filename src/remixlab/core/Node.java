@@ -449,7 +449,6 @@ public class Node extends Frame implements Grabber {
    * {@link Graph#traverse()}.
    *
    * @see #disableVisit()
-   * @see #toggleVisit()
    * @see #isVisitEnabled()
    */
   public void enableVisit() {
@@ -461,23 +460,10 @@ public class Node extends Frame implements Grabber {
    * {@link Graph#traverse()}.
    *
    * @see #enableVisit()
-   * @see #toggleVisit()
    * @see #isVisitEnabled()
    */
   public void disableVisit() {
     _visit = false;
-  }
-
-  /**
-   * Toggles {@link #visit()} of this frame when performing the
-   * {@link Graph#traverse()}.
-   *
-   * @see #enableVisit()
-   * @see #disableVisit()
-   * @see #isVisitEnabled()
-   */
-  public void toggleVisit() {
-    _visit = !_visit;
   }
 
   /**
@@ -486,7 +472,6 @@ public class Node extends Frame implements Grabber {
    *
    * @see #enableVisit()
    * @see #disableVisit()
-   * @see #toggleVisit()
    */
   public boolean isVisitEnabled() {
     return _visit;

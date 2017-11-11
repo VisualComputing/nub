@@ -57,11 +57,6 @@ public interface Animator {
   void restartAnimation();
 
   /**
-   * Starts or stops the animation according to {@link #animationStarted()}.
-   */
-  void toggleAnimation();
-
-  /**
    * Returns {@code true} if animation was started and {@code false} otherwise.
    */
   boolean animationStarted();
