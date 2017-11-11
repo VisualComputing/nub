@@ -31,11 +31,8 @@ import java.util.List;
  * translation, rotation and scaling {@link Frame} updates (see
  * {@link #translationSensitivity()}, {@link #rotationSensitivity()} and
  * {@link #scalingSensitivity()}). A node may thus be attached to some of your
- * graph objects to control their motion using an {@link Agent}, such
- * as the {@link Graph#motionAgent()} and the
- * {@link Graph#keyAgent()} (see
- * {@link #Node(Graph)} and all the constructors that take an graph
- * parameter). To attach a node to {@code MyObject} use code like this:
+ * visual objects to control their motion using an {@link Agent}. To attach
+ * a node to {@code MyObject} use code like this:
  * <p>
  * <pre>
  * {@code
@@ -188,9 +185,7 @@ public class Node extends Frame implements Grabber {
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
    * The {@link Graph#inputHandler()} will attempt to addGrabber
-   * the node to all its {@link InputHandler#agents()}, such
-   * as the {@link Graph#motionAgent()} and the
-   * {@link Graph#keyAgent()}.
+   * the node to all its {@link InputHandler#agents()}.
    * <p>
    * The node sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
