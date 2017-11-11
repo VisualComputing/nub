@@ -26,10 +26,10 @@ public class MatrixHandler {
   public static int STACK_DEPTH = 32;
   public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
   public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
-  protected float[][] _stack = new float[STACK_DEPTH][16];
-  protected int _stackDepth;
-  protected float[][] pmatrixStack = new float[STACK_DEPTH][16];
-  protected int pmatrixStackDepth;
+  protected float[][] _modelviewStack = new float[STACK_DEPTH][16];
+  protected int _modelviewStackDepth;
+  protected float[][] _projectionStack = new float[STACK_DEPTH][16];
+  protected int _projectionStackDepth;
 
   /**
    * Instantiates matrices and sets
@@ -205,22 +205,22 @@ public class MatrixHandler {
    * Push a copy of the modelview matrix onto the stack.
    */
   public void pushModelView() {
-    if (_stackDepth == STACK_DEPTH) {
+    if (_modelviewStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    _modelview.get(_stack[_stackDepth]);
-    _stackDepth++;
+    _modelview.get(_modelviewStack[_modelviewStackDepth]);
+    _modelviewStackDepth++;
   }
 
   /**
    * Replace the current modelview matrix with the top of the stack.
    */
   public void popModelView() {
-    if (_stackDepth == 0) {
+    if (_modelviewStackDepth == 0) {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
-    _stackDepth--;
-    _modelview.set(_stack[_stackDepth]);
+    _modelviewStackDepth--;
+    _modelview.set(_modelviewStack[_modelviewStackDepth]);
   }
 
   /**
@@ -306,22 +306,22 @@ public class MatrixHandler {
    * Push a copy of the projection matrix onto the stack.
    */
   public void pushProjection() {
-    if (pmatrixStackDepth == STACK_DEPTH) {
+    if (_projectionStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    _projection.get(pmatrixStack[pmatrixStackDepth]);
-    pmatrixStackDepth++;
+    _projection.get(_projectionStack[_projectionStackDepth]);
+    _projectionStackDepth++;
   }
 
   /**
    * Replace the current projection matrix with the top of the stack.
    */
   public void popProjection() {
-    if (pmatrixStackDepth == 0) {
+    if (_projectionStackDepth == 0) {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
-    pmatrixStackDepth--;
-    _projection.set(pmatrixStack[pmatrixStackDepth]);
+    _projectionStackDepth--;
+    _projection.set(_projectionStack[_projectionStackDepth]);
   }
 
   /**
