@@ -10,10 +10,10 @@
 
 package remixlab.proscene;
 
-import remixlab.bias.Agent;
-import remixlab.bias.Event;
-import remixlab.bias.Grabber;
-import remixlab.bias.event.KeyEvent;
+import remixlab.input.Agent;
+import remixlab.input.Event;
+import remixlab.input.Grabber;
+import remixlab.input.event.KeyEvent;
 
 /**
  * Proscene _key-agent. A Processing fully fledged _key {@link Agent}.

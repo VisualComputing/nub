@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias.event;
+package remixlab.input.event;
 
 /**
- * A {@link remixlab.bias.event.MotionEvent} with one degree of freedom ({@link #x()}).
+ * A {@link remixlab.input.event.MotionEvent} with one degree of freedom ({@link #x()}).
  */
 public class MotionEvent1 extends MotionEvent {
   protected float _x, _dx;

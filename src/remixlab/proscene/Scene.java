@@ -16,8 +16,8 @@ import processing.data.JSONObject;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.bias.Agent;
-import remixlab.fpstiming.TimingTask;
+import remixlab.input.Agent;
+import remixlab.timing.TimingTask;
 import remixlab.core.Graph;
 import remixlab.core.Node;
 import remixlab.core.Interpolator;
@@ -408,7 +408,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Sets all {@link #timingHandler()} timers as (single-threaded)
-   * {@link remixlab.fpstiming.SeqTimer}(s).
+   * {@link remixlab.timing.SeqTimer}(s).
    *
    * @see #setNonSeqTimers()
    * @see #shiftTimers()
@@ -459,7 +459,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * @return true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
-   * timers are (single-threaded) {@link remixlab.fpstiming.SeqTimer}(s)).
+   * timers are (single-threaded) {@link remixlab.timing.SeqTimer}(s)).
    * @see #setSeqTimers()
    * @see #setNonSeqTimers()
    * @see #shiftTimers()

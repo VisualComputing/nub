@@ -10,7 +10,7 @@
 
 package remixlab.primitives;
 
-import remixlab.fpstiming.TimingHandler;
+import remixlab.timing.TimingHandler;
 import remixlab.core.Graph;
 import remixlab.primitives.constraint.Constraint;
 

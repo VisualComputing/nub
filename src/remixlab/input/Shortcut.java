@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias;
+package remixlab.input;
 
-import remixlab.bias.event.*;
+import remixlab.input.event.*;
 
 /**
  * Every {@link Event} instance has a shortcut which represents a
@@ -21,8 +21,8 @@ import remixlab.bias.event.*;
  * <p>
  * The current implementation supports the following event/shortcut types:
  * <ol>
- * <li>{@link remixlab.bias.event.MotionEvent} /
- * {@link remixlab.bias.Shortcut}. Note that motion-event derived classes:
+ * <li>{@link remixlab.input.event.MotionEvent} /
+ * {@link remixlab.input.Shortcut}. Note that motion-event derived classes:
  * {@link MotionEvent1}, {@link MotionEvent2},
  * {@link MotionEvent3}, {@link MotionEvent6}, are also
  * related to shortcuts.</li>

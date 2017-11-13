@@ -14,8 +14,8 @@
  */
 
 import remixlab.proscene.*;
-import remixlab.bias.*;
-import remixlab.bias.event.*;
+import remixlab.input.*;
+import remixlab.input.event.*;
 import remixlab.dandelion.primitives.*;
 import remixlab.dandelion.geom.*;
 

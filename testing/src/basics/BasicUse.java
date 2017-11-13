@@ -1,9 +1,9 @@
 package basics;
 
 import processing.core.*;
-import remixlab.bias.event.KeyEvent;
-import remixlab.bias.event.KeyShortcut;
-import remixlab.bias.event.MotionEvent;
+import remixlab.input.event.KeyEvent;
+import remixlab.input.event.KeyShortcut;
+import remixlab.input.event.MotionEvent;
 import remixlab.core.Node;
 import remixlab.proscene.*;
 

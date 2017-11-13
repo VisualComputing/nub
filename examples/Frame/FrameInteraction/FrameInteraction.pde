@@ -30,7 +30,7 @@
  * and mouse bindings in the console.
  */
 
-import remixlab.bias.event.*;
+import remixlab.input.event.*;
 import remixlab.proscene.*;
 
 Scene scene;

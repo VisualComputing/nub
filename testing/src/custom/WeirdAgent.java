@@ -1,6 +1,6 @@
 package custom;
 
-import remixlab.bias.Agent;
+import remixlab.input.Agent;
 import remixlab.proscene.Scene;
 
 /**

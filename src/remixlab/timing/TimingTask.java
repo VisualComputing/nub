@@ -8,11 +8,11 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.fpstiming;
+package remixlab.timing;
 
 /**
  * An abstract wrapper class holding a {@link #timer()} together with its call back method
- * ( {@link remixlab.fpstiming.Taskable#execute()}) which derived classes should
+ * ( {@link remixlab.timing.Taskable#execute()}) which derived classes should
  * implement.
  */
 public abstract class TimingTask implements Taskable {

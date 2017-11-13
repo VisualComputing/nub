@@ -10,9 +10,9 @@
 
 package remixlab.proscene;
 
-import remixlab.bias.Agent;
-import remixlab.bias.Event;
-import remixlab.bias.event.*;
+import remixlab.input.Agent;
+import remixlab.input.Event;
+import remixlab.input.event.*;
 
 /**
  * Proscene mouse-agent. A Processing fully fledged mouse

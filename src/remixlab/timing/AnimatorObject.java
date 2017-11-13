@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.fpstiming;
+package remixlab.timing;
 
 /**
- * Class implementing the main {@link remixlab.fpstiming.Animator} behavior.
+ * Class implementing the main {@link remixlab.timing.Animator} behavior.
  */
 public class AnimatorObject implements Animator {
   protected SeqTimer _animationTimer;

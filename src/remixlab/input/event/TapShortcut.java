@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias.event;
+package remixlab.input.event;
 
-import remixlab.bias.Event;
-import remixlab.bias.Shortcut;
+import remixlab.input.Event;
+import remixlab.input.Shortcut;
 
 /**
  * This class represents {@link TapEvent} shortcuts.

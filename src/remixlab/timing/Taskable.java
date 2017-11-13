@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.fpstiming;
+package remixlab.timing;
 
 /**
  * Interface used to define a timer callback method.

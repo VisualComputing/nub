@@ -1,9 +1,9 @@
-import remixlab.bias.*;
-import remixlab.bias.event.*;
+import remixlab.input.*;
+import remixlab.input.event.*;
 import remixlab.dandelion.constraint.*;
 import remixlab.dandelion.geom.*;
 import remixlab.dandelion.primitives.*;
-import remixlab.fpstiming.*;
+import remixlab.timing.*;
 import remixlab.proscene.*;
 import remixlab.util.*;
 

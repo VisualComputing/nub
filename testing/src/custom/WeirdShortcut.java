@@ -1,6 +1,6 @@
 package custom;
 
-import remixlab.bias.Shortcut;
+import remixlab.input.Shortcut;
 
 /**
  * Created by pierre on 11/24/16.

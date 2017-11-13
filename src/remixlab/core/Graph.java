@@ -10,12 +10,12 @@
 
 package remixlab.core;
 
-import remixlab.bias.Agent;
-import remixlab.bias.InputHandler;
+import remixlab.input.Agent;
+import remixlab.input.InputHandler;
 import remixlab.primitives.*;
-import remixlab.fpstiming.Animator;
-import remixlab.fpstiming.TimingHandler;
-import remixlab.fpstiming.TimingTask;
+import remixlab.timing.Animator;
+import remixlab.timing.TimingHandler;
+import remixlab.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ import java.util.List;
  * <ol>
  * <li>An {@link #eye()} which represents the 2D/3D controlling object.</li>
  * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For
- * details please refer to the {@link remixlab.fpstiming.TimingHandler} class.</li>
+ * details please refer to the {@link remixlab.timing.TimingHandler} class.</li>
  * <li>An {@link #inputHandler()} which handles all user input through
  * {@link Agent}s (for details please refer to the
  * {@link InputHandler} class). The {@link #inputHandler()} holds _agents which should
@@ -843,7 +843,7 @@ public class Graph {
    * Convenience wrapper function that simply calls
    * {@code timingHandler().registerTask(_task)}.
    *
-   * @see remixlab.fpstiming.TimingHandler#registerTask(TimingTask)
+   * @see remixlab.timing.TimingHandler#registerTask(TimingTask)
    */
   public void registerTimingTask(TimingTask task) {
     timingHandler().registerTask(task);
@@ -877,7 +877,7 @@ public class Graph {
    * Convenience wrapper function that simply calls
    * {@code timingHandler().unregisterAnimator(object)}.
    *
-   * @see remixlab.fpstiming.TimingHandler#unregisterAnimator(Animator)
+   * @see remixlab.timing.TimingHandler#unregisterAnimator(Animator)
    */
   public void unregisterAnimator(Animator animator) {
     timingHandler().unregisterAnimator(animator);
@@ -887,7 +887,7 @@ public class Graph {
    * Convenience wrapper function that simply returns
    * {@code timingHandler().isAnimatorRegistered(object)}.
    *
-   * @see remixlab.fpstiming.TimingHandler#isAnimatorRegistered(Animator)
+   * @see remixlab.timing.TimingHandler#isAnimatorRegistered(Animator)
    */
   public boolean isAnimatorRegistered(Animator animator) {
     return timingHandler().isAnimatorRegistered(animator);
@@ -1276,7 +1276,7 @@ public class Graph {
   /**
    * Called after your main drawing and performs the following:
    * <ol>
-   * <li>Calls {@link remixlab.fpstiming.TimingHandler#handle()} and increments the the
+   * <li>Calls {@link remixlab.timing.TimingHandler#handle()} and increments the the
    * {@link #frameCount()}</li>
    * <li>Increments the {@link #frameCount()}</li>
    * <li>Calls {@link InputHandler#handle()}</li>

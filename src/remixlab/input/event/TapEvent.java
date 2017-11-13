@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias.event;
+package remixlab.input.event;
 
-import remixlab.bias.Event;
+import remixlab.input.Event;
 
 /**
  * A tap event encapsulates a {@link TapShortcut} and it's defined

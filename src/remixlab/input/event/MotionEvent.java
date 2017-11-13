@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias.event;
+package remixlab.input.event;
 
-import remixlab.bias.Event;
+import remixlab.input.Event;
 
 /**
  * Base class of all motion events defined from DOFs (degrees-of-freedom).
@@ -29,7 +29,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent with an "empty"
-   * {@link remixlab.bias.Shortcut}.
+   * {@link remixlab.input.Shortcut}.
    */
   public MotionEvent() {
     super();
@@ -37,7 +37,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent taking the given {@code modifiers} as a
-   * {@link remixlab.bias.Shortcut}.
+   * {@link remixlab.input.Shortcut}.
    */
   public MotionEvent(int modifiers) {
     super(modifiers, NO_ID);
@@ -45,7 +45,7 @@ public class MotionEvent extends Event {
 
   /**
    * Constructs an absolute MotionEvent taking the given {@code modifiers} and
-   * {@code modifiers} as a {@link remixlab.bias.Shortcut}.
+   * {@code modifiers} as a {@link remixlab.input.Shortcut}.
    */
   public MotionEvent(int modifiers, int id) {
     super(modifiers, id);

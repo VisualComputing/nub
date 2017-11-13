@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.fpstiming;
+package remixlab.timing;
 
 /**
  * Sequential timers are single-threaded timers handled by a TimingHandler.
@@ -61,7 +61,7 @@ public class SeqTimer implements Timer {
    * Executes the callback method defined by the {@link #timingTask()}.
    * <p>
    * <b>Note:</b> You should not call this method since it's done by the timing handler
-   * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
+   * (see {@link remixlab.timing.TimingHandler#handle()}).
    */
   protected boolean _execute() {
     boolean result = trigggered();
@@ -123,7 +123,7 @@ public class SeqTimer implements Timer {
    * Returns {@code true} if the timer was triggered at the given frame.
    * <p>
    * <b>Note:</b> You should not call this method since it's done by the timing handler
-   * (see {@link remixlab.fpstiming.TimingHandler#handle()}).
+   * (see {@link remixlab.timing.TimingHandler#handle()}).
    */
   public boolean trigggered() {
     if (!_active)

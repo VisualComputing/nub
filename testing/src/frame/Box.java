@@ -1,7 +1,7 @@
 package frame;
 
 import processing.core.PApplet;
-import remixlab.bias.event.*;
+import remixlab.input.event.*;
 import remixlab.core.Node;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;

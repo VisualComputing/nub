@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias;
+package remixlab.input;
 
 /**
  * A [{@link Event},{@link Grabber}] tuple. An

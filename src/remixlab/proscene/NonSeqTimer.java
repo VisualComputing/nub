@@ -10,8 +10,8 @@
 
 package remixlab.proscene;
 
-import remixlab.fpstiming.Taskable;
-import remixlab.fpstiming.Timer;
+import remixlab.timing.Taskable;
+import remixlab.timing.Timer;
 
 /**
  * Non-seq _timer based on java.util.Timer and java.util.TimerTask.

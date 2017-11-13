@@ -11,7 +11,7 @@
 
 import remixlab.proscene.*;
 import remixlab.dandelion.primitives.*;
-import remixlab.bias.event.*;
+import remixlab.input.event.*;
 
 Scene scene;
 Board board;

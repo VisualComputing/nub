@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias;
+package remixlab.input;
 
-import remixlab.bias.event.TapEvent;
+import remixlab.input.event.TapEvent;
 
 /**
  * The root of all events that are to be handled by an {@link Agent}.
@@ -19,8 +19,8 @@ import remixlab.bias.event.TapEvent;
  * objects, are reported by {@link #fired()} and {@link #flushed()}, respectively.
  * <p>
  * The following are the main class specializations:
- * {@link remixlab.bias.event.MotionEvent}, {@link TapEvent}, and
- * {@link remixlab.bias.event.KeyEvent}. Please refer to their documentation for
+ * {@link remixlab.input.event.MotionEvent}, {@link TapEvent}, and
+ * {@link remixlab.input.event.KeyEvent}. Please refer to their documentation for
  * details.
  * <p>
  * If you ever need to define you're own event type, derive from this class; and, optional,
@@ -164,7 +164,7 @@ public class Event {
   }
 
   /**
-   * Only {@link remixlab.bias.event.MotionEvent}s may be null.
+   * Only {@link remixlab.input.event.MotionEvent}s may be null.
    */
   public boolean isNull() {
     return false;

@@ -10,8 +10,8 @@
 
 package remixlab.core;
 
-import remixlab.fpstiming.TimingHandler;
-import remixlab.fpstiming.TimingTask;
+import remixlab.timing.TimingHandler;
+import remixlab.timing.TimingTask;
 import remixlab.primitives.*;
 
 import java.util.ArrayList;

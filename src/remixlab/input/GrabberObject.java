@@ -8,9 +8,9 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.bias;
+package remixlab.input;
 
-import remixlab.bias.event.*;
+import remixlab.input.event.*;
 
 /**
  * {@link Grabber} object which eases third-party implementation of the
@@ -84,7 +84,7 @@ public abstract class GrabberObject implements Grabber {
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
    * Override this method when you want the object to interact an interaction from a
-   * {@link remixlab.bias.event.MotionEvent}.
+   * {@link remixlab.input.event.MotionEvent}.
    */
   protected void interact(MotionEvent event) {
     if (event instanceof MotionEvent1)

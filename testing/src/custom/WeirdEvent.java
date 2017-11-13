@@ -1,6 +1,6 @@
 package custom;
 
-import remixlab.bias.Event;
+import remixlab.input.Event;
 
 /**
  * Created by pierre on 11/24/16.

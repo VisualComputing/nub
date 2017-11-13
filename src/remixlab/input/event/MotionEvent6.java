@@ -8,10 +8,10 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  ********************************************************************************/
 
-package remixlab.bias.event;
+package remixlab.input.event;
 
 /**
- * A {@link remixlab.bias.event.MotionEvent} with six degrees-of-freedom ( {@link #x()},
+ * A {@link remixlab.input.event.MotionEvent} with six degrees-of-freedom ( {@link #x()},
  * {@link #y()}, {@link #z()} , {@link #rx()}, {@link #ry()} and {@link #rz()}).
  */
 public class MotionEvent6 extends MotionEvent {

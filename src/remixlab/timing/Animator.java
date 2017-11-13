@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.fpstiming;
+package remixlab.timing;
 
 /**
  * Interface defining the behavior animated objects should implement.

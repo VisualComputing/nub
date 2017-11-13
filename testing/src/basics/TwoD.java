@@ -1,8 +1,8 @@
 package basics;
 
 import processing.core.PApplet;
-import remixlab.bias.event.KeyEvent;
-import remixlab.bias.event.MotionEvent;
+import remixlab.input.event.KeyEvent;
+import remixlab.input.event.MotionEvent;
 import remixlab.core.Graph;
 import remixlab.core.Node;
 import remixlab.proscene.Scene;

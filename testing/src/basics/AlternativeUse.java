@@ -1,7 +1,6 @@
 package basics;
 
 import processing.core.PApplet;
-import remixlab.bias.event.KeyEvent;
 import remixlab.proscene.Scene;
 
 /**
