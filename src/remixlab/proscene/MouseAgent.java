@@ -24,27 +24,23 @@ import remixlab.input.event.*;
 public class MouseAgent extends Agent {
   public static int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
           LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
-  protected float xSens = 1f;
-  protected float ySens = 1f;
-  protected Scene scene;
-  protected MotionEvent2 currentEvent, prevEvent;
-  protected boolean move, press, drag, release;
-  protected PickingMode pMode;
+  protected Scene _scene;
+  protected MotionEvent2 _currentEvent, _previousEvent;
+  protected boolean _move, _press, _drag, _release;
+  protected PickingMode _pickingMode;
 
   public enum PickingMode {
     MOVE, CLICK
   }
-
-  ;
 
   /**
    * Calls super on (scn,n) and sets {@link #pickingMode()} to {@link PickingMode#MOVE}.
    *
    * @see #setPickingMode(PickingMode)
    */
-  public MouseAgent(Scene scn) {
-    super(scn.inputHandler());
-    scene = scn;
+  public MouseAgent(Scene scene) {
+    super(scene.inputHandler());
+    _scene = scene;
     setPickingMode(PickingMode.MOVE);
   }
 
@@ -52,7 +48,7 @@ public class MouseAgent extends Agent {
    * Returns the graph this object belongs to.
    */
   public Scene scene() {
-    return scene;
+    return _scene;
   }
 
   /**
@@ -62,7 +58,7 @@ public class MouseAgent extends Agent {
    * @see #pickingMode()
    */
   public void setPickingMode(PickingMode mode) {
-    pMode = mode;
+    _pickingMode = mode;
   }
 
   /**
@@ -72,73 +68,37 @@ public class MouseAgent extends Agent {
    * @see #setPickingMode(PickingMode)
    */
   public PickingMode pickingMode() {
-    return pMode;
+    return _pickingMode;
   }
 
   /**
    * Processing mouseEvent method to be registered at the PApplet's instance.
    */
-  public void mouseEvent(processing.event.MouseEvent e) {
-    move = e.getAction() == processing.event.MouseEvent.MOVE;
-    press = e.getAction() == processing.event.MouseEvent.PRESS;
-    drag = e.getAction() == processing.event.MouseEvent.DRAG;
-    release = e.getAction() == processing.event.MouseEvent.RELEASE;
-    if (move || press || drag || release) {
-      currentEvent = new MotionEvent2(prevEvent, e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
-          e.getModifiers(), move ? Event.NO_ID : e.getButton());
-      if (move && (pickingMode() == PickingMode.MOVE))
-        poll(currentEvent);
-      handle(press ? currentEvent.fire() : release ? currentEvent.flush() : currentEvent);
-      prevEvent = currentEvent.get();
+  public void mouseEvent(processing.event.MouseEvent mouseEvent) {
+    _move = mouseEvent.getAction() == processing.event.MouseEvent.MOVE;
+    _press = mouseEvent.getAction() == processing.event.MouseEvent.PRESS;
+    _drag = mouseEvent.getAction() == processing.event.MouseEvent.DRAG;
+    _release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
+    if (_move || _press || _drag || _release) {
+      _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _scene.originCorner().x(), mouseEvent.getY() - _scene.originCorner().y(),
+          mouseEvent.getModifiers(), _move ? Event.NO_ID : mouseEvent.getButton());
+      if (_move && (pickingMode() == PickingMode.MOVE))
+        poll(_currentEvent);
+      handle(_press ? _currentEvent.fire() : _release ? _currentEvent.flush() : _currentEvent);
+      _previousEvent = _currentEvent.get();
       return;
     }
-    if (e.getAction() == processing.event.MouseEvent.WHEEL) {
-      handle(new MotionEvent1(e.getCount(), e.getModifiers(), WHEEL_ID));
+    if (mouseEvent.getAction() == processing.event.MouseEvent.WHEEL) {
+      handle(new MotionEvent1(mouseEvent.getCount(), mouseEvent.getModifiers(), WHEEL_ID));
       return;
     }
-    if (e.getAction() == processing.event.MouseEvent.CLICK) {
-      TapEvent bogusTapEvent = new TapEvent(e.getX() - scene.originCorner().x(), e.getY() - scene.originCorner().y(),
-          e.getModifiers(), e.getButton(), e.getCount());
+    if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
+      TapEvent bogusTapEvent = new TapEvent(mouseEvent.getX() - _scene.originCorner().x(), mouseEvent.getY() - _scene.originCorner().y(),
+          mouseEvent.getModifiers(), mouseEvent.getButton(), mouseEvent.getCount());
       if (pickingMode() == PickingMode.CLICK)
         poll(bogusTapEvent);
       handle(bogusTapEvent);
       return;
     }
-  }
-
-  /**
-   * Defines the {@link #xSensitivity()}.
-   */
-  public void setXSensitivity(float sensitivity) {
-    xSens = sensitivity;
-  }
-
-  /**
-   * Returns the x sensitivity.
-   * <p>
-   * Default value is 1. A higher value will make the _event more efficient (usually
-   * meaning a faster motion). Use a negative value to invert the along x-Axis motion
-   * direction.
-   */
-  public float xSensitivity() {
-    return xSens;
-  }
-
-  /**
-   * Defines the {@link #ySensitivity()}.
-   */
-  public void setYSensitivity(float sensitivity) {
-    ySens = sensitivity;
-  }
-
-  /**
-   * Returns the y sensitivity.
-   * <p>
-   * Default value is 1. A higher value will make the _event more efficient (usually
-   * meaning a faster motion). Use a negative value to invert the along y-Axis motion
-   * direction.
-   */
-  public float ySensitivity() {
-    return ySens;
   }
 }

@@ -33,13 +33,13 @@ public class Vector {
    * @param other vec
    */
   public boolean matches(Vector other) {
-    return this.vec[0] == other.vec[0] && this.vec[1] == other.vec[1] && this.vec[2] == other.vec[2];
+    return this._vector[0] == other._vector[0] && this._vector[1] == other._vector[1] && this._vector[2] == other._vector[2];
   }
 
   /**
    * The x, y and z coordinates of the Vector.
    */
-  public float vec[] = new float[3];
+  public float _vector[] = new float[3];
 
   /**
    * Constructor for an empty vector: x, y, and z are set to 0.
@@ -56,9 +56,9 @@ public class Vector {
    * @param z the y coordinate.
    */
   public Vector(float x, float y, float z) {
-    this.vec[0] = x;
-    this.vec[1] = y;
-    this.vec[2] = z;
+    this._vector[0] = x;
+    this._vector[1] = y;
+    this._vector[2] = z;
   }
 
   protected Vector(Vector other) {
@@ -72,51 +72,51 @@ public class Vector {
    * @param y the y coordinate.
    */
   public Vector(float x, float y) {
-    this.vec[0] = x;
-    this.vec[1] = y;
-    this.vec[2] = 0;
+    this._vector[0] = x;
+    this._vector[1] = y;
+    this._vector[2] = 0;
   }
 
   /**
    * Returns the x component of the Vector.
    */
   public float x() {
-    return this.vec[0];
+    return this._vector[0];
   }
 
   /**
    * Returns the y component of the Vector.
    */
   public float y() {
-    return this.vec[1];
+    return this._vector[1];
   }
 
   /**
    * Returns the z component of the Vector.
    */
   public float z() {
-    return this.vec[2];
+    return this._vector[2];
   }
 
   /**
    * Sets the x component of the Vector.
    */
   public void setX(float x) {
-    this.vec[0] = x;
+    this._vector[0] = x;
   }
 
   /**
    * Sets the y component of the Vector.
    */
   public void setY(float y) {
-    this.vec[1] = y;
+    this._vector[1] = y;
   }
 
   /**
    * Sets the z component of the Vector.
    */
   public void setZ(float z) {
-    this.vec[2] = z;
+    this._vector[2] = z;
   }
 
   /**
@@ -148,12 +148,12 @@ public class Vector {
    * Projects the {@code src} Vector on the axis defined by {@code direction} (which does not
    * need to be normalized, but must be non null) that passes through the origin.
    */
-  public static Vector projectVectorOnAxis(Vector src, Vector direction) {
+  public static Vector projectVectorOnAxis(Vector vector, Vector direction) {
     Vector b = direction.get();
     b.normalize();
     if (b.magnitude() == 0)
       throw new RuntimeException("Direction squared norm is nearly 0");
-    return Vector.vectorProjection(src, b);
+    return Vector.vectorProjection(vector, b);
   }
 
   /**
@@ -166,16 +166,16 @@ public class Vector {
   }
 
   /**
-   * Projects {@code src} on the plane defined by {@code normal} (which does not need to
+   * Projects {@code vector} on the plane defined by {@code normal} (which does not need to
    * be normalized, but must be non null) that passes through the origin.
    */
-  public static Vector projectVectorOnPlane(Vector src, Vector normal) {
+  public static Vector projectVectorOnPlane(Vector vector, Vector normal) {
     float normalSquaredNorm = squaredNorm(normal);
     if (normalSquaredNorm == 0)
       throw new RuntimeException("Normal squared norm is nearly 0");
 
-    float modulation = src.dot(normal) / normalSquaredNorm;
-    return Vector.subtract(src, Vector.multiply(normal, modulation));
+    float modulation = vector.dot(normal) / normalSquaredNorm;
+    return Vector.subtract(vector, Vector.multiply(normal, modulation));
   }
 
   /**
@@ -190,8 +190,8 @@ public class Vector {
   /**
    * Utility function that returns the squared norm of the Vector.
    */
-  public static float squaredNorm(Vector v) {
-    return (v.vec[0] * v.vec[0]) + (v.vec[1] * v.vec[1]) + (v.vec[2] * v.vec[2]);
+  public static float squaredNorm(Vector vector) {
+    return (vector._vector[0] * vector._vector[0]) + (vector._vector[1] * vector._vector[1]) + (vector._vector[2] * vector._vector[2]);
   }
 
   /**
@@ -204,22 +204,22 @@ public class Vector {
   }
 
   /**
-   * Utility function that returns a Vector orthogonal to {@code v}. Its {@code mag()}
+   * Utility function that returns a Vector orthogonal to {@code vector}. Its {@code magnitude()}
    * depends on the Vector, but is zero only for a {@code null} Vector. Note that the function
    * that associates an {@code orthogonalVector()} to a Vector is not continuous.
    */
-  public static Vector orthogonalVector(Vector v) {
+  public static Vector orthogonalVector(Vector vector) {
     // Find smallest component. Keep equal case for null values.
-    if ((Math.abs(v.vec[1]) >= 0.9f * Math.abs(v.vec[0])) && (Math.abs(v.vec[2]) >= 0.9f * Math.abs(v.vec[0])))
-      return new Vector(0.0f, -v.vec[2], v.vec[1]);
-    else if ((Math.abs(v.vec[0]) >= 0.9f * Math.abs(v.vec[1])) && (Math.abs(v.vec[2]) >= 0.9f * Math.abs(v.vec[1])))
-      return new Vector(-v.vec[2], 0.0f, v.vec[0]);
+    if ((Math.abs(vector._vector[1]) >= 0.9f * Math.abs(vector._vector[0])) && (Math.abs(vector._vector[2]) >= 0.9f * Math.abs(vector._vector[0])))
+      return new Vector(0.0f, -vector._vector[2], vector._vector[1]);
+    else if ((Math.abs(vector._vector[0]) >= 0.9f * Math.abs(vector._vector[1])) && (Math.abs(vector._vector[2]) >= 0.9f * Math.abs(vector._vector[1])))
+      return new Vector(-vector._vector[2], 0.0f, vector._vector[0]);
     else
-      return new Vector(-v.vec[1], v.vec[0], 0.0f);
+      return new Vector(-vector._vector[1], vector._vector[0], 0.0f);
   }
 
-  public void link(float[] src) {
-    vec = src;
+  public void link(float[] source) {
+    _vector = source;
   }
 
   public void unLink() {
@@ -232,7 +232,7 @@ public class Vector {
    * Sets all Vector components to 0.
    */
   public void reset() {
-    vec[0] = vec[1] = vec[2] = 0;
+    _vector[0] = _vector[1] = _vector[2] = 0;
   }
 
   // end new
@@ -245,20 +245,20 @@ public class Vector {
    * @param z the z coordinate.
    */
   public void set(float x, float y, float z) {
-    this.vec[0] = x;
-    this.vec[1] = y;
-    this.vec[2] = z;
+    this._vector[0] = x;
+    this._vector[1] = y;
+    this._vector[2] = z;
   }
 
   /**
    * Set x, y, and z coordinates from a Vector object.
    *
-   * @param v the Vector object to be copied
+   * @param vector the Vector object to be copied
    */
-  public void set(Vector v) {
-    this.vec[0] = v.vec[0];
-    this.vec[1] = v.vec[1];
-    this.vec[2] = v.vec[2];
+  public void set(Vector vector) {
+    this._vector[0] = vector._vector[0];
+    this._vector[1] = vector._vector[1];
+    this._vector[2] = vector._vector[2];
   }
 
   /**
@@ -268,11 +268,11 @@ public class Vector {
    */
   public void set(float[] source) {
     if (source.length >= 2) {
-      this.vec[0] = source[0];
-      this.vec[1] = source[1];
+      this._vector[0] = source[0];
+      this._vector[1] = source[1];
     }
     if (source.length >= 3) {
-      this.vec[2] = source[2];
+      this._vector[2] = source[2];
     }
   }
 
@@ -285,14 +285,14 @@ public class Vector {
 
   public float[] get(float[] target) {
     if (target == null) {
-      return new float[]{this.vec[0], this.vec[1], this.vec[2]};
+      return new float[]{this._vector[0], this._vector[1], this._vector[2]};
     }
     if (target.length >= 2) {
-      target[0] = this.vec[0];
-      target[1] = this.vec[1];
+      target[0] = this._vector[0];
+      target[1] = this._vector[1];
     }
     if (target.length >= 3) {
-      target[2] = this.vec[2];
+      target[2] = this._vector[2];
     }
     return target;
   }
@@ -303,7 +303,7 @@ public class Vector {
    * @return the magnitude of the vector
    */
   public float magnitude() {
-    return (float) Math.sqrt(this.vec[0] * this.vec[0] + this.vec[1] * this.vec[1] + this.vec[2] * this.vec[2]);
+    return (float) Math.sqrt(this._vector[0] * this._vector[0] + this._vector[1] * this._vector[1] + this._vector[2] * this._vector[2]);
   }
 
   /**
@@ -313,18 +313,18 @@ public class Vector {
    * @return squared magnitude of the vector
    */
   public float squaredMagnitude() {
-    return (this.vec[0] * this.vec[0] + this.vec[1] * this.vec[1] + this.vec[2] * this.vec[2]);
+    return (this._vector[0] * this._vector[0] + this._vector[1] * this._vector[1] + this._vector[2] * this._vector[2]);
   }
 
   /**
    * Add a vector to this vector
    *
-   * @param v the vector to be added
+   * @param vector the vector to be added
    */
-  public void add(Vector v) {
-    this.vec[0] += v.vec[0];
-    this.vec[1] += v.vec[1];
-    this.vec[2] += v.vec[2];
+  public void add(Vector vector) {
+    this._vector[0] += vector._vector[0];
+    this._vector[1] += vector._vector[1];
+    this._vector[2] += vector._vector[2];
   }
 
   /**
@@ -333,35 +333,35 @@ public class Vector {
    * @param z z component of the vector
    */
   public void add(float x, float y, float z) {
-    this.vec[0] += x;
-    this.vec[1] += y;
-    this.vec[2] += z;
+    this._vector[0] += x;
+    this._vector[1] += y;
+    this._vector[2] += z;
   }
 
   /**
    * Add two vectors
    *
-   * @param v1 a vector
-   * @param v2 another vector
-   * @return a new vector that is the sum of v1 and v2
+   * @param vector1 a vector
+   * @param vector2 another vector
+   * @return a new vector that is the sum of vector1 and vector2
    */
-  static public Vector add(Vector v1, Vector v2) {
-    return add(v1, v2, null);
+  static public Vector add(Vector vector1, Vector vector2) {
+    return add(vector1, vector2, null);
   }
 
   /**
    * Add two vectors into a target vector
    *
-   * @param v1     a vector
-   * @param v2     another vector
+   * @param vector1     a vector
+   * @param vector2     another vector
    * @param target the target vector (if null, a new vector will be created)
-   * @return a new vector that is the sum of v1 and v2
+   * @return a new vector that is the sum of vector1 and vector2
    */
-  static public Vector add(Vector v1, Vector v2, Vector target) {
+  static public Vector add(Vector vector1, Vector vector2, Vector target) {
     if (target == null) {
-      target = new Vector(v1.vec[0] + v2.vec[0], v1.vec[1] + v2.vec[1], v1.vec[2] + v2.vec[2]);
+      target = new Vector(vector1._vector[0] + vector2._vector[0], vector1._vector[1] + vector2._vector[1], vector1._vector[2] + vector2._vector[2]);
     } else {
-      target.set(v1.vec[0] + v2.vec[0], v1.vec[1] + v2.vec[1], v1.vec[2] + v2.vec[2]);
+      target.set(vector1._vector[0] + vector2._vector[0], vector1._vector[1] + vector2._vector[1], vector1._vector[2] + vector2._vector[2]);
     }
     return target;
   }
@@ -369,12 +369,12 @@ public class Vector {
   /**
    * Subtract a vector from this vector
    *
-   * @param v the vector to be subtracted
+   * @param vector the vector to be subtracted
    */
-  public void subtract(Vector v) {
-    this.vec[0] -= v.vec[0];
-    this.vec[1] -= v.vec[1];
-    this.vec[2] -= v.vec[2];
+  public void subtract(Vector vector) {
+    this._vector[0] -= vector._vector[0];
+    this._vector[1] -= vector._vector[1];
+    this._vector[2] -= vector._vector[2];
   }
 
   /**
@@ -383,34 +383,34 @@ public class Vector {
    * @param z the z component of the vector
    */
   public void subtract(float x, float y, float z) {
-    this.vec[0] -= x;
-    this.vec[1] -= y;
-    this.vec[2] -= z;
+    this._vector[0] -= x;
+    this._vector[1] -= y;
+    this._vector[2] -= z;
   }
 
   /**
    * Subtract one vector from another
    *
-   * @param v1 a vector
-   * @param v2 another vector
-   * @return a new vector that is v1 - v2
+   * @param vector1 a vector
+   * @param vector2 another vector
+   * @return a new vector that is vector1 - vector2
    */
-  static public Vector subtract(Vector v1, Vector v2) {
-    return subtract(v1, v2, null);
+  static public Vector subtract(Vector vector1, Vector vector2) {
+    return subtract(vector1, vector2, null);
   }
 
   /**
    * Subtract one vector from another and store in another vector
    *
-   * @param v1     the x, y, and z components of a Vector object
-   * @param v2     the x, y, and z components of a Vector object
+   * @param vector1     the x, y, and z components of a Vector object
+   * @param vector2     the x, y, and z components of a Vector object
    * @param target Vector in which to store the result
    */
-  static public Vector subtract(Vector v1, Vector v2, Vector target) {
+  static public Vector subtract(Vector vector1, Vector vector2, Vector target) {
     if (target == null) {
-      target = new Vector(v1.vec[0] - v2.vec[0], v1.vec[1] - v2.vec[1], v1.vec[2] - v2.vec[2]);
+      target = new Vector(vector1._vector[0] - vector2._vector[0], vector1._vector[1] - vector2._vector[1], vector1._vector[2] - vector2._vector[2]);
     } else {
-      target.set(v1.vec[0] - v2.vec[0], v1.vec[1] - v2.vec[1], v1.vec[2] - v2.vec[2]);
+      target.set(vector1._vector[0] - vector2._vector[0], vector1._vector[1] - vector2._vector[1], vector1._vector[2] - vector2._vector[2]);
     }
     return target;
   }
@@ -421,35 +421,35 @@ public class Vector {
    * @param n the value to multiply by
    */
   public void multiply(float n) {
-    this.vec[0] *= n;
-    this.vec[1] *= n;
-    this.vec[2] *= n;
+    this._vector[0] *= n;
+    this._vector[1] *= n;
+    this._vector[2] *= n;
   }
 
   /**
    * Multiply a vector by a scalar
    *
-   * @param v a vector
+   * @param vector a vector
    * @param n scalar
-   * @return a new vector that is v1 * n
+   * @return a new vector that is vector * n
    */
-  static public Vector multiply(Vector v, float n) {
-    return multiply(v, n, null);
+  static public Vector multiply(Vector vector, float n) {
+    return multiply(vector, n, null);
   }
 
   /**
    * Multiply a vector by a scalar, and write the result into a target Vector.
    *
-   * @param v      a vector
+   * @param vector      a vector
    * @param n      scalar
    * @param target Vector to store the result
-   * @return the target vector, now set to v1 * n
+   * @return the target vector, now set to vector * n
    */
-  static public Vector multiply(Vector v, float n, Vector target) {
+  static public Vector multiply(Vector vector, float n, Vector target) {
     if (target == null) {
-      target = new Vector(v.vec[0] * n, v.vec[1] * n, v.vec[2] * n);
+      target = new Vector(vector._vector[0] * n, vector._vector[1] * n, vector._vector[2] * n);
     } else {
-      target.set(v.vec[0] * n, v.vec[1] * n, v.vec[2] * n);
+      target.set(vector._vector[0] * n, vector._vector[1] * n, vector._vector[2] * n);
     }
     return target;
   }
@@ -460,20 +460,20 @@ public class Vector {
    * @param n the value to divide by
    */
   public void divide(float n) {
-    this.vec[0] /= n;
-    this.vec[1] /= n;
-    this.vec[2] /= n;
+    this._vector[0] /= n;
+    this._vector[1] /= n;
+    this._vector[2] /= n;
   }
 
   /**
    * Divide a vector by a scalar and return the result in a new vector.
    *
-   * @param v a vector
+   * @param vector a vector
    * @param n scalar
-   * @return a new vector that is v1 / n
+   * @return a new vector that is vector / n
    */
-  static public Vector divide(Vector v, float n) {
-    return divide(v, n, null);
+  static public Vector divide(Vector vector, float n) {
+    return divide(vector, n, null);
   }
 
   /**
@@ -481,41 +481,41 @@ public class Vector {
    *
    * @param target Vector in which to store the result
    */
-  static public Vector divide(Vector v, float n, Vector target) {
+  static public Vector divide(Vector vector, float n, Vector target) {
     if (target == null) {
-      target = new Vector(v.vec[0] / n, v.vec[1] / n, v.vec[2] / n);
+      target = new Vector(vector._vector[0] / n, vector._vector[1] / n, vector._vector[2] / n);
     } else {
-      target.set(v.vec[0] / n, v.vec[1] / n, v.vec[2] / n);
+      target.set(vector._vector[0] / n, vector._vector[1] / n, vector._vector[2] / n);
     }
     return target;
   }
 
   /**
-   * Calculate the Euclidean _distance between two points (considering a point as a vector
+   * Calculate the Euclidean distance between two points (considering a point as a vector
    * object)
    *
-   * @param v another vector
-   * @return the Euclidean _distance between
+   * @param vector another vector
+   * @return the Euclidean distance between
    */
-  public float distance(Vector v) {
-    float dx = this.vec[0] - v.vec[0];
-    float dy = this.vec[1] - v.vec[1];
-    float dz = this.vec[2] - v.vec[2];
+  public float distance(Vector vector) {
+    float dx = this._vector[0] - vector._vector[0];
+    float dy = this._vector[1] - vector._vector[1];
+    float dz = this._vector[2] - vector._vector[2];
     return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
   /**
-   * Calculate the Euclidean _distance between two points (considering a point as a vector
+   * Calculate the Euclidean distance between two points (considering a point as a vector
    * object)
    *
-   * @param v1 a vector
-   * @param v2 another vector
-   * @return the Euclidean _distance between v1 and v2
+   * @param vector1 a vector
+   * @param vector2 another vector
+   * @return the Euclidean distance between vector1 and vector2
    */
-  static public float distance(Vector v1, Vector v2) {
-    float dx = v1.vec[0] - v2.vec[0];
-    float dy = v1.vec[1] - v2.vec[1];
-    float dz = v1.vec[2] - v2.vec[2];
+  static public float distance(Vector vector1, Vector vector2) {
+    float dx = vector1._vector[0] - vector2._vector[0];
+    float dy = vector1._vector[1] - vector2._vector[1];
+    float dz = vector1._vector[2] - vector2._vector[2];
     return (float) Math.sqrt(dx * dx + dy * dy + dz * dz);
   }
 
@@ -524,8 +524,8 @@ public class Vector {
    *
    * @return the dot product
    */
-  public float dot(Vector v) {
-    return this.vec[0] * v.vec[0] + this.vec[1] * v.vec[1] + this.vec[2] * v.vec[2];
+  public float dot(Vector vector) {
+    return this._vector[0] * vector._vector[0] + this._vector[1] * vector._vector[1] + this._vector[2] * vector._vector[2];
   }
 
   /**
@@ -534,15 +534,15 @@ public class Vector {
    * @param z z component of the vector
    */
   public float dot(float x, float y, float z) {
-    return this.vec[0] * x + this.vec[1] * y + this.vec[2] * z;
+    return this._vector[0] * x + this._vector[1] * y + this._vector[2] * z;
   }
 
   /**
-   * @param v1 any variable of type Vector
-   * @param v2 any variable of type Vector
+   * @param vector1 any variable of type Vector
+   * @param vector2 any variable of type Vector
    */
-  static public float dot(Vector v1, Vector v2) {
-    return v1.vec[0] * v2.vec[0] + v1.vec[1] * v2.vec[1] + v1.vec[2] * v2.vec[2];
+  static public float dot(Vector vector1, Vector vector2) {
+    return vector1._vector[0] * vector2._vector[0] + vector1._vector[1] * vector2._vector[1] + vector1._vector[2] * vector2._vector[2];
   }
 
   /**
@@ -556,10 +556,10 @@ public class Vector {
    * Perform cross product between this and another vector, and store the result in
    * 'target'. If target is null, a new vector is created.
    */
-  public Vector cross(Vector v, Vector target) {
-    float crossX = this.vec[1] * v.vec[2] - v.vec[1] * this.vec[2];
-    float crossY = this.vec[2] * v.vec[0] - v.vec[2] * this.vec[0];
-    float crossZ = this.vec[0] * v.vec[1] - v.vec[0] * this.vec[1];
+  public Vector cross(Vector vector, Vector target) {
+    float crossX = this._vector[1] * vector._vector[2] - vector._vector[1] * this._vector[2];
+    float crossY = this._vector[2] * vector._vector[0] - vector._vector[2] * this._vector[0];
+    float crossZ = this._vector[0] * vector._vector[1] - vector._vector[0] * this._vector[1];
 
     if (target == null) {
       target = new Vector(crossX, crossY, crossZ);
@@ -570,14 +570,14 @@ public class Vector {
   }
 
   /**
-   * @param v1     any variable of type Vector
-   * @param v2     any variable of type Vector
+   * @param vector1     any variable of type Vector
+   * @param vector2     any variable of type Vector
    * @param target Vector to store the result
    */
-  static public Vector cross(Vector v1, Vector v2, Vector target) {
-    float crossX = v1.vec[1] * v2.vec[2] - v2.vec[1] * v1.vec[2];
-    float crossY = v1.vec[2] * v2.vec[0] - v2.vec[2] * v1.vec[0];
-    float crossZ = v1.vec[0] * v2.vec[1] - v2.vec[0] * v1.vec[1];
+  static public Vector cross(Vector vector1, Vector vector2, Vector target) {
+    float crossX = vector1._vector[1] * vector2._vector[2] - vector2._vector[1] * vector1._vector[2];
+    float crossY = vector1._vector[2] * vector2._vector[0] - vector2._vector[2] * vector1._vector[0];
+    float crossZ = vector1._vector[0] * vector2._vector[1] - vector2._vector[0] * vector1._vector[1];
 
     if (target == null) {
       target = new Vector(crossX, crossY, crossZ);
@@ -609,9 +609,9 @@ public class Vector {
     }
     float m = magnitude();
     if (m > 0) {
-      target.set(vec[0] / m, vec[1] / m, vec[02] / m);
+      target.set(_vector[0] / m, _vector[1] / m, _vector[02] / m);
     } else {
-      target.set(vec[0], vec[1], vec[2]);
+      target.set(_vector[0], _vector[1], _vector[2]);
     }
     return target;
   }
@@ -619,35 +619,35 @@ public class Vector {
   /**
    * Limit the magnitude of this vector
    *
-   * @param max the maximum length to limit this vector
+   * @param maximum the maximum length to limit this vector
    */
-  public void limit(float max) {
-    if (magnitude() > max) {
+  public void limit(float maximum) {
+    if (magnitude() > maximum) {
       normalize();
-      multiply(max);
+      multiply(maximum);
     }
   }
 
   /**
    * Sets the magnitude of the vector to an arbitrary amount.
    *
-   * @param len the new length for this vector
+   * @param magnitude the new length for this vector
    */
-  public void setMagnitude(float len) {
+  public void setMagnitude(float magnitude) {
     normalize();
-    multiply(len);
+    multiply(magnitude);
   }
 
   /**
    * Sets the magnitude of this vector, storing the result in another vector.
    *
    * @param target Set to null to create a new vector
-   * @param len    the new length for the new vector
+   * @param magnitude    the new length for the new vector
    * @return a new vector (if target was null), or target
    */
-  public Vector setMagnitude(Vector target, float len) {
+  public Vector setMagnitude(Vector target, float magnitude) {
     target = normalize(target);
-    target.multiply(len);
+    target.multiply(magnitude);
     return target;
   }
 
@@ -657,7 +657,7 @@ public class Vector {
    * @return the angle of rotation
    */
   public float heading() {
-    float angle = (float) Math.atan2(-this.vec[1], this.vec[0]);
+    float angle = (float) Math.atan2(-this._vector[1], this._vector[0]);
     return -1 * angle;
   }
 
@@ -667,45 +667,45 @@ public class Vector {
    * @param theta the angle of rotation
    */
   public void rotate(float theta) {
-    float xTemp = this.vec[0];
+    float xTemp = this._vector[0];
     // Might need to check for rounding errors like with angleBetween function?
-    this.vec[0] = this.vec[0] * (float) Math.cos(theta) - this.vec[1] * (float) Math.sin(theta);
-    this.vec[1] = xTemp * (float) Math.sin(theta) + this.vec[1] * (float) Math.cos(theta);
+    this._vector[0] = this._vector[0] * (float) Math.cos(theta) - this._vector[1] * (float) Math.sin(theta);
+    this._vector[1] = xTemp * (float) Math.sin(theta) + this._vector[1] * (float) Math.cos(theta);
   }
 
   /**
-   * Calculates a number between two numbers at a specific increment. The {@code amt}
+   * Calculates a number between two numbers at a specific increment. The {@code amount}
    * parameter is the amount to interpolate between the two values where 0.0 equal to the
    * first point, 0.1 is very near the first point, 0.5 is half-way in between, etc.
    */
   //TODO decide where to leave me
-  public static float lerp(float start, float stop, float amt) {
-    return start + (stop - start) * amt;
+  public static float lerp(float start, float stop, float amount) {
+    return start + (stop - start) * amount;
   }
 
   /**
    * Linear interpolate the vector to another vector
    *
-   * @param v   the vector to lerp to
-   * @param amt The amt parameter is the amount to interpolate between the two vectors where
+   * @param vector   the vector to lerp to
+   * @param amount The amt parameter is the amount to interpolate between the two vectors where
    *            1.0 equal to the new vector 0.1 is very near the new vector, 0.5 is half-way
    *            in between.
    */
-  public void lerp(Vector v, float amt) {
-    this.vec[0] = Vector.lerp(this.vec[0], v.vec[0], amt);
-    this.vec[1] = Vector.lerp(this.vec[1], v.vec[1], amt);
-    this.vec[2] = Vector.lerp(this.vec[2], v.vec[2], amt);
+  public void lerp(Vector vector, float amount) {
+    this._vector[0] = Vector.lerp(this._vector[0], vector._vector[0], amount);
+    this._vector[1] = Vector.lerp(this._vector[1], vector._vector[1], amount);
+    this._vector[2] = Vector.lerp(this._vector[2], vector._vector[2], amount);
   }
 
   /**
    * Linear interpolate between two vectors (returns a new Vector object).
    *
-   * @param v1 the vector to start from
-   * @param v2 the vector to lerp to
+   * @param vector1 the vector to start from
+   * @param vector2 the vector to lerp to
    */
-  public static Vector lerp(Vector v1, Vector v2, float amt) {
-    Vector v = v1.get();
-    v.lerp(v2, amt);
+  public static Vector lerp(Vector vector1, Vector vector2, float amount) {
+    Vector v = vector1.get();
+    v.lerp(vector2, amount);
     return v;
   }
 
@@ -716,26 +716,26 @@ public class Vector {
    * @param y the y component to lerp to
    * @param z the z component to lerp to
    */
-  public void lerp(float x, float y, float z, float amt) {
-    this.vec[0] = Vector.lerp(this.x(), x, amt);
-    this.vec[1] = Vector.lerp(this.y(), y, amt);
-    this.vec[2] = Vector.lerp(this.z(), z, amt);
+  public void lerp(float x, float y, float z, float amount) {
+    this._vector[0] = Vector.lerp(this.x(), x, amount);
+    this._vector[1] = Vector.lerp(this.y(), y, amount);
+    this._vector[2] = Vector.lerp(this.z(), z, amount);
   }
 
   /**
    * Calculate the angle between two vectors, using the dot product.
    *
-   * @param v1 a vector
-   * @param v2 another vector
+   * @param vector1 a vector
+   * @param vector2 another vector
    * @return the angle between the vectors
    */
-  static public float angleBetween(Vector v1, Vector v2) {
+  static public float angleBetween(Vector vector1, Vector vector2) {
     // We get NaN if we pass in a zero vector which can cause problems
     // Zero seems like a reasonable angle between a 0 length vector and
     // something else
-    if (v1.magnitude() == 0)
+    if (vector1.magnitude() == 0)
       return 0.0f;
-    if (v2.magnitude() == 0)
+    if (vector2.magnitude() == 0)
       return 0.0f;
 
     // as in P5:
@@ -750,8 +750,8 @@ public class Vector {
 
     // as here:
     // http://stackoverflow.com/questions/10133957/signed-angle-between-two-vectors-without-a-reference-plane
-    float s = cross(v1, v2, null).magnitude();
-    float c = dot(v1, v2);
+    float s = cross(vector1, vector2, null).magnitude();
+    float c = dot(vector1, vector2);
     return (float) Math.atan2(s, c);
   }
 
@@ -786,6 +786,6 @@ public class Vector {
   }
 
   public String toString() {
-    return "[ " + this.vec[0] + ", " + this.vec[1] + ", " + this.vec[2] + " ]";
+    return "[ " + this._vector[0] + ", " + this._vector[1] + ", " + this._vector[2] + " ]";
   }
 }

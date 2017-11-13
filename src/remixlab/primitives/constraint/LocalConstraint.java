@@ -27,7 +27,7 @@ public class LocalConstraint extends AxisPlaneConstraint {
    */
   @Override
   public Vector constrainTranslation(Vector translation, Frame frame) {
-    Vector res = new Vector(translation.vec[0], translation.vec[1], translation.vec[2]);
+    Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
     Vector proj;
     switch (translationConstraintType()) {
       case FREE:
@@ -70,9 +70,9 @@ public class LocalConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         Vector axis = rotationConstraintDirection();
-        Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+        Vector quat = new Vector(((Quaternion) rotation)._quaternion[0], ((Quaternion) rotation)._quaternion[1], ((Quaternion) rotation)._quaternion[2]);
         quat = Vector.projectVectorOnAxis(quat, axis);
-        res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
+        res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation)._quaternion[3]));
         break;
       case FORBIDDEN:
         res = new Quaternion(); // identity

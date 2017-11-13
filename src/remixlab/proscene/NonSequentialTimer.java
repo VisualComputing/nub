@@ -14,9 +14,9 @@ import remixlab.timing.Taskable;
 import remixlab.timing.Timer;
 
 /**
- * Non-seq _timer based on java.util.Timer and java.util.TimerTask.
+ * Non-sequential timer based on java.util.Timer and java.util.TimerTask.
  */
-class NonSeqTimer implements Timer {
+class NonSequentialTimer implements Timer {
   Scene _scene;
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
@@ -25,14 +25,14 @@ class NonSeqTimer implements Timer {
   boolean _active;
   long _period;
 
-  public NonSeqTimer(Scene scn, Taskable o) {
-    this(scn, o, false);
+  public NonSequentialTimer(Scene scene, Taskable task) {
+    this(scene, task, false);
   }
 
-  public NonSeqTimer(Scene scn, Taskable o, boolean singleShot) {
-    _scene = scn;
+  public NonSequentialTimer(Scene scene, Taskable task, boolean singleShot) {
+    _scene = scene;
     _once = singleShot;
-    _task = o;
+    _task = task;
   }
 
   @Override

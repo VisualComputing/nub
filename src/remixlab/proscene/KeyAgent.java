@@ -25,26 +25,25 @@ public class KeyAgent extends Agent {
   public static int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
   // public static int LEFT_KEY = PApplet.LEFT, RIGHT_KEY = PApplet.RIGHT,
   // UP_KEY = PApplet.UP, DOWN_KEY = PApplet.DOWN;
-  protected Scene scene;
-  protected boolean press, release, type;
-  protected KeyEvent currentEvent;
+  protected Scene _scene;
+  protected boolean _press, _release, _type;
+  protected KeyEvent _currentEvent;
+  protected boolean _bypass;
 
   /**
    * Calls super on (scn,n) and sets default keyboard shortcuts.
    */
-  public KeyAgent(Scene scn) {
-    super(scn.inputHandler());
-    scene = scn;
+  public KeyAgent(Scene scene) {
+    super(scene.inputHandler());
+    _scene = scene;
   }
 
   /**
    * Returns the graph this object belongs to.
    */
   public Scene scene() {
-    return scene;
+    return _scene;
   }
-
-  protected boolean bypass;
 
   /**
    * Processing keyEvent method to be registered at the PApplet's instance.
@@ -66,7 +65,7 @@ public class KeyAgent extends Agent {
    * precedence among all agent grabbers, provided that more than one _grabber defines a
    * binding for the same _key shortcut.
    */
-  public void keyEvent(processing.event.KeyEvent e) {
+  public void keyEvent(processing.event.KeyEvent keyEvent) {
     // According to Processing _key _event flow .e.g.,
     // RIGHT_ARROW
     // pressed: mod: vkey: 39 description: VK_RIGHT
@@ -86,18 +85,18 @@ public class KeyAgent extends Agent {
     // pressed: mod: vkey: 27 description: VK_ESCAPE
     // we need to bypass TYPE events when a press _event generates an action on the _trackedGrabber
     // _grabber
-    press = e.getAction() == processing.event.KeyEvent.PRESS;
-    release = e.getAction() == processing.event.KeyEvent.RELEASE;
-    type = e.getAction() == processing.event.KeyEvent.TYPE;
-    currentEvent = type ?
-        (new KeyEvent(e.getKey())).fire() :
-        press ?
-            (new KeyEvent(e.getModifiers(), e.getKeyCode())).fire() :
-            (new KeyEvent(e.getModifiers(), e.getKeyCode())).flush();
-    if (press)
-      bypass = update(currentEvent);
-    if (type && !bypass)
-      update(currentEvent);
+    _press = keyEvent.getAction() == processing.event.KeyEvent.PRESS;
+    _release = keyEvent.getAction() == processing.event.KeyEvent.RELEASE;
+    _type = keyEvent.getAction() == processing.event.KeyEvent.TYPE;
+    _currentEvent = _type ?
+        (new KeyEvent(keyEvent.getKey())).fire() :
+        _press ?
+            (new KeyEvent(keyEvent.getModifiers(), keyEvent.getKeyCode())).fire() :
+            (new KeyEvent(keyEvent.getModifiers(), keyEvent.getKeyCode())).flush();
+    if (_press)
+      _bypass = _update(_currentEvent);
+    if (_type && !_bypass)
+      _update(_currentEvent);
     /*
     if (press) {
       bypass = poll(currentEvent) != null;
@@ -114,7 +113,7 @@ public class KeyAgent extends Agent {
         handle(currentEvent);
     }
     */
-    if (release)
+    if (_release)
       resetTrackedGrabber();
     // debug
     // System.out.println(press ? "pressed: " + printEvent(currentEvent) :
@@ -123,7 +122,7 @@ public class KeyAgent extends Agent {
   }
 
   //TODO experimental
-  protected boolean update(Event event) {
+  protected boolean _update(Event event) {
     if(poll(event) != null)
       return handle(event);
     //if(_defaultGrabber() != null)
@@ -143,11 +142,4 @@ public class KeyAgent extends Agent {
   // protected String printTypedEvent(KeyEvent _event) {
   // return " char: " + _event._key();
   // }
-
-  /**
-   * Same as {@code return java.awt._event.KeyEvent.getExtendedKeyCodeForChar(_key)}.
-   */
-  public static int keyCode(char key) {
-    return java.awt.event.KeyEvent.getExtendedKeyCodeForChar(key);
-  }
 }

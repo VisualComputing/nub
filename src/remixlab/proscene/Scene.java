@@ -404,7 +404,7 @@ public class Scene extends Graph implements PConstants {
     if (areTimersSeq())
       timingHandler().registerTask(task);
     else
-      timingHandler().registerTask(task, new NonSeqTimer(this, task));
+      timingHandler().registerTask(task, new NonSequentialTimer(this, task));
   }
 
   /**
@@ -445,7 +445,7 @@ public class Scene extends Graph implements PConstants {
         rOnce = task.timer().isSingleShot();
       }
       task.stop();
-      task.setTimer(new NonSeqTimer(this, task));
+      task.setTimer(new NonSequentialTimer(this, task));
       if (isActive) {
         if (rOnce)
           task.runOnce(period);
@@ -1222,9 +1222,9 @@ public class Scene extends Graph implements PConstants {
    */
   public static void applyTransformation(PGraphics pgraphics, Frame frame) {
     if (pgraphics instanceof PGraphics3D) {
-      pgraphics.translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
-      pgraphics.rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis().vec[0],
-          ((Quaternion) frame.rotation()).axis().vec[1], ((Quaternion) frame.rotation()).axis().vec[2]);
+      pgraphics.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
+      pgraphics.rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis()._vector[0],
+          ((Quaternion) frame.rotation()).axis()._vector[1], ((Quaternion) frame.rotation()).axis()._vector[2]);
       pgraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
     } else {
       pgraphics.translate(frame.translation().x(), frame.translation().y());

@@ -43,26 +43,33 @@ public class Point {
   /**
    * Copy constructor
    *
-   * @param p the point to be copied
+   * @param point the point to be copied
    */
-  public Point(Point p) {
-    this(p.x(), p.y());
+  protected Point(Point point) {
+    this(point.x(), point.y());
   }
 
   /**
-   * Constructs and initializes a point at the specified (xCoord,yCoord) location in the
+   * Get a copy of this point.
+   */
+  public Point get() {
+    return new Point(this);
+  }
+
+  /**
+   * Constructs and initializes a point at the specified (x,y) location in the
    * coordinate space.
    */
-  public Point(int xCoord, int yCoord) {
-    set(xCoord, yCoord);
+  public Point(int x, int y) {
+    set(x, y);
   }
 
   /**
    * Constructs and initializes a point at the specified (xCoord,yCoord) location in the
-   * coordinate space. The location (xCoord,yCoord) is given in single float precision.
+   * coordinate space. The location (x,y) is given in single float precision.
    */
-  public Point(float xCoord, float yCoord) {
-    set(xCoord, yCoord);
+  public Point(float x, float y) {
+    set(x, y);
   }
 
   /**
@@ -75,11 +82,11 @@ public class Point {
 
   /**
    * Sets the (x,y) coordinates of this point from the given single float precision
-   * (xCoord,yCoord) coordinates.
+   * (x,y) coordinates.
    */
-  public void set(float xCoord, float yCoord) {
-    this.x = (int) xCoord;
-    this.y = (int) yCoord;
+  public void set(float x, float y) {
+    this.x = (int) x;
+    this.y = (int) y;
   }
 
   /**
@@ -96,12 +103,12 @@ public class Point {
     return y;
   }
 
-  public void setX(int xVal) {
-    x = xVal;
+  public void setX(int x) {
+    this.x = x;
   }
 
-  public void setY(int yVal) {
-    y = yVal;
+  public void setY(int y) {
+    this.y = y;
   }
 
   /**
@@ -125,10 +132,10 @@ public class Point {
   }
 
   /**
-   * Returns the Euclidean distance between points p1 and p2.
+   * Returns the Euclidean distance between points point1 and point2.
    */
-  public static float distance(Point p1, Point p2) {
-    return Point.distance(p1.x(), p1.y(), p2.x(), p2.y());
+  public static float distance(Point point1, Point point2) {
+    return Point.distance(point1.x(), point1.y(), point2.x(), point2.y());
   }
 
   public static float distance(float deltaX, float deltaY) {

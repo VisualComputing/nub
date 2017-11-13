@@ -91,9 +91,9 @@ public class EyeConstraint extends AxisPlaneConstraint {
         if (frame.is2D())
           break;
         Vector axis = frame.transformOf(eye().inverseTransformOf(rotationConstraintDirection()));
-        Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
+        Vector quat = new Vector(((Quaternion) rotation)._quaternion[0], ((Quaternion) rotation)._quaternion[1], ((Quaternion) rotation)._quaternion[2]);
         quat = Vector.projectVectorOnAxis(quat, axis);
-        res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
+        res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation)._quaternion[3]));
         break;
       case FORBIDDEN:
         res = new Quaternion(); // identity

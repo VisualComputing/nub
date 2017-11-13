@@ -20,15 +20,15 @@ import remixlab.primitives.Matrix;
  * transformation.
  */
 class GLMatrixHandler extends MatrixHandler {
-  PGraphicsOpenGL pg;
+  PGraphicsOpenGL _pgraphics;
 
-  public GLMatrixHandler(Scene scn, PGraphicsOpenGL renderer) {
-    super(scn);
-    pg = renderer;
+  public GLMatrixHandler(Scene scene, PGraphicsOpenGL renderer) {
+    super(scene);
+    _pgraphics = renderer;
   }
 
   public PGraphicsOpenGL pggl() {
-    return pg;
+    return _pgraphics;
   }
 
   @Override
@@ -52,8 +52,8 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void applyProjection(Matrix source) {
-    pggl().applyProjection(Scene.toPMatrix(source));
+  public void applyProjection(Matrix matrix) {
+    pggl().applyProjection(Scene.toPMatrix(matrix));
   }
 
   @Override
@@ -82,8 +82,8 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void applyModelView(Matrix source) {
-    pggl().applyMatrix(Scene.toPMatrix(source));
+  public void applyModelView(Matrix matrix) {
+    pggl().applyMatrix(Scene.toPMatrix(matrix));
   }
 
   @Override

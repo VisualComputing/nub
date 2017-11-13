@@ -580,7 +580,7 @@ public class Node extends Frame implements Grabber {
   public boolean track(float x, float y) {
     Vector proj = _graph.projectedCoordinatesOf(position());
     float halfThreshold = grabsInputThreshold() / 2;
-    return ((Math.abs(x - proj.vec[0]) < halfThreshold) && (Math.abs(y - proj.vec[1]) < halfThreshold));
+    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 
   /**
@@ -2256,15 +2256,15 @@ public class Node extends Frame implements Grabber {
       float angle;
       if (isEye()) {
         trns = graph().projectedCoordinatesOf(graph().anchor());
-        angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]) - (float) Math
-            .atan2(event.previousY() - trns.vec[1], event.previousX() - trns.vec[0]);
+        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]) - (float) Math
+            .atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
         if (_graph.isLeftHanded())
           angle = -angle;
         rt = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
       } else {
         trns = _graph.projectedCoordinatesOf(position());
-        float prev_angle = (float) Math.atan2(event.previousY() - trns.vec[1], event.previousX() - trns.vec[0]);
-        angle = (float) Math.atan2(event.y() - trns.vec[1], event.x() - trns.vec[0]);
+        float prev_angle = (float) Math.atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
+        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]);
         Vector axis = transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
         if (_graph.isRightHanded())
           rt = new Quaternion(axis, angle - prev_angle);
@@ -2366,31 +2366,31 @@ public class Node extends Frame implements Grabber {
     switch (_graph.type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(_graph.fieldOfView() / 2.0f) * Math.abs(
-            _graph.eye().coordinatesOf(isEye() ? graph().anchor() : position()).vec[2] * _graph.eye().magnitude());
+            _graph.eye().coordinatesOf(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
         // * Math.abs(graph.eye().frame().coordinatesOf(isEye() ?
         // graph.eye().anchor() : position()).vec[2]);
         //TODO check me wierd to find height instead of width working (may it has to do with fov?)
-        eyeVector.vec[0] *= 2.0 * k / _graph.height();
-        eyeVector.vec[1] *= 2.0 * k / _graph.height();
+        eyeVector._vector[0] *= 2.0 * k / _graph.height();
+        eyeVector._vector[1] *= 2.0 * k / _graph.height();
         break;
       case ORTHOGRAPHIC:
         float[] wh = _graph.getBoundaryWidthHeight();
         // float[] wh = graph.eye().getOrthoWidthHeight();
-        eyeVector.vec[0] *= 2.0 * wh[0] / _graph.width();
-        eyeVector.vec[1] *= 2.0 * wh[1] / _graph.height();
+        eyeVector._vector[0] *= 2.0 * wh[0] / _graph.width();
+        eyeVector._vector[1] *= 2.0 * wh[1] / _graph.height();
         break;
     }
     float coef;
     if (isEye()) {
       // float coef = 8E-4f;
-      coef = Math.max(Math.abs((coordinatesOf(graph().anchor())).vec[2] * magnitude()), 0.2f * graph().radius());
-      eyeVector.vec[2] *= coef / graph().height();
+      coef = Math.max(Math.abs((coordinatesOf(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
+      eyeVector._vector[2] *= coef / graph().height();
       // eye _wheel seems different
       // trns.vec[2] *= coef * 8E-4f;
       eyeVector.divide(graph().eye().magnitude());
     } else {
       coef = Vector.subtract(_graph.eye().position(), position()).magnitude();
-      eyeVector.vec[2] *= coef / _graph.height();
+      eyeVector._vector[2] *= coef / _graph.height();
       eyeVector.divide(_graph.eye().magnitude());
     }
     // if( isEye() )
@@ -2403,7 +2403,7 @@ public class Node extends Frame implements Grabber {
    * @see #screenToQuaternion(float, float, float)
    */
   public Quaternion screenToQuaternion(Vector angles) {
-    return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2]);
+    return screenToQuaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
   }
 
   /**

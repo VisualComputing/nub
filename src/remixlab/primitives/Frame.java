@@ -1279,9 +1279,9 @@ public class Frame {
 
     pM = rotation().matrix();
 
-    pM.mat[12] = translation().vec[0];
-    pM.mat[13] = translation().vec[1];
-    pM.mat[14] = translation().vec[2];
+    pM._matrix[12] = translation()._vector[0];
+    pM._matrix[13] = translation()._vector[1];
+    pM._matrix[14] = translation()._vector[2];
 
     if (scaling() != 1) {
       pM.setM00(pM.m00() * scaling());
@@ -1360,26 +1360,26 @@ public class Frame {
    * {@link #coordinatesOf(Vector)} and {@link #transformOf(Vector)}.
    */
   public void fromMatrix(Matrix matrix, float scaling) {
-    if (matrix.mat[15] == 0) {
+    if (matrix._matrix[15] == 0) {
       System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
       return;
     }
 
-    translation().vec[0] = matrix.mat[12] / matrix.mat[15];
-    translation().vec[1] = matrix.mat[13] / matrix.mat[15];
-    translation().vec[2] = matrix.mat[14] / matrix.mat[15];
+    translation()._vector[0] = matrix._matrix[12] / matrix._matrix[15];
+    translation()._vector[1] = matrix._matrix[13] / matrix._matrix[15];
+    translation()._vector[2] = matrix._matrix[14] / matrix._matrix[15];
 
     float[][] r = new float[3][3];
 
-    r[0][0] = matrix.mat[0] / matrix.mat[15];
-    r[0][1] = matrix.mat[4] / matrix.mat[15];
-    r[0][2] = matrix.mat[8] / matrix.mat[15];
-    r[1][0] = matrix.mat[1] / matrix.mat[15];
-    r[1][1] = matrix.mat[5] / matrix.mat[15];
-    r[1][2] = matrix.mat[9] / matrix.mat[15];
-    r[2][0] = matrix.mat[2] / matrix.mat[15];
-    r[2][1] = matrix.mat[6] / matrix.mat[15];
-    r[2][2] = matrix.mat[10] / matrix.mat[15];
+    r[0][0] = matrix._matrix[0] / matrix._matrix[15];
+    r[0][1] = matrix._matrix[4] / matrix._matrix[15];
+    r[0][2] = matrix._matrix[8] / matrix._matrix[15];
+    r[1][0] = matrix._matrix[1] / matrix._matrix[15];
+    r[1][1] = matrix._matrix[5] / matrix._matrix[15];
+    r[1][2] = matrix._matrix[9] / matrix._matrix[15];
+    r[2][0] = matrix._matrix[2] / matrix._matrix[15];
+    r[2][1] = matrix._matrix[6] / matrix._matrix[15];
+    r[2][2] = matrix._matrix[10] / matrix._matrix[15];
 
     setScaling(scaling);// calls _modified() :P
 

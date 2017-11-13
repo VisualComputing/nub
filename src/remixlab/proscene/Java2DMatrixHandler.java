@@ -22,15 +22,15 @@ import remixlab.primitives.Vector;
  * transformations.
  */
 class Java2DMatrixHandler extends MatrixHandler {
-  protected PGraphics pgr;
+  protected PGraphics _pgraphics;
 
-  public Java2DMatrixHandler(Scene scn, PGraphics renderer) {
-    super(scn);
-    pgr = renderer;
+  public Java2DMatrixHandler(Scene scene, PGraphics renderer) {
+    super(scene);
+    _pgraphics = renderer;
   }
 
   public PGraphics pg() {
-    return pgr;
+    return _pgraphics;
   }
 
   // Comment the above line and uncomment this one to develop the driver:
@@ -52,8 +52,8 @@ class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void applyModelView(Matrix source) {
-    pg().applyMatrix(Scene.toPMatrix2D(source));
+  public void applyModelView(Matrix matrix) {
+    pg().applyMatrix(Scene.toPMatrix2D(matrix));
   }
 
   @Override

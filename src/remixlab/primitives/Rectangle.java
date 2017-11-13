@@ -54,10 +54,17 @@ public class Rectangle {
   /**
    * Copy constructor
    *
-   * @param r the rectangle to be copied
+   * @param rectangle the rectangle to be copied
    */
-  public Rectangle(Rectangle r) {
-    this(r.x, r.y, r.width, r.height);
+  protected Rectangle(Rectangle rectangle) {
+    this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+  }
+
+  /**
+   * Get a copy of this rectangle.
+   */
+  public Rectangle get() {
+    return new Rectangle(this);
   }
 
   /**
@@ -88,19 +95,19 @@ public class Rectangle {
   /**
    * Sets the x coordinate
    *
-   * @param xVal
+   * @param x
    */
-  public void setX(int xVal) {
-    x = xVal;
+  public void setX(int x) {
+    this.x = x;
   }
 
   /**
    * Sets the y coordinate
    *
-   * @param yVal
+   * @param y
    */
-  public void setY(int yVal) {
-    x = yVal;
+  public void setY(int y) {
+    x = y;
   }
 
   /**

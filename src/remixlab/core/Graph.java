@@ -58,9 +58,10 @@ import java.util.List;
  * </ol>
  */
 //TODO
-//1. add origin corner. Idea is to use the Scene as a connector and (static) drawing
-//drawing class only, i.e., to easily instantiate Graph
+// 1. add origin corner. Idea is to use the Scene as a connector and (static) drawing
+// drawing class only, i.e., to easily instantiate Graph
 // 2. Remove all is2D is3D stuff. Requires dealing with rescalingFactor() and ortho projections
+// 3. (decide) Remove printing stuff (vector, map, ...) and warnings (hashmap).
 public class Graph {
   // 1. Eye
   protected Frame _eye;
@@ -983,23 +984,23 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
-        m.mat[0] = 1 / (eye().magnitude() * this.aspectRatio());
-        m.mat[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
-        m.mat[10] = (ZNear + ZFar) / (ZNear - ZFar);
-        m.mat[11] = -1.0f;
-        m.mat[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
-        m.mat[15] = 0.0f;
+        m._matrix[0] = 1 / (eye().magnitude() * this.aspectRatio());
+        m._matrix[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
+        m._matrix[10] = (ZNear + ZFar) / (ZNear - ZFar);
+        m._matrix[11] = -1.0f;
+        m._matrix[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
+        m._matrix[15] = 0.0f;
         // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(), zNear(), zFar() );
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = getBoundaryWidthHeight();
-        m.mat[0] = 1.0f / wh[0];
-        m.mat[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
-        m.mat[10] = -2.0f / (ZFar - ZNear);
-        m.mat[11] = 0.0f;
-        m.mat[14] = -(ZFar + ZNear) / (ZFar - ZNear);
-        m.mat[15] = 1.0f;
+        m._matrix[0] = 1.0f / wh[0];
+        m._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
+        m._matrix[10] = -2.0f / (ZFar - ZNear);
+        m._matrix[11] = 0.0f;
+        m._matrix[14] = -(ZFar + ZNear) / (ZFar - ZNear);
+        m._matrix[15] = 1.0f;
         // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
         break;
       case CUSTOM:
@@ -1029,39 +1030,39 @@ public class Graph {
 
     Quaternion q = eye().orientation();
 
-    float q00 = 2.0f * q.quat[0] * q.quat[0];
-    float q11 = 2.0f * q.quat[1] * q.quat[1];
-    float q22 = 2.0f * q.quat[2] * q.quat[2];
+    float q00 = 2.0f * q._quaternion[0] * q._quaternion[0];
+    float q11 = 2.0f * q._quaternion[1] * q._quaternion[1];
+    float q22 = 2.0f * q._quaternion[2] * q._quaternion[2];
 
-    float q01 = 2.0f * q.quat[0] * q.quat[1];
-    float q02 = 2.0f * q.quat[0] * q.quat[2];
-    float q03 = 2.0f * q.quat[0] * q.quat[3];
+    float q01 = 2.0f * q._quaternion[0] * q._quaternion[1];
+    float q02 = 2.0f * q._quaternion[0] * q._quaternion[2];
+    float q03 = 2.0f * q._quaternion[0] * q._quaternion[3];
 
-    float q12 = 2.0f * q.quat[1] * q.quat[2];
-    float q13 = 2.0f * q.quat[1] * q.quat[3];
-    float q23 = 2.0f * q.quat[2] * q.quat[3];
+    float q12 = 2.0f * q._quaternion[1] * q._quaternion[2];
+    float q13 = 2.0f * q._quaternion[1] * q._quaternion[3];
+    float q23 = 2.0f * q._quaternion[2] * q._quaternion[3];
 
-    m.mat[0] = 1.0f - q11 - q22;
-    m.mat[1] = q01 - q23;
-    m.mat[2] = q02 + q13;
-    m.mat[3] = 0.0f;
+    m._matrix[0] = 1.0f - q11 - q22;
+    m._matrix[1] = q01 - q23;
+    m._matrix[2] = q02 + q13;
+    m._matrix[3] = 0.0f;
 
-    m.mat[4] = q01 + q23;
-    m.mat[5] = 1.0f - q22 - q00;
-    m.mat[6] = q12 - q03;
-    m.mat[7] = 0.0f;
+    m._matrix[4] = q01 + q23;
+    m._matrix[5] = 1.0f - q22 - q00;
+    m._matrix[6] = q12 - q03;
+    m._matrix[7] = 0.0f;
 
-    m.mat[8] = q02 - q13;
-    m.mat[9] = q12 + q03;
-    m.mat[10] = 1.0f - q11 - q00;
-    m.mat[11] = 0.0f;
+    m._matrix[8] = q02 - q13;
+    m._matrix[9] = q12 + q03;
+    m._matrix[10] = 1.0f - q11 - q00;
+    m._matrix[11] = 0.0f;
 
     Vector t = q.inverseRotate(eye().position());
 
-    m.mat[12] = -t.vec[0];
-    m.mat[13] = -t.vec[1];
-    m.mat[14] = -t.vec[2];
-    m.mat[15] = 1.0f;
+    m._matrix[12] = -t._vector[0];
+    m._matrix[13] = -t._vector[1];
+    m._matrix[14] = -t._vector[2];
+    m._matrix[15] = 1.0f;
 
     return m;
   }
@@ -1449,8 +1450,8 @@ public class Graph {
     for (int i = 0; i < 6; ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
-        Vector pos = new Vector(((c & 4) != 0) ? corner1.vec[0] : corner2.vec[0], ((c & 2) != 0) ? corner1.vec[1] : corner2.vec[1],
-                ((c & 1) != 0) ? corner1.vec[2] : corner2.vec[2]);
+        Vector pos = new Vector(((c & 4) != 0) ? corner1._vector[0] : corner2._vector[0], ((c & 2) != 0) ? corner1._vector[1] : corner2._vector[1],
+                ((c & 1) != 0) ? corner1._vector[2] : corner2._vector[2]);
         if (distanceToBoundary(i, pos) > 0.0)
           allInForAllPlanes = false;
         else
@@ -1599,9 +1600,9 @@ public class Graph {
     _dist[3] = posViewDir + zFar();
 
     for (int i = 0; i < 6; ++i) {
-      coefficients[i][0] = _normal[i].vec[0];
-      coefficients[i][1] = _normal[i].vec[1];
-      coefficients[i][2] = _normal[i].vec[2];
+      coefficients[i][0] = _normal[i]._vector[0];
+      coefficients[i][1] = _normal[i]._vector[1];
+      coefficients[i][2] = _normal[i]._vector[2];
       coefficients[i][3] = _dist[i];
     }
 
@@ -1772,7 +1773,7 @@ public class Graph {
   public float sceneToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().coordinatesOf(position)).vec[2] * eye().magnitude()) * (float) Math
+        return 2.0f * Math.abs((eye().coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
                 .tan(fieldOfView() / 2.0f) / height();
       case ORTHOGRAPHIC:
         float[] wh = getBoundaryWidthHeight();
@@ -1964,9 +1965,9 @@ public class Graph {
 
     if (frame != null) {
       Vector tmp = frame.inverseCoordinatesOf(vector);
-      _project(tmp.vec[0], tmp.vec[1], tmp.vec[2], xyz);
+      _project(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
-      _project(vector.vec[0], vector.vec[1], vector.vec[2], xyz);
+      _project(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
 
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
@@ -1983,14 +1984,14 @@ public class Graph {
     in[2] = objz;
     in[3] = 1.0f;
 
-    out[0] = projectionViewMatrix.mat[0] * in[0] + projectionViewMatrix.mat[4] * in[1] + projectionViewMatrix.mat[8] * in[2]
-            + projectionViewMatrix.mat[12] * in[3];
-    out[1] = projectionViewMatrix.mat[1] * in[0] + projectionViewMatrix.mat[5] * in[1] + projectionViewMatrix.mat[9] * in[2]
-            + projectionViewMatrix.mat[13] * in[3];
-    out[2] = projectionViewMatrix.mat[2] * in[0] + projectionViewMatrix.mat[6] * in[1] + projectionViewMatrix.mat[10] * in[2]
-            + projectionViewMatrix.mat[14] * in[3];
-    out[3] = projectionViewMatrix.mat[3] * in[0] + projectionViewMatrix.mat[7] * in[1] + projectionViewMatrix.mat[11] * in[2]
-            + projectionViewMatrix.mat[15] * in[3];
+    out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
+            + projectionViewMatrix._matrix[12] * in[3];
+    out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
+            + projectionViewMatrix._matrix[13] * in[3];
+    out[2] = projectionViewMatrix._matrix[2] * in[0] + projectionViewMatrix._matrix[6] * in[1] + projectionViewMatrix._matrix[10] * in[2]
+            + projectionViewMatrix._matrix[14] * in[3];
+    out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
+            + projectionViewMatrix._matrix[15] * in[3];
 
     if (out[3] == 0.0)
       return false;
@@ -2069,7 +2070,7 @@ public class Graph {
     // _unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
-    _unproject(vector.vec[0], vector.vec[1], vector.vec[2], xyz);
+    _unproject(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
     if (frame != null)
       return frame.coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
     else
@@ -2490,8 +2491,8 @@ public class Graph {
    * {@code max}) is entirely visible, using {@link #fitBall(Vector, float)}.
    */
   public void fitBoundingBox(Vector corner1, Vector corner2) {
-    float diameter = Math.max(Math.abs(corner2.vec[1] - corner1.vec[1]), Math.abs(corner2.vec[0] - corner1.vec[0]));
-    diameter = Math.max(Math.abs(corner2.vec[2] - corner1.vec[2]), diameter);
+    float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
+    diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
     fitBall(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
   }
 
@@ -2688,8 +2689,8 @@ public class Graph {
       rotate(frame.rotation().angle2D());
       scale(frame.scaling(), frame.scaling());
     } else {
-      translate(frame.translation().vec[0], frame.translation().vec[1], frame.translation().vec[2]);
-      rotate(frame.rotation().angle(), (frame.rotation()).axis().vec[0], (frame.rotation()).axis().vec[1], (frame.rotation()).axis().vec[2]);
+      translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
+      rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
       scale(frame.scaling(), frame.scaling(), frame.scaling());
     }
   }
