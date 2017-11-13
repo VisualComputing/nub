@@ -87,10 +87,7 @@ public class FrameInterpolation extends PApplet {
         if(key == 'l')
             interpolator.addKeyFrame(scene.eye().get());
         if(key == 'm')
-            if(interpolator.started())
-                interpolator.stop();
-            else
-                interpolator.start();
+            interpolator.toggle();
         if(key == 'n')
             interpolator.clear();
         if ( key == 'u')

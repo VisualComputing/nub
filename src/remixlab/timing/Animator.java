@@ -20,59 +20,48 @@ public interface Animator {
   void animate();
 
   /**
-   * Returns whether or not the animated method is defined externally, as when register it
-   * through reflection.
-   */
-  boolean invokeAnimationHandler();
-
-  /**
    * Returns the animation period in milliseconds.
    */
-  long animationPeriod();
+  long period();
 
   /**
    * Sets the animation period in milliseconds.
    */
-  void setAnimationPeriod(long period);
+  void setPeriod(long period);
 
   /**
    * Sets the animation period in milliseconds and restarts the animation according to
    * {@code restart}.
    */
-  void setAnimationPeriod(long period, boolean restart);
+  void setPeriod(long period, boolean restart);
 
   /**
    * Stops the animation.
    */
-  void stopAnimation();
+  void stop();
 
   /**
    * Starts the animation executing periodically the animated call back method.
    */
-  void startAnimation();
+  void start();
 
   /**
-   * Simply calls {@link #stopAnimation()} and then {@link #startAnimation()}.
+   * Simply calls {@link #stop()} and then {@link #start()}.
    */
-  void restartAnimation();
+  void restart();
+
+  /**
+   * Toggles the animation
+   */
+  void toggle();
 
   /**
    * Returns {@code true} if animation was started and {@code false} otherwise.
    */
-  boolean animationStarted();
-
-  /**
-   * Sets the timing handler.
-   */
-  void setTimingHandler(TimingHandler h);
-
-  /**
-   * Returns the timing handler.
-   */
-  TimingHandler timingHandler();
+  boolean started();
 
   /**
    * Returns the sequential timer.
    */
-  SeqTimer timer();
+  SequentialTimer timer();
 }

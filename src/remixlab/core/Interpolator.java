@@ -544,6 +544,13 @@ public class Interpolator {
     _started = false;
   }
 
+  public void toggle() {
+    if(started())
+      stop();
+    else
+      start();
+  }
+
   /**
    * Stops the interpolation and resets {@link #time()} to the
    * {@link #firstTime()}.

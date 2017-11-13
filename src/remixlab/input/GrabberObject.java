@@ -26,12 +26,6 @@ import remixlab.input.event.*;
  */
 public abstract class GrabberObject implements Grabber {
   /**
-   * Empty constructor.
-   */
-  public GrabberObject() {
-  }
-
-  /**
    * Constructs and adds this grabber to the agent pool.
    *
    * @see Agent#grabbers()

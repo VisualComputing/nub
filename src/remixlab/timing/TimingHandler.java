@@ -47,9 +47,9 @@ public class TimingHandler {
   /**
    * Constructor that takes and registers an animation object.
    */
-  public TimingHandler(Animator aObject) {
+  public TimingHandler(Animator animator) {
     this();
-    this.registerAnimator(aObject);
+    this.registerAnimator(animator);
   }
 
   /**
@@ -62,15 +62,14 @@ public class TimingHandler {
     _updateFrameRate();
     for (TimingTask task : _taskPool)
       if (task.timer() != null)
-        if (task.timer() instanceof SeqTimer)
-          if (((SeqTimer) task.timer()).timingTask() != null)
-            ((SeqTimer) task.timer())._execute();
+        if (task.timer() instanceof SequentialTimer)
+          if (task.timer().timingTask() != null)
+            ((SequentialTimer) task.timer())._execute();
     // Animation
-    for (Animator aObj : _animatorPool)
-      if (aObj.animationStarted())
-        if (aObj.timer().trigggered())
-          if (!aObj.invokeAnimationHandler())
-            aObj.animate();
+    for (Animator animator : _animatorPool)
+      if (animator.started())
+        if (animator.timer().trigggered())
+          animator.animate();
   }
 
   /**
@@ -84,7 +83,7 @@ public class TimingHandler {
    * Register a task in the timer pool and creates a sequential timer for it.
    */
   public void registerTask(TimingTask task) {
-    task.setTimer(new SeqTimer(this, task));
+    task.setTimer(new SequentialTimer(this, task));
     _taskPool.add(task);
   }
 
@@ -101,14 +100,14 @@ public class TimingHandler {
    *
    * @see #unregisterTask(TimingTask)
    */
-  public void unregisterTask(SeqTimer t) {
-    _taskPool.remove(t.timingTask());
+  public void unregisterTask(SequentialTimer timer) {
+    _taskPool.remove(timer.timingTask());
   }
 
   /**
    * Unregisters the timer task.
    *
-   * @see #unregisterTask(SeqTimer)
+   * @see #unregisterTask(SequentialTimer)
    */
   public void unregisterTask(TimingTask task) {
     _taskPool.remove(task);
@@ -136,7 +135,7 @@ public class TimingHandler {
     }
     _frameRateLastMillis = now;
     _localCount++;
-    //TODO needs testing but I think is also safe but simpler
+    //TODO needs testing but I think is also safe and simpler
     //if (TimingHandler.frameCount < frameCount())
       //TimingHandler.frameCount = frameCount();
     if (frameCount < frameCount() + _deltaCount)
@@ -174,7 +173,7 @@ public class TimingHandler {
         rOnce = task.timer().isSingleShot();
       }
       task.stop();
-      task.setTimer(new SeqTimer(this, task));
+      task.setTimer(new SequentialTimer(this, task));
       if (isActive) {
         if (rOnce)
           task.runOnce(period);
@@ -198,24 +197,22 @@ public class TimingHandler {
   /**
    * Registers the animation object.
    */
-  public void registerAnimator(Animator object) {
-    if (object.timingHandler() != this)
-      object.setTimingHandler(this);
-    _animatorPool.add(object);
+  public void registerAnimator(Animator animator) {
+    _animatorPool.add(animator);
   }
 
   /**
    * Unregisters the animation object.
    */
-  public void unregisterAnimator(Animator object) {
-    _animatorPool.remove(object);
+  public void unregisterAnimator(Animator animator) {
+    _animatorPool.remove(animator);
   }
 
   /**
    * Returns {@code true} if the animation object is registered and {@code false}
    * otherwise.
    */
-  public boolean isAnimatorRegistered(Animator object) {
-    return _animatorPool.contains(object);
+  public boolean isAnimatorRegistered(Animator animator) {
+    return _animatorPool.contains(animator);
   }
 }

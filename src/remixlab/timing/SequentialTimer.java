@@ -13,7 +13,7 @@ package remixlab.timing;
 /**
  * Sequential timers are single-threaded timers handled by a TimingHandler.
  */
-public class SeqTimer implements Timer {
+public class SequentialTimer implements Timer {
   protected Taskable _task;
   protected TimingHandler _handler;
   protected boolean _active;
@@ -25,30 +25,30 @@ public class SeqTimer implements Timer {
   /**
    * Defines a single shot sequential (single-threaded) timer.
    *
-   * @param h timing handler owner
+   * @param timingHandler timing handler owner
    */
-  public SeqTimer(TimingHandler h) {
-    this(h, false, null);
+  public SequentialTimer(TimingHandler timingHandler) {
+    this(timingHandler, false, null);
   }
 
   /**
    * Defines a sequential (single-threaded) timer.
    *
-   * @param h          timing handler owner
+   * @param timingHandler          timing handler owner
    * @param singleShot
    */
-  public SeqTimer(TimingHandler h, boolean singleShot) {
-    this(h, singleShot, null);
+  public SequentialTimer(TimingHandler timingHandler, boolean singleShot) {
+    this(timingHandler, singleShot, null);
   }
 
-  public SeqTimer(TimingHandler h, Taskable t) {
-    this(h, false, t);
+  public SequentialTimer(TimingHandler timingHandler, Taskable task) {
+    this(timingHandler, false, task);
   }
 
-  public SeqTimer(TimingHandler h, boolean singleShot, Taskable t) {
-    _handler = h;
+  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, Taskable task) {
+    _handler = timingHandler;
     _once = singleShot;
-    _task = t;
+    _task = task;
     create();
   }
 
@@ -113,7 +113,7 @@ public class SeqTimer implements Timer {
   // others
 
   /**
-   * Deactivates the SeqTimer.
+   * Deactivates the SequentialTimer.
    */
   public void inactivate() {
     _active = false;
@@ -148,18 +148,6 @@ public class SeqTimer implements Timer {
 
     if (result) {
       _counter++;
-      // if (_period < timePerFrame)
-      // System.out.println("Your current frame rate (~" + _handler.frameRate() +
-      // " fps) is not high enough " + "to run the timer and reach the specified
-      // " + _period + " ms period, "
-      // + timePerFrame
-      // + " ms period will be used instead. If you want to sustain a lower
-      // timer " +
-      // "period, define a higher frame rate (minimum of " + 1000f / _period + "
-      // fps) " +
-      // "before running the timer (you may need to simplify your drawing to
-      // achieve it.)");
-
     }
 
     return result;

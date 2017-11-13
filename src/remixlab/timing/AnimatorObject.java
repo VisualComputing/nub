@@ -14,66 +14,46 @@ package remixlab.timing;
  * Class implementing the main {@link remixlab.timing.Animator} behavior.
  */
 public class AnimatorObject implements Animator {
-  protected SeqTimer _animationTimer;
+  protected SequentialTimer _animationTimer;
   protected boolean _started;
   protected long _animationPeriod;
   protected TimingHandler _handler;
 
   /**
-   * Constructs an animated object with a default {@link #animationPeriod()} of 40
-   * milliseconds (25Hz). The handler should explicitly be defined afterwards (
-   * {@link #setTimingHandler(TimingHandler)}).
-   */
-  public AnimatorObject() {
-    setAnimationPeriod(40, false); // 25Hz
-    stopAnimation();
-  }
-
-  /**
-   * Constructs an animated object with a default {@link #animationPeriod()} of 40
+   * Constructs an animated object with a default {@link #period()} of 40
    * milliseconds (25Hz).
    */
   public AnimatorObject(TimingHandler handler) {
-    setTimingHandler(handler);
-    setAnimationPeriod(40, false); // 25Hz
-    stopAnimation();
-  }
-
-  @Override
-  public void setTimingHandler(TimingHandler handler) {
     _handler = handler;
     _handler.registerAnimator(this);
-    _animationTimer = new SeqTimer(_handler);
+    _animationTimer = new SequentialTimer(_handler);
+    setPeriod(40, false); // 25Hz
+    stop();
   }
 
   @Override
-  public TimingHandler timingHandler() {
-    return _handler;
-  }
-
-  @Override
-  public SeqTimer timer() {
+  public SequentialTimer timer() {
     return _animationTimer;
   }
 
   /**
    * Return {@code true} when the animation loop is started.
    * <p>
-   * The timing handler will check when {@link #animationStarted()} and then called the
-   * animation callback method every {@link #animationPeriod()} milliseconds.
+   * The timing handler will check when {@link #started()} and then called the
+   * animation callback method every {@link #period()} milliseconds.
    * <p>
-   * Use {@link #startAnimation()} and {@link #stopAnimation()}.
+   * Use {@link #start()} and {@link #stop()}.
    *
-   * @see #startAnimation()
+   * @see #start()
    * @see #animate()
    */
   @Override
-  public boolean animationStarted() {
+  public boolean started() {
     return _started;
   }
 
   /**
-   * The animation loop period, in milliseconds. When {@link #animationStarted()}, this is
+   * The animation loop period, in milliseconds. When {@link #started()}, this is
    * the delay that takes place between two consecutive iterations of the animation loop.
    * <p>
    * This delay defines a target frame rate that will only be achieved if your
@@ -82,49 +62,49 @@ public class AnimatorObject implements Animator {
    * Default value is 40 milliseconds (25 Hz).
    * <p>
    * <b>Note:</b> This value is taken into account only the next time you call
-   * {@link #startAnimation()}. If {@link #animationStarted()}, you should
-   * {@link #stopAnimation()} first. See {@link #restartAnimation()} and
-   * {@link #setAnimationPeriod(long, boolean)}.
+   * {@link #start()}. If {@link #started()}, you should
+   * {@link #stop()} first. See {@link #restart()} and
+   * {@link #setPeriod(long, boolean)}.
    *
-   * @see #setAnimationPeriod(long, boolean)
+   * @see #setPeriod(long, boolean)
    */
   @Override
-  public long animationPeriod() {
+  public long period() {
     return _animationPeriod;
   }
 
   /**
    * Convenience function that simply calls {@code period(period, true)}.
    *
-   * @see #setAnimationPeriod(long, boolean)
+   * @see #setPeriod(long, boolean)
    */
   @Override
-  public void setAnimationPeriod(long period) {
-    setAnimationPeriod(period, true);
+  public void setPeriod(long period) {
+    setPeriod(period, true);
   }
 
   /**
-   * Sets the {@link #animationPeriod()}, in milliseconds. If restart is {@code true} and
-   * {@link #animationStarted()} then {@link #restartAnimation()} is called.
+   * Sets the {@link #period()}, in milliseconds. If restart is {@code true} and
+   * {@link #started()} then {@link #restart()} is called.
    *
-   * @see #startAnimation()
+   * @see #start()
    */
   @Override
-  public void setAnimationPeriod(long period, boolean restart) {
+  public void setPeriod(long period, boolean restart) {
     if (period > 0) {
       _animationPeriod = period;
-      if (animationStarted() && restart)
-        restartAnimation();
+      if (started() && restart)
+        restart();
     }
   }
 
   /**
    * Stops animation.
    *
-   * @see #animationStarted()
+   * @see #started()
    */
   @Override
-  public void stopAnimation() {
+  public void stop() {
     _started = false;
     if (timer() != null)
       timer().stop();
@@ -133,32 +113,35 @@ public class AnimatorObject implements Animator {
   /**
    * Starts the animation loop.
    *
-   * @see #animationStarted()
+   * @see #started()
    */
   @Override
-  public void startAnimation() {
+  public void start() {
     _started = true;
     if (timer() != null)
       timer().run(_animationPeriod);
   }
 
+  @Override
+  public void toggle() {
+    if(started())
+      stop();
+    else
+      start();
+  }
+
   /**
    * Restart the animation.
    * <p>
-   * Simply calls {@link #stopAnimation()} and then {@link #startAnimation()}.
+   * Simply calls {@link #stop()} and then {@link #start()}.
    */
   @Override
-  public void restartAnimation() {
-    stopAnimation();
-    startAnimation();
+  public void restart() {
+    stop();
+    start();
   }
 
   @Override
   public void animate() {
-  }
-
-  @Override
-  public boolean invokeAnimationHandler() {
-    return false;
   }
 }

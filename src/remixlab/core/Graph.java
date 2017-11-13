@@ -12,7 +12,12 @@ package remixlab.core;
 
 import remixlab.input.Agent;
 import remixlab.input.InputHandler;
-import remixlab.primitives.*;
+import remixlab.primitives.Frame;
+import remixlab.primitives.Point;
+import remixlab.primitives.Rectangle;
+import remixlab.primitives.Vector;
+import remixlab.primitives.Quaternion;
+import remixlab.primitives.Matrix;
 import remixlab.timing.Animator;
 import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
@@ -52,6 +57,10 @@ import java.util.List;
  * {@link MatrixHandler} interface.</li>
  * </ol>
  */
+//TODO
+//1. add origin corner. Idea is to use the Scene as a connector and (static) drawing
+//drawing class only, i.e., to easily instantiate Graph
+// 2. Remove all is2D is3D stuff. Requires dealing with rescalingFactor() and ortho projections
 public class Graph {
   // 1. Eye
   protected Frame _eye;

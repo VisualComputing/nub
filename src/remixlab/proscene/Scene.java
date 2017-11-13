@@ -17,6 +17,7 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.input.Agent;
+import remixlab.timing.SequentialTimer;
 import remixlab.timing.TimingTask;
 import remixlab.core.Graph;
 import remixlab.core.Node;
@@ -408,7 +409,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Sets all {@link #timingHandler()} timers as (single-threaded)
-   * {@link remixlab.timing.SeqTimer}(s).
+   * {@link SequentialTimer}(s).
    *
    * @see #setNonSeqTimers()
    * @see #shiftTimers()
@@ -459,7 +460,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * @return true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
-   * timers are (single-threaded) {@link remixlab.timing.SeqTimer}(s)).
+   * timers are (single-threaded) {@link SequentialTimer}(s)).
    * @see #setSeqTimers()
    * @see #setNonSeqTimers()
    * @see #shiftTimers()
