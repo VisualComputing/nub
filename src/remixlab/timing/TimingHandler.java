@@ -45,14 +45,6 @@ public class TimingHandler {
   }
 
   /**
-   * Constructor that takes and registers an animation object.
-   */
-  public TimingHandler(Animator animator) {
-    this();
-    this.registerAnimator(animator);
-  }
-
-  /**
    * Handler's main method. It should be called from within your main event loop. It does
    * the following: 1. Recomputes the frame rate; 2. Executes the all timers (those in the
    * {@link #timerPool()}) callback functions; and, 3. Performs all the animated objects
