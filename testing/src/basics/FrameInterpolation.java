@@ -55,14 +55,14 @@ public class FrameInterpolation extends PApplet {
 
         pushStyle();
         stroke(255);
-        //scene.drawPath(kfi);
+        //graph.drawPath(kfi);
         scene.drawPath(kfi, 5);
         popStyle();
 
         for (int i=0; i<nbKeyFrames; ++i) {
             pushMatrix();
             scene.applyTransformation(kfi.keyFrame(i));
-            //kfi.keyFrame(i).applyTransformation(scene);
+            //kfi.keyFrame(i).applyTransformation(graph);
 
             if ( keyFrame[i].grabsInput() )
                 scene.drawAxes(40);

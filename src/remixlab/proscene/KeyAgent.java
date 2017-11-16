@@ -10,6 +10,7 @@
 
 package remixlab.proscene;
 
+import remixlab.core.Graph;
 import remixlab.input.Agent;
 import remixlab.input.Event;
 import remixlab.input.Grabber;
@@ -25,7 +26,7 @@ public class KeyAgent extends Agent {
   public static int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;
   // public static int LEFT_KEY = PApplet.LEFT, RIGHT_KEY = PApplet.RIGHT,
   // UP_KEY = PApplet.UP, DOWN_KEY = PApplet.DOWN;
-  protected Scene _scene;
+  protected Graph _graph;
   protected boolean _press, _release, _type;
   protected KeyEvent _currentEvent;
   protected boolean _bypass;
@@ -33,16 +34,16 @@ public class KeyAgent extends Agent {
   /**
    * Calls super on (scn,n) and sets default keyboard shortcuts.
    */
-  public KeyAgent(Scene scene) {
-    super(scene.inputHandler());
-    _scene = scene;
+  public KeyAgent(Graph graph) {
+    super(graph.inputHandler());
+    _graph = graph;
   }
 
   /**
    * Returns the graph this object belongs to.
    */
-  public Scene scene() {
-    return _scene;
+  public Graph graph() {
+    return _graph;
   }
 
   /**

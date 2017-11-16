@@ -8,7 +8,7 @@ import remixlab.proscene.Scene;
  */
 public class AlternativeUse extends PApplet {
   MyScene scene;
-  //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
+  //Choose one of P3D for a 3D graph, or P2D or JAVA2D for a 2D graph
   String renderer = P2D;
 
   public void settings() {

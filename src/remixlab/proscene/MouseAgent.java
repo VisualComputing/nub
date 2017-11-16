@@ -10,9 +10,11 @@
 
 package remixlab.proscene;
 
+import remixlab.core.Graph;
 import remixlab.input.Agent;
 import remixlab.input.Event;
 import remixlab.input.event.*;
+import remixlab.primitives.Point;
 
 /**
  * Proscene mouse-agent. A Processing fully fledged mouse
@@ -22,9 +24,10 @@ import remixlab.input.event.*;
  * @see remixlab.proscene.KeyAgent
  */
 public class MouseAgent extends Agent {
+  protected Point _upperLeftCorner;
   public static int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
           LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
-  protected Scene _scene;
+  protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
   protected PickingMode _pickingMode;
@@ -34,21 +37,31 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Calls super on (scn,n) and sets {@link #pickingMode()} to {@link PickingMode#MOVE}.
+   * Same as {@code this(graph, new Point())}.
+   *
+   * @see #MouseAgent(Graph, Point)
+   */
+  public MouseAgent(Graph graph) {
+    this(graph, new Point());
+  }
+
+  /**
+   * Calls super on (graph.inputHandler()) and sets {@link #pickingMode()} to {@link PickingMode#MOVE}.
    *
    * @see #setPickingMode(PickingMode)
    */
-  public MouseAgent(Scene scene) {
-    super(scene.inputHandler());
-    _scene = scene;
+  public MouseAgent(Graph graph, Point upperLeftCorner) {
+    super(graph.inputHandler());
+    _graph = graph;
+    _upperLeftCorner = upperLeftCorner;
     setPickingMode(PickingMode.MOVE);
   }
 
   /**
    * Returns the graph this object belongs to.
    */
-  public Scene scene() {
-    return _scene;
+  public Graph graph() {
+    return _graph;
   }
 
   /**
@@ -80,7 +93,7 @@ public class MouseAgent extends Agent {
     _drag = mouseEvent.getAction() == processing.event.MouseEvent.DRAG;
     _release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
     if (_move || _press || _drag || _release) {
-      _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _scene.originCorner().x(), mouseEvent.getY() - _scene.originCorner().y(),
+      _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
           mouseEvent.getModifiers(), _move ? Event.NO_ID : mouseEvent.getButton());
       if (_move && (pickingMode() == PickingMode.MOVE))
         poll(_currentEvent);
@@ -93,11 +106,11 @@ public class MouseAgent extends Agent {
       return;
     }
     if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
-      TapEvent bogusTapEvent = new TapEvent(mouseEvent.getX() - _scene.originCorner().x(), mouseEvent.getY() - _scene.originCorner().y(),
+      TapEvent tapEvent = new TapEvent(mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
           mouseEvent.getModifiers(), mouseEvent.getButton(), mouseEvent.getCount());
       if (pickingMode() == PickingMode.CLICK)
-        poll(bogusTapEvent);
-      handle(bogusTapEvent);
+        poll(tapEvent);
+      handle(tapEvent);
       return;
     }
   }

@@ -191,7 +191,6 @@ public class Graph {
 
     // eye stuff
     if(is3D()) {
-      setType(Type.PERSPECTIVE);
       setZNearCoefficient(0.005f);
       setZClippingCoefficient((float) Math.sqrt(3.0f));
 
@@ -2310,7 +2309,7 @@ public class Graph {
 
     eye().rotate(q);
 
-    // Useful in _fly mode to keep the horizontal direction.
+    // Useful in fly mode to keep the horizontal direction.
     if(eye() instanceof Node)
       ((Node)eye())._updateUpVector();
   }
@@ -2357,7 +2356,6 @@ public class Graph {
   public Vector rightVector() {
     return eye().xAxis();
   }
-
 
   /**
    * 2D Windows return the postion. 3D Cameras return a point defined in the world
