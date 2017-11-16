@@ -12,6 +12,7 @@ package remixlab.proscene;
 
 import processing.core.PGraphics;
 import processing.core.PMatrix2D;
+import remixlab.core.Graph;
 import remixlab.core.MatrixHandler;
 import remixlab.primitives.Matrix;
 import remixlab.primitives.Quaternion;
@@ -21,11 +22,11 @@ import remixlab.primitives.Vector;
  * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics
  * transformations.
  */
-class Java2DMatrixHandler extends MatrixHandler {
+public class Java2DMatrixHandler extends MatrixHandler {
   protected PGraphics _pgraphics;
 
-  public Java2DMatrixHandler(Scene scene, PGraphics renderer) {
-    super(scene);
+  public Java2DMatrixHandler(Graph graph, PGraphics renderer) {
+    super(graph);
     _pgraphics = renderer;
   }
 

@@ -12,6 +12,7 @@ package remixlab.proscene;
 
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
+import remixlab.core.Graph;
 import remixlab.core.MatrixHandler;
 import remixlab.primitives.Matrix;
 
@@ -19,11 +20,11 @@ import remixlab.primitives.Matrix;
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics
  * transformation.
  */
-class GLMatrixHandler extends MatrixHandler {
+public class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
-  public GLMatrixHandler(Scene scene, PGraphicsOpenGL renderer) {
-    super(scene);
+  public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
+    super(graph);
     _pgraphics = renderer;
   }
 
