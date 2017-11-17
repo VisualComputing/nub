@@ -70,13 +70,13 @@ public class CajasOrientadas extends PApplet {
       @Override
       public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
-          _translateY(true);
+          translateYPos();
         if (event.id() == PApplet.DOWN)
-          _translateY(false);
+          translateYNeg();
         if (event.id() == PApplet.LEFT)
-          _translateX(false);
+          translateXNeg();
         if (event.id() == PApplet.RIGHT)
-          _translateX(true);
+          translateXPos();
       }
     };
 
