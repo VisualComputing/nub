@@ -49,7 +49,7 @@ import java.util.List;
  * details please refer to the {@link remixlab.timing.TimingHandler} class.</li>
  * <li>An {@link #inputHandler()} which handles all user input through
  * {@link Agent}s (for details please refer to the
- * {@link InputHandler} class). The {@link #inputHandler()} holds _agents which should
+ * {@link InputHandler} class). The {@link #inputHandler()} holds agents which should
  * be instantiated by derived classes at construction time.</li>
  * <li>A {@link #matrixHandler()} which handles matrix operations either through the
  * {@link MatrixHandler} or through a third party matrix stack
@@ -144,7 +144,7 @@ public class Graph {
    * (such as Processing) provides its own matrix handling.</li>
    * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
    * {@link #is2D()} or {@link #is3D()}.</li>
-   * <li>Instantiate some _agents and enable them (register them at the
+   * <li>Instantiate some agents and enable them (register them at the
    * {@link #inputHandler()}).</li>
    * </ol>
    *
@@ -257,7 +257,7 @@ public class Graph {
    * <p>
    * With a {@link Type#ORTHOGRAPHIC} {@link #type()}, the
    * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
-   * are inferred from the _distance to the {@link #anchor()} using
+   * are inferred from the distance to the {@link #anchor()} using
    * {@link #getBoundaryWidthHeight()}.
    * <p>
    * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
@@ -351,7 +351,7 @@ public class Graph {
    * {@code lightCamera.setFieldOfView();} <br>
    * <p>
    * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to M_PI/2.0. This happens
-   * when the Camera is at a _distance lower than sqrt(2.0) * sceneRadius() from the
+   * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
    * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
    * parts of the graph.
    */
@@ -375,7 +375,7 @@ public class Graph {
   }
 
   /**
-   * Returns the near clipping plane _distance used by the Camera projection matrix in
+   * Returns the near clipping plane distance used by the Camera projection matrix in
    * graph (world) units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and
@@ -383,18 +383,18 @@ public class Graph {
    * A good graph dimension approximation will hence result in an optimal precision of the
    * z-buffer.
    * <p>
-   * The near clipping plane is positioned at a _distance equal to
+   * The near clipping plane is positioned at a distance equal to
    * {@link #zClippingCoefficient()} * {@link #radius()} in front of the
    * {@link #center()}: {@code Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) -
    * zClippingCoefficient() * sceneRadius()}
    * <p>
    * In order to prevent negative or too small {@link #zNear()} values (which would
-   * degrade the z precision), {@link #zNearCoefficient()} is used when the Camera is
+   * degrade the z precision), {@link #zNearCoefficient()} is used when the eye is
    * inside the {@link #radius()} sphere:
    * <p>
    * {@code zMin = zNearCoefficient() * zClippingCoefficient() * sceneRadius();} <br>
    * {@code zNear = zMin;}<br>
-   * {@code // With an ORTHOGRAPHIC type, the value is simply clamped to 0.0} <br>
+   * {@code With an ORTHOGRAPHIC type, the value is simply clamped to 0.0} <br>
    * <p>
    * See also the {@link #zFar()}, {@link #zClippingCoefficient()} and
    * {@link #zNearCoefficient()} documentations.
@@ -403,8 +403,7 @@ public class Graph {
    * and {@link #zFar()} methods.
    * <p>
    * <b>Attention:</b> The value is always positive although the clipping plane is
-   * positioned at a negative z value in the Camera coordinate system. This follows the
-   * {@code gluPerspective} standard.
+   * positioned at a negative z value in the eye coordinate system.
    *
    * @see #zFar()
    */
@@ -426,10 +425,10 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane _distance used by the Camera projection matrix in graph
+   * Returns the far clipping plane distance used by the Camera projection matrix in graph
    * (world) units.
    * <p>
-   * The far clipping plane is positioned at a _distance equal to
+   * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * sceneRadius()} behind the {@link #center()}:
    * <p>
    * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient()*sceneRadius()}
@@ -471,7 +470,7 @@ public class Graph {
   /**
    * Returns the coefficient used to position the near and far clipping planes.
    * <p>
-   * The near (resp. far) clipping plane is positioned at a _distance equal to
+   * The near (resp. far) clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * sceneRadius()} in front of (resp. behind) the
    * {@link #center()}. This guarantees an optimal use of the z-buffer range and
    * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
@@ -511,28 +510,28 @@ public class Graph {
    * Fills in {@code target} with the {@code halfWidth} and {@code halfHeight} of the eye
    * boundary and returns it. While {@code target[0]} holds {@code halfWidth},
    * {@code target[1]} holds {@code halfHeight}. Values are computed as:
-   * {@code target[0] = _rescalingOrthoFactor() * (frame().magnitude() * this.screenWidth() / 2)}
-   * and {@code _rescalingOrthoFactor() * (frame().magnitude() * this.screenHeight() / 2)}
+   * {@code target[0] = _rescalingFactor() * (frame().magnitude() * this.screenWidth() / 2)}
+   * and {@code _rescalingFactor() * (frame().magnitude() * this.screenHeight() / 2)}
    * .
    * <p>
    * These values are valid for 2d Windows and ortho Cameras (but not persp) and they are
    * expressed in virtual graph units.
    * <p>
    * In the case of ortho Cameras these values are proportional to the Camera (z
-   * projected) _distance to the {@link #anchor()}. When zooming on the object, the Camera
+   * projected) distance to the {@link #anchor()}. When zooming on the object, the Camera
    * is translated forward and its boundary is narrowed, making the object appear bigger
    * on screen, as intuitively expected.
    * <p>
    * Overload this method to change this behavior if desired.
    *
-   * @see #_rescalingOrthoFactor()
+   * @see #_rescalingFactor()
    */
   public float[] getBoundaryWidthHeight(float[] target) {
     if ((target == null) || (target.length != 2)) {
       target = new float[2];
     }
 
-    float orthoCoef = this._rescalingOrthoFactor();
+    float orthoCoef = _rescalingFactor();
 
     target[0] = orthoCoef * (eye().magnitude() * width() / 2);
     target[1] = orthoCoef * (eye().magnitude() * height() / 2);
@@ -543,7 +542,7 @@ public class Graph {
   /**
    * Simply returns {@code 1} which is valid for 2d Windows.
    * <p>
-   * In 3D returns a value proportional to the Camera (z projected) _distance to the
+   * In 3D returns a value proportional to the Camera (z projected) distance to the
    * {@link #anchor()} so that when zooming on the object, the ortho Camera is translated
    * forward and its boundary is narrowed, making the object appear bigger on screen, as
    * intuitively expected.
@@ -552,7 +551,7 @@ public class Graph {
    *
    * @see #getBoundaryWidthHeight(float[])
    */
-  protected float _rescalingOrthoFactor() {
+  protected float _rescalingFactor() {
     if(is2D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
@@ -661,7 +660,7 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #traverse()} algorithm.
    * <p>
-   * nodes in the {@code node} branch will also be removed from all the _agents currently
+   * nodes in the {@code node} branch will also be removed from all the agents currently
    * registered in the {@link #inputHandler()}.
    * <p>
    * To make all the nodes in the branch reachable again, first cache the nodes
@@ -669,7 +668,7 @@ public class Graph {
    * {@link #appendBranch(List)} on the cached branch. Note that calling
    * {@link Node#setReference(Node)} on a
    * node belonging to the pruned branch will become reachable again by the traversal
-   * algorithm. In this case, the node should be manually added to some _agents to
+   * algorithm. In this case, the node should be manually added to some agents to
    * interactively handle it.
    * <p>
    * Note that if node is not reachable ({@link #isNodeReachable(Node)}) this
@@ -701,7 +700,7 @@ public class Graph {
    * Appends the branch which typically should come from the one pruned (and cached) with
    * {@link #pruneBranch(Node)}.
    * <p>
-   * All nodes belonging to the branch are automatically added to all graph _agents.
+   * All nodes belonging to the branch are automatically added to all graph agents.
    * <p>
    * {@link #pruneBranch(Node)}
    */
@@ -1711,8 +1710,8 @@ public class Graph {
   }
 
   /**
-   * Returns the signed _distance between point {@code pos} and plane {@code index} in
-   * Scene units. The _distance is negative if the point lies in the planes's boundary
+   * Returns the signed distance between point {@code pos} and plane {@code index} in
+   * Scene units. The distance is negative if the point lies in the planes's boundary
    * halfspace, and positive otherwise.
    * <p>
    * {@code index} is a value between {@code 0} and {@code 5} which respectively
@@ -2040,7 +2039,7 @@ public class Graph {
    * linear interpolation between {@link #zNear()} and
    * {@link #zFar()};
    * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
-   * is the _distance from the point you _project to the camera, along the
+   * is the distance from the point you _project to the camera, along the
    * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
    * <p>
    * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
