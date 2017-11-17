@@ -39,13 +39,13 @@ public class Sphere {
       @Override
       public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
-          translateY(true);
+          _translateY(true);
         if (event.id() == PApplet.DOWN)
-          translateY(false);
+          _translateY(false);
         if (event.id() == PApplet.LEFT)
-          translateX(false);
+          _translateX(false);
         if (event.id() == PApplet.RIGHT)
-          translateX(true);
+          _translateX(true);
       }
     };
     iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);

@@ -517,7 +517,7 @@ public class Matrix {
   }
 
   /**
-   * Same as {@code rotateZ(angle)}.
+   * Same as {@code _rotateZ(angle)}.
    *
    * @see #rotateZ(float)
    */

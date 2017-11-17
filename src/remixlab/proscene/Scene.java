@@ -1548,7 +1548,7 @@ public class Scene extends Graph implements PConstants {
    * draws the intermediate orientation, etc. The maximum value is 30. {@code nbFrames}
    * should divide 30 so that an object is drawn for each KeyFrame. Default value is 6.
    * <p>
-   * {@code scale} controls the scaling of the camera and axes drawing. A value of
+   * {@code _scale} controls the scaling of the camera and axes drawing. A value of
    * {@link #radius()} should give good results.
    */
   public void drawPath(Interpolator interpolator, int mask, int frameCount, float scale) {
