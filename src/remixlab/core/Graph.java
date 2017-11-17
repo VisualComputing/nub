@@ -552,7 +552,7 @@ public class Graph {
    * @see #getBoundaryWidthHeight(float[])
    */
   protected float _rescalingFactor() {
-    if(is2D())
+    if(is3D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;

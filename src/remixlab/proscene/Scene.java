@@ -125,7 +125,7 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, PGraphics)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
-    super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+    super(pGraphics instanceof PGraphics3D ? Type.ORTHOGRAPHIC : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _pg = pGraphics;

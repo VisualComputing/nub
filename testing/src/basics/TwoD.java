@@ -12,17 +12,26 @@ public class TwoD extends PApplet {
     Node eye, node;
     boolean target = true;
 
+    public void info() {
+        println(scene.radius());
+        scene.center().print();
+        scene.eye().position().print();
+        println(scene.zNear());
+        println(scene.zFar());
+        scene.matrixHandler().projection().print();
+        scene.matrixHandler().view().print();
+        scene.matrixHandler().modelView().print();
+    }
+
     @Override
     public void settings() {
-        size(800, 800, P2D);
+        size(800, 800, P3D);
     }
 
     @Override
     public void setup() {
         rectMode(CENTER);
         scene = new Scene(this);
-
-        //graph.setType(Graph.Type.ORTHOGRAPHIC);
 
         node = new InteractiveFrame();
         eye = new InteractiveFrame();
@@ -66,6 +75,8 @@ public class TwoD extends PApplet {
             target = !target;
         if(key == ' ')
             scene.flip();
+        if(key == 'i')
+            info();
     }
 
     public class InteractiveFrame extends Node {
