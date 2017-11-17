@@ -225,23 +225,6 @@ public class Frame {
     return _lastUpdate;
   }
 
-  // DIM
-
-  //TODO discard
-  /**
-   * @return true if frame is 2D.
-   */
-  public boolean is2D() {
-    return !is3D();
-  }
-
-  /**
-   * @return true if frame is 3D.
-   */
-  public boolean is3D() {
-    return true;
-  }
-
   // REFERENCE_FRAME
 
   /**
@@ -521,28 +504,8 @@ public class Frame {
    * Same as {@link #setRotation(Quaternion)} but with {@code float} Quaternion parameters.
    */
   public void setRotation(float x, float y, float z, float w) {
-    if (is2D()) {
-      System.err.println("setRotation(float x, float y, float z, float w) is not available in 2D");
-      return;
-    }
     setRotation(new Quaternion(x, y, z, w));
   }
-
-  /**
-   * Defines a 2D {@link Quaternion}.
-   *
-   * @param a angle
-   */
-  //TODO Restore 2D
-  /*
-  public void setRotation(float a) {
-    if (is3D()) {
-      System.err.println("setRotation(float a) is not available in 3D");
-      return;
-    }
-    setRotation(new Rot(a));
-  }
-  */
 
   /**
    * Same as {@link #setRotation(Quaternion)}, but if there's a {@link #constraint()} it's
@@ -554,21 +517,10 @@ public class Frame {
    */
   public void setRotationWithConstraint(Quaternion rotation) {
     Quaternion deltaQ;
-
     deltaQ = Quaternion.compose(rotation().inverse(), rotation);
-    //TODO Restore 2D
-    /*
-    if (is3D())
-      deltaQ = Quaternion.compose(rotation().inverse(), rotation);
-    else
-      deltaQ = Rot.compose(rotation().inverse(), rotation);
-    */
-
     if (constraint() != null)
       deltaQ = constraint().constrainRotation(deltaQ, this);
-
     deltaQ.normalize(); // Prevent numerical drift
-
     rotate(deltaQ);
   }
 
@@ -588,14 +540,7 @@ public class Frame {
       rotation().compose(constraint().constrainRotation(quaternion, this));
     else
       rotation().compose(quaternion);
-
     rotation().normalize(); // Prevents numerical drift
-    //TODO Restore 2D
-    /*
-    if (is3D())
-      ((Quaternion) rotation()).normalize(); // Prevents numerical drift
-    */
-
     _modified();
   }
 
@@ -603,10 +548,6 @@ public class Frame {
    * Same as {@link #rotate(Quaternion)} but with {@code float} rotation parameters.
    */
   public void rotate(float x, float y, float z, float w) {
-    if (is2D()) {
-      System.err.println("rotate(float x, float y, float z, float w) is not available in 2D");
-      return;
-    }
     rotate(new Quaternion(x, y, z, w));
   }
 
@@ -630,19 +571,9 @@ public class Frame {
       rotation = constraint().constrainRotation(rotation, this);
 
     this.rotation().compose(rotation);
-    if (is3D())
-      this.rotation().normalize(); // Prevents numerical drift
+    this.rotation().normalize(); // Prevents numerical drift
 
-    Quaternion q = new Quaternion(orientation().rotate(((Quaternion) rotation).axis()), rotation.angle());
-
-    //TODO Restore 2D
-    /*
-    Rotation q;
-    if (is3D())
-      q = new Quaternion(orientation().rotate(((Quaternion) rotation).axis()), rotation.angle());
-    else
-      q = new Rot(rotation.angle());
-    */
+    Quaternion q = new Quaternion(orientation().rotate(rotation.axis()), rotation.angle());
 
     Vector t = Vector.add(point, q.rotate(Vector.subtract(position(), point)));
     t.subtract(translation());
@@ -652,13 +583,9 @@ public class Frame {
       translate(t);
   }
 
-  // TODO this one needs testing, specially 2d case
   public void rotateAroundFrame(Quaternion rotation, Frame frame) {
-    if (is3D()) {
-      Vector euler = ((Quaternion) rotation).eulerAngles();
-      rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
-    } else
-      rotateAroundFrame(0, 0, rotation.angle(), frame);
+    Vector euler = rotation.eulerAngles();
+    rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
   }
 
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
@@ -684,25 +611,13 @@ public class Frame {
    * @see #rotation()
    */
   public Quaternion orientation() {
-    Quaternion res = rotation().get();
+    Quaternion quaternion = rotation().get();
     Frame fr = reference();
-
     while (fr != null) {
-        res = Quaternion.compose(fr.rotation(), res);
+        quaternion = Quaternion.compose(fr.rotation(), quaternion);
       fr = fr.reference();
     }
-    //TODO Restore 2D
-    /*
-    while (fr != null) {
-      if (is3D())
-        res = Quaternion.compose(fr.rotation(), res);
-      else
-        res = Rot.compose(fr.rotation(), res);
-      fr = fr.reference();
-    }
-    */
-
-    return res;
+    return quaternion;
   }
 
   /**
@@ -715,16 +630,6 @@ public class Frame {
    */
   public void setOrientation(Quaternion quaternion) {
     setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), quaternion) : quaternion);
-    //TODO Restore 2D
-    /*
-    if (reference() != null) {
-      if (is3D())
-        setRotation(Quaternion.compose(reference().orientation().inverse(), q));
-      else
-        setRotation(Rot.compose(reference().orientation().inverse(), q));
-    } else
-      setRotation(q);
-    */
   }
 
   /**
@@ -744,16 +649,6 @@ public class Frame {
   public void setOrientationWithConstraint(Quaternion orientation) {
     if (reference() != null)
       orientation = Quaternion.compose(reference().orientation().inverse(), orientation);
-    //TODO Restore 2D
-    /*
-    if (reference() != null) {
-      if (is3D())
-        orientation = Quaternion.compose(reference().orientation().inverse(), orientation);
-      else
-        orientation = Rot.compose(reference().orientation().inverse(), orientation);
-    }
-    */
-
     setRotationWithConstraint(orientation);
   }
 
@@ -918,8 +813,8 @@ public class Frame {
         angle = -angle;
       // setOrientation(Quaternion(axis, angle) * orientation());
       Quaternion q = new Quaternion(axis, angle);
-      q = Quaternion.multiply(((Quaternion) rotation()).inverse(), q);
-      q = Quaternion.multiply(q, (Quaternion) orientation());
+      q = Quaternion.multiply(rotation().inverse(), q);
+      q = Quaternion.multiply(q, orientation());
       rotate(q);
 
       // Try to align an other axis direction
@@ -946,8 +841,8 @@ public class Frame {
           angle = -angle;
         // setOrientation(Quaternion(axis, angle) * orientation());
         q.fromAxisAngle(axis, angle);
-        q = Quaternion.multiply(((Quaternion) rotation()).inverse(), q);
-        q = Quaternion.multiply(q, (Quaternion) orientation());
+        q = Quaternion.multiply(rotation().inverse(), q);
+        q = Quaternion.multiply(q, orientation());
         rotate(q);
       }
     }
@@ -961,121 +856,6 @@ public class Frame {
       translate(vector);
     }
   }
-  //TODO Restore 2D
-  /*
-  public void alignWithFrame(Frame frame, boolean move, float threshold) {
-    if (is3D()) {
-      Vector[][] directions = new Vector[2][3];
-
-      for (int d = 0; d < 3; ++d) {
-        Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
-        if (frame != null)
-          directions[0][d] = frame.orientation().rotate(dir);
-        else
-          directions[0][d] = dir;
-        directions[1][d] = orientation().rotate(dir);
-      }
-
-      float maxProj = 0.0f;
-      float proj;
-      short[] index = new short[2];
-      index[0] = index[1] = 0;
-
-      Vector vec = new Vector(0.0f, 0.0f, 0.0f);
-      for (int i = 0; i < 3; ++i) {
-        for (int j = 0; j < 3; ++j) {
-          vec.set(directions[0][i]);
-          proj = Math.abs(vec.dot(directions[1][j]));
-          if ((proj) >= maxProj) {
-            index[0] = (short) i;
-            index[1] = (short) j;
-            maxProj = proj;
-          }
-        }
-      }
-      Frame old = new Frame(this); // correct line
-      // VFrame old = this.get();// this call the get overloaded method and
-      // hence addGrabber the frame to the mouse _grabber
-
-      vec.set(directions[0][index[0]]);
-      float coef = vec.dot(directions[1][index[1]]);
-
-      if (Math.abs(coef) >= threshold) {
-        vec.set(directions[0][index[0]]);
-        Vector axis = vec.cross(directions[1][index[1]]);
-        float angle = (float) Math.asin(axis.magnitude());
-        if (coef >= 0.0)
-          angle = -angle;
-        // setOrientation(Quaternion(axis, angle) * orientation());
-        Quaternion q = new Quaternion(axis, angle);
-        q = Quaternion.multiply(((Quaternion) rotation()).inverse(), q);
-        q = Quaternion.multiply(q, (Quaternion) orientation());
-        rotate(q);
-
-        // Try to align an other axis direction
-        short d = (short) ((index[1] + 1) % 3);
-        Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
-        dir = orientation().rotate(dir);
-
-        float max = 0.0f;
-        for (int i = 0; i < 3; ++i) {
-          vec.set(directions[0][i]);
-          proj = Math.abs(vec.dot(dir));
-          if (proj > max) {
-            index[0] = (short) i;
-            max = proj;
-          }
-        }
-
-        if (max >= threshold) {
-          vec.set(directions[0][index[0]]);
-          axis = vec.cross(dir);
-          angle = (float) Math.asin(axis.magnitude());
-          vec.set(directions[0][index[0]]);
-          if (vec.dot(dir) >= 0.0)
-            angle = -angle;
-          // setOrientation(Quaternion(axis, angle) * orientation());
-          q.fromAxisAngle(axis, angle);
-          q = Quaternion.multiply(((Quaternion) rotation()).inverse(), q);
-          q = Quaternion.multiply(q, (Quaternion) orientation());
-          rotate(q);
-        }
-      }
-      if (move) {
-        Vector center = new Vector(0.0f, 0.0f, 0.0f);
-        if (frame != null)
-          center = frame.position();
-
-        vec = Vector.subtract(center, inverseTransformOf(old.coordinatesOf(center)));
-        vec.subtract(translation());
-        translate(vec);
-      }
-    } else {
-      Rot o;
-      if (frame != null)
-        o = (Rot) frame.orientation();
-      else
-        o = new Rot();
-      o.normalize(true);
-      ((Rot) orientation()).normalize(true);
-
-      float angle = 0; // if( (-QUARTER_PI <= delta) && (delta < QUARTER_PI) )
-      float delta = Math.abs(o.angle() - orientation().angle());
-
-      if (((float) Math.PI / 4 <= delta) && (delta < ((float) Math.PI * 3 / 4)))
-        angle = (float) Math.PI / 2;
-      else if ((((float) Math.PI * 3 / 4) <= delta) && (delta < ((float) Math.PI * 5 / 4)))
-        angle = (float) Math.PI;
-      else if ((((float) Math.PI * 5 / 4) <= delta) && (delta < ((float) Math.PI * 7 / 4)))
-        angle = (float) Math.PI * 3 / 2;
-
-      angle += o.angle();
-      Rot other = new Rot(angle);
-      other.normalize();
-      setOrientation(other);
-    }
-  }
-  */
 
   /**
    * Translates the Frame so that its {@link #position()} lies on the line defined by
@@ -1134,10 +914,7 @@ public class Frame {
    * @see #setZAxis(Vector)
    */
   public void setZAxis(Vector axis) {
-    if (is3D())
-      rotate(new Quaternion(new Vector(0.0f, 0.0f, 1.0f), transformOf(axis)));
-    else
-      System.out.println("There's no point in setting the Z axis in 2D");
+    rotate(new Quaternion(new Vector(0.0f, 0.0f, 1.0f), transformOf(axis)));
   }
 
   /**
@@ -1158,17 +935,10 @@ public class Frame {
    * @see #zAxis()
    */
   public Vector xAxis(boolean positive) {
-    Vector res;
-    if (is3D()) {
-      res = inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
-      if (magnitude() != 1)
-        res.normalize();
-    } else {
-      res = inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f));
-      if (magnitude() != 1)
-        res.normalize();
-    }
-    return res;
+    Vector axis = inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
+    if (magnitude() != 1)
+      axis.normalize();
+    return axis;
   }
 
   /**
@@ -1189,17 +959,10 @@ public class Frame {
    * @see #zAxis()
    */
   public Vector yAxis(boolean positive) {
-    Vector res;
-    if (is3D()) {
-      res = inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
-      if (magnitude() != 1)
-        res.normalize();
-    } else {
-      res = inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f));
-      if (magnitude() != 1)
-        res.normalize();
-    }
-    return res;
+    Vector axis = inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
+    if (magnitude() != 1)
+      axis.normalize();
+    return axis;
   }
 
   /**
@@ -1220,13 +983,10 @@ public class Frame {
    * @see #yAxis()
    */
   public Vector zAxis(boolean positive) {
-    Vector res = new Vector();
-    if (is3D()) {
-      res = inverseTransformOf(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
-      if (magnitude() != 1)
-        res.normalize();
-    }
-    return res;
+    Vector axis = inverseTransformOf(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
+    if (magnitude() != 1)
+      axis.normalize();
+    return axis;
   }
 
   // CONVERSION
@@ -1392,11 +1152,9 @@ public class Frame {
       r[1][1] = r[1][1] / scaling();
       r[2][1] = r[2][1] / scaling();
 
-      if (this.is3D()) {
-        r[0][2] = r[0][2] / scaling();
-        r[1][2] = r[1][2] / scaling();
-        r[2][2] = r[2][2] / scaling();
-      }
+      r[0][2] = r[0][2] / scaling();
+      r[1][2] = r[1][2] / scaling();
+      r[2][2] = r[2][2] / scaling();
     }
 
     Vector x = new Vector(r[0][0], r[1][0], r[2][0]);

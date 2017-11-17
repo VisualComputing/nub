@@ -913,6 +913,7 @@ public class Scene extends Graph implements PConstants {
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
+    //TODO fix me
     json.setBoolean("ortho", is2D() ? true : type() == Type.ORTHOGRAPHIC ? true : false);
     json.setJSONObject("eye", toJSONObject(eye()));
     JSONArray jsonPaths = new JSONArray();
@@ -967,6 +968,7 @@ public class Scene extends Graph implements PConstants {
     }
     if (json != null) {
       setRadius(json.getFloat("radius"));
+      //TODO fix me
       if (is3D())
         setType(json.getBoolean("ortho") ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
       eye().setWorldMatrix(toFrame(json.getJSONObject("eye")));
@@ -1098,7 +1100,7 @@ public class Scene extends Graph implements PConstants {
   protected JSONArray toJSONArray(Rotation rot) {
     JSONArray jsonRot = new JSONArray();
     if (is3D()) {
-      Quaternion quat = (Quaternion) rot;
+      Quaternion quat = rot;
       jsonRot.setFloat(0, quat.x());
       jsonRot.setFloat(1, quat.y());
       jsonRot.setFloat(2, quat.z());
@@ -1223,8 +1225,8 @@ public class Scene extends Graph implements PConstants {
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
     if (pGraphics instanceof PGraphics3D) {
       pGraphics.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      pGraphics.rotate(frame.rotation().angle(), ((Quaternion) frame.rotation()).axis()._vector[0],
-          ((Quaternion) frame.rotation()).axis()._vector[1], ((Quaternion) frame.rotation()).axis()._vector[2]);
+      pGraphics.rotate(frame.rotation().angle(), frame.rotation().axis()._vector[0],
+          frame.rotation().axis()._vector[1], frame.rotation().axis()._vector[2]);
       pGraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
     } else {
       pGraphics.translate(frame.translation().x(), frame.translation().y());

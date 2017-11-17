@@ -174,32 +174,16 @@ public class Graph {
     setMatrixHandler(new MatrixHandler(this));
     setRightHanded();
 
-    if (is2D()) {
-      _coefficients = new float[4][3];
-      _normal = new Vector[4];
-      for (int i = 0; i < _normal.length; i++)
-        _normal[i] = new Vector();
-      _dist = new float[4];
-    } else {
-      _coefficients = new float[6][4];
-      _normal = new Vector[6];
-      for (int i = 0; i < _normal.length; i++)
-        _normal[i] = new Vector();
-      _dist = new float[6];
-    }
+    _coefficients = new float[6][4];
+    _normal = new Vector[6];
+    for (int i = 0; i < _normal.length; i++)
+      _normal[i] = new Vector();
+    _dist = new float[6];
+
     enableBoundaryEquations(false);
 
-    // eye stuff
-    if(is3D()) {
-      setZNearCoefficient(0.005f);
-      setZClippingCoefficient((float) Math.sqrt(3.0f));
-
-      // TODO Stereo parameters
-      //setIODistance(0.062f);
-      //setPhysicalDistanceToScreen(0.5f);
-      //setPhysicalScreenWidth(0.4f);
-      // focusDistance is set from setFieldOfView()
-    }
+    setZNearCoefficient(0.005f);
+    setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
 
   // dimensions
@@ -417,6 +401,7 @@ public class Graph {
         case PERSPECTIVE:
           z = zMin;
           break;
+        case TWO_D:
         case ORTHOGRAPHIC:
           z = 0.0f;
           break;
@@ -552,7 +537,7 @@ public class Graph {
    * @see #getBoundaryWidthHeight(float[])
    */
   protected float _rescalingFactor() {
-    if(is3D())
+    if(is2D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;
@@ -803,7 +788,7 @@ public class Graph {
       _collectNodes(list, child);
   }
 
-  // TODO decide whether or not the following methods can take a Frame
+  // TODO docs missing
   // param instead of Node. It allows to manipulate the eye() instance more easily sometimes
   public void setDefaultNode(Node node) {
     inputHandler().setDefaultGrabber(node);
@@ -973,11 +958,9 @@ public class Graph {
   //TODO pass a Matrix param!
   public Matrix computeProjection() {
     Matrix m = new Matrix();
-    //float ZNear = zNear();
-    //float ZFar = zFar();
 
-    float ZNear = is2D() ? -10 : zNear();
-    float ZFar = is2D() ? 10 : zFar();
+    float ZNear = zNear();
+    float ZFar = zFar();
 
     switch (type()) {
       case PERSPECTIVE:
@@ -1577,6 +1560,7 @@ public class Graph {
         _dist[4] = _dist[4] + posUpCosH;
         break;
       }
+      case TWO_D:
       case ORTHOGRAPHIC:
         _normal[0] = Vector.multiply(right, -1);
         _normal[1] = right;
@@ -1773,6 +1757,7 @@ public class Graph {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
                 .tan(fieldOfView() / 2.0f) / height();
+      case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = getBoundaryWidthHeight();
         return 2.0f * wh[1] / height();
@@ -2220,7 +2205,6 @@ public class Graph {
    * graph limits are defined by a (world axis aligned) bounding box.
    */
   public void setBoundingBox(Vector corner1, Vector corner2) {
-    //TODO check 2d case
     setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
     setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
@@ -2237,11 +2221,6 @@ public class Graph {
    * {@link #rightVector()}.
    */
   public Vector viewDirection() {
-    //TODO test me
-    //before it was:
-    //if(graph.is2D())
-    //return new Vector(0, 0, (frame().zAxis().z() > 0) ? -1 : 1);
-    //bu now I think we should simply go something like this:
     return eye().zAxis(false);
   }
 
@@ -2302,9 +2281,8 @@ public class Graph {
   public void setUpVector(Vector up, boolean noMove) {
     Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().transformOf(up));
 
-    if (!noMove && is3D())
-      eye().setPosition(Vector.subtract(anchor(),
-              (Quaternion.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
+    if (!noMove)
+      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
 
     eye().rotate(q);
 
@@ -2474,6 +2452,7 @@ public class Graph {
         distance = Math.max(xview, yview);
         break;
       }
+      case TWO_D:
       case ORTHOGRAPHIC: {
         distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
         break;
@@ -2523,6 +2502,7 @@ public class Graph {
         distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
         distance = Math.max(distX, distY);
         break;
+      case TWO_D:
       case ORTHOGRAPHIC:
         float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
         distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
@@ -2560,6 +2540,7 @@ public class Graph {
         direction.normalize();
         break;
 
+      case TWO_D:
       case ORTHOGRAPHIC: {
         float[] wh = getBoundaryWidthHeight();
         origin.set(

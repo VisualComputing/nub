@@ -933,16 +933,10 @@ public class Interpolator {
     float mag = Vector.lerp(_list.get(_current1.nextIndex()).magnitude(),
         _list.get(_current2.nextIndex()).magnitude(), alpha);
 
-    Quaternion q;
-    if (_graph.is3D()) {
-      q = Quaternion.squad((Quaternion) _list.get(_current1.nextIndex()).orientation(),
-          _list.get(_current1.nextIndex()).tangentQuaternion(),
-          _list.get(_current2.nextIndex()).tangentQuaternion(),
-          _list.get(_current2.nextIndex()).orientation(), alpha);
-    } else {
-      q = new Quaternion(new Vector(0,0,1), Vector.lerp(_list.get(_current1.nextIndex()).orientation().angle(),
-          _list.get(_current2.nextIndex()).orientation().angle(), (alpha)));
-    }
+    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).orientation(),
+            _list.get(_current1.nextIndex()).tangentQuaternion(),
+            _list.get(_current2.nextIndex()).tangentQuaternion(),
+            _list.get(_current2.nextIndex()).orientation(), alpha);
 
     frame().setPositionWithConstraint(pos);
     frame().setRotationWithConstraint(q);

@@ -33,15 +33,11 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        if (frame.is2D() && translationConstraintDirection().z() != 0)
-          break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        if (frame.is2D() && translationConstraintDirection().z() != 0)
-          break;
         proj = frame.rotation().rotate(translationConstraintDirection());
         // proj = frame.localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnAxis(translation, proj);
@@ -67,12 +63,10 @@ public class LocalConstraint extends AxisPlaneConstraint {
       case PLANE:
         break;
       case AXIS:
-        if (frame.is2D())
-          break;
         Vector axis = rotationConstraintDirection();
-        Vector quat = new Vector(((Quaternion) rotation)._quaternion[0], ((Quaternion) rotation)._quaternion[1], ((Quaternion) rotation)._quaternion[2]);
+        Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
         quat = Vector.projectVectorOnAxis(quat, axis);
-        res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation)._quaternion[3]));
+        res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
         break;
       case FORBIDDEN:
         res = new Quaternion(); // identity
@@ -80,34 +74,4 @@ public class LocalConstraint extends AxisPlaneConstraint {
     }
     return res;
   }
-  //TODO Restore 2D
-  /*
-  @Override
-  public Rotation constrainRotation(Rotation rotation, Frame frame) {
-    Rotation res = rotation.get();
-    switch (rotationConstraintType()) {
-      case FREE:
-        break;
-      case PLANE:
-        break;
-      case AXIS:
-        if (frame.is2D())
-          break;
-        if (rotation instanceof Quaternion) {
-          Vector axis = rotationConstraintDirection();
-          Vector quat = new Vector(((Quaternion) rotation).quat[0], ((Quaternion) rotation).quat[1], ((Quaternion) rotation).quat[2]);
-          quat = Vector.projectVectorOnAxis(quat, axis);
-          res = new Quaternion(quat, 2.0f * (float) Math.acos(((Quaternion) rotation).quat[3]));
-        }
-        break;
-      case FORBIDDEN:
-        if (rotation instanceof Quaternion)
-          res = new Quaternion(); // identity
-        else
-          res = new Rot(); // identity
-        break;
-    }
-    return res;
-  }
-  */
 }
