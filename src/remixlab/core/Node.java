@@ -204,7 +204,7 @@ public class Node extends Frame implements Grabber {
     if (_id == 16777216)
       throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
 
-    if(graph().is3D()) {
+    if(graph().is2D()) {
       LocalConstraint constraint2D = new LocalConstraint();
       //constraint2D.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
       constraint2D.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(0, 0, 1));
