@@ -10,7 +10,6 @@ import remixlab.proscene.*;
 public class FirstPerson extends PApplet {
     Scene scene;
     Node iFrame;
-    boolean firstPerson;
 
      @Override
     public void settings() {
