@@ -2317,7 +2317,10 @@ public class Graph {
    * @see #fitBoundingBox(Vector, Vector)
    */
   public void lookAt(Vector target) {
-    setViewDirection(Vector.subtract(target, eye().position()));
+    if(is2D())
+      eye().setPosition(target.x(), target.y());
+    else
+      setViewDirection(Vector.subtract(target, eye().position()));
   }
 
   /**
@@ -2483,6 +2486,24 @@ public class Graph {
    * is used to define the 3D rectangle that is eventually fitted.
    */
   public void fitScreenRegion(Rectangle rectangle) {
+    //ad-hoc
+    if(is2D()) {
+      float rectRatio = (float) rectangle.width() / (float) rectangle.height();
+    if (aspectRatio() < 1.0f) {
+      if (aspectRatio() < rectRatio)
+        eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+      else
+        eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+    } else {
+      if (aspectRatio() < rectRatio)
+        eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+      else
+        eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+    }
+    lookAt(unprojectedCoordinatesOf(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      return;
+    }
+
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
     Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
@@ -2502,7 +2523,6 @@ public class Graph {
         distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
         distance = Math.max(distX, distY);
         break;
-      case TWO_D:
       case ORTHOGRAPHIC:
         float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
         distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();

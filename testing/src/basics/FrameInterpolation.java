@@ -15,7 +15,7 @@ public class FrameInterpolation extends PApplet {
     boolean showEyePath;
 
     public void settings() {
-        size(640, 360, P3D);
+        size(640, 360, P2D);
     }
 
     public void setup() {
@@ -120,7 +120,7 @@ public class FrameInterpolation extends PApplet {
                     rotate(event);
                     break;
                 case processing.event.MouseEvent.WHEEL:
-                    if(isEye())
+                    if(isEye() && graph().is3D())
                         translateZ(event);
                     else
                         scale(event);

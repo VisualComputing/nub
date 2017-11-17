@@ -105,6 +105,9 @@ public class TwoD extends PApplet {
                 case processing.event.MouseEvent.WHEEL:
                     scale(event);
                     break;
+                case PApplet.CENTER:
+                    if(isEye())
+                        zoomOnRegion(event);
             }
         }
 
