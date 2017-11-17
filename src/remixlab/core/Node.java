@@ -2017,20 +2017,6 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into move-backward conversion routine.
-   */
-  public void moveBackward(MotionEvent2 event) {
-    _moveForward(event, false);
-  }
-
-  /**
-   * User gesture into move-forward conversion routine.
-   */
-  public void moveForward(MotionEvent2 event) {
-    _moveForward(event, true);
-  }
-
-  /**
    * User gesture into move-forward conversion routine.
    */
   protected void _moveForward(MotionEvent2 event, boolean forward) {
