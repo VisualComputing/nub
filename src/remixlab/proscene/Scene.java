@@ -2223,58 +2223,49 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
     pGraphics.popStyle();
   }
-
-  /**
-   * Draws a representation of the {@code eye} in the graph.
-   * <p>
-   * The near and far planes are drawn as quads, the frustum is drawn using lines and the
-   * camera up vector is represented by an arrow to disambiguate the drawing.
-   * <p>
-   * <b>Note:</b> The drawing of a Scene's own Scene.eye() should not be visible, but
-   * may create artifacts due to numerical imprecisions.
-   */
-  public void drawEye() {
-    drawEye(false);
+  
+  public void drawEye(Graph graph) {
+    drawEye(graph, false);
   }
 
   /**
-   * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, boolean)} on the graph {@link #pg()}. If
-   * {@code texture} draws the projected graph on the near plane.
+   * Applies the {@code eye.eye()} transformation and then calls
+   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #pg()}. If
+   * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, boolean)
+   * @see #drawEye(PGraphics, Graph, boolean)
    */
-  public void drawEye(boolean texture) {
+  public void drawEye(Graph graph, boolean texture) {
     pg().pushMatrix();
-    applyTransformation(eye());
-    drawEye(pg(), texture);
+    applyTransformation(graph.eye());
+    drawEye(pg(), graph, texture);
     pg().popMatrix();
   }
 
   /**
-   * Same as {@code drawEye(pg, eye, false)}.
+   * Same as {@code drawGraph(pg, eye, false)}.
    *
-   * @see #drawEye(PGraphics, boolean)
+   * @see #drawEye(PGraphics, Graph, boolean)
    */
-  public void drawEye(PGraphics pGraphics) {
-    drawEye(pGraphics, false);
+  public void drawEye(PGraphics pGraphics, Graph graph) {
+    drawEye(pGraphics, graph, false);
   }
 
   /**
-   * Implementation of {@link #drawEye()}. If {@code texture} draws the projected graph
+   * Implementation of {@link #drawEye(Graph)}. If {@code texture} draws the projected scene
    * on the near plane.
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    */
-  public void drawEye(PGraphics pGraphics, boolean texture) {
+  public void drawEye(PGraphics pGraphics, Graph graph, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight, zNear and zFar params
-    // (which are is given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.frame().magnitude()
-    if (pg() == pGraphics) {
-      System.out.println("Warning: No drawEye done, eye.graph()).pg() and pg are the same!");
+    // (which are given in world units) in eye units.
+    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
+    if (graph == this) {
+      System.out.println("Warning: No drawGraph done, eye.scene()).pg() and pg are the same!");
       return;
     }
     pGraphics.pushStyle();
@@ -2284,7 +2275,7 @@ public class Scene extends Graph implements PConstants {
     int farIndex = is3D() ? 1 : 0;
     boolean ortho = false;
     if (is3D())
-      if (type() == Type.ORTHOGRAPHIC)
+      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
         ortho = true;
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
@@ -2293,26 +2284,26 @@ public class Scene extends Graph implements PConstants {
     points[1] = new Vector();
 
     if (is2D() || ortho) {
-      float[] wh = getBoundaryWidthHeight();
-      points[0].setX(wh[0] * 1 / eye().magnitude());
-      points[1].setX(wh[0] * 1 / eye().magnitude());
-      points[0].setY(wh[1] * 1 / eye().magnitude());
-      points[1].setY(wh[1] * 1 / eye().magnitude());
+      float[] wh = graph.getBoundaryWidthHeight();
+      points[0].setX(wh[0] * 1 / graph.eye().magnitude());
+      points[1].setX(wh[0] * 1 / graph.eye().magnitude());
+      points[0].setY(wh[1] * 1 / graph.eye().magnitude());
+      points[1].setY(wh[1] * 1 / graph.eye().magnitude());
     }
 
     if (is3D()) {
-      points[0].setZ(zNear() * 1 / eye().magnitude());
-      points[1].setZ(zFar() * 1 / eye().magnitude());
-      if (type() == Type.PERSPECTIVE) {
-        points[0].setY(points[0].z() * PApplet.tan(fieldOfView() / 2.0f));
-        points[0].setX(points[0].y() * aspectRatio());
+      points[0].setZ(graph.zNear() * 1 / graph.eye().magnitude());
+      points[1].setZ(graph.zFar() * 1 / graph.eye().magnitude());
+      if (graph.type() == Graph.Type.PERSPECTIVE) {
+        points[0].setY(points[0].z() * PApplet.tan((graph.fieldOfView() / 2.0f)));
+        points[0].setX(points[0].y() * graph.aspectRatio());
         float ratio = points[1].z() / points[0].z();
         points[1].setY(ratio * points[0].y());
         points[1].setX(ratio * points[0].x());
       }
 
       // Frustum lines
-      switch (type()) {
+      switch (graph.type()) {
         case PERSPECTIVE: {
           pGraphics.beginShape(PApplet.LINES);
           Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
@@ -2391,87 +2382,87 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    drawPlane(pGraphics, points[1], new Vector(0, 0, -1), false);
+    drawPlane(pGraphics, graph, points[1], new Vector(0, 0, -1), false);
     // near plane
-    drawPlane(pGraphics, points[0], new Vector(0, 0, 1), texture);
+    drawPlane(pGraphics, graph, points[0], new Vector(0, 0, 1), texture);
 
     pGraphics.popStyle();
   }
 
-  public void drawEyeNearPlane() {
-    drawEyeNearPlane(false);
+  public void drawEyeNearPlane(Graph graph) {
+    drawEyeNearPlane(graph, false);
   }
 
   /**
-   * Applies the {@code eye.frame()} transformation and then calls
-   * {@link #drawEye(PGraphics, boolean)} on the graph {@link #pg()}. If
-   * {@code texture} draws the projected graph on the near plane.
+   * Applies the {@code eye.eye()} transformation and then calls
+   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #pg()}. If
+   * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, boolean)
+   * @see #drawEye(PGraphics, Graph, boolean)
    */
-  public void drawEyeNearPlane(boolean texture) {
+  public void drawEyeNearPlane(Graph graph, boolean texture) {
     pg().pushMatrix();
-    applyTransformation(eye());
-    drawEyeNearPlane(pg(), texture);
+    applyTransformation(graph.eye());
+    drawEyeNearPlane(pg(), graph, texture);
     pg().popMatrix();
   }
 
   /**
-   * Same as {@code drawEyeNearPlane(pg, eye, false)}.
+   * Same as {@code drawGraphNearPlane(pg, eye, false)}.
    *
-   * @see #drawEyeNearPlane(PGraphics, boolean)
+   * @see #drawEyeNearPlane(PGraphics, Graph, boolean)
    */
-  public void drawEyeNearPlane(PGraphics pGraphics) {
-    drawEyeNearPlane(pGraphics, false);
+  public void drawEyeNearPlane(PGraphics pGraphics, Graph graph) {
+    drawEyeNearPlane(pGraphics, graph, false);
   }
 
   /**
-   * Draws the eye near plane. If {@code texture} draws the projected graph on the plane.
+   * Draws the eye near plane. If {@code texture} draws the projected scene on the plane.
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    */
-  public void drawEyeNearPlane(PGraphics pGraphics, boolean texture) {
+  public void drawEyeNearPlane(PGraphics pGraphics, Graph graph, boolean texture) {
     // Key here is to represent the eye getBoundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.frame().magnitude()
-    if (pg() == pGraphics) {
-      System.out.println("Warning: No drawEyeNearPlane done, eye.graph()).pg() and pg are the same!");
+    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
+    if (graph == this) {
+      System.out.println("Warning: No drawGraphNearPlane done, eye.scene()).pg() and pg are the same!");
       return;
     }
     pGraphics.pushStyle();
     boolean ortho = false;
     if (is3D())
-      if (type() == Type.ORTHOGRAPHIC)
+      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
         ortho = true;
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vector corner = new Vector();
     if (is2D() || ortho) {
-      float[] wh = getBoundaryWidthHeight();
-      corner.setX(wh[0] * 1 / eye().magnitude());
-      corner.setY(wh[1] * 1 / eye().magnitude());
+      float[] wh = graph.getBoundaryWidthHeight();
+      corner.setX(wh[0] * 1 / graph.eye().magnitude());
+      corner.setY(wh[1] * 1 / graph.eye().magnitude());
     }
     if (is3D()) {
-      corner.setZ(zNear() * 1 / eye().magnitude());
-      if (type() == Type.PERSPECTIVE) {
-        corner.setY(corner.z() * PApplet.tan(fieldOfView() / 2.0f));
-        corner.setX(corner.y() * aspectRatio());
+      corner.setZ(graph.zNear() * 1 / graph.eye().magnitude());
+      if (graph.type() == Graph.Type.PERSPECTIVE) {
+        corner.setY(corner.z() * PApplet.tan((graph.fieldOfView() / 2.0f)));
+        corner.setX(corner.y() * graph.aspectRatio());
       }
     }
-    drawPlane(pGraphics, corner, new Vector(0, 0, 1), texture);
+    drawPlane(pGraphics, graph, corner, new Vector(0, 0, 1), texture);
   }
 
-  protected void drawPlane(PGraphics pGraphics, Vector corner, Vector normal, boolean texture) {
+  protected void drawPlane(PGraphics pGraphics, Graph graph, Vector corner, Vector normal, boolean texture) {
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
-    if (pGraphics instanceof PGraphicsOpenGL && texture) {
+    if (pGraphics instanceof PGraphicsOpenGL && texture && graph instanceof Scene) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
-      pGraphics.texture(pg());
+      pGraphics.texture(((Scene) graph).pg());
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
@@ -2487,16 +2478,16 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjector(PGraphics, Vector)} on the graph {@link #pg()}.
+   * Calls {@link #drawProjector(PGraphics, Graph, Vector)} on the scene {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
-   * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
+   * projector it should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
    *
-   * @see #drawProjector(PGraphics, Vector)
-   * @see #drawProjectors(List)
+   * @see #drawProjector(PGraphics, Graph, Vector)
+   * @see #drawProjectors(Graph, List)
    */
-  public void drawProjector(Vector vector) {
-    drawProjector(pg(), vector);
+  public void drawProjector(Graph graph, Vector vector) {
+    drawProjector(pg(), graph, vector);
   }
 
   /**
@@ -2505,28 +2496,28 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with
-   * {@link #drawEye(PGraphics, boolean)}.
+   * {@link #drawEye(PGraphics, Graph, boolean)}.
    * <p>
-   * Note that if {@code eye.graph()).pg() == pg} this method hasGrabber not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    *
-   * @see #drawProjector(PGraphics, Vector)
-   * @see #drawProjectors(PGraphics, List)
+   * @see #drawProjector(PGraphics, Graph, Vector)
+   * @see #drawProjectors(PGraphics, Graph, List)
    */
-  public void drawProjector(PGraphics pGraphics, Vector vector) {
-    drawProjectors(pGraphics, Arrays.asList(vector));
+  public void drawProjector(PGraphics pg, Graph eye, Vector src) {
+    drawProjectors(pg, eye, Arrays.asList(src));
   }
 
   /**
-   * Calls {@link #drawProjectors(PGraphics, List)} on the graph {@link #pg()}.
+   * Calls {@link #drawProjectors(PGraphics, Graph, List)} on the scene {@link #pg()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
-   * projector it should be used in conjunction with {@link #drawEye(PGraphics)}.
+   * projector it should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
    *
-   * @see #drawProjectors(PGraphics, List)
-   * @see #drawProjector(Vector)
+   * @see #drawProjectors(PGraphics, Graph, List)
+   * @see #drawProjector(Graph, Vector)
    */
-  public void drawProjectors(List<Vector> vectors) {
-    drawProjectors(pg(), vectors);
+  public void drawProjectors(Graph graph, List<Vector> vectors) {
+    drawProjectors(pg(), graph, vectors);
   }
 
   /**
@@ -2535,16 +2526,16 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with
-   * {@link #drawEye(PGraphics, boolean)}.
+   * {@link #drawEye(PGraphics, Graph, boolean)}.
    * <p>
-   * Note that if {@code pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    *
-   * @see #drawProjectors(PGraphics, List)
-   * @see #drawProjector(PGraphics, Vector)
+   * @see #drawProjectors(PGraphics, Graph, List)
+   * @see #drawProjector(PGraphics, Graph, Vector)
    */
-  public void drawProjectors(PGraphics pGraphics, List<Vector> vectors) {
-    if (pg() == pGraphics) {
-      System.out.println("Warning: No drawProjectors done, eye.graph()).pg() and pg are the same!");
+  public void drawProjectors(PGraphics pGraphics, Graph graph, List<Vector> vectors) {
+    if (graph == this) {
+      System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
       return;
     }
     pGraphics.pushStyle();
@@ -2557,31 +2548,31 @@ public class Scene extends Graph implements PConstants {
       // if ORTHOGRAPHIC: do it in the eye coordinate system
       // if PERSPECTIVE: do it in the world coordinate system
       Vector o = new Vector();
-      if (type() == Type.ORTHOGRAPHIC) {
+      if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
         pGraphics.pushMatrix();
-        applyTransformation(eye());
+        applyTransformation(graph.eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = eye().inverseCoordinatesOf(new Vector());
+        o = graph.eye().inverseCoordinatesOf(new Vector());
       pGraphics.beginShape(PApplet.LINES);
       for (Vector s : vectors) {
-        if (type() == Type.ORTHOGRAPHIC) {
-          Vector v = eye().coordinatesOf(s);
+        if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
+          Vector v = graph.eye().coordinatesOf(s);
           Scene.vertex(pGraphics, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
-          // Hence it should be multiplied by: 1 / eye.frame().magnitude()
+          // Hence it should be multiplied by: 1 / eye.eye().magnitude()
           // The neg sign is because the zNear is positive but the eye view direction is
           // the negative Z-axis
-          Scene.vertex(pGraphics, v.x(), v.y(), -zNear() * 1 / eye().magnitude());
+          Scene.vertex(pGraphics, v.x(), v.y(), -(graph.zNear() * 1 / graph.eye().magnitude()));
         } else {
           Scene.vertex(pGraphics, s.x(), s.y(), s.z());
           Scene.vertex(pGraphics, o.x(), o.y(), o.z());
         }
       }
       pGraphics.endShape();
-      if (type() == Type.ORTHOGRAPHIC)
+      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
         pGraphics.popMatrix();
     }
     pGraphics.popStyle();

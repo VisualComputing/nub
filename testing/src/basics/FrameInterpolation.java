@@ -15,7 +15,7 @@ public class FrameInterpolation extends PApplet {
     boolean showEyePath;
 
     public void settings() {
-        size(640, 360, P2D);
+        size(640, 360, P3D);
     }
 
     public void setup() {

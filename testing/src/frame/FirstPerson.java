@@ -3,6 +3,7 @@ package frame;
 import processing.core.PApplet;
 import remixlab.core.Graph;
 import remixlab.core.Node;
+import remixlab.input.Event;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.proscene.*;
@@ -111,7 +112,7 @@ public class FirstPerson extends PApplet {
                     else
                         scale(event);
                     break;
-                case 0:
+                case Event.NO_ID:
                     if(isEye())
                         lookAround(event);
                     break;
