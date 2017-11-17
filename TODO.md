@@ -7,13 +7,9 @@ Remember to properly instantiate the twod boolean flag in AbstractScene!
 ## Key ideas
 
 1. Remove Eye: Move functionality to Scene
-2. New scene hierarchy:
-Scene -> RasterScene -> P5Scene
-Scene is concrete and allows to set a ray-tracing scene.
-3. Remove drawing methods from scene: move functionality to Utility drawing class.
-4. Rethink EyeConstraint: A constraint defined in terms of an arbitrary frame.
-5. Rethink Trackable: idem. Scene.preDraw needs proper handling: eye().setWorldMatrix().
-6. Implement Eye.modified()! (Scene.preDraw again)
+2. New scene hierarchy
+4. Rethink constraints
+5. Rethink Trackable
 
 ## AbstractScene
 
@@ -25,7 +21,6 @@ Scene is concrete and allows to set a ray-tracing scene.
 4. public void fitBall(Vec center, float radius)
 5. public void fitBoundingBox(Vec min, Vec max)
 6. public void fitScreenRegion(Rect rectangle) 
-
 
 ### Methods to be restored
 

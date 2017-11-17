@@ -189,7 +189,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * The node sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
-   * {@link #keyboardSensitivity()}, {@link #rotationSensitivity()},
+   * {@link #keySensitivity()}, {@link #rotationSensitivity()},
    * {@link #translationSensitivity()} and {@link #scalingSensitivity()}.
    * <p>
    * Sets the {@link #pickingPrecision()} to {@link PickingPrecision#FIXED}.
@@ -221,7 +221,7 @@ public class Node extends Frame implements Grabber {
     setScalingSensitivity(1.0f);
     setTranslationSensitivity(1.0f);
     setWheelSensitivity(15f);
-    setKeyboardSensitivity(10f);
+    setKeySensitivity(10f);
     setSpinningSensitivity(0.3f);
     setDamping(0.5f);
 
@@ -300,7 +300,7 @@ public class Node extends Frame implements Grabber {
     this.setScalingSensitivity(other.scalingSensitivity());
     this.setTranslationSensitivity(other.translationSensitivity());
     this.setWheelSensitivity(other.wheelSensitivity());
-    this.setKeyboardSensitivity(other.keyboardSensitivity());
+    this.setKeySensitivity(other.keySensitivity());
     //
     this.setSpinningSensitivity(other.spinningSensitivity());
     this.setDamping(other.damping());
@@ -845,9 +845,9 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Defines the {@link #keyboardSensitivity()}.
+   * Defines the {@link #keySensitivity()}.
    */
-  public void setKeyboardSensitivity(float sensitivity) {
+  public void setKeySensitivity(float sensitivity) {
     _keySensitivity = sensitivity;
   }
 
@@ -861,7 +861,7 @@ public class Node extends Frame implements Grabber {
    * @see #setRotationSensitivity(float)
    * @see #translationSensitivity()
    * @see #scalingSensitivity()
-   * @see #keyboardSensitivity()
+   * @see #keySensitivity()
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
@@ -878,7 +878,7 @@ public class Node extends Frame implements Grabber {
    * @see #setScalingSensitivity(float)
    * @see #setRotationSensitivity(float)
    * @see #translationSensitivity()
-   * @see #keyboardSensitivity()
+   * @see #keySensitivity()
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
@@ -899,7 +899,7 @@ public class Node extends Frame implements Grabber {
    * @see #setTranslationSensitivity(float)
    * @see #rotationSensitivity()
    * @see #scalingSensitivity()
-   * @see #keyboardSensitivity()
+   * @see #keySensitivity()
    * @see #spinningSensitivity()
    * @see #wheelSensitivity()
    */
@@ -923,7 +923,7 @@ public class Node extends Frame implements Grabber {
    * @see #translationSensitivity()
    * @see #rotationSensitivity()
    * @see #scalingSensitivity()
-   * @see #keyboardSensitivity()
+   * @see #keySensitivity()
    * @see #wheelSensitivity()
    * @see #setDamping(float)
    */
@@ -942,7 +942,7 @@ public class Node extends Frame implements Grabber {
    * @see #translationSensitivity()
    * @see #rotationSensitivity()
    * @see #scalingSensitivity()
-   * @see #keyboardSensitivity()
+   * @see #keySensitivity()
    * @see #spinningSensitivity()
    */
   public float wheelSensitivity() {
@@ -955,14 +955,14 @@ public class Node extends Frame implements Grabber {
    * Default value is 10. A higher value will make the keyboard more efficient (usually
    * meaning faster motion).
    *
-   * @see #setKeyboardSensitivity(float)
+   * @see #setKeySensitivity(float)
    * @see #translationSensitivity()
    * @see #rotationSensitivity()
    * @see #scalingSensitivity()
    * @see #wheelSensitivity()
    * @see #setDamping(float)
    */
-  public float keyboardSensitivity() {
+  public float keySensitivity() {
     return _keySensitivity;
   }
 
@@ -1344,7 +1344,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void _translateX(boolean right) {
     translate(screenToVector(
-        Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keyboardSensitivity() : -keyboardSensitivity())));
+        Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keySensitivity() : -keySensitivity())));
   }
 
   /**
@@ -1397,7 +1397,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void _translateY(boolean up) {
     translate(screenToVector(
-        Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keyboardSensitivity())));
+        Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keySensitivity())));
   }
 
   /**
@@ -1457,7 +1457,7 @@ public class Node extends Frame implements Grabber {
       return;
     }
     translate(screenToVector(
-        Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keyboardSensitivity() : keyboardSensitivity())));
+        Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
   }
 
   /**
@@ -1580,7 +1580,7 @@ public class Node extends Frame implements Grabber {
     Vector direction = Vector.subtract(_graph.anchor(), position());
     if (reference() != null)
       direction = reference().transformOf(direction);
-    float delta = (in ? keyboardSensitivity() : -keyboardSensitivity()) / _graph.height();
+    float delta = (in ? keySensitivity() : -keySensitivity()) / _graph.height();
     if (direction.magnitude() > 0.02f * _graph.radius() || delta > 0.0f)
       translate(Vector.multiply(direction, delta));
   }
@@ -1682,7 +1682,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("_rotateX");
       return;
     }
-    rotate(screenToQuaternion(_computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0, 0));
+    rotate(screenToQuaternion(_computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0, 0));
   }
 
   /**
@@ -1741,7 +1741,7 @@ public class Node extends Frame implements Grabber {
       Graph.showDepthWarning("_rotateY");
       return;
     }
-    Quaternion rt = screenToQuaternion(0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()), 0);
+    Quaternion rt = screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0);
     rotate(rt);
   }
 
@@ -1813,11 +1813,11 @@ public class Node extends Frame implements Grabber {
     /*
     Rotation rt;
     if (is2D())
-      rt = new Rot(_computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
+      rt = new Rot(_computeAngle() * (up ? keySensitivity() : -keySensitivity()));
     else
-      rt = screenToQuaternion(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity()));
+      rt = screenToQuaternion(0, 0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()));
     */
-    rotate(screenToQuaternion(0, 0, _computeAngle() * (up ? keyboardSensitivity() : -keyboardSensitivity())));
+    rotate(screenToQuaternion(0, 0, _computeAngle() * (up ? keySensitivity() : -keySensitivity())));
   }
 
   /**
@@ -1976,7 +1976,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into scaling conversion routine.
    */
   protected void _scale(boolean up) {
-    float s = 1 + Math.abs(keyboardSensitivity()) / (isEye() ? (float) -_graph.height() : (float) _graph.height());
+    float s = 1 + Math.abs(keySensitivity()) / (isEye() ? (float) -_graph.height() : (float) _graph.height());
     scale(up ? s : 1 / s);
   }
 
