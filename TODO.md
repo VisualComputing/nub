@@ -1,119 +1,43 @@
 # Next release: 4.0.0
 
-## Warning
-
-Remember to properly instantiate the twod boolean flag in AbstractScene!
-
 ## Key ideas
 
-1. Remove Eye: Move functionality to Scene
-2. New scene hierarchy
-4. Rethink constraints
-5. Rethink Trackable
+1. Remove reflect stuff, i.e., Profiles and iFrame.setShape(method).
+2. Make Graph (previously AbstractScene) instantiable. Refactor GenericFrames as Nodes.
+3. Make eye nodes indistinguible from other nodes, i.e., the can interchangeably be used.
+4. Rethink third person camera by removimg Trackable in favor of 3.
+5. Better 2D and 3D merging by removing Eye hierarchy and move its functionality into the Graph. 
+6. Rethink constraints to cope with ik framework.
+7. Port the framework to JS (from all the previous points).
+8. Implement proscene package to simplify all the examples which should be ported and update the API docs.
 
-## AbstractScene
+## JS port (@sechaparroc)
 
-### Ambiguous methods (modified some eye() params)
+### Methodology
 
-1. public void setFieldOfView(float fov)
-2. public void lookAt(Vec target)
-3. public void setViewDirection(Vec direction)
-4. public void fitBall(Vec center, float radius)
-5. public void fitBoundingBox(Vec min, Vec max)
-6. public void fitScreenRegion(Rect rectangle) 
+Port one by one the java packages in the following order:
 
-### Methods to be restored
+1. [Timing](https://github.com/VisualComputing/proscene.js/tree/processing/src/remixlab/timing). Status: API is completed and tested. Expect some (occasional) API docs updates.
+2. [Input](https://github.com/VisualComputing/proscene.js/tree/processing/src/remixlab/input). Status: API is completed and tested. Expect some API (occasional) docs updates.
+3. [Primitives](https://github.com/VisualComputing/proscene.js/tree/processing/src/remixlab/primitives). Status: API is completed and tested. Expect some API docs updates.
+4. [Core](https://github.com/VisualComputing/proscene.js/tree/processing/src/remixlab/core). Status: API is completed and (mostly completed) tested. Expect lots of API docs updates.
+5. [Proscene](https://github.com/VisualComputing/proscene.js/tree/processing/src/remixlab/proscene). Status: API is uncomplete (see below).
 
-1. add/play/delete/Path_n
-2. protected void drawPointUnderPixelHint()
-3. public abstract String info()
-4. public void displayInfo(boolean onConsole)
-5. public boolean pathsVisualHint()
-6. public boolean zoomVisualHint()
-7. public boolean rotateVisualHint()
-8. public void togglePathsVisualHint()
-9. protected void toggleZoomVisualHint()
-10. protected void toggleRotateVisualHint()
-11. public void setPathsVisualHint(boolean draw)
-12. public void setPathsVisualHint(boolean draw)
-13. public void setZoomVisualHint(boolean draw)
-14. public void setRotateVisualHint(boolean draw)
-15. protected void drawPathsHint()
-16. protected void drawPaths()
-17. protected abstract void drawZoomWindowHint()
-18. protected abstract void drawScreenRotateHint()
+Observations:
 
-### Methods that were modified
+1. Timing and Input packages should be ported at their own repos (_master_ branches): [here](https://github.com/VisualComputing/fpstiming.js) and [here](https://github.com/VisualComputing/bias.js). Note that the _processing_ branches contain the Java code with the examples to be tested.
+2. Primitives, Core and Proscene packages should be ported at the [proscene.js](https://github.com/VisualComputing/proscene.js) repo master branch. Note that the _processing_ branch is synced with the repos in 1.
 
-1. public void setPathsVisualHint(boolean draw) 
-2. public void preDraw()
-3. protected void drawPaths()
-4. protected void drawPaths()
-5. public void setAvatar(Trackable t)
-6. public Trackable resetAvatar()
-7. protected void displayVisualHints()
+### Code conventions
 
-## Scene
+* [ECMAScript 2015](http://es6-features.org) (a.k.a., ECMAScript6 or [ES6](https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_-_ECMAScript_2015)) compatibility with [class support](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
+* vars (class attributes) and 'private' methods begin with _underscore. Convention adopted from [here](https://developer.mozilla.org/en-US/docs/Archive/Add-ons/Add-on_SDK/Guides/Contributor_s_Guide/Private_Properties). Note that Java protected methods aren't prefixed.
+* Method params should be named as explicit as possible (in order to cope with js dynamic and weak typed features).
 
-### Methods to be restored
+## Proscene (@nakednous)
 
-1. protected JSONArray toJSONArray(int id)
-2. protected void drawPointUnderPixelHint()
-
-### Methods that were modified
-
-1. public void preDraw()
-2. public void saveConfig(String fileName)
-
-## Eye
-
-### Methods to be restored
-
-1. public HashMap<Integer, keyFrameInterpolator> keyFrameInterpolatorMap()
-2. public keyFrameInterpolator[] keyFrameInterpolatorArray()
-3. public List<keyFrameInterpolator> keyFrameInterpolatorList()
-4. public keyFrameInterpolator keyFrameInterpolator(int key)
-5. public void setKeyFrameInterpolator(int key, KeyFrameInterpolator keyFInterpolator)
-6. public void addKeyFrameToPath(int key)
-7. protected void detachPaths()
-8. protected void detachPath(int key)
-9. protected void attachPaths()
-10. protected void attachPath(int key)
-11. public void playPath(int key)
-12. public void deletePath(int key)
-13. public void resetPath(int key)
-14. public boolean anyInterpolationStarted()
-15. public void stopInterpolations()
-16. public void interpolateToZoomOnRegion(Rect rectangle)
-17. public void interpolateToFitScene()
-18. public void interpolateTo(InteractiveFrame fr)
-19. public void interpolateTo(InteractiveFrame fr, float duration)
-20. public void interpolateToZoomOnPixel(float x, float y)
-21. public void interpolateToZoomOnPixel(Point pixel)
-22. protected void interpolateToZoomOnTarget(Vec target)
-23. protected void unSetTimerFlag()
-24. protected void runResetAnchorHintTimer(long period)
-25. public abstract boolean setSceneCenterFromPixel(Point pixel)
-26. public boolean setSceneCenterFromPixel(float x, float y)
-27. public abstract boolean setAnchorFromPixel(Point pixel)
-28. public boolean setAnchorFromPixel(float x, float y)
-
-### Methods that were modified
-
-1. public Eye
-2. protected Eye
-3. protected final void replaceFrame(InteractiveFrame g)
-4. public final void setFrame(InteractiveFrame g)
-5. public boolean setAnchorFromPixel(Point pixel)
-
-## InteractiveFrame
-
-### Methods to be restored
-
-1. public void zoomOnPixel(TapEvent event)
-2. public void anchorFromPixel(TapEvent event)
-
-## Foundation
-
-1. Release inverse kinematics.
-2. Perform a deep copy of generic-children frames.
+* Merge Node and Frame in the API, e.g., setEye(Frame), setDefaultNode(Node).
+* Restored save/loadConfig (json).
+* Make all drawing _static_.
+* Restore PickingPrecision.EXACT using the pickingBuffer.
+* Restore Luxo, MiniMap, Flock and the remaining advnaced examples with the book (and slides) in mind.

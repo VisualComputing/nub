@@ -58,10 +58,7 @@ import java.util.List;
  * </ol>
  */
 //TODO
-// 1. add origin corner. Idea is to use the Scene as a connector and (static) drawing
-// drawing class only, i.e., to easily instantiate Graph
-// 2. Remove all is2D is3D stuff. Requires dealing with rescalingFactor() and ortho projections
-// 3. (decide) Remove printing stuff (vector, map, ...) and warnings (hashmap).
+// (decide) Remove printing stuff (vector, map, ...) and warnings (hashmap).
 public class Graph {
   // 1. Eye
   protected Frame _eye;
