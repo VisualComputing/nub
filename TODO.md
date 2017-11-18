@@ -26,7 +26,7 @@ Port one by one the java packages in the following order:
 Observations:
 
 1. *Timing* and *Input* packages should be ported at their own repos (_master_ branches): [here](https://github.com/VisualComputing/fpstiming.js) and [here](https://github.com/VisualComputing/bias.js). Note that the _processing_ branches contain the Java code with the examples to be tested.
-2. El port del paquete bias y probarlo al menos con p5.js es clave, como prueba-de-concepto del nuevo diseño.
+2. The _bias_ js port is key as a design proof-of-concept. Testing should be done at least against [p5.js](https://p5js.org/).
 3. *Primitives*, *Core* and *Proscene* packages should be ported at the [proscene.js](https://github.com/VisualComputing/proscene.js) repo master branch. Note that the _processing_ branch is synced with the repos in 1 and that it contains the examples [here](https://github.com/VisualComputing/proscene.js/tree/processing/testing).
 
 ### Code conventions
