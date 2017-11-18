@@ -234,7 +234,7 @@ public class Interpolator {
 
     _task = new TimingTask() {
       public void execute() {
-        update();
+        _update();
       }
     };
     _graph.registerTask(_task);
@@ -273,7 +273,7 @@ public class Interpolator {
 
     this._task = new TimingTask() {
       public void execute() {
-        update();
+        _update();
       }
     };
     _graph.registerTask(_task);
@@ -296,14 +296,14 @@ public class Interpolator {
    * Internal use. Updates the last frame path was updated. Called by
    * {@link #_checkValidity()}.
    */
-  protected void checked() {
+  protected void _checked() {
     _lastUpdate = TimingHandler.frameCount;
   }
 
   /**
    * Internal use. Called by {@link #_checkValidity()}.
    */
-  protected long lastUpdate() {
+  protected long _lastUpdate() {
     return _lastUpdate;
   }
 
@@ -451,7 +451,7 @@ public class Interpolator {
    * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
    * unless {@link #loop()} is {@code true}.
    */
-  protected void update() {
+  protected void _update() {
     interpolateAtTime(time());
 
     _time += speed() * period() / 1000.0f;
@@ -531,7 +531,7 @@ public class Interpolator {
       if (_list.size() > 1)
         _task.run(period());
       _started = true;
-      update();
+      _update();
     }
   }
 
@@ -648,7 +648,7 @@ public class Interpolator {
     _currentFrameValid = false;
   }
 
-  protected void updateModifiedFrameValues() {
+  protected void _updateModifiedFrames() {
     KeyFrame kf;
     KeyFrame prev = _list.get(0);
     kf = _list.get(0);
@@ -703,7 +703,7 @@ public class Interpolator {
         return;
 
       if (!_valuesAreValid)
-        updateModifiedFrameValues();
+        _updateModifiedFrames();
 
       if (_list.get(0) == _list.get(_list.size() - 1))
         _path.add(
@@ -765,14 +765,14 @@ public class Interpolator {
   protected void _checkValidity() {
     boolean flag = false;
     for (KeyFrame element : _list) {
-      if (element.frame().lastUpdate() > lastUpdate()) {
+      if (element.frame().lastUpdate() > _lastUpdate()) {
         flag = true;
         break;
       }
     }
     if (flag) {
       this._invalidateValues();
-      this.checked();
+      this._checked();
     }
   }
 
@@ -920,7 +920,7 @@ public class Interpolator {
       return;
 
     if (!_valuesAreValid)
-      updateModifiedFrameValues();
+      _updateModifiedFrames();
 
     _updateCurrentKeyFrameForTime(time);
 
