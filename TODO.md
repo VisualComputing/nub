@@ -39,5 +39,5 @@ Observations:
 * Merge Node and Frame in the API, e.g., `setEye(Frame)`, `setDefaultNode(Node)`.
 * Restored `save/loadConfig` (json).
 * Make all drawing _static_.
-* Restore `PickingPrecision.EXACT` using the pickingBuffer.
+* Restore `PickingPrecision.EXACT` using the `pickingBuffer`.
 * Restore *Luxo*, *MiniMap*, *Flock* and the remaining advanced examples with the book (and slides) in mind.
