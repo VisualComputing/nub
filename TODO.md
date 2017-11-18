@@ -26,13 +26,13 @@ Port one by one the java packages in the following order:
 Observations:
 
 1. Timing and Input packages should be ported at their own repos (_master_ branches): [here](https://github.com/VisualComputing/fpstiming.js) and [here](https://github.com/VisualComputing/bias.js). Note that the _processing_ branches contain the Java code with the examples to be tested.
-2. Primitives, Core and Proscene packages should be ported at the [proscene.js](https://github.com/VisualComputing/proscene.js) repo master branch. Note that the _processing_ branch is synced with the repos in 1.
+2. Primitives, Core and Proscene packages should be ported at the [proscene.js](https://github.com/VisualComputing/proscene.js) repo master branch. Note that the _processing_ branch is synced with the repos in 1 and that it contains the examples [here](https://github.com/VisualComputing/proscene.js/tree/processing/testing).
 
 ### Code conventions
 
 * [ECMAScript 2015](http://es6-features.org) (a.k.a., ECMAScript6 or [ES6](https://en.wikipedia.org/wiki/ECMAScript#6th_Edition_-_ECMAScript_2015)) compatibility with [class support](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes).
-* vars (class attributes) and 'private' methods begin with _underscore. Convention adopted from [here](https://developer.mozilla.org/en-US/docs/Archive/Add-ons/Add-on_SDK/Guides/Contributor_s_Guide/Private_Properties). Note that Java protected methods aren't prefixed.
-* Method params should be named as explicit as possible (in order to cope with js dynamic and weak typed features).
+* vars (class attributes) and 'private' methods are prefixed with _underscore_ (_). Convention adopted from [here](https://developer.mozilla.org/en-US/docs/Archive/Add-ons/Add-on_SDK/Guides/Contributor_s_Guide/Private_Properties). Note that Java protected methods aren't prefixed (the same goes for their js counterparts).
+* Method _params_ should be named as explicit as possible (in order to cope with js dynamic and weak typed features).
 
 ## Proscene (@nakednous)
 
