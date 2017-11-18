@@ -237,7 +237,7 @@ public class Interpolator {
         update();
       }
     };
-    _graph.registerTimingTask(_task);
+    _graph.registerTask(_task);
   }
 
   protected Interpolator(Interpolator other) {
@@ -276,7 +276,7 @@ public class Interpolator {
         update();
       }
     };
-    _graph.registerTimingTask(_task);
+    _graph.registerTask(_task);
 
     this.invalidateValues();
   }

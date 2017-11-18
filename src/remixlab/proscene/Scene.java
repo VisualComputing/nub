@@ -400,7 +400,7 @@ public class Scene extends Graph implements PConstants {
   // TIMING
 
   @Override
-  public void registerTimingTask(TimingTask task) {
+  public void registerTask(TimingTask task) {
     if (areTimersSequential())
       timingHandler().registerTask(task);
     else

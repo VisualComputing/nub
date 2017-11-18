@@ -836,7 +836,7 @@ public class Graph {
    *
    * @see remixlab.timing.TimingHandler#registerTask(TimingTask)
    */
-  public void registerTimingTask(TimingTask task) {
+  public void registerTask(TimingTask task) {
     timingHandler().registerTask(task);
   }
 
@@ -844,7 +844,7 @@ public class Graph {
    * Convenience wrapper function that simply calls
    * {@code timingHandler().unregisterTask(_task)}.
    */
-  public void unregisterTimingTask(TimingTask task) {
+  public void unregisterTask(TimingTask task) {
     timingHandler().unregisterTask(task);
   }
 
@@ -852,7 +852,7 @@ public class Graph {
    * Convenience wrapper function that simply returns
    * {@code timingHandler().isTaskRegistered(_task)}.
    */
-  public boolean isTimingTaskRegistered(TimingTask task) {
+  public boolean isTaskRegistered(TimingTask task) {
     return timingHandler().isTaskRegistered(task);
   }
 

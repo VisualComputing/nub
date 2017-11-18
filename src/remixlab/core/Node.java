@@ -230,7 +230,7 @@ public class Node extends Frame implements Grabber {
         _spinExecution();
       }
     };
-    graph().registerTimingTask(_spinningTask);
+    graph().registerTask(_spinningTask);
 
     _fly = new Vector(0.0f, 0.0f, 0.0f);
     _flyTask = new TimingTask() {
@@ -238,7 +238,7 @@ public class Node extends Frame implements Grabber {
         _fly();
       }
     };
-    graph().registerTimingTask(_flyTask);
+    graph().registerTask(_flyTask);
     // end
 
     // pkgnPrecision = PickingPrecision.ADAPTIVE;
@@ -277,7 +277,7 @@ public class Node extends Frame implements Grabber {
       }
     };
 
-    this._graph.registerTimingTask(_spinningTask);
+    this._graph.registerTask(_spinningTask);
 
     this._fly = new Vector();
     this._fly.set(other._fly.get());
@@ -286,7 +286,7 @@ public class Node extends Frame implements Grabber {
         _fly();
       }
     };
-    this._graph.registerTimingTask(_flyTask);
+    this._graph.registerTask(_flyTask);
     _lastUpdate = other.lastUpdate();
     // end
     // this.isInCamPath = otherFrame.isInCamPath;
