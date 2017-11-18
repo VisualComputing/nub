@@ -31,21 +31,24 @@ public class ViewFrustumCulling extends PApplet {
 
         canvas = createGraphics(w, h/2, P3D);
         scene = new Scene(this, canvas);
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.enableBoundaryEquations();
         InteractiveFrame eye = new InteractiveFrame(scene);
         scene.setEye(eye);
         scene.setDefaultNode(eye);
+        scene.setFieldOfView(PI/3);
         scene.fitBall();
 
         auxCanvas = createGraphics(w, h/2, P3D);
         // Note that we pass the upper left corner coordinates where the scene
         // is to be drawn (see drawing code below) to its constructor.
         auxScene = new Scene(this, auxCanvas, 0, h/2);
-        //auxScene.camera().setType(Camera.Type.ORTHOGRAPHIC);
+        auxScene.setType(Graph.Type.ORTHOGRAPHIC);
         InteractiveFrame auxEye = new InteractiveFrame(auxScene);
         auxScene.setEye(auxEye);
         auxScene.setDefaultNode(auxEye);
         auxScene.setRadius(200);
+        scene.setFieldOfView(PI/3);
         auxScene.fitBall();
     }
 

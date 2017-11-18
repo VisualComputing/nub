@@ -24,6 +24,17 @@ public class WindowCulling  extends PApplet {
         size(w, h, renderer);
     }
 
+    public void info() {
+        println(scene.radius());
+        scene.center().print();
+        scene.eye().position().print();
+        println(scene.zNear());
+        println(scene.zFar());
+        scene.matrixHandler().projection().print();
+        scene.matrixHandler().view().print();
+        scene.matrixHandler().modelView().print();
+    }
+
     public void setup() {
         canvas = createGraphics(w, h/2, renderer);
         scene = new Scene(this, canvas);
@@ -32,7 +43,7 @@ public class WindowCulling  extends PApplet {
         scene.setEye(eye);
         scene.setDefaultNode(eye);
         scene.setRadius(200);
-        scene.fitBallInterpolation();
+        scene.fitBall();
 
         // enable computation of the boundary hyper-planes equations (disabled by default)
         scene.enableBoundaryEquations();
@@ -46,7 +57,7 @@ public class WindowCulling  extends PApplet {
         auxScene.setEye(auxEye);
         auxScene.setDefaultNode(auxEye);
         auxScene.setRadius(400);
-        auxScene.fitBallInterpolation();
+        auxScene.fitBall();
     }
 
     void mainDrawing(Scene s) {
@@ -61,7 +72,6 @@ public class WindowCulling  extends PApplet {
                 p.ellipse(0, 0, circleRadius, circleRadius);
                 break;
             case SEMIVISIBLE:
-                println(scene.frameCount());
                 p.fill(255, 0, 0);
                 p.ellipse(0, 0, circleRadius, circleRadius);
                 break;
@@ -89,6 +99,15 @@ public class WindowCulling  extends PApplet {
         auxiliarDrawing(auxScene);
         auxScene.endDraw();
         auxScene.display();
+    }
+
+    public void keyPressed() {
+        if(key == 's')
+            scene.fitBallInterpolation();
+        if(key == 'f')
+            scene.fitBall();
+        if(key == 'i')
+            info();
     }
 
     public class InteractiveFrame extends Node {

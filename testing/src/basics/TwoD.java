@@ -32,6 +32,8 @@ public class TwoD extends PApplet {
     public void setup() {
         rectMode(CENTER);
         scene = new Scene(this);
+        if(scene.is3D())
+            scene.setType(Graph.Type.ORTHOGRAPHIC);
 
         node = new InteractiveFrame();
         eye = new InteractiveFrame();
