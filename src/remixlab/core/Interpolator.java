@@ -52,7 +52,7 @@ import java.util.ListIterator;
  * be monotonously increasing over keyFrames. When {@link #speed()} equals
  * 1.0 (default value), these times correspond to actual user's seconds during
  * interpolation (provided that your main loop is fast enough). The interpolation is then
- * real-time: the keyFrames will be reached at their {@link #keyFrameTime(int)}.
+ * real-time: the keyFrames will be reached at their {@link #time(int)}.
  * <p>
  * <h3>Interpolation details</h3>
  * <p>
@@ -278,7 +278,7 @@ public class Interpolator {
     };
     _graph.registerTask(_task);
 
-    this.invalidateValues();
+    this._invalidateValues();
   }
 
   public Interpolator get() {
@@ -294,14 +294,14 @@ public class Interpolator {
 
   /**
    * Internal use. Updates the last frame path was updated. Called by
-   * {@link #checkValidity()}.
+   * {@link #_checkValidity()}.
    */
   protected void checked() {
     _lastUpdate = TimingHandler.frameCount;
   }
 
   /**
-   * Internal use. Called by {@link #checkValidity()}.
+   * Internal use. Called by {@link #_checkValidity()}.
    */
   protected long lastUpdate() {
     return _lastUpdate;
@@ -331,7 +331,7 @@ public class Interpolator {
    * Returns the number of keyFrames used by the interpolation. Use
    * {@link #addKeyFrame(Frame)} to addGrabber new keyFrames.
    */
-  public int numberOfKeyFrames() {
+  public int size() {
     return _list.size();
   }
 
@@ -350,7 +350,7 @@ public class Interpolator {
   /**
    * Returns the current interpolation _speed.
    * <p>
-   * Default value is 1.0f, which means {@link #keyFrameTime(int)} will be matched during
+   * Default value is 1.0f, which means {@link #time(int)} will be matched during
    * the interpolation (provided that your main loop is fast enough).
    * <p>
    * A negative value will result in a reverse interpolation of the keyFrames.
@@ -478,9 +478,9 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Called by {@link #checkValidity()}.
+   * Internal use. Called by {@link #_checkValidity()}.
    */
-  protected void invalidateValues() {
+  protected void _invalidateValues() {
     _valuesAreValid = false;
     _pathIsValid = false;
     _splineCacheIsValid = false;
@@ -567,7 +567,7 @@ public class Interpolator {
    * Appends a new keyFrame to the path.
    * <p>
    * Same as {@link #addKeyFrame(Frame, float)}, except that the
-   * {@link #keyFrameTime(int)} is set to the previous {@link #keyFrameTime(int)} plus one
+   * {@link #time(int)} is set to the previous {@link #time(int)} plus one
    * second (or 0.0 if there is no previous keyFrame).
    */
   public void addKeyFrame(Frame frame) {
@@ -591,7 +591,7 @@ public class Interpolator {
    * which will be connected to the Interpolator: when {@code frame} is _modified,
    * the Interpolator path is updated accordingly. This allows for dynamic paths,
    * where keyFrame can be edited, even during the interpolation. {@code null} frame
-   * references are silently ignored. The {@link #keyFrameTime(int)} has to be
+   * references are silently ignored. The {@link #time(int)} has to be
    * monotonously increasing over keyFrames.
    */
   public void addKeyFrame(Frame frame, float time) {
@@ -632,7 +632,7 @@ public class Interpolator {
   }
 
   /**
-   * Removes all keyFrames from the path. The {@link #numberOfKeyFrames()} is set to 0.
+   * Removes all keyFrames from the path. The {@link #size()} is set to 0.
    */
   public void clear() {
     stop();
@@ -667,26 +667,34 @@ public class Interpolator {
     _valuesAreValid = true;
   }
 
-  protected List<KeyFrame> keyFrames() {
-    return _list;
+  /**
+   * Returns the list of key frames which defines this interpolator.
+   */
+  public List<Frame> keyFrames() {
+    List<Frame> list = new ArrayList<Frame>();
+    for(KeyFrame keyFrame : _list)
+      list.add(keyFrame.frame());
+    return list;
   }
 
   /**
-   * Calls {@link #updatePath()} and then returns a list of Frames defining the
-   * Interpolator path.
+   * Computes a path from {@link #keyFrames()} for the interpolator to be drawn.
+   * <p>
+   * Calls {@link #_updatePath()} and then returns a list of Frames defining the
+   * Interpolator path (which is different than that of {@link #keyFrames()}).
    * <p>
    * Use it in your Interpolator path drawing routine.
    */
   public List<Frame> path() {
-    updatePath();
+    _updatePath();
     return _path;
   }
 
   /**
-   * Intenal use. Call {@link #checkValidity()} and if path is not valid recomputes it.
+   * Intenal use. Call {@link #_checkValidity()} and if path is not valid recomputes it.
    */
-  protected void updatePath() {
-    checkValidity();
+  protected void _updatePath() {
+    _checkValidity();
     if (!_pathIsValid) {
       _path.clear();
       int nbSteps = 30;
@@ -751,10 +759,10 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Calls {@link #invalidateValues()} if a keyFrame (frame) defining the
+   * Internal use. Calls {@link #_invalidateValues()} if a keyFrame (frame) defining the
    * path was recently _modified.
    */
-  protected void checkValidity() {
+  protected void _checkValidity() {
     boolean flag = false;
     for (KeyFrame element : _list) {
       if (element.frame().lastUpdate() > lastUpdate()) {
@@ -763,7 +771,7 @@ public class Interpolator {
       }
     }
     if (flag) {
-      this.invalidateValues();
+      this._invalidateValues();
       this.checked();
     }
   }
@@ -771,8 +779,8 @@ public class Interpolator {
   /**
    * Returns the Frame associated with the keyFrame at index {@code index}.
    * <p>
-   * See also {@link #keyFrameTime(int)}. {@code index} has to be in the range 0..
-   * {@link #numberOfKeyFrames()}-1.
+   * See also {@link #time(int)}. {@code index} has to be in the range 0..
+   * {@link #size()}-1.
    * <p>
    * <b>Note:</b> If this keyFrame was defined using a reference to a Frame (see
    * {@link #addKeyFrame(Frame, float)} the current referenced Frame state is
@@ -784,11 +792,11 @@ public class Interpolator {
 
   /**
    * Returns the time corresponding to the {@code index} keyFrame. index has to be in the
-   * range 0.. {@link #numberOfKeyFrames()}-1.
+   * range 0.. {@link #size()}-1.
    *
    * @see #keyFrame(int)
    */
-  public float keyFrameTime(int index) {
+  public float time(int index) {
     return _list.get(index).time();
   }
 
@@ -798,7 +806,7 @@ public class Interpolator {
    * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0.0 if the
    * path has less than 2 keyFrames.
    *
-   * @see #keyFrameTime(int)
+   * @see #time(int)
    */
   public float duration() {
     return lastTime() - firstTime();
@@ -811,7 +819,7 @@ public class Interpolator {
    *
    * @see #lastTime()
    * @see #duration()
-   * @see #keyFrameTime(int)
+   * @see #time(int)
    */
   public float firstTime() {
     if (_list.isEmpty())
@@ -826,7 +834,7 @@ public class Interpolator {
    *
    * @see #firstTime()
    * @see #duration()
-   * @see #keyFrameTime(int)
+   * @see #time(int)
    */
   public float lastTime() {
     if (_list.isEmpty())
@@ -835,7 +843,7 @@ public class Interpolator {
       return _list.get(_list.size() - 1).time();
   }
 
-  protected void updateCurrentKeyFrameForTime(float time) {
+  protected void _updateCurrentKeyFrameForTime(float time) {
     // Assertion: times are sorted in monotone order.
     // Assertion: keyFrame_ is not empty
 
@@ -885,7 +893,7 @@ public class Interpolator {
     }
   }
 
-  protected void updateSplineCache() {
+  protected void _updateSplineCache() {
     Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).position(),
         _list.get(_current1.nextIndex()).position());
     _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex()).tangentVector(), (-2.0f)));
@@ -905,7 +913,7 @@ public class Interpolator {
    */
   //TODO rename me as atTime() ??
   public void interpolateAtTime(float time) {
-    this.checkValidity();
+    this._checkValidity();
     setTime(time);
 
     if ((_list.isEmpty()) || (frame() == null))
@@ -914,10 +922,10 @@ public class Interpolator {
     if (!_valuesAreValid)
       updateModifiedFrameValues();
 
-    updateCurrentKeyFrameForTime(time);
+    _updateCurrentKeyFrameForTime(time);
 
     if (!_splineCacheIsValid)
-      updateSplineCache();
+      _updateSplineCache();
 
     float alpha;
     float dt = _list.get(_current2.nextIndex()).time() - _list.get(_current1.nextIndex()).time();

@@ -1590,9 +1590,9 @@ public class Scene extends Graph implements PConstants {
       pg().strokeWeight(pg().strokeWeight / 2f);
     }
     // draw the picking targets:
-    for (int index = 0; index < interpolator.numberOfKeyFrames(); index++)
-      if(interpolator.keyFrame(index) instanceof Node)
-        drawPickingTarget((Node)interpolator.keyFrame(index));
+    for (Frame frame : interpolator.keyFrames())
+      if(frame instanceof Node)
+        drawPickingTarget((Node)frame);
     pg().popStyle();
   }
 
