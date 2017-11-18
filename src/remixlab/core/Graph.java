@@ -770,6 +770,15 @@ public class Graph {
       _collectNodes(list, child);
   }
 
+  // Input stuff
+
+  /**
+   * Returns the graph {@link InputHandler}.
+   */
+  public InputHandler inputHandler() {
+    return _inputHandler;
+  }
+
   // TODO docs missing
   // param instead of Node. It allows to manipulate the eye() instance more easily sometimes
   public void setDefaultNode(Node node) {
@@ -802,7 +811,14 @@ public class Graph {
     inputHandler().unregisterAgents();
   }
 
-  // FPSTiming STUFF
+  // Timing stuff
+
+  /**
+   * Returns the graph {@link TimingHandler}.
+   */
+  public TimingHandler timingHandler() {
+    return _timingHandler;
+  }
 
   /**
    * Returns the number of frames displayed since the graph was instantiated.
@@ -868,25 +884,9 @@ public class Graph {
     return timingHandler().isAnimatorRegistered(animator);
   }
 
-  // E V E N T H A N D L I N G
-
-  /**
-   * Returns the graph {@link InputHandler}.
-   */
-  public InputHandler inputHandler() {
-    return _inputHandler;
-  }
-
-  /**
-   * Returns the graph {@link TimingHandler}.
-   */
-  public TimingHandler timingHandler() {
-    return _timingHandler;
-  }
-
   // 1. Scene overloaded
 
-  // MATRIX and TRANSFORMATION STUFF
+  // Matrix and transformations stuff
 
   /**
    * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds
@@ -1224,7 +1224,7 @@ public class Graph {
     _matrixHandler.cacheProjectionViewInverse(optimise);
   }
 
-  // DRAWING STUFF
+  // Drawing stuff
 
   /**
    * Called before your main drawing and performs the following:
@@ -1239,7 +1239,6 @@ public class Graph {
   public void preDraw() {
     // 1. Eye, raster graph
     matrixHandler().bind();
-    //TODO really needs checking
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
@@ -1264,17 +1263,7 @@ public class Graph {
     inputHandler().handle();
   }
 
-  /**
-   * Draws visual hint (a cross on the screen) when the
-   * {@link #anchor()} is being set.
-   */
-  //protected abstract void drawAnchorHint();
-
-  // 0. Optimization stuff
-
-  // public abstract long frameCount();
-
-  // 3. EYE STUFF
+  // Eye stuff
 
   /**
    * Returns the associated eye. Never null.
@@ -2596,7 +2585,7 @@ public class Graph {
     }
   }
 
-  // WARNINGS and EXCEPTIONS STUFF
+  // Warning and exception handling stuff
 
   static protected HashMap<String, Object> _warnings;
 
@@ -2664,7 +2653,7 @@ public class Graph {
     showWarning(themethod + "() requires at least a " + dofs + " dofs.");
   }
 
-  // NICE STUFF
+  // Nice stuff :P
 
   /**
    * Apply the local transformation defined by {@code frame}, i.e., respect to the frame
@@ -2729,7 +2718,7 @@ public class Graph {
       applyTransformation(frame);
   }
 
-  // GENERAL STUFF
+  // Other stuff
 
   /**
    * Returns true if graph is left handed. Note that the graph is right handed by default.
