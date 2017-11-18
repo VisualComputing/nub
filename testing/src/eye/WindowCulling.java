@@ -18,7 +18,7 @@ public class WindowCulling  extends PApplet {
     int h = 1110;
 
     //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-    String renderer = JAVA2D;
+    String renderer = P2D;
 
     public void settings() {
         size(w, h, renderer);

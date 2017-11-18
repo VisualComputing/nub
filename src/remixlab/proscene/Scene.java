@@ -2261,7 +2261,7 @@ public class Scene extends Graph implements PConstants {
    * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    */
   public void drawEye(PGraphics pGraphics, Graph graph, boolean texture) {
-    // Key here is to represent the eye getBoundaryWidthHeight, zNear and zFar params
+    // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
     // (which are given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.eye().magnitude()
     if (graph == this) {
@@ -2284,7 +2284,7 @@ public class Scene extends Graph implements PConstants {
     points[1] = new Vector();
 
     if (is2D() || ortho) {
-      float[] wh = graph.getBoundaryWidthHeight();
+      float[] wh = graph.boundaryWidthHeight();
       points[0].setX(wh[0] * 1 / graph.eye().magnitude());
       points[1].setX(wh[0] * 1 / graph.eye().magnitude());
       points[0].setY(wh[1] * 1 / graph.eye().magnitude());
@@ -2425,7 +2425,7 @@ public class Scene extends Graph implements PConstants {
    * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
    */
   public void drawEyeNearPlane(PGraphics pGraphics, Graph graph, boolean texture) {
-    // Key here is to represent the eye getBoundaryWidthHeight and zNear params
+    // Key here is to represent the eye boundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.eye().magnitude()
     if (graph == this) {
@@ -2440,7 +2440,7 @@ public class Scene extends Graph implements PConstants {
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vector corner = new Vector();
     if (is2D() || ortho) {
-      float[] wh = graph.getBoundaryWidthHeight();
+      float[] wh = graph.boundaryWidthHeight();
       corner.setX(wh[0] * 1 / graph.eye().magnitude());
       corner.setY(wh[1] * 1 / graph.eye().magnitude());
     }

@@ -75,7 +75,7 @@ public class Graph {
   protected float _coefficients[][];
   protected boolean _coefficientsUpdate;
   protected Vector _normal[];
-  protected float _dist[];
+  protected float _distance[];
   // rescale ortho when anchor changes
   protected float _rapK = 1;
   // Inverse the direction of an horizontal mouse motion. Depends on the
@@ -174,12 +174,6 @@ public class Graph {
     setMatrixHandler(new MatrixHandler(this));
     setRightHanded();
 
-    _coefficients = new float[6][4];
-    _normal = new Vector[6];
-    for (int i = 0; i < _normal.length; i++)
-      _normal[i] = new Vector();
-    _dist = new float[6];
-
     enableBoundaryEquations(false);
 
     setZNearCoefficient(0.005f);
@@ -242,7 +236,7 @@ public class Graph {
    * With a {@link Type#ORTHOGRAPHIC} {@link #type()}, the
    * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
    * are inferred from the distance to the {@link #anchor()} using
-   * {@link #getBoundaryWidthHeight()}.
+   * {@link #boundaryWidthHeight()}.
    * <p>
    * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
    * and {@link #aspectRatio()} (for frustum shape).
@@ -482,22 +476,12 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code getOrthoWidthHeight(new
-   * float[2])}.
-   *
-   * @see #getBoundaryWidthHeight(float[])
-   */
-  public float[] getBoundaryWidthHeight() {
-    return getBoundaryWidthHeight(new float[2]);
-  }
-
-  /**
-   * Fills in {@code target} with the {@code halfWidth} and {@code halfHeight} of the eye
-   * boundary and returns it. While {@code target[0]} holds {@code halfWidth},
-   * {@code target[1]} holds {@code halfHeight}. Values are computed as:
-   * {@code target[0] = _rescalingFactor() * (frame().magnitude() * this.screenWidth() / 2)}
-   * and {@code _rescalingFactor() * (frame().magnitude() * this.screenHeight() / 2)}
-   * .
+   * Returns the {@code halfWidth} and {@code halfHeight} of the eye boundary.
+   * While first element holds {@code halfWidth}, the second one
+   * holds {@code halfHeight}. Values are computed as:
+   * {@code _rescalingFactor() * (eye().magnitude() * width() / 2)}
+   * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)}
+   * respectively.
    * <p>
    * These values are valid for 2d Windows and ortho Cameras (but not persp) and they are
    * expressed in virtual graph units.
@@ -511,7 +495,8 @@ public class Graph {
    *
    * @see #_rescalingFactor()
    */
-  public float[] getBoundaryWidthHeight(float[] target) {
+  public float[] boundaryWidthHeight() {
+    float[] target = new float[2];
     if ((target == null) || (target.length != 2)) {
       target = new float[2];
     }
@@ -534,7 +519,7 @@ public class Graph {
    * <p>
    * Value is computed as: {@code 2 * Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis()) / screenHeight()}.
    *
-   * @see #getBoundaryWidthHeight(float[])
+   * @see #boundaryWidthHeight()
    */
   protected float _rescalingFactor() {
     if(is2D())
@@ -945,7 +930,7 @@ public class Graph {
    * {@link #zNear()} and
    * {@link #zFar()} parameters. If eye is a 3D ORTHOGRAPHIC
    * Camera, the frustum's width and height are set using
-   * {@link #getBoundaryWidthHeight()}. Both types use
+   * {@link #boundaryWidthHeight()}. Both types use
    * {@link #zNear()} and
    * {@link #zFar()} to place clipping planes. These values
    * are determined from sceneRadius() and sceneCenter() so that they best fit the graph
@@ -975,7 +960,7 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = getBoundaryWidthHeight();
+        float[] wh = boundaryWidthHeight();
         m._matrix[0] = 1.0f / wh[0];
         m._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
         m._matrix[10] = -2.0f / (ZFar - ZNear);
@@ -1351,14 +1336,14 @@ public class Graph {
    * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
+   * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by pointIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
         return false;
     return true;
@@ -1382,7 +1367,7 @@ public class Graph {
    * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
+   * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility ballVisibility(Vector center, float radius) {
@@ -1390,7 +1375,7 @@ public class Graph {
       System.out.println("The camera frustum plane equations (needed by sphereIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       float d = distanceToBoundary(i, center);
       if (d > radius)
         return Visibility.INVISIBLE;
@@ -1420,7 +1405,7 @@ public class Graph {
    * @see #ballVisibility(Vector, float)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
+   * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
@@ -1428,7 +1413,7 @@ public class Graph {
       System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
         Vector pos = new Vector(((c & 4) != 0) ? corner1._vector[0] : corner2._vector[0], ((c & 2) != 0) ? corner1._vector[1] : corner2._vector[1],
@@ -1451,25 +1436,9 @@ public class Graph {
   }
 
   /**
-   * Convenience function that in 2D simply returns
-   * {@code computeFrustumPlanesCoefficients(new float [4][3])} and in 3D
-   * {@code computeFrustumPlanesCoefficients(new float [6][4])}.
+   * Returns the 6 plane equations of the eye boundary.
    * <p>
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * frustum equations to be updated only occasionally (rare). Use
-   * {@link Graph#enableBoundaryEquations()} which
-   * automatically update the frustum equations every frame instead.
-   *
-   * @see #computeBoundaryEquations(float[][])
-   */
-  public float[][] computeBoundaryEquations() {
-    return computeBoundaryEquations(new float[6][4]);
-  }
-
-  /**
-   * Fills {@code coef} with the 6 plane equations of the camera frustum and returns it.
-   * <p>
-   * In 2D the four 4-component vectors of {@code coef} respectively correspond to the
+   * In 2D the four 4-component vectors of respectively correspond to the
    * left, right, top and bottom Window boundary lines. Each vector holds a plane equation
    * of the form:
    * <p>
@@ -1477,7 +1446,7 @@ public class Graph {
    * components of each vector, in that order.
    * <p>
    * <p>
-   * In 3D the six 4-component vectors of {@code coef} respectively correspond to the
+   * In 3D the six 4-component vectors of respectively correspond to the
    * left, right, near, far, top and bottom Camera frustum planes. Each vector holds a
    * plane equation of the form:
    * <p>
@@ -1490,11 +1459,11 @@ public class Graph {
    * frustum plane can hence be applied in an other viewer to visualize the culling
    * results:
    * <p>
-   * {@code // Retrieve place equations}<br>
+   * {@code Retrieve place equations}<br>
    * {@code float [][] coef =
    * mainViewer.camera().getFrustumPlanesCoefficients();}<br>
-   * {@code // These two additional clipping planes (which must have been enabled)} <br>
-   * {@code // will reproduce the mainViewer's near and far clipping.}<br>
+   * {@code These two additional clipping planes (which must have been enabled)} <br>
+   * {@code will reproduce the mainViewer's near and far clipping.}<br>
    * {@code gl.glClipPlane(GL.GL_CLIP_PLANE0, coef[2]);}<br>
    * {@code gl.glClipPlane(GL.GL_CLIP_PLANE1, coef[3]);}<br>
    * <p>
@@ -1505,13 +1474,34 @@ public class Graph {
    *
    * @see #computeBoundaryEquations()
    */
-  public float[][] computeBoundaryEquations(float[][] coefficients) {
-    // soft check:
-    if (coefficients == null || (coefficients.length == 0))
-      coefficients = new float[6][4];
-    else if ((coefficients.length != 6) || (coefficients[0].length != 4))
-      coefficients = new float[6][4];
+  public float[][] computeBoundaryEquations() {
+    _initCoefficients();
+    return is3D() ? _computeBoundaryEquations3() : _computeBoundaryEquations2();
+  }
 
+  protected void _initCoefficients() {
+    int rows = is3D() ? 6 : 4, cols = is3D() ? 4 : 3;
+    if (_coefficients == null)
+      _coefficients = new float[rows][cols];
+    else if (_coefficients.length != rows)
+      _coefficients = new float[rows][cols];
+    if (_normal == null) {
+      _normal = new Vector[rows];
+      for (int i = 0; i < _normal.length; i++)
+        _normal[i] = new Vector();
+    }
+    else if (_normal.length != rows) {
+      _normal = new Vector[rows];
+      for (int i = 0; i < _normal.length; i++)
+        _normal[i] = new Vector();
+    }
+    if (_distance == null)
+      _distance = new float[rows];
+    else if (_distance.length != rows)
+      _distance = new float[rows];
+  }
+
+  protected float[][] _computeBoundaryEquations3() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector viewDir = viewDirection();
@@ -1539,9 +1529,9 @@ public class Graph {
         _normal[4] = Vector.add(_normal[4], Vector.multiply(up, chfov));
 
         for (int i = 0; i < 2; ++i)
-          _dist[i] = Vector.dot(pos, _normal[i]);
+          _distance[i] = Vector.dot(pos, _normal[i]);
         for (int j = 4; j < 6; ++j)
-          _dist[j] = Vector.dot(pos, _normal[j]);
+          _distance[j] = Vector.dot(pos, _normal[j]);
 
         // Natural equations are:
         // dist[0,1,4,5] = pos * normal[0,1,4,5];
@@ -1551,44 +1541,71 @@ public class Graph {
         // 2 times less computations using expanded/merged equations. Dir vectors
         // are normalized.
         float posRightCosHH = chhfov * Vector.dot(pos, right);
-        _dist[0] = -shhfov * posViewDir;
-        _dist[1] = _dist[0] + posRightCosHH;
-        _dist[0] = _dist[0] - posRightCosHH;
+        _distance[0] = -shhfov * posViewDir;
+        _distance[1] = _distance[0] + posRightCosHH;
+        _distance[0] = _distance[0] - posRightCosHH;
         float posUpCosH = chfov * Vector.dot(pos, up);
-        _dist[4] = -shfov * posViewDir;
-        _dist[5] = _dist[4] - posUpCosH;
-        _dist[4] = _dist[4] + posUpCosH;
+        _distance[4] = -shfov * posViewDir;
+        _distance[5] = _distance[4] - posUpCosH;
+        _distance[4] = _distance[4] + posUpCosH;
         break;
       }
-      case TWO_D:
       case ORTHOGRAPHIC:
         _normal[0] = Vector.multiply(right, -1);
         _normal[1] = right;
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float[] wh = getBoundaryWidthHeight();
-        _dist[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
-        _dist[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
-        _dist[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[4]);
-        _dist[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[5]);
+        float[] wh = boundaryWidthHeight();
+        _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
+        _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
+        _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[4]);
+        _distance[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[5]);
         break;
     }
 
     // Front and far planes are identical for both camera types.
     _normal[2] = Vector.multiply(viewDir, -1);
     _normal[3] = viewDir;
-    _dist[2] = -posViewDir - zNear();
-    _dist[3] = posViewDir + zFar();
+    _distance[2] = -posViewDir - zNear();
+    _distance[3] = posViewDir + zFar();
 
     for (int i = 0; i < 6; ++i) {
-      coefficients[i][0] = _normal[i]._vector[0];
-      coefficients[i][1] = _normal[i]._vector[1];
-      coefficients[i][2] = _normal[i]._vector[2];
-      coefficients[i][3] = _dist[i];
+      _coefficients[i][0] = _normal[i]._vector[0];
+      _coefficients[i][1] = _normal[i]._vector[1];
+      _coefficients[i][2] = _normal[i]._vector[2];
+      _coefficients[i][3] = _distance[i];
     }
 
-    return coefficients;
+    return _coefficients;
+  }
+
+  protected float[][] _computeBoundaryEquations2() {
+    // Computed once and for all
+    Vector pos = eye().position();
+    Vector up = upVector();
+    Vector right = rightVector();
+
+    _normal[0] = Vector.multiply(right, -1);
+    _normal[1] = right;
+    _normal[2] = up;
+    _normal[3] = Vector.multiply(up, -1);
+
+    float[] wh = boundaryWidthHeight();
+
+    _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
+    _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
+    _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[2]);
+    _distance[3] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[3]);
+
+    for (int i = 0; i < 4; ++i) {
+      _coefficients[i][0] = _normal[i]._vector[0];
+      _coefficients[i][1] = _normal[i]._vector[1];
+      // Change respect to Camera occurs here:
+      _coefficients[i][2] = -_distance[i];
+    }
+
+    return _coefficients;
   }
 
   /**
@@ -1653,11 +1670,11 @@ public class Graph {
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
-   * @see #getBoundaryEquations()
+   * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public void updateBoundaryEquations() {
-    computeBoundaryEquations(_coefficients);
+    computeBoundaryEquations();
   }
 
   /**
@@ -1675,8 +1692,7 @@ public class Graph {
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link #enableBoundaryEquations()}).
+   * Scene setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1686,7 +1702,7 @@ public class Graph {
    * @see #updateBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
-  public float[][] getBoundaryEquations() {
+  public float[][] boundaryEquations() {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
@@ -1712,7 +1728,7 @@ public class Graph {
    * @see #boxVisibility(Vector, Vector)
    * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
-   * @see #getBoundaryEquations()
+   * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public float distanceToBoundary(int index, Vector position) {
@@ -1720,7 +1736,12 @@ public class Graph {
       System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
               + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
-    return Vector.dot(position, myVector) - _coefficients[index][3];
+    if(is3D())
+      return Vector.dot(position, myVector) - _coefficients[index][3];
+    else
+      return (_coefficients[index][0] * position.x() + _coefficients[index][1] * position.y() + _coefficients[index][2])
+            / (float) Math
+            .sqrt(_coefficients[index][0] * _coefficients[index][0] + _coefficients[index][1] * _coefficients[index][1]);
   }
 
   /**
@@ -1759,7 +1780,7 @@ public class Graph {
                 .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = getBoundaryWidthHeight();
+        float[] wh = boundaryWidthHeight();
         return 2.0f * wh[1] / height();
     }
     return 1.0f;
@@ -2447,6 +2468,12 @@ public class Graph {
    * @see #setUpVector(Vector, boolean)
    */
   public void fitBall(Vector center, float radius) {
+    if(is2D()) {
+      float size = Math.min(width(), height());
+      eye().setMagnitude(2 * radius / size);
+      lookAt(center);
+      return;
+    }
     float distance = 0.0f;
     switch (type()) {
       case PERSPECTIVE: {
@@ -2455,7 +2482,6 @@ public class Graph {
         distance = Math.max(xview, yview);
         break;
       }
-      case TWO_D:
       case ORTHOGRAPHIC: {
         distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
         break;
@@ -2562,7 +2588,7 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float[] wh = getBoundaryWidthHeight();
+        float[] wh = boundaryWidthHeight();
         origin.set(
                 new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
                         0.0f));

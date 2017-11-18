@@ -2209,7 +2209,7 @@ public class Node extends Frame implements Grabber {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = _graph.getBoundaryWidthHeight();
+        float[] wh = _graph.boundaryWidthHeight();
         // float[] wh = graph.eye().getOrthoWidthHeight();
         eyeVector._vector[0] *= 2.0 * wh[0] / _graph.width();
         eyeVector._vector[1] *= 2.0 * wh[1] / _graph.height();
