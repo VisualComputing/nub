@@ -4,8 +4,8 @@
 
 1. Remove reflect stuff, i.e., Profiles and iFrame.setShape(method).
 2. Make Graph (previously AbstractScene) instantiable. Refactor GenericFrames as Nodes.
-3. Make eye nodes indistinguible from other nodes, i.e., the can interchangeably be used.
-4. Rethink third person camera by removimg Trackable in favor of 3.
+3. Make eye nodes indistinguible from other nodes, i.e., they can interchangeably be used.
+4. Rethink third person camera by removing Trackable in favor of 3.
 5. Better 2D and 3D merging by removing Eye hierarchy and move its functionality into the Graph. 
 6. Rethink constraints to cope with ik framework.
 7. Port the framework to JS (from all the previous points).
