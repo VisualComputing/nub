@@ -37,7 +37,7 @@ public class ViewFrustumCulling extends PApplet {
         scene.setEye(eye);
         scene.setDefaultNode(eye);
         scene.setFieldOfView(PI/3);
-        scene.fitBall();
+        scene.fitBallInterpolation();
 
         auxCanvas = createGraphics(w, h/2, P3D);
         // Note that we pass the upper left corner coordinates where the scene
