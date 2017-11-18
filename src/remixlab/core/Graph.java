@@ -177,7 +177,7 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
 
-  // dimensions
+  // Dimensions stuff
 
   /**
    * Returns the {@link #width()} to {@link #height()} aspect ratio of the display window.
@@ -220,7 +220,7 @@ public class Graph {
     _height = height > 0 ? height : 1;
   }
 
-  // 1. type
+  // Type handling stuff
 
   /**
    * Returns the Camera.Type.
@@ -526,7 +526,7 @@ public class Graph {
     return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
   }
 
-  // nodes
+  // Graph and nodes stuff
 
   /**
    * Returns the top-level nodes (those which reference is null).
@@ -793,8 +793,6 @@ public class Graph {
     return inputHandler().isInputGrabber(node);
   }
 
-  // Agent wrappers
-
   public boolean registerAgent(Agent agent) {
     return inputHandler().registerAgent(agent);
   }
@@ -883,8 +881,6 @@ public class Graph {
   public boolean isAnimatorRegistered(Animator animator) {
     return timingHandler().isAnimatorRegistered(animator);
   }
-
-  // 1. Scene overloaded
 
   // Matrix and transformations stuff
 
