@@ -7,6 +7,10 @@ import remixlab.primitives.Frame;
 import remixlab.proscene.*;
 import remixlab.core.*;
 
+/**
+ * This example introduces the three different interpolations offered
+ * by the Graph.
+ */
 public class FrameInterpolation extends PApplet {
     Scene scene;
     Interpolator nodeInterpolator, eyeInterpolator;
@@ -23,10 +27,16 @@ public class FrameInterpolation extends PApplet {
         //interactivity defaults to the eye
         scene.setDefaultNode(eye);
         scene.setRadius(150);
+
+        // interpolation 1. Default eye interpolations
         scene.fitBallInterpolation();
 
+        // interpolation 2. Custom eye interpolations
+        // (for the composed constructor please refer to my note @105 line)
         eyeInterpolator = new Interpolator(scene, scene.eye());
 
+        // interpolation 3. Custom (arbitrary)frame interpolations
+        // like the one you guys David & Juan currently explores to deform a shape
         nodeInterpolator = new Interpolator(scene);
         nodeInterpolator.setLoop();
         // Create an initial path
@@ -66,7 +76,6 @@ public class FrameInterpolation extends PApplet {
                 scene.drawAxes(40);
             else
                 scene.drawAxes(20);
-
             popMatrix();
         }
         if(showEyePath) {
@@ -102,8 +111,8 @@ public class FrameInterpolation extends PApplet {
             super(scene);
         }
 
-        //this one gotta be overriden because we want the a frame (line 86 above, i.e.,
-        // scene.eye().get()) to have the same behavior as its original
+        // this one gotta be overridden because we want a copied frame (e.g., line 85 above, i.e.,
+        // scene.eye().get()) to have the same behavior as its original.
         protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
             super(otherGraph, otherFrame);
         }
