@@ -3,80 +3,77 @@ package basics;
 import processing.core.PApplet;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
+import remixlab.primitives.Frame;
 import remixlab.proscene.*;
 import remixlab.core.*;
 
 public class FrameInterpolation extends PApplet {
     Scene scene;
-    Node keyFrame[];
-    Interpolator kfi;
-    int nbKeyFrames;
-    Interpolator interpolator;
+    Interpolator nodeInterpolator, eyeInterpolator;
     boolean showEyePath;
 
     public void settings() {
-        size(640, 360, P3D);
+        size(1000, 800, P3D);
     }
 
     public void setup() {
-        nbKeyFrames = 4;
         scene = new Scene(this);
-        //unsets grid and axis altogether
         InteractiveFrame eye = new InteractiveFrame();
         scene.setEye(eye);
+        //interactivity defaults to the eye
         scene.setDefaultNode(eye);
-        scene.setRadius(70);
+        scene.setRadius(150);
         scene.fitBallInterpolation();
 
-        interpolator = new Interpolator(scene, scene.eye());
+        eyeInterpolator = new Interpolator(scene, scene.eye());
 
-        kfi = new Interpolator(scene);
-        kfi.setLoop();
-
-        // An array of interactive (_key) frames.
-        keyFrame = new Node[nbKeyFrames];
+        nodeInterpolator = new Interpolator(scene);
+        nodeInterpolator.setLoop();
         // Create an initial path
+        int nbKeyFrames = 4;
         for (int i=0; i<nbKeyFrames; i++) {
-            keyFrame[i] = new InteractiveFrame();
-            keyFrame[i].setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
-            keyFrame[i].setScaling(random(0.25f, 4.0f));
-            kfi.addKeyFrame(keyFrame[i]);
+            InteractiveFrame iFrame = new InteractiveFrame();
+            iFrame.setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
+            iFrame.setScaling(random(0.25f, 4.0f));
+            nodeInterpolator.addKeyFrame(iFrame);
         }
-
-        kfi.start();
+        nodeInterpolator.start();
     }
 
     public void draw() {
         background(0);
         pushMatrix();
-        scene.applyTransformation(kfi.frame());
+        scene.applyTransformation(nodeInterpolator.frame());
         scene.drawAxes(30);
+        pushStyle();
+        fill(0,255,255,125);
+        stroke(0,0,255);
+        strokeWeight(2);
+        box(30);
+        popStyle();
         popMatrix();
 
         pushStyle();
         stroke(255);
-        //graph.drawPath(kfi);
-        scene.drawPath(kfi, 5);
+        scene.drawPath(nodeInterpolator, 5);
         popStyle();
 
-        for (int i=0; i<nbKeyFrames; ++i) {
+        for(Frame frame : nodeInterpolator.keyFrames()) {
             pushMatrix();
-            scene.applyTransformation(kfi.keyFrame(i));
-            //kfi.keyFrame(i).applyTransformation(graph);
-
-            if ( keyFrame[i].grabsInput() )
+            scene.applyTransformation(frame);
+            // Horrible cast, but Java is just horrible
+            if ( ((InteractiveFrame)frame).grabsInput() )
                 scene.drawAxes(40);
             else
                 scene.drawAxes(20);
 
             popMatrix();
         }
-
         if(showEyePath) {
             pushStyle();
             fill(255,0,0);
             stroke(0,255,0);
-            scene.drawPath(interpolator, 3);
+            scene.drawPath(eyeInterpolator, 3);
             popStyle();
         }
     }
@@ -85,15 +82,19 @@ public class FrameInterpolation extends PApplet {
         if(key == ' ')
             showEyePath = !showEyePath;
         if(key == 'l')
-            interpolator.addKeyFrame(scene.eye().get());
+            eyeInterpolator.addKeyFrame(scene.eye().get());
         if(key == 'm')
-            interpolator.toggle();
+            eyeInterpolator.toggle();
         if(key == 'n')
-            interpolator.clear();
+            eyeInterpolator.clear();
         if ( key == 'u')
-            kfi.setSpeed(kfi.speed()-0.25f);
+            nodeInterpolator.setSpeed(nodeInterpolator.speed()-0.25f);
         if ( key == 'v')
-            kfi.setSpeed(kfi.speed()+0.25f);
+            nodeInterpolator.setSpeed(nodeInterpolator.speed()+0.25f);
+        if(key == 's')
+            scene.fitBallInterpolation();
+        if(key == 'f')
+            scene.fitBall();
     }
 
     public class InteractiveFrame extends Node {
@@ -101,6 +102,8 @@ public class FrameInterpolation extends PApplet {
             super(scene);
         }
 
+        //this one gotta be overriden because we want the a frame (line 86 above, i.e.,
+        // scene.eye().get()) to have the same behavior as its original
         protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
             super(otherGraph, otherFrame);
         }
@@ -110,6 +113,7 @@ public class FrameInterpolation extends PApplet {
             return new InteractiveFrame(this.graph(), this);
         }
 
+        // behavior is here :P
         @Override
         public void interact(MotionEvent event) {
             switch (event.shortcut().id()) {
