@@ -36,8 +36,7 @@ public class FrameInterpolation extends PApplet {
         scene.fitBallInterpolation();
 
         // interpolation 2. Custom eye interpolations
-        // (for the composed constructor please refer to my note @105 line)
-        eyeInterpolator = new Interpolator(scene, scene.eye());
+        eyeInterpolator = new Interpolator(eye);
 
         // interpolation 3. Custom (arbitrary)frame interpolations, like the one
         // you guys David & Juan are currently exploring to deform a shape
@@ -118,7 +117,7 @@ public class FrameInterpolation extends PApplet {
             super(scene);
         }
 
-        // this one gotta be overridden because we want a copied frame (e.g., line 85 above, i.e.,
+        // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
         // scene.eye().get()) to have the same behavior as its original.
         protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
             super(otherGraph, otherFrame);
