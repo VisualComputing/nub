@@ -35,8 +35,8 @@ public class FrameInterpolation extends PApplet {
         // (for the composed constructor please refer to my note @105 line)
         eyeInterpolator = new Interpolator(scene, scene.eye());
 
-        // interpolation 3. Custom (arbitrary)frame interpolations
-        // like the one you guys David & Juan currently explores to deform a shape
+        // interpolation 3. Custom (arbitrary)frame interpolations, like the one
+        // you guys David & Juan are currently exploring to deform a shape
         nodeInterpolator = new Interpolator(scene);
         nodeInterpolator.setLoop();
         // Create an initial path
