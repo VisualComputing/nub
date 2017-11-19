@@ -198,7 +198,7 @@ public class Interpolator {
    * @see #Interpolator(Graph, Frame)
    */
   public Interpolator(Graph graph) {
-    this(graph, new Frame());
+    this(graph, new Node(graph));
   }
 
   public Interpolator(Node node) {

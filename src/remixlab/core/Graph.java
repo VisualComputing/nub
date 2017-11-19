@@ -2352,6 +2352,10 @@ public class Graph {
     return Vector.add(eye().position(), viewDirection());
   }
 
+  public Interpolator interpolator() {
+    return _interpolator;
+  }
+
   /**
    * Convenience function that simply calls {@code interpolateTo(fr, 1)}.
    *
