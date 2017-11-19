@@ -7,7 +7,6 @@ import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
-import vfc.ViewFrustumCulling;
 
 public class WindowCulling  extends PApplet {
     Scene scene, auxScene;
