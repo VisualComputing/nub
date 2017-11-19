@@ -16,11 +16,15 @@ public class FrameInterpolation extends PApplet {
     Interpolator nodeInterpolator, eyeInterpolator;
     boolean showEyePath;
 
+    //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
+    String renderer = P2D;
+
     public void settings() {
-        size(1000, 800, P3D);
+        size(1000, 800, renderer);
     }
 
     public void setup() {
+        rectMode(CENTER);
         scene = new Scene(this);
         InteractiveFrame eye = new InteractiveFrame();
         scene.setEye(eye);
@@ -59,7 +63,10 @@ public class FrameInterpolation extends PApplet {
         fill(0,255,255,125);
         stroke(0,0,255);
         strokeWeight(2);
-        box(30);
+        if(getGraphics().is2D())
+            rect(0,0,100,100);
+        else
+            box(30);
         popStyle();
         popMatrix();
 
