@@ -2352,6 +2352,10 @@ public class Graph {
     return Vector.add(eye().position(), viewDirection());
   }
 
+  /**
+   * Returns the {@link #eye()} {@link Interpolator} used by {@link #fitBallInterpolation()},
+   * {@link #fitScreenRegionInterpolation(Rectangle)}, {@link #interpolateTo(Frame)}, etc.
+   */
   public Interpolator interpolator() {
     return _interpolator;
   }
