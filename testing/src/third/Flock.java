@@ -21,7 +21,7 @@ public class Flock extends PApplet {
     static int FPS = 50;
 
     int initBoidNum = 300; // amount of boids to start the program with
-    ArrayList<Boid> flock;
+    static ArrayList<Boid> flock;
 
     boolean triggered;
     boolean inThirdPerson;
@@ -67,7 +67,7 @@ public class Flock extends PApplet {
         task.run(1000/FPS);
         //*/
 
-        ///*
+        /*
         frameRate(FPS);
         for (int i = 0; i < initBoidNum; i++) {
             Boid boid = new Boid(scene, new PVector(flockWidth/2, flockHeight/2, flockDepth/2 ));
@@ -83,6 +83,12 @@ public class Flock extends PApplet {
             task.run(1000/FPS);
         }
         //*/
+
+        //frameRate(FPS);
+        for (int i = 0; i < initBoidNum; i++)
+            flock.add(new Boid(scene, new PVector(flockWidth/2, flockHeight/2, flockDepth/2 )));
+
+        frameRate(FPS);
     }
 
     public void draw() {

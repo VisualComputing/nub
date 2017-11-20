@@ -6,10 +6,12 @@ import remixlab.core.Node;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
+import remixlab.timing.AnimatorObject;
 
 import java.util.ArrayList;
 
-class Boid {
+// this is so obviously an animator object
+class Boid extends AnimatorObject {
     Scene scene;
     PApplet p;
     Node frame;
@@ -29,6 +31,7 @@ class Boid {
 
     // constructors
     Boid(Scene scn, PVector inPos) {
+        super(scn.timingHandler());
         scene = scn;
         p = scene.pApplet();
         grabsMouseColor = p.color(0, 0, 255);
@@ -40,9 +43,17 @@ class Boid {
         vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
         acc = new PVector(0, 0, 0);
         neighborhoodRadius = 100;
+        setPeriod(1000/Flock.FPS);
+        start();
     }
 
-    void run(ArrayList bl) {
+    @Override
+    public void animate() {
+        run(Flock.flock);
+        render();
+    }
+
+    public void run(ArrayList bl) {
         t += .1;
         flap = 10 * PApplet.sin(t);
         // acc.add(steer(new PVector(mouseX,mouseY,300),true));
