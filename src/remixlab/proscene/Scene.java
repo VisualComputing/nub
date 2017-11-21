@@ -17,6 +17,7 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.input.Agent;
+import remixlab.input.Grabber;
 import remixlab.timing.SequentialTimer;
 import remixlab.timing.TimingTask;
 import remixlab.core.Graph;
@@ -240,6 +241,18 @@ public class Scene extends Graph implements PConstants {
     return isAgentRegistered(mouseAgent());
   }
 
+  public Grabber mouseAgentInputGrabber() {
+    return mouseAgent().inputGrabber();
+  }
+
+  public Node mouseAgentInputNode() {
+    return mouseAgentInputGrabber() instanceof Node ? (Node)mouseAgent().inputGrabber() : null;
+  }
+
+  public void resetMouseAgentInputNode() {
+    mouseAgent().resetTrackedGrabber();
+  }
+
   // keyAgent
 
   /**
@@ -291,6 +304,18 @@ public class Scene extends Graph implements PConstants {
    */
   public boolean isKeyAgentEnabled() {
     return isAgentRegistered(keyAgent());
+  }
+
+  public Grabber keyAgentInputGrabber() {
+    return mouseAgent().inputGrabber();
+  }
+
+  public Node keyAgentInputNode() {
+    return keyAgentInputGrabber() instanceof Node ? (Node)keyAgent().inputGrabber() : null;
+  }
+
+  public void resetKeyAgentInputNode() {
+    keyAgent().resetTrackedGrabber();
   }
 
   // OPENGL
@@ -1202,6 +1227,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   //TODO really needs overloading??
+  /*
   @Override
   protected void _visitNode(Node node) {
     targetPGraphics.pushMatrix();
@@ -1212,6 +1238,7 @@ public class Scene extends Graph implements PConstants {
       _visitNode(child);
     targetPGraphics.popMatrix();
   }
+  */
 
   /**
    * Apply the local transformation defined by the given {@code frame} on the given

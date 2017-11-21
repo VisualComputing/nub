@@ -785,6 +785,8 @@ public class Graph {
     inputHandler().setDefaultGrabber(node);
   }
 
+  public void resetInputNode() {inputHandler().resetTrackedGrabber();}
+
   public void shiftDefaultNode(Node node1, Node node2) {
     inputHandler().shiftDefaultGrabber(node1, node2);
   }

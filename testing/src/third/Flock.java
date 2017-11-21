@@ -2,6 +2,7 @@ package third;
 
 import processing.core.PApplet;
 import processing.core.PVector;
+import remixlab.core.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.MouseAgent;
 import remixlab.proscene.Scene;
@@ -22,9 +23,7 @@ public class Flock extends PApplet {
 
     int initBoidNum = 300; // amount of boids to start the program with
     static ArrayList<Boid> flock;
-
-    boolean triggered;
-    boolean inThirdPerson;
+    static Boid thirdPerson;
 
     public void settings() {
         size(1000, 800, P3D);
@@ -38,6 +37,8 @@ public class Flock extends PApplet {
         scene.setAnchor(scene.center());
         InteractiveFrame eye = new InteractiveFrame(scene);
         scene.setEye(eye);
+        if(scene.mouseAgent().hasGrabber((Node)scene.eye()))
+            println("has eye!");
         scene.setFieldOfView(PI/3);
         //interactivity defaults to the eye
         scene.setDefaultNode(eye);
@@ -150,6 +151,25 @@ public class Flock extends PApplet {
                 break;
             case 'v':
                 avoidWalls = !avoidWalls;
+                break;
+            case 's':
+                for (Boid boid : flock)
+                    boid.stop();
+                break;
+            case 'S':
+                for (Boid boid : flock)
+                    boid.start();
+                break;
+            case ' ':
+                if(scene.eye().reference() != null) {
+                    scene.lookAt(scene.center());
+                    scene.fitBallInterpolation();
+                    scene.eye().setReference(null);
+                    //scene.resetMouseAgentInputNode();
+                    if(scene.mouseAgent().hasGrabber((Node)scene.eye()))
+                        println("has eye!");
+                    scene.setDefaultNode((Node)scene.eye());
+                }
                 break;
                 /*
             case '+':

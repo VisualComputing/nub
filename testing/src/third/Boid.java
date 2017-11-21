@@ -49,7 +49,13 @@ class Boid extends AnimatorObject {
 
     @Override
     public void animate() {
-        run(Flock.flock);
+        if(scene.mouseAgentInputNode() == frame && scene.eye().reference() != frame) {
+            scene.eye().setReference(frame);
+            scene.interpolateTo(frame);
+            //scene.resetMouseAgentInputNode();
+        }
+        else
+            run(Flock.flock);
         render();
     }
 
@@ -111,6 +117,10 @@ class Boid extends AnimatorObject {
             pos.z = Flock.flockDepth;
     }
 
+    public boolean isAvatar() {
+        return scene.mouseAgentInputNode() == frame && scene.eye() != frame;
+    }
+
     /*
     boolean isAvatar() {
         return scene.avatar() == null ? false : scene.avatar().equals(frame) ? true : false;
@@ -131,6 +141,7 @@ class Boid extends AnimatorObject {
         p.pushMatrix();
         // Multiply matrix to get in the frame coordinate system.
         frame.applyTransformation();
+        scene.drawAxes();
 
         // highlight boids under the mouse
         if ( frame.track(p.mouseX, p.mouseY) )
