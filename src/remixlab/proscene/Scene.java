@@ -1316,7 +1316,7 @@ public class Scene extends Graph implements PConstants {
    * This method doesn't perform any computation, but simple retrieve the current matrices
    * whose actual computation has been updated in {@link #preDraw()}.
    */
-  //TODO needs testing shader chaining and picking buffer
+  //TODO needs testing shader chaining
   public void bindMatrices(PGraphics pGraphics) {
     if (this.pg() == pGraphics)
       return;
@@ -1326,20 +1326,6 @@ public class Scene extends Graph implements PConstants {
     mh.cacheProjectionView();
     mh.bindModelView(view());
   }
-
-  //TODO really needs overloading??
-  /*
-  @Override
-  protected void _visitNode(Node node) {
-    _targetPGraphics.pushMatrix();
-    applyTransformation(_targetPGraphics, node);
-    if (node instanceof Node)
-      node.visitCallback();
-    for (Node child : node.children())
-      _visitNode(child);
-    _targetPGraphics.popMatrix();
-  }
-  */
 
   /**
    * Apply the local transformation defined by the given {@code frame} on the given
