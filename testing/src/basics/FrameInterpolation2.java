@@ -204,7 +204,7 @@ public class FrameInterpolation2 extends PApplet {
         }
     }
 
-    // Controls are implemented from usign (the new) NodeP5 class which uses
+    // Controls are implemented from using (the new) NodeP5 class which uses
     // the picking buffer (exact picking according to the picking shape)
     public class Button extends NodeP5 {
         //button dimensions
