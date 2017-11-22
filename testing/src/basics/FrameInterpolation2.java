@@ -5,7 +5,6 @@ import processing.core.PGraphics;
 import remixlab.input.Event;
 import remixlab.input.event.*;
 import remixlab.primitives.Frame;
-import remixlab.primitives.Vector;
 import remixlab.proscene.*;
 import remixlab.core.*;
 
@@ -27,7 +26,7 @@ public class FrameInterpolation2 extends PApplet {
     int oH = h/3;
     int oX = w - oW;
     int oY = h - oH;
-    boolean showMiniMap = true;
+    boolean showControls = true;
 
     public void settings() {
         size(w, h, P3D);
@@ -117,11 +116,11 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         // Note that autoFocus is currently broken when one scene is onscreen
-        // and the other is offfscreen. It will be fixed ... next year...
+        // and the other is offscreen. It will be fixed ... next year...
         // in the mean time please write conditions on mouseX mouseY to (dis)enable
         // (e.g., scene.disableKeyAgent(); scene.disableMouseAgent();)
         // the two scenes agents according to their dimensions and placement.
-        if (showMiniMap) {
+        if (showControls) {
             scene.beginScreenDrawing();
             auxScene.beginDraw();
             auxCanvas.background(29, 153, 243);
@@ -136,7 +135,7 @@ public class FrameInterpolation2 extends PApplet {
 
     public void keyPressed() {
         if(key == 'c')
-            showMiniMap = !showMiniMap;
+            showControls = !showControls;
         if(key == ' ')
             showEyePath = !showEyePath;
         if(key == 'l')
