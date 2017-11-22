@@ -2,9 +2,8 @@ package basics;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.MotionEvent;
-import remixlab.input.event.TapEvent;
+import remixlab.input.Event;
+import remixlab.input.event.*;
 import remixlab.primitives.Frame;
 import remixlab.primitives.Vector;
 import remixlab.proscene.*;
@@ -16,7 +15,6 @@ import remixlab.core.*;
  */
 public class FrameInterpolation2 extends PApplet {
     Scene scene;
-    PGraphics canvas;
     Interpolator nodeInterpolator, eyeInterpolator;
     boolean showEyePath;
 
@@ -29,16 +27,14 @@ public class FrameInterpolation2 extends PApplet {
     int oH = h/3;
     int oX = w - oW;
     int oY = h - oH;
-    boolean showMiniMap  = true;
+    boolean showMiniMap = true;
 
     public void settings() {
         size(w, h, P3D);
     }
 
     public void setup() {
-        canvas = createGraphics(w, h, P3D);
-        canvas.rectMode(CENTER);
-        scene = new Scene(this, canvas);
+        scene = new Scene(this);
         InteractiveFrame eye = new InteractiveFrame(scene);
         scene.setEye(eye);
         //interactivity defaults to the eye
@@ -69,72 +65,75 @@ public class FrameInterpolation2 extends PApplet {
         auxCanvas = createGraphics(oW, oH, P2D);
         auxCanvas.rectMode(CENTER);
         auxScene = new Scene(this, auxCanvas, oX, oY);
+        //auxScene.disablePickingBuffer();
         InteractiveFrame eye1 = new InteractiveFrame(auxScene);
         auxScene.setEye(eye1);
         //interactivity defaults to the eye
         auxScene.setDefaultNode(eye1);
         Button button = new Button(100,60);
         //note that we can transform (but no rotate) the button and it still will be correctly picked
-        button.setPosition(100,20);
-        button.scale(0.8f);
+        button.setPosition(200,50);
         auxScene.setRadius(200);
         auxScene.fitBall();
     }
 
     public void draw() {
         background(0);
-        scene.beginDraw();
-        canvas.background(0);
-
-        canvas.pushMatrix();
+        pushMatrix();
         scene.applyTransformation(nodeInterpolator.frame());
         scene.drawAxes(30);
-        canvas.pushStyle();
-        canvas.fill(0,255,255,125);
-        canvas.stroke(0,0,255);
-        canvas.strokeWeight(2);
+        pushStyle();
+        fill(0,255,255,125);
+        stroke(0,0,255);
+        strokeWeight(2);
         if(scene.is2D())
-            canvas.rect(0,0,100,100);
+            rect(0,0,100,100);
         else
-            canvas.box(30);
-        canvas.popStyle();
-        canvas.popMatrix();
+            box(30);
+        popStyle();
+        popMatrix();
 
-        canvas.pushStyle();
-        canvas.stroke(255);
+        pushStyle();
+        stroke(255);
         scene.drawPath(nodeInterpolator, 5);
-        canvas.popStyle();
+        popStyle();
 
         for(Frame frame : nodeInterpolator.keyFrames()) {
-            canvas.pushMatrix();
+            pushMatrix();
             scene.applyTransformation(frame);
             // Horrible cast, but Java is just horrible
             if ( ((InteractiveFrame)frame).grabsInput() )
                 scene.drawAxes(35);
             else
                 scene.drawAxes(20);
-            canvas.popMatrix();
+            popMatrix();
         }
         if(showEyePath) {
-            canvas.pushStyle();
-            canvas.fill(255,0,0);
-            canvas.stroke(0,255,255);
+            pushStyle();
+            fill(255,0,0);
+            stroke(0,255,255);
             scene.drawPath(eyeInterpolator, 3);
-            canvas.popStyle();
+            popStyle();
         }
 
-        scene.endDraw();
-        scene.display();
-
-        //control graph
+        // Note that autoFocus is currently broken when one scene is onscreen
+        // and the other is offfscreen. It will be fixed ... next year...
+        // in the mean time please write conditions on mouseX mouseY to (dis)enable
+        // the two scenes agents according to their dimensions and placement.
         if (showMiniMap) {
+            //scene.disableKeyAgent();
+            //scene.disableMouseAgent();
+            scene.beginScreenDrawing();
             auxScene.beginDraw();
             auxCanvas.background(29, 153, 243);
             auxScene.drawAxes();
             // calls visit() for each node in the graph
+            //auxScene.initPickingBuffer();
             auxScene.traverse();
+            //auxScene.endPickingBuffer();
             auxScene.endDraw();
             auxScene.display();
+            scene.endScreenDrawing();
         }
     }
 
@@ -208,8 +207,9 @@ public class FrameInterpolation2 extends PApplet {
         }
     }
 
-    // button
-    public class Button extends Node {
+    // Controls are implemented from usign (the new) NodeP5 class which uses
+    // the picking buffer (exact picking according to the picking shape)
+    public class Button extends NodeP5 {
         //button dimensions
         int _w , _h;
         public Button(int w, int h) {
@@ -219,10 +219,10 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         @Override
-        public void interact(MotionEvent event) {
+        public void interact(MotionEvent2 event) {
             switch (event.shortcut().id()) {
                 case LEFT:
-
+                    nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx()/10);
                     break;
                 case RIGHT:
                     translate(event);
@@ -235,27 +235,19 @@ public class FrameInterpolation2 extends PApplet {
 
         @Override
         public void interact(TapEvent event) {
-
+            TapShortcut left = new TapShortcut(Event.NO_MODIFIER_MASK, LEFT, 2);
+            TapShortcut right = new TapShortcut(Event.SHIFT, RIGHT, 1);
+            if(event.shortcut().matches(left))
+                scene.fitBallInterpolation();
+            if(event.shortcut().matches(right))
+                println("got me!");
         }
 
         @Override
-        protected void visit() {
-            auxCanvas.pushStyle();
-            auxCanvas.rectMode(CENTER);
-            auxCanvas.fill(255,0,0);
-            auxCanvas.rect(0,0,_w,_h);
-            auxCanvas.pushStyle();
-        }
-
-        // emulate exact picking precision. Better to use the graph picking buffer
-        // next time for sure :P
-        @Override
-        public boolean track(float x, float y) {
-            //convert world to screen
-            Vector origin = graph().projectedCoordinatesOf(position());
-            float halfThresholdX = _w / 2 * scaling() * graph().pixelToSceneRatio(position());
-            float halfThresholdY = _h / 2 * scaling() * graph().pixelToSceneRatio(position());
-            return ((Math.abs(x - origin._vector[0]) < halfThresholdX) && (Math.abs(y - origin._vector[1]) < halfThresholdY));
+        protected void display(PGraphics pg) {
+            pg.rectMode(CENTER);
+            pg.fill(255,0,0);
+            pg.rect(0,0,_w,_h);
         }
     }
 

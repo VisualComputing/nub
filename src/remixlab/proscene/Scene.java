@@ -16,6 +16,7 @@ import processing.data.JSONObject;
 import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShader;
 import remixlab.input.Agent;
 import remixlab.input.Grabber;
 import remixlab.timing.SequentialTimer;
@@ -80,6 +81,12 @@ public class Scene extends Graph implements PConstants {
   protected MouseAgent _mouseAgent;
   protected KeyAgent _keyAgent;
 
+  // _pb : picking buffer
+  protected PGraphics _targetPGraphics;
+  protected PGraphics _pb;
+  protected boolean _pbEnabled;
+  protected PShader _pbTriangleShader, _pbLineShader, _pbPointShader;
+
   // CONSTRUCTORS
 
   /**
@@ -136,7 +143,18 @@ public class Scene extends Graph implements PConstants {
     // 2. Matrix helper
     setMatrixHandler(matrixHelper(pGraphics));
 
-    // 3. Create _agents and register P5 methods
+    // 3. Frames & picking buffer
+    _pb = (pg() instanceof processing.opengl.PGraphicsOpenGL) ?
+            pApplet().createGraphics(pg().width, pg().height, pg() instanceof PGraphics3D ? P3D : P2D) :
+            null;
+    if (_pb != null) {
+      enablePickingBuffer();
+      _pbTriangleShader = pApplet().loadShader("PickingBuffer.frag");
+      _pbLineShader = pApplet().loadShader("PickingBuffer.frag");
+      _pbPointShader = pApplet().loadShader("PickingBuffer.frag");
+    }
+
+    // 4. Create _agents and register P5 methods
     _mouseAgent = new MouseAgent(this, originCorner());
     _keyAgent = new KeyAgent(this);
     _parent.registerMethod("mouseEvent", mouseAgent());
@@ -180,6 +198,70 @@ public class Scene extends Graph implements PConstants {
    */
   public PGraphics pg() {
     return _pg;
+  }
+
+  // PICKING BUFFER
+
+  /**
+   * Returns the picking buffer.
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> color
+   * buffer.
+   */
+  public PGraphics pickingBuffer() {
+    return _pb;
+  }
+
+  /**
+   * Enable the {@link #pickingBuffer()}.
+   */
+  public void enablePickingBuffer() {
+    if (!(_pbEnabled = _pb != null))
+      System.out.println("PickingBuffer can't be instantiated!");
+  }
+
+  /**
+   * Disable the {@link #pickingBuffer()}.
+   */
+  public void disablePickingBuffer() {
+    _pbEnabled = false;
+  }
+
+  /**
+   * Returns {@code true} if {@link #pickingBuffer()} buffer is enabled and {@code false}
+   * otherwise.
+   */
+  public boolean isPickingBufferEnabled() {
+    return _pbEnabled;
+  }
+
+  /**
+   * Toggles availability of the {@link #pickingBuffer()}.
+   */
+  public void togglePickingBuffer() {
+    if (isPickingBufferEnabled())
+      disablePickingBuffer();
+    else
+      enablePickingBuffer();
+  }
+
+  /**
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #pickingBuffer()} to perform picking on the scene {@link #nodes()}.
+   * <p>
+   * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
+   * scenes).
+   */
+  protected void _handlePickingBuffer() {
+    if (!this.isPickingBufferEnabled())
+      return;
+    pickingBuffer().beginDraw();
+    pickingBuffer().pushStyle();
+    pickingBuffer().background(0);
+    traverse(pickingBuffer());
+    pickingBuffer().popStyle();
+    pickingBuffer().endDraw();
+    // if (frames().size() > 0)
+    pickingBuffer().loadPixels();
   }
 
   // Mouse agent
@@ -588,6 +670,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void draw() {
     popModelView();
+    _handlePickingBuffer();
     postDraw();
   }
 
@@ -663,7 +746,7 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * <ol>
    * <li>{@code pg().endDraw()} and hence there's no need to explicitly call it</li>
-   * <li>{@link #handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
+   * <li>{@link #_handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * <li>{@link #postDraw()}</li>
    * </ol>
    * <p>
@@ -687,8 +770,9 @@ public class Scene extends Graph implements PConstants {
           + "endDraw() and they cannot be nested. Check your implementation!");
     popModelView();
     pg().endDraw();
+    _handlePickingBuffer();
     if (hasAutoFocus())
-      handleFocus();
+      _handleFocus();
     postDraw();
   }
 
@@ -714,41 +798,41 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Implementation of the "Focus follows mouse" policy. Used by {@link #hasFocus()}.
+   * Implementation of the "Focus follows mouse" policy. Used by {@link #_hasFocus()}.
    */
-  protected boolean hasMouseFocus() {
+  protected boolean _hasMouseFocus() {
     return originCorner().x() < pApplet().mouseX && pApplet().mouseX < originCorner().x() + this.width()
         && originCorner().y() < pApplet().mouseY && pApplet().mouseY < originCorner().y() + this.height();
   }
 
   /**
-   * Main condition evaluated by the {@link #handleFocus()} algorithm, which defaults to
-   * {@link #hasMouseFocus()}.
+   * Main condition evaluated by the {@link #_handleFocus()} algorithm, which defaults to
+   * {@link #_hasMouseFocus()}.
    * <p>
    * Override this method to define a focus policy different than "focus follows mouse".
    */
-  protected boolean hasFocus() {
-    return hasMouseFocus();
+  protected boolean _hasFocus() {
+    return _hasMouseFocus();
   }
 
   /**
-   * Macro used by {@link #handleFocus()}.
+   * Macro used by {@link #_handleFocus()}.
    */
-  protected boolean displayed() {
+  protected boolean _displayed() {
     return _lastDisplay == pApplet().frameCount - 1;
   }
 
   /**
    * Called by {@link #endDraw()} if {@link #hasAutoFocus()} is {@code true}.
    */
-  protected void handleFocus() {
+  protected void _handleFocus() {
     if (_offScreenScenes < 2)
       return;
     // Handling focus of non-overlapping scenes is trivial.
     // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
     // scn2.display() is to be called after scn1.display() (which is the _key observation).
-    // Then, for a given frame either only scn1 hasFocus() (which is handled trivially);
-    // or, both, scn1 and scn2 hasFocus(), which means only scn2 should retain focus
+    // Then, for a given frame either only scn1 _hasFocus() (which is handled trivially);
+    // or, both, scn1 and scn2 _hasFocus(), which means only scn2 should retain focus
     // (while scn1 lose it).
     boolean available = true;
     if (_lastScene != null)
@@ -759,9 +843,9 @@ public class Scene extends Graph implements PConstants {
         // frame it will lose it when the routine is run on scn2 in the current frame;
         // and, 2. If scn2 hasGrabber gained focus in the previous frame, it will prevent scn1
         // from having it back in the current frame.
-        if (_lastScene.hasFocus() && _lastScene.displayed())
+        if (_lastScene._hasFocus() && _lastScene._displayed())
           available = false;
-    if (hasFocus() && displayed() && available) {
+    if (_hasFocus() && _displayed() && available) {
       enableMouseAgent();
       enableKeyAgent();
       _lastScene = this;
@@ -797,7 +881,7 @@ public class Scene extends Graph implements PConstants {
    * To implement a different policy either:
    * <p>
    * <ol>
-   * <li>Override the {@link #hasFocus()} Scene object; or,</li>
+   * <li>Override the {@link #_hasFocus()} Scene object; or,</li>
    * <li>Call {@link #disableAutoFocus()} and implement your own focus policy at the
    * sketch space.</li>
    * </ol>
@@ -1136,8 +1220,13 @@ public class Scene extends Graph implements PConstants {
   }
   */
 
-  protected boolean unchachedBuffer;
-  public PGraphics targetPGraphics;
+  //protected boolean unchachedBuffer;
+  //public PGraphics _targetPGraphics;
+
+  @Override
+  public void traverse() {
+    traverse(pg());
+  }
 
   /**
    * Draw all graph {@link #nodes()} into the {@link #pg()} buffer. A similar (but
@@ -1158,10 +1247,13 @@ public class Scene extends Graph implements PConstants {
    * @see #pg()
    * @see #drawNodes(PGraphics)
    */
+  //TODO: shader chaining
+  /*
   public void drawNodes() {
-    targetPGraphics = pg();
+    _targetPGraphics = pg();
     traverse();
   }
+  */
 
   /**
    * Draw all {@link #nodes()} into the given pgraphics. No
@@ -1178,14 +1270,23 @@ public class Scene extends Graph implements PConstants {
    *
    * @param pGraphics
    * @see #nodes()
-   * @see #drawNodes()
+   * @see #traverse()
    */
-  public void drawNodes(PGraphics pGraphics) {
-    // 1. Set pgraphics matrices using a custom MatrixHandler
-    bindMatrices(pGraphics);
-    // 2. Draw all nodes into pgraphics
-    targetPGraphics = pGraphics;
-    traverse();
+  public void traverse(PGraphics pGraphics) {
+    _targetPGraphics = pGraphics;
+    if(pGraphics != pg())
+      bindMatrices(pGraphics);
+    super.traverse();
+  }
+
+  @Override
+  protected void _visitNode(Node node) {
+    _targetPGraphics.pushMatrix();
+    applyTransformation(_targetPGraphics, node);
+    node.visitCallback();
+    for (Node child : node.children())
+      _visitNode(child);
+    _targetPGraphics.popMatrix();
   }
 
   /**
@@ -1196,8 +1297,7 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #matrixHandler()
    * @see #setMatrixHandler(MatrixHandler)
-   * @see #drawNodes()
-   * @see #drawNodes(PGraphics)
+   *
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
   public MatrixHandler matrixHelper(PGraphics pGraphics) {
@@ -1216,6 +1316,7 @@ public class Scene extends Graph implements PConstants {
    * This method doesn't perform any computation, but simple retrieve the current matrices
    * whose actual computation has been updated in {@link #preDraw()}.
    */
+  //TODO needs testing shader chaining and picking buffer
   public void bindMatrices(PGraphics pGraphics) {
     if (this.pg() == pGraphics)
       return;
@@ -1230,13 +1331,13 @@ public class Scene extends Graph implements PConstants {
   /*
   @Override
   protected void _visitNode(Node node) {
-    targetPGraphics.pushMatrix();
-    applyTransformation(targetPGraphics, node);
+    _targetPGraphics.pushMatrix();
+    applyTransformation(_targetPGraphics, node);
     if (node instanceof Node)
       node.visitCallback();
     for (Node child : node.children())
       _visitNode(child);
-    targetPGraphics.popMatrix();
+    _targetPGraphics.popMatrix();
   }
   */
 
