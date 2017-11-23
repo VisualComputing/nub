@@ -159,7 +159,7 @@ public class FrameInterpolation2 extends PApplet {
             super(s);
         }
 
-        // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
+        // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
         // scene.eye().get()) to have the same behavior as its original.
         protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
             super(otherGraph, otherFrame);
