@@ -70,7 +70,6 @@ public class FrameInterpolation2 extends PApplet {
         //interactivity defaults to the eye
         auxScene.setDefaultNode(eye1);
         Button button = new Button(100,60);
-        //note that we can transform (but no rotate) the button and it still will be correctly picked
         button.setPosition(200,50);
         auxScene.setRadius(200);
         auxScene.fitBall();
