@@ -60,7 +60,6 @@ public class BasicUse extends PApplet {
     iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
     iFrame.setGrabsInputThreshold(length);
     iFrame.translate(50,50);
-    //iFrame.rotate(new Quaternion(QUARTER_PI));
     scene.fitBall();
   }
 
@@ -72,9 +71,6 @@ public class BasicUse extends PApplet {
   public void draw() {
     background(0);
     scene.traverse();
-    //TODO decide to just leave graph.traverse(); throws a npe on graph._targetPGraphics though. The 'hack' would be somethng like:
-    //graph._targetPGraphics = pg;
-    //graph.traverse();
   }
 
   public static void main(String args[]) {

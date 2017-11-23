@@ -10,6 +10,9 @@ import remixlab.timing.TimingTask;
 
 import java.util.ArrayList;
 
+/**
+ * Flock is a work in progress still
+ */
 public class Flock extends PApplet {
     static int count=0;
     Scene scene;

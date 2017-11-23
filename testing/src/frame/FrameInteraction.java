@@ -7,6 +7,10 @@ import remixlab.proscene.KeyAgent;
 
 import remixlab.proscene.*;
 
+/**
+ * This example just to show that a Graph is instantiable.
+ * More to come...
+ */
 public class FrameInteraction extends PApplet {
     Graph graph;
     public void settings() {
