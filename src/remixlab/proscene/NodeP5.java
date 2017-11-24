@@ -25,14 +25,14 @@ public class NodeP5  extends Node {
         super(scene);
         _scene = scene;
         if(_scene.pg() instanceof PGraphicsOpenGL)
-            setPickingPrecision(PickingPrecision.EXACT);
+            setPrecision(Precision.EXACT);
     }
 
     public NodeP5(NodeP5 reference) {
         super(reference);
         _scene = reference.scene();
         if(_scene.pg() instanceof PGraphicsOpenGL)
-            setPickingPrecision(PickingPrecision.EXACT);
+            setPrecision(Precision.EXACT);
     }
 
     protected NodeP5(Scene otherGraph, NodeP5 otherFrame) {
@@ -49,12 +49,32 @@ public class NodeP5  extends Node {
     }
 
     @Override
-    public void setPickingPrecision(PickingPrecision precision) {
-        if (precision == PickingPrecision.EXACT)
+    public void setPrecision(Precision precision) {
+        if (precision == Precision.EXACT)
             if (!scene().isPickingBufferEnabled())
                 System.out.println("Warning: EXACT picking precision will behave like FIXED until the scene.pickingBuffer() is enabled.");
-        this._pickingPrecision = precision;
+        this._Precision = precision;
+        //updatePickingBufferCache();
     }
+
+    /**
+     * Internal cache optimization method.
+     */
+    /*
+    protected void updatePickingBufferCache() {
+        if (this != _scene.eye() && precision() == Precision.EXACT && _backShape != null) {
+            scene()._unchachedBuffer = true;
+            return;
+        }
+        for (Node frame : scene().nodes())
+            if(frame instanceof NodeP5)
+                if (this != _scene.eye() && frame.precision() == Precision.EXACT && ((NodeP5)frame)._backShape != null) {
+                    scene()._unchachedBuffer = true;
+                    return;
+                }
+        scene()._unchachedBuffer = false;
+    }
+    */
 
     @Override
     protected void visit() {
@@ -65,12 +85,12 @@ public class NodeP5  extends Node {
             pg.pushStyle();
             if(_frontShape != null)
                 pg.shape(_frontShape);
-            display(pg);
-            frontDisplay(pg);
+            setShape(pg);
+            setVisualShape(pg);
             pg.popStyle();
         }
         else {
-            if (scene().isPickingBufferEnabled() && pickingPrecision() == PickingPrecision.EXACT) {
+            if (scene().isPickingBufferEnabled() && precision() == Precision.EXACT) {
                 float r = (float) (_id & 255) / 255.f;
                 float g = (float) ((_id >> 8) & 255) / 255.f;
                 float b = (float) ((_id >> 16) & 255) / 255.f;
@@ -86,36 +106,39 @@ public class NodeP5  extends Node {
                 pg.pushStyle();
                 if (_backShape != null)
                     pg.shape(_backShape);
-                display(pg);
-                backDisplay(pg);
+                setShape(pg);
+                setGrabbingShape(pg);
                 pg.popStyle();
             }
         }
     }
 
-    protected void display(PGraphics pg) {
+    protected void setShape(PGraphics pg) {
+        //TODO how to:
+        //updatePickingBufferCache();
+    }
+
+    protected void setVisualShape(PGraphics pg) {
 
     }
 
-    protected void frontDisplay(PGraphics pg) {
-
-    }
-
-    protected void backDisplay(PGraphics pg) {
-
+    protected void setGrabbingShape(PGraphics pg) {
+        //TODO how to:
+        //updatePickingBufferCache();
     }
 
     public void setShape(PShape shape) {
-        setFrontShape(shape);
-        setBackShape(shape);
+        setVisualShape(shape);
+        setGrabbingShape(shape);
     }
 
-    public void setFrontShape(PShape shape) {
+    public void setVisualShape(PShape shape) {
         _frontShape = shape;
     }
 
-    public void setBackShape(PShape shape) {
+    public void setGrabbingShape(PShape shape) {
         _backShape = shape;
+        //updatePickingBufferCache();
     }
 
     /**
@@ -128,7 +151,7 @@ public class NodeP5  extends Node {
      * <p>
      * This method is only meaningful when this node is not an eye.
      *
-     * @see #setPickingPrecision(PickingPrecision)
+     * @see #setPrecision(Precision)
      */
     @Override
     public final boolean track(float x, float y) {
@@ -136,7 +159,7 @@ public class NodeP5  extends Node {
             Scene.showOnlyEyeWarning("checkIfGrabsInput", false);
             return false;
         }
-        if (pickingPrecision() != PickingPrecision.EXACT || !scene().isPickingBufferEnabled())
+        if (precision() != Precision.EXACT || !scene().isPickingBufferEnabled())
             return super.track(x, y);
         int index = (int) y * scene().width() + (int) x;
         if ((0 <= index) && (index < scene().pickingBuffer().pixels.length))

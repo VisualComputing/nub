@@ -82,6 +82,8 @@ public class Scene extends Graph implements PConstants {
   protected KeyAgent _keyAgent;
 
   // _pb : picking buffer
+  //TODO restore and remove enablePickingBuffer
+  //protected boolean _unchachedBuffer;
   protected PGraphics _targetPGraphics;
   protected PGraphics _pb;
   protected boolean _pbEnabled;
@@ -252,7 +254,7 @@ public class Scene extends Graph implements PConstants {
    * scenes).
    */
   protected void _handlePickingBuffer() {
-    if (!this.isPickingBufferEnabled())
+    if (!this.isPickingBufferEnabled() /*|| !_unchachedBuffer*/)
       return;
     pickingBuffer().beginDraw();
     pickingBuffer().pushStyle();
@@ -792,7 +794,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (!isOffscreen())
-      showOnlyOffScreenWarning("display");
+      showOnlyOffScreenWarning("setShape");
     pApplet().image(pgraphics, originCorner().x(), originCorner().y());
     _lastDisplay = pApplet().frameCount;
   }
@@ -1094,8 +1096,8 @@ public class Scene extends Graph implements PConstants {
           Node keyFrame = new Node(this);
           pruneBranch(keyFrame);
           keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
-          keyFrame.setPickingPrecision(Node.PickingPrecision.FIXED);
-          keyFrame.setGrabsInputThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
+          keyFrame.setPrecision(Node.Precision.FIXED);
+          keyFrame.setPrecisionThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
           if (pathsVisualHint())
             inputHandler().addGrabber(keyFrame);
           if (!eye().keyFrameInterpolatorMap().containsKey(_id))
@@ -1227,33 +1229,6 @@ public class Scene extends Graph implements PConstants {
   public void traverse() {
     traverse(pg());
   }
-
-  /**
-   * Draw all graph {@link #nodes()} into the {@link #pg()} buffer. A similar (but
-   * slightly less efficient) effect may be achieved with
-   * {@code for (Node frame : nodes()) frame.draw(pg());}.
-   * <p>
-   * Note that {@code drawNodes()} is typically called from within your sketch
-   * {@link #pApplet()} draw() loop.
-   * <p>
-   * This method is implementing by simply calling
-   * {@link Graph#traverse()}.
-   * <p>
-   * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
-   * eye update which happens at {@link #preDraw()}) and before any other transformation
-   * of the modelview takes place.
-   *
-   * @see #nodes()
-   * @see #pg()
-   * @see #drawNodes(PGraphics)
-   */
-  //TODO: shader chaining
-  /*
-  public void drawNodes() {
-    _targetPGraphics = pg();
-    traverse();
-  }
-  */
 
   /**
    * Draw all {@link #nodes()} into the given pgraphics. No
@@ -2888,7 +2863,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Draws all GrabberFrames' picking targets: a shooter target visual hint of
-   * {@link Node#grabsInputThreshold()} pixels size.
+   * {@link Node#precisionThreshold()} pixels size.
    * <p>
    * <b>Attention:</b> the target is drawn either if the iFrame is part of camera path and
    * keyFrame is {@code true}, or if the iFrame is not part of camera path and keyFrame is
@@ -2913,7 +2888,7 @@ public class Scene extends Graph implements PConstants {
       float saturation = pg().saturation(pg().strokeColor);
       float brightness = pg().brightness(pg().strokeColor);
       pg().stroke(hue, saturation * 1.4f, brightness * 1.4f);
-      drawShooterTarget(center, (node.grabsInputThreshold() + 1));
+      drawShooterTarget(center, (node.precisionThreshold() + 1));
       pg().popStyle();
     } else {
       pg().pushStyle();
@@ -2922,7 +2897,7 @@ public class Scene extends Graph implements PConstants {
       float saturation = pg().saturation(pg().strokeColor);
       float brightness = pg().brightness(pg().strokeColor);
       pg().stroke(hue, saturation * 1.4f, brightness);
-      drawShooterTarget(center, node.grabsInputThreshold());
+      drawShooterTarget(center, node.precisionThreshold());
       pg().popStyle();
     }
   }

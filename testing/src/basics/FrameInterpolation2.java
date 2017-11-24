@@ -239,7 +239,7 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         @Override
-        protected void display(PGraphics pg) {
+        protected void setShape(PGraphics pg) {
             pg.rectMode(CENTER);
             pg.fill(255,0,0);
             pg.rect(0,0,_w,_h);

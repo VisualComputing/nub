@@ -84,8 +84,8 @@ import java.util.List;
  * buttons, provided it's added to the mouse-agent first (see
  * {@link Agent#addGrabber(Grabber)}.
  * <p>
- * Picking a node is done accordingly to a {@link #pickingPrecision()}. Refer to
- * {@link #setPickingPrecision(PickingPrecision)} for details.
+ * Picking a node is done accordingly to a {@link #precision()}. Refer to
+ * {@link #setPrecision(Precision)} for details.
  * <p>
  * A node is loosely-coupled with the graph object used to instantiate it, i.e.,
  * the transformation it represents may be applied to a different graph. See
@@ -138,7 +138,7 @@ public class Node extends Frame implements Grabber {
   protected Vector _upVector;
   protected Graph _graph;
 
-  protected float _pickingThreshold;
+  protected float _threshold;
 
   protected boolean _visit;
 
@@ -148,11 +148,11 @@ public class Node extends Frame implements Grabber {
   /**
    * Enumerates the Picking precision modes.
    */
-  public enum PickingPrecision {
+  public enum Precision {
     FIXED, ADAPTIVE, EXACT
   }
 
-  protected PickingPrecision _pickingPrecision;
+  protected Precision _Precision;
 
   protected MotionEvent2 _initEvent;
   protected float _flySpeedCache;
@@ -192,7 +192,7 @@ public class Node extends Frame implements Grabber {
    * {@link #keySensitivity()}, {@link #rotationSensitivity()},
    * {@link #translationSensitivity()} and {@link #scalingSensitivity()}.
    * <p>
-   * Sets the {@link #pickingPrecision()} to {@link PickingPrecision#FIXED}.
+   * Sets the {@link #precision()} to {@link Precision#FIXED}.
    * <p>
    * After object creation a call to {@link #isEye()} will return {@code false}.
    */
@@ -241,11 +241,11 @@ public class Node extends Frame implements Grabber {
     graph().registerTask(_flyTask);
     // end
 
-    // pkgnPrecision = PickingPrecision.ADAPTIVE;
-    // setGrabsInputThreshold(Math.round(scn.radius()/4));
+    // pkgnPrecision = Precision.ADAPTIVE;
+    // setPrecisionThreshold(Math.round(scn.radius()/4));
     graph().inputHandler().addGrabber(this);
-    _pickingPrecision = PickingPrecision.FIXED;
-    setGrabsInputThreshold(20);
+    _Precision = Precision.FIXED;
+    setPrecisionThreshold(20);
     setFlySpeed(0.01f * graph().radius());
   }
 
@@ -291,10 +291,10 @@ public class Node extends Frame implements Grabber {
     // end
     // this.isInCamPath = otherFrame.isInCamPath;
     //
-    // this.setGrabsInputThreshold(otherFrame.grabsInputThreshold(),
+    // this.setPrecisionThreshold(otherFrame.precisionThreshold(),
     // otherFrame.adaptiveGrabsInputThreshold());
-    this._pickingPrecision = other._pickingPrecision;
-    this._pickingThreshold = other._pickingThreshold;
+    this._Precision = other._Precision;
+    this._threshold = other._threshold;
 
     this.setRotationSensitivity(other.rotationSensitivity());
     this.setScalingSensitivity(other.scalingSensitivity());
@@ -572,14 +572,14 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Picks the node according to the {@link #pickingPrecision()}.
+   * Picks the node according to the {@link #precision()}.
    *
-   * @see #pickingPrecision()
-   * @see #setPickingPrecision(PickingPrecision)
+   * @see #precision()
+   * @see #setPrecision(Precision)
    */
   public boolean track(float x, float y) {
     Vector proj = _graph.projectedCoordinatesOf(position());
-    float halfThreshold = grabsInputThreshold() / 2;
+    float halfThreshold = precisionThreshold() / 2;
     return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 
@@ -2460,40 +2460,40 @@ public class Node extends Frame implements Grabber {
    * Returns the grabs inputGrabber threshold which is used by the interactive frame to
    * {@link #track(Event)}.
    *
-   * @see #setGrabsInputThreshold(float)
+   * @see #setPrecisionThreshold(float)
    */
-  public float grabsInputThreshold() {
+  public float precisionThreshold() {
     if (isEye()) {
-      Graph.showOnlyEyeWarning("grabsInputThreshold", false);
+      Graph.showOnlyEyeWarning("precisionThreshold", false);
       return 0;
     }
-    if (pickingPrecision() == PickingPrecision.ADAPTIVE)
-      return _pickingThreshold * scaling() * _graph.pixelToSceneRatio(position());
-    return _pickingThreshold;
+    if (precision() == Precision.ADAPTIVE)
+      return _threshold * scaling() * _graph.pixelToSceneRatio(position());
+    return _threshold;
   }
 
   /**
    * Returns the frame picking precision. See
-   * {@link #setPickingPrecision(PickingPrecision)} for details.
+   * {@link #setPrecision(Precision)} for details.
    *
-   * @see #setPickingPrecision(PickingPrecision)
-   * @see #setGrabsInputThreshold(float)
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
    */
-  public PickingPrecision pickingPrecision() {
+  public Precision precision() {
     if (isEye())
-      Graph.showOnlyEyeWarning("pickingPrecision", false);
-    return _pickingPrecision;
+      Graph.showOnlyEyeWarning("precision", false);
+    return _Precision;
   }
 
   /**
    * Sets the picking precision of the frame.
    * <p>
-   * When {@link #pickingPrecision()} is {@link PickingPrecision#FIXED} or
-   * {@link PickingPrecision#ADAPTIVE} Picking is done by checking if the pointer lies
+   * When {@link #precision()} is {@link Precision#FIXED} or
+   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
    * within a squared area around the frame {@link #center()} screen projection which size
-   * is defined by {@link #setGrabsInputThreshold(float)}.
+   * is defined by {@link #setPrecisionThreshold(float)}.
    * <p>
-   * When {@link #pickingPrecision()} is {@link PickingPrecision#EXACT}, picking is done
+   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
    * in a precise manner according to the projected pixels of the graphics related to the
    * frame. It is meant to be implemented by generic frame derived classes and requires
    * the graph to implement a so called picking buffer (see the proscene
@@ -2502,18 +2502,18 @@ public class Node extends Frame implements Grabber {
    * attach graphics to it (see the proscene <a href=
    * "http://remixlab.github.io/proscene-javadocs/remixlab/proscene/InteractiveFrame.html">
    * Node</a> class for a possible implementation). Default implementation of
-   * this policy will behave like {@link PickingPrecision#FIXED}.
+   * this policy will behave like {@link Precision#FIXED}.
    *
-   * @see #pickingPrecision()
-   * @see #setGrabsInputThreshold(float)
+   * @see #precision()
+   * @see #setPrecisionThreshold(float)
    */
-  public void setPickingPrecision(PickingPrecision precision) {
-    if (precision == PickingPrecision.EXACT)
+  public void setPrecision(Precision precision) {
+    if (precision == Precision.EXACT)
       System.out.println(
           "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a pickingBuffer.");
-    _pickingPrecision = precision;
+    _Precision = precision;
     if (isEye()) {
-      Graph.showOnlyEyeWarning("setPickingPrecision", false);
+      Graph.showOnlyEyeWarning("setPrecision", false);
       return;
     }
   }
@@ -2523,12 +2523,12 @@ public class Node extends Frame implements Grabber {
    * projection that defined the {@link #track(Event)} condition used for
    * frame picking.
    * <p>
-   * If {@link #pickingPrecision()} is {@link PickingPrecision#FIXED}, the
+   * If {@link #precision()} is {@link Precision#FIXED}, the
    * {@code threshold} is expressed in pixels and directly defines the fixed length of a
    * 'shooter target', centered
    * at the projection of the frame origin onto the screen.
    * <p>
-   * If {@link #pickingPrecision()} is {@link PickingPrecision#ADAPTIVE}, the
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the
    * {@code threshold} is expressed in object space (world units) and defines the edge
    * length of a squared bounding box that leads to an adaptive length of a
    * 'shooter target',
@@ -2536,26 +2536,26 @@ public class Node extends Frame implements Grabber {
    * if you have a good idea of the bounding box size of the object you are attaching to
    * the frame.
    * <p>
-   * The value is meaningless when the {@link #pickingPrecision()} is
-   * {@link PickingPrecision#EXACT}. See {@link #setPickingPrecision(PickingPrecision)}
+   * The value is meaningless when the {@link #precision()} is
+   * {@link Precision#EXACT}. See {@link #setPrecision(Precision)}
    * for details.
    * <p>
-   * Default behavior is to set the {@link #grabsInputThreshold()} (in a non-adaptive
+   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
    * manner) to 20.
    * <p>
    * Negative {@code threshold} values are silently ignored.
    *
-   * @see #pickingPrecision()
-   * @see #grabsInputThreshold()
+   * @see #precision()
+   * @see #precisionThreshold()
    * @see #track(Event)
    */
-  public void setGrabsInputThreshold(float threshold) {
+  public void setPrecisionThreshold(float threshold) {
     if (isEye()) {
-      Graph.showOnlyEyeWarning("setGrabsInputThreshold", false);
+      Graph.showOnlyEyeWarning("setPrecisionThreshold", false);
       return;
     }
     if (threshold >= 0)
-      _pickingThreshold = threshold;
+      _threshold = threshold;
   }
 
   /**

@@ -57,8 +57,8 @@ public class BasicUse extends PApplet {
       }
     };
 
-    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
-    iFrame.setGrabsInputThreshold(length);
+    iFrame.setPrecision(Node.Precision.ADAPTIVE);
+    iFrame.setPrecisionThreshold(length);
     iFrame.translate(50,50);
     scene.fitBall();
   }

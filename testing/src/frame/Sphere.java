@@ -48,7 +48,7 @@ public class Sphere {
           _translateX(true);
       }
     };
-    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
+    iFrame.setPrecision(Node.Precision.ADAPTIVE);
     setRadius(10);
   }
 
@@ -80,7 +80,7 @@ public class Sphere {
 
   public void setRadius(float myR) {
     r = myR;
-    iFrame.setGrabsInputThreshold(2 * r);
+    iFrame.setPrecisionThreshold(2 * r);
   }
 
   public int getColor() {

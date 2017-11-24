@@ -28,7 +28,7 @@ public class ProsceneNodes extends PApplet {
         scene.fitBallInterpolation();
 
         node = new INode();
-        //node.setPickingPrecision(Node.PickingPrecision.FIXED);
+        //node.setPrecision(Node.Precision.FIXED);
     }
 
     public void draw() {
@@ -121,7 +121,7 @@ public class ProsceneNodes extends PApplet {
         }
 
         @Override
-        protected void display(PGraphics pg) {
+        protected void setShape(PGraphics pg) {
             pg.fill(255,0,0);
             pg.sphere(50);
         }

@@ -42,8 +42,8 @@ public class Box {
           translateXNeg();
       }
     };
-    iFrame.setPickingPrecision(Node.PickingPrecision.ADAPTIVE);
-    iFrame.setGrabsInputThreshold(25);
+    iFrame.setPrecision(Node.Precision.ADAPTIVE);
+    iFrame.setPrecisionThreshold(25);
     setSize();
     setColor();
     setPosition();
@@ -85,7 +85,7 @@ public class Box {
     w = scene.pApplet().random(10, 40);
     h = scene.pApplet().random(10, 40);
     d = scene.pApplet().random(10, 40);
-    iFrame.setGrabsInputThreshold(PApplet.max(w, h, d));
+    iFrame.setPrecisionThreshold(PApplet.max(w, h, d));
 
   }
 
