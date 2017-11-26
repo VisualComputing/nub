@@ -2,6 +2,7 @@ package basics;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PShape;
 import remixlab.input.Event;
 import remixlab.input.event.*;
 import remixlab.primitives.Frame;
@@ -19,6 +20,7 @@ public class FrameInterpolation2 extends PApplet {
 
     //controls
     Scene auxScene;
+    Button button;
     PGraphics auxCanvas;
     int w = 1200;
     int h = 900;
@@ -61,7 +63,7 @@ public class FrameInterpolation2 extends PApplet {
         nodeInterpolator.start();
 
         // application control
-        auxCanvas = createGraphics(oW, oH, P2D);
+        auxCanvas = createGraphics(oW, oH, P3D);
         auxCanvas.rectMode(CENTER);
         auxScene = new Scene(this, auxCanvas, oX, oY);
         //auxScene.disablePickingBuffer();
@@ -69,8 +71,8 @@ public class FrameInterpolation2 extends PApplet {
         auxScene.setEye(eye1);
         //interactivity defaults to the eye
         auxScene.setDefaultNode(eye1);
-        Button button = new Button(100,60);
-        button.setPosition(200,50);
+        button = new Button(100,60);
+        //button.setPosition(200,50);
         auxScene.setRadius(200);
         auxScene.fitBall();
     }
@@ -126,6 +128,7 @@ public class FrameInterpolation2 extends PApplet {
             auxScene.drawAxes();
             // calls visit() for each node in the graph
             auxScene.traverse();
+            //button.draw();
             auxScene.endDraw();
             auxScene.display();
             scene.endScreenDrawing();
@@ -211,6 +214,13 @@ public class FrameInterpolation2 extends PApplet {
             super(auxScene);
             _w = w;
             _h = h;
+            ///*
+            PShape rectangle = createShape(RECT,0,0,_w,_h);
+            rectangle.setStroke(color(255));
+            rectangle.setStrokeWeight(4);
+            rectangle.setFill(color(127));
+            setShape(rectangle);
+            //*/
         }
 
         @Override
@@ -238,12 +248,14 @@ public class FrameInterpolation2 extends PApplet {
                 println("got me!");
         }
 
+        /*
         @Override
         protected void setShape(PGraphics pg) {
             pg.rectMode(CENTER);
             pg.fill(255,0,0);
             pg.rect(0,0,_w,_h);
         }
+        //*/
     }
 
     public static void main(String args[]) {

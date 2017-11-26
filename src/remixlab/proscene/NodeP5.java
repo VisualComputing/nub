@@ -16,16 +16,24 @@ import processing.core.PShape;
 import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.core.Node;
+import remixlab.primitives.Vector;
 
 public class NodeP5  extends Node {
     Scene _scene;
     PShape _frontShape, _backShape;
+    public enum Highlighting {
+        NONE, FRONT_SHAPE, FRONT_PICKING_SHAPES, PICKING_SHAPE
+    }
+    Highlighting _highlight;
+    Vector _shift;
 
     public NodeP5(Scene scene) {
         super(scene);
         _scene = scene;
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
+        setShift(new Vector());
+        setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
     public NodeP5(NodeP5 reference) {
@@ -33,10 +41,12 @@ public class NodeP5  extends Node {
         _scene = reference.scene();
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
+        setShift(new Vector());
+        setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
-    protected NodeP5(Scene otherGraph, NodeP5 otherFrame) {
-        super(otherGraph, otherFrame);
+    protected NodeP5(Scene otherGraph, NodeP5 otherNodeP5) {
+        super(otherGraph, otherNodeP5);
     }
 
     @Override
@@ -46,6 +56,40 @@ public class NodeP5  extends Node {
 
     public Scene scene() {
         return _scene;
+    }
+
+    /**
+     * Enables highlighting of the frame visual representation when picking takes place
+     * ({@link #grabsInput()} returns {@code true}) according to {@code mode} as follows:
+     * <p>
+     * <ol>
+     * <li>{@link Highlighting#NONE}: no highlighting
+     * takes place.</li>
+     * <li>{@link Highlighting#FRONT_SHAPE}: the
+     * front-shape (see {@link #setFrontShape(PShape)}) is scaled by a {@code 1.15}
+     * factor.</li>
+     * <li>{@link Highlighting#PICKING_SHAPE}: the
+     * picking-shape (see {@link #setBackShape(PShape)} is displayed instead of the
+     * front-shape.</li>
+     * <li>{@link Highlighting#FRONT_PICKING_SHAPES}:
+     * both, the front and the picking shapes are displayed.</li>
+     * </ol>
+     * <p>
+     * Default is {@link Highlighting#FRONT_SHAPE}.
+     *
+     * @see #highlighting()
+     */
+    public void setHighlighting(Highlighting mode) {
+        _highlight = mode;
+    }
+
+    /**
+     * Returns the highlighting mode.
+     *
+     * @see #setHighlighting(Highlighting)
+     */
+    public Highlighting highlighting() {
+        return _highlight;
     }
 
     @Override
@@ -70,6 +114,22 @@ public class NodeP5  extends Node {
         scene()._bbEnabled = false;
     }
 
+    /**
+     * Draw the visual representation of the frame into the given PGraphics using the
+     * current point of view.
+     */
+    //TODO does it make sense to draw a single node?
+    /*
+    public boolean draw() {
+        PGraphics pg = scene().frontBuffer();
+        pg.pushMatrix();
+        Scene.applyWorldTransformation(pg, this);
+        visit();
+        pg.popMatrix();
+        return true;
+    }
+    //*/
+
     @Override
     protected void visit() {
         if (scene().eye() == this)
@@ -77,11 +137,53 @@ public class NodeP5  extends Node {
         PGraphics pg = scene()._targetPGraphics;
         if(pg != scene().backBuffer()) {
             pg.pushStyle();
+            pg.pushMatrix();
+            /*
             if(_frontShape != null)
                 pg.shape(_frontShape);
             setShape(pg);
             setFrontShape(pg);
+            //*/
+            ///*
+            if (pg.is3D())
+                pg.translate(_shift.x(), _shift.y(), _shift.z());
+            else
+                pg.translate(_shift.x(), _shift.y());
+            switch (highlighting()) {
+                case FRONT_SHAPE:
+                    if (grabsInput())
+                        pg.scale(1.15f);
+                case NONE:
+                    if(_frontShape != null)
+                        pg.shape(_frontShape);
+                    setShape(pg);
+                    break;
+                case FRONT_PICKING_SHAPES:
+                    if(_frontShape != null)
+                        pg.shape(_frontShape);
+                    setFrontShape(pg);
+                    if (grabsInput()) {
+                        if (_backShape != null)
+                            pg.shape(_backShape);
+                        setBackShape(pg);
+                    }
+                    break;
+                case PICKING_SHAPE:
+                    if (grabsInput()) {
+                        if (_backShape != null)
+                            pg.shape(_backShape);
+                        setBackShape(pg);
+                    }
+                    else {
+                        if(_frontShape != null)
+                            pg.shape(_frontShape);
+                        setFrontShape(pg);
+                    }
+                    break;
+            }
+            //*/
             pg.popStyle();
+            pg.popMatrix();
         }
         else {
             if (precision() == Precision.EXACT) {
@@ -98,20 +200,50 @@ public class NodeP5  extends Node {
                 scene()._lineShader.set("id", new PVector(r, g, b));
                 scene()._pointShader.set("id", new PVector(r, g, b));
                 pg.pushStyle();
+                pg.pushMatrix();
+                /*
                 if (_backShape != null)
                     pg.shape(_backShape);
                 setShape(pg);
                 setBackShape(pg);
+                //*/
+                ///*
+                if (pg.is3D())
+                    pg.translate(_shift.x(), _shift.y(), _shift.z());
+                else
+                    pg.translate(_shift.x(), _shift.y());
+                if (_frontShape != null)
+                    pg.shapeMode(scene().frontBuffer().shapeMode);
+                if (_backShape != null)
+                    pg.shape(_backShape);
+                setShape(pg);
+                setBackShape(pg);
+                //*/
                 pg.popStyle();
+                pg.popMatrix();
             }
         }
+    }
+
+    /**
+     * Same as {@code shiftFrontShape(_shift); shiftPickingShape(_shift)}.
+     * <p>
+     * This method is only meaningful when frame is not eyeFrame.
+     *
+     * @see #shift()
+     */
+    public void setShift(Vector s) {
+        _shift = s;
+    }
+
+    public Vector shift() {
+        return _shift;
     }
 
     protected void setShape(PGraphics pg) {
     }
 
     protected void setFrontShape(PGraphics pg) {
-
     }
 
     protected void setBackShape(PGraphics pg) {
