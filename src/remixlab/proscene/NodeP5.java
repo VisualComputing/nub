@@ -84,7 +84,7 @@ public class NodeP5  extends Node {
             pg.popStyle();
         }
         else {
-            if (scene()._bbEnabled && precision() == Precision.EXACT) {
+            if (precision() == Precision.EXACT) {
                 float r = (float) (_id & 255) / 255.f;
                 float g = (float) ((_id >> 8) & 255) / 255.f;
                 float b = (float) ((_id >> 16) & 255) / 255.f;
@@ -148,7 +148,7 @@ public class NodeP5  extends Node {
             Scene.showOnlyEyeWarning("checkIfGrabsInput", false);
             return false;
         }
-        if (precision() != Precision.EXACT || !scene()._bbEnabled)
+        if (precision() != Precision.EXACT)
             return super.track(x, y);
         int index = (int) y * scene().width() + (int) x;
         if ((0 <= index) && (index < scene().backBuffer().pixels.length))
