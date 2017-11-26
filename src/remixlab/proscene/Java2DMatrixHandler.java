@@ -35,7 +35,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   // Comment the above line and uncomment this one to develop the driver:
-  // public PGraphicsJava2D pg() { return (PGraphicsJava2D) pg; }
+  // public PGraphicsJava2D frontBuffer() { return (PGraphicsJava2D) frontBuffer; }
 
   @Override
   public void bind() {

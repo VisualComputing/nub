@@ -60,7 +60,7 @@ public class WindowCulling  extends PApplet {
     }
 
     void mainDrawing(Scene s) {
-        PGraphics p = s.pg();
+        PGraphics p = s.frontBuffer();
         p.background(0);
         p.noStroke();
         p.ellipseMode(RADIUS);
@@ -81,11 +81,11 @@ public class WindowCulling  extends PApplet {
 
     void auxiliarDrawing(Scene s) {
         mainDrawing(s);
-        s.pg().pushStyle();
-        s.pg().stroke(255, 255, 0);
-        s.pg().fill(255, 255, 0, 160);
+        s.frontBuffer().pushStyle();
+        s.frontBuffer().stroke(255, 255, 0);
+        s.frontBuffer().fill(255, 255, 0, 160);
         s.drawEye(scene);
-        s.pg().popStyle();
+        s.frontBuffer().popStyle();
     }
 
     public void draw() {

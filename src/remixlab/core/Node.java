@@ -2510,7 +2510,7 @@ public class Node extends Frame implements Grabber {
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
       System.out.println(
-          "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a pickingBuffer.");
+          "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
     _Precision = precision;
     if (isEye()) {
       Graph.showOnlyEyeWarning("setPrecision", false);

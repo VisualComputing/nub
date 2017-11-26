@@ -61,7 +61,7 @@ public class Scene extends Graph implements PConstants {
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
-  protected PGraphics _pg;
+  protected PGraphics _fg;
 
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
@@ -81,13 +81,11 @@ public class Scene extends Graph implements PConstants {
   protected MouseAgent _mouseAgent;
   protected KeyAgent _keyAgent;
 
-  // _pb : picking buffer
-  //TODO restore and remove enablePickingBuffer
-  //protected boolean _unchachedBuffer;
+  // _bb : picking buffer
   protected PGraphics _targetPGraphics;
-  protected PGraphics _pb;
-  protected boolean _pbEnabled;
-  protected PShader _pbTriangleShader, _pbLineShader, _pbPointShader;
+  protected PGraphics _bb;
+  protected boolean _bbEnabled;
+  protected PShader _triangleShader, _lineShader, _pointShader;
 
   // CONSTRUCTORS
 
@@ -114,17 +112,17 @@ public class Scene extends Graph implements PConstants {
   /**
    * Main constructor defining a left-handed Processing compatible Scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
-   * {@link MatrixHandler} depending on the {@code pg} type (see
+   * {@link MatrixHandler} depending on the {@code frontBuffer} type (see
    * {@link Java2DMatrixHandler} and
    * {@link GLMatrixHandler}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
    * visual hint flags, instantiates the {@link #eye()}. It also
    * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}.
    * <p>
-   * An off-screen Processing Scene is defined if {@code pg != p.g}. In this case the
+   * An off-screen Processing Scene is defined if {@code frontBuffer != p.g}. In this case the
    * {@code x} and {@code y} parameters define the position of the upper-left corner where
    * the off-screen Scene is expected to be displayed, e.g., for instance with a call to
-   * Processing the {@code image(img, x, y)} function. If {@code pg == p.g}) (which
+   * Processing the {@code image(img, x, y)} function. If {@code frontBuffer == p.g}) (which
    * defines an on-screen Scene, see also {@link #isOffscreen()}), the values of x and y
    * are meaningless (both are set to 0 to be taken as dummy values). Render into an
    * off-screen graph requires the drawing code to be enclose by {@link #beginDraw()} and
@@ -138,7 +136,7 @@ public class Scene extends Graph implements PConstants {
     super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
-    _pg = pGraphics;
+    _fg = pGraphics;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
@@ -146,14 +144,13 @@ public class Scene extends Graph implements PConstants {
     setMatrixHandler(matrixHelper(pGraphics));
 
     // 3. Frames & picking buffer
-    _pb = (pg() instanceof processing.opengl.PGraphicsOpenGL) ?
-            pApplet().createGraphics(pg().width, pg().height, pg() instanceof PGraphics3D ? P3D : P2D) :
+    _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
+            pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
             null;
-    if (_pb != null) {
-      enablePickingBuffer();
-      _pbTriangleShader = pApplet().loadShader("PickingBuffer.frag");
-      _pbLineShader = pApplet().loadShader("PickingBuffer.frag");
-      _pbPointShader = pApplet().loadShader("PickingBuffer.frag");
+    if (_bb != null) {
+      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+      _lineShader = pApplet().loadShader("PickingBuffer.frag");
+      _pointShader = pApplet().loadShader("PickingBuffer.frag");
     }
 
     // 4. Create _agents and register P5 methods
@@ -198,8 +195,8 @@ public class Scene extends Graph implements PConstants {
    * Returns the PGraphics instance this Scene is related to. It may be the PApplets one,
    * if the Scene is on-screen or an user-defined if the Scene {@link #isOffscreen()}.
    */
-  public PGraphics pg() {
-    return _pg;
+  public PGraphics frontBuffer() {
+    return _fg;
   }
 
   // PICKING BUFFER
@@ -209,61 +206,28 @@ public class Scene extends Graph implements PConstants {
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> color
    * buffer.
    */
-  public PGraphics pickingBuffer() {
-    return _pb;
-  }
-
-  /**
-   * Enable the {@link #pickingBuffer()}.
-   */
-  public void enablePickingBuffer() {
-    if (!(_pbEnabled = _pb != null))
-      System.out.println("PickingBuffer can't be instantiated!");
-  }
-
-  /**
-   * Disable the {@link #pickingBuffer()}.
-   */
-  public void disablePickingBuffer() {
-    _pbEnabled = false;
-  }
-
-  /**
-   * Returns {@code true} if {@link #pickingBuffer()} buffer is enabled and {@code false}
-   * otherwise.
-   */
-  public boolean isPickingBufferEnabled() {
-    return _pbEnabled;
-  }
-
-  /**
-   * Toggles availability of the {@link #pickingBuffer()}.
-   */
-  public void togglePickingBuffer() {
-    if (isPickingBufferEnabled())
-      disablePickingBuffer();
-    else
-      enablePickingBuffer();
+  public PGraphics backBuffer() {
+    return _bb;
   }
 
   /**
    * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #pickingBuffer()} to perform picking on the scene {@link #nodes()}.
+   * {@link #backBuffer()} to perform picking on the scene {@link #nodes()}.
    * <p>
    * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
    * scenes).
    */
-  protected void _handlePickingBuffer() {
-    if (!this.isPickingBufferEnabled() /*|| !_unchachedBuffer*/)
+  protected void _renderBackBuffer() {
+    if (!_bbEnabled)
       return;
-    pickingBuffer().beginDraw();
-    pickingBuffer().pushStyle();
-    pickingBuffer().background(0);
-    traverse(pickingBuffer());
-    pickingBuffer().popStyle();
-    pickingBuffer().endDraw();
+    backBuffer().beginDraw();
+    backBuffer().pushStyle();
+    backBuffer().background(0);
+    traverse(backBuffer());
+    backBuffer().popStyle();
+    backBuffer().endDraw();
     // if (frames().size() > 0)
-    pickingBuffer().loadPixels();
+    backBuffer().loadPixels();
   }
 
   // Mouse agent
@@ -427,10 +391,10 @@ public class Scene extends Graph implements PConstants {
 
   public float pixelDepth(Point pixel) {
     PGraphicsOpenGL pggl;
-    if (pg() instanceof PGraphicsOpenGL)
-      pggl = (PGraphicsOpenGL) pg();
+    if (frontBuffer() instanceof PGraphicsOpenGL)
+      pggl = (PGraphicsOpenGL) frontBuffer();
     else
-      throw new RuntimeException("pg() is not instance of PGraphicsOpenGL");
+      throw new RuntimeException("frontBuffer() is not instance of PGraphicsOpenGL");
     float[] depth = new float[1];
     PGL pgl = pggl.beginPGL();
     pgl.readPixels(pixel.x(), (height() - pixel.y()), 1, 1, PGL.DEPTH_COMPONENT, PGL.FLOAT,
@@ -478,7 +442,7 @@ public class Scene extends Graph implements PConstants {
    * Disables z-buffer.
    */
   public void disableDepthTest() {
-    disableDepthTest(pg());
+    disableDepthTest(frontBuffer());
   }
 
   /**
@@ -494,7 +458,7 @@ public class Scene extends Graph implements PConstants {
    * Enables z-buffer.
    */
   public void enableDepthTest() {
-    enableDepthTest(pg());
+    enableDepthTest(frontBuffer());
   }
 
   /**
@@ -634,7 +598,7 @@ public class Scene extends Graph implements PConstants {
    * don't need to call it. Only meaningful if the graph is on-screen (it the graph
    * {@link #isOffscreen()} it even doesn't get registered at the PApplet.
    * <p>
-   * If {@link #pg()} is resized then (re)sets the graph {@link #width()} and
+   * If {@link #frontBuffer()} is resized then (re)sets the graph {@link #width()} and
    * {@link #height()}, and calls
    * {@link #setWidth(int)} and {@link #setHeight(int)}.
    * <p>
@@ -647,9 +611,9 @@ public class Scene extends Graph implements PConstants {
    * @see #isOffscreen()
    */
   public void pre() {
-    if ((width() != pg().width) || (height() != pg().height)) {
-      setWidth(pg().width);
-      setHeight(pg().height);
+    if ((width() != frontBuffer().width) || (height() != frontBuffer().height)) {
+      setWidth(frontBuffer().width);
+      setHeight(frontBuffer().height);
     }
     preDraw();
     pushModelView();
@@ -672,7 +636,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void draw() {
     popModelView();
-    _handlePickingBuffer();
+    _renderBackBuffer();
     postDraw();
   }
 
@@ -711,7 +675,7 @@ public class Scene extends Graph implements PConstants {
    * Only if the Scene {@link #isOffscreen()}. Calls {@code pg().beginDraw()} (hence
    * there's no need to explicitly call it) and then {@link #preDraw()} .
    * <p>
-   * If {@link #pg()} is resized then (re)sets the graph {@link #width()} and
+   * If {@link #frontBuffer()} is resized then (re)sets the graph {@link #width()} and
    * {@link #height()}, and calls
    * {@link #setWidth(int)} and {@link #setHeight(int)}.
    *
@@ -721,7 +685,7 @@ public class Scene extends Graph implements PConstants {
    * @see #pre()
    * @see #endDraw()
    * @see #isOffscreen()
-   * @see #pg()
+   * @see #frontBuffer()
    */
   public void beginDraw() {
     if (!isOffscreen())
@@ -731,14 +695,14 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _beginOffScreenDrawingCalls++;
-    if ((_width != pg().width) || (_height != pg().height)) {
-      _width = pg().width;
-      _height = pg().height;
+    if ((_width != frontBuffer().width) || (_height != frontBuffer().height)) {
+      _width = frontBuffer().width;
+      _height = frontBuffer().height;
       setWidth(_width);
       setHeight(_height);
     }
     // open off-screen pgraphics for drawing:
-    pg().beginDraw();
+    frontBuffer().beginDraw();
     preDraw();
     pushModelView();
   }
@@ -760,7 +724,7 @@ public class Scene extends Graph implements PConstants {
    * @see #beginDraw()
    * @see #pre()
    * @see #isOffscreen()
-   * @see #pg()
+   * @see #frontBuffer()
    */
   public void endDraw() {
     if (!isOffscreen())
@@ -771,8 +735,8 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     popModelView();
-    pg().endDraw();
-    _handlePickingBuffer();
+    frontBuffer().endDraw();
+    _renderBackBuffer();
     if (hasAutoFocus())
       _handleFocus();
     postDraw();
@@ -782,10 +746,10 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code display(pg())}. Only meaningful if the graph {@link #isOffscreen()}.
    *
    * @see #display(PGraphics)
-   * @see #pg()
+   * @see #frontBuffer()
    */
   public void display() {
-    display(pg());
+    display(frontBuffer());
   }
 
   /**
@@ -889,7 +853,7 @@ public class Scene extends Graph implements PConstants {
    * </ol>
    * <p>
    * <b>Note</b> that for this policy to work you should call {@link #display()} instead
-   * of the papplet image() function on the {@link #pg()}.
+   * of the papplet image() function on the {@link #frontBuffer()}.
    *
    * @see #beginDraw()
    * @see #endDraw()
@@ -1227,7 +1191,7 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   public void traverse() {
-    traverse(pg());
+    traverse(frontBuffer());
   }
 
   /**
@@ -1235,7 +1199,7 @@ public class Scene extends Graph implements PConstants {
    * {@code pgraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
-   * Note that {@code drawNodes(pickingBuffer())} (which enables 'picking' of the nodes
+   * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the nodes
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
    * <p>
@@ -1249,7 +1213,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void traverse(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
-    if(pGraphics != pg())
+    if(pGraphics != frontBuffer())
       bindMatrices(pGraphics);
     super.traverse();
   }
@@ -1286,14 +1250,14 @@ public class Scene extends Graph implements PConstants {
    * matrices by calling
    * {@link MatrixHandler#bindProjection(Matrix)} and
    * {@link MatrixHandler#bindModelView(Matrix)} (only makes sense
-   * when {@link #pg()} is different than {@code pgraphics}).
+   * when {@link #frontBuffer()} is different than {@code pgraphics}).
    * <p>
    * This method doesn't perform any computation, but simple retrieve the current matrices
    * whose actual computation has been updated in {@link #preDraw()}.
    */
   //TODO needs testing shader chaining
   public void bindMatrices(PGraphics pGraphics) {
-    if (this.pg() == pGraphics)
+    if (this.frontBuffer() == pGraphics)
       return;
     MatrixHandler mh = matrixHelper(pGraphics);
     mh.bindProjection(projection());
@@ -1305,7 +1269,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Apply the local transformation defined by the given {@code frame} on the given
    * {@code pgraphics}. This method doesn't call {@link #bindMatrices(PGraphics)} which
-   * should be called manually (only makes sense when {@link #pg()} is different than
+   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
    * {@code pgraphics}). Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
    *
    * @see #applyWorldTransformation(PGraphics, Frame)
@@ -1327,7 +1291,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Apply the global transformation defined by the given {@code frame} on the given
    * {@code pgraphics}. This method doesn't call {@link #bindMatrices(PGraphics)} which
-   * should be called manually (only makes sense when {@link #pg()} is different than
+   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
    * {@code pgraphics}).
    *
    * @see #applyTransformation(PGraphics, Frame)
@@ -1351,7 +1315,7 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void beginScreenDrawing() {
-    beginScreenDrawing(pg());
+    beginScreenDrawing(frontBuffer());
   }
 
   /**
@@ -1372,7 +1336,7 @@ public class Scene extends Graph implements PConstants {
     // if-else same as:
     // matrixHandler(p).beginScreenDrawing();
     // but perhaps a bit more efficient
-    if (pGraphics == pg())
+    if (pGraphics == frontBuffer())
       matrixHandler().beginScreenDrawing();
     else
       matrixHelper(pGraphics).beginScreenDrawing();
@@ -1384,7 +1348,7 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void endScreenDrawing() {
-    endScreenDrawing(pg());
+    endScreenDrawing(frontBuffer());
   }
 
   /**
@@ -1403,7 +1367,7 @@ public class Scene extends Graph implements PConstants {
     // if-else same as:
     // matrixHandler(p).endScreenDrawing();
     // but perhaps a bit more efficient
-    if (pGraphics == pg())
+    if (pGraphics == frontBuffer())
       matrixHandler().endScreenDrawing();
     else
       matrixHelper(pGraphics).endScreenDrawing();
@@ -1414,12 +1378,12 @@ public class Scene extends Graph implements PConstants {
   // drawing
 
   /**
-   * Same as {@code vertex(pg(), v)}.
+   * Same as {@code vertex(frontBuffer(), v)}.
    *
    * @see #vertex(PGraphics, float[])
    */
   public void vertex(float[] v) {
-    vertex(pg(), v);
+    vertex(frontBuffer(), v);
   }
 
   /**
@@ -1430,15 +1394,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code if (this.is2D()) vertex(pg(), x, y); elsevertex(pg(), x, _y, z)}.
+   * Same as {@code if (this.is2D()) vertex(frontBuffer(), x, y); elsevertex(frontBuffer(), x, _y, z)}.
    *
    * @see #vertex(PGraphics, float, float, float)
    */
   public void vertex(float x, float y, float z) {
     if (is2D())
-      vertex(pg(), x, y);
+      vertex(frontBuffer(), x, y);
     else
-      vertex(pg(), x, y, z);
+      vertex(frontBuffer(), x, y, z);
   }
 
   /**
@@ -1453,16 +1417,16 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Same as
-   * {@code if (this.is2D()) vertex(pg(), x, y, u, v); else vertex(pg(), x, _y, z, u, v);}.
+   * {@code if (this.is2D()) vertex(frontBuffer(), x, y, u, v); else vertex(frontBuffer(), x, _y, z, u, v);}.
    *
    * @see #vertex(PGraphics, float, float, float, float)
    * @see #vertex(PGraphics, float, float, float, float, float)
    */
   public void vertex(float x, float y, float z, float u, float v) {
     if (is2D())
-      vertex(pg(), x, y, u, v);
+      vertex(frontBuffer(), x, y, u, v);
     else
-      vertex(pg(), x, y, z, u, v);
+      vertex(frontBuffer(), x, y, z, u, v);
   }
 
   /**
@@ -1476,12 +1440,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code vertex(pg(), x, y)}.
+   * Same as {@code vertex(frontBuffer(), x, y)}.
    *
    * @see #vertex(PGraphics, float, float)
    */
   public void vertex(float x, float y) {
-    vertex(pg(), x, y);
+    vertex(frontBuffer(), x, y);
   }
 
   /**
@@ -1492,12 +1456,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code vertex(pg(), x, y, u, v)}.
+   * Same as {@code vertex(frontBuffer(), x, y, u, v)}.
    *
    * @see #vertex(PGraphics, float, float, float, float)
    */
   public void vertex(float x, float y, float u, float v) {
-    vertex(pg(), x, y, u, v);
+    vertex(frontBuffer(), x, y, u, v);
   }
 
   /**
@@ -1509,16 +1473,16 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Same as
-   * {@code if (this.is2D()) line(pg(), x1, y1, x2, y2); else line(pg(), x1, y1, z1, x2, y2, z2);}
+   * {@code if (this.is2D()) line(frontBuffer(), x1, y1, x2, y2); else line(frontBuffer(), x1, y1, z1, x2, y2, z2);}
    * .
    *
    * @see #line(PGraphics, float, float, float, float, float, float)
    */
   public void line(float x1, float y1, float z1, float x2, float y2, float z2) {
     if (is2D())
-      line(pg(), x1, y1, x2, y2);
+      line(frontBuffer(), x1, y1, x2, y2);
     else
-      line(pg(), x1, y1, z1, x2, y2, z2);
+      line(frontBuffer(), x1, y1, z1, x2, y2, z2);
   }
 
   /**
@@ -1532,12 +1496,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code pg().line(x1, y1, x2, y2)}.
+   * Same as {@code frontBuffer().line(x1, y1, x2, y2)}.
    *
    * @see #line(PGraphics, float, float, float, float)
    */
   public void line(float x1, float y1, float x2, float y2) {
-    line(pg(), x1, y1, x2, y2);
+    line(frontBuffer(), x1, y1, x2, y2);
   }
 
   /**
@@ -1643,17 +1607,17 @@ public class Scene extends Graph implements PConstants {
    * {@link #radius()} should give good results.
    */
   public void drawPath(Interpolator interpolator, int mask, int frameCount, float scale) {
-    pg().pushStyle();
+    frontBuffer().pushStyle();
     if (mask != 0) {
       int nbSteps = 30;
-      pg().strokeWeight(2 * pg().strokeWeight);
-      pg().noFill();
+      frontBuffer().strokeWeight(2 * frontBuffer().strokeWeight);
+      frontBuffer().noFill();
       List<Frame> path = interpolator.path();
       if (((mask & 1) != 0) && path.size() > 1) {
-        pg().beginShape();
+        frontBuffer().beginShape();
         for (Frame myFr : path)
           vertex(myFr.position().x(), myFr.position().y(), myFr.position().z());
-        pg().endShape();
+        frontBuffer().endShape();
       }
       if ((mask & 6) != 0) {
         int count = 0;
@@ -1676,13 +1640,13 @@ public class Scene extends Graph implements PConstants {
             popModelView();
           }
       }
-      pg().strokeWeight(pg().strokeWeight / 2f);
+      frontBuffer().strokeWeight(frontBuffer().strokeWeight / 2f);
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
       if(frame instanceof Node)
         drawPickingTarget((Node)frame);
-    pg().popStyle();
+    frontBuffer().popStyle();
   }
 
   /**
@@ -1876,11 +1840,11 @@ public class Scene extends Graph implements PConstants {
    * {@code z} axis.
    */
   public void drawCylinder(float w, float h) {
-    drawCylinder(pg(), w, h);
+    drawCylinder(frontBuffer(), w, h);
   }
 
   /**
-   * Same as {@code drawCylinder(pg, radius()/6, radius()/3)}.
+   * Same as {@code drawCylinder(frontBuffer, radius()/6, radius()/3)}.
    */
   public void drawCylinder(PGraphics pGraphics) {
     drawCylinder(pGraphics, radius() / 6, radius() / 3);
@@ -1889,7 +1853,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Low-level version of {@link #drawCylinder(float, float)}.
    * <p>
-   * Calls {@link #drawCylinder(float, float)} on {@code pg}.
+   * Calls {@link #drawCylinder(float, float)} on {@code frontBuffer}.
    */
   public static void drawCylinder(PGraphics pGraphics, float w, float h) {
     if (!(pGraphics instanceof PGraphics3D)) {
@@ -1940,13 +1904,13 @@ public class Scene extends Graph implements PConstants {
    * @see #drawCylinder(float, float)
    */
   public void drawHollowCylinder(int detail, float w, float h, Vector m, Vector n) {
-    drawHollowCylinder(pg(), detail, w, h, m, n);
+    drawHollowCylinder(frontBuffer(), detail, w, h, m, n);
   }
 
   /**
    * Low-level version of {@link #drawHollowCylinder(int, float, float, Vector, Vector)}.
    * <p>
-   * Calls {@link #drawHollowCylinder(int, float, float, Vector, Vector)} on {@code pg}.
+   * Calls {@link #drawHollowCylinder(int, float, float, Vector, Vector)} on {@code frontBuffer}.
    */
   public static void drawHollowCylinder(PGraphics pGraphics, int detail, float w, float h, Vector m, Vector n) {
     if (!(pGraphics instanceof PGraphics3D)) {
@@ -1992,11 +1956,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawCone(int, float, float, float, float, float)
    */
   public void drawCone(int detail, float x, float y, float r, float h) {
-    drawCone(pg(), detail, x, y, r, h);
+    drawCone(frontBuffer(), detail, x, y, r, h);
   }
 
   /**
-   * Same as {@code cone(pg, det, 0, 0, r, h);}
+   * Same as {@code cone(frontBuffer, det, 0, 0, r, h);}
    *
    * @see #drawCone(PGraphics, int, float, float, float, float)
    */
@@ -2005,7 +1969,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code cone(pg, 12, 0, 0, r, h);}
+   * Same as {@code cone(frontBuffer, 12, 0, 0, r, h);}
    *
    * @see #drawCone(PGraphics, int, float, float, float, float)
    */
@@ -2014,7 +1978,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawCone(pg, 12, 0, 0, radius()/4, sqrt(3) * radius()/4)}.
+   * Same as {@code drawCone(frontBuffer, 12, 0, 0, radius()/4, sqrt(3) * radius()/4)}.
    */
   public void drawCone(PGraphics pGraphics) {
     float r = radius() / 4;
@@ -2024,7 +1988,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Low-level version of {@link #drawCone(int, float, float, float, float)}.
    * <p>
-   * Calls {@link #drawCone(int, float, float, float, float)} on {@code pg}.
+   * Calls {@link #drawCone(int, float, float, float, float)} on {@code frontBuffer}.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float r, float h) {
     if (!(pGraphics instanceof PGraphics3D)) {
@@ -2056,7 +2020,7 @@ public class Scene extends Graph implements PConstants {
   // Cone v2
 
   /**
-   * Same as {@code cone(pg, det, 0, 0, r1, r2, h)}
+   * Same as {@code cone(frontBuffer, det, 0, 0, r1, r2, h)}
    *
    * @see #drawCone(PGraphics, int, float, float, float, float, float)
    */
@@ -2065,7 +2029,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code cone(pg, 18, 0, 0, r1, r2, h);}
+   * Same as {@code cone(frontBuffer, 18, 0, 0, r1, r2, h);}
    *
    * @see #drawCone(PGraphics, int, float, float, float, float, float)
    */
@@ -2081,13 +2045,13 @@ public class Scene extends Graph implements PConstants {
    * @see #drawCone(int, float, float, float, float)
    */
   public void drawCone(int detail, float x, float y, float r1, float r2, float h) {
-    drawCone(pg(), detail, x, y, r1, r2, h);
+    drawCone(frontBuffer(), detail, x, y, r1, r2, h);
   }
 
   /**
    * Low-level version of {@link #drawCone(int, float, float, float, float, float)}.
    * <p>
-   * Calls {@link #drawCone(int, float, float, float, float, float)} on {@code pg}.
+   * Calls {@link #drawCone(int, float, float, float, float, float)} on {@code frontBuffer}.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float r1, float r2, float h) {
     if (!(pGraphics instanceof PGraphics3D)) {
@@ -2127,11 +2091,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawGrid(float, int)
    */
   public void drawAxes(float length) {
-    drawAxes(pg(), length);
+    drawAxes(frontBuffer(), length);
   }
 
   /**
-   * Same as {@code drawAxes(pg, radius()/5)}.
+   * Same as {@code drawAxes(frontBuffer, radius()/5)}.
    */
   public void drawAxes(PGraphics pGraphics) {
     drawAxes(pGraphics, radius() / 5);
@@ -2140,7 +2104,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Low-level version of {@link #drawAxes(float)}.
    * <p>
-   * Calls {@link #drawAxes(float)} on {@code pg}.
+   * Calls {@link #drawAxes(float)} on {@code frontBuffer}.
    */
   public void drawAxes(PGraphics pGraphics, float length) {
     pGraphics.pushStyle();
@@ -2226,11 +2190,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawAxes(float)
    */
   public void drawGrid(float size, int subdivisions) {
-    drawGrid(pg(), size, subdivisions);
+    drawGrid(frontBuffer(), size, subdivisions);
   }
 
   /**
-   * Same as {@code drawGrid(pg, radius()/4, 10)}.
+   * Same as {@code drawGrid(frontBuffer, radius()/4, 10)}.
    */
   public void drawGrid(PGraphics pGraphics) {
     drawGrid(pGraphics, radius() / 4, 10);
@@ -2239,7 +2203,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Low-level version of {@link #drawGrid(float)}.
    * <p>
-   * Calls {@link #drawGrid(float)} on {@code pg}.
+   * Calls {@link #drawGrid(float)} on {@code frontBuffer}.
    */
   public void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
@@ -2264,11 +2228,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawAxes(float)
    */
   public void drawDottedGrid(float size, int subdivisions) {
-    drawDottedGrid(pg(), size, subdivisions);
+    drawDottedGrid(frontBuffer(), size, subdivisions);
   }
 
   /**
-   * Same as {@code drawDottedGrid(pg, radius()/4, 10)}.
+   * Same as {@code drawDottedGrid(frontBuffer, radius()/4, 10)}.
    */
   public void drawDottedGrid(PGraphics pGraphics) {
     drawDottedGrid(pGraphics, radius() / 4, 10);
@@ -2277,7 +2241,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Low-level version of {@link #drawDottedGrid(float, int)}.
    * <p>
-   * Calls {@link #drawDottedGrid(float, int)} on {@code pg}.
+   * Calls {@link #drawDottedGrid(float, int)} on {@code frontBuffer}.
    */
   public void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
@@ -2319,21 +2283,21 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code eye.eye()} transformation and then calls
-   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #pg()}. If
+   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #frontBuffer()}. If
    * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
    * @see #drawEye(PGraphics, Graph, boolean)
    */
   public void drawEye(Graph graph, boolean texture) {
-    pg().pushMatrix();
+    frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEye(pg(), graph, texture);
-    pg().popMatrix();
+    drawEye(frontBuffer(), graph, texture);
+    frontBuffer().popMatrix();
   }
 
   /**
-   * Same as {@code drawGraph(pg, eye, false)}.
+   * Same as {@code drawGraph(frontBuffer, eye, false)}.
    *
    * @see #drawEye(PGraphics, Graph, boolean)
    */
@@ -2347,14 +2311,14 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).frontBuffer() == frontBuffer} this method has not effect at all.
    */
   public void drawEye(PGraphics pGraphics, Graph graph, boolean texture) {
     // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
     // (which are given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.eye().magnitude()
     if (graph == this) {
-      System.out.println("Warning: No drawGraph done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawGraph done, eye.scene()).frontBuffer() and frontBuffer are the same!");
       return;
     }
     pGraphics.pushStyle();
@@ -2484,21 +2448,21 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code eye.eye()} transformation and then calls
-   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #pg()}. If
+   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #frontBuffer()}. If
    * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
    * @see #drawEye(PGraphics, Graph, boolean)
    */
   public void drawEyeNearPlane(Graph graph, boolean texture) {
-    pg().pushMatrix();
+    frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEyeNearPlane(pg(), graph, texture);
-    pg().popMatrix();
+    drawEyeNearPlane(frontBuffer(), graph, texture);
+    frontBuffer().popMatrix();
   }
 
   /**
-   * Same as {@code drawGraphNearPlane(pg, eye, false)}.
+   * Same as {@code drawGraphNearPlane(frontBuffer, eye, false)}.
    *
    * @see #drawEyeNearPlane(PGraphics, Graph, boolean)
    */
@@ -2511,14 +2475,14 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Warning: texture only works with opengl renderers.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).frontBuffer() == frontBuffer} this method has not effect at all.
    */
   public void drawEyeNearPlane(PGraphics pGraphics, Graph graph, boolean texture) {
     // Key here is to represent the eye boundaryWidthHeight and zNear params
     // (which are is given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.eye().magnitude()
     if (graph == this) {
-      System.out.println("Warning: No drawGraphNearPlane done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawGraphNearPlane done, eye.scene()).frontBuffer() and frontBuffer are the same!");
       return;
     }
     pGraphics.pushStyle();
@@ -2551,7 +2515,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics instanceof PGraphicsOpenGL && texture && graph instanceof Scene) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
-      pGraphics.texture(((Scene) graph).pg());
+      pGraphics.texture(((Scene) graph).frontBuffer());
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
@@ -2567,7 +2531,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjector(PGraphics, Graph, Vector)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjector(PGraphics, Graph, Vector)} on the scene {@link #frontBuffer()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
@@ -2576,7 +2540,7 @@ public class Scene extends Graph implements PConstants {
    * @see #drawProjectors(Graph, List)
    */
   public void drawProjector(Graph graph, Vector vector) {
-    drawProjector(pg(), graph, vector);
+    drawProjector(frontBuffer(), graph, vector);
   }
 
   /**
@@ -2587,7 +2551,7 @@ public class Scene extends Graph implements PConstants {
    * projector it should be used in conjunction with
    * {@link #drawEye(PGraphics, Graph, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).frontBuffer() == frontBuffer} this method has not effect at all.
    *
    * @see #drawProjector(PGraphics, Graph, Vector)
    * @see #drawProjectors(PGraphics, Graph, List)
@@ -2597,7 +2561,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #drawProjectors(PGraphics, Graph, List)} on the scene {@link #pg()}.
+   * Calls {@link #drawProjectors(PGraphics, Graph, List)} on the scene {@link #frontBuffer()}.
    * <p>
    * Since this method uses the eye origin and zNear plane to draw the other end of the
    * projector it should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
@@ -2606,7 +2570,7 @@ public class Scene extends Graph implements PConstants {
    * @see #drawProjector(Graph, Vector)
    */
   public void drawProjectors(Graph graph, List<Vector> vectors) {
-    drawProjectors(pg(), graph, vectors);
+    drawProjectors(frontBuffer(), graph, vectors);
   }
 
   /**
@@ -2617,14 +2581,14 @@ public class Scene extends Graph implements PConstants {
    * projector it should be used in conjunction with
    * {@link #drawEye(PGraphics, Graph, boolean)}.
    * <p>
-   * Note that if {@code eye.scene()).pg() == pg} this method has not effect at all.
+   * Note that if {@code eye.scene()).frontBuffer() == frontBuffer} this method has not effect at all.
    *
    * @see #drawProjectors(PGraphics, Graph, List)
    * @see #drawProjector(PGraphics, Graph, Vector)
    */
   public void drawProjectors(PGraphics pGraphics, Graph graph, List<Vector> vectors) {
     if (graph == this) {
-      System.out.println("Warning: No drawProjectors done, eye.scene()).pg() and pg are the same!");
+      System.out.println("Warning: No drawProjectors done, eye.scene()).frontBuffer() and frontBuffer are the same!");
       return;
     }
     pGraphics.pushStyle();
@@ -2671,7 +2635,7 @@ public class Scene extends Graph implements PConstants {
    * Internal use.
    */
   protected void drawInterpolatorEye(float scale) {
-    pg().pushStyle();
+    frontBuffer().pushStyle();
     float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
     float halfWidth = halfHeight * 1.3f;
     float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
@@ -2682,28 +2646,28 @@ public class Scene extends Graph implements PConstants {
     float baseHalfWidth = 0.3f * halfWidth;
 
     // Frustum outline
-    pg().noFill();
-    pg().beginShape();
+    frontBuffer().noFill();
+    frontBuffer().beginShape();
     vertex(-halfWidth, halfHeight, -dist);
     vertex(-halfWidth, -halfHeight, -dist);
     vertex(0.0f, 0.0f, 0.0f);
     vertex(halfWidth, -halfHeight, -dist);
     vertex(-halfWidth, -halfHeight, -dist);
-    pg().endShape();
-    pg().noFill();
-    pg().beginShape();
+    frontBuffer().endShape();
+    frontBuffer().noFill();
+    frontBuffer().beginShape();
     vertex(halfWidth, -halfHeight, -dist);
     vertex(halfWidth, halfHeight, -dist);
     vertex(0.0f, 0.0f, 0.0f);
     vertex(-halfWidth, halfHeight, -dist);
     vertex(halfWidth, halfHeight, -dist);
-    pg().endShape();
+    frontBuffer().endShape();
 
     // Up arrow
-    pg().noStroke();
-    pg().fill(pg().strokeColor);
+    frontBuffer().noStroke();
+    frontBuffer().fill(frontBuffer().strokeColor);
     // Base
-    pg().beginShape(PApplet.QUADS);
+    frontBuffer().beginShape(PApplet.QUADS);
 
     if (isLeftHanded()) {
       vertex(baseHalfWidth, -halfHeight, -dist);
@@ -2717,9 +2681,9 @@ public class Scene extends Graph implements PConstants {
       vertex(-baseHalfWidth, baseHeight, -dist);
     }
 
-    pg().endShape();
+    frontBuffer().endShape();
     // Arrow
-    pg().beginShape(PApplet.TRIANGLES);
+    frontBuffer().beginShape(PApplet.TRIANGLES);
 
     if (isLeftHanded()) {
       vertex(0.0f, -arrowHeight, -dist);
@@ -2730,8 +2694,8 @@ public class Scene extends Graph implements PConstants {
       vertex(-arrowHalfWidth, baseHeight, -dist);
       vertex(arrowHalfWidth, baseHeight, -dist);
     }
-    pg().endShape();
-    pg().popStyle();
+    frontBuffer().endShape();
+    frontBuffer().popStyle();
   }
 
   /**
@@ -2739,7 +2703,7 @@ public class Scene extends Graph implements PConstants {
    * {@code size}.
    */
   public void drawCross(float px, float py, float size) {
-    drawCross(pg(), px, py, size);
+    drawCross(frontBuffer(), px, py, size);
   }
 
   public void drawCross(PGraphics pGraphics, float px, float py, float size) {
@@ -2765,7 +2729,7 @@ public class Scene extends Graph implements PConstants {
    * @param radius       Circle screen radius.
    */
   public void drawFilledCircle(int subdivisions, Vector center, float radius) {
-    drawFilledCircle(pg(), subdivisions, center, radius);
+    drawFilledCircle(frontBuffer(), subdivisions, center, radius);
   }
 
   public void drawFilledCircle(PGraphics pGraphics, int subdivisions, Vector center, float radius) {
@@ -2795,7 +2759,7 @@ public class Scene extends Graph implements PConstants {
    * @param edge   Square edge length.
    */
   public void drawFilledSquare(Vector center, float edge) {
-    drawFilledSquare(pg(), center, edge);
+    drawFilledSquare(frontBuffer(), center, edge);
   }
 
   public void drawFilledSquare(PGraphics pGraphics, Vector center, float edge) {
@@ -2822,7 +2786,7 @@ public class Scene extends Graph implements PConstants {
    * @param length Length of the target in pixels
    */
   public void drawShooterTarget(Vector center, float length) {
-    drawShooterTarget(pg(), center, length);
+    drawShooterTarget(frontBuffer(), center, length);
   }
 
   public void drawShooterTarget(PGraphics pGraphics, Vector center, float length) {
@@ -2881,24 +2845,24 @@ public class Scene extends Graph implements PConstants {
     // }
     Vector center = projectedCoordinatesOf(node.position());
     if (inputHandler().isInputGrabber(node)) {
-      pg().pushStyle();
-      pg().strokeWeight(2 * pg().strokeWeight);
-      pg().colorMode(HSB, 255);
-      float hue = pg().hue(pg().strokeColor);
-      float saturation = pg().saturation(pg().strokeColor);
-      float brightness = pg().brightness(pg().strokeColor);
-      pg().stroke(hue, saturation * 1.4f, brightness * 1.4f);
+      frontBuffer().pushStyle();
+      frontBuffer().strokeWeight(2 * frontBuffer().strokeWeight);
+      frontBuffer().colorMode(HSB, 255);
+      float hue = frontBuffer().hue(frontBuffer().strokeColor);
+      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
+      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
+      frontBuffer().stroke(hue, saturation * 1.4f, brightness * 1.4f);
       drawShooterTarget(center, (node.precisionThreshold() + 1));
-      pg().popStyle();
+      frontBuffer().popStyle();
     } else {
-      pg().pushStyle();
-      pg().colorMode(HSB, 255);
-      float hue = pg().hue(pg().strokeColor);
-      float saturation = pg().saturation(pg().strokeColor);
-      float brightness = pg().brightness(pg().strokeColor);
-      pg().stroke(hue, saturation * 1.4f, brightness);
+      frontBuffer().pushStyle();
+      frontBuffer().colorMode(HSB, 255);
+      float hue = frontBuffer().hue(frontBuffer().strokeColor);
+      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
+      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
+      frontBuffer().stroke(hue, saturation * 1.4f, brightness);
       drawShooterTarget(center, node.precisionThreshold());
-      pg().popStyle();
+      frontBuffer().popStyle();
     }
   }
 
@@ -2915,11 +2879,11 @@ public class Scene extends Graph implements PConstants {
    * @param outsideRadius
    */
   public void drawTorusSolenoid(int faces, int detail, float insideRadius, float outsideRadius) {
-    drawTorusSolenoid(pg(), faces, detail, insideRadius, outsideRadius);
+    drawTorusSolenoid(frontBuffer(), faces, detail, insideRadius, outsideRadius);
   }
 
   /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(pg, 6)}.
+   * Convenience function that simply calls {@code drawTorusSolenoid(frontBuffer, 6)}.
    *
    * @see #drawTorusSolenoid(PGraphics, int, int, float, float)
    */
@@ -2928,7 +2892,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(pg, 6, insideRadius)}
+   * Convenience function that simply calls {@code drawTorusSolenoid(frontBuffer, 6, insideRadius)}
    * .
    *
    * @see #drawTorusSolenoid(PGraphics, int, int, float, float)
@@ -2939,7 +2903,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Convenience function that simply calls
-   * {@code drawTorusSolenoid(pg, faces, 100, insideRadius, insideRadius * 1.3f)} .
+   * {@code drawTorusSolenoid(frontBuffer, faces, 100, insideRadius, insideRadius * 1.3f)} .
    *
    * @see #drawTorusSolenoid(int, int, float, float)
    */
@@ -2948,7 +2912,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)} pn {@code pg} .
+   * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)} pn {@code frontBuffer} .
    */
   public static void drawTorusSolenoid(PGraphics pGraphics, int faces, int detail, float insideRadius, float outsideRadius) {
     pGraphics.pushStyle();
