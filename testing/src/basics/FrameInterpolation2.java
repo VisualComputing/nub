@@ -127,8 +127,8 @@ public class FrameInterpolation2 extends PApplet {
             auxCanvas.background(29, 153, 243);
             auxScene.drawAxes();
             // calls visit() for each node in the graph
-            auxScene.traverse();
-            //button.draw();
+            //auxScene.traverse();
+            button.draw();
             auxScene.endDraw();
             auxScene.display();
             scene.endScreenDrawing();

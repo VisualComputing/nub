@@ -16,6 +16,7 @@ import processing.core.PShape;
 import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.core.Node;
+import remixlab.primitives.Frame;
 import remixlab.primitives.Vector;
 
 public class NodeP5  extends Node {
@@ -130,11 +131,40 @@ public class NodeP5  extends Node {
     }
     //*/
 
+    /**
+     * Same as {@code draw(scene.pg())}.
+     *
+     * @see remixlab.proscene.Scene#traverse(PGraphics)
+     */
+    public void draw() {
+        draw(scene().frontBuffer());
+    }
+
+    /**
+     * Draw the visual representation of the node into the given PGraphics using the
+     * current point of view (see
+     * {@link remixlab.proscene.Scene#applyTransformation(PGraphics, Frame)}).
+     * <p>
+     * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
+     * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
+     * the node into the scene main {@link Scene#frontBuffer()}.
+     */
+    public boolean draw(PGraphics pg) {
+        pg.pushMatrix();
+        Scene.applyWorldTransformation(pg, this);
+        visit(pg);
+        pg.popMatrix();
+        return true;
+    }
+
     @Override
-    protected void visit() {
+    public void visit() {
+        visit(scene()._targetPGraphics);
+    }
+
+    protected void visit(PGraphics pg) {
         if (scene().eye() == this)
             return;
-        PGraphics pg = scene()._targetPGraphics;
         if(pg != scene().backBuffer()) {
             pg.pushStyle();
             pg.pushMatrix();
