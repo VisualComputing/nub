@@ -114,23 +114,7 @@ public class NodeP5  extends Node {
                 }
         scene()._bbEnabled = false;
     }
-
-    /**
-     * Draw the visual representation of the frame into the given PGraphics using the
-     * current point of view.
-     */
-    //TODO does it make sense to draw a single node?
-    /*
-    public boolean draw() {
-        PGraphics pg = scene().frontBuffer();
-        pg.pushMatrix();
-        Scene.applyWorldTransformation(pg, this);
-        visit();
-        pg.popMatrix();
-        return true;
-    }
-    //*/
-
+    
     /**
      * Same as {@code draw(scene.pg())}.
      *
