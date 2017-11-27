@@ -1280,7 +1280,7 @@ public class Scene extends Graph implements PConstants {
       pGraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
     } else {
       pGraphics.translate(frame.translation().x(), frame.translation().y());
-      pGraphics.rotate(frame.rotation().angle());
+      pGraphics.rotate(frame.rotation().angle2D());
       pGraphics.scale(frame.scaling(), frame.scaling());
     }
   }
