@@ -1186,9 +1186,6 @@ public class Scene extends Graph implements PConstants {
   }
   */
 
-  //protected boolean unchachedBuffer;
-  //public PGraphics _targetPGraphics;
-
   @Override
   public void traverse() {
     traverse(frontBuffer());
