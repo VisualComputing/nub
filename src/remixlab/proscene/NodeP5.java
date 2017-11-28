@@ -26,14 +26,12 @@ public class NodeP5  extends Node {
         NONE, FRONT_SHAPE, FRONT_PICKING_SHAPES, PICKING_SHAPE
     }
     Highlighting _highlight;
-    Vector _shift;
 
     public NodeP5(Scene scene) {
         super(scene);
         _scene = scene;
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
-        setShift(new Vector());
         setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
@@ -42,7 +40,6 @@ public class NodeP5  extends Node {
         _scene = reference.scene();
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
-        setShift(new Vector());
         setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
@@ -159,10 +156,6 @@ public class NodeP5  extends Node {
             setFrontShape(pg);
             //*/
             ///*
-            if (pg.is3D())
-                pg.translate(_shift.x(), _shift.y(), _shift.z());
-            else
-                pg.translate(_shift.x(), _shift.y());
             switch (highlighting()) {
                 case FRONT_SHAPE:
                     if (grabsInput())
@@ -222,10 +215,6 @@ public class NodeP5  extends Node {
                 setBackShape(pg);
                 //*/
                 ///*
-                if (pg.is3D())
-                    pg.translate(_shift.x(), _shift.y(), _shift.z());
-                else
-                    pg.translate(_shift.x(), _shift.y());
                 if (_frontShape != null)
                     pg.shapeMode(scene().frontBuffer().shapeMode);
                 if (_backShape != null)
@@ -237,21 +226,6 @@ public class NodeP5  extends Node {
                 pg.popMatrix();
             }
         }
-    }
-
-    /**
-     * Same as {@code shiftFrontShape(_shift); shiftPickingShape(_shift)}.
-     * <p>
-     * This method is only meaningful when frame is not eyeFrame.
-     *
-     * @see #shift()
-     */
-    public void setShift(Vector s) {
-        _shift = s;
-    }
-
-    public Vector shift() {
-        return _shift;
     }
 
     protected void setShape(PGraphics pg) {
