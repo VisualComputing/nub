@@ -40,6 +40,7 @@ Observations:
 * Decide framework name and Processing interface classes naming conventions.
 * Merge Node and Frame in the API, e.g., `setEye(Frame)`, `setDefaultNode(Node)`.
 * Restored `save/loadConfig` (json).
+* Discard frame.syncing (seems over kill) in favor of Scene.applyTransformation(Frame)
 * Make all drawing _static_.
 * ~Restore `PickingPrecision.EXACT` using the `pickingBuffer`~.
 * Restore shader chaining (example).

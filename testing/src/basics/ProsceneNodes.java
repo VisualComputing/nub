@@ -7,7 +7,7 @@ import remixlab.core.Node;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.input.event.TapEvent;
-import remixlab.proscene.NodeP5;
+import remixlab.proscene.Shape;
 import remixlab.proscene.Scene;
 
 public class ProsceneNodes extends PApplet {
@@ -94,7 +94,7 @@ public class ProsceneNodes extends PApplet {
         }
     }
 
-    public class INode extends NodeP5 {
+    public class INode extends Shape {
         //button dimensions
         public INode() {
             super(scene);
@@ -121,7 +121,7 @@ public class ProsceneNodes extends PApplet {
         }
 
         @Override
-        protected void setShape(PGraphics pg) {
+        protected void set(PGraphics pg) {
             pg.fill(255,0,0);
             pg.sphere(50);
         }

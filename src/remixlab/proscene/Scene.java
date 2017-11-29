@@ -758,7 +758,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (!isOffscreen())
-      showOnlyOffScreenWarning("setShape");
+      showOnlyOffScreenWarning("set");
     pApplet().image(pgraphics, originCorner().x(), originCorner().y());
     _lastDisplay = pApplet().frameCount;
   }

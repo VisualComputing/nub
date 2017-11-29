@@ -17,17 +17,16 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.core.Node;
 import remixlab.primitives.Frame;
-import remixlab.primitives.Vector;
 
-public class NodeP5  extends Node {
+public class Shape extends Node {
     Scene _scene;
     PShape _frontShape, _backShape;
     public enum Highlighting {
-        NONE, FRONT_SHAPE, FRONT_PICKING_SHAPES, PICKING_SHAPE
+        NONE, FRONT_SHAPE, FRONT_BACK_SHAPES, BACK_SHAPE
     }
     Highlighting _highlight;
 
-    public NodeP5(Scene scene) {
+    public Shape(Scene scene) {
         super(scene);
         _scene = scene;
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
@@ -35,7 +34,7 @@ public class NodeP5  extends Node {
         setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
-    public NodeP5(NodeP5 reference) {
+    public Shape(Shape reference) {
         super(reference);
         _scene = reference.scene();
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
@@ -43,13 +42,15 @@ public class NodeP5  extends Node {
         setHighlighting(Highlighting.FRONT_SHAPE);
     }
 
-    protected NodeP5(Scene otherGraph, NodeP5 otherNodeP5) {
-        super(otherGraph, otherNodeP5);
+    protected Shape(Scene otherGraph, Shape otherShape) {
+        super(otherGraph, otherShape);
+        this._frontShape = otherShape._frontShape;
+        this._backShape = otherShape._backShape;
     }
 
     @Override
-    public NodeP5 get() {
-        return new NodeP5(scene(), this);
+    public Shape get() {
+        return new Shape(scene(), this);
     }
 
     public Scene scene() {
@@ -64,12 +65,12 @@ public class NodeP5  extends Node {
      * <li>{@link Highlighting#NONE}: no highlighting
      * takes place.</li>
      * <li>{@link Highlighting#FRONT_SHAPE}: the
-     * front-shape (see {@link #setFrontShape(PShape)}) is scaled by a {@code 1.15}
+     * front-shape (see {@link #setFront(PShape)}) is scaled by a {@code 1.15}
      * factor.</li>
-     * <li>{@link Highlighting#PICKING_SHAPE}: the
-     * picking-shape (see {@link #setBackShape(PShape)} is displayed instead of the
+     * <li>{@link Highlighting#BACK_SHAPE}: the
+     * picking-shape (see {@link #setBack(PShape)} is displayed instead of the
      * front-shape.</li>
-     * <li>{@link Highlighting#FRONT_PICKING_SHAPES}:
+     * <li>{@link Highlighting#FRONT_BACK_SHAPES}:
      * both, the front and the picking shapes are displayed.</li>
      * </ol>
      * <p>
@@ -104,7 +105,7 @@ public class NodeP5  extends Node {
             return;
         }
         for (Node node : scene().nodes())
-            if(node instanceof NodeP5)
+            if(node instanceof Shape)
                 if (node.precision() == Precision.EXACT) {
                     scene()._bbEnabled = true;
                     return;
@@ -152,10 +153,11 @@ public class NodeP5  extends Node {
             /*
             if(_frontShape != null)
                 pg.shape(_frontShape);
-            setShape(pg);
-            setFrontShape(pg);
+            set(pg);
+            setFront(pg);
             //*/
             ///*
+            //TODO needs more thinking
             switch (highlighting()) {
                 case FRONT_SHAPE:
                     if (grabsInput())
@@ -163,28 +165,33 @@ public class NodeP5  extends Node {
                 case NONE:
                     if(_frontShape != null)
                         pg.shape(_frontShape);
-                    setShape(pg);
+                    else
+                        set(pg);
                     break;
-                case FRONT_PICKING_SHAPES:
+                case FRONT_BACK_SHAPES:
                     if(_frontShape != null)
                         pg.shape(_frontShape);
-                    setFrontShape(pg);
+                    else
+                        setFront(pg);
                     if (grabsInput()) {
                         if (_backShape != null)
                             pg.shape(_backShape);
-                        setBackShape(pg);
+                        else
+                            setBack(pg);
                     }
                     break;
-                case PICKING_SHAPE:
+                case BACK_SHAPE:
                     if (grabsInput()) {
                         if (_backShape != null)
                             pg.shape(_backShape);
-                        setBackShape(pg);
+                        else
+                            setBack(pg);
                     }
                     else {
                         if(_frontShape != null)
                             pg.shape(_frontShape);
-                        setFrontShape(pg);
+                        else
+                            setFront(pg);
                     }
                     break;
             }
@@ -211,16 +218,18 @@ public class NodeP5  extends Node {
                 /*
                 if (_backShape != null)
                     pg.shape(_backShape);
-                setShape(pg);
-                setBackShape(pg);
+                set(pg);
+                setBack(pg);
                 //*/
                 ///*
                 if (_frontShape != null)
                     pg.shapeMode(scene().frontBuffer().shapeMode);
                 if (_backShape != null)
                     pg.shape(_backShape);
-                setShape(pg);
-                setBackShape(pg);
+                else {
+                    set(pg);
+                    setBack(pg);
+                }
                 //*/
                 pg.popStyle();
                 pg.popMatrix();
@@ -228,25 +237,25 @@ public class NodeP5  extends Node {
         }
     }
 
-    protected void setShape(PGraphics pg) {
+    protected void set(PGraphics pg) {
     }
 
-    protected void setFrontShape(PGraphics pg) {
+    protected void setFront(PGraphics pg) {
     }
 
-    protected void setBackShape(PGraphics pg) {
+    protected void setBack(PGraphics pg) {
     }
 
-    public void setShape(PShape shape) {
-        setFrontShape(shape);
-        setBackShape(shape);
+    public void set(PShape shape) {
+        setFront(shape);
+        setBack(shape);
     }
 
-    public void setFrontShape(PShape shape) {
+    public void setFront(PShape shape) {
         _frontShape = shape;
     }
 
-    public void setBackShape(PShape shape) {
+    public void setBack(PShape shape) {
         _backShape = shape;
     }
 

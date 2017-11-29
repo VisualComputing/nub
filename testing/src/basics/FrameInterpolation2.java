@@ -205,9 +205,9 @@ public class FrameInterpolation2 extends PApplet {
         }
     }
 
-    // Controls are implemented from using (the new) NodeP5 class which uses
+    // Controls are implemented from using (the new) Shape class which uses
     // the picking buffer (exact picking according to the picking shape)
-    public class Button extends NodeP5 {
+    public class Button extends Shape {
         //button dimensions
         int _w , _h;
         public Button(int w, int h) {
@@ -219,7 +219,7 @@ public class FrameInterpolation2 extends PApplet {
             rectangle.setStroke(color(255));
             rectangle.setStrokeWeight(4);
             rectangle.setFill(color(127));
-            setShape(rectangle);
+            //set(rectangle);
             //*/
         }
 
@@ -239,6 +239,11 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         @Override
+        public void interact(MotionEvent1 event) {
+            nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx()/10);
+        }
+
+        @Override
         public void interact(TapEvent event) {
             TapShortcut left = new TapShortcut(Event.NO_MODIFIER_MASK, LEFT, 2);
             TapShortcut right = new TapShortcut(Event.SHIFT, RIGHT, 1);
@@ -248,9 +253,9 @@ public class FrameInterpolation2 extends PApplet {
                 println("got me!");
         }
 
-        /*
+        ///*
         @Override
-        protected void setShape(PGraphics pg) {
+        protected void set(PGraphics pg) {
             pg.rectMode(CENTER);
             pg.fill(255,0,0);
             pg.rect(0,0,_w,_h);
