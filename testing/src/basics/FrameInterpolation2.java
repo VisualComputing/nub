@@ -156,7 +156,7 @@ public class FrameInterpolation2 extends PApplet {
         if(key == 'f')
             scene.fitBall();
         if(key == 'i') {
-            println(scene._lastDisplay + " and " + auxScene._lastDisplay);
+            //println(scene._lastDisplay + " and " + auxScene._lastDisplay);
         }
     }
 

@@ -3,6 +3,7 @@ package eye;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import remixlab.core.Graph;
 import remixlab.core.Node;
 import remixlab.proscene.Scene;
 import remixlab.proscene.Shape;
@@ -30,6 +31,7 @@ public class MiniMap extends PApplet {
     public void setup() {
         sceneCanvas = createGraphics(w, h, renderer);
         scene = new Scene(this, sceneCanvas);
+        //if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         node1 = new InteractiveShape(scene);
         node1.setPrecision(Node.Precision.EXACT);
         node1.translate(30, 30);
@@ -39,24 +41,26 @@ public class MiniMap extends PApplet {
         node3.translate(40, 0);
         InteractiveNode sceneEye = new InteractiveNode(scene);
         scene.setEye(sceneEye);
+        scene.setFieldOfView((float)Math.PI/3);
         //interactivity defaults to the eye
         scene.setDefaultNode(sceneEye);
         scene.setRadius(150);
         //scene.fitBallInterpolation();
         scene.fitBall();
-        scene.disableAutoFocus();
-        scene.disableMouseAgent();
+        //scene.disableAutoFocus();
+        //scene.disableMouseAgent();
 
         minimapCanvas = createGraphics(oW, oH, renderer);
         minimap = new Scene(this, minimapCanvas, oX, oY);
+        if(minimap.is3D()) minimap.setType(Graph.Type.ORTHOGRAPHIC);
         InteractiveNode minimapEye = new InteractiveNode(minimap);
         minimap.setEye(minimapEye);
         //interactivity defaults to the eye
         minimap.setDefaultNode(minimapEye);
-        minimap.setRadius(200);
+        minimap.setRadius(500);
         minimap.fitBall();
         //minimap.fitBallInterpolation();
-        minimap.disableAutoFocus();
+        //minimap.disableAutoFocus();
 
         eye = new InteractiveShape(minimap);
         //to not scale the eye on mouse hover uncomment:
@@ -66,6 +70,7 @@ public class MiniMap extends PApplet {
     }
 
     public void draw() {
+        Node.sync((Node)scene.eye(), eye);
         scene.beginDraw();
         sceneCanvas.background(0);
         scene.traverse();
@@ -88,31 +93,6 @@ public class MiniMap extends PApplet {
     public void keyPressed() {
         if (key == ' ')
             showMiniMap = !showMiniMap;
-        /*
-        if (key == 'x')
-            eye.setShape("eyeDrawing");
-        if (key == 'y')
-            eye.setShape(scene.eyeFrame());
-            */
-    }
-
-    public void frameDrawing(PGraphics pg) {
-        pg.fill(random(0, 255), random(0, 255), random(0, 255));
-        if (scene.is3D())
-            pg.box(40, 10, 5);
-        else
-            pg.rect(0, 0, 40, 10, 5);
-    }
-
-    public void eyeDrawing(PGraphics pg) {
-        if (minimap.is3D())
-            pg.box(200);
-        else {
-            pg.pushStyle();
-            pg.rectMode(CENTER);
-            pg.rect(0, 0, 200, 200);
-            pg.popStyle();
-        }
     }
 
     public static void main(String args[]) {
@@ -139,7 +119,11 @@ public class MiniMap extends PApplet {
                 Scene.drawTorusSolenoid(pg, 6, 8);
             }
             if(scene() == minimap) {
-                minimap.drawEye(scene);
+                //minimap.drawEye(pg, scene, true);
+                pg.fill(0,255,0);
+                pg.stroke(0,0,255);
+                pg.strokeWeight(2);
+                minimap.drawEye(pg, scene, scene.is3D());
             }
         }
     }

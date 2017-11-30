@@ -76,7 +76,7 @@ public class ViewFrustumCulling extends PApplet {
 
     public void keyPressed() {
         if(key == 'i') {
-            println(scene._lastDisplay + " and " + auxScene._lastDisplay);
+            //println(scene._lastDisplay + " and " + auxScene._lastDisplay);
         }
     }
 
