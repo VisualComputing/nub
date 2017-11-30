@@ -93,6 +93,10 @@ public class MiniMap extends PApplet {
     public void keyPressed() {
         if (key == ' ')
             showMiniMap = !showMiniMap;
+        if(key == 's')
+            scene.fitBallInterpolation();
+        if(key == 'S')
+            minimap.fitBallInterpolation();
     }
 
     public static void main(String args[]) {
