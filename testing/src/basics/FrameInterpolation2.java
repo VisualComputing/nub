@@ -1,5 +1,6 @@
 package basics;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -36,7 +37,7 @@ public class FrameInterpolation2 extends PApplet {
 
     public void setup() {
         scene = new Scene(this);
-        InteractiveFrame eye = new InteractiveFrame(scene);
+        InteractiveNode eye = new InteractiveNode(scene);
         scene.setEye(eye);
         //interactivity defaults to the eye
         scene.setDefaultNode(eye);
@@ -55,7 +56,7 @@ public class FrameInterpolation2 extends PApplet {
         // Create an initial path
         int nbKeyFrames = 4;
         for (int i=0; i<nbKeyFrames; i++) {
-            InteractiveFrame iFrame = new InteractiveFrame(scene);
+            InteractiveNode iFrame = new InteractiveNode(scene);
             iFrame.setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
             iFrame.setScaling(random(0.25f, 4.0f));
             nodeInterpolator.addKeyFrame(iFrame);
@@ -67,7 +68,7 @@ public class FrameInterpolation2 extends PApplet {
         auxCanvas.rectMode(CENTER);
         auxScene = new Scene(this, auxCanvas, oX, oY);
         //auxScene.disablePickingBuffer();
-        InteractiveFrame eye1 = new InteractiveFrame(auxScene);
+        InteractiveNode eye1 = new InteractiveNode(auxScene);
         auxScene.setEye(eye1);
         //interactivity defaults to the eye
         auxScene.setDefaultNode(eye1);
@@ -102,7 +103,7 @@ public class FrameInterpolation2 extends PApplet {
             pushMatrix();
             scene.applyTransformation(frame);
             // Horrible cast, but Java is just horrible
-            if ( ((InteractiveFrame)frame).grabsInput() )
+            if ( ((InteractiveNode)frame).grabsInput() )
                 scene.drawAxes(35);
             else
                 scene.drawAxes(20);
@@ -154,54 +155,8 @@ public class FrameInterpolation2 extends PApplet {
             scene.fitBallInterpolation();
         if(key == 'f')
             scene.fitBall();
-    }
-
-    // eye node, good for both scenes
-    public class InteractiveFrame extends Node {
-        public InteractiveFrame(Scene s) {
-            super(s);
-        }
-
-        // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
-        // scene.eye().get()) to have the same behavior as its original.
-        protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
-            super(otherGraph, otherFrame);
-        }
-
-        @Override
-        public InteractiveFrame get() {
-            return new InteractiveFrame(this.graph(), this);
-        }
-
-        // behavior is here :P
-        @Override
-        public void interact(MotionEvent event) {
-            switch (event.shortcut().id()) {
-                case PApplet.LEFT:
-                    rotate(event);
-                    break;
-                case PApplet.RIGHT:
-                    translate(event);
-                    break;
-                case processing.event.MouseEvent.WHEEL:
-                    if(isEye() && graph().is3D())
-                        translateZ(event);
-                    else
-                        scale(event);
-                    break;
-            }
-        }
-
-        @Override
-        public void interact(KeyEvent event) {
-            if (event.id() == PApplet.UP)
-                translateYPos();
-            if (event.id() == PApplet.DOWN)
-                translateYNeg();
-            if (event.id() == PApplet.LEFT)
-                translateXNeg();
-            if (event.id() == PApplet.RIGHT)
-                translateXPos();
+        if(key == 'i') {
+            println(scene._lastDisplay + " and " + auxScene._lastDisplay);
         }
     }
 

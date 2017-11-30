@@ -1,5 +1,6 @@
 package eye;
 
+import common.InteractiveNode;
 import processing.core.*;
 import remixlab.core.Graph;
 import remixlab.core.Node;
@@ -38,7 +39,7 @@ public class WindowCulling  extends PApplet {
         canvas = createGraphics(w, h/2, renderer);
         scene = new Scene(this, canvas);
 
-        InteractiveFrame eye = new InteractiveFrame(scene);
+        InteractiveNode eye = new InteractiveNode(scene);
         scene.setEye(eye);
         scene.setDefaultNode(eye);
         scene.setRadius(200);
@@ -52,7 +53,7 @@ public class WindowCulling  extends PApplet {
         // is to be drawn (see drawing code below) to its constructor.
         auxScene = new Scene(this, auxCanvas, 0, h/2);
 
-        InteractiveFrame auxEye = new InteractiveFrame(auxScene);
+        InteractiveNode auxEye = new InteractiveNode(auxScene);
         auxScene.setEye(auxEye);
         auxScene.setDefaultNode(auxEye);
         auxScene.setRadius(400);
@@ -107,51 +108,6 @@ public class WindowCulling  extends PApplet {
             scene.fitBall();
         if(key == 'i')
             info();
-    }
-
-    public class InteractiveFrame extends Node {
-        public InteractiveFrame(Graph graph) {
-            super(graph);
-        }
-
-        protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {
-            super(otherGraph, otherFrame);
-        }
-
-        @Override
-        public InteractiveFrame get() {
-            return new InteractiveFrame(this.graph(), this);
-        }
-
-        @Override
-        public void interact(MotionEvent event) {
-            switch (event.shortcut().id()) {
-                case PApplet.LEFT:
-                    rotate(event);
-                    break;
-                case PApplet.RIGHT:
-                    translate(event);
-                    break;
-                case processing.event.MouseEvent.WHEEL:
-                    if(isEye() && graph().is3D())
-                        translateZ(event);
-                    else
-                        scale(event);
-                    break;
-            }
-        }
-
-        @Override
-        public void interact(KeyEvent event) {
-            if (event.id() == PApplet.UP)
-                translateYPos();
-            if (event.id() == PApplet.DOWN)
-                translateYNeg();
-            if (event.id() == PApplet.LEFT)
-                translateXNeg();
-            if (event.id() == PApplet.RIGHT)
-                translateXPos();
-        }
     }
 
     public static void main(String args[]) {
