@@ -165,10 +165,9 @@ public class Scene extends Graph implements PConstants {
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
-    } else {
+    } else
       _offScreenScenes++;
-      enableAutoFocus();
-    }
+    enableAutoFocus();
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
@@ -858,8 +857,6 @@ public class Scene extends Graph implements PConstants {
    * @see #toggleAutoFocus()
    */
   public boolean hasAutoFocus() {
-    if (!isOffscreen())
-      showOnlyOffScreenWarning("hasAutoFocus");
     return _autofocus;
   }
 
@@ -872,10 +869,6 @@ public class Scene extends Graph implements PConstants {
    * @see #disableAutoFocus()
    */
   public void toggleAutoFocus() {
-    if (!isOffscreen()) {
-      showOnlyOffScreenWarning("toggleAutoFocus");
-      return;
-    }
     if (hasAutoFocus())
       disableAutoFocus();
     else
@@ -891,10 +884,6 @@ public class Scene extends Graph implements PConstants {
    * @see #toggleAutoFocus()
    */
   public void disableAutoFocus() {
-    if (!isOffscreen()) {
-      showOnlyOffScreenWarning("disableAutoFocus");
-      return;
-    }
     enableAutoFocus(false);
   }
 
@@ -907,10 +896,6 @@ public class Scene extends Graph implements PConstants {
    * @see #toggleAutoFocus()
    */
   public void enableAutoFocus() {
-    if (!isOffscreen()) {
-      showOnlyOffScreenWarning("enableAutoFocus");
-      return;
-    }
     enableAutoFocus(true);
   }
 
@@ -926,10 +911,6 @@ public class Scene extends Graph implements PConstants {
    * @see #toggleAutoFocus()
    */
   public void enableAutoFocus(boolean autoFocus) {
-    if (!isOffscreen()) {
-      showOnlyOffScreenWarning("enableAutoFocus");
-      return;
-    }
     _autofocus = autoFocus;
   }
 
