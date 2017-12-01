@@ -1,11 +1,8 @@
 package vfc;
 
-import common.InteractiveNode;
+import common.InteractiveShape;
 import processing.core.*;
 import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.MotionEvent;
 import remixlab.primitives.*;
 import remixlab.proscene.*;
 
@@ -34,7 +31,7 @@ public class ViewFrustumCulling extends PApplet {
         scene = new Scene(this, canvas);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.enableBoundaryEquations();
-        InteractiveNode eye = new InteractiveNode(scene);
+        InteractiveShape eye = new InteractiveShape(scene);
         scene.setEye(eye);
         scene.setDefaultNode(eye);
         scene.setFieldOfView(PI/3);
@@ -45,7 +42,7 @@ public class ViewFrustumCulling extends PApplet {
         // is to be drawn (see drawing code below) to its constructor.
         auxScene = new Scene(this, auxCanvas, 0, h/2);
         auxScene.setType(Graph.Type.ORTHOGRAPHIC);
-        InteractiveNode auxEye = new InteractiveNode(auxScene);
+        InteractiveShape auxEye = new InteractiveShape(auxScene);
         auxScene.setEye(auxEye);
         auxScene.setDefaultNode(auxEye);
         auxScene.setRadius(200);

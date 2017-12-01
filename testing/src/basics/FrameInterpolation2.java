@@ -1,6 +1,7 @@
 package basics;
 
 import common.InteractiveNode;
+import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -56,10 +57,10 @@ public class FrameInterpolation2 extends PApplet {
         // Create an initial path
         int nbKeyFrames = 4;
         for (int i=0; i<nbKeyFrames; i++) {
-            InteractiveNode iFrame = new InteractiveNode(scene);
-            iFrame.setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
-            iFrame.setScaling(random(0.25f, 4.0f));
-            nodeInterpolator.addKeyFrame(iFrame);
+            InteractiveNode iNode = new InteractiveNode(scene);
+            iNode.setPosition(-100 + 200*i/(nbKeyFrames-1), 0, 0);
+            iNode.setScaling(random(0.25f, 4.0f));
+            nodeInterpolator.addKeyFrame(iNode);
         }
         nodeInterpolator.start();
 

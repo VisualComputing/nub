@@ -1,11 +1,10 @@
 package basics;
 
 import common.InteractiveNode;
+import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.input.event.TapEvent;
 import remixlab.proscene.Shape;

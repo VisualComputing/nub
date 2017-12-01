@@ -1,6 +1,7 @@
 package eye;
 
 import common.InteractiveNode;
+import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import remixlab.core.Graph;
@@ -11,8 +12,9 @@ import remixlab.proscene.Shape;
 public class MiniMap extends PApplet {
     Scene scene, minimap;
     PGraphics sceneCanvas, minimapCanvas;
-    InteractiveShape node1, node2, node3, eye;
-    InteractiveShape2 node4;
+    TorusShape node1, node2, node3;
+    EyeShape eye;
+    TorusShape node4;
 
     int w = 1800;
     int h = 1200;
@@ -33,12 +35,12 @@ public class MiniMap extends PApplet {
         sceneCanvas = createGraphics(w, h, renderer);
         scene = new Scene(this, sceneCanvas);
         //if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
-        node1 = new InteractiveShape(scene);
+        node1 = new TorusShape(scene);
         //node1.setPrecision(Node.Precision.EXACT);
         node1.translate(30, 30);
-        node2 = new InteractiveShape(node1);
+        node2 = new TorusShape(node1);
         node2.translate(40, 0);
-        node3 = new InteractiveShape(node2);
+        node3 = new TorusShape(node2);
         node3.translate(40, 0);
         InteractiveNode sceneEye = new InteractiveNode(scene);
         scene.setEye(sceneEye);
@@ -53,7 +55,7 @@ public class MiniMap extends PApplet {
 
         minimapCanvas = createGraphics(oW, oH, renderer);
         minimap = new Scene(this, minimapCanvas, oX, oY);
-        node4 = new InteractiveShape2(minimap);
+        node4 = new TorusShape(minimap);
         ////node1.setPrecision(Node.Precision.EXACT);
         node4.translate(30, 30);
         if(minimap.is3D()) minimap.setType(Graph.Type.ORTHOGRAPHIC);
@@ -67,7 +69,7 @@ public class MiniMap extends PApplet {
         //minimap.disableAutoFocus();
 
         ///*
-        eye = new InteractiveShape(minimap);
+        eye = new EyeShape(minimap);
         //to not scale the eye on mouse hover uncomment:
         eye.setHighlighting(Shape.Highlighting.NONE);
         eye.setWorldMatrix(scene.eye());
@@ -113,52 +115,39 @@ public class MiniMap extends PApplet {
         PApplet.main(new String[]{"eye.MiniMap"});
     }
 
-    public class InteractiveShape extends InteractiveNode {
-        public InteractiveShape(Scene s) {
-            super(s);
+    public class EyeShape extends InteractiveShape {
+        public EyeShape(Scene scene) {
+            super(scene);
             //this.setPrecision(Precision.EXACT);
         }
 
-        public InteractiveShape(InteractiveShape n) {
-            super(n);
+        public EyeShape(EyeShape eyeShape) {
+            super(eyeShape);
             //this.setPrecision(Precision.EXACT);
         }
 
         @Override
         protected void set(PGraphics pg) {
-            //pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
-            //Scene.drawTorusSolenoid(pg, 6, 8);
-            ///*
-            if (scene() == scene) {
-                //pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
-                //Scene.drawTorusSolenoid(pg, (int)scene().pApplet().random(2,10), scene().pApplet().random(2,10));
-                pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
-                Scene.drawTorusSolenoid(pg, 6, 8);
-            }
-            if (scene() == minimap) {
-                //minimap.drawEye(pg, scene, true);
-                pg.fill(0, 255, 0);
-                pg.stroke(0, 0, 255);
-                pg.strokeWeight(2);
-                minimap.drawEye(pg, scene, true);
-            }
-            //*/
+            pg.fill(0, 255, 0);
+            pg.stroke(0, 0, 255);
+            pg.strokeWeight(2);
+            minimap.drawEye(pg, scene, true);
         }
     }
 
-        public class InteractiveShape2 extends InteractiveNode {
-            public InteractiveShape2(Scene s) {
-                super(s);
-            }
-
-            public InteractiveShape2(InteractiveShape2 n) {
-                super(n);
-            }
-
-            @Override
-            protected void set(PGraphics pg) {
-                pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
-                Scene.drawTorusSolenoid(pg, 6, 8);
-            }
+    public class TorusShape extends InteractiveShape {
+        public TorusShape(Scene scene) {
+            super(scene);
         }
+
+        public TorusShape(TorusShape torusShape) {
+            super(torusShape);
+        }
+
+        @Override
+        protected void set(PGraphics pg) {
+            pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
+            Scene.drawTorusSolenoid(pg, 6, 8);
+        }
+    }
 }

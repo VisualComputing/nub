@@ -1,25 +1,32 @@
 package common;
 
+
 import processing.core.PApplet;
-import remixlab.core.Graph;
-import remixlab.core.Node;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
+import remixlab.proscene.Scene;
+import remixlab.proscene.Shape;
 
-public class InteractiveNode extends Node {
-    public InteractiveNode(Graph graph) {
-        super(graph);
+public class InteractiveShape extends Shape {
+    public InteractiveShape(Scene scene) {
+        super(scene);
+        //this.setPrecision(Precision.EXACT);
     }
 
-    // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
+    public InteractiveShape(InteractiveShape shape) {
+        super(shape);
+        //this.setPrecision(Precision.EXACT);
+    }
+
+    // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
     // scene.eye().get()) to have the same behavior as its original.
-    protected InteractiveNode(Graph otherGraph, InteractiveNode otherNode) {
-        super(otherGraph, otherNode);
+    protected InteractiveShape(Scene otherScene, InteractiveShape otherShape) {
+        super(otherScene, otherShape);
     }
 
     @Override
-    public InteractiveNode get() {
-        return new InteractiveNode(this.graph(), this);
+    public InteractiveShape get() {
+        return new InteractiveShape(this.scene(), this);
     }
 
     // behavior is here :P
@@ -27,10 +34,10 @@ public class InteractiveNode extends Node {
     public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
             case PApplet.LEFT:
-                translate(event);
+                rotate(event);
                 break;
             case PApplet.RIGHT:
-                rotate(event);
+                translate(event);
                 break;
             case processing.event.MouseEvent.WHEEL:
                 if(isEye() && graph().is3D())

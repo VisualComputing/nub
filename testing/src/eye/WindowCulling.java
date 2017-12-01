@@ -1,11 +1,7 @@
 package eye;
 
-import common.InteractiveNode;
+import common.InteractiveShape;
 import processing.core.*;
-import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
@@ -39,7 +35,7 @@ public class WindowCulling  extends PApplet {
         canvas = createGraphics(w, h/2, renderer);
         scene = new Scene(this, canvas);
 
-        InteractiveNode eye = new InteractiveNode(scene);
+        InteractiveShape eye = new InteractiveShape(scene);
         scene.setEye(eye);
         scene.setDefaultNode(eye);
         scene.setRadius(200);
@@ -53,7 +49,7 @@ public class WindowCulling  extends PApplet {
         // is to be drawn (see drawing code below) to its constructor.
         auxScene = new Scene(this, auxCanvas, 0, h/2);
 
-        InteractiveNode auxEye = new InteractiveNode(auxScene);
+        InteractiveShape auxEye = new InteractiveShape(auxScene);
         auxScene.setEye(auxEye);
         auxScene.setDefaultNode(auxEye);
         auxScene.setRadius(400);
