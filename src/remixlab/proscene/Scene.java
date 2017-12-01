@@ -745,9 +745,9 @@ public class Scene extends Graph implements PConstants {
   @Override
   public void postDraw() {
     super.postDraw();
+    _lastDisplay = TimingHandler.frameCount;
     if (hasAutoFocus())
       _handleFocus();
-    _lastDisplay = TimingHandler.frameCount;
   }
 
   /**
@@ -789,13 +789,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Macro used by {@link #_handleFocus()}.
-   */
-  protected boolean _displayed() {
-    return _lastDisplay == TimingHandler.frameCount - 1;
-  }
-
-  /**
    * Called by {@link #endDraw()} if {@link #hasAutoFocus()} is {@code true}.
    */
   protected void _handleFocus() {
@@ -810,15 +803,15 @@ public class Scene extends Graph implements PConstants {
     boolean available = true;
     if (_lastScene != null)
       if (_lastScene != this)
-        // Note that lastScene.displayed() returns true only if the lastScene was assigned
-        // in the previous frame and false otherwise (particularly, if it was assigned in
-        // the current frame) which means both: 1. If scn1 gained focus on the current
-        // frame it will lose it when the routine is run on scn2 in the current frame;
-        // and, 2. If scn2 hasGrabber gained focus in the previous frame, it will prevent scn1
-        // from having it back in the current frame.
-        if (_lastScene._hasFocus() && _lastScene._displayed())
+        // Note that _lastScene._lastDisplay == TimingHandler.frameCount - 1 returns true only
+        // if the lastScene was assigned in the previous frame and false otherwise
+        // (particularly, if it was assigned in the current frame) which means both: 1. If scn1
+        // gained focus on the current frame it will lose it when the routine is run on scn2 in
+        // the current frame; and, 2. If scn2 has gained focus in the previous frame, it will
+        // prevent scn1 from having it back in the current frame.
+        if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
           available = false;
-    if (_hasFocus() && _displayed() && available) {
+    if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
       enableMouseAgent();
       enableKeyAgent();
       _lastScene = this;
