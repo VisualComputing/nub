@@ -742,6 +742,7 @@ public class Scene extends Graph implements PConstants {
     postDraw();
   }
 
+  @Override
   public void postDraw() {
     super.postDraw();
     if (hasAutoFocus())
