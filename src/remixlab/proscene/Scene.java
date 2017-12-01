@@ -746,8 +746,7 @@ public class Scene extends Graph implements PConstants {
     super.postDraw();
     if (hasAutoFocus())
       _handleFocus();
-    _lastDisplay = pApplet().frameCount;
-    //_lastDisplay = TimingHandler.frameCount;
+    _lastDisplay = TimingHandler.frameCount;
   }
 
   /**

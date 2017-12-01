@@ -80,6 +80,7 @@ public class MiniMap extends PApplet {
         scene.beginDraw();
         sceneCanvas.background(0);
         scene.traverse();
+        scene.drawAxes();
         scene.endDraw();
         scene.display();
         if (showMiniMap) {
