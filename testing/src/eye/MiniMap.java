@@ -12,6 +12,7 @@ public class MiniMap extends PApplet {
     Scene scene, minimap;
     PGraphics sceneCanvas, minimapCanvas;
     InteractiveShape node1, node2, node3, eye;
+    InteractiveShape2 node4;
 
     int w = 1800;
     int h = 1200;
@@ -33,7 +34,7 @@ public class MiniMap extends PApplet {
         scene = new Scene(this, sceneCanvas);
         //if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         node1 = new InteractiveShape(scene);
-        node1.setPrecision(Node.Precision.EXACT);
+        //node1.setPrecision(Node.Precision.EXACT);
         node1.translate(30, 30);
         node2 = new InteractiveShape(node1);
         node2.translate(40, 0);
@@ -52,6 +53,9 @@ public class MiniMap extends PApplet {
 
         minimapCanvas = createGraphics(oW, oH, renderer);
         minimap = new Scene(this, minimapCanvas, oX, oY);
+        node4 = new InteractiveShape2(minimap);
+        ////node1.setPrecision(Node.Precision.EXACT);
+        node4.translate(30, 30);
         if(minimap.is3D()) minimap.setType(Graph.Type.ORTHOGRAPHIC);
         InteractiveNode minimapEye = new InteractiveNode(minimap);
         minimap.setEye(minimapEye);
@@ -62,11 +66,13 @@ public class MiniMap extends PApplet {
         //minimap.fitBallInterpolation();
         //minimap.disableAutoFocus();
 
+        ///*
         eye = new InteractiveShape(minimap);
         //to not scale the eye on mouse hover uncomment:
         eye.setHighlighting(Shape.Highlighting.NONE);
         eye.setWorldMatrix(scene.eye());
         //eye.setShape(scene.eye());
+        //*/
     }
 
     public void draw() {
@@ -80,11 +86,14 @@ public class MiniMap extends PApplet {
             minimap.beginDraw();
             minimapCanvas.background(29, 153, 243);
             minimap.frontBuffer().fill(255, 0, 255, 125);
-            //minimap.traverse();
-            eye.draw();
+            minimap.traverse();
+            //eye.draw();
+            ///*
             for(Node node : scene.nodes())
                 if(node instanceof Shape)
                     ((Shape)node).draw(minimap.frontBuffer());
+                    //*/
+            minimap.drawAxes();
             minimap.endDraw();
             minimap.display();
         }
@@ -116,19 +125,39 @@ public class MiniMap extends PApplet {
 
         @Override
         protected void set(PGraphics pg) {
-            if(scene() == scene) {
+            //pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
+            //Scene.drawTorusSolenoid(pg, 6, 8);
+            ///*
+            if (scene() == scene) {
                 //pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
                 //Scene.drawTorusSolenoid(pg, (int)scene().pApplet().random(2,10), scene().pApplet().random(2,10));
                 pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
                 Scene.drawTorusSolenoid(pg, 6, 8);
             }
-            if(scene() == minimap) {
+            if (scene() == minimap) {
                 //minimap.drawEye(pg, scene, true);
-                pg.fill(0,255,0);
-                pg.stroke(0,0,255);
+                pg.fill(0, 255, 0);
+                pg.stroke(0, 0, 255);
                 pg.strokeWeight(2);
-                minimap.drawEye(pg, scene, scene.is3D());
+                minimap.drawEye(pg, scene, true);
             }
+            //*/
         }
     }
+
+        public class InteractiveShape2 extends InteractiveNode {
+            public InteractiveShape2(Scene s) {
+                super(s);
+            }
+
+            public InteractiveShape2(InteractiveShape2 n) {
+                super(n);
+            }
+
+            @Override
+            protected void set(PGraphics pg) {
+                pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
+                Scene.drawTorusSolenoid(pg, 6, 8);
+            }
+        }
 }

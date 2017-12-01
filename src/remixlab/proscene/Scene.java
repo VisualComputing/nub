@@ -20,6 +20,7 @@ import processing.opengl.PShader;
 import remixlab.input.Agent;
 import remixlab.input.Grabber;
 import remixlab.timing.SequentialTimer;
+import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
 import remixlab.core.Graph;
 import remixlab.core.Node;
@@ -67,8 +68,9 @@ public class Scene extends Graph implements PConstants {
   protected int _beginOffScreenDrawingCalls;
 
   // off-screen scenes:
-  protected static Scene _lastScene;
-  protected long _lastDisplay;
+  //TODO make protected
+  public static Scene _lastScene;
+  public long _lastDisplay;
   protected boolean _autofocus;
   // just to make it compatible with previous versions of proscene
   protected static int _offScreenScenes;
@@ -737,9 +739,15 @@ public class Scene extends Graph implements PConstants {
     popModelView();
     frontBuffer().endDraw();
     _renderBackBuffer();
+    postDraw();
+  }
+
+  public void postDraw() {
+    super.postDraw();
     if (hasAutoFocus())
       _handleFocus();
-    postDraw();
+    _lastDisplay = pApplet().frameCount;
+    //_lastDisplay = TimingHandler.frameCount;
   }
 
   /**
@@ -760,7 +768,6 @@ public class Scene extends Graph implements PConstants {
     if (!isOffscreen())
       showOnlyOffScreenWarning("set");
     pApplet().image(pgraphics, originCorner().x(), originCorner().y());
-    _lastDisplay = pApplet().frameCount;
   }
 
   /**
@@ -785,14 +792,15 @@ public class Scene extends Graph implements PConstants {
    * Macro used by {@link #_handleFocus()}.
    */
   protected boolean _displayed() {
-    return _lastDisplay == pApplet().frameCount - 1;
+    //return _lastDisplay == pApplet().frameCount - 1;
+    return _lastDisplay == TimingHandler.frameCount - 1;
   }
 
   /**
    * Called by {@link #endDraw()} if {@link #hasAutoFocus()} is {@code true}.
    */
   protected void _handleFocus() {
-    if (_offScreenScenes < 2)
+    if (_offScreenScenes == 0)
       return;
     // Handling focus of non-overlapping scenes is trivial.
     // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,

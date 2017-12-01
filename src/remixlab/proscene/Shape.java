@@ -280,8 +280,9 @@ public class Shape extends Node {
         if (precision() != Precision.EXACT)
             return super.track(x, y);
         int index = (int) y * scene().width() + (int) x;
-        if ((0 <= index) && (index < scene().backBuffer().pixels.length))
-            return scene().backBuffer().pixels[index] == id();
+        if(scene().backBuffer().pixels != null)
+            if ((0 <= index) && (index < scene().backBuffer().pixels.length))
+                return scene().backBuffer().pixels[index] == id();
         return false;
     }
 }
