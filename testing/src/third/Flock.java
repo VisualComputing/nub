@@ -1,8 +1,10 @@
 package third;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PVector;
 import remixlab.core.Node;
+import remixlab.input.Grabber;
 import remixlab.primitives.Vector;
 import remixlab.proscene.MouseAgent;
 import remixlab.proscene.Scene;
@@ -26,7 +28,7 @@ public class Flock extends PApplet {
 
     int initBoidNum = 300; // amount of boids to start the program with
     static ArrayList<Boid> flock;
-    static Boid thirdPerson;
+    static Node thirdPerson;
 
     public void settings() {
         size(1000, 800, P3D);
@@ -38,10 +40,8 @@ public class Flock extends PApplet {
         scene.mouseAgent().setPickingMode(MouseAgent.PickingMode.CLICK);
         scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
         scene.setAnchor(scene.center());
-        InteractiveFrame eye = new InteractiveFrame(scene);
+        InteractiveNode eye = new InteractiveNode(scene);
         scene.setEye(eye);
-        if(scene.mouseAgent().hasGrabber((Node)scene.eye()))
-            println("has eye!");
         scene.setFieldOfView(PI/3);
         //interactivity defaults to the eye
         scene.setDefaultNode(eye);
@@ -131,7 +131,7 @@ public class Flock extends PApplet {
 
         /*
         if(thirdPerson && scene.eye().reference() == null && !scene.interpolator().started())
-            scene.eye().setReference(nodeInterpolator.frame());
+            scene.eye().setReference(nodeInterpolator.node());
         */
     }
 
@@ -139,7 +139,7 @@ public class Flock extends PApplet {
         /*
         if(key == 'i') {
             thirdPerson = true;
-            scene.interpolateTo(nodeInterpolator.frame());
+            scene.interpolateTo(nodeInterpolator.node());
         }
         if(key == 'I') {
             thirdPerson = false;
@@ -147,6 +147,8 @@ public class Flock extends PApplet {
         }
         */
         switch (key) {
+            case 'a':
+                scene.fitBall();
             case 't':
                 scene.shiftTimers();
             case 'p':
@@ -165,14 +167,20 @@ public class Flock extends PApplet {
                 break;
             case ' ':
                 if(scene.eye().reference() != null) {
+                    scene.eye().setReference(null);
+                    scene.lookAt(scene.center());
+                    scene.fitBallInterpolation();
+                    //TODO broken: eye got removed from inputHandler
+                    /*
                     scene.lookAt(scene.center());
                     scene.fitBallInterpolation();
                     scene.eye().setReference(null);
-                    //scene.resetMouseAgentInputNode();
-                    if(scene.mouseAgent().hasGrabber((Node)scene.eye()))
-                        println("has eye!");
-                    scene.setDefaultNode((Node)scene.eye());
+                    //*/
                 }
+                else if (thirdPerson != null) {
+                    ((Node)scene.eye()).setReference(thirdPerson);
+                    scene.interpolateTo(thirdPerson);
+            }
                 break;
                 /*
             case '+':

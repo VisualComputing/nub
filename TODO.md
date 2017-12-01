@@ -40,9 +40,8 @@ Observations:
 * Decide framework name and Processing interface classes naming conventions.
 * Merge Node and Frame in the API, e.g., `setEye(Frame)`, `setDefaultNode(Node)`.
 * Restored `save/loadConfig` (json).
-* Discard frame.syncing (seems over kill) in favor of Scene.applyTransformation(Frame)
 * Make all drawing _static_.
 * ~Restore `PickingPrecision.EXACT` using the `pickingBuffer`~.
 * Restore shader chaining (example).
-* Improve offscreen graph to allow the use of an offscreen scene on top of a onscreen one.
-* Restore *Luxo*, *MiniMap*, *Flock* and the remaining advanced examples with the book (and slides) in mind.
+* ~Improve offscreen graph to allow the use of an offscreen scene on top of a onscreen one~.
+* Restore *Luxo*, ~*MiniMap*, *Flock*~ and the remaining advanced examples with the book (and slides) in mind.

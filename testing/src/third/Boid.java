@@ -14,7 +14,7 @@ import java.util.ArrayList;
 class Boid extends AnimatorObject {
     Scene scene;
     PApplet p;
-    Node frame;
+    Node node;
     Quaternion q;
     int grabsMouseColor;//color
     int avatarColor;
@@ -38,8 +38,8 @@ class Boid extends AnimatorObject {
         avatarColor = p.color(255, 0, 0);
         pos = new PVector();
         pos.set(inPos);
-        frame = new InteractiveFrame(scene);
-        frame.setPosition(new Vector(pos.x, pos.y, pos.z));
+        node = new Node(scene);
+        node.setPosition(new Vector(pos.x, pos.y, pos.z));
         vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
         acc = new PVector(0, 0, 0);
         neighborhoodRadius = 100;
@@ -49,9 +49,10 @@ class Boid extends AnimatorObject {
 
     @Override
     public void animate() {
-        if(scene.mouseAgentInputNode() == frame && scene.eye().reference() != frame) {
-            scene.eye().setReference(frame);
-            scene.interpolateTo(frame);
+        if(scene.mouseAgentInputNode() == node && scene.eye().reference() != node) {
+            Flock.thirdPerson = node;
+            ((Node)scene.eye()).setReference(node);
+            scene.interpolateTo(node);
             //scene.resetMouseAgentInputNode();
         }
         else
@@ -98,7 +99,7 @@ class Boid extends AnimatorObject {
         vel.limit(maxSpeed); // make sure the velocity vector magnitude does not
         // exceed maxSpeed
         pos.add(vel); // add velocity to position
-        frame.setPosition(new Vector(pos.x, pos.y, pos.z));
+        node.setPosition(new Vector(pos.x, pos.y, pos.z));
         acc.mult(0); // reset acceleration
     }
 
@@ -118,12 +119,12 @@ class Boid extends AnimatorObject {
     }
 
     public boolean isAvatar() {
-        return scene.mouseAgentInputNode() == frame && scene.eye() != frame;
+        return scene.mouseAgentInputNode() == node && scene.eye() != node;
     }
 
     /*
     boolean isAvatar() {
-        return scene.avatar() == null ? false : scene.avatar().equals(frame) ? true : false;
+        return scene.avatar() == null ? false : scene.avatar().equals(node) ? true : false;
     }
     */
 
@@ -136,25 +137,25 @@ class Boid extends AnimatorObject {
 
         q = Quaternion.multiply(new Quaternion( new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
                 new Quaternion( new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())) );
-        frame.setRotation(q);
+        node.setRotation(q);
 
         p.pushMatrix();
-        // Multiply matrix to get in the frame coordinate system.
-        frame.applyTransformation();
+        // Multiply matrix to get in the node coordinate system.
+        node.applyTransformation();
         scene.drawAxes();
 
         // highlight boids under the mouse
-        if ( frame.track(p.mouseX, p.mouseY) )
+        if ( node.track(p.mouseX, p.mouseY) )
             p.fill( grabsMouseColor);
 
         /*
         // setAvatar according to scene.motionAgent().inputGrabber()
-        // check if this boid's frame is the avatar
-        if (frame.grabsInput())
+        // check if this boid's node is the avatar
+        if (node.grabsInput())
             if (!isAvatar())
-                scene.setAvatar(frame);
+                scene.setAvatar(node);
 
-        // highlight the boid if its frame is the avatar
+        // highlight the boid if its node is the avatar
         if ( isAvatar() )
             p.fill( avatarColor );
         */
