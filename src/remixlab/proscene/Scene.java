@@ -639,6 +639,8 @@ public class Scene extends Graph implements PConstants {
     popModelView();
     _renderBackBuffer();
     postDraw();
+    if (hasAutoFocus())
+      _handleFocus();
   }
 
   // Off-screen
@@ -788,30 +790,49 @@ public class Scene extends Graph implements PConstants {
   protected void _handleFocus() {
     if (_offScreenScenes == 0)
       return;
-    // Handling focus of non-overlapping scenes is trivial.
-    // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
-    // scn2.display() is to be called after scn1.display() (which is the _key observation).
-    // Then, for a given frame either only scn1 _hasFocus() (which is handled trivially);
-    // or, both, scn1 and scn2 _hasFocus(), which means only scn2 should retain focus
-    // (while scn1 lose it).
-    boolean available = true;
-    if (_lastScene != null)
-      if (_lastScene != this)
-        // Note that _lastScene._lastDisplay == TimingHandler.frameCount - 1 returns true only
-        // if the lastScene was assigned in the previous frame and false otherwise
-        // (particularly, if it was assigned in the current frame) which means both: 1. If scn1
-        // gained focus on the current frame it will lose it when the routine is run on scn2 in
-        // the current frame; and, 2. If scn2 has gained focus in the previous frame, it will
-        // prevent scn1 from having it back in the current frame.
-        if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
+    if(isOffscreen()) {
+      // Handling focus of non-overlapping scenes is trivial.
+      // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
+      // scn2.display() is to be called after scn1.display() (which is the _key observation).
+      // Then, for a given frame either only scn1 _hasFocus() (which is handled trivially);
+      // or, both, scn1 and scn2 _hasFocus(), which means only scn2 should retain focus
+      // (while scn1 lose it).
+      boolean available = true;
+      if (_lastScene != null)
+        if (_lastScene != this)
+          // Note that _lastScene._lastDisplay == TimingHandler.frameCount - 1 returns true only
+          // if the lastScene was assigned in the previous frame and false otherwise
+          // (particularly, if it was assigned in the current frame) which means both: 1. If scn1
+          // gained focus on the current frame it will lose it when the routine is run on scn2 in
+          // the current frame; and, 2. If scn2 has gained focus in the previous frame, it will
+          // prevent scn1 from having it back in the current frame.
+          if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
+            available = false;
+      if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
+        enableMouseAgent();
+        enableKeyAgent();
+        _lastScene = this;
+        //System.out.println("win");
+      } else {
+        disableMouseAgent();
+        disableKeyAgent();
+      }
+    }
+    else {
+      if (_lastScene != null) {
+        boolean available = true;
+        if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
+        || _lastScene._lastDisplay == TimingHandler.frameCount)  && _lastScene._hasFocus()) {
+          disableMouseAgent();
+          disableKeyAgent();
           available = false;
-    if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
-      enableMouseAgent();
-      enableKeyAgent();
-      _lastScene = this;
-    } else {
-      disableMouseAgent();
-      disableKeyAgent();
+        }
+        if(_hasFocus() && available) {
+          enableMouseAgent();
+          enableKeyAgent();
+          _lastScene = this;
+        }
+      }
     }
   }
 
