@@ -740,11 +740,6 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().endDraw();
     _renderBackBuffer();
     postDraw();
-  }
-
-  @Override
-  public void postDraw() {
-    super.postDraw();
     _lastDisplay = TimingHandler.frameCount;
     if (hasAutoFocus())
       _handleFocus();
