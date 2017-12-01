@@ -791,7 +791,6 @@ public class Scene extends Graph implements PConstants {
    * Macro used by {@link #_handleFocus()}.
    */
   protected boolean _displayed() {
-    //return _lastDisplay == pApplet().frameCount - 1;
     return _lastDisplay == TimingHandler.frameCount - 1;
   }
 
