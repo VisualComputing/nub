@@ -2468,7 +2468,7 @@ public class Node extends Frame implements Grabber {
       return 0;
     }
     if (precision() == Precision.ADAPTIVE)
-      return _threshold * scaling() * _graph.pixelToSceneRatio(position());
+      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
     return _threshold;
   }
 

@@ -24,7 +24,7 @@ public class Flock extends PApplet {
     static int flockDepth = 600;
     static boolean avoidWalls = true;
     static float hue = 255;
-    static int FPS = 50;
+    static int FPS = 100;
 
     int initBoidNum = 300; // amount of boids to start the program with
     static ArrayList<Boid> flock;
@@ -36,7 +36,7 @@ public class Flock extends PApplet {
 
     public void setup() {
         scene = new Scene(this);
-        scene.setSequentialTimers();
+        //scene.setSequentialTimers();
         scene.mouseAgent().setPickingMode(MouseAgent.PickingMode.CLICK);
         scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
         scene.setAnchor(scene.center());
@@ -182,20 +182,20 @@ public class Flock extends PApplet {
                     scene.interpolateTo(thirdPerson);
             }
                 break;
-                /*
             case '+':
-                scene.setAnimationPeriod(scene.animationPeriod()-2, false);
+                for (Boid boid : flock)
+                    //boid.setPeriod(boid.period()-2, false);
+                    boid.setPeriod(10, false);
                 break;
             case '-':
-                scene.setAnimationPeriod(scene.animationPeriod()+2, false);
+                for (Boid boid : flock)
+                    //boid.setPeriod(boid.period()+2, false);
+                    boid.setPeriod(50, false);
                 break;
-            case ' ':
-                if ( scene.avatar() == null && lastAvatar != null)
-                    scene.setAvatar(lastAvatar);
-                else
-                    lastAvatar = scene.resetAvatar();
+            case 'u':
+                for (Boid boid : flock)
+                    boid.toggle();
                 break;
-                */
         }
     }
 

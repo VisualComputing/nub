@@ -1731,18 +1731,18 @@ public class Graph {
   /**
    * Returns the pixel to graph (units) ratio at {@code position}.
    * <p>
-   * Convenience function that simply returns {@code 1 / sceneToPixelRatio(position)}.
+   * Convenience function that simply returns {@code 1 / graphToPixelRatio(position)}.
    *
-   * @see #sceneToPixelRatio(Vector)
+   * @see #graphToPixelRatio(Vector)
    */
-  public float pixelToSceneRatio(Vector position) {
-    return 1 / sceneToPixelRatio(position);
+  public float pixelToGraphRatio(Vector position) {
+    return 1 / graphToPixelRatio(position);
   }
 
   /**
    * Returns the ratio of graph (units) to pixel at {@code position}.
    * <p>
-   * A line of {@code n * sceneToPixelRatio()} graph units, located at {@code position} in
+   * A line of {@code n * graphToPixelRatio()} graph units, located at {@code position} in
    * the world coordinates system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
@@ -1752,12 +1752,12 @@ public class Graph {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vector v = Vector.addGrabber(sceneCenter(), Vector.mult(upVector(), 20 * sceneToPixelRatio(sceneCenter())));}
+   * {@code Vector v = Vector.addGrabber(sceneCenter(), Vector.mult(upVector(), 20 * graphToPixelRatio(sceneCenter())));}
    * <br>
    * {@code vertex(v.x, v.y, v.z);}<br>
    * {@code endShape();}<br>
    */
-  public float sceneToPixelRatio(Vector position) {
+  public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
