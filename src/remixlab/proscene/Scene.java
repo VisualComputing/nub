@@ -1308,32 +1308,32 @@ public class Scene extends Graph implements PConstants {
    * https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void beginScreenDrawing() {
-    beginScreenDrawing(frontBuffer());
+  public void beginScreenCoordinates() {
+    beginScreenCoordinates(frontBuffer());
   }
 
   /**
    * Begins screen drawing on an arbitrary PGraphics instance using {@link #eye()}
-   * parameters. Don't forget to call {@link #endScreenDrawing(PGraphics)} after screen
+   * parameters. Don't forget to call {@link #endScreenCoordinates(PGraphics)} after screen
    * drawing ends.
    *
-   * @see #endScreenDrawing(PGraphics)
-   * @see #beginScreenDrawing()
+   * @see #endScreenCoordinates(PGraphics)
+   * @see #beginScreenCoordinates()
    */
-  public void beginScreenDrawing(PGraphics pGraphics) {
+  public void beginScreenCoordinates(PGraphics pGraphics) {
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
+          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
     _startCoordCalls++;
     pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
     disableDepthTest(pGraphics);
     // if-else same as:
-    // matrixHandler(p).beginScreenDrawing();
+    // matrixHandler(p).beginScreenCoordinates();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().beginScreenDrawing();
+      matrixHandler().beginScreenCoordinates();
     else
-      matrixHelper(pGraphics).beginScreenDrawing();
+      matrixHelper(pGraphics).beginScreenCoordinates();
   }
 
   /**
@@ -1341,30 +1341,30 @@ public class Scene extends Graph implements PConstants {
    * https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void endScreenDrawing() {
-    endScreenDrawing(frontBuffer());
+  public void endScreenCoordinates() {
+    endScreenCoordinates(frontBuffer());
   }
 
   /**
    * Ends screen drawing on the arbitrary PGraphics instance using {@link #eye()}
    * parameters. The screen drawing should happen between
-   * {@link #beginScreenDrawing(PGraphics)} and this method.
+   * {@link #beginScreenCoordinates(PGraphics)} and this method.
    *
-   * @see #beginScreenDrawing(PGraphics)
-   * @see #endScreenDrawing()
+   * @see #beginScreenCoordinates(PGraphics)
+   * @see #endScreenCoordinates()
    */
-  public void endScreenDrawing(PGraphics pGraphics) {
+  public void endScreenCoordinates(PGraphics pGraphics) {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
+          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHandler(p).endScreenDrawing();
+    // matrixHandler(p).endScreenCoordinates();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().endScreenDrawing();
+      matrixHandler().endScreenCoordinates();
     else
-      matrixHelper(pGraphics).endScreenDrawing();
+      matrixHelper(pGraphics).endScreenCoordinates();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
@@ -2703,7 +2703,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(PGraphics pGraphics, float px, float py, float size) {
     float half_size = size / 2f;
     pGraphics.pushStyle();
-    beginScreenDrawing(pGraphics);
+    beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
     vertex(pGraphics, px - half_size, py);
@@ -2711,7 +2711,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, px, py - half_size);
     vertex(pGraphics, px, py + half_size);
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2732,7 +2732,7 @@ public class Scene extends Graph implements PConstants {
     float x = center.x();
     float y = center.y();
     float angle, x2, y2;
-    beginScreenDrawing(pGraphics);
+    beginScreenCoordinates(pGraphics);
     pGraphics.noStroke();
     pGraphics.beginShape(TRIANGLE_FAN);
     vertex(pGraphics, x, y);
@@ -2742,7 +2742,7 @@ public class Scene extends Graph implements PConstants {
       vertex(pGraphics, x2, y2);
     }
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2761,7 +2761,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     float x = center.x();
     float y = center.y();
-    beginScreenDrawing(pGraphics);
+    beginScreenCoordinates(pGraphics);
     pGraphics.noStroke();
     pGraphics.beginShape(QUADS);
     vertex(pGraphics, x - half_edge, y + half_edge);
@@ -2769,7 +2769,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, x + half_edge, y - half_edge);
     vertex(pGraphics, x - half_edge, y - half_edge);
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2788,7 +2788,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     float x = center.x();
     float y = center.y();
-    beginScreenDrawing(pGraphics);
+    beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
 
     pGraphics.beginShape();
@@ -2814,7 +2814,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), (y + half_length));
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endScreenCoordinates(pGraphics);
     drawCross(center.x(), center.y(), 0.6f * length);
     pGraphics.popStyle();
   }

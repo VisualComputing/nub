@@ -1,7 +1,6 @@
 package basics;
 
 import common.InteractiveNode;
-import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -124,7 +123,7 @@ public class FrameInterpolation2 extends PApplet {
         // (e.g., scene.disableKeyAgent(); scene.disableMouseAgent();)
         // the two scenes agents according to their dimensions and placement.
         if (showControls) {
-            scene.beginScreenDrawing();
+            scene.beginScreenCoordinates();
             auxScene.beginDraw();
             auxCanvas.background(29, 153, 243);
             auxScene.drawAxes();
@@ -133,7 +132,7 @@ public class FrameInterpolation2 extends PApplet {
             button.draw();
             auxScene.endDraw();
             auxScene.display();
-            scene.endScreenDrawing();
+            scene.endScreenCoordinates();
         }
     }
 

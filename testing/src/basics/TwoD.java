@@ -65,10 +65,10 @@ public class TwoD extends PApplet {
             popStyle();
         }
 
-        scene.beginScreenDrawing();
+        scene.beginScreenCoordinates();
         fill(0, 0, 255);
         rect(80,80,50,100);
-        scene.endScreenDrawing();
+        scene.endScreenCoordinates();
     }
 
     @Override

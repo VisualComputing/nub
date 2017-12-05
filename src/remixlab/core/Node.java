@@ -259,7 +259,7 @@ public class Node extends Frame implements Grabber {
         throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     }
     else {
-      this._id = other.id();
+      this._id = other._id();
       this.setWorldMatrix(other);
     }
 
@@ -335,7 +335,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. Frame graphics color to be used for picking with a color buffer.
    */
-  public int id() {
+  protected int _id() {
     // see here:
     // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;

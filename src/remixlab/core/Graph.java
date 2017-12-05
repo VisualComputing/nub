@@ -702,7 +702,7 @@ public class Graph {
 
   /**
    * Returns a list of all the nodes that are reachable by the {@link #traverse()}
-   * algorithm, including the eye nodes (when {@code eyeframes} is {@code true}).
+   * algorithm.
    *
    * @see #isNodeReachable(Node)
    * @see Node#isEye()
@@ -887,34 +887,34 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds
+   * Wrapper for {@link MatrixHandler#beginScreenCoordinates()}. Adds
    * exception when no properly closing the screen drawing with a call to
-   * {@link #endScreenDrawing()}.
+   * {@link #endScreenCoordinates()}.
    *
-   * @see MatrixHandler#beginScreenDrawing()
+   * @see MatrixHandler#beginScreenCoordinates()
    */
-  public void beginScreenDrawing() {
+  public void beginScreenCoordinates() {
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-              + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
+              + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
 
     _startCoordCalls++;
-    _matrixHandler.beginScreenDrawing();
+    _matrixHandler.beginScreenCoordinates();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endScreenDrawing()} . Adds
-   * exception if {@link #beginScreenDrawing()} wasn't properly called before
+   * Wrapper for {@link MatrixHandler#endScreenCoordinates()} . Adds
+   * exception if {@link #beginScreenCoordinates()} wasn't properly called before
    *
-   * @see MatrixHandler#endScreenDrawing()
+   * @see MatrixHandler#endScreenCoordinates()
    */
-  public void endScreenDrawing() {
+  public void endScreenCoordinates() {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-              + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
+              + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
 
-    _matrixHandler.endScreenDrawing();
+    _matrixHandler.endScreenCoordinates();
   }
 
   /**

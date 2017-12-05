@@ -264,7 +264,7 @@ public class Shape extends Node {
      * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
      * color buffer (see {@link remixlab.proscene.Scene#backBuffer()}). This method
      * compares the color of the {@link remixlab.proscene.Scene#backBuffer()} at
-     * {@code (x,y)} with {@link #id()}. Returns true if both colors are the same, and false
+     * {@code (x,y)} with {@link #_id()}. Returns true if both colors are the same, and false
      * otherwise.
      * <p>
      * This method is only meaningful when this node is not an eye.
@@ -282,7 +282,7 @@ public class Shape extends Node {
         int index = (int) y * scene().width() + (int) x;
         if(scene().backBuffer().pixels != null)
             if ((0 <= index) && (index < scene().backBuffer().pixels.length))
-                return scene().backBuffer().pixels[index] == id();
+                return scene().backBuffer().pixels[index] == _id();
         return false;
     }
 }
