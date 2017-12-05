@@ -39,7 +39,7 @@ public class FirstPerson extends PApplet {
         };
         iFrame.translate(30, 30);
 
-        scene.mouseAgent().setPickingMode(MouseAgent.PickingMode.CLICK);
+        scene.mouseAgent().setMode(MouseAgent.Mode.CLICK);
 
         InteractiveFrame eye = new InteractiveFrame();
         scene.setEye(eye);

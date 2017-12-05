@@ -4,11 +4,9 @@ import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PVector;
 import remixlab.core.Node;
-import remixlab.input.Grabber;
 import remixlab.primitives.Vector;
 import remixlab.proscene.MouseAgent;
 import remixlab.proscene.Scene;
-import remixlab.timing.TimingTask;
 
 import java.util.ArrayList;
 
@@ -37,7 +35,7 @@ public class Flock extends PApplet {
     public void setup() {
         scene = new Scene(this);
         //scene.setSequentialTimers();
-        scene.mouseAgent().setPickingMode(MouseAgent.PickingMode.CLICK);
+        scene.mouseAgent().setMode(MouseAgent.Mode.CLICK);
         scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
         scene.setAnchor(scene.center());
         InteractiveNode eye = new InteractiveNode(scene);

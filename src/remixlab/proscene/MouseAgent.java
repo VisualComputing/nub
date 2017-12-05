@@ -30,9 +30,9 @@ public class MouseAgent extends Agent {
   protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
-  protected PickingMode _pickingMode;
+  protected Mode _mode;
 
-  public enum PickingMode {
+  public enum Mode {
     MOVE, CLICK
   }
 
@@ -46,15 +46,15 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Calls super on (graph.inputHandler()) and sets {@link #pickingMode()} to {@link PickingMode#MOVE}.
+   * Calls super on (graph.inputHandler()) and sets {@link #mode()} to {@link Mode#MOVE}.
    *
-   * @see #setPickingMode(PickingMode)
+   * @see #setMode(Mode)
    */
   public MouseAgent(Graph graph, Point upperLeftCorner) {
     super(graph.inputHandler());
     _graph = graph;
     _upperLeftCorner = upperLeftCorner;
-    setPickingMode(PickingMode.MOVE);
+    setMode(Mode.MOVE);
   }
 
   /**
@@ -65,23 +65,23 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Sets the agent {@link #pickingMode()}. Either {@link PickingMode#MOVE} or
-   * {@link PickingMode#CLICK}.
+   * Sets the agent {@link #mode()}. Either {@link Mode#MOVE} or
+   * {@link Mode#CLICK}.
    *
-   * @see #pickingMode()
+   * @see #mode()
    */
-  public void setPickingMode(PickingMode mode) {
-    _pickingMode = mode;
+  public void setMode(Mode mode) {
+    _mode = mode;
   }
 
   /**
-   * Returns the agent {@link #pickingMode()}. Either {@link PickingMode#MOVE} or
-   * {@link PickingMode#CLICK}.
+   * Returns the agent {@link #mode()}. Either {@link Mode#MOVE} or
+   * {@link Mode#CLICK}.
    *
-   * @see #setPickingMode(PickingMode)
+   * @see #setMode(Mode)
    */
-  public PickingMode pickingMode() {
-    return _pickingMode;
+  public Mode mode() {
+    return _mode;
   }
 
   /**
@@ -95,7 +95,7 @@ public class MouseAgent extends Agent {
     if (_move || _press || _drag || _release) {
       _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
           mouseEvent.getModifiers(), _move ? Event.NO_ID : mouseEvent.getButton());
-      if (_move && (pickingMode() == PickingMode.MOVE))
+      if (_move && (mode() == Mode.MOVE))
         poll(_currentEvent);
       handle(_press ? _currentEvent.fire() : _release ? _currentEvent.flush() : _currentEvent);
       _previousEvent = _currentEvent.get();
@@ -108,7 +108,7 @@ public class MouseAgent extends Agent {
     if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
       TapEvent tapEvent = new TapEvent(mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
           mouseEvent.getModifiers(), mouseEvent.getButton(), mouseEvent.getCount());
-      if (pickingMode() == PickingMode.CLICK)
+      if (mode() == Mode.CLICK)
         poll(tapEvent);
       handle(tapEvent);
       return;
