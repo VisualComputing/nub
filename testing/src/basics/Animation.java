@@ -15,6 +15,7 @@ public class Animation extends PApplet {
 
     public void setup() {
         scene = new Scene(this);
+        //scene.shiftTimers();
         InteractiveNode eye = new InteractiveNode(scene);
         scene.setEye(eye);
         //interactivity defaults to the eye
@@ -43,19 +44,12 @@ public class Animation extends PApplet {
     public void keyPressed() {
         if (key == '+') {
             for (Particle p : particle)
-                // TODO does not work if animation is not restarted
-                //p.setPeriod(p.period()-2, false);
-                p.setPeriod(5, false);
-                // restarting the animation works fine
-                //p.setPeriod(p.period()-2);
+                p.setPeriod(p.period()-2);
+
         }
         if (key == '-') {
             for (Particle p : particle)
-                // TODO does not work if animation is not restarted
-                //p.setPeriod(p.period()+2, false);
-                p.setPeriod(30, false);
-                // restarting the animation works fine
-                //p.setPeriod(p.period()+2);
+                p.setPeriod(p.period()+2);
         }
     }
 

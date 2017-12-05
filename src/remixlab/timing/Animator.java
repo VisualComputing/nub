@@ -25,15 +25,10 @@ public interface Animator {
   long period();
 
   /**
-   * Sets the animation period in milliseconds.
+   * Sets the animation period in milliseconds. Restarts the animation if it
+   * already {@link #started()}.
    */
   void setPeriod(long period);
-
-  /**
-   * Sets the animation period in milliseconds and restarts the animation according to
-   * {@code restart}.
-   */
-  void setPeriod(long period, boolean restart);
 
   /**
    * Stops the animation.

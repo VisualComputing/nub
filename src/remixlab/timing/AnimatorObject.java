@@ -27,7 +27,7 @@ public class AnimatorObject implements Animator {
     _handler = handler;
     _handler.registerAnimator(this);
     _animationTimer = new SequentialTimer(_handler);
-    setPeriod(40, false); // 25Hz
+    setPeriod(40); // 25Hz
     stop();
   }
 
@@ -60,40 +60,19 @@ public class AnimatorObject implements Animator {
    * {@link #animate()} methods is fast enough.
    * <p>
    * Default value is 40 milliseconds (25 Hz).
-   * <p>
-   * <b>Note:</b> This value is taken into account only the next time you call
-   * {@link #start()}. If {@link #started()}, you should
-   * {@link #stop()} first. See {@link #restart()} and
-   * {@link #setPeriod(long, boolean)}.
    *
-   * @see #setPeriod(long, boolean)
+   * @see #setPeriod(long)
    */
   @Override
   public long period() {
     return _animationPeriod;
   }
 
-  /**
-   * Convenience function that simply calls {@code period(period, true)}.
-   *
-   * @see #setPeriod(long, boolean)
-   */
   @Override
   public void setPeriod(long period) {
-    setPeriod(period, true);
-  }
-
-  /**
-   * Sets the {@link #period()}, in milliseconds. If restart is {@code true} and
-   * {@link #started()} then {@link #restart()} is called.
-   *
-   * @see #start()
-   */
-  @Override
-  public void setPeriod(long period, boolean restart) {
     if (period > 0) {
       _animationPeriod = period;
-      if (started() && restart)
+      if (started())
         restart();
     }
   }

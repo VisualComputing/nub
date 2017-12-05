@@ -183,14 +183,25 @@ public class Flock extends PApplet {
             }
                 break;
             case '+':
-                for (Boid boid : flock)
-                    //boid.setPeriod(boid.period()-2, false);
-                    boid.setPeriod(10, false);
+                for (Boid boid : flock) {
+                    boid.setPeriod(boid.period()-2);
+                    /*
+                    FPS = (int)boid.period()-2;
+                    frameRate(boid.period());
+                    boid.setPeriod(1000/FPS);
+                    //*/
+                }
                 break;
             case '-':
-                for (Boid boid : flock)
-                    //boid.setPeriod(boid.period()+2, false);
-                    boid.setPeriod(50, false);
+                for (Boid boid : flock) {
+                    boid.setPeriod(boid.period()+2);
+                    /*
+                    //boid.setPeriod(60);
+                    FPS = (int)boid.period()+2;
+                    frameRate(boid.period());
+                    boid.setPeriod(1000/FPS);
+                    //*/
+                }
                 break;
             case 'u':
                 for (Boid boid : flock)
