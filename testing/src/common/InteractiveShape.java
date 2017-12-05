@@ -2,6 +2,7 @@ package common;
 
 
 import processing.core.PApplet;
+import processing.core.PShape;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.proscene.Scene;
@@ -10,12 +11,18 @@ import remixlab.proscene.Shape;
 public class InteractiveShape extends Shape {
     public InteractiveShape(Scene scene) {
         super(scene);
-        //this.setPrecision(Precision.EXACT);
     }
 
-    public InteractiveShape(InteractiveShape shape) {
-        super(shape);
-        //this.setPrecision(Precision.EXACT);
+    public InteractiveShape(InteractiveShape interactiveShape) {
+        super(interactiveShape);
+    }
+
+    public InteractiveShape(Scene scene, PShape shape) {
+        super(scene, shape);
+    }
+
+    public InteractiveShape(InteractiveShape interactiveShape, PShape shape) {
+        super(interactiveShape, shape);
     }
 
     // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,

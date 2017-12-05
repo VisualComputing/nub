@@ -27,6 +27,7 @@ public class Shape extends Node {
     Highlighting _highlight;
 
     public Shape(Scene scene) {
+        //this(scene, (PShape)null);
         super(scene);
         _scene = scene;
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
@@ -37,9 +38,20 @@ public class Shape extends Node {
     public Shape(Shape reference) {
         super(reference);
         _scene = reference.scene();
+
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
         setHighlighting(Highlighting.FRONT_SHAPE);
+    }
+
+    public Shape(Scene scene, PShape shape) {
+        this(scene);
+        set(shape);
+    }
+
+    public Shape(Shape reference, PShape shape) {
+        this(reference);
+        set(shape);
     }
 
     protected Shape(Scene otherGraph, Shape otherShape) {

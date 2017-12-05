@@ -1165,15 +1165,6 @@ public class Frame {
   }
 
   /**
-   * Same as {@code #setWorldMatrix(Frame)}.
-   *
-   * @see #setWorldMatrix(Frame)
-   */
-  public void set(Frame other) {
-    setWorldMatrix(other);
-  }
-
-  /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
    * those of {@code otherFrame}.
    * <p>

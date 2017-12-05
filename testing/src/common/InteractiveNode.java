@@ -1,6 +1,7 @@
 package common;
 
 import processing.core.PApplet;
+import processing.core.PShape;
 import remixlab.core.Graph;
 import remixlab.core.Node;
 import remixlab.input.event.KeyEvent;
