@@ -39,6 +39,8 @@ public class SimpleUse extends PApplet {
           interact1((MotionEvent1)event);
         if(event instanceof MotionEvent2)
           interact2((MotionEvent2)event);
+        if(event instanceof KeyEvent)
+          interactKey((KeyEvent)event);
       }
 
       public void interact1(MotionEvent1 event) {
@@ -56,8 +58,7 @@ public class SimpleUse extends PApplet {
         }
       }
 
-      @Override
-      public void interact(KeyEvent event) {
+      public void interactKey(KeyEvent event) {
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
           translateXPos();
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
@@ -69,6 +70,7 @@ public class SimpleUse extends PApplet {
     iFrame.setPrecisionThreshold(length);
     iFrame.translate(50,50);
     scene.fitBall();
+    scene.keyAgent().setDefaultGrabber(iFrame);
   }
 
   public void graphics(PGraphics pg) {
