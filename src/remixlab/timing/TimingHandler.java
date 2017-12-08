@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class TimingHandler {
   static public long frameCount;
-  public float frameRate;
+  protected float _frameRate;
 
   protected long _deltaCount;
     // T i m e r P o o l
@@ -38,7 +38,7 @@ public class TimingHandler {
   public TimingHandler() {
     _localCount = 0;
     _deltaCount = frameCount;
-    frameRate = 10;
+    _frameRate = 10;
     _frameRateLastMillis = System.currentTimeMillis();
     _taskPool = new ArrayList<TimingTask>();
     _animatorPool = new ArrayList<Animator>();
@@ -120,10 +120,10 @@ public class TimingHandler {
   protected void _updateFrameRate() {
     long now = System.currentTimeMillis();
     if (_localCount > 1) {
-      // update the current frameRate
+      // update the current _frameRate
       double rate = 1000.0 / ((now - _frameRateLastMillis) / 1000.0);
       float instantaneousRate = (float) rate / 1000.0f;
-      frameRate = (frameRate * 0.9f) + (instantaneousRate * 0.1f);
+      _frameRate = (_frameRate * 0.9f) + (instantaneousRate * 0.1f);
     }
     _frameRateLastMillis = now;
     _localCount++;
@@ -140,7 +140,7 @@ public class TimingHandler {
    * several nodes. As such, this value won't be valid until after 5-10 nodes.
    */
   public float frameRate() {
-    return frameRate;
+    return _frameRate;
   }
 
   /**
