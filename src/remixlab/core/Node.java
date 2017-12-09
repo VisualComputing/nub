@@ -513,27 +513,27 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motionTracking(MotionEvent event) {
+  public boolean motionTracking(MotionEvent motionEvent) {
     if (isEye())
       return false;
-    if (event instanceof MotionEvent1)
-      return motion1Tracking((MotionEvent1) event);
-    if (event instanceof MotionEvent2)
-      return motion2Tracking((MotionEvent2) event);
-    if (event instanceof MotionEvent3)
-      return motion3Tracking((MotionEvent3) event);
-    if (event instanceof MotionEvent6)
-      return motion6Tracking((MotionEvent6) event);
+    if (motionEvent instanceof MotionEvent1)
+      return motion1Tracking((MotionEvent1) motionEvent);
+    if (motionEvent instanceof MotionEvent2)
+      return motion2Tracking((MotionEvent2) motionEvent);
+    if (motionEvent instanceof MotionEvent3)
+      return motion3Tracking((MotionEvent3) motionEvent);
+    if (motionEvent instanceof MotionEvent6)
+      return motion6Tracking((MotionEvent6) motionEvent);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean tapTracking(TapEvent event) {
+  public boolean tapTracking(TapEvent tapEvent) {
     if (isEye())
       return false;
-    return track(event.x(), event.y());
+    return track(tapEvent.x(), tapEvent.y());
   }
 
   /**
@@ -541,7 +541,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
-  public boolean keyTracking(KeyEvent event) {
+  public boolean keyTracking(KeyEvent keyEvent) {
     Graph.showMissingImplementationWarning("keyTracking(KeyEvent _event)", this.getClass().getName());
     return false;
   }
@@ -551,7 +551,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
-  public boolean motion1Tracking(MotionEvent1 event) {
+  public boolean motion1Tracking(MotionEvent1 motionEvent1) {
     if (isEye())
       return false;
     Graph.showMissingImplementationWarning("keyTracking(MotionEvent1 _event)", this.getClass().getName());
@@ -561,14 +561,14 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion2Tracking(MotionEvent2 event) {
+  public boolean motion2Tracking(MotionEvent2 motionEvent2) {
     if (isEye())
       return false;
-    if (event.isAbsolute()) {
+    if (motionEvent2.isAbsolute()) {
       Graph.showEventVariationWarning("keyTracking");
       return false;
     }
-    return track(event.x(), event.y());
+    return track(motionEvent2.x(), motionEvent2.y());
   }
 
   /**
@@ -586,15 +586,15 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion3Tracking(MotionEvent3 event) {
-    return motion2Tracking(event.event2());
+  public boolean motion3Tracking(MotionEvent3 motionEvent3) {
+    return motion2Tracking(motionEvent3.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion6Tracking(MotionEvent6 event) {
-    return motion2Tracking(event.event3().event2());
+  public boolean motion6Tracking(MotionEvent6 motionEvent6) {
+    return motion2Tracking(motionEvent6.event3().event2());
   }
 
   @Override
@@ -615,57 +615,57 @@ public class Node extends Frame implements Grabber {
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.input.event.MotionEvent}.
    */
-  protected void motionInteraction(MotionEvent event) {
-    if (event instanceof MotionEvent1)
-      motion1Interaction((MotionEvent1) event);
-    if (event instanceof MotionEvent2)
-      motion2Interaction((MotionEvent2) event);
-    if (event instanceof MotionEvent3)
-      motion3Interaction((MotionEvent3) event);
-    if (event instanceof MotionEvent6)
-      motion6Interaction((MotionEvent6) event);
+  protected void motionInteraction(MotionEvent motionEvent) {
+    if (motionEvent instanceof MotionEvent1)
+      motion1Interaction((MotionEvent1) motionEvent);
+    if (motionEvent instanceof MotionEvent2)
+      motion2Interaction((MotionEvent2) motionEvent);
+    if (motionEvent instanceof MotionEvent3)
+      motion3Interaction((MotionEvent3) motionEvent);
+    if (motionEvent instanceof MotionEvent6)
+      motion6Interaction((MotionEvent6) motionEvent);
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent1}.
    */
-  protected void motion1Interaction(MotionEvent1 event) {
+  protected void motion1Interaction(MotionEvent1 motionEvent1) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent2}.
    */
-  protected void motion2Interaction(MotionEvent2 event) {
+  protected void motion2Interaction(MotionEvent2 motionEvent2) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent3}.
    */
-  protected void motion3Interaction(MotionEvent3 event) {
+  protected void motion3Interaction(MotionEvent3 motionEvent3) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent6}.
    */
-  protected void motion6Interaction(MotionEvent6 event) {
+  protected void motion6Interaction(MotionEvent6 motionEvent6) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link TapEvent}.
    */
-  protected void tapInteraction(TapEvent event) {
+  protected void tapInteraction(TapEvent tapEvent) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link KeyEvent}.
    */
-  protected void keyInteraction(KeyEvent event) {
+  protected void keyInteraction(KeyEvent keyEvent) {
   }
 
   // APPLY TRANSFORMATION
