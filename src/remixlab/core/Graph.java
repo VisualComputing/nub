@@ -1277,11 +1277,11 @@ public class Graph {
    *
    * @see #eye()
    */
-  public void setEye(Frame e) {
-    if (e == null || _eye == e)
+  public void setEye(Frame eye) {
+    if (eye == null || _eye == eye)
       return;
-    _eye = e;
-    _interpolator.setFrame(e);
+    _eye = eye;
+    _interpolator.setFrame(eye);
     _modified();
   }
 
