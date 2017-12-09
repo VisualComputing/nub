@@ -25,7 +25,7 @@ public class InteractiveNode extends Node {
 
     // behavior is here :P
     @Override
-    public void interact(MotionEvent event) {
+    public void motionInteraction(MotionEvent event) {
         switch (event.shortcut().id()) {
             case PApplet.LEFT:
                 translate(event);
@@ -43,7 +43,7 @@ public class InteractiveNode extends Node {
     }
 
     @Override
-    public void interact(KeyEvent event) {
+    public void keyInteraction(KeyEvent event) {
         if (event.id() == PApplet.UP)
             translateYPos();
         if (event.id() == PApplet.DOWN)

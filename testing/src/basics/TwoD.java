@@ -96,7 +96,7 @@ public class TwoD extends PApplet {
         }
 
         @Override
-        public void interact(MotionEvent event) {
+        public void motionInteraction(MotionEvent event) {
             switch (event.shortcut().id()) {
                 case PApplet.LEFT:
                     rotate(event);
@@ -114,7 +114,7 @@ public class TwoD extends PApplet {
         }
 
         @Override
-        public void interact(KeyEvent event) {
+        public void keyInteraction(KeyEvent event) {
             if (event.id() == PApplet.UP)
                 translateYPos();
             if (event.id() == PApplet.DOWN)

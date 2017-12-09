@@ -65,8 +65,8 @@ import java.util.List;
  * {@link #rotate(MotionEvent)}, {@link #_moveForward(MotionEvent2, boolean)},
  * {@link #_translateX(boolean)}, etc. To use them, derive from this class and override the
  * version of {@code interact} with the (bogus-_event) parameter type you want to
- * customize (see {@link #interact(MotionEvent)},
- * {@link #interact(KeyEvent)}, etc.). For example, with the following
+ * customize (see {@link #motionInteraction(MotionEvent)},
+ * {@link #keyInteraction(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
@@ -502,35 +502,35 @@ public class Node extends Frame implements Grabber {
   @Override
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
-      return track((KeyEvent) event);
+      return keyTracking((KeyEvent) event);
     if (event instanceof TapEvent)
-      return track((TapEvent) event);
+      return tapTracking((TapEvent) event);
     if (event instanceof MotionEvent)
-      return track((MotionEvent) event);
+      return motionTracking((MotionEvent) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean track(MotionEvent event) {
+  public boolean motionTracking(MotionEvent event) {
     if (isEye())
       return false;
     if (event instanceof MotionEvent1)
-      return track((MotionEvent1) event);
+      return motion1Tracking((MotionEvent1) event);
     if (event instanceof MotionEvent2)
-      return track((MotionEvent2) event);
+      return motion2Tracking((MotionEvent2) event);
     if (event instanceof MotionEvent3)
-      return track((MotionEvent3) event);
+      return motion3Tracking((MotionEvent3) event);
     if (event instanceof MotionEvent6)
-      return track((MotionEvent6) event);
+      return motion6Tracking((MotionEvent6) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean track(TapEvent event) {
+  public boolean tapTracking(TapEvent event) {
     if (isEye())
       return false;
     return track(event.x(), event.y());
@@ -541,8 +541,8 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
-  public boolean track(KeyEvent event) {
-    Graph.showMissingImplementationWarning("track(KeyEvent _event)", this.getClass().getName());
+  public boolean keyTracking(KeyEvent event) {
+    Graph.showMissingImplementationWarning("keyTracking(KeyEvent _event)", this.getClass().getName());
     return false;
   }
 
@@ -551,21 +551,21 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
-  public boolean track(MotionEvent1 event) {
+  public boolean motion1Tracking(MotionEvent1 event) {
     if (isEye())
       return false;
-    Graph.showMissingImplementationWarning("track(MotionEvent1 _event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("keyTracking(MotionEvent1 _event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean track(MotionEvent2 event) {
+  public boolean motion2Tracking(MotionEvent2 event) {
     if (isEye())
       return false;
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("track");
+      Graph.showEventVariationWarning("keyTracking");
       return false;
     }
     return track(event.x(), event.y());
@@ -586,25 +586,25 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean track(MotionEvent3 event) {
-    return track(event.event2());
+  public boolean motion3Tracking(MotionEvent3 event) {
+    return motion2Tracking(event.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean track(MotionEvent6 event) {
-    return track(event.event3().event2());
+  public boolean motion6Tracking(MotionEvent6 event) {
+    return motion2Tracking(event.event3().event2());
   }
 
   @Override
   public void interact(Event event) {
     if (event instanceof TapEvent)
-      interact((TapEvent) event);
+      tapInteraction((TapEvent) event);
     if (event instanceof MotionEvent)
-      interact((MotionEvent) event);
+      motionInteraction((MotionEvent) event);
     if (event instanceof KeyEvent)
-      interact((KeyEvent) event);
+      keyInteraction((KeyEvent) event);
   }
 
   /**
@@ -615,57 +615,57 @@ public class Node extends Frame implements Grabber {
    * Override this method when you want the object to interact an interaction from a
    * {@link remixlab.input.event.MotionEvent}.
    */
-  protected void interact(MotionEvent event) {
+  protected void motionInteraction(MotionEvent event) {
     if (event instanceof MotionEvent1)
-      interact((MotionEvent1) event);
+      motion1Interaction((MotionEvent1) event);
     if (event instanceof MotionEvent2)
-      interact((MotionEvent2) event);
+      motion2Interaction((MotionEvent2) event);
     if (event instanceof MotionEvent3)
-      interact((MotionEvent3) event);
+      motion3Interaction((MotionEvent3) event);
     if (event instanceof MotionEvent6)
-      interact((MotionEvent6) event);
+      motion6Interaction((MotionEvent6) event);
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent1}.
    */
-  protected void interact(MotionEvent1 event) {
+  protected void motion1Interaction(MotionEvent1 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent2}.
    */
-  protected void interact(MotionEvent2 event) {
+  protected void motion2Interaction(MotionEvent2 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent3}.
    */
-  protected void interact(MotionEvent3 event) {
+  protected void motion3Interaction(MotionEvent3 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link MotionEvent6}.
    */
-  protected void interact(MotionEvent6 event) {
+  protected void motion6Interaction(MotionEvent6 event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link TapEvent}.
    */
-  protected void interact(TapEvent event) {
+  protected void tapInteraction(TapEvent event) {
   }
 
   /**
    * Override this method when you want the object to interact an interaction from a
    * {@link KeyEvent}.
    */
-  protected void interact(KeyEvent event) {
+  protected void keyInteraction(KeyEvent event) {
   }
 
   // APPLY TRANSFORMATION
@@ -755,7 +755,7 @@ public class Node extends Frame implements Grabber {
    * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
    * separately.
    *
-   * @see #set(Frame)
+   * @see #setWorldMatrix(Frame)
    */
   public static void sync(Node node1, Node node2) {
     if (node1 == null || node2 == null)

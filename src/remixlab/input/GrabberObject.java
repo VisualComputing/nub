@@ -19,8 +19,8 @@ import remixlab.input.event.*;
  * Based on the concrete event type, this model object splits the
  * {@link #track(Event)} and the {@link #interact(Event)}
  * methods into more specific versions of them, e.g.,
- * {@link #track(TapEvent)}, {@link #track(MotionEvent3)},
- * {@link #interact(MotionEvent6)} , {@link #interact(KeyEvent)} and
+ * {@link #tapTracking(TapEvent)}, {@link #motion3Tracking(MotionEvent3)},
+ * {@link #motion6Interaction(MotionEvent6)} , {@link #keyInteraction(KeyEvent)} and
  * so on. Thus allowing implementations of this abstract GrabberObject to override only
  * those method signatures that might be of their interest.
  */
@@ -65,102 +65,102 @@ public abstract class GrabberObject implements Grabber {
   @Override
   public void interact(Event event) {
     if (event instanceof KeyEvent)
-      interact((KeyEvent) event);
+      keyInteraction((KeyEvent) event);
     if (event instanceof TapEvent)
-      interact((TapEvent) event);
+      tapInteraction((TapEvent) event);
     if (event instanceof MotionEvent)
-      interact((MotionEvent) event);
+      motionInteraction((MotionEvent) event);
   }
 
   /**
-   * Calls interact() on the proper motion event:
+   * Calls keyInteraction() on the proper motion event:
    * {@link MotionEvent1}, {@link MotionEvent2},
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link remixlab.input.event.MotionEvent}.
    */
-  protected void interact(MotionEvent event) {
+  protected void motionInteraction(MotionEvent event) {
     if (event instanceof MotionEvent1)
-      interact((MotionEvent1) event);
+      motion1Interaction((MotionEvent1) event);
     if (event instanceof MotionEvent2)
-      interact((MotionEvent2) event);
+      motion2Interaction((MotionEvent2) event);
     if (event instanceof MotionEvent3)
-      interact((MotionEvent3) event);
+      motion3Interaction((MotionEvent3) event);
     if (event instanceof MotionEvent6)
-      interact((MotionEvent6) event);
+      motion6Interaction((MotionEvent6) event);
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link KeyEvent}.
    */
-  protected void interact(KeyEvent event) {
+  protected void keyInteraction(KeyEvent event) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link TapEvent}.
    */
-  protected void interact(TapEvent event) {
+  protected void tapInteraction(TapEvent event) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link MotionEvent1}.
    */
-  protected void interact(MotionEvent1 event) {
+  protected void motion1Interaction(MotionEvent1 event) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link MotionEvent2}.
    */
-  protected void interact(MotionEvent2 event) {
+  protected void motion2Interaction(MotionEvent2 event) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link MotionEvent3}.
    */
-  protected void interact(MotionEvent3 event) {
+  protected void motion3Interaction(MotionEvent3 event) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to keyInteraction an interaction from a
    * {@link MotionEvent6}.
    */
-  protected void interact(MotionEvent6 event) {
+  protected void motion6Interaction(MotionEvent6 event) {
   }
 
   @Override
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
-      return track((KeyEvent) event);
+      return keyTracking((KeyEvent) event);
     if (event instanceof TapEvent)
-      return track((TapEvent) event);
+      return tapTracking((TapEvent) event);
     if (event instanceof MotionEvent)
-      return track((MotionEvent) event);
+      return motionTracking((MotionEvent) event);
     return false;
   }
 
   /**
-   * Calls track() on the proper motion event:
+   * Calls keyTracking() on the proper motion event:
    * {@link MotionEvent1}, {@link MotionEvent2},
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
-  public boolean track(MotionEvent event) {
+  public boolean motionTracking(MotionEvent event) {
     if (event instanceof MotionEvent1)
-      return track((MotionEvent1) event);
+      return motion1Tracking((MotionEvent1) event);
     if (event instanceof MotionEvent2)
-      return track((MotionEvent2) event);
+      return motion2Tracking((MotionEvent2) event);
     if (event instanceof MotionEvent3)
-      return track((MotionEvent3) event);
+      return motion3Tracking((MotionEvent3) event);
     if (event instanceof MotionEvent6)
-      return track((MotionEvent6) event);
+      return motion6Tracking((MotionEvent6) event);
     return false;
   }
 
@@ -168,7 +168,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link KeyEvent}.
    */
-  protected boolean track(KeyEvent event) {
+  protected boolean keyTracking(KeyEvent event) {
     return false;
   }
 
@@ -176,7 +176,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link TapEvent}.
    */
-  protected boolean track(TapEvent event) {
+  protected boolean tapTracking(TapEvent event) {
     return false;
   }
 
@@ -184,7 +184,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link MotionEvent1}.
    */
-  protected boolean track(MotionEvent1 event) {
+  protected boolean motion1Tracking(MotionEvent1 event) {
     return false;
   }
 
@@ -192,7 +192,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link MotionEvent2}.
    */
-  protected boolean track(MotionEvent2 event) {
+  protected boolean motion2Tracking(MotionEvent2 event) {
     return false;
   }
 
@@ -200,7 +200,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link MotionEvent3}.
    */
-  protected boolean track(MotionEvent3 event) {
+  protected boolean motion3Tracking(MotionEvent3 event) {
     return false;
   }
 
@@ -208,7 +208,7 @@ public abstract class GrabberObject implements Grabber {
    * Override this method when you want the object to be picked from a
    * {@link MotionEvent6}.
    */
-  protected boolean track(MotionEvent6 event) {
+  protected boolean motion6Tracking(MotionEvent6 event) {
     return false;
   }
 }

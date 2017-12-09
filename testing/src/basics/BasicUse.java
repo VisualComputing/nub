@@ -33,7 +33,7 @@ public class BasicUse extends PApplet {
       }
 
       @Override
-      public void interact(MotionEvent event) {
+      public void motionInteraction(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             //translate(_event);
@@ -49,7 +49,7 @@ public class BasicUse extends PApplet {
       }
 
       @Override
-      public void interact(KeyEvent event) {
+      public void keyInteraction(KeyEvent event) {
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
           translateXPos();
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
