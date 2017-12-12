@@ -22,7 +22,7 @@ public class Shape extends Node {
     Scene _scene;
     PShape _frontShape, _backShape;
     public enum Highlighting {
-        NONE, FRONT_SHAPE, FRONT_BACK_SHAPES, BACK_SHAPE
+        NONE, FRONT, FRONT_BACK, BACK
     }
     Highlighting _highlight;
 
@@ -143,11 +143,11 @@ public class Shape extends Node {
      * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
      * the node into the scene main {@link Scene#frontBuffer()}.
      */
-    public boolean draw(PGraphics pg) {
-        pg.pushMatrix();
-        Scene.applyWorldTransformation(pg, this);
-        visit(pg);
-        pg.popMatrix();
+    public boolean draw(PGraphics pGraphics) {
+        pGraphics.pushMatrix();
+        Scene.applyWorldTransformation(pGraphics, this);
+        visit(pGraphics);
+        pGraphics.popMatrix();
         return true;
     }
 
