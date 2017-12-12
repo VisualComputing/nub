@@ -32,7 +32,7 @@ public class Shape extends Node {
         _scene = scene;
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
-        setHighlighting(Highlighting.FRONT_SHAPE);
+        setHighlighting(Highlighting.FRONT);
     }
 
     public Shape(Shape reference) {
@@ -41,7 +41,7 @@ public class Shape extends Node {
 
         if(_scene.frontBuffer() instanceof PGraphicsOpenGL)
             setPrecision(Precision.EXACT);
-        setHighlighting(Highlighting.FRONT_SHAPE);
+        setHighlighting(Highlighting.FRONT);
     }
 
     public Shape(Scene scene, PShape shape) {
@@ -76,17 +76,17 @@ public class Shape extends Node {
      * <ol>
      * <li>{@link Highlighting#NONE}: no highlighting
      * takes place.</li>
-     * <li>{@link Highlighting#FRONT_SHAPE}: the
+     * <li>{@link Highlighting#FRONT}: the
      * front-shape (see {@link #setFront(PShape)}) is scaled by a {@code 1.15}
      * factor.</li>
-     * <li>{@link Highlighting#BACK_SHAPE}: the
+     * <li>{@link Highlighting#BACK}: the
      * picking-shape (see {@link #setBack(PShape)} is displayed instead of the
      * front-shape.</li>
-     * <li>{@link Highlighting#FRONT_BACK_SHAPES}:
+     * <li>{@link Highlighting#FRONT_BACK}:
      * both, the front and the picking shapes are displayed.</li>
      * </ol>
      * <p>
-     * Default is {@link Highlighting#FRONT_SHAPE}.
+     * Default is {@link Highlighting#FRONT}.
      *
      * @see #highlighting()
      */
@@ -171,7 +171,7 @@ public class Shape extends Node {
             ///*
             //TODO needs more thinking
             switch (highlighting()) {
-                case FRONT_SHAPE:
+                case FRONT:
                     if (grabsInput())
                         pg.scale(1.15f);
                 case NONE:
@@ -180,7 +180,7 @@ public class Shape extends Node {
                     else
                         set(pg);
                     break;
-                case FRONT_BACK_SHAPES:
+                case FRONT_BACK:
                     if(_frontShape != null)
                         pg.shape(_frontShape);
                     else
@@ -192,7 +192,7 @@ public class Shape extends Node {
                             setBack(pg);
                     }
                     break;
-                case BACK_SHAPE:
+                case BACK:
                     if (grabsInput()) {
                         if (_backShape != null)
                             pg.shape(_backShape);

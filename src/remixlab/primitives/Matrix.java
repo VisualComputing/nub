@@ -16,7 +16,7 @@ package remixlab.primitives;
  */
 public class Matrix {
   /**
-   * Returns whether or not this Matrix matches other.
+   * Returns whether or not this matrix matches other.
    *
    * @param other rect
    */
@@ -304,16 +304,17 @@ public class Matrix {
   }
 
   /**
-   * Retubs the matrix contents as a 16 entry float array.
+   * Link {@code source} array to this matrix.
+   *
+   * @see #unLink()
    */
-  public float[] getData() {
-    return _matrix;
-  }
-
   public void link(float[] source) {
     _matrix = source;
   }
 
+  /**
+   * Unlinks this matrix if it was previously {@link #link(float[])}.
+   */
   public void unLink() {
     float[] data = new float[16];
     get(data);
@@ -321,7 +322,7 @@ public class Matrix {
   }
 
   /**
-   * Returns a copy of this Matrix.
+   * Returns a copy of this matrix.
    */
   public Matrix get() {
     return new Matrix(this);
@@ -390,7 +391,7 @@ public class Matrix {
   }
 
   /**
-   * Sets the matrix contents from the {@code src} matrix contents.
+   * Sets the matrix contents from the {@code matrix} contents.
    */
   public void set(Matrix matrix) {
     set(matrix._matrix[0], matrix._matrix[1], matrix._matrix[2], matrix._matrix[3], matrix._matrix[4], matrix._matrix[5], matrix._matrix[6], matrix._matrix[7], matrix._matrix[8],
@@ -829,7 +830,7 @@ public class Matrix {
   }
 
   /**
-   * Pre-multiply this matrix by the one defined from {@code source}.
+   * Pre-multiply this matrix by the one defined from {@code left}.
    */
   public void preApply(Matrix left) {
     preApply(left._matrix[0], left._matrix[1], left._matrix[2], left._matrix[3], left._matrix[4], left._matrix[5], left._matrix[6], left._matrix[7],

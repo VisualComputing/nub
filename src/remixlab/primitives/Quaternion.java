@@ -11,15 +11,14 @@
 package remixlab.primitives;
 
 /**
- * A 3D Quaternion is a 4 element unit quaternion
- * represented by single precision floating point x,y,z,w coordinates. This class API aims
- * to conform that of the great <a href=
+ * A 4 element unit quaternion represented by single precision floating point
+ * x,y,z,w coordinates. This class API aims to conform that of the great <a href=
  * "http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html">libQGLViewer
  * Quaternion</a>.
  */
 public class Quaternion {
   /**
-   * Returns whether or not this Rot matches other.
+   * Returns whether or not this quaternion matches other.
    *
    * @param other quaternion
    */
@@ -31,12 +30,12 @@ public class Quaternion {
   }
 
   /**
-   * The x, y, z, and w coordinates of the Quaternion represented as a public array.
+   * The x, y, z, and w coordinates of the quaternion represented as a public array.
    */
   public float _quaternion[] = new float[4];
 
   /**
-   * Constructs and initializes a Quaternion to (0.0,0.0,0.0,1.0), i.e., an identity rotation.
+   * Constructs and initializes a quaternion to (0.0,0.0,0.0,1.0), i.e., an identity rotation.
    */
   public Quaternion() {
     reset();
@@ -51,7 +50,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs and initializes a Quaternion from the specified xyzw coordinates.
+   * Constructs and initializes a quaternion from the specified xyzw coordinates.
    *
    * @param x         the x coordinate
    * @param y         the y coordinate
@@ -89,7 +88,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs and initializes a Quaternion from the array of length 4.
+   * Constructs and initializes a quaternion from the array of length 4.
    *
    * @param source the array of length 4 containing xyzw in order
    */
@@ -116,7 +115,7 @@ public class Quaternion {
   }
 
   /**
-   * Copy constructor. If {@code normalize} is {@code true} this Quaternion is
+   * Copy constructor. If {@code normalize} is {@code true} this quaternion is
    * {@link #normalize()}.
    *
    * @param quaternion the Quaternion containing the initialization x y z w data
@@ -126,7 +125,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs and initializes a Quaternion from the specified rotation {@link #axis() axis}
+   * Constructs and initializes a quaternion from the specified rotation {@link #axis() axis}
    * (non null) and {@link #angle() angle} (in radians).
    *
    * @param axis  the Vector representing the axis
@@ -138,7 +137,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs a Quaternion that will rotate from the {@code from} direction to the {@code to}
+   * Constructs a quaternion that will rotate from the {@code from} direction to the {@code to}
    * direction.
    *
    * @param from the first Vector
@@ -150,7 +149,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs a Quaternion from the given Euler angles.
+   * Constructs a quaternion from the given Euler angles.
    *
    * @param roll  Rotation angle in radians around the x-Axis
    * @param pitch Rotation angle in radians around the y-Axis
@@ -162,7 +161,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs a Quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper
+   * Constructs a quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper
    * left 3x3 sub-matrix of the Matrix.
    *
    * @param matrix
@@ -173,7 +172,7 @@ public class Quaternion {
   }
 
   /**
-   * Constructs a Quaternion from the three rotated vectors of an orthogonal basis.
+   * Constructs a quaternion from the three rotated vectors of an orthogonal basis.
    *
    * @param X 1st Orthogonal Vector
    * @param Y 2nd Orthogonal Vector
@@ -199,10 +198,18 @@ public class Quaternion {
     this._quaternion[3] = 1;
   }
 
+  /**
+   * Link {@code source} array to this quaternion.
+   *
+   * @see #unLink()
+   */
   public void link(float[] source) {
     _quaternion = source;
   }
 
+  /**
+   * Unlinks this quaternion if it was previously {@link #link(float[])}.
+   */
   public void unLink() {
     float[] data = new float[4];
     get(data);
@@ -296,7 +303,7 @@ public class Quaternion {
   }
 
   /**
-   * Set this Quaternion from quaternion {@code quaternion}. If {@code normalize} is {@code true} this
+   * Set this from quaternion {@code quaternion}. If {@code normalize} is {@code true} this
    * Quaternion is {@link #normalize()}.
    */
   public void set(Quaternion quaternion, boolean normalize) {
@@ -309,7 +316,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the value of this Quaternion to the conjugate of itself.
+   * Sets this as its conjugate.
    */
   public void conjugate() {
     this._quaternion[0] = -this._quaternion[0];
@@ -318,7 +325,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the value of this Quaternion to the conjugate of Quaternion quaternion.
+   * Sets this as the quaternion conjugate.
    *
    * @param quaternion the source vector
    */
@@ -330,7 +337,7 @@ public class Quaternion {
   }
 
   /**
-   * Negates all the coefficients of the Quaternion.
+   * Negates all the coefficients of the quaternion.
    */
   public void negate() {
     this._quaternion[0] = -this._quaternion[0];
@@ -340,9 +347,9 @@ public class Quaternion {
   }
 
   /**
-   * Returns the "dot" product of this Quaternion and {@code quaternion}:
+   * Returns the "dot" product of this quaternion and {@code quaternion}:
    * <p>
-   * {@code this.quat[0] * b.x + this.quat[1] * b.y + this.quat[2] * b.z + this.quat[3] * b.quat[3]}
+   * {@code  this._quaternion[0] * quaternion._quaternion[0] + this._quaternion[1] * quaternion._quaternion[1] + this._quaternion[2] * quaternion._quaternion[2] + this._quaternion[3] * quaternion._quaternion[3]}
    *
    * @param quaternion the Quaternion
    */
@@ -353,7 +360,7 @@ public class Quaternion {
   /**
    * Returns the "dot" product of {@code a} and {@code b}:
    * <p>
-   * {@code a.x * b.x + a.y * b._y + a.z * b.z + a.quat[3] * b.quat[3]}
+   * {@code a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w}
    *
    * @param a the first Quaternion
    * @param b the second Quaternion
@@ -362,12 +369,17 @@ public class Quaternion {
     return a._quaternion[0] * b._quaternion[0] + a._quaternion[1] * b._quaternion[1] + a._quaternion[2] * b._quaternion[2] + a._quaternion[3] * b._quaternion[3];
   }
 
+  /**
+   * Same as {@code multiply(quaternion)}.
+   *
+   * @see #multiply(Quaternion)
+   */
   public void compose(Quaternion quaternion) {
     multiply(quaternion);
   }
 
   /**
-   * Sets the value of this Quaternion to the Quaternion product of itself and {@code quaternion}, (i.e.,
+   * Sets this as the quaternion product of itself and {@code quaternion}, (i.e.,
    * {@code this = this * quaternion}).
    *
    * @param quaternion the other Quaternion
@@ -395,7 +407,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the Quaternion which is product of quaternions {@code a} and {@code b}.
+   * Returns the product of quaternions {@code a} and {@code b}.
    *
    * @param a the first Quaternion
    * @param b the second Quaternion
@@ -411,7 +423,7 @@ public class Quaternion {
 
   /**
    * Returns the image of {@code vector} by the rotation of this vector. Same as
-   * {@code this.rotate(vector).}
+   * {@code this.rotate(vector)}.
    *
    * @param vector the Vector
    * @see #rotate(Vector)
@@ -423,7 +435,7 @@ public class Quaternion {
 
   /**
    * Returns the image of {@code vector} by the rotation {@code quaternion}. Same as
-   * {@code quaternion.rotate(vector).}
+   * {@code quaternion.rotate(vector)}.
    *
    * @param quaternion the Quaternion
    * @param vector  the Vector
@@ -435,8 +447,8 @@ public class Quaternion {
   }
 
   /**
-   * Multiplies this Quaternion by the inverse of Quaternion {@code q1} and places the value into this
-   * Quaternion (i.e., {@code this = this * q^-1}). The value of the argument Quaternion is preserved.
+   * Multiplies this by the inverse of Quaternion {@code q1} and places the value into this
+   * (i.e., {@code this = this * q^-1}). The value of the argument quaternion is preserved.
    *
    * @param q1 the other Quaternion
    */
@@ -447,7 +459,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the product of Quaternion {@code q1} by the inverse of Quaternion {@code q2} (i.e.,
+   * Returns the product of quaternion {@code q1} by the inverse of quaternion {@code q2} (i.e.,
    * {@code q1 * q2^-1}). The value of both argument quaternions is preserved.
    *
    * @param q1 the first Quaternion
@@ -460,12 +472,12 @@ public class Quaternion {
   }
 
   /**
-   * Returns the inverse Quaternion (inverse rotation).
+   * Returns the inverse quaternion (inverse rotation).
    * <p>
-   * The result hasGrabber a negated {@link #axis()} direction and the same {@link #angle()}.
+   * The result has a negated {@link #axis()} direction and the same {@link #angle()}.
    * <p>
-   * A composition of a Quaternion and its {@link #inverse()} results in an identity function.
-   * Use {@link #invert()} to actually modify the Quaternion.
+   * A composition of a quaternion and its {@link #inverse()} results in an identity function.
+   * Use {@link #invert()} to actually modify the quaternion.
    *
    * @see #invert()
    */
@@ -476,7 +488,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the value of this Quaternion to the inverse of itself.
+   * Sets the value of this to the inverse of itself.
    *
    * @see #inverse()
    */
@@ -489,7 +501,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the value of this Quaternion to the Quaternion inverse of {@code quaternion}.
+   * Sets the value of this to the Quaternion inverse of {@code quaternion}.
    *
    * @param quaternion the Quaternion to be inverted
    */
@@ -502,7 +514,7 @@ public class Quaternion {
   }
 
   /**
-   * Normalizes the value of this Quaternion in place and return its {@code norm}.
+   * Normalize this quaternion return its {@code norm}.
    */
   public float normalize() {
     float norm = (float) Math.sqrt(this._quaternion[0] * this._quaternion[0] + this._quaternion[1] * this._quaternion[1] + this._quaternion[2] * this._quaternion[2]
@@ -522,7 +534,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the image of {@code vector} by the Quaternion rotation.
+   * Returns the image of {@code vector} by the quaternion rotation.
    *
    * @param vector the Vector
    */
@@ -546,7 +558,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the image of {@code vector} by the Quaternion {@link #inverse()} rotation.
+   * Returns the image of {@code vector} by the quaternion {@link #inverse()} rotation.
    * <p>
    * {@link #rotate(Vector)} performs an inverse transformation.
    *
@@ -559,11 +571,11 @@ public class Quaternion {
   }
 
   /**
-   * Sets the Quaternion as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
+   * Sets the quaternion as a rotation of {@link #axis() axis} and {@link #angle() angle} (in
    * radians).
    * <p>
    * The {@code axis} does not need to be normalized. A null {@code axis} will result in
-   * an identity Quaternion.
+   * an identity quaternion.
    *
    * @param axis  the Vector representing the axis
    * @param angle the angle in radians
@@ -621,7 +633,7 @@ public class Quaternion {
 
   /**
    * Converts Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
-   * respectively defined to the x, y and z axes, to this Quaternion. In the convention used
+   * respectively defined to the x, y and z axes, to this quaternion. In the convention used
    * here these angles represent a composition of extrinsic rotations (rotations about the
    * reference frame axes), which is also known as {@link #taitBryanAngles()} (See
    * http://en.wikipedia.org/wiki/Euler_angles and
@@ -653,13 +665,13 @@ public class Quaternion {
   }
 
   /**
-   * Converts this Quaternion to Euler rotation angles {@code roll}, {@code pitch} and
+   * Converts this quaternion to Euler rotation angles {@code roll}, {@code pitch} and
    * {@code yaw} in radians. {@link #fromEulerAngles(float, float, float)} performs the
    * inverse operation. The code was adapted from:
    * http://www.euclideanspace.com/maths/geometry/rotations/conversions/
    * quaternionToEuler/index.htm.
    * <p>
-   * <b>Attention:</b> This method assumes that this Quaternion is normalized.
+   * <b>Attention:</b> This method assumes that this quaternion is normalized.
    *
    * @return the Vector holding the roll (x coordinate of the vector), pitch (y coordinate of
    * the vector) and yaw angles (z coordinate of the vector). <b>Note:</b> The
@@ -692,7 +704,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the Quaternion as a rotation from the {@code from} direction to the {@code to}
+   * Sets the quaternion as a rotation from the {@code from} direction to the {@code to}
    * direction.
    * <p>
    * <b>Attention:</b> this rotation is not uniquely defined. The selected axis is usually
@@ -737,7 +749,7 @@ public class Quaternion {
   }
 
   /**
-   * Set the Quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
+   * Set the quaternion from a (supposedly correct) 3x3 rotation matrix given in the upper left
    * 3x3 sub-matrix of the Matrix.
    *
    * @see #fromRotatedBasis(Vector, Vector, Vector)
@@ -750,7 +762,7 @@ public class Quaternion {
   }
 
   /**
-   * Sets the Quaternion from the three rotated vectors of an orthogonal basis.
+   * Sets the quaternion from the three rotated vectors of an orthogonal basis.
    * <p>
    * The three vectors do not have to be normalized but must be orthogonal and direct
    * (i,e., {@code X^Y=k*Z, with k>0}).
@@ -810,9 +822,9 @@ public class Quaternion {
   }
 
   /**
-   * Returns the normalized axis direction of the rotation represented by the Quaternion.
+   * Returns the normalized axis direction of the rotation represented by the quaternion.
    * <p>
-   * The result is null for an identity Quaternion.
+   * The result is null for an identity quaternion.
    *
    * @see #angle()
    */
@@ -825,7 +837,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the {@code angle} (in radians) of the rotation represented by the Quaternion.
+   * Returns the {@code angle} (in radians) of the rotation represented by the quaternion.
    * <p>
    * This value is always in the range {@code [0-pi]}. Larger rotational angles are
    * obtained by inverting the {@link #axis()} direction.
@@ -844,7 +856,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the Matrix which represents the rotation matrix associated with the Quaternion.
+   * Returns the rotation matrix associated with the quaternion.
    */
   public Matrix matrix() {
     float q00 = 2.0f * this._quaternion[0] * this._quaternion[0];
@@ -884,7 +896,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the associated inverse rotation Matrix. This is simply {@link #matrix()} of the
+   * Returns the associated inverse rotation matrix. This is simply {@link #matrix()} of the
    * {@link #inverse()}.
    * <p>
    * <b>Attention:</b> The result is only valid until the next call to
@@ -898,7 +910,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the logarithm of the Quaternion.
+   * Returns the quaternion logarithm.
    *
    * @see #exp()
    */
@@ -916,7 +928,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns the exponential of the Quaternion.
+   * Returns the quaternion exponential.
    *
    * @see #log()
    */
@@ -933,7 +945,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns a random unit Quaternion.
+   * Returns a random unit quaternion.
    * <p>
    * You can create a randomly directed unit vector using:
    * <p>
@@ -969,7 +981,7 @@ public class Quaternion {
    * {@code b} when {@code t=1}.
    * <p>
    * When {@code allowFlip} is true (default) the slerp interpolation will always use the
-   * "shortest path" between the quaternions' orientations, by "flipping" the source Quaternion
+   * "shortest path" between the quaternions' orientations, by "flipping" the source quaternion
    * if needed (see {@link #negate()}).
    *
    * @param a         the first Quaternion
@@ -1006,10 +1018,10 @@ public class Quaternion {
    * Returns the slerp interpolation of the two quaternions {@code a} and {@code b}, at
    * time {@code t}, using tangents {@code tgA} and {@code tgB}.
    * <p>
-   * The resulting Quaternion is "between" {@code a} and {@code b} (result is {@code a} when
+   * The resulting quaternion is "between" {@code a} and {@code b} (result is {@code a} when
    * {@code t=0} and {@code b} for {@code t=1}).
    * <p>
-   * Use {@link #squadTangent(Quaternion, Quaternion, Quaternion)} to define the Quaternion tangents {@code tgA}
+   * Use {@link #squadTangent(Quaternion, Quaternion, Quaternion)} to define the quaternion tangents {@code tgA}
    * and {@code tgB}.
    *
    * @param a   the first Quaternion
@@ -1041,7 +1053,7 @@ public class Quaternion {
   }
 
   /**
-   * Returns a tangent Quaternion for {@code center}, defined by {@code before} and
+   * Returns a tangent quaternion for {@code center}, defined by {@code before} and
    * {@code after} quaternions.
    *
    * @param before the first Quaternion
@@ -1062,7 +1074,7 @@ public class Quaternion {
   }
 
   /**
-   * Utility function that returns the squared norm of the Quaternion.
+   * Utility function that returns the squared norm of the quaternion.
    */
   public static float squaredNorm(Quaternion quaternion) {
     return (quaternion._quaternion[0] * quaternion._quaternion[0]) + (quaternion._quaternion[1] * quaternion._quaternion[1]) + (quaternion._quaternion[2] * quaternion._quaternion[2]) + (quaternion._quaternion[3] * quaternion._quaternion[3]);

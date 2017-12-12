@@ -20,18 +20,18 @@ public class Point {
    * @param other rect
    */
   public boolean matches(Rectangle other) {
-    return this.x == other.x && this.y == other.y;
+    return this._x == other._x && this._y == other._y;
   }
 
   /**
-   * The X coordinate of this Point.
+   * The x coordinate of this Point.
    */
-  protected int x;
+  protected int _x;
 
   /**
-   * The Y coordinate of this Point.
+   * The y coordinate of this Point.
    */
-  protected int y;
+  protected int _y;
 
   /**
    * Constructs and initializes a point at the (0,0) location in the coordinate space.
@@ -75,9 +75,9 @@ public class Point {
   /**
    * Sets the (x,y) coordinates of this point from the given (xCoord,yCoord) coordinates.
    */
-  public void set(int xCoord, int yCoord) {
-    this.x = xCoord;
-    this.y = yCoord;
+  public void set(int x, int y) {
+    this._x = x;
+    this._y = y;
   }
 
   /**
@@ -85,30 +85,30 @@ public class Point {
    * (x,y) coordinates.
    */
   public void set(float x, float y) {
-    this.x = (int) x;
-    this.y = (int) y;
+    this._x = (int) x;
+    this._y = (int) y;
   }
 
   /**
    * Returns the x coordinate of the point.
    */
   public int x() {
-    return x;
+    return _x;
   }
 
   /**
    * Returns the y coordinate of the point.
    */
   public int y() {
-    return y;
+    return _y;
   }
 
   public void setX(int x) {
-    this.x = x;
+    this._x = x;
   }
 
   public void setY(int y) {
-    this.y = y;
+    this._y = y;
   }
 
   /**

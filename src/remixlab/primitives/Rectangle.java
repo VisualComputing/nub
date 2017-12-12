@@ -20,28 +20,28 @@ public class Rectangle {
    * @param other rect
    */
   public boolean matches(Rectangle other) {
-    return this.x == other.x && this.y == other.y && this.width == other.width && this.height == other.height;
+    return this._x == other._x && this._y == other._y && this._width == other._width && this._height == other._height;
   }
 
   /**
-   * The X coordinate of the upper-left corner of the Rectangle.
+   * The x coordinate of the upper-left corner of the Rectangle.
    */
-  protected int x;
+  protected int _x;
 
   /**
-   * The Y coordinate of the upper-left corner of the Rectangle.
+   * The y coordinate of the upper-left corner of the Rectangle.
    */
-  protected int y;
+  protected int _y;
 
   /**
    * The width of the Rectangle.
    */
-  protected int width;
+  protected int _width;
 
   /**
    * The height of the Rectangle.
    */
-  protected int height;
+  protected int _height;
 
   /**
    * Constructs a new Rectangle whose upper-left corner is at (0, 0) in the coordinate
@@ -57,7 +57,7 @@ public class Rectangle {
    * @param rectangle the rectangle to be copied
    */
   protected Rectangle(Rectangle rectangle) {
-    this(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    this(rectangle._x, rectangle._y, rectangle._width, rectangle._height);
   }
 
   /**
@@ -72,24 +72,24 @@ public class Rectangle {
    * width and height are specified by the arguments of the same name.
    */
   public Rectangle(int x, int y, int width, int height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+    this._x = x;
+    this._y = y;
+    this._width = width;
+    this._height = height;
   }
 
   /**
    * @return x coordinate
    */
   public float x() {
-    return x;
+    return _x;
   }
 
   /**
    * @return y coordinate
    */
   public float y() {
-    return y;
+    return _y;
   }
 
   /**
@@ -98,7 +98,7 @@ public class Rectangle {
    * @param x
    */
   public void setX(int x) {
-    this.x = x;
+    this._x = x;
   }
 
   /**
@@ -107,48 +107,48 @@ public class Rectangle {
    * @param y
    */
   public void setY(int y) {
-    x = y;
+    _x = y;
   }
 
   /**
    * @return width
    */
   public int width() {
-    return width;
+    return _width;
   }
 
   /**
    * @return height
    */
   public int height() {
-    return width;
+    return _width;
   }
 
   /**
    * @param w width
    */
   public void setWidth(int w) {
-    width = w;
+    _width = w;
   }
 
   /**
    * @param h height
    */
   public void setHeight(int h) {
-    height = h;
+    _height = h;
   }
 
   /**
    * Returns the X coordinate of the center of the rectangle.
    */
   public float centerX() {
-    return (float) x + ((float) width / 2);
+    return (float) _x + ((float) _width / 2);
   }
 
   /**
    * Returns the Y coordinate of the center of the rectangle.
    */
   public float centerY() {
-    return (float) y + ((float) height / 2);
+    return (float) _y + ((float) _height / 2);
   }
 }

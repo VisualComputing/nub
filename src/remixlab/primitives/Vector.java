@@ -16,19 +16,19 @@ package remixlab.primitives;
  * PVector</a>.
  * <p>
  * The result of all functions are applied to the vector itself, with the exception of
- * cross(), which returns a new Vector (or writes to a specified 'target' Vector). That is,
- * addGrabber() will addGrabber the contents of one vector to this one. Using addGrabber() with additional
- * parameters allows you to put the result into a new Vector. Functions that act on multiple
+ * cross(), which returns a new vector (or writes to a specified 'target' vector). That is,
+ * add() will add the contents of one vector to this one. Using add() with additional
+ * parameters allows you to put the result into a new vector. Functions that act on multiple
  * vectors also include static versions. Because creating new objects can be
- * computationally expensive, most functions include an optional 'target' Vector, so that a
- * new Vector object is not created with each operation.
+ * computationally expensive, most functions include an optional 'target' vector, so that a
+ * new vector object is not created with each operation.
  * <p>
  * Initially based on the <a href="http://www.processing.org">Processing</a> PVector
  * class.
  */
 public class Vector {
   /**
-   * Returns whether or not this Vector matches other.
+   * Returns whether or not this vector matches other.
    *
    * @param other vec
    */
@@ -78,42 +78,42 @@ public class Vector {
   }
 
   /**
-   * Returns the x component of the Vector.
+   * Returns the x component of the vector.
    */
   public float x() {
     return this._vector[0];
   }
 
   /**
-   * Returns the y component of the Vector.
+   * Returns the y component of the vector.
    */
   public float y() {
     return this._vector[1];
   }
 
   /**
-   * Returns the z component of the Vector.
+   * Returns the z component of the vector.
    */
   public float z() {
     return this._vector[2];
   }
 
   /**
-   * Sets the x component of the Vector.
+   * Sets the x component of the vector.
    */
   public void setX(float x) {
     this._vector[0] = x;
   }
 
   /**
-   * Sets the y component of the Vector.
+   * Sets the y component of the vector.
    */
   public void setY(float y) {
     this._vector[1] = y;
   }
 
   /**
-   * Sets the z component of the Vector.
+   * Sets the z component of the vector.
    */
   public void setZ(float z) {
     this._vector[2] = z;
@@ -145,7 +145,7 @@ public class Vector {
   }
 
   /**
-   * Projects the {@code src} Vector on the axis defined by {@code direction} (which does not
+   * Projects the {@code vector} on the axis defined by {@code direction} (which does not
    * need to be normalized, but must be non null) that passes through the origin.
    */
   public static Vector projectVectorOnAxis(Vector vector, Vector direction) {
@@ -188,7 +188,7 @@ public class Vector {
   }
 
   /**
-   * Utility function that returns the squared norm of the Vector.
+   * Utility function that returns the squared norm of the vector.
    */
   public static float squaredNorm(Vector vector) {
     return (vector._vector[0] * vector._vector[0]) + (vector._vector[1] * vector._vector[1]) + (vector._vector[2] * vector._vector[2]);
@@ -204,9 +204,9 @@ public class Vector {
   }
 
   /**
-   * Utility function that returns a Vector orthogonal to {@code vector}. Its {@code magnitude()}
-   * depends on the Vector, but is zero only for a {@code null} Vector. Note that the function
-   * that associates an {@code orthogonalVector()} to a Vector is not continuous.
+   * Utility function that returns a vector orthogonal to {@code vector}. Its {@code magnitude()}
+   * depends on the vector, but is zero only for a {@code null} vector. Note that the function
+   * that associates an {@code orthogonalVector()} to a vector is not continuous.
    */
   public static Vector orthogonalVector(Vector vector) {
     // Find smallest component. Keep equal case for null values.
@@ -218,10 +218,18 @@ public class Vector {
       return new Vector(-vector._vector[1], vector._vector[0], 0.0f);
   }
 
+  /**
+   * Link {@code source} array to this vector.
+   *
+   * @see #unLink()
+   */
   public void link(float[] source) {
     _vector = source;
   }
 
+  /**
+   * Unlinks this vector if it was previously {@link #link(float[])}.
+   */
   public void unLink() {
     float[] data = new float[3];
     get(data);
@@ -229,7 +237,7 @@ public class Vector {
   }
 
   /**
-   * Sets all Vector components to 0.
+   * Sets all vector components to 0.
    */
   public void reset() {
     _vector[0] = _vector[1] = _vector[2] = 0;
@@ -283,6 +291,9 @@ public class Vector {
     return new Vector(this);
   }
 
+  /**
+   * Returns this vector as an array.
+   */
   public float[] get(float[] target) {
     if (target == null) {
       return new float[]{this._vector[0], this._vector[1], this._vector[2]};
@@ -307,8 +318,7 @@ public class Vector {
   }
 
   /**
-   * Calculate the squared magnitude of the vector Faster if the real length is not
-   * required in the case of comparing vectors, etc.
+   * Calculate the squared magnitude of the vector.
    *
    * @return squared magnitude of the vector
    */
@@ -339,7 +349,7 @@ public class Vector {
   }
 
   /**
-   * Add two vectors
+   * Add two vectors.
    *
    * @param vector1 a vector
    * @param vector2 another vector
@@ -350,7 +360,7 @@ public class Vector {
   }
 
   /**
-   * Add two vectors into a target vector
+   * Add two vectors into a target vector.
    *
    * @param vector1     a vector
    * @param vector2     another vector
@@ -367,7 +377,7 @@ public class Vector {
   }
 
   /**
-   * Subtract a vector from this vector
+   * Subtract a vector from this vector.
    *
    * @param vector the vector to be subtracted
    */
@@ -389,7 +399,7 @@ public class Vector {
   }
 
   /**
-   * Subtract one vector from another
+   * Subtract one vector from another.
    *
    * @param vector1 a vector
    * @param vector2 another vector
@@ -400,7 +410,7 @@ public class Vector {
   }
 
   /**
-   * Subtract one vector from another and store in another vector
+   * Subtract one vector from another and store in another vector.
    *
    * @param vector1     the x, y, and z components of a Vector object
    * @param vector2     the x, y, and z components of a Vector object
@@ -416,7 +426,7 @@ public class Vector {
   }
 
   /**
-   * Multiply this vector by a scalar
+   * Multiply this vector by a scalar.
    *
    * @param n the value to multiply by
    */
@@ -427,7 +437,7 @@ public class Vector {
   }
 
   /**
-   * Multiply a vector by a scalar
+   * Multiply a vector by a scalar.
    *
    * @param vector a vector
    * @param n scalar
@@ -438,7 +448,7 @@ public class Vector {
   }
 
   /**
-   * Multiply a vector by a scalar, and write the result into a target Vector.
+   * Multiply a vector by a scalar, and write the result into a target vector.
    *
    * @param vector      a vector
    * @param n      scalar
@@ -455,7 +465,7 @@ public class Vector {
   }
 
   /**
-   * Divide this vector by a scalar
+   * Divide this vector by a scalar.
    *
    * @param n the value to divide by
    */
@@ -492,7 +502,7 @@ public class Vector {
 
   /**
    * Calculate the Euclidean distance between two points (considering a point as a vector
-   * object)
+   * object).
    *
    * @param vector another vector
    * @return the Euclidean distance between
@@ -506,7 +516,7 @@ public class Vector {
 
   /**
    * Calculate the Euclidean distance between two points (considering a point as a vector
-   * object)
+   * object).
    *
    * @param vector1 a vector
    * @param vector2 another vector
@@ -520,7 +530,7 @@ public class Vector {
   }
 
   /**
-   * Calculate the dot product with another vector
+   * Calculate the dot product with another vector.
    *
    * @return the dot product
    */
@@ -570,6 +580,8 @@ public class Vector {
   }
 
   /**
+   * Cross product: target = vector1 * vector2.
+   *
    * @param vector1     any variable of type Vector
    * @param vector2     any variable of type Vector
    * @param target Vector to store the result
@@ -588,7 +600,7 @@ public class Vector {
   }
 
   /**
-   * Normalize the vector to length 1 (make it a unit vector)
+   * Normalize the vector to length 1 (make it a unit vector).
    */
   public void normalize() {
     float m = magnitude();
@@ -617,7 +629,7 @@ public class Vector {
   }
 
   /**
-   * Limit the magnitude of this vector
+   * Limit the magnitude of this vector.
    *
    * @param maximum the maximum length to limit this vector
    */
@@ -652,7 +664,7 @@ public class Vector {
   }
 
   /**
-   * Calculate the angle of rotation for this vector (only 2D vectors)
+   * Calculate the angle of rotation for this vector (only 2D vectors).
    *
    * @return the angle of rotation
    */
@@ -662,7 +674,7 @@ public class Vector {
   }
 
   /**
-   * Rotate the vector by an angle (only 2D vectors), magnitude remains the same
+   * Rotate the vector by an angle (only 2D vectors), magnitude remains the same.
    *
    * @param theta the angle of rotation
    */
@@ -683,7 +695,7 @@ public class Vector {
   }
 
   /**
-   * Linear interpolate the vector to another vector
+   * Linear interpolate the vector to another vector.
    *
    * @param vector   the vector to lerp to
    * @param amount The amt parameter is the amount to interpolate between the two vectors where
@@ -765,7 +777,7 @@ public class Vector {
   }
 
   /**
-   * Make a new 2D unit vector from an angle
+   * Make a new 2D unit vector from an angle.
    *
    * @param angle  the angle
    * @param target the target vector (if null, a new vector will be created)

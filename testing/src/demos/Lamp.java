@@ -32,7 +32,7 @@ public class Lamp implements PConstants {
         for (int i = 0; i < 4; ++i) {
             frameArray[i] = new LampShape(scene);
             frame(i).setReference(i>0 ? frameArray[i-1] : null);
-            frame(i).setHighlighting(InteractiveShape.Highlighting.FRONT_SHAPE);
+            frame(i).setHighlighting(InteractiveShape.Highlighting.FRONT);
         }
 
         // Initialize frames
