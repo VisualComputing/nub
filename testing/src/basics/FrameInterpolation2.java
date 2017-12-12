@@ -117,11 +117,6 @@ public class FrameInterpolation2 extends PApplet {
             popStyle();
         }
 
-        // Note that autoFocus is currently broken when one scene is onscreen
-        // and the other is offscreen. It will be fixed ... next year...
-        // in the mean time please write conditions on mouseX mouseY to (dis)enable
-        // (e.g., scene.disableKeyAgent(); scene.disableMouseAgent();)
-        // the two scenes agents according to their dimensions and placement.
         if (showControls) {
             scene.beginScreenCoordinates();
             auxScene.beginDraw();
