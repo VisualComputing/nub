@@ -30,10 +30,6 @@ import java.util.List;
 /**
  * A 2D or 3D graph graph.
  * <p>
- * Main package class representing an interface between Dandelion and the outside world.
- * For an introduction to DANDELION please refer to
- * <a href="http://nakednous.github.io/projects/dandelion">this</a>.
- * <p>
  * Instantiated graph {@link Node}s form a graph-tree of
  * transformations which may be traverse with {@link #traverse()}. The node
  * collection belonging to the graph may be retrieved with {@link #nodes()}. The

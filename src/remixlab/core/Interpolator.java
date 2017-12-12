@@ -21,20 +21,19 @@ import java.util.ListIterator;
 /**
  * A keyFrame Catmull-Rom Frame interpolator.
  * <p>
- * A Interpolator holds keyFrames (that define a path) and, optionally, a
+ * An Interpolator holds keyFrames (that define a path) and, optionally, a
  * reference to a Frame of your application (which will be interpolated). In this case,
  * when the user {@link #start()}, the Interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
- * Here is a typical utilization example (see also ProScene's FrameInterpolation and
- * CameraInterpolation examples):
+ * Here is a typical utilization example:
  * <p>
  * {@code //init() should look like:}<br>
  * {@code // The Interpolator kfi is given the Frame that it will drive over time.}
  * <br>
  * {@code myFrame = new Frame());}<br>
- * {@code kfi = new Interpolator( myScene, myFrame );}<br>
- * {@code // With an anonymous frame would look like this: kfi = new Interpolator( myScene );}
+ * {@code kfi = new Interpolator( graph, frame );}<br>
+ * {@code // With an anonymous frame would look like this: kfi = new Interpolator( graph );}
  * <br>
  * {@code kfi.addKeyFrame( new Frame( new Vector(1,0,0), new Quaternion() ) );}<br>
  * {@code kfi.addKeyFrame( new Frame( new Vector(2,1,0), new Quaternion() ) );}<br>
@@ -43,7 +42,7 @@ import java.util.ListIterator;
  * <p>
  * {@code //mainDrawingLoop() should look like:}<br>
  * {@code graph.pushModelView();}<br>
- * {@code kfi.frame().applyTransformation(this);}<br>
+ * {@code graph.applyTransformation(kfi.frame());}<br>
  * {@code // Draw your object here. Its position, orientation and magnitude are interpolated.}
  * <br>
  * {@code graph.popModelView();}<br>
@@ -56,11 +55,10 @@ import java.util.ListIterator;
  * <p>
  * <h3>Interpolation details</h3>
  * <p>
- * When the user {@link #start()}, a timer is _started which will update the
+ * When the user {@link #start()}, a timer is started which will update the
  * {@link #frame()}'s position, orientation and magnitude every
  * {@link #period()} milliseconds. This update increases the
- * {@link #time()} by {@link #period()} *
- * {@link #speed()} milliseconds.
+ * {@link #time()} by {@link #period()} * {@link #speed()} milliseconds.
  * <p>
  * Note that this mechanism ensures that the number of interpolation steps is constant and
  * equal to the total path {@link #duration()} divided by the
@@ -92,7 +90,7 @@ public class Interpolator {
   }
 
   /**
-   * Internal protected abstract base class for 2d and 3d KeyFrames
+   * Internal protected class representing 2d and 3d KeyFrames
    */
   protected class KeyFrame {
     /**
@@ -164,29 +162,28 @@ public class Interpolator {
   protected ListIterator<KeyFrame> _current2;
   protected ListIterator<KeyFrame> _current3;
   protected List<Frame> _path;
-  // A s s o c i a t e d f r a m e
+
+  // Main frame
   protected Frame _frame;
 
-  // R h y t h m
+  // Beat
   protected TimingTask _task;
   protected int _period;
   protected float _time;
   protected float _speed;
   protected boolean _started;
 
-  // M i s c
+  // Misc
   protected boolean _loop;
 
-  // C a c h e d v a l u e s a n d f l a g s
+  // Cached values and flags
   protected boolean _pathIsValid;
   protected boolean _valuesAreValid;
   protected boolean _currentFrameValid;
   protected boolean _splineCacheIsValid;
   protected Vector _vector1, _vector2;
-  // Option 2 (interpolate magnitude using a spline)
-  // private Vector sv1, sv2;
 
-  // S C E N E
+  // Graph
   protected Graph _graph;
 
   /**
@@ -286,7 +283,7 @@ public class Interpolator {
   }
 
   /**
-   * Returns the graph this object belongs to
+   * Returns the graph this interpolator belongs to.
    */
   public Graph graph() {
     return _graph;
@@ -308,16 +305,16 @@ public class Interpolator {
   }
 
   /**
-   * Sets the {@link #frame()} associated to the Interpolator.
+   * Sets the interpolator {@link #frame()}.
    */
   public void setFrame(Frame frame) {
     _frame = frame;
   }
 
   /**
-   * Returns the associated Frame that is interpolated by the Interpolator.
+   * Returns the frame that is to be interpolated by the Interpolator.
    * <p>
-   * When {@link #started()}, this Frame's position, orientation and
+   * When {@link #started()}, this frame's position, orientation and
    * magnitude will regularly be updated by a timer, so that they follow the
    * Interpolator path.
    * <p>
@@ -329,7 +326,7 @@ public class Interpolator {
 
   /**
    * Returns the number of keyFrames used by the interpolation. Use
-   * {@link #addKeyFrame(Frame)} to addGrabber new keyFrames.
+   * {@link #addKeyFrame(Frame)} to add new keyFrames.
    */
   public int size() {
     return _list.size();
@@ -340,15 +337,14 @@ public class Interpolator {
    * path.
    * <p>
    * This time is regularly updated when {@link #started()}. Can be set
-   * directly with {@link #setTime(float)} or
-   * {@link #interpolateAtTime(float)}.
+   * directly with {@link #setTime(float)} or {@link #interpolate(float)}.
    */
   public float time() {
     return _time;
   }
 
   /**
-   * Returns the current interpolation _speed.
+   * Returns the current interpolation speed.
    * <p>
    * Default value is 1.0f, which means {@link #time(int)} will be matched during
    * the interpolation (provided that your main loop is fast enough).
@@ -368,7 +364,7 @@ public class Interpolator {
    * <p>
    * This period (multiplied by {@link #speed()}) is added to the
    * {@link #time()} at each update, and the {@link #frame()} state is
-   * _modified accordingly (see {@link #interpolateAtTime(float)}). Default value is 40
+   * modified accordingly (see {@link #interpolate(float)}). Default value is 40
    * milliseconds.
    *
    * @see #setPeriod(int)
@@ -397,7 +393,7 @@ public class Interpolator {
    * <p>
    * <b>Attention:</b> The {@link #frame()} state is not affected by this method. Use this
    * function to define the starting time of a future interpolation (see
-   * {@link #start()}). Use {@link #interpolateAtTime(float)} to actually
+   * {@link #start()}). Use {@link #interpolate(float)} to actually
    * interpolate at a given time.
    */
   public void setTime(float time) {
@@ -443,8 +439,7 @@ public class Interpolator {
 
   /**
    * Updates {@link #frame()} state according to current {@link #time()}.
-   * Then adds {@link #period()}* {@link #speed()} to
-   * {@link #time()}.
+   * Then adds {@link #period()}* {@link #speed()} to {@link #time()}.
    * <p>
    * This internal method is called by a timer when {@link #started()}. It
    * can be used for debugging purpose. {@link #stop()} is called when
@@ -452,7 +447,7 @@ public class Interpolator {
    * unless {@link #loop()} is {@code true}.
    */
   protected void _update() {
-    interpolateAtTime(time());
+    interpolate(time());
 
     _time += speed() * period() / 1000.0f;
 
@@ -462,7 +457,7 @@ public class Interpolator {
             _list.get(0).time() + _time - _list.get(_list.size() - 1).time());
       else {
         // Make sure last KeyFrame is reached and displayed
-        interpolateAtTime(_list.get(_list.size() - 1).time());
+        interpolate(_list.get(_list.size() - 1).time());
         stop();
       }
     } else if (time() < _list.get(0).time()) {
@@ -471,7 +466,7 @@ public class Interpolator {
             _list.get(_list.size() - 1).time() - _list.get(0).time() + _time);
       else {
         // Make sure first KeyFrame is reached and displayed
-        interpolateAtTime(_list.get(0).time());
+        interpolate(_list.get(0).time());
         stop();
       }
     }
@@ -498,7 +493,7 @@ public class Interpolator {
   /**
    * Starts the interpolation process.
    * <p>
-   * A timer is _started with an {@link #period()} period that updates the
+   * A timer is started with an {@link #period()} period that updates the
    * {@link #frame()}'s position, orientation and magnitude.
    * {@link #started()} will return {@code true} until
    * {@link #stop()} is called.
@@ -536,7 +531,7 @@ public class Interpolator {
   }
 
   /**
-   * Stops an interpolation _started with {@link #start()}. See
+   * Stops an interpolation started with {@link #start()}. See
    * {@link #started()}.
    */
   public void stop() {
@@ -555,7 +550,7 @@ public class Interpolator {
    * Stops the interpolation and resets {@link #time()} to the
    * {@link #firstTime()}.
    * <p>
-   * If desired, call {@link #interpolateAtTime(float)} after this method to actually move
+   * If desired, call {@link #interpolate(float)} after this method to actually move
    * the {@link #frame()} to {@link #firstTime()}.
    */
   public void reset() {
@@ -584,14 +579,11 @@ public class Interpolator {
   /**
    * Appends a new keyFrame to the path, with its associated {@code time} (in seconds).
    * <p>
-   * When {@code setRef} is {@code false} the keyFrame is added by value, meaning that the
-   * path will use the current {@code frame} state.
+   * Note that when {@code frame} is modified, the interpolator path is updated accordingly.
+   * This allows for dynamic paths, where keyFrames can be edited, even during the
+   * interpolation.
    * <p>
-   * When {@code setRef} is {@code true} the keyFrame is given as a reference to a Frame,
-   * which will be connected to the Interpolator: when {@code frame} is _modified,
-   * the Interpolator path is updated accordingly. This allows for dynamic paths,
-   * where keyFrame can be edited, even during the interpolation. {@code null} frame
-   * references are silently ignored. The {@link #time(int)} has to be
+   * {@code null} frame references are silently ignored. The {@link #time(int)} has to be
    * monotonously increasing over keyFrames.
    */
   public void addKeyFrame(Frame frame, float time) {
@@ -683,7 +675,7 @@ public class Interpolator {
    * Calls {@link #_updatePath()} and then returns a list of Frames defining the
    * Interpolator path (which is different than that of {@link #keyFrames()}).
    * <p>
-   * Use it in your Interpolator path drawing routine.
+   * Use it in your interpolator path drawing routine.
    */
   public List<Frame> path() {
     _updatePath();
@@ -760,7 +752,7 @@ public class Interpolator {
 
   /**
    * Internal use. Calls {@link #_invalidateValues()} if a keyFrame (frame) defining the
-   * path was recently _modified.
+   * path was recently modified.
    */
   protected void _checkValidity() {
     boolean flag = false;
@@ -777,7 +769,7 @@ public class Interpolator {
   }
 
   /**
-   * Returns the Frame associated with the keyFrame at index {@code index}.
+   * Returns the frame associated with the keyFrame at index {@code index}.
    * <p>
    * See also {@link #time(int)}. {@code index} has to be in the range 0..
    * {@link #size()}-1.
@@ -791,8 +783,8 @@ public class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the {@code index} keyFrame. index has to be in the
-   * range 0.. {@link #size()}-1.
+   * Returns the time corresponding to the {@code index} keyFrame. Not that index has
+   * to be in the range 0.. {@link #size()}-1.
    *
    * @see #keyFrame(int)
    */
@@ -801,7 +793,7 @@ public class Interpolator {
   }
 
   /**
-   * Returns the duration of the Interpolator path, expressed in seconds.
+   * Returns the duration of the interpolator path, expressed in seconds.
    * <p>
    * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0.0 if the
    * path has less than 2 keyFrames.
@@ -911,8 +903,7 @@ public class Interpolator {
    * If you simply want to change {@link #time()} but not the
    * {@link #frame()} state, use {@link #setTime(float)} instead.
    */
-  //TODO rename me as atTime() ??
-  public void interpolateAtTime(float time) {
+  public void interpolate(float time) {
     this._checkValidity();
     setTime(time);
 
