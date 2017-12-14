@@ -22,7 +22,7 @@ public class Sphere {
     parent = scn.pApplet();
     iFrame = new Node(scene) {
       @Override
-      public void motionInteraction(MotionEvent event) {
+      public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             rotate(event);
@@ -37,7 +37,7 @@ public class Sphere {
       }
 
       @Override
-      public void keyInteraction(KeyEvent event) {
+      public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
           _translateY(true);
         if (event.id() == PApplet.DOWN)

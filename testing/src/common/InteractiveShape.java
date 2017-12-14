@@ -38,7 +38,7 @@ public class InteractiveShape extends Shape {
 
     // behavior is here :P
     @Override
-    public void motionInteraction(MotionEvent event) {
+    public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
             case PApplet.LEFT:
                 rotate(event);
@@ -56,7 +56,7 @@ public class InteractiveShape extends Shape {
     }
 
     @Override
-    public void keyInteraction(KeyEvent event) {
+    public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
             translateYPos();
         if (event.id() == PApplet.DOWN)

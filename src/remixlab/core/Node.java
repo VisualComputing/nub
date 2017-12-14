@@ -65,8 +65,8 @@ import java.util.List;
  * {@link #rotate(MotionEvent)}, {@link #_moveForward(MotionEvent2, boolean)},
  * {@link #_translateX(boolean)}, etc. To use them, derive from this class and override the
  * version of {@code interact} with the (bogus-_event) parameter type you want to
- * customize (see {@link #motionInteraction(MotionEvent)},
- * {@link #keyInteraction(KeyEvent)}, etc.). For example, with the following
+ * customize (see {@link #interact(MotionEvent)},
+ * {@link #interact(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
@@ -502,35 +502,35 @@ public class Node extends Frame implements Grabber {
   @Override
   public boolean track(Event event) {
     if (event instanceof KeyEvent)
-      return keyTracking((KeyEvent) event);
+      return track((KeyEvent) event);
     if (event instanceof TapEvent)
-      return tapTracking((TapEvent) event);
+      return track((TapEvent) event);
     if (event instanceof MotionEvent)
-      return motionTracking((MotionEvent) event);
+      return track((MotionEvent) event);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motionTracking(MotionEvent motionEvent) {
+  public boolean track(MotionEvent motionEvent) {
     if (isEye())
       return false;
     if (motionEvent instanceof MotionEvent1)
-      return motion1Tracking((MotionEvent1) motionEvent);
+      return track((MotionEvent1) motionEvent);
     if (motionEvent instanceof MotionEvent2)
-      return motion2Tracking((MotionEvent2) motionEvent);
+      return track((MotionEvent2) motionEvent);
     if (motionEvent instanceof MotionEvent3)
-      return motion3Tracking((MotionEvent3) motionEvent);
+      return track((MotionEvent3) motionEvent);
     if (motionEvent instanceof MotionEvent6)
-      return motion6Tracking((MotionEvent6) motionEvent);
+      return track((MotionEvent6) motionEvent);
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean tapTracking(TapEvent tapEvent) {
+  public boolean track(TapEvent tapEvent) {
     if (isEye())
       return false;
     return track(tapEvent.x(), tapEvent.y());
@@ -541,8 +541,8 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
-  public boolean keyTracking(KeyEvent keyEvent) {
-    Graph.showMissingImplementationWarning("keyTracking(KeyEvent _event)", this.getClass().getName());
+  public boolean track(KeyEvent keyEvent) {
+    Graph.showMissingImplementationWarning("track(KeyEvent _event)", this.getClass().getName());
     return false;
   }
 
@@ -551,21 +551,21 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
-  public boolean motion1Tracking(MotionEvent1 motionEvent1) {
+  public boolean track(MotionEvent1 motionEvent1) {
     if (isEye())
       return false;
-    Graph.showMissingImplementationWarning("keyTracking(MotionEvent1 _event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(MotionEvent1 _event)", this.getClass().getName());
     return false;
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion2Tracking(MotionEvent2 motionEvent2) {
+  public boolean track(MotionEvent2 motionEvent2) {
     if (isEye())
       return false;
     if (motionEvent2.isAbsolute()) {
-      Graph.showEventVariationWarning("keyTracking");
+      Graph.showEventVariationWarning("track");
       return false;
     }
     return track(motionEvent2.x(), motionEvent2.y());
@@ -586,25 +586,25 @@ public class Node extends Frame implements Grabber {
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion3Tracking(MotionEvent3 motionEvent3) {
-    return motion2Tracking(motionEvent3.event2());
+  public boolean track(MotionEvent3 motionEvent3) {
+    return track(motionEvent3.event2());
   }
 
   /**
    * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
    */
-  public boolean motion6Tracking(MotionEvent6 motionEvent6) {
-    return motion2Tracking(motionEvent6.event3().event2());
+  public boolean track(MotionEvent6 motionEvent6) {
+    return track(motionEvent6.event3().event2());
   }
 
   @Override
   public void interact(Event event) {
     if (event instanceof TapEvent)
-      tapInteraction((TapEvent) event);
+      interact((TapEvent) event);
     if (event instanceof MotionEvent)
-      motionInteraction((MotionEvent) event);
+      interact((MotionEvent) event);
     if (event instanceof KeyEvent)
-      keyInteraction((KeyEvent) event);
+      interact((KeyEvent) event);
   }
 
   /**
@@ -612,60 +612,60 @@ public class Node extends Frame implements Grabber {
    * {@link MotionEvent1}, {@link MotionEvent2},
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link remixlab.input.event.MotionEvent}.
    */
-  protected void motionInteraction(MotionEvent motionEvent) {
+  protected void interact(MotionEvent motionEvent) {
     if (motionEvent instanceof MotionEvent1)
-      motion1Interaction((MotionEvent1) motionEvent);
+      interact((MotionEvent1) motionEvent);
     if (motionEvent instanceof MotionEvent2)
-      motion2Interaction((MotionEvent2) motionEvent);
+      interact((MotionEvent2) motionEvent);
     if (motionEvent instanceof MotionEvent3)
-      motion3Interaction((MotionEvent3) motionEvent);
+      interact((MotionEvent3) motionEvent);
     if (motionEvent instanceof MotionEvent6)
-      motion6Interaction((MotionEvent6) motionEvent);
+      interact((MotionEvent6) motionEvent);
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link MotionEvent1}.
    */
-  protected void motion1Interaction(MotionEvent1 motionEvent1) {
+  protected void interact(MotionEvent1 motionEvent1) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link MotionEvent2}.
    */
-  protected void motion2Interaction(MotionEvent2 motionEvent2) {
+  protected void interact(MotionEvent2 motionEvent2) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link MotionEvent3}.
    */
-  protected void motion3Interaction(MotionEvent3 motionEvent3) {
+  protected void interact(MotionEvent3 motionEvent3) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link MotionEvent6}.
    */
-  protected void motion6Interaction(MotionEvent6 motionEvent6) {
+  protected void interact(MotionEvent6 motionEvent6) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link TapEvent}.
    */
-  protected void tapInteraction(TapEvent tapEvent) {
+  protected void interact(TapEvent tapEvent) {
   }
 
   /**
-   * Override this method when you want the object to interact an interaction from a
+   * Override this method when you want the object to perform an interaction from a
    * {@link KeyEvent}.
    */
-  protected void keyInteraction(KeyEvent keyEvent) {
+  protected void interact(KeyEvent keyEvent) {
   }
 
   // APPLY TRANSFORMATION

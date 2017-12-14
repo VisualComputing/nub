@@ -48,7 +48,7 @@ public class CajasOrientadas extends PApplet {
 
     eye1 = new Node(graph) {
       @Override
-      public void motionInteraction(MotionEvent event) {
+      public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             //zoomOnRegion(_event);
@@ -69,7 +69,7 @@ public class CajasOrientadas extends PApplet {
       }
 
       @Override
-      public void keyInteraction(KeyEvent event) {
+      public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
           translateYPos();
         if (event.id() == PApplet.DOWN)
@@ -83,7 +83,7 @@ public class CajasOrientadas extends PApplet {
 
     eye2 = new Node(graph) {
       @Override
-      public void motionInteraction(MotionEvent event) {
+      public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
           case PApplet.LEFT:
             translate(event);
@@ -98,7 +98,7 @@ public class CajasOrientadas extends PApplet {
       }
 
       @Override
-      public void keyInteraction(KeyEvent event) {
+      public void interact(KeyEvent event) {
         if (event.id() == PApplet.UP)
           translateYPos();
         if (event.id() == PApplet.DOWN)

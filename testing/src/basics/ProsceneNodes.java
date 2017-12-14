@@ -53,7 +53,7 @@ public class ProsceneNodes extends PApplet {
         }
 
         @Override
-        public void motionInteraction(MotionEvent event) {
+        public void interact(MotionEvent event) {
             switch (event.shortcut().id()) {
                 case LEFT:
                     rotate(event);
@@ -68,7 +68,7 @@ public class ProsceneNodes extends PApplet {
         }
 
         @Override
-        public void tapInteraction(TapEvent event) {
+        public void interact(TapEvent event) {
 
         }
 

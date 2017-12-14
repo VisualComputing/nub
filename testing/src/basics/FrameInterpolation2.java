@@ -174,7 +174,7 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         @Override
-        public void motion2Interaction(MotionEvent2 event) {
+        public void interact(MotionEvent2 event) {
             switch (event.shortcut().id()) {
                 case LEFT:
                     nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx()/10);
@@ -189,12 +189,12 @@ public class FrameInterpolation2 extends PApplet {
         }
 
         @Override
-        public void motion1Interaction(MotionEvent1 event) {
+        public void interact(MotionEvent1 event) {
             nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx()/10);
         }
 
         @Override
-        public void tapInteraction(TapEvent event) {
+        public void interact(TapEvent event) {
             TapShortcut left = new TapShortcut(Event.NO_MODIFIER_MASK, LEFT, 2);
             TapShortcut right = new TapShortcut(Event.SHIFT, RIGHT, 1);
             if(event.shortcut().matches(left))

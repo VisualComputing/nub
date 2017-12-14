@@ -22,7 +22,7 @@ public class FirstPerson extends PApplet {
         scene = new Scene(this);
         iFrame = new Node(scene) {
             @Override
-            public void motionInteraction(MotionEvent event) {
+            public void interact(MotionEvent event) {
                 switch (event.shortcut().id()) {
                     case PApplet.LEFT:
                         rotate(event);
@@ -98,7 +98,7 @@ public class FirstPerson extends PApplet {
         }
 
         @Override
-        public void motionInteraction(MotionEvent event) {
+        public void interact(MotionEvent event) {
             switch (event.shortcut().id()) {
                 case PApplet.LEFT:
                     moveForward(event);
@@ -120,7 +120,7 @@ public class FirstPerson extends PApplet {
         }
 
         @Override
-        public void keyInteraction(KeyEvent event) {
+        public void interact(KeyEvent event) {
             if (event.id() == PApplet.UP)
                 translateYPos();
             if (event.id() == PApplet.DOWN)
