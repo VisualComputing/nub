@@ -11,7 +11,6 @@
 package remixlab.primitives;
 
 import remixlab.timing.TimingHandler;
-import remixlab.core.Graph;
 import remixlab.primitives.constraint.Constraint;
 
 /**
@@ -74,9 +73,8 @@ import remixlab.primitives.constraint.Constraint;
  * {@link #scaling()}) and <b>global</b> ( {@link #position()}, {@link #orientation()} and
  * {@link #magnitude()}) definitions is used in all the methods' names and should be
  * sufficient to prevent ambiguities. These notions are obviously identical when the
- * {@link #reference()} is {@code null}, i.e., when the Frame is defined in the world
- * coordinate system (the one you are left with after calling
- * {@link Graph#preDraw()}).
+ * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
+ * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
@@ -994,9 +992,8 @@ public class Frame {
   /**
    * Returns the local transformation matrix represented by the Frame.
    * <p>
-   * This method could be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link Graph#modelView()} matrix from a Frame
-   * hierarchy. For example, with this Frame hierarchy:
+   * This method could be used in conjunction with {@code applyMatrix()} to modify a graph
+   * modelView() matrix from a frame hierarchy. For example, with this frame hierarchy:
    * <p>
    * {@code Frame body = new Frame();} <br>
    * {@code Frame leftArm = new Frame();} <br>
@@ -1063,8 +1060,8 @@ public class Frame {
   /**
    * Returns the global transformation matrix represented by the Frame.
    * <p>
-   * This method should be used in conjunction with {@code applyMatrix()} to modify the
-   * {@link Graph#modelView()} matrix from a Frame:
+   * This method should be used in conjunction with {@code applyMatrix()} to modify a
+   * graph modelView() matrix from a Frame:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
    * {@code Frame fr = new Frame(pos, Rotation(from, to));} <br>
