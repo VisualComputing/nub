@@ -10,8 +10,6 @@
 
 package remixlab.input;
 
-import remixlab.input.event.*;
-
 /**
  * Every {@link Event} instance has a shortcut which represents a
  * gesture-{@link #id()}. For instance, the button being dragged and the modifier key
@@ -21,12 +19,10 @@ import remixlab.input.event.*;
  * <p>
  * The current implementation supports the following event/shortcut types:
  * <ol>
- * <li>{@link remixlab.input.event.MotionEvent} /
- * {@link remixlab.input.Shortcut}. Note that motion-event derived classes:
- * {@link MotionEvent1}, {@link MotionEvent2},
- * {@link MotionEvent3}, {@link MotionEvent6}, are also
+ * <li>MotionEvent} / Shortcut}. Note that motion-event derived classes:
+ * MotionEvent1, MotionEvent2, MotionEvent3 and MotionEvent6, are also
  * related to shortcuts.</li>
- * <li>{@link TapEvent} / {@link TapShortcut}
+ * <li>TapEvent} / TapShortcut
  * </li>
  * </ol>
  */
@@ -83,6 +79,8 @@ public class Shortcut {
    * @param other shortcut
    */
   public boolean matches(Shortcut other) {
-    return id() == other.id() && modifiers() == other.modifiers();
+    if(this.getClass() == other.getClass())
+      return id() == other.id() && modifiers() == other.modifiers();
+    return false;
   }
 }

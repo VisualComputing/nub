@@ -1,9 +1,9 @@
 package basics;
 
 import processing.core.*;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.KeyShortcut;
-import remixlab.input.event.MotionEvent;
+import remixlab.input.Event;
+import remixlab.input.Shortcut;
+import remixlab.input.event.*;
 import remixlab.core.Node;
 import remixlab.proscene.*;
 
@@ -17,7 +17,7 @@ public class BasicUse extends PApplet {
   PGraphics pg;
 
   public void settings() {
-    size(800, 800);
+    size(800, 800, P2D);
   }
 
   public void setup() {
@@ -32,6 +32,44 @@ public class BasicUse extends PApplet {
         graphics(pg);
       }
 
+      @Override
+      public void interact(Event event) {
+        Shortcut s1 = new Shortcut(PApplet.LEFT);
+        Shortcut s2 = new Shortcut(PApplet.RIGHT);
+        Shortcut s3 = new Shortcut(processing.event.MouseEvent.WHEEL);
+        Shortcut s4 = new KeyShortcut(KeyAgent.RIGHT_KEY);
+        Shortcut s5 = new KeyShortcut(KeyAgent.LEFT_KEY);
+        //look at the ugly casts needed Java that actually was
+        //preventing the following syntax:
+        //those casts aren't needed in js
+        /*
+        if(s1.matches(event.shortcut()))
+          rotate((MotionEvent2) event);
+        if(s2.matches(event.shortcut()))
+          screenTranslate((MotionEvent2) event);
+        if(s3.matches(event.shortcut()))
+          scale((MotionEvent1) event);
+        if(s4.matches(event.shortcut()))
+          translateXPos();
+        if(s5.matches(event.shortcut()))
+          translateXNeg();
+        // */
+        //Check symmetry of Shortcut.matches
+        // /*
+        if(event.shortcut().matches(s1))
+          rotate((MotionEvent2) event);
+        if(event.shortcut().matches(s2))
+          screenTranslate((MotionEvent2) event);
+        if(event.shortcut().matches(s3))
+          scale((MotionEvent1) event);
+        if(event.shortcut().matches(s4))
+          translateXPos();
+        if(event.shortcut().matches(s5))
+          translateXNeg();
+        // */
+      }
+
+      /*
       @Override
       public void interact(MotionEvent event) {
         switch (event.shortcut().id()) {
@@ -55,12 +93,15 @@ public class BasicUse extends PApplet {
         if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
           translateXNeg();
       }
+      */
     };
 
     iFrame.setPrecision(Node.Precision.ADAPTIVE);
     iFrame.setPrecisionThreshold(length);
     iFrame.translate(50,50);
-    scene.fitBall();
+
+    scene.setDefaultNode(iFrame);
+    scene.fitBallInterpolation();
   }
 
   public void graphics(PGraphics pg) {

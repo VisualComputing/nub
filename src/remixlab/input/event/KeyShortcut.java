@@ -62,8 +62,6 @@ public class KeyShortcut extends Shortcut {
 
   @Override
   public boolean matches(Shortcut other) {
-    if(other instanceof KeyShortcut)
-      return super.matches(other) && getKey() == ((KeyShortcut) other).getKey();
-    return false;
+    return super.matches(other) && getKey() == ((KeyShortcut) other).getKey();
   }
 }
