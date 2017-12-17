@@ -69,6 +69,8 @@ public class TapShortcut extends Shortcut {
 
   @Override
   public boolean matches(Shortcut other) {
-    return super.matches(other) && count() == ((TapShortcut) other).count();
+    if(super.matches(other))
+      return count() == ((TapShortcut) other).count();
+    return false;
   }
 }

@@ -42,7 +42,7 @@ public class BasicUse extends PApplet {
         //look at the ugly casts needed Java that actually was
         //preventing the following syntax:
         //those casts aren't needed in js
-        /*
+        ///*
         if(s1.matches(event.shortcut()))
           rotate((MotionEvent2) event);
         if(s2.matches(event.shortcut()))
@@ -55,7 +55,7 @@ public class BasicUse extends PApplet {
           translateXNeg();
         // */
         //Check symmetry of Shortcut.matches
-        // /*
+        /*
         if(event.shortcut().matches(s1))
           rotate((MotionEvent2) event);
         if(event.shortcut().matches(s2))
