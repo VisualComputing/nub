@@ -1,0 +1,20 @@
+{
+  "projectName": "proscene.js",
+  "projectOwner": "nakednous",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "contributors": [
+    {
+      "login": "jiapulidoar",
+      "name": "Jimmynex",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/13878096?v=4",
+      "profile": "https://github.com/jiapulidoar",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
+}
