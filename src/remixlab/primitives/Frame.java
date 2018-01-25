@@ -396,10 +396,7 @@ public class Frame {
    * @see #scale(float)
    */
   public void translate(Vector vector) {
-    if (constraint() != null)
-      translation().add(constraint().constrainTranslation(vector, this));
-    else
-      translation().add(vector);
+    translation().add(constraint() != null ? constraint().constrainTranslation(vector, this) : vector);
     _modified();
   }
 
@@ -503,10 +500,7 @@ public class Frame {
    * @see #translate(Vector)
    */
   public void rotate(Quaternion quaternion) {
-    if (constraint() != null)
-      rotation().compose(constraint().constrainRotation(quaternion, this));
-    else
-      rotation().compose(quaternion);
+    rotation().compose(constraint() != null ? constraint().constrainRotation(quaternion, this) : quaternion);
     rotation().normalize(); // Prevents numerical drift
     _modified();
   }
