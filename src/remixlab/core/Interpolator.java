@@ -938,7 +938,7 @@ public class Interpolator {
             _list.get(_current2.nextIndex()).orientation(), alpha);
 
     frame().setPosition(pos);
-    frame().setRotationWithConstraint(q);
+    frame().setRotation(q);
     frame().setMagnitude(mag);
   }
 }

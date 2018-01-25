@@ -430,10 +430,7 @@ public class Frame {
    * @see #setConstraint(Constraint)
    */
   public void setPosition(Vector position) {
-    if (reference() != null)
-      setTranslation(reference().coordinatesOf(position));
-    else
-      setTranslation(position);
+    setTranslation(reference() != null ? reference().coordinatesOf(position) : position);
   }
 
   /**
@@ -460,30 +457,9 @@ public class Frame {
    * are identical when the {@link #reference()} is {@code null} (default).
    *
    * @see #setRotation(Quaternion)
-   * @see #setRotationWithConstraint(Quaternion)
    */
   public Quaternion rotation() {
     return _rotation;
-  }
-
-  /**
-   * Set the current rotation. See the different {@link Quaternion}
-   * constructors.
-   * <p>
-   * Sets the frame {@link #rotation()}, locally defined with respect to the
-   * {@link #reference()}.
-   * <p>
-   * Use {@link #setOrientation(Quaternion)} to define the world coordinates
-   * {@link #orientation()}. The potential frame {@link #constraint()} is not taken
-   * into account, use {@link #setRotationWithConstraint(Quaternion)} instead.
-   *
-   * @see #setRotationWithConstraint(Quaternion)
-   * @see #rotation()
-   * @see #setTranslation(Vector)
-   */
-  public void setRotation(Quaternion rotation) {
-    _rotation = rotation;
-    _modified();
   }
 
   /**
@@ -494,19 +470,27 @@ public class Frame {
   }
 
   /**
-   * Same as {@link #setRotation(Quaternion)}, but if there's a {@link #constraint()} it's
-   * satisfied.
+   * Set the current rotation. See the different {@link Quaternion} constructors.
+   * <p>
+   * Sets the frame {@link #rotation()}, locally defined with respect to the
+   * {@link #reference()}. Use {@link #setOrientation(Quaternion)} to define the
+   * world coordinates {@link #orientation()}.
+   * <p>
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
-   * @see #setOrientationWithConstraint(Quaternion)
-   * @see #setScaling(float)
+   * @see #setConstraint(Constraint)
+   * @see #rotation()
+   * @see #setTranslation(Vector)
    */
-  public void setRotationWithConstraint(Quaternion rotation) {
-    Quaternion deltaQ;
-    deltaQ = Quaternion.compose(rotation().inverse(), rotation);
-    if (constraint() != null)
-      deltaQ = constraint().constrainRotation(deltaQ, this);
-    deltaQ.normalize(); // Prevent numerical drift
-    rotate(deltaQ);
+  public void setRotation(Quaternion rotation) {
+    if (constraint() == null)
+      _rotation = rotation;
+    else {
+      rotation().compose(constraint().constrainRotation(Quaternion.compose(rotation().inverse(), rotation), this));
+      rotation().normalize(); // Prevents numerical drift
+    }
+    _modified();
   }
 
   /**
@@ -575,12 +559,12 @@ public class Frame {
 
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
-      Frame ref = frame.get();
-      Frame copy = get();
-      copy.setReference(ref);
-      copy.setWorldMatrix(this);
-      ref.rotate(new Quaternion(roll, pitch, yaw));
-      setWorldMatrix(copy);
+      Frame rotateAroundFrameCopy = frame.get();
+      Frame thisFrameCopy = get();
+      thisFrameCopy.setReference(rotateAroundFrameCopy);
+      thisFrameCopy.setWorldMatrix(this);
+      rotateAroundFrameCopy.rotate(new Quaternion(roll, pitch, yaw));
+      setWorldMatrix(thisFrameCopy);
       return;
     }
   }
@@ -597,10 +581,10 @@ public class Frame {
    */
   public Quaternion orientation() {
     Quaternion quaternion = rotation().get();
-    Frame fr = reference();
-    while (fr != null) {
-        quaternion = Quaternion.compose(fr.rotation(), quaternion);
-      fr = fr.reference();
+    Frame reference = reference();
+    while (reference != null) {
+        quaternion = Quaternion.compose(reference.rotation(), quaternion);
+      reference = reference.reference();
     }
     return quaternion;
   }
@@ -609,9 +593,10 @@ public class Frame {
    * Sets the {@link #orientation()} of the Frame, defined in the world coordinate system.
    * <p>
    * Use {@link #setRotation(Quaternion)} to define the local frame rotation (with respect
-   * to the {@link #reference()}). The potential {@link #constraint()} of the Frame
-   * is not taken into account, use {@link #setOrientationWithConstraint(Quaternion)}
-   * instead.
+   * to the {@link #reference()}).
+   * <p>
+   * Note that the potential {@link #constraint()} of the frame is taken into account, i.e.,
+   * to bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void setOrientation(Quaternion quaternion) {
     setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), quaternion) : quaternion);
@@ -622,18 +607,6 @@ public class Frame {
    */
   public void setOrientation(float x, float y, float z, float w) {
     setOrientation(new Quaternion(x, y, z, w));
-  }
-
-  /**
-   * Same as {@link #setOrientation(Quaternion)}, but if there's a {@link #constraint()} it
-   * is satisfied (without modifying {@code orientation}).
-   *
-   * @see #setRotationWithConstraint(Quaternion)
-   */
-  public void setOrientationWithConstraint(Quaternion orientation) {
-    if (reference() != null)
-      orientation = Quaternion.compose(reference().orientation().inverse(), orientation);
-    setRotationWithConstraint(orientation);
   }
 
   // SCALING
