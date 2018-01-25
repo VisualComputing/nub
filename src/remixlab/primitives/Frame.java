@@ -317,7 +317,7 @@ public class Frame {
   /**
    * Sets the {@link #constraint()} attached to the frame.
    * <p>
-   * A {@code null} value means no constraint.
+   * A {@code null} value means set no constraint (also reset it if there was one).
    */
   public void setConstraint(Constraint constraint) {
     _constraint = constraint;
@@ -332,7 +332,6 @@ public class Frame {
    * identical when the {@link #reference()} is {@code null} (default).
    *
    * @see #setTranslation(Vector)
-   * @see #setTranslationWithConstraint(Vector)
    */
   public Vector translation() {
     return _translation;
@@ -342,29 +341,19 @@ public class Frame {
    * Sets the {@link #translation()} of the frame, locally defined with respect to the
    * {@link #reference()}.
    * <p>
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * <p>
    * Use {@link #setPosition(Vector)} to define the world coordinates {@link #position()}.
-   * Use {@link #setTranslationWithConstraint(Vector)} to take into account the potential
-   * {@link #constraint()} of the frame.
+   *
+   * @see #setConstraint(Constraint)
    */
   public void setTranslation(Vector translation) {
-    _translation = translation;
+    if (constraint() == null)
+      _translation = translation;
+    else
+      translation().add(constraint().constrainTranslation(Vector.subtract(translation, this.translation()), this));
     _modified();
-  }
-
-  /**
-   * Same as {@link #setTranslation(Vector)}, but if there's a {@link #constraint()} it is
-   * satisfied.
-   *
-   * @see #setRotationWithConstraint(Quaternion)
-   * @see #setPositionWithConstraint(Vector)
-   * @see #setScaling(float)
-   */
-  public void setTranslationWithConstraint(Vector translation) {
-    Vector deltaT = Vector.subtract(translation, this.translation());
-    if (constraint() != null)
-      deltaT = constraint().constrainTranslation(deltaT, this);
-
-    translate(deltaT);
   }
 
   /**
@@ -433,8 +422,12 @@ public class Frame {
    * Sets the frame {@link #position()}, defined in the world coordinate system.
    * <p>
    * Use {@link #setTranslation(Vector)} to define the local frame translation (with respect
-   * to the {@link #reference()}). The potential {@link #constraint()} of the frame
-   * is not taken into account, use {@link #setPositionWithConstraint(Vector)} instead.
+   * to the {@link #reference()}).
+   * <p>
+   * Note that the potential {@link #constraint()} of the frame is taken into account, i.e.,
+   * to bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #setConstraint(Constraint)
    */
   public void setPosition(Vector position) {
     if (reference() != null)
@@ -455,20 +448,6 @@ public class Frame {
    */
   public void setPosition(float x, float y, float z) {
     setPosition(new Vector(x, y, z));
-  }
-
-  /**
-   * Same as {@link #setPosition(Vector)}, but if there's a {@link #constraint()} it is
-   * satisfied (without modifying {@code position}).
-   *
-   * @see #setOrientationWithConstraint(Quaternion)
-   * @see #setTranslationWithConstraint(Vector)
-   */
-  public void setPositionWithConstraint(Vector position) {
-    if (reference() != null)
-      position = reference().coordinatesOf(position);
-
-    setTranslationWithConstraint(position);
   }
 
   // ROTATION
@@ -518,7 +497,6 @@ public class Frame {
    * Same as {@link #setRotation(Quaternion)}, but if there's a {@link #constraint()} it's
    * satisfied.
    *
-   * @see #setTranslationWithConstraint(Vector)
    * @see #setOrientationWithConstraint(Quaternion)
    * @see #setScaling(float)
    */
@@ -650,7 +628,6 @@ public class Frame {
    * Same as {@link #setOrientation(Quaternion)}, but if there's a {@link #constraint()} it
    * is satisfied (without modifying {@code orientation}).
    *
-   * @see #setPositionWithConstraint(Vector)
    * @see #setRotationWithConstraint(Quaternion)
    */
   public void setOrientationWithConstraint(Quaternion orientation) {

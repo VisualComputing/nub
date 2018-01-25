@@ -2476,7 +2476,7 @@ public class Graph {
       }
     }
     Vector newPos = Vector.subtract(center, Vector.multiply(viewDirection(), distance));
-    eye().setPositionWithConstraint(newPos);
+    eye().setPosition(newPos);
   }
 
   /**
@@ -2544,7 +2544,7 @@ public class Graph {
         distance = dist + Math.max(distX, distY);
         break;
     }
-    eye().setPositionWithConstraint(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
+    eye().setPosition(Vector.subtract(newCenter, Vector.multiply(vd, distance)));
   }
 
   /**

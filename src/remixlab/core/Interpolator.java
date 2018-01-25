@@ -937,7 +937,7 @@ public class Interpolator {
             _list.get(_current2.nextIndex()).tangentQuaternion(),
             _list.get(_current2.nextIndex()).orientation(), alpha);
 
-    frame().setPositionWithConstraint(pos);
+    frame().setPosition(pos);
     frame().setRotationWithConstraint(q);
     frame().setMagnitude(mag);
   }
