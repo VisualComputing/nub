@@ -493,10 +493,10 @@ public class Frame {
    * Rotates the frame by {@code quaternion} (defined in the frame coordinate system):
    * {@code rotation().compose(quaternion)}.
    * <p>
-   * If there's a {@link #constraint()} it is satisfied. Hence the rotation actually
-   * applied to the frame may differ from {@code quaternion} (since it can be filtered by the
-   * {@link #constraint()}).
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
+   * @see #setConstraint(Constraint)
    * @see #translate(Vector)
    */
   public void rotate(Quaternion quaternion) {
@@ -514,18 +514,13 @@ public class Frame {
 
   /**
    * Makes the frame {@link #rotate(Quaternion)} by {@code rotation} around {@code point}.
-   * <p>
-   * {@code point} is defined in the world coordinate system, while the {@code rotation}
+   * The {@code point} is defined in the world coordinate system while the {@code rotation}
    * axis is defined in the frame coordinate system.
    * <p>
-   * If the frame has a {@link #constraint()}, {@code rotation} is first constrained using
-   * {@link remixlab.primitives.constraint.Constraint#constrainRotation(Quaternion, Frame)} .
-   * Hence the rotation actually applied to the frame may differ from {@code rotation}
-   * (since it can be filtered by the {@link #constraint()}).
-   * <p>
-   * The translation which results from the filtered rotation around {@code point} is then
-   * computed and filtered using
-   * {@link remixlab.primitives.constraint.Constraint#constrainTranslation(Vector, Frame)} .
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #setConstraint(Constraint)
    */
   public void rotateAroundPoint(Quaternion rotation, Vector point) {
     if (constraint() != null)
@@ -544,11 +539,18 @@ public class Frame {
       translate(t);
   }
 
+  /**
+   * Applies a {@code rotation} (to this frame) around the {@code frame} param.
+   */
   public void rotateAroundFrame(Quaternion rotation, Frame frame) {
     Vector euler = rotation.eulerAngles();
     rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
   }
 
+  /**
+   * Applies the rotation (to this frame) defined by the Euler angles
+   * around the {@code frame} param.
+   */
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
       Frame rotateAroundFrameCopy = frame.get();
@@ -564,7 +566,7 @@ public class Frame {
   // ORIENTATION
 
   /**
-   * Returns the orientation of the Frame, defined in the world coordinate system.
+   * Returns the orientation of the frame, defined in the world coordinate system.
    *
    * @see #position()
    * @see #magnitude()
@@ -582,7 +584,7 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #orientation()} of the Frame, defined in the world coordinate system.
+   * Sets the {@link #orientation()} of the frame, defined in the world coordinate system.
    * <p>
    * Use {@link #setRotation(Quaternion)} to define the local frame rotation (with respect
    * to the {@link #reference()}).
@@ -604,7 +606,7 @@ public class Frame {
   // SCALING
 
   /**
-   * Returns the Frame scaling, defined with respect to the {@link #reference()}.
+   * Returns the frame scaling, defined with respect to the {@link #reference()}.
    * <p>
    * Use {@link #magnitude()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
@@ -619,8 +621,7 @@ public class Frame {
    * Sets the {@link #scaling()} of the frame, locally defined with respect to the
    * {@link #reference()}.
    * <p>
-   * Use {@link #setMagnitude(float)} to define the world coordinates {@link #magnitude()}
-   * .
+   * Use {@link #setMagnitude(float)} to define the world coordinates {@link #magnitude()}.
    */
   public void setScaling(float scaling) {
     if (scaling > 0) {
@@ -631,7 +632,7 @@ public class Frame {
   }
 
   /**
-   * Scales the Frame according to {@code s}, locally defined with respect to the
+   * Scales the frame according to {@code scaling}, locally defined with respect to the
    * {@link #reference()}.
    *
    * @see #rotate(Quaternion)
@@ -644,7 +645,7 @@ public class Frame {
   // MAGNITUDE
 
   /**
-   * Returns the magnitude of the Frame, defined in the world coordinate system.
+   * Returns the magnitude of the frame, defined in the world coordinate system.
    *
    * @see #orientation()
    * @see #position()
@@ -659,9 +660,9 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #magnitude()} of the Frame, defined in the world coordinate system.
+   * Sets the {@link #magnitude()} of the frame, defined in the world coordinate system.
    * <p>
-   * Use {@link #setScaling(float)} to define the local Frame scaling (with respect to the
+   * Use {@link #setScaling(float)} to define the local frame scaling (with respect to the
    * {@link #reference()}).
    */
   public void setMagnitude(float magnitude) {
@@ -697,7 +698,7 @@ public class Frame {
   }
 
   /**
-   * Aligns the Frame with {@code frame}, so that two of their axis are parallel.
+   * Aligns the frame with {@code frame}, so that two of their axis are parallel.
    * <p>
    * If one of the X, Y and Z axis of the Frame is almost parallel to any of the X, Y, or
    * Z axis of {@code frame}, the Frame is rotated so that these two axis actually become
@@ -807,7 +808,7 @@ public class Frame {
   }
 
   /**
-   * Translates the Frame so that its {@link #position()} lies on the line defined by
+   * Translates the frame so that its {@link #position()} lies on the line defined by
    * {@code origin} and {@code direction} (defined in the world coordinate system).
    * <p>
    * Simply uses an orthogonal projection. {@code direction} does not need to be
@@ -941,7 +942,7 @@ public class Frame {
   // CONVERSION
 
   /**
-   * Returns the local transformation matrix represented by the Frame.
+   * Returns the local transformation matrix represented by the frame.
    * <p>
    * This method could be used in conjunction with {@code applyMatrix()} to modify a graph
    * modelView() matrix from a frame hierarchy. For example, with this frame hierarchy:
@@ -971,65 +972,66 @@ public class Frame {
    * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    * <p>
-   * <b>Attention:</b> In Processing this technique is inefficient because
-   * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
-   * <p>
-   * This matrix only represents the local Frame transformation (i.e., with respect to the
+   * This matrix only represents the local frame transformation (i.e., with respect to the
    * {@link #reference()}). Use {@link #worldMatrix()} to get the full Frame
    * transformation matrix (i.e., from the world to the Frame coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
    * <p>
-   * The result is only valid until the next call to {@code matrix()} or
-   * {@link #worldMatrix()}. Use it immediately (as above).
+   * <b>Attention:</b> In Processing this technique is inefficient because
+   * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
+   * Use {@link remixlab.core.Graph#applyTransformation(Frame)} instead.
+   *
+   * @see #setMatrix(Frame)
+   * @see #worldMatrix()
    */
   public Matrix matrix() {
-    Matrix pM = new Matrix();
+    Matrix matrix = new Matrix();
 
-    pM = rotation().matrix();
+    matrix = rotation().matrix();
 
-    pM._matrix[12] = translation()._vector[0];
-    pM._matrix[13] = translation()._vector[1];
-    pM._matrix[14] = translation()._vector[2];
+    matrix._matrix[12] = translation()._vector[0];
+    matrix._matrix[13] = translation()._vector[1];
+    matrix._matrix[14] = translation()._vector[2];
 
     if (scaling() != 1) {
-      pM.setM00(pM.m00() * scaling());
-      pM.setM10(pM.m10() * scaling());
-      pM.setM20(pM.m20() * scaling());
+      matrix.setM00(matrix.m00() * scaling());
+      matrix.setM10(matrix.m10() * scaling());
+      matrix.setM20(matrix.m20() * scaling());
 
-      pM.setM01(pM.m01() * scaling());
-      pM.setM11(pM.m11() * scaling());
-      pM.setM21(pM.m21() * scaling());
+      matrix.setM01(matrix.m01() * scaling());
+      matrix.setM11(matrix.m11() * scaling());
+      matrix.setM21(matrix.m21() * scaling());
 
-      pM.setM02(pM.m02() * scaling());
-      pM.setM12(pM.m12() * scaling());
-      pM.setM22(pM.m22() * scaling());
+      matrix.setM02(matrix.m02() * scaling());
+      matrix.setM12(matrix.m12() * scaling());
+      matrix.setM22(matrix.m22() * scaling());
     }
 
-    return pM;
+    return matrix;
   }
 
   /**
-   * Returns the global transformation matrix represented by the Frame.
+   * Returns the global transformation matrix represented by the frame.
    * <p>
    * This method should be used in conjunction with {@code applyMatrix()} to modify a
-   * graph modelView() matrix from a Frame:
+   * graph modelView() matrix from a frame:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
-   * {@code Frame fr = new Frame(pos, Rotation(from, to));} <br>
+   * {@code Frame frame = new Frame(translation, new Rotation(from, to));} <br>
    * {@code graph.pushModelView();} <br>
-   * {@code graph.applyMatrix(worldMatrix());} <br>
-   * {@code // draw object in the fr coordinate system.} <br>
+   * {@code graph.applyModelView(frame.worldMatrix());} <br>
+   * {@code // draw object in the frame coordinate system.} <br>
    * {@code graph.popModelView();} <br>
    * <p>
-   * This matrix represents the global Frame transformation: the entire
-   * {@link #reference()} hierarchy is taken into account to define the Frame
+   * This matrix represents the global frame transformation: the entire
+   * {@link #reference()} hierarchy is taken into account to define the frame
    * transformation from the world coordinate system. Use {@link #matrix()} to get the
-   * local Frame transformation matrix (i.e. defined with respect to the
+   * local frame transformation matrix (i.e. defined with respect to the
    * {@link #reference()}). These two match when the {@link #reference()} is
    * {@code null}.
-   * <p>
-   * <b>Attention:</b> The result is only valid until the next call to {@link #matrix()}
-   * or {@code worldMatrix()}. Use it immediately (as above).
+   *
+   * @see #setWorldMatrix(Frame)
+   * @see #matrix()
    */
   public Matrix worldMatrix() {
     if (reference() != null)
@@ -1039,32 +1041,32 @@ public class Frame {
   }
 
   /**
-   * Convenience function that simply calls {@code fromMatrix(pM, 1))}.
+   * Convenience function that simply calls {@code fromMatrix(matrix, 1))}.
    *
    * @see #fromMatrix(Matrix, float)
    */
-  public void fromMatrix(Matrix pM) {
-    fromMatrix(pM, 1);
+  public void fromMatrix(Matrix matrix) {
+    fromMatrix(matrix, 1);
   }
 
   /**
-   * Sets the Frame from a Matrix representation: rotation in the upper left 3x3 matrix and
-   * translation on the last column. Scaling is defined separately in {@code scl}.
+   * Sets the frame from a Matrix representation: rotation in the upper left 3x3 matrix and
+   * translation on the last column. Scaling is defined separately in {@code scaling}.
    * <p>
-   * Hence, if a code fragment looks like:
+   * Hence, if your openGL code fragment looks like:
    * <p>
    * {@code float [] m = new float [16]; m[0]=...;} <br>
    * {@code gl.glMultMatrixf(m);} <br>
    * <p>
    * It is equivalent to write:
    * <p>
-   * {@code Frame fr = new Frame();} <br>
-   * {@code fr.fromMatrix(m);} <br>
-   * {@code applyMatrix(fr.matrix());} <br>
+   * {@code Frame frame = new Frame();} <br>
+   * {@code frame.fromMatrix(m);} <br>
+   * {@code graph.applyModelView(frame.matrix());} <br>
    * <p>
-   * Using this conversion, you can benefit from the powerful Frame transformation methods
-   * to translate points and vectors to and from the Frame coordinate system to any other
-   * Frame coordinate system (including the world coordinate system). See
+   * Using this conversion, you can benefit from the powerful frame transformation methods
+   * to translate points and vectors to and from the frame coordinate system to any other
+   * frame coordinate system (including the world coordinate system). See
    * {@link #coordinatesOf(Vector)} and {@link #transformOf(Vector)}.
    */
   public void fromMatrix(Matrix matrix, float scaling) {
@@ -1114,11 +1116,12 @@ public class Frame {
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of {@code otherFrame}.
+   * those of the {@code other} frame.
    * <p>
-   * After calling {@code set} a call to {@code this.equals(otherFrame)} should return
-   * {@code true}.
+   * After calling {@code setWorldMatrix(other)} a call to {@code this.matches(other)} should
+   * return {@code true}.
    *
+   * @see #worldMatrix()
    * @see #setMatrix(Frame)
    */
   public void setWorldMatrix(Frame other) {
@@ -1131,8 +1134,9 @@ public class Frame {
 
   /**
    * Sets {@link #translation()}, {@link #rotation()} and {@link #scaling()} values from
-   * those of {@code otherFrame}.
+   * those of the {@code other} frame.
    *
+   * @see #matrix()
    * @see #setWorldMatrix(Frame)
    */
   public void setMatrix(Frame other) {
@@ -1144,44 +1148,48 @@ public class Frame {
   }
 
   /**
-   * Returns a Frame representing the inverse of the Frame space transformation.
+   * Returns a frame representing the inverse of this frame space transformation.
    * <p>
-   * The the new Frame {@link #rotation()} is the
+   * The the new frame {@link #rotation()} is the
    * {@link Quaternion#inverse()} of the original rotation. Its
    * {@link #translation()} is the negated inverse rotated image of the original
    * translation. Its {@link #scaling()} is 1 / original scaling.
    * <p>
-   * If a Frame is considered as a space rigid transformation, i.e., translation and
-   * rotation, but no scaling (scaling=1), the inverse() Frame performs the inverse
+   * If a frame is considered as a space rigid transformation, i.e., translation and
+   * rotation, but no scaling (scaling=1), the inverse() frame performs the inverse
    * transformation.
    * <p>
-   * Only the local Frame transformation (i.e., defined with respect to the
+   * Only the local frame transformation (i.e., defined with respect to the
    * {@link #reference()}) is inverted. Use {@link #worldInverse()} for a global
    * inverse.
    * <p>
-   * The resulting Frame has the same {@link #reference()} as the Frame and a
+   * The resulting frame has the same {@link #reference()} as the this frame and a
    * {@code null} {@link #constraint()}.
+   *
+   * @see #worldInverse()
    */
   public Frame inverse() {
-    Frame fr = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
-    fr.setReference(reference());
-    return fr;
+    Frame frame = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    frame.setReference(reference());
+    return frame;
   }
 
   /**
-   * Returns the {@link #inverse()} of the Frame world transformation.
+   * Returns the {@link #inverse()} of the frame world transformation.
    * <p>
-   * The {@link #orientation()} of the new Frame is the
+   * The {@link #orientation()} of the new frame is the
    * {@link Quaternion#inverse()} of the original orientation. Its
    * {@link #position()} is the negated and inverse rotated image of the original
    * position. The {@link #magnitude()} is the the original magnitude multiplicative
    * inverse.
    * <p>
-   * The result Frame has a {@code null} {@link #reference()} and a {@code null}
+   * The result frame has a {@code null} {@link #reference()} and a {@code null}
    * {@link #constraint()}.
    * <p>
    * Use {@link #inverse()} for a local (i.e., with respect to {@link #reference()})
    * transformation inverse.
+   *
+   * @see #inverse()
    */
   public Frame worldInverse() {
     return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
@@ -1191,8 +1199,8 @@ public class Frame {
   // POINT CONVERSION
 
   /**
-   * Returns the Frame coordinates of the point whose position in the {@code from}
-   * coordinate system is {@code src} (converts from {@code from} to Frame).
+   * Returns the frame coordinates of the point whose position in the {@code from}
+   * coordinate system is {@code src} (converts from {@code from} to this frame).
    * <p>
    * {@link #coordinatesOfIn(Vector, Frame)} performs the inverse transformation.
    */
@@ -1206,8 +1214,8 @@ public class Frame {
   }
 
   /**
-   * Returns the {@code in} coordinates of the point whose position in the Frame
-   * coordinate system is {@code src} (converts from Frame to {@code in}).
+   * Returns the {@code in} coordinates of the point whose position in the frame
+   * coordinate system is {@code src} (converts from this frame to {@code in}).
    * <p>
    * {@link #coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
    */
@@ -1229,9 +1237,9 @@ public class Frame {
   }
 
   /**
-   * Returns the Frame coordinates of a point {@code src} defined in the
+   * Returns the frame coordinates of a point {@code src} defined in the
    * {@link #reference()} coordinate system (converts from {@link #reference()}
-   * to Frame).
+   * to this frame).
    * <p>
    * {@link #localInverseCoordinatesOf(Vector)} performs the inverse conversion.
    *
@@ -1242,8 +1250,8 @@ public class Frame {
   }
 
   /**
-   * Returns the Frame coordinates of a point {@code src} defined in the world coordinate
-   * system (converts from world to Frame).
+   * Returns the frame coordinates of a point {@code src} defined in the world coordinate
+   * system (converts from world to this frame).
    * <p>
    * {@link #inverseCoordinatesOf(Vector)} performs the inverse conversion.
    * {@link #transformOf(Vector)} converts vectors instead of coordinates.
@@ -1258,8 +1266,8 @@ public class Frame {
   // VECTOR CONVERSION
 
   /**
-   * Returns the Frame transform of the vector whose coordinates in the {@code from}
-   * coordinate system is {@code src} (converts vectors from {@code from} to Frame).
+   * Returns the frame transform of the vector whose coordinates in the {@code from}
+   * coordinate system is {@code src} (converts vectors from {@code from} to this frame).
    * <p>
    * {@link #transformOfIn(Vector, Frame)} performs the inverse transformation.
    */
@@ -1273,8 +1281,8 @@ public class Frame {
   }
 
   /**
-   * Returns the {@code in} transform of the vector whose coordinates in the Frame
-   * coordinate system is {@code src} (converts vectors from Frame to {@code in}).
+   * Returns the {@code in} transform of the vector whose coordinates in the frame
+   * coordinate system is {@code src} (converts vectors from this frame to {@code in}).
    * <p>
    * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
    */
@@ -1296,7 +1304,7 @@ public class Frame {
 
   /**
    * Returns the {@link #reference()} coordinates of a point {@code src} defined in
-   * the Frame coordinate system (converts from Frame to {@link #reference()}).
+   * the frame coordinate system (converts from this frame to {@link #reference()}).
    * <p>
    * {@link #localCoordinatesOf(Vector)} performs the inverse conversion.
    *
@@ -1307,8 +1315,8 @@ public class Frame {
   }
 
   /**
-   * Returns the world coordinates of the point whose position in the Frame coordinate
-   * system is {@code src} (converts from Frame to world).
+   * Returns the world coordinates of the point whose position in the frame coordinate
+   * system is {@code src} (converts from this frame to world).
    * <p>
    * {@link #coordinatesOf(Vector)} performs the inverse conversion. Use
    * {@link #inverseTransformOf(Vector)} to transform vectors instead of coordinates.
@@ -1324,8 +1332,8 @@ public class Frame {
   }
 
   /**
-   * Returns the Frame transform of a vector {@code src} defined in the world coordinate
-   * system (converts vectors from world to Frame).
+   * Returns the frame transform of a vector {@code src} defined in the world coordinate
+   * system (converts vectors from world to this frame).
    * <p>
    * {@link #inverseTransformOf(Vector)} performs the inverse transformation.
    * {@link #coordinatesOf(Vector)} converts coordinates instead of vectors (here only the
@@ -1339,8 +1347,8 @@ public class Frame {
   }
 
   /**
-   * Returns the world transform of the vector whose coordinates in the Frame coordinate
-   * system is {@code src} (converts vectors from Frame to world).
+   * Returns the world transform of the vector whose coordinates in the fFrame coordinate
+   * system is {@code src} (converts vectors from this frame to world).
    * <p>
    * {@link #transformOf(Vector)} performs the inverse transformation. Use
    * {@link #inverseCoordinatesOf(Vector)} to transform coordinates instead of vectors.
@@ -1356,9 +1364,9 @@ public class Frame {
   }
 
   /**
-   * Returns the Frame transform of a vector {@code src} defined in the
+   * Returns the frame transform of a vector {@code src} defined in the
    * {@link #reference()} coordinate system (converts vectors from
-   * {@link #reference()} to Frame).
+   * {@link #reference()} to this frame).
    * <p>
    * {@link #localInverseTransformOf(Vector)} performs the inverse transformation.
    *
@@ -1370,8 +1378,7 @@ public class Frame {
 
   /**
    * Returns the {@link #reference()} transform of a vector {@code src} defined in
-   * the Frame coordinate system (converts vectors from Frame to {@link #reference()}
-   * ).
+   * the Frame coordinate system (converts vectors from this frame to {@link #reference()}).
    * <p>
    * {@link #localTransformOf(Vector)} performs the inverse transformation.
    *
