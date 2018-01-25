@@ -390,8 +390,7 @@ public class Frame {
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
    * applied to the frame may differ from {@code vector} (since it can be filtered by the
-   * {@link #constraint()}). Use {@link #setTranslation(Vector)} to directly translate the
-   * frame without taking the {@link #constraint()} into account.
+   * {@link #constraint()}).
    *
    * @see #rotate(Quaternion)
    * @see #scale(float)
@@ -499,8 +498,7 @@ public class Frame {
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the rotation actually
    * applied to the frame may differ from {@code quaternion} (since it can be filtered by the
-   * {@link #constraint()}). Use {@link #setRotation(Quaternion)} to directly rotate the
-   * frame without taking the {@link #constraint()} into account.
+   * {@link #constraint()}).
    *
    * @see #translate(Vector)
    */
