@@ -203,7 +203,7 @@ public class Interpolator {
   }
 
   /**
-   * Creates a Interpolator, with {@code frame} as associated {@link #frame()}.
+   * Creates an interpolator, with {@code frame} as associated {@link #frame()}.
    * <p>
    * The {@link #frame()} can be set or changed using {@link #setFrame(Frame)}.
    * <p>

@@ -1106,29 +1106,6 @@ public class Scene extends Graph implements PConstants {
     frame.setMagnitude(jsonFrame.getFloat("magnitude"));
     return frame;
   }
-  //TODO Restore 2D
-  /*
-  protected Frame toFrame(JSONObject jsonFrame) {
-    Frame frame = new Frame(is3D());
-    float x, y, z;
-    x = jsonFrame.getJSONArray("position").getFloat(0);
-    y = jsonFrame.getJSONArray("position").getFloat(1);
-    z = jsonFrame.getJSONArray("position").getFloat(2);
-    Vector pos = new Vector(x, y, z);
-    frame.setPosition(pos);
-    if (is2D())
-      frame.setOrientation(new Rot(jsonFrame.getJSONArray("orientation").getFloat(0)));
-    else {
-      x = jsonFrame.getJSONArray("orientation").getFloat(0);
-      y = jsonFrame.getJSONArray("orientation").getFloat(1);
-      z = jsonFrame.getJSONArray("orientation").getFloat(2);
-      float w = jsonFrame.getJSONArray("orientation").getFloat(3);
-      frame.setOrientation(new Quaternion(x, y, z, w));
-    }
-    frame.setMagnitude(jsonFrame.getFloat("magnitude"));
-    return frame;
-  }
-  */
 
   /**
    * Used internally by {@link #saveConfig(String)}. Converts {@code frame} into a P5
@@ -1158,30 +1135,14 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code rot} into a P5
    * JSONArray.
    */
-  protected JSONArray toJSONArray(Quaternion Quaternion) {
+  protected JSONArray toJSONArray(Quaternion quaternion) {
     JSONArray jsonRot = new JSONArray();
-    Quaternion quaternion = Quaternion;
     jsonRot.setFloat(0, quaternion.x());
     jsonRot.setFloat(1, quaternion.y());
     jsonRot.setFloat(2, quaternion.z());
     jsonRot.setFloat(3, quaternion.w());
     return jsonRot;
   }
-  //TODO Restore 2D
-  /*
-  protected JSONArray toJSONArray(Rotation rot) {
-    JSONArray jsonRot = new JSONArray();
-    if (is3D()) {
-      Quaternion quat = rot;
-      jsonRot.setFloat(0, quat.x());
-      jsonRot.setFloat(1, quat.y());
-      jsonRot.setFloat(2, quat.z());
-      jsonRot.setFloat(3, quat.w());
-    } else
-      jsonRot.setFloat(0, rot.angle());
-    return jsonRot;
-  }
-  */
 
   @Override
   public void traverse() {

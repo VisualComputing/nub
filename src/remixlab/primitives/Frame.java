@@ -14,27 +14,27 @@ import remixlab.timing.TimingHandler;
 import remixlab.primitives.constraint.Constraint;
 
 /**
- * A Frame is a 2D or 3D coordinate system, represented by a {@link #position()} , an
+ * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
  * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
- * important: the Frame is first translated, then rotated around the new translated origin
+ * important: the frame is first translated, then rotated around the new translated origin
  * and then scaled. This class API aims to conform that of the great
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
  * Frame</a>, but it adds {@link #magnitude()} to it.
  * <p>
- * A Frame is useful to define the position, orientation and magnitude of an object, using
+ * A frame is useful to define the position, orientation and magnitude of an object, using
  * its {@link #matrix()} method, as shown below:
  * <p>
- * {@code // Builds a Frame at position (0.5,0,0) and oriented such that its Y axis is along the (1,1,1) }
- * <br>
- * {@code // direction. One could also have used setPosition() and setOrientation().} <br>
- * {@code Frame fr(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0), new Vector(1,1,1)));} <br>
+ * {@code // Builds a frame at position (0.5,0,0) and oriented such that its Y axis is
+ * along the (1,1,1)} direction<br>
+ * {@code Frame frame = new Frame(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
+ * new Vector(1,1,1)));} <br>
  * {@code graph.pushModelView();} <br>
- * {@code graph.applyModelView(fr.matrix());} <br>
- * {@code // Draw your object here, in the local fr coordinate system.} <br>
+ * {@code graph.applyModelView(frame.matrix());} <br>
+ * {@code // Draw your object here, in the local frame coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
- * Many functions are provided to transform a point from one coordinate system (Frame) to
- * an other: see {@link #coordinatesOf(Vector)}, {@link #inverseCoordinatesOf(Vector)},
+ * Many functions are provided to transform a point from one frame to another, see
+ * {@link #coordinatesOf(Vector)}, {@link #inverseCoordinatesOf(Vector)},
  * {@link #coordinatesOfIn(Vector, Frame)}, {@link #coordinatesOfFrom(Vector, Frame)}...
  * <p>
  * You may also want to transform a vector (such as a normal), which corresponds to
@@ -42,57 +42,57 @@ import remixlab.primitives.constraint.Constraint;
  * {@link #transformOf(Vector)} and {@link #inverseTransformOf(Vector)}.
  * <p>
  * The {@link #translation()}, {@link #rotation()} and uniform positive {@link #scaling()}
- * that are encapsulated in a Frame can also be used to represent an angle preserving
+ * that are encapsulated in a frame can also be used to represent an angle preserving
  * transformation of space. Such a transformation can also be interpreted as a change of
  * coordinate system, and the coordinate system conversion functions actually allow you to
- * use a Frame as an angle preserving transformation. Use
- * {@link #inverseCoordinatesOf(Vector)} (resp. {@link #coordinatesOf(Vector)}) to apply the
- * transformation (resp. its inverse). Note the inversion.
+ * use a frame as an angle preserving transformation. Use
+ * {@link #inverseCoordinatesOf(Vector)} (resp. {@link #coordinatesOf(Vector)}) to apply
+ * the transformation (resp. its inverse). Note the inversion.
  * <p>
  * <p>
- * <h3>Hierarchy of Frames</h3>
+ * <h3>Hierarchy of frames</h3>
  * <p>
- * The position, orientation and magnitude of a Frame are actually defined with respect to
- * a {@link #reference()}. The default {@link #reference()} is the world
+ * The frame position, orientation and magnitude are actually defined with respect to
+ * a {@link #reference()} frame. The default {@link #reference()} is the world
  * coordinate system (represented by a {@code null} {@link #reference()}). If you
- * {@link #setReference(Frame)} to a different Frame, you must then differentiate:
+ * {@link #setReference(Frame)} to a different frame, you must then differentiate:
  * <p>
  * <ul>
- * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()}
- * , defined with respect to the {@link #reference()}.</li>
+ * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
+ * defined with respect to the {@link #reference()}.</li>
  * <li>the <b>global</b> {@link #position()}, {@link #orientation()} and
  * {@link #magnitude()}, always defined with respect to the world coordinate system.</li>
  * </ul>
  * <p>
- * A Frame is actually defined by its {@link #translation()} with respect to its
+ * A frame is actually defined by its {@link #translation()} with respect to its
  * {@link #reference()}, then by {@link #rotation()} of the coordinate system around
  * the new translated origin and then by a uniform positive {@link #scaling()} along its
  * rotated axes.
  * <p>
  * This terminology for <b>local</b> ({@link #translation()}, {@link #rotation()} and
- * {@link #scaling()}) and <b>global</b> ( {@link #position()}, {@link #orientation()} and
+ * {@link #scaling()}) and <b>global</b> ({@link #position()}, {@link #orientation()} and
  * {@link #magnitude()}) definitions is used in all the methods' names and should be
- * sufficient to prevent ambiguities. These notions are obviously identical when the
+ * enough to prevent ambiguities. These notions are obviously identical when the
  * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
- * Frame definition. Therefore {@link #settingAsReferenceWillCreateALoop(Frame)}
+ * frame definition. Therefore {@link #settingAsReferenceWillCreateALoop(Frame)}
  * checks this and prevents {@link #reference()} from creating such a loop.
  * <p>
  * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vector, Frame)},
  * {@link #coordinatesOfFrom(Vector, Frame)} ... which allow coordinates (or vector)
- * conversions from a Frame to any other one (including the world coordinate system).
+ * conversions from a frame to any other one (including the world coordinate system).
  * <p>
  * <h3>Constraints</h3>
  * <p>
- * An interesting feature of Frames is that their displacements can be constrained. When a
- * {@link remixlab.primitives.constraint.Constraint} is attached to a Frame, it filters the
- * inputGrabber of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the resulting
- * filtered motion is applied to the Frame. The default {@link #constraint()} {@code null}
- * resulting in no filtering. Use {@link #setConstraint(Constraint)} to attach a
- * Constraint to a frame.
+ * One interesting feature of a frame is that its displacements can be constrained. When a
+ * {@link remixlab.primitives.constraint.Constraint} is attached to a frame, it filters
+ * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the
+ * resulting filtered motion is applied to the frame. The default {@link #constraint()}
+ * is {@code null} resulting in no filtering. Use {@link #setConstraint(Constraint)} to
+ * attach a constraint to a frame.
  * <p>
  * Classical constraints are provided for convenience (see
  * {@link remixlab.primitives.constraint.LocalConstraint},
@@ -102,13 +102,13 @@ import remixlab.primitives.constraint.Constraint;
  * <p>
  * <h3>Derived classes</h3>
  * <p>
- * The Node class inherits Frame and implements
- * all sorts of motion actions, so that a Frame (and hence an object) can be manipulated
- * in the graph by whatever user interaction means you can imagine.
+ * A Node is a Frame specialization which implements all sorts of motion actions, so that
+ * an object can be manipulated by whatever user interaction means imaginable.
  */
 public class Frame {
   /**
-   * Returns whether or not this Frame matches other.
+   * Returns whether or not this frame matches other taking into account the {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()} frame parameters, but not its {@link #reference()}.
    *
    * @param other frame
    */
@@ -124,7 +124,7 @@ public class Frame {
   protected long _lastUpdate;
 
   /**
-   * Same as {@code this(null, new Vector(), three_d ? new Quaternion() : new Rot(), 1)}.
+   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
    *
    * @see #Frame(Vector, Quaternion, float)
    */
@@ -133,7 +133,7 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(null, new Vector(), r, s)}.
+   * Same as {@code this(null, new Vector(), rotation, scaling)}.
    *
    * @see #Frame(Vector, Quaternion, float)
    */
@@ -142,7 +142,7 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(p, r, 1)}.
+   * Same as {@code this(translation, rotation, 1)}.
    *
    * @see #Frame(Vector, Quaternion, float)
    */
@@ -151,7 +151,7 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(null, p, r, s)}.
+   * Same as {@code this(null, translation, rotation, scaling)}.
    *
    * @see #Frame(Frame, Vector, Quaternion, float)
    */
@@ -160,7 +160,7 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(reference, p, r, 1)}.
+   * Same as {@code this(reference, translation, rotation, 1)}.
    *
    * @see #Frame(Frame, Vector, Quaternion, float)
    */
@@ -169,7 +169,7 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(reference, new Vector(), r, 1)}.
+   * Same as {@code this(reference, new Vector(), rotation, 1)}.
    *
    * @see #Frame(Frame, Vector, Quaternion, float)
    */
@@ -178,8 +178,8 @@ public class Frame {
   }
 
   /**
-   * Creates a Frame with {@code reference} as {@link #reference()}, and
-   * {@code p}, {@code r} and {@code s} as the frame {@link #translation()},
+   * Creates a frame with {@code reference} as {@link #reference()}, and {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
   public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
@@ -197,27 +197,36 @@ public class Frame {
     _constraint = other.constraint();
   }
 
+  /**
+   * Returns a deep copy of this frame.
+   */
+  public Frame get() {
+    return new Frame(this);
+  }
+
+  /**
+   * Returns a new frame defined in the world coordinate system, with the same {@link #position()},
+   * {@link #orientation()} and {@link #magnitude()} as this frame.
+   *
+   * @see #reference()
+   */
   public Frame detach() {
     Frame frame = new Frame();
     frame.setWorldMatrix(this);
     return frame;
   }
 
-  public Frame get() {
-    return new Frame(this);
-  }
-
   // MODIFIED
 
   /**
-   * Internal use. Automatically call by all methods which change the Frame state.
+   * Internal use. Automatically call by all methods which change the frame state.
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
   }
 
   /**
-   * @return the last frame the Frame was updated.
+   * @return the last frame the this obect was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -226,20 +235,20 @@ public class Frame {
   // REFERENCE_FRAME
 
   /**
-   * Returns the reference Frame, in which coordinates system the Frame is defined.
+   * Returns the reference frame, in which this frame is defined.
    * <p>
-   * The Frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
+   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
    * defined with respect to the {@link #reference()} coordinate system. A
-   * {@code null} reference Frame (default value) means that the Frame is defined in the
+   * {@code null} reference frame (default value) means that the frame is defined in the
    * world coordinate system.
    * <p>
    * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to
-   * recursively convert values along the reference Frame chain and to get values
-   * expressed in the world coordinate system. The values match when the reference Frame
+   * recursively convert values along the reference frame chain and to get values
+   * expressed in the world coordinate system. The values match when the reference frame
    * is {@code null}.
    * <p>
-   * Use {@link #setReference(Frame)} to set this value and create a Frame hierarchy.
-   * Convenient functions allow you to convert coordinates from one Frame to another: see
+   * Use {@link #setReference(Frame)} to set this value and create a frame hierarchy.
+   * Convenient functions allow you to convert coordinates from one frame to another: see
    * {@link #coordinatesOf(Vector)}, {@link #localCoordinatesOf(Vector)} ,
    * {@link #coordinatesOfIn(Vector, Frame)} and their inverse functions.
    * <p>
@@ -252,18 +261,18 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #reference()} of the Frame.
+   * Sets the {@link #reference()} of the frame.
    * <p>
-   * The Frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
+   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
    * defined in the {@link #reference()} coordinate system.
    * <p>
    * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to express
-   * these in the world coordinate system.
+   * the frame global transformation in the world coordinate system.
    * <p>
-   * Using this method, you can create a hierarchy of Frames. This hierarchy needs to be a
+   * Using this method, you can create a hierarchy of frames. This hierarchy needs to be a
    * tree, which root is the world coordinate system (i.e., {@code null}
-   * {@link #reference()}). No action is performed if setting {@code refFrame} as the
-   * {@link #reference()} would create a loop in the Frame hierarchy.
+   * {@link #reference()}). No action is performed if setting {@code reference} as the
+   * {@link #reference()} would create a loop in the hierarchy.
    */
   public void setReference(Frame reference) {
     if (settingAsReferenceWillCreateALoop(reference)) {
@@ -277,8 +286,8 @@ public class Frame {
   }
 
   /**
-   * Returns {@code true} if setting {@code frame} as the Frame's
-   * {@link #reference()} would create a loop in the Frame hierarchy.
+   * Returns {@code true} if setting {@code frame} as the frame's
+   * {@link #reference()} would create a loop in the frame hierarchy.
    */
   public boolean settingAsReferenceWillCreateALoop(Frame frame) {
     Frame f = frame;
@@ -294,9 +303,9 @@ public class Frame {
 
   /**
    * Returns the current {@link remixlab.primitives.constraint.Constraint} applied to the
-   * Frame.
+   * frame.
    * <p>
-   * A {@code null} value (default) means that no Constraint is used to filter the Frame
+   * A {@code null} value (default) means that no constraint is used to filter the frame
    * translation and rotation.
    * <p>
    * See the Constraint class documentation for details.
@@ -306,7 +315,7 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #constraint()} attached to the Frame.
+   * Sets the {@link #constraint()} attached to the frame.
    * <p>
    * A {@code null} value means no constraint.
    */
@@ -317,7 +326,7 @@ public class Frame {
   // TRANSLATION
 
   /**
-   * Returns the Frame translation, defined with respect to the {@link #reference()}.
+   * Returns the frame translation, defined with respect to the {@link #reference()}.
    * <p>
    * Use {@link #position()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
@@ -335,7 +344,7 @@ public class Frame {
    * <p>
    * Use {@link #setPosition(Vector)} to define the world coordinates {@link #position()}.
    * Use {@link #setTranslationWithConstraint(Vector)} to take into account the potential
-   * {@link #constraint()} of the Frame.
+   * {@link #constraint()} of the frame.
    */
   public void setTranslation(Vector translation) {
     _translation = translation;
@@ -387,13 +396,13 @@ public class Frame {
   }
 
   /**
-   * Translates the Frame according to {@code t}, locally defined with respect to the
+   * Translates the frame according to {@code vector}, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
-   * applied to the Frame may differ from {@code t} (since it can be filtered by the
+   * applied to the frame may differ from {@code vector} (since it can be filtered by the
    * {@link #constraint()}). Use {@link #setTranslation(Vector)} to directly translate the
-   * Frame without taking the {@link #constraint()} into account.
+   * frame without taking the {@link #constraint()} into account.
    *
    * @see #rotate(Quaternion)
    * @see #scale(float)
@@ -409,7 +418,7 @@ public class Frame {
   // POSITION
 
   /**
-   * Returns the position of the Frame, defined in the world coordinate system.
+   * Returns the frame position defined in the world coordinate system.
    *
    * @see #orientation()
    * @see #magnitude()
@@ -421,10 +430,10 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #position()} of the Frame, defined in the world coordinate system.
+   * Sets the frame {@link #position()}, defined in the world coordinate system.
    * <p>
-   * Use {@link #setTranslation(Vector)} to define the local Frame translation (with respect
-   * to the {@link #reference()}). The potential {@link #constraint()} of the Frame
+   * Use {@link #setTranslation(Vector)} to define the local frame translation (with respect
+   * to the {@link #reference()}). The potential {@link #constraint()} of the frame
    * is not taken into account, use {@link #setPositionWithConstraint(Vector)} instead.
    */
   public void setPosition(Vector position) {
@@ -465,7 +474,7 @@ public class Frame {
   // ROTATION
 
   /**
-   * Returns the Frame rotation, defined with respect to the {@link #reference()}
+   * Returns the frame rotation, defined with respect to the {@link #reference()}
    * (i.e, the current Quaternion orientation).
    * <p>
    * Use {@link #orientation()} to get the result in world coordinates. These two values
@@ -482,11 +491,11 @@ public class Frame {
    * Set the current rotation. See the different {@link Quaternion}
    * constructors.
    * <p>
-   * Sets the {@link #rotation()} of the Frame, locally defined with respect to the
+   * Sets the frame {@link #rotation()}, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * Use {@link #setOrientation(Quaternion)} to define the world coordinates
-   * {@link #orientation()}. The potential {@link #constraint()} of the Frame is not taken
+   * {@link #orientation()}. The potential frame {@link #constraint()} is not taken
    * into account, use {@link #setRotationWithConstraint(Quaternion)} instead.
    *
    * @see #setRotationWithConstraint(Quaternion)
@@ -523,13 +532,13 @@ public class Frame {
   }
 
   /**
-   * Rotates the Frame by {@code r} (defined in the Frame coordinate system):
-   * {@code rotation().compose(r)}.
+   * Rotates the frame by {@code quaternion} (defined in the frame coordinate system):
+   * {@code rotation().compose(quaternion)}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the rotation actually
-   * applied to the Frame may differ from {@code q} (since it can be filtered by the
+   * applied to the frame may differ from {@code quaternion} (since it can be filtered by the
    * {@link #constraint()}). Use {@link #setRotation(Quaternion)} to directly rotate the
-   * Frame without taking the {@link #constraint()} into account.
+   * frame without taking the {@link #constraint()} into account.
    *
    * @see #translate(Vector)
    */
@@ -550,14 +559,14 @@ public class Frame {
   }
 
   /**
-   * Makes the Frame {@link #rotate(Quaternion)} by {@code rotation} around {@code point}.
+   * Makes the frame {@link #rotate(Quaternion)} by {@code rotation} around {@code point}.
    * <p>
    * {@code point} is defined in the world coordinate system, while the {@code rotation}
-   * axis is defined in the Frame coordinate system.
+   * axis is defined in the frame coordinate system.
    * <p>
-   * If the Frame has a {@link #constraint()}, {@code rotation} is first constrained using
+   * If the frame has a {@link #constraint()}, {@code rotation} is first constrained using
    * {@link remixlab.primitives.constraint.Constraint#constrainRotation(Quaternion, Frame)} .
-   * Hence the rotation actually applied to the Frame may differ from {@code rotation}
+   * Hence the rotation actually applied to the frame may differ from {@code rotation}
    * (since it can be filtered by the {@link #constraint()}).
    * <p>
    * The translation which results from the filtered rotation around {@code point} is then
