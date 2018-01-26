@@ -202,7 +202,7 @@ public class Node extends Frame implements Grabber {
     _id = ++graph()._nodeCount;
     // unlikely but theoretically possible
     if (_id == 16777216)
-      throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+      throw new RuntimeException("Maximum node instances reached. Exiting now!");
 
     if(graph().is2D()) {
       LocalConstraint constraint2D = new LocalConstraint();
