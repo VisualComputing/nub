@@ -972,10 +972,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Saves the {@link #eye()}, the {@link #radius()}, the
-   * {@link #type()} and the
-   * keyFrameInterpolators into
-   * {@code fileName}.
+   * Saves the {@link #eye()}, the {@link #radius()} and the {@link #type()} into {@code fileName}.
    *
    * @see #saveConfig()
    * @see #loadConfig()
@@ -1020,10 +1017,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Loads the {@link #eye()}, the {@link #radius()}, the
-   * {@link #type()} and the
-   * keyFrameInterpolators from
-   * {@code fileName}.
+   * Loads the {@link #eye()}, the {@link #radius()} and the {@link #type()} from {@code fileName}.
    *
    * @see #saveConfig()
    * @see #saveConfig(String)
@@ -1058,6 +1052,9 @@ public class Scene extends Graph implements PConstants {
     }
   }
 
+  /**
+   * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONArray into an interpolator.
+   */
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
     Interpolator interpolator =  new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
@@ -1093,21 +1090,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a
-   * {@code frame}.
+   * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a frame.
    */
   protected Frame _toFrame(JSONObject jsonFrame) {
     Frame frame = new Frame();
-    float x, y, z;
+    float x, y, z, w;
     x = jsonFrame.getJSONArray("position").getFloat(0);
     y = jsonFrame.getJSONArray("position").getFloat(1);
     z = jsonFrame.getJSONArray("position").getFloat(2);
-    Vector pos = new Vector(x, y, z);
-    frame.setPosition(pos);
+    frame.setPosition(new Vector(x, y, z));
     x = jsonFrame.getJSONArray("orientation").getFloat(0);
     y = jsonFrame.getJSONArray("orientation").getFloat(1);
     z = jsonFrame.getJSONArray("orientation").getFloat(2);
-    float w = jsonFrame.getJSONArray("orientation").getFloat(3);
+    w = jsonFrame.getJSONArray("orientation").getFloat(3);
     frame.setOrientation(new Quaternion(x, y, z, w));
     frame.setMagnitude(jsonFrame.getFloat("magnitude"));
     return frame;
