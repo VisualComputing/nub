@@ -100,6 +100,8 @@ public class DOF extends PApplet {
         if ( key=='0') mode = 0;
         if ( key=='1') mode = 1;
         if ( key=='2') mode = 2;
+        if ( key=='s') scene.saveConfig("/home/pierre/config.json");
+        if ( key=='l') scene.loadConfig("/home/pierre/config.json");
     }
 
     public static void main(String args[]) {

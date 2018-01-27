@@ -966,8 +966,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void saveConfig() {
     if (this.isOffscreen())
-      System.out
-          .println("Warning: no config saved! Off-screen graph config requires saveConfig(String fileName) to be called");
+      System.out.println("Warning: no config saved! Off-screen graph config requires saveConfig(String fileName) to be called");
     else
       saveConfig("data/config.json");
   }
@@ -985,18 +984,18 @@ public class Scene extends Graph implements PConstants {
   public void saveConfig(String fileName) {
     JSONObject json = new JSONObject();
     json.setFloat("radius", radius());
-    //TODO fix me
-    json.setBoolean("ortho", is2D() ? true : type() == Type.ORTHOGRAPHIC ? true : false);
-    json.setJSONObject("eye", toJSONObject(eye()));
-    JSONArray jsonPaths = new JSONArray();
+    json.setString("type", type().name());
+    json.setJSONObject("eye", _toJSONObject(eye()));
+
     //TODO restore
-    // keyFrames
     /*
+    // keyFrames
+    JSONArray jsonPaths = new JSONArray();
     int i = 0;
     for (int _id : eye().keyFrameInterpolatorMap().keySet()) {
       JSONObject jsonPath = new JSONObject();
       jsonPath.setInt("_key", _id);
-      jsonPath.setJSONArray("keyFrames", toJSONArray(_id));
+      jsonPath.setJSONArray("keyFrames", _toJSONArray(_id));
       jsonPaths.setJSONObject(i++, jsonPath);
     }
     json.setJSONArray("paths", jsonPaths);
@@ -1015,8 +1014,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void loadConfig() {
     if (this.isOffscreen())
-      System.out
-          .println("Warning: no config loaded! Off-screen graph config requires loadConfig(String fileName) to be called");
+      System.out.println("Warning: no config loaded! Off-screen graph config requires loadConfig(String fileName) to be called");
     else
       loadConfig("config.json");
   }
@@ -1040,57 +1038,65 @@ public class Scene extends Graph implements PConstants {
     }
     if (json != null) {
       setRadius(json.getFloat("radius"));
-      //TODO fix me
-      if (is3D())
-        setType(json.getBoolean("ortho") ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
-      eye().setWorldMatrix(toFrame(json.getJSONObject("eye")));
-      // keyFrames
-      //TODO restore
+      String type = json.getString("type");
+      setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
+              type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
+      eye().setWorldMatrix(_toFrame(json.getJSONObject("eye")));
+
       /*
-      JSONArray paths = json.getJSONArray("paths");
+      JSONObject jsonEye = json.getJSONObject("eye");
+      eye().setWorldMatrix(_toFrame(jsonEye));
+      JSONArray paths = jsonEye.getJSONArray("paths");
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
         int _id = path.getInt("_key");
         eye().clear(_id);
         JSONArray keyFrames = path.getJSONArray("keyFrames");
-        for (int j = 0; j < keyFrames.size(); j++) {
-          Node keyFrame = new Node(this);
-          pruneBranch(keyFrame);
-          keyFrame.setWorldMatrix(toFrame(keyFrames.getJSONObject(j)));
-          keyFrame.setPrecision(Node.Precision.FIXED);
-          keyFrame.setPrecisionThreshold(Graph.platform() == Platform.PROCESSING_ANDROID ? 50 : 20);
-          if (pathsVisualHint())
-            inputHandler().addGrabber(keyFrame);
-          if (!eye().keyFrameInterpolatorMap().containsKey(_id))
-            eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
-          eye().keyFrameInterpolator(_id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
-        }
+        _toInterpolator(keyFrames);
       }
       //*/
     }
   }
 
+  protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
+    Interpolator interpolator =  new Interpolator(this);
+    for (int j = 0; j < jsonInterpolator.size(); j++) {
+      Node keyFrame = new Node(this);
+      pruneBranch(keyFrame);
+      keyFrame.setWorldMatrix(_toFrame(jsonInterpolator.getJSONObject(j)));
+      keyFrame.setPrecision(Node.Precision.FIXED);
+      keyFrame.setPrecisionThreshold(20);
+      interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
+      /*
+      if (pathsVisualHint())
+        inputHandler().addGrabber(keyFrame);
+      if (!eye().keyFrameInterpolatorMap().containsKey(_id))
+        eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
+      eye().keyFrameInterpolator(_id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
+      //*/
+    }
+    return interpolator;
+  }
+
   /**
-   * Used internally by {@link #saveConfig(String)}. Converts the {@code _id} eye path into
-   * a P5 JSONArray.
+   * Used internally by {@link #saveConfig(String)}. Converts the {@code interpolator}
+   * to a P5 JSONArray.
    */
-  /*
-  protected JSONArray toJSONArray(int _id) {
+  protected JSONArray _toJSONArray(Interpolator interpolator) {
     JSONArray jsonKeyFrames = new JSONArray();
-    for (int i = 0; i < eye().keyFrameInterpolator(_id).numberOfKeyFrames(); i++) {
-      JSONObject jsonKeyFrame = toJSONObject(eye().keyFrameInterpolator(_id).keyFrame(i));
-      jsonKeyFrame.setFloat("time", eye().keyFrameInterpolator(_id).keyFrameTime(i));
+    for (int i = 0; i < interpolator.size(); i++) {
+      JSONObject jsonKeyFrame = _toJSONObject(interpolator.keyFrame(i));
+      jsonKeyFrame.setFloat("time", interpolator.time(i));
       jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
     }
     return jsonKeyFrames;
   }
-  */
 
   /**
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a
    * {@code frame}.
    */
-  protected Frame toFrame(JSONObject jsonFrame) {
+  protected Frame _toFrame(JSONObject jsonFrame) {
     Frame frame = new Frame();
     float x, y, z;
     x = jsonFrame.getJSONArray("position").getFloat(0);
@@ -1111,11 +1117,11 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code frame} into a P5
    * JSONObject.
    */
-  protected JSONObject toJSONObject(Frame frame) {
+  protected JSONObject _toJSONObject(Frame frame) {
     JSONObject jsonFrame = new JSONObject();
     jsonFrame.setFloat("magnitude", frame.magnitude());
-    jsonFrame.setJSONArray("position", toJSONArray(frame.position()));
-    jsonFrame.setJSONArray("orientation", toJSONArray(frame.orientation()));
+    jsonFrame.setJSONArray("position", _toJSONArray(frame.position()));
+    jsonFrame.setJSONArray("orientation", _toJSONArray(frame.orientation()));
     return jsonFrame;
   }
 
@@ -1123,7 +1129,7 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code vector} into a P5
    * JSONArray.
    */
-  protected JSONArray toJSONArray(Vector vector) {
+  protected JSONArray _toJSONArray(Vector vector) {
     JSONArray jsonVec = new JSONArray();
     jsonVec.setFloat(0, vector.x());
     jsonVec.setFloat(1, vector.y());
@@ -1135,7 +1141,7 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #saveConfig(String)}. Converts {@code rot} into a P5
    * JSONArray.
    */
-  protected JSONArray toJSONArray(Quaternion quaternion) {
+  protected JSONArray _toJSONArray(Quaternion quaternion) {
     JSONArray jsonRot = new JSONArray();
     jsonRot.setFloat(0, quaternion.x());
     jsonRot.setFloat(1, quaternion.y());
