@@ -1,5 +1,4 @@
 ProScene [![Version](https://img.shields.io/badge/proscene-v3.0.0-brightgreen.svg)](https://github.com/remixlab/proscene/releases/download/latest/proscene.zip) [![Dependencies](https://img.shields.io/badge/dependencies-processing%203-orange.svg)](http://processing.org/) [![License](https://img.shields.io/badge/license-GPL%203-blue.svg)](http://www.gnu.org/licenses/gpl.html) [![Paper](https://img.shields.io/badge/paper-softwareX-yellow.svg)](https://authors.elsevier.com/sd/article/S235271101730002X)
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -72,39 +71,3 @@ included in the package file).
 # Installation
 
 Import/update it directly from your PDE. Otherwise download your release from [here](https://github.com/remixlab/proscene/releases) and extract it to your sketchbook `libraries` folder.
-
-# Acknowledgements
-
-Thanks to [Eduardo Moriana](http://edumo.net/) and [Miguel Parra](http://maparrar.github.io/) for their contributions with the [TUIO](http://www.tuio.org/)-based touch and kinect interfaces, respectively.
-Thanks to experimental computational designer [Amnon Owed](https://twitter.com/AmnonOwed/media) for his collaboration with polishing the KeyFrameInterpolator sub-system.
-Thanks to [Jacques Maire](http://www.xelyx.fr) for providing most of the examples found at the *Geom* section. Thanks to [Andres Colubri](http://codeanticode.wordpress.com/) for his continuous support and thorough insights.
-Thanks to [Victor Forero](https://sites.google.com/site/proscenedroi/home) for coding the initial Android agents.
-Thanks also to all **ProScene** users whose sketchs and library hacks always amaze us and inspire us.
-
-
-<!-- Contributors START
-fname_mname_lname githubUsername websiteLink contributionType1 contributionType2
-fname_mname_lname githubUsername websiteLink contributionType1 contributionType5 contributionType7
-fname_mname_lname githubUsername websiteLink contributionType3
-Contributors END -->
-<!-- Contributors table START -->
-<!-- Contributors table END -->
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification.
-
-# Author, core developer and maintainer
-
-[Jean Pierre Charalambos](http://disi.unal.edu.co/profesores/pierre/), [National University of Colombia](http://www.unal.edu.co)
-
-[![Analytics](https://ga-beacon.appspot.com/UA-45867702-2/proscene/readme)](https://github.com/igrigorik/ga-beacon)
-
-## Contributors
-
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/13878096?v=4" width="100px;"/><br /><sub><b>Jimmynex</b></sub>](https://github.com/jiapulidoar)<br />[💻](https://github.com/nakednous/proscene.js/commits?author=jiapulidoar "Code") |
-| :---: |
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!
