@@ -206,7 +206,7 @@ public class Node extends Frame implements Grabber {
 
     if(graph().is2D()) {
       LocalConstraint constraint2D = new LocalConstraint();
-      //constraint2D.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
+      constraint2D.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
       constraint2D.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(0, 0, 1));
       setConstraint(constraint2D);
     }

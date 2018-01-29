@@ -25,7 +25,7 @@ public class TwoD extends PApplet {
 
     @Override
     public void settings() {
-        size(800, 800, P2D);
+        size(800, 800, JAVA2D);
     }
 
     @Override

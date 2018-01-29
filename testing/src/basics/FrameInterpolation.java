@@ -18,7 +18,7 @@ public class FrameInterpolation extends PApplet {
     boolean showEyePath;
 
     //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-    String renderer = P3D;
+    String renderer = P2D;
 
     public void settings() {
         size(1000, 800, renderer);

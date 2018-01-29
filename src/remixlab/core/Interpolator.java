@@ -722,15 +722,8 @@ public class Interpolator {
             float alpha = step / (float) nbSteps;
             frame.setPosition(Vector.add(kf[1].position(),
                 Vector.multiply(Vector.add(kf[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)));
-            if (_graph.is3D()) {
-              frame.setOrientation(
-                  Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha));
-            } else {
-              // linear interpolation
-              float start = kf[1].orientation().angle();
-              float stop = kf[2].orientation().angle();
-              frame.setOrientation(new Quaternion(new Vector(0,0,1), start + (stop - start) * alpha));
-            }
+            frame.setOrientation(
+                    Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha));
             frame.setMagnitude(Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             _path.add(frame.get());
           }
