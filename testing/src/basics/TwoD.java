@@ -5,6 +5,8 @@ import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.core.Graph;
 import remixlab.core.Node;
+import remixlab.primitives.Quaternion;
+import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
 public class TwoD extends PApplet {
@@ -35,7 +37,7 @@ public class TwoD extends PApplet {
         if(scene.is3D())
             scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        node = new InteractiveFrame();
+        node = new InteractiveFrame(new Vector(40,-80,0), new Quaternion(QUARTER_PI));
         eye = new InteractiveFrame();
 
         scene.setEye(eye);
@@ -84,6 +86,10 @@ public class TwoD extends PApplet {
     public class InteractiveFrame extends Node {
         public InteractiveFrame() {
             super(scene);
+        }
+
+        public InteractiveFrame(Vector position, Quaternion quaternion) {
+            super(scene, null, position, quaternion, 1);
         }
 
         protected InteractiveFrame(Graph otherGraph, InteractiveFrame otherFrame) {

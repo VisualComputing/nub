@@ -125,6 +125,19 @@ public class Quaternion {
   }
 
   /**
+   * Same as {@code fromAxisAngle(new Vector(0,0,1), angle)}.
+   * <p>
+   * Constructs and initializes a quaternion from the specified 2d rotation {@code angle} (in radians).
+   * The axis of the quaternion is Z.
+   *
+   * @param angle the angle in radians
+   * @see #fromAxisAngle(Vector, float)
+   */
+  public Quaternion(float angle) {
+    fromAxisAngle(new Vector(0,0,1), angle);
+  }
+
+  /**
    * Constructs and initializes a quaternion from the specified rotation {@link #axis() axis}
    * (non null) and {@link #angle() angle} (in radians).
    *
@@ -824,7 +837,7 @@ public class Quaternion {
   /**
    * Returns the normalized axis direction of the rotation represented by the quaternion.
    * <p>
-   * The result is null for an identity quaternion.
+   * The result is {@code (0,0,0)} for an identity quaternion.
    *
    * @see #angle()
    */

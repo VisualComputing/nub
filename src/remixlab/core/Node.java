@@ -18,8 +18,8 @@ import remixlab.input.event.*;
 import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
 import remixlab.primitives.*;
-import remixlab.primitives.constraint.AxisPlaneConstraint;
-import remixlab.primitives.constraint.LocalConstraint;
+import remixlab.primitives.constraint.WorldConstraint;
+//import remixlab.primitives.constraint.AxisPlaneConstraint;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -205,9 +205,13 @@ public class Node extends Frame implements Grabber {
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
 
     if(graph().is2D()) {
-      LocalConstraint constraint2D = new LocalConstraint();
-      constraint2D.setTranslationConstraint(AxisPlaneConstraint.Type.PLANE, new Vector(0, 0, 1));
-      constraint2D.setRotationConstraint(AxisPlaneConstraint.Type.AXIS, new Vector(0, 0, 1));
+      if(position().z() != 0)
+        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y, 0)");
+      if(orientation().axis().x() != 0 || orientation().axis().y() != 0)
+        throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
+      WorldConstraint constraint2D = new WorldConstraint();
+      constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
+      constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
       setConstraint(constraint2D);
     }
 
