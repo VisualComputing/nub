@@ -1,7 +1,8 @@
 distribution
-bin
-tmp
-/out
+bin/
+tmp/
+out/
+node_modules/
 data/config.json
 **/.idea/workspace.xml
 **/.idea/tasks.xml

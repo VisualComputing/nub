@@ -310,7 +310,16 @@ public class Interpolator {
    * Sets the interpolator {@link #frame()}.
    */
   public void setFrame(Frame frame) {
+    if(frame == _frame)
+      return;
+    if(frame instanceof Node)
+      if(graph() != ((Node) frame)._graph)
+        throw new RuntimeException("Node and Interpolator graphs should match");
+    if(_frame instanceof Node)
+      ((Node) _frame)._interpolators.remove(this);
     _frame = frame;
+    if(_frame instanceof Node)
+      ((Node) _frame)._interpolators.add(this);
   }
 
   /**
@@ -591,6 +600,10 @@ public class Interpolator {
   public void addKeyFrame(Frame frame, float time) {
     if (frame == null)
       return;
+
+    if(frame instanceof Node)
+      if(graph() != ((Node) frame)._graph)
+        throw new RuntimeException("Node and Interpolator graphs should match");
 
     if (_list.isEmpty())
       _time = time;
