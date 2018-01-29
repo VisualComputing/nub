@@ -82,7 +82,7 @@ public class MotionEvent1 extends MotionEvent {
    * the {@link #distance()}, {@link #delay()} and {@link #speed()} all to {@code zero}.
    *
    * @param previous
-   * @param x         1-dof
+   * @param x        1-dof
    */
   public MotionEvent1(MotionEvent1 previous, float x) {
     super();
@@ -149,7 +149,7 @@ public class MotionEvent1 extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (dx()==0 && !fired() && !flushed())
+    if (dx() == 0 && !fired() && !flushed())
       return true;
     return false;
   }

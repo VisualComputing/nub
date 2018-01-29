@@ -183,7 +183,7 @@ public class MotionEvent2 extends MotionEvent {
 
   @Override
   public boolean isNull() {
-    if (dx()==0 && dy()==0 && !fired() && !flushed())
+    if (dx() == 0 && dy() == 0 && !fired() && !flushed())
       return true;
     return false;
   }

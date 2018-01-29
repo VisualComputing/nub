@@ -133,7 +133,7 @@ public class Vector {
    * https://en.wikipedia.org/wiki/Vector_projection
    */
   public static Vector vectorProjection(Vector a, Vector b) {
-    return Vector.multiply(b, scalarProjection(a,b));
+    return Vector.multiply(b, scalarProjection(a, b));
   }
 
   /**
@@ -141,7 +141,7 @@ public class Vector {
    * https://en.wikipedia.org/wiki/Scalar_projection
    */
   public static float scalarProjection(Vector a, Vector b) {
-    return Vector.dot(a,b);
+    return Vector.dot(a, b);
   }
 
   /**
@@ -362,9 +362,9 @@ public class Vector {
   /**
    * Add two vectors into a target vector.
    *
-   * @param vector1     a vector
-   * @param vector2     another vector
-   * @param target the target vector (if null, a new vector will be created)
+   * @param vector1 a vector
+   * @param vector2 another vector
+   * @param target  the target vector (if null, a new vector will be created)
    * @return a new vector that is the sum of vector1 and vector2
    */
   static public Vector add(Vector vector1, Vector vector2, Vector target) {
@@ -412,9 +412,9 @@ public class Vector {
   /**
    * Subtract one vector from another and store in another vector.
    *
-   * @param vector1     the x, y, and z components of a Vector object
-   * @param vector2     the x, y, and z components of a Vector object
-   * @param target Vector in which to store the result
+   * @param vector1 the x, y, and z components of a Vector object
+   * @param vector2 the x, y, and z components of a Vector object
+   * @param target  Vector in which to store the result
    */
   static public Vector subtract(Vector vector1, Vector vector2, Vector target) {
     if (target == null) {
@@ -440,7 +440,7 @@ public class Vector {
    * Multiply a vector by a scalar.
    *
    * @param vector a vector
-   * @param n scalar
+   * @param n      scalar
    * @return a new vector that is vector * n
    */
   static public Vector multiply(Vector vector, float n) {
@@ -450,7 +450,7 @@ public class Vector {
   /**
    * Multiply a vector by a scalar, and write the result into a target vector.
    *
-   * @param vector      a vector
+   * @param vector a vector
    * @param n      scalar
    * @param target Vector to store the result
    * @return the target vector, now set to vector * n
@@ -479,7 +479,7 @@ public class Vector {
    * Divide a vector by a scalar and return the result in a new vector.
    *
    * @param vector a vector
-   * @param n scalar
+   * @param n      scalar
    * @return a new vector that is vector / n
    */
   static public Vector divide(Vector vector, float n) {
@@ -582,9 +582,9 @@ public class Vector {
   /**
    * Cross product: target = vector1 * vector2.
    *
-   * @param vector1     any variable of type Vector
-   * @param vector2     any variable of type Vector
-   * @param target Vector to store the result
+   * @param vector1 any variable of type Vector
+   * @param vector2 any variable of type Vector
+   * @param target  Vector to store the result
    */
   static public Vector cross(Vector vector1, Vector vector2, Vector target) {
     float crossX = vector1._vector[1] * vector2._vector[2] - vector2._vector[1] * vector1._vector[2];
@@ -653,8 +653,8 @@ public class Vector {
   /**
    * Sets the magnitude of this vector, storing the result in another vector.
    *
-   * @param target Set to null to create a new vector
-   * @param magnitude    the new length for the new vector
+   * @param target    Set to null to create a new vector
+   * @param magnitude the new length for the new vector
    * @return a new vector (if target was null), or target
    */
   public Vector setMagnitude(Vector target, float magnitude) {
@@ -697,10 +697,10 @@ public class Vector {
   /**
    * Linear interpolate the vector to another vector.
    *
-   * @param vector   the vector to lerp to
+   * @param vector the vector to lerp to
    * @param amount The amt parameter is the amount to interpolate between the two vectors where
-   *            1.0 equal to the new vector 0.1 is very near the new vector, 0.5 is half-way
-   *            in between.
+   *               1.0 equal to the new vector 0.1 is very near the new vector, 0.5 is half-way
+   *               in between.
    */
   public void lerp(Vector vector, float amount) {
     this._vector[0] = Vector.lerp(this._vector[0], vector._vector[0], amount);

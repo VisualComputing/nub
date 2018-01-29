@@ -124,11 +124,11 @@ public class KeyAgent extends Agent {
 
   //TODO experimental
   protected boolean _update(Event event) {
-    if(poll(event) != null)
+    if (poll(event) != null)
       return handle(event);
     //if(_defaultGrabber() != null)
     //return handle(_event);
-    if(defaultGrabber() != null)
+    if (defaultGrabber() != null)
       handle(event);
     return false;
   }

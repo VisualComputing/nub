@@ -22,8 +22,8 @@ public class Matrix {
    */
   public boolean matches(Matrix other) {
     boolean result = true;
-    for(int i = 0; i < _matrix.length; i++) {
-      if(_matrix[i] != other._matrix[i])
+    for (int i = 0; i < _matrix.length; i++) {
+      if (_matrix[i] != other._matrix[i])
         result = false;
       break;
     }

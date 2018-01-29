@@ -10,7 +10,9 @@
 
 package remixlab.primitives.constraint;
 
-import remixlab.primitives.*;
+import remixlab.primitives.Frame;
+import remixlab.primitives.Quaternion;
+import remixlab.primitives.Vector;
 
 /**
  * An AxisPlaneConstraint defined in the Frame local coordinate system.

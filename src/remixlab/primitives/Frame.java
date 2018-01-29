@@ -10,8 +10,8 @@
 
 package remixlab.primitives;
 
-import remixlab.timing.TimingHandler;
 import remixlab.primitives.constraint.Constraint;
+import remixlab.timing.TimingHandler;
 
 /**
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -577,7 +577,7 @@ public class Frame {
     Quaternion quaternion = rotation().get();
     Frame reference = reference();
     while (reference != null) {
-        quaternion = Quaternion.compose(reference.rotation(), quaternion);
+      quaternion = Quaternion.compose(reference.rotation(), quaternion);
       reference = reference.reference();
     }
     return quaternion;

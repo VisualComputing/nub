@@ -17,16 +17,16 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
+import remixlab.core.Graph;
+import remixlab.core.Interpolator;
+import remixlab.core.MatrixHandler;
+import remixlab.core.Node;
 import remixlab.input.Agent;
 import remixlab.input.Grabber;
+import remixlab.primitives.*;
 import remixlab.timing.SequentialTimer;
 import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
-import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.core.Interpolator;
-import remixlab.core.MatrixHandler;
-import remixlab.primitives.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -147,8 +147,8 @@ public class Scene extends Graph implements PConstants {
 
     // 3. Frames & picking buffer
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
-            pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
-            null;
+        pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
+        null;
     if (_bb != null) {
       _triangleShader = pApplet().loadShader("PickingBuffer.frag");
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
@@ -295,7 +295,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   public Node mouseAgentInputNode() {
-    return mouseAgentInputGrabber() instanceof Node ? (Node)mouseAgent().inputGrabber() : null;
+    return mouseAgentInputGrabber() instanceof Node ? (Node) mouseAgent().inputGrabber() : null;
   }
 
   public void resetMouseAgentInputNode() {
@@ -360,7 +360,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   public Node keyAgentInputNode() {
-    return keyAgentInputGrabber() instanceof Node ? (Node)keyAgent().inputGrabber() : null;
+    return keyAgentInputGrabber() instanceof Node ? (Node) keyAgent().inputGrabber() : null;
   }
 
   public void resetKeyAgentInputNode() {
@@ -790,7 +790,7 @@ public class Scene extends Graph implements PConstants {
   protected void _handleFocus() {
     if (_offScreenScenes == 0)
       return;
-    if(isOffscreen()) {
+    if (isOffscreen()) {
       // Handling focus of non-overlapping scenes is trivial.
       // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
       // scn2.display() is to be called after scn1.display() (which is the _key observation).
@@ -817,17 +817,16 @@ public class Scene extends Graph implements PConstants {
         disableMouseAgent();
         disableKeyAgent();
       }
-    }
-    else {
+    } else {
       if (_lastScene != null) {
         boolean available = true;
         if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
-        || _lastScene._lastDisplay == TimingHandler.frameCount)  && _lastScene._hasFocus()) {
+            || _lastScene._lastDisplay == TimingHandler.frameCount) && _lastScene._hasFocus()) {
           disableMouseAgent();
           disableKeyAgent();
           available = false;
         }
-        if(_hasFocus() && available) {
+        if (_hasFocus() && available) {
           enableMouseAgent();
           enableKeyAgent();
           _lastScene = this;
@@ -1034,7 +1033,7 @@ public class Scene extends Graph implements PConstants {
       setRadius(json.getFloat("radius"));
       String type = json.getString("type");
       setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
-              type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
+          type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
       eye().setWorldMatrix(_toFrame(json.getJSONObject("eye")));
 
       /*
@@ -1056,7 +1055,7 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONArray into an interpolator.
    */
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
-    Interpolator interpolator =  new Interpolator(this);
+    Interpolator interpolator = new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node keyFrame = new Node(this);
       pruneBranch(keyFrame);
@@ -1169,7 +1168,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void traverse(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
-    if(pGraphics != frontBuffer())
+    if (pGraphics != frontBuffer())
       bindMatrices(pGraphics);
     super.traverse();
   }
@@ -1192,7 +1191,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #matrixHandler()
    * @see #setMatrixHandler(MatrixHandler)
-   *
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
   public MatrixHandler matrixHelper(PGraphics pGraphics) {
@@ -1487,7 +1485,7 @@ public class Scene extends Graph implements PConstants {
   public static PMatrix3D toPMatrix(Matrix matrix) {
     float[] a = matrix.getTransposed(new float[16]);
     return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
-            a[15]);
+        a[15]);
   }
 
   /**
@@ -1600,8 +1598,8 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      if(frame instanceof Node)
-        drawPickingTarget((Node)frame);
+      if (frame instanceof Node)
+        drawPickingTarget((Node) frame);
     frontBuffer().popStyle();
   }
 
@@ -2232,7 +2230,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
     pGraphics.popStyle();
   }
-  
+
   public void drawEye(Graph graph) {
     drawEye(graph, false);
   }
@@ -2824,7 +2822,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Draws a torus solenoid. Dandelion logo.
-   *
+   * <p>
    * Code contributed by Jacques Maire (http://www.alcys.com/) See also:
    * http://www.mathcurve.com/courbes3d/solenoidtoric/solenoidtoric.shtml
    * http://crazybiocomputing.blogspot.fr/2011/12/3d-curves-toric-solenoids.html
@@ -2885,10 +2883,10 @@ public class Scene extends Graph implements PConstants {
         float ai = eps * jj;
         float alpha = a * PApplet.TWO_PI / faces + ai;
         v1 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
-                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+            (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         alpha = b * PApplet.TWO_PI / faces + ai;
         v2 = new Vector((outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.cos(ai),
-                (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
+            (outsideRadius + insideRadius * PApplet.cos(alpha)) * PApplet.sin(ai), insideRadius * PApplet.sin(alpha));
         vertex(pGraphics, v1.x(), v1.y(), v1.z());
         vertex(pGraphics, v2.x(), v2.y(), v2.z());
       }

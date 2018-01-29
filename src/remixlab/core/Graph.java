@@ -12,12 +12,7 @@ package remixlab.core;
 
 import remixlab.input.Agent;
 import remixlab.input.InputHandler;
-import remixlab.primitives.Frame;
-import remixlab.primitives.Point;
-import remixlab.primitives.Rectangle;
-import remixlab.primitives.Vector;
-import remixlab.primitives.Quaternion;
-import remixlab.primitives.Matrix;
+import remixlab.primitives.*;
 import remixlab.timing.Animator;
 import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
@@ -294,7 +289,7 @@ public class Graph {
    * .
    */
   public float horizontalFieldOfView() {
-    return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude() )* aspectRatio());
+    return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
   }
 
   /**
@@ -515,7 +510,7 @@ public class Graph {
    * @see #boundaryWidthHeight()
    */
   protected float _rescalingFactor() {
-    if(is2D())
+    if (is2D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;
@@ -734,15 +729,15 @@ public class Graph {
     //1. Check if tip is a tail descendant
     boolean desc = false;
     ArrayList<Node> descList = branch(tail);
-    for(Node node : descList)
-      if(node == tip) {
+    for (Node node : descList)
+      if (node == tip) {
         desc = true;
         break;
       }
     //2. If so, return the path between the two
-    if(desc) {
+    if (desc) {
       Node _tip = tip;
-      while(_tip != tail) {
+      while (_tip != tail) {
         list.add(0, _tip);
         _tip = _tip.reference();
       }
@@ -781,7 +776,9 @@ public class Graph {
     inputHandler().setDefaultGrabber(node);
   }
 
-  public void resetInputNode() {inputHandler().resetTrackedGrabber();}
+  public void resetInputNode() {
+    inputHandler().resetTrackedGrabber();
+  }
 
   public void shiftDefaultNode(Node node1, Node node2) {
     inputHandler().shiftDefaultGrabber(node1, node2);
@@ -892,7 +889,7 @@ public class Graph {
   public void beginScreenCoordinates() {
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-              + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
 
     _startCoordCalls++;
     _matrixHandler.beginScreenCoordinates();
@@ -908,7 +905,7 @@ public class Graph {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-              + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
 
     _matrixHandler.endScreenCoordinates();
   }
@@ -1322,7 +1319,7 @@ public class Graph {
   public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by pointIsVisible) may be outdated. Please "
-              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
         return false;
@@ -1353,7 +1350,7 @@ public class Graph {
   public Visibility ballVisibility(Vector center, float radius) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by sphereIsVisible) may be outdated. Please "
-              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       float d = distanceToBoundary(i, center);
@@ -1391,13 +1388,13 @@ public class Graph {
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
-              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
       boolean allOut = true;
       for (int c = 0; c < 8; ++c) {
         Vector pos = new Vector(((c & 4) != 0) ? corner1._vector[0] : corner2._vector[0], ((c & 2) != 0) ? corner1._vector[1] : corner2._vector[1],
-                ((c & 1) != 0) ? corner1._vector[2] : corner2._vector[2]);
+            ((c & 1) != 0) ? corner1._vector[2] : corner2._vector[2]);
         if (distanceToBoundary(i, pos) > 0.0)
           allInForAllPlanes = false;
         else
@@ -1469,8 +1466,7 @@ public class Graph {
       _normal = new Vector[rows];
       for (int i = 0; i < _normal.length; i++)
         _normal[i] = new Vector();
-    }
-    else if (_normal.length != rows) {
+    } else if (_normal.length != rows) {
       _normal = new Vector[rows];
       for (int i = 0; i < _normal.length; i++)
         _normal[i] = new Vector();
@@ -1685,7 +1681,7 @@ public class Graph {
   public float[][] boundaryEquations() {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations may be outdated. Please "
-              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     return _coefficients;
   }
 
@@ -1714,14 +1710,14 @@ public class Graph {
   public float distanceToBoundary(int index, Vector position) {
     if (!areBoundaryEquationsEnabled())
       System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
-              + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
-    if(is3D())
+    if (is3D())
       return Vector.dot(position, myVector) - _coefficients[index][3];
     else
       return (_coefficients[index][0] * position.x() + _coefficients[index][1] * position.y() + _coefficients[index][2])
-            / (float) Math
-            .sqrt(_coefficients[index][0] * _coefficients[index][0] + _coefficients[index][1] * _coefficients[index][1]);
+          / (float) Math
+          .sqrt(_coefficients[index][0] * _coefficients[index][0] + _coefficients[index][1] * _coefficients[index][1]);
   }
 
   /**
@@ -1757,7 +1753,7 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
-                .tan(fieldOfView() / 2.0f) / height();
+            .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
@@ -1791,8 +1787,8 @@ public class Graph {
    */
   public boolean isFaceBackFacing(Vector a, Vector b, Vector c) {
     return isFaceBackFacing(a, isLeftHanded() ?
-            Vector.subtract(b, a).cross(Vector.subtract(c, a)) :
-            Vector.subtract(c, a).cross(Vector.subtract(b, a)));
+        Vector.subtract(b, a).cross(Vector.subtract(c, a)) :
+        Vector.subtract(c, a).cross(Vector.subtract(b, a)));
   }
 
   /**
@@ -1969,13 +1965,13 @@ public class Graph {
     in[3] = 1.0f;
 
     out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
-            + projectionViewMatrix._matrix[12] * in[3];
+        + projectionViewMatrix._matrix[12] * in[3];
     out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
-            + projectionViewMatrix._matrix[13] * in[3];
+        + projectionViewMatrix._matrix[13] * in[3];
     out[2] = projectionViewMatrix._matrix[2] * in[0] + projectionViewMatrix._matrix[6] * in[1] + projectionViewMatrix._matrix[10] * in[2]
-            + projectionViewMatrix._matrix[14] * in[3];
+        + projectionViewMatrix._matrix[14] * in[3];
     out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
-            + projectionViewMatrix._matrix[15] * in[3];
+        + projectionViewMatrix._matrix[15] * in[3];
 
     if (out[3] == 0.0)
       return false;
@@ -2064,14 +2060,14 @@ public class Graph {
   /**
    * Similar to {@code gluUnProject}: map window coordinates to object coordinates.
    *
-   * @param winx                     Specify the window x coordinate.
-   * @param winy                     Specify the window y coordinate.
-   * @param winz                     Specify the window z coordinate.
-   * @param objCoordinate            Return the computed object coordinates.
+   * @param winx          Specify the window x coordinate.
+   * @param winy          Specify the window y coordinate.
+   * @param winz          Specify the window z coordinate.
+   * @param objCoordinate Return the computed object coordinates.
    */
   protected boolean _unproject(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
-    if(matrixHandler().isProjectionViewInverseCached())
+    if (matrixHandler().isProjectionViewInverseCached())
       projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
     else {
       projectionViewInverseMatrix = Matrix.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
@@ -2167,11 +2163,10 @@ public class Graph {
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
   public void setAnchor(Vector anchor) {
-    if(is2D()) {
+    if (is2D()) {
       _anchor = anchor;
       _anchor.setZ(0);
-    }
-    else {
+    } else {
       float prevDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
       this._anchor = anchor;
       float newDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
@@ -2288,8 +2283,8 @@ public class Graph {
     eye().rotate(q);
 
     // Useful in fly mode to keep the horizontal direction.
-    if(eye() instanceof Node)
-      ((Node)eye())._updateUpVector();
+    if (eye() instanceof Node)
+      ((Node) eye())._updateUpVector();
   }
 
   /**
@@ -2318,7 +2313,7 @@ public class Graph {
    * @see #fitBoundingBox(Vector, Vector)
    */
   public void lookAt(Vector target) {
-    if(is2D())
+    if (is2D())
       eye().setPosition(target.x(), target.y());
     else
       setViewDirection(Vector.subtract(target, eye().position()));
@@ -2456,7 +2451,7 @@ public class Graph {
    * @see #setUpVector(Vector, boolean)
    */
   public void fitBall(Vector center, float radius) {
-    if(is2D()) {
+    if (is2D()) {
       float size = Math.min(width(), height());
       eye().setMagnitude(2 * radius / size);
       lookAt(center);
@@ -2501,20 +2496,20 @@ public class Graph {
    */
   public void fitScreenRegion(Rectangle rectangle) {
     //ad-hoc
-    if(is2D()) {
+    if (is2D()) {
       float rectRatio = (float) rectangle.width() / (float) rectangle.height();
-    if (aspectRatio() < 1.0f) {
-      if (aspectRatio() < rectRatio)
-        eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
-      else
-        eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
-    } else {
-      if (aspectRatio() < rectRatio)
-        eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
-      else
-        eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
-    }
-    lookAt(unprojectedCoordinatesOf(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      if (aspectRatio() < 1.0f) {
+        if (aspectRatio() < rectRatio)
+          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+        else
+          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+      } else {
+        if (aspectRatio() < rectRatio)
+          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+        else
+          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+      }
+      lookAt(unprojectedCoordinatesOf(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
       return;
     }
 
@@ -2568,8 +2563,8 @@ public class Graph {
       case PERSPECTIVE:
         origin.set(eye().position());
         direction.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
-                ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
-                -1.0f));
+            ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
+            -1.0f));
         direction.set(Vector.subtract(eye().inverseCoordinatesOf(direction), origin));
         direction.normalize();
         break;
@@ -2578,8 +2573,8 @@ public class Graph {
       case ORTHOGRAPHIC: {
         float[] wh = boundaryWidthHeight();
         origin.set(
-                new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
-                        0.0f));
+            new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
+                0.0f));
         origin.set(eye().inverseCoordinatesOf(origin));
         direction.set(viewDirection());
         break;

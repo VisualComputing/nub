@@ -10,9 +10,11 @@
 
 package remixlab.core;
 
+import remixlab.primitives.Frame;
+import remixlab.primitives.Quaternion;
+import remixlab.primitives.Vector;
 import remixlab.timing.TimingHandler;
 import remixlab.timing.TimingTask;
-import remixlab.primitives.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,8 +83,8 @@ public class Interpolator {
    */
   public boolean matches(Interpolator other) {
     boolean result = true;
-    for(int i = 0; i < _list.size(); i++) {
-      if(!_list.get(i).matches(other._list.get(i)))
+    for (int i = 0; i < _list.size(); i++) {
+      if (!_list.get(i).matches(other._list.get(i)))
         result = false;
       break;
     }
@@ -513,7 +515,7 @@ public class Interpolator {
    * the interpolation will naturally immediately stop.
    */
   public void start(int period) {
-    if(started())
+    if (started())
       stop();
     if (period >= 0)
       setPeriod(period);
@@ -540,7 +542,7 @@ public class Interpolator {
   }
 
   public void toggle() {
-    if(started())
+    if (started())
       stop();
     else
       start();
@@ -618,8 +620,8 @@ public class Interpolator {
     if (started())
       stop();
     KeyFrame kf = _list.remove(index);
-    if(kf.frame() instanceof Node)
-      _graph.pruneBranch((Node)kf._frame);
+    if (kf.frame() instanceof Node)
+      _graph.pruneBranch((Node) kf._frame);
     setTime(firstTime());
   }
 
@@ -631,8 +633,8 @@ public class Interpolator {
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      if(keyFrame.frame() instanceof Node)
-        _graph.pruneBranch((Node)keyFrame._frame);
+      if (keyFrame.frame() instanceof Node)
+        _graph.pruneBranch((Node) keyFrame._frame);
     }
     _list.clear();
     _pathIsValid = false;
@@ -664,7 +666,7 @@ public class Interpolator {
    */
   public List<Frame> keyFrames() {
     List<Frame> list = new ArrayList<Frame>();
-    for(KeyFrame keyFrame : _list)
+    for (KeyFrame keyFrame : _list)
       list.add(keyFrame.frame());
     return list;
   }
@@ -723,7 +725,7 @@ public class Interpolator {
             frame.setPosition(Vector.add(kf[1].position(),
                 Vector.multiply(Vector.add(kf[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)));
             frame.setOrientation(
-                    Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha));
+                Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha));
             frame.setMagnitude(Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
             _path.add(frame.get());
           }
@@ -926,9 +928,9 @@ public class Interpolator {
         _list.get(_current2.nextIndex()).magnitude(), alpha);
 
     Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).orientation(),
-            _list.get(_current1.nextIndex()).tangentQuaternion(),
-            _list.get(_current2.nextIndex()).tangentQuaternion(),
-            _list.get(_current2.nextIndex()).orientation(), alpha);
+        _list.get(_current1.nextIndex()).tangentQuaternion(),
+        _list.get(_current2.nextIndex()).tangentQuaternion(),
+        _list.get(_current2.nextIndex()).orientation(), alpha);
 
     frame().setPosition(pos);
     frame().setRotation(q);

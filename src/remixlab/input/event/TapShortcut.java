@@ -37,8 +37,8 @@ public class TapShortcut extends Shortcut {
   /**
    * Defines a tap shortcut from the given gesture-id and number of taps.
    *
-   * @param id id
-   * @param count  number of taps
+   * @param id    id
+   * @param count number of taps
    */
   public TapShortcut(int id, int count) {
     this(Event.NO_MODIFIER_MASK, id, count);
@@ -48,9 +48,9 @@ public class TapShortcut extends Shortcut {
    * Defines a tap shortcut from the given gesture-id, modifier mask, and number of
    * taps.
    *
-   * @param modifiers  modifier mask
-   * @param id id
-   * @param count  number of taps
+   * @param modifiers modifier mask
+   * @param id        id
+   * @param count     number of taps
    */
   public TapShortcut(int modifiers, int id, int count) {
     super(modifiers, id);
@@ -69,7 +69,7 @@ public class TapShortcut extends Shortcut {
 
   @Override
   public boolean matches(Shortcut other) {
-    if(super.matches(other))
+    if (super.matches(other))
       return count() == ((TapShortcut) other).count();
     return false;
   }

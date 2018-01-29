@@ -15,15 +15,16 @@ import remixlab.input.Event;
 import remixlab.input.Grabber;
 import remixlab.input.InputHandler;
 import remixlab.input.event.*;
-import remixlab.timing.TimingHandler;
-import remixlab.timing.TimingTask;
 import remixlab.primitives.*;
 import remixlab.primitives.constraint.WorldConstraint;
-//import remixlab.primitives.constraint.AxisPlaneConstraint;
+import remixlab.timing.TimingHandler;
+import remixlab.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+//import remixlab.primitives.constraint.AxisPlaneConstraint;
 
 /**
  * A {@link Frame} implementing the
@@ -204,10 +205,10 @@ public class Node extends Frame implements Grabber {
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
 
-    if(graph().is2D()) {
-      if(position().z() != 0)
+    if (graph().is2D()) {
+      if (position().z() != 0)
         throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y, 0)");
-      if(orientation().axis().x() != 0 || orientation().axis().y() != 0)
+      if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
         throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
       WorldConstraint constraint2D = new WorldConstraint();
       constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
@@ -256,13 +257,12 @@ public class Node extends Frame implements Grabber {
   protected Node(Graph graph, Node other) {
     super(other);
     this._graph = graph;
-    if(this.graph() == other.graph()) {
+    if (this.graph() == other.graph()) {
       this._id = ++graph()._nodeCount;
       // unlikely but theoretically possible
       if (this._id == 16777216)
         throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
-    }
-    else {
+    } else {
       this._id = other._id();
       this.setWorldMatrix(other);
     }
@@ -271,7 +271,7 @@ public class Node extends Frame implements Grabber {
     this._visit = other._visit;
 
     this._children = new ArrayList<Node>();
-    if(this.graph() == other.graph()) {
+    if (this.graph() == other.graph()) {
       this.setReference(reference());// _restorePath
     }
 
@@ -311,12 +311,11 @@ public class Node extends Frame implements Grabber {
     //
     this.setFlySpeed(other.flySpeed());
 
-    if(this.graph() == other.graph()) {
+    if (this.graph() == other.graph()) {
       for (Agent agent : this._graph.inputHandler().agents())
         if (agent.hasGrabber(other))
           agent.addGrabber(this);
-    }
-    else {
+    } else {
       this.graph().inputHandler().addGrabber(this);
     }
   }
@@ -1181,7 +1180,7 @@ public class Node extends Frame implements Grabber {
     // Points on the deformed ball
     float px = rotationSensitivity() * ((int) prevX - cx) / _graph.width();
     float py =
-            rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
+        rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
     float dx = rotationSensitivity() * (x - cx) / _graph.width();
     float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
 
@@ -2199,7 +2198,7 @@ public class Node extends Frame implements Grabber {
     // Scale to fit the screen relative _event displacement
     // Quite excited to see how simple it's in 2d:
     //if (_graph.is2D())
-      //return eyeVector;
+    //return eyeVector;
     // ... and amazed as to how dirty it's in 3d:
     switch (_graph.type()) {
       case PERSPECTIVE:

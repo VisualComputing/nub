@@ -27,7 +27,7 @@ public class Tuple {
    * Constructs a {@link Event},
    * {@link Grabber} tuple.
    *
-   * @param event {@link Event}
+   * @param event   {@link Event}
    * @param grabber {@link Grabber}
    */
   public Tuple(Event event, Grabber grabber) {

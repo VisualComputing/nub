@@ -24,9 +24,9 @@ public class Quaternion {
    */
   public boolean matches(Quaternion other) {
     return _quaternion[0] == other._quaternion[0]
-            && _quaternion[1] == other._quaternion[1]
-            && _quaternion[2] == other._quaternion[2]
-            && _quaternion[3] == other._quaternion[3];
+        && _quaternion[1] == other._quaternion[1]
+        && _quaternion[2] == other._quaternion[2]
+        && _quaternion[3] == other._quaternion[3];
   }
 
   /**
@@ -134,7 +134,7 @@ public class Quaternion {
    * @see #fromAxisAngle(Vector, float)
    */
   public Quaternion(float angle) {
-    fromAxisAngle(new Vector(0,0,1), angle);
+    fromAxisAngle(new Vector(0, 0, 1), angle);
   }
 
   /**
@@ -451,7 +451,7 @@ public class Quaternion {
    * {@code quaternion.rotate(vector)}.
    *
    * @param quaternion the Quaternion
-   * @param vector  the Vector
+   * @param vector     the Vector
    * @see #rotate(Vector)
    * @see #inverseRotate(Vector)
    */

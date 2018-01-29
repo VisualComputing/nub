@@ -103,7 +103,7 @@ public class AnimatorObject implements Animator {
 
   @Override
   public void toggle() {
-    if(started())
+    if (started())
       stop();
     else
       start();

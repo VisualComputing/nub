@@ -24,7 +24,7 @@ public class TimingHandler {
   protected float _frameRate;
 
   protected long _deltaCount;
-    // T i m e r P o o l
+  // T i m e r P o o l
   protected ArrayList<TimingTask> _taskPool;
   protected long _frameRateLastMillis;
   protected long _localCount;
@@ -129,7 +129,7 @@ public class TimingHandler {
     _localCount++;
     //TODO needs testing but I think is also safe and simpler
     //if (TimingHandler.frameCount < frameCount())
-      //TimingHandler.frameCount = frameCount();
+    //TimingHandler.frameCount = frameCount();
     if (frameCount < frameCount() + _deltaCount)
       frameCount = frameCount() + _deltaCount;
   }

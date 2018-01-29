@@ -13,7 +13,9 @@ package remixlab.proscene;
 import remixlab.core.Graph;
 import remixlab.input.Agent;
 import remixlab.input.Event;
-import remixlab.input.event.*;
+import remixlab.input.event.MotionEvent1;
+import remixlab.input.event.MotionEvent2;
+import remixlab.input.event.TapEvent;
 import remixlab.primitives.Point;
 
 /**
@@ -26,7 +28,7 @@ import remixlab.primitives.Point;
 public class MouseAgent extends Agent {
   protected Point _upperLeftCorner;
   public static int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
-          LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
+      LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
   protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;

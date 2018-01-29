@@ -79,7 +79,7 @@ public class Shortcut {
    * @param other shortcut
    */
   public boolean matches(Shortcut other) {
-    if(this.getClass() == other.getClass())
+    if (this.getClass() == other.getClass())
       return id() == other.id() && modifiers() == other.modifiers();
     return false;
   }

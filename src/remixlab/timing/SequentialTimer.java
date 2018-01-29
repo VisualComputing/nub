@@ -34,7 +34,7 @@ public class SequentialTimer implements Timer {
   /**
    * Defines a sequential (single-threaded) timer.
    *
-   * @param timingHandler          timing handler owner
+   * @param timingHandler timing handler owner
    * @param singleShot
    */
   public SequentialTimer(TimingHandler timingHandler, boolean singleShot) {
