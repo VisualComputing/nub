@@ -141,9 +141,6 @@ public class Node extends Frame implements Grabber {
 
   protected boolean _visit;
 
-  // Interpolators
-  protected List<Interpolator> _interpolators;
-
   // id
   protected int _id;
 
@@ -217,8 +214,6 @@ public class Node extends Frame implements Grabber {
       setConstraint(constraint2D);
     }
 
-    _interpolators = new ArrayList<>();
-
     setFlySpeed(0.01f * graph().radius());
     _upVector = new Vector(0.0f, 1.0f, 0.0f);
     _visit = true;
@@ -269,10 +264,6 @@ public class Node extends Frame implements Grabber {
       this._id = other._id();
       this.setWorldMatrix(other);
     }
-
-    this._interpolators = new ArrayList<>();
-    for(Interpolator interpolator : other._interpolators)
-      _interpolators.add(interpolator.get());
 
     this._upVector = other._upVector.get();
     this._visit = other._visit;

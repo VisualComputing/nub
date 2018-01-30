@@ -315,11 +315,7 @@ public class Interpolator {
     if(frame instanceof Node)
       if(graph() != ((Node) frame)._graph)
         throw new RuntimeException("Node and Interpolator graphs should match");
-    if(_frame instanceof Node)
-      ((Node) _frame)._interpolators.remove(this);
     _frame = frame;
-    if(_frame instanceof Node)
-      ((Node) _frame)._interpolators.add(this);
   }
 
   /**

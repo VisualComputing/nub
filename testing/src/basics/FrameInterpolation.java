@@ -2,8 +2,6 @@ package basics;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Frame;
 import remixlab.proscene.*;
 import remixlab.core.*;
@@ -14,11 +12,11 @@ import remixlab.core.*;
  */
 public class FrameInterpolation extends PApplet {
     Scene scene;
-    Interpolator nodeInterpolator, eyeInterpolator;
-    boolean showEyePath;
+    Interpolator nodeInterpolator, eyeInterpolator1, eyeInterpolator2;
+    boolean showEyePath = true;
 
     //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-    String renderer = P2D;
+    String renderer = P3D;
 
     public void settings() {
         size(1000, 800, renderer);
@@ -37,7 +35,8 @@ public class FrameInterpolation extends PApplet {
         scene.fitBallInterpolation();
 
         // interpolation 2. Custom eye interpolations
-        eyeInterpolator = new Interpolator(eye);
+        eyeInterpolator1 = new Interpolator(eye);
+        eyeInterpolator2 = new Interpolator(eye);
 
         // interpolation 3. Custom (arbitrary)frame interpolations, like the one
         // you guys David & Juan are currently exploring to deform a shape
@@ -89,28 +88,48 @@ public class FrameInterpolation extends PApplet {
             pushStyle();
             fill(255,0,0);
             stroke(0,255,0);
-            scene.drawPath(eyeInterpolator, 3);
+            scene.drawPath(eyeInterpolator1, 3);
+            scene.drawPath(eyeInterpolator2, 3);
             popStyle();
         }
     }
 
     public void keyPressed() {
+        if(key == 'i') {
+            //println(((Node)scene.eye()).interpolators().size());
+            println("path 1: " + eyeInterpolator1.size());
+            println("path 2: " + eyeInterpolator2.size());
+        }
+
         if(key == ' ')
             showEyePath = !showEyePath;
-        if(key == 'l')
-            eyeInterpolator.addKeyFrame(scene.eye().get());
-        if(key == 'm')
-            eyeInterpolator.toggle();
-        if(key == 'n')
-            eyeInterpolator.clear();
-        if ( key == 'u')
+
+        if(key == '1')
+            eyeInterpolator1.addKeyFrame(scene.eye().get());
+        if(key == 'a')
+            eyeInterpolator1.toggle();
+        if(key == 'b')
+            eyeInterpolator1.clear();
+
+        if(key == '2')
+            eyeInterpolator2.addKeyFrame(scene.eye().get());
+        if(key == 'c')
+            eyeInterpolator2.toggle();
+        if(key == 'd')
+            eyeInterpolator2.clear();
+
+        if ( key == '-')
             nodeInterpolator.setSpeed(nodeInterpolator.speed()-0.25f);
-        if ( key == 'v')
+        if ( key == '+')
             nodeInterpolator.setSpeed(nodeInterpolator.speed()+0.25f);
+
         if(key == 's')
             scene.fitBallInterpolation();
         if(key == 'f')
             scene.fitBall();
+
+        if ( key=='u') scene.saveConfig("/home/pierre/config.json");
+        if ( key=='v') scene.loadConfig("/home/pierre/config.json");
     }
 
     public static void main(String args[]) {
