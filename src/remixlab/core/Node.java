@@ -25,76 +25,88 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A {@link Frame} implementing the
- * {@link Grabber} interface, which converts user gestures into
- * translation, rotation and scaling {@link Frame} updates (see
- * {@link #translationSensitivity()}, {@link #rotationSensitivity()} and
- * {@link #scalingSensitivity()}). A node may thus be attached to some of your
- * visual objects to control their motion using an {@link Agent}. To attach
- * a node to {@code MyObject} use code like this:
+ * A {@link Frame} implementing the {@link Grabber} interface, which converts user gestures into
+ * translation, rotation and scaling updates (see {@link #translationSensitivity()},
+ * {@link #rotationSensitivity()} and {@link #scalingSensitivity()}). A node may thus be attached
+ * to some of your visual objects to control their behavior using an {@link Agent}.
+ * <p>
+ * <h3>Geometry transformations</h3>
+ * <p>
+ * To define the position, orientation and magnitude of a visual object use {@link #matrix()}
+ * (see the {@link remixlab.primitives.Frame} class documentation for details) or
+ * {@link #applyTransformation()} (or {@link #applyWorldTransformation()}), as shown below:
+ * <p>
+ * {@code // Builds a node located at (0,0,0) with an identity orientation (node and
+ * world axes match)} <br>
+ * {@code Node node = new Node(graph);} <br>
+ * {@code graph.pushModelView();} <br>
+ * {@code node.applyWorldTransformation(); //same as graph.applyModelView(node.matrix());} <br>
+ * {@code // Draw your object here, in the local coordinate system.} <br>
+ * {@code graph.popModelView();} <br>
+ * <p>
+ * Alternatively, the node geometry transformation may be automatically handled by the graph
+ * traversal algorithm (see {@link remixlab.core.Graph#traverse()}), provided
+ * that the node {@link #visit()} method is overridden, as shown below:
  * <p>
  * <pre>
  * {@code
- * public class MyObject {
- *   public Node gFrame;
- *
- *   public void draw() {
- *     gFrame.graph().pushModelView();
- *     gFrame.applyWorldTransformation();
- *     drawMyObject();
- *     gFrame.graph().popModelView();
+ * node = new Node(graph) {
+ *   @Override
+ *   public void visit() {
+ *     // Draw your object here, in the local coordinate system.
  *   }
  * }
  * }
  * </pre>
  * <p>
- * See {@link #applyTransformation()}, {@link #applyWorldTransformation()},
- * {@link #graph()}, {@link Graph#pushModelView()} and
- * {@link Graph#popModelView()}
+ * A node may also be defined as the {@link Graph#eye()} (see {@link #isEye()}
+ * and {@link Graph#setEye(Frame)}). Some user gestures are then interpreted in a negated way,
+ * respect to non-eye nodes. For instance, with a move-to-the-right user gesture the
+ * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
+ * to the right.
  * <p>
- * A frame may also be defined as the {@link Graph#eye()} (see {@link #isEye()}
- * and {@link Graph#setEye(Frame)}).
- * Some user gestures are then interpreted in a negated way, respect to non-eye nodes.
- * For instance, with a move-to-the-right user gesture the
- * {@link Graph#eye()} hasGrabber to go to the <i>left</i>,
- * so that the <i>graph</i> seems to move to the right. A interactive-frame can be set
- * as the {@link Graph#eye()}, see {@link Graph#setEye(Frame)}.
+ * <h3>Behaviors</h3>
  * <p>
- * This class provides several gesture-to-motion converting methods, such as:
- * {@link #rotate(MotionEvent)}, {@link #_moveForward(MotionEvent2, boolean)},
- * {@link #_translateX(boolean)}, etc. To use them, derive from this class and override the
- * version of {@code interact} with the (bogus-_event) parameter type you want to
+ * To implement a node behavior derive from this class and override the
+ * version of {@code interact} with the (event) parameter type you want to
  * customize (see {@link #interact(MotionEvent)},
  * {@link #interact(KeyEvent)}, etc.). For example, with the following
  * code:
  * <p>
  * <pre>
  * {@code
- * protected void interact(MotionEvent2 _event) {
- *   if(_event._id() == LEFT)
- *     gestureArcball(_event);
- *   if(_event._id() == RIGHT)
- *     gestureTranslateXY(_event);
+ * Shortcut left = new Shortcut(PApplet.LEFT);
+ * Shortcut right = new Shortcut(PApplet.RIGHT);
+ * node = new Node(graph) {
+ *   @Override
+ *   public void interact(MotionEvent2 event) {
+ *     if(left.matches(event.shortcut()))
+ *       rotate(event);
+ *     if(right.matches(event.shortcut()))
+ *       translate(event);
+ *   }
  * }
  * }
  * </pre>
  * <p>
- * your custom node will then accordingly react to the LEFT and RIGHT mouse
- * buttons, provided it's added to the mouse-agent first (see
- * {@link Agent#addGrabber(Grabber)}.
+ * your custom node will then accordingly react to the LEFT and RIGHT mouse buttons,
+ * provided it's added to the mouse-agent first (see {@link Agent#addGrabber(Grabber)}.
+ * <p>
+ * Note that a node implements by default several gesture-to-motion converting methods,
+ * such as: {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent)},
+ * {@link #translateXPos()}, etc.
+ * <p>
+ * <h3>Picking</h3>
  * <p>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
  * <p>
- * A node is loosely-coupled with the graph object used to instantiate it, i.e.,
- * the transformation it represents may be applied to a different graph. See
- * {@link #applyTransformation()} and {@link #applyTransformation(Graph)}.
+ * <h3>Syncing</h3>
  * <p>
- * Two generic-nodes can be synced together ({@link #sync(Node, Node)}),
- * meaning that they will share their global parameters (position, orientation and
- * magnitude) taken the one that hasGrabber been most recently updated. Syncing can be useful to
- * share nodes among different off-screen scenes (see ProScene's EyeCrane and the
- * AuxiliarViewer examples).
+ * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
+ * share their global parameters (position, orientation and magnitude) taken the one
+ * that hasGrabber been most recently updated. Syncing can be useful to share nodes
+ * among different off-screen graphs.
  */
 public class Node extends Frame implements Grabber {
   // according to space-nav fine tuning it turned out that the space-nav is
@@ -695,7 +707,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Convenience function that simply calls {@code scn.applyTransformation(this)}. You may
+   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
    * apply the transformation represented by this frame to any graph you want using this
    * method.
    * <p>
@@ -710,7 +722,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Convenience function that simply calls {@code scn.applyWorldTransformation(this)}.
+   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
    * You may apply the world transformation represented by this frame to any graph you
    * want using this method.
    *

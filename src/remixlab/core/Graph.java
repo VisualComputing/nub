@@ -572,8 +572,7 @@ public class Graph {
 
   /**
    * Traverse the node hierarchy, successively applying the local transformation defined
-   * by each traversed node, and calling
-   * {@link Node#visit()} on it.
+   * by each traversed node, and calling {@link Node#visit()} on it.
    * <p>
    * Note that only reachable nodes are visited by this algorithm.
    * <p>
