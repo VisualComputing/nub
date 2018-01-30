@@ -21,46 +21,40 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * A keyFrame Catmull-Rom Frame interpolator.
+ * A key frame Catmull-Rom interpolator.
  * <p>
- * An Interpolator holds keyFrames (that define a path) and, optionally, a
- * reference to a Frame of your application (which will be interpolated). In this case,
- * when the user {@link #start()}, the Interpolator regularly updates
+ * An interpolator holds key frames (that define a path) and, optionally, a
+ * reference to a frame of your application (which will be interpolated). In this case,
+ * when the user {@link #start()}, the interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
  * Here is a typical utilization example:
  * <p>
- * {@code //init() should look like:}<br>
- * {@code // The Interpolator kfi is given the Frame that it will drive over time.}
- * <br>
- * {@code myFrame = new Frame());}<br>
- * {@code kfi = new Interpolator( graph, frame );}<br>
- * {@code // With an anonymous frame would look like this: kfi = new Interpolator( graph );}
- * <br>
- * {@code kfi.addKeyFrame( new Frame( new Vector(1,0,0), new Quaternion() ) );}<br>
- * {@code kfi.addKeyFrame( new Frame( new Vector(2,1,0), new Quaternion() ) );}<br>
- * {@code // ...and so on for all the keyFrames.}<br>
- * {@code kfi.start();}<br>
+ * {@code Interpolator interpolator = new Interpolator(graph);}<br>
+ * {@code interpolator.addKeyFrame(new Frame( new Vector(1,0,0), new Quaternion()));}<br>
+ * {@code interpolator.addKeyFrame(new Frame( new Vector(2,1,0), new Quaternion()));}<br>
+ * {@code // ...and so on for all the key frames.}<br>
+ * {@code interpolator.start();}<br>
  * <p>
  * {@code //mainDrawingLoop() should look like:}<br>
  * {@code graph.pushModelView();}<br>
- * {@code graph.applyTransformation(kfi.frame());}<br>
+ * {@code graph.applyTransformation(interpolator.frame());}<br>
  * {@code // Draw your object here. Its position, orientation and magnitude are interpolated.}
  * <br>
  * {@code graph.popModelView();}<br>
  * <p>
- * The keyFrames are defined by a Frame and a time, expressed in seconds. The time has to
- * be monotonously increasing over keyFrames. When {@link #speed()} equals
- * 1.0 (default value), these times correspond to actual user's seconds during
+ * The key frames are defined by a frame and a time, expressed in seconds. The time has to
+ * be monotonously increasing over key frames. When {@link #speed()} equals
+ * 1 (default value), these times correspond to actual user's seconds during
  * interpolation (provided that your main loop is fast enough). The interpolation is then
- * real-time: the keyFrames will be reached at their {@link #time(int)}.
+ * real-time: the key frames will be reached at their {@link #time(int)}.
  * <p>
  * <h3>Interpolation details</h3>
  * <p>
- * When the user {@link #start()}, a timer is started which will update the
- * {@link #frame()}'s position, orientation and magnitude every
- * {@link #period()} milliseconds. This update increases the
- * {@link #time()} by {@link #period()} * {@link #speed()} milliseconds.
+ * When {@link #start()} is called, a timer is started which will update the
+ * {@link #frame()}'s position, orientation and magnitude every {@link #period()} milliseconds.
+ * This update increases the {@link #time()} by {@link #period()} * {@link #speed()}
+ * milliseconds.
  * <p>
  * Note that this mechanism ensures that the number of interpolation steps is constant and
  * equal to the total path {@link #duration()} divided by the
@@ -70,16 +64,16 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  * <p>
- * <b>Attention:</b> If a Constraint is attached to the {@link #frame()} (see
- * {@link Frame#constraint()}), it should be deactivated before
- * {@link #started()}, otherwise the interpolated motion (computed as if
+ * <b>Attention:</b> If a {@link remixlab.primitives.constraint.Constraint} is attached to
+ * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
+ * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
  */
 public class Interpolator {
   /**
-   * Returns whether or not this Interpolator matches other.
+   * Returns whether or not this interpolator matches other.
    *
-   * @param other keyFrameInterpolator
+   * @param other Interpolator
    */
   public boolean matches(Interpolator other) {
     boolean result = true;
@@ -92,11 +86,11 @@ public class Interpolator {
   }
 
   /**
-   * Internal protected class representing 2d and 3d KeyFrames
+   * Internal protected class representing 2d and 3d key frames.
    */
   protected class KeyFrame {
     /**
-     * Returns whether or not this KeyFrame matches other.
+     * Returns whether or not this key frame matches the {@code other}.
      *
      * @param other KeyFrame
      */
@@ -189,10 +183,10 @@ public class Interpolator {
   protected Graph _graph;
 
   /**
-   * Convenience constructor that simply calls {@code this(scn, new Frame())}.
+   * Convenience constructor that simply calls {@code this(graph, new Node(graph))}.
    * <p>
    * Creates an anonymous {@link #frame()} to be interpolated by this
-   * Interpolator.
+   * interpolator.
    *
    * @see #Interpolator(Graph, Frame)
    */
@@ -209,8 +203,7 @@ public class Interpolator {
    * <p>
    * The {@link #frame()} can be set or changed using {@link #setFrame(Frame)}.
    * <p>
-   * {@link #time()}, {@link #speed()} and
-   * {@link #period()} are set to their default values.
+   * {@link #time()}, {@link #speed()} and {@link #period()} are set to their default values.
    */
   public Interpolator(Graph graph, Frame frame) {
     _graph = graph;
@@ -280,6 +273,9 @@ public class Interpolator {
     this._invalidateValues();
   }
 
+  /**
+   * Returns a deep copy of this interpolator.
+   */
   public Interpolator get() {
     return new Interpolator(this);
   }
@@ -307,40 +303,41 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}.
+   * Sets the interpolator {@link #frame()}. If frame is instance of {@link remixlab.core.Node},
+   * the frame graph ({@link Node#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {
-    if(frame == _frame)
+    if (frame == _frame)
       return;
-    if(frame instanceof Node)
-      if(graph() != ((Node) frame)._graph)
+    if (frame instanceof Node)
+      if (graph() != ((Node) frame)._graph)
         throw new RuntimeException("Node and Interpolator graphs should match");
     _frame = frame;
   }
 
   /**
-   * Returns the frame that is to be interpolated by the Interpolator.
+   * Returns the frame that is to be interpolated by the interpolator.
    * <p>
    * When {@link #started()}, this frame's position, orientation and
    * magnitude will regularly be updated by a timer, so that they follow the
-   * Interpolator path.
+   * interpolator path.
    * <p>
-   * Set using {@link #setFrame(Frame)} or with the Interpolator constructor.
+   * Set using {@link #setFrame(Frame)} or with the interpolator constructor.
    */
   public Frame frame() {
     return _frame;
   }
 
   /**
-   * Returns the number of keyFrames used by the interpolation. Use
-   * {@link #addKeyFrame(Frame)} to add new keyFrames.
+   * Returns the number of key frames used by the interpolation. Use
+   * {@link #addKeyFrame(Frame)} to add new key frames.
    */
   public int size() {
     return _list.size();
   }
 
   /**
-   * Returns the current interpolation time (in seconds) along the Interpolator
+   * Returns the current interpolation time (in seconds) along the interpolator
    * path.
    * <p>
    * This time is regularly updated when {@link #started()}. Can be set
@@ -353,10 +350,10 @@ public class Interpolator {
   /**
    * Returns the current interpolation speed.
    * <p>
-   * Default value is 1.0f, which means {@link #time(int)} will be matched during
+   * Default value is 1, which means {@link #time(int)} will be matched during
    * the interpolation (provided that your main loop is fast enough).
    * <p>
-   * A negative value will result in a reverse interpolation of the keyFrames.
+   * A negative value will result in a reverse interpolation of the key frames.
    *
    * @see #period()
    */
@@ -500,7 +497,7 @@ public class Interpolator {
   /**
    * Starts the interpolation process.
    * <p>
-   * A timer is started with an {@link #period()} period that updates the
+   * A timer is started with an {@link #period()} that updates the
    * {@link #frame()}'s position, orientation and magnitude.
    * {@link #started()} will return {@code true} until
    * {@link #stop()} is called.
@@ -515,7 +512,7 @@ public class Interpolator {
    * Use {@link #setTime(float)} before calling this method to change the
    * starting {@link #time()}.
    * <p>
-   * <b>Attention:</b> The keyFrames must be defined (see
+   * <b>Attention:</b> The key frames must be defined (see
    * {@link #addKeyFrame(Frame, float)}) before you start(), or else
    * the interpolation will naturally immediately stop.
    */
@@ -538,8 +535,7 @@ public class Interpolator {
   }
 
   /**
-   * Stops an interpolation started with {@link #start()}. See
-   * {@link #started()}.
+   * Stops an interpolation started with {@link #start()}. See {@link #started()}.
    */
   public void stop() {
     _task.stop();
@@ -554,8 +550,7 @@ public class Interpolator {
   }
 
   /**
-   * Stops the interpolation and resets {@link #time()} to the
-   * {@link #firstTime()}.
+   * Stops the interpolation and resets {@link #time()} to the {@link #firstTime()}.
    * <p>
    * If desired, call {@link #interpolate(float)} after this method to actually move
    * the {@link #frame()} to {@link #firstTime()}.
@@ -566,11 +561,11 @@ public class Interpolator {
   }
 
   /**
-   * Appends a new keyFrame to the path.
+   * Appends a new key frame to the path.
    * <p>
    * Same as {@link #addKeyFrame(Frame, float)}, except that the
    * {@link #time(int)} is set to the previous {@link #time(int)} plus one
-   * second (or 0.0 if there is no previous keyFrame).
+   * second (or 0 if there is no previous key frame).
    */
   public void addKeyFrame(Frame frame) {
     float time;
@@ -584,21 +579,21 @@ public class Interpolator {
   }
 
   /**
-   * Appends a new keyFrame to the path, with its associated {@code time} (in seconds).
+   * Appends a new key frame to the path, with its associated {@code time} (in seconds).
    * <p>
    * Note that when {@code frame} is modified, the interpolator path is updated accordingly.
-   * This allows for dynamic paths, where keyFrames can be edited, even during the
+   * This allows for dynamic paths, where key frames can be edited, even during the
    * interpolation.
    * <p>
    * {@code null} frame references are silently ignored. The {@link #time(int)} has to be
-   * monotonously increasing over keyFrames.
+   * monotonously increasing over key frames.
    */
   public void addKeyFrame(Frame frame, float time) {
     if (frame == null)
       return;
 
-    if(frame instanceof Node)
-      if(graph() != ((Node) frame)._graph)
+    if (frame instanceof Node)
+      if (graph() != ((Node) frame)._graph)
         throw new RuntimeException("Node and Interpolator graphs should match");
 
     if (_list.isEmpty())
@@ -616,7 +611,7 @@ public class Interpolator {
   }
 
   /**
-   * Remove KeyFrame according to {@code index} in the list and
+   * Remove key frame according to {@code index} in the list and
    * {@link #stop()} if {@link #started()}. If
    * {@code index < 0 || index >= keyFr.size()} the call is silently ignored.
    */
@@ -635,7 +630,7 @@ public class Interpolator {
   }
 
   /**
-   * Removes all keyFrames from the path. The {@link #size()} is set to 0.
+   * Removes all key frames from the path. The {@link #size()} is set to 0.
    */
   public void clear() {
     stop();
@@ -683,8 +678,8 @@ public class Interpolator {
   /**
    * Computes a path from {@link #keyFrames()} for the interpolator to be drawn.
    * <p>
-   * Calls {@link #_updatePath()} and then returns a list of Frames defining the
-   * Interpolator path (which is different than that of {@link #keyFrames()}).
+   * Calls {@link #_updatePath()} and then returns a list of frames defining the
+   * interpolator path (which is different than that of {@link #keyFrames()}).
    * <p>
    * Use it in your interpolator path drawing routine.
    */
@@ -694,7 +689,7 @@ public class Interpolator {
   }
 
   /**
-   * Intenal use. Call {@link #_checkValidity()} and if path is not valid recomputes it.
+   * Internal use. Call {@link #_checkValidity()} and if path is not valid recomputes it.
    */
   protected void _updatePath() {
     _checkValidity();
@@ -755,7 +750,7 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Calls {@link #_invalidateValues()} if a keyFrame (frame) defining the
+   * Internal use. Calls {@link #_invalidateValues()} if a key frame (frame) defining the
    * path was recently modified.
    */
   protected void _checkValidity() {
@@ -773,21 +768,17 @@ public class Interpolator {
   }
 
   /**
-   * Returns the frame associated with the keyFrame at index {@code index}.
+   * Returns the frame associated with the key frame at index {@code index}.
    * <p>
    * See also {@link #time(int)}. {@code index} has to be in the range 0..
    * {@link #size()}-1.
-   * <p>
-   * <b>Note:</b> If this keyFrame was defined using a reference to a Frame (see
-   * {@link #addKeyFrame(Frame, float)} the current referenced Frame state is
-   * returned.
    */
   public Frame keyFrame(int index) {
     return _list.get(index).frame();
   }
 
   /**
-   * Returns the time corresponding to the {@code index} keyFrame. Not that index has
+   * Returns the time corresponding to the {@code index} key frame. Not that index has
    * to be in the range 0.. {@link #size()}-1.
    *
    * @see #keyFrame(int)
@@ -799,8 +790,8 @@ public class Interpolator {
   /**
    * Returns the duration of the interpolator path, expressed in seconds.
    * <p>
-   * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0.0 if the
-   * path has less than 2 keyFrames.
+   * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0 if the
+   * path has less than 2 key frames.
    *
    * @see #time(int)
    */
@@ -809,9 +800,9 @@ public class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the first keyFrame, expressed in seconds.
+   * Returns the time corresponding to the first key frame, expressed in seconds.
    * <p>
-   * Returns 0.0 if the path is empty.
+   * Returns 0 if the path is empty.
    *
    * @see #lastTime()
    * @see #duration()
@@ -825,8 +816,7 @@ public class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the last keyFrame, expressed in seconds.
-   * <p>
+   * Returns the time corresponding to the last key frame, expressed in seconds.
    *
    * @see #firstTime()
    * @see #duration()
@@ -889,6 +879,9 @@ public class Interpolator {
     }
   }
 
+  /**
+   * Internal use. Used by {@link #interpolate(float)}.
+   */
   protected void _updateSplineCache() {
     Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).position(),
         _list.get(_current1.nextIndex()).position());
@@ -901,8 +894,7 @@ public class Interpolator {
 
   /**
    * Interpolate {@link #frame()} at time {@code time} (expressed in seconds).
-   * {@link #time()} is set to {@code time} and {@link #frame()} is set
-   * accordingly.
+   * {@link #time()} is set to {@code time} and {@link #frame()} is set accordingly.
    * <p>
    * If you simply want to change {@link #time()} but not the
    * {@link #frame()} state, use {@link #setTime(float)} instead.
