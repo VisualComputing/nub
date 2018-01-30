@@ -51,7 +51,6 @@ import java.util.List;
  * <pre>
  * {@code
  * node = new Node(graph) {
- *   @Override
  *   public void visit() {
  *     // Draw your object here, in the local coordinate system.
  *   }
@@ -78,7 +77,6 @@ import java.util.List;
  * Shortcut left = new Shortcut(PApplet.LEFT);
  * Shortcut right = new Shortcut(PApplet.RIGHT);
  * node = new Node(graph) {
- *   @Override
  *   public void interact(MotionEvent2 event) {
  *     if(left.matches(event.shortcut()))
  *       rotate(event);
