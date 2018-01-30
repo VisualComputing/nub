@@ -14,7 +14,7 @@ import remixlab.primitives.Matrix;
 import remixlab.primitives.Vector;
 
 /**
- * Various matrix operations dandelion should support either through a third-party
+ * Various matrix operations that should be supported either through a third-party
  * implementation or locally.
  */
 public class MatrixHandler {
@@ -32,8 +32,7 @@ public class MatrixHandler {
   protected int _projectionStackDepth;
 
   /**
-   * Instantiates matrices and sets
-   * {@link #isProjectionViewInverseCached()} to {@code false}.
+   * Instantiates matrices and sets {@link #isProjectionViewInverseCached()} to {@code false}.
    *
    * @param scn
    */
@@ -47,14 +46,14 @@ public class MatrixHandler {
   }
 
   /**
-   * Returns the graph this object belongs to
+   * Returns the graph this matrix helper belongs to.
    */
   public Graph graph() {
     return _graph;
   }
 
   /**
-   * Binds matrices to (raster) renderer.
+   * Binds matrices to (a raster) renderer.
    */
   public void bind() {
     cacheProjection(graph().computeProjection());
@@ -149,14 +148,14 @@ public class MatrixHandler {
   }
 
   /**
-   * Returns the cached projection times view matrix.
+   * Returns the cached projection * view matrix.
    */
   public Matrix cacheProjectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns {@code true} if {@code P x M} and {@code inv (P x M)} are being cached, and
+   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
    * {@code false} otherwise.
    *
    * @see #cacheProjectionView()
@@ -167,9 +166,8 @@ public class MatrixHandler {
   }
 
   /**
-   * Cache {@code inv (P x M)} (and also {@code (P x M)} ) so that
-   * {@link Graph#unprojectedCoordinatesOf(Vector)} is
-   * optimized.
+   * Cache projection * view inverse matrix(and also projection * view}) so that
+   * {@link Graph#unprojectedCoordinatesOf(Vector)} is optimized.
    *
    * @see #isProjectionViewInverseCached()
    * @see #cacheProjectionView()
@@ -226,23 +224,22 @@ public class MatrixHandler {
   /**
    * Translate in X and Y.
    */
-  public void translate(float tx, float ty) {
-    translate(tx, ty, 0);
+  public void translate(float x, float y) {
+    translate(x, y, 0);
   }
 
   /**
    * Translate in X, Y, and Z.
    */
-  public void translate(float tx, float ty, float tz) {
-    _modelview.translate(tx, ty, tz);
+  public void translate(float x, float y, float z) {
+    _modelview.translate(x, y, z);
   }
 
   /**
    * Two dimensional rotation.
    * <p>
-   * Same as _rotateZ (this is identical to a 3D rotation along the z-axis) but included
-   * for clarity. It'd be weird for people drawing 2D graphics to be using _rotateZ. And
-   * they might kick our a-- for the confusion.
+   * Same as rotateZ (this is identical to a 3D rotation along the z-axis) but included
+   * for clarity.
    * <p>
    * <A HREF="http://www.xkcd.com/c184.html">Additional background</A>.
    */
@@ -272,7 +269,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Rotate about a vector in space. Same as the glRotatef() function.
+   * Rotate about a vector in space.
    */
   public void rotate(float angle, float v0, float v1, float v2) {
     _modelview.rotate(angle, v0, v1, v2);
@@ -286,10 +283,10 @@ public class MatrixHandler {
   }
 
   /**
-   * Scale in X and Y. Equivalent to _scale(sx, sy, 1).
+   * Scale in X and Y. Equivalent to scale(sx, sy, 1).
    * <p>
    * Not recommended for use in 3D, because the z-dimension is just scaled by 1, since
-   * there's no way to know what else to _scale it by.
+   * there's no way to know what else to scale it by.
    */
   public void scale(float sx, float sy) {
     scale(sx, sy, 1);
@@ -338,9 +335,9 @@ public class MatrixHandler {
    */
   public void beginScreenCoordinates() {
     pushProjection();
-    ortho2D();
+    _ortho2D();
     pushModelView();
-    resetViewPoint();
+    _resetViewPoint();
   }
 
   /**
@@ -356,7 +353,7 @@ public class MatrixHandler {
   // see:
   // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
   // "9.030 How do I draw 2D controls over my 3D rendering?"
-  protected void ortho2D() {
+  protected void _ortho2D() {
     float cameraZ = (_graph.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
     float cameraNear = cameraZ / 2.0f;
     float cameraFar = cameraZ * 2.0f;
@@ -381,7 +378,7 @@ public class MatrixHandler {
   }
 
   // as it's done in P5:
-  protected void resetViewPoint() {
+  protected void _resetViewPoint() {
     float eyeX = _graph.width() / 2f;
     float eyeY = _graph.height() / 2f;
     float eyeZ = (_graph.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);

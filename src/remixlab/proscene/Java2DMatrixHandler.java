@@ -97,13 +97,13 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void translate(float tx, float ty) {
-    pg().translate(tx, ty);
+  public void translate(float x, float y) {
+    pg().translate(x, y);
   }
 
   @Override
-  public void translate(float tx, float ty, float tz) {
-    pg().translate(tx, ty, tz);
+  public void translate(float x, float y, float z) {
+    pg().translate(x, y, z);
   }
 
   @Override

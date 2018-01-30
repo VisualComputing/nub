@@ -88,13 +88,13 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void translate(float tx, float ty) {
-    pggl().translate(tx, ty);
+  public void translate(float x, float y) {
+    pggl().translate(x, y);
   }
 
   @Override
-  public void translate(float tx, float ty, float tz) {
-    pggl().translate(tx, ty, tz);
+  public void translate(float x, float y, float z) {
+    pggl().translate(x, y, z);
   }
 
   @Override
