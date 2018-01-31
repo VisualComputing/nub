@@ -6,6 +6,7 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import proscene.core.Interpolator;
 import proscene.input.Event;
+import proscene.input.Shortcut;
 import proscene.input.event.MotionEvent1;
 import proscene.input.event.MotionEvent2;
 import proscene.input.event.TapEvent;
@@ -180,17 +181,15 @@ public class FrameInterpolation2 extends PApplet {
 
     @Override
     public void interact(MotionEvent2 event) {
-      switch (event.shortcut().id()) {
-        case LEFT:
-          nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx() / 10);
-          break;
-        case RIGHT:
-          translate(event);
-          break;
-        case processing.event.MouseEvent.WHEEL:
+      if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+        nodeInterpolator.setSpeed(nodeInterpolator.speed() + event.dx() / 10);
+      else if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+        rotate(event);
+      else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+        if (isEye() && graph().is3D())
+          translateZ(event);
+        else
           scale(event);
-          break;
-      }
     }
 
     @Override
@@ -200,11 +199,9 @@ public class FrameInterpolation2 extends PApplet {
 
     @Override
     public void interact(TapEvent event) {
-      TapShortcut left = new TapShortcut(Event.NO_MODIFIER_MASK, LEFT, 2);
-      TapShortcut right = new TapShortcut(Event.SHIFT, RIGHT, 1);
-      if (event.shortcut().matches(left))
+      if (event.shortcut().matches(new TapShortcut(Event.NO_MODIFIER_MASK, LEFT, 2)))
         scene.fitBallInterpolation();
-      if (event.shortcut().matches(right))
+      if (event.shortcut().matches(new TapShortcut(Event.SHIFT, RIGHT, 1)))
         println("got me!");
     }
 
