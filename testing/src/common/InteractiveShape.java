@@ -3,67 +3,72 @@ package common;
 
 import processing.core.PApplet;
 import processing.core.PShape;
+import remixlab.input.Shortcut;
 import remixlab.input.event.KeyEvent;
+import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent;
 import remixlab.proscene.Scene;
 import remixlab.proscene.Shape;
 
 public class InteractiveShape extends Shape {
-    public InteractiveShape(Scene scene) {
-        super(scene);
-    }
+  Shortcut left = new Shortcut(PApplet.LEFT);
+  Shortcut right = new Shortcut(PApplet.RIGHT);
+  Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
+  KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
+  KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
+  KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
+  KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
 
-    public InteractiveShape(InteractiveShape interactiveShape) {
-        super(interactiveShape);
-    }
+  public InteractiveShape(Scene scene) {
+    super(scene);
+  }
 
-    public InteractiveShape(Scene scene, PShape shape) {
-        super(scene, shape);
-    }
+  public InteractiveShape(InteractiveShape interactiveShape) {
+    super(interactiveShape);
+  }
 
-    public InteractiveShape(InteractiveShape interactiveShape, PShape shape) {
-        super(interactiveShape, shape);
-    }
+  public InteractiveShape(Scene scene, PShape shape) {
+    super(scene, shape);
+  }
 
-    // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
-    // scene.eye().get()) to have the same behavior as its original.
-    protected InteractiveShape(Scene otherScene, InteractiveShape otherShape) {
-        super(otherScene, otherShape);
-    }
+  public InteractiveShape(InteractiveShape interactiveShape, PShape shape) {
+    super(interactiveShape, shape);
+  }
 
-    @Override
-    public InteractiveShape get() {
-        return new InteractiveShape(this.scene(), this);
-    }
+  // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
+  // scene.eye().get()) to have the same behavior as its original.
+  protected InteractiveShape(Scene otherScene, InteractiveShape otherShape) {
+    super(otherScene, otherShape);
+  }
 
-    // behavior is here :P
-    @Override
-    public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-            case PApplet.LEFT:
-                rotate(event);
-                break;
-            case PApplet.RIGHT:
-                translate(event);
-                break;
-            case processing.event.MouseEvent.WHEEL:
-                if(isEye() && graph().is3D())
-                    translateZ(event);
-                else
-                    scale(event);
-                break;
-        }
-    }
+  @Override
+  public InteractiveShape get() {
+    return new InteractiveShape(this.scene(), this);
+  }
 
-    @Override
-    public void interact(KeyEvent event) {
-        if (event.id() == PApplet.UP)
-            translateYPos();
-        if (event.id() == PApplet.DOWN)
-            translateYNeg();
-        if (event.id() == PApplet.LEFT)
-            translateXNeg();
-        if (event.id() == PApplet.RIGHT)
-            translateXPos();
-    }
+  // behavior is here :P
+  @Override
+  public void interact(MotionEvent event) {
+    if (event.shortcut().matches(left))
+      rotate(event);
+    else if (event.shortcut().matches(right))
+      translate(event);
+    else if (event.shortcut().matches(wheel))
+      if (isEye() && graph().is3D())
+        translateZ(event);
+      else
+        scale(event);
+  }
+
+  @Override
+  public void interact(KeyEvent event) {
+    if (event.shortcut().matches(upArrow))
+      translateYPos();
+    else if (event.shortcut().matches(downArrow))
+      translateYNeg();
+    else if (event.shortcut().matches(leftArrow))
+      translateXNeg();
+    else if (event.shortcut().matches(rightArrow))
+      translateXPos();
+  }
 }

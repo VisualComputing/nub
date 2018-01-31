@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D graph graph.
+ * A 2D or 3D scene graph.
  * <p>
  * Instantiated graph {@link Node}s form a graph-tree of
  * transformations which may be traverse with {@link #traverse()}. The node
@@ -33,7 +33,7 @@ import java.util.List;
  * {@link #isNodeReachable(Node)}, {@link #branch(Node)}, and
  * {@link #clear()}.
  * <p>
- * Each Graph provides the following main object instances:
+ * Each graph provides the following main object instances:
  * <ol>
  * <li>An {@link #eye()} which represents the 2D/3D controlling object.</li>
  * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For

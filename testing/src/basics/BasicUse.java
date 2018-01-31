@@ -1,11 +1,15 @@
 package basics;
 
-import processing.core.*;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import remixlab.core.Node;
 import remixlab.input.Event;
 import remixlab.input.Shortcut;
-import remixlab.input.event.*;
-import remixlab.core.Node;
-import remixlab.proscene.*;
+import remixlab.input.event.KeyShortcut;
+import remixlab.input.event.MotionEvent1;
+import remixlab.input.event.MotionEvent2;
+import remixlab.proscene.KeyAgent;
+import remixlab.proscene.Scene;
 
 /**
  * Created by pierre on 11/15/16.
@@ -43,15 +47,15 @@ public class BasicUse extends PApplet {
         //preventing the following syntax:
         //those casts aren't needed in js
         ///*
-        if(s1.matches(event.shortcut()))
+        if (s1.matches(event.shortcut()))
           rotate((MotionEvent2) event);
-        if(s2.matches(event.shortcut()))
+        if (s2.matches(event.shortcut()))
           screenTranslate((MotionEvent2) event);
-        if(s3.matches(event.shortcut()))
+        if (s3.matches(event.shortcut()))
           scale((MotionEvent1) event);
-        if(s4.matches(event.shortcut()))
+        if (s4.matches(event.shortcut()))
           translateXPos();
-        if(s5.matches(event.shortcut()))
+        if (s5.matches(event.shortcut()))
           translateXNeg();
         // */
         //Check symmetry of Shortcut.matches
@@ -98,15 +102,15 @@ public class BasicUse extends PApplet {
 
     iFrame.setPrecision(Node.Precision.ADAPTIVE);
     iFrame.setPrecisionThreshold(length);
-    iFrame.translate(50,50);
+    iFrame.translate(50, 50);
 
     scene.setDefaultNode(iFrame);
     scene.fitBallInterpolation();
   }
 
   public void graphics(PGraphics pg) {
-    pg.fill(255,0,255);
-    pg.rect(0,0,length,length);
+    pg.fill(255, 0, 255);
+    pg.rect(0, 0, length, length);
   }
 
   public void draw() {

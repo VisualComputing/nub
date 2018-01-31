@@ -3,68 +3,69 @@ package frame;
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
 import remixlab.core.Graph;
+import remixlab.proscene.GLMatrixHandler;
 import remixlab.proscene.KeyAgent;
-
-import remixlab.proscene.*;
+import remixlab.proscene.MouseAgent;
 
 /**
  * This example just to show that a Graph is instantiable.
  * More to come...
  */
 public class FrameInteraction extends PApplet {
-    Graph graph;
-    public void settings() {
-        size(640, 360, P3D);
-    }
+  Graph graph;
 
-    public void setup() {
-        graph = new Graph(width, height);
-        //TODO wanna go like this:
-        //refer to the MatrixShader proscene experiment
-        //graph.setMatrixHandler(new MatrixHandler(graph));
-        graph.setMatrixHandler(new GLMatrixHandler(graph, (PGraphicsOpenGL)g));
+  public void settings() {
+    size(640, 360, P3D);
+  }
 
-        MouseAgent mouseAgent = new MouseAgent(graph);
-        graph.inputHandler().registerAgent(mouseAgent);
-        registerMethod("mouseEvent", mouseAgent);
+  public void setup() {
+    graph = new Graph(width, height);
+    //TODO wanna go like this:
+    //refer to the MatrixShader proscene experiment
+    //graph.setMatrixHandler(new MatrixHandler(graph));
+    graph.setMatrixHandler(new GLMatrixHandler(graph, (PGraphicsOpenGL) g));
 
-        // 3. Create agents and register P5 methods
+    MouseAgent mouseAgent = new MouseAgent(graph);
+    graph.inputHandler().registerAgent(mouseAgent);
+    registerMethod("mouseEvent", mouseAgent);
 
-        KeyAgent keyAgent = new KeyAgent(graph);
-        graph.inputHandler().registerAgent(keyAgent);
-        registerMethod("keyEvent", keyAgent);
+    // 3. Create agents and register P5 methods
 
-        registerMethod("pre", this);
-        //registerMethod("draw", this);
-        //registerMethod("post", this);
-        //registerMethod("dispose", this);
+    KeyAgent keyAgent = new KeyAgent(graph);
+    graph.inputHandler().registerAgent(keyAgent);
+    registerMethod("keyEvent", keyAgent);
 
-        graph.setRadius(200);
-        graph.fitBallInterpolation();
+    registerMethod("pre", this);
+    //registerMethod("draw", this);
+    //registerMethod("post", this);
+    //registerMethod("dispose", this);
 
-        // 5. Handed
-        graph.setLeftHanded();
-    }
+    graph.setRadius(200);
+    graph.fitBallInterpolation();
 
-    public void proscenium() {
-        background(100);
-        box(50);
-    }
+    // 5. Handed
+    graph.setLeftHanded();
+  }
 
-    public void pre() {
-        //println("pre");
-        graph.preDraw();
-        graph.pushModelView();
-    }
+  public void proscenium() {
+    background(100);
+    box(50);
+  }
 
-    public void draw() {
-        proscenium();
-        graph.popModelView();
-        //println("post");
-        graph.postDraw();
-    }
+  public void pre() {
+    //println("pre");
+    graph.preDraw();
+    graph.pushModelView();
+  }
 
-    public static void main(String args[]) {
-        PApplet.main(new String[]{"frame.FrameInteraction"});
-    }
+  public void draw() {
+    proscenium();
+    graph.popModelView();
+    //println("post");
+    graph.postDraw();
+  }
+
+  public static void main(String args[]) {
+    PApplet.main(new String[]{"frame.FrameInteraction"});
+  }
 }

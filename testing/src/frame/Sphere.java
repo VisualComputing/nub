@@ -1,9 +1,10 @@
 package frame;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
+import remixlab.core.Node;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
-import remixlab.core.Node;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
@@ -20,34 +21,7 @@ public class Sphere {
   public Sphere(Scene scn) {
     scene = scn;
     parent = scn.pApplet();
-    iFrame = new Node(scene) {
-      @Override
-      public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-          case PApplet.LEFT:
-            rotate(event);
-            break;
-          case PApplet.RIGHT:
-            translate(event);
-            break;
-          case processing.event.MouseEvent.WHEEL:
-            scale(event);
-            break;
-        }
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.id() == PApplet.UP)
-          _translateY(true);
-        if (event.id() == PApplet.DOWN)
-          _translateY(false);
-        if (event.id() == PApplet.LEFT)
-          _translateX(false);
-        if (event.id() == PApplet.RIGHT)
-          _translateX(true);
-      }
-    };
+    iFrame = new InteractiveNode(scene);
     iFrame.setPrecision(Node.Precision.ADAPTIVE);
     setRadius(10);
   }

@@ -1,11 +1,15 @@
 package frame;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.input.event.*;
 import remixlab.core.Node;
+import remixlab.input.event.KeyEvent;
+import remixlab.input.event.KeyShortcut;
+import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
-import remixlab.proscene.*;
+import remixlab.proscene.KeyAgent;
+import remixlab.proscene.Scene;
 
 /**
  * Created by pierre on 11/15/16.
@@ -18,30 +22,7 @@ public class Box {
 
   public Box(Scene scn) {
     scene = scn;
-    iFrame = new Node(scene) {
-      @Override
-      public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-          case PApplet.LEFT:
-            translate(event);
-            break;
-          case PApplet.RIGHT:
-            screenTranslate(event);
-            break;
-          case processing.event.MouseEvent.WHEEL:
-            scale(event);
-            break;
-        }
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
-          translateXPos();
-        if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
-          translateXNeg();
-      }
-    };
+    iFrame = new InteractiveNode(scene);
     iFrame.setPrecision(Node.Precision.ADAPTIVE);
     iFrame.setPrecisionThreshold(25);
     setSize();

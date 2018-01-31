@@ -1,56 +1,60 @@
 package common;
 
 import processing.core.PApplet;
-import processing.core.PShape;
 import remixlab.core.Graph;
 import remixlab.core.Node;
+import remixlab.input.Shortcut;
 import remixlab.input.event.KeyEvent;
+import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent;
 
 public class InteractiveNode extends Node {
-    public InteractiveNode(Graph graph) {
-        super(graph);
-    }
+  Shortcut left = new Shortcut(PApplet.LEFT);
+  Shortcut right = new Shortcut(PApplet.RIGHT);
+  Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
+  KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
+  KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
+  KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
+  KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
 
-    // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
-    // scene.eye().get()) to have the same behavior as its original.
-    protected InteractiveNode(Graph otherGraph, InteractiveNode otherNode) {
-        super(otherGraph, otherNode);
-    }
+  public InteractiveNode(Graph graph) {
+    super(graph);
+  }
 
-    @Override
-    public InteractiveNode get() {
-        return new InteractiveNode(this.graph(), this);
-    }
+  // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
+  // scene.eye().get()) to have the same behavior as its original.
+  protected InteractiveNode(Graph otherGraph, InteractiveNode otherNode) {
+    super(otherGraph, otherNode);
+  }
 
-    // behavior is here :P
-    @Override
-    public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-            case PApplet.LEFT:
-                translate(event);
-                break;
-            case PApplet.RIGHT:
-                rotate(event);
-                break;
-            case processing.event.MouseEvent.WHEEL:
-                if(isEye() && graph().is3D())
-                    translateZ(event);
-                else
-                    scale(event);
-                break;
-        }
-    }
+  @Override
+  public InteractiveNode get() {
+    return new InteractiveNode(this.graph(), this);
+  }
 
-    @Override
-    public void interact(KeyEvent event) {
-        if (event.id() == PApplet.UP)
-            translateYPos();
-        if (event.id() == PApplet.DOWN)
-            translateYNeg();
-        if (event.id() == PApplet.LEFT)
-            translateXNeg();
-        if (event.id() == PApplet.RIGHT)
-            translateXPos();
-    }
+  // behavior is here :P
+  @Override
+  public void interact(MotionEvent event) {
+    if (event.shortcut().matches(left))
+      translate(event);
+    else if (event.shortcut().matches(right))
+      rotate(event);
+    else if (event.shortcut().matches(wheel))
+      if (isEye() && graph().is3D())
+        translateZ(event);
+      else
+        scale(event);
+  }
+
+  @Override
+  public void interact(KeyEvent event) {
+    if (event.shortcut().matches(upArrow))
+      translateYPos();
+    else if (event.shortcut().matches(downArrow))
+      translateYNeg();
+    else if (event.shortcut().matches(leftArrow))
+      translateXNeg();
+    else if (event.shortcut().matches(rightArrow))
+      translateXPos();
+  }
 }

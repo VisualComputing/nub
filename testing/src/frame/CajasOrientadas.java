@@ -1,9 +1,12 @@
 package frame;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.input.event.*;
 import remixlab.core.Graph;
 import remixlab.core.Node;
+import remixlab.input.Shortcut;
+import remixlab.input.event.KeyEvent;
+import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Vector;
 import remixlab.proscene.Scene;
 
@@ -46,77 +49,34 @@ public class CajasOrientadas extends PApplet {
     for (int i = 0; i < cajas.length; i++)
       cajas[i] = new Box(graph);
 
-    eye1 = new Node(graph) {
-      @Override
-      public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-          case PApplet.LEFT:
-            //zoomOnRegion(_event);
-            rotate(event);
-            break;
-          case PApplet.CENTER:
-            //rotate(_event);
-            zoomOnRegion(event);
-            break;
-          case PApplet.RIGHT:
-            translate(event);
-            break;
-          case processing.event.MouseEvent.WHEEL:
-            //_scale(_event);
-            translateZ(event);
-            break;
-        }
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.id() == PApplet.UP)
-          translateYPos();
-        if (event.id() == PApplet.DOWN)
-          translateYNeg();
-        if (event.id() == PApplet.LEFT)
-          translateXNeg();
-        if (event.id() == PApplet.RIGHT)
-          translateXPos();
-      }
-    };
+    eye1 = new InteractiveNode(graph);
 
     eye2 = new Node(graph) {
-      @Override
-      public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-          case PApplet.LEFT:
-            translate(event);
-            break;
-          case PApplet.RIGHT:
-            rotate(event);
-            break;
-          case processing.event.MouseEvent.WHEEL:
-            scale(event);
-            break;
-        }
-      }
+      Shortcut left = new Shortcut(PApplet.LEFT);
+      Shortcut right = new Shortcut(PApplet.RIGHT);
+      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
 
       @Override
-      public void interact(KeyEvent event) {
-        if (event.id() == PApplet.UP)
-          translateYPos();
-        if (event.id() == PApplet.DOWN)
-          translateYNeg();
-        if (event.id() == PApplet.LEFT)
-          translateXNeg();
-        if (event.id() == PApplet.RIGHT)
-          translateXPos();
+      public void interact(MotionEvent event) {
+        if (event.shortcut().matches(left))
+          translate(event);
+        else if (event.shortcut().matches(right))
+          rotate(event);
+        else if (event.shortcut().matches(wheel))
+          if (isEye() && graph().is3D())
+            translateZ(event);
+          else
+            scale(event);
       }
     };
 
     graph.setEye(eye1);
-    graph.setFieldOfView((float)Math.PI/3);
+    graph.setFieldOfView((float) Math.PI / 3);
     graph.setDefaultNode(eye1);
     graph.fitBall();
     println(graph.inputHandler().hasGrabber(eye1) ? "has eye1" : "has NOT eye1");
 
-    if(graph.is3D())
+    if (graph.is3D())
       println("Scene is 3D");
     else
       println("Scene is 2D");
@@ -135,37 +95,36 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
-    if(key == 'e') {
+    if (key == 'e') {
       graph.setType(Graph.Type.ORTHOGRAPHIC);
     }
-    if(key == 'E') {
+    if (key == 'E') {
       graph.setType(Graph.Type.PERSPECTIVE);
     }
-    if(key == ' ') {
-      if(eye1 == graph.eye()) {
+    if (key == ' ') {
+      if (eye1 == graph.eye()) {
         graph.setEye(eye2);
         graph.setFieldOfView(1);
         graph.setDefaultNode(eye2);
         //graph.fitBall();
         println("Eye2 set " + graph.fieldOfView());
-      }
-      else {
+      } else {
         graph.setEye(eye1);
-        graph.setFieldOfView((float)Math.PI/4);
+        graph.setFieldOfView((float) Math.PI / 4);
         graph.setDefaultNode(eye1);
         //graph.fitBall();
         println("Eye1 set " + graph.fieldOfView());
       }
     }
-    if(key == 's')
+    if (key == 's')
       graph.fitBallInterpolation();
-    if(key == 'S')
+    if (key == 'S')
       graph.fitBall();
-    if(key == 'u')
-      graph.shiftDefaultNode((Node)graph.eye(), esfera.iFrame);
-    if(key == 't')
+    if (key == 'u')
+      graph.shiftDefaultNode((Node) graph.eye(), esfera.iFrame);
+    if (key == 't')
       info();
-    if(key == 'v') {
+    if (key == 'v') {
       println(Vector.scalarProjection(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()));
       Vector.projectVectorOnAxis(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()).print();
     }
