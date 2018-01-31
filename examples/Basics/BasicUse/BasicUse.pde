@@ -8,14 +8,13 @@
 
 import proscene.input.*;
 import proscene.input.event.*;
-import proscene.core.*;
 import proscene.processing.*;
 
 Scene scene;
 //Choose P2D or P3D
 String renderer = P2D;
 
-Node node;
+Shape shape;
 float length = 100;
 PGraphics pg;
 
@@ -26,10 +25,11 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(200);
 
-  node = new Node(scene) {
+  shape = new Shape(scene) {
     @Override
-    public void visit() {
-      graphics(pg);
+    public void set(PGraphics pg) {
+      pg.fill(255, 0, 255);
+      pg.rect(0, 0, length, length);
     }
 
     @Override
@@ -45,7 +45,7 @@ void setup() {
     @Override
     public void interact(MotionEvent1 event) {
       if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
-        scale((MotionEvent1) event);
+        scale(event);
     }
 
     @Override
@@ -65,17 +65,8 @@ void setup() {
     }
   };
 
-  node.setPrecision(Node.Precision.ADAPTIVE);
-  node.setPrecisionThreshold(length);
-  node.translate(50, 50);
-
-  scene.setDefaultNode(node);
+  scene.setDefaultNode(shape);
   scene.fitBallInterpolation();
-}
-
-void graphics(PGraphics pg) {
-  pg.fill(255, 0, 255);
-  pg.rect(0, 0, length, length);
 }
 
 void draw() {
