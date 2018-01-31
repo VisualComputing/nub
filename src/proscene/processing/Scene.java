@@ -23,6 +23,11 @@ import proscene.core.MatrixHandler;
 import proscene.core.Node;
 import proscene.input.Agent;
 import proscene.input.Grabber;
+import proscene.input.Shortcut;
+import proscene.input.event.KeyEvent;
+import proscene.input.event.KeyShortcut;
+import proscene.input.event.MotionEvent1;
+import proscene.input.event.MotionEvent2;
 import proscene.primitives.*;
 import proscene.timing.SequentialTimer;
 import proscene.timing.TimingHandler;
@@ -173,6 +178,121 @@ public class Scene extends Graph implements PConstants {
 
     // 5. Handed
     setLeftHanded();
+  }
+
+  //TODO experimental rename and add api docs.
+  public Node orbitNode() {
+    class OrbitNode extends Node {
+      Shortcut left = new Shortcut(PApplet.LEFT);
+      Shortcut right = new Shortcut(PApplet.RIGHT);
+      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
+      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
+      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
+      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
+      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
+
+      public OrbitNode(Graph graph) {
+        super(graph);
+      }
+
+      // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
+      // scene.eye().get()) to have the same behavior as its original.
+      protected OrbitNode(Graph otherGraph, OrbitNode otherNode) {
+        super(otherGraph, otherNode);
+      }
+
+      @Override
+      public OrbitNode get() {
+        return new OrbitNode(this.graph(), this);
+      }
+
+      @Override
+      public void interact(MotionEvent2 event) {
+        if (left.matches(event.shortcut()))
+          rotate(event);
+        if (right.matches(event.shortcut()))
+          translate(event);
+      }
+
+      @Override
+      public void interact(MotionEvent1 event) {
+        if (event.shortcut().matches(wheel))
+          if (isEye() && graph().is3D())
+            translateZ(event);
+          else
+            scale(event);
+      }
+
+      @Override
+      public void interact(KeyEvent event) {
+        if (event.shortcut().matches(upArrow))
+          translateYPos();
+        else if (event.shortcut().matches(downArrow))
+          translateYNeg();
+        else if (event.shortcut().matches(leftArrow))
+          translateXNeg();
+        else if (event.shortcut().matches(rightArrow))
+          translateXPos();
+      }
+    }
+    return new OrbitNode(this);
+  }
+
+  public Shape orbitShape() {
+    class OrbitShape extends Shape {
+      Shortcut left = new Shortcut(PApplet.LEFT);
+      Shortcut right = new Shortcut(PApplet.RIGHT);
+      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
+      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
+      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
+      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
+      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
+
+      public OrbitShape(Scene scene) {
+        super(scene);
+      }
+
+      // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
+      // scene.eye().get()) to have the same behavior as its original.
+      protected OrbitShape(Scene otherScene, OrbitShape otherShape) {
+        super(otherScene, otherShape);
+      }
+
+      @Override
+      public OrbitShape get() {
+        return new OrbitShape(this.scene(), this);
+      }
+
+      @Override
+      public void interact(KeyEvent event) {
+        if (event.shortcut().matches(upArrow))
+          translateYPos();
+        else if (event.shortcut().matches(downArrow))
+          translateYNeg();
+        else if (event.shortcut().matches(leftArrow))
+          translateXNeg();
+        else if (event.shortcut().matches(rightArrow))
+          translateXPos();
+      }
+
+      @Override
+      public void interact(MotionEvent2 event) {
+        if (left.matches(event.shortcut()))
+          rotate(event);
+        if (right.matches(event.shortcut()))
+          translate(event);
+      }
+
+      @Override
+      public void interact(MotionEvent1 event) {
+        if (event.shortcut().matches(wheel))
+          if (isEye() && graph().is3D())
+            translateZ(event);
+          else
+            scale(event);
+      }
+    }
+    return new OrbitShape(this);
   }
 
   /**
