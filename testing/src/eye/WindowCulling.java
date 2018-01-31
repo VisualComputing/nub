@@ -4,7 +4,7 @@ import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import remixlab.primitives.Vector;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 public class WindowCulling extends PApplet {
   Scene scene, auxScene;

@@ -5,10 +5,9 @@ import processing.core.PApplet;
 import remixlab.core.Graph;
 import remixlab.core.Node;
 import remixlab.input.Shortcut;
-import remixlab.input.event.KeyEvent;
 import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Vector;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

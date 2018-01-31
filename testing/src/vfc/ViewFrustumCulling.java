@@ -5,7 +5,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import remixlab.core.Graph;
 import remixlab.primitives.Vector;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;

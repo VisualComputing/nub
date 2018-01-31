@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;

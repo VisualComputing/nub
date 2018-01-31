@@ -5,8 +5,8 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import remixlab.core.Node;
 import remixlab.primitives.Vector;
-import remixlab.proscene.MouseAgent;
-import remixlab.proscene.Scene;
+import remixlab.processing.MouseAgent;
+import remixlab.processing.Scene;
 
 import java.util.ArrayList;
 

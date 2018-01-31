@@ -2,7 +2,7 @@ package basics;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 public class Animation extends PApplet {
   int nbPart;

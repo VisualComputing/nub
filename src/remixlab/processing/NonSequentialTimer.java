@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import remixlab.timing.Taskable;
 import remixlab.timing.Timer;

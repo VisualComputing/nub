@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import remixlab.core.Graph;
 import remixlab.input.Agent;
@@ -23,7 +23,7 @@ import remixlab.primitives.Point;
  * {@link Agent}.
  *
  * @see Agent
- * @see remixlab.proscene.KeyAgent
+ * @see remixlab.processing.KeyAgent
  */
 public class MouseAgent extends Agent {
   protected Point _upperLeftCorner;

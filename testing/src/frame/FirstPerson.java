@@ -3,13 +3,12 @@ package frame;
 import processing.core.PApplet;
 import remixlab.core.Graph;
 import remixlab.core.Node;
-import remixlab.input.Event;
 import remixlab.input.Shortcut;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent;
-import remixlab.proscene.MouseAgent;
-import remixlab.proscene.Scene;
+import remixlab.processing.MouseAgent;
+import remixlab.processing.Scene;
 
 public class FirstPerson extends PApplet {
   Scene scene;

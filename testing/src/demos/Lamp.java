@@ -8,7 +8,7 @@ import remixlab.primitives.Vector;
 import remixlab.primitives.constraint.AxisPlaneConstraint;
 import remixlab.primitives.constraint.LocalConstraint;
 import remixlab.primitives.constraint.WorldConstraint;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 /**
  * Lamp by Jean Pierre Charalambos.

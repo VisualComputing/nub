@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -130,7 +130,7 @@ public class Shape extends Node {
   /**
    * Same as {@code draw(scene.pg())}.
    *
-   * @see remixlab.proscene.Scene#traverse(PGraphics)
+   * @see remixlab.processing.Scene#traverse(PGraphics)
    */
   public void draw() {
     draw(scene().frontBuffer());
@@ -139,7 +139,7 @@ public class Shape extends Node {
   /**
    * Draw the visual representation of the node into the given PGraphics using the
    * current point of view (see
-   * {@link remixlab.proscene.Scene#applyTransformation(PGraphics, Frame)}).
+   * {@link remixlab.processing.Scene#applyTransformation(PGraphics, Frame)}).
    * <p>
    * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
    * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
@@ -274,8 +274,8 @@ public class Shape extends Node {
   /**
    * An interactive-frame may be picked using
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link remixlab.proscene.Scene#backBuffer()}). This method
-   * compares the color of the {@link remixlab.proscene.Scene#backBuffer()} at
+   * color buffer (see {@link remixlab.processing.Scene#backBuffer()}). This method
+   * compares the color of the {@link remixlab.processing.Scene#backBuffer()} at
    * {@code (x,y)} with {@link #_id()}. Returns true if both colors are the same, and false
    * otherwise.
    * <p>

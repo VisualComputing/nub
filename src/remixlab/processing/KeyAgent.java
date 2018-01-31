@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import remixlab.core.Graph;
 import remixlab.input.Agent;
@@ -20,7 +20,7 @@ import remixlab.input.event.KeyEvent;
  * Proscene _key-agent. A Processing fully fledged _key {@link Agent}.
  *
  * @see Agent
- * @see remixlab.proscene.MouseAgent
+ * @see remixlab.processing.MouseAgent
  */
 public class KeyAgent extends Agent {
   public static int LEFT_KEY = 37, RIGHT_KEY = 39, UP_KEY = 38, DOWN_KEY = 40;

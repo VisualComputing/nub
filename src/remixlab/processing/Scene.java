@@ -8,7 +8,7 @@
  * which is available at http://www.gnu.org/licenses/gpl.html
  **************************************************************************************/
 
-package remixlab.proscene;
+package remixlab.processing;
 
 import processing.core.*;
 import processing.data.JSONArray;
@@ -50,8 +50,8 @@ import java.util.List;
  * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
  * <li><b>The default mouse agent</b> provides high-level methods to manage the
  * eye and node
- * motion actions. Please refer to the {@link remixlab.proscene.MouseAgent} and
- * {@link remixlab.proscene.KeyAgent} API's.
+ * motion actions. Please refer to the {@link remixlab.processing.MouseAgent} and
+ * {@link remixlab.processing.KeyAgent} API's.
  * </ol>
  */
 public class Scene extends Graph implements PConstants {

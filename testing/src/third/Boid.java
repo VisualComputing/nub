@@ -5,7 +5,7 @@ import processing.core.PVector;
 import remixlab.core.Node;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 import remixlab.timing.AnimatorObject;
 
 import java.util.ArrayList;

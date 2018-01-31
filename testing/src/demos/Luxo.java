@@ -2,7 +2,7 @@ package demos;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 public class Luxo extends PApplet {
   Scene scene;

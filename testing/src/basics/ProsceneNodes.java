@@ -6,9 +6,8 @@ import processing.core.PGraphics;
 import remixlab.core.Graph;
 import remixlab.input.Shortcut;
 import remixlab.input.event.MotionEvent;
-import remixlab.input.event.TapEvent;
-import remixlab.proscene.Scene;
-import remixlab.proscene.Shape;
+import remixlab.processing.Scene;
+import remixlab.processing.Shape;
 
 public class ProsceneNodes extends PApplet {
   Scene scene;

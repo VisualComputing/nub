@@ -4,7 +4,7 @@ import common.InteractiveNode;
 import processing.core.PApplet;
 import remixlab.core.Interpolator;
 import remixlab.primitives.Frame;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 /**
  * This example introduces the three different interpolations offered

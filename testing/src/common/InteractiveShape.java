@@ -7,8 +7,8 @@ import remixlab.input.Shortcut;
 import remixlab.input.event.KeyEvent;
 import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent;
-import remixlab.proscene.Scene;
-import remixlab.proscene.Shape;
+import remixlab.processing.Scene;
+import remixlab.processing.Shape;
 
 public class InteractiveShape extends Shape {
   Shortcut left = new Shortcut(PApplet.LEFT);

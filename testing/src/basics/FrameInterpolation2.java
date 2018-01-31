@@ -11,8 +11,8 @@ import remixlab.input.event.MotionEvent2;
 import remixlab.input.event.TapEvent;
 import remixlab.input.event.TapShortcut;
 import remixlab.primitives.Frame;
-import remixlab.proscene.Scene;
-import remixlab.proscene.Shape;
+import remixlab.processing.Scene;
+import remixlab.processing.Shape;
 
 /**
  * This example introduces the three different interpolations offered

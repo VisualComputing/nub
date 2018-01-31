@@ -9,7 +9,7 @@ import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent;
 import remixlab.primitives.Quaternion;
 import remixlab.primitives.Vector;
-import remixlab.proscene.Scene;
+import remixlab.processing.Scene;
 
 public class TwoD extends PApplet {
   Scene scene;

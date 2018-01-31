@@ -8,8 +8,8 @@ import remixlab.input.Shortcut;
 import remixlab.input.event.KeyShortcut;
 import remixlab.input.event.MotionEvent1;
 import remixlab.input.event.MotionEvent2;
-import remixlab.proscene.KeyAgent;
-import remixlab.proscene.Scene;
+import remixlab.processing.KeyAgent;
+import remixlab.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

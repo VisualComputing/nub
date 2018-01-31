@@ -6,8 +6,8 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import remixlab.core.Graph;
 import remixlab.core.Node;
-import remixlab.proscene.Scene;
-import remixlab.proscene.Shape;
+import remixlab.processing.Scene;
+import remixlab.processing.Shape;
 
 public class MiniMap extends PApplet {
   Scene scene, minimap;
