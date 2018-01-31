@@ -9,7 +9,7 @@
  * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 
 PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, colorShader, horizontalShader;
 PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, graphics, colorGraphics, horizontalGraphics;

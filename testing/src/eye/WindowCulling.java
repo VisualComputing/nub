@@ -3,8 +3,8 @@ package eye;
 import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.primitives.Vector;
-import remixlab.processing.Scene;
+import proscene.primitives.Vector;
+import proscene.processing.Scene;
 
 public class WindowCulling extends PApplet {
   Scene scene, auxScene;

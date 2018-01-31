@@ -23,7 +23,7 @@
  * To print frame bindings call frame.info()
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 import android.view.MotionEvent;
 
 Scene scene;

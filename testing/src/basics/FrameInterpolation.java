@@ -2,9 +2,9 @@ package basics;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.core.Interpolator;
-import remixlab.primitives.Frame;
-import remixlab.processing.Scene;
+import proscene.core.Interpolator;
+import proscene.primitives.Frame;
+import proscene.processing.Scene;
 
 /**
  * This example introduces the three different interpolations offered

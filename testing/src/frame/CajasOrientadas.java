@@ -2,12 +2,12 @@ package frame;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.input.Shortcut;
-import remixlab.input.event.MotionEvent;
-import remixlab.primitives.Vector;
-import remixlab.processing.Scene;
+import proscene.core.Graph;
+import proscene.core.Node;
+import proscene.input.Shortcut;
+import proscene.input.event.MotionEvent;
+import proscene.primitives.Vector;
+import proscene.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

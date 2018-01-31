@@ -15,9 +15,9 @@
  * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
-import remixlab.proscene.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.dandelion.constraint.*;
+import proscene.proscene.*;
+import proscene.dandelion.primitives.*;
+import proscene.dandelion.constraint.*;
 
 boolean enabledLights = true;
 boolean drawRobotCamFrustum = false;

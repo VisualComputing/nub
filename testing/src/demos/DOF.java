@@ -6,7 +6,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.opengl.PShader;
-import remixlab.processing.Scene;
+import proscene.processing.Scene;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;

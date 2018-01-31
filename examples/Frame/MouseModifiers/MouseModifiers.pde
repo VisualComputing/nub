@@ -15,7 +15,7 @@
  * back at the forum or PM me.
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 
 Scene scene;
 InteractiveFrame frame;

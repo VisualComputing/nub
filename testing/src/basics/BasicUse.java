@@ -2,14 +2,14 @@ package basics;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.core.Node;
-import remixlab.input.Event;
-import remixlab.input.Shortcut;
-import remixlab.input.event.KeyShortcut;
-import remixlab.input.event.MotionEvent1;
-import remixlab.input.event.MotionEvent2;
-import remixlab.processing.KeyAgent;
-import remixlab.processing.Scene;
+import proscene.core.Node;
+import proscene.input.Event;
+import proscene.input.Shortcut;
+import proscene.input.event.KeyShortcut;
+import proscene.input.event.MotionEvent1;
+import proscene.input.event.MotionEvent2;
+import proscene.processing.KeyAgent;
+import proscene.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

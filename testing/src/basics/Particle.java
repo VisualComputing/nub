@@ -2,8 +2,8 @@ package basics;
 
 import processing.core.PApplet;
 import processing.core.PVector;
-import remixlab.processing.Scene;
-import remixlab.timing.AnimatorObject;
+import proscene.processing.Scene;
+import proscene.timing.AnimatorObject;
 
 public class Particle extends AnimatorObject {
   Scene scene;

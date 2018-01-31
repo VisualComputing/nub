@@ -2,8 +2,8 @@ package vfc;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.core.Graph;
-import remixlab.primitives.Vector;
+import proscene.core.Graph;
+import proscene.primitives.Vector;
 
 public class OctreeNode {
   Vector p1, p2;

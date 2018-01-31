@@ -11,7 +11,7 @@
  * coordinate system) used by the CAD Camera.
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 
 Scene scene;
 

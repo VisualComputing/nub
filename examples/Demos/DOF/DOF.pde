@@ -9,7 +9,7 @@
  * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 
 PShader depthShader, dofShader;
 PGraphics srcPGraphics, depthPGraphics, dofPGraphics;

@@ -1,15 +1,15 @@
 package basics;
 
 import processing.core.PApplet;
-import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.input.Shortcut;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.KeyShortcut;
-import remixlab.input.event.MotionEvent;
-import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vector;
-import remixlab.processing.Scene;
+import proscene.core.Graph;
+import proscene.core.Node;
+import proscene.input.Shortcut;
+import proscene.input.event.KeyEvent;
+import proscene.input.event.KeyShortcut;
+import proscene.input.event.MotionEvent;
+import proscene.primitives.Quaternion;
+import proscene.primitives.Vector;
+import proscene.processing.Scene;
 
 public class TwoD extends PApplet {
   Scene scene;

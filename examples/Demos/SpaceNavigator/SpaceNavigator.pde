@@ -13,11 +13,11 @@
  * Press 'h' to display the key shortcuts, mouse and SpaceNavigator bindings in the console.
  */
 
-import remixlab.proscene.*;
-import remixlab.input.*;
-import remixlab.input.event.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.dandelion.geom.*;
+import proscene.proscene.*;
+import proscene.input.*;
+import proscene.input.event.*;
+import proscene.dandelion.primitives.*;
+import proscene.dandelion.geom.*;
 
 import org.gamecontrolplus.*;
 import net.java.games.input.*;

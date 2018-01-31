@@ -2,10 +2,10 @@ package frame;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import remixlab.core.Node;
-import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vector;
-import remixlab.processing.Scene;
+import proscene.core.Node;
+import proscene.primitives.Quaternion;
+import proscene.primitives.Vector;
+import proscene.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

@@ -23,9 +23,9 @@
  * To print frame bindings call frame.info()
  */
 
-import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.primitives.*;
+import proscene.proscene.*;
+import proscene.dandelion.geom.*;
+import proscene.dandelion.primitives.*;
 
 import android.view.MotionEvent;
 

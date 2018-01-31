@@ -2,11 +2,11 @@ package third;
 
 import processing.core.PApplet;
 import processing.core.PVector;
-import remixlab.core.Node;
-import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vector;
-import remixlab.processing.Scene;
-import remixlab.timing.AnimatorObject;
+import proscene.core.Node;
+import proscene.primitives.Quaternion;
+import proscene.primitives.Vector;
+import proscene.processing.Scene;
+import proscene.timing.AnimatorObject;
 
 import java.util.ArrayList;
 

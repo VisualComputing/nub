@@ -10,7 +10,7 @@
  * Press 'x' and 'y' to change the mini-map eye representation.
  */
 
-import remixlab.proscene.*;
+import proscene.proscene.*;
 
 Scene scene, auxScene;
 PGraphics canvas, auxCanvas;  

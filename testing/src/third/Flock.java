@@ -3,10 +3,10 @@ package third;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PVector;
-import remixlab.core.Node;
-import remixlab.primitives.Vector;
-import remixlab.processing.MouseAgent;
-import remixlab.processing.Scene;
+import proscene.core.Node;
+import proscene.primitives.Vector;
+import proscene.processing.MouseAgent;
+import proscene.processing.Scene;
 
 import java.util.ArrayList;
 

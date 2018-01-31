@@ -28,9 +28,9 @@
  * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
-import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.primitives.*;
+import proscene.proscene.*;
+import proscene.dandelion.geom.*;
+import proscene.dandelion.primitives.*;
 
 Scene scene;
 Trackable lastAvatar;

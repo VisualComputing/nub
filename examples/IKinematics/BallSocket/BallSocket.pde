@@ -1,11 +1,11 @@
-import remixlab.input.*;
-import remixlab.input.event.*;
-import remixlab.dandelion.constraint.*;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.timing.*;
-import remixlab.proscene.*;
-import remixlab.util.*;
+import proscene.input.*;
+import proscene.input.event.*;
+import proscene.dandelion.constraint.*;
+import proscene.dandelion.geom.*;
+import proscene.dandelion.primitives.*;
+import proscene.timing.*;
+import proscene.proscene.*;
+import proscene.util.*;
 
 /*
  * Testing Ball And Socket Constraint and Hinge Constraint

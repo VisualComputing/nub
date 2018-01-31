@@ -30,8 +30,8 @@
  * and mouse bindings in the console.
  */
 
-import remixlab.input.event.*;
-import remixlab.proscene.*;
+import proscene.input.event.*;
+import proscene.proscene.*;
 
 Scene scene;
 InteractiveFrame frame1, frame2, frame3, frame4;

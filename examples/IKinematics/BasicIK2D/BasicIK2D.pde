@@ -1,13 +1,13 @@
-import remixlab.input.*;
-import remixlab.input.event.*;
-import remixlab.dandelion.constraint.*;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.dandelion.ik.*;
-import remixlab.timing.*;
-import remixlab.proscene.*;
-import remixlab.util.*;
-import remixlab.dandelion.ik.Solver.*;
+import proscene.input.*;
+import proscene.input.event.*;
+import proscene.dandelion.constraint.*;
+import proscene.dandelion.geom.*;
+import proscene.dandelion.primitives.*;
+import proscene.dandelion.ik.*;
+import proscene.timing.*;
+import proscene.proscene.*;
+import proscene.util.*;
+import proscene.dandelion.ik.Solver.*;
 import java.util.Map;
 
 /**

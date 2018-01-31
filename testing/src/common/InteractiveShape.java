@@ -3,12 +3,12 @@ package common;
 
 import processing.core.PApplet;
 import processing.core.PShape;
-import remixlab.input.Shortcut;
-import remixlab.input.event.KeyEvent;
-import remixlab.input.event.KeyShortcut;
-import remixlab.input.event.MotionEvent;
-import remixlab.processing.Scene;
-import remixlab.processing.Shape;
+import proscene.input.Shortcut;
+import proscene.input.event.KeyEvent;
+import proscene.input.event.KeyShortcut;
+import proscene.input.event.MotionEvent;
+import proscene.processing.Scene;
+import proscene.processing.Shape;
 
 public class InteractiveShape extends Shape {
   Shortcut left = new Shortcut(PApplet.LEFT);

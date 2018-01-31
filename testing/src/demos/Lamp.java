@@ -3,12 +3,12 @@ package demos;
 import common.InteractiveShape;
 import processing.core.PConstants;
 import processing.core.PGraphics;
-import remixlab.primitives.Quaternion;
-import remixlab.primitives.Vector;
-import remixlab.primitives.constraint.AxisPlaneConstraint;
-import remixlab.primitives.constraint.LocalConstraint;
-import remixlab.primitives.constraint.WorldConstraint;
-import remixlab.processing.Scene;
+import proscene.primitives.Quaternion;
+import proscene.primitives.Vector;
+import proscene.primitives.constraint.AxisPlaneConstraint;
+import proscene.primitives.constraint.LocalConstraint;
+import proscene.primitives.constraint.WorldConstraint;
+import proscene.processing.Scene;
 
 /**
  * Lamp by Jean Pierre Charalambos.

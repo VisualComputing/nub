@@ -3,11 +3,11 @@ package basics;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.core.Graph;
-import remixlab.input.Shortcut;
-import remixlab.input.event.MotionEvent;
-import remixlab.processing.Scene;
-import remixlab.processing.Shape;
+import proscene.core.Graph;
+import proscene.input.Shortcut;
+import proscene.input.event.MotionEvent;
+import proscene.processing.Scene;
+import proscene.processing.Shape;
 
 public class ProsceneNodes extends PApplet {
   Scene scene;

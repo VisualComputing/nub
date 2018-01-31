@@ -2,10 +2,10 @@ package frame;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
-import remixlab.core.Graph;
-import remixlab.processing.GLMatrixHandler;
-import remixlab.processing.KeyAgent;
-import remixlab.processing.MouseAgent;
+import proscene.core.Graph;
+import proscene.processing.GLMatrixHandler;
+import proscene.processing.KeyAgent;
+import proscene.processing.MouseAgent;
 
 /**
  * This example just to show that a Graph is instantiable.

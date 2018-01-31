@@ -4,10 +4,10 @@ import common.InteractiveNode;
 import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import remixlab.core.Graph;
-import remixlab.core.Node;
-import remixlab.processing.Scene;
-import remixlab.processing.Shape;
+import proscene.core.Graph;
+import proscene.core.Node;
+import proscene.processing.Scene;
+import proscene.processing.Shape;
 
 public class MiniMap extends PApplet {
   Scene scene, minimap;

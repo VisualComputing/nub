@@ -4,15 +4,15 @@ import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
-import remixlab.core.Interpolator;
-import remixlab.input.Event;
-import remixlab.input.event.MotionEvent1;
-import remixlab.input.event.MotionEvent2;
-import remixlab.input.event.TapEvent;
-import remixlab.input.event.TapShortcut;
-import remixlab.primitives.Frame;
-import remixlab.processing.Scene;
-import remixlab.processing.Shape;
+import proscene.core.Interpolator;
+import proscene.input.Event;
+import proscene.input.event.MotionEvent1;
+import proscene.input.event.MotionEvent2;
+import proscene.input.event.TapEvent;
+import proscene.input.event.TapShortcut;
+import proscene.primitives.Frame;
+import proscene.processing.Scene;
+import proscene.processing.Shape;
 
 /**
  * This example introduces the three different interpolations offered

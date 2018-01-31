@@ -8,10 +8,10 @@
  * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
-import remixlab.proscene.*;
-import remixlab.dandelion.geom.*;
-import remixlab.dandelion.primitives.*;
-import remixlab.dandelion.constraint.*;
+import proscene.proscene.*;
+import proscene.dandelion.geom.*;
+import proscene.dandelion.primitives.*;
+import proscene.dandelion.constraint.*;
 
 Scene scene;
 Ceva ceva;
