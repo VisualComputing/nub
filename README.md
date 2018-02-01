@@ -11,7 +11,6 @@ ProScene [![Version](https://img.shields.io/badge/proscene-v3.0.0-brightgreen.sv
 - [Usage](#user-content-usage)
 - [Installation](#user-content-installation)
 - [Acknowledgements](#user-content-acknowledgements)
-- [Author, core developer and maintainer](#user-content-author-core-developer-and-maintainer)
 
 # Description
 
