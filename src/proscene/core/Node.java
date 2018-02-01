@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A {@link Frame} implementing the {@link Grabber} interface, which converts user gestures into
- * translation, rotation and scaling updates (see {@link #translationSensitivity()},
- * {@link #rotationSensitivity()} and {@link #scalingSensitivity()}). A node may thus be attached
+ * A Node is a {@link Frame} element on a {@link Graph} hierarchy, which converts user gestures
+ * into translation, rotation and scaling updates (see {@link #translationSensitivity()},
+ * {@link #rotationSensitivity()} and {@link #scalingSensitivity()}). A node may be attached
  * to some of your visual objects to control their behavior using an {@link Agent}.
  * <p>
  * <h3>Geometry transformations</h3>
@@ -178,9 +178,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as
-   * {@code this(reference.graph(), reference, new Vector(), scn.is3D() ? new Quaternion() : new Rot(), 1)}
-   * .
+   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
    *
    * @see #Node(Graph, Node, Vector, Quaternion, float)
    */
@@ -189,12 +187,12 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Creates a graph node with {@code reference} as
-   * {@link #reference()}, and {@code p}, {@code r} and {@code s} as the frame
+   * Creates a graph node with {@code reference} as {@link #reference()}, and
+   * {@code translation}, {@code rotation} and {@code scaling} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * The {@link Graph#inputHandler()} will attempt to addGrabber
-   * the node to all its {@link InputHandler#agents()}.
+   * The {@link Graph#inputHandler()} will attempt to addGrabber the node to all its
+   * {@link InputHandler#agents()}.
    * <p>
    * The node sensitivities are set to their default values, see
    * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
@@ -331,8 +329,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Perform a deep, non-recursive copy of this node.
    * <p>
-   * The copied frame will keep this frame {@link #reference()}, but its children
-   * aren't copied.
+   * The copied node will keep this node {@link #reference()}, but its children aren't copied.
    *
    * @return node copy
    */
@@ -360,13 +357,16 @@ public class Node extends Frame implements Grabber {
   }
 
   @Override
-  public void setReference(Frame reference) {
-    if (reference instanceof Node || reference == null)
-      setReference((Node) reference);
+  public void setReference(Frame frame) {
+    if (frame instanceof Node || frame == null)
+      setReference((Node) frame);
     else
-      System.out.println("Warning: nothing done: Generic.reference() should be instanceof Node");
+      System.out.println("Warning: nothing done: Node.reference() should be instanceof Node");
   }
 
+  /**
+   * Same as {@link #setReference(Frame)} but using a Node parameter.
+   */
   public void setReference(Node node) {
     if (settingAsReferenceWillCreateALoop(node)) {
       System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
@@ -403,29 +403,28 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns a list of the frame children, i.e., frame which {@link #reference()} is
-   * this.
+   * Returns a list of the node children, i.e., nodes which {@link #reference()} is this.
    */
   public List<Node> children() {
     return _children;
   }
 
-  protected boolean _addChild(Node frame) {
-    if (frame == null)
+  protected boolean _addChild(Node node) {
+    if (node == null)
       return false;
-    if (_hasChild(frame))
+    if (_hasChild(node))
       return false;
-    return children().add(frame);
+    return children().add(node);
   }
 
   /**
-   * Removes the leading frame if present. Typically used when re-parenting the frame.
+   * Removes the leading node if present. Typically used when re-parenting the node.
    */
-  protected boolean _removeChild(Node frame) {
+  protected boolean _removeChild(Node node) {
     boolean result = false;
     Iterator<Node> it = children().iterator();
     while (it.hasNext()) {
-      if (it.next() == frame) {
+      if (it.next() == node) {
         it.remove();
         result = true;
         break;
@@ -442,22 +441,29 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Procedure called by the graph frame traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes.
+   * Procedure called on the node by the graph traversal algorithm. Default implementation is
+   * empty, i.e., it is meant to be implemented by derived classes. Note that
+   * {@link #isVisitEnabled()} should return {@code true} (see {@link #enableVisit()}).
    *
    * @see Graph#traverse()
+   * @see #enableVisit()
    */
-  protected void visit() {
+  public void visit() {
   }
 
-  public void visitCallback() {
+  /**
+   * If {@link #isVisitEnabled()} calls {@link #visit()} which should be implemented.
+   * You don't need to call this method since it is called automatically by {@link Graph#traverse()}.
+   *
+   * @see #visit()
+   */
+  public void _visit() {
     if (isVisitEnabled())
       visit();
   }
 
   /**
-   * Enables {@link #visit()} of this frame when performing the
-   * {@link Graph#traverse()}.
+   * Enables {@link #visit()} of this node during {@link Graph#traverse()}.
    *
    * @see #disableVisit()
    * @see #isVisitEnabled()
@@ -467,8 +473,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Disables {@link #visit()} of this frame when performing the
-   * {@link Graph#traverse()}.
+   * Disables {@link #visit()} of this node during {@link Graph#traverse()}.
    *
    * @see #enableVisit()
    * @see #isVisitEnabled()
@@ -478,8 +483,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns true if {@link #visit()} of this frame when performing the
-   * {@link Graph#traverse() is enabled}.
+   * Returns true if {@link #visit()} of this node is enabled during {@link Graph#traverse()}.
    *
    * @see #enableVisit()
    * @see #disableVisit()
@@ -489,9 +493,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the graph this object belongs to.
-   * <p>
-   * Note that if this {@link #isEye()} then returns {@code eye().graph()}.
+   * Returns the graph this node belongs to.
    *
    * @see Graph#eye()
    */
@@ -500,10 +502,9 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns true if the node is attached to an eye, and false otherwise.
-   * generic-nodes can only be attached to an eye at construction times. Refer to the
-   * node constructors that take an eye parameter.
+   * Returns true if this node is the {@link Graph#eye()}, and false otherwise.
    *
+   * @see Graph#setEye(Frame)
    * @see Graph#eye()
    */
   public boolean isEye() {
@@ -522,7 +523,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    */
   public boolean track(MotionEvent motionEvent) {
     if (isEye())
@@ -539,7 +540,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    */
   public boolean track(TapEvent tapEvent) {
     if (isEye())
@@ -548,7 +549,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    * <p>
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
@@ -558,19 +559,19 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    * <p>
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
   public boolean track(MotionEvent1 motionEvent1) {
     if (isEye())
       return false;
-    Graph.showMissingImplementationWarning("track(MotionEvent1 _event)", this.getClass().getName());
+    Graph.showMissingImplementationWarning("track(MotionEvent1 motionEvent1)", this.getClass().getName());
     return false;
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    */
   public boolean track(MotionEvent2 motionEvent2) {
     if (isEye())
@@ -595,14 +596,14 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    */
   public boolean track(MotionEvent3 motionEvent3) {
     return track(motionEvent3.event2());
   }
 
   /**
-   * Internal use. You don't need to call this. Automatically called by _agents handling this frame.
+   * Internal use. You don't need to call this. Automatically called by agents handling this node.
    */
   public boolean track(MotionEvent6 motionEvent6) {
     return track(motionEvent6.event3().event2());
@@ -619,7 +620,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Calls interact() on the proper motion _event:
+   * Calls interact() on the proper motion event:
    * {@link MotionEvent1}, {@link MotionEvent2},
    * {@link MotionEvent3} or {@link MotionEvent6}.
    * <p>
@@ -682,31 +683,32 @@ public class Node extends Frame implements Grabber {
   // APPLY TRANSFORMATION
 
   /**
-   * Convenience function that simply calls {@code applyTransformation(graph)}. It applies
-   * the transformation defined by the frame to the graph used to instantiated.
+   * Convenience function that simply calls {@code applyTransformation(graph())}. It applies
+   * the transformation defined by this node to {@link #graph()}.
    *
    * @see #applyTransformation(Graph)
    * @see #matrix()
+   * @see #graph()
    */
   public void applyTransformation() {
-    applyTransformation(_graph);
+    applyTransformation(graph());
   }
 
   /**
-   * Convenience function that simply calls {@code applyWorldTransformation(graph)}. It
-   * applies the world transformation defined by the frame to the graph used to
-   * instantiated.
+   * Convenience function that simply calls {@code applyWorldTransformation(graph())}. It
+   * applies the world transformation defined by this node to {@link #graph()}.
    *
    * @see #applyWorldTransformation(Graph)
    * @see #worldMatrix()
+   * @see #graph()
    */
   public void applyWorldTransformation() {
-    applyWorldTransformation(_graph);
+    applyWorldTransformation(graph());
   }
 
   /**
    * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this frame to any graph you want using this
+   * apply the transformation represented by this node to any graph you want using this
    * method.
    * <p>
    * Very efficient prefer always this than
@@ -721,7 +723,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this frame to any graph you
+   * You may apply the world transformation represented by this node to any graph you
    * want using this method.
    *
    * @see #applyWorldTransformation()
@@ -735,7 +737,7 @@ public class Node extends Frame implements Grabber {
   // MODIFIED
 
   /**
-   * Internal use. Automatically call by all methods which change the Frame state.
+   * Internal use. Automatically call by all methods which change the node state.
    */
   @Override
   protected void _modified() {
@@ -748,7 +750,7 @@ public class Node extends Frame implements Grabber {
   // SYNC
 
   /**
-   * Same as {@code sync(this, otherFrame)}.
+   * Same as {@code sync(this, other)}.
    *
    * @see #sync(Node, Node)
    */
@@ -757,13 +759,13 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * If {@code f1} hasGrabber been more recently updated than {@code f2}, calls
-   * {@code f2.setWorldMatrix(f1)}, otherwise calls {@code f1.setWorldMatrix(f2)}. Does
-   * nothing if both objects were updated at the same frame.
+   * If {@code node1} has been more recently updated than {@code node2}, calls
+   * {@code node2.setWorldMatrix(node1)}, otherwise calls {@code node1.setWorldMatrix(node2)}.
+   * Does nothing if both objects were updated at the same frame.
    * <p>
    * This method syncs only the global geometry attributes ({@link #position()},
    * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
+   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
    * separately.
    *
    * @see #setWorldMatrix(Frame)
@@ -794,7 +796,7 @@ public class Node extends Frame implements Grabber {
    * Defines the spinning deceleration.
    * <p>
    * Default value is 0.5. Use {@link #setDamping(float)} to tune this value. A higher
-   * value will make damping more difficult (a value of 1.0 forbids damping).
+   * value will make damping more difficult (a value of 1 forbids damping).
    */
   public float damping() {
     return _dampFriction;
@@ -865,8 +867,8 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns the influence of a gesture displacement on the node rotation.
    * <p>
-   * Default value is 1.0 (which matches an identical mouse displacement), a higher value
-   * will generate a larger rotation (and inversely for lower values). A 0.0 value will
+   * Default value is 1 (for instance matching an identical mouse displacement), a higher
+   * value will generate a larger rotation (and inversely for lower values). A 0 value will
    * forbid rotation (see also {@link #constraint()}).
    *
    * @see #setRotationSensitivity(float)
@@ -883,8 +885,8 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns the influence of a gesture displacement on the node scaling.
    * <p>
-   * Default value is 1.0, a higher value will generate a larger scaling (and inversely
-   * for lower values). A 0.0 value will forbid scaling (see also {@link #constraint()}).
+   * Default value is 1, a higher value will generate a larger scaling (and inversely
+   * for lower values). A 0 value will forbid scaling (see also {@link #constraint()}).
    *
    * @see #setScalingSensitivity(float)
    * @see #setRotationSensitivity(float)
@@ -900,11 +902,11 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns the influence of a gesture displacement on the node translation.
    * <p>
-   * Default value is 1.0 which in the case of a mouse interaction makes the node
+   * Default value is 1 which in the case of a mouse interaction makes the node
    * precisely stays under the mouse cursor.
    * <p>
    * With an identical gesture displacement, a higher value will generate a larger
-   * translation (and inversely for lower values). A 0.0 value will forbid translation
+   * translation (and inversely for lower values). A 0 value will forbid translation
    * (see also {@link #constraint()}).
    *
    * @see #setTranslationSensitivity(float)
@@ -919,15 +921,15 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the minimum gesture _speed required to make the node {@link #_spin()}.
-   * Spinning requires to set to {@link #damping()} to 0.
+   * Returns the minimum gesture speed required to make the node spin.
+   * Spinning requires to set {@link #damping()} to 0.
    * <p>
    * See {@link #_spin()}, {@link #spinningQuaternion()} and
    * {@link #_startSpinning(MotionEvent, Quaternion)} for details.
    * <p>
-   * Gesture _speed is expressed in pixels per milliseconds. Default value is 0.3 (300
+   * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
-   * higher value will make spinning more difficult (a value of 100.0 forbids spinning in
+   * higher value will make spinning more difficult (a value of 100 forbids spinning in
    * practice).
    *
    * @see #setSpinningSensitivity(float)
@@ -943,9 +945,9 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the _wheel sensitivity.
+   * Returns the wheel sensitivity.
    * <p>
-   * Default value is 15.0. A higher value will make the _wheel action more efficient
+   * Default value is 15. A higher value will make the wheel action more efficient
    * (usually meaning faster motion). Use a negative value to invert the operation
    * direction.
    *
@@ -1002,7 +1004,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * The {@link #spinningQuaternion()} axis is defined in the node coordinate
    * system. You can use {@link Frame#transformOfFrom(Vector, Frame)}
-   * to convert this axis from another Frame coordinate system.
+   * to convert this axis from another coordinate system.
    * <p>
    * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
    * stops completely.
@@ -1024,8 +1026,8 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the spinning motion _started using {@link #_startSpinning(MotionEvent, Quaternion)}
-   * . {@link #isSpinning()} will return {@code false} after this call.
+   * Stops the spinning motion _started using {@link #_startSpinning(MotionEvent, Quaternion)}.
+   * Note that {@link #isSpinning()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #_spin()}, since spinning may be
    * decelerated according to {@link #damping()} till it stops completely.
@@ -1071,7 +1073,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Cache version. Used by rotate methods when damping = 0.
+   * Cache version. Used by rotate methods when damping is 0.
    */
   protected void _startSpinning() {
     startSpinning(spinningQuaternion(), _eventSpeed, _eventDelay);
@@ -1105,10 +1107,8 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Rotates the graph-frame by its {@link #spinningQuaternion()} or around the
-   * {@link Graph#anchor()} when this graph-frame is the
-   * {@link Graph#eye()}. Called by a timer when the
-   * node {@link #isSpinning()}.
+   * Rotates the node by its {@link #spinningQuaternion()} or around the {@link Graph#anchor()}
+   * when this node is the {@link Graph#eye()}. Called by a timer when the node {@link #isSpinning()}.
    * <p>
    * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
    * stops completely.
@@ -1123,8 +1123,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal method. Recomputes the {@link #spinningQuaternion()} according to
-   * {@link #damping()}.
+   * Internal method. Recomputes the {@link #spinningQuaternion()} according to {@link #damping()}.
    */
   protected void _recomputeSpinningQuaternion() {
     float prevSpeed = _eventSpeed;
@@ -1151,7 +1150,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Return 1 if mouse motion was _started horizontally and -1 if it was more vertical.
+   * Return 1 if mouse motion was started horizontally and -1 if it was more vertical.
    * Returns 0 if this could not be determined yet (perfect diagonal motion, rare).
    */
   protected int _originalDirection(MotionEvent2 event) {
@@ -1171,8 +1170,9 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns a quaternion computed according to the mouse motion. Mouse positions are
-   * projected on a deformed ball, centered on ({@code center.x()}, {@code center.y()}).
+   * Returns a quaternion computed according to the 2-DOF gesture motion, such as those gathered
+   * from mice (mouse positions are projected on a deformed ball, centered on ({@code center.x()},
+   * {@code center.y()})).
    */
   public Quaternion deformedBallQuaternion(MotionEvent2 event, Vector center) {
     if (event.isAbsolute()) {
@@ -1203,8 +1203,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
-   * ball, it is proportional to the euclidean _distance to the ball. For a point outside
-   * the ball, it is proportional to the inverse of this _distance (tends to zero) on the
+   * ball, it is proportional to the euclidean distance to the ball. For a point outside
+   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
    * ball, the function is continuous.
    */
   protected float _projectOnBall(float x, float y) {
@@ -1239,6 +1239,8 @@ public class Node extends Frame implements Grabber {
   /**
    * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
    * between eye and non-eye nodes.
+   *
+   * @see #isEye()
    */
   public void align() {
     if (isEye())
@@ -2145,7 +2147,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code return eyeToReferenceFrame(screenToEye(trns))}. Transforms the vector
+   * Same as {@code return eyeToReferenceFrame(screenToEye(vector))}. Transforms the vector
    * from screen (device) coordinates to {@link #reference()} coordinates.
    *
    * @see #screenToEye(Vector)
@@ -2306,9 +2308,8 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns {@code true} when the node is tossing.
    * <p>
-   * During tossing, {@link #damping()} translates the node by its
-   * {@link #flyDirection()} at a frequency defined when the node
-   * {@link #_startFlying(MotionEvent, Vector)}.
+   * During tossing, {@link #damping()} translates the node by its {@link #flyDirection()}
+   * at a frequency defined when the node {@link #_startFlying(MotionEvent, Vector)}.
    * <p>
    * Use {@link #_startFlying(MotionEvent, Vector)} and {@link #stopFlying()} to change this
    * state. Default value is {@code false}.
@@ -2320,7 +2321,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the tossing motion _started using {@link #_startFlying(MotionEvent, Vector)}.
+   * Stops the tossing motion started using {@link #_startFlying(MotionEvent, Vector)}.
    * {@link #isFlying()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #damping()}, since tossing may
@@ -2359,7 +2360,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. Same as {@code _startFlying(direction, _event._speed())}.
+   * Internal use. Same as {@code startFlying(direction, event.speed())}.
    *
    * @see #startFlying(Vector, float)
    * @see #_startSpinning(MotionEvent, Quaternion)
@@ -2371,7 +2372,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Starts the tossing of the node.
    * <p>
-   * This method starts a timer that will call {@link #damping()} every _flyUpdatePeriod
+   * This method starts a timer that will call {@link #damping()} every 20
    * milliseconds. The node {@link #isFlying()} until you call
    * {@link #stopFlying()}.
    * <p>
@@ -2403,26 +2404,23 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the _fly _speed, expressed in virtual graph units.
+   * Returns the fly speed, expressed in graph units.
    * <p>
    * It corresponds to the incremental displacement that is periodically applied to the
    * node by {@link #_moveForward(MotionEvent, boolean)}.
    * <p>
-   * <b>Attention:</b> When frame is set as the
-   * {@link Graph#eye()}, this value is set according
-   * to the {@link Graph#radius()} by
-   * {@link Graph#setRadius(float)}.
+   * <b>Attention:</b> When the node is set as the {@link Graph#eye()}, this value is set according
+   * to the {@link Graph#radius()} by {@link Graph#setRadius(float)}.
    */
   public float flySpeed() {
     return _flySpeed;
   }
 
   /**
-   * Sets the {@link #flySpeed()}, defined in virtual graph units.
+   * Sets the {@link #flySpeed()}, defined in  graph units.
    * <p>
-   * Default value is 0.0, but it is _modified according to the
-   * {@link Graph#radius()} when the node is set
-   * as the {@link Graph#eye()}.
+   * Default value is 0, but it is modified according to the {@link Graph#radius()} when the node
+   * is set as the {@link Graph#eye()}.
    */
   public void setFlySpeed(float speed) {
     _flySpeed = speed;
@@ -2440,7 +2438,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * mouse roll (X axis) and pitch.
+   * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
    */
   protected Quaternion _rollPitchQuaternion(MotionEvent2 event) {
     float deltaX = event.dx();
@@ -2458,7 +2456,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
-   * _event X-displacement.
+   * event X-displacement.
    */
   protected Quaternion _turnQuaternion(MotionEvent1 event) {
     float deltaX = event.dx();
@@ -2468,8 +2466,7 @@ public class Node extends Frame implements Grabber {
   // end decide
 
   /**
-   * Returns the grabs inputGrabber threshold which is used by the interactive frame to
-   * {@link #track(Event)}.
+   * Returns the picking precision threshold in pixels used by the node to {@link #track(Event)}.
    *
    * @see #setPrecisionThreshold(float)
    */
@@ -2484,8 +2481,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the frame picking precision. See
-   * {@link #setPrecision(Precision)} for details.
+   * Returns the node picking precision. See {@link #setPrecision(Precision)} for details.
    *
    * @see #setPrecision(Precision)
    * @see #setPrecisionThreshold(float)
@@ -2497,23 +2493,20 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Sets the picking precision of the frame.
+   * Sets the node picking precision.
    * <p>
    * When {@link #precision()} is {@link Precision#FIXED} or
    * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #center()} screen projection which size
+   * within a squared area around the node {@link #center()} screen projection which size
    * is defined by {@link #setPrecisionThreshold(float)}.
    * <p>
    * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the graphics related to the
-   * frame. It is meant to be implemented by generic frame derived classes and requires
-   * the graph to implement a so called picking buffer (see the proscene
-   * <a href="http://remixlab.github.io/proscene-javadocs/remixlab/proscene/Scene.html">
-   * Scene</a> class for a possible implementation) and the frame to implement means to
-   * attach graphics to it (see the proscene <a href=
-   * "http://remixlab.github.io/proscene-javadocs/remixlab/proscene/InteractiveFrame.html">
-   * Node</a> class for a possible implementation). Default implementation of
-   * this policy will behave like {@link Precision#FIXED}.
+   * in a precise manner according to the projected pixels of the visual representation
+   * related to the node. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the node) and requires the graph to implement
+   * a back buffer.
+   * <p>
+   * Default implementation of this policy will behave like {@link Precision#FIXED}.
    *
    * @see #precision()
    * @see #setPrecisionThreshold(float)
@@ -2530,26 +2523,22 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Sets the length of the squared area around the frame {@link #center()} screen
+   * Sets the length of the squared area around the node {@link #center()} screen
    * projection that defined the {@link #track(Event)} condition used for
-   * frame picking.
+   * node picking.
    * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the
-   * {@code threshold} is expressed in pixels and directly defines the fixed length of a
-   * 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
+   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * in pixels and directly defines the fixed length of a 'shooter target', centered
+   * at the projection of the node origin onto the screen.
    * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the
-   * {@code threshold} is expressed in object space (world units) and defines the edge
-   * length of a squared bounding box that leads to an adaptive length of a
-   * 'shooter target',
-   * centered at the projection of the frame origin onto the screen. Use this version only
-   * if you have a good idea of the bounding box size of the object you are attaching to
-   * the frame.
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * in object space (world units) and defines the edge length of a squared bounding box that
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the node
+   * origin onto the screen. Use this version only if you have a good idea of the bounding box
+   * size of the object you are attaching to the frame.
    * <p>
-   * The value is meaningless when the {@link #precision()} is
-   * {@link Precision#EXACT}. See {@link #setPrecision(Precision)}
-   * for details.
+   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
+   * {@link #setPrecision(Precision)} for details.
    * <p>
    * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
    * manner) to 20.
@@ -2570,7 +2559,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Check if this object is the {@link Agent#inputGrabber()} . Returns
+   * Check if this node is the {@link Agent#inputGrabber()}. Returns
    * {@code true} if this object grabs the agent and {@code false} otherwise.
    */
   public boolean grabsInput(Agent agent) {
@@ -2578,7 +2567,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Checks if the frame grabs inputGrabber from any agent registered at the graph inputGrabber _handler.
+   * Checks if the node grabs input from any agent registered at the graph input-handler.
    */
   public boolean grabsInput() {
     for (Agent agent : _graph.inputHandler().agents()) {

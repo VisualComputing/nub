@@ -1294,12 +1294,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void _visitNode(Node node) {
+  protected void _visit(Node node) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, node);
-    node.visitCallback();
+    node._visit();
     for (Node child : node.children())
-      _visitNode(child);
+      _visit(child);
     _targetPGraphics.popMatrix();
   }
 

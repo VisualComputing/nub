@@ -584,18 +584,18 @@ public class Graph {
    */
   public void traverse() {
     for (Node node : leadingNodes())
-      _visitNode(node);
+      _visit(node);
   }
 
   /**
    * Used by the traverse node tree algorithm.
    */
-  protected void _visitNode(Node node) {
+  protected void _visit(Node node) {
     pushModelView();
     applyTransformation(node);
-    node.visitCallback();
+    node._visit();
     for (Node child : node.children())
-      _visitNode(child);
+      _visit(child);
     popModelView();
   }
 
