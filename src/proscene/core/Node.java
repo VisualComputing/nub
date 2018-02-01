@@ -1254,7 +1254,7 @@ public class Node extends Frame implements Grabber {
    */
   public void center() {
     if (isEye())
-      graph().center();
+      projectOnLine(graph().center(), graph().viewDirection());
     else
       projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
   }

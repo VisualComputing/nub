@@ -7,11 +7,10 @@ import proscene.input.Shortcut;
 import proscene.input.event.KeyEvent;
 import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent;
+import proscene.input.event.TapEvent;
+import proscene.processing.MouseAgent;
 
 public class InteractiveNode extends Node {
-  Shortcut left = new Shortcut(PApplet.LEFT);
-  Shortcut right = new Shortcut(PApplet.RIGHT);
-  Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
   KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
   KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
   KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
@@ -35,15 +34,23 @@ public class InteractiveNode extends Node {
   // behavior is here :P
   @Override
   public void interact(MotionEvent event) {
-    if (event.shortcut().matches(left))
+    if (event.shortcut().matches(MouseAgent.RIGHT))
       translate(event);
-    else if (event.shortcut().matches(right))
+    else if (event.shortcut().matches(MouseAgent.LEFT))
       rotate(event);
-    else if (event.shortcut().matches(wheel))
+    else if (event.shortcut().matches(MouseAgent.WHEEL))
       if (isEye() && graph().is3D())
         translateZ(event);
       else
         scale(event);
+  }
+
+  @Override
+  public void interact(TapEvent event) {
+    if (event.shortcut().matches(MouseAgent.CENTER_TAP2))
+      center();
+    else if (event.shortcut().matches(MouseAgent.RIGHT_TAP))
+      align();
   }
 
   @Override

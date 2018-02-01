@@ -181,6 +181,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   //TODO experimental rename and add api docs.
+  // decide later
+  /*
   public Node orbitNode() {
     class OrbitNode extends Node {
       Shortcut left = new Shortcut(PApplet.LEFT);
@@ -237,7 +239,9 @@ public class Scene extends Graph implements PConstants {
     }
     return new OrbitNode(this);
   }
+  //*/
 
+  /*
   public Shape orbitShape() {
     class OrbitShape extends Shape {
       Shortcut left = new Shortcut(PApplet.LEFT);
@@ -294,6 +298,7 @@ public class Scene extends Graph implements PConstants {
     }
     return new OrbitShape(this);
   }
+  //*/
 
   /**
    * Returns the upper left corner of the Scene window. It's always (0,0) for on-screen

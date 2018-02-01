@@ -10,12 +10,15 @@
 
 package proscene.processing;
 
+import processing.core.PApplet;
 import proscene.core.Graph;
 import proscene.input.Agent;
 import proscene.input.Event;
+import proscene.input.Shortcut;
 import proscene.input.event.MotionEvent1;
 import proscene.input.event.MotionEvent2;
 import proscene.input.event.TapEvent;
+import proscene.input.event.TapShortcut;
 import proscene.primitives.Point;
 
 /**
@@ -26,9 +29,20 @@ import proscene.primitives.Point;
  * @see proscene.processing.KeyAgent
  */
 public class MouseAgent extends Agent {
+  //common mouse shortcuts
+  public static Shortcut NO_BUTTON = new Shortcut(Event.NO_ID);
+  public static Shortcut LEFT = new Shortcut(PApplet.LEFT);
+  public static Shortcut RIGHT = new Shortcut(PApplet.RIGHT);
+  public static Shortcut CENTER = new Shortcut(PApplet.CENTER);
+  public static Shortcut WHEEL = new Shortcut(processing.event.MouseEvent.WHEEL);
+  public static TapShortcut LEFT_TAP = new TapShortcut(PApplet.LEFT);
+  public static TapShortcut RIGHT_TAP = new TapShortcut(PApplet.RIGHT);
+  public static TapShortcut CENTER_TAP = new TapShortcut(PApplet.CENTER);
+  public static TapShortcut LEFT_TAP2 = new TapShortcut(PApplet.LEFT, 2);
+  public static TapShortcut RIGHT_TAP2 = new TapShortcut(PApplet.RIGHT, 2);
+  public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER,2 );
+
   protected Point _upperLeftCorner;
-  public static int LEFT_ID = 37, CENTER_ID = 3, RIGHT_ID = 39, WHEEL_ID = 8, NO_BUTTON = Event.NO_ID,
-      LEFT_CLICK_ID = LEFT_ID, RIGHT_CLICK_ID = RIGHT_ID, CENTER_CLICK_ID = CENTER_ID;
   protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
@@ -104,7 +118,7 @@ public class MouseAgent extends Agent {
       return;
     }
     if (mouseEvent.getAction() == processing.event.MouseEvent.WHEEL) {
-      handle(new MotionEvent1(mouseEvent.getCount(), mouseEvent.getModifiers(), WHEEL_ID));
+      handle(new MotionEvent1(mouseEvent.getCount(), mouseEvent.getModifiers(), processing.event.MouseEvent.WHEEL));
       return;
     }
     if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
