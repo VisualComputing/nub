@@ -14,8 +14,13 @@ import proscene.primitives.Matrix;
 import proscene.primitives.Vector;
 
 /**
- * Various matrix operations that should be supported either through a third-party
- * implementation or locally.
+ * The matrix handler specifies (and implements) various matrix operations needed by the
+ * {@link Graph} to properly perform its geometry transformations.
+ * <p>
+ * To bind a {@link Graph} object to a third party renderer, simply override
+ * {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)} in terms
+ * of the renderer method counterparts. Then call {@link #bind()} right at the beginning
+ * of your (raster) renderer main event loop.
  */
 public class MatrixHandler {
   protected Graph _graph;
@@ -53,7 +58,28 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds matrices to (a raster) renderer.
+   * Binds matrices to a raster renderer by calling (in the given order):
+   * <p>
+   * <ol>
+   * <li>{@code cacheProjection(graph().computeProjection())}</li>
+   * <li>{@code cacheView(graph().computeView())}</li>
+   * <li>{@code cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()))}</li>
+   * <li>{@code bindProjection(cacheProjection())}</li>
+   * <li>{@code bindModelView(cacheView())}</li>
+   * </ol>
+   * <p>
+   * This method is automatically called by {@link Graph#preDraw()} right at the beginning
+   * of the renderer main event loop.
+   *
+   * @see Graph#preDraw()
+   * @see Graph#computeProjection()
+   * @see Graph#computeCustomProjection()
+   * @see Graph#computeView()
+   * @see #cacheProjection(Matrix)
+   * @see #cacheView(Matrix)
+   * @see #cacheProjectionView(Matrix)
+   * @see #bindProjection(Matrix)
+   * @see #bindModelView(Matrix)
    */
   public void bind() {
     cacheProjection(graph().computeProjection());

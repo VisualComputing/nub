@@ -23,11 +23,6 @@ import proscene.core.MatrixHandler;
 import proscene.core.Node;
 import proscene.input.Agent;
 import proscene.input.Grabber;
-import proscene.input.Shortcut;
-import proscene.input.event.KeyEvent;
-import proscene.input.event.KeyShortcut;
-import proscene.input.event.MotionEvent1;
-import proscene.input.event.MotionEvent2;
 import proscene.primitives.*;
 import proscene.timing.SequentialTimer;
 import proscene.timing.TimingHandler;
@@ -148,7 +143,7 @@ public class Scene extends Graph implements PConstants {
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix helper
-    setMatrixHandler(matrixHelper(pGraphics));
+    setMatrixHandler(matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
@@ -1318,7 +1313,7 @@ public class Scene extends Graph implements PConstants {
    * @see #setMatrixHandler(MatrixHandler)
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
-  public MatrixHandler matrixHelper(PGraphics pGraphics) {
+  public MatrixHandler matrixHandler(PGraphics pGraphics) {
     return (pGraphics instanceof processing.opengl.PGraphicsOpenGL) ?
         new GLMatrixHandler(this, (PGraphicsOpenGL) pGraphics) :
         new Java2DMatrixHandler(this, pGraphics);
@@ -1338,7 +1333,7 @@ public class Scene extends Graph implements PConstants {
   public void bindMatrices(PGraphics pGraphics) {
     if (this.frontBuffer() == pGraphics)
       return;
-    MatrixHandler mh = matrixHelper(pGraphics);
+    MatrixHandler mh = matrixHandler(pGraphics);
     mh.bindProjection(projection());
     mh.bindView(view());
     mh.cacheProjectionView();
@@ -1418,7 +1413,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().beginScreenCoordinates();
     else
-      matrixHelper(pGraphics).beginScreenCoordinates();
+      matrixHandler(pGraphics).beginScreenCoordinates();
   }
 
   /**
@@ -1449,7 +1444,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().endScreenCoordinates();
     else
-      matrixHelper(pGraphics).endScreenCoordinates();
+      matrixHandler(pGraphics).endScreenCoordinates();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }

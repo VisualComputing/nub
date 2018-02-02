@@ -23,30 +23,71 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D scene graph.
+ * A 2D or 3D scene graph providing eye, input and timing handling to a third party
+ * raster or ray-tracing renderer.
  * <p>
- * Instantiated graph {@link Node}s form a graph-tree of
- * transformations which may be traverse with {@link #traverse()}. The node
- * collection belonging to the graph may be retrieved with {@link #nodes()}. The
- * graph provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(Node)}, {@link #appendBranch(List)},
- * {@link #isNodeReachable(Node)}, {@link #branch(Node)}, and
+ * <h2>Type and dimensions</h2>
+ * Frustum dimensions... bounding box, center radius anchor pixelToGraphRatio zNear, zFar
+ * <p>
+ * <h2>Scene graph handling</h2>
+ * <p>
+ * A graph forms a tree of {@link Node}s which may be {@link #traverse()}. The node collection
+ * belonging to the graph may be retrieved with {@link #nodes()}. The graph provides other
+ * useful routines to handle the hierarchy, such as {@link #pruneBranch(Node)},
+ * {@link #appendBranch(List)}, {@link #isNodeReachable(Node)}, {@link #branch(Node)}, and
  * {@link #clear()}.
  * <p>
- * Each graph provides the following main object instances:
- * <ol>
- * <li>An {@link #eye()} which represents the 2D/3D controlling object.</li>
- * <li>A {@link #timingHandler()} which control (single-threaded) timing operations. For
- * details please refer to the {@link proscene.timing.TimingHandler} class.</li>
- * <li>An {@link #inputHandler()} which handles all user input through
- * {@link Agent}s (for details please refer to the
- * {@link InputHandler} class). The {@link #inputHandler()} holds agents which should
- * be instantiated by derived classes at construction time.</li>
- * <li>A {@link #matrixHandler()} which handles matrix operations either through the
- * {@link MatrixHandler} or through a third party matrix stack
- * (like it's done with Processing). For details please refer to the
- * {@link MatrixHandler} interface.</li>
- * </ol>
+ * <h2>Eye handling</h2>
+ * <p>
+ * Any {@link Frame} or {@link Node} at the graph hierarchy may be set as the {@link #eye()}
+ * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
+ * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
+ * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #setFieldOfView()},
+ * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)},
+ * {@link #projectedCoordinatesOf(Vector, Frame)} and {@link #unprojectedCoordinatesOf(Vector, Frame)},
+ * are provided for convenience.
+ * <p>
+ * <h3>Screen drawing</h3>
+ * <p>
+ * <h3>Interpolator</h3>
+ * <p>
+ * <p>
+ * <h3>Visibility and culling techniques</h3>
+ * <p>
+ * <p>
+ * <h2>Input handling</h2>
+ * <p>
+ * The graph performs input handling through an {@link #inputHandler()}. Several
+ * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
+ * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
+ * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
+ * convenience.
+ * <p>
+ * <h2>Timing handling</h2>
+ * <p>
+ * The graph performs timing handling through a {@link #timingHandler()}. Several
+ * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
+ * and {@link #registerAnimator(Animator)}, are provided for convenience.
+ * <p>
+ * <h2>Matrix handling</h2>
+ * <p>
+ * The graph performs matrix handling through a {@link #matrixHandler()}. Several
+ * {@link MatrixHandler} wrapper functions, such as {@link #pushModelView()},
+ * {@link #pushProjection()}, {@link #translate(float, float, float)} and
+ * {@link #rotate(float)}, are provided for convenience.
+ * <p>
+ * Binding a graph to a third party renderer initially takes place at the beginning of the
+ * main even loop (see {@link #preDraw()}), where the projection and view matrices are
+ * computed (see {@link #computeProjection()} and {@link #computeView()}) from
+ * {@link #eye()} parameters and then cached at the {@link #matrixHandler()}
+ * (see {@link MatrixHandler#bind()}. Therefore, to bind a graph to a third party renderer,
+ * simply override a {@link MatrixHandler} in terms of your renderer matrix functions and
+ * then set it with {@link #setMatrixHandler(MatrixHandler)}. Refer to the
+ * {@link MatrixHandler} documentation for details.
+ *
+ * @see InputHandler
+ * @see TimingHandler
+ * @see MatrixHandler
  */
 //TODO
 // (decide) Remove printing stuff (vector, map, ...) and warnings (hashmap).
@@ -1220,8 +1261,8 @@ public class Graph {
    * Called before your main drawing and performs the following:
    * <ol>
    * <li>Calls {@link MatrixHandler#bind()}</li>
-   * <li>Calls {@link #updateBoundaryEquations()} if
-   * {@link #areBoundaryEquationsEnabled()}</li>
+   * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
+   * <li>Increments the {@link TimingHandler#frameCount}</li>
    * </ol>
    *
    * @see #postDraw()

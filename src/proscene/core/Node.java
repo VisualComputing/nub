@@ -30,9 +30,9 @@ import java.util.List;
  * {@link #rotationSensitivity()} and {@link #scalingSensitivity()}). A node may be attached
  * to some of your visual objects to control their behavior using an {@link Agent}.
  * <p>
- * <h3>Geometry transformations</h3>
+ * <h2>Geometry transformations</h2>
  * <p>
- * To define the position, orientation and magnitude of a visual object use {@link #matrix()}
+ * To define the position, orientation and magnitude of a visual object, use {@link #matrix()}
  * (see the {@link proscene.primitives.Frame} class documentation for details) or
  * {@link #applyTransformation()} (or {@link #applyWorldTransformation()}), as shown below:
  * <p>
@@ -64,7 +64,7 @@ import java.util.List;
  * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
  * to the right.
  * <p>
- * <h3>Behaviors</h3>
+ * <h2>Behaviors</h2>
  * <p>
  * To implement a node behavior derive from this class and override the
  * version of {@code interact} with the (event) parameter type you want to
@@ -94,12 +94,12 @@ import java.util.List;
  * such as: {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent)},
  * {@link #translateXPos()}, etc.
  * <p>
- * <h3>Picking</h3>
+ * <h2>Picking</h2>
  * <p>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
  * <p>
- * <h3>Syncing</h3>
+ * <h2>Syncing</h2>
  * <p>
  * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
  * share their global parameters (position, orientation and magnitude) taken the one

@@ -40,7 +40,7 @@ public class MouseAgent extends Agent {
   public static TapShortcut CENTER_TAP = new TapShortcut(PApplet.CENTER);
   public static TapShortcut LEFT_TAP2 = new TapShortcut(PApplet.LEFT, 2);
   public static TapShortcut RIGHT_TAP2 = new TapShortcut(PApplet.RIGHT, 2);
-  public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER,2 );
+  public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER, 2);
 
   protected Point _upperLeftCorner;
   protected Graph _graph;
