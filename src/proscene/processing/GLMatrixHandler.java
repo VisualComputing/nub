@@ -17,8 +17,7 @@ import proscene.core.MatrixHandler;
 import proscene.primitives.Matrix;
 
 /**
- * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics
- * transformation.
+ * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.
  */
 public class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
