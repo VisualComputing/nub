@@ -17,10 +17,23 @@ import proscene.primitives.Vector;
  * The matrix handler specifies (and implements) various matrix operations needed by the
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
- * To bind a {@link Graph} object to a third party renderer, simply override
- * {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)} in terms
- * of the renderer method counterparts. Then call {@link #bind()} right at the beginning
- * of your (raster) renderer main event loop.
+ * To set shader matrix uniform variables call {@link #projection()}, {@link #modelView()}
+ * and (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * <p>
+ * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
+ * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc),
+ * override at least {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}, by
+ * implementing them in terms of the renderer params (see {@link #bind()}). Implement, in
+ * the same way, all the methods defined here that the renderer supports, so that they get
+ * bound too.
+ *
+ * @see Matrix
+ * @see #projection()
+ * @see #bindProjection(Matrix)
+ * @see #modelView()
+ * @see #bindModelView(Matrix)
+ * @see #bind()
+ * @see Graph#preDraw()
  */
 public class MatrixHandler {
   protected Graph _graph;
@@ -70,35 +83,29 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds matrices to a raster renderer by calling (in the given order):
+   * Updates (computes and caches) the {@link #projection()} and {@link #view()} matrices from
+   * from the {@link #graph()} {@link Graph#eye()} parameters. This method is automatically
+   * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
-   * <ol>
-   * <li>{@code cacheProjection(graph().computeProjection())}</li>
-   * <li>{@code cacheView(graph().computeView())}</li>
-   * <li>{@code cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()))}</li>
-   * <li>{@code bindProjection(cacheProjection())}</li>
-   * <li>{@code bindModelView(cacheView())}</li>
-   * </ol>
-   * <p>
-   * This method is automatically called by {@link Graph#preDraw()} right at the beginning
-   * of the renderer main event loop.
+   * If {@link #graph()} is bound to a third party (raster) renderer (i.e., that renderer provides
+   * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc)
+   * this method also binds the {@link #projection()} and {@link #view()} matrices to the renderer.
+   * In this case, note that {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}
+   * should be overridden, by implementing them in terms of the renderer parameters.
    *
    * @see Graph#preDraw()
    * @see Graph#computeProjection()
    * @see Graph#computeCustomProjection()
    * @see Graph#computeView()
-   * @see #cacheProjection(Matrix)
-   * @see #cacheView(Matrix)
-   * @see #cacheProjectionView(Matrix)
    * @see #bindProjection(Matrix)
    * @see #bindModelView(Matrix)
    */
   public void bind() {
     if(_raster)
-      cacheProjection(graph().computeProjection());
-    cacheView(graph().computeView());
+      _cacheProjection(graph().computeProjection());
+    _cacheView(graph().computeView());
     if(_raster) {
-      cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+      _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
       bindProjection(cacheProjection());
     }
     bindModelView(cacheView());
@@ -115,13 +122,15 @@ public class MatrixHandler {
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
    */
   public void bindProjection(Matrix matrix) {
-    cacheProjection(matrix);
+    _cacheProjection(matrix);
   }
+
+  //TODO decide if _cache* version should be pubic
 
   /**
    * Caches the projection matrix.
    */
-  public void cacheProjection(Matrix matrix) {
+  protected void _cacheProjection(Matrix matrix) {
     _projection.set(matrix);
   }
 
@@ -143,13 +152,13 @@ public class MatrixHandler {
    * Binds the view matrix to the renderer.
    */
   public void bindView(Matrix matrix) {
-    cacheView(matrix);
+    _cacheView(matrix);
   }
 
   /**
    * Caches the view matrix.
    */
-  public void cacheView(Matrix matrix) {
+  protected void _cacheView(Matrix matrix) {
     _view.set(matrix);
   }
 
@@ -179,7 +188,7 @@ public class MatrixHandler {
    *
    * @see #isProjectionViewInverseCached()
    */
-  public void cacheProjectionView(Matrix matrix) {
+  protected void _cacheProjectionView(Matrix matrix) {
     _projectionView.set(matrix);
     if (isProjectionViewInverseCached()) {
       if (_projectionViewInverse == null)
@@ -207,7 +216,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Cache projection * view inverse matrix(and also projection * view}) so that
+   * Cache projection * view inverse matrix (and also projection * view}) so that
    * {@link Graph#unprojectedCoordinatesOf(Vector)} is optimized.
    *
    * @see #isProjectionViewInverseCached()
