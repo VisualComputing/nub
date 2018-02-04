@@ -85,11 +85,11 @@ public class MatrixHandler {
   }
 
   /**
-   * Updates (computes and caches) the projection and view matrices from from the
-   * {@link #graph()} {@link Graph#eye()} parameters. This method is automatically
-   * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
+   * Updates (computes and caches) the projection and view matrices from the {@link #graph()}
+   * {@link Graph#eye()} parameters. This method is automatically called by
+   * {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
-   * If {@link #graph()} is bound to a third party (raster) renderer (i.e., that renderer provides
+   * If {@link #graph()} is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
    * this method also binds the projection and view matrices to that renderer.
    * In this case, note that {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}
@@ -107,7 +107,7 @@ public class MatrixHandler {
       _projection.set(graph().computeProjection());
     _view.set(graph().computeView());
     if (_raster) {
-      cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+      _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
       bindProjection(cacheProjection());
     }
     bindModelView(cacheView());
@@ -302,7 +302,7 @@ public class MatrixHandler {
    *
    * @see #isProjectionViewInverseCached()
    */
-  protected void cacheProjectionView(Matrix matrix) {
+  protected void _cacheProjectionView(Matrix matrix) {
     _projectionView.set(matrix);
     if (isProjectionViewInverseCached()) {
       if (_projectionViewInverse == null)

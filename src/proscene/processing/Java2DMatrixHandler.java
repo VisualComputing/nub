@@ -41,7 +41,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   protected void _bind() {
     _projection.set(graph().computeProjection());
     _view.set(graph().computeView());
-    cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+    _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
     translate(_graph.width() / 2, _graph.height() / 2);
