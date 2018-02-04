@@ -38,7 +38,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   // public PGraphicsJava2D frontBuffer() { return (PGraphicsJava2D) frontBuffer; }
 
   @Override
-  public void bind() {
+  protected void _bind() {
     _projection.set(graph().computeProjection());
     _view.set(graph().computeView());
     cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));

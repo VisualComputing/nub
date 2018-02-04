@@ -3,7 +3,6 @@ package common;
 import processing.core.PApplet;
 import proscene.core.Graph;
 import proscene.core.Node;
-import proscene.input.Shortcut;
 import proscene.input.event.KeyEvent;
 import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent;

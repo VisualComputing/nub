@@ -23,8 +23,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D scene graph providing eye, input and timing handling to a third party
- * raster or ray-tracing renderer.
+ * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
+ * renderer.
  * <p>
  * <h2>Type and dimensions</h2>
  * Frustum dimensions... bounding box, center radius anchor pixelToGraphRatio zNear, zFar
@@ -71,18 +71,19 @@ import java.util.List;
  * <p>
  * <h2>Matrix handling</h2>
  * <p>
- * The graph performs matrix handling through a {@link #matrixHandler()}. Several
- * {@link MatrixHandler} wrapper functions, such as {@link #pushModelView()},
- * {@link #popModelView()} and {@link #applyModelView(Matrix)}.
+ * The graph performs matrix handling through a {@link #matrixHandler()}.
  * <p>
- * Binding a graph to a third party renderer initially takes place at the beginning of the
- * main even loop (see {@link #preDraw()}), where the projection and view matrices are
- * computed (see {@link #computeProjection()} and {@link #computeView()}) from
- * {@link #eye()} parameters and then cached at the {@link #matrixHandler()}
- * (see {@link MatrixHandler#bind()}. Therefore, to bind a graph to a third party renderer,
- * simply override a {@link MatrixHandler} in terms of your renderer matrix functions and
- * then set it with {@link #setMatrixHandler(MatrixHandler)}. Refer to the
- * {@link MatrixHandler} documentation for details.
+ * To {@link #applyTransformation(Frame)}, call {@link #pushModelView()},
+ * {@link #popModelView()} and {@link #applyModelView(Matrix)} (which wrap
+ * {@link MatrixHandler} functions with the same signatures).
+ * <p>
+ * To set shader matrix uniform variables call {@link #projection()}, {@link #modelView()}
+ * (which wrap {@link MatrixHandler} functions with the same signatures) and
+ * (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * <p>
+ * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
+ * with {@link #setMatrixHandler(MatrixHandler)} (refer to the {@link MatrixHandler}
+ * documentation for details).
  *
  * @see InputHandler
  * @see TimingHandler
@@ -616,7 +617,7 @@ public class Graph {
    * <p>
    * Note that only reachable nodes are visited by this algorithm.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link MatrixHandler#bind()} (i.e.,
+   * <b>Attention:</b> this method should be called after {@link MatrixHandler#_bind()} (i.e.,
    * eye update) and before any other transformation of the modelview takes place.
    *
    * @see #isNodeReachable(Node)
@@ -1166,7 +1167,7 @@ public class Graph {
   /**
    * Called before your main drawing and performs the following:
    * <ol>
-   * <li>Calls {@link MatrixHandler#bind()}</li>
+   * <li>Calls {@link MatrixHandler#_bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
    * <li>Increments the {@link TimingHandler#frameCount}</li>
    * </ol>
@@ -1175,7 +1176,7 @@ public class Graph {
    */
   public void preDraw() {
     // 1. Eye, raster graph
-    matrixHandler().bind();
+    matrixHandler()._bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;

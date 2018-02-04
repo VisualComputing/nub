@@ -21,18 +21,20 @@ import proscene.primitives.Vector;
  * and (possibly) {@code Matrix.multiply(projection(), modelView())}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
- * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc),
- * override at least {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}, by
- * implementing them in terms of the renderer params (see {@link #bind()}). Implement, in
- * the same way, all the methods defined here that the renderer supports, so that they get
- * bound too.
+ * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
+ * override: {@link #bindModelView(Matrix)}, {@link #modelView()}, {@link #applyModelView(Matrix)},
+ * {@link #pushModelView()}, {@link #popModelView()}, {@link #translate(float, float, float)},
+ * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
+ * {@link #scale(float, float, float)}, {@link #projection()}, {@link #bindProjection(Matrix)},
+ * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
+ * implementing them in terms of the renderer params (see {@link #_bind()}).
  *
  * @see Matrix
  * @see #projection()
  * @see #bindProjection(Matrix)
  * @see #modelView()
  * @see #bindModelView(Matrix)
- * @see #bind()
+ * @see #_bind()
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
@@ -83,13 +85,13 @@ public class MatrixHandler {
   }
 
   /**
-   * Updates (computes and caches) the {@link #projection()} and view matrices from
-   * from the {@link #graph()} {@link Graph#eye()} parameters. This method is automatically
+   * Updates (computes and caches) the projection and view matrices from from the
+   * {@link #graph()} {@link Graph#eye()} parameters. This method is automatically
    * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
    * If {@link #graph()} is bound to a third party (raster) renderer (i.e., that renderer provides
-   * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc)
-   * this method also binds the {@link #projection()} and view matrices to the renderer.
+   * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
+   * this method also binds the projection and view matrices to that renderer.
    * In this case, note that {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
@@ -100,11 +102,11 @@ public class MatrixHandler {
    * @see #bindProjection(Matrix)
    * @see #bindModelView(Matrix)
    */
-  protected void bind() {
-    if(_raster)
+  protected void _bind() {
+    if (_raster)
       _projection.set(graph().computeProjection());
     _view.set(graph().computeView());
-    if(_raster) {
+    if (_raster) {
       cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
       bindProjection(cacheProjection());
     }
@@ -115,8 +117,10 @@ public class MatrixHandler {
 
   /**
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
+   * Default implementation is empty (see {@link #_bind()}).
    */
-  public void bindProjection(Matrix matrix) {}
+  public void bindProjection(Matrix matrix) {
+  }
 
   /**
    * Binds the modelview matrix to the renderer.

@@ -1278,7 +1278,7 @@ public class Scene extends Graph implements PConstants {
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link #bind(PGraphics)}
+   * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
    * (i.e., manual eye update) and before any other transformation of the modelview takes
    * place.
    *
@@ -1289,7 +1289,7 @@ public class Scene extends Graph implements PConstants {
   public void traverse(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
     if (pGraphics != frontBuffer())
-      bind(pGraphics);
+      _bind(pGraphics);
     super.traverse();
   }
 
@@ -1320,7 +1320,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code matrixHandler(pgraphics).bind(false)}. Set the {@code pgraphics}
+   * Same as {@code matrixHandler(pgraphics)._bind(false)}. Set the {@code pgraphics}
    * matrices by calling
    * {@link MatrixHandler#bindProjection(Matrix)} and
    * {@link MatrixHandler#bindModelView(Matrix)} (only makes sense
@@ -1329,8 +1329,7 @@ public class Scene extends Graph implements PConstants {
    * This method doesn't perform any computation, but simple retrieve the current matrices
    * whose actual computation has been updated in {@link #preDraw()}.
    */
-  //TODO needs testing shader chaining
-  public void bind(PGraphics pGraphics) {
+  protected void _bind(PGraphics pGraphics) {
     if (this.frontBuffer() == pGraphics)
       return;
     MatrixHandler matrixHandler = matrixHandler(pGraphics);
@@ -1341,12 +1340,12 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Apply the local transformation defined by the given {@code frame} on the given
-   * {@code pgraphics}. This method doesn't call {@link #bind(PGraphics)} which
+   * {@code pgraphics}. This method doesn't call {@link #_bind(PGraphics)} which
    * should be called manually (only makes sense when {@link #frontBuffer()} is different than
    * {@code pgraphics}). Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
    *
    * @see #applyWorldTransformation(PGraphics, Frame)
-   * @see #bind(PGraphics)
+   * @see #_bind(PGraphics)
    */
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
     if (pGraphics instanceof PGraphics3D) {
@@ -1363,12 +1362,12 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Apply the global transformation defined by the given {@code frame} on the given
-   * {@code pgraphics}. This method doesn't call {@link #bind(PGraphics)} which
+   * {@code pgraphics}. This method doesn't call {@link #_bind(PGraphics)} which
    * should be called manually (only makes sense when {@link #frontBuffer()} is different than
    * {@code pgraphics}).
    *
    * @see #applyTransformation(PGraphics, Frame)
-   * @see #bind(PGraphics)
+   * @see #_bind(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
     Frame refFrame = frame.reference();
