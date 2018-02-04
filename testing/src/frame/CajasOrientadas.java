@@ -31,7 +31,7 @@ public class CajasOrientadas extends PApplet {
     println(graph.zNear());
     println(graph.zFar());
     graph.matrixHandler().projection().print();
-    graph.matrixHandler().view().print();
+    graph.matrixHandler().cacheView().print();
     graph.matrixHandler().modelView().print();
   }
 
@@ -91,6 +91,14 @@ public class CajasOrientadas extends PApplet {
       cajas[i].setOrientation(esfera.getPosition());
       cajas[i].draw(true);
     }
+
+    String text = "Hello world";
+    float w = graph.frontBuffer().textWidth(text);
+    float h = graph.frontBuffer().textAscent() + graph.frontBuffer().textDescent();
+    graph.beginScreenCoordinates();
+    //textFont(font);
+    text(text, 20, 20, w + 1, h);
+    graph.endScreenCoordinates();
   }
 
   public void keyPressed() {

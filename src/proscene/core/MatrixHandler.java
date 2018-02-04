@@ -83,13 +83,13 @@ public class MatrixHandler {
   }
 
   /**
-   * Updates (computes and caches) the {@link #projection()} and {@link #view()} matrices from
+   * Updates (computes and caches) the {@link #projection()} and view matrices from
    * from the {@link #graph()} {@link Graph#eye()} parameters. This method is automatically
    * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
    * If {@link #graph()} is bound to a third party (raster) renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc)
-   * this method also binds the {@link #projection()} and {@link #view()} matrices to the renderer.
+   * this method also binds the {@link #projection()} and view matrices to the renderer.
    * In this case, note that {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
@@ -100,15 +100,29 @@ public class MatrixHandler {
    * @see #bindProjection(Matrix)
    * @see #bindModelView(Matrix)
    */
-  public void bind() {
+  protected void bind() {
     if(_raster)
-      _cacheProjection(graph().computeProjection());
-    _cacheView(graph().computeView());
+      _projection.set(graph().computeProjection());
+    _view.set(graph().computeView());
     if(_raster) {
-      _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+      cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
       bindProjection(cacheProjection());
     }
     bindModelView(cacheView());
+  }
+
+  // 1. May be overridden
+
+  /**
+   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
+   */
+  public void bindProjection(Matrix matrix) {}
+
+  /**
+   * Binds the modelview matrix to the renderer.
+   */
+  public void bindModelView(Matrix matrix) {
+    _modelview.set(matrix);
   }
 
   /**
@@ -119,121 +133,13 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
-   */
-  public void bindProjection(Matrix matrix) {
-    _cacheProjection(matrix);
-  }
-
-  //TODO decide if _cache* version should be pubic
-
-  /**
-   * Caches the projection matrix.
-   */
-  protected void _cacheProjection(Matrix matrix) {
-    _projection.set(matrix);
-  }
-
-  /**
-   * Returns the cached projection matrix.
-   */
-  public Matrix cacheProjection() {
-    return _projection;
-  }
-
-  /**
-   * @return view matrix
-   */
-  public Matrix view() {
-    return cacheView();
-  }
-
-  /**
-   * Binds the view matrix to the renderer.
-   */
-  public void bindView(Matrix matrix) {
-    _cacheView(matrix);
-  }
-
-  /**
-   * Caches the view matrix.
-   */
-  protected void _cacheView(Matrix matrix) {
-    _view.set(matrix);
-  }
-
-  /**
-   * Returns the cached view matrix.
-   */
-  public Matrix cacheView() {
-    return _view;
-  }
-
-  /**
    * @return modelview matrix
    */
   public Matrix modelView() {
     return _modelview;
   }
 
-  /**
-   * Binds the modelview matrix to the renderer.
-   */
-  public void bindModelView(Matrix matrix) {
-    _modelview.set(matrix);
-  }
-
-  /**
-   * Caches the projection * view matrix.
-   *
-   * @see #isProjectionViewInverseCached()
-   */
-  protected void _cacheProjectionView(Matrix matrix) {
-    _projectionView.set(matrix);
-    if (isProjectionViewInverseCached()) {
-      if (_projectionViewInverse == null)
-        _projectionViewInverse = new Matrix();
-      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
-    }
-  }
-
-  /**
-   * Returns the cached projection * view matrix.
-   */
-  public Matrix cacheProjectionView() {
-    return _projectionView;
-  }
-
-  /**
-   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
-   * {@code false} otherwise.
-   *
-   * @see #cacheProjectionView()
-   * @see #cacheProjectionViewInverse(boolean)
-   */
-  public boolean isProjectionViewInverseCached() {
-    return _isProjectionViewInverseCached;
-  }
-
-  /**
-   * Cache projection * view inverse matrix (and also projection * view}) so that
-   * {@link Graph#unprojectedCoordinatesOf(Vector)} is optimized.
-   *
-   * @see #isProjectionViewInverseCached()
-   * @see #cacheProjectionView()
-   */
-  public void cacheProjectionViewInverse(boolean optimise) {
-    _isProjectionViewInverseCached = optimise;
-  }
-
-  /**
-   * Returns the cached projection times view inverse matrix.
-   */
-  public Matrix cacheProjectionViewInverse() {
-    if (!isProjectionViewInverseCached())
-      throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
-    return _projectionViewInverse;
-  }
+  // matrix operations
 
   /**
    * Multiplies the current modelview matrix by the one specified through the parameters.
@@ -272,13 +178,6 @@ public class MatrixHandler {
   }
 
   /**
-   * Translate in X and Y.
-   */
-  public void translate(float x, float y) {
-    translate(x, y, 0);
-  }
-
-  /**
    * Translate in X, Y, and Z.
    */
   public void translate(float x, float y, float z) {
@@ -286,35 +185,9 @@ public class MatrixHandler {
   }
 
   /**
-   * Two dimensional rotation.
-   * <p>
-   * Same as rotateZ (this is identical to a 3D rotation along the z-axis) but included
-   * for clarity.
-   * <p>
-   * <A HREF="http://www.xkcd.com/c184.html">Additional background</A>.
-   */
-  public void rotate(float angle) {
-    rotateZ(angle);
-  }
-
-  /**
-   * Rotate around the X axis.
-   */
-  public void rotateX(float angle) {
-    _modelview.rotateX(angle);
-  }
-
-  /**
-   * Rotate around the Y axis.
-   */
-  public void rotateY(float angle) {
-    _modelview.rotateY(angle);
-  }
-
-  /**
    * Rotate around the Z axis.
    */
-  public void rotateZ(float angle) {
+  public void rotate(float angle) {
     _modelview.rotateZ(angle);
   }
 
@@ -323,23 +196,6 @@ public class MatrixHandler {
    */
   public void rotate(float angle, float v0, float v1, float v2) {
     _modelview.rotate(angle, v0, v1, v2);
-  }
-
-  /**
-   * Scale equally in all dimensions.
-   */
-  public void scale(float s) {
-    scale(s, s, s);
-  }
-
-  /**
-   * Scale in X and Y. Equivalent to scale(sx, sy, 1).
-   * <p>
-   * Not recommended for use in 3D, because the z-dimension is just scaled by 1, since
-   * there's no way to know what else to scale it by.
-   */
-  public void scale(float sx, float sy) {
-    scale(sx, sy, 1);
   }
 
   /**
@@ -370,6 +226,99 @@ public class MatrixHandler {
     _projectionStackDepth--;
     _projection.set(_projectionStack[_projectionStackDepth]);
   }
+
+  // 2. WARNING don't override from here ever!
+
+  // 2a macros
+
+  /**
+   * Translate in X and Y.
+   */
+  public void translate(float x, float y) {
+    translate(x, y, 0);
+  }
+
+  /**
+   * Scale in X and Y. Equivalent to scale(sx, sy, 1).
+   * <p>
+   * Not recommended for use in 3D, because the z-dimension is just scaled by 1, since
+   * there's no way to know what else to scale it by.
+   */
+  public void scale(float sx, float sy) {
+    scale(sx, sy, 1);
+  }
+
+  // 2b caches
+
+  /**
+   * Returns the cached projection matrix.
+   */
+  public Matrix cacheProjection() {
+    return _projection;
+  }
+
+  /**
+   * Returns the cached view matrix.
+   */
+  public Matrix cacheView() {
+    return _view;
+  }
+
+  /**
+   * Returns the cached projection * view matrix.
+   */
+  public Matrix cacheProjectionView() {
+    return _projectionView;
+  }
+
+  /**
+   * Returns the cached projection times view inverse matrix.
+   */
+  public Matrix cacheProjectionViewInverse() {
+    if (!isProjectionViewInverseCached())
+      throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
+    return _projectionViewInverse;
+  }
+
+  // cache setters for projection times view and its inverse
+
+  /**
+   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
+   * {@code false} otherwise.
+   *
+   * @see #cacheProjectionView()
+   * @see #cacheProjectionViewInverse(boolean)
+   */
+  public boolean isProjectionViewInverseCached() {
+    return _isProjectionViewInverseCached;
+  }
+
+  /**
+   * Caches the projection * view matrix.
+   *
+   * @see #isProjectionViewInverseCached()
+   */
+  protected void cacheProjectionView(Matrix matrix) {
+    _projectionView.set(matrix);
+    if (isProjectionViewInverseCached()) {
+      if (_projectionViewInverse == null)
+        _projectionViewInverse = new Matrix();
+      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
+    }
+  }
+
+  /**
+   * Cache projection * view inverse matrix (and also projection * view}) so that
+   * {@link Graph#unprojectedCoordinatesOf(Vector)} is optimized.
+   *
+   * @see #isProjectionViewInverseCached()
+   * @see #cacheProjectionView()
+   */
+  public void cacheProjectionViewInverse(boolean optimise) {
+    _isProjectionViewInverseCached = optimise;
+  }
+
+  // 2c screen drawing
 
   /**
    * Computes the world coordinates of an screen object so that drawing can be done

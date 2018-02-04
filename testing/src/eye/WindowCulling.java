@@ -28,7 +28,7 @@ public class WindowCulling extends PApplet {
     println(scene.zNear());
     println(scene.zFar());
     scene.matrixHandler().projection().print();
-    scene.matrixHandler().view().print();
+    scene.matrixHandler().cacheView().print();
     scene.matrixHandler().modelView().print();
   }
 

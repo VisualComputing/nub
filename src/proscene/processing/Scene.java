@@ -1335,8 +1335,8 @@ public class Scene extends Graph implements PConstants {
       return;
     MatrixHandler matrixHandler = matrixHandler(pGraphics);
     matrixHandler.bindProjection(projection());
-    matrixHandler.bindView(view());
-    matrixHandler.bindModelView(view());
+    //matrixHandler.bindView(matrixHandler().cacheView());
+    matrixHandler.bindModelView(matrixHandler().cacheView());
   }
 
   /**
@@ -1872,9 +1872,9 @@ public class Scene extends Graph implements PConstants {
     float coneRadiusCoef = 4.0f - 5.0f * head;
 
     drawCylinder(radius, length * (1.0f - head / coneRadiusCoef));
-    translate(0.0f, 0.0f, length * (1.0f - head));
+    matrixHandler().translate(0.0f, 0.0f, length * (1.0f - head));
     drawCone(coneRadiusCoef * radius, head * length);
-    translate(0.0f, 0.0f, -length * (1.0f - head));
+    matrixHandler().translate(0.0f, 0.0f, -length * (1.0f - head));
   }
 
   /**
@@ -1885,7 +1885,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawArrow(Vector from, Vector to, float radius) {
     pushModelView();
-    translate(from.x(), from.y(), from.z());
+    matrixHandler().translate(from.x(), from.y(), from.z());
     applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
     popModelView();

@@ -69,7 +69,7 @@ public class FrameInterpolation2 extends PApplet {
     nodeInterpolator.start();
 
     // application control
-    auxCanvas = createGraphics(oW, oH, P3D);
+    auxCanvas = createGraphics(oW, oH, P2D);
     auxCanvas.rectMode(CENTER);
     auxScene = new Scene(this, auxCanvas, oX, oY);
     //auxScene.disablePickingBuffer();

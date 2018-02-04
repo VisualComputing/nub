@@ -39,9 +39,9 @@ public class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void bind() {
-    _cacheProjection(graph().computeProjection());
-    _cacheView(graph().computeView());
-    _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+    _projection.set(graph().computeProjection());
+    _view.set(graph().computeView());
+    cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
     translate(_graph.width() / 2, _graph.height() / 2);
@@ -112,28 +112,8 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void rotateX(float angle) {
-    pg().rotateX(angle);
-  }
-
-  @Override
-  public void rotateY(float angle) {
-    pg().rotateY(angle);
-  }
-
-  @Override
-  public void rotateZ(float angle) {
-    pg().rotateZ(angle);
-  }
-
-  @Override
   public void rotate(float angle, float vx, float vy, float vz) {
     pg().rotate(angle, vx, vy, vz);
-  }
-
-  @Override
-  public void scale(float s) {
-    pg().scale(s);
   }
 
   @Override

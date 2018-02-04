@@ -77,7 +77,7 @@ public class GLMatrixHandler extends MatrixHandler {
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(matrix));
-      pggl().projmodelview.set(Matrix.multiply(projection(), view()).getTransposed(new float[16]));
+      pggl().projmodelview.set(Matrix.multiply(projection(), cacheView()).getTransposed(new float[16]));
     }
   }
 
@@ -102,28 +102,8 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void rotateX(float angle) {
-    pggl().rotateX(angle);
-  }
-
-  @Override
-  public void rotateY(float angle) {
-    pggl().rotateY(angle);
-  }
-
-  @Override
-  public void rotateZ(float angle) {
-    pggl().rotateZ(angle);
-  }
-
-  @Override
   public void rotate(float angle, float vx, float vy, float vz) {
     pggl().rotate(angle, vx, vy, vz);
-  }
-
-  @Override
-  public void scale(float s) {
-    pggl().scale(s);
   }
 
   @Override

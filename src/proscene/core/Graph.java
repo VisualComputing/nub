@@ -73,8 +73,7 @@ import java.util.List;
  * <p>
  * The graph performs matrix handling through a {@link #matrixHandler()}. Several
  * {@link MatrixHandler} wrapper functions, such as {@link #pushModelView()},
- * {@link #pushProjection()}, {@link #translate(float, float, float)} and
- * {@link #rotate(float)}, are provided for convenience.
+ * {@link #popModelView()} and {@link #applyModelView(Matrix)}.
  * <p>
  * Binding a graph to a third party renderer initially takes place at the beginning of the
  * main even loop (see {@link #preDraw()}), where the projection and view matrices are
@@ -1081,6 +1080,13 @@ public class Graph {
   }
 
   /**
+   * Wrapper for {@link MatrixHandler#modelView()}
+   */
+  public Matrix modelView() {
+    return _matrixHandler.modelView();
+  }
+
+  /**
    * Wrapper for {@link MatrixHandler#pushModelView()}
    */
   public void pushModelView() {
@@ -1095,6 +1101,20 @@ public class Graph {
   }
 
   /**
+   * Wrapper for {@link MatrixHandler#applyModelView(Matrix)}
+   */
+  public void applyModelView(Matrix source) {
+    _matrixHandler.applyModelView(source);
+  }
+
+  /**
+   * Wrapper for {@link MatrixHandler#projection()}
+   */
+  public Matrix projection() {
+    return _matrixHandler.projection();
+  }
+
+  /**
    * Wrapper for {@link MatrixHandler#pushProjection()}
    */
   public void pushProjection() {
@@ -1106,120 +1126,6 @@ public class Graph {
    */
   public void popProjection() {
     _matrixHandler.popProjection();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#translate(float, float)}
-   */
-  public void translate(float tx, float ty) {
-    _matrixHandler.translate(tx, ty);
-  }
-
-  /**
-   * Wrapper for
-   * {@link MatrixHandler#translate(float, float, float)}
-   */
-  public void translate(float tx, float ty, float tz) {
-    _matrixHandler.translate(tx, ty, tz);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#rotate(float)}
-   */
-  public void rotate(float angle) {
-    _matrixHandler.rotate(angle);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#rotateX(float)}
-   */
-  public void rotateX(float angle) {
-    _matrixHandler.rotateX(angle);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#rotateY(float)}
-   */
-  public void rotateY(float angle) {
-    _matrixHandler.rotateY(angle);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#rotateZ(float)}
-   */
-  public void rotateZ(float angle) {
-    _matrixHandler.rotateZ(angle);
-  }
-
-  /**
-   * Wrapper for
-   * {@link MatrixHandler#rotate(float, float, float, float)}
-   */
-  public void rotate(float angle, float vx, float vy, float vz) {
-    _matrixHandler.rotate(angle, vx, vy, vz);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#scale(float)}
-   */
-  public void scale(float s) {
-    _matrixHandler.scale(s);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#scale(float, float)}
-   */
-  public void scale(float sx, float sy) {
-    _matrixHandler.scale(sx, sy);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#scale(float, float, float)}
-   */
-  public void scale(float x, float y, float z) {
-    _matrixHandler.scale(x, y, z);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#modelView()}
-   */
-  public Matrix modelView() {
-    return _matrixHandler.modelView();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#projection()}
-   */
-  public Matrix projection() {
-    return _matrixHandler.projection();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#projection()}
-   */
-  public Matrix view() {
-    return _matrixHandler.view();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#bindModelView(Matrix)}
-   */
-  public void setModelView(Matrix source) {
-    _matrixHandler.bindModelView(source);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#bindProjection(Matrix)}
-   */
-  public void setProjection(Matrix source) {
-    _matrixHandler.bindProjection(source);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#applyModelView(Matrix)}
-   */
-  public void applyModelView(Matrix source) {
-    _matrixHandler.applyModelView(source);
   }
 
   /**
@@ -2072,8 +1978,8 @@ public class Graph {
    * <p>
    * {@link #projectedCoordinatesOf(Vector, Frame)} performs the inverse transformation.
    * <p>
-   * This method only uses the intrinsic eye parameters (see {@link #view()},
-   * {@link #projection()}, {@link #width()} and {@link #height()}) and is completely independent of
+   * This method only uses the intrinsic eye parameters (view and projection matrices),
+   * {@link #width()} and {@link #height()}) and is completely independent of
    * the Processing matrices. You can hence define a virtual eye and use this method to
    * compute un-projections out of a classical rendering context.
    * <p>
@@ -2732,13 +2638,13 @@ public class Graph {
    */
   public void applyTransformation(Frame frame) {
     if (is2D()) {
-      translate(frame.translation().x(), frame.translation().y());
-      rotate(frame.rotation().angle2D());
-      scale(frame.scaling(), frame.scaling());
+      matrixHandler().translate(frame.translation().x(), frame.translation().y());
+      matrixHandler().rotate(frame.rotation().angle2D());
+      matrixHandler().scale(frame.scaling(), frame.scaling());
     } else {
-      translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
-      scale(frame.scaling(), frame.scaling(), frame.scaling());
+      matrixHandler().translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
+      matrixHandler().rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
+      matrixHandler().scale(frame.scaling(), frame.scaling(), frame.scaling());
     }
   }
 
