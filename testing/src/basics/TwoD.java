@@ -53,7 +53,7 @@ public class TwoD extends PApplet {
     background(0);
     scene.drawAxes(scene.radius());
     pushMatrix();
-    scene.applyTransformation(node);
+    node.applyTransformation();
     if (node.grabsInput())
       fill(255, 0, 0);
     else

@@ -21,7 +21,6 @@ import proscene.timing.TimingHandler;
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
  * Frame</a>, but it adds {@link #magnitude()} to it.
  * <h2>Geometry transformations</h2>
- * <p>
  * A frame is useful to define the position, orientation and magnitude of an object, using
  * its {@link #matrix()} method, as shown below:
  * <p>
@@ -49,9 +48,7 @@ import proscene.timing.TimingHandler;
  * use a frame as an angle preserving transformation. Use
  * {@link #inverseCoordinatesOf(Vector)} (resp. {@link #coordinatesOf(Vector)}) to apply
  * the transformation (resp. its inverse). Note the inversion.
- * <p>
  * <h2>Hierarchy of frames</h2>
- * <p>
  * The frame position, orientation and magnitude are actually defined with respect to
  * a {@link #reference()} frame. The default {@link #reference()} is the world
  * coordinate system (represented by a {@code null} {@link #reference()}). If you
@@ -84,9 +81,7 @@ import proscene.timing.TimingHandler;
  * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vector, Frame)},
  * {@link #coordinatesOfFrom(Vector, Frame)} ... which allow coordinates (or vector)
  * conversions from a frame to any other one (including the world coordinate system).
- * <p>
  * <h2>Constraints</h2>
- * <p>
  * One interesting feature of a frame is that its displacements can be constrained. When a
  * {@link proscene.primitives.constraint.Constraint} is attached to a frame, it filters
  * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the

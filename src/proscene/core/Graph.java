@@ -11,6 +11,7 @@
 package proscene.core;
 
 import proscene.input.Agent;
+import proscene.input.Event;
 import proscene.input.InputHandler;
 import proscene.primitives.*;
 import proscene.timing.Animator;
@@ -25,61 +26,76 @@ import java.util.List;
 /**
  * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
- * <p>
  * <h2>Type and dimensions</h2>
- * Frustum dimensions... bounding box, center radius anchor pixelToGraphRatio zNear, zFar
+ * A graph uses a ball to set the 2d or 3d viewing volume (instead of the more traditional
+ * methods to set the 3d viewing frustum). See {@link #setCenter(Vector)} and
+ * {@link #setRadius(float)}, and also {@link #setZClippingCoefficient(float)} and
+ * {@link #setZNearCoefficient(float)} for a 3d graph. See also
+ * {@link #setBoundingBox(Vector, Vector)}.
  * <p>
+ * The way the {@link #projection()} matrix is computed (see {@link #computeProjection()}),
+ * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
+ * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
+ * override {@link #computeCustomProjection()}. Note that the type of the graph is set at
+ * construction time.
  * <h2>Scene graph handling</h2>
- * <p>
- * A graph forms a tree of {@link Node}s which may be {@link #traverse()}. The node collection
- * belonging to the graph may be retrieved with {@link #nodes()}. The graph provides other
- * useful routines to handle the hierarchy, such as {@link #pruneBranch(Node)},
- * {@link #appendBranch(List)}, {@link #isNodeReachable(Node)}, {@link #branch(Node)}, and
- * {@link #clear()}.
- * <p>
+ * A graph forms a tree of {@link Node}s which may be {@link #traverse()}, calling
+ * {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
+ * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
+ * The graph provides other useful routines to handle the hierarchy, such as
+ * {@link #pruneBranch(Node)}, {@link #appendBranch(List)}, {@link #isNodeReachable(Node)},
+ * {@link #branch(Node)}, and {@link #clear()}.
  * <h2>Eye handling</h2>
- * <p>
- * Any {@link Frame} or {@link Node} at the graph hierarchy may be set as the {@link #eye()}
- * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
- * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
+ * Any {@link Frame} or {@link Node} belonging to the graph hierarchy may be set as the
+ * {@link #eye()} (see {@link #setEye(Frame)}). Several frame wrapper functions to handle
+ * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #setFieldOfView()},
- * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)},
- * {@link #projectedCoordinatesOf(Vector, Frame)} and {@link #unprojectedCoordinatesOf(Vector, Frame)},
- * are provided for convenience.
- * <p>
- * <h3>Screen drawing</h3>
- * <p>
+ * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
+ * {@link #projectedCoordinatesOf(Vector, Frame)} and
+ * {@link #unprojectedCoordinatesOf(Vector, Frame)}, are provided for convenience.
  * <h3>Interpolator</h3>
- * <p>
- * <p>
+ * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
+ * such as {@link #fitBallInterpolation()}, {@link #fitScreenRegionInterpolation(Rectangle)},
+ * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
+ * {@link Interpolator} documentation for details.
  * <h3>Visibility and culling techniques</h3>
- * <p>
- * <p>
+ * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
+ * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
+ * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
+ * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
+ * {@link #areBoundaryEquationsEnabled()}).
  * <h2>Input handling</h2>
- * <p>
  * The graph performs input handling through an {@link #inputHandler()}. Several
  * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
  * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
  * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
  * convenience.
  * <p>
+ * To define an interaction metaphor through a
+ * <a href="https://en.wikipedia.org/wiki/Human_interface_device">human interface device</a>
+ * implement an {@link Agent} and call {@link #registerAgent(Agent)} (see also
+ * {@link #unregisterAgent(Agent)}). The interaction is implemented by the
+ * nodes (see {@link Node#interact(Event)}) which parse the {@link proscene.input.Shortcut}s
+ * defined by agent. Refer to the {@link Node} documentation for details.
  * <h2>Timing handling</h2>
- * <p>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
- * <p>
  * <h2>Matrix handling</h2>
- * <p>
  * The graph performs matrix handling through a {@link #matrixHandler()}.
+ * To set shader matrices use {@link #projection()}, {@link #modelView()}
+ * (which wrap {@link MatrixHandler} functions with the same signatures) and
+ * (possibly) {@code Matrix.multiply(projection(), modelView())}.
  * <p>
  * To {@link #applyTransformation(Frame)}, call {@link #pushModelView()},
  * {@link #popModelView()} and {@link #applyModelView(Matrix)} (which wrap
  * {@link MatrixHandler} functions with the same signatures).
  * <p>
- * To set shader matrix uniform variables call {@link #projection()}, {@link #modelView()}
- * (which wrap {@link MatrixHandler} functions with the same signatures) and
- * (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * Issue your drawing code between {@link #beginScreenCoordinates()} and
+ * {@link #endScreenCoordinates()} to define your geometry on the screen coordinate
+ * system (such as when drawing 2d controls on top of 3d graph). These methods
+ * are {@link MatrixHandler} wrapper functions with the same signatures provided
+ * for convenience.
  * <p>
  * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
  * with {@link #setMatrixHandler(MatrixHandler)} (refer to the {@link MatrixHandler}
@@ -87,6 +103,7 @@ import java.util.List;
  *
  * @see InputHandler
  * @see TimingHandler
+ * @see #applyTransformation(Frame)
  * @see MatrixHandler
  */
 //TODO

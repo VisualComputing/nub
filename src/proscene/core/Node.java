@@ -29,7 +29,6 @@ import java.util.List;
  * into translation, rotation and scaling updates (see {@link #translationSensitivity()},
  * {@link #rotationSensitivity()} and {@link #scalingSensitivity()}). A node may be attached
  * to some of your visual objects to control their behavior using an {@link Agent}.
- * <p>
  * <h2>Geometry transformations</h2>
  * <p>
  * To define the position, orientation and magnitude of a visual object, use {@link #matrix()}
@@ -63,9 +62,7 @@ import java.util.List;
  * respect to non-eye nodes. For instance, with a move-to-the-right user gesture the
  * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
  * to the right.
- * <p>
  * <h2>Behaviors</h2>
- * <p>
  * To implement a node behavior derive from this class and override the
  * version of {@code interact} with the (event) parameter type you want to
  * customize (see {@link #interact(MotionEvent)},
@@ -93,14 +90,10 @@ import java.util.List;
  * Note that a node implements by default several gesture-to-motion converting methods,
  * such as: {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent)},
  * {@link #translateXPos()}, etc.
- * <p>
  * <h2>Picking</h2>
- * <p>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
- * <p>
  * <h2>Syncing</h2>
- * <p>
  * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
  * share their global parameters (position, orientation and magnitude) taken the one
  * that hasGrabber been most recently updated. Syncing can be useful to share nodes

@@ -16,21 +16,19 @@ import java.util.List;
 /**
  * Agents gather data from different sources --mostly from input devices such touch
  * surfaces or simple mice-- and reduce them into a rather simple but quite 'useful' set
- * of interface events ({@link Event} ) for third party objects (
- * {@link Grabber} objects) to consume them (
- * {@link #handle(Event)}). Agents thus effectively open up a channel between all
- * kinds of input data sources and user-space objects. To add/removeGrabbers a grabber to/from the
- * {@link #grabbers()} collection issue {@link #addGrabber(Grabber)} /
- * {@link #removeGrabber(Grabber)} calls. Derive from this agent and either call
+ * of interface events ({@link Event}) for third party objects ({@link Grabber} objects)
+ * to consume them ({@link #handle(Event)}). Agents thus effectively open up a channel
+ * between all kinds of input data sources and user-space objects. To add/removeGrabbers
+ * a grabber to/from the {@link #grabbers()} collection issue {@link #addGrabber(Grabber)}
+ * / {@link #removeGrabber(Grabber)} calls. Derive from this agent and either call
  * {@link #handle(Event)} or override {@link #handleFeed()} .
  * <p>
  * The agent may send events to its {@link #inputGrabber()} which may be regarded as
  * the agent's grabber target. The {@link #inputGrabber()} may be set by querying each
- * grabber object in {@link #grabbers()} to check if its
- * {@link Grabber#track(Event)}) condition is met (see
- * {@link #poll(Event)}, {@link #pollFeed()}). The
- * first grabber meeting the condition, namely the {@link #trackedGrabber()}), will then
- * be set as the {@link #inputGrabber()}. When no grabber meets the condition, the
+ * grabber object in {@link #grabbers()} to check if its {@link Grabber#track(Event)})
+ * condition is met (see {@link #poll(Event)}, {@link #pollFeed()}). The first grabber
+ * meeting the condition, namely the {@link #trackedGrabber()}), will then be set as the
+ * {@link #inputGrabber()}. When no grabber meets the condition, the
  * {@link #trackedGrabber()} is then set to null. In this case, a non-null
  * {@link #inputGrabber()} may still be set with {@link #setDefaultGrabber(Grabber)} (see
  * also {@link #defaultGrabber()}).
