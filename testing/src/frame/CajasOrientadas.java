@@ -6,7 +6,10 @@ import proscene.core.Graph;
 import proscene.core.Node;
 import proscene.input.Shortcut;
 import proscene.input.event.MotionEvent;
+import proscene.primitives.Frame;
+import proscene.primitives.Matrix;
 import proscene.primitives.Vector;
+import proscene.processing.MouseAgent;
 import proscene.processing.Scene;
 
 /**
@@ -51,17 +54,13 @@ public class CajasOrientadas extends PApplet {
     eye1 = new InteractiveNode(graph);
 
     eye2 = new Node(graph) {
-      Shortcut left = new Shortcut(PApplet.LEFT);
-      Shortcut right = new Shortcut(PApplet.RIGHT);
-      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
-
       @Override
       public void interact(MotionEvent event) {
-        if (event.shortcut().matches(left))
+        if (event.shortcut().matches(MouseAgent.LEFT))
           translate(event);
-        else if (event.shortcut().matches(right))
+        else if (event.shortcut().matches(MouseAgent.RIGHT))
           rotate(event);
-        else if (event.shortcut().matches(wheel))
+        else if (event.shortcut().matches(MouseAgent.WHEEL))
           if (isEye() && graph().is3D())
             translateZ(event);
           else
@@ -109,6 +108,7 @@ public class CajasOrientadas extends PApplet {
       graph.setType(Graph.Type.PERSPECTIVE);
     }
     if (key == ' ') {
+      /*
       if (eye1 == graph.eye()) {
         graph.setEye(eye2);
         graph.setFieldOfView(1);
@@ -122,6 +122,29 @@ public class CajasOrientadas extends PApplet {
         //graph.fitBall();
         println("Eye1 set " + graph.fieldOfView());
       }
+      */
+
+      /*
+      Matrix m1 = graph.eye().worldMatrix();
+      m1.print();
+
+      Matrix m2 = graph.eye().matrix();
+      m2.print();
+      */
+
+      Matrix m3 = graph.eye().matrix();
+      m3.invert();
+      m3.print();
+
+      /*
+      Frame frame = graph.eye().inverse();
+      Matrix m4 = frame.matrix();
+      m4.print();
+
+      Frame frame2 = graph.eye().worldInverse();
+      Matrix m5 = frame2.matrix();
+      m5.print();
+      */
     }
     if (key == 's')
       graph.fitBallInterpolation();
@@ -135,6 +158,8 @@ public class CajasOrientadas extends PApplet {
       println(Vector.scalarProjection(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()));
       Vector.projectVectorOnAxis(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()).print();
     }
+    if(key == 'w')
+      graph.fitFieldOfView();
   }
 
   public static void main(String args[]) {

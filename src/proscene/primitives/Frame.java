@@ -973,11 +973,10 @@ public class Frame {
    *
    * @see #setMatrix(Frame)
    * @see #worldMatrix()
+   * @see #view()
    */
   public Matrix matrix() {
-    Matrix matrix = new Matrix();
-
-    matrix = rotation().matrix();
+    Matrix matrix = rotation().matrix();
 
     matrix._matrix[12] = translation()._vector[0];
     matrix._matrix[13] = translation()._vector[1];
@@ -1022,12 +1021,68 @@ public class Frame {
    *
    * @see #setWorldMatrix(Frame)
    * @see #matrix()
+   * @see #view()
    */
   public Matrix worldMatrix() {
     if (reference() != null)
       return new Frame(position(), orientation(), magnitude()).matrix();
     else
       return matrix();
+  }
+
+  /**
+   * Same as {@link #worldMatrix()}, but the view matrix is computing with the frame magnitude
+   * set to 1, i.e., returns the matrix associated with the frame position and orientation.
+   * To be used when the frame represents an eye.
+   * <p>
+   * The view matrix converts from the world coordinates system to the eye coordinates system,
+   * so that coordinates can then be projected on screen using a projection matrix.
+   *
+   * @see #matrix()
+   * @see #worldMatrix()
+   * @see #setMatrix(Frame)
+   * @see #setWorldMatrix(Frame)
+   */
+  public Matrix view() {
+    Matrix view = new Matrix();
+
+    Quaternion q = orientation();
+
+    float q00 = 2.0f * q._quaternion[0] * q._quaternion[0];
+    float q11 = 2.0f * q._quaternion[1] * q._quaternion[1];
+    float q22 = 2.0f * q._quaternion[2] * q._quaternion[2];
+
+    float q01 = 2.0f * q._quaternion[0] * q._quaternion[1];
+    float q02 = 2.0f * q._quaternion[0] * q._quaternion[2];
+    float q03 = 2.0f * q._quaternion[0] * q._quaternion[3];
+
+    float q12 = 2.0f * q._quaternion[1] * q._quaternion[2];
+    float q13 = 2.0f * q._quaternion[1] * q._quaternion[3];
+    float q23 = 2.0f * q._quaternion[2] * q._quaternion[3];
+
+    view._matrix[0] = 1.0f - q11 - q22;
+    view._matrix[1] = q01 - q23;
+    view._matrix[2] = q02 + q13;
+    view._matrix[3] = 0.0f;
+
+    view._matrix[4] = q01 + q23;
+    view._matrix[5] = 1.0f - q22 - q00;
+    view._matrix[6] = q12 - q03;
+    view._matrix[7] = 0.0f;
+
+    view._matrix[8] = q02 - q13;
+    view._matrix[9] = q12 + q03;
+    view._matrix[10] = 1.0f - q11 - q00;
+    view._matrix[11] = 0.0f;
+
+    Vector t = q.inverseRotate(position());
+
+    view._matrix[12] = -t._vector[0];
+    view._matrix[13] = -t._vector[1];
+    view._matrix[14] = -t._vector[2];
+    view._matrix[15] = 1.0f;
+
+    return view;
   }
 
   /**

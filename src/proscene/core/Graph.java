@@ -27,8 +27,8 @@ import java.util.List;
  * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h2>Type and dimensions</h2>
- * A graph uses a ball to set the 2d or 3d viewing volume (instead of the more traditional
- * methods to set the 3d viewing frustum). See {@link #setCenter(Vector)} and
+ * A graph uses a ball to set the 2d or 3d viewing space (instead of the more traditional
+ * methods to set a 3d viewing frustum). See {@link #setCenter(Vector)} and
  * {@link #setRadius(float)}, and also {@link #setZClippingCoefficient(float)} and
  * {@link #setZNearCoefficient(float)} for a 3d graph. See also
  * {@link #setBoundingBox(Vector, Vector)}.
@@ -36,8 +36,7 @@ import java.util.List;
  * The way the {@link #projection()} matrix is computed (see {@link #computeProjection()}),
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
- * override {@link #computeCustomProjection()}. Note that the type of the graph is set at
- * construction time.
+ * override {@link #computeCustomProjection()}.
  * <h2>Scene graph handling</h2>
  * A graph forms a tree of {@link Node}s which may be {@link #traverse()}, calling
  * {@link Node#visit()} on each visited node (refer to the {@link Node} documentation).
@@ -49,7 +48,7 @@ import java.util.List;
  * Any {@link Frame} or {@link Node} belonging to the graph hierarchy may be set as the
  * {@link #eye()} (see {@link #setEye(Frame)}). Several frame wrapper functions to handle
  * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
- * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #setFieldOfView()},
+ * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
  * {@link #projectedCoordinatesOf(Vector, Frame)} and
  * {@link #unprojectedCoordinatesOf(Vector, Frame)}, are provided for convenience.
@@ -157,10 +156,9 @@ public class Graph {
   Type _type;
 
   /**
-   * Enumerates the two possible types of Camera.
+   * Enumerates the graph types.
    * <p>
-   * This type mainly defines different camera projection matrix. Many other methods take
-   * this Type into account.
+   * The type mainly defines the way the projection matrix is computed.
    */
   public enum Type {
     PERSPECTIVE, ORTHOGRAPHIC, TWO_D, CUSTOM
@@ -179,18 +177,23 @@ public class Graph {
   }
 
   /**
-   * Default constructor which defines a right-handed OpenGL compatible Scene with its own
-   * {@link MatrixHandler}. The constructor also instantiates
-   * the {@link #inputHandler()} and the {@link #timingHandler()}, and sets the AXES and
-   * GRID visual hint flags.
+   * Default constructor defines a right-handed graph with the specified {@code width} and
+   * {@code height} screen window dimensions. The graph {@link #center()} and
+   * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
    * <p>
-   * Third party (concrete) Scenes should additionally:
+   * The constructor sets a {@link Frame} instance as the graph {@link #eye()} and then
+   * calls {@link #fitBall()}, so that the entire scene fits the screen dimensions. To set
+   * an interactive eye override {@link Node#interact(Event)} and set the node as the eye,
+   * see {@link #setEye(Frame)}.
+   * <p>
+   * The constructor also instantiates the graph {@link #matrixHandler()},
+   * {@link #inputHandler()} and {@link #timingHandler()}.
+   * <p>
+   * Third party graphs should additionally:
    * <ol>
    * <li>(Optionally) Define a custom {@link #matrixHandler()}. Only if the target platform
    * (such as Processing) provides its own matrix handling.</li>
-   * <li>Call {@link #setEye(Frame)} to set the {@link #eye()}, once it's known if the Scene
-   * {@link #is2D()} or {@link #is3D()}.</li>
-   * <li>Instantiate some agents and enable them (register them at the
+   * <li>Instantiate some agents, such as the mouse, and enable them (register them at the
    * {@link #inputHandler()}).</li>
    * </ol>
    *
@@ -200,7 +203,6 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Frame)
    */
-  //TODO graph.get()
   public Graph(Type type, int width, int height) {
     setType(type);
     setWidth(width);
@@ -225,6 +227,8 @@ public class Graph {
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
+
+  //TODO graph.get()
 
   // Dimensions stuff
 
@@ -272,31 +276,29 @@ public class Graph {
   // Type handling stuff
 
   /**
-   * Returns the Camera.Type.
-   * <p>
-   * Set by {@link #setType(Type)}.
-   * <p>
-   * A {@link Type#PERSPECTIVE} Camera uses a classical
-   * projection mainly defined by its {@link #fieldOfView()}.
-   * <p>
-   * With a {@link Type#ORTHOGRAPHIC} {@link #type()}, the
-   * {@link #fieldOfView()} is meaningless and the width and height of the Camera frustum
-   * are inferred from the distance to the {@link #anchor()} using
-   * {@link #boundaryWidthHeight()}.
-   * <p>
-   * Both types use {@link #zNear()} and {@link #zFar()} (to define their clipping planes)
-   * and {@link #aspectRatio()} (for frustum shape).
+   * Returns the graph type. Set by {@link #setType(Type)}.
+   *
+   * @see #setType(Type)
    */
   public Type type() {
     return _type;
   }
 
   /**
-   * Defines the Camera {@link #type()}.
+   * Defines the graph {@link #type()}.
    * <p>
-   * Changing the Camera Type alters the viewport and the objects' size can be changed.
-   * This method guarantees that the two frustum match in a plane normal to
-   * {@link #viewDirection()}, passing through the arcball reference point.
+   * A {@link Type#PERSPECTIVE} uses a classical projection mainly defined by its
+   * {@link #fieldOfView()}. With a {@link Type#ORTHOGRAPHIC}, the {@link #fieldOfView()}
+   * is meaningless and the width and height of the graph frustum are inferred from the
+   * distance to the {@link #anchor()} using {@link #boundaryWidthHeight()}. Both types
+   * use {@link #zNear()} and {@link #zFar()} (to define their clipping planes) and
+   * {@link #aspectRatio()} (for frustum shape).
+   * <p>
+   * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
+   * nodes will be constrained so that they will remain at the x-y plane. See
+   * {@link proscene.primitives.constraint.Constraint}.
+   * <p>
+   * To set a {@link Type#CUSTOM} override {@link #computeCustomProjection()}.
    */
   public void setType(Type type) {
     if (type != type()) {
@@ -306,21 +308,18 @@ public class Graph {
   }
 
   /**
-   * Returns the vertical field of view of the Camera (in radians) computed as
-   * {@code 2.0f * (float) Math.atan(frame().magnitude())}.
+   * Returns the vertical field of view of the {@link #eye()} (in radians) computed as
+   * {@code 2.0f * (float) Math.atan(eye().magnitude())}.
    * <p>
    * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
-   * This value is meaningless if the Camera {@link #type()} is
-   * {@link Type#ORTHOGRAPHIC}.
+   * This value is meaningless if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
    * <p>
-   * The field of view corresponds the one used in {@code gluPerspective} (see manual). It
-   * sets the Y (vertical) aperture of the Camera. The X (horizontal) angle is inferred
-   * from the window aspect ratio (see {@link #aspectRatio()} and
-   * {@link #horizontalFieldOfView()}).
-   * <p>
-   * Use {@link #setFieldOfView} to adapt the {@link #fieldOfView()} to a given graph.
+   * The field of view corresponds the one used in {@code gluPerspective}. It sets the Y
+   * (vertical) aperture of the eye. The X (horizontal) angle is inferred from the
+   * window aspect ratio (see {@link #aspectRatio()} and {@link #horizontalFieldOfView()}).
    *
    * @see #setFieldOfView(float)
+   * @see #eye()
    */
   public float fieldOfView() {
     return 2.0f * (float) Math.atan(eye().magnitude());
@@ -329,8 +328,7 @@ public class Graph {
   /**
    * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2.0f))}.
    * <p>
-   * Sets the so called vertical field-of-view of an eye provided this frame
-   * is set as a Graph eye.
+   * Sets the field-of-view of the current {@link #eye()}.
    *
    * @see Frame#setMagnitude(float)
    */
@@ -339,47 +337,31 @@ public class Graph {
   }
 
   /**
-   * Returns the horizontal field of view of the Camera (in radians).
+   * Returns the horizontal field of view of the {@link #eye()} (in radians).
    * <p>
    * Value is set using {@link #setHorizontalFieldOfView(float)} or
    * {@link #setFieldOfView(float)}. These values are always linked by:
-   * {@code horizontalFieldOfView() = 2.0 * atan ( tan(fieldOfView()/2.0) * aspectRatio() )}
-   * .
+   * {@code horizontalFieldOfView() = 2 * atan ( tan(fieldOfView()/2) * aspectRatio() )}.
    */
   public float horizontalFieldOfView() {
     return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
   }
 
   /**
-   * Changes the Camera {@link Graph#fieldOfView()} so that the entire graph (defined by
-   * {@link #center()} and
-   * {@link Graph#radius()} is visible from the Camera
-   * {@link Node#position()}.
+   * Changes the {@link #eye()} {@link Graph#fieldOfView()} so that the entire scene
+   * (defined by {@link #center()} and {@link Graph#radius()}) is visible.
    * <p>
-   * The eye position and orientation of the Camera are not _modified and
-   * you first have to orientate the Camera in order to actually see the graph (see
-   * {@link Graph#lookAt(Vector)}, {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
+   * The eye position and orientation are not modified and you first have to orientate
+   * the eye in order to actually see the scene (see {@link Graph#lookAt(Vector)},
+   * {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
    * <p>
-   * This method is especially useful for <i>shadow maps</i> computation. Use the Camera
-   * positioning tools ({@link Graph#lookAt(Vector)}) to position a
-   * Camera at the light position. Then use this method to define the
-   * {@link Graph#fieldOfView()} so that the shadow map resolution is optimally used:
-   * <p>
-   * {@code // The light camera needs size hints in order to optimize its
-   * fieldOfView} <br>
-   * {@code lightCamera.setSceneRadius(sceneRadius());} <br>
-   * {@code lightCamera.setSceneCenter(sceneCenter());} <br>
-   * {@code // Place the light camera} <br>
-   * {@code lightCamera.setPosition(lightFrame.position());} <br>
-   * {@code lightCamera.lookAt(sceneCenter());} <br>
-   * {@code lightCamera.setFieldOfView();} <br>
-   * <p>
-   * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to M_PI/2.0. This happens
-   * when the Camera is at a distance lower than sqrt(2.0) * sceneRadius() from the
-   * sceneCenter(). It optimizes the shadow map resolution, although it may miss some
-   * parts of the graph.
+   * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to PI/2. This happens
+   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
+   *
+   * @see #setFieldOfView(float)
    */
-  public void setFieldOfView() {
+  // TODO shadow maps computation docs are missing
+  public void fitFieldOfView() {
     if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2.0f) * radius())
       setFieldOfView(2.0f * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
     else
@@ -387,11 +369,11 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link Graph#horizontalFieldOfView()} of the Camera (in radians).
+   * Sets the {@link Graph#horizontalFieldOfView()} of the {@link #eye()} (in radians).
    * <p>
    * {@link Graph#horizontalFieldOfView()} and {@link Graph#fieldOfView()} are linked by the
-   * {@link Graph#aspectRatio()}. This method actually calls
-   * {@code setFieldOfView(( 2.0 * atan (tan(hfov / 2.0) / aspectRatio()) ))} so that a
+   * {@link Graph#aspectRatio()}. This method actually calls:
+   * {@code setFieldOfView(( 2 * atan (tan(hfov / 2) / aspectRatio()) ))} so that a
    * call to {@link Graph#horizontalFieldOfView()} returns the expected value.
    */
   public void setHorizontalFieldOfView(float hfov) {
@@ -399,26 +381,25 @@ public class Graph {
   }
 
   /**
-   * Returns the near clipping plane distance used by the Camera projection matrix in
-   * graph (world) units.
+   * Returns the near clipping plane distance used by {@link #computeProjection()} matrix in
+   * world units.
    * <p>
-   * The clipping planes' positions depend on the {@link #radius()} and
-   * {@link #center()} rather than being fixed small-enough and large-enough values.
-   * A good graph dimension approximation will hence result in an optimal precision of the
-   * z-buffer.
+   * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
+   * rather than being fixed small-enough and large-enough values. A good approximation will
+   * hence result in an optimal precision of the z-buffer.
    * <p>
    * The near clipping plane is positioned at a distance equal to
    * {@link #zClippingCoefficient()} * {@link #radius()} in front of the
-   * {@link #center()}: {@code Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) -
-   * zClippingCoefficient() * sceneRadius()}
+   * {@link #center()}: {@code Vector.scalarProjection(
+   * Vector.subtract(eye().position(), center()), eye().zAxis()) - zClippingCoefficient() * radius()}
    * <p>
    * In order to prevent negative or too small {@link #zNear()} values (which would
    * degrade the z precision), {@link #zNearCoefficient()} is used when the eye is
    * inside the {@link #radius()} sphere:
    * <p>
-   * {@code zMin = zNearCoefficient() * zClippingCoefficient() * sceneRadius();} <br>
+   * {@code zMin = zNearCoefficient() * zClippingCoefficient() * radius();} <br>
    * {@code zNear = zMin;}<br>
-   * {@code With an ORTHOGRAPHIC type, the value is simply clamped to 0.0} <br>
+   * {@code With an ORTHOGRAPHIC and TWO_D types, the value is simply clamped to 0}<br>
    * <p>
    * See also the {@link #zFar()}, {@link #zClippingCoefficient()} and
    * {@link #zNearCoefficient()} documentations.
@@ -426,7 +407,7 @@ public class Graph {
    * If you need a completely different zNear computation, overload the {@link #zNear()}
    * and {@link #zFar()} methods.
    * <p>
-   * <b>Attention:</b> The value is always positive although the clipping plane is
+   * <b>Attention:</b> The value is always positive, although the clipping plane is
    * positioned at a negative z value in the eye coordinate system.
    *
    * @see #zFar()
@@ -450,13 +431,13 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the Camera projection matrix in graph
-   * (world) units.
+   * Returns the far clipping plane distance used by the {@link #computeProjection()} matrix in world units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
-   * {@code zClippingCoefficient() * sceneRadius()} behind the {@link #center()}:
+   * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
    * <p>
-   * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) + zClippingCoefficient()*sceneRadius()}
+   * {@code zFar = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())
+   * + zClippingCoefficient() * radius()}
    *
    * @see #zNear()
    */
@@ -465,19 +446,18 @@ public class Graph {
   }
 
   /**
-   * Returns the coefficient which is used to set {@link #zNear()} when the Camera is
-   * inside the sphere defined by {@link #center()} and
-   * {@link #zClippingCoefficient()} * {@link #radius()}.
+   * Returns the coefficient used to set {@link #zNear()} when the {@link #eye()} is
+   * inside the sphere defined by {@link #center()} and {@link #zClippingCoefficient()} * {@link #radius()}.
    * <p>
    * In that case, the {@link #zNear()} value is set to
-   * {@code zNearCoefficient() * zClippingCoefficient() * sceneRadius()}. See the
+   * {@code zNearCoefficient() * zClippingCoefficient() * radius()}. See the
    * {@code zNear()} documentation for details.
    * <p>
    * Default value is 0.005, which is appropriate for most applications. In case you need
    * a high dynamic ZBuffer precision, you can increase this value (~0.1). A lower value
    * will prevent clipping of very close objects at the expense of a worst Z precision.
    * <p>
-   * Only meaningful when Camera type is PERSPECTIVE.
+   * Only meaningful when the graph type is PERSPECTIVE.
    */
   public float zNearCoefficient() {
     return _zNearCoefficient;
@@ -496,17 +476,14 @@ public class Graph {
    * Returns the coefficient used to position the near and far clipping planes.
    * <p>
    * The near (resp. far) clipping plane is positioned at a distance equal to
-   * {@code zClippingCoefficient() * sceneRadius()} in front of (resp. behind) the
+   * {@code zClippingCoefficient() * radius()} in front of (resp. behind) the
    * {@link #center()}. This guarantees an optimal use of the z-buffer range and
    * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
    * <p>
-   * Default value is square root of 3.0 (so that a cube of size 2*{@link #radius()}
+   * Default value is square root of 3 (so that a cube of size 2*{@link #radius()}
    * is not clipped).
-   * <p>
-   * However, since the {@link #radius()} is used for other purposes (see
-   * showEntireScene(), flySpeed(), ...) and you may want to change this value to define
-   * more precisely the location of the clipping planes. See also
-   * {@link #zNearCoefficient()}.
+   *
+   * @see #zNearCoefficient()
    */
   public float zClippingCoefficient() {
     return _zClippingCoefficient;
@@ -526,14 +503,14 @@ public class Graph {
    * While first element holds {@code halfWidth}, the second one
    * holds {@code halfHeight}. Values are computed as:
    * {@code _rescalingFactor() * (eye().magnitude() * width() / 2)}
-   * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)}
+   * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)},
    * respectively.
    * <p>
-   * These values are valid for 2d Windows and ortho Cameras (but not persp) and they are
-   * expressed in virtual graph units.
+   * These values are valid for 2d and ortho graphs (but not persp) and they are
+   * expressed in virtual world units.
    * <p>
-   * In the case of ortho Cameras these values are proportional to the Camera (z
-   * projected) distance to the {@link #anchor()}. When zooming on the object, the Camera
+   * In the case of ortho graphs these values are proportional to the eye (z
+   * projected) distance to the {@link #anchor()}. When zooming on the object, the eye
    * is translated forward and its boundary is narrowed, making the object appear bigger
    * on screen, as intuitively expected.
    * <p>
@@ -556,10 +533,10 @@ public class Graph {
   }
 
   /**
-   * Simply returns {@code 1} which is valid for 2d Windows.
+   * Simply returns {@code 1} which is valid for 2d graphs.
    * <p>
-   * In 3D returns a value proportional to the Camera (z projected) distance to the
-   * {@link #anchor()} so that when zooming on the object, the ortho Camera is translated
+   * In 3D returns a value proportional to the eye (z projected) distance to the
+   * {@link #anchor()} so that when zooming on the object, the ortho eye is translated
    * forward and its boundary is narrowed, making the object appear bigger on screen, as
    * intuitively expected.
    * <p>
@@ -580,8 +557,7 @@ public class Graph {
   /**
    * Returns the top-level nodes (those which reference is null).
    * <p>
-   * All leading nodes are also reachable by the {@link #traverse()} algorithm for
-   * which they are the seeds.
+   * All leading nodes are also reachable by the {@link #traverse()} algorithm for which they are the seeds.
    *
    * @see #nodes()
    * @see #isNodeReachable(Node)
@@ -634,8 +610,8 @@ public class Graph {
    * <p>
    * Note that only reachable nodes are visited by this algorithm.
    * <p>
-   * <b>Attention:</b> this method should be called after {@link MatrixHandler#_bind()} (i.e.,
-   * eye update) and before any other transformation of the modelview takes place.
+   * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
+   * eye update) and before any other transformation of the modelview matrix takes place.
    *
    * @see #isNodeReachable(Node)
    * @see #pruneBranch(Node)
@@ -646,7 +622,7 @@ public class Graph {
   }
 
   /**
-   * Used by the traverse node tree algorithm.
+   * Used by the traversal algorithm.
    */
   protected void _visit(Node node) {
     pushModelView();
@@ -675,22 +651,21 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #traverse()} algorithm.
    * <p>
-   * nodes in the {@code node} branch will also be removed from all the agents currently
-   * registered in the {@link #inputHandler()}.
+   * Nodes in the {@code node} branch will also be removed from all the agents currently
+   * registered at the {@link #inputHandler()}.
    * <p>
    * To make all the nodes in the branch reachable again, first cache the nodes
    * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
    * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link Node#setReference(Node)} on a
-   * node belonging to the pruned branch will become reachable again by the traversal
-   * algorithm. In this case, the node should be manually added to some agents to
-   * interactively handle it.
+   * {@link Node#setReference(Node)} on a node belonging to the pruned branch will become
+   * reachable again by the traversal algorithm. In this case, the node should be manually
+   * added to some agents to interactively handle it.
    * <p>
-   * Note that if node is not reachable ({@link #isNodeReachable(Node)}) this
-   * method returns {@code null}.
+   * Note that if node is not reachable ({@link #isNodeReachable(Node)}) this method returns
+   * {@code null}.
    * <p>
-   * When collected, pruned nodes behave like {@link Node},
-   * otherwise they are eligible for garbage collection.
+   * When collected, pruned nodes behave like {@link Node}, otherwise they are eligible for
+   * garbage collection.
    *
    * @see #clear()
    * @see #appendBranch(List)
@@ -735,9 +710,8 @@ public class Graph {
    * Returns {@code true} if the node is reachable by the {@link #traverse()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Nodes are make unreachable with {@link #pruneBranch(Node)} and reachable
-   * again with
-   * {@link Node#setReference(Node)}.
+   * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
+   * again with {@link Node#setReference(Node)}.
    *
    * @see #traverse()
    * @see #nodes()
@@ -763,8 +737,7 @@ public class Graph {
   }
 
   /**
-   * Collects {@code node} and all its descendant nodes. When {@code eyeframes} is
-   * {@code true} eye-nodes will also be collected. Note that for a node to be collected
+   * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
    * @see #isNodeReachable(Node)
@@ -776,10 +749,10 @@ public class Graph {
   }
 
   /**
-   * Returns a straight path of nodes between {@code tail} and {@code tip}. When {@code eyeframes} is
-   * {@code true} eye-nodes will also be included.
+   * Returns a straight path of nodes between {@code tail} and {@code tip}.
    * <p>
-   * If {@code tip} is descendant of {@code tail} the returned list will include both of them. Otherwise it will be empty.
+   * If {@code tip} is descendant of {@code tail} the returned list will include both of them.
+   * Otherwise it will be empty.
    */
   public ArrayList<Node> branch(Node tail, Node tip) {
     ArrayList<Node> list = new ArrayList<Node>();
@@ -804,8 +777,7 @@ public class Graph {
   }
 
   /**
-   * Collects {@code node} and all its descendant nodes. When {@code eyeframes} is
-   * {@code true} eye-nodes will also be collected. Note that for a node to be collected
+   * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
    * @see #isNodeReachable(Node)
@@ -873,7 +845,7 @@ public class Graph {
   /**
    * Returns the number of frames displayed since the graph was instantiated.
    * <p>
-   * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
+   * Use {@code TimingHandler.frameCount} to retrieve the number of frames displayed since
    * the first graph was instantiated.
    */
   public long frameCount() {
@@ -881,8 +853,7 @@ public class Graph {
   }
 
   /**
-   * Convenience wrapper function that simply calls
-   * {@code timingHandler().registerTask(_task)}.
+   * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
    *
    * @see proscene.timing.TimingHandler#registerTask(TimingTask)
    */
@@ -891,32 +862,28 @@ public class Graph {
   }
 
   /**
-   * Convenience wrapper function that simply calls
-   * {@code timingHandler().unregisterTask(_task)}.
+   * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
    */
   public void unregisterTask(TimingTask task) {
     timingHandler().unregisterTask(task);
   }
 
   /**
-   * Convenience wrapper function that simply returns
-   * {@code timingHandler().isTaskRegistered(_task)}.
+   * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
    */
   public boolean isTaskRegistered(TimingTask task) {
     return timingHandler().isTaskRegistered(task);
   }
 
   /**
-   * Convenience wrapper function that simply calls
-   * {@code timingHandler().registerAnimator(object)}.
+   * Convenience wrapper function that simply calls {@code timingHandler().registerAnimator(animator)}.
    */
   public void registerAnimator(Animator animator) {
     timingHandler().registerAnimator(animator);
   }
 
   /**
-   * Convenience wrapper function that simply calls
-   * {@code timingHandler().unregisterAnimator(object)}.
+   * Convenience wrapper function that simply calls {@code timingHandler().unregisterAnimator(animator)}.
    *
    * @see proscene.timing.TimingHandler#unregisterAnimator(Animator)
    */
@@ -925,8 +892,7 @@ public class Graph {
   }
 
   /**
-   * Convenience wrapper function that simply returns
-   * {@code timingHandler().isAnimatorRegistered(object)}.
+   * Convenience wrapper function that simply returns {@code timingHandler().isAnimatorRegistered(animator)}.
    *
    * @see proscene.timing.TimingHandler#isAnimatorRegistered(Animator)
    */
@@ -937,9 +903,8 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginScreenCoordinates()}. Adds
-   * exception when no properly closing the screen drawing with a call to
-   * {@link #endScreenCoordinates()}.
+   * Wrapper for {@link MatrixHandler#beginScreenCoordinates()}. Adds exception when no properly
+   * closing the screen drawing with a call to {@link #endScreenCoordinates()}.
    *
    * @see MatrixHandler#beginScreenCoordinates()
    */
@@ -947,14 +912,13 @@ public class Graph {
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
           + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
-
     _startCoordCalls++;
     _matrixHandler.beginScreenCoordinates();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endScreenCoordinates()} . Adds
-   * exception if {@link #beginScreenCoordinates()} wasn't properly called before
+   * Wrapper for {@link MatrixHandler#endScreenCoordinates()} . Adds exception
+   * if {@link #beginScreenCoordinates()} wasn't properly called before
    *
    * @see MatrixHandler#endScreenCoordinates()
    */
@@ -963,31 +927,32 @@ public class Graph {
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
           + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
-
     _matrixHandler.endScreenCoordinates();
   }
 
   /**
-   * Computes the projection matrix associated with the eye.
+   * Computes and returns the projection matrix associated with the graph.
    * <p>
-   * If eye is a 3D PERSPECTIVE Camera, defines a projection matrix using the
-   * {@link #fieldOfView()}, {@link #aspectRatio()},
-   * {@link #zNear()} and
-   * {@link #zFar()} parameters. If eye is a 3D ORTHOGRAPHIC
-   * Camera, the frustum's width and height are set using
-   * {@link #boundaryWidthHeight()}. Both types use
-   * {@link #zNear()} and
-   * {@link #zFar()} to place clipping planes. These values
-   * are determined from sceneRadius() and sceneCenter() so that they best fit the graph
-   * size.
+   * If the graph type is PERSPECTIVE, defines a projection matrix using the
+   * {@link #fieldOfView()}, {@link #aspectRatio()}, {@link #zNear()} and {@link #zFar()}
+   * parameters.
    * <p>
-   * <b>Note:</b> You must call this method if your eye is not associated with a Scene and
-   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
-   * instance).
+   * If the graph type is ORTHOGRAPHIC or TWO_D, the frustum's width and height are set using
+   * {@link #boundaryWidthHeight()}.
+   * <p>
+   * Both PERSPECTIVE and ORTHOGRAPHIC types use {@link #zNear()} and {@link #zFar()}
+   * to place the clipping planes. These values are determined from radius() and center() so that
+   * they best fit the graph size.
+   * <p>
+   * Override {@link #computeProjection()} to define a CUSTOM projection.
+   * <p>
+   * <b>Note 1:</b> This method is called by {@link #preDraw()}.
+   * <p>
+   * <b>Note 2:</b> Note that the computation of both, the PERSPECTIVE and ORTHOGRAPHIC frustum
+   * shapes depend on the eye magnitude, see {@link #fieldOfView()} and {@link #boundaryWidthHeight()}.
    */
-  //TODO pass a Matrix param!
   public Matrix computeProjection() {
-    Matrix m = new Matrix();
+    Matrix projection = new Matrix();
 
     float ZNear = zNear();
     float ZFar = zFar();
@@ -995,87 +960,36 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
-        m._matrix[0] = 1 / (eye().magnitude() * this.aspectRatio());
-        m._matrix[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
-        m._matrix[10] = (ZNear + ZFar) / (ZNear - ZFar);
-        m._matrix[11] = -1.0f;
-        m._matrix[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
-        m._matrix[15] = 0.0f;
+        projection._matrix[0] = 1 / (eye().magnitude() * this.aspectRatio());
+        projection._matrix[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
+        projection._matrix[10] = (ZNear + ZFar) / (ZNear - ZFar);
+        projection._matrix[11] = -1.0f;
+        projection._matrix[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
+        projection._matrix[15] = 0.0f;
         // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(), zNear(), zFar() );
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        m._matrix[0] = 1.0f / wh[0];
-        m._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
-        m._matrix[10] = -2.0f / (ZFar - ZNear);
-        m._matrix[11] = 0.0f;
-        m._matrix[14] = -(ZFar + ZNear) / (ZFar - ZNear);
-        m._matrix[15] = 1.0f;
+        projection._matrix[0] = 1.0f / wh[0];
+        projection._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
+        projection._matrix[10] = -2.0f / (ZFar - ZNear);
+        projection._matrix[11] = 0.0f;
+        projection._matrix[14] = -(ZFar + ZNear) / (ZFar - ZNear);
+        projection._matrix[15] = 1.0f;
         // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
         break;
       case CUSTOM:
         return computeCustomProjection();
     }
-    return m;
-  }
-
-  protected Matrix computeCustomProjection() {
-    return new Matrix();
+    return projection;
   }
 
   /**
-   * Computes the View matrix associated with the {@link #eye()}) position and orientation.
-   * <p>
-   * This matrix converts from the world coordinates system to the eye coordinates system,
-   * so that coordinates can then be projected on screen using the projection matrix (see
-   * {@link #computeProjection()}).
-   * <p>
-   * <b>Note:</b> You must call this method if your eye is not associated with a Scene and
-   * is used for offscreen computations (using {@code projectedCoordinatesOf()} for
-   * instance).
+   * Override this method to define a graph CUSTOM projection matrix.
    */
-  //TODO pass a Matrix param!
-  public Matrix computeView() {
-    Matrix m = new Matrix();
-
-    Quaternion q = eye().orientation();
-
-    float q00 = 2.0f * q._quaternion[0] * q._quaternion[0];
-    float q11 = 2.0f * q._quaternion[1] * q._quaternion[1];
-    float q22 = 2.0f * q._quaternion[2] * q._quaternion[2];
-
-    float q01 = 2.0f * q._quaternion[0] * q._quaternion[1];
-    float q02 = 2.0f * q._quaternion[0] * q._quaternion[2];
-    float q03 = 2.0f * q._quaternion[0] * q._quaternion[3];
-
-    float q12 = 2.0f * q._quaternion[1] * q._quaternion[2];
-    float q13 = 2.0f * q._quaternion[1] * q._quaternion[3];
-    float q23 = 2.0f * q._quaternion[2] * q._quaternion[3];
-
-    m._matrix[0] = 1.0f - q11 - q22;
-    m._matrix[1] = q01 - q23;
-    m._matrix[2] = q02 + q13;
-    m._matrix[3] = 0.0f;
-
-    m._matrix[4] = q01 + q23;
-    m._matrix[5] = 1.0f - q22 - q00;
-    m._matrix[6] = q12 - q03;
-    m._matrix[7] = 0.0f;
-
-    m._matrix[8] = q02 - q13;
-    m._matrix[9] = q12 + q03;
-    m._matrix[10] = 1.0f - q11 - q00;
-    m._matrix[11] = 0.0f;
-
-    Vector t = q.inverseRotate(eye().position());
-
-    m._matrix[12] = -t._vector[0];
-    m._matrix[13] = -t._vector[1];
-    m._matrix[14] = -t._vector[2];
-    m._matrix[15] = 1.0f;
-
-    return m;
+  protected Matrix computeCustomProjection() {
+    return new Matrix();
   }
 
   /**
@@ -1154,8 +1068,7 @@ public class Graph {
   }
 
   /**
-   * Wrapper for
-   * {@link MatrixHandler#isProjectionViewInverseCached()} .
+   * Wrapper for {@link MatrixHandler#isProjectionViewInverseCached()}.
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
@@ -1167,8 +1080,7 @@ public class Graph {
   }
 
   /**
-   * Wrapper for
-   * {@link MatrixHandler#cacheProjectionViewInverse(boolean)} .
+   * Wrapper for {@link MatrixHandler#cacheProjectionViewInverse(boolean)}.
    * <p>
    * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
    *
@@ -1186,7 +1098,6 @@ public class Graph {
    * <ol>
    * <li>Calls {@link MatrixHandler#_bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
-   * <li>Increments the {@link TimingHandler#frameCount}</li>
    * </ol>
    *
    * @see #postDraw()
@@ -1203,9 +1114,7 @@ public class Graph {
   /**
    * Called after your main drawing and performs the following:
    * <ol>
-   * <li>Calls {@link proscene.timing.TimingHandler#handle()} and increments the the
-   * {@link #frameCount()}</li>
-   * <li>Increments the {@link #frameCount()}</li>
+   * <li>Calls {@link proscene.timing.TimingHandler#handle()}.</li>
    * <li>Calls {@link InputHandler#handle()}</li>
    * </ol>
    *
@@ -1267,9 +1176,8 @@ public class Graph {
    * and {@code false} otherwise.
    * <p>
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
+   * this method. You may compute them explicitly (by calling {@link #computeBoundaryEquations()})
+   * or enable them to be automatic updated in your graph setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
@@ -1282,7 +1190,7 @@ public class Graph {
    */
   public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The camera frustum plane equations (needed by pointIsVisible) may be outdated. Please "
+      System.out.println("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
@@ -1291,17 +1199,14 @@ public class Graph {
   }
 
   /**
-   * Returns {@link Visibility#VISIBLE},
-   * {@link Visibility#INVISIBLE}, or
-   * {@link Visibility#SEMIVISIBLE}, depending whether the
-   * sphere (of radius {@code radius} and center {@code center}) is visible, invisible, or
-   * semi-visible, respectively.
+   * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
+   * {@link Visibility#SEMIVISIBLE}, depending whether the sphere (of radius {@code radius}
+   * and center {@code center}) is visible, invisible, or semi-visible, respectively.
    * <p>
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link Graph#enableBoundaryEquations()}).
+   * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1313,7 +1218,7 @@ public class Graph {
    */
   public Visibility ballVisibility(Vector center, float radius) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The camera frustum plane equations (needed by sphereIsVisible) may be outdated. Please "
+      System.out.println("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1329,17 +1234,15 @@ public class Graph {
   }
 
   /**
-   * Returns {@link Visibility#VISIBLE},
-   * {@link Visibility#INVISIBLE}, or
-   * {@link Visibility#SEMIVISIBLE}, depending whether the
-   * axis aligned box (defined by corners {@code p1} and {@code p2}) is visible,
-   * invisible, or semi-visible, respectively.
+   * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
+   * {@link Visibility#SEMIVISIBLE}, depending whether the axis aligned box
+   * (defined by corners {@code p1} and {@code p2}) is visible, invisible,
+   * or semi-visible, respectively.
    * <p>
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link Graph#enableBoundaryEquations()}).
+   * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1351,7 +1254,7 @@ public class Graph {
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The camera frustum plane equations (needed by aaBoxIsVisible) may be outdated. Please "
+      System.out.println("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1377,18 +1280,17 @@ public class Graph {
   }
 
   /**
-   * Returns the 6 plane equations of the eye boundary.
+   * Returns the 4 or 6 plane equations of the eye boundary.
    * <p>
-   * In 2D the four 4-component vectors of respectively correspond to the
-   * left, right, top and bottom Window boundary lines. Each vector holds a plane equation
+   * In 2D the four 4-component vectors, respectively correspond to the
+   * left, right, top and bottom eye boundary lines. Each vector holds a plane equation
    * of the form:
    * <p>
    * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
    * components of each vector, in that order.
    * <p>
-   * <p>
-   * In 3D the six 4-component vectors of respectively correspond to the
-   * left, right, near, far, top and bottom Camera frustum planes. Each vector holds a
+   * In 3D the six 4-component vectors, respectively correspond to the
+   * left, right, near, far, top and bottom frustum planes. Each vector holds a
    * plane equation of the form:
    * <p>
    * {@code a*x + b*y + c*z + d = 0}
@@ -1396,22 +1298,10 @@ public class Graph {
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
    * <p>
-   * This format is compatible with the {@code gl.glClipPlane()} function. One camera
-   * frustum plane can hence be applied in an other viewer to visualize the culling
-   * results:
-   * <p>
-   * {@code Retrieve place equations}<br>
-   * {@code float [][] coef =
-   * mainViewer.camera().getFrustumPlanesCoefficients();}<br>
-   * {@code These two additional clipping planes (which must have been enabled)} <br>
-   * {@code will reproduce the mainViewer's near and far clipping.}<br>
-   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE0, coef[2]);}<br>
-   * {@code gl.glClipPlane(GL.GL_CLIP_PLANE1, coef[3]);}<br>
-   * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
-   * {@link Graph#enableBoundaryEquations()} which
-   * automatically update the frustum equations every frame instead.
+   * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
+   * every frame instead.
    *
    * @see #computeBoundaryEquations()
    */
@@ -1549,7 +1439,7 @@ public class Graph {
   }
 
   /**
-   * Disables automatic update of the camera frustum plane equations every frame.
+   * Disables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1562,7 +1452,7 @@ public class Graph {
   }
 
   /**
-   * Enables automatic update of the camera frustum plane equations every frame.
+   * Enables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1602,8 +1492,8 @@ public class Graph {
    * <p>
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * boundary equations to be updated only occasionally (rare). Use
-   * {@link #enableBoundaryEquations()} which
-   * automatically update the boundary equations every frame instead.
+   * {@link #enableBoundaryEquations()} which automatically update the boundary equations
+   * every frame instead.
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1620,7 +1510,14 @@ public class Graph {
   /**
    * Returns the boundary plane equations.
    * <p>
-   * The six 4-component vectors returned by this method, respectively correspond to the
+   * In 2D the four 4-component vectors, respectively correspond to the
+   * left, right, top and bottom eye boundary lines. Each vector holds a plane equation
+   * of the form:
+   * <p>
+   * {@code a*x + b*y + c = 0} where {@code a}, {@code b} and {@code c} are the 3
+   * components of each vector, in that order.
+   * <p>
+   * In 3D the six 4-component vectors returned by this method, respectively correspond to the
    * left, right, near, far, top and bottom eye boundary planes. Each vector holds a plane
    * equation of the form:
    * <p>
@@ -1631,8 +1528,8 @@ public class Graph {
    * <p>
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with {@link #enableBoundaryEquations()}).
+   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
@@ -1644,24 +1541,26 @@ public class Graph {
    */
   public float[][] boundaryEquations() {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The viewpoint boundary equations may be outdated. Please "
-          + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
+      System.out.println("The graph boundary equations may be outdated. Please "
+          + "enable automatic updates of the equations in your setup with enableBoundaryEquations()");
     return _coefficients;
   }
 
   /**
-   * Returns the signed distance between point {@code pos} and plane {@code index} in
-   * Scene units. The distance is negative if the point lies in the planes's boundary
+   * Returns the signed distance between point {@code position} and plane {@code index}
+   * in world units. The distance is negative if the point lies in the planes's boundary
    * halfspace, and positive otherwise.
    * <p>
-   * {@code index} is a value between {@code 0} and {@code 5} which respectively
+   * In 2D {@code index} is a value between {@code 0} and {@code 3} which respectively
+   * correspond to the left, right, top and bottom eye boundary planes.
+   * <p>
+   * In 3D {@code index} is a value between {@code 0} and {@code 5} which respectively
    * correspond to the left, right, near, far, top and bottom eye boundary planes.
    * <p>
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
-   * Scene setup (with
-   * {@link #enableBoundaryEquations()}).
+   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
@@ -1702,7 +1601,7 @@ public class Graph {
    * the world coordinates system, will be projected with a length of {@code n} pixels on
    * screen.
    * <p>
-   * Use this method to _scale objects so that they have a constant pixel size on screen.
+   * Use this method to scale objects so that they have a constant pixel size on screen.
    * The following code will draw a 20 pixel line, starting at {@link #center()} and
    * always directed along the screen vertical direction:
    * <p>
@@ -1736,11 +1635,10 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the given face is back-facing the camera. Otherwise returns
+   * Returns {@code true} if the given face is back-facing the eye. Otherwise returns
    * {@code false}.
    * <p>
-   * Vertices must given in clockwise order if
-   * {@link Graph#isLeftHanded()} or in counter-clockwise
+   * Vertices must given in clockwise order if {@link Graph#isLeftHanded()} or in counter-clockwise
    * order if {@link Graph#isRightHanded()}.
    *
    * @param a first face vertex
@@ -1787,8 +1685,7 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
-   * otherwise.
+   * Returns {@code true} if the given cone is back-facing the eye and {@code false} otherwise.
    *
    * @param vertex  Cone vertex
    * @param normals ArrayList of normals defining the cone.
@@ -1809,8 +1706,7 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
-   * otherwise.
+   * Returns {@code true} if the given cone is back-facing the eye and {@code false} otherwise.
    *
    * @param vertex  Cone vertex
    * @param normals Array of normals defining the cone.
@@ -1854,8 +1750,7 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the given cone is back-facing the camera and {@code false}
-   * otherwise.
+   * Returns {@code true} if the given cone is back-facing the eye and {@code false} otherwise.
    *
    * @param vertex Cone vertex
    * @param axis   Cone axis
@@ -1892,26 +1787,26 @@ public class Graph {
   }
 
   /**
-   * Returns the screen projected coordinates of a point {@code src} defined in the
+   * Returns the screen projected coordinates of {@code point} defined in the
    * {@code frame} coordinate system.
    * <p>
-   * When {@code frame} is {@code null}, {@code src} is expressed in the world coordinate
+   * When {@code frame} is {@code null}, {@code point} is expressed in the world coordinate
    * system. See {@link #projectedCoordinatesOf(Vector)}.
    * <p>
-   * The x and y coordinates of the returned Vector are expressed in pixel, (0,0) being the
-   * upper left corner of the window. The z coordinate ranges between 0.0 (near plane) and
-   * 1.0 (excluded, far plane). See the {@code gluProject} man page for details.
+   * The x and y coordinates of the returned vector are expressed in screen coordinates,
+   * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
+   * (near plane) and 1 (excluded, far plane).
    *
    * @see #unprojectedCoordinatesOf(Vector, Frame)
    */
-  public Vector projectedCoordinatesOf(Vector vector, Frame frame) {
+  public Vector projectedCoordinatesOf(Vector point, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vector tmp = frame.inverseCoordinatesOf(vector);
+      Vector tmp = frame.inverseCoordinatesOf(point);
       _project(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
-      _project(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
+      _project(point._vector[0], point._vector[1], point._vector[2], xyz);
 
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
@@ -1967,54 +1862,49 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code unprojectedCoordinatesOf(src, null)}.
+   * Convenience function that simply returns {@code unprojectedCoordinatesOf(point, null)}.
    * <p>
    * #see {@link #unprojectedCoordinatesOf(Vector, Frame)}
    */
-  public Vector unprojectedCoordinatesOf(Vector vector) {
-    return this.unprojectedCoordinatesOf(vector, null);
+  public Vector unprojectedCoordinatesOf(Vector point) {
+    return this.unprojectedCoordinatesOf(point, null);
   }
 
   /**
-   * Returns the world unprojected coordinates of a point {@code src} defined in the
-   * screen coordinate system.
+   * Returns the world unprojected coordinates of the {@code pixel}.
    * <p>
-   * The {@code src.x} and {@code src.y} inputGrabber values are expressed in pixels, (0,0) being
-   * the upper left corner of the window. The {@code src.z} is a depth value ranging in
-   * [0..1] (near and far plane respectively). In 3D Note that {@code src.z} is not a
-   * linear interpolation between {@link #zNear()} and
+   * The pixel (0,0) corresponds to the upper left corner of the window. The
+   * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
+   * In 3D note that {@code pixel.z} is not a linear interpolation between {@link #zNear()} and
    * {@link #zFar()};
-   * {@code src.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
-   * is the distance from the point you _project to the camera, along the
-   * {@link #viewDirection()} . See the {@code gluUnProject} man page for details.
+   * {@code pixel.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
+   * is the distance from the point you project to the camera, along the {@link #viewDirection()}.
    * <p>
    * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
    * {@code null}, the result is expressed in the world coordinates system. The possible
-   * {@code frame} hierarchy (i.e., when
-   * {@link Frame#reference()} is non-null) is taken into
+   * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
    * account.
    * <p>
    * {@link #projectedCoordinatesOf(Vector, Frame)} performs the inverse transformation.
    * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
-   * {@link #width()} and {@link #height()}) and is completely independent of
-   * the Processing matrices. You can hence define a virtual eye and use this method to
-   * compute un-projections out of a classical rendering context.
+   * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
+   * this method to compute un-projections out of a classical rendering context.
    * <p>
    * This method is not computationally optimized by default. If you call it several times with no
-   * change in the matrices, you should buffer the entire inverse projection matrix (view,
-   * projection) to _speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
+   * change in the matrices, you should buffer the inverse of the projection times view matrix
+   * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
    * @see #projectedCoordinatesOf(Vector, Frame)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector unprojectedCoordinatesOf(Vector vector, Frame frame) {
+  public Vector unprojectedCoordinatesOf(Vector pixel, Frame frame) {
     float xyz[] = new float[3];
     // _unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
-    _unproject(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
+    _unproject(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (frame != null)
       return frame.coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
     else
@@ -2077,16 +1967,13 @@ public class Graph {
   }
 
   /**
-   * Returns the radius of the graph observed by the eye in graph (world) units.
+   * Returns the radius of the graph observed by the eye in world units.
    * <p>
-   * In the case of a 3D eye you need to provide such an approximation of the
-   * graph dimensions so that the it can adapt its
-   * {@link #zNear()} and
-   * {@link #zFar()} values. See the {@link #center()}
+   * In 3D you need to provide such an approximation of the graph dimensions so
+   * that the it can adapt its {@link #zNear()} and {@link #zFar()} values. See the {@link #center()}
    * documentation.
    * <p>
-   * Note that {@link Graph#radius()} (resp.
-   * {@link Graph#setRadius(float)} simply call this
+   * Note that {@link Graph#radius()} (resp. {@link Graph#setRadius(float)} simply call this
    * method on its associated eye.
    *
    * @see #setBoundingBox(Vector, Vector)
@@ -2103,6 +1990,7 @@ public class Graph {
    * <p>
    * Default value is the world origin. Use {@link #setCenter(Vector)} to change it.
    *
+   * @see #setCenter(Vector)
    * @see #setBoundingBox(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
@@ -2112,12 +2000,13 @@ public class Graph {
   }
 
   /**
-   * The point the eye revolves around with the ROTATE action binding. Defined in world
+   * The point the eye revolves around with a ROTATE gesture. Defined in world
    * coordinate system.
    * <p>
-   * Default value is the {@link #center()}.
+   * Default value is the {@link #center()}. Use {@link #setAnchor(Vector)} to change it.
    * <p>
-   * <b>Attention:</b> {@link #setCenter(Vector)} changes this value.
+   *
+   * @see #setAnchor(Vector)
    */
   public Vector anchor() {
     return _anchor;
@@ -2140,7 +2029,7 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #radius()} value in graph (world) units. Negative values are
+   * Sets the {@link #radius()} value in world units. Negative values are
    * ignored. It also sets {@link Node#flySpeed()} to 1% of {@link #radius()}.
    */
   public void setRadius(float radius) {
@@ -2152,7 +2041,7 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #center()} of the Scene.
+   * Sets the {@link #center()} of the graph.
    *
    * @see #setRadius(float)
    */
@@ -2162,7 +2051,7 @@ public class Graph {
 
   /**
    * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
-   * graph limits are defined by a (world axis aligned) bounding box.
+   * graph limits are defined by a world axis aligned bounding box.
    */
   public void setBoundingBox(Vector corner1, Vector corner2) {
     setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
@@ -2171,13 +2060,12 @@ public class Graph {
 
   /**
    * Returns the normalized view direction of the eye, defined in the world coordinate
-   * system. This corresponds to the negative Z axis of the {@link #eye()} (
-   * {@code frame().inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))} ) whih in 2D always is
-   * (0,0,-1)
+   * system. This corresponds to the negative Z axis of the {@link #eye()}
+   * ({@code frame().inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
+   * it always is (0,0,-1).
    * <p>
-   * In 3D change this value using
-   * {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
-   * {@link Node#setOrientation(Quaternion)} . It is orthogonal to {@link #upVector()} and to
+   * Xhange this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
+   * {@link Node#setOrientation(Quaternion)}. It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
   public Vector viewDirection() {
@@ -2185,10 +2073,10 @@ public class Graph {
   }
 
   /**
-   * Rotates the Camera so that its {@link #viewDirection()} is {@code direction} (defined
+   * Rotates the eye so that its {@link #viewDirection()} is {@code direction} (defined
    * in the world coordinate system).
    * <p>
-   * The Camera {@link Node#position()} is not _modified. The Camera is rotated so that the
+   * The eye {@link Node#position()} is not modified. The eye is rotated so that the
    * horizon (defined by its {@link #upVector()}) is preserved.
    *
    * @see #lookAt(Vector)
@@ -2220,17 +2108,17 @@ public class Graph {
   }
 
   /**
-   * Rotates the Eye so that its {@link #upVector()} becomes {@code up} (defined in the
+   * Rotates the eye so that its {@link #upVector()} becomes {@code up} (defined in the
    * world coordinate system).
    * <p>
-   * The Eye is rotated around an axis orthogonal to {@code up} and to the current
+   * The eye is rotated around an axis orthogonal to {@code up} and to the current
    * {@link #upVector()} direction.
    * <p>
-   * Use this method in order to define the Eye horizontal plane.
+   * Use this method in order to define the eye horizontal plane.
    * <p>
    * When {@code noMove} is set to {@code false}, the orientation modification is
    * compensated by a translation, so that the {@link #anchor()} stays projected at the
-   * same position on screen. This is especially useful when the Eye is an observer of the
+   * same position on screen. This is especially useful when the eye is an observer of the
    * graph (default action binding).
    * <p>
    * When {@code noMove} is true, the Eye {@link Node#position()} is left unchanged, which is
@@ -2265,9 +2153,9 @@ public class Graph {
   }
 
   /**
-   * 2D Windows simply call {@code frame().setPosition(target.x(), target.y())}. 3D
-   * Cameras set {@link Node#orientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The Camera {@link Node#position()} is not _modified.
+   * 2D eyes simply call {@code frame().setPosition(target.x(), target.y())}. 3D
+   * eyes set {@link Node#orientation()}, so that it looks at point {@code target} defined
+   * in the world coordinate system (The eye {@link Node#position()} is not modified.
    * Simply {@link #setViewDirection(Vector)}).
    *
    * @see #at()
@@ -2298,8 +2186,8 @@ public class Graph {
   }
 
   /**
-   * 2D Windows return the postion. 3D Cameras return a point defined in the world
-   * coordinate system where the camera is pointing at (just in front of
+   * 2D eyes return the position. 3D eyes return a point defined in the world
+   * coordinate system where the eyes is pointing at (just in front of
    * {@link #viewDirection()}). Useful for setting the Processing camera() which uses a
    * similar approach of that found in gluLookAt.
    *
@@ -2328,11 +2216,11 @@ public class Graph {
   }
 
   /**
-   * Smoothly interpolates the Eye on a KeyFrameInterpolator path so that it goes to
-   * {@code fr}.
+   * Smoothly interpolates the eye on a interpolator path so that it goes to
+   * {@code frame}.
    * <p>
-   * {@code fr} is expressed in world coordinates. {@code duration} tunes the
-   * interpolation _speed.
+   * {@code frame} is expressed in world coordinates. {@code duration} tunes the
+   * interpolation speed.
    *
    * @see #interpolateTo(Frame)
    * @see #fitBallInterpolation()
@@ -2346,7 +2234,7 @@ public class Graph {
   }
 
   /**
-   * Smoothly moves the Eye so that the rectangular screen region defined by
+   * Smoothly moves the eye so that the rectangular screen region defined by
    * {@code rectangle} (pixel units, with origin in the upper left corner) fits the
    * screen.
    * <p>
@@ -2376,7 +2264,7 @@ public class Graph {
    * The graph is defined by its {@link #center()} and its {@link #radius()}.
    * See {@link #fitBall()}.
    * <p>
-   * The {@link Frame#orientation()} of the {@link #eye()} is not _modified.
+   * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
    */
   public void fitBallInterpolation() {
     _interpolator.stop();
@@ -2406,10 +2294,10 @@ public class Graph {
    * Moves the eye so that the ball defined by {@code center} and {@code radius} is
    * visible and fits the window.
    * <p>
-   * In 3D the Camera is simply translated along its {@link #viewDirection()} so that the
+   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
    * sphere fits the screen. Its {@link Node#orientation()} and its
-   * {@link #fieldOfView()} are unchanged. You should
-   * therefore orientate the Camera before you call this method.
+   * {@link #fieldOfView()} are unchanged. You should therefore orientate the eye
+   * before you call this method.
    *
    * @see #lookAt(Vector)
    * @see #setUpVector(Vector, boolean)
@@ -2439,8 +2327,8 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the (world axis aligned) bounding box ({@code min} ,
-   * {@code max}) is entirely visible, using {@link #fitBall(Vector, float)}.
+   * Moves the eye so that the world axis aligned bounding box ({@code corner1} and
+   * {@code corner2}) is entirely visible, using {@link #fitBall(Vector, float)}.
    */
   public void fitBoundingBox(Vector corner1, Vector corner2) {
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
@@ -2452,7 +2340,7 @@ public class Graph {
    * Moves the eye so that the rectangular screen region defined by {@code rectangle}
    * (pixel units, with origin in the upper left corner) fits the screen.
    * <p>
-   * in 3D the Camera is translated (its {@link Node#orientation()} is unchanged) so that
+   * in 3D the eye is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
    * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
@@ -2507,8 +2395,8 @@ public class Graph {
   }
 
   /**
-   * Gives the coefficients of a 3D half-line passing through the Camera eye and pixel
-   * (x,y). Origin in the upper left corner. Use {@link #height()} - _y to locate the
+   * Gives the coefficients of a 3D half-line passing through the eye and pixel
+   * (x,y). Origin in the upper left corner. Use {@link #height()} - y to locate the
    * origin at the lower left corner.
    * <p>
    * The origin of the half line (eye position) is stored in {@code orig}, while
@@ -2583,7 +2471,7 @@ public class Graph {
 
   /**
    * Display a warning that the specified method can only be implemented from a relative
-   * bogus _event.
+   * bogus event.
    */
   static public void showEventVariationWarning(String method) {
     showWarning(method + " can only be performed using a relative _event.");
@@ -2605,9 +2493,9 @@ public class Graph {
    */
   static public void showOnlyEyeWarning(String method, boolean eye) {
     if (eye)
-      showWarning(method + "() is meaningful only when frame is attached to an eye.");
+      showWarning(method + "() is meaningful only when frame is and graph eye.");
     else
-      showWarning(method + "() is meaningful only when frame is detached from an eye.");
+      showWarning(method + "() is meaningful only when frame is not a graph eye.");
   }
 
   static public void showMinDOFsWarning(String themethod, int dofs) {
@@ -2617,12 +2505,12 @@ public class Graph {
   // Nice stuff :P
 
   /**
-   * Apply the local transformation defined by {@code frame}, i.e., respect to the frame
-   * {@link Frame#reference()}. The Frame is first translated
-   * and then rotated around the new translated origin.
+   * Apply the local transformation defined by {@code frame}, i.e., respect to its
+   * {@link Frame#reference()}. The Frame is first translated and then rotated around
+   * the new translated origin.
    * <p>
-   * This method may be used to modify the modelview matrix from a Frame hierarchy. For
-   * example, with this Frame hierarchy:
+   * This method may be used to modify the modelview matrix from a frame hierarchy. For
+   * example, with this frame hierarchy:
    * <p>
    * {@code Frame body = new Frame();} <br>
    * {@code Frame leftArm = new Frame();} <br>
@@ -2648,9 +2536,6 @@ public class Graph {
    * Note the use of nested {@link #pushModelView()} and {@link #popModelView()} blocks to
    * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
-   * <p>
-   * <b>Attention:</b> When drawing a frame hierarchy as above, this method should be used
-   * whenever possible.
    *
    * @see #applyWorldTransformation(Frame)
    */
@@ -2667,7 +2552,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #applyTransformation(Frame)} but applies the global transformation
+   * Same as {@link #applyTransformation(Frame)}, but applies the global transformation
    * defined by the frame.
    */
   public void applyWorldTransformation(Frame frame) {
@@ -2683,7 +2568,6 @@ public class Graph {
 
   /**
    * Returns true if graph is left handed. Note that the graph is right handed by default.
-   * However in proscene we set it as right handed (same as with P5).
    *
    * @see #setLeftHanded()
    */
@@ -2692,8 +2576,7 @@ public class Graph {
   }
 
   /**
-   * Returns true if graph is right handed. Note that the graph is right handed by
-   * default. However in proscene we set it as right handed (same as with P5).
+   * Returns true if graph is right handed. Note that the graph is right handed by default.
    *
    * @see #setRightHanded()
    */
@@ -2738,10 +2621,9 @@ public class Graph {
   }
 
   /**
-   * Max between {@link Node#lastUpdate()} and
-   * {@link #_lastNonEyeUpdate()}.
+   * Max between {@link Node#lastUpdate()} and {@link #_lastNonEyeUpdate()}.
    *
-   * @return last frame the Eye was updated
+   * @return last frame the eye was updated
    * @see #_lastNonEyeUpdate()
    */
   public long lastUpdate() {
@@ -2749,7 +2631,7 @@ public class Graph {
   }
 
   /**
-   * @return last frame a local Eye parameter (different than the Frame) was updated.
+   * @return last frame a local eye parameter (different than the Frame) was updated.
    * @see #lastUpdate()
    */
   protected long _lastNonEyeUpdate() {

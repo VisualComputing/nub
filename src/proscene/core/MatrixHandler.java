@@ -50,25 +50,13 @@ public class MatrixHandler {
   protected int _modelviewStackDepth;
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
-  protected boolean _raster;
-
-  /**
-   * Same as {@code this(graph, true)}.
-   *
-   * @see #MatrixHandler(Graph, boolean)
-   */
-  public MatrixHandler(Graph graph) {
-    this(graph, true);
-  }
 
   /**
    * Instantiates matrices and sets {@link #isProjectionViewInverseCached()} to {@code false}.
-   * If {@code raster} is true raster renderer or ray-tracing otherwise.
    *
    * @param graph
    */
-  public MatrixHandler(Graph graph, boolean raster) {
-    _raster = raster;
+  public MatrixHandler(Graph graph) {
     _graph = graph;
     _projection = new Matrix();
     _view = new Matrix();
@@ -98,18 +86,15 @@ public class MatrixHandler {
    * @see Graph#preDraw()
    * @see Graph#computeProjection()
    * @see Graph#computeCustomProjection()
-   * @see Graph#computeView()
+   * @see proscene.primitives.Frame#view()
    * @see #bindProjection(Matrix)
    * @see #bindModelView(Matrix)
    */
   protected void _bind() {
-    if (_raster)
-      _projection.set(graph().computeProjection());
-    _view.set(graph().computeView());
-    if (_raster) {
-      _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
-      bindProjection(cacheProjection());
-    }
+    _projection.set(graph().computeProjection());
+    _view.set(graph().eye().view());
+    _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+    bindProjection(cacheProjection());
     bindModelView(cacheView());
   }
 
