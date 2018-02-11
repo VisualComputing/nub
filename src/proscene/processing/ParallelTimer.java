@@ -14,9 +14,9 @@ import proscene.timing.Taskable;
 import proscene.timing.Timer;
 
 /**
- * Non-sequential timer based on java.util.Timer and java.util.TimerTask.
+ * Parrallel timer based on java.util.Timer and java.util.TimerTask.
  */
-class NonSequentialTimer implements Timer {
+class ParallelTimer implements Timer {
   Scene _scene;
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
@@ -25,11 +25,23 @@ class NonSequentialTimer implements Timer {
   boolean _active;
   long _period;
 
-  public NonSequentialTimer(Scene scene, Taskable task) {
+  /**
+   * Same as {@code this(scene, task, false)}.
+   *
+   * @see #ParallelTimer(Scene, Taskable, boolean)
+   */
+  public ParallelTimer(Scene scene, Taskable task) {
     this(scene, task, false);
   }
 
-  public NonSequentialTimer(Scene scene, Taskable task, boolean singleShot) {
+  /**
+   * Defines a parallel (multi-threaded) timer.
+   *
+   * @param scene timing handler owner
+   * @param task
+   * @param singleShot
+   */
+  public ParallelTimer(Scene scene, Taskable task, boolean singleShot) {
     _scene = scene;
     _once = singleShot;
     _task = task;

@@ -208,7 +208,8 @@ public class Scene extends Graph implements PConstants {
   // CONSTRUCTORS
 
   /**
-   * Constructor that defines an on-screen Processing Scene. Same as {@code this(p, p.g}.
+   * Constructor that defines an on-screen Processing scene. Same as
+   * {@code this(pApplet, pApplet.g)}.
    *
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, PGraphics, int, int)
@@ -218,7 +219,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code this(p, renderer, 0, 0)}.
+   * Same as {@code this(pApplet, pGraphics, 0, 0)}.
    *
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics, int, int)
@@ -228,23 +229,20 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Main constructor defining a left-handed Processing compatible Scene. Calls
+   * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@code frontBuffer} type (see
-   * {@link Java2DMatrixHandler} and
-   * {@link GLMatrixHandler}). The constructor instantiates the
-   * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
-   * visual hint flags, instantiates the {@link #eye()}. It also
-   * instantiates the {@link #mouseAgent()}.
+   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor instantiates
+   * the {@link #mouseAgent()}.
    * <p>
-   * An off-screen Processing Scene is defined if {@code frontBuffer != p.g}. In this case the
-   * {@code x} and {@code y} parameters define the position of the upper-left corner where
-   * the off-screen Scene is expected to be displayed, e.g., for instance with a call to
-   * Processing the {@code image(img, x, y)} function. If {@code frontBuffer == p.g}) (which
-   * defines an on-screen Scene, see also {@link #isOffscreen()}), the values of x and y
-   * are meaningless (both are set to 0 to be taken as dummy values). Render into an
-   * off-screen graph requires the drawing code to be enclose by {@link #beginDraw()} and
-   * {@link #endDraw()}. To display an off-screen graph call {@link #display()}.
+   * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
+   * case the {@code x} and {@code y} parameters define the position of the upper-left corner
+   * where the off-screen scene is expected to be displayed, see {@link #display()}. If
+   * {@code pGraphics == pApplet.g}) (which defines an on-screen scene, see also
+   * {@link #isOffscreen()}), the values of x and y are meaningless (both are set to 0 to be
+   * taken as dummy values). Render into an off-screen graph requires the drawing code to be
+   * enclose by {@link #beginDraw()} and {@link #endDraw()}. To display an off-screen scene
+   * call {@link #display()}.
    *
    * @see Graph#Graph(int, int)
    * @see #Scene(PApplet)
@@ -410,8 +408,8 @@ public class Scene extends Graph implements PConstants {
   //*/
 
   /**
-   * Returns the upper left corner of the Scene window. It's always (0,0) for on-screen
-   * scenes, but off-screen scenes may be defined elsewhere on a canvas.
+   * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
+   * scenes, but off-screen scenes may define it elsewhere on a canvas.
    */
   public Point originCorner() {
     return _upperLeftCorner;
@@ -420,15 +418,15 @@ public class Scene extends Graph implements PConstants {
   // P5 STUFF
 
   /**
-   * Returns the PApplet instance this Scene is related to.
+   * Returns the PApplet instance this scene is related to.
    */
   public PApplet pApplet() {
     return _parent;
   }
 
   /**
-   * Returns the PGraphics instance this Scene is related to. It may be the PApplets one,
-   * if the Scene is on-screen or an user-defined if the Scene {@link #isOffscreen()}.
+   * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
+   * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
   public PGraphics frontBuffer() {
     return _fg;
@@ -437,9 +435,8 @@ public class Scene extends Graph implements PConstants {
   // PICKING BUFFER
 
   /**
-   * Returns the picking buffer.
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> color
-   * buffer.
+   * Returns the back buffer, used for
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
   public PGraphics backBuffer() {
     return _bb;
@@ -468,8 +465,7 @@ public class Scene extends Graph implements PConstants {
   // Mouse agent
 
   /**
-   * Returns the default mouse agent handling Processing mouse events. If you plan to
-   * customize your mouse use this method.
+   * Returns the default mouse agent handling Processing mouse events.
    *
    * @see #enableMouseAgent()
    * @see #isMouseAgentEnabled()
@@ -480,7 +476,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Enables motion handling through the {@link #mouseAgent()}.
+   * Enables the {@link #mouseAgent()}.
    *
    * @see #mouseAgent()
    * @see #isMouseAgentEnabled()
@@ -494,7 +490,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Disables the default mouse agent and returns it.
+   * Disables the {@link #mouseAgent()}.
    *
    * @see #mouseAgent()
    * @see #isMouseAgentEnabled()
@@ -526,10 +522,6 @@ public class Scene extends Graph implements PConstants {
 
   public Node mouseAgentInputNode() {
     return mouseAgentInputGrabber() instanceof Node ? (Node) mouseAgent().inputGrabber() : null;
-  }
-
-  public void resetMouseAgentInputNode() {
-    mouseAgent().resetTrackedGrabber();
   }
 
   // OPENGL
@@ -643,14 +635,14 @@ public class Scene extends Graph implements PConstants {
     if (areTimersSequential())
       timingHandler().registerTask(task);
     else
-      timingHandler().registerTask(task, new NonSequentialTimer(this, task));
+      timingHandler().registerTask(task, new ParallelTimer(this, task));
   }
 
   /**
    * Sets all {@link #timingHandler()} timers as (single-threaded)
    * {@link SequentialTimer}(s).
    *
-   * @see #setNonSequentialTimers()
+   * @see #setParallelTimers()
    * @see #shiftTimers()
    * @see #areTimersSequential()
    */
@@ -669,7 +661,7 @@ public class Scene extends Graph implements PConstants {
    * @see #shiftTimers()
    * @see #areTimersSequential()
    */
-  public void setNonSequentialTimers() {
+  public void setParallelTimers() {
     if (!areTimersSequential())
       return;
 
@@ -684,7 +676,7 @@ public class Scene extends Graph implements PConstants {
         rOnce = task.timer().isSingleShot();
       }
       task.stop();
-      task.setTimer(new NonSequentialTimer(this, task));
+      task.setTimer(new ParallelTimer(this, task));
       if (isActive) {
         if (rOnce)
           task.runOnce(period);
@@ -701,7 +693,7 @@ public class Scene extends Graph implements PConstants {
    * @return true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
    * timers are (single-threaded) {@link SequentialTimer}(s)).
    * @see #setSequentialTimers()
-   * @see #setNonSequentialTimers()
+   * @see #setParallelTimers()
    * @see #shiftTimers()
    */
   public boolean areTimersSequential() {
@@ -709,12 +701,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * If {@link #areTimersSequential()} calls {@link #setNonSequentialTimers()}, otherwise call
+   * If {@link #areTimersSequential()} calls {@link #setParallelTimers()}, otherwise call
    * {@link #setSequentialTimers()}.
    */
   public void shiftTimers() {
     if (areTimersSequential())
-      setNonSequentialTimers();
+      setParallelTimers();
     else
       setSequentialTimers();
   }
@@ -891,7 +883,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code display(pg())}. Only meaningful if the graph {@link #isOffscreen()}.
+   * Same as {@code display(frontBuffer())}. Only meaningful if the graph {@link #isOffscreen()}.
    *
    * @see #display(PGraphics)
    * @see #frontBuffer()

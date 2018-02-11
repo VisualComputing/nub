@@ -22,7 +22,7 @@ import proscene.input.event.TapShortcut;
 import proscene.primitives.Point;
 
 /**
- * Proscene mouse-agent. A Processing fully fledged mouse {@link Agent}.
+ * Mouse agent. A Processing fully fledged mouse {@link Agent}.
  *
  * @see Agent
  */
