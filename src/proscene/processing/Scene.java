@@ -92,7 +92,7 @@ import java.util.List;
  * void setup() {
  *   ...
  *   eye = new Node(scene) {
- *     public void interact(MotionEvent event) {
+ *     public void interact(Event event) {
  *       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
  *         translate(event);
  *     }
@@ -862,27 +862,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code showOnlyOffScreenWarning(method, true)}.
-   *
-   * @see #showOnlyOffScreenWarning(String, boolean)
-   */
-  static public void showOnlyOffScreenWarning(String method) {
-    showOnlyOffScreenWarning(method, true);
-  }
-
-  /**
-   * Display a warning that the specified method is only available for off-screen scenes
-   * if {@code offscreen} is {@code true}, or (on-screen scenes if if {@code offscreen} is
-   * {@code false}).
-   */
-  static public void showOnlyOffScreenWarning(String method, boolean offscreen) {
-    if (offscreen)
-      showWarning(method + "() is only meaningful for offscreen scenes.");
-    else
-      showWarning(method + "() is only meaningful for onscreen scenes.");
-  }
-
-  /**
    * Only if the Scene {@link #isOffscreen()}. Calls {@code pg().beginDraw()} (hence
    * there's no need to explicitly call it) and then {@link #preDraw()} .
    * <p>
@@ -969,9 +948,8 @@ public class Scene extends Graph implements PConstants {
    * Only meaningful if the graph {@link #isOffscreen()}.
    */
   public void display(PGraphics pgraphics) {
-    if (!isOffscreen())
-      showOnlyOffScreenWarning("set");
-    pApplet().image(pgraphics, originCorner().x(), originCorner().y());
+    if (isOffscreen())
+      pApplet().image(pgraphics, originCorner().x(), originCorner().y());
   }
 
   /**
@@ -2016,10 +1994,8 @@ public class Scene extends Graph implements PConstants {
    * Calls {@link #drawCylinder(float, float)} on {@code frontBuffer}.
    */
   public static void drawCylinder(PGraphics pGraphics, float w, float h) {
-    if (!(pGraphics instanceof PGraphics3D)) {
-      Graph.showDepthWarning("drawCylinder");
+    if (!(pGraphics instanceof PGraphics3D))
       return;
-    }
     pGraphics.pushStyle();
     float px, py;
 
@@ -2073,10 +2049,8 @@ public class Scene extends Graph implements PConstants {
    * Calls {@link #drawHollowCylinder(int, float, float, Vector, Vector)} on {@code frontBuffer}.
    */
   public static void drawHollowCylinder(PGraphics pGraphics, int detail, float w, float h, Vector m, Vector n) {
-    if (!(pGraphics instanceof PGraphics3D)) {
-      Graph.showDepthWarning("drawHollowCylinder");
+    if (!(pGraphics instanceof PGraphics3D))
       return;
-    }
     pGraphics.pushStyle();
     // eqs taken from: http://en.wikipedia.org/wiki/Line-plane_intersection
     Vector pm0 = new Vector(0, 0, 0);
@@ -2151,10 +2125,8 @@ public class Scene extends Graph implements PConstants {
    * Calls {@link #drawCone(int, float, float, float, float)} on {@code frontBuffer}.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float r, float h) {
-    if (!(pGraphics instanceof PGraphics3D)) {
-      Graph.showDepthWarning("drawCone");
+    if (!(pGraphics instanceof PGraphics3D))
       return;
-    }
     pGraphics.pushStyle();
     float unitConeX[] = new float[detail + 1];
     float unitConeY[] = new float[detail + 1];
@@ -2214,10 +2186,8 @@ public class Scene extends Graph implements PConstants {
    * Calls {@link #drawCone(int, float, float, float, float, float)} on {@code frontBuffer}.
    */
   public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float r1, float r2, float h) {
-    if (!(pGraphics instanceof PGraphics3D)) {
-      Graph.showDepthWarning("drawCone");
+    if (!(pGraphics instanceof PGraphics3D))
       return;
-    }
     pGraphics.pushStyle();
     float firstCircleX[] = new float[detail + 1];
     float firstCircleY[] = new float[detail + 1];

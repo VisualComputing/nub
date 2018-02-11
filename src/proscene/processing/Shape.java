@@ -286,7 +286,6 @@ public class Shape extends Node {
   @Override
   public final boolean track(float x, float y) {
     if (this == scene().eye()) {
-      Scene.showOnlyEyeWarning("checkIfGrabsInput", false);
       return false;
     }
     if (precision() != Precision.EXACT)

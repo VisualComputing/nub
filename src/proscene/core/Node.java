@@ -74,7 +74,7 @@ import java.util.List;
  * Shortcut left = new Shortcut(PApplet.LEFT);
  * Shortcut right = new Shortcut(PApplet.RIGHT);
  * node = new Node(graph) {
- *   public void interact(MotionEvent2 event) {
+ *   public void interact(Event event) {
  *     if(left.matches(event.shortcut()))
  *       rotate(event);
  *     if(right.matches(event.shortcut()))
@@ -576,7 +576,6 @@ public class Node extends Frame implements Grabber {
    * Override this method when you want the object to be picked from a {@link KeyEvent}.
    */
   public boolean track(KeyEvent keyEvent) {
-    Graph.showMissingImplementationWarning("track(KeyEvent _event)", this.getClass().getName());
     return false;
   }
 
@@ -586,9 +585,6 @@ public class Node extends Frame implements Grabber {
    * Override this method when you want the object to be picked from a {@link MotionEvent1}.
    */
   public boolean track(MotionEvent1 motionEvent1) {
-    if (isEye())
-      return false;
-    Graph.showMissingImplementationWarning("track(MotionEvent1 motionEvent1)", this.getClass().getName());
     return false;
   }
 
@@ -599,7 +595,7 @@ public class Node extends Frame implements Grabber {
     if (isEye())
       return false;
     if (motionEvent2.isAbsolute()) {
-      Graph.showEventVariationWarning("track");
+      System.out.println("track(Event) requires a relative motion-event");
       return false;
     }
     return track(motionEvent2.x(), motionEvent2.y());
@@ -1165,10 +1161,8 @@ public class Node extends Frame implements Grabber {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event, fromX);
     if (motionEvent2 != null)
       return _originalDirection(motionEvent2);
-    else {
-      Graph.showMinDOFsWarning("_originalDirection", 2);
+    else
       return 0;
-    }
   }
 
   /**
@@ -1198,7 +1192,7 @@ public class Node extends Frame implements Grabber {
    */
   public Quaternion deformedBallQuaternion(MotionEvent2 event, Vector center) {
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("deformedBallQuaternion");
+      System.out.println("deformedBallQuaternion(Event) requires a relative motion-event");
       return null;
     }
     float cx = center.x();
@@ -1458,7 +1452,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       translate(motionEvent2);
     else
-      Graph.showMinDOFsWarning("translate", 2);
+      System.out.println("translate(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -1477,7 +1471,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent3 != null)
       translateXYZ(motionEvent3);
     else
-      Graph.showMinDOFsWarning("translateXYZ", 3);
+      System.out.println("translateXYZ(Event) requires a motion event of at least 3 DOFs");
   }
 
   /**
@@ -1570,7 +1564,7 @@ public class Node extends Frame implements Grabber {
   public void zoomOnRegion(MotionEvent event) {
     MotionEvent2 dof2 = MotionEvent.event2(event);
     if (dof2 == null) {
-      Graph.showMinDOFsWarning("zoomOnRegion", 2);
+      System.out.println("zoomOnRegion(Event) requires a motion event of at least 2 DOFs");
       return;
     }
     zoomOnRegion(dof2);
@@ -1581,11 +1575,10 @@ public class Node extends Frame implements Grabber {
    */
   public void zoomOnRegion(MotionEvent2 event) {
     if (!isEye()) {
-      Graph.showOnlyEyeWarning("zoomOnRegion");
       return;
     }
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("zoomOnRegion");
+      System.out.println("zoomOnRegion(Event) requires a relative motion-event");
       return;
     }
     if (event.fired()) {
@@ -1767,7 +1760,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent3 != null)
       rotateXYZ(motionEvent3);
     else
-      Graph.showMinDOFsWarning("rotateXYZ", 3);
+      System.out.println("rotateXYZ(Event) requires a motion event of at least 3 DOFs");
   }
 
   /**
@@ -1789,7 +1782,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       rotate(motionEvent2);
     else
-      Graph.showMinDOFsWarning("rotate", 2);
+      System.out.println("rotate(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -1797,7 +1790,7 @@ public class Node extends Frame implements Grabber {
    */
   public void rotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("rotate");
+      System.out.println("rotate(Event) requires a relative motion-event");
       return;
     }
     if (event.fired())
@@ -1911,7 +1904,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       _moveForward(motionEvent2, forward);
     else
-      Graph.showMinDOFsWarning("_moveForward", 2);
+      System.out.println("moveForward(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -1940,7 +1933,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       drive(motionEvent2);
     else
-      Graph.showMinDOFsWarning("drive", 2);
+      System.out.println("drive(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -1972,7 +1965,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       rotateCAD(motionEvent2);
     else
-      Graph.showMinDOFsWarning("rotateCAD", 2);
+      System.out.println("rotateCAD(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -1980,7 +1973,7 @@ public class Node extends Frame implements Grabber {
    */
   public void rotateCAD(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("rotateCAD");
+      System.out.println("rotateCAD(Event) requires a relative motion-event");
       return;
     }
     if (event.fired())
@@ -2013,7 +2006,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent6 != null)
       hinge(motionEvent6);
     else
-      Graph.showMinDOFsWarning("hinge", 6);
+      System.out.println("hinge(Event) requires a motion event of at least 6 DOFs");
   }
 
   /**
@@ -2021,7 +2014,7 @@ public class Node extends Frame implements Grabber {
    */
   public void hinge(MotionEvent6 event) {
     if (!isEye()) {
-      Graph.showOnlyEyeWarning("hinge");
+      System.out.println("hinge(Event) only makes sense for the eye");
       return;
     }
     // aka google earth navigation
@@ -2075,7 +2068,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       screenTranslate(motionEvent2);
     else
-      Graph.showMinDOFsWarning("screenTranslate", 2);
+      System.out.println("screenTranslate(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -2099,7 +2092,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       screenRotate(motionEvent2);
     else
-      Graph.showMinDOFsWarning("screenRotate", 2);
+      System.out.println("screenRotate(Event) requires a motion event of at least 2 DOFs");
   }
 
   /**
@@ -2107,7 +2100,7 @@ public class Node extends Frame implements Grabber {
    */
   public void screenRotate(MotionEvent2 event) {
     if (event.isAbsolute()) {
-      Graph.showEventVariationWarning("screenRotate");
+      System.out.println("screenRotate(Event) requires a relative motion-event");
       return;
     }
     if (event.fired()) {
@@ -2458,7 +2451,7 @@ public class Node extends Frame implements Grabber {
     if (motionEvent2 != null)
       return _rollPitchQuaternion(motionEvent2);
     else {
-      Graph.showMinDOFsWarning("_rollPitchQuaternion", 2);
+      System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
       return null;
     }
   }
@@ -2498,10 +2491,6 @@ public class Node extends Frame implements Grabber {
    * @see #setPrecisionThreshold(float)
    */
   public float precisionThreshold() {
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("precisionThreshold", false);
-      return 0;
-    }
     if (precision() == Precision.ADAPTIVE)
       return _threshold * scaling() * _graph.pixelToGraphRatio(position());
     return _threshold;
@@ -2514,8 +2503,6 @@ public class Node extends Frame implements Grabber {
    * @see #setPrecisionThreshold(float)
    */
   public Precision precision() {
-    if (isEye())
-      Graph.showOnlyEyeWarning("precision", false);
     return _Precision;
   }
 
@@ -2540,13 +2527,8 @@ public class Node extends Frame implements Grabber {
    */
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
-      System.out.println(
-          "Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
     _Precision = precision;
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("setPrecision", false);
-      return;
-    }
   }
 
   /**
@@ -2562,7 +2544,7 @@ public class Node extends Frame implements Grabber {
    * in object space (world units) and defines the edge length of a squared bounding box that
    * leads to an adaptive length of a 'shooter target', centered at the projection of the node
    * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame.
+   * size of the object you are attaching to the node shape.
    * <p>
    * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
    * {@link #setPrecision(Precision)} for details.
@@ -2577,10 +2559,6 @@ public class Node extends Frame implements Grabber {
    * @see #track(Event)
    */
   public void setPrecisionThreshold(float threshold) {
-    if (isEye()) {
-      Graph.showOnlyEyeWarning("setPrecisionThreshold", false);
-      return;
-    }
     if (threshold >= 0)
       _threshold = threshold;
   }
