@@ -99,10 +99,9 @@ import java.util.List;
  * The eye can be controlled both programmatically (since a {@link Node} is a
  * {@link Frame} specialization) and interactively (using the mouse, see
  * {@link #mouseAgent()} and {@link MouseAgent}). Note the use of the anonymous
- * inner {@link Node} class used to define how the node will behave
- * using a mouse (see below), refer to the {@link Node} API for details.
- * Note also the {@link #setDefaultNode(Node)} call which will direct mouse input
- * to the eye when no other node is being picked.
+ * inner {@link Node} class used to define how the node will behave, refer to the
+ * {@link Node} API for details. Note also the {@link #setDefaultNode(Node)} call
+ * which will direct mouse input to the eye when no other node is being picked.
  * <h3>Shapes</h3>
  * A {@link Shape} is a {@link Node} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
