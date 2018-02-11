@@ -95,9 +95,9 @@ public class Vector {
     Vector vector = new Vector();
     float lower = -10;
     float upper = 10;
-    vector.setX(((float)Math.random() * (upper - lower)) + lower);
-    vector.setY(((float)Math.random() * (upper - lower)) + lower);
-    vector.setZ(((float)Math.random() * (upper - lower)) + lower);
+    vector.setX(((float) Math.random() * (upper - lower)) + lower);
+    vector.setY(((float) Math.random() * (upper - lower)) + lower);
+    vector.setZ(((float) Math.random() * (upper - lower)) + lower);
     vector.normalize();
     return vector;
   }

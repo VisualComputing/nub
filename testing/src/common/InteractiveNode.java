@@ -36,28 +36,12 @@ public class InteractiveNode extends Node {
   public void interact(Event event) {
     if (event.shortcut().matches(MouseAgent.RIGHT))
       translate(event);
-    /*
     else if (event.shortcut().matches(MouseAgent.LEFT))
       rotate(event);
-    else if (event.shortcut().matches(MouseAgent.WHEEL))
-      if (isEye() && graph().is3D())
-        translateZ(event);
-      else
-        scale(event);
-        */
-  }
-
-  /*
-  @Override
-  public void interact(TapEvent event) {
-    if (event.shortcut().matches(MouseAgent.CENTER_TAP2))
+    else if (event.shortcut().matches(MouseAgent.CENTER_TAP2))
       center();
     else if (event.shortcut().matches(MouseAgent.RIGHT_TAP))
       align();
-  }
-
-  @Override
-  public void interact(KeyEvent event) {
     if (event.shortcut().matches(upArrow))
       translateYPos();
     else if (event.shortcut().matches(downArrow))
@@ -66,6 +50,10 @@ public class InteractiveNode extends Node {
       translateXNeg();
     else if (event.shortcut().matches(rightArrow))
       translateXPos();
+    else if (event.shortcut().matches(MouseAgent.WHEEL))
+      if (isEye() && graph().is3D())
+        translateZ(event);
+      else
+        scale(event);
   }
-  */
 }

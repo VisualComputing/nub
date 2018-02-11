@@ -63,11 +63,8 @@ import java.util.List;
  * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
  * to the right.
  * <h2>Behaviors</h2>
- * To implement a node behavior derive from this class and override the
- * version of {@code interact} with the (event) parameter type you want to
- * customize (see {@link #interact(MotionEvent)},
- * {@link #interact(KeyEvent)}, etc.). For example, with the following
- * code:
+ * To implement a node behavior derive from this class and override {@code interact()}.
+ * For example, with the following code:
  * <p>
  * <pre>
  * {@code
@@ -88,7 +85,7 @@ import java.util.List;
  * provided it's added to the mouse-agent first (see {@link Agent#addGrabber(Grabber)}.
  * <p>
  * Note that a node implements by default several gesture-to-motion converting methods,
- * such as: {@link #rotate(MotionEvent)}, {@link #moveForward(MotionEvent)},
+ * such as: {@link #rotate(Event)}, {@link #moveForward(Event)},
  * {@link #translateXPos()}, etc.
  * <h2>Picking</h2>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
@@ -367,7 +364,7 @@ public class Node extends Frame implements Grabber {
     node.setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    node.setMagnitude(((float)Math.random() * (upper - lower)) + lower);
+    node.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     return node;
   }
 
@@ -1190,7 +1187,7 @@ public class Node extends Frame implements Grabber {
    * from mice (mouse positions are projected on a deformed ball, centered on ({@code center.x()},
    * {@code center.y()})).
    */
-  public Quaternion deformedBallQuaternion(MotionEvent2 event, Vector center) {
+  protected Quaternion _deformedBallQuaternion(MotionEvent2 event, Vector center) {
     if (event.isAbsolute()) {
       System.out.println("deformedBallQuaternion(Event) requires a relative motion-event");
       return null;
@@ -1276,6 +1273,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void translateX(Event event) {
+    if (event instanceof MotionEvent)
+      translateX((MotionEvent) event);
+    else
+      System.out.println("translateX(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into x-translation conversion routine.
    */
   public void translateX(MotionEvent event) {
@@ -1325,6 +1332,16 @@ public class Node extends Frame implements Grabber {
   protected void _translateX(boolean right) {
     translate(screenToVector(
         Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keySensitivity() : -keySensitivity())));
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void translateY(Event event) {
+    if (event instanceof MotionEvent)
+      translateY((MotionEvent) event);
+    else
+      System.out.println("translateY(Event) requires a motion event");
   }
 
   /**
@@ -1381,6 +1398,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void translateZ(Event event) {
+    if (event instanceof MotionEvent)
+      translateZ((MotionEvent) event);
+    else
+      System.out.println("translateZ(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into z-translation conversion routine.
    */
   public void translateZ(MotionEvent event) {
@@ -1432,9 +1459,14 @@ public class Node extends Frame implements Grabber {
         Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
   }
 
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
   public void translate(Event event) {
-    if(event instanceof MotionEvent)
-      translate((MotionEvent)event, true);
+    if (event instanceof MotionEvent)
+      translate((MotionEvent) event, true);
+    else
+      System.out.println("translate(Event) requires a motion event");
   }
 
   /**
@@ -1464,6 +1496,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void translateXYZ(Event event) {
+    if (event instanceof MotionEvent)
+      translateXYZ((MotionEvent) event);
+    else
+      System.out.println("translateXYZ(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into xyz-translation conversion routine.
    */
   public void translateXYZ(MotionEvent event) {
@@ -1472,6 +1514,16 @@ public class Node extends Frame implements Grabber {
       translateXYZ(motionEvent3);
     else
       System.out.println("translateXYZ(Event) requires a motion event of at least 3 DOFs");
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void translateRotateXYZ(Event event) {
+    if (event instanceof MotionEvent)
+      translateRotateXYZ((MotionEvent) event);
+    else
+      System.out.println("translateY(Event) requires a motion event");
   }
 
   /**
@@ -1490,6 +1542,16 @@ public class Node extends Frame implements Grabber {
     translate(screenToVector(
         Vector.multiply(new Vector(event.dx(), _graph.isRightHanded() ? -event.dy() : event.dy(), -event.dz()),
             this.translationSensitivity())));
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void zoomOnAnchor(Event event) {
+    if (event instanceof MotionEvent)
+      zoomOnAnchor((MotionEvent) event);
+    else
+      System.out.println("zoomOnAnchor(Event) requires a motion event");
   }
 
   /**
@@ -1559,6 +1621,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void zoomOnRegion(Event event) {
+    if (event instanceof MotionEvent)
+      zoomOnRegion((MotionEvent) event);
+    else
+      System.out.println("zoomOnRegion(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into zoom-on-region conversion routine.
    */
   public void zoomOnRegion(MotionEvent event) {
@@ -1596,6 +1668,16 @@ public class Node extends Frame implements Grabber {
       graph().fitScreenRegionInterpolation(new Rectangle(tlX, tlY, w, h));
       //graph().fitScreenRegion(new Rectangle(tlX, tlY, w, h));
     }
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotateX(Event event) {
+    if (event instanceof MotionEvent)
+      rotateX((MotionEvent) event);
+    else
+      System.out.println("rotateX(Event) requires a motion event");
   }
 
   /**
@@ -1647,6 +1729,16 @@ public class Node extends Frame implements Grabber {
    */
   protected void _rotateX(boolean up) {
     rotate(screenToQuaternion(_computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0, 0));
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotateY(Event event) {
+    if (event instanceof MotionEvent)
+      rotateY((MotionEvent) event);
+    else
+      System.out.println("rotateY(Event) requires a motion event");
   }
 
   /**
@@ -1702,6 +1794,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotateZ(Event event) {
+    if (event instanceof MotionEvent)
+      rotateZ((MotionEvent) event);
+    else
+      System.out.println("rotateZ(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into z-rotation conversion routine.
    */
   public void rotateZ(MotionEvent event) {
@@ -1753,6 +1855,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotateXYZ(Event event) {
+    if (event instanceof MotionEvent)
+      rotateXYZ((MotionEvent) event);
+    else
+      System.out.println("rotateY(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into xyz-rotation conversion routine.
    */
   public void rotateXYZ(MotionEvent event) {
@@ -1772,6 +1884,16 @@ public class Node extends Frame implements Grabber {
     rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotate(Event event) {
+    if (event instanceof MotionEvent)
+      rotate((MotionEvent) event);
+    else
+      System.out.println("rotate(Event) requires a motion event");
   }
 
   /**
@@ -1805,10 +1927,10 @@ public class Node extends Frame implements Grabber {
       Quaternion rt;
       Vector trns;
       if (isEye())
-        rt = deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
+        rt = _deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
       else {
         trns = _graph.projectedCoordinatesOf(position());
-        rt = deformedBallQuaternion(event, trns);
+        rt = _deformedBallQuaternion(event, trns);
         trns = rt.axis();
         trns = _graph.eye().orientation().rotate(trns);
         trns = transformOf(trns);
@@ -1816,6 +1938,16 @@ public class Node extends Frame implements Grabber {
       }
       _spin(rt, event.speed(), event.delay());
     }
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void scale(Event event) {
+    if (event instanceof MotionEvent)
+      scale((MotionEvent) event);
+    else
+      System.out.println("scale(Event) requires a motion event");
   }
 
   /**
@@ -1878,8 +2010,28 @@ public class Node extends Frame implements Grabber {
     _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void lookAround(Event event) {
+    if (event instanceof MotionEvent)
+      lookAround((MotionEvent) event);
+    else
+      System.out.println("lookAround(Event) requires a motion event");
+  }
+
   public void lookAround(MotionEvent event) {
     rotate(_rollPitchQuaternion(event));
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void moveBackward(Event event) {
+    if (event instanceof MotionEvent)
+      moveBackward((MotionEvent) event);
+    else
+      System.out.println("moveBackward(Event) requires a motion event");
   }
 
   /**
@@ -1887,6 +2039,16 @@ public class Node extends Frame implements Grabber {
    */
   public void moveBackward(MotionEvent event) {
     _moveForward(event, false);
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void moveForward(Event event) {
+    if (event instanceof MotionEvent)
+      moveForward((MotionEvent) event);
+    else
+      System.out.println("moveForward(Event) requires a motion event");
   }
 
   /**
@@ -1926,6 +2088,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void drive(Event event) {
+    if (event instanceof MotionEvent)
+      drive((MotionEvent) event);
+    else
+      System.out.println("drive(Event) requires a motion event");
+  }
+
+  /**
    * User gesture into drive conversion routine.
    */
   public void drive(MotionEvent event) {
@@ -1955,6 +2127,16 @@ public class Node extends Frame implements Grabber {
     _fly.set(0.0f, 0.0f, flySpeed());
     trns = rotation().rotate(_fly);
     _startFlying(event, trns);
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void rotateCAD(Event event) {
+    if (event instanceof MotionEvent)
+      rotateCAD((MotionEvent) event);
+    else
+      System.out.println("rotateCAD(Event) requires a motion event");
   }
 
   /**
@@ -1996,6 +2178,16 @@ public class Node extends Frame implements Grabber {
       _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event.speed(),
           event.delay());
     }
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void hinge(Event event) {
+    if (event instanceof MotionEvent)
+      hinge((MotionEvent) event);
+    else
+      System.out.println("hinge(Event) requires a motion event");
   }
 
   /**
@@ -2061,6 +2253,16 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void screenTranslate(Event event) {
+    if (event instanceof MotionEvent)
+      screenTranslate((MotionEvent) event);
+    else
+      System.out.println("screenTranslate(Event) requires a motion event");
+  }
+
+  /**
    * User gesture screen-translate conversion routine.
    */
   public void screenTranslate(MotionEvent event) {
@@ -2082,6 +2284,16 @@ public class Node extends Frame implements Grabber {
       translateX(event, true);
     else if (dir == -1)
       translateY(event, false);
+  }
+
+  /**
+   * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
+   */
+  public void screenRotate(Event event) {
+    if (event instanceof MotionEvent)
+      screenRotate((MotionEvent) event);
+    else
+      System.out.println("screenRotate(Event) requires a motion event");
   }
 
   /**

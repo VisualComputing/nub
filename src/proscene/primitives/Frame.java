@@ -202,7 +202,7 @@ public class Frame {
     setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    float magnitude = magnitude() * ((float)Math.random() * (upper - lower)) + lower;
+    float magnitude = magnitude() * ((float) Math.random() * (upper - lower)) + lower;
     setMagnitude(magnitude);
   }
 
@@ -222,8 +222,8 @@ public class Frame {
     frame.setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    float magnitude = ((float)Math.random() * (upper - lower)) + lower;
-    frame.setMagnitude(((float)Math.random() * (upper - lower)) + lower);
+    float magnitude = ((float) Math.random() * (upper - lower)) + lower;
+    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     return frame;
   }
 

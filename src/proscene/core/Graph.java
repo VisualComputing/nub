@@ -19,7 +19,6 @@ import proscene.timing.TimingHandler;
 import proscene.timing.TimingTask;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -1147,8 +1146,8 @@ public class Graph {
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
-    if(eye instanceof Node)
-      if(((Node)eye).graph() != this)
+    if (eye instanceof Node)
+      if (((Node) eye).graph() != this)
         return;
     _eye = eye;
     _interpolator.setFrame(eye);
