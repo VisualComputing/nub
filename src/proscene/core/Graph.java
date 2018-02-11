@@ -45,7 +45,7 @@ import java.util.List;
  * {@link #pruneBranch(Node)}, {@link #appendBranch(List)}, {@link #isNodeReachable(Node)},
  * {@link #branch(Node)}, and {@link #clear()}.
  * <h2>Eye handling</h2>
- * Any {@link Frame} or {@link Node} belonging to the graph hierarchy may be set as the
+ * Any {@link Frame} or {@link Node} (belonging to the graph hierarchy) may be set as the
  * {@link #eye()} (see {@link #setEye(Frame)}). Several frame wrapper functions to handle
  * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
@@ -1139,13 +1139,17 @@ public class Graph {
   }
 
   /**
-   * Replaces the current {@link #eye()} with {@code e}.
+   * Replaces the current {@link #eye()} with {@code eye}. If {@code eye} is instance of
+   * {@link Node} it should belong to this graph object.
    *
    * @see #eye()
    */
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
+    if(eye instanceof Node)
+      if(((Node)eye).graph() != this)
+        return;
     _eye = eye;
     _interpolator.setFrame(eye);
     _modified();

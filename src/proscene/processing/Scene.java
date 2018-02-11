@@ -22,6 +22,7 @@ import proscene.core.Interpolator;
 import proscene.core.MatrixHandler;
 import proscene.core.Node;
 import proscene.input.Agent;
+import proscene.input.Event;
 import proscene.input.Grabber;
 import proscene.primitives.*;
 import proscene.timing.SequentialTimer;
@@ -33,26 +34,111 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * A 2D or 3D interactive, on-screen or off-screen, Processing Scene. The Scene is a specialization of the
- * {@link Graph}, providing an interface between Dandelion
- * and Processing.
+ * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
  * <p>
- * <h3>Usage</h3> To use a Scene you should instantiate your own Scene
- * object at the {@code PApplet.setup()} function. See the example <i>BasicUse</i>.
- * <h3>Interactivity mechanisms</h3> ProScene provides powerful interactivity mechanisms
- * allowing a wide range of graph setups ranging from very simple to complex ones. For
- * convenience, two interaction mechanisms are provided by default:
- * {@link #keyAgent()}, and {@link #mouseAgent()} (which in the desktop version of
- * proscene defaults to a {@link #mouseAgent()}):
- * <ol>
- * <li><b>The default _key agent</b> provides shortcuts to
- * node and graph _key actions (such as
- * {@link #drawGrid()} or {@link #drawAxes()}). See {@link #keyAgent()}.
- * <li><b>The default mouse agent</b> provides high-level methods to manage the
- * eye and node
- * motion actions. Please refer to the {@link proscene.processing.MouseAgent} and
- * {@link proscene.processing.KeyAgent} API's.
- * </ol>
+ * <h2>Default interactivity mechanisms</h2>
+ * Two interaction mechanisms are provided by default: {@link #keyAgent()}, and
+ * {@link #mouseAgent()} (see {@link MouseAgent} and {@link KeyAgent}). To
+ * control your scene nodes by other means implement an {@link Agent} and call
+ * {@link #registerAgent(Agent)}.
+ * <h2>Usage</h2>
+ * Typical usage comprises three steps: Scene instantiation, setting an eye
+ * and setting some shapes.
+ * <h3>Scene instantiation</h3>
+ * Instantiate your on-screen scene at the {@code PApplet.setup()}:
+ * <pre>
+ * {@code
+ * Scene scene;
+ * void setup() {
+ *   scene = new Scene(this);
+ * }
+ * }
+ * </pre>
+ * The scene {@link #frontBuffer()} corresponds to the {@code PApplet} main canvas.
+ * <p>
+ * Off-screen scenes should be instantiated upon a {@code PGraphics} object:
+ * <pre>
+ * {@code
+ * Scene scene;
+ * PGraphics canvas;
+ * void setup() {
+ *   canvas = createGraphics(500, 500, P3D);
+ *   scene = new Scene(this, canvas);
+ * }
+ * }
+ * </pre>
+ * In this case, the scene {@link #frontBuffer()} corresponds to the {@code canvas}.
+ * <h3>The eye</h3>
+ * The scene eye can be an instance of {@link Frame} or a {@link Node}. To set the
+ * eye from a frame instance use code such as the following:
+ * <pre>
+ * {@code
+ * ...
+ * Frame eye;
+ * void setup() {
+ *   ...
+ *   eye = new Frame();
+ *   scene.setEye(eye);
+ * }
+ * }
+ * </pre>
+ * The eye can be controlled programmatically using the powerful {@link Frame} API.
+ * <p>
+ * To set the eye from a node instance use code such as the following:
+ * <pre>
+ * {@code
+ * ...
+ * Node eye;
+ * void setup() {
+ *   ...
+ *   eye = new Node(scene) {
+ *     public void interact(MotionEvent event) {
+ *       if (event.shortcut().matches(MouseAgent.LEFT))
+ *         translate(event);
+ *     }
+ *   };
+ *   scene.setDefaultNode(eye);
+ * }
+ * }
+ * </pre>
+ * The eye can be controlled both programmatically (since a {@link Node} is a
+ * {@link Frame} specialization) and interactively. Note the use of the anonymous
+ * inner {@link Node} class used to define how the node will behave
+ * using a mouse (see below), refer to the {@link Node} API for details.
+ * Note also the {@link #setDefaultNode(Node)} call which will direct mouse input
+ * to the eye when no other node is being picked.
+ * <h3>Shapes</h3>
+ * A {@link Shape} is a {@link Node} specialization that can be set from a
+ * retained-mode rendering Processing {@code PShape} or from an immediate-mode
+ * rendering Processing procedure. Use {@link #traverse()} to render all scene-graph
+ * shapes or {@link Shape#draw()} to render a specific one instead.
+ * <h3>Retained-mode shapes</h3>
+ * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
+ * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
+ * {@link Shape#set(PGraphics)}.
+ * <h3>Immediate-mode shapes</h3>
+ * To set an immediate-mode shape use code such as the following:
+ * <pre>
+ * {@code
+ * ...
+ * Shape shape;
+ * void setup() {
+ *   ...
+ *   shape = new Shape(scene) {
+ *     public void set(PGraphics canvas) {
+ *       //drawing procedure
+ *     }
+ *   };
+ * }
+ * }
+ * </pre>
+ * <p>
+ * Note tha shapes like nodes can be control interactively. Override
+ * {@link Node#interact(Event)}, like it has been done above.
+ * <h2>Key-frame interpolators</h2>
+ * A frame (and hence a node or a shape) can be animated through a key-frame
+ * Catmull-Rom interpolator path. Use code such as the following:
+ *
  */
 public class Scene extends Graph implements PConstants {
   // Timing

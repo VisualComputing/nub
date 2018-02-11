@@ -77,6 +77,21 @@ public class Vector {
     this._vector[2] = 0;
   }
 
+  public void randomize() {
+    set(Vector.random());
+  }
+
+  public static Vector random() {
+    Vector vector = new Vector();
+    float lower = -10;
+    float upper = 10;
+    vector.setX(((float)Math.random() * (upper - lower)) + lower);
+    vector.setY(((float)Math.random() * (upper - lower)) + lower);
+    vector.setZ(((float)Math.random() * (upper - lower)) + lower);
+    vector.normalize();
+    return vector;
+  }
+
   /**
    * Returns the x component of the vector.
    */

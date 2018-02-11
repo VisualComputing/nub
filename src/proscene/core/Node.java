@@ -342,6 +342,19 @@ public class Node extends Frame implements Grabber {
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
   }
 
+  public void randomize() {
+    randomize(graph().center(), graph().radius());
+  }
+
+  public static Node random(Graph graph) {
+    Node node = new Node(graph);
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(graph.radius());
+    node.setPosition(Vector.add(graph.center(), displacement));
+    node.setOrientation(Quaternion.random());
+    return node;
+  }
+
   // GRAPH
 
   @Override

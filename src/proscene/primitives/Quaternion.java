@@ -204,6 +204,22 @@ public class Quaternion {
     return new Quaternion(this);
   }
 
+  public void randomize() {
+    set(Quaternion.random());
+  }
+
+  public static Quaternion random() {
+    Vector from = Vector.random();
+    Vector to = Vector.random();
+    Quaternion quaternion = new Quaternion(from, to);
+    /*
+    float lower = 0;
+    float upper = 2 * (float)Math.PI;
+    Quaternion quaternion = new Quaternion(new Vector(0,0,1), ((float)Math.random() * (upper - lower)) + lower);
+    */
+    return quaternion;
+  }
+
   public void reset() {
     this._quaternion[0] = 0;
     this._quaternion[1] = 0;

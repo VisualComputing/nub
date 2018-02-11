@@ -187,6 +187,22 @@ public class Frame {
     _constraint = other.constraint();
   }
 
+  public void randomize(Vector center, float radius) {
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(radius);
+    setPosition(Vector.add(center, displacement));
+    setOrientation(Quaternion.random());
+  }
+
+  public static Frame random(Vector center, float radius) {
+    Frame frame = new Frame();
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(radius);
+    frame.setPosition(Vector.add(center, displacement));
+    frame.setOrientation(Quaternion.random());
+    return frame;
+  }
+
   /**
    * Returns a deep copy of this frame.
    */
