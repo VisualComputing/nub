@@ -37,7 +37,7 @@ class ParallelTimer implements Timer {
   /**
    * Defines a parallel (multi-threaded) timer.
    *
-   * @param scene timing handler owner
+   * @param scene      timing handler owner
    * @param task
    * @param singleShot
    */

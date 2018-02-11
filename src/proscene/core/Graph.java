@@ -12,6 +12,7 @@ package proscene.core;
 
 import proscene.input.Agent;
 import proscene.input.Event;
+import proscene.input.Grabber;
 import proscene.input.InputHandler;
 import proscene.primitives.*;
 import proscene.timing.Animator;
@@ -798,36 +799,74 @@ public class Graph {
     return _inputHandler;
   }
 
-  // TODO docs missing
-  // param instead of Node. It allows to manipulate the eye() instance more easily sometimes
+  /**
+   * Same as {@code inputHandler().setDefaultGrabber(node)}.
+   *
+   * @see {@link InputHandler#setDefaultGrabber(Grabber)}
+   */
   public void setDefaultNode(Node node) {
     inputHandler().setDefaultGrabber(node);
   }
 
+  /**
+   * Same as {@code inputHandler().resetTrackedGrabber()}.
+   *
+   * @see InputHandler#resetTrackedGrabber()
+   */
   public void resetInputNode() {
     inputHandler().resetTrackedGrabber();
   }
 
+  /**
+   * Same as {@code inputHandler().shiftDefaultGrabber(node1, node2)}.
+   *
+   * @see InputHandler#shiftDefaultGrabber(Grabber, Grabber)
+   */
   public void shiftDefaultNode(Node node1, Node node2) {
     inputHandler().shiftDefaultGrabber(node1, node2);
   }
 
+  /**
+   * Same as {@code return inputHandler().isInputGrabber(node)}.
+   *
+   * @see InputHandler#isInputGrabber(Grabber)
+   */
   public boolean isInputNode(Node node) {
     return inputHandler().isInputGrabber(node);
   }
 
+  /**
+   * Same as {@code return inputHandler().registerAgent(agent)}.
+   *
+   * @see InputHandler#registerAgent(Agent)
+   */
   public boolean registerAgent(Agent agent) {
     return inputHandler().registerAgent(agent);
   }
 
+  /**
+   * Same as {@code return inputHandler().isAgentRegistered(agent)}.
+   *
+   * @see InputHandler#isAgentRegistered(Agent)
+   */
   public boolean isAgentRegistered(Agent agent) {
     return inputHandler().isAgentRegistered(agent);
   }
 
+  /**
+   * Same as {@code return inputHandler().unregisterAgent(agent)}.
+   *
+   * @see InputHandler#unregisterAgent(Agent)
+   */
   public boolean unregisterAgent(Agent agent) {
     return inputHandler().unregisterAgent(agent);
   }
 
+  /**
+   * Same as {@code inputHandler().unregisterAgents()}.
+   *
+   * @see InputHandler#unregisterAgents()
+   */
   public void unregisterAgents() {
     inputHandler().unregisterAgents();
   }

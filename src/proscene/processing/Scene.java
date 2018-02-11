@@ -23,7 +23,6 @@ import proscene.core.MatrixHandler;
 import proscene.core.Node;
 import proscene.input.Agent;
 import proscene.input.Event;
-import proscene.input.Grabber;
 import proscene.primitives.*;
 import proscene.timing.SequentialTimer;
 import proscene.timing.TimingHandler;
@@ -37,7 +36,7 @@ import java.util.List;
  * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
  * <p>
  * <h2>Usage</h2>
- * Typical usage comprises three steps: Scene instantiation, setting an eye
+ * Typical usage comprises three steps: scene instantiation, setting an eye
  * and setting some shapes.
  * <h3>Scene instantiation</h3>
  * Instantiate your on-screen scene at the {@code PApplet.setup()}:
@@ -167,9 +166,8 @@ import java.util.List;
  * while {@link #traverse()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
  * <h2>Non-standard interactivity</h2>
- * To control your scene nodes by means different than the {@link #mouse()}
- * (see {@link Mouse}), implement an {@link Agent} and call
- * {@link #registerAgent(Agent)}.
+ * To control your scene nodes by means different than the {@link #mouse()} (see
+ * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
  */
 public class Scene extends Graph implements PConstants {
   // Timing
@@ -465,7 +463,7 @@ public class Scene extends Graph implements PConstants {
   // Mouse agent
 
   /**
-   * Returns the default mouse agent handling Processing mouse events.
+   * Returns the default mouse.
    *
    * @see #enableMouse()
    * @see #isMouseEnabled()
@@ -518,6 +516,11 @@ public class Scene extends Graph implements PConstants {
 
   // OPENGL
 
+  /**
+   * Same as {@code return setCenterFromPixel(new Point(x, y))}.
+   *
+   * @see #setCenterFromPixel(Point)
+   */
   public boolean setCenterFromPixel(float x, float y) {
     return setCenterFromPixel(new Point(x, y));
   }
@@ -539,6 +542,17 @@ public class Scene extends Graph implements PConstants {
     return false;
   }
 
+  /**
+   * Returns the depth (z-value) of the object under the {@code pixel}. Used by
+   * {@link #pointUnderPixel(Point)}.
+   * <p>
+   * The z-value ranges in [0..1] (near and far plane respectively). In 3D note that this
+   * value is not a linear interpolation between {@link #zNear()} and {@link #zFar()}:
+   * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z')} where {@code z'} is
+   * the distance from the point you project to the eye, along the {@link #viewDirection()}.
+   *
+   * @see #pointUnderPixel(Point)
+   */
   public float pixelDepth(Point pixel) {
     PGraphicsOpenGL pggl;
     if (frontBuffer() instanceof PGraphicsOpenGL)
@@ -555,7 +569,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Returns the world coordinates of the 3D point located at {@code pixel} (x,y) on
-   * screen. May be null if no pixel is under pixel.
+   * screen. May be null if no object is under pixel.
    */
   public Vector pointUnderPixel(Point pixel) {
     float depth = pixelDepth(pixel);
@@ -573,16 +587,9 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Returns the depth (z-value) of the object under the {@code pixel}.
-   * <p>
-   * The z-value ranges in [0..1] (near and far plane respectively). In 3D Note that this
-   * value is not a linear interpolation between
-   * {@link #zNear()} and
-   * {@link #zFar()};
-   * {@code z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z');} where {@code z'} is
-   * the _distance from the point you _project to the camera, along the
-   * {@link #viewDirection()}. See the {@code gluUnProject}
-   * man page for details.
+   * Same as {@code return pixelDepth(new Point(x, y))}.
+   *
+   * @see #pixelDepth(Point)
    */
   public float pixelDepth(float x, float y) {
     return pixelDepth(new Point(x, y));
@@ -631,8 +638,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Sets all {@link #timingHandler()} timers as (single-threaded)
-   * {@link SequentialTimer}(s).
+   * Sets all {@link #timingHandler()} timers as (single-threaded) {@link SequentialTimer}(s).
    *
    * @see #setParallelTimers()
    * @see #shiftTimers()
@@ -682,8 +688,9 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * @return true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
+   * Returns true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
    * timers are (single-threaded) {@link SequentialTimer}(s)).
+   *
    * @see #setSequentialTimers()
    * @see #setParallelTimers()
    * @see #shiftTimers()
@@ -707,7 +714,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Convenience function that simply calls:
-   * {@code return setAnchorFromPixel(new Point(x, y))}
+   * {@code return setAnchorFromPixel(new Point(x, y))}.
    *
    * @see #setAnchorFromPixel(Point)
    */
@@ -718,9 +725,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * The {@link #anchor()} is set to the point located under {@code pixel} on screen.
    * <p>
-   * 2D windows always returns true.
-   * <p>
-   * 3D Cameras returns {@code true} if a point was found under {@code pixel} and
+   * Returns {@code true} if a point was found under {@code pixel} and
    * {@code false} if none was found (in this case no {@link #anchor()} is set).
    */
   public boolean setAnchorFromPixel(Point pixel) {
