@@ -19,8 +19,7 @@ import proscene.primitives.Quaternion;
 import proscene.primitives.Vector;
 
 /**
- * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics
- * transformations.
+ * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics transformations.
  */
 public class Java2DMatrixHandler extends MatrixHandler {
   protected PGraphics _pgraphics;
@@ -30,6 +29,9 @@ public class Java2DMatrixHandler extends MatrixHandler {
     _pgraphics = renderer;
   }
 
+  /**
+   * Returns the the PGraphics object to be bound by this handler.
+   */
   public PGraphics pg() {
     return _pgraphics;
   }

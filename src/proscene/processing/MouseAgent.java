@@ -22,11 +22,9 @@ import proscene.input.event.TapShortcut;
 import proscene.primitives.Point;
 
 /**
- * Proscene mouse-agent. A Processing fully fledged mouse
- * {@link Agent}.
+ * Proscene mouse-agent. A Processing fully fledged mouse {@link Agent}.
  *
  * @see Agent
- * @see proscene.processing.KeyAgent
  */
 public class MouseAgent extends Agent {
   //common mouse shortcuts
@@ -81,8 +79,7 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Sets the agent {@link #mode()}. Either {@link Mode#MOVE} or
-   * {@link Mode#CLICK}.
+   * Sets the agent {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
    *
    * @see #mode()
    */
@@ -91,8 +88,7 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Returns the agent {@link #mode()}. Either {@link Mode#MOVE} or
-   * {@link Mode#CLICK}.
+   * Returns the agent {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
    *
    * @see #setMode(Mode)
    */

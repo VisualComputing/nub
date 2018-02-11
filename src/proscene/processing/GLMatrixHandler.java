@@ -27,6 +27,9 @@ public class GLMatrixHandler extends MatrixHandler {
     _pgraphics = renderer;
   }
 
+  /**
+   * Returns the the PGraphics object to be bound by this handler.
+   */
   public PGraphicsOpenGL pggl() {
     return _pgraphics;
   }
