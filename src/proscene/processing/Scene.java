@@ -93,7 +93,7 @@ import java.util.List;
  *   ...
  *   eye = new Node(scene) {
  *     public void interact(MotionEvent event) {
- *       if (event.shortcut().matches(MouseAgent.LEFT))
+ *       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
  *         translate(event);
  *     }
  *   };
@@ -110,8 +110,10 @@ import java.util.List;
  * <h3>Shapes</h3>
  * A {@link Shape} is a {@link Node} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
- * rendering Processing procedure. Use {@link #traverse()} to render all scene-graph
- * shapes or {@link Shape#draw()} to render a specific one instead.
+ * rendering Processing procedure. Shapes can be picked precisely using their projection
+ * onto the screen, see {@link Shape#setPrecision(Node.Precision)}. Use
+ * {@link #traverse()} to render all scene-graph shapes or {@link Shape#draw()} to
+ * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
  * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
@@ -126,7 +128,7 @@ import java.util.List;
  *   ...
  *   shape = new Shape(scene) {
  *     public void set(PGraphics canvas) {
- *       //drawing procedure
+ *       //immediate-mode rendering procedure
  *     }
  *   };
  * }

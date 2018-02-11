@@ -2,6 +2,7 @@ package basics;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
+import processing.core.PShape;
 import proscene.core.Interpolator;
 import proscene.core.Node;
 import proscene.primitives.Frame;
@@ -37,27 +38,40 @@ public class ShapeInterpolation extends PApplet {
     // interpolation 1. Default eye interpolations
     scene.fitBallInterpolation();
 
-    if(scene.is3D())
-      shape = new Shape(scene, createShape(SPHERE, 10));
-    else
-      shape = new Shape(scene, createShape(RECT, 0,0,50,50));
+    //PShape pshape = scene.is3D() ? createShape(SPHERE, 10) : createShape(RECT, 0,0,50,50);
+    PShape pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0,0,50,50);
+    pshape.setFill(color(50,250,80));
+    //pshape.setFill(255,255,0);
+
+    shape = new Shape(scene, pshape);
+
     // interpolation 2. Custom eye interpolations
     interpolator = new Interpolator(shape);
     interpolator.setLoop();
     // Create an initial path
-    int nbKeyFrames = 4;
-    //for (int i = 0; i < nbKeyFrames; i++)
+    //for (int i = 0; i < random(4, 10); i++)
       //interpolator.addKeyFrame(Frame.random(scene.center(), scene.radius()));
     /*
-    for (int i = 0; i < nbKeyFrames; i++) {
+    for (int i = 0; i < random(4, 10); i++) {
       Node node = new Node(scene);
       node.randomize();
       interpolator.addKeyFrame(node);
     }
     */
-    for (int i = 0; i < nbKeyFrames; i++)
+
+    /*
+    for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(Node.random(scene));
     interpolator.start();
+    */
+
+    for (int i = 0; i < random(4, 10); i++) {
+      Node node = new InteractiveNode(scene);
+      node.randomize();
+      interpolator.addKeyFrame(node);
+    }
+    interpolator.start();
+
   }
 
   public void draw() {

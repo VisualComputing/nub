@@ -77,10 +77,20 @@ public class Vector {
     this._vector[2] = 0;
   }
 
+  /**
+   * Randomize this vector. The vector is normalized too.
+   *
+   * @see #random()
+   */
   public void randomize() {
     set(Vector.random());
   }
 
+  /**
+   * Returns a normalized random vector.
+   *
+   * @see #randomize()
+   */
   public static Vector random() {
     Vector vector = new Vector();
     float lower = -10;

@@ -187,19 +187,43 @@ public class Frame {
     _constraint = other.constraint();
   }
 
+  /**
+   * Randomized this frame. The frame is randomly re-positioned inside the ball
+   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
+   * magnitude is a random in oldMagnitude * [0,5...2].
+   *
+   * @see #random(Vector, float)
+   */
   public void randomize(Vector center, float radius) {
     Vector displacement = Vector.random();
     displacement.setMagnitude(radius);
     setPosition(Vector.add(center, displacement));
     setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    float magnitude = magnitude() * ((float)Math.random() * (upper - lower)) + lower;
+    setMagnitude(magnitude);
   }
 
+  /**
+   * Returns a random frame. The frame is randomly positioned inside the ball defined
+   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
+   * is a random in [0,5...2].
+   *
+   * @see #randomize(Vector, float)
+   */
   public static Frame random(Vector center, float radius) {
     Frame frame = new Frame();
     Vector displacement = Vector.random();
     displacement.setMagnitude(radius);
     frame.setPosition(Vector.add(center, displacement));
     frame.setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    float magnitude = ((float)Math.random() * (upper - lower)) + lower;
+    frame.setMagnitude(((float)Math.random() * (upper - lower)) + lower);
     return frame;
   }
 

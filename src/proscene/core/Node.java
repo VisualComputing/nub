@@ -342,16 +342,32 @@ public class Node extends Frame implements Grabber {
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
   }
 
+  /**
+   * Same as {@code randomize(graph().center(), graph().radius())}.
+   *
+   * @see #random(Graph)
+   */
   public void randomize() {
     randomize(graph().center(), graph().radius());
   }
 
+  /**
+   * Returns a random graph node. The node is randomly positioned inside the ball defined
+   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
+   * is a random in [0,5...2].
+   *
+   * @see #randomize()
+   */
   public static Node random(Graph graph) {
     Node node = new Node(graph);
     Vector displacement = Vector.random();
     displacement.setMagnitude(graph.radius());
     node.setPosition(Vector.add(graph.center(), displacement));
     node.setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    node.setMagnitude(((float)Math.random() * (upper - lower)) + lower);
     return node;
   }
 
@@ -1420,6 +1436,11 @@ public class Node extends Frame implements Grabber {
   protected void _translateZ(boolean up) {
     translate(screenToVector(
         Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
+  }
+
+  public void translate(Event event) {
+    if(event instanceof MotionEvent)
+      translate((MotionEvent)event, true);
   }
 
   /**

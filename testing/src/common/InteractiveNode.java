@@ -3,6 +3,7 @@ package common;
 import processing.core.PApplet;
 import proscene.core.Graph;
 import proscene.core.Node;
+import proscene.input.Event;
 import proscene.input.event.KeyEvent;
 import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent;
@@ -32,9 +33,10 @@ public class InteractiveNode extends Node {
 
   // behavior is here :P
   @Override
-  public void interact(MotionEvent event) {
+  public void interact(Event event) {
     if (event.shortcut().matches(MouseAgent.RIGHT))
       translate(event);
+    /*
     else if (event.shortcut().matches(MouseAgent.LEFT))
       rotate(event);
     else if (event.shortcut().matches(MouseAgent.WHEEL))
@@ -42,8 +44,10 @@ public class InteractiveNode extends Node {
         translateZ(event);
       else
         scale(event);
+        */
   }
 
+  /*
   @Override
   public void interact(TapEvent event) {
     if (event.shortcut().matches(MouseAgent.CENTER_TAP2))
@@ -63,4 +67,5 @@ public class InteractiveNode extends Node {
     else if (event.shortcut().matches(rightArrow))
       translateXPos();
   }
+  */
 }

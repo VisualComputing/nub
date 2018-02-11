@@ -204,10 +204,20 @@ public class Quaternion {
     return new Quaternion(this);
   }
 
+  /**
+   * Randomize this quaternion. The quaternion is normalized too.
+   *
+   * @see #random()
+   */
   public void randomize() {
     set(Quaternion.random());
   }
 
+  /**
+   * Returns a normalized random quaternion.
+   *
+   * @see #randomize()
+   */
   public static Quaternion random() {
     Vector from = Vector.random();
     Vector to = Vector.random();
