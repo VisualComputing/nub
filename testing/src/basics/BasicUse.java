@@ -5,7 +5,6 @@ import processing.core.PGraphics;
 import proscene.core.Node;
 import proscene.input.Event;
 import proscene.input.Shortcut;
-import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent1;
 import proscene.input.event.MotionEvent2;
 import proscene.processing.Scene;

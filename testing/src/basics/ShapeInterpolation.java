@@ -5,7 +5,6 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import proscene.core.Interpolator;
 import proscene.core.Node;
-import proscene.primitives.Frame;
 import proscene.processing.Scene;
 import proscene.processing.Shape;
 
@@ -18,6 +17,7 @@ public class ShapeInterpolation extends PApplet {
   PShape pshape;
   Shape shape;
   Interpolator interpolator;
+  InteractiveNode eye;
   boolean showEyePath = true;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -30,7 +30,7 @@ public class ShapeInterpolation extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    InteractiveNode eye = new InteractiveNode(scene);
+    eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
     scene.setDefaultNode(eye);
@@ -40,9 +40,8 @@ public class ShapeInterpolation extends PApplet {
     scene.fitBallInterpolation();
 
     //PShape pshape = scene.is3D() ? createShape(SPHERE, 10) : createShape(RECT, 0,0,50,50);
-    pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0,0,50,50);
-    pshape.setFill(color(50,250,80));
-    //pshape.setFill(255,255,0);
+    pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0, 0, 50, 50);
+    pshape.setFill(color(50, 250, 80));
 
     shape = new Shape(scene, pshape);
 
@@ -50,22 +49,18 @@ public class ShapeInterpolation extends PApplet {
     interpolator = new Interpolator(shape);
     interpolator.setLoop();
     // Create an initial path
+
+    // Several options:
+    // 1. Using frames:
     //for (int i = 0; i < random(4, 10); i++)
-      //interpolator.addKeyFrame(Frame.random(scene.center(), scene.radius()));
-    /*
-    for (int i = 0; i < random(4, 10); i++) {
-      Node node = new Node(scene);
-      node.randomize();
-      interpolator.addKeyFrame(node);
-    }
-    */
+    //  interpolator.addKeyFrame(Frame.random(scene.center(), scene.radius()));
 
-    /*
-    for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(Node.random(scene));
-    interpolator.start();
-    */
 
+    // 2. Using nodes:
+    //for (int i = 0; i < random(4, 10); i++)
+    // interpolator.addKeyFrame(Node.random(scene));
+
+    // 3. Using InteractiveNodes, which is the same as 2., but makes path editable
     for (int i = 0; i < random(4, 10); i++) {
       Node node = new InteractiveNode(scene);
       node.randomize();
@@ -94,6 +89,15 @@ public class ShapeInterpolation extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
+    if (key == CODED)
+      if (keyCode == UP)
+        eye.translateYPos();
+      else if (keyCode == DOWN)
+        eye.translateYNeg();
+      else if (keyCode == RIGHT)
+        eye.translateXPos();
+      else if (keyCode == LEFT)
+        eye.translateXNeg();
   }
 
   public static void main(String args[]) {

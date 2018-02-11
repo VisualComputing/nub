@@ -4,9 +4,7 @@ import common.InteractiveNode;
 import processing.core.PApplet;
 import proscene.core.Graph;
 import proscene.core.Node;
-import proscene.input.Shortcut;
 import proscene.input.event.MotionEvent;
-import proscene.primitives.Frame;
 import proscene.primitives.Matrix;
 import proscene.primitives.Vector;
 import proscene.processing.MouseAgent;
@@ -158,7 +156,7 @@ public class CajasOrientadas extends PApplet {
       println(Vector.scalarProjection(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()));
       Vector.projectVectorOnAxis(Vector.subtract(graph.eye().position(), graph.center()), graph.eye().zAxis()).print();
     }
-    if(key == 'w')
+    if (key == 'w')
       graph.fitFieldOfView();
   }
 

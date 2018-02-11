@@ -1,21 +1,11 @@
 package common;
 
-import processing.core.PApplet;
 import proscene.core.Graph;
 import proscene.core.Node;
 import proscene.input.Event;
-import proscene.input.event.KeyEvent;
-import proscene.input.event.KeyShortcut;
-import proscene.input.event.MotionEvent;
-import proscene.input.event.TapEvent;
 import proscene.processing.MouseAgent;
 
 public class InteractiveNode extends Node {
-  KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-  KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-  KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-  KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-
   public InteractiveNode(Graph graph) {
     super(graph);
   }
@@ -42,14 +32,6 @@ public class InteractiveNode extends Node {
       center();
     else if (event.shortcut().matches(MouseAgent.RIGHT_TAP))
       align();
-    if (event.shortcut().matches(upArrow))
-      translateYPos();
-    else if (event.shortcut().matches(downArrow))
-      translateYNeg();
-    else if (event.shortcut().matches(leftArrow))
-      translateXNeg();
-    else if (event.shortcut().matches(rightArrow))
-      translateXPos();
     else if (event.shortcut().matches(MouseAgent.WHEEL))
       if (isEye() && graph().is3D())
         translateZ(event);
