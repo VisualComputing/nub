@@ -4,7 +4,6 @@ import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
 import proscene.core.Graph;
 import proscene.processing.GLMatrixHandler;
-import proscene.processing.KeyAgent;
 import proscene.processing.MouseAgent;
 
 /**
@@ -30,10 +29,6 @@ public class FrameInteraction extends PApplet {
     registerMethod("mouseEvent", mouseAgent);
 
     // 3. Create agents and register P5 methods
-
-    KeyAgent keyAgent = new KeyAgent(graph);
-    graph.inputHandler().registerAgent(keyAgent);
-    registerMethod("keyEvent", keyAgent);
 
     registerMethod("pre", this);
     //registerMethod("draw", this);

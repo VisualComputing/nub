@@ -36,11 +36,6 @@ import java.util.List;
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
  * <p>
- * <h2>Default interactivity mechanisms</h2>
- * Two interaction mechanisms are provided by default: {@link #keyAgent()}, and
- * {@link #mouseAgent()} (see {@link MouseAgent} and {@link KeyAgent}). To
- * control your scene nodes by other means implement an {@link Agent} and call
- * {@link #registerAgent(Agent)}.
  * <h2>Usage</h2>
  * Typical usage comprises three steps: Scene instantiation, setting an eye
  * and setting some shapes.
@@ -102,7 +97,8 @@ import java.util.List;
  * }
  * </pre>
  * The eye can be controlled both programmatically (since a {@link Node} is a
- * {@link Frame} specialization) and interactively. Note the use of the anonymous
+ * {@link Frame} specialization) and interactively (using the mouse, see
+ * {@link #mouseAgent()} and {@link MouseAgent}). Note the use of the anonymous
  * inner {@link Node} class used to define how the node will behave
  * using a mouse (see below), refer to the {@link Node} API for details.
  * Note also the {@link #setDefaultNode(Node)} call which will direct mouse input
@@ -171,6 +167,10 @@ import java.util.List;
  * </pre>
  * while {@link #traverse()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
+ * <h2>Non-standard interactivity</h2>
+ * To control your scene nodes by means different than the {@link #mouseAgent()}
+ * (see {@link MouseAgent}), implement an {@link Agent} and call
+ * {@link #registerAgent(Agent)}.
  */
 public class Scene extends Graph implements PConstants {
   // Timing
@@ -199,7 +199,6 @@ public class Scene extends Graph implements PConstants {
 
   // 4. Agents
   protected MouseAgent _mouseAgent;
-  protected KeyAgent _keyAgent;
 
   // _bb : picking buffer
   protected PGraphics _targetPGraphics;
@@ -237,7 +236,7 @@ public class Scene extends Graph implements PConstants {
    * {@link GLMatrixHandler}). The constructor instantiates the
    * {@link #inputHandler()} and the {@link #timingHandler()}, sets the AXIS and GRID
    * visual hint flags, instantiates the {@link #eye()}. It also
-   * instantiates the {@link #keyAgent()} and the {@link #mouseAgent()}.
+   * instantiates the {@link #mouseAgent()}.
    * <p>
    * An off-screen Processing Scene is defined if {@code frontBuffer != p.g}. In this case the
    * {@code x} and {@code y} parameters define the position of the upper-left corner where
@@ -275,9 +274,7 @@ public class Scene extends Graph implements PConstants {
 
     // 4. Create _agents and register P5 methods
     _mouseAgent = new MouseAgent(this, originCorner());
-    _keyAgent = new KeyAgent(this);
     _parent.registerMethod("mouseEvent", mouseAgent());
-    _parent.registerMethod("keyEvent", keyAgent());
 
     // this.setDefaultKeyBindings();
     if (!isOffscreen()) {
@@ -478,7 +475,6 @@ public class Scene extends Graph implements PConstants {
    * @see #enableMouseAgent()
    * @see #isMouseAgentEnabled()
    * @see #disableMouseAgent()
-   * @see #keyAgent()
    */
   public MouseAgent mouseAgent() {
     return _mouseAgent;
@@ -490,7 +486,6 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseAgent()
    * @see #isMouseAgentEnabled()
    * @see #disableMouseAgent()
-   * @see #enableKeyAgent()
    */
   public void enableMouseAgent() {
     if (!isMouseAgentEnabled()) {
@@ -505,7 +500,6 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseAgent()
    * @see #isMouseAgentEnabled()
    * @see #enableMouseAgent()
-   * @see #disableKeyAgent()
    */
   public boolean disableMouseAgent() {
     if (isMouseAgentEnabled()) {
@@ -522,7 +516,6 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseAgent()
    * @see #enableMouseAgent()
    * @see #disableMouseAgent()
-   * @see #enableKeyAgent()
    */
   public boolean isMouseAgentEnabled() {
     return isAgentRegistered(mouseAgent());
@@ -538,71 +531,6 @@ public class Scene extends Graph implements PConstants {
 
   public void resetMouseAgentInputNode() {
     mouseAgent().resetTrackedGrabber();
-  }
-
-  // keyAgent
-
-  /**
-   * Returns the default {@link Agent} _key agent.
-   *
-   * @see #mouseAgent()
-   */
-  public Agent keyAgent() {
-    return _keyAgent;
-  }
-
-  /**
-   * Enables _key handling through the {@link #keyAgent()}.
-   *
-   * @see #keyAgent()
-   * @see #isKeyAgentEnabled()
-   * @see #disableKeyAgent()
-   * @see #enableMouseAgent()
-   */
-  public void enableKeyAgent() {
-    if (!isKeyAgentEnabled()) {
-      registerAgent(keyAgent());
-      _parent.registerMethod("keyEvent", keyAgent());
-    }
-  }
-
-  /**
-   * Disables the _key agent and returns it.
-   *
-   * @see #keyAgent()
-   * @see #isKeyAgentEnabled()
-   * @see #enableKeyAgent()
-   * @see #disableMouseAgent()
-   */
-  public boolean disableKeyAgent() {
-    if (inputHandler().isAgentRegistered(keyAgent())) {
-      _parent.unregisterMethod("keyEvent", keyAgent());
-      return unregisterAgent(keyAgent());
-    }
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #keyAgent()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #enableKeyAgent()
-   * @see #disableKeyAgent()
-   */
-  public boolean isKeyAgentEnabled() {
-    return isAgentRegistered(keyAgent());
-  }
-
-  public Grabber keyAgentInputGrabber() {
-    return mouseAgent().inputGrabber();
-  }
-
-  public Node keyAgentInputNode() {
-    return keyAgentInputGrabber() instanceof Node ? (Node) keyAgent().inputGrabber() : null;
-  }
-
-  public void resetKeyAgentInputNode() {
-    keyAgent().resetTrackedGrabber();
   }
 
   // OPENGL
@@ -1026,25 +954,19 @@ public class Scene extends Graph implements PConstants {
             available = false;
       if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
         enableMouseAgent();
-        enableKeyAgent();
         _lastScene = this;
-        //System.out.println("win");
-      } else {
+      } else
         disableMouseAgent();
-        disableKeyAgent();
-      }
     } else {
       if (_lastScene != null) {
         boolean available = true;
         if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
             || _lastScene._lastDisplay == TimingHandler.frameCount) && _lastScene._hasFocus()) {
           disableMouseAgent();
-          disableKeyAgent();
           available = false;
         }
         if (_hasFocus() && available) {
           enableMouseAgent();
-          enableKeyAgent();
           _lastScene = this;
         }
       }
@@ -1053,8 +975,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * When having multiple off-screen scenes displayed at once, one should decide which
-   * graph will grab inputGrabber from both, the {@link #mouseAgent()} and the
-   * {@link #keyAgent()}, so that code like this:
+   * graph will grab inputGrabber from the {@link #mouseAgent()}, so that code like this:
    * <p>
    * <pre>
    * {@code

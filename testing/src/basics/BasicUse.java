@@ -8,7 +8,6 @@ import proscene.input.Shortcut;
 import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent1;
 import proscene.input.event.MotionEvent2;
-import proscene.processing.KeyAgent;
 import proscene.processing.Scene;
 
 /**
@@ -41,8 +40,6 @@ public class BasicUse extends PApplet {
         Shortcut s1 = new Shortcut(PApplet.LEFT);
         Shortcut s2 = new Shortcut(PApplet.RIGHT);
         Shortcut s3 = new Shortcut(processing.event.MouseEvent.WHEEL);
-        Shortcut s4 = new KeyShortcut(KeyAgent.RIGHT_KEY);
-        Shortcut s5 = new KeyShortcut(KeyAgent.LEFT_KEY);
         //look at the ugly casts needed Java that actually was
         //preventing the following syntax:
         //those casts aren't needed in js
@@ -53,10 +50,6 @@ public class BasicUse extends PApplet {
           screenTranslate((MotionEvent2) event);
         if (s3.matches(event.shortcut()))
           scale((MotionEvent1) event);
-        if (s4.matches(event.shortcut()))
-          translateXPos();
-        if (s5.matches(event.shortcut()))
-          translateXNeg();
         // */
         //Check symmetry of Shortcut.matches
         /*
