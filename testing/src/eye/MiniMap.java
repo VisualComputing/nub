@@ -51,7 +51,7 @@ public class MiniMap extends PApplet {
     //scene.fitBallInterpolation();
     scene.fitBall();
     //scene.disableAutoFocus();
-    //scene.disableMouseAgent();
+    //scene.disableMouse();
 
     minimapCanvas = createGraphics(oW, oH, renderer);
     minimap = new Scene(this, minimapCanvas, oX, oY);

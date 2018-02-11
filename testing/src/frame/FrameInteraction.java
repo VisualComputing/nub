@@ -4,7 +4,7 @@ import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
 import proscene.core.Graph;
 import proscene.processing.GLMatrixHandler;
-import proscene.processing.MouseAgent;
+import proscene.processing.Mouse;
 
 /**
  * This example just to show that a Graph is instantiable.
@@ -24,9 +24,9 @@ public class FrameInteraction extends PApplet {
     //graph.setMatrixHandler(new MatrixHandler(graph));
     graph.setMatrixHandler(new GLMatrixHandler(graph, (PGraphicsOpenGL) g));
 
-    MouseAgent mouseAgent = new MouseAgent(graph);
-    graph.inputHandler().registerAgent(mouseAgent);
-    registerMethod("mouseEvent", mouseAgent);
+    Mouse mouse = new Mouse(graph);
+    graph.inputHandler().registerAgent(mouse);
+    registerMethod("mouseEvent", mouse);
 
     // 3. Create agents and register P5 methods
 

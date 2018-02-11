@@ -3,7 +3,7 @@ package common;
 import proscene.core.Graph;
 import proscene.core.Node;
 import proscene.input.Event;
-import proscene.processing.MouseAgent;
+import proscene.processing.Mouse;
 
 public class InteractiveNode extends Node {
   public InteractiveNode(Graph graph) {
@@ -24,15 +24,15 @@ public class InteractiveNode extends Node {
   // behavior is here :P
   @Override
   public void interact(Event event) {
-    if (event.shortcut().matches(MouseAgent.RIGHT))
+    if (event.shortcut().matches(Mouse.RIGHT))
       translate(event);
-    else if (event.shortcut().matches(MouseAgent.LEFT))
+    else if (event.shortcut().matches(Mouse.LEFT))
       rotate(event);
-    else if (event.shortcut().matches(MouseAgent.CENTER_TAP2))
+    else if (event.shortcut().matches(Mouse.CENTER_TAP2))
       center();
-    else if (event.shortcut().matches(MouseAgent.RIGHT_TAP))
+    else if (event.shortcut().matches(Mouse.RIGHT_TAP))
       align();
-    else if (event.shortcut().matches(MouseAgent.WHEEL))
+    else if (event.shortcut().matches(Mouse.WHEEL))
       if (isEye() && graph().is3D())
         translateZ(event);
       else

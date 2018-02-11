@@ -36,7 +36,7 @@ public class Sphere {
     if (drawAxes)
       //DrawingUtils.drawAxes(parent, radius()*1.3f);
       scene.drawAxes(radius() * 1.3f);
-    if (iFrame.grabsInput(scene.mouseAgent())) {
+    if (iFrame.grabsInput(scene.mouse())) {
       parent.fill(255, 0, 0);
       parent.sphere(radius() * 1.2f);
     } else {

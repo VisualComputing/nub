@@ -7,7 +7,7 @@ import proscene.core.Node;
 import proscene.input.event.MotionEvent;
 import proscene.primitives.Matrix;
 import proscene.primitives.Vector;
-import proscene.processing.MouseAgent;
+import proscene.processing.Mouse;
 import proscene.processing.Scene;
 
 /**
@@ -54,11 +54,11 @@ public class CajasOrientadas extends PApplet {
     eye2 = new Node(graph) {
       @Override
       public void interact(MotionEvent event) {
-        if (event.shortcut().matches(MouseAgent.LEFT))
+        if (event.shortcut().matches(Mouse.LEFT))
           translate(event);
-        else if (event.shortcut().matches(MouseAgent.RIGHT))
+        else if (event.shortcut().matches(Mouse.RIGHT))
           rotate(event);
-        else if (event.shortcut().matches(MouseAgent.WHEEL))
+        else if (event.shortcut().matches(Mouse.WHEEL))
           if (isEye() && graph().is3D())
             translateZ(event);
           else

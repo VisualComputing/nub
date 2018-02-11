@@ -12,6 +12,7 @@ package proscene.processing;
 
 import processing.core.PApplet;
 import proscene.core.Graph;
+import proscene.core.Node;
 import proscene.input.Agent;
 import proscene.input.Event;
 import proscene.input.Shortcut;
@@ -26,7 +27,7 @@ import proscene.primitives.Point;
  *
  * @see Agent
  */
-public class MouseAgent extends Agent {
+public class Mouse extends Agent {
   //common mouse shortcuts
   public static Shortcut NO_BUTTON = new Shortcut(Event.NO_ID);
   public static Shortcut LEFT = new Shortcut(PApplet.LEFT);
@@ -53,9 +54,9 @@ public class MouseAgent extends Agent {
   /**
    * Same as {@code this(graph, new Point())}.
    *
-   * @see #MouseAgent(Graph, Point)
+   * @see #Mouse(Graph, Point)
    */
-  public MouseAgent(Graph graph) {
+  public Mouse(Graph graph) {
     this(graph, new Point());
   }
 
@@ -64,7 +65,7 @@ public class MouseAgent extends Agent {
    *
    * @see #setMode(Mode)
    */
-  public MouseAgent(Graph graph, Point upperLeftCorner) {
+  public Mouse(Graph graph, Point upperLeftCorner) {
     super(graph.inputHandler());
     _graph = graph;
     _upperLeftCorner = upperLeftCorner;
@@ -79,7 +80,7 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Sets the agent {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
+   * Sets the mouse {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
    *
    * @see #mode()
    */
@@ -88,7 +89,7 @@ public class MouseAgent extends Agent {
   }
 
   /**
-   * Returns the agent {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
+   * Returns the mouse {@link #mode()}. Either {@link Mode#MOVE} or {@link Mode#CLICK}.
    *
    * @see #setMode(Mode)
    */
@@ -125,5 +126,14 @@ public class MouseAgent extends Agent {
       handle(tapEvent);
       return;
     }
+  }
+
+  /**
+   * Returns the current mouse input node. May be null.
+   * <p>
+   * Same as {@code return inputGrabber() instanceof Node ? (Node) inputGrabber() : null}.
+   */
+  public Node inputNode() {
+    return inputGrabber() instanceof Node ? (Node) inputGrabber() : null;
   }
 }

@@ -7,7 +7,7 @@ import proscene.input.Shortcut;
 import proscene.input.event.KeyEvent;
 import proscene.input.event.KeyShortcut;
 import proscene.input.event.MotionEvent;
-import proscene.processing.MouseAgent;
+import proscene.processing.Mouse;
 import proscene.processing.Scene;
 
 public class FirstPerson extends PApplet {
@@ -41,7 +41,7 @@ public class FirstPerson extends PApplet {
     };
     iFrame.translate(30, 30);
 
-    scene.mouseAgent().setMode(MouseAgent.Mode.CLICK);
+    scene.mouse().setMode(Mouse.Mode.CLICK);
 
     InteractiveFrame eye = new InteractiveFrame();
     scene.setEye(eye);
@@ -64,7 +64,7 @@ public class FirstPerson extends PApplet {
     scene.drawAxes(20);
 
     // Draw a second torus
-    if (scene.mouseAgent().defaultGrabber() == iFrame) {
+    if (scene.mouse().defaultGrabber() == iFrame) {
       fill(0, 255, 255);
       scene.drawTorusSolenoid();
     } else if (iFrame.grabsInput()) {

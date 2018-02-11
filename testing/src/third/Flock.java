@@ -5,7 +5,7 @@ import processing.core.PApplet;
 import processing.core.PVector;
 import proscene.core.Node;
 import proscene.primitives.Vector;
-import proscene.processing.MouseAgent;
+import proscene.processing.Mouse;
 import proscene.processing.Scene;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class Flock extends PApplet {
   public void setup() {
     scene = new Scene(this);
     //scene.setSequentialTimers();
-    scene.mouseAgent().setMode(MouseAgent.Mode.CLICK);
+    scene.mouse().setMode(Mouse.Mode.CLICK);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
     InteractiveNode eye = new InteractiveNode(scene);

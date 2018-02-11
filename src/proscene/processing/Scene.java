@@ -98,7 +98,7 @@ import java.util.List;
  * </pre>
  * The eye can be controlled both programmatically (since a {@link Node} is a
  * {@link Frame} specialization) and interactively (using the mouse, see
- * {@link #mouseAgent()} and {@link MouseAgent}). Note the use of the anonymous
+ * {@link #mouse()} and {@link Mouse}). Note the use of the anonymous
  * inner {@link Node} class used to define how the node will behave, refer to the
  * {@link Node} API for details. Note also the {@link #setDefaultNode(Node)} call
  * which will direct mouse input to the eye when no other node is being picked.
@@ -167,8 +167,8 @@ import java.util.List;
  * while {@link #traverse()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
  * <h2>Non-standard interactivity</h2>
- * To control your scene nodes by means different than the {@link #mouseAgent()}
- * (see {@link MouseAgent}), implement an {@link Agent} and call
+ * To control your scene nodes by means different than the {@link #mouse()}
+ * (see {@link Mouse}), implement an {@link Agent} and call
  * {@link #registerAgent(Agent)}.
  */
 public class Scene extends Graph implements PConstants {
@@ -197,7 +197,7 @@ public class Scene extends Graph implements PConstants {
   protected boolean _offscreen;
 
   // 4. Agents
-  protected MouseAgent _mouseAgent;
+  protected Mouse _mouse;
 
   // _bb : picking buffer
   protected PGraphics _targetPGraphics;
@@ -233,7 +233,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@code frontBuffer} type (see
    * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor instantiates
-   * the {@link #mouseAgent()}.
+   * the {@link #mouse()}.
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -270,8 +270,8 @@ public class Scene extends Graph implements PConstants {
     }
 
     // 4. Create _agents and register P5 methods
-    _mouseAgent = new MouseAgent(this, originCorner());
-    _parent.registerMethod("mouseEvent", mouseAgent());
+    _mouse = new Mouse(this, originCorner());
+    _parent.registerMethod("mouseEvent", mouse());
 
     // this.setDefaultKeyBindings();
     if (!isOffscreen()) {
@@ -467,61 +467,53 @@ public class Scene extends Graph implements PConstants {
   /**
    * Returns the default mouse agent handling Processing mouse events.
    *
-   * @see #enableMouseAgent()
-   * @see #isMouseAgentEnabled()
-   * @see #disableMouseAgent()
+   * @see #enableMouse()
+   * @see #isMouseEnabled()
+   * @see #disableMouse()
    */
-  public MouseAgent mouseAgent() {
-    return _mouseAgent;
+  public Mouse mouse() {
+    return _mouse;
   }
 
   /**
-   * Enables the {@link #mouseAgent()}.
+   * Enables the {@link #mouse()}.
    *
-   * @see #mouseAgent()
-   * @see #isMouseAgentEnabled()
-   * @see #disableMouseAgent()
+   * @see #mouse()
+   * @see #isMouseEnabled()
+   * @see #disableMouse()
    */
-  public void enableMouseAgent() {
-    if (!isMouseAgentEnabled()) {
-      registerAgent(mouseAgent());
-      _parent.registerMethod("mouseEvent", mouseAgent());
+  public void enableMouse() {
+    if (!isMouseEnabled()) {
+      registerAgent(mouse());
+      _parent.registerMethod("mouseEvent", mouse());
     }
   }
 
   /**
-   * Disables the {@link #mouseAgent()}.
+   * Disables the {@link #mouse()}.
    *
-   * @see #mouseAgent()
-   * @see #isMouseAgentEnabled()
-   * @see #enableMouseAgent()
+   * @see #mouse()
+   * @see #isMouseEnabled()
+   * @see #enableMouse()
    */
-  public boolean disableMouseAgent() {
-    if (isMouseAgentEnabled()) {
-      _parent.unregisterMethod("mouseEvent", mouseAgent());
-      return unregisterAgent(mouseAgent());
+  public boolean disableMouse() {
+    if (isMouseEnabled()) {
+      _parent.unregisterMethod("mouseEvent", mouse());
+      return unregisterAgent(mouse());
     }
     return false;
   }
 
   /**
-   * Returns {@code true} if the {@link #mouseAgent()} is enabled and {@code false}
+   * Returns {@code true} if the {@link #mouse()} is enabled and {@code false}
    * otherwise.
    *
-   * @see #mouseAgent()
-   * @see #enableMouseAgent()
-   * @see #disableMouseAgent()
+   * @see #mouse()
+   * @see #enableMouse()
+   * @see #disableMouse()
    */
-  public boolean isMouseAgentEnabled() {
-    return isAgentRegistered(mouseAgent());
-  }
-
-  public Grabber mouseAgentInputGrabber() {
-    return mouseAgent().inputGrabber();
-  }
-
-  public Node mouseAgentInputNode() {
-    return mouseAgentInputGrabber() instanceof Node ? (Node) mouseAgent().inputGrabber() : null;
+  public boolean isMouseEnabled() {
+    return isAgentRegistered(mouse());
   }
 
   // OPENGL
@@ -944,20 +936,20 @@ public class Scene extends Graph implements PConstants {
           if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
             available = false;
       if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
-        enableMouseAgent();
+        enableMouse();
         _lastScene = this;
       } else
-        disableMouseAgent();
+        disableMouse();
     } else {
       if (_lastScene != null) {
         boolean available = true;
         if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
             || _lastScene._lastDisplay == TimingHandler.frameCount) && _lastScene._hasFocus()) {
-          disableMouseAgent();
+          disableMouse();
           available = false;
         }
         if (_hasFocus() && available) {
-          enableMouseAgent();
+          enableMouse();
           _lastScene = this;
         }
       }
@@ -966,7 +958,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * When having multiple off-screen scenes displayed at once, one should decide which
-   * graph will grab inputGrabber from the {@link #mouseAgent()}, so that code like this:
+   * graph will grab inputGrabber from the {@link #mouse()}, so that code like this:
    * <p>
    * <pre>
    * {@code
