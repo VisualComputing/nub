@@ -140,6 +140,37 @@ import java.util.List;
  * <h2>Key-frame interpolators</h2>
  * A frame (and hence a node or a shape) can be animated through a key-frame
  * Catmull-Rom interpolator path. Use code such as the following:
+ * <pre>
+ * {@code
+ * Scene scene;
+ * PShape pshape;
+ * Shape shape;
+ * Interpolator interpolator;
+ * void setup() {
+ *   ...
+ *   shape = new Shape(scene, pshape);
+ *   interpolator = new Interpolator(shape);
+ *   for (int i = 0; i < random(4, 10); i++)
+ *     interpolator.addKeyFrame(Node.random(scene));
+ *   interpolator.start();
+ * }
+ * }
+ * </pre>
+ * which will create a random (see {@link Node#random(Graph)}) interpolator path
+ * containing [4..10] key-frames (see {@link Interpolator#addKeyFrame(Frame)}).
+ * The interpolation is also started (see {@link Interpolator#start()}). The
+ * interpolator path may be drawn with code like this:
+ * <pre>
+ * {@code
+ * ...
+ * void draw() {
+ *   scene.traverse();
+ *   scene.drawPath(interpolator, 5);
+ * }
+ * }
+ * </pre>
+ * while {@link #traverse()} will draw the animated shape(s),
+ * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
  */
 public class Scene extends Graph implements PConstants {
   // Timing

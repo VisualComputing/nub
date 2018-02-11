@@ -15,6 +15,7 @@ import proscene.processing.Shape;
  */
 public class ShapeInterpolation extends PApplet {
   Scene scene;
+  PShape pshape;
   Shape shape;
   Interpolator interpolator;
   boolean showEyePath = true;
@@ -39,7 +40,7 @@ public class ShapeInterpolation extends PApplet {
     scene.fitBallInterpolation();
 
     //PShape pshape = scene.is3D() ? createShape(SPHERE, 10) : createShape(RECT, 0,0,50,50);
-    PShape pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0,0,50,50);
+    pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0,0,50,50);
     pshape.setFill(color(50,250,80));
     //pshape.setFill(255,255,0);
 
