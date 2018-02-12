@@ -23,7 +23,7 @@ public class Box {
     iFrame.setPrecisionThreshold(25);
     setSize();
     setColor();
-    setPosition();
+    iFrame.randomize();
   }
 
   public void draw() {
@@ -86,12 +86,6 @@ public class Box {
 
   public Vector getPosition() {
     return iFrame.position();
-  }
-
-  public void setPosition() {
-    float low = -100;
-    float high = 100;
-    iFrame.setPosition(new Vector(scene.pApplet().random(low, high), scene.pApplet().random(low, high), scene.pApplet().random(low, high)));
   }
 
   public void setPosition(Vector pos) {

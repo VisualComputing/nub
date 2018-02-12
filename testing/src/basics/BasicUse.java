@@ -1,113 +1,87 @@
 package basics;
 
+import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import proscene.core.Node;
 import proscene.input.Event;
-import proscene.input.Shortcut;
-import proscene.input.event.MotionEvent1;
-import proscene.input.event.MotionEvent2;
+import proscene.primitives.Frame;
+import proscene.primitives.Vector;
+import proscene.processing.Mouse;
 import proscene.processing.Scene;
+import proscene.processing.Shape;
 
 /**
  * Created by pierre on 11/15/16.
  */
 public class BasicUse extends PApplet {
   Scene scene;
-  Node iFrame;
-  float length = 100;
+  Frame frame;
+  Node eye, node;
+  float radius = 100;
   PGraphics pg;
 
   public void settings() {
-    size(800, 800, P2D);
+    size(800, 800, P3D);
   }
 
   public void setup() {
     pg = this.g;
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setRadius(200);
+    scene.setRadius(400);
 
-    iFrame = new Node(scene) {
+    frame = new Frame();
+    eye = new InteractiveNode(scene);
+
+    node = new Shape(scene) {
       @Override
-      public void visit() {
-        graphics(pg);
+      public void set(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(255, 0, 255);
+        Vector normal = new Vector(0,0,1);
+        Scene.drawHollowCylinder(pg, 30, radius, 200, normal, normal);
+        pg.popStyle();
       }
 
       @Override
       public void interact(Event event) {
-        Shortcut s1 = new Shortcut(PApplet.LEFT);
-        Shortcut s2 = new Shortcut(PApplet.RIGHT);
-        Shortcut s3 = new Shortcut(processing.event.MouseEvent.WHEEL);
-        //look at the ugly casts needed Java that actually was
-        //preventing the following syntax:
-        //those casts aren't needed in js
-        ///*
-        if (s1.matches(event.shortcut()))
-          rotate((MotionEvent2) event);
-        if (s2.matches(event.shortcut()))
-          screenTranslate((MotionEvent2) event);
-        if (s3.matches(event.shortcut()))
-          scale((MotionEvent1) event);
-        // */
-        //Check symmetry of Shortcut.matches
-        /*
-        if(event.shortcut().matches(s1))
-          rotate((MotionEvent2) event);
-        if(event.shortcut().matches(s2))
-          screenTranslate((MotionEvent2) event);
-        if(event.shortcut().matches(s3))
-          scale((MotionEvent1) event);
-        if(event.shortcut().matches(s4))
-          translateXPos();
-        if(event.shortcut().matches(s5))
-          translateXNeg();
-        // */
-      }
-
-      /*
-      @Override
-      public void interact(MotionEvent event) {
-        switch (event.shortcut().id()) {
-          case PApplet.LEFT:
-            //translate(_event);
-            rotate(event);
-            break;
-          case PApplet.RIGHT:
-            screenTranslate(event);
-            break;
-          case processing.event.MouseEvent.WHEEL:
+        if (event.shortcut().matches(Mouse.RIGHT))
+          translate(event);
+        else if (event.shortcut().matches(Mouse.LEFT))
+          rotate(event);
+        else if (event.shortcut().matches(Mouse.RIGHT_TAP))
+          align();
+        else if (event.shortcut().matches(Mouse.WHEEL))
+          if (isEye() && graph().is3D())
+            translateZ(event);
+          else
             scale(event);
-            break;
-        }
       }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if(event.shortcut().matches(new KeyShortcut(KeyAgent.RIGHT_KEY)))
-          translateXPos();
-        if(event.shortcut().matches(new KeyShortcut(KeyAgent.LEFT_KEY)))
-          translateXNeg();
-      }
-      */
     };
 
-    iFrame.setPrecision(Node.Precision.ADAPTIVE);
-    iFrame.setPrecisionThreshold(length);
-    iFrame.translate(50, 50);
-
-    scene.setDefaultNode(iFrame);
+    scene.setEye(eye);
+    scene.setFieldOfView(PI / 3);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
   }
 
   public void graphics(PGraphics pg) {
-    pg.fill(255, 0, 255);
-    pg.rect(0, 0, length, length);
+
+    pg.rect(0, 0, radius, radius);
   }
 
   public void draw() {
     background(0);
     scene.traverse();
+
+    pushStyle();
+    scene.pushModelView();
+    scene.applyTransformation(frame);
+    fill(255,0,0,100);
+    sphere(radius);
+    scene.popModelView();
+    popStyle();
   }
 
   public static void main(String args[]) {

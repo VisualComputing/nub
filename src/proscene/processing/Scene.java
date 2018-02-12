@@ -168,6 +168,8 @@ import java.util.List;
  * <h2>Non-standard interactivity</h2>
  * To control your scene nodes by means different than the {@link #mouse()} (see
  * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
+ * <h2>Drawing functionality</h2>
+ * The scene... TODO: add me!
  */
 public class Scene extends Graph implements PConstants {
   // Timing
@@ -229,9 +231,9 @@ public class Scene extends Graph implements PConstants {
   /**
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
-   * {@link MatrixHandler} depending on the {@code frontBuffer} type (see
-   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor instantiates
-   * the {@link #mouse()}.
+   * {@link MatrixHandler} depending on the {@link #frontBuffer()} type (see
+   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor
+   * instantiates also the {@link #mouse()}.
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -1970,6 +1972,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code drawHollowCylinder(frontBuffer(), radius, height, normal1, normal2)}.
+   *
+   * @see #drawHollowCylinder(PGraphics, float, float, Vector, Vector)
+   */
+  public void drawHollowCylinder(float radius, float height, Vector normal1, Vector normal2) {
+    drawHollowCylinder(frontBuffer(), radius, height, normal1, normal2);
+  }
+
+  /**
    * Same as {@code drawHollowCylinder(frontBuffer(), detail, radius, height, normal1, normal2)}.
    *
    * @see #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)
@@ -1977,6 +1988,15 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawHollowCylinder(int detail, float radius, float height, Vector normal1, Vector normal2) {
     drawHollowCylinder(frontBuffer(), detail, radius, height, normal1, normal2);
+  }
+
+  /**
+   * Same as {@code drawHollowCylinder(pGraphics, 30, radius, height, normal1, normal2)}.
+   *
+   * @see #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)
+   */
+  public static void drawHollowCylinder(PGraphics pGraphics, float radius, float height, Vector normal1, Vector normal2) {
+    drawHollowCylinder(pGraphics, 30, radius, height, normal1, normal2);
   }
 
   /**
