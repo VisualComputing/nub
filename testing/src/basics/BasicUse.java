@@ -6,7 +6,6 @@ import processing.core.PGraphics;
 import proscene.core.Node;
 import proscene.input.Event;
 import proscene.primitives.Frame;
-import proscene.primitives.Vector;
 import proscene.processing.Mouse;
 import proscene.processing.Scene;
 import proscene.processing.Shape;
@@ -39,8 +38,7 @@ public class BasicUse extends PApplet {
       public void set(PGraphics pg) {
         pg.pushStyle();
         pg.fill(255, 0, 255);
-        Vector normal = new Vector(0,0,1);
-        Scene.drawHollowCylinder(pg, 30, radius, 200, normal, normal);
+        Scene.drawCylinder(pg, 30, radius, 200);
         pg.popStyle();
       }
 
@@ -78,7 +76,7 @@ public class BasicUse extends PApplet {
     pushStyle();
     scene.pushModelView();
     scene.applyTransformation(frame);
-    fill(255,0,0,100);
+    fill(255, 0, 0, 100);
     sphere(radius);
     scene.popModelView();
     popStyle();

@@ -1916,12 +1916,21 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawCylinder(frontBuffer(), radius, height)}.
+   * Same as {@code drawCylinder(20, radius, height)}.
    *
-   * @see #drawCylinder(PGraphics, float, float)
+   * @see #drawCylinder(int, float, float)
    */
   public void drawCylinder(float radius, float height) {
-    drawCylinder(frontBuffer(), radius, height);
+    drawCylinder(20, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCylinder(frontBuffer(), detail, radius, height)}.
+   *
+   * @see #drawCylinder(PGraphics, int, float, float)
+   */
+  public void drawCylinder(int detail, float radius, float height) {
+    drawCylinder(frontBuffer(), detail, radius, height);
   }
 
   /**
@@ -1934,18 +1943,29 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws a cylinder of {@code radius} and {@code height} onto {@code pGraphics}.
+   * Same as {@code drawCylinder(pGraphics, 20, radius, height)}.
+   *
+   * @see #drawCylinder(PGraphics, int, float, float)
    */
   public static void drawCylinder(PGraphics pGraphics, float radius, float height) {
+    drawCylinder(pGraphics, 20, radius, height);
+  }
+
+  /**
+   * Draws a cylinder of {@code radius} and {@code height} onto {@code pGraphics}.
+   */
+  public static void drawCylinder(PGraphics pGraphics, int detail, float radius, float height) {
     if (!(pGraphics instanceof PGraphics3D))
       return;
     pGraphics.pushStyle();
     float px, py;
 
+    float degrees = 360 / detail;
+
     pGraphics.beginShape(PApplet.QUAD_STRIP);
-    for (float i = 0; i < 13; i++) {
-      px = (float) Math.cos(PApplet.radians(i * 30)) * radius;
-      py = (float) Math.sin(PApplet.radians(i * 30)) * radius;
+    for (float i = 0; i < detail + 1; i++) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
       vertex(pGraphics, px, py, 0);
       vertex(pGraphics, px, py, height);
     }
@@ -1953,18 +1973,18 @@ public class Scene extends Graph implements PConstants {
 
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     vertex(pGraphics, 0, 0, 0);
-    for (float i = 12; i > -1; i--) {
-      px = (float) Math.cos(PApplet.radians(i * 30)) * radius;
-      py = (float) Math.sin(PApplet.radians(i * 30)) * radius;
+    for (float i = detail; i > -1; i--) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
       vertex(pGraphics, px, py, 0);
     }
     pGraphics.endShape();
 
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     vertex(pGraphics, 0, 0, height);
-    for (float i = 0; i < 13; i++) {
-      px = (float) Math.cos(PApplet.radians(i * 30)) * radius;
-      py = (float) Math.sin(PApplet.radians(i * 30)) * radius;
+    for (float i = 0; i < detail + 1; i++) {
+      px = (float) Math.cos(PApplet.radians(i * degrees)) * radius;
+      py = (float) Math.sin(PApplet.radians(i * degrees)) * radius;
       vertex(pGraphics, px, py, height);
     }
     pGraphics.endShape();
