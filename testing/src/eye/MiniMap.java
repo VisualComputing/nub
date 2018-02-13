@@ -127,11 +127,11 @@ public class MiniMap extends PApplet {
     }
 
     @Override
-    protected void set(PGraphics pg) {
-      pg.fill(0, 255, 0);
-      pg.stroke(0, 0, 255);
-      pg.strokeWeight(2);
-      minimap.drawEye(pg, scene, true);
+    protected void set(PGraphics pGraphics) {
+      pGraphics.fill(0, 255, 0);
+      pGraphics.stroke(0, 0, 255);
+      pGraphics.strokeWeight(2);
+      minimap.drawEye(pGraphics, scene, true);
     }
   }
 
@@ -145,9 +145,9 @@ public class MiniMap extends PApplet {
     }
 
     @Override
-    protected void set(PGraphics pg) {
-      pg.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
-      Scene.drawTorusSolenoid(pg, 6, 8);
+    protected void set(PGraphics pGraphics) {
+      pGraphics.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
+      Scene.drawTorusSolenoid(pGraphics, 6, 8);
     }
   }
 }

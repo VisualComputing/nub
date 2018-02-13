@@ -35,11 +35,11 @@ public class BasicUse extends PApplet {
 
     node = new Shape(scene) {
       @Override
-      public void set(PGraphics pg) {
-        pg.pushStyle();
-        pg.fill(255, 0, 255);
-        Scene.drawCylinder(pg, 30, radius, 200);
-        pg.popStyle();
+      public void set(PGraphics pGraphics) {
+        pGraphics.pushStyle();
+        pGraphics.fill(255, 0, 255);
+        Scene.drawCylinder(pGraphics, 30, radius, 200);
+        pGraphics.popStyle();
       }
 
       @Override

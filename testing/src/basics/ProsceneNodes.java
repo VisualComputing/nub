@@ -69,9 +69,9 @@ public class ProsceneNodes extends PApplet {
     }
 
     @Override
-    protected void set(PGraphics pg) {
-      pg.fill(255, 0, 0);
-      pg.sphere(50);
+    protected void set(PGraphics pGraphics) {
+      pGraphics.fill(255, 0, 0);
+      pGraphics.sphere(50);
     }
   }
 

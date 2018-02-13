@@ -207,10 +207,10 @@ public class FrameInterpolation2 extends PApplet {
 
     ///*
     @Override
-    protected void set(PGraphics pg) {
-      pg.rectMode(CENTER);
-      pg.fill(255, 0, 0);
-      pg.rect(0, 0, _w, _h);
+    protected void set(PGraphics pGraphics) {
+      pGraphics.rectMode(CENTER);
+      pGraphics.fill(255, 0, 0);
+      pGraphics.rect(0, 0, _w, _h);
     }
     //*/
   }
