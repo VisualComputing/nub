@@ -61,7 +61,7 @@ import java.util.List;
  * </pre>
  * <p>
  * Implement a {@code cullingCondition} to perform hierarchical culling on the node
- * (culling of the node as its descendants by the {@link proscene.core.Graph#traverse()}
+ * (culling of the node and its descendants by the {@link proscene.core.Graph#traverse()}
  * algorithm). The {@link #isCulled()} flag is {@code false} by default, see
  * {@link #cull(boolean)}.
  * <p>
