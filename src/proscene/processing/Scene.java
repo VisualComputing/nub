@@ -170,16 +170,21 @@ import java.util.List;
  * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
  * <h2>Drawing functionality</h2>
  * There are several static drawing functions that complements those already provided
- * by processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
+ * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
  * {@link #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)},
  * {@link #drawCone(PGraphics, int, float, float, float, float)},
- * {@link #drawCone(PGraphics, int, float, float, float, float, float)},
- * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)},
- * {@link #drawAxes(PGraphics, float)} and {@link #drawGrid(PGraphics, float, int)},
- * among others.
+ * {@link #drawCone(PGraphics, int, float, float, float, float, float)} and
+ * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
- * Note that a representation of another  representation
- * {@link #drawEye(Graph)}
+ * Drawing functions that take a {@code PGraphics} parameter (including the above
+ * static ones), such as {@link #beginScreenCoordinates(PGraphics)},
+ * {@link #endScreenCoordinates(PGraphics)}, {@link #drawAxes(PGraphics, float)},
+ * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
+ * among others, can be used to set a {@link Shape} (see {@link Shape#set(PGraphics)}).
+ * <p>
+ * Another scene's eye (different than this one) can be drawn with
+ * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
+ * visibility culling visualization and debugging.
  */
 public class Scene extends Graph implements PConstants {
   // Timing
