@@ -627,9 +627,10 @@ public class Graph {
   protected void _visit(Node node) {
     pushModelView();
     applyTransformation(node);
-    node._visit();
-    for (Node child : node.children())
-      _visit(child);
+    node.visit();
+    if (!node.isCulled())
+      for (Node child : node.children())
+        _visit(child);
     popModelView();
   }
 

@@ -1322,9 +1322,10 @@ public class Scene extends Graph implements PConstants {
   protected void _visit(Node node) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, node);
-    node._visit();
-    for (Node child : node.children())
-      _visit(child);
+    node.visit();
+    if (!node.isCulled())
+      for (Node child : node.children())
+        _visit(child);
     _targetPGraphics.popMatrix();
   }
 
@@ -1992,6 +1993,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   // Cone v1
+
   /**
    * Same as {@code drawCone(detail, 0, 0, radius, height)}
    *

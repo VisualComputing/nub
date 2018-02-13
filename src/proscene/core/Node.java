@@ -51,11 +51,19 @@ import java.util.List;
  * {@code
  * node = new Node(graph) {
  *   public void visit() {
- *     // Draw your object here, in the local coordinate system.
+ *     //hierarchical culling is optional and disabled by default
+ *     cull(cullingCondition);
+ *     if(!isCulled())
+ *       // Draw your object here, in the local coordinate system.
  *   }
  * }
  * }
  * </pre>
+ * <p>
+ * Implement a {@code cullingCondition} to perform hierarchical culling on the node
+ * (culling of the node as its descendants by the {@link proscene.core.Graph#traverse()}
+ * algorithm). The {@link #isCulled()} flag is {@code false} by default, see
+ * {@link #cull(boolean)}.
  * <p>
  * A node may also be defined as the {@link Graph#eye()} (see {@link #isEye()}
  * and {@link Graph#setEye(Frame)}). Some user gestures are then interpreted in a negated way,
@@ -139,7 +147,7 @@ public class Node extends Frame implements Grabber {
 
   protected float _threshold;
 
-  protected boolean _visit;
+  protected boolean _culled;
 
   // id
   protected int _id;
@@ -214,7 +222,7 @@ public class Node extends Frame implements Grabber {
 
     setFlySpeed(0.01f * graph().radius());
     _upVector = new Vector(0.0f, 1.0f, 0.0f);
-    _visit = true;
+    _culled = false;
     _children = new ArrayList<Node>();
     // graph()._addLeadingNode(this);
     setReference(reference());// _restorePath seems more robust
@@ -264,7 +272,7 @@ public class Node extends Frame implements Grabber {
     }
 
     this._upVector = other._upVector.get();
-    this._visit = other._visit;
+    this._culled = other._culled;
 
     this._children = new ArrayList<Node>();
     if (this.graph() == other.graph()) {
@@ -461,54 +469,60 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Procedure called on the node by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes. Note that
-   * {@link #isVisitEnabled()} should return {@code true} (see {@link #enableVisit()}).
+   * empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   * <p>
+   * <pre>
+   * {@code
+   * node = new Node(graph) {
+   *   public void visit() {
+   *     //hierarchical culling is optional and disabled by default
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
    *
    * @see Graph#traverse()
-   * @see #enableVisit()
+   * @see #cull(boolean)
+   * @see #isCulled()
    */
   public void visit() {
   }
 
   /**
-   * If {@link #isVisitEnabled()} calls {@link #visit()} which should be implemented.
-   * You don't need to call this method since it is called automatically by {@link Graph#traverse()}.
+   * Same as {@code cull(true)}.
    *
-   * @see #visit()
+   * @see #cull(boolean)
+   * @see #isCulled()
    */
-  public void _visit() {
-    if (isVisitEnabled())
-      visit();
+
+  public void cull() {
+    cull(true);
   }
 
   /**
-   * Enables {@link #visit()} of this node during {@link Graph#traverse()}.
+   * Enables or disables {@link #visit()} of this node and its children during
+   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
    *
-   * @see #disableVisit()
-   * @see #isVisitEnabled()
+   * @see #isCulled()
    */
-  public void enableVisit() {
-    _visit = true;
+  public void cull(boolean cull) {
+    _culled = cull;
   }
 
   /**
-   * Disables {@link #visit()} of this node during {@link Graph#traverse()}.
+   * Returns whether or not the node culled or not. Culled nodes (and their children)
+   * will not be visited by the {@link Graph#traverse()} algoruthm.
    *
-   * @see #enableVisit()
-   * @see #isVisitEnabled()
+   * @see #cull(boolean)
    */
-  public void disableVisit() {
-    _visit = false;
-  }
-
-  /**
-   * Returns true if {@link #visit()} of this node is enabled during {@link Graph#traverse()}.
-   *
-   * @see #enableVisit()
-   * @see #disableVisit()
-   */
-  public boolean isVisitEnabled() {
-    return _visit;
+  public boolean isCulled() {
+    return _culled;
   }
 
   /**
