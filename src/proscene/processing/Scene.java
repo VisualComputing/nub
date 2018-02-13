@@ -169,7 +169,17 @@ import java.util.List;
  * To control your scene nodes by means different than the {@link #mouse()} (see
  * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
  * <h2>Drawing functionality</h2>
- * The scene... TODO: add me!
+ * There are several static drawing functions that complements those already provided
+ * by processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
+ * {@link #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)},
+ * {@link #drawCone(PGraphics, int, float, float, float, float)},
+ * {@link #drawCone(PGraphics, int, float, float, float, float, float)},
+ * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)},
+ * {@link #drawAxes(PGraphics, float)} and {@link #drawGrid(PGraphics, float, int)},
+ * among others.
+ * <p>
+ * Note that a representation of another  representation
+ * {@link #drawEye(Graph)}
  */
 public class Scene extends Graph implements PConstants {
   // Timing
@@ -1708,7 +1718,7 @@ public class Scene extends Graph implements PConstants {
             applyTransformation(myFr);
 
             if ((mask & 2) != 0)
-              _drawInterpolatorEye(scale);
+              _drawEye(scale);
             if ((mask & 4) != 0)
               drawAxes(scale / 10.0f);
 
@@ -1725,139 +1735,70 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawAxes(100)}.
-   *
-   * @see #drawAxes(float)
+   * Internal use.
    */
-  public void drawAxes() {
-    drawAxes(100);
-  }
+  protected void _drawEye(float scale) {
+    frontBuffer().pushStyle();
+    float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
+    float halfWidth = halfHeight * 1.3f;
+    float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
 
-  /**
-   * Convenience function that simply calls {@code drawDottedGrid(100, 10)}.
-   *
-   * @see #drawDottedGrid(float, int)
-   */
-  public void drawDottedGrid() {
-    drawDottedGrid(100, 10);
-  }
+    float arrowHeight = 1.5f * halfHeight;
+    float baseHeight = 1.2f * halfHeight;
+    float arrowHalfWidth = 0.5f * halfWidth;
+    float baseHalfWidth = 0.3f * halfWidth;
 
-  /**
-   * Convenience function that simply calls {@code drawGrid(100, 10)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid() {
-    drawGrid(100, 10);
-  }
+    // Frustum outline
+    frontBuffer().noFill();
+    frontBuffer().beginShape();
+    vertex(-halfWidth, halfHeight, -dist);
+    vertex(-halfWidth, -halfHeight, -dist);
+    vertex(0.0f, 0.0f, 0.0f);
+    vertex(halfWidth, -halfHeight, -dist);
+    vertex(-halfWidth, -halfHeight, -dist);
+    frontBuffer().endShape();
+    frontBuffer().noFill();
+    frontBuffer().beginShape();
+    vertex(halfWidth, -halfHeight, -dist);
+    vertex(halfWidth, halfHeight, -dist);
+    vertex(0.0f, 0.0f, 0.0f);
+    vertex(-halfWidth, halfHeight, -dist);
+    vertex(halfWidth, halfHeight, -dist);
+    frontBuffer().endShape();
 
-  /**
-   * Convenience function that simply calls {@code drawDottedGrid(size, 10)}.
-   *
-   * @see #drawDottedGrid(float, int)
-   */
-  public void drawDottedGrid(float size) {
-    drawDottedGrid(size, 10);
-  }
+    // Up arrow
+    frontBuffer().noStroke();
+    frontBuffer().fill(frontBuffer().strokeColor);
+    // Base
+    frontBuffer().beginShape(PApplet.QUADS);
 
-  /**
-   * Convenience function that simply calls {@code drawGrid(size, 10)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid(float size) {
-    drawGrid(size, 10);
-  }
+    if (isLeftHanded()) {
+      vertex(baseHalfWidth, -halfHeight, -dist);
+      vertex(-baseHalfWidth, -halfHeight, -dist);
+      vertex(-baseHalfWidth, -baseHeight, -dist);
+      vertex(baseHalfWidth, -baseHeight, -dist);
+    } else {
+      vertex(-baseHalfWidth, halfHeight, -dist);
+      vertex(baseHalfWidth, halfHeight, -dist);
+      vertex(baseHalfWidth, baseHeight, -dist);
+      vertex(-baseHalfWidth, baseHeight, -dist);
+    }
 
-  /**
-   * Convenience function that simplt calls {@code drawDottedGrid(100, subdivisions)}.
-   *
-   * @see #drawDottedGrid(float, int)
-   */
-  public void drawDottedGrid(int subdivisions) {
-    drawDottedGrid(100, subdivisions);
-  }
+    frontBuffer().endShape();
+    // Arrow
+    frontBuffer().beginShape(PApplet.TRIANGLES);
 
-  /**
-   * Convenience function that simply calls {@code drawGrid(100, subdivisions)}
-   *
-   * @see #drawGrid(float, int)
-   */
-  public void drawGrid(int subdivisions) {
-    drawGrid(100, subdivisions);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(6)}.
-   *
-   * @see #drawTorusSolenoid(int)
-   */
-  public void drawTorusSolenoid() {
-    drawTorusSolenoid(6);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(faces, 0.07f * radius())}.
-   *
-   * @see #drawTorusSolenoid(int, float)
-   */
-  public void drawTorusSolenoid(int faces) {
-    drawTorusSolenoid(faces, 0.07f * radius());
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawTorusSolenoid(6, insideRadius)}.
-   *
-   * @see #drawTorusSolenoid(int, float)
-   */
-  public void drawTorusSolenoid(float insideRadius) {
-    drawTorusSolenoid(6, insideRadius);
-  }
-
-  /**
-   * Convenience function that simply calls
-   * {@code drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f)}.
-   *
-   * @see #drawTorusSolenoid(int, int, float, float)
-   */
-  public void drawTorusSolenoid(int faces, float insideRadius) {
-    drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f);
-  }
-
-  /**
-   * Same as {@code drawCone(detail, 0, 0, radius, height)}
-   *
-   * @see #drawCone(int, float, float, float, float)
-   */
-  public void drawCone(int detail, float radius, float height) {
-    drawCone(detail, 0, 0, radius, height);
-  }
-
-  /**
-   * Same as {@code drawCone(12, 0, 0, radius, height)}
-   *
-   * @see #drawCone(int, float, float, float, float)
-   */
-  public void drawCone(float radius, float height) {
-    drawCone(12, 0, 0, radius, height);
-  }
-
-  /**
-   * Same as {@code drawCone(detail, 0, 0, radius1, radius2, height)}.
-   *
-   * @see #drawCone(int, float, float, float, float, float)
-   */
-  public void drawCone(int detail, float radius1, float radius2, float height) {
-    drawCone(detail, 0, 0, radius1, radius2, height);
-  }
-
-  /**
-   * Same as {@code drawCone(18, 0, 0, radius1, radius2, height)}.
-   *
-   * @see #drawCone(int, float, float, float, float, float)
-   */
-  public void drawCone(float radius1, float radius2, float height) {
-    drawCone(18, 0, 0, radius1, radius2, height);
+    if (isLeftHanded()) {
+      vertex(0.0f, -arrowHeight, -dist);
+      vertex(arrowHalfWidth, -baseHeight, -dist);
+      vertex(-arrowHalfWidth, -baseHeight, -dist);
+    } else {
+      vertex(0.0f, arrowHeight, -dist);
+      vertex(-arrowHalfWidth, baseHeight, -dist);
+      vertex(arrowHalfWidth, baseHeight, -dist);
+    }
+    frontBuffer().endShape();
+    frontBuffer().popStyle();
   }
 
   /**
@@ -1895,24 +1836,6 @@ public class Scene extends Graph implements PConstants {
     applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
     popModelView();
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawCross(px, py, 30)}.
-   *
-   * @see #drawCross(float, float, float)
-   */
-  public void drawCross(float px, float py) {
-    drawCross(px, py, 30);
-  }
-
-  /**
-   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
-   *
-   * @see #drawFilledCircle(int, Vector, float)
-   */
-  public void drawFilledCircle(Vector center, float radius) {
-    drawFilledCircle(40, center, radius);
   }
 
   /**
@@ -2064,6 +1987,24 @@ public class Scene extends Graph implements PConstants {
   }
 
   // Cone v1
+  /**
+   * Same as {@code drawCone(detail, 0, 0, radius, height)}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(int detail, float radius, float height) {
+    drawCone(detail, 0, 0, radius, height);
+  }
+
+  /**
+   * Same as {@code drawCone(12, 0, 0, radius, height)}
+   *
+   * @see #drawCone(int, float, float, float, float)
+   */
+  public void drawCone(float radius, float height) {
+    drawCone(12, 0, 0, radius, height);
+  }
+
 
   /**
    * Same as {@code drawCone(frontBuffer(), detail, x, y, radius, height)}.
@@ -2134,6 +2075,24 @@ public class Scene extends Graph implements PConstants {
   // Cone v2
 
   /**
+   * Same as {@code drawCone(detail, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(int detail, float radius1, float radius2, float height) {
+    drawCone(detail, 0, 0, radius1, radius2, height);
+  }
+
+  /**
+   * Same as {@code drawCone(18, 0, 0, radius1, radius2, height)}.
+   *
+   * @see #drawCone(int, float, float, float, float, float)
+   */
+  public void drawCone(float radius1, float radius2, float height) {
+    drawCone(18, 0, 0, radius1, radius2, height);
+  }
+
+  /**
    * Same as {@code drawCone(pGraphics, detail, 0, 0, radius1, radius2, height)}.
    *
    * @see #drawCone(PGraphics, int, float, float, float, float, float)
@@ -2193,6 +2152,15 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
     pGraphics.popMatrix();
     pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawAxes(100)}.
+   *
+   * @see #drawAxes(float)
+   */
+  public void drawAxes() {
+    drawAxes(100);
   }
 
   /**
@@ -2293,6 +2261,33 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Convenience function that simply calls {@code drawGrid(100, 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid() {
+    drawGrid(100, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(size, 10)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(float size) {
+    drawGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawGrid(100, subdivisions)}
+   *
+   * @see #drawGrid(float, int)
+   */
+  public void drawGrid(int subdivisions) {
+    drawGrid(100, subdivisions);
+  }
+
+  /**
    * Same as {@code drawGrid(frontBuffer(), size, subdivisions)}.
    *
    * @see #drawGrid(PGraphics, float, int)
@@ -2325,6 +2320,33 @@ public class Scene extends Graph implements PConstants {
     }
     pGraphics.endShape();
     pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawDottedGrid(100, 10)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid() {
+    drawDottedGrid(100, 10);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawDottedGrid(size, 10)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid(float size) {
+    drawDottedGrid(size, 10);
+  }
+
+  /**
+   * Convenience function that simplt calls {@code drawDottedGrid(100, subdivisions)}.
+   *
+   * @see #drawDottedGrid(float, int)
+   */
+  public void drawDottedGrid(int subdivisions) {
+    drawDottedGrid(100, subdivisions);
   }
 
   /**
@@ -2723,70 +2745,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Internal use.
+   * Convenience function that simply calls {@code drawCross(px, py, 30)}.
+   *
+   * @see #drawCross(float, float, float)
    */
-  protected void _drawInterpolatorEye(float scale) {
-    frontBuffer().pushStyle();
-    float halfHeight = scale * (is2D() ? 1.2f : 0.07f);
-    float halfWidth = halfHeight * 1.3f;
-    float dist = halfHeight / (float) Math.tan(PApplet.PI / 8.0f);
-
-    float arrowHeight = 1.5f * halfHeight;
-    float baseHeight = 1.2f * halfHeight;
-    float arrowHalfWidth = 0.5f * halfWidth;
-    float baseHalfWidth = 0.3f * halfWidth;
-
-    // Frustum outline
-    frontBuffer().noFill();
-    frontBuffer().beginShape();
-    vertex(-halfWidth, halfHeight, -dist);
-    vertex(-halfWidth, -halfHeight, -dist);
-    vertex(0.0f, 0.0f, 0.0f);
-    vertex(halfWidth, -halfHeight, -dist);
-    vertex(-halfWidth, -halfHeight, -dist);
-    frontBuffer().endShape();
-    frontBuffer().noFill();
-    frontBuffer().beginShape();
-    vertex(halfWidth, -halfHeight, -dist);
-    vertex(halfWidth, halfHeight, -dist);
-    vertex(0.0f, 0.0f, 0.0f);
-    vertex(-halfWidth, halfHeight, -dist);
-    vertex(halfWidth, halfHeight, -dist);
-    frontBuffer().endShape();
-
-    // Up arrow
-    frontBuffer().noStroke();
-    frontBuffer().fill(frontBuffer().strokeColor);
-    // Base
-    frontBuffer().beginShape(PApplet.QUADS);
-
-    if (isLeftHanded()) {
-      vertex(baseHalfWidth, -halfHeight, -dist);
-      vertex(-baseHalfWidth, -halfHeight, -dist);
-      vertex(-baseHalfWidth, -baseHeight, -dist);
-      vertex(baseHalfWidth, -baseHeight, -dist);
-    } else {
-      vertex(-baseHalfWidth, halfHeight, -dist);
-      vertex(baseHalfWidth, halfHeight, -dist);
-      vertex(baseHalfWidth, baseHeight, -dist);
-      vertex(-baseHalfWidth, baseHeight, -dist);
-    }
-
-    frontBuffer().endShape();
-    // Arrow
-    frontBuffer().beginShape(PApplet.TRIANGLES);
-
-    if (isLeftHanded()) {
-      vertex(0.0f, -arrowHeight, -dist);
-      vertex(arrowHalfWidth, -baseHeight, -dist);
-      vertex(-arrowHalfWidth, -baseHeight, -dist);
-    } else {
-      vertex(0.0f, arrowHeight, -dist);
-      vertex(-arrowHalfWidth, baseHeight, -dist);
-      vertex(arrowHalfWidth, baseHeight, -dist);
-    }
-    frontBuffer().endShape();
-    frontBuffer().popStyle();
+  public void drawCross(float px, float py) {
+    drawCross(px, py, 30);
   }
 
   /**
@@ -2815,6 +2779,15 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
+   *
+   * @see #drawFilledCircle(int, Vector, float)
+   */
+  public void drawFilledCircle(Vector center, float radius) {
+    drawFilledCircle(40, center, radius);
   }
 
   /**
@@ -2971,6 +2944,43 @@ public class Scene extends Graph implements PConstants {
       drawShooterTarget(center, node.precisionThreshold());
       frontBuffer().popStyle();
     }
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6)}.
+   *
+   * @see #drawTorusSolenoid(int)
+   */
+  public void drawTorusSolenoid() {
+    drawTorusSolenoid(6);
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(faces, 0.07f * radius())}.
+   *
+   * @see #drawTorusSolenoid(int, float)
+   */
+  public void drawTorusSolenoid(int faces) {
+    drawTorusSolenoid(faces, 0.07f * radius());
+  }
+
+  /**
+   * Convenience function that simply calls {@code drawTorusSolenoid(6, insideRadius)}.
+   *
+   * @see #drawTorusSolenoid(int, float)
+   */
+  public void drawTorusSolenoid(float insideRadius) {
+    drawTorusSolenoid(6, insideRadius);
+  }
+
+  /**
+   * Convenience function that simply calls
+   * {@code drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f)}.
+   *
+   * @see #drawTorusSolenoid(int, int, float, float)
+   */
+  public void drawTorusSolenoid(int faces, float insideRadius) {
+    drawTorusSolenoid(faces, 100, insideRadius, insideRadius * 1.3f);
   }
 
   /**
