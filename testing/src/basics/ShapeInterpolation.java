@@ -44,10 +44,10 @@ public class ShapeInterpolation extends PApplet {
     pbox.setFill(color(50, 250, 80));
     box = new Shape(scene, pbox);
 
-    psphere = scene.is3D() ? createShape(SPHERE, 10) : createShape(ELLIPSE, 0,0,50,50);
+    psphere = scene.is3D() ? createShape(SPHERE, 10) : createShape(ELLIPSE, 0, 0, 50, 50);
     psphere.setFill(color(250, 50, 80));
     sphere = new Shape(box, psphere);
-    sphere.translate(15,15,15);
+    sphere.translate(15, 15, 15);
 
     // interpolation 2. Custom eye interpolations
     interpolator = new Interpolator(box);

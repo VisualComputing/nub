@@ -87,7 +87,7 @@ public class Shape extends Node {
    */
   public Shape(Node reference) {
     super(reference);
-    if (! (reference.graph() instanceof Scene))
+    if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("reference graph of the node should ber instance of Scene");
     if (scene().frontBuffer() instanceof PGraphicsOpenGL)
       setPrecision(Precision.EXACT);
