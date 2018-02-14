@@ -42,7 +42,7 @@ public class Mouse extends Agent {
   public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER, 2);
 
   protected Point _upperLeftCorner;
-  protected Graph _graph;
+  //protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
   protected Mode _mode;
@@ -67,16 +67,8 @@ public class Mouse extends Agent {
    */
   public Mouse(Graph graph, Point upperLeftCorner) {
     super(graph.inputHandler());
-    _graph = graph;
     _upperLeftCorner = upperLeftCorner;
     setMode(Mode.MOVE);
-  }
-
-  /**
-   * Returns the graph this object belongs to.
-   */
-  public Graph graph() {
-    return _graph;
   }
 
   /**
