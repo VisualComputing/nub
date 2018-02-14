@@ -14,8 +14,8 @@ import proscene.processing.Shape;
  */
 public class ShapeInterpolation extends PApplet {
   Scene scene;
-  PShape pshape;
-  Shape shape;
+  PShape pbox, psphere;
+  Shape box, sphere;
   Interpolator interpolator;
   InteractiveNode eye;
   boolean showEyePath = true;
@@ -40,13 +40,17 @@ public class ShapeInterpolation extends PApplet {
     scene.fitBallInterpolation();
 
     //PShape pshape = scene.is3D() ? createShape(SPHERE, 10) : createShape(RECT, 0,0,50,50);
-    pshape = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0, 0, 50, 50);
-    pshape.setFill(color(50, 250, 80));
+    pbox = scene.is3D() ? createShape(BOX, 10) : createShape(RECT, 0, 0, 50, 50);
+    pbox.setFill(color(50, 250, 80));
+    box = new Shape(scene, pbox);
 
-    shape = new Shape(scene, pshape);
+    psphere = scene.is3D() ? createShape(SPHERE, 10) : createShape(ELLIPSE, 0,0,50,50);
+    psphere.setFill(color(250, 50, 80));
+    sphere = new Shape(box, psphere);
+    sphere.translate(15,15,15);
 
     // interpolation 2. Custom eye interpolations
-    interpolator = new Interpolator(shape);
+    interpolator = new Interpolator(box);
     interpolator.setLoop();
     // Create an initial path
 
@@ -89,6 +93,8 @@ public class ShapeInterpolation extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
+    if (key == 't')
+      scene.shiftTimers();
     if (key == CODED)
       if (keyCode == UP)
         eye.translateYPos();

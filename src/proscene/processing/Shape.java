@@ -63,7 +63,6 @@ import proscene.primitives.Frame;
  * {@link #setHighlighting(Highlighting)}).
  */
 public class Shape extends Node {
-  Scene _scene;
   PShape _frontShape, _backShape;
 
   public enum Highlighting {
@@ -77,8 +76,7 @@ public class Shape extends Node {
    */
   public Shape(Scene scene) {
     super(scene);
-    _scene = scene;
-    if (_scene.frontBuffer() instanceof PGraphicsOpenGL)
+    if (scene().frontBuffer() instanceof PGraphicsOpenGL)
       setPrecision(Precision.EXACT);
     setHighlighting(Highlighting.FRONT);
   }
@@ -89,11 +87,9 @@ public class Shape extends Node {
    */
   public Shape(Node reference) {
     super(reference);
-    if (reference.graph() instanceof Scene)
-      _scene = (Scene) reference.graph();
-    else
+    if (! (reference.graph() instanceof Scene))
       throw new RuntimeException("reference graph of the node should ber instance of Scene");
-    if (_scene.frontBuffer() instanceof PGraphicsOpenGL)
+    if (scene().frontBuffer() instanceof PGraphicsOpenGL)
       setPrecision(Precision.EXACT);
     setHighlighting(Highlighting.FRONT);
   }
@@ -128,11 +124,16 @@ public class Shape extends Node {
     return new Shape(scene(), this);
   }
 
+  @Override
+  public Scene graph() {
+    return (Scene) _graph;
+  }
+
   /**
    * Returns the scene this shape belongs to.
    */
   public Scene scene() {
-    return _scene;
+    return graph();
   }
 
   /**

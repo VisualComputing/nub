@@ -17,7 +17,6 @@ import proscene.timing.Timer;
  * Parrallel timer based on java.util.Timer and java.util.TimerTask.
  */
 class ParallelTimer implements Timer {
-  Scene _scene;
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
   Taskable _task;
@@ -26,23 +25,21 @@ class ParallelTimer implements Timer {
   long _period;
 
   /**
-   * Same as {@code this(scene, task, false)}.
+   * Same as {@code this(task, false)}.
    *
-   * @see #ParallelTimer(Scene, Taskable, boolean)
+   * @see #ParallelTimer(Taskable, boolean)
    */
-  public ParallelTimer(Scene scene, Taskable task) {
-    this(scene, task, false);
+  public ParallelTimer(Taskable task) {
+    this(task, false);
   }
 
   /**
    * Defines a parallel (multi-threaded) timer.
    *
-   * @param scene      timing handler owner
    * @param task
    * @param singleShot
    */
-  public ParallelTimer(Scene scene, Taskable task, boolean singleShot) {
-    _scene = scene;
+  public ParallelTimer(Taskable task, boolean singleShot) {
     _once = singleShot;
     _task = task;
   }

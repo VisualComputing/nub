@@ -651,7 +651,7 @@ public class Scene extends Graph implements PConstants {
     if (areTimersSequential())
       timingHandler().registerTask(task);
     else
-      timingHandler().registerTask(task, new ParallelTimer(this, task));
+      timingHandler().registerTask(task, new ParallelTimer(task));
   }
 
   /**
@@ -691,7 +691,7 @@ public class Scene extends Graph implements PConstants {
         rOnce = task.timer().isSingleShot();
       }
       task.stop();
-      task.setTimer(new ParallelTimer(this, task));
+      task.setTimer(new ParallelTimer(task));
       if (isActive) {
         if (rOnce)
           task.runOnce(period);
