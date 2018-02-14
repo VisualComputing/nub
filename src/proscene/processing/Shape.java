@@ -76,7 +76,7 @@ public class Shape extends Node {
    */
   public Shape(Scene scene) {
     super(scene);
-    if (scene().frontBuffer() instanceof PGraphicsOpenGL)
+    if (graph().frontBuffer() instanceof PGraphicsOpenGL)
       setPrecision(Precision.EXACT);
     setHighlighting(Highlighting.FRONT);
   }
@@ -89,7 +89,7 @@ public class Shape extends Node {
     super(reference);
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("reference graph of the node should ber instance of Scene");
-    if (scene().frontBuffer() instanceof PGraphicsOpenGL)
+    if (graph().frontBuffer() instanceof PGraphicsOpenGL)
       setPrecision(Precision.EXACT);
     setHighlighting(Highlighting.FRONT);
   }
@@ -121,19 +121,12 @@ public class Shape extends Node {
 
   @Override
   public Shape get() {
-    return new Shape(scene(), this);
+    return new Shape(graph(), this);
   }
 
   @Override
   public Scene graph() {
     return (Scene) _graph;
-  }
-
-  /**
-   * Returns the scene this shape belongs to.
-   */
-  public Scene scene() {
-    return graph();
   }
 
   /**
@@ -169,23 +162,23 @@ public class Shape extends Node {
   @Override
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
-      if (scene()._bb == null) {
+      if (graph()._bb == null) {
         System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
         return;
       }
     this._Precision = precision;
     // enables or disables the grabbing buffer
     if (precision() == Precision.EXACT) {
-      scene()._bbEnabled = true;
+      graph()._bbEnabled = true;
       return;
     }
-    for (Node node : scene().nodes())
+    for (Node node : graph().nodes())
       if (node instanceof Shape)
         if (node.precision() == Precision.EXACT) {
-          scene()._bbEnabled = true;
+          graph()._bbEnabled = true;
           return;
         }
-    scene()._bbEnabled = false;
+    graph()._bbEnabled = false;
   }
 
   /**
@@ -196,7 +189,7 @@ public class Shape extends Node {
    * @see proscene.processing.Scene#traverse(PGraphics)
    */
   public void draw() {
-    draw(scene().frontBuffer());
+    draw(graph().frontBuffer());
   }
 
   /**
@@ -218,16 +211,16 @@ public class Shape extends Node {
 
   @Override
   public void visit() {
-    _visit(scene()._targetPGraphics);
+    _visit(graph()._targetPGraphics);
   }
 
   /**
    * Internal use.
    */
   protected void _visit(PGraphics pg) {
-    if (scene().eye() == this)
+    if (graph().eye() == this)
       return;
-    if (pg != scene().backBuffer()) {
+    if (pg != graph().backBuffer()) {
       pg.pushStyle();
       pg.pushMatrix();
             /*
@@ -284,13 +277,13 @@ public class Shape extends Node {
         float b = (float) ((_id >> 16) & 255) / 255.f;
         // funny, only safe way. Otherwise break things horribly when setting shapes
         // and there are more than one iFrame
-        pg.shader(scene()._triangleShader);
-        pg.shader(scene()._lineShader, PApplet.LINES);
-        pg.shader(scene()._pointShader, PApplet.POINTS);
+        pg.shader(graph()._triangleShader);
+        pg.shader(graph()._lineShader, PApplet.LINES);
+        pg.shader(graph()._pointShader, PApplet.POINTS);
 
-        scene()._triangleShader.set("id", new PVector(r, g, b));
-        scene()._lineShader.set("id", new PVector(r, g, b));
-        scene()._pointShader.set("id", new PVector(r, g, b));
+        graph()._triangleShader.set("id", new PVector(r, g, b));
+        graph()._lineShader.set("id", new PVector(r, g, b));
+        graph()._pointShader.set("id", new PVector(r, g, b));
         pg.pushStyle();
         pg.pushMatrix();
                 /*
@@ -301,7 +294,7 @@ public class Shape extends Node {
                 //*/
         ///*
         if (_frontShape != null)
-          pg.shapeMode(scene().frontBuffer().shapeMode);
+          pg.shapeMode(graph().frontBuffer().shapeMode);
         if (_backShape != null)
           pg.shape(_backShape);
         else {
@@ -395,15 +388,15 @@ public class Shape extends Node {
    */
   @Override
   public final boolean track(float x, float y) {
-    if (this == scene().eye()) {
+    if (this == graph().eye()) {
       return false;
     }
     if (precision() != Precision.EXACT)
       return super.track(x, y);
-    int index = (int) y * scene().width() + (int) x;
-    if (scene().backBuffer().pixels != null)
-      if ((0 <= index) && (index < scene().backBuffer().pixels.length))
-        return scene().backBuffer().pixels[index] == _id();
+    int index = (int) y * graph().width() + (int) x;
+    if (graph().backBuffer().pixels != null)
+      if ((0 <= index) && (index < graph().backBuffer().pixels.length))
+        return graph().backBuffer().pixels[index] == _id();
     return false;
   }
 }

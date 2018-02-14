@@ -146,7 +146,7 @@ public class MiniMap extends PApplet {
 
     @Override
     protected void set(PGraphics pGraphics) {
-      pGraphics.fill(scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255), scene().pApplet().random(255));
+      pGraphics.fill(graph().pApplet().random(255), graph().pApplet().random(255), graph().pApplet().random(255), graph().pApplet().random(255));
       Scene.drawTorusSolenoid(pGraphics, 6, 8);
     }
   }

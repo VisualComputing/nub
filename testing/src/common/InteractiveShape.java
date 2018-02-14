@@ -43,7 +43,7 @@ public class InteractiveShape extends Shape {
 
   @Override
   public InteractiveShape get() {
-    return new InteractiveShape(this.scene(), this);
+    return new InteractiveShape(this.graph(), this);
   }
 
   // behavior is here :P
