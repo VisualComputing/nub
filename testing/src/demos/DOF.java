@@ -12,7 +12,6 @@ public class DOF extends PApplet {
   PShader depthShader, dofShader;
   PGraphics srcPGraphics, depthPGraphics, dofPGraphics;
   Scene scene;
-  float posns[];
   InteractiveShape[] models;
   int mode = 2;
 
@@ -22,13 +21,6 @@ public class DOF extends PApplet {
 
   public void setup() {
     colorMode(HSB, 255);
-    posns = new float[300];
-    for (int i = 0; i < 100; i++) {
-      posns[3 * i] = random(-1000, 1000);
-      posns[3 * i + 1] = random(-1000, 1000);
-      posns[3 * i + 2] = random(-1000, 1000);
-    }
-
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
     InteractiveNode eye = new InteractiveNode(scene);
@@ -43,7 +35,7 @@ public class DOF extends PApplet {
 
     for (int i = 0; i < models.length; i++) {
       models[i] = new InteractiveShape(scene, boxShape());
-      models[i].translate(posns[3 * i], posns[3 * i + 1], posns[3 * i + 2]);
+      models[i].randomize();
     }
 
     depthShader = loadShader("/home/pierre/IdeaProjects/proscene.js/testing/data/dof/depth.glsl");
