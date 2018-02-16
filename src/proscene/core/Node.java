@@ -211,7 +211,7 @@ public class Node extends Frame implements Grabber {
 
     if (graph().is2D()) {
       if (position().z() != 0)
-        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y, 0)");
+        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y)");
       if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
         throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
       WorldConstraint constraint2D = new WorldConstraint();
