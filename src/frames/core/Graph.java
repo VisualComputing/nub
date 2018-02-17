@@ -2531,9 +2531,9 @@ public class Graph {
    * defined by the frame.
    */
   public void applyWorldTransformation(Frame frame) {
-    Frame refFrame = frame.reference();
-    if (refFrame != null) {
-      applyWorldTransformation(refFrame);
+    Frame reference = frame.reference();
+    if (reference != null) {
+      applyWorldTransformation(reference);
       applyTransformation(frame);
     } else
       applyTransformation(frame);

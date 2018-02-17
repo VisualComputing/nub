@@ -1393,9 +1393,9 @@ public class Scene extends Graph implements PConstants {
    * @see #_bind(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
-    Frame refFrame = frame.reference();
-    if (refFrame != null) {
-      applyWorldTransformation(pGraphics, refFrame);
+    Frame reference = frame.reference();
+    if (reference != null) {
+      applyWorldTransformation(pGraphics, reference);
       applyTransformation(pGraphics, frame);
     } else {
       applyTransformation(pGraphics, frame);

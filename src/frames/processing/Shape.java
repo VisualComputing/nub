@@ -217,12 +217,12 @@ public class Shape extends Node {
   /**
    * Internal use.
    */
-  protected void _visit(PGraphics pg) {
+  protected void _visit(PGraphics pGraphics) {
     if (graph().eye() == this)
       return;
-    if (pg != graph().backBuffer()) {
-      pg.pushStyle();
-      pg.pushMatrix();
+    if (pGraphics != graph().backBuffer()) {
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
             /*
             if(_frontShape != null)
                 pg.shape(_frontShape);
@@ -234,42 +234,42 @@ public class Shape extends Node {
       switch (highlighting()) {
         case FRONT:
           if (grabsInput())
-            pg.scale(1.15f);
+            pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
-            pg.shape(_frontShape);
+            pGraphics.shape(_frontShape);
           else
-            set(pg);
+            set(pGraphics);
           break;
         case FRONT_BACK:
           if (_frontShape != null)
-            pg.shape(_frontShape);
+            pGraphics.shape(_frontShape);
           else
-            setFront(pg);
+            setFront(pGraphics);
           if (grabsInput()) {
             if (_backShape != null)
-              pg.shape(_backShape);
+              pGraphics.shape(_backShape);
             else
-              setBack(pg);
+              setBack(pGraphics);
           }
           break;
         case BACK:
           if (grabsInput()) {
             if (_backShape != null)
-              pg.shape(_backShape);
+              pGraphics.shape(_backShape);
             else
-              setBack(pg);
+              setBack(pGraphics);
           } else {
             if (_frontShape != null)
-              pg.shape(_frontShape);
+              pGraphics.shape(_frontShape);
             else
-              setFront(pg);
+              setFront(pGraphics);
           }
           break;
       }
       //*/
-      pg.popStyle();
-      pg.popMatrix();
+      pGraphics.popStyle();
+      pGraphics.popMatrix();
     } else {
       if (precision() == Precision.EXACT) {
         float r = (float) (_id & 255) / 255.f;
@@ -277,15 +277,15 @@ public class Shape extends Node {
         float b = (float) ((_id >> 16) & 255) / 255.f;
         // funny, only safe way. Otherwise break things horribly when setting shapes
         // and there are more than one iFrame
-        pg.shader(graph()._triangleShader);
-        pg.shader(graph()._lineShader, PApplet.LINES);
-        pg.shader(graph()._pointShader, PApplet.POINTS);
+        pGraphics.shader(graph()._triangleShader);
+        pGraphics.shader(graph()._lineShader, PApplet.LINES);
+        pGraphics.shader(graph()._pointShader, PApplet.POINTS);
 
         graph()._triangleShader.set("id", new PVector(r, g, b));
         graph()._lineShader.set("id", new PVector(r, g, b));
         graph()._pointShader.set("id", new PVector(r, g, b));
-        pg.pushStyle();
-        pg.pushMatrix();
+        pGraphics.pushStyle();
+        pGraphics.pushMatrix();
                 /*
                 if (_backShape != null)
                     pg.shape(_backShape);
@@ -294,16 +294,16 @@ public class Shape extends Node {
                 //*/
         ///*
         if (_frontShape != null)
-          pg.shapeMode(graph().frontBuffer().shapeMode);
+          pGraphics.shapeMode(graph().frontBuffer().shapeMode);
         if (_backShape != null)
-          pg.shape(_backShape);
+          pGraphics.shape(_backShape);
         else {
-          set(pg);
-          setBack(pg);
+          set(pGraphics);
+          setBack(pGraphics);
         }
         //*/
-        pg.popStyle();
-        pg.popMatrix();
+        pGraphics.popStyle();
+        pGraphics.popMatrix();
       }
     }
   }
