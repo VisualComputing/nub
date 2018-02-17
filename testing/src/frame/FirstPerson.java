@@ -1,14 +1,14 @@
 package frame;
 
 import processing.core.PApplet;
-import proscene.core.Graph;
-import proscene.core.Node;
-import proscene.input.Shortcut;
-import proscene.input.event.KeyEvent;
-import proscene.input.event.KeyShortcut;
-import proscene.input.event.MotionEvent;
-import proscene.processing.Mouse;
-import proscene.processing.Scene;
+import frames.core.Graph;
+import frames.core.Node;
+import frames.input.Shortcut;
+import frames.input.event.KeyEvent;
+import frames.input.event.KeyShortcut;
+import frames.input.event.MotionEvent;
+import frames.processing.Mouse;
+import frames.processing.Scene;
 
 public class FirstPerson extends PApplet {
   Scene scene;

@@ -1,9 +1,9 @@
 package common;
 
-import proscene.core.Graph;
-import proscene.core.Node;
-import proscene.input.Event;
-import proscene.processing.Mouse;
+import frames.core.Graph;
+import frames.core.Node;
+import frames.input.Event;
+import frames.processing.Mouse;
 
 public class InteractiveNode extends Node {
   public InteractiveNode(Graph graph) {

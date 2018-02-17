@@ -4,16 +4,16 @@ import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
-import proscene.core.Interpolator;
-import proscene.input.Event;
-import proscene.input.Shortcut;
-import proscene.input.event.MotionEvent1;
-import proscene.input.event.MotionEvent2;
-import proscene.input.event.TapEvent;
-import proscene.input.event.TapShortcut;
-import proscene.primitives.Frame;
-import proscene.processing.Scene;
-import proscene.processing.Shape;
+import frames.core.Interpolator;
+import frames.input.Event;
+import frames.input.Shortcut;
+import frames.input.event.MotionEvent1;
+import frames.input.event.MotionEvent2;
+import frames.input.event.TapEvent;
+import frames.input.event.TapShortcut;
+import frames.primitives.Frame;
+import frames.processing.Scene;
+import frames.processing.Shape;
 
 /**
  * This example introduces the three different interpolations offered

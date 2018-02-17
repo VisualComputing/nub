@@ -3,10 +3,10 @@ package third;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PVector;
-import proscene.core.Node;
-import proscene.primitives.Vector;
-import proscene.processing.Mouse;
-import proscene.processing.Scene;
+import frames.core.Node;
+import frames.primitives.Vector;
+import frames.processing.Mouse;
+import frames.processing.Scene;
 
 import java.util.ArrayList;
 

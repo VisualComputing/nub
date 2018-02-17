@@ -4,10 +4,10 @@ import common.InteractiveNode;
 import common.InteractiveShape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import proscene.core.Graph;
-import proscene.core.Node;
-import proscene.processing.Scene;
-import proscene.processing.Shape;
+import frames.core.Graph;
+import frames.core.Node;
+import frames.processing.Scene;
+import frames.processing.Shape;
 
 public class MiniMap extends PApplet {
   Scene scene, minimap;

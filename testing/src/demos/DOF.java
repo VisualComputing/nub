@@ -6,7 +6,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.opengl.PShader;
-import proscene.processing.Scene;
+import frames.processing.Scene;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;
@@ -38,12 +38,12 @@ public class DOF extends PApplet {
       models[i].randomize();
     }
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/proscene.js/testing/data/dof/depth.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/frames.js/testing/data/dof/depth.glsl");
     depthShader.set("maxDepth", scene.radius() * 2);
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/proscene.js/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/frames.js/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);

@@ -2,9 +2,9 @@ package frame;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import proscene.core.Node;
-import proscene.primitives.Vector;
-import proscene.processing.Scene;
+import frames.core.Node;
+import frames.primitives.Vector;
+import frames.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

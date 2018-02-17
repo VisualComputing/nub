@@ -3,10 +3,10 @@ package basics;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PShape;
-import proscene.core.Interpolator;
-import proscene.core.Node;
-import proscene.processing.Scene;
-import proscene.processing.Shape;
+import frames.core.Interpolator;
+import frames.core.Node;
+import frames.processing.Scene;
+import frames.processing.Shape;
 
 /**
  * This example introduces the three different interpolations offered

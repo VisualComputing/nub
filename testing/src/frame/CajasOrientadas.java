@@ -2,13 +2,13 @@ package frame;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import proscene.core.Graph;
-import proscene.core.Node;
-import proscene.input.event.MotionEvent;
-import proscene.primitives.Matrix;
-import proscene.primitives.Vector;
-import proscene.processing.Mouse;
-import proscene.processing.Scene;
+import frames.core.Graph;
+import frames.core.Node;
+import frames.input.event.MotionEvent;
+import frames.primitives.Matrix;
+import frames.primitives.Vector;
+import frames.processing.Mouse;
+import frames.processing.Scene;
 
 /**
  * Created by pierre on 11/15/16.

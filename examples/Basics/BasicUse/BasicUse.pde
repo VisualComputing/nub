@@ -2,13 +2,13 @@
  * Basic Use.
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates a direct approach to use proscene by Scene proper
+ * This example illustrates a direct approach to use frames by Scene proper
  * instantiation.
  */
 
-import proscene.input.*;
-import proscene.input.event.*;
-import proscene.processing.*;
+import frames.input.*;
+import frames.input.event.*;
+import frames.processing.*;
 
 Scene scene;
 //Choose P2D or P3D
@@ -49,7 +49,7 @@ void setup() {
     }
 
     @Override
-    public void interact(proscene.input.event.KeyEvent event) {
+    public void interact(frames.input.event.KeyEvent event) {
       KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
       KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
       KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);

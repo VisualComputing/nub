@@ -2,9 +2,9 @@ package frame;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphicsOpenGL;
-import proscene.core.Graph;
-import proscene.processing.GLMatrixHandler;
-import proscene.processing.Mouse;
+import frames.core.Graph;
+import frames.processing.GLMatrixHandler;
+import frames.processing.Mouse;
 
 /**
  * This example just to show that a Graph is instantiable.
@@ -20,7 +20,7 @@ public class FrameInteraction extends PApplet {
   public void setup() {
     graph = new Graph(width, height);
     //TODO wanna go like this:
-    //refer to the MatrixShader proscene experiment
+    //refer to the MatrixShader frames experiment
     //graph.setMatrixHandler(new MatrixHandler(graph));
     graph.setMatrixHandler(new GLMatrixHandler(graph, (PGraphicsOpenGL) g));
 

@@ -3,11 +3,11 @@ package basics;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import proscene.core.Graph;
-import proscene.input.Shortcut;
-import proscene.input.event.MotionEvent;
-import proscene.processing.Scene;
-import proscene.processing.Shape;
+import frames.core.Graph;
+import frames.input.Shortcut;
+import frames.input.event.MotionEvent;
+import frames.processing.Scene;
+import frames.processing.Shape;
 
 public class ProsceneNodes extends PApplet {
   Scene scene;

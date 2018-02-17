@@ -3,12 +3,12 @@ package basics;
 import common.InteractiveNode;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import proscene.core.Node;
-import proscene.input.Event;
-import proscene.primitives.Frame;
-import proscene.processing.Mouse;
-import proscene.processing.Scene;
-import proscene.processing.Shape;
+import frames.core.Node;
+import frames.input.Event;
+import frames.primitives.Frame;
+import frames.processing.Mouse;
+import frames.processing.Scene;
+import frames.processing.Shape;
 
 /**
  * Created by pierre on 11/15/16.

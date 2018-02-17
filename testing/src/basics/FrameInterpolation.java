@@ -2,9 +2,9 @@ package basics;
 
 import common.InteractiveNode;
 import processing.core.PApplet;
-import proscene.core.Interpolator;
-import proscene.primitives.Frame;
-import proscene.processing.Scene;
+import frames.core.Interpolator;
+import frames.primitives.Frame;
+import frames.processing.Scene;
 
 /**
  * This example introduces the three different interpolations offered

@@ -1,15 +1,15 @@
 package basics;
 
 import processing.core.PApplet;
-import proscene.core.Graph;
-import proscene.core.Node;
-import proscene.input.Shortcut;
-import proscene.input.event.KeyEvent;
-import proscene.input.event.KeyShortcut;
-import proscene.input.event.MotionEvent;
-import proscene.primitives.Quaternion;
-import proscene.primitives.Vector;
-import proscene.processing.Scene;
+import frames.core.Graph;
+import frames.core.Node;
+import frames.input.Shortcut;
+import frames.input.event.KeyEvent;
+import frames.input.event.KeyShortcut;
+import frames.input.event.MotionEvent;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
+import frames.processing.Scene;
 
 public class TwoD extends PApplet {
   Scene scene;
