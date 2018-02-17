@@ -1,4 +1,4 @@
-<project name="Proscene Library" default="clean" basedir="../">
+<project name="frames Library" default="clean" basedir="../">
 
     
 <!--	
