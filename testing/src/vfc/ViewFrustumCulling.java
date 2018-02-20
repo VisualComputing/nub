@@ -1,11 +1,11 @@
 package vfc;
 
 import common.InteractiveShape;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Graph;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;

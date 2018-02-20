@@ -583,13 +583,11 @@ public class Frame {
    */
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
-      Frame rotateAroundFrameCopy = frame.get();
-      Frame thisFrameCopy = get();
-      thisFrameCopy.setReference(rotateAroundFrameCopy);
-      thisFrameCopy.setWorldMatrix(this);
-      rotateAroundFrameCopy.rotate(new Quaternion(roll, pitch, yaw));
-      setWorldMatrix(thisFrameCopy);
-      return;
+      Frame axis = frame.detach();
+      Frame copy = detach();
+      copy.setReference(axis);
+      axis.rotate(new Quaternion(roll, pitch, yaw));
+      setWorldMatrix(copy);
     }
   }
 

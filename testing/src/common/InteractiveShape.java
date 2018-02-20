@@ -1,14 +1,14 @@
 package common;
 
 
-import processing.core.PApplet;
-import processing.core.PShape;
 import frames.input.Shortcut;
 import frames.input.event.KeyEvent;
 import frames.input.event.KeyShortcut;
 import frames.input.event.MotionEvent;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PShape;
 
 public class InteractiveShape extends Shape {
   Shortcut left = new Shortcut(PApplet.LEFT);

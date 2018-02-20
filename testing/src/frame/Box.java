@@ -1,11 +1,11 @@
 package frame;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
 import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 /**
  * Created by pierre on 11/15/16.

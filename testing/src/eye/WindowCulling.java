@@ -1,10 +1,10 @@
 package eye;
 
 import common.InteractiveShape;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class WindowCulling extends PApplet {
   Scene scene, auxScene;

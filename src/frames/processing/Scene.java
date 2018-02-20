@@ -10,13 +10,6 @@
 
 package frames.processing;
 
-import processing.core.*;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
-import processing.opengl.PGL;
-import processing.opengl.PGraphics3D;
-import processing.opengl.PGraphicsOpenGL;
-import processing.opengl.PShader;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
@@ -27,6 +20,13 @@ import frames.primitives.*;
 import frames.timing.SequentialTimer;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
+import processing.core.*;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.opengl.PGL;
+import processing.opengl.PGraphics3D;
+import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShader;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;

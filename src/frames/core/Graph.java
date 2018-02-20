@@ -2291,13 +2291,12 @@ public class Graph {
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
     _interpolator.stop();
     _interpolator.clear();
+    Frame eye = eye();
+    setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
-    Frame originalFrame = eye();
-    Frame tempFrame = eye().detach();
-    setEye(tempFrame);
     fitScreenRegion(rectangle);
-    setEye(originalFrame);
-    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.addKeyFrame(eye().detach());
+    setEye(eye);
     _interpolator.start();
   }
 
@@ -2312,13 +2311,12 @@ public class Graph {
   public void fitBallInterpolation() {
     _interpolator.stop();
     _interpolator.clear();
+    Frame eye = eye();
+    setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
-    Frame originalFrame = eye();
-    Frame tempFrame = eye().detach();
-    setEye(tempFrame);
     fitBall();
-    setEye(originalFrame);
-    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.addKeyFrame(eye().detach());
+    setEye(eye);
     _interpolator.start();
   }
 

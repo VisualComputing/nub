@@ -2532,22 +2532,15 @@ public class Node extends Frame implements Grabber {
     }
   }
 
+  //TODO needs testing
   @Override
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
-      Frame ref = frame.get();
-      if (ref instanceof Node)
-        _graph.pruneBranch((Node) ref);
-      else if (ref instanceof Grabber) {
-        _graph.inputHandler().removeGrabber((Grabber) ref);
-      }
-      Node copy = get();
-      _graph.pruneBranch(copy);
-      copy.setReference(ref);
-      copy.setWorldMatrix(this);
-      ref.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
+      Frame axis = frame.detach();
+      Frame copy = detach();
+      copy.setReference(axis);
+      axis.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
       setWorldMatrix(copy);
-      return;
     }
   }
 

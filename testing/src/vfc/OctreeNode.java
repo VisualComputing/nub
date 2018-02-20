@@ -1,9 +1,9 @@
 package vfc;
 
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Graph;
 import frames.primitives.Vector;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class OctreeNode {
   Vector p1, p2;

@@ -1,9 +1,6 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PShape;
 import frames.core.Interpolator;
 import frames.input.Event;
 import frames.input.Shortcut;
@@ -14,6 +11,9 @@ import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PShape;
 
 /**
  * This example introduces the three different interpolations offered

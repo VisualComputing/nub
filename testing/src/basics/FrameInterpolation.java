@@ -1,10 +1,10 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
 import frames.core.Interpolator;
 import frames.primitives.Frame;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 /**
  * This example introduces the three different interpolations offered

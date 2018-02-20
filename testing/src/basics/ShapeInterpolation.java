@@ -1,12 +1,12 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PShape;
 import frames.core.Interpolator;
 import frames.core.Node;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PShape;
 
 /**
  * This example introduces the three different interpolations offered

@@ -2,11 +2,11 @@ package demos;
 
 import common.InteractiveNode;
 import common.InteractiveShape;
+import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.opengl.PShader;
-import frames.processing.Scene;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;
