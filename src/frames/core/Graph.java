@@ -151,7 +151,6 @@ public class Graph {
   protected List<TreeSolver> _solvers;
 
 
-
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -2623,7 +2622,7 @@ public class Graph {
 
   /**
    * Return registered solvers
-   * */
+   */
   public List<TreeSolver> solvers() {
     return _solvers;
   }
@@ -2632,9 +2631,9 @@ public class Graph {
    * Registers the given chain to solve IK.
    */
   public TreeSolver setIKStructure(Node branchRoot) {
-    for(TreeSolver solver : _solvers) {
+    for (TreeSolver solver : _solvers) {
       //If Head is Contained in any structure do nothing
-      if(!branch(solver.getHead(), branchRoot).isEmpty())
+      if (!branch(solver.getHead(), branchRoot).isEmpty())
         return null;
     }
     TreeSolver solver = new TreeSolver(branchRoot);
@@ -2650,7 +2649,7 @@ public class Graph {
    */
   public boolean resetIKStructure(Node branchRoot) {
     TreeSolver toRemove = null;
-    for(TreeSolver solver: _solvers) {
+    for (TreeSolver solver : _solvers) {
       if (solver.getHead() == branchRoot) {
         toRemove = solver;
         break;
@@ -2664,8 +2663,8 @@ public class Graph {
   /**
    * Gets the IK Solver with associated with branchRoot node
    */
-  public TreeSolver getSolver(Node branchRoot){
-    for(TreeSolver solver: _solvers) {
+  public TreeSolver getSolver(Node branchRoot) {
+    for (TreeSolver solver : _solvers) {
       if (solver.getHead() == branchRoot) {
         return solver;
       }
@@ -2673,9 +2672,9 @@ public class Graph {
     return null;
   }
 
-  public boolean addIKTarget(Node endEffector, Frame target){
-    for(TreeSolver solver: _solvers) {
-      if(solver.addTarget(endEffector, target)) return true;
+  public boolean addIKTarget(Node endEffector, Frame target) {
+    for (TreeSolver solver : _solvers) {
+      if (solver.addTarget(endEffector, target)) return true;
     }
     return false;
   }
@@ -2683,11 +2682,11 @@ public class Graph {
   /**
    * Execute IK Task for a IK Solver that is not registered
    */
-  public void executeIKSolver(Solver solver){
+  public void executeIKSolver(Solver solver) {
     executeIKSolver(solver, 1);
   }
 
-  public void executeIKSolver(Solver solver, long period){
+  public void executeIKSolver(Solver solver, long period) {
     registerTask(solver.getExecutionTask());
     solver.getExecutionTask().run(period);
   }
