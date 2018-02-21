@@ -20,7 +20,6 @@ PGraphics pg;
 
 void setup() {
   size(800, 800, renderer);
-  pg = this.g;
   rectMode(CENTER);
   scene = new Scene(this);
   scene.setRadius(200);
@@ -33,35 +32,16 @@ void setup() {
     }
 
     @Override
-    public void interact(MotionEvent2 event) {
+    public void interact(frames.input.Event event) {
       Shortcut left = new Shortcut(PApplet.LEFT);
       Shortcut right = new Shortcut(PApplet.RIGHT);
+      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
       if (left.matches(event.shortcut()))
         rotate(event);
       if (right.matches(event.shortcut()))
         screenTranslate(event);
-    }
-
-    @Override
-    public void interact(MotionEvent1 event) {
-      if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+      if (event.shortcut().matches(wheel))
         scale(event);
-    }
-
-    @Override
-    public void interact(frames.input.event.KeyEvent event) {
-      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-      if (event.shortcut().matches(upArrow))
-        translateYPos();
-      else if (event.shortcut().matches(downArrow))
-        translateYNeg();
-      else if (event.shortcut().matches(leftArrow))
-        translateXNeg();
-      else if (event.shortcut().matches(rightArrow))
-        translateXPos();
     }
   };
 
