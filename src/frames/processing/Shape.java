@@ -218,8 +218,6 @@ public class Shape extends Node {
    * Internal use.
    */
   protected void _visit(PGraphics pGraphics) {
-    if (graph().eye() == this)
-      return;
     if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
