@@ -10,6 +10,8 @@
 
 package frames.core;
 
+import frames.ik.Solver;
+import frames.ik.TreeSolver;
 import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Grabber;
@@ -145,6 +147,11 @@ public class Graph {
   protected int _nodeCount;
   protected long _lastNonEyeUpdate = 0;
 
+  // 5. IKinematics solvers
+  protected List<TreeSolver> _solvers;
+
+
+
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -209,6 +216,7 @@ public class Graph {
     setHeight(height);
 
     _seeds = new ArrayList<Node>();
+    _solvers = new ArrayList<TreeSolver>();
     _timingHandler = new TimingHandler();
     _inputHandler = new InputHandler();
 
@@ -2610,4 +2618,78 @@ public class Graph {
   protected long _lastNonEyeUpdate() {
     return _lastNonEyeUpdate;
   }
+
+  //TODO: high-level ik api handling
+
+  /**
+   * Return registered solvers
+   * */
+  public List<TreeSolver> solvers() {
+    return _solvers;
+  }
+
+  /**
+   * Registers the given chain to solve IK.
+   */
+  public TreeSolver setIKStructure(Node branchRoot) {
+    for(TreeSolver solver : _solvers) {
+      //If Head is Contained in any structure do nothing
+      if(!branch(solver.getHead(), branchRoot).isEmpty())
+        return null;
+    }
+    TreeSolver solver = new TreeSolver(branchRoot);
+    _solvers.add(solver);
+    //Add task
+    registerTask(solver.getExecutionTask());
+    solver.getExecutionTask().run(1);
+    return solver;
+  }
+
+  /**
+   * Unregisters the IK Solver with the given Frame as branchRoot
+   */
+  public boolean resetIKStructure(Node branchRoot) {
+    TreeSolver toRemove = null;
+    for(TreeSolver solver: _solvers) {
+      if (solver.getHead() == branchRoot) {
+        toRemove = solver;
+        break;
+      }
+    }
+    //Remove task
+    unregisterTask(toRemove.getExecutionTask());
+    return _solvers.remove(toRemove);
+  }
+
+  /**
+   * Gets the IK Solver with associated with branchRoot node
+   */
+  public TreeSolver getSolver(Node branchRoot){
+    for(TreeSolver solver: _solvers) {
+      if (solver.getHead() == branchRoot) {
+        return solver;
+      }
+    }
+    return null;
+  }
+
+  public boolean addIKTarget(Node endEffector, Frame target){
+    for(TreeSolver solver: _solvers) {
+      if(solver.addTarget(endEffector, target)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Execute IK Task for a IK Solver that is not registered
+   */
+  public void executeIKSolver(Solver solver){
+    executeIKSolver(solver, 1);
+  }
+
+  public void executeIKSolver(Solver solver, long period){
+    registerTask(solver.getExecutionTask());
+    solver.getExecutionTask().run(period);
+  }
+
 }
