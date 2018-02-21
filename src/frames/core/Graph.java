@@ -65,8 +65,8 @@ import java.util.List;
  * {@link #areBoundaryEquationsEnabled()}).
  * <h2>Input handling</h2>
  * The graph performs input handling through an {@link #inputHandler()}. Several
- * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
- * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
+ * {@link InputHandler} wrapper functions, such as {@link #isInputGrabber(Grabber)},
+ * {@link #setDefaultGrabber(Grabber)}, {@link #shiftDefaultGrabber(Grabber, Grabber)},
  * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
  * convenience.
  * <p>
@@ -801,12 +801,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code inputHandler().setDefaultGrabber(node)}.
+   * Same as {@code inputHandler().setDefaultGrabber(grabber)}.
    *
    * @see {@link InputHandler#setDefaultGrabber(Grabber)}
    */
-  public void setDefaultNode(Node node) {
-    inputHandler().setDefaultGrabber(node);
+  public void setDefaultGrabber(Grabber grabber) {
+    inputHandler().setDefaultGrabber(grabber);
   }
 
   /**
@@ -814,26 +814,26 @@ public class Graph {
    *
    * @see InputHandler#resetTrackedGrabber()
    */
-  public void resetInputNode() {
+  public void resetInputGrabber() {
     inputHandler().resetTrackedGrabber();
   }
 
   /**
-   * Same as {@code inputHandler().shiftDefaultGrabber(node1, node2)}.
+   * Same as {@code inputHandler().shiftDefaultGrabber(grabber1, grabber2)}.
    *
    * @see InputHandler#shiftDefaultGrabber(Grabber, Grabber)
    */
-  public void shiftDefaultNode(Node node1, Node node2) {
-    inputHandler().shiftDefaultGrabber(node1, node2);
+  public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
+    inputHandler().shiftDefaultGrabber(grabber1, grabber2);
   }
 
   /**
-   * Same as {@code return inputHandler().isInputGrabber(node)}.
+   * Same as {@code return inputHandler().isInputGrabber(grabber)}.
    *
    * @see InputHandler#isInputGrabber(Grabber)
    */
-  public boolean isInputNode(Node node) {
-    return inputHandler().isInputGrabber(node);
+  public boolean isInputGrabber(Grabber grabber) {
+    return inputHandler().isInputGrabber(grabber);
   }
 
   /**

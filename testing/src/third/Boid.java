@@ -49,7 +49,7 @@ class Boid extends AnimatorObject {
 
   @Override
   public void animate() {
-    if (scene.mouse().inputNode() == node && scene.eye().reference() != node) {
+    if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
       Flock.thirdPerson = node;
       ((Node) scene.eye()).setReference(node);
       scene.interpolateTo(node);
@@ -118,7 +118,7 @@ class Boid extends AnimatorObject {
   }
 
   public boolean isAvatar() {
-    return scene.mouse().inputNode() == node && scene.eye() != node;
+    return scene.mouse().inputGrabber() == node && scene.eye() != node;
   }
 
     /*

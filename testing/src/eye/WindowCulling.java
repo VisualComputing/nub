@@ -38,7 +38,7 @@ public class WindowCulling extends PApplet {
 
     InteractiveShape eye = new InteractiveShape(scene);
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(200);
     scene.fitBall();
 
@@ -52,7 +52,7 @@ public class WindowCulling extends PApplet {
 
     InteractiveShape auxEye = new InteractiveShape(auxScene);
     auxScene.setEye(auxEye);
-    auxScene.setDefaultNode(auxEye);
+    auxScene.setDefaultGrabber(auxEye);
     auxScene.setRadius(400);
     auxScene.fitBall();
   }

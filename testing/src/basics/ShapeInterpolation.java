@@ -33,7 +33,7 @@ public class ShapeInterpolation extends PApplet {
     eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations

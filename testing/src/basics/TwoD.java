@@ -43,7 +43,7 @@ public class TwoD extends PApplet {
     eye = new InteractiveFrame();
 
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(200);
     scene.fitBallInterpolation();
   }

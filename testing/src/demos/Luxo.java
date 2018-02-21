@@ -18,7 +18,7 @@ public class Luxo extends PApplet {
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(100);
     scene.fitBallInterpolation();
     lamp = new Lamp(scene);

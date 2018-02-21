@@ -60,7 +60,7 @@ public class BasicUse extends PApplet {
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.fitBallInterpolation();
   }
 

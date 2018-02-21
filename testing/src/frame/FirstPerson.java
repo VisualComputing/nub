@@ -45,7 +45,7 @@ public class FirstPerson extends PApplet {
 
     InteractiveFrame eye = new InteractiveFrame();
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.fitBallInterpolation();
   }
 

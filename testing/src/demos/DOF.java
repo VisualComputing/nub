@@ -27,7 +27,7 @@ public class DOF extends PApplet {
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
