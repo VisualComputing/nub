@@ -117,7 +117,7 @@ public class BasicIK extends PApplet {
         int color = color(random(0,255), random(0,255), random(0,255), 100);
         for (int i = 0; i < num_joints; i++) {
             Joint iFrame;
-            iFrame = new Joint(scene, color);
+            iFrame = new Joint(scene, i == 0, color);
             if (i == 0)
                 chainRoot = iFrame;
             if (prevFrame != null) iFrame.setReference(prevFrame);

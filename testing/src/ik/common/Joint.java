@@ -19,27 +19,36 @@ import static ik.basic.BasicIK.constraint_factor_y;
  */
 public class Joint extends InteractiveShape {
     private int color;
+    private boolean root;
 
-    public Joint(Scene scene) {
-        this(scene, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255),scene.pApplet().random(0,255), 100));
+    public Joint(Scene scene, boolean root) {
+        this(scene, root, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255),scene.pApplet().random(0,255)));
     }
 
-    public Joint(Scene scene, int color) {
+    public Joint(Scene scene, boolean root, int color) {
         super(scene);
+        this.root  = root;
         this.color = color;
     }
 
     public void set(PGraphics pg) {
         pg.pushStyle();
         pg.fill(color);
+        pg.noStroke();
+        if(pg.is2D()) pg.ellipse(0,0, 3, 3);
+        else pg.sphere(3);
+
         pg.strokeWeight(5);
         pg.stroke(color);
-        if (reference() != null) {
+
+        if (!root) {
             Vector v = this.coordinatesOfFrom(new Vector(), reference());
-            if(pg.is2D())
+            if(pg.is2D()) {
                 pg.line(0, 0, v.x(), v.y());
-            else
+            }
+            else {
                 pg.line(0, 0, 0, v.x(), v.y(), v.z());
+            }
         }
         pg.popStyle();
         graph().drawAxes(5);
