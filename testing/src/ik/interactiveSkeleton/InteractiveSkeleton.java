@@ -4,12 +4,15 @@ import common.InteractiveNode;
 import common.InteractiveShape;
 import frames.core.Graph;
 import frames.core.Node;
+import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
+import ik.common.Target;
 import processing.core.PApplet;
+import processing.core.PImage;
 import processing.core.PShape;
 
 import java.util.ArrayList;
@@ -24,14 +27,15 @@ public class InteractiveSkeleton  extends PApplet {
     InteractiveShape shape;
     Joint root;
     LinearBlendSkinning skinning;
+    Target target;
 
     public void settings() {
         size(700, 700, P3D);
     }
 
     public void setup() {
-        hint(DISABLE_OPTIMIZED_STROKE);
-        hint(DISABLE_DEPTH_TEST);
+        //hint(DISABLE_OPTIMIZED_STROKE);
+        //hint(DISABLE_DEPTH_TEST);
 
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -40,17 +44,20 @@ public class InteractiveSkeleton  extends PApplet {
         scene.setFieldOfView(PI / 3);
         scene.setDefaultNode(eye);
         scene.fitBallInterpolation();
+
+        target = new Target(scene);
         //Create an initial Joint at the center of the Shape
         //root = new InteractiveJoint(scene, true);
         //Create and load an InteractiveShape
         PShape model = loadShape("/home/sebchaparr/Processing/JS/framesjs/testing/data/objs/TropicalFish01.obj");
+        model.setTexture(loadImage("/home/sebchaparr/Processing/JS/framesjs/testing/data/objs/TropicalFish01.jpg"));
         Vector[] box = getBoundingBox(model);
         //Scale model
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
         model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
         //model.rotateZ(PI);
-        model.setFill(color(0,255,0, 100));
+        //model.setFill(color(0,255,0, 100));
         shape = new InteractiveShape(scene, model);
         shape.setPrecision(Node.Precision.FIXED);
         shape.setPrecisionThreshold(1);
@@ -58,7 +65,14 @@ public class InteractiveSkeleton  extends PApplet {
         root = fishSkeleton(shape);
         //Apply skinning
         skinning = new LinearBlendSkinning(shape, model);
-        skinning.setup(scene.branch(root));
+        ArrayList<Node> skeleton = scene.branch(root);
+        skinning.setup(skeleton);
+        //Adding IK behavior
+        target.setPosition(skeleton.get(skeleton.size()-1).position());
+        Solver solver = scene.setIKStructure(root);
+        scene.addIKTarget(skeleton.get(skeleton.size()-1), target);
+        solver.setTIMESPERFRAME(1);
+
     }
 
     public void draw(){
