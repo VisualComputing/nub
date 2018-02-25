@@ -4,6 +4,7 @@ import common.InteractiveNode;
 import common.InteractiveShape;
 import frames.core.Graph;
 import frames.core.Node;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -21,7 +22,8 @@ public class InteractiveSkeleton  extends PApplet {
     Scene scene;
     Node eye;
     InteractiveShape shape;
-    InteractiveJoint root;
+    Joint root;
+    LinearBlendSkinning skinning;
 
     public void settings() {
         size(700, 700, P3D);
@@ -39,8 +41,7 @@ public class InteractiveSkeleton  extends PApplet {
         scene.setDefaultNode(eye);
         scene.fitBallInterpolation();
         //Create an initial Joint at the center of the Shape
-        root = new InteractiveJoint(scene, true);
-
+        //root = new InteractiveJoint(scene, true);
         //Create and load an InteractiveShape
         PShape model = loadShape("/home/sebchaparr/Processing/JS/framesjs/testing/data/objs/TropicalFish01.obj");
         Vector[] box = getBoundingBox(model);
@@ -48,12 +49,16 @@ public class InteractiveSkeleton  extends PApplet {
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
         model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
-        model.rotateZ(PI);
+        //model.rotateZ(PI);
         model.setFill(color(0,255,0, 100));
         shape = new InteractiveShape(scene, model);
         shape.setPrecision(Node.Precision.FIXED);
         shape.setPrecisionThreshold(1);
-        root.setReference(shape);
+        shape.rotate(new Quaternion(new Vector(0,0,1), PI));
+        root = fishSkeleton(shape);
+        //Apply skinning
+        skinning = new LinearBlendSkinning(shape, model);
+        skinning.setup(scene.branch(root));
     }
 
     public void draw(){
@@ -65,6 +70,7 @@ public class InteractiveSkeleton  extends PApplet {
         for(Node frame : scene.nodes()){
             if(frame instanceof Shape) ((Shape) frame).draw();
         }
+        skinning.applyTransformations();
     }
 
     public static  Vector[] getBoundingBox(PShape shape) {
@@ -92,24 +98,25 @@ public class InteractiveSkeleton  extends PApplet {
         return v;
     }
 
-    public Joint fishSkeleton(){
+    public Joint fishSkeleton(Node reference){
         Joint j1 = new Joint(scene, true);
-        j1.setPosition(0, 12, 95);
+        j1.setReference(reference);
+        j1.setPosition(0, 10.8f, 93);
         Joint j2 = new Joint(scene, false);
         j2.setReference(j1);
-        j2.setPosition(0, 14, 64);
+        j2.setPosition(0, 2.3f, 54.7f);
         Joint j3 = new Joint(scene, false);
         j3.setReference(j2);
-        j3.setPosition(0, 14, 25);
+        j3.setPosition(0, 0.4f, 22);
         Joint j4 = new Joint(scene, false);
         j4.setReference(j3);
-        j4.setPosition(0, 8.5f, -12);
+        j4.setPosition(0, 0, -18);
         Joint j5 = new Joint(scene, false);
         j5.setReference(j4);
-        j5.setPosition(0, 2, -49);
+        j5.setPosition(0, 1.8f, -54);
         Joint j6 = new Joint(scene, false);
         j6.setReference(j5);
-        j6.setPosition(0, 2.5f, -96);
+        j6.setPosition(0, -1.1f, -95);
         return j1;
     }
 
