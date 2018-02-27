@@ -49,17 +49,17 @@ public class Joint extends InteractiveShape {
       pg.pushStyle();
       Frame reference = new Frame(new Vector(), rotation().inverse());
       if (constraint() instanceof BallAndSocket) {
-        reference.rotate(((BallAndSocket) constraint()).getRestRotation());
+        reference.rotate(((BallAndSocket) constraint()).restRotation());
         graph().applyTransformation(reference);
         drawCone(pg, boneLength / 2.f, (boneLength / 2.f) * PApplet.tan(PApplet.radians(constraint_factor_x)), (boneLength / 2.f) * PApplet.tan(PApplet.radians(constraint_factor_y)), 20);
       } else if (constraint() instanceof PlanarPolygon) {
-        reference.rotate(((PlanarPolygon) constraint()).getRestRotation());
+        reference.rotate(((PlanarPolygon) constraint()).restRotation());
         graph().applyTransformation(reference);
-        drawCone(pg, ((PlanarPolygon) constraint()).getHeight(), ((PlanarPolygon) constraint()).getVertices());
+        drawCone(pg, ((PlanarPolygon) constraint()).height(), ((PlanarPolygon) constraint()).vertices());
       } else if (constraint() instanceof SphericalPolygon) {
-        reference.rotate(((SphericalPolygon) constraint()).getRestRotation());
+        reference.rotate(((SphericalPolygon) constraint()).restRotation());
         graph().applyTransformation(reference);
-        drawCone(pg, ((SphericalPolygon) constraint()).getVertices(), boneLength);
+        drawCone(pg, ((SphericalPolygon) constraint()).vertices(), boneLength);
       }
       pg.popStyle();
       pg.popMatrix();

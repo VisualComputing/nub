@@ -105,7 +105,7 @@ public abstract class FABRIKSolver extends Solver {
       //Find the orientation of restRotation
       BallAndSocket constraint = (BallAndSocket) parent.constraint();
       Quaternion reference = Quaternion.compose(orientations.get(i), parent.rotation().inverse());
-      Quaternion restOrientation = Quaternion.compose(reference, constraint.getRestRotation());
+      Quaternion restOrientation = Quaternion.compose(reference, constraint.restRotation());
 
       //Align axis
       Vector translation = orientations.get(i).rotate(j.translation().get());
@@ -113,14 +113,14 @@ public abstract class FABRIKSolver extends Solver {
       restOrientation = Quaternion.compose(new Quaternion(translation, newTranslation), restOrientation);
 
       //Find constraint
-      Vector target = constraint.getConstraint(Vector.subtract(p, o), restOrientation);
+      Vector target = constraint.constraint(Vector.subtract(p, o), restOrientation);
       return Vector.add(o, target);
     } else if (parent.constraint() instanceof PlanarPolygon) {
       if (q == null) return p.get();
       //Find the orientation of restRotation
       PlanarPolygon constraint = (PlanarPolygon) parent.constraint();
       Quaternion reference = Quaternion.compose(orientations.get(i), parent.rotation().inverse());
-      Quaternion restOrientation = Quaternion.compose(reference, constraint.getRestRotation());
+      Quaternion restOrientation = Quaternion.compose(reference, constraint.restRotation());
 
       //Align axis
       Vector translation = orientations.get(i).rotate(j.translation().get());
@@ -128,7 +128,7 @@ public abstract class FABRIKSolver extends Solver {
       restOrientation = Quaternion.compose(new Quaternion(translation, newTranslation), restOrientation);
 
       //Find constraint
-      Vector target = constraint.getConstraint(Vector.subtract(p, o), restOrientation);
+      Vector target = constraint.constraint(Vector.subtract(p, o), restOrientation);
       return Vector.add(o, target);
     } else if (parent.constraint() instanceof Hinge) {
             /*if (parent.is2D()) {

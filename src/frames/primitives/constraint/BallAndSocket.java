@@ -34,71 +34,71 @@ public class BallAndSocket extends Constraint {
    * Z-Axis in The rest Rotation Transformation, similarly Up Vector will correspond to
    * Y-Axis and right direction with X-Axis direction.
    * */
-  private float down;
-  private float up;
-  private float left;
-  private float right;
-  private Quaternion restRotation = new Quaternion();
+  protected float _down;
+  protected float _up;
+  protected float _left;
+  protected float _right;
+  protected Quaternion _restRotation = new Quaternion();
 
-  public float getDown() {
-    return down;
+  public float down() {
+    return _down;
   }
 
   public void setDown(float down) {
-    this.down = down;
+    this._down = down;
   }
 
-  public float getUp() {
-    return up;
+  public float up() {
+    return _up;
   }
 
   public void setUp(float up) {
-    this.up = up;
+    this._up = up;
   }
 
-  public float getLeft() {
-    return left;
+  public float left() {
+    return _left;
   }
 
   public void setLeft(float left) {
-    this.left = left;
+    this._left = left;
   }
 
-  public float getRight() {
-    return right;
+  public float right() {
+    return _right;
   }
 
   public void setRight(float right) {
-    this.right = right;
+    this._right = right;
   }
 
-  public Quaternion getRestRotation() {
-    return restRotation;
+  public Quaternion restRotation() {
+    return _restRotation;
   }
 
   public void setRestRotation(Quaternion restRotation) {
-    this.restRotation = restRotation.get();
+    this._restRotation = restRotation.get();
   }
 
   public BallAndSocket() {
-    down = (float) (PI / 2.f);
-    left = (float) (PI / 2.f);
-    up = (float) (PI / 2.f);
-    right = (float) (PI / 2.f);
-    restRotation = new Quaternion();
+    _down = (float) (PI / 2.f);
+    _left = (float) (PI / 2.f);
+    _up = (float) (PI / 2.f);
+    _right = (float) (PI / 2.f);
+    _restRotation = new Quaternion();
   }
 
   public BallAndSocket(float down, float up, float left, float right, Quaternion restRotation) {
     this(down, up, left, right);
-    this.restRotation = restRotation.get();
+    this._restRotation = restRotation.get();
   }
 
   public BallAndSocket(float down, float up, float left, float right) {
     this();
-    this.down = down;
-    this.up = up;
-    this.left = left;
-    this.right = right;
+    this._down = down;
+    this._up = up;
+    this._left = left;
+    this._right = right;
   }
 
   public BallAndSocket(float vertical, float horizontal) {
@@ -113,7 +113,7 @@ public class BallAndSocket extends Constraint {
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     Vector new_pos = Quaternion.multiply(desired, new Vector(0, 0, 1));
-    Vector constrained = getConstraint(new_pos, restRotation);
+    Vector constrained = constraint(new_pos, _restRotation);
     //Get Quaternion
     return new Quaternion(new Vector(0, 0, 1), Quaternion.multiply(frame.rotation().inverse(), constrained));
   }
@@ -130,12 +130,12 @@ public class BallAndSocket extends Constraint {
    * new_pos: new position defined in terms of local coordinates
    */
 
-  public Vector getConstraint(Vector target) {
-    return getConstraint(target, restRotation);
+  public Vector constraint(Vector target) {
+    return constraint(target, _restRotation);
   }
 
   //TODO : Simplify
-  public Vector getConstraint(Vector target, Quaternion restRotation) {
+  public Vector constraint(Vector target, Quaternion restRotation) {
     Vector uvec = Quaternion.multiply(restRotation, new Vector(0, 1, 0));
     Vector rvec = Quaternion.multiply(restRotation, new Vector(1, 0, 0));
     Vector line = Quaternion.multiply(restRotation, new Vector(0, 0, 1));
@@ -147,10 +147,10 @@ public class BallAndSocket extends Constraint {
     Vector adjust = Vector.subtract(target, proj);
     float xaspect = Vector.dot(adjust, rvec);
     float yaspect = Vector.dot(adjust, uvec);
-    float clampDown = this.down;
-    float clampUp = this.up;
-    float clampLeft = this.left;
-    float clampRight = this.right;
+    float clampDown = this._down;
+    float clampUp = this._up;
+    float clampLeft = this._left;
+    float clampRight = this._right;
     boolean inv = false;
     float xbound = xaspect >= 0 ? clampRight : clampLeft;
     float ybound = yaspect >= 0 ? clampUp : clampDown;

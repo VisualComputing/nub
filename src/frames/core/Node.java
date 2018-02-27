@@ -2807,8 +2807,8 @@ public class Node extends Frame implements Grabber {
   /**
    * Set the orientation of this Node when it is not pointing to its child
    **/
-  private void fixRotation(Node child) {
-    fixRotation(child.translation());
+  protected void _fixRotation(Node child) {
+    _fixRotation(child.translation());
   }
 
   /**
@@ -2821,7 +2821,7 @@ public class Node extends Frame implements Grabber {
    * 1. X-Axis points to direction vector
    * Returns the Quaternion that allows the described Transformation
    **/
-  private Quaternion fixRotation(Vector direction) {
+  protected Quaternion _fixRotation(Vector direction) {
     Vector x = new Vector(1, 0, 0);
     Vector y = new Vector(0, 1, 0);
     Vector z = new Vector(0, 0, 1);
@@ -2869,11 +2869,9 @@ public class Node extends Frame implements Grabber {
    */
   public void setupHierarchy() {
     if (children().isEmpty()) setRotation(new Quaternion());
-    if (children().size() == 1) fixRotation(children().get(0));
+    if (children().size() == 1) _fixRotation(children().get(0));
     for (Node node : children()) {
       node.setupHierarchy();
     }
   }
-
-
 }
