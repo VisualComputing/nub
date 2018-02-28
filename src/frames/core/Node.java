@@ -125,14 +125,14 @@ public class Node extends Frame implements Grabber {
   protected TimingTask _spinningTask;
   protected Quaternion _spinningQuaternion;
   protected float _dampFriction; // new
-  // toss and _spin share the damp var:
+  // fly and spin share the damp var:
   protected float _spiningFriction; // new
 
   // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or not
   public boolean _directionIsFixed;
   protected boolean _horizontal = true; // Two simultaneous nodes require two mice!
 
-  protected float _eventSpeed; // spnning and tossing
+  protected float _eventSpeed; // spinning and flying
   protected long _eventDelay;
 
   // _fly
@@ -1661,6 +1661,7 @@ public class Node extends Frame implements Grabber {
    */
   public void zoomOnRegion(MotionEvent2 event) {
     if (!isEye()) {
+      System.out.println("zoomOnRegion(Event) only makes sense for the eye");
       return;
     }
     if (event.isAbsolute()) {
@@ -2545,12 +2546,12 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns {@code true} when the node is tossing.
+   * Returns {@code true} when the node is flying.
    * <p>
-   * During tossing, {@link #damping()} translates the node by its {@link #flyDirection()}
-   * at a frequency defined when the node {@link #_startFlying(MotionEvent, Vector)}.
+   * When flying, {@link #damping()} translates the node by its {@link #flyDirection()}
+   * at a frequency defined when the node {@link #startFlying(Vector, float)}.
    * <p>
-   * Use {@link #_startFlying(MotionEvent, Vector)} and {@link #stopFlying()} to change this
+   * Use {@link #startFlying(Vector, float)} and {@link #stopFlying()} to change this
    * state. Default value is {@code false}.
    * <p>
    * {@link #isSpinning()}
@@ -2560,14 +2561,14 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the tossing motion started using {@link #_startFlying(MotionEvent, Vector)}.
+   * Stops the flying motion started using {@link #startFlying(Vector, float)}.
    * {@link #isFlying()} will return {@code false} after this call.
    * <p>
-   * <b>Attention: </b>This method may be called by {@link #damping()}, since tossing may
+   * <b>Attention: </b>This method may be called by {@link #damping()}, since flying may
    * be decelerated according to {@link #damping()} till it stops completely.
    *
    * @see #damping()
-   * @see #_spin()
+   * @see #stopSpinning()
    */
   public void stopFlying() {
     _flyTask.stop();
@@ -2580,7 +2581,7 @@ public class Node extends Frame implements Grabber {
    * Default value is no translation. Use {@link #setFlyDirection(Vector)} to change this
    * value.
    * <p>
-   * <b>Attention: </b>Tossing may be decelerated according to {@link #damping()} till it
+   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
    * @see #spinningQuaternion()
@@ -2609,13 +2610,13 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Starts the tossing of the node.
+   * Starts the flying of the node.
    * <p>
    * This method starts a timer that will call {@link #damping()} every 20
    * milliseconds. The node {@link #isFlying()} until you call
    * {@link #stopFlying()}.
    * <p>
-   * <b>Attention: </b>Tossing may be decelerated according to {@link #damping()} till it
+   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
    * @see #damping()
@@ -2633,7 +2634,7 @@ public class Node extends Frame implements Grabber {
    * Translates the node by its {@link #flyDirection()}. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
    * <p>
-   * <b>Attention: </b>Tossing may be decelerated according to {@link #damping()} till it
+   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
    * @see #_spin()
