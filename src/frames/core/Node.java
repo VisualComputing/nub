@@ -1645,7 +1645,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into zoom-on-region conversion routine.
+   * User gesture into zoom-on-region conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void zoomOnRegion(MotionEvent event) {
     MotionEvent2 dof2 = MotionEvent.event2(event);
@@ -1657,7 +1657,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into zoom-on-region conversion routine.
+   * User gesture into zoom-on-region conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void zoomOnRegion(MotionEvent2 event) {
     if (!isEye()) {
@@ -2035,7 +2035,14 @@ public class Node extends Frame implements Grabber {
       System.out.println("lookAround(Event) requires a motion event");
   }
 
+  /**
+   * User gesture into lookAround conversion routine. Only meaningful if {@link #isEye()}.
+   */
   public void lookAround(MotionEvent event) {
+    if (!isEye()) {
+      System.out.println("lookAround(Event) only makes sense for the eye");
+      return;
+    }
     rotate(_rollPitchQuaternion(event));
   }
 
@@ -2050,7 +2057,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into move-backward conversion routine.
+   * User gesture into move-backward conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void moveBackward(MotionEvent event) {
     _moveForward(event, false);
@@ -2067,7 +2074,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into move-forward conversion routine.
+   * User gesture into move-forward conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void moveForward(MotionEvent event) {
     _moveForward(event, true);
@@ -2088,6 +2095,10 @@ public class Node extends Frame implements Grabber {
    * User gesture into move-forward conversion routine.
    */
   protected void _moveForward(MotionEvent2 event, boolean forward) {
+    if (!isEye()) {
+      System.out.println("moveForward(Event) only makes sense for the eye");
+      return;
+    }
     if (event.fired())
       _updateUpVector();
     else if (event.flushed()) {
@@ -2113,7 +2124,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into drive conversion routine.
+   * User gesture into drive conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void drive(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
@@ -2124,9 +2135,13 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into drive conversion routine.
+   * User gesture into drive conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void drive(MotionEvent2 event) {
+    if (!isEye()) {
+      System.out.println("drive(Event) only makes sense for the eye");
+      return;
+    }
     if (event.fired()) {
       _initEvent = event.get();
       _updateUpVector();
@@ -2155,7 +2170,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into CAD-rotation conversion routine.
+   * User gesture into CAD-rotation conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void rotateCAD(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
@@ -2166,9 +2181,13 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into CAD-rotation conversion routine.
+   * User gesture into CAD-rotation conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void rotateCAD(MotionEvent2 event) {
+    if (!isEye()) {
+      System.out.println("rotateCAD(Event) only makes sense for the eye");
+      return;
+    }
     if (event.isAbsolute()) {
       System.out.println("rotateCAD(Event) requires a relative motion-event");
       return;
@@ -2206,7 +2225,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into hinge conversion routine.
+   * User gesture into hinge conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void hinge(MotionEvent event) {
     MotionEvent6 motionEvent6 = MotionEvent.event6(event);
@@ -2217,7 +2236,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * User gesture into hinge conversion routine.
+   * User gesture into hinge conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void hinge(MotionEvent6 event) {
     if (!isEye()) {
