@@ -954,7 +954,7 @@ public class Node extends Frame implements Grabber {
    * Spinning requires to set {@link #damping()} to 0.
    * <p>
    * See {@link #_spin()}, {@link #spinningQuaternion()} and
-   * {@link #_startSpinning(MotionEvent, Quaternion)} for details.
+   * {@link #startSpinning(Quaternion, float, long)} for details.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -1013,9 +1013,9 @@ public class Node extends Frame implements Grabber {
    * <p>
    * During spinning, {@link #_spin()} rotates the node by its
    * {@link #spinningQuaternion()} at a frequency defined when the node
-   * {@link #_startSpinning(MotionEvent, Quaternion)}.
+   * {@link #startSpinning(Quaternion, float, long)}.
    * <p>
-   * Use {@link #_startSpinning(MotionEvent, Quaternion)} and {@link #stopSpinning()} to
+   * Use {@link #startSpinning(Quaternion, float, long)} and {@link #stopSpinning()} to
    * change this state. Default value is {@code false}.
    *
    * @see #isFlying()
@@ -1055,7 +1055,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the spinning motion _started using {@link #_startSpinning(MotionEvent, Quaternion)}.
+   * Stops the spinning motion _started using {@link #startSpinning(Quaternion, float, long)}.
    * Note that {@link #isSpinning()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #_spin()}, since spinning may be
@@ -1065,16 +1065,6 @@ public class Node extends Frame implements Grabber {
    */
   public void stopSpinning() {
     _spinningTask.stop();
-  }
-
-  /**
-   * Internal use. Same as {@code _startSpinning(rt, _event._speed(), _event._delay())}.
-   *
-   * @see #_startFlying(MotionEvent, Vector)
-   * @see #startSpinning(Quaternion, float, long)
-   */
-  protected void _startSpinning(MotionEvent event, Quaternion quaternion) {
-    startSpinning(quaternion, event.speed(), event.delay());
   }
 
   /**
@@ -2105,12 +2095,10 @@ public class Node extends Frame implements Grabber {
       stopFlying();
       return;
     }
-    Vector trns;
     float fSpeed = forward ? -flySpeed() : flySpeed();
     rotate(_rollPitchQuaternion(event));
     _fly.set(0.0f, 0.0f, fSpeed);
-    trns = rotation().rotate(_fly);
-    _startFlying(event, trns);
+    startFlying(rotation().rotate(_fly), event.speed());
   }
 
   /**
@@ -2152,11 +2140,9 @@ public class Node extends Frame implements Grabber {
       return;
     }
     setFlySpeed(0.01f * _graph.radius() * 0.01f * (event.y() - _initEvent.y()));
-    Vector trns;
     rotate(_turnQuaternion(event.event1()));
     _fly.set(0.0f, 0.0f, flySpeed());
-    trns = rotation().rotate(_fly);
-    _startFlying(event, trns);
+    startFlying(rotation().rotate(_fly), event.speed());
   }
 
   /**
@@ -2619,16 +2605,6 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Internal use. Same as {@code startFlying(direction, event.speed())}.
-   *
-   * @see #startFlying(Vector, float)
-   * @see #_startSpinning(MotionEvent, Quaternion)
-   */
-  protected void _startFlying(MotionEvent event, Vector direction) {
-    startFlying(direction, event.speed());
-  }
-
-  /**
    * Starts the flying of the node.
    * <p>
    * This method starts a timer that will call {@link #damping()} every 20
@@ -2640,7 +2616,6 @@ public class Node extends Frame implements Grabber {
    *
    * @see #damping()
    * @see #_spin()
-   * @see #_startFlying(MotionEvent, Vector)
    * @see #startSpinning(Quaternion, float, long)
    */
   public void startFlying(Vector direction, float speed) {

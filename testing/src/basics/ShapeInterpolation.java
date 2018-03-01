@@ -31,6 +31,7 @@ public class ShapeInterpolation extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     eye = new InteractiveNode(scene);
+    eye.setDamping(0);
     scene.setEye(eye);
     //interactivity defaults to the eye
     scene.setDefaultGrabber(eye);
