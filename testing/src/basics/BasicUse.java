@@ -32,6 +32,7 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
     eye = new InteractiveNode(scene);
+    eye.setDamping(0.3f);
 
     node = new Shape(scene) {
       @Override
@@ -71,6 +72,8 @@ public class BasicUse extends PApplet {
 
   public void draw() {
     background(0);
+    scene.drawAxes();
+
     scene.traverse();
 
     pushStyle();

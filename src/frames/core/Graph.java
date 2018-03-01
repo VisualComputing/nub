@@ -106,7 +106,7 @@ import java.util.List;
  * @see MatrixHandler
  */
 //TODO
-// (decide) Remove printing stuff (vector, map, ...) and warnings (hashmap).
+// (decide) Remove printing stuff (vector, map, ...).
 public class Graph {
   // 1. Eye
   protected Frame _eye;

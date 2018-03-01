@@ -124,9 +124,7 @@ public class Node extends Frame implements Grabber {
   protected float _spinningSensitivity;
   protected TimingTask _spinningTask;
   protected Quaternion _spinningQuaternion;
-  protected float _dampFriction; // new
-  // fly and spin share the damp var:
-  protected float _spiningFriction; // new
+  protected float _damping; // new
 
   // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or not
   public boolean _directionIsFixed;
@@ -809,18 +807,6 @@ public class Node extends Frame implements Grabber {
     target.setWorldMatrix(source);
   }
 
-  // Fx
-
-  /**
-   * Internal use.
-   * <p>
-   * Returns the cached value of the spinning friction used in
-   * {@link #_recomputeSpinningQuaternion()}.
-   */
-  protected float _dampingFx() {
-    return _spiningFriction;
-  }
-
   /**
    * Defines the spinning deceleration.
    * <p>
@@ -828,7 +814,7 @@ public class Node extends Frame implements Grabber {
    * value will make damping more difficult (a value of 1 forbids damping).
    */
   public float damping() {
-    return _dampFriction;
+    return _damping;
   }
 
   /**
@@ -837,18 +823,7 @@ public class Node extends Frame implements Grabber {
   public void setDamping(float damping) {
     if (damping < 0 || damping > 1)
       return;
-    _dampFriction = damping;
-    _setDampingFx(_dampFriction);
-  }
-
-  /**
-   * Internal use.
-   * <p>
-   * Computes and caches the value of the spinning friction used in
-   * {@link #_recomputeSpinningQuaternion()}.
-   */
-  protected void _setDampingFx(float friction) {
-    _spiningFriction = friction * friction * friction;
+    _damping = damping;
   }
 
   /**
@@ -1146,7 +1121,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void _recomputeSpinningQuaternion() {
     float prevSpeed = _eventSpeed;
-    float damping = 1.0f - _dampingFx();
+    float damping = 1.0f - (float) Math.pow(damping(), 3);
     _eventSpeed *= damping;
     if (Math.abs(_eventSpeed) < .001f)
       _eventSpeed = 0;

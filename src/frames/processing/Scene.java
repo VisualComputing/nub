@@ -1651,7 +1651,7 @@ public class Scene extends Graph implements PConstants {
   // DRAWING
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, 100)}.
+   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, radius())}.
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
@@ -1669,7 +1669,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, mask, nbFrames, * 100)}
+   * Convenience function that simply calls {@code drawPath(interpolator, mask, frameCount, radius())}.
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
@@ -2162,12 +2162,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawAxes(100)}.
+   * Convenience function that simply calls {@code drawAxes(radius())}.
    *
    * @see #drawAxes(float)
    */
   public void drawAxes() {
-    drawAxes(100);
+    drawAxes(radius());
   }
 
   /**
@@ -2181,12 +2181,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawAxes(pGraphics, radius() / 5)}.
+   * Same as {@code drawAxes(pGraphics, radius())}.
    *
    * @see #drawAxes(PGraphics, float)
    */
   public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, radius() / 5);
+    drawAxes(pGraphics, radius());
   }
 
   /**
@@ -2268,12 +2268,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawGrid(100, 10)}
+   * Convenience function that simply calls {@code drawGrid(radius(), 10)}
    *
    * @see #drawGrid(float, int)
    */
   public void drawGrid() {
-    drawGrid(100, 10);
+    drawGrid(radius(), 10);
   }
 
   /**
@@ -2286,12 +2286,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawGrid(100, subdivisions)}
+   * Convenience function that simply calls {@code drawGrid(radius(), subdivisions)}
    *
    * @see #drawGrid(float, int)
    */
   public void drawGrid(int subdivisions) {
-    drawGrid(100, subdivisions);
+    drawGrid(radius(), subdivisions);
   }
 
   /**
@@ -2305,10 +2305,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawGrid(frontBuffer, radius()/4, 10)}.
+   * Same as {@code drawGrid(frontBuffer, radius(), 10)}.
    */
   public void drawGrid(PGraphics pGraphics) {
-    drawGrid(pGraphics, radius() / 4, 10);
+    drawGrid(pGraphics, radius(), 10);
   }
 
   /**
@@ -2330,12 +2330,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawDottedGrid(100, 10)}.
+   * Convenience function that simply calls {@code drawDottedGrid(radius(), 10)}.
    *
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid() {
-    drawDottedGrid(100, 10);
+    drawDottedGrid(radius(), 10);
   }
 
   /**
@@ -2348,12 +2348,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simplt calls {@code drawDottedGrid(100, subdivisions)}.
+   * Convenience function that simplt calls {@code drawDottedGrid(radius(), subdivisions)}.
    *
    * @see #drawDottedGrid(float, int)
    */
   public void drawDottedGrid(int subdivisions) {
-    drawDottedGrid(100, subdivisions);
+    drawDottedGrid(radius(), subdivisions);
   }
 
   /**
@@ -2366,12 +2366,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawDottedGrid(pGraphics, radius() / 4, 10)}.
+   * Same as {@code drawDottedGrid(pGraphics, radius(), 10)}.
    *
    * @see #drawDottedGrid(PGraphics, float, int)
    */
   public void drawDottedGrid(PGraphics pGraphics) {
-    drawDottedGrid(pGraphics, radius() / 4, 10);
+    drawDottedGrid(pGraphics, radius(), 10);
   }
 
   /**

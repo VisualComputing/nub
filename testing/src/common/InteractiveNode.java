@@ -24,13 +24,15 @@ public class InteractiveNode extends Node {
   // behavior is here :P
   @Override
   public void interact(Event event) {
+    /*
     if (event.shortcut().matches(Mouse.RIGHT))
       moveForward(event);
     if (event.shortcut().matches(Mouse.LEFT))
       moveBackward(event);
     if (event.shortcut().matches(Mouse.CENTER))
       lookAround(event);
-    /*
+    //*/
+    // /*
     if (event.shortcut().matches(Mouse.RIGHT))
       translate(event);
     else if (event.shortcut().matches(Mouse.LEFT))
