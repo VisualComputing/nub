@@ -1061,9 +1061,8 @@ public class Node extends Frame implements Grabber {
     _eventDelay = delay;
     if (damping() == 0 && _eventSpeed < spinningSensitivity())
       return;
-    int updateInterval = (int) delay;
-    if (updateInterval > 0)
-      _spinningTask.run(updateInterval);
+    if (delay > 0)
+      _spinningTask.run(delay);
   }
 
   /**
