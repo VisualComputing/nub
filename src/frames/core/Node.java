@@ -2532,22 +2532,15 @@ public class Node extends Frame implements Grabber {
     }
   }
 
+  //TODO needs testing
   @Override
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
-      Frame ref = frame.get();
-      if (ref instanceof Node)
-        _graph.pruneBranch((Node) ref);
-      else if (ref instanceof Grabber) {
-        _graph.inputHandler().removeGrabber((Grabber) ref);
-      }
-      Node copy = get();
-      _graph.pruneBranch(copy);
-      copy.setReference(ref);
-      copy.setWorldMatrix(this);
-      ref.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
+      Frame axis = frame.detach();
+      Frame copy = detach();
+      copy.setReference(axis);
+      axis.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
       setWorldMatrix(copy);
-      return;
     }
   }
 
@@ -2811,58 +2804,60 @@ public class Node extends Frame implements Grabber {
 
   //SOME USEFUL METHODS FOR IK
 
-  /**Set the orientation of this Node when it is not pointing to its child**/
-  private void fixRotation(Node child){
-    fixRotation(child.translation());
+  /**
+   * Set the orientation of this Node when it is not pointing to its child
+   **/
+  protected void _fixRotation(Node child) {
+    _fixRotation(child.translation());
   }
 
   /**
    * Set orientation of a Node in the following way:
    * When Graph is 3D:
-   *  1. Z-Axis points to direction vector
-   *  2. Y-Axis will be orthogonal to Z-Axis Parent Node and Z-Axis.
-   *  3. Y-Axis Parent Node and Y-Axis must have same Sign
+   * 1. Z-Axis points to direction vector
+   * 2. Y-Axis will be orthogonal to Z-Axis Parent Node and Z-Axis.
+   * 3. Y-Axis Parent Node and Y-Axis must have same Sign
    * When Graph is 2D:
-   *  1. X-Axis points to direction vector
+   * 1. X-Axis points to direction vector
    * Returns the Quaternion that allows the described Transformation
-   * **/
-  private Quaternion fixRotation(Vector direction){
-    Vector x = new Vector(1,0,0);
-    Vector y = new Vector(0,1,0);
-    Vector z = new Vector(0,0,1);
+   **/
+  protected Quaternion _fixRotation(Vector direction) {
+    Vector x = new Vector(1, 0, 0);
+    Vector y = new Vector(0, 1, 0);
+    Vector z = new Vector(0, 0, 1);
     Quaternion rotation = rotation().inverse();
     Quaternion inverse_rotation;
     rotate(rotation);
-    if(this.graph().is3D()){
+    if (this.graph().is3D()) {
       /*First we get the rotation required to set Z-Axis in the direction of the child new position*/
       Quaternion z_rotation = new Quaternion(z, rotation.inverse().rotate(direction));
       rotate(z_rotation);
       /*Then we let Y-Axis to be orthogonal to Z_parent and Z*/
       Vector z_parent = localTransformOf(z);
       Vector y_direction = new Vector();
-      Vector.cross(z_parent,z, y_direction);
+      Vector.cross(z_parent, z, y_direction);
       //Check dot product
-      if(z_parent.dot(z) < 0){
+      if (z_parent.dot(z) < 0) {
         y_direction.multiply(-1);
       }
       /*Get how much Y-Axis must rotate*/
-      if(y_direction.magnitude() > 1e-6f) {
+      if (y_direction.magnitude() > 1e-6f) {
         Quaternion y_rotation = new Quaternion(y, y_direction);
         rotate(y_rotation);
         rotation.compose(Quaternion.compose(z_rotation, y_rotation));
         inverse_rotation = rotation.inverse();
-      }else{
+      } else {
         rotation.compose(z_rotation);
         inverse_rotation = rotation.inverse();
       }
-    }else{
+    } else {
       /*First we get the rotation required to set X-Axis in the direction of the child new position*/
       rotation.compose(new Quaternion(x, direction));
       inverse_rotation = rotation.inverse();
       rotate(rotation);
     }
     //Apply inverse rotation to each children
-    for(int i = 0; i < children().size(); i++) {
+    for (int i = 0; i < children().size(); i++) {
       children().get(i).setRotation(Quaternion.compose(inverse_rotation, children().get(i).rotation()));
       children().get(i).setTranslation(new Vector(0, 0, children().get(i).translation().magnitude()));
     }
@@ -2872,13 +2867,11 @@ public class Node extends Frame implements Grabber {
   /**
    * From the branch specified by this as root, change Nodes rotation to follow  Standard Notation
    */
-  public void setupHierarchy(){
-    if(children().isEmpty()) setRotation(new Quaternion());
-    if(children().size() == 1) fixRotation(children().get(0));
-    for(Node node : children()) {
+  public void setupHierarchy() {
+    if (children().isEmpty()) setRotation(new Quaternion());
+    if (children().size() == 1) _fixRotation(children().get(0));
+    for (Node node : children()) {
       node.setupHierarchy();
     }
   }
-
-
 }

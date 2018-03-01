@@ -1,12 +1,12 @@
 package third;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PVector;
 import frames.core.Node;
 import frames.primitives.Vector;
 import frames.processing.Mouse;
 import frames.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PVector;
 
 import java.util.ArrayList;
 
@@ -42,7 +42,7 @@ public class Flock extends PApplet {
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.fitBall();
     // create and fill the list of boids
     flock = new ArrayList();

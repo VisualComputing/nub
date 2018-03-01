@@ -14,6 +14,7 @@ import ik.common.Target;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PShape;
+import processing.opengl.PShader;
 
 import java.util.ArrayList;
 
@@ -42,7 +43,7 @@ public class InteractiveSkeleton  extends PApplet {
         eye = new InteractiveNode(scene);
         scene.setEye(eye);
         scene.setFieldOfView(PI / 3);
-        scene.setDefaultNode(eye);
+        scene.setDefaultGrabber(eye);
         scene.fitBallInterpolation();
 
         target = new Target(scene);
@@ -51,6 +52,9 @@ public class InteractiveSkeleton  extends PApplet {
         //Create and load an InteractiveShape
         PShape model = loadShape("/home/sebchaparr/Processing/JS/framesjs/testing/data/objs/TropicalFish01.obj");
         model.setTexture(loadImage("/home/sebchaparr/Processing/JS/framesjs/testing/data/objs/TropicalFish01.jpg"));
+        //model.setFill(color(255,0,0));
+
+
         Vector[] box = getBoundingBox(model);
         //Scale model
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
@@ -72,19 +76,24 @@ public class InteractiveSkeleton  extends PApplet {
         Solver solver = scene.setIKStructure(root);
         scene.addIKTarget(skeleton.get(skeleton.size()-1), target);
         solver.setTIMESPERFRAME(1);
-
+        //setSkinning();
     }
 
+    int counter = 0;
     public void draw(){
+        //updateParams();
         background(0);
         lights();
         //Draw Constraints
         scene.drawAxes();
-
         for(Node frame : scene.nodes()){
+            //if(frame == shape) shader(shader);
             if(frame instanceof Shape) ((Shape) frame).draw();
+            //if(frame == shape) resetShader();
         }
         skinning.applyTransformations();
+        target.setPosition(new Vector(50*sin(radians(counter)), target.position().y(), target.position().z()));
+        counter++;
     }
 
     public static  Vector[] getBoundingBox(PShape shape) {
@@ -147,6 +156,57 @@ public class InteractiveSkeleton  extends PApplet {
             printSkeleton(root);
         }
     }
+
+    // TODO: SKINNING on GPU
+    /*
+    //testing skinning on GPU
+    PShader shader;
+    Quaternion[] boneQuat = new Quaternion[120];
+    float[] bonePosition = new float[120];
+
+    public void setSkinning(){
+        ArrayList<Node> skeleton = scene.branch(root);
+        shader = loadShader("/home/sebchaparr/Processing/JS/framesjs/testing/src/ik/interactiveSkeleton/frag.glsl",
+                "/home/sebchaparr/Processing/JS/framesjs/testing/src/ik/interactiveSkeleton/skinning.glsl");
+        int i = 0, j = 0;
+        for(Node node : skeleton){
+            Vector position;
+            boneQuat[j++] = node.rotation();
+            position = node.position();
+            bonePosition[i++] = position.x();
+            bonePosition[i++] = position.y();
+            bonePosition[i++] = position.z();
+        }
+        shader.set("bonePosition", bonePosition);
+
+    }
+
+    public void updateParams(){
+        ArrayList<Node> skeleton = scene.branch(root);
+        float[] boneRotation = new float[120];
+        int i = 0, j = 0, k =0;
+        for(Node node : skeleton){
+            Vector position;
+            Quaternion rotation;
+            position = node.position();
+            rotation = Quaternion.compose(node.rotation(),boneQuat[k].inverse());
+
+            //bonePosition[i++] = position.x();
+            //bonePosition[i++] = position.y();
+            //bonePosition[i++] = position.z();
+            boneRotation[j++] = rotation.x();
+            boneRotation[j++] = rotation.y();
+            boneRotation[j++] = rotation.z();
+            boneRotation[j++] = rotation.w();
+            boneQuat[k++] = node.orientation();
+            i+=3;
+
+        }
+        //shader.set("bonePosition", bonePosition);
+        shader.set("boneRotation", boneRotation);
+        shader.set("boneLength", i);
+
+    }*/
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveSkeleton"});

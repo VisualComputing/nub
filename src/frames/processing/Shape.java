@@ -10,13 +10,13 @@
 
 package frames.processing;
 
+import frames.core.Node;
+import frames.primitives.Frame;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
-import frames.core.Node;
-import frames.primitives.Frame;
 
 /**
  * A shape is a {@link Node} specialization that can be set from a retained-mode rendering
@@ -218,8 +218,6 @@ public class Shape extends Node {
    * Internal use.
    */
   protected void _visit(PGraphics pGraphics) {
-    if (graph().eye() == this)
-      return;
     if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();

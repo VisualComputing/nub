@@ -1,11 +1,11 @@
 package vfc;
 
 import common.InteractiveShape;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Graph;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
@@ -34,7 +34,7 @@ public class ViewFrustumCulling extends PApplet {
     scene.enableBoundaryEquations();
     InteractiveShape eye = new InteractiveShape(scene);
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
@@ -45,7 +45,7 @@ public class ViewFrustumCulling extends PApplet {
     auxScene.setType(Graph.Type.ORTHOGRAPHIC);
     InteractiveShape auxEye = new InteractiveShape(auxScene);
     auxScene.setEye(auxEye);
-    auxScene.setDefaultNode(auxEye);
+    auxScene.setDefaultGrabber(auxEye);
     auxScene.setRadius(200);
     scene.setFieldOfView(PI / 3);
     auxScene.fitBall();

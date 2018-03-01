@@ -1,7 +1,6 @@
 package frame;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.input.event.MotionEvent;
@@ -9,6 +8,7 @@ import frames.primitives.Matrix;
 import frames.primitives.Vector;
 import frames.processing.Mouse;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 /**
  * Created by pierre on 11/15/16.
@@ -68,7 +68,7 @@ public class CajasOrientadas extends PApplet {
 
     graph.setEye(eye1);
     graph.setFieldOfView((float) Math.PI / 3);
-    graph.setDefaultNode(eye1);
+    graph.setDefaultGrabber(eye1);
     graph.fitBall();
     println(graph.inputHandler().hasGrabber(eye1) ? "has eye1" : "has NOT eye1");
 
@@ -110,13 +110,13 @@ public class CajasOrientadas extends PApplet {
       if (eye1 == graph.eye()) {
         graph.setEye(eye2);
         graph.setFieldOfView(1);
-        graph.setDefaultNode(eye2);
+        graph.setDefaultGrabber(eye2);
         //graph.fitBall();
         println("Eye2 set " + graph.fieldOfView());
       } else {
         graph.setEye(eye1);
         graph.setFieldOfView((float) Math.PI / 4);
-        graph.setDefaultNode(eye1);
+        graph.setDefaultGrabber(eye1);
         //graph.fitBall();
         println("Eye1 set " + graph.fieldOfView());
       }
@@ -149,7 +149,7 @@ public class CajasOrientadas extends PApplet {
     if (key == 'S')
       graph.fitBall();
     if (key == 'u')
-      graph.shiftDefaultNode((Node) graph.eye(), esfera.iFrame);
+      graph.shiftDefaultGrabber((Node) graph.eye(), esfera.iFrame);
     if (key == 't')
       info();
     if (key == 'v') {

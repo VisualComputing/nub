@@ -1,12 +1,12 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PShape;
 import frames.core.Interpolator;
 import frames.core.Node;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PShape;
 
 /**
  * This example introduces the three different interpolations offered
@@ -33,7 +33,7 @@ public class ShapeInterpolation extends PApplet {
     eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations

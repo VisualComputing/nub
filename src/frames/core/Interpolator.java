@@ -724,14 +724,12 @@ public class Interpolator {
           pvec2 = Vector.add(pvec2, kf[2].tangentVector());
 
           for (int step = 0; step < nbSteps; ++step) {
-            Frame frame = new Frame();
             float alpha = step / (float) nbSteps;
-            frame.setPosition(Vector.add(kf[1].position(),
-                Vector.multiply(Vector.add(kf[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)));
-            frame.setOrientation(
-                Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha));
-            frame.setMagnitude(Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha));
-            _path.add(frame.get());
+            _path.add(new Frame(
+                Vector.add(kf[1].position(), Vector.multiply(Vector.add(kf[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha),
+                Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha))
+            );
           }
 
           // Shift

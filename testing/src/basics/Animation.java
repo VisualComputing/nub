@@ -1,8 +1,8 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 public class Animation extends PApplet {
   int nbPart;
@@ -19,7 +19,7 @@ public class Animation extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(150);
     scene.fitBall();
 

@@ -202,8 +202,7 @@ public class Frame {
     setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    float magnitude = magnitude() * ((float) Math.random() * (upper - lower)) + lower;
-    setMagnitude(magnitude);
+    setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
   }
 
   /**
@@ -222,7 +221,6 @@ public class Frame {
     frame.setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    float magnitude = ((float) Math.random() * (upper - lower)) + lower;
     frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     return frame;
   }
@@ -583,13 +581,11 @@ public class Frame {
    */
   public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
     if (frame != null) {
-      Frame rotateAroundFrameCopy = frame.get();
-      Frame thisFrameCopy = get();
-      thisFrameCopy.setReference(rotateAroundFrameCopy);
-      thisFrameCopy.setWorldMatrix(this);
-      rotateAroundFrameCopy.rotate(new Quaternion(roll, pitch, yaw));
-      setWorldMatrix(thisFrameCopy);
-      return;
+      Frame axis = frame.detach();
+      Frame copy = detach();
+      copy.setReference(axis);
+      axis.rotate(new Quaternion(roll, pitch, yaw));
+      setWorldMatrix(copy);
     }
   }
 

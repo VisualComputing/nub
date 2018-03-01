@@ -67,8 +67,8 @@ import java.util.List;
  * {@link #areBoundaryEquationsEnabled()}).
  * <h2>Input handling</h2>
  * The graph performs input handling through an {@link #inputHandler()}. Several
- * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
- * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
+ * {@link InputHandler} wrapper functions, such as {@link #isInputGrabber(Grabber)},
+ * {@link #setDefaultGrabber(Grabber)}, {@link #shiftDefaultGrabber(Grabber, Grabber)},
  * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
  * convenience.
  * <p>
@@ -149,7 +149,6 @@ public class Graph {
 
   // 5. IKinematics solvers
   protected List<TreeSolver> _solvers;
-
 
 
   /**
@@ -809,12 +808,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code inputHandler().setDefaultGrabber(node)}.
+   * Same as {@code inputHandler().setDefaultGrabber(grabber)}.
    *
    * @see {@link InputHandler#setDefaultGrabber(Grabber)}
    */
-  public void setDefaultNode(Node node) {
-    inputHandler().setDefaultGrabber(node);
+  public void setDefaultGrabber(Grabber grabber) {
+    inputHandler().setDefaultGrabber(grabber);
   }
 
   /**
@@ -822,26 +821,26 @@ public class Graph {
    *
    * @see InputHandler#resetTrackedGrabber()
    */
-  public void resetInputNode() {
+  public void resetInputGrabber() {
     inputHandler().resetTrackedGrabber();
   }
 
   /**
-   * Same as {@code inputHandler().shiftDefaultGrabber(node1, node2)}.
+   * Same as {@code inputHandler().shiftDefaultGrabber(grabber1, grabber2)}.
    *
    * @see InputHandler#shiftDefaultGrabber(Grabber, Grabber)
    */
-  public void shiftDefaultNode(Node node1, Node node2) {
-    inputHandler().shiftDefaultGrabber(node1, node2);
+  public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
+    inputHandler().shiftDefaultGrabber(grabber1, grabber2);
   }
 
   /**
-   * Same as {@code return inputHandler().isInputGrabber(node)}.
+   * Same as {@code return inputHandler().isInputGrabber(grabber)}.
    *
    * @see InputHandler#isInputGrabber(Grabber)
    */
-  public boolean isInputNode(Node node) {
-    return inputHandler().isInputGrabber(node);
+  public boolean isInputGrabber(Grabber grabber) {
+    return inputHandler().isInputGrabber(grabber);
   }
 
   /**
@@ -2299,13 +2298,12 @@ public class Graph {
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
     _interpolator.stop();
     _interpolator.clear();
+    Frame eye = eye();
+    setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
-    Frame originalFrame = eye();
-    Frame tempFrame = eye().detach();
-    setEye(tempFrame);
     fitScreenRegion(rectangle);
-    setEye(originalFrame);
-    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.addKeyFrame(eye().detach());
+    setEye(eye);
     _interpolator.start();
   }
 
@@ -2320,13 +2318,12 @@ public class Graph {
   public void fitBallInterpolation() {
     _interpolator.stop();
     _interpolator.clear();
+    Frame eye = eye();
+    setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
-    Frame originalFrame = eye();
-    Frame tempFrame = eye().detach();
-    setEye(tempFrame);
     fitBall();
-    setEye(originalFrame);
-    _interpolator.addKeyFrame(tempFrame);
+    _interpolator.addKeyFrame(eye().detach());
+    setEye(eye);
     _interpolator.start();
   }
 
@@ -2625,7 +2622,7 @@ public class Graph {
 
   /**
    * Return registered solvers
-   * */
+   */
   public List<TreeSolver> solvers() {
     return _solvers;
   }
@@ -2634,9 +2631,9 @@ public class Graph {
    * Registers the given chain to solve IK.
    */
   public TreeSolver setIKStructure(Node branchRoot) {
-    for(TreeSolver solver : _solvers) {
+    for (TreeSolver solver : _solvers) {
       //If Head is Contained in any structure do nothing
-      if(!branch(solver.getHead(), branchRoot).isEmpty())
+      if (!branch(solver.getHead(), branchRoot).isEmpty())
         return null;
     }
     TreeSolver solver = new TreeSolver(branchRoot);
@@ -2652,7 +2649,7 @@ public class Graph {
    */
   public boolean resetIKStructure(Node branchRoot) {
     TreeSolver toRemove = null;
-    for(TreeSolver solver: _solvers) {
+    for (TreeSolver solver : _solvers) {
       if (solver.getHead() == branchRoot) {
         toRemove = solver;
         break;
@@ -2666,8 +2663,8 @@ public class Graph {
   /**
    * Gets the IK Solver with associated with branchRoot node
    */
-  public TreeSolver getSolver(Node branchRoot){
-    for(TreeSolver solver: _solvers) {
+  public TreeSolver getSolver(Node branchRoot) {
+    for (TreeSolver solver : _solvers) {
       if (solver.getHead() == branchRoot) {
         return solver;
       }
@@ -2675,9 +2672,9 @@ public class Graph {
     return null;
   }
 
-  public boolean addIKTarget(Node endEffector, Frame target){
-    for(TreeSolver solver: _solvers) {
-      if(solver.addTarget(endEffector, target)) return true;
+  public boolean addIKTarget(Node endEffector, Frame target) {
+    for (TreeSolver solver : _solvers) {
+      if (solver.addTarget(endEffector, target)) return true;
     }
     return false;
   }
@@ -2685,11 +2682,11 @@ public class Graph {
   /**
    * Execute IK Task for a IK Solver that is not registered
    */
-  public void executeIKSolver(Solver solver){
+  public void executeIKSolver(Solver solver) {
     executeIKSolver(solver, 1);
   }
 
-  public void executeIKSolver(Solver solver, long period){
+  public void executeIKSolver(Solver solver, long period) {
     registerTask(solver.getExecutionTask());
     solver.getExecutionTask().run(period);
   }

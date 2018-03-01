@@ -1,6 +1,5 @@
 package frame;
 
-import processing.core.PApplet;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.input.Shortcut;
@@ -9,6 +8,7 @@ import frames.input.event.KeyShortcut;
 import frames.input.event.MotionEvent;
 import frames.processing.Mouse;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 public class FirstPerson extends PApplet {
   Scene scene;
@@ -45,7 +45,7 @@ public class FirstPerson extends PApplet {
 
     InteractiveFrame eye = new InteractiveFrame();
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.fitBallInterpolation();
   }
 

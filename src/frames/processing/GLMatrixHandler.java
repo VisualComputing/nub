@@ -10,11 +10,11 @@
 
 package frames.processing;
 
-import processing.core.PMatrix3D;
-import processing.opengl.PGraphicsOpenGL;
 import frames.core.Graph;
 import frames.core.MatrixHandler;
 import frames.primitives.Matrix;
+import processing.core.PMatrix3D;
+import processing.opengl.PGraphicsOpenGL;
 
 /**
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.

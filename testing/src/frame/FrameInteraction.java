@@ -1,10 +1,10 @@
 package frame;
 
-import processing.core.PApplet;
-import processing.opengl.PGraphicsOpenGL;
 import frames.core.Graph;
 import frames.processing.GLMatrixHandler;
 import frames.processing.Mouse;
+import processing.core.PApplet;
+import processing.opengl.PGraphicsOpenGL;
 
 /**
  * This example just to show that a Graph is instantiable.

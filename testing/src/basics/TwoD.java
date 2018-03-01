@@ -1,6 +1,5 @@
 package basics;
 
-import processing.core.PApplet;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.input.Shortcut;
@@ -10,6 +9,7 @@ import frames.input.event.MotionEvent;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import processing.core.PApplet;
 
 public class TwoD extends PApplet {
   Scene scene;
@@ -43,7 +43,7 @@ public class TwoD extends PApplet {
     eye = new InteractiveFrame();
 
     scene.setEye(eye);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(200);
     scene.fitBallInterpolation();
   }

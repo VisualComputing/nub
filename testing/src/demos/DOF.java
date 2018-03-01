@@ -2,11 +2,11 @@ package demos;
 
 import common.InteractiveNode;
 import common.InteractiveShape;
+import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.opengl.PShader;
-import frames.processing.Scene;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;
@@ -27,7 +27,7 @@ public class DOF extends PApplet {
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 

@@ -2,12 +2,12 @@ package eye;
 
 import common.InteractiveNode;
 import common.InteractiveShape;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class MiniMap extends PApplet {
   Scene scene, minimap;
@@ -46,7 +46,7 @@ public class MiniMap extends PApplet {
     scene.setEye(sceneEye);
     scene.setFieldOfView((float) Math.PI / 3);
     //interactivity defaults to the eye
-    scene.setDefaultNode(sceneEye);
+    scene.setDefaultGrabber(sceneEye);
     scene.setRadius(150);
     //scene.fitBallInterpolation();
     scene.fitBall();
@@ -62,7 +62,7 @@ public class MiniMap extends PApplet {
     InteractiveNode minimapEye = new InteractiveNode(minimap);
     minimap.setEye(minimapEye);
     //interactivity defaults to the eye
-    minimap.setDefaultNode(minimapEye);
+    minimap.setDefaultGrabber(minimapEye);
     minimap.setRadius(500);
     minimap.fitBall();
     //minimap.fitBallInterpolation();

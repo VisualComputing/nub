@@ -1,14 +1,14 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
 import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 /**
  * Created by pierre on 11/15/16.
@@ -60,7 +60,7 @@ public class BasicUse extends PApplet {
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.fitBallInterpolation();
   }
 

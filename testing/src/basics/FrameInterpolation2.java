@@ -1,9 +1,6 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PShape;
 import frames.core.Interpolator;
 import frames.input.Event;
 import frames.input.Shortcut;
@@ -14,6 +11,9 @@ import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.core.PShape;
 
 /**
  * This example introduces the three different interpolations offered
@@ -45,7 +45,7 @@ public class FrameInterpolation2 extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations
@@ -76,7 +76,7 @@ public class FrameInterpolation2 extends PApplet {
     InteractiveNode eye1 = new InteractiveNode(auxScene);
     auxScene.setEye(eye1);
     //interactivity defaults to the eye
-    auxScene.setDefaultNode(eye1);
+    auxScene.setDefaultGrabber(eye1);
     button = new Button(100, 60);
     //button.setPosition(200,50);
     auxScene.setRadius(200);

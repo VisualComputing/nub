@@ -1,13 +1,13 @@
 package basics;
 
 import common.InteractiveNode;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import frames.core.Graph;
 import frames.input.Shortcut;
 import frames.input.event.MotionEvent;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class ProsceneNodes extends PApplet {
   Scene scene;
@@ -22,7 +22,7 @@ public class ProsceneNodes extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultNode(eye);
+    scene.setDefaultGrabber(eye);
     scene.setRadius(200);
     scene.fitBallInterpolation();
 

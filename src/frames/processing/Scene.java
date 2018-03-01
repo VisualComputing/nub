@@ -10,6 +10,17 @@
 
 package frames.processing;
 
+import frames.core.Graph;
+import frames.core.Interpolator;
+import frames.core.MatrixHandler;
+import frames.core.Node;
+import frames.input.Agent;
+import frames.input.Event;
+import frames.input.Grabber;
+import frames.primitives.*;
+import frames.timing.SequentialTimer;
+import frames.timing.TimingHandler;
+import frames.timing.TimingTask;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -17,16 +28,6 @@ import processing.opengl.PGL;
 import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
-import frames.core.Graph;
-import frames.core.Interpolator;
-import frames.core.MatrixHandler;
-import frames.core.Node;
-import frames.input.Agent;
-import frames.input.Event;
-import frames.primitives.*;
-import frames.timing.SequentialTimer;
-import frames.timing.TimingHandler;
-import frames.timing.TimingTask;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -91,7 +92,7 @@ import java.util.List;
  *         translate(event);
  *     }
  *   };
- *   scene.setDefaultNode(eye);
+ *   scene.setDefaultGrabber(eye);
  * }
  * }
  * </pre>
@@ -99,8 +100,8 @@ import java.util.List;
  * {@link Frame} specialization) and interactively (using the mouse, see
  * {@link #mouse()} and {@link Mouse}). Note the use of the anonymous
  * inner {@link Node} class used to define how the node will behave, refer to the
- * {@link Node} API for details. Note also the {@link #setDefaultNode(Node)} call
- * which will direct mouse input to the eye when no other node is being picked.
+ * {@link Node} API for details. Note also the {@link #setDefaultGrabber(Grabber)}
+ * call which will direct input to the eye when no other node is being picked.
  * <h3>Shapes</h3>
  * A {@link Shape} is a {@link Node} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode

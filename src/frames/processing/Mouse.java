@@ -10,9 +10,7 @@
 
 package frames.processing;
 
-import processing.core.PApplet;
 import frames.core.Graph;
-import frames.core.Node;
 import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Shortcut;
@@ -21,6 +19,7 @@ import frames.input.event.MotionEvent2;
 import frames.input.event.TapEvent;
 import frames.input.event.TapShortcut;
 import frames.primitives.Point;
+import processing.core.PApplet;
 
 /**
  * Mouse agent. A Processing fully fledged mouse {@link Agent}.
@@ -118,14 +117,5 @@ public class Mouse extends Agent {
       handle(tapEvent);
       return;
     }
-  }
-
-  /**
-   * Returns the current mouse input node. May be null.
-   * <p>
-   * Same as {@code return inputGrabber() instanceof Node ? (Node) inputGrabber() : null}.
-   */
-  public Node inputNode() {
-    return inputGrabber() instanceof Node ? (Node) inputGrabber() : null;
   }
 }
