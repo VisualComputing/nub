@@ -234,7 +234,7 @@ public class Node extends Frame implements Grabber {
 
     _spinningTask = new TimingTask() {
       public void execute() {
-        _spinExecution();
+        _spin();
       }
     };
     graph().registerTask(_spinningTask);
@@ -279,7 +279,7 @@ public class Node extends Frame implements Grabber {
 
     this._spinningTask = new TimingTask() {
       public void execute() {
-        _spinExecution();
+        _spin();
       }
     };
 
@@ -1000,36 +1000,6 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the incremental rotation that is applied by {@link #_spin()} to the
-   * node orientation when it {@link #isSpinning()}.
-   * <p>
-   * Default value is a {@code null} quaternion. Use {@link #setSpinningQuaternion(Quaternion)}
-   * to change this value.
-   * <p>
-   * The {@link #spinningQuaternion()} axis is defined in the node coordinate
-   * system. You can use {@link Frame#transformOfFrom(Vector, Frame)}
-   * to convert this axis from another coordinate system.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   *
-   * @see #flyDirection()
-   */
-  public Quaternion spinningQuaternion() {
-    return _spinningQuaternion;
-  }
-
-  /**
-   * Defines the {@link #spinningQuaternion()}. Its axis is defined in the node
-   * coordinate system.
-   *
-   * @see #setFlyDirection(Vector)
-   */
-  public void setSpinningQuaternion(Quaternion spinningQuaternion) {
-    _spinningQuaternion = spinningQuaternion;
-  }
-
-  /**
    * Stops the spinning motion _started using {@link #startSpinning(Quaternion, float, long)}.
    * Note that {@link #isSpinning()} will return {@code false} after this call.
    * <p>
@@ -1056,7 +1026,7 @@ public class Node extends Frame implements Grabber {
    * @see #startFlying(Vector, float)
    */
   public void startSpinning(Quaternion quaternion, float speed, long delay) {
-    setSpinningQuaternion(quaternion);
+    _spinningQuaternion = quaternion;
     _eventSpeed = speed;
     _eventDelay = delay;
     if (damping() == 0 && _eventSpeed < spinningSensitivity())
@@ -1069,34 +1039,44 @@ public class Node extends Frame implements Grabber {
    * Cache version. Used by rotate methods when damping is 0.
    */
   protected void _startSpinning() {
-    startSpinning(spinningQuaternion(), _eventSpeed, _eventDelay);
+    startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
   }
 
-  protected void _spinExecution() {
+  protected void _spin() {
     if (damping() == 0)
-      _spin();
+      spin(_spinningQuaternion);
     else {
       if (_eventSpeed == 0) {
         stopSpinning();
         return;
       }
-      _spin();
+      spin(_spinningQuaternion);
       _recomputeSpinningQuaternion();
     }
   }
 
   protected void _spin(Quaternion quaternion, float speed, long delay) {
     if (damping() == 0) {
-      _spin(quaternion);
+      _spinningQuaternion = quaternion;
       _eventSpeed = speed;
       _eventDelay = delay;
+      spin(_spinningQuaternion);
     } else
       startSpinning(quaternion, speed, delay);
   }
 
+  /*
   protected void _spin(Quaternion quaternion) {
     setSpinningQuaternion(quaternion);
     _spin();
+  }
+  */
+
+  public void spin(Quaternion quaternion) {
+    if (isEye())
+      rotateAroundPoint(quaternion, graph().anchor());
+    else
+      rotate(quaternion);
   }
 
   /**
@@ -1108,12 +1088,14 @@ public class Node extends Frame implements Grabber {
    *
    * @see #damping()
    */
+  /*
   protected void _spin() {
     if (isEye())
-      rotateAroundPoint(spinningQuaternion(), graph().anchor());
+      rotateAroundPoint(_spinningQuaternion, graph().anchor());
     else
-      rotate(spinningQuaternion());
+      rotate(_spinningQuaternion);
   }
+  */
 
   /**
    * Internal method. Recomputes the {@link #spinningQuaternion()} according to {@link #damping()}.
@@ -1125,7 +1107,7 @@ public class Node extends Frame implements Grabber {
     if (Math.abs(_eventSpeed) < .001f)
       _eventSpeed = 0;
     // float currSpeed = eventSpeed;
-    spinningQuaternion().fromAxisAngle((spinningQuaternion()).axis(), spinningQuaternion().angle() * (_eventSpeed / prevSpeed));
+    _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
   }
 
   protected int _originalDirection(MotionEvent event) {
@@ -1894,10 +1876,10 @@ public class Node extends Frame implements Grabber {
       System.out.println("rotate(Event) requires a relative motion-event");
       return;
     }
-    if (event.fired())
+    if (event.fired()) {
       stopSpinning();
-    if (event.fired())
       _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+    }
     if (event.flushed() && damping() == 0) {
       _startSpinning();
       return;

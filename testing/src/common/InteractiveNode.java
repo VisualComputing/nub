@@ -34,7 +34,8 @@ public class InteractiveNode extends Node {
     //*/
     // /*
     if (event.shortcut().matches(Mouse.RIGHT))
-      translate(event);
+      //translate(event);
+      rotateX(event);
     else if (event.shortcut().matches(Mouse.LEFT))
       rotate(event);
     else if (event.shortcut().matches(Mouse.CENTER_TAP2))
