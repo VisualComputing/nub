@@ -22,23 +22,23 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
 
-  protected ArrayList<? extends Frame> chain;
-  private ArrayList<Frame> bestSolution;
+  protected ArrayList<? extends Frame> _chain;
+  protected ArrayList<Frame> _bestSolution;
 
-  protected Frame target;
-  private Frame prevTarget;
+  protected Frame _target;
+  protected Frame _prevTarget;
 
-  public ArrayList<? extends Frame> getChain() {
-    return chain;
+  public ArrayList<? extends Frame> chain() {
+    return _chain;
   }
 
-  private ArrayList<Frame> copyChain(ArrayList<? extends Frame> list) {
+  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
     ArrayList<Frame> copy = new ArrayList<Frame>();
-    Frame reference = list.get(0).reference();
+    Frame reference = chain.get(0).reference();
     if (reference != null) {
       reference = new Frame(reference.position().get(), reference.orientation().get());
     }
-    for (Frame joint : list) {
+    for (Frame joint : chain) {
       Frame newJoint = new Frame();
       newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
@@ -50,25 +50,20 @@ public class ChainSolver extends FABRIKSolver {
     return copy;
   }
 
-  public void setChain(ArrayList<? extends Frame> chain) {
-    this.chain = chain;
-    bestSolution = copyChain(chain);
-  }
-
-  public Frame getTarget() {
-    return target;
+  public Frame target() {
+    return _target;
   }
 
   public void setTarget(Frame target) {
-    this.target = target;
+    this._target = target;
   }
 
-  public Frame getHead() {
-    return chain.get(0);
+  public Frame head() {
+    return _chain.get(0);
   }
 
-  public Frame getEndEffector() {
-    return chain.get(chain.size() - 1);
+  public Frame endEffector() {
+    return _chain.get(_chain.size() - 1);
   }
 
   public ChainSolver(ArrayList<? extends Frame> chain) {
@@ -77,10 +72,11 @@ public class ChainSolver extends FABRIKSolver {
 
   public ChainSolver(ArrayList<? extends Frame> chain, Frame target) {
     super();
-    setChain(chain);
-    positions = new ArrayList<Vector>();
-    distances = new ArrayList<Float>();
-    orientations = new ArrayList<Quaternion>();
+    this._chain = chain;
+    _bestSolution = _copy(chain);
+    _positions = new ArrayList<Vector>();
+    _distances = new ArrayList<Float>();
+    _orientations = new ArrayList<Quaternion>();
     Vector prevPosition = chain.get(0).reference() != null
         ? chain.get(0).reference().position().get() : new Vector(0, 0, 0);
     Quaternion prevOrientation = chain.get(0).reference() != null
@@ -89,58 +85,58 @@ public class ChainSolver extends FABRIKSolver {
       Vector position = joint.position().get();
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
-      positions.add(position);
-      distances.add(Vector.subtract(position, prevPosition).magnitude());
-      orientations.add(orientation);
+      _positions.add(position);
+      _distances.add(Vector.subtract(position, prevPosition).magnitude());
+      _orientations.add(orientation);
       prevPosition = position;
       prevOrientation = orientation.get();
     }
-    this.target = target;
-    this.prevTarget =
+    this._target = target;
+    this._prevTarget =
         target == null ? null : new Frame(target.position().get(), target.orientation().get());
   }
 
   /*Get maximum length of a given chain*/
-  public float getLength() {
+  protected float _length() {
     float dist = 0;
-    for (int i = 1; i < chain.size(); i++) {
-      dist += chain.get(i).translation().magnitude() / chain.get(i).magnitude();
+    for (int i = 1; i < _chain.size(); i++) {
+      dist += _chain.get(i).translation().magnitude() / _chain.get(i).magnitude();
     }
     return dist;
   }
 
-  public void stretchChain(ArrayList<? extends Frame> chain, Vector target) {
+  protected void _stretch(ArrayList<? extends Frame> chain, Vector target) {
     for (int i = 0; i < chain.size() - 1; i++) {
       //Get the distance between Joint i and the Target
-      Vector pos_i = positions.get(i);
+      Vector pos_i = _positions.get(i);
       float r_i = Vector.distance(pos_i, target);
       float dist_i = chain.get(i + 1).translation().magnitude() / chain.get(i + 1).magnitude();
       float lambda_i = dist_i / r_i;
       Vector new_pos = Vector.multiply(pos_i, 1.f - lambda_i);
       new_pos.add(Vector.multiply(target, lambda_i));
-      positions.set(i + 1, new_pos);
+      _positions.set(i + 1, new_pos);
     }
   }
 
 
   /*
    * Performs a FABRIK ITERATION
-   *
-   * */
-  public boolean iterate() {
+   */
+  @Override
+  protected boolean _iterate() {
     //As no target is specified there is no need to perform FABRIK
-    if (target == null) return true;
-    Frame root = chain.get(0);
-    Frame end = chain.get(chain.size() - 1);
-    Vector target = this.target.position().get();
+    if (_target == null) return true;
+    Frame root = _chain.get(0);
+    Frame end = _chain.get(_chain.size() - 1);
+    Vector target = this._target.position().get();
 
     //Execute Until the distance between the end effector and the target is below a threshold
-    if (Vector.distance(end.position(), target) <= ERROR) {
+    if (Vector.distance(end.position(), target) <= error) {
       return true;
     }
 
     //Get the distance between the Root and the End Effector
-    float length = getLength();
+    float length = _length();
     //Get the distance between the Root and the Target
     float dist = Vector.distance(root.position(), target);
     //When Target is unreachable        //Debug methods
@@ -149,69 +145,72 @@ public class ChainSolver extends FABRIKSolver {
                     return true;
                 }else{*/
     //Initial root position
-    Vector initial = positions.get(0).get();
+    Vector initial = _positions.get(0).get();
     //Stage 1: Forward Reaching
-    positions.set(chain.size() - 1, target.get());
-    executeForwardReaching();
+    _positions.set(_chain.size() - 1, target.get());
+    _forwardReaching();
     //Stage 2: Backward Reaching
-    positions.set(0, initial);
-    float change = executeBackwardReaching();
+    _positions.set(0, initial);
+    float change = _backwardReaching();
     //Save best solution
-    if (Vector.distance(target, end.position()) < Vector.distance(target, bestSolution.get(chain.size() - 1).position())) {
-      bestSolution = copyChain(chain);
+    if (Vector.distance(target, end.position()) < Vector.distance(target, _bestSolution.get(_chain.size() - 1).position())) {
+      _bestSolution = _copy(_chain);
     }
     //Check total position change
-    if (change <= MINCHANGE) return true;
+    if (change <= minDistance) return true;
     return false;
   }
 
-  public void executeForwardReaching() {
-    executeForwardReaching(chain);
+  protected void _forwardReaching() {
+    _forwardReaching(_chain);
   }
 
-  public float executeBackwardReaching() {
-    return executeBackwardReaching(chain);
+  protected float _backwardReaching() {
+    return _backwardReaching(_chain);
   }
 
-  public void update() {
+  @Override
+  protected void _update() {
     //for(int i = 0; i < chain.size(); i++){
     //    chain.get(i).setRotation(bestSolution.get(i).rotation().get());
     //}
   }
 
-  public boolean stateChanged() {
-    if (target == null) {
-      prevTarget = null;
+  @Override
+  protected boolean _changed() {
+    if (_target == null) {
+      _prevTarget = null;
       return false;
-    } else if (prevTarget == null) {
+    } else if (_prevTarget == null) {
       return true;
     }
-    return !(prevTarget.position().equals(target.position()) && prevTarget.orientation().equals(target.orientation()));
+    return !(_prevTarget.position().equals(_target.position()) && _prevTarget.orientation().equals(_target.orientation()));
   }
 
-  public void reset() {
-    prevTarget = target == null ? null : new Frame(target.position().get(), target.orientation().get());
+  @Override
+  protected void _reset() {
+    _prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
     iterations = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
-    initialize();
+    _init();
   }
 
-  public void initialize() {
+  protected void _init() {
     //Initialize List with info about Positions and Orientations
-    positions = new ArrayList<Vector>();
-    distances = new ArrayList<Float>();
-    orientations = new ArrayList<Quaternion>();
-    Vector prevPosition = chain.get(0).reference() != null
-        ? chain.get(0).reference().position().get() : new Vector(0, 0, 0);
-    Quaternion prevOrientation = chain.get(0).reference() != null
-        ? chain.get(0).reference().orientation().get() : new Quaternion();
-    for (Frame joint : chain) {
+    _positions = new ArrayList<Vector>();
+    _distances = new ArrayList<Float>();
+    _orientations = new ArrayList<Quaternion>();
+    Vector prevPosition = _chain.get(0).reference() != null
+        ? _chain.get(0).reference().position().get() : new Vector(0, 0, 0);
+    Quaternion prevOrientation = _chain.get(0).reference() != null
+        ? _chain.get(0).reference().orientation().get() : new Quaternion();
+    for (Frame joint : _chain) {
       Vector position = joint.position().get();
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
-      positions.add(position);
-      distances.add(Vector.subtract(position, prevPosition).magnitude());
-      orientations.add(orientation);
+      _positions.add(position);
+      _distances.add(Vector.subtract(position, prevPosition).magnitude());
+      _orientations.add(orientation);
       prevPosition = position;
       prevOrientation = orientation.get();
     }

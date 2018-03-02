@@ -47,6 +47,6 @@ public class InteractiveNode extends Node {
         translateZ(event);
       else
         scale(event);
-     // */
+    // */
   }
 }

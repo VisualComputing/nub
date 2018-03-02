@@ -50,12 +50,11 @@ public class SphericalPolygon extends Constraint {
   }
 
   public void setVertices(ArrayList<Vector> vertices) {
-    this._vertices = projectOnUnitSphere(vertices);
-    this._visiblePoint = computeVisiblePoint();
-    computeBoundingBox();
-    doPrecomputations();
+    this._vertices = _projectOnUnitSphere(vertices);
+    this._visiblePoint = _setVisiblePoint();
+    _setBoundingBox();
+    _init();
   }
-
 
   public SphericalPolygon() {
     _vertices = new ArrayList<Vector>();
@@ -64,27 +63,27 @@ public class SphericalPolygon extends Constraint {
   }
 
   public SphericalPolygon(ArrayList<Vector> vertices, Quaternion restRotation, Vector visiblePoint) {
-    this._vertices = projectOnUnitSphere(vertices);
+    this._vertices = _projectOnUnitSphere(vertices);
     this._restRotation = restRotation.get();
     this._visiblePoint = visiblePoint;
     visiblePoint.normalize();
-    computeBoundingBox();
-    doPrecomputations();
+    _setBoundingBox();
+    _init();
   }
 
   public SphericalPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
-    this._vertices = projectOnUnitSphere(vertices);
+    this._vertices = _projectOnUnitSphere(vertices);
     this._restRotation = restRotation.get();
-    this._visiblePoint = computeVisiblePoint();
-    computeBoundingBox();
-    doPrecomputations();
+    this._visiblePoint = _setVisiblePoint();
+    _setBoundingBox();
+    _init();
   }
 
   public SphericalPolygon(ArrayList<Vector> vertices) {
-    this._vertices = projectOnUnitSphere(vertices);
-    this._visiblePoint = computeVisiblePoint();
-    computeBoundingBox();
-    doPrecomputations();
+    this._vertices = _projectOnUnitSphere(vertices);
+    this._visiblePoint = _setVisiblePoint();
+    _setBoundingBox();
+    _init();
   }
 
   @Override
@@ -95,7 +94,7 @@ public class SphericalPolygon extends Constraint {
         */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     Vector new_pos = Quaternion.multiply(desired, new Vector(0, 0, 1));
-    Vector constrained = constraint(new_pos, _restRotation);
+    Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion
     return new Quaternion(new Vector(0, 0, 1), Quaternion.multiply(frame.rotation().inverse(), constrained));
   }
@@ -106,20 +105,20 @@ public class SphericalPolygon extends Constraint {
     return new Vector(0, 0, 0);
   }
 
-  public Vector constraint(Vector target) {
-    return constraint(target, _restRotation);
+  public Vector apply(Vector target) {
+    return apply(target, _restRotation);
   }
 
-  public Vector constraint(Vector target, Quaternion restRotation) {
+  public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
-    if (!isInside(point)) {
-      Vector constrained = closestPoint(point);
+    if (!_isInside(point)) {
+      Vector constrained = _closestPoint(point);
       return restRotation.rotate(constrained);
     }
     return target;
   }
 
-  public void computeBoundingBox() {
+  protected void _setBoundingBox() {
     _min = new Vector();
     _max = new Vector();
     for (Vector v : _vertices) {
@@ -133,8 +132,8 @@ public class SphericalPolygon extends Constraint {
   }
 
   //Compute centroid
-  //TO DO: Choose a Visible point which works well for non convex Polygons
-  public Vector computeVisiblePoint() {
+  //TODO: Choose a Visible point which works well for non convex Polygons
+  protected Vector _setVisiblePoint() {
     if (_vertices.isEmpty()) return null;
     Vector centroid = new Vector();
     //Assume that every vertex lie in the sphere boundary
@@ -145,7 +144,7 @@ public class SphericalPolygon extends Constraint {
     return centroid;
   }
 
-  public ArrayList<Vector> projectOnUnitSphere(ArrayList<Vector> vertices) {
+  protected ArrayList<Vector> _projectOnUnitSphere(ArrayList<Vector> vertices) {
     ArrayList<Vector> newVertices = new ArrayList<Vector>();
     for (Vector vertex : vertices) {
       newVertices.add(vertex.normalize(new Vector()));
@@ -154,7 +153,7 @@ public class SphericalPolygon extends Constraint {
   }
 
   //TODO: seems this one should be protected
-  public void doPrecomputations() {
+  protected void _init() {
     _b = new ArrayList<Vector>();
     _s = new ArrayList<Vector>();
     for (int i = 0; i < _vertices.size(); i++) {
@@ -165,7 +164,7 @@ public class SphericalPolygon extends Constraint {
     }
   }
 
-  public boolean isInside(Vector L) {
+  protected boolean _isInside(Vector L) {
     //1. Find i s.t p_i = S_i . L >= 0 and p_j = S_j . L < 0 with j = i + 1
     int index = 0;
     for (int i = 0; i < _vertices.size(); i++) {
@@ -177,7 +176,7 @@ public class SphericalPolygon extends Constraint {
     return Vector.dot(_b.get(index), L) >= 0;
   }
 
-  public Vector closestPoint(Vector point) {
+  protected Vector _closestPoint(Vector point) {
     float minDist = 999999;
     Vector target = new Vector();
     for (int i = 0, j = _vertices.size() - 1; i < _vertices.size(); j = i++) {

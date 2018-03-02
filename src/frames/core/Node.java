@@ -2756,13 +2756,6 @@ public class Node extends Frame implements Grabber {
   //SOME USEFUL METHODS FOR IK
 
   /**
-   * Set the orientation of this Node when it is not pointing to its child
-   **/
-  protected void _fixRotation(Node child) {
-    _fixRotation(child.translation());
-  }
-
-  /**
    * Set orientation of a Node in the following way:
    * When Graph is 3D:
    * 1. Z-Axis points to direction vector
@@ -2772,7 +2765,9 @@ public class Node extends Frame implements Grabber {
    * 1. X-Axis points to direction vector
    * Returns the Quaternion that allows the described Transformation
    **/
-  protected Quaternion _fixRotation(Vector direction) {
+  //TODO discard me
+  protected Quaternion _fixRotation(Node child) {
+    Vector direction = child.translation();
     Vector x = new Vector(1, 0, 0);
     Vector y = new Vector(0, 1, 0);
     Vector z = new Vector(0, 0, 1);

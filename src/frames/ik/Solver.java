@@ -21,76 +21,22 @@ import frames.timing.TimingTask;
  */
 
 public abstract class Solver {
-  protected float ERROR = 0.01f;
-  protected int MAXITER = 200;
-  protected float MINCHANGE = 0.01f;
-  protected float TIMESPERFRAME = 1.f;
-  protected float FRAMECOUNTER = 0;
-  protected int iterations = 0;
-  protected TimingTask executionTask;
+  //TODO paper idea: optimize values per _solver / timer / local config
+  public float error = 0.01f;
+  public int maxIter = 200;
+  public float minDistance = 0.01f;
+  public float timesPerFrame = 1.f;
+  public float frameCounter = 0;
+  public int iterations = 0;
 
-  public void restartIterations() {
-    iterations = 0;
-  }
+  protected TimingTask _task;
 
-  public float getERROR() {
-    return ERROR;
-  }
-
-  public void setERROR(float ERROR) {
-    this.ERROR = ERROR;
-  }
-
-  public int getMAXITER() {
-    return MAXITER;
-  }
-
-  public void setMAXITER(int MAXITER) {
-    this.MAXITER = MAXITER;
-  }
-
-  public float getMINCHANGE() {
-    return MINCHANGE;
-  }
-
-  public void setMINCHANGE(float MINCHANGE) {
-    this.MINCHANGE = MINCHANGE;
-  }
-
-  public float getTIMESPERFRAME() {
-    return TIMESPERFRAME;
-  }
-
-  public void setTIMESPERFRAME(float TIMESPERFRAME) {
-    this.TIMESPERFRAME = TIMESPERFRAME;
-  }
-
-  public float getFRAMECOUNTER() {
-    return FRAMECOUNTER;
-  }
-
-  public void setFRAMECOUNTER(float FRAMECOUNTER) {
-    this.FRAMECOUNTER = FRAMECOUNTER;
-  }
-
-  public int getIterations() {
-    return iterations;
-  }
-
-  public void setIterations(int iterations) {
-    this.iterations = iterations;
-  }
-
-  public TimingTask getExecutionTask() {
-    return executionTask;
-  }
-
-  public void setExecutionTask(TimingTask executionTask) {
-    this.executionTask = executionTask;
+  public TimingTask task() {
+    return _task;
   }
 
   public Solver() {
-    executionTask = new TimingTask() {
+    _task = new TimingTask() {
       @Override
       public void execute() {
         solve();
@@ -98,37 +44,36 @@ public abstract class Solver {
     };
   }
 
-
   /*Performs an Iteration of Solver Algorithm */
-  public abstract boolean iterate();
+  protected abstract boolean _iterate();
 
-  public abstract void update();
+  protected abstract void _update();
 
-  public abstract boolean stateChanged();
+  protected abstract boolean _changed();
 
-  public abstract void reset();
+  protected abstract void _reset();
 
   public boolean solve() {
     //Reset counter
-    if (stateChanged()) {
-      reset();
+    if (_changed()) {
+      _reset();
     }
 
-    if (iterations == MAXITER) {
+    if (iterations == maxIter) {
       return true;
     }
-    FRAMECOUNTER += TIMESPERFRAME;
+    frameCounter += timesPerFrame;
 
-    while (Math.floor(FRAMECOUNTER) > 0) {
+    while (Math.floor(frameCounter) > 0) {
       //Returns a boolean that indicates if a termination condition has been accomplished
-      if (iterate()) {
-        iterations = MAXITER;
+      if (_iterate()) {
+        iterations = maxIter;
         break;
       } else iterations += 1;
-      FRAMECOUNTER -= 1;
+      frameCounter -= 1;
     }
     //update positions
-    update();
+    _update();
     return false;
   }
 }

@@ -66,21 +66,27 @@ public class PlanarPolygon extends Constraint {
     this._vertices = vertices;
     this._restRotation = restRotation.get();
     this._height = height;
-    projectOnPlane();
-    computeBoundingBox();
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
+    _setBoundingBox();
   }
 
   public PlanarPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
     this._vertices = vertices;
     this._restRotation = restRotation.get();
-    projectOnPlane();
-    computeBoundingBox();
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
+    _setBoundingBox();
   }
 
   public PlanarPolygon(ArrayList<Vector> vertices) {
     this._vertices = vertices;
-    projectOnPlane();
-    computeBoundingBox();
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
+    _setBoundingBox();
   }
 
   @Override
@@ -91,7 +97,7 @@ public class PlanarPolygon extends Constraint {
         */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     Vector new_pos = Quaternion.multiply(desired, new Vector(0, 0, 1));
-    Vector constrained = constraint(new_pos, _restRotation);
+    Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion
     return new Quaternion(new Vector(0, 0, 1), Quaternion.multiply(frame.rotation().inverse(), constrained));
   }
@@ -102,17 +108,17 @@ public class PlanarPolygon extends Constraint {
     return new Vector(0, 0, 0);
   }
 
-  public Vector constraint(Vector target) {
-    return constraint(target, _restRotation);
+  public Vector apply(Vector target) {
+    return apply(target, _restRotation);
   }
 
-  public Vector constraint(Vector target, Quaternion restRotation) {
+  public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
     Vector proj = new Vector(_height * point.x() / point.z(), _height * point.y() / point.z());
     float inverse = (_height < 0) == (point.z() < 0) ? 1 : -1;
-    if (!isInside(proj)) {
+    if (!_isInside(proj)) {
       proj.multiply(inverse);
-      Vector constrained = closestPoint(proj);
+      Vector constrained = _closestPoint(proj);
       constrained.setZ(_height);
       constrained.multiply(inverse * point.z() / _height);
       return restRotation.rotate(constrained);
@@ -120,7 +126,7 @@ public class PlanarPolygon extends Constraint {
     return inverse == -1 ? new Vector(target.x(), target.y(), -target.z()) : target;
   }
 
-  public void computeBoundingBox() {
+  protected void _setBoundingBox() {
     _min = new Vector();
     _max = new Vector();
     for (Vector v : _vertices) {
@@ -131,15 +137,8 @@ public class PlanarPolygon extends Constraint {
     }
   }
 
-  public void projectOnPlane() {
-    for (Vector v : _vertices) {
-      //Just not consider Z
-      v.setZ(0);
-    }
-  }
-
   /*Code was transcript from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html*/
-  public boolean isInside(Vector point) {
+  protected boolean _isInside(Vector point) {
     if (point.x() < _min.x() || point.x() > _max.x() ||
         point.y() < _min.y() || point.y() > _max.y()) return false;
     //Ray-casting algorithm
@@ -154,7 +153,7 @@ public class PlanarPolygon extends Constraint {
     return c;
   }
 
-  public Vector closestPoint(Vector point) {
+  protected Vector _closestPoint(Vector point) {
     float minDist = 999999;
     Vector target = new Vector();
     for (int i = 0, j = _vertices.size() - 1; i < _vertices.size(); j = i++) {

@@ -113,7 +113,7 @@ public class BallAndSocket extends Constraint {
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     Vector new_pos = Quaternion.multiply(desired, new Vector(0, 0, 1));
-    Vector constrained = constraint(new_pos, _restRotation);
+    Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion
     return new Quaternion(new Vector(0, 0, 1), Quaternion.multiply(frame.rotation().inverse(), constrained));
   }
@@ -130,12 +130,14 @@ public class BallAndSocket extends Constraint {
    * new_pos: new position defined in terms of local coordinates
    */
 
+  /*
   public Vector constraint(Vector target) {
     return constraint(target, _restRotation);
   }
+  */
 
-  //TODO : Simplify
-  public Vector constraint(Vector target, Quaternion restRotation) {
+  //TODO : rename, discard?
+  public Vector apply(Vector target, Quaternion restRotation) {
     Vector uvec = Quaternion.multiply(restRotation, new Vector(0, 1, 0));
     Vector rvec = Quaternion.multiply(restRotation, new Vector(1, 0, 0));
     Vector line = Quaternion.multiply(restRotation, new Vector(0, 0, 1));

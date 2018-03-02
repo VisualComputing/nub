@@ -2623,49 +2623,49 @@ public class Graph {
   /**
    * Return registered solvers
    */
-  public List<TreeSolver> solvers() {
+  public List<TreeSolver> treeSolvers() {
     return _solvers;
   }
 
   /**
    * Registers the given chain to solve IK.
    */
-  public TreeSolver setIKStructure(Node branchRoot) {
+  public TreeSolver registerTreeSolver(Node node) {
     for (TreeSolver solver : _solvers) {
       //If Head is Contained in any structure do nothing
-      if (!branch(solver.getHead(), branchRoot).isEmpty())
+      if (!branch(solver.head(), node).isEmpty())
         return null;
     }
-    TreeSolver solver = new TreeSolver(branchRoot);
+    TreeSolver solver = new TreeSolver(node);
     _solvers.add(solver);
     //Add task
-    registerTask(solver.getExecutionTask());
-    solver.getExecutionTask().run(1);
+    registerTask(solver.task());
+    solver.task().run(40);
     return solver;
   }
 
   /**
    * Unregisters the IK Solver with the given Frame as branchRoot
    */
-  public boolean resetIKStructure(Node branchRoot) {
+  public boolean unregisterTreeSolver(Node node) {
     TreeSolver toRemove = null;
     for (TreeSolver solver : _solvers) {
-      if (solver.getHead() == branchRoot) {
+      if (solver.head() == node) {
         toRemove = solver;
         break;
       }
     }
     //Remove task
-    unregisterTask(toRemove.getExecutionTask());
+    unregisterTask(toRemove.task());
     return _solvers.remove(toRemove);
   }
 
   /**
    * Gets the IK Solver with associated with branchRoot node
    */
-  public TreeSolver getSolver(Node branchRoot) {
+  public TreeSolver treeSolver(Node node) {
     for (TreeSolver solver : _solvers) {
-      if (solver.getHead() == branchRoot) {
+      if (solver.head() == node) {
         return solver;
       }
     }
@@ -2680,15 +2680,23 @@ public class Graph {
   }
 
   /**
-   * Execute IK Task for a IK Solver that is not registered
+   * Same as {@code executeIKSolver(_solver, 40)}.
+   *
+   * @see #executeSolver(Solver, long)
    */
-  public void executeIKSolver(Solver solver) {
-    executeIKSolver(solver, 1);
+  public void executeSolver(Solver solver) {
+    executeSolver(solver, 40);
   }
 
-  public void executeIKSolver(Solver solver, long period) {
-    registerTask(solver.getExecutionTask());
-    solver.getExecutionTask().run(period);
+  /**
+   * Only meaningful for non-registered solvers. Solver should be different than
+   * {@link TreeSolver}.
+   *
+   * @see #registerTreeSolver(Node)
+   * @see #unregisterTreeSolver(Node)
+   */
+  public void executeSolver(Solver solver, long period) {
+    registerTask(solver.task());
+    solver.task().run(period);
   }
-
 }
