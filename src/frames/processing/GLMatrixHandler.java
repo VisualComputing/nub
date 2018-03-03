@@ -4,8 +4,8 @@
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights refserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
+ * handling to a raster or ray-tracing renderer. Released under the terms of the GNU
+ * Public License v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
 package frames.processing;
