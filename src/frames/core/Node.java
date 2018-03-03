@@ -1702,8 +1702,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(boolean up) {
-    Quaternion rt = screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0);
-    rotate(rt);
+    rotate(screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0));
   }
 
   /**
