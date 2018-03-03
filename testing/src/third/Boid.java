@@ -141,7 +141,7 @@ class Boid extends AnimatorObject {
     p.pushMatrix();
     // Multiply matrix to get in the node coordinate system.
     node.applyTransformation();
-    scene.drawAxes();
+    scene.drawAxes(10);
 
     // highlight boids under the mouse
     if (node.track(p.mouseX, p.mouseY))
