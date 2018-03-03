@@ -1018,6 +1018,8 @@ public class Node extends Frame implements Grabber {
       return;
     }
     spin(_spinningQuaternion);
+    if (damping() == 0)
+      return;
     //recompute spinning quaternion
     float prevSpeed = _eventSpeed;
     float damping = 1.0f - (float) Math.pow(damping(), 3);
@@ -1048,7 +1050,7 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
     else if (_eventDelay > 0)
       _spinningTask.run(_eventDelay);
-    if(!isSpinning())
+    if (!isSpinning())
       spin(quaternion);
   }
 
@@ -1914,13 +1916,6 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Use for first person (move forward/backward, lookAround) and cad motion actions.
-   */
-  protected void _updateUpVector() {
-    _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-  }
-
-  /**
    * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
    */
   public void lookAround(Event event) {
@@ -1995,7 +1990,7 @@ public class Node extends Frame implements Grabber {
       return;
     }
     if (event.fired())
-      _updateUpVector();
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
     else if (event.flushed()) {
       stopFlying();
       return;
@@ -2037,7 +2032,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       _initEvent = event.get();
-      _updateUpVector();
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
       _flySpeedCache = flySpeed();
     } else if (event.flushed()) {
       setFlySpeed(_flySpeedCache);
@@ -2073,6 +2068,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * User gesture into CAD-rotation conversion routine. Only meaningful if {@link #isEye()}.
+   * <p>
+   * Current implementation doesn't spin.
    */
   public void rotateCAD(MotionEvent2 event) {
     if (!isEye()) {
@@ -2095,8 +2092,9 @@ public class Node extends Frame implements Grabber {
       dx = -dx;
     if (_graph.isRightHanded())
       dy = -dy;
-    Vector verticalAxis = transformOf(_upVector);
-    _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
+    //TODO spinning breaks upVector orientation
+    //_spin(Quaternion.multiply(new Quaternion(transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
+    spin(Quaternion.multiply(new Quaternion(transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)));
   }
 
   /**

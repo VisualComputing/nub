@@ -2175,7 +2175,7 @@ public class Graph {
 
     // Useful in fly mode to keep the horizontal direction.
     if (eye() instanceof Node)
-      ((Node) eye())._updateUpVector();
+      ((Node) eye())._upVector = eye().orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
   /**
