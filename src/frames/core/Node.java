@@ -1011,6 +1011,15 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
+   * Same as {@code startSpinning(quaternion, speed, 40)}.
+   *
+   * @see #startSpinning(Quaternion, float, long)
+   */
+  public void startSpinning(Quaternion quaternion, float speed) {
+    startSpinning(quaternion, speed, 40);
+  }
+
+  /**
    * Starts the spinning of the node.
    * <p>
    * This method starts a timer that will call {@link #_spin()} every
@@ -1024,7 +1033,11 @@ public class Node extends Frame implements Grabber {
    * @see #startFlying(Vector, float)
    */
   public void startSpinning(Quaternion quaternion, float speed, long delay) {
-    _spinningQuaternion = quaternion;
+    if (quaternion == null) {
+      System.out.println("Warning: using identity rotation for startSpinning");
+      _spinningQuaternion = new Quaternion();
+    } else
+      _spinningQuaternion = quaternion;
     _eventSpeed = speed;
     _eventDelay = delay;
     if (damping() == 0 && _eventSpeed < spinningSensitivity())
@@ -1034,12 +1047,8 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Cache version. Used by rotate methods when damping is 0.
+   * Called by the timer. If
    */
-  protected void _startSpinning() {
-    startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
-  }
-
   protected void _spin() {
     if (damping() == 0)
       spin(_spinningQuaternion);
@@ -1049,11 +1058,29 @@ public class Node extends Frame implements Grabber {
         return;
       }
       spin(_spinningQuaternion);
-      _recomputeSpinningQuaternion();
+      //recompute spinning quaternion
+      float prevSpeed = _eventSpeed;
+      float damping = 1.0f - (float) Math.pow(damping(), 3);
+      _eventSpeed *= damping;
+      if (Math.abs(_eventSpeed) < .001f)
+        _eventSpeed = 0;
+      _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
     }
   }
 
+  /**
+   * Implements two spinning models according to {@link #damping()}. 1. If
+   * the event was flushed (see {@link Event#flush()}), check if {@link #damping()} == 0
+   * to {@link #startSpinning(Quaternion, float, long)} on the previous (cache) event,
+   * otherwise; 2. Either call {@link #spin(Quaternion)} ({@link #damping()} == 0) or
+   * {@link #startSpinning(Quaternion, float, long)} ({@link #damping()} > 0), on the
+   * current event.
+   */
   protected void _spin(Quaternion quaternion, MotionEvent event) {
+    if (event.flushed() && damping() == 0) {
+      startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
+      return;
+    }
     _spinningQuaternion = quaternion;
     _eventSpeed = event.speed();
     _eventDelay = event.delay();
@@ -1067,9 +1094,6 @@ public class Node extends Frame implements Grabber {
    * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
    * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}. Called
    * by a timer when the node {@link #isSpinning()}.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
    *
    * @see #damping()
    */
@@ -1078,28 +1102,6 @@ public class Node extends Frame implements Grabber {
       rotateAroundPoint(quaternion, graph().anchor());
     else
       rotate(quaternion);
-  }
-
-  /*
-  protected void _spin() {
-    if (isEye())
-      rotateAroundPoint(_spinningQuaternion, graph().anchor());
-    else
-      rotate(_spinningQuaternion);
-  }
-  */
-
-  /**
-   * Internal method.
-   */
-  protected void _recomputeSpinningQuaternion() {
-    float prevSpeed = _eventSpeed;
-    float damping = 1.0f - (float) Math.pow(damping(), 3);
-    _eventSpeed *= damping;
-    if (Math.abs(_eventSpeed) < .001f)
-      _eventSpeed = 0;
-    // float currSpeed = eventSpeed;
-    _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
   }
 
   protected int _originalDirection(MotionEvent event) {
@@ -1872,25 +1874,19 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
-    if (event.flushed() && damping() == 0) {
-      _startSpinning();
-      return;
+    Quaternion quaternion;
+    Vector vector;
+    if (isEye())
+      quaternion = _deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
+    else {
+      vector = _graph.projectedCoordinatesOf(position());
+      quaternion = _deformedBallQuaternion(event, vector);
+      vector = quaternion.axis();
+      vector = _graph.eye().orientation().rotate(vector);
+      vector = transformOf(vector);
+      quaternion = new Quaternion(vector, -quaternion.angle());
     }
-    if (!event.flushed()) {
-      Quaternion rt;
-      Vector trns;
-      if (isEye())
-        rt = _deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
-      else {
-        trns = _graph.projectedCoordinatesOf(position());
-        rt = _deformedBallQuaternion(event, trns);
-        trns = rt.axis();
-        trns = _graph.eye().orientation().rotate(trns);
-        trns = transformOf(trns);
-        rt = new Quaternion(trns, -rt.angle());
-      }
-      _spin(rt, event);
-    }
+    _spin(quaternion, event);
   }
 
   /**
@@ -2126,25 +2122,20 @@ public class Node extends Frame implements Grabber {
       System.out.println("rotateCAD(Event) requires a relative motion-event");
       return;
     }
-    if (event.fired())
+    if (event.fired()) {
       stopSpinning();
-    if (event.fired())
       _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
-    if (event.flushed() && damping() == 0) {
-      _startSpinning();
-      return;
-    } else {
-      // Multiply by 2.0 to get on average about the same _speed as with the
-      // deformed ball
-      float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
-      float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
-      if (_graph._cadRotationIsReversed)
-        dx = -dx;
-      if (_graph.isRightHanded())
-        dy = -dy;
-      Vector verticalAxis = transformOf(_upVector);
-      _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
     }
+    // Multiply by 2.0 to get on average about the same _speed as with the
+    // deformed ball
+    float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
+    float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
+    if (_graph._cadRotationIsReversed)
+      dx = -dx;
+    if (_graph.isRightHanded())
+      dy = -dy;
+    Vector verticalAxis = transformOf(_upVector);
+    _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
   }
 
   /**
@@ -2288,37 +2279,27 @@ public class Node extends Frame implements Grabber {
       //graph.setRotateVisualHint(true); // display visual hint
       _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
-    if (event.flushed()) {
-      //TODO handle me
-      //graph.setRotateVisualHint(false);
-      if (damping() == 0) {
-        _startSpinning();
-        return;
-      }
+    Quaternion quaternion;
+    Vector vector;
+    float angle;
+    if (isEye()) {
+      vector = graph().projectedCoordinatesOf(graph().anchor());
+      angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]) - (float) Math
+          .atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
+      if (_graph.isLeftHanded())
+        angle = -angle;
+      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
+    } else {
+      vector = _graph.projectedCoordinatesOf(position());
+      float prev_angle = (float) Math.atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
+      angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]);
+      Vector axis = transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
+      if (_graph.isRightHanded())
+        quaternion = new Quaternion(axis, angle - prev_angle);
+      else
+        quaternion = new Quaternion(axis, prev_angle - angle);
     }
-    if (!event.flushed()) {
-      Quaternion rt;
-      Vector trns;
-      float angle;
-      if (isEye()) {
-        trns = graph().projectedCoordinatesOf(graph().anchor());
-        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]) - (float) Math
-            .atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
-        if (_graph.isLeftHanded())
-          angle = -angle;
-        rt = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
-      } else {
-        trns = _graph.projectedCoordinatesOf(position());
-        float prev_angle = (float) Math.atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
-        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]);
-        Vector axis = transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
-        if (_graph.isRightHanded())
-          rt = new Quaternion(axis, angle - prev_angle);
-        else
-          rt = new Quaternion(axis, prev_angle - angle);
-      }
-      _spin(rt, event);
-    }
+    _spin(quaternion, event);
   }
 
   /**

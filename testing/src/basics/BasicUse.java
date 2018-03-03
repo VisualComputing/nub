@@ -32,7 +32,7 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
     eye = new InteractiveNode(scene);
-    eye.setDamping(0.5f);
+    eye.setDamping(0f);
 
     node = new Shape(scene) {
       @Override
@@ -58,6 +58,7 @@ public class BasicUse extends PApplet {
             scale(event);
       }
     };
+    node.setDamping(0);
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
