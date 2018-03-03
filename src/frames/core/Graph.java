@@ -123,10 +123,6 @@ public class Graph {
   protected float _distance[];
   // rescale ortho when anchor changes
   protected float _rapK = 1;
-  // Inverse the direction of an horizontal mouse motion. Depends on the
-  // projected
-  // screen orientation of the vertical axis when the mouse button is pressed.
-  public boolean _cadRotationIsReversed;
   // handed and screen drawing
   protected boolean _rightHanded;
   protected int _startCoordCalls;

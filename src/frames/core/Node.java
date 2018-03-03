@@ -140,6 +140,10 @@ public class Node extends Frame implements Grabber {
   protected Vector _fly;
   protected long _flyUpdatePeriod = 20;
   //TODO move to Frame? see Graph.setUpVector
+
+  // Inverse the direction of an horizontal mouse motion. Depends on the projected
+  // screen orientation of the vertical axis when the mouse button is pressed.
+  public boolean _cadRotationIsReversed;
   protected Vector _upVector;
   protected Graph _graph;
 
@@ -1792,7 +1796,7 @@ public class Node extends Frame implements Grabber {
    */
   public void rotateXYZ(MotionEvent3 event) {
     if (event.fired())
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -1829,7 +1833,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
     Quaternion quaternion;
     Vector vector;
@@ -2081,13 +2085,13 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
     // Multiply by 2.0 to get on average about the same _speed as with the
     // deformed ball
     float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
     float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
-    if (_graph._cadRotationIsReversed)
+    if (_cadRotationIsReversed)
       dx = -dx;
     if (_graph.isRightHanded())
       dy = -dy;
@@ -2234,7 +2238,7 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       //TODO handle me
       //graph.setRotateVisualHint(true); // display visual hint
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
     Quaternion quaternion;
     Vector vector;
