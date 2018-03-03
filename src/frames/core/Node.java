@@ -1053,14 +1053,14 @@ public class Node extends Frame implements Grabber {
     }
   }
 
-  protected void _spin(Quaternion quaternion, float speed, long delay) {
+  protected void _spin(Quaternion quaternion, MotionEvent event) {
+    _spinningQuaternion = quaternion;
+    _eventSpeed = event.speed();
+    _eventDelay = event.delay();
     if (damping() == 0) {
-      _spinningQuaternion = quaternion;
-      _eventSpeed = speed;
-      _eventDelay = delay;
       spin(_spinningQuaternion);
     } else
-      startSpinning(quaternion, speed, delay);
+      startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
   }
 
   /**
@@ -1660,7 +1660,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-rotation conversion routine.
    */
   protected void _rotateX(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event);
   }
 
   /**
@@ -1721,7 +1721,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event);
   }
 
   /**
@@ -1783,7 +1783,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-rotation conversion routine.
    */
   protected void _rotateZ(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event.speed(), event.delay());
+    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event);
   }
 
   /**
@@ -1889,7 +1889,7 @@ public class Node extends Frame implements Grabber {
         trns = transformOf(trns);
         rt = new Quaternion(trns, -rt.angle());
       }
-      _spin(rt, event.speed(), event.delay());
+      _spin(rt, event);
     }
   }
 
@@ -2143,8 +2143,7 @@ public class Node extends Frame implements Grabber {
       if (_graph.isRightHanded())
         dy = -dy;
       Vector verticalAxis = transformOf(_upVector);
-      _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event.speed(),
-          event.delay());
+      _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
     }
   }
 
@@ -2318,7 +2317,7 @@ public class Node extends Frame implements Grabber {
         else
           rt = new Quaternion(axis, prev_angle - angle);
       }
-      _spin(rt, event.speed(), event.delay());
+      _spin(rt, event);
     }
   }
 
