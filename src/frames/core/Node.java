@@ -928,8 +928,7 @@ public class Node extends Frame implements Grabber {
    * Returns the minimum gesture speed required to make the node spin.
    * Spinning requires to set {@link #damping()} to 0.
    * <p>
-   * See {@link #_spin()}, {@link #spinningQuaternion()} and
-   * {@link #startSpinning(Quaternion, float, long)} for details.
+   * See {@link #startSpinning(Quaternion, float, long)} for details.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -986,8 +985,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns {@code true} when the node is spinning.
    * <p>
-   * During spinning, {@link #_spin()} rotates the node by its
-   * {@link #spinningQuaternion()} at a frequency defined when the node
+   * During spinning, {@link #_spin()} rotates the node according to
    * {@link #startSpinning(Quaternion, float, long)}.
    * <p>
    * Use {@link #startSpinning(Quaternion, float, long)} and {@link #stopSpinning()} to
@@ -1065,13 +1063,16 @@ public class Node extends Frame implements Grabber {
       startSpinning(quaternion, speed, delay);
   }
 
-  /*
-  protected void _spin(Quaternion quaternion) {
-    setSpinningQuaternion(quaternion);
-    _spin();
-  }
-  */
-
+  /**
+   * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
+   * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}. Called
+   * by a timer when the node {@link #isSpinning()}.
+   * <p>
+   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
+   * stops completely.
+   *
+   * @see #damping()
+   */
   public void spin(Quaternion quaternion) {
     if (isEye())
       rotateAroundPoint(quaternion, graph().anchor());
@@ -1079,15 +1080,6 @@ public class Node extends Frame implements Grabber {
       rotate(quaternion);
   }
 
-  /**
-   * Rotates the node by its {@link #spinningQuaternion()} or around the {@link Graph#anchor()}
-   * when this node is the {@link Graph#eye()}. Called by a timer when the node {@link #isSpinning()}.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   *
-   * @see #damping()
-   */
   /*
   protected void _spin() {
     if (isEye())
@@ -1098,7 +1090,7 @@ public class Node extends Frame implements Grabber {
   */
 
   /**
-   * Internal method. Recomputes the {@link #spinningQuaternion()} according to {@link #damping()}.
+   * Internal method.
    */
   protected void _recomputeSpinningQuaternion() {
     float prevSpeed = _eventSpeed;
@@ -2544,18 +2536,16 @@ public class Node extends Frame implements Grabber {
    * <p>
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
-   *
-   * @see #spinningQuaternion()
    */
+  //TODO remove me!
   public Vector flyDirection() {
     return _flyDirection;
   }
 
   /**
    * Defines the {@link #flyDirection()} in the reference frame coordinate system.
-   *
-   * @see #setSpinningQuaternion(Quaternion)
    */
+  //TODO remove me!
   public void setFlyDirection(Vector dir) {
     _flyDirection = dir;
   }
