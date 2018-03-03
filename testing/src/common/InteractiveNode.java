@@ -32,7 +32,7 @@ public class InteractiveNode extends Node {
     if (event.shortcut().matches(Mouse.CENTER))
       //lookAround(event);
       drive(event);
-    //*/
+      //*/
     /*
     if (event.shortcut().matches(Mouse.RIGHT))
       rotate(event);

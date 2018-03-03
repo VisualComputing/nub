@@ -4,7 +4,6 @@ import common.InteractiveNode;
 import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
-import frames.primitives.Quaternion;
 import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -41,10 +40,10 @@ public class BasicUse extends PApplet {
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
-        if(scene.is3D())
+        if (scene.is3D())
           Scene.drawCylinder(pGraphics, 30, radius, 200);
         else
-          pGraphics.rect(10,10,200,200);
+          pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
       }
 
@@ -66,7 +65,7 @@ public class BasicUse extends PApplet {
     node.setDamping(0.2f);
     node.setSpinningSensitivity(0);
     //node.startSpinning(Quaternion.random(), 10,1);
-    if(node.isSpinning())
+    if (node.isSpinning())
       println("node is spinning");
     else
       println("node is NOT spinning");
@@ -87,19 +86,19 @@ public class BasicUse extends PApplet {
     scene.pushModelView();
     scene.applyTransformation(frame);
     fill(255, 0, 0, 100);
-    if(scene.is3D())
+    if (scene.is3D())
       sphere(radius);
     else
-      ellipse(0,0,radius,radius);
+      ellipse(0, 0, radius, radius);
     scene.popModelView();
     popStyle();
   }
 
   public void keyPressed() {
-    if(key == ' ')
-      if(eye.isFlying())
+    if (key == ' ')
+      if (eye.isFlying())
         println("IS flying");
-    else
+      else
         println("is NOT flying");
   }
 
