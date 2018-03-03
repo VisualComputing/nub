@@ -4,6 +4,7 @@ import common.InteractiveNode;
 import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
+import frames.primitives.Quaternion;
 import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -58,7 +59,13 @@ public class BasicUse extends PApplet {
             scale(event);
       }
     };
-    node.setDamping(0);
+    node.setDamping(0.2f);
+    node.setSpinningSensitivity(0);
+    //node.startSpinning(Quaternion.random(), 10,1);
+    if(node.isSpinning())
+      println("node is spinning");
+    else
+      println("node is NOT spinning");
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);

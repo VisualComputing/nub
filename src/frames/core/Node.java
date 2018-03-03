@@ -1047,25 +1047,21 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Called by the timer. If
+   * Called by the timer.
    */
   protected void _spin() {
-    if (damping() == 0)
-      spin(_spinningQuaternion);
-    else {
-      if (_eventSpeed == 0) {
-        stopSpinning();
-        return;
-      }
-      spin(_spinningQuaternion);
-      //recompute spinning quaternion
-      float prevSpeed = _eventSpeed;
-      float damping = 1.0f - (float) Math.pow(damping(), 3);
-      _eventSpeed *= damping;
-      if (Math.abs(_eventSpeed) < .001f)
-        _eventSpeed = 0;
-      _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
+    if (_eventSpeed == 0) {
+      stopSpinning();
+      return;
     }
+    spin(_spinningQuaternion);
+    //recompute spinning quaternion
+    float prevSpeed = _eventSpeed;
+    float damping = 1.0f - (float) Math.pow(damping(), 3);
+    _eventSpeed *= damping;
+    if (Math.abs(_eventSpeed) < .001f)
+      _eventSpeed = 0;
+    _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
   }
 
   /**
