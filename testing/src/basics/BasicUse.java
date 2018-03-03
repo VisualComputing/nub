@@ -33,7 +33,9 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
     eye = new InteractiveNode(scene);
-    eye.setDamping(0f);
+    eye.setDamping(0.3f);
+    eye.setRotationSensitivity(4);
+    //eye.setSpinningSensitivity(0);
 
     node = new Shape(scene) {
       @Override

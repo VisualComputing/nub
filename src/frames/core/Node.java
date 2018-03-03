@@ -926,9 +926,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns the minimum gesture speed required to make the node spin.
-   * Spinning requires to set {@link #damping()} to 0.
-   * <p>
-   * See {@link #startSpinning(Quaternion, float, long)} for details.
+   * Continuously spinning requires to set {@link #damping()} to 0.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -983,67 +981,28 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns {@code true} when the node is spinning.
-   * <p>
-   * During spinning, {@link #_spin()} rotates the node according to
-   * {@link #startSpinning(Quaternion, float, long)}.
-   * <p>
-   * Use {@link #startSpinning(Quaternion, float, long)} and {@link #stopSpinning()} to
-   * change this state. Default value is {@code false}.
+   * Returns {@code true} when the node is spinning. Spinning is started by user
+   * interaction, e.g., {@link #rotate(Event)}.
    *
    * @see #isFlying()
+   * @see #stopSpinning()
    */
   public boolean isSpinning() {
     return _spinningTask.isActive();
   }
 
   /**
-   * Stops the spinning motion _started using {@link #startSpinning(Quaternion, float, long)}.
-   * Note that {@link #isSpinning()} will return {@code false} after this call.
+   * Stops the spinning motion. Spinning is started by user interaction, e.g.,
+   * {@link #rotate(Event)}. Note that {@link #isSpinning()} will return {@code false}
+   * after this call.
    * <p>
-   * <b>Attention: </b>This method may be called by {@link #_spin()}, since spinning may be
-   * decelerated according to {@link #damping()} till it stops completely.
+   * <b>Attention: Spinning may be decelerated according to {@link #damping()} till it stops
+   * completely.
    *
    * @see #damping()
    */
   public void stopSpinning() {
     _spinningTask.stop();
-  }
-
-  /**
-   * Same as {@code startSpinning(quaternion, speed, 40)}.
-   *
-   * @see #startSpinning(Quaternion, float, long)
-   */
-  public void startSpinning(Quaternion quaternion, float speed) {
-    startSpinning(quaternion, speed, 40);
-  }
-
-  /**
-   * Starts the spinning of the node.
-   * <p>
-   * This method starts a timer that will call {@link #_spin()} every
-   * {@code updateInterval} milliseconds. The node {@link #isSpinning()} until
-   * you call {@link #stopSpinning()}.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   *
-   * @see #damping()
-   * @see #startFlying(Vector, float)
-   */
-  public void startSpinning(Quaternion quaternion, float speed, long delay) {
-    if (quaternion == null) {
-      System.out.println("Warning: using identity rotation for startSpinning");
-      _spinningQuaternion = new Quaternion();
-    } else
-      _spinningQuaternion = quaternion;
-    _eventSpeed = speed;
-    _eventDelay = delay;
-    if (damping() == 0 && _eventSpeed < spinningSensitivity())
-      return;
-    if (delay > 0)
-      _spinningTask.run(delay);
   }
 
   /**
@@ -1065,25 +1024,28 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Implements two spinning models according to {@link #damping()}. 1. If
-   * the event was flushed (see {@link Event#flush()}), check if {@link #damping()} == 0
-   * to {@link #startSpinning(Quaternion, float, long)} on the previous (cache) event,
-   * otherwise; 2. Either call {@link #spin(Quaternion)} ({@link #damping()} == 0) or
-   * {@link #startSpinning(Quaternion, float, long)} ({@link #damping()} > 0), on the
-   * current event.
+   * Implementation of the spinning behavior. Performs:
+   * <p>
+   * <ol>
+   * <li>If event isn't flushed (see {@link Event#flush()}), caches its speed and delay.</li>
+   * <li>Calls {@link #stopSpinning()} if the cached event speed <
+   * {@link #spinningSensitivity()}.</li>
+   * <li>Runs the spinning timer if cached event delay > 0.</li>
+   * <li>Calls {@link #spin(Quaternion)} if the timer isn't running.</li>
+   * </ol>
    */
   protected void _spin(Quaternion quaternion, MotionEvent event) {
-    if (event.flushed() && damping() == 0) {
-      startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
-      return;
+    if (!event.flushed()) {
+      _spinningQuaternion = quaternion;
+      _eventSpeed = event.speed();
+      _eventDelay = event.delay();
     }
-    _spinningQuaternion = quaternion;
-    _eventSpeed = event.speed();
-    _eventDelay = event.delay();
-    if (damping() == 0) {
-      spin(_spinningQuaternion);
-    } else
-      startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
+    if (_eventSpeed < spinningSensitivity())
+      stopSpinning();
+    else if (_eventDelay > 0)
+      _spinningTask.run(_eventDelay);
+    if(!isSpinning())
+      spin(quaternion);
   }
 
   /**
@@ -2538,7 +2500,6 @@ public class Node extends Frame implements Grabber {
    *
    * @see #damping()
    * @see #_spin()
-   * @see #startSpinning(Quaternion, float, long)
    */
   public void startFlying(Vector direction, float speed) {
     _eventSpeed = speed;
