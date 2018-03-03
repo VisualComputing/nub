@@ -1983,6 +1983,10 @@ public class Node extends Frame implements Grabber {
    * User gesture into move-forward conversion routine.
    */
   protected void _moveForward(MotionEvent2 event, boolean forward) {
+    if (graph().is2D()) {
+      System.out.println("moveForward(Event) only makes sense in 3D");
+      return;
+    }
     if (!isEye()) {
       System.out.println("moveForward(Event) only makes sense for the eye");
       return;
@@ -2018,6 +2022,10 @@ public class Node extends Frame implements Grabber {
    * User gesture into drive conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void drive(MotionEvent2 event) {
+    if (graph().is2D()) {
+      System.out.println("drive(Event) only makes sense in 3D");
+      return;
+    }
     if (!isEye()) {
       System.out.println("drive(Event) only makes sense for the eye");
       return;

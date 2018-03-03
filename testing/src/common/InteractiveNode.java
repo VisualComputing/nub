@@ -24,27 +24,23 @@ public class InteractiveNode extends Node {
   // behavior is here :P
   @Override
   public void interact(Event event) {
-    /*
+    // /*
     if (event.shortcut().matches(Mouse.RIGHT))
       moveForward(event);
     if (event.shortcut().matches(Mouse.LEFT))
       moveBackward(event);
     if (event.shortcut().matches(Mouse.CENTER))
-      lookAround(event);
-    //*/
-    // /*
-    if (event.shortcut().matches(Mouse.RIGHT))
+      //lookAround(event);
       drive(event);
-      //translate(event);
-      //rotateX(event);
-      //screenRotate(event);
-      //moveForward(event);
+    //*/
+    /*
+    if (event.shortcut().matches(Mouse.RIGHT))
+      rotate(event);
     else if (event.shortcut().matches(Mouse.LEFT))
       translate(event);
-      //rotateCAD(event);
-      //moveBackward(event);
     if (event.shortcut().matches(Mouse.CENTER))
       rotate(event);
+    // */
     else if (event.shortcut().matches(Mouse.CENTER_TAP2))
       center();
     else if (event.shortcut().matches(Mouse.RIGHT_TAP))
@@ -54,6 +50,5 @@ public class InteractiveNode extends Node {
         translateZ(event);
       else
         scale(event);
-     // */
   }
 }

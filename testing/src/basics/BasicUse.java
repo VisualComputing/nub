@@ -19,14 +19,12 @@ public class BasicUse extends PApplet {
   Frame frame;
   Node eye, node;
   float radius = 100;
-  PGraphics pg;
 
   public void settings() {
     size(800, 800, P3D);
   }
 
   public void setup() {
-    pg = this.g;
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(400);
@@ -34,15 +32,19 @@ public class BasicUse extends PApplet {
     frame = new Frame();
     eye = new InteractiveNode(scene);
     //eye.setDamping(0f);
-    eye.setRotationSensitivity(4);
+    //eye.setRotationSensitivity(0.1f);
     //eye.setSpinningSensitivity(0);
 
     node = new Shape(scene) {
       @Override
       public void set(PGraphics pGraphics) {
         pGraphics.pushStyle();
+        pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
-        Scene.drawCylinder(pGraphics, 30, radius, 200);
+        if(scene.is3D())
+          Scene.drawCylinder(pGraphics, 30, radius, 200);
+        else
+          pGraphics.rect(10,10,200,200);
         pGraphics.popStyle();
       }
 
@@ -75,11 +77,6 @@ public class BasicUse extends PApplet {
     scene.fitBallInterpolation();
   }
 
-  public void graphics(PGraphics pg) {
-
-    pg.rect(0, 0, radius, radius);
-  }
-
   public void draw() {
     background(0);
     scene.drawAxes();
@@ -90,7 +87,10 @@ public class BasicUse extends PApplet {
     scene.pushModelView();
     scene.applyTransformation(frame);
     fill(255, 0, 0, 100);
-    sphere(radius);
+    if(scene.is3D())
+      sphere(radius);
+    else
+      ellipse(0,0,radius,radius);
     scene.popModelView();
     popStyle();
   }
