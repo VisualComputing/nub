@@ -137,9 +137,8 @@ public class Node extends Frame implements Grabber {
   protected Vector _flyDirection;
   protected float _flySpeed;
   protected TimingTask _flyTask;
-  protected Vector _fly;
+  protected boolean _applyFlyDamping;
   protected long _flyUpdatePeriod = 20;
-  //TODO move to Frame? see Graph.setUpVector
 
   // Inverse the direction of an horizontal mouse motion. Depends on the projected
   // screen orientation of the vertical axis when the mouse button is pressed.
@@ -164,7 +163,6 @@ public class Node extends Frame implements Grabber {
   protected Precision _Precision;
 
   protected MotionEvent2 _initEvent;
-  protected float _flySpeedCache;
 
   protected List<Node> _children;
 
@@ -243,7 +241,6 @@ public class Node extends Frame implements Grabber {
     };
     graph().registerTask(_spinningTask);
 
-    _fly = new Vector(0.0f, 0.0f, 0.0f);
     _flyTask = new TimingTask() {
       public void execute() {
         _fly();
@@ -257,7 +254,6 @@ public class Node extends Frame implements Grabber {
     graph().inputHandler().addGrabber(this);
     _Precision = Precision.FIXED;
     setPrecisionThreshold(20);
-    setFlySpeed(0.01f * graph().radius());
   }
 
   protected Node(Graph graph, Node other) {
@@ -289,8 +285,6 @@ public class Node extends Frame implements Grabber {
 
     this._graph.registerTask(_spinningTask);
 
-    this._fly = new Vector();
-    this._fly.set(other._fly.get());
     this._flyTask = new TimingTask() {
       public void execute() {
         _fly();
@@ -1011,6 +1005,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Called by the timer.
+   *
+   * @see #_fly()
    */
   protected void _spin() {
     if (_eventSpeed == 0) {
@@ -1024,7 +1020,7 @@ public class Node extends Frame implements Grabber {
     float prevSpeed = _eventSpeed;
     float damping = 1.0f - (float) Math.pow(damping(), 3);
     _eventSpeed *= damping;
-    if (Math.abs(_eventSpeed) < .001f)
+    if (Math.abs(_eventSpeed) < .01f)
       _eventSpeed = 0;
     _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
   }
@@ -1039,6 +1035,8 @@ public class Node extends Frame implements Grabber {
    * <li>Runs the spinning timer if cached event delay > 0.</li>
    * <li>Calls {@link #spin(Quaternion)} if the timer isn't running.</li>
    * </ol>
+   *
+   * @see #_fly(Vector, MotionEvent)
    */
   protected void _spin(Quaternion quaternion, MotionEvent event) {
     if (!event.flushed()) {
@@ -1991,14 +1989,8 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired())
       _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-    else if (event.flushed()) {
-      stopFlying();
-      return;
-    }
-    float fSpeed = forward ? -flySpeed() : flySpeed();
     rotate(_rollPitchQuaternion(event));
-    _fly.set(0.0f, 0.0f, fSpeed);
-    startFlying(rotation().rotate(_fly), event.speed());
+    _fly(rotation().rotate(new Vector(0.0f, 0.0f, forward ? -flySpeed() : flySpeed())), event);
   }
 
   /**
@@ -2033,16 +2025,10 @@ public class Node extends Frame implements Grabber {
     if (event.fired()) {
       _initEvent = event.get();
       _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-      _flySpeedCache = flySpeed();
-    } else if (event.flushed()) {
-      setFlySpeed(_flySpeedCache);
-      stopFlying();
-      return;
     }
-    setFlySpeed(0.01f * _graph.radius() * 0.01f * (event.y() - _initEvent.y()));
+    float speed = flySpeed() * 0.01f * (event.y() - _initEvent.y());
     rotate(_turnQuaternion(event.event1()));
-    _fly.set(0.0f, 0.0f, flySpeed());
-    startFlying(rotation().rotate(_fly), event.speed());
+    _fly(rotation().rotate(new Vector(0.0f, 0.0f, speed)), event);
   }
 
   /**
@@ -2440,10 +2426,10 @@ public class Node extends Frame implements Grabber {
   /**
    * Returns {@code true} when the node is flying.
    * <p>
-   * When flying, {@link #damping()} translates the node by its {@link #flyDirection()}
-   * at a frequency defined when the node {@link #startFlying(Vector, float)}.
+   * When flying, {@link #damping()} translates the node by its fly direction
+   * at a frequency defined when the node {@link #_fly(Vector, MotionEvent)}.
    * <p>
-   * Use {@link #startFlying(Vector, float)} and {@link #stopFlying()} to change this
+   * Use {@link #_fly(Vector, MotionEvent)} and {@link #stopFlying()} to change this
    * state. Default value is {@code false}.
    * <p>
    * {@link #isSpinning()}
@@ -2453,7 +2439,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the flying motion started using {@link #startFlying(Vector, float)}.
+   * Stops the flying motion started using {@link #_fly(Vector, MotionEvent)}.
    * {@link #isFlying()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #damping()}, since flying may
@@ -2467,49 +2453,27 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the incremental translation that is applied by {@link #damping()} to the
-   * node position when it {@link #isFlying()}.
+   * Implementation of the flying behavior.
    * <p>
-   * Default value is no translation. Use {@link #setFlyDirection(Vector)} to change this
-   * value.
-   * <p>
-   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   */
-  //TODO remove me!
-  public Vector flyDirection() {
-    return _flyDirection;
-  }
-
-  /**
-   * Defines the {@link #flyDirection()} in the reference frame coordinate system.
-   */
-  //TODO remove me!
-  public void setFlyDirection(Vector dir) {
-    _flyDirection = dir;
-  }
-
-  /**
-   * Starts the flying of the node.
-   * <p>
-   * This method starts a timer that will call {@link #damping()} every 20
-   * milliseconds. The node {@link #isFlying()} until you call
-   * {@link #stopFlying()}.
+   * This method starts a timer that will translate the node along {@code direction} every 20
+   * milliseconds. The node {@link #isFlying()} until you call {@link #stopFlying()}.
    * <p>
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
    * @see #damping()
-   * @see #_spin()
+   * @see #_spin(Quaternion, MotionEvent)
    */
-  public void startFlying(Vector direction, float speed) {
-    _eventSpeed = speed;
-    setFlyDirection(direction);
+  protected void _fly(Vector direction, MotionEvent event) {
+    _flyDirection = direction;
+    _eventSpeed = event.speed();
+    _eventDelay = event.delay();
+    _applyFlyDamping = event.flushed();
     _flyTask.run(_flyUpdatePeriod);
   }
 
   /**
-   * Translates the node by its {@link #flyDirection()}. Invoked by
+   * Translates the node by its fly direction. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
    * <p>
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
@@ -2518,7 +2482,17 @@ public class Node extends Frame implements Grabber {
    * @see #_spin()
    */
   protected void _fly() {
-    translate(flyDirection());
+    if (_flyDirection.magnitude() < .01f) {
+      stopFlying();
+      return;
+    }
+    translate(_flyDirection);
+    if (damping() == 0)
+      return;
+    if (_applyFlyDamping) {
+      float damping = 1.0f - (float) Math.pow(damping(), 3);
+      _flyDirection.multiply(damping);
+    }
   }
 
   /**
@@ -2537,8 +2511,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Sets the {@link #flySpeed()}, defined in  graph units.
    * <p>
-   * Default value is 0, but it is modified according to the {@link Graph#radius()} when the node
-   * is set as the {@link Graph#eye()}.
+   * Default value is {@code 0.01f * graph().radius()}.
    */
   public void setFlySpeed(float speed) {
     _flySpeed = speed;

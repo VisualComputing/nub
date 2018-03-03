@@ -33,7 +33,7 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
     eye = new InteractiveNode(scene);
-    eye.setDamping(0);
+    //eye.setDamping(0f);
     eye.setRotationSensitivity(4);
     //eye.setSpinningSensitivity(0);
 
@@ -93,6 +93,14 @@ public class BasicUse extends PApplet {
     sphere(radius);
     scene.popModelView();
     popStyle();
+  }
+
+  public void keyPressed() {
+    if(key == ' ')
+      if(eye.isFlying())
+        println("IS flying");
+    else
+        println("is NOT flying");
   }
 
   public static void main(String args[]) {
