@@ -133,6 +133,7 @@ void draw() {
   scene.traverse();
   scene.drawPath(interpolator, 5);
 }
+```
 
 while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too.
  
