@@ -93,7 +93,7 @@ To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape sh
 
 #### Immediate-mode shapes
 
-Immediate-mode shapes may be set using an anonymous inner [Shape class](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
+Immediate-mode shapes may be set using an anonymous inner [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
  
 ```java
 ...
