@@ -110,7 +110,7 @@ void setup() {
 }
 ```
 
-Note tha shapes like nodes can be controlled interactively. You may also override [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-), like it has been done above.
+Note tha shapes like nodes can be controlled interactively by overriding [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-), like it has been done above.
 
 ## Interpolators
 
