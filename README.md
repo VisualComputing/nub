@@ -70,6 +70,7 @@ Node eye;
 void setup() {
   ...
   eye = new Node(scene) {
+    @Override
     public void interact(Event event) {
       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
         translate(event);
@@ -92,7 +93,7 @@ To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape sh
 
 #### Immediate-mode shapes
 
-To set an immediate-mode shape use code such as the following:
+Immediate-mode shapes may be set using an anonymous inner [Shape class](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
  
 ```java
 ...
@@ -100,6 +101,7 @@ Shape shape;
 void setup() {
   ...
   shape = new Shape(scene) {
+    @Override
     public void set(PGraphics canvas) {
       //immediate-mode rendering procedure
     }
