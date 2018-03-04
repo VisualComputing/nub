@@ -103,7 +103,7 @@ void setup() {
   ...
   shape = new Shape(scene) {
     @Override
-    public void set(PGraphics canvas) {
+    protected void set(PGraphics canvas) {
       //immediate-mode rendering procedure
     }
   };
