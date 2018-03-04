@@ -92,6 +92,7 @@ import java.util.List;
  *         translate(event);
  *     }
  *   };
+ *   scene.setEye(eye);
  *   scene.setDefaultGrabber(eye);
  * }
  * }
