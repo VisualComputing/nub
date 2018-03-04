@@ -125,6 +125,7 @@ void setup() {
     interpolator.addKeyFrame(Node.random(scene));
   interpolator.start();
 }
+```
 
 which will create a random interpolator path containing [4..10] key-frames. The interpolation is also started. The interpolator path may be drawn with code like this:
 
