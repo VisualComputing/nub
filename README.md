@@ -5,9 +5,9 @@ framesjs
 
 - [Description](#user-content-description)
 - [Usage](#user-content-usage)
-- [Key-frame interpolators](#user-content-interpolators)
-- [Non-standard interactivity](#user-content-interactivity)
-- [Drawing functionality](#user-content-drawing)
+- [Interpolators](#user-content-interpolators)
+- [Interactivity](#user-content-interactivity)
+- [Drawing](#user-content-drawing)
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
 
@@ -108,7 +108,7 @@ void setup() {
 
 Note tha shapes like nodes can be control interactively. You may also override [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-), like it has been done above.
 
-## Key-frame interpolators
+## Interpolators
 
 A frame (and hence a node or a shape) can be animated through a key-frame [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) interpolator path. Use code such as the following:
 
@@ -139,11 +139,11 @@ void draw() {
 
 while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too.
  
-## Non-standard interactivity
+## Interactivity
  
 To control your scene nodes by means different than the [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) (see [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)), implement an [Agent](https://visualcomputing.github.io/frames-javadocs/frames/input/Agent.html) and call [registerAgent(Agent)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#registerAgent-frames.input.Agent-).
 
-## Drawing functionality
+## Drawing
 
 The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: `drawCylinder(PGraphics, int, float, float)}`, `drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)`, `drawCone(PGraphics, int, float, float, float, float)`, `drawCone(PGraphics, int, float, float, float, float, float)` and `drawTorusSolenoid(PGraphics, int, int, float, float)`.
 
