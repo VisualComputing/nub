@@ -21,7 +21,7 @@ public class ShapeInterpolation extends PApplet {
   boolean showEyePath = true;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-  String renderer = P3D;
+  String renderer = FX2D;
 
   public void settings() {
     size(1000, 800, renderer);

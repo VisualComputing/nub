@@ -14,7 +14,7 @@ framesjs
 
 ## Description
 
-A 2D or 3D [Processing](http://forum.processing.org) scene-graph providing eye, input and timing handling to a raster or ray-tracing renderer.
+A 2D or 3D [graph](https://en.wikipedia.org/wiki/Scene_graph) of [frames](https://en.wikipedia.org/wiki/Frame_of_reference) providing eye, input and timing handling to third party raster and ray-tracing renderers. The _processing git branch_ (the one you're looking at) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
 
 ## Usage
 
