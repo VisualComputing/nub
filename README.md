@@ -11,15 +11,15 @@ framesjs
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
 
-# Description
+## Description
 
 A 2D or 3D [Processing](http://forum.processing.org) scene-graph providing eye, input and timing handling to a raster or ray-tracing renderer.
 
-# Usage
+## Usage
 
 Typical usage comprises three steps: scene instantiation, setting an eye and setting some shapes.
 
-## Scene instantiation
+### Scene instantiation
 
 Instantiate your on-screen scene at the [setup()](https://processing.org/reference/setup_.html):
 
@@ -45,7 +45,7 @@ void setup() {
 
 In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the `canvas`.
 
-## The eye
+### The eye
 
 The scene eye can be an instance of [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) or a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html). To set the eye from a `frame` instance use code such as the following:
 
@@ -81,15 +81,15 @@ void setup() {
 
 The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization)) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)). Note the use of the anonymous inner [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) class used to define how the node will behave, refer to the [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details. Note also the [setDefaultGrabber(Grabber)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setDefaultGrabber-frames.input.Grabber-) call which will direct input to the eye when no other node is being picked.
 
-## Shapes
+### Shapes
 
 A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) is a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) specialization that can be set from a retained-mode rendering Processing [PShape](https://processing.org/reference/PShape.html) or from an immediate-mode rendering Processing procedure. Shapes can be picked precisely using their projection onto the screen, see [setPrecision(Node.Precision)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Node.Precision-). Use [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) to render all scene-graph shapes or [draw()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#draw--) to render a specific one instead.
 
-### Retained-mode shapes
+#### Retained-mode shapes
 
 To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call `Shape.set(PGraphics)`.
 
-### Immediate-mode shapes
+#### Immediate-mode shapes
 
 To set an immediate-mode shape use code such as the following:
  
@@ -108,7 +108,7 @@ void setup() {
 
 Note tha shapes like nodes can be control interactively. You may also override [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-), like it has been done above.
 
-# Key-frame interpolators
+## Key-frame interpolators
 
 A frame (and hence a node or a shape) can be animated through a key-frame [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) interpolator path. Use code such as the following:
 
@@ -139,11 +139,11 @@ void draw() {
 
 while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too.
  
-# Non-standard interactivity
+## Non-standard interactivity
  
 To control your scene nodes by means different than the [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) (see [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)), implement an [Agent](https://visualcomputing.github.io/frames-javadocs/frames/input/Agent.html) and call [registerAgent(Agent)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#registerAgent-frames.input.Agent-).
 
-# Drawing functionality
+## Drawing functionality
 
 The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: `drawCylinder(PGraphics, int, float, float)}`, `drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)`, `drawCone(PGraphics, int, float, float, float, float)`, `drawCone(PGraphics, int, float, float, float, float, float)` and `drawTorusSolenoid(PGraphics, int, int, float, float)`.
 
@@ -152,7 +152,7 @@ Drawing functions that take a `PGraphics` parameter (including the above static 
 
 Another scene's eye (different than this one) can be drawn with `drawEye(Graph)`. Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
-# Installation
+## Installation
 
 Import/update it directly from your PDE. Otherwise download your release from [here](https://github.com/VisualComputing/framesjs/releases) and extract it to your sketchbook `libraries` folder.
 
