@@ -90,7 +90,7 @@ A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Sh
 
 #### Retained-mode shapes
 
-To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call `Shape.set(PGraphics)`.
+To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.set(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
 #### Immediate-mode shapes
 
