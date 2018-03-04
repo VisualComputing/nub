@@ -1,12 +1,14 @@
 package basics;
 
-import common.InteractiveNode;
 import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import frames.timing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
@@ -15,24 +17,45 @@ import processing.core.PGraphics;
  */
 public class BasicUse extends PApplet {
   Scene scene;
+  boolean yDirection;
   Frame frame;
   Node eye, node;
   float radius = 100;
+  protected TimingTask spinningTask;
 
   public void settings() {
     size(800, 800, P3D);
+  }
+
+  public void spin() {
+    scene.eye().rotateAroundPoint(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
   }
 
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(400);
+    scene.fitBallInterpolation();
+
+    spinningTask = new TimingTask() {
+      public void execute() {
+        spin();
+      }
+    };
+    scene.registerTask(spinningTask);
 
     frame = new Frame();
+
+    /*
     eye = new InteractiveNode(scene);
     //eye.setDamping(0f);
     //eye.setRotationSensitivity(0.1f);
     //eye.setSpinningSensitivity(0);
+    scene.setEye(eye);
+    scene.setFieldOfView(PI / 3);
+    scene.setDefaultGrabber(eye);
+    scene.fitBallInterpolation();
+    */
 
     node = new Shape(scene) {
       @Override
@@ -62,18 +85,10 @@ public class BasicUse extends PApplet {
             scale(event);
       }
     };
+
     node.setDamping(0.2f);
     node.setSpinningSensitivity(0);
     //node.startSpinning(Quaternion.random(), 10,1);
-    if (node.isSpinning())
-      println("node is spinning");
-    else
-      println("node is NOT spinning");
-
-    scene.setEye(eye);
-    scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
-    scene.fitBallInterpolation();
   }
 
   public void draw() {
@@ -96,10 +111,14 @@ public class BasicUse extends PApplet {
 
   public void keyPressed() {
     if (key == ' ')
-      if (eye.isFlying())
-        println("IS flying");
+      if (spinningTask.isActive())
+        spinningTask.stop();
       else
-        println("is NOT flying");
+        spinningTask.run(20);
+    if (key == 'x')
+      yDirection = false;
+    if (key == 'y')
+      yDirection = true;
   }
 
   public static void main(String args[]) {
