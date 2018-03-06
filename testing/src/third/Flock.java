@@ -24,7 +24,7 @@ public class Flock extends PApplet {
   static float hue = 255;
   static int FPS = 100;
 
-  int initBoidNum = 300; // amount of boids to start the program with
+  int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
   static Node thirdPerson;
 
@@ -39,6 +39,7 @@ public class Flock extends PApplet {
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
     InteractiveNode eye = new InteractiveNode(scene);
+    //eye.setSpinningSensitivity(100);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
@@ -116,7 +117,7 @@ public class Flock extends PApplet {
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
     //for (Boid boid : flock)
-    //  boid.render();
+      //boid.render();
 
         /*
         triggered = scene.timer().trigggered();
@@ -175,35 +176,27 @@ public class Flock extends PApplet {
                     scene.eye().setReference(null);
                     //*/
         } else if (thirdPerson != null) {
-          ((Node) scene.eye()).setReference(thirdPerson);
+          scene.eye().setReference(thirdPerson);
           scene.interpolateTo(thirdPerson);
         }
         break;
+        /*
       case '+':
-        for (Boid boid : flock) {
-          boid.setPeriod(boid.period() - 2);
-                    /*
-                    FPS = (int)boid.period()-2;
-                    frameRate(boid.period());
-                    boid.setPeriod(1000/FPS);
-                    //*/
-        }
+        Flock.FPS += 10;
+        for (Boid boid : flock)
+          boid.setPeriod(1000 / Flock.FPS);
         break;
       case '-':
-        for (Boid boid : flock) {
-          boid.setPeriod(boid.period() + 2);
-                    /*
-                    //boid.setPeriod(60);
-                    FPS = (int)boid.period()+2;
-                    frameRate(boid.period());
-                    boid.setPeriod(1000/FPS);
-                    //*/
-        }
+        if(Flock.FPS>10)
+          Flock.FPS -= 10;
+        for (Boid boid : flock)
+          boid.setPeriod(1000 / Flock.FPS);
         break;
       case 'u':
         for (Boid boid : flock)
           boid.toggle();
         break;
+        */
     }
   }
 

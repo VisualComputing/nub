@@ -1,5 +1,6 @@
 package basics;
 
+import common.InteractiveNode;
 import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
@@ -46,16 +47,16 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
 
-    /*
+    ///*
     eye = new InteractiveNode(scene);
-    //eye.setDamping(0f);
+    eye.setDamping(0f);
     //eye.setRotationSensitivity(0.1f);
-    //eye.setSpinningSensitivity(0);
+    //eye.setSpinningSensitivity(1);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.setDefaultGrabber(eye);
     scene.fitBallInterpolation();
-    */
+    //*/
 
     node = new Shape(scene) {
       @Override
@@ -110,6 +111,8 @@ public class BasicUse extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 's')
+      scene.fitBall();
     if (key == ' ')
       if (spinningTask.isActive())
         spinningTask.stop();

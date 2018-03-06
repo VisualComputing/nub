@@ -30,17 +30,17 @@ public class InteractiveNode extends Node {
     if (event.shortcut().matches(Mouse.LEFT))
       moveBackward(event);
     if (event.shortcut().matches(Mouse.CENTER))
-      //lookAround(event);
-      drive(event);
-      //*/
-    ///*
+      lookAround(event);
+      //drive(event);
+    //*/
+    // /*
     if (event.shortcut().matches(Mouse.RIGHT))
-      rotate(event);
-    else if (event.shortcut().matches(Mouse.LEFT))
       translate(event);
+    else if (event.shortcut().matches(Mouse.LEFT))
+      rotate(event);
     if (event.shortcut().matches(Mouse.CENTER))
       rotate(event);
-      // */
+    // */
     else if (event.shortcut().matches(Mouse.CENTER_TAP2))
       center();
     else if (event.shortcut().matches(Mouse.RIGHT_TAP))

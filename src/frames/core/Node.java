@@ -1039,17 +1039,15 @@ public class Node extends Frame implements Grabber {
    * @see #_fly(Vector, MotionEvent)
    */
   protected void _spin(Quaternion quaternion, MotionEvent event) {
+    if (isSpinning())
+      stopSpinning();
     if (!event.flushed()) {
       _spinningQuaternion = quaternion;
       _eventSpeed = event.speed();
       _eventDelay = event.delay();
-    }
-    if (_eventSpeed < spinningSensitivity())
-      stopSpinning();
-    else if (_eventDelay > 0)
-      _spinningTask.run(_eventDelay);
-    if (!isSpinning())
       spin(quaternion);
+    } else if (_eventSpeed >= spinningSensitivity() && _eventDelay > 0)
+      _spinningTask.run(20);
   }
 
   /**
@@ -2477,7 +2475,8 @@ public class Node extends Frame implements Grabber {
     _eventSpeed = event.speed();
     _eventDelay = event.delay();
     _applyFlyDamping = event.flushed();
-    _flyTask.run(_flyUpdatePeriod);
+    if (!isFlying())
+      _flyTask.run(_flyUpdatePeriod);
   }
 
   /**

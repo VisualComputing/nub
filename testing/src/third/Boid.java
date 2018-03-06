@@ -51,9 +51,8 @@ class Boid extends AnimatorObject {
   public void animate() {
     if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
       Flock.thirdPerson = node;
-      ((Node) scene.eye()).setReference(node);
+      scene.eye().setReference(node);
       scene.interpolateTo(node);
-      //scene.resetMouseAgentInputNode();
     } else
       run(Flock.flock);
     render();
@@ -117,15 +116,11 @@ class Boid extends AnimatorObject {
       pos.z = Flock.flockDepth;
   }
 
+  /*
   public boolean isAvatar() {
     return scene.mouse().inputGrabber() == node && scene.eye() != node;
   }
-
-    /*
-    boolean isAvatar() {
-        return scene.avatar() == null ? false : scene.avatar().equals(node) ? true : false;
-    }
-    */
+  */
 
   void render() {
     p.pushStyle();
