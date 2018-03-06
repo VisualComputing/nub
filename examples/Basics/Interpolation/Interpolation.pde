@@ -19,7 +19,7 @@ boolean showEyePath = true;
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
 String renderer = P3D;
 
-public void setup() {
+void setup() {
   size(1000, 800, renderer);
   rectMode(CENTER);
   scene = new Scene(this);
@@ -67,7 +67,7 @@ public void setup() {
   interpolator.start();
 }
 
-public void draw() {
+void draw() {
   background(0);
   scene.traverse();
   if (showEyePath) {
@@ -79,7 +79,7 @@ public void draw() {
   }
 }
 
-public void keyPressed() {
+void keyPressed() {
   if (key == ' ')
     showEyePath = !showEyePath;
   if (key == 's')

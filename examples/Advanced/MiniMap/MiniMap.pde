@@ -65,7 +65,7 @@ void setup() {
   eye.setWorldMatrix(scene.eye());
 }
 
-public void draw() {
+void draw() {
   Node.sync((Node) scene.eye(), eye);
   scene.beginDraw();
   sceneCanvas.background(0);
@@ -87,7 +87,7 @@ public void draw() {
   }
 }
 
-public void keyPressed() {
+void keyPressed() {
   if (key == ' ')
     showMiniMap = !showMiniMap;
   if (key == 's')

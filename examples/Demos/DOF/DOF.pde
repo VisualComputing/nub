@@ -17,7 +17,7 @@ Scene scene;
 OrbitShape[] models;
 int mode = 2;
 
-public void setup() {
+void setup() {
   size(1000, 800, P3D);
   colorMode(HSB, 255);
   srcPGraphics = createGraphics(width, height, P3D);
@@ -53,7 +53,7 @@ public void setup() {
   frameRate(1000);
 }
 
-public void draw() {
+void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
   scene.frontBuffer().background(0);
@@ -88,7 +88,7 @@ PShape boxShape() {
   return box;
 }
 
-public void keyPressed() {
+void keyPressed() {
   if (key == '0') mode = 0;
   if (key == '1') mode = 1;
   if (key == '2') mode = 2;
