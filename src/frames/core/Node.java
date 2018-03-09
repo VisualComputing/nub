@@ -1060,7 +1060,6 @@ public class Node extends Frame implements Grabber {
   public void spin(Quaternion quaternion) {
     if (isEye())
       rotate(quaternion, graph().anchor());
-      //_rotate(new Quaternion(inverseTransformOf(quaternion.axis()), quaternion.angle()), graph().anchor());
     else
       rotate(quaternion);
   }

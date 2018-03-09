@@ -576,32 +576,6 @@ public class Frame {
       translate(vector);
   }
 
-  /**
-   * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
-   * passes through {@code point}. Both, the {@code quaternion} and {@code point}, are
-   * defined in the world coordinate system).
-   * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
-   *
-   * @see #setConstraint(Constraint)
-   */
-  public void _rotate(Quaternion quaternion, Vector point) {
-    Quaternion rotation = new Quaternion(transformOf(quaternion.axis()), quaternion.angle());
-    if (constraint() != null)
-      rotation = constraint().constrainRotation(rotation, this);
-
-    this.rotation().compose(rotation);
-    this.rotation().normalize(); // Prevents numerical drift
-
-    Vector t = Vector.add(point, quaternion.rotate(Vector.subtract(position(), point)));
-    t.subtract(translation());
-    if (constraint() != null)
-      translate(constraint().constrainTranslation(t, this));
-    else
-      translate(t);
-  }
-
   // ORIENTATION
 
   /**

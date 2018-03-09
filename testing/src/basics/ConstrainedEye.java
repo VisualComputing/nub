@@ -2,20 +2,13 @@ package basics;
 
 import common.InteractiveNode;
 import frames.core.Node;
-import frames.input.Event;
-import frames.primitives.Frame;
-import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.primitives.constraint.AxisPlaneConstraint;
 import frames.primitives.constraint.LocalConstraint;
 import frames.primitives.constraint.WorldConstraint;
-import frames.processing.Mouse;
 import frames.processing.Scene;
-import frames.processing.Shape;
-import frames.timing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PFont;
-import processing.core.PGraphics;
 
 /**
  * Created by pierre on 11/15/16.
@@ -56,7 +49,7 @@ public class ConstrainedEye extends PApplet {
     // An EyeConstraint is a LocalConstraint when applied to the camera frame !
     constraints[1] = new LocalConstraint();
     transDir = 0;
-    rotDir   = 0;
+    rotDir = 0;
     activeConstraint = 0;
     eye.setConstraint(constraints[activeConstraint]);
   }
@@ -74,10 +67,10 @@ public class ConstrainedEye extends PApplet {
 
   public void keyPressed() {
     if (key == 'b' || key == 'B') {
-      rotDir   = (rotDir+1)%3;
+      rotDir = (rotDir + 1) % 3;
     }
     if (key == 'd' || key == 'D') {
-      transDir = (transDir+1)%3;
+      transDir = (transDir + 1) % 3;
     }
     if (key == 'u' || key == 'U') {
       changeConstraint();
@@ -91,13 +84,13 @@ public class ConstrainedEye extends PApplet {
 
     Vector dir = new Vector(0.0f, 0.0f, 0.0f);
     switch (transDir) {
-      case 0 :
+      case 0:
         dir.setX(1.0f);
         break;
-      case 1 :
+      case 1:
         dir.setY(1.0f);
         break;
-      case 2 :
+      case 2:
         dir.setZ(1.0f);
         break;
     }
@@ -106,13 +99,13 @@ public class ConstrainedEye extends PApplet {
 
     dir.set(0.0f, 0.0f, 0.0f);
     switch (rotDir) {
-      case 0 :
+      case 0:
         dir.setX(1.0f);
         break;
-      case 1 :
+      case 1:
         dir.setY(1.0f);
         break;
-      case 2 :
+      case 2:
         dir.setZ(1.0f);
         break;
     }
@@ -122,19 +115,19 @@ public class ConstrainedEye extends PApplet {
   public static AxisPlaneConstraint.Type nextTranslationConstraintType(AxisPlaneConstraint.Type type) {
     AxisPlaneConstraint.Type rType;
     switch (type) {
-      case FREE  :
+      case FREE:
         rType = AxisPlaneConstraint.Type.PLANE;
         break;
-      case PLANE :
+      case PLANE:
         rType = AxisPlaneConstraint.Type.AXIS;
         break;
-      case AXIS  :
-        rType =  AxisPlaneConstraint.Type.FORBIDDEN;
+      case AXIS:
+        rType = AxisPlaneConstraint.Type.FORBIDDEN;
         break;
-      case FORBIDDEN   :
+      case FORBIDDEN:
         rType = AxisPlaneConstraint.Type.FREE;
         break;
-      default :
+      default:
         rType = AxisPlaneConstraint.Type.FREE;
     }
     return rType;
@@ -143,19 +136,19 @@ public class ConstrainedEye extends PApplet {
   public static AxisPlaneConstraint.Type nextRotationConstraintType(AxisPlaneConstraint.Type type) {
     AxisPlaneConstraint.Type rType;
     switch (type) {
-      case FREE  :
+      case FREE:
         rType = AxisPlaneConstraint.Type.AXIS;
         break;
-      case PLANE :
+      case PLANE:
         rType = AxisPlaneConstraint.Type.FREE;
         break;
-      case AXIS  :
-        rType =  AxisPlaneConstraint.Type.FORBIDDEN;
+      case AXIS:
+        rType = AxisPlaneConstraint.Type.FORBIDDEN;
         break;
-      case FORBIDDEN   :
+      case FORBIDDEN:
         rType = AxisPlaneConstraint.Type.FREE;
         break;
-      default :
+      default:
         rType = AxisPlaneConstraint.Type.FREE;
     }
     return rType;
@@ -163,7 +156,7 @@ public class ConstrainedEye extends PApplet {
 
   private void changeConstraint() {
     int previous = activeConstraint;
-    activeConstraint = (activeConstraint+1)%2;
+    activeConstraint = (activeConstraint + 1) % 2;
 
     constraints[activeConstraint].setTranslationConstraintType(constraints[previous].translationConstraintType());
     constraints[activeConstraint].setTranslationConstraintDirection(constraints[previous].translationConstraintDirection());
@@ -223,19 +216,19 @@ public class ConstrainedEye extends PApplet {
   }
 
   public void displayText() {
-    text("TRANSLATION :", 350, height-30);
-    displayDir(transDir, (350+105), height-30, 'D');
-    displayType(constraints[activeConstraint].translationConstraintType(), 350, height-60, 'T');
+    text("TRANSLATION :", 350, height - 30);
+    displayDir(transDir, (350 + 105), height - 30, 'D');
+    displayType(constraints[activeConstraint].translationConstraintType(), 350, height - 60, 'T');
 
-    text("ROTATION :", width-120, height-30);
-    displayDir(rotDir, width-40, height-30, 'B');
-    displayType(constraints[activeConstraint].rotationConstraintType(), width-120, height-60, 'R');
+    text("ROTATION :", width - 120, height - 30);
+    displayDir(rotDir, width - 40, height - 30, 'B');
+    displayType(constraints[activeConstraint].rotationConstraintType(), width - 120, height - 60, 'R');
 
     switch (activeConstraint) {
-      case 0 :
+      case 0:
         text("Constraint direction defined w/r to WORLD (U)", 350, 20);
         break;
-      case 1 :
+      case 1:
         text("Constraint direction defined w/r to EYE (U)", 370, 20);
         break;
     }

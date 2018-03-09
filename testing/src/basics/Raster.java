@@ -1,17 +1,9 @@
 package basics;
 
-import common.InteractiveNode;
-import frames.core.Node;
-import frames.input.Event;
 import frames.primitives.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Mouse;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import frames.timing.TimingTask;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 
 /**
  * Created by pierre on 11/15/16.

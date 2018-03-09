@@ -40,7 +40,7 @@ public class InteractiveNode extends Node {
       rotate(event);
     if (event.shortcut().matches(Mouse.CENTER))
       rotate(event);
-    // */
+      // */
     else if (event.shortcut().matches(Mouse.CENTER_TAP2))
       center();
     else if (event.shortcut().matches(Mouse.RIGHT_TAP))

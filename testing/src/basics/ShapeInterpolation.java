@@ -116,7 +116,7 @@ public class ShapeInterpolation extends PApplet {
         eye.translateXPos();
       else if (keyCode == LEFT)
         eye.translateXNeg();
-    if(key == 'p') {
+    if (key == 'p') {
       Quaternion q1 = Quaternion.random();
       Frame ref = sphere.detach();
 
@@ -130,7 +130,7 @@ public class ShapeInterpolation extends PApplet {
       Frame copy2 = frame.get();
       copy2.setReference(ref);
       //Quaternion q2 = new Quaternion(copy2.inverseTransformOf(q1.axis()), q1.angle());
-      copy2._rotate(q1, new Vector(15,15,15));
+      //copy2._rotate(q1, new Vector(15, 15, 15));
       //copy2.position().print();
       copy2.orientation().print();
     }

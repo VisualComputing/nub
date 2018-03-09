@@ -5,6 +5,7 @@ import frames.core.Node;
 import frames.input.Event;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -28,9 +29,9 @@ public class BasicUse extends PApplet {
   }
 
   public void spin() {
-    //scene.eye().rotateAroundPoint(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
+    scene.eye().rotate(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
     //scene.eye().rotateAround(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
-    scene.eye()._rotate(new Quaternion(yDirection ? scene.eye().yAxis() : scene.eye().xAxis(), PI / 100), scene.anchor());
+    //scene.eye()._rotate(new Quaternion(yDirection ? scene.eye().yAxis() : scene.eye().xAxis(), PI / 100), scene.anchor());
   }
 
   public void setup() {

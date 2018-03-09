@@ -117,7 +117,7 @@ public class Flock extends PApplet {
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
     //for (Boid boid : flock)
-      //boid.render();
+    //boid.render();
 
         /*
         triggered = scene.timer().trigggered();
