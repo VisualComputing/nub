@@ -29,7 +29,7 @@ public class Raster extends PApplet {
   }
 
   public void spin() {
-    scene.eye().rotateAroundPoint(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
+    //scene.eye().rotateAroundPoint(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), scene.anchor());
   }
 
   public void setup() {

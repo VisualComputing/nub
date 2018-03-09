@@ -550,43 +550,56 @@ public class Frame {
    *
    * @see #setConstraint(Constraint)
    */
-  public void rotateAroundPoint(Quaternion rotation, Vector point) {
+
+  /**
+   * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
+   * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
+   * defined in the frame coordinate system, while {@code point} is defined in the world
+   * coordinate system).
+   * <p>
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #setConstraint(Constraint)
+   */
+  public void rotate(Quaternion quaternion, Vector point) {
+    if (constraint() != null)
+      quaternion = constraint().constrainRotation(quaternion, this);
+    this.rotation().compose(quaternion);
+    this.rotation().normalize(); // Prevents numerical drift
+
+    Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+    vector.subtract(translation());
+    if (constraint() != null)
+      translate(constraint().constrainTranslation(vector, this));
+    else
+      translate(vector);
+  }
+
+  /**
+   * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
+   * passes through {@code point}. Both, the {@code quaternion} and {@code point}, are
+   * defined in the world coordinate system).
+   * <p>
+   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   *
+   * @see #setConstraint(Constraint)
+   */
+  public void _rotate(Quaternion quaternion, Vector point) {
+    Quaternion rotation = new Quaternion(transformOf(quaternion.axis()), quaternion.angle());
     if (constraint() != null)
       rotation = constraint().constrainRotation(rotation, this);
 
     this.rotation().compose(rotation);
     this.rotation().normalize(); // Prevents numerical drift
 
-    Quaternion q = new Quaternion(orientation().rotate(rotation.axis()), rotation.angle());
-
-    Vector t = Vector.add(point, q.rotate(Vector.subtract(position(), point)));
+    Vector t = Vector.add(point, quaternion.rotate(Vector.subtract(position(), point)));
     t.subtract(translation());
     if (constraint() != null)
       translate(constraint().constrainTranslation(t, this));
     else
       translate(t);
-  }
-
-  /**
-   * Applies a {@code rotation} (to this frame) around the {@code frame} param.
-   */
-  public void rotateAroundFrame(Quaternion rotation, Frame frame) {
-    Vector euler = rotation.eulerAngles();
-    rotateAroundFrame(euler.x(), euler.y(), euler.z(), frame);
-  }
-
-  /**
-   * Applies the rotation (to this frame) defined by the Euler angles
-   * around the {@code frame} param.
-   */
-  public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
-    if (frame != null) {
-      Frame axis = frame.detach();
-      Frame copy = detach();
-      copy.setReference(axis);
-      axis.rotate(new Quaternion(roll, pitch, yaw));
-      setWorldMatrix(copy);
-    }
   }
 
   // ORIENTATION
@@ -1428,7 +1441,7 @@ public class Frame {
   }
 
   /**
-   * Returns the world transform of the vector whose coordinates in the fFrame coordinate
+   * Returns the world transform of the vector whose coordinates in the frame coordinate
    * system is {@code src} (converts vectors from this frame to world).
    * <p>
    * {@link #transformOf(Vector)} performs the inverse transformation. Use

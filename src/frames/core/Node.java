@@ -1059,7 +1059,8 @@ public class Node extends Frame implements Grabber {
    */
   public void spin(Quaternion quaternion) {
     if (isEye())
-      rotateAroundPoint(quaternion, graph().anchor());
+      rotate(quaternion, graph().anchor());
+      //_rotate(new Quaternion(inverseTransformOf(quaternion.axis()), quaternion.angle()), graph().anchor());
     else
       rotate(quaternion);
   }
@@ -2414,18 +2415,6 @@ public class Node extends Frame implements Grabber {
       q.setY(trns.y());
       q.setZ(trns.z());
       return q;
-    }
-  }
-
-  //TODO needs testing
-  @Override
-  public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
-    if (frame != null) {
-      Frame axis = frame.detach();
-      Frame copy = detach();
-      copy.setReference(axis);
-      axis.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
-      setWorldMatrix(copy);
     }
   }
 
