@@ -105,8 +105,6 @@ import java.util.List;
  * @see #applyTransformation(Frame)
  * @see MatrixHandler
  */
-//TODO
-// (decide) Remove printing stuff (vector, map, ...).
 public class Graph {
   // 1. Eye
   protected Frame _eye;

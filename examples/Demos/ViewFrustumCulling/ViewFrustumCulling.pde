@@ -7,7 +7,7 @@
  * 
  * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
  * A second viewer displays an external view of the scene that exhibits the clipping
- * (using Scene.drawCamera() to display the frustum).
+ * (using scene.drawEye(Scene otherScene) to display the frustum).
  */
 
 

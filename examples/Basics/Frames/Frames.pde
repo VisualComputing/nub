@@ -28,17 +28,19 @@ int translation, rotation;
 void setup() {
   size(700, 700, renderer);
   frame1 = new Frame();
-  frame1.translate(new Vector(250, 250));
   frame2 = new Frame(frame1, new Vector(200, 200), new Quaternion());
 }
 
+// Scene.applyTransformation does the same as apply(PMatrix), but:
+// 1. It also works in 2D.
+// 2. It's far more efficient (apply(PMatrix) computes the inverse).
 void draw() {
   background(0);
   push();
-  translate(float(translation % width) - 250, 0);
+  translate(float(translation % width), height/2);
   if (world)
     translation++;
-  apply(frame1);
+  Scene.applyTransformation(this.g, frame1);
   stroke(0, 255, 0);
   fill(255, 0, 255, 125);
   bola(100);
@@ -46,7 +48,7 @@ void draw() {
   rotate(radians(rotation));
   if (!world)
     --rotation;
-  apply(frame2);
+  Scene.applyTransformation(this.g, frame2);
   stroke(255, 0, 0);
   fill(0, 255, 255);
   caja(100);
@@ -76,17 +78,6 @@ void push() {
 void pop() {
   popStyle();
   popMatrix();
-}
-
-void apply(Frame frame) {
-  if (g.is3D())
-    applyMatrix(Scene.toPMatrix(frame.matrix()));
-  // applyMatrix is not available in 2D!
-  else {
-    translate(frame.translation().x(), frame.translation().y());
-    rotate(frame.rotation().angle2D());
-    scale(frame.scaling(), frame.scaling());
-  }
 }
 
 void keyPressed() {

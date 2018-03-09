@@ -2172,28 +2172,37 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawAxes(frontBuffer(), length)}.
+   * Same as {@code drawAxes(frontBuffer(), length, isLeftHanded())}.
    *
-   * @see #drawAxes(PGraphics, float)
-   * @see #drawGrid(float, int)
+   * @see #drawAxes(PGraphics, float, boolean)
    */
   public void drawAxes(float length) {
-    drawAxes(frontBuffer(), length);
+    drawAxes(frontBuffer(), length, isLeftHanded());
   }
 
   /**
-   * Same as {@code drawAxes(pGraphics, radius())}.
+   * Same as {@code drawAxes(pGraphics, radius(), isLeftHanded())}.
+   *
+   * @see #drawAxes(PGraphics, float, boolean)
+   */
+  public void drawAxes(PGraphics pGraphics) {
+    drawAxes(pGraphics, radius(), isLeftHanded());
+  }
+
+  /**
+   * Same as {@code drawAxes(pGraphics, length, true)}.
    *
    * @see #drawAxes(PGraphics, float)
    */
-  public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, radius());
+  public static void drawAxes(PGraphics pGraphics, float length) {
+    drawAxes(pGraphics, length, true);
   }
 
   /**
-   * Draws axes of {@code length} onto {@code pGraphics}.
+   * Draws axes of {@code length} onto {@code pGraphics} taking into account
+   * {@code leftHanded}.
    */
-  public void drawAxes(PGraphics pGraphics, float length) {
+  public static void drawAxes(PGraphics pGraphics, float length, boolean leftHanded) {
     pGraphics.pushStyle();
     pGraphics.colorMode(PApplet.RGB, 255);
     float charWidth = length / 40.0f;
@@ -2203,7 +2212,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.beginShape(PApplet.LINES);
     pGraphics.strokeWeight(2);
-    if (is2D()) {
+    if (pGraphics.is2D()) {
       // The X
       pGraphics.stroke(200, 0, 0);
       pGraphics.vertex(charShift + charWidth, -charHeight);
@@ -2214,12 +2223,12 @@ public class Scene extends Graph implements PConstants {
       // The Y
       charShift *= 1.02;
       pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift + (isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(-charWidth, charShift + (isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(-charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift + 0.0f);
       pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(0.0f, charShift + -(isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift + -(!leftHanded ? charHeight : -charHeight));
     } else {
       // The X
       pGraphics.stroke(200, 0, 0);
@@ -2229,39 +2238,39 @@ public class Scene extends Graph implements PConstants {
       pGraphics.vertex(charShift, charWidth, charHeight);
       // The Y
       pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift, (isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(-charWidth, charShift, (isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift, 0.0f);
       pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(0.0f, charShift, -(isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
       // The Z
       pGraphics.stroke(0, 100, 200);
-      pGraphics.vertex(-charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(-charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(-charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
     }
     pGraphics.endShape();
     pGraphics.popStyle();
 
     // X Axis
     pGraphics.stroke(200, 0, 0);
-    if (is2D())
+    if (pGraphics.is2D())
       pGraphics.line(0, 0, length, 0);
     else
       pGraphics.line(0, 0, 0, length, 0, 0);
     // Y Axis
     pGraphics.stroke(0, 200, 0);
-    if (is2D())
+    if (pGraphics.is2D())
       pGraphics.line(0, 0, 0, length);
     else
       pGraphics.line(0, 0, 0, 0, length, 0);
 
     // Z Axis
-    if (is3D()) {
+    if (pGraphics.is3D()) {
       pGraphics.stroke(0, 100, 200);
       pGraphics.line(0, 0, 0, 0, 0, length);
     }
@@ -2306,7 +2315,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawGrid(frontBuffer, radius(), 10)}.
+   * Same as {@code drawGrid(pGraphics, radius(), 10)}.
+   *
+   * @see #drawGrid(PGraphics, float, int)
+   * @see #drawAxes(float)
    */
   public void drawGrid(PGraphics pGraphics) {
     drawGrid(pGraphics, radius(), 10);
@@ -2316,7 +2328,7 @@ public class Scene extends Graph implements PConstants {
    * Draws a grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
    * having {@code subdivisions}.
    */
-  public void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
+  public static void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
     pGraphics.beginShape(LINES);
     for (int i = 0; i <= subdivisions; ++i) {
@@ -2379,7 +2391,7 @@ public class Scene extends Graph implements PConstants {
    * Draws a dotted-grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
    * having {@code subdivisions}.
    */
-  public void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
+  public static void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
     float posi, posj;
     pGraphics.beginShape(POINTS);

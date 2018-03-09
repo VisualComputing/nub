@@ -2,11 +2,14 @@
  * DOF.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates how to attach a PShape to an interactive frame.
- * PShapes attached to interactive frames can then be automatically picked
- * and easily drawn.
+ * This example implements a Depth-Of-Field (DOF) shader effect
+ * using the traverse(), traverse(PGraphics), display() and
+ * display(PGraphics) Scene methods.
+ *
+ * Press 0 to display the original scene.
+ * Press 1 to display a depth shader (which is used by DOF).
+ * Press 2 to display the DOF effect.
  */
-
 
 import frames.core.*;
 import frames.processing.*;
@@ -50,6 +53,7 @@ void setup() {
   dofPGraphics = createGraphics(width, height, P3D);
   dofPGraphics.shader(dofShader);
 
+  scene.frontBuffer().hint(ENABLE_BUFFER_READING);
   frameRate(1000);
 }
 
@@ -68,7 +72,8 @@ void draw() {
 
   // 3. Draw destination buffer
   dofPGraphics.beginDraw();
-  dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
+  //dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
+  dofShader.set("focus", map(scene.pixelDepth(mouseX, mouseY), 0, 1, -0.5f, 1.5f));
   dofShader.set("tDepth", depthPGraphics);
   dofPGraphics.image(scene.frontBuffer(), 0, 0);
   dofPGraphics.endDraw();
