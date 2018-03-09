@@ -11,6 +11,7 @@
  * Press 2 to display the DOF effect.
  */
 
+import frames.input.*;
 import frames.core.*;
 import frames.processing.*;
 
@@ -73,6 +74,8 @@ void draw() {
   // 3. Draw destination buffer
   dofPGraphics.beginDraw();
   //dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
+  //Seems broken, check an approximate result with previous instead
+  //of this one. Test with other hardware and please report.
   dofShader.set("focus", map(scene.pixelDepth(mouseX, mouseY), 0, 1, -0.5f, 1.5f));
   dofShader.set("tDepth", depthPGraphics);
   dofPGraphics.image(scene.frontBuffer(), 0, 0);

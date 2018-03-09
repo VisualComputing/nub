@@ -28,6 +28,7 @@ import processing.core.PApplet;
  */
 public class Mouse extends Agent {
   //common mouse shortcuts
+  /*
   public static Shortcut NO_BUTTON = new Shortcut(Event.NO_ID);
   public static Shortcut LEFT = new Shortcut(PApplet.LEFT);
   public static Shortcut RIGHT = new Shortcut(PApplet.RIGHT);
@@ -39,6 +40,7 @@ public class Mouse extends Agent {
   public static TapShortcut LEFT_TAP2 = new TapShortcut(PApplet.LEFT, 2);
   public static TapShortcut RIGHT_TAP2 = new TapShortcut(PApplet.RIGHT, 2);
   public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER, 2);
+  */
 
   protected Point _upperLeftCorner;
   //protected Graph _graph;

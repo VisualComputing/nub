@@ -5,7 +5,6 @@ import frames.core.Interpolator;
 import frames.core.Node;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;

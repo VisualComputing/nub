@@ -11,6 +11,7 @@
  */
 
 import frames.processing.*;
+import frames.input.*;
 import frames.core.*;
 import frames.primitives.*;
 import frames.primitives.constraint.*;

@@ -3,7 +3,10 @@ package common;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.input.Event;
+import frames.input.Shortcut;
+import frames.input.event.TapShortcut;
 import frames.processing.Mouse;
+import processing.core.PApplet;
 
 public class InteractiveNode extends Node {
   public InteractiveNode(Graph graph) {
@@ -34,18 +37,18 @@ public class InteractiveNode extends Node {
       //drive(event);
     //*/
     // /*
-    if (event.shortcut().matches(Mouse.RIGHT))
+    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
       translate(event);
-    else if (event.shortcut().matches(Mouse.LEFT))
+    else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
       rotate(event);
-    if (event.shortcut().matches(Mouse.CENTER))
+    if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))
       rotate(event);
       // */
-    else if (event.shortcut().matches(Mouse.CENTER_TAP2))
+    else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
       center();
-    else if (event.shortcut().matches(Mouse.RIGHT_TAP))
+    else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
       align();
-    else if (event.shortcut().matches(Mouse.WHEEL))
+    else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
       if (isEye() && graph().is3D())
         translateZ(event);
       else

@@ -8,7 +8,7 @@
  * Feel free to copy paste it.
  */
 
-public class OrbitShape extends Shape {
+public class OrbitShape extends Shape {  
   public OrbitShape(Scene scene) {
     super(scene);
   }
@@ -31,13 +31,13 @@ public class OrbitShape extends Shape {
   // behavior is here :P
   @Override
   public void interact(frames.input.Event event) {
-    if (event.shortcut().matches(Mouse.RIGHT))
+    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
       translate(event);
-    if (event.shortcut().matches(Mouse.LEFT))
+    if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
       rotate(event);
-    if (event.shortcut().matches(Mouse.CENTER))
+    if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))
       rotate(event);
-    if (event.shortcut().matches(Mouse.WHEEL))
+    if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
       if (isEye() && graph().is3D())
         translateZ(event);
       else

@@ -10,7 +10,7 @@
  * (using scene.drawEye(Scene otherScene) to display the frustum).
  */
 
-
+import frames.input.*;
 import frames.core.*;
 import frames.primitives.*;
 import frames.processing.*;

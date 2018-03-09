@@ -7,7 +7,7 @@
  * shows Frame syncing among views.
  */
 
-
+import frames.input.*;
 import frames.core.*;
 import frames.processing.*;
 

@@ -3,6 +3,8 @@ package basics;
 import common.InteractiveNode;
 import frames.core.Node;
 import frames.input.Event;
+import frames.input.Shortcut;
+import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -75,13 +77,13 @@ public class BasicUse extends PApplet {
 
       @Override
       public void interact(Event event) {
-        if (event.shortcut().matches(Mouse.RIGHT))
+        if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
           translate(event);
-        else if (event.shortcut().matches(Mouse.LEFT))
+        else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
           rotate(event);
-        else if (event.shortcut().matches(Mouse.RIGHT_TAP))
+        else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
           align();
-        else if (event.shortcut().matches(Mouse.WHEEL))
+        else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
           if (isEye() && graph().is3D())
             translateZ(event);
           else

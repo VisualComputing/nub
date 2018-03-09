@@ -6,6 +6,7 @@
  * by the Graph.
  */
 
+import frames.input.*;
 import frames.core.*;
 import frames.processing.*;
 

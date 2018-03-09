@@ -5,6 +5,7 @@
  * Cajas Orientadas proscene example ported to frames.
  */
 
+import frames.input.*;
 import frames.core.*;
 import frames.primitives.*;
 import frames.processing.*;
