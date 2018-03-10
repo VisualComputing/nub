@@ -34,13 +34,11 @@ void setup() {
       pushStyle();
       stroke(0, 255, 0);
       fill(255, 0, 255, 125);
-      setMagnitude(graph.isInputGrabber(this) ? 1.1 : 1);
-      if(graph.isInputGrabber(this))
-        scale(1.1);
+      float dim = graph.isInputGrabber(this) ? length*1.1 : length;
       if (graph().is3D())
-        sphere(length);
+        sphere(dim);
       else
-        ellipse(0, 0, length, length);
+        ellipse(0, 0, dim, dim);
       popStyle();
     }
   };
@@ -50,11 +48,11 @@ void setup() {
       pushStyle();
       stroke(255, 0, 0);
       fill(0, 255, 255);
-      setMagnitude(graph.isInputGrabber(this) ? 1.1 : 1);
+      float dim = graph.isInputGrabber(this) ? length*1.1 : length;
       if (graph().is3D())
-        box(length);
+        box(dim);
       else
-        rect(0, 0, length, length);
+        rect(0, 0, dim, dim);
       popStyle();
     }
   };

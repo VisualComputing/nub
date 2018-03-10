@@ -14,7 +14,7 @@ public class OrbitNode extends Node {
     setPrecision(Node.Precision.ADAPTIVE);
     setPrecisionThreshold(length);
   }
-  
+
   public OrbitNode(Node node) {
     super(node);
     setPrecision(Node.Precision.ADAPTIVE);
@@ -35,13 +35,13 @@ public class OrbitNode extends Node {
   // behavior is here :P
   @Override
   public void interact(frames.input.Event event) {
-    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+    if (event.shortcut().matches(new Shortcut(RIGHT)))
       translate(event);
-    if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+    else if (event.shortcut().matches(new Shortcut(LEFT)))
       rotate(event);
-    if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))
+    else if (event.shortcut().matches(new Shortcut(CENTER)))
       rotate(event);
-    if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+    else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
       if (isEye() && graph().is3D())
         translateZ(event);
       else
