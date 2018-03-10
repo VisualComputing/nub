@@ -1,62 +1,70 @@
 /**
- * Frames.
+ * Eye1.
  * by Jean Pierre Charalambos.
  *
- * This example implements the following 'graph-less' frame hierarchy:
+ * This example implements the following graph frame hierarchy:
  *
- * World
- *   ^
- *   |
- * frame1
- *   |
+ *    World
+ *      ^
+ *      |\
+ * frame1 eye
+ *      |
  * frame2
- *   |
+ *      |
  * frame3
  *
- * To enter a frame coordinate system use the following pattern:
+ * Instantiate a graph object to use an eye frame.
  *
- * push();
- * Scene.applyTransformation(this.g, frame);
- * // coordinates here are given in the frame system
- * pop();
- *
- * Press any key to change the animation.
+ * Press ' ' to toggle spinning.
+ * Press 's' to fit scene smoothly.
+ * press 'y' to change the eye spinning axis.
  */
 
+import frames.timing.*;
 import frames.core.*;
 import frames.primitives.*;
 import frames.processing.*;
 
+Graph graph;
+TimingTask spinningTask;
 Frame frame1, frame2, frame3;
 //Choose FX2D, JAVA2D, P2D or P3D
-String renderer = P2D;
-boolean world;
-int translation, rotation;
+String renderer = P3D;
+boolean yDirection;
+int rotation;
 
 void setup() {
   size(700, 700, renderer);
+  graph = new Scene(this);
+  spinningTask = new TimingTask() {
+    public void execute() {
+      spin();
+    }
+  };
+  graph.registerTask(spinningTask);
+  spinningTask.run(20);
+  graph.setRadius(250);
+  graph.fitBallInterpolation();
   frame1 = new Frame();
-  frame1.translate(0, height/2);
   frame2 = new Frame();
   frame2.setReference(frame1);
   frame3 = new Frame(frame2, new Vector(200, 200), new Quaternion());
 }
 
-// Scene.applyTransformation does the same as apply(PMatrix), but:
+// scene.applyTransformation does the same as apply(PMatrix), but:
 // 1. It also works in 2D.
 // 2. It's far more efficient (apply(PMatrix) computes the inverse).
 void draw() {
   background(0);
-  updateFrames();
   push();
-  Scene.applyTransformation(this.g, frame1);
+  graph.applyTransformation(frame1);
   stroke(0, 255, 0);
   fill(255, 0, 255, 125);
   bola(100);
   push();
-  Scene.applyTransformation(this.g, frame2);
+  graph.applyTransformation(frame2);
   push();
-  Scene.applyTransformation(this.g, frame3);
+  graph.applyTransformation(frame3);
   stroke(255, 0, 0);
   fill(0, 255, 255);
   caja(100);
@@ -89,15 +97,18 @@ void pop() {
   popMatrix();
 }
 
-void updateFrames() {
-  if (world)
-    translation++;
-  else
-    --rotation;
-  frame1.setTranslation(float(translation % width), height/2);
-  frame2.setRotation(new Quaternion(radians(rotation)));
+public void spin() {
+  graph.eye().rotate(new Quaternion(yDirection ? new Vector(0, 1, 0) : new Vector(1, 0, 0), PI / 100), graph.anchor());
 }
 
 void keyPressed() {
-  world = !world;
+  if (key == 's')
+    graph.fitBallInterpolation();
+  if (key == ' ')
+    if (spinningTask.isActive())
+      spinningTask.stop();
+    else
+      spinningTask.run(20);
+  if (key == 'y')
+    yDirection = !yDirection;
 }

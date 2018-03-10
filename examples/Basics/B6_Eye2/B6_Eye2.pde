@@ -1,5 +1,5 @@
 /**
- * Eye.
+ * Eye2.
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates the following frame hierarchy:
