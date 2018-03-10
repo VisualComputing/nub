@@ -92,6 +92,10 @@ import java.util.List;
  * your custom node will then accordingly react to the LEFT and RIGHT mouse buttons,
  * provided it's added to the mouse-agent first (see {@link Agent#addGrabber(Grabber)}.
  * <p>
+ * Note that actions are bound to the node using the event {@link frames.input.Shortcut}
+ * attribute which identifies it. For instance {@code Shortcut(PApplet.LEFT))} tells us
+ * the {@code event} is a {@link MotionEvent2} mouse drag.
+ * <p>
  * Note that a node implements by default several gesture-to-motion converting methods,
  * such as: {@link #rotate(Event)}, {@link #moveForward(Event)},
  * {@link #translateXPos()}, etc.
