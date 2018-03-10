@@ -1,9 +1,15 @@
 /**
- * Interpolation.
+ * Interpolation1.
  * by Jean Pierre Charalambos.
  *
  * This example introduces the three different interpolations offered
  * by the Graph.
+ *
+ * Press ' ' to toggle the path display.
+ * Press 's' to fit ball interpolation.
+ * Press 'f' to fit ball.
+ * Press 't' to shift timers.
+ * Press the arrow keys to move the camera.
  */
 
 import frames.input.*;
@@ -15,10 +21,10 @@ PShape pbox, psphere;
 Shape box, sphere;
 Interpolator interpolator;
 OrbitNode eye;
-boolean showEyePath = true;
+boolean showPath = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-String renderer = P3D;
+String renderer = P2D;
 
 void setup() {
   size(1000, 800, renderer);
@@ -44,7 +50,7 @@ void setup() {
   sphere = new Shape(box, psphere);
   sphere.translate(15, 15, 15);
 
-  // interpolation 2. Custom eye interpolations
+  // interpolation 2. Custom interpolations
   interpolator = new Interpolator(box);
   interpolator.setLoop();
   // Create an initial path
@@ -71,7 +77,7 @@ void setup() {
 void draw() {
   background(0);
   scene.traverse();
-  if (showEyePath) {
+  if (showPath) {
     pushStyle();
     fill(255, 0, 0);
     stroke(0, 255, 0);
@@ -82,7 +88,7 @@ void draw() {
 
 void keyPressed() {
   if (key == ' ')
-    showEyePath = !showEyePath;
+    showPath = !showPath;
   if (key == 's')
     scene.fitBallInterpolation();
   if (key == 'f')

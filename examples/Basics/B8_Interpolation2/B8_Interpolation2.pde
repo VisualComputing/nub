@@ -1,9 +1,16 @@
 /**
- * Interpolation.
+ * Interpolation2.
  * by Jean Pierre Charalambos.
  *
- * This example introduces the three different interpolations offered
- * by the Graph.
+ * This example adds an interactive eye path to Interpolation1.
+ *
+ * Press ' ' to toggle the path display.
+ * Press 's' to fit ball interpolation.
+ * Press 'f' to fit ball.
+ * Press the arrow keys to move the camera.
+ * Press '1' to add eye key-frames.
+ * Press 'a' to play the eye path.
+ * Press 'b' to remove the eye path.
  */
 
 import frames.input.*;
@@ -13,9 +20,9 @@ import frames.processing.*;
 Scene scene;
 PShape pbox, psphere;
 Shape box, sphere;
-Interpolator interpolator;
+Interpolator interpolator, eyeInterpolator;
 OrbitNode eye;
-boolean showEyePath = true;
+boolean showPaths = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
 String renderer = P3D;
@@ -43,8 +50,11 @@ void setup() {
   psphere.setFill(color(250, 50, 80));
   sphere = new Shape(box, psphere);
   sphere.translate(15, 15, 15);
-
+  
   // interpolation 2. Custom eye interpolations
+  eyeInterpolator = new Interpolator(eye);
+
+  // interpolation 2. Custom interpolations
   interpolator = new Interpolator(box);
   interpolator.setLoop();
   // Create an initial path
@@ -65,30 +75,35 @@ void setup() {
     node.randomize();
     interpolator.addKeyFrame(node);
   }
-  interpolator.start();
+  interpolator.start();  
 }
 
 void draw() {
   background(0);
   scene.traverse();
-  if (showEyePath) {
+  if (showPaths) {
     pushStyle();
     fill(255, 0, 0);
     stroke(0, 255, 0);
     scene.drawPath(interpolator, 5);
+    fill(0, 255, 0);
+    stroke(255, 0, 255);
+    scene.drawPath(eyeInterpolator, 3);
     popStyle();
   }
 }
 
 void keyPressed() {
   if (key == ' ')
-    showEyePath = !showEyePath;
+    showPaths = !showPaths;
+  if (key == '1')
+      eyeInterpolator.addKeyFrame(scene.eye().get());
+    if (key == 'a')
+      eyeInterpolator.toggle();
+    if (key == 'b')
+      eyeInterpolator.clear();
   if (key == 's')
     scene.fitBallInterpolation();
-  if (key == 'f')
-    scene.fitBall();
-  if (key == 't')
-    scene.shiftTimers();
   if (key == CODED)
     if (keyCode == UP)
       eye.translateYPos();
