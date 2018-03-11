@@ -57,12 +57,9 @@ public class BasicGait extends PApplet {
 
     Solver solver = scene.registerTreeSolver(leftLeg.get(0));
     scene.addIKTarget(leftLeg.get(2), leftTarget);
-    solver.setTIMESPERFRAME(TimesPerFrame);
 
     solver = scene.registerTreeSolver(rightLeg.get(0));
     scene.addIKTarget(rightLeg.get(2), rightTarget);
-    solver.setTIMESPERFRAME(TimesPerFrame);
-
   }
 
   public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation, float theta) {

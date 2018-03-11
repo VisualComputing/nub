@@ -12,7 +12,9 @@ import frames.processing.Shape;
 import ik.common.Joint;
 import ik.common.Target;
 import processing.core.PApplet;
+import processing.core.PImage;
 import processing.core.PShape;
+import processing.opengl.PShader;
 
 import java.util.ArrayList;
 
@@ -20,7 +22,7 @@ import java.util.ArrayList;
  * Created by sebchaparr on 24/02/18.
  */
 
-public class InteractiveSkeleton extends PApplet {
+public class InteractiveSkeleton  extends PApplet {
   Scene scene;
   Node eye;
   InteractiveShape shape;
@@ -48,63 +50,64 @@ public class InteractiveSkeleton extends PApplet {
     //Create an initial Joint at the center of the Shape
     //root = new InteractiveJoint(scene, true);
     //Create and load an InteractiveShape
-    PShape model = loadShape("/home/pierre/IdeaProjects/framesjs/testing/data/objs/TropicalFish01.obj");
-    model.setTexture(loadImage("/home/pierre/IdeaProjects/framesjs/testing/data/objs/TropicalFish01.jpg"));
+    PShape model = loadShape(sketchPath() + "/testing/data/objs/TropicalFish01.obj");
+    model.setTexture(loadImage(sketchPath() + "/testing/data/objs/TropicalFish01.jpg"));
     //model.setFill(color(255,0,0));
-
 
     Vector[] box = getBoundingBox(model);
     //Scale model
     float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
-    model.scale(200.f * 1.f / max);
+    model.scale(200.f*1.f/max);
     //Invert Y Axis and set Fill
     //model.rotateZ(PI);
     //model.setFill(color(0,255,0, 100));
     shape = new InteractiveShape(scene, model);
     shape.setPrecision(Node.Precision.FIXED);
     shape.setPrecisionThreshold(1);
-    shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
+    shape.rotate(new Quaternion(new Vector(0,0,1), PI));
     root = fishSkeleton(shape);
     //Apply skinning
     skinning = new LinearBlendSkinning(shape, model);
     ArrayList<Node> skeleton = scene.branch(root);
     skinning.setup(skeleton);
     //Adding IK behavior
-    target.setPosition(skeleton.get(skeleton.size() - 1).position());
+    target.setPosition(skeleton.get(skeleton.size()-1).position());
     Solver solver = scene.registerTreeSolver(root);
-    scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
-    //setSkinning();
+    scene.addIKTarget(skeleton.get(skeleton.size()-1), target);
+    setSkinning();
   }
 
   int counter = 0;
-
-  public void draw() {
-    //updateParams();
+  public void draw(){
+    updateParams();
     background(0);
     lights();
     //Draw Constraints
-    scene.drawAxes();
-    for (Node frame : scene.nodes()) {
-      //if(frame == shape) shader(shader);
-      if (frame instanceof Shape) ((Shape) frame).draw();
-      //if(frame == shape) resetShader();
+    //scene.drawAxes();
+    for(Node frame : scene.nodes()){
+      if(frame == shape) shader(shader);
+      if(frame instanceof Shape){
+        ((Shape) frame).draw();
+        pushMatrix();
+        frame.applyWorldTransformation();
+        scene.drawAxes(10);
+        popMatrix();
+      }
+      if(frame == shape) resetShader();
     }
-    skinning.applyTransformations();
-    target.setPosition(new Vector(50 * sin(radians(counter)), target.position().y(), target.position().z()));
+    //skinning.applyTransformations();
+    target.setPosition(new Vector(50*sin(radians(counter)), target.position().y(), target.position().z()));
     counter++;
   }
 
-  public static Vector[] getBoundingBox(PShape shape) {
+  public static  Vector[] getBoundingBox(PShape shape) {
     Vector v[] = new Vector[2];
-    float minx = 999;
-    float miny = 999;
-    float maxx = -999;
-    float maxy = -999;
-    float minz = 999;
-    float maxz = -999;
-    for (int j = 0; j < shape.getChildCount(); j++) {
+    float minx = 999;  float miny = 999;
+    float maxx = -999; float maxy = -999;
+    float minz = 999;  float maxz = -999;
+    for(int j = 0; j < shape.getChildCount(); j++){
       PShape aux = shape.getChild(j);
-      for (int i = 0; i < aux.getVertexCount(); i++) {
+      for(int i = 0; i < aux.getVertexCount(); i++){
         float x = aux.getVertex(i).x;
         float y = aux.getVertex(i).y;
         float z = aux.getVertex(i).z;
@@ -117,12 +120,12 @@ public class InteractiveSkeleton extends PApplet {
       }
     }
 
-    v[0] = new Vector(minx, miny, minz);
-    v[1] = new Vector(maxx, maxy, maxz);
+    v[0] = new Vector(minx,miny, minz);
+    v[1] = new Vector(maxx,maxy, maxz);
     return v;
   }
 
-  public Joint fishSkeleton(Node reference) {
+  public Joint fishSkeleton(Node reference){
     Joint j1 = new Joint(scene, true);
     j1.setReference(reference);
     j1.setPosition(0, 10.8f, 93);
@@ -144,70 +147,77 @@ public class InteractiveSkeleton extends PApplet {
     return j1;
   }
 
-  public void printSkeleton(Node root) {
+  public void printSkeleton(Node root){
     int i = 0;
-    for (Node node : scene.branch(root)) {
+    for(Node node : scene.branch(root)){
       System.out.println("Node " + i + " : " + node.position());
       i++;
     }
   }
 
-  public void keyPressed() {
-    if (key == ' ') {
+  public void keyPressed(){
+    if(key == ' '){
       printSkeleton(root);
     }
   }
 
   // TODO: SKINNING on GPU
-    /*
-    //testing skinning on GPU
-    PShader shader;
-    Quaternion[] boneQuat = new Quaternion[120];
-    float[] bonePosition = new float[120];
 
-    public void setSkinning(){
-        ArrayList<Node> skeleton = scene.branch(root);
-        shader = loadShader("/home/sebchaparr/Processing/JS/framesjs/testing/src/ik/interactiveSkeleton/frag.glsl",
-                "/home/sebchaparr/Processing/JS/framesjs/testing/src/ik/interactiveSkeleton/skinning.glsl");
-        int i = 0, j = 0;
-        for(Node node : skeleton){
-            Vector position;
-            boneQuat[j++] = node.rotation();
-            position = node.position();
-            bonePosition[i++] = position.x();
-            bonePosition[i++] = position.y();
-            bonePosition[i++] = position.z();
-        }
-        shader.set("bonePosition", bonePosition);
+  //testing skinning on GPU
+  PShader shader;
+  Quaternion[] boneQuat = new Quaternion[120];
+  float[] bonePositionOrig = new float[120];
+  float[] bonePosition = new float[120];
+
+  public void setSkinning(){
+    ArrayList<Node> skeleton = scene.branch(root);
+    shader = loadShader(sketchPath() + "/testing/src/ik/interactiveSkeleton/frag.glsl",
+            sketchPath() + "/testing/src/ik/interactiveSkeleton/skinning.glsl");
+    int i = 0, j = 0;
+    for(Node node : skeleton){
+      Vector position;
+      boneQuat[j++] = node.orientation().get();
+      position = shape.coordinatesOfFrom(new Vector(), node);
+      bonePositionOrig[i+0] = position.x();
+      bonePositionOrig[i+1] = position.y();
+      bonePositionOrig[i+2] = position.z();
+      bonePosition[i++] = position.x();
+      bonePosition[i++] = position.y();
+      bonePosition[i++] = position.z();
 
     }
+    shader.set("bonePositionOrig", bonePositionOrig);
+    shader.set("bonePosition", bonePosition);
+    shader.set("boneLength", i);
 
-    public void updateParams(){
-        ArrayList<Node> skeleton = scene.branch(root);
-        float[] boneRotation = new float[120];
-        int i = 0, j = 0, k =0;
-        for(Node node : skeleton){
-            Vector position;
-            Quaternion rotation;
-            position = node.position();
-            rotation = Quaternion.compose(node.rotation(),boneQuat[k].inverse());
+  }
 
-            //bonePosition[i++] = position.x();
-            //bonePosition[i++] = position.y();
-            //bonePosition[i++] = position.z();
-            boneRotation[j++] = rotation.x();
-            boneRotation[j++] = rotation.y();
-            boneRotation[j++] = rotation.z();
-            boneRotation[j++] = rotation.w();
-            boneQuat[k++] = node.orientation();
-            i+=3;
+  public void updateParams(){
+    ArrayList<Node> skeleton = scene.branch(root);
+    float[] boneRotation = new float[120];
+    int i = 0, j = 0, k =0;
+    //System.out.println("Begin--------------------");
+    //System.out.println("Begin--------------------");
+    for(Node node : skeleton){
+      Vector position;
+      Quaternion rotation;
+      position = shape.coordinatesOfFrom(new Vector(), node);
+      bonePosition[i++] = position.x();
+      bonePosition[i++] = position.y();
+      bonePosition[i++] = position.z();
+      rotation = Quaternion.compose(boneQuat[k++].inverse(),node.orientation());
+      //System.out.println("rota: " + rotation.axis() + " ang : " + rotation.angle());
+      boneRotation[j++] = rotation.x();
+      boneRotation[j++] = rotation.y();
+      boneRotation[j++] = rotation.z();
+      boneRotation[j++] = rotation.w();
+    }
+    //System.out.println("End--------------------");
+    //System.out.println("End--------------------");
 
-        }
-        //shader.set("bonePosition", bonePosition);
-        shader.set("boneRotation", boneRotation);
-        shader.set("boneLength", i);
-
-    }*/
+    shader.set("bonePosition", bonePosition);
+    shader.set("boneRotation", boneRotation);
+  }
 
   public static void main(String args[]) {
     PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveSkeleton"});
