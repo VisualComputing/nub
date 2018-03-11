@@ -69,7 +69,7 @@ void setup() {
   //for (int i = 0; i < random(4, 10); i++)
   // interpolator.addKeyFrame(Node.random(scene));
 
-  // 3. Using InteractiveNodes, which is the same as 2., but makes path editable
+  // 3. Using OrbitNodes, which is the same as 2., but makes path editable
   for (int i = 0; i < random(4, 10); i++) {
     Node node = new OrbitNode(scene);
     node.randomize();
