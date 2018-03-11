@@ -1,7 +1,16 @@
+
+#ifdef GL_ES
+precision mediump float;
+precision mediump int;
+#endif
+
+uniform sampler2D texture;
+
+uniform vec2 texOffset;
+
 varying vec4 vertColor;
-varying vec3 vertNormal;
-varying vec3 vertLightDir;
+varying vec4 vertTexCoord;
 
 void main() {
-    gl_FragColor = vertColor;
+  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
 }
