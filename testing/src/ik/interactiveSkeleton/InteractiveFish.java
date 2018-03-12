@@ -10,6 +10,7 @@ import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
+import ik.common.LinearBlendSkinningGPU;
 import ik.common.Target;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -82,14 +83,10 @@ public class InteractiveFish extends PApplet {
         lights();
         //Draw Constraints
         scene.drawAxes();
-        for(Node frame : scene.nodes()){
-            if(frame == shape){
-                //comment this line if you're using Linear Blending Skinning with CPU
-                shader(skinning.shader);
-                ((Shape) frame).draw();
-                resetShader();
-            }
-        }
+        //comment this line if you're using Linear Blending Skinning with CPU
+        shader(skinning.shader);
+        shape.draw();
+        resetShader();
         //Uncomment to use Linear Blending Skinning with CPU
        //skinning.applyTransformations();
     }
