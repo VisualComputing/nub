@@ -1,10 +1,7 @@
 package ik.flock;
 
-import common.InteractiveNode;
-import common.InteractiveShape;
 import frames.core.Interpolator;
 import frames.core.Node;
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -14,10 +11,8 @@ import ik.common.LinearBlendSkinning;
 import ik.common.LinearBlendSkinningGPU;
 import ik.common.Target;
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PShape;
 import processing.core.PVector;
-import processing.core.PApplet.*;
 
 import java.util.ArrayList;
 
@@ -32,9 +27,11 @@ class Boid extends AnimatorObject {
     int avatarColor;
     boolean cpu = false;
     //SHAPE AND IK BEHAVIOR
-    InteractiveShape shape;
+    Node node;
     LinearBlendSkinning skinningCPU;
     LinearBlendSkinningGPU skinningGPU;
+    PShape shape;
+    int color;
 
     Target target;
     Interpolator targetInterpolator;
@@ -74,15 +71,15 @@ class Boid extends AnimatorObject {
         if(cpu) skinningCPU.applyTransformations();
         else skinningGPU.updateParams();
 
-        /*if (scene.mouse().inputGrabber() == shape && scene.eye().reference() != shape) {
-            Flock.thirdPerson = shape;
-            ((Node) scene.eye()).setReference(shape);
-            scene.interpolateTo(shape);
+        if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
+            Flock.thirdPerson = node;
+            ((Node) scene.eye()).setReference(node);
+            scene.interpolateTo(node);
             //scene.resetMouseAgentInputNode();
-        } else {*/
+        } else {
 
            if(!norun) run(Flock.flock);
-        //}
+        }
 
         render();
     }
@@ -126,7 +123,7 @@ class Boid extends AnimatorObject {
         vel.limit(maxSpeed); // make sure the velocity vector magnitude does not
         // exceed maxSpeed
         pos.add(vel); // add velocity to position
-        shape.setPosition(new Vector(pos.x, pos.y, pos.z));
+        node.setPosition(new Vector(pos.x, pos.y, pos.z));
         acc.mult(0); // reset acceleration
     }
 
@@ -146,7 +143,7 @@ class Boid extends AnimatorObject {
     }
 
     public boolean isAvatar() {
-        return scene.mouse().inputGrabber() == shape && scene.eye() != shape;
+        return scene.mouse().inputGrabber() == node && scene.eye() != node;
     }
 
     /*
@@ -156,36 +153,36 @@ class Boid extends AnimatorObject {
     */
 
     void render() {
-        /*p.pushStyle();
-        p.stroke(Flock.hue);
-        p.noFill();
-        p.noStroke();
-        p.fill(Flock.hue);*/
-
-        q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
-                new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
-        shape.setRotation(q);
-
+        Vector direction = node.transformOf(new Vector(vel.x, vel.y, vel.z));
+        //q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
+        //        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
+        q = new Quaternion(new Vector(0,0,1), direction);
+        node.rotate(q);
         if(!cpu) p.shader(skinningGPU.shader);
-        shape.draw();
+        p.pushMatrix();
+        // Multiply matrix to get in the node coordinate system.
+        node.applyTransformation();
+        // highlight boids under the mouse
+        if (node.track(p.mouseX, p.mouseY))
+            shape.setFill(grabsMouseColor);
+        else
+            shape.setFill(color);
+        p.shape(shape);
+        p.popMatrix();
+
         if(!cpu) p.resetShader();
 
-        /*p.pushMatrix();
-
-        // Multiply matrix to get in the node coordinate system.
-        shape.applyTransformation();
-        scene.drawAxes();
-
-        // highlight boids under the mouse
-        if (shape.track(p.mouseX, p.mouseY))
-            p.fill(grabsMouseColor);
-
-        p.popMatrix();
-        p.popStyle();*/
-        //target.draw();
-        //System.out.println("target pos : " + target.position());
-        //System.out.println("fish pos : " + target.reference().position());
-
+        //Uncomment to see how IK is working
+        /*
+        target.draw();
+        for(Frame f : targetInterpolator.keyFrames()){
+            p.pushMatrix();
+            p.noStroke();
+            scene.applyWorldTransformation(f);
+            p.sphere(10);
+            p.popMatrix();
+        }
+        */
     }
 
     // steering. If arrival==true, the boid slows to meet the target. Credit to
@@ -280,36 +277,40 @@ class Boid extends AnimatorObject {
 
     //SHAPE AND IK BEHAVIOR
     public void setupShape(String shapePath, String texturePath){
-        PShape model = scene.pApplet().loadShape(scene.pApplet().sketchPath() + shapePath);
-        model.setTexture(scene.pApplet().loadImage( scene.pApplet().sketchPath() + texturePath));
+        shape = scene.pApplet().loadShape(scene.pApplet().sketchPath() + shapePath);
+        //TODO : TEXTURE MODE IS DISABLED DUE TO PERFORMANCE
+        //shape.setTexture(scene.pApplet().loadImage( scene.pApplet().sketchPath() + texturePath));
+        color = scene.pApplet().color(scene.pApplet().random(0,255),
+                scene.pApplet().random(0,255), scene.pApplet().random(0,255));
+        shape.setFill(color);
         target = new Target(scene);
 
-        Vector[] box = getBoundingBox(model);
+        Vector[] box = getBoundingBox(shape);
         //Scale model
         float max = PApplet.max(PApplet.abs(box[0].x() - box[1].x()),
                 PApplet.abs(box[0].y() - box[1].y()),
                 PApplet.abs(box[0].z() - box[1].z()));
 
-        model.scale(200.f*1.f/max);
+        shape.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
-        shape = new InteractiveShape(scene, model);
-        shape.setPrecision(Node.Precision.FIXED);
-        shape.rotate(new Quaternion(new Vector(0,0,1), PApplet.PI));
-        Joint root = fishSkeleton(shape);
-        shape.setPosition(new Vector(pos.x, pos.y, pos.z));
+        node = new Node(scene);
+        //shape.setPrecision(Node.Precision.FIXED);
+        node.rotate(new Quaternion(new Vector(0,0,1), PApplet.PI));
+        Joint root = fishSkeleton(node);
+        node.setPosition(new Vector(pos.x, pos.y, pos.z));
 
         ArrayList<Node> skeleton = scene.branch(root);
 
         //Uncomment to use Linear Blending Skinning with CPU
         if(cpu) {
-            skinningCPU = new LinearBlendSkinning(shape, model);
+            skinningCPU = new LinearBlendSkinning(node, shape);
             skinningCPU.setup(skeleton);
         }else{
-            skinningGPU = new LinearBlendSkinningGPU(shape, skeleton);
+            skinningGPU = new LinearBlendSkinningGPU(node, skeleton);
             skinningGPU.setSkinning(scene.pApplet(), scene);
         }
         //Adding IK behavior
-        target.setReference(shape);
+        target.setReference(node);
         target.setPosition(skeleton.get(skeleton.size()-1).position());
         //Making a default Path that target must follow
         targetInterpolator = setupTargetInterpolator(target);
@@ -372,10 +373,8 @@ class Boid extends AnimatorObject {
         int nbKeyFrames = 4;
         float step = 2.0f * PApplet.PI/(nbKeyFrames-1);
         for (int i = 0; i < nbKeyFrames; i++) {
-            PShape sh = scene.pApplet().createShape(PConstants.SPHERE, 10);
-            sh.setStroke(false);
-            InteractiveShape iFrame = new InteractiveShape(scene, sh);
-            iFrame.setReference(shape);
+            Node iFrame = new Node(scene);
+            iFrame.setReference(node);
             iFrame.setPosition(new Vector(50*PApplet.sin(step*i) + target.position().x(), target.position().y(), target.position().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
