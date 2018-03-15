@@ -1,5 +1,5 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -24,21 +24,6 @@ import frames.primitives.Point;
  * @see Agent
  */
 public class Mouse extends Agent {
-  //common mouse shortcuts
-  /*
-  public static Shortcut NO_BUTTON = new Shortcut(Event.NO_ID);
-  public static Shortcut LEFT = new Shortcut(PApplet.LEFT);
-  public static Shortcut RIGHT = new Shortcut(PApplet.RIGHT);
-  public static Shortcut CENTER = new Shortcut(PApplet.CENTER);
-  public static Shortcut WHEEL = new Shortcut(processing.event.MouseEvent.WHEEL);
-  public static TapShortcut LEFT_TAP = new TapShortcut(PApplet.LEFT);
-  public static TapShortcut RIGHT_TAP = new TapShortcut(PApplet.RIGHT);
-  public static TapShortcut CENTER_TAP = new TapShortcut(PApplet.CENTER);
-  public static TapShortcut LEFT_TAP2 = new TapShortcut(PApplet.LEFT, 2);
-  public static TapShortcut RIGHT_TAP2 = new TapShortcut(PApplet.RIGHT, 2);
-  public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER, 2);
-  */
-
   protected Point _upperLeftCorner;
   //protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;

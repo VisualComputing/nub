@@ -1,5 +1,5 @@
 /*******************************************************************************
- * framesjs (version 1.0.0)
+ * frames (version 1.0.0)
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -196,7 +196,7 @@ public class Scene extends Graph implements PConstants {
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
-  protected PGraphics _fg;
+  protected PGraphics _fb;
 
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
@@ -268,7 +268,7 @@ public class Scene extends Graph implements PConstants {
     super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
-    _fg = pGraphics;
+    _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
@@ -303,126 +303,6 @@ public class Scene extends Graph implements PConstants {
     setLeftHanded();
   }
 
-  //TODO experimental rename and add api docs.
-  // decide later
-  /*
-  public Node orbitNode() {
-    class OrbitNode extends Node {
-      Shortcut left = new Shortcut(PApplet.LEFT);
-      Shortcut right = new Shortcut(PApplet.RIGHT);
-      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
-      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-
-      public OrbitNode(Graph graph) {
-        super(graph);
-      }
-
-      // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
-      // scene.eye().get()) to have the same behavior as its original.
-      protected OrbitNode(Graph otherGraph, OrbitNode otherNode) {
-        super(otherGraph, otherNode);
-      }
-
-      @Override
-      public OrbitNode get() {
-        return new OrbitNode(this.graph(), this);
-      }
-
-      @Override
-      public void interact(MotionEvent2 event) {
-        if (left.matches(event.shortcut()))
-          rotate(event);
-        if (right.matches(event.shortcut()))
-          translate(event);
-      }
-
-      @Override
-      public void interact(MotionEvent1 event) {
-        if (event.shortcut().matches(wheel))
-          if (isEye() && graph().is3D())
-            translateZ(event);
-          else
-            scale(event);
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.shortcut().matches(upArrow))
-          translateYPos();
-        else if (event.shortcut().matches(downArrow))
-          translateYNeg();
-        else if (event.shortcut().matches(leftArrow))
-          translateXNeg();
-        else if (event.shortcut().matches(rightArrow))
-          translateXPos();
-      }
-    }
-    return new OrbitNode(this);
-  }
-  //*/
-
-  /*
-  public Shape orbitShape() {
-    class OrbitShape extends Shape {
-      Shortcut left = new Shortcut(PApplet.LEFT);
-      Shortcut right = new Shortcut(PApplet.RIGHT);
-      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
-      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-
-      public OrbitShape(Scene scene) {
-        super(scene);
-      }
-
-      // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
-      // scene.eye().get()) to have the same behavior as its original.
-      protected OrbitShape(Scene otherScene, OrbitShape otherShape) {
-        super(otherScene, otherShape);
-      }
-
-      @Override
-      public OrbitShape get() {
-        return new OrbitShape(this.scene(), this);
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.shortcut().matches(upArrow))
-          translateYPos();
-        else if (event.shortcut().matches(downArrow))
-          translateYNeg();
-        else if (event.shortcut().matches(leftArrow))
-          translateXNeg();
-        else if (event.shortcut().matches(rightArrow))
-          translateXPos();
-      }
-
-      @Override
-      public void interact(MotionEvent2 event) {
-        if (left.matches(event.shortcut()))
-          rotate(event);
-        if (right.matches(event.shortcut()))
-          translate(event);
-      }
-
-      @Override
-      public void interact(MotionEvent1 event) {
-        if (event.shortcut().matches(wheel))
-          if (isEye() && graph().is3D())
-            translateZ(event);
-          else
-            scale(event);
-      }
-    }
-    return new OrbitShape(this);
-  }
-  //*/
-
   /**
    * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
    * scenes, but off-screen scenes may define it elsewhere on a canvas.
@@ -445,7 +325,7 @@ public class Scene extends Graph implements PConstants {
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
   public PGraphics frontBuffer() {
-    return _fg;
+    return _fb;
   }
 
   // PICKING BUFFER
