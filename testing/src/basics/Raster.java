@@ -7,7 +7,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.timing.TimingTask;
-import processing.core.*;
+import processing.core.PApplet;
 
 /**
  * Created by pierre on 11/15/16.
@@ -33,9 +33,9 @@ public class Raster extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    if(scene.is3D())
+    if (scene.is3D())
       scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.setRadius(width/2);
+    scene.setRadius(width / 2);
     scene.fitBallInterpolation();
 
     spinningTask = new TimingTask() {
@@ -46,7 +46,7 @@ public class Raster extends PApplet {
     scene.registerTask(spinningTask);
 
     frame = new Frame();
-    frame.setScaling(width/pow( 2, n));
+    frame.setScaling(width / pow(2, n));
 
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
@@ -57,10 +57,10 @@ public class Raster extends PApplet {
 
   public void draw() {
     background(0);
-    stroke(0,255,0);
-    if(gridHint)
-      scene.drawGrid(scene.radius(), (int)pow( 2, n));
-    if(triangleHint)
+    stroke(0, 255, 0);
+    if (gridHint)
+      scene.drawGrid(scene.radius(), (int) pow(2, n));
+    if (triangleHint)
       drawTriangleHint();
     pushMatrix();
     pushStyle();
@@ -75,17 +75,17 @@ public class Raster extends PApplet {
   public void triangleRaster() {
     // frame.coordinatesOf converts from world to frame
     // here we convert v1 to illustrate the idea
-    if(debug) {
+    if (debug) {
       pushStyle();
-      stroke(255,255,0,125);
+      stroke(255, 255, 0, 125);
       point(round(frame.coordinatesOf(v1).x()), round(frame.coordinatesOf(v1).y()));
       popStyle();
     }
   }
 
   void randomizeTriangle() {
-    int low = -width/2;
-    int high = width/2;
+    int low = -width / 2;
+    int high = width / 2;
     v1 = new Vector(random(low, high), random(low, high));
     v2 = new Vector(random(low, high), random(low, high));
     v3 = new Vector(random(low, high), random(low, high));
@@ -95,10 +95,10 @@ public class Raster extends PApplet {
     pushStyle();
     noFill();
     strokeWeight(2);
-    stroke(255,0,0);
+    stroke(255, 0, 0);
     triangle(v1.x(), v1.y(), v2.x(), v2.y(), v3.x(), v3.y());
     strokeWeight(5);
-    stroke(0,255,255);
+    stroke(0, 255, 255);
     point(v1.x(), v1.y());
     point(v2.x(), v2.y());
     point(v3.x(), v3.y());
@@ -106,21 +106,21 @@ public class Raster extends PApplet {
   }
 
   public void keyPressed() {
-    if(key == 'g')
+    if (key == 'g')
       gridHint = !gridHint;
-    if(key == 't')
+    if (key == 't')
       triangleHint = !triangleHint;
-    if(key == 'd')
+    if (key == 'd')
       debug = !debug;
-    if(key == '+') {
-      n = n < 7 ? n+1 : 2;
-      frame.setScaling(1024/pow( 2, n));
+    if (key == '+') {
+      n = n < 7 ? n + 1 : 2;
+      frame.setScaling(1024 / pow(2, n));
     }
-    if(key == '-') {
-      n = n >2 ? n-1 : 7;
-      frame.setScaling(1024/pow( 2, n));
+    if (key == '-') {
+      n = n > 2 ? n - 1 : 7;
+      frame.setScaling(1024 / pow(2, n));
     }
-    if(key == 'r')
+    if (key == 'r')
       randomizeTriangle();
     if (key == ' ')
       if (spinningTask.isActive())

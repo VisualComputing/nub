@@ -8,7 +8,6 @@ import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.processing.Mouse;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import frames.timing.TimingTask;

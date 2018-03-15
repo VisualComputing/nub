@@ -5,7 +5,6 @@ import frames.core.Node;
 import frames.input.Event;
 import frames.input.Shortcut;
 import frames.input.event.TapShortcut;
-import frames.processing.Mouse;
 import processing.core.PApplet;
 
 public class InteractiveNode extends Node {

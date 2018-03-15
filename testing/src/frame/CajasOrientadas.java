@@ -7,7 +7,6 @@ import frames.input.Shortcut;
 import frames.input.event.MotionEvent;
 import frames.primitives.Matrix;
 import frames.primitives.Vector;
-import frames.processing.Mouse;
 import frames.processing.Scene;
 import processing.core.PApplet;
 
