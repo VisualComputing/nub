@@ -26,28 +26,57 @@ public class InteractiveNode extends Node {
   // behavior is here :P
   @Override
   public void interact(Event event) {
-    /*
-    if (event.shortcut().matches(Mouse.RIGHT))
-      moveForward(event);
-    if (event.shortcut().matches(Mouse.LEFT))
-      moveBackward(event);
-    if (event.shortcut().matches(Mouse.CENTER))
-      lookAround(event);
-      //drive(event);
-    //*/
-    // /*
+    profile3(event);
+  }
+
+  public void profile1(Event event) {
     if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
       translate(event);
     else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
       rotate(event);
     if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))
       rotate(event);
-      // */
     else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
       center();
     else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
       align();
     else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+      if (isEye() && graph().is3D())
+        translateZ(event);
+      else
+        scale(event);
+  }
+
+  public void profile2(Event event) {
+    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+      moveForward(event);
+    else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+      moveBackward(event);
+    if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))
+      lookAround(event);
+    else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
+      center();
+    else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
+      align();
+    else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+      if (isEye() && graph().is3D())
+        translateZ(event);
+      else
+        scale(event);
+  }
+
+  public void profile3(Event event) {
+    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+      translate(event);
+    else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+      rotate(event);
+    if (event.shortcut().matches(new Shortcut(Event.SHIFT, PApplet.CENTER)))
+      rotate(event);
+    else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
+      center();
+    else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
+      align();
+    else if (event.shortcut().matches(new Shortcut(Event.CTRL, processing.event.MouseEvent.WHEEL)))
       if (isEye() && graph().is3D())
         translateZ(event);
       else

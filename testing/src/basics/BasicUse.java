@@ -26,7 +26,7 @@ public class BasicUse extends PApplet {
   protected TimingTask spinningTask;
 
   public void settings() {
-    size(800, 800, P3D);
+    size(800, 800, P2D);
   }
 
   public void spin() {
@@ -98,9 +98,7 @@ public class BasicUse extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-
     scene.traverse();
-
     pushStyle();
     scene.pushModelView();
     scene.applyTransformation(frame);

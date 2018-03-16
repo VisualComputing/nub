@@ -17,6 +17,8 @@ import frames.input.event.MotionEvent1;
 import frames.input.event.MotionEvent2;
 import frames.input.event.TapEvent;
 import frames.primitives.Point;
+import processing.awt.PGraphicsJava2D;
+import processing.core.PApplet;
 
 /**
  * Mouse agent. A Processing fully fledged mouse {@link Agent}.
@@ -25,7 +27,7 @@ import frames.primitives.Point;
  */
 public class Mouse extends Agent {
   protected Point _upperLeftCorner;
-  //protected Graph _graph;
+  protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
   protected Mode _mode;
@@ -50,6 +52,7 @@ public class Mouse extends Agent {
    */
   public Mouse(Graph graph, Point upperLeftCorner) {
     super(graph.inputHandler());
+    _graph = graph;
     _upperLeftCorner = upperLeftCorner;
     setMode(Mode.MOVE);
   }
@@ -82,7 +85,7 @@ public class Mouse extends Agent {
     _release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
     if (_move || _press || _drag || _release) {
       _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
-          mouseEvent.getModifiers(), _move ? Event.NO_ID : mouseEvent.getButton());
+          _modifiers(mouseEvent), _move ? Event.NO_ID : mouseEvent.getButton());
       if (_move && (mode() == Mode.MOVE))
         poll(_currentEvent);
       handle(_press ? _currentEvent.fire() : _release ? _currentEvent.flush() : _currentEvent);
@@ -95,11 +98,27 @@ public class Mouse extends Agent {
     }
     if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
       TapEvent tapEvent = new TapEvent(mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
-          mouseEvent.getModifiers(), mouseEvent.getButton(), mouseEvent.getCount());
+          _modifiers(mouseEvent), mouseEvent.getButton(), mouseEvent.getCount());
       if (mode() == Mode.CLICK)
         poll(tapEvent);
       handle(tapEvent);
       return;
     }
+  }
+
+  /**
+   * PGraphicsJava2D mouse event modifiers fix.
+   * <p>
+   * See: https://github.com/processing/processing/issues/1693
+   */
+  protected int _modifiers(processing.event.MouseEvent event) {
+    int modifiers = event.getModifiers();
+    if (_graph instanceof Scene)
+      if (((Scene) _graph).frontBuffer() instanceof PGraphicsJava2D)
+        if (event.getButton() == PApplet.CENTER)
+          modifiers = Event.ALT ^ event.getModifiers();
+        else if (event.getButton() == PApplet.RIGHT)
+          modifiers = Event.META ^ event.getModifiers();
+    return modifiers;
   }
 }
