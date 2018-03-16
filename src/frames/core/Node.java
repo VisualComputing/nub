@@ -102,11 +102,6 @@ import java.util.List;
  * <h2>Picking</h2>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
- * <h2>Syncing</h2>
- * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that hasGrabber been most recently updated. Syncing can be useful to share nodes
- * among different off-screen graphs.
  */
 public class Node extends Frame implements Grabber {
   // according to space-nav fine tuning it turned out that the space-nav is
@@ -774,39 +769,6 @@ public class Node extends Frame implements Grabber {
     if (children() != null)
       for (Node child : children())
         child._modified();
-  }
-
-  // SYNC
-
-  /**
-   * Same as {@code sync(this, other)}.
-   *
-   * @see #sync(Node, Node)
-   */
-  public void sync(Node other) {
-    sync(this, other);
-  }
-
-  /**
-   * If {@code node1} has been more recently updated than {@code node2}, calls
-   * {@code node2.setWorldMatrix(node1)}, otherwise calls {@code node1.setWorldMatrix(node2)}.
-   * Does nothing if both objects were updated at the same frame.
-   * <p>
-   * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
-   * separately.
-   *
-   * @see #setWorldMatrix(Frame)
-   */
-  public static void sync(Node node1, Node node2) {
-    if (node1 == null || node2 == null)
-      return;
-    if (node1.lastUpdate() == node2.lastUpdate())
-      return;
-    Node source = (node1.lastUpdate() > node2.lastUpdate()) ? node1 : node2;
-    Node target = (node1.lastUpdate() > node2.lastUpdate()) ? node2 : node1;
-    target.setWorldMatrix(source);
   }
 
   /**

@@ -94,6 +94,11 @@ import frames.timing.TimingHandler;
  * {@link frames.primitives.constraint.WorldConstraint} and
  * {@link frames.primitives.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
+ * <h2>Syncing</h2>
+ * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
+ * share their global parameters (position, orientation and magnitude) taken the one
+ * that has been most recently updated. Syncing can be useful to share frames
+ * among different off-screen canvases.
  */
 public class Frame {
   /**
@@ -258,6 +263,39 @@ public class Frame {
    */
   public long lastUpdate() {
     return _lastUpdate;
+  }
+
+  // SYNC
+
+  /**
+   * Same as {@code sync(this, other)}.
+   *
+   * @see #sync(Frame, Frame)
+   */
+  public void sync(Frame other) {
+    sync(this, other);
+  }
+
+  /**
+   * If {@code frame1} has been more recently updated than {@code frame2}, calls
+   * {@code frame2.setWorldMatrix(frame1)}, otherwise calls {@code frame1.setWorldMatrix(frame2)}.
+   * Does nothing if both objects were updated at the same time.
+   * <p>
+   * This method syncs only the global geometry attributes ({@link #position()},
+   * {@link #orientation()} and {@link #magnitude()}) among the two frames. The
+   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
+   * separately.
+   *
+   * @see #setWorldMatrix(Frame)
+   */
+  public static void sync(Frame frame1, Frame frame2) {
+    if (frame1 == null || frame2 == null)
+      return;
+    if (frame1.lastUpdate() == frame2.lastUpdate())
+      return;
+    Frame source = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame1 : frame2;
+    Frame target = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame2 : frame1;
+    target.setWorldMatrix(source);
   }
 
   // REFERENCE_FRAME
@@ -708,7 +746,7 @@ public class Frame {
    * parallel.
    * <p>
    * If, after this first rotation, two other axis are also almost parallel, a second
-   * alignment is performed. The two nodes then have identical orientations, up to 90
+   * alignment is performed. The two frames then have identical orientations, up to 90
    * degrees rotations.
    * <p>
    * {@code threshold} measures how close two axis must be to be considered parallel. It
