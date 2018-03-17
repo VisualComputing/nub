@@ -120,7 +120,7 @@ void setup() {
 }
 ```
 
-Note that shapes like nodes can be controlled interactively by overriding [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-) (like it has been done above), and like frames they can be set as the scene eye which may be useful in first person camera mode to depict the viewer.
+Note that shapes like nodes can be controlled interactively by overriding [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-) (like it has been done above) and, like frames, they can be set as the scene eye which may be useful to depict the viewer in first person camera style.
 
 Note also that shapes override the `Node` [visit](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#visit--) method to actually render its contents.
 
