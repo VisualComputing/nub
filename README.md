@@ -54,7 +54,7 @@ In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/fram
 
 The default scene eye is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) instance, but it can also be a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) one.
 
-To set the eye from a `frame` instance different than the default one, use code such as the following:
+To set the eye from whatever `frame` instance, different than the default one, use code such as the following:
 
 ```java
 ...
