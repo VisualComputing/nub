@@ -18,7 +18,7 @@ frames
 
 *Frames* is meant to be coupled with third party raster and ray-tracing renderers. The _processing git branch_ (the one you're looking at) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
 
-If looking for the the API docs, check them [here](https://visualcomputing.github.io/frames-javadocs/).
+If looking for the API docs, check them [here](https://visualcomputing.github.io/frames-javadocs/).
 
 ## Usage
 
