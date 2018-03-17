@@ -14,7 +14,7 @@ frames
 
 ## Description
 
-Simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) of [frames](https://en.wikipedia.org/wiki/Frame_of_reference) featuring interaction, inverse kinematics, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
+[frames](https://en.wikipedia.org/wiki/Frame_of_reference) is a imple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, inverse kinematics, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
 *Frames* is meant to be coupled with third party raster and ray-tracing renderers. The _processing git branch_ (the one you're looking at) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
 
@@ -52,7 +52,7 @@ In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/fram
 
 ### The eye
 
-The scene eye can be an instance of [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) or [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html). To set the eye from a `frame` instance use code such as the following:
+The scene eye can be an instance of [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) or [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html). The default scene es a `frame` instance. To set the eye from another `frame` instance use code such as the following:
 
 ```java
 ...
@@ -119,6 +119,8 @@ void setup() {
 ```
 
 Note tha shapes like nodes can be controlled interactively by overriding [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-), like it has been done above.
+
+Note also that shapes override the `Node` [visit](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#visit--) method to actually render its contents.
 
 ## Interpolators
 
