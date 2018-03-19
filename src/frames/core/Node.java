@@ -2437,7 +2437,15 @@ public class Node extends Frame implements Grabber {
    * @see #_spin()
    */
   protected void _fly() {
+    if (_flyDirection.magnitude() < .01f) {
+      stopFlying();
+      return;
+    }
     translate(_flyDirection);
+    if (damping() == 0)
+      return;
+    float damping = 1.0f - (float) Math.pow(damping(), 3);
+    _flyDirection.multiply(damping);
   }
 
   /**
