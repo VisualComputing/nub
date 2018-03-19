@@ -230,7 +230,7 @@ public class Node extends Frame implements Grabber {
     setWheelSensitivity(15f);
     setKeySensitivity(10f);
     setSpinningSensitivity(0.3f);
-    setDamping(0.5f);
+    setDamping(0.3f);
 
     _spinningTask = new TimingTask() {
       public void execute() {
@@ -773,7 +773,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Defines the spinning deceleration.
    * <p>
-   * Default value is 0.5. Use {@link #setDamping(float)} to tune this value. A higher
+   * Default value is 0.3. Use {@link #setDamping(float)} to tune this value. A higher
    * value will make damping more difficult (a value of 1 forbids damping).
    */
   public float damping() {
