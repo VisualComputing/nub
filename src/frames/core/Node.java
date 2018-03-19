@@ -1926,6 +1926,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * User gesture into move-forward conversion routine. Only meaningful if {@link #isEye()}.
+   * <p>
+   * Note that {@link #isFlying()} will return true after a call to this function.
    */
   public void moveForward(MotionEvent event) {
     _moveForward(event, true);
@@ -2416,6 +2418,9 @@ public class Node extends Frame implements Grabber {
    * <p>
    * This method starts a timer that will translate the node along {@code direction} every 20
    * milliseconds. The node {@link #isFlying()} until you call {@link #stopFlying()}.
+   * <p>
+   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
+   * stops completely.
    *
    * @see #damping()
    * @see #_spin(Quaternion, MotionEvent)
@@ -2424,7 +2429,7 @@ public class Node extends Frame implements Grabber {
     _flyDirection = direction;
     _eventSpeed = event.speed();
     _eventDelay = event.delay();
-    if(event.flushed() || (event.fired() && isFlying()))
+    if (event.fired() && isFlying())
       stopFlying();
     else
       _flyTask.run(_flyUpdatePeriod);
@@ -2433,6 +2438,9 @@ public class Node extends Frame implements Grabber {
   /**
    * Translates the node by its fly direction. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
+   * <p>
+   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
+   * stops completely.
    *
    * @see #_spin()
    */

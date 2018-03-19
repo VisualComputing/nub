@@ -40,14 +40,27 @@ public class OrbitNode extends Node {
   // behavior is here :P
   @Override
   public void interact(frames.input.Event event) {
-    boolean move = ((Scene)graph()).mouse().mode() == Mouse.Mode.MOVE;
-    if (event.shortcut().matches(move ? new Shortcut(PApplet.RIGHT) : new Shortcut(frames.input.Event.SHIFT, frames.input.Event.NO_ID)))
-      moveBackward(event);
-    else if (event.shortcut().matches(move ? new Shortcut(PApplet.LEFT) : new Shortcut(frames.input.Event.CTRL, frames.input.Event.NO_ID)))
-      moveForward(event);
-    else if (event.shortcut().matches(new Shortcut(frames.input.Event.NO_ID)))
-      lookAround(event);
-    else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
+    if(((Scene)graph()).mouse().mode() == Mouse.Mode.MOVE) {
+      if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+        moveBackward(event);
+      else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+        moveForward(event);
+      else if (event.shortcut().matches(new Shortcut(frames.input.Event.NO_ID)))
+        lookAround(event);
+      else
+        stopFlying();
+    }
+    else {
+      if (event.shortcut().matches(new Shortcut(frames.input.Event.SHIFT, frames.input.Event.NO_ID)))
+        moveBackward(event);
+      else if (event.shortcut().matches(new Shortcut(frames.input.Event.CTRL, frames.input.Event.NO_ID)))
+        moveForward(event);
+      else if (event.shortcut().matches(new Shortcut(frames.input.Event.NO_ID)))
+        lookAround(event);
+      else
+        stopFlying();
+    }
+    if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
       translateZ(event);
   }
 }
