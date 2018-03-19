@@ -136,7 +136,6 @@ public class Node extends Frame implements Grabber {
   protected Vector _flyDirection;
   protected float _flySpeed;
   protected TimingTask _flyTask;
-  protected boolean _applyFlyDamping;
   protected long _flyUpdatePeriod = 20;
 
   // Inverse the direction of an horizontal mouse motion. Depends on the projected
@@ -2417,9 +2416,6 @@ public class Node extends Frame implements Grabber {
    * <p>
    * This method starts a timer that will translate the node along {@code direction} every 20
    * milliseconds. The node {@link #isFlying()} until you call {@link #stopFlying()}.
-   * <p>
-   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
-   * stops completely.
    *
    * @see #damping()
    * @see #_spin(Quaternion, MotionEvent)
@@ -2428,32 +2424,20 @@ public class Node extends Frame implements Grabber {
     _flyDirection = direction;
     _eventSpeed = event.speed();
     _eventDelay = event.delay();
-    _applyFlyDamping = event.flushed();
-    if (!isFlying())
+    if(event.flushed() || (event.fired() && isFlying()))
+      stopFlying();
+    else
       _flyTask.run(_flyUpdatePeriod);
   }
 
   /**
    * Translates the node by its fly direction. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
-   * <p>
-   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
-   * stops completely.
    *
    * @see #_spin()
    */
   protected void _fly() {
-    if (_flyDirection.magnitude() < .01f) {
-      stopFlying();
-      return;
-    }
     translate(_flyDirection);
-    if (damping() == 0)
-      return;
-    if (_applyFlyDamping) {
-      float damping = 1.0f - (float) Math.pow(damping(), 3);
-      _flyDirection.multiply(damping);
-    }
   }
 
   /**

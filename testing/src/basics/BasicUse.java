@@ -1,6 +1,7 @@
 package basics;
 
 import common.InteractiveNode;
+import common.OrbitNode;
 import frames.core.Node;
 import frames.input.Event;
 import frames.input.Shortcut;
@@ -26,7 +27,7 @@ public class BasicUse extends PApplet {
   protected TimingTask spinningTask;
 
   public void settings() {
-    size(800, 800, P2D);
+    size(800, 800, P3D);
   }
 
   public void spin() {
@@ -51,8 +52,10 @@ public class BasicUse extends PApplet {
     frame = new Frame();
 
     ///*
-    eye = new InteractiveNode(scene);
-    eye.setDamping(0f);
+    //eye = new InteractiveNode(scene);
+    eye = new OrbitNode(scene);
+    //eye.setDamping(0f);
+    eye.setDamping(0.3f);
     //eye.setRotationSensitivity(0.1f);
     //eye.setSpinningSensitivity(1);
     scene.setEye(eye);
