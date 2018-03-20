@@ -24,6 +24,7 @@ Scene scene;
 void setup() {
   size(700, 700, P3D);
   scene = new Scene(this);
+  scene.setRadius(300);
   // node instantation requires a graph or a (reference) node.
   // Inner classes are used to define what is going to happen during traversal
   shape1 = new OrbitShape(scene);
@@ -38,7 +39,6 @@ void setup() {
   // user gesture input data is directed towards
   // the eye when no other node is being picked
   scene.setDefaultGrabber(eye);
-  scene.setRadius(300);
   scene.fitBallInterpolation();
 }
 
