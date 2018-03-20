@@ -45,6 +45,7 @@ void setup() {
 
 void draw() {
   background(0);
+  scene.drawAxes();
   // traversal algorithm visit all nodes belonging to the graph
   scene.traverse();
 }
