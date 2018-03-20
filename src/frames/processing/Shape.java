@@ -83,7 +83,7 @@ public class Shape extends Node {
 
   /**
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
-   * Sets {@code reference} as its {@link #reference() node.
+   * Sets {@code reference} as its {@link #reference()} node.
    */
   public Shape(Node reference) {
     super(reference);
