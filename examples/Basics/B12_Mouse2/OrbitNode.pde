@@ -28,10 +28,10 @@ public class OrbitNode extends Node {
     return new OrbitNode(this.graph(), this);
   }
 
-  // behavior is here :P
+  // behavior is here
   @Override
   public void interact(frames.input.Event event) {
-    if(((Scene)graph()).mouse().mode() == Mouse.Mode.MOVE) {
+    if (((Scene) graph()).mouse().mode() == Mouse.Mode.MOVE) {
       if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
         moveBackward(event);
       else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
@@ -40,13 +40,12 @@ public class OrbitNode extends Node {
         lookAround(event);
       else
         stopFlying();
-    }
-    else {
+    } else {
       if (event.shortcut().matches(new Shortcut(frames.input.Event.SHIFT, frames.input.Event.NO_ID)))
         moveBackward(event);
       else if (event.shortcut().matches(new Shortcut(frames.input.Event.CTRL, frames.input.Event.NO_ID)))
         moveForward(event);
-      else if (event.shortcut().matches(new Shortcut(frames.input.Event.NO_ID)))
+      else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)) || event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
         lookAround(event);
       else
         stopFlying();

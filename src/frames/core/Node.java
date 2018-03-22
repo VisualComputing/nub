@@ -137,6 +137,7 @@ public class Node extends Frame implements Grabber {
   protected float _flySpeed;
   protected TimingTask _flyTask;
   protected long _flyUpdatePeriod = 20;
+  protected boolean _applyFlyDamping;
 
   // Inverse the direction of an horizontal mouse motion. Depends on the projected
   // screen orientation of the vertical axis when the mouse button is pressed.
@@ -230,7 +231,7 @@ public class Node extends Frame implements Grabber {
     setWheelSensitivity(15f);
     setKeySensitivity(10f);
     setSpinningSensitivity(0.3f);
-    setDamping(0.3f);
+    setDamping(0.5f);
 
     _spinningTask = new TimingTask() {
       public void execute() {
@@ -773,7 +774,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Defines the spinning deceleration.
    * <p>
-   * Default value is 0.3. Use {@link #setDamping(float)} to tune this value. A higher
+   * Default value is 0.5. Use {@link #setDamping(float)} to tune this value. A higher
    * value will make damping more difficult (a value of 1 forbids damping).
    */
   public float damping() {
@@ -2429,9 +2430,10 @@ public class Node extends Frame implements Grabber {
     _flyDirection = direction;
     _eventSpeed = event.speed();
     _eventDelay = event.delay();
+    _applyFlyDamping = event.flushed();
     if (event.fired() && isFlying())
       stopFlying();
-    else
+    else if (!isFlying())
       _flyTask.run(_flyUpdatePeriod);
   }
 
@@ -2452,8 +2454,10 @@ public class Node extends Frame implements Grabber {
     translate(_flyDirection);
     if (damping() == 0)
       return;
-    float damping = 1.0f - (float) Math.pow(damping(), 3);
-    _flyDirection.multiply(damping);
+    if (_applyFlyDamping) {
+      float damping = 1.0f - (float) Math.pow(damping(), 3);
+      _flyDirection.multiply(damping);
+    }
   }
 
   /**
