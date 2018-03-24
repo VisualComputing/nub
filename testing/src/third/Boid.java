@@ -94,6 +94,9 @@ class Boid {
     pos.add(vel); // add velocity to position
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
     acc.mult(0); // reset acceleration
+    q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
+        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
+    node.setRotation(q);
   }
 
   void checkBounds() {
@@ -113,15 +116,11 @@ class Boid {
 
   void render() {
     p.pushStyle();
+    scene.drawAxes(10);
     p.stroke(Flock.hue);
     p.noFill();
     p.noStroke();
     p.fill(Flock.hue);
-
-    q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
-        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
-    node.setRotation(q);
-    scene.drawAxes(10);
 
     // highlight boids under the mouse
     if (node.track(p.mouseX, p.mouseY))
