@@ -1,6 +1,7 @@
 package ik.common;
 
 import common.InteractiveShape;
+import frames.core.Node;
 import frames.primitives.Frame;
 import frames.primitives.Vector;
 import frames.primitives.constraint.BallAndSocket;
@@ -19,15 +20,13 @@ import static ik.basic.BasicIK.*;
  */
 public class Joint extends InteractiveShape {
   private int color;
-  private boolean root;
 
-  public Joint(Scene scene, boolean root) {
-    this(scene, root, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)));
+  public Joint(Scene scene) {
+    this(scene, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)));
   }
 
-  public Joint(Scene scene, boolean root, int color) {
+  public Joint(Scene scene, int color) {
     super(scene);
-    this.root = root;
     this.color = color;
   }
 
@@ -41,8 +40,8 @@ public class Joint extends InteractiveShape {
     pg.strokeWeight(5);
     pg.stroke(color);
 
-    if (!root) {
-      Vector v = this.coordinatesOfFrom(new Vector(), reference());
+    for(Node node : this._children){
+      Vector v = node.translation();
       if (pg.is2D()) {
         pg.line(0, 0, v.x(), v.y());
       } else {

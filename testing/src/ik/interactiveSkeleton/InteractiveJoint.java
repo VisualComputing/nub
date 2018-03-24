@@ -14,12 +14,12 @@ public class InteractiveJoint extends Joint {
   Shortcut ctrlRight = new Shortcut(Event.CTRL, PApplet.RIGHT);
   InteractiveJoint child;
 
-  public InteractiveJoint(Scene scene, boolean root) {
-    super(scene, root);
+  public InteractiveJoint(Scene scene) {
+    super(scene);
   }
 
-  public InteractiveJoint(Scene scene, boolean root, int color) {
-    super(scene, root, color);
+  public InteractiveJoint(Scene scene, int color) {
+    super(scene, color);
   }
 
   @Override
@@ -29,7 +29,7 @@ public class InteractiveJoint extends Joint {
     if (event.shortcut().matches(ctrlRight)) {
       if (event.fired()) {
         //create a new InteractiveJoint
-        child = new InteractiveJoint(graph(), false);
+        child = new InteractiveJoint(graph());
         child.setReference(this);
       } else {
         child.translate(event);

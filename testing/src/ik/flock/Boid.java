@@ -344,22 +344,22 @@ class Boid extends AnimatorObject {
     }
 
     public Joint fishSkeleton(Node reference){
-        Joint j1 = new Joint(scene, true);
+        Joint j1 = new Joint(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        Joint j2 = new Joint(scene, false);
+        Joint j2 = new Joint(scene);
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
-        Joint j3 = new Joint(scene, false);
+        Joint j3 = new Joint(scene);
         j3.setReference(j2);
         j3.setPosition(0, 0.4f, 22);
-        Joint j4 = new Joint(scene, false);
+        Joint j4 = new Joint(scene);
         j4.setReference(j3);
         j4.setPosition(0, 0, -18);
-        Joint j5 = new Joint(scene, false);
+        Joint j5 = new Joint(scene);
         j5.setReference(j4);
         j5.setPosition(0, 1.8f, -54);
-        Joint j6 = new Joint(scene, false);
+        Joint j6 = new Joint(scene);
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         return j1;
