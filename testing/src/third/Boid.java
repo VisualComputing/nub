@@ -11,7 +11,7 @@ import processing.core.PVector;
 import java.util.ArrayList;
 
 // this is so obviously an animator object
-class Boid extends AnimatorObject {
+class Boid {
   Scene scene;
   PApplet p;
   Node node;
@@ -31,31 +31,48 @@ class Boid extends AnimatorObject {
 
   // constructors
   Boid(Scene scn, PVector inPos) {
-    super(scn.timingHandler());
     scene = scn;
     p = scene.pApplet();
     grabsMouseColor = p.color(0, 0, 255);
     avatarColor = p.color(255, 0, 0);
     pos = new PVector();
     pos.set(inPos);
-    node = new Node(scene);
+    //node = new Node(scene);
+    ///*
+    node = new Node(scene) {
+      @Override
+      public void visit() {
+        render();
+        if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) //{
+          Flock.thirdPerson = node;
+          //scene.eye().setReference(node);
+          //scene.interpolateTo(node);
+        //} //else
+        run(Flock.flock);
+
+        //run(Flock.flock);
+        //render();
+        //animate();
+        //run(Flock.flock);
+        //render();
+        //animate();
+        //render();
+      }
+    };
+    //*/
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
     vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
     acc = new PVector(0, 0, 0);
     neighborhoodRadius = 100;
-    setPeriod(1000 / Flock.FPS);
-    start();
   }
 
-  @Override
   public void animate() {
     if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
       Flock.thirdPerson = node;
-      scene.eye().setReference(node);
-      scene.interpolateTo(node);
+      //scene.eye().setReference(node);
+      //scene.interpolateTo(node);
     } else
       run(Flock.flock);
-    render();
   }
 
   public void run(ArrayList bl) {
@@ -133,9 +150,9 @@ class Boid extends AnimatorObject {
         new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
     node.setRotation(q);
 
-    p.pushMatrix();
+    //p.pushMatrix();
     // Multiply matrix to get in the node coordinate system.
-    node.applyTransformation();
+    //node.applyTransformation();
     scene.drawAxes(10);
 
     // highlight boids under the mouse
@@ -173,7 +190,7 @@ class Boid extends AnimatorObject {
     p.vertex(-3 * sc, -2 * sc, 0);
     p.endShape();
 
-    p.popMatrix();
+    //p.popMatrix();
     p.popStyle();
   }
 

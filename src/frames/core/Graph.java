@@ -2266,7 +2266,7 @@ public class Graph {
     _interpolator.stop();
     _interpolator.clear();
     _interpolator.addKeyFrame(eye().detach());
-    _interpolator.addKeyFrame(frame, duration);
+    _interpolator.addKeyFrame(frame.detach(), duration);
     _interpolator.start();
   }
 

@@ -14,7 +14,6 @@ import java.util.ArrayList;
  * Flock is a work in progress still
  */
 public class Flock extends PApplet {
-  static int count = 0;
   Scene scene;
   //flock bounding box
   static int flockWidth = 1280;
@@ -22,11 +21,11 @@ public class Flock extends PApplet {
   static int flockDepth = 600;
   static boolean avoidWalls = true;
   static float hue = 255;
-  static int FPS = 100;
 
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
   static Node thirdPerson;
+  int framesInBetween = 2;
 
   public void settings() {
     size(1000, 800, P3D);
@@ -90,8 +89,6 @@ public class Flock extends PApplet {
     //frameRate(FPS);
     for (int i = 0; i < initBoidNum; i++)
       flock.add(new Boid(scene, new PVector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
-
-    frameRate(FPS);
   }
 
   public void draw() {
@@ -116,11 +113,33 @@ public class Flock extends PApplet {
     line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
-    //for (Boid boid : flock)
-    //boid.render();
+    /*
+    for (Boid boid : flock) {
+      boid.render();
+      if(frameCount % framesInBetween == 0)
+        boid.animate();
+    }
+    //*/
+
+    /*
+    for (Boid boid : flock) {
+      boid.render();
+      boid.animate();
+    }
+    //*/
+
+    Node prev = thirdPerson;
+    scene.traverse();
+    if(thirdPerson != null && thirdPerson != prev) {
+      scene.eye().setReference(thirdPerson);
+      scene.interpolateTo(thirdPerson);
+    }
+
+    //scene.eye().setReference(node);
+    //scene.interpolateTo(node);
 
         /*
-        triggered = scene.timer().trigggered();
+        triggered = scene.timer().triggered();
         for (Boid boid : flock) {
             if (triggered)
                 boid.run(flock);
@@ -156,25 +175,29 @@ public class Flock extends PApplet {
       case 'v':
         avoidWalls = !avoidWalls;
         break;
-      case 's':
-        for (Boid boid : flock)
-          boid.stop();
-        break;
-      case 'S':
-        for (Boid boid : flock)
-          boid.start();
-        break;
       case ' ':
         if (scene.eye().reference() != null) {
-          scene.eye().setReference(null);
+          /*
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 1");
           scene.lookAt(scene.center());
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 2");
+          scene.eye().setReference(null);
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 3");
           scene.fitBallInterpolation();
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 4");
+          //*/
           //TODO broken: eye got removed from inputHandler
-                    /*
-                    scene.lookAt(scene.center());
-                    scene.fitBallInterpolation();
-                    scene.eye().setReference(null);
-                    //*/
+          ///*
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 1");
+          scene.lookAt(scene.center());
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 2");
+          scene.fitBallInterpolation();
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 3");
+          scene.eye().setReference(null);
+          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 4");
+          //scene.inputHandler().addGrabber((Node)scene.eye());
+          //scene.inputHandler().setDefaultGrabber((Node)scene.eye());
+          //*/
         } else if (thirdPerson != null) {
           scene.eye().setReference(thirdPerson);
           scene.interpolateTo(thirdPerson);
