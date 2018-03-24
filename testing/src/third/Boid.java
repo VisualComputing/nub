@@ -11,12 +11,10 @@ import java.util.ArrayList;
 
 class Boid {
   Scene scene;
-  PApplet p;
+  PApplet pApplet;
   Node node;
-  Quaternion q;
   int grabsMouseColor;//color
   int avatarColor;
-
   // fields
   PVector pos, vel, acc, ali, coh, sep; // pos, velocity, and acceleration in
   // a vector datatype
@@ -30,9 +28,9 @@ class Boid {
   // constructors
   Boid(Scene scn, PVector inPos) {
     scene = scn;
-    p = scene.pApplet();
-    grabsMouseColor = p.color(0, 0, 255);
-    avatarColor = p.color(255, 0, 0);
+    pApplet = scene.pApplet();
+    grabsMouseColor = pApplet.color(0, 0, 255);
+    avatarColor = pApplet.color(255, 0, 0);
     pos = new PVector();
     pos.set(inPos);
     node = new Node(scene) {
@@ -48,7 +46,7 @@ class Boid {
       }
     };
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
-    vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
+    vel = new PVector(pApplet.random(-1, 1), pApplet.random(-1, 1), pApplet.random(1, -1));
     acc = new PVector(0, 0, 0);
     neighborhoodRadius = 100;
   }
@@ -93,10 +91,9 @@ class Boid {
     // exceed maxSpeed
     pos.add(vel); // add velocity to position
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
+    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
+        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag()))));
     acc.mult(0); // reset acceleration
-    q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
-        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
-    node.setRotation(q);
   }
 
   void checkBounds() {
@@ -115,37 +112,37 @@ class Boid {
   }
 
   void render() {
-    p.pushStyle();
+    pApplet.pushStyle();
     scene.drawAxes(10);
-    p.stroke(Flock.hue);
-    p.noFill();
-    p.noStroke();
-    p.fill(Flock.hue);
+    pApplet.stroke(Flock.hue);
+    pApplet.noFill();
+    pApplet.noStroke();
+    pApplet.fill(Flock.hue);
 
     // highlight boids under the mouse
-    if (node.track(p.mouseX, p.mouseY))
-      p.fill(grabsMouseColor);
+    if (node.track(pApplet.mouseX, pApplet.mouseY))
+      pApplet.fill(grabsMouseColor);
 
     //draw boid
-    p.beginShape(PApplet.TRIANGLES);
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.beginShape(PApplet.TRIANGLES);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
 
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
 
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 0, 2 * sc);
-    p.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
 
-    p.vertex(-3 * sc, 0, 2 * sc);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, -2 * sc, 0);
-    p.endShape();
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.endShape();
 
-    p.popStyle();
+    pApplet.popStyle();
   }
 
   // steering. If arrival==true, the boid slows to meet the target. Credit to
