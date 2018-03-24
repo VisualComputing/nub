@@ -4,13 +4,11 @@ import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.timing.AnimatorObject;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.ArrayList;
 
-// this is so obviously an animator object
 class Boid {
   Scene scene;
   PApplet p;
@@ -37,42 +35,22 @@ class Boid {
     avatarColor = p.color(255, 0, 0);
     pos = new PVector();
     pos.set(inPos);
-    //node = new Node(scene);
-    ///*
     node = new Node(scene) {
       @Override
       public void visit() {
-        render();
-        if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) //{
-          Flock.thirdPerson = node;
-          //scene.eye().setReference(node);
-          //scene.interpolateTo(node);
-        //} //else
+        //TODO we uncoupled render from run to be able to set different frequencies for them.
+        //as we want to appreciate the visual results (when the freqs are different)
+        //best results I found is when they both are called together every frame:
         run(Flock.flock);
-
-        //run(Flock.flock);
-        //render();
-        //animate();
-        //run(Flock.flock);
-        //render();
-        //animate();
-        //render();
+        render();
+        if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node)
+          Flock.thirdPerson = node;
       }
     };
-    //*/
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
     vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
     acc = new PVector(0, 0, 0);
     neighborhoodRadius = 100;
-  }
-
-  public void animate() {
-    if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
-      Flock.thirdPerson = node;
-      //scene.eye().setReference(node);
-      //scene.interpolateTo(node);
-    } else
-      run(Flock.flock);
   }
 
   public void run(ArrayList bl) {
@@ -133,12 +111,6 @@ class Boid {
       pos.z = Flock.flockDepth;
   }
 
-  /*
-  public boolean isAvatar() {
-    return scene.mouse().inputGrabber() == node && scene.eye() != node;
-  }
-  */
-
   void render() {
     p.pushStyle();
     p.stroke(Flock.hue);
@@ -149,27 +121,11 @@ class Boid {
     q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
         new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
     node.setRotation(q);
-
-    //p.pushMatrix();
-    // Multiply matrix to get in the node coordinate system.
-    //node.applyTransformation();
     scene.drawAxes(10);
 
     // highlight boids under the mouse
     if (node.track(p.mouseX, p.mouseY))
       p.fill(grabsMouseColor);
-
-        /*
-        // setAvatar according to scene.motionAgent().inputGrabber()
-        // check if this boid's node is the avatar
-        if (node.grabsInput())
-            if (!isAvatar())
-                scene.setAvatar(node);
-
-        // highlight the boid if its node is the avatar
-        if ( isAvatar() )
-            p.fill( avatarColor );
-        */
 
     //draw boid
     p.beginShape(PApplet.TRIANGLES);
@@ -190,7 +146,6 @@ class Boid {
     p.vertex(-3 * sc, -2 * sc, 0);
     p.endShape();
 
-    //p.popMatrix();
     p.popStyle();
   }
 

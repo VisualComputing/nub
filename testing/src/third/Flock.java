@@ -25,7 +25,6 @@ public class Flock extends PApplet {
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
   static Node thirdPerson;
-  int framesInBetween = 2;
 
   public void settings() {
     size(1000, 800, P3D);
@@ -33,12 +32,10 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    //scene.setSequentialTimers();
     scene.mouse().setMode(Mouse.Mode.CLICK);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
     InteractiveNode eye = new InteractiveNode(scene);
-    //eye.setSpinningSensitivity(100);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
@@ -46,47 +43,6 @@ public class Flock extends PApplet {
     scene.fitBall();
     // create and fill the list of boids
     flock = new ArrayList();
-        /*
-        for (int i = 0; i < initBoidNum; i++)
-            flock.add(new Boid(scene, new PVector(flockWidth/2, flockHeight/2, flockDepth/2 )));
-        scene.startAnimation();
-        */
-
-        /*
-        frameRate(FPS);
-        for (int i = 0; i < initBoidNum; i++)
-            flock.add(new Boid(scene, new PVector(flockWidth/2, flockHeight/2, flockDepth/2 )));
-        TimingTask task = new TimingTask() {
-            @Override
-            public void execute() {
-                for (Boid boid : flock) {
-                    boid.run(flock);
-                    boid.render();
-                }
-            }
-        };
-        scene.registerTask(task);
-        task.run(1000/FPS);
-        //*/
-
-        /*
-        frameRate(FPS);
-        for (int i = 0; i < initBoidNum; i++) {
-            Boid boid = new Boid(scene, new PVector(flockWidth/2, flockHeight/2, flockDepth/2 ));
-            flock.add(boid);
-            TimingTask task = new TimingTask() {
-                @Override
-                public void execute() {
-                    boid.run(flock);
-                    boid.render();
-                }
-            };
-            scene.registerTask(task);
-            task.run(1000/FPS);
-        }
-        //*/
-
-    //frameRate(FPS);
     for (int i = 0; i < initBoidNum; i++)
       flock.add(new Boid(scene, new PVector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
   }
@@ -113,57 +69,15 @@ public class Flock extends PApplet {
     line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
-    /*
-    for (Boid boid : flock) {
-      boid.render();
-      if(frameCount % framesInBetween == 0)
-        boid.animate();
-    }
-    //*/
-
-    /*
-    for (Boid boid : flock) {
-      boid.render();
-      boid.animate();
-    }
-    //*/
-
-    Node prev = thirdPerson;
+    Node previousThirdPerson = thirdPerson;
     scene.traverse();
-    if(thirdPerson != null && thirdPerson != prev) {
+    if (thirdPerson != null && thirdPerson != previousThirdPerson) {
       scene.eye().setReference(thirdPerson);
       scene.interpolateTo(thirdPerson);
     }
-
-    //scene.eye().setReference(node);
-    //scene.interpolateTo(node);
-
-        /*
-        triggered = scene.timer().triggered();
-        for (Boid boid : flock) {
-            if (triggered)
-                boid.run(flock);
-            boid.render();
-        }
-        */
-
-        /*
-        if(thirdPerson && scene.eye().reference() == null && !scene.interpolator().started())
-            scene.eye().setReference(nodeInterpolator.node());
-        */
   }
 
   public void keyPressed() {
-        /*
-        if(key == 'i') {
-            thirdPerson = true;
-            scene.interpolateTo(nodeInterpolator.node());
-        }
-        if(key == 'I') {
-            thirdPerson = false;
-            scene.eye().setReference(null);
-        }
-        */
     switch (key) {
       case 'a':
         scene.fitBall();
@@ -178,48 +92,22 @@ public class Flock extends PApplet {
       case ' ':
         if (scene.eye().reference() != null) {
           /*
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 1");
           scene.lookAt(scene.center());
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 2");
           scene.eye().setReference(null);
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 3");
           scene.fitBallInterpolation();
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 4");
           //*/
-          //TODO broken: eye got removed from inputHandler
           ///*
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 1");
+          //much better visual results under this order ;)
           scene.lookAt(scene.center());
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 2");
           scene.fitBallInterpolation();
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 3");
           scene.eye().setReference(null);
-          //if(scene.inputHandler().hasGrabber((Node)scene.eye())) println("has 4");
-          //scene.inputHandler().addGrabber((Node)scene.eye());
-          //scene.inputHandler().setDefaultGrabber((Node)scene.eye());
           //*/
+          scene.resetTrackedGrabber();
         } else if (thirdPerson != null) {
           scene.eye().setReference(thirdPerson);
           scene.interpolateTo(thirdPerson);
         }
         break;
-        /*
-      case '+':
-        Flock.FPS += 10;
-        for (Boid boid : flock)
-          boid.setPeriod(1000 / Flock.FPS);
-        break;
-      case '-':
-        if(Flock.FPS>10)
-          Flock.FPS -= 10;
-        for (Boid boid : flock)
-          boid.setPeriod(1000 / Flock.FPS);
-        break;
-      case 'u':
-        for (Boid boid : flock)
-          boid.toggle();
-        break;
-        */
     }
   }
 

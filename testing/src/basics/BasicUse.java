@@ -1,6 +1,5 @@
 package basics;
 
-import common.InteractiveNode;
 import common.OrbitNode;
 import frames.core.Node;
 import frames.input.Event;

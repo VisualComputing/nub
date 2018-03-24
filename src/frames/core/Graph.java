@@ -808,7 +808,7 @@ public class Graph {
    *
    * @see InputHandler#resetTrackedGrabber()
    */
-  public void resetInputGrabber() {
+  public void resetTrackedGrabber() {
     inputHandler().resetTrackedGrabber();
   }
 
@@ -819,6 +819,15 @@ public class Graph {
    */
   public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
     inputHandler().shiftDefaultGrabber(grabber1, grabber2);
+  }
+
+  /**
+   * Same as {@code inputHandler().hasGrabber(grabber)}.
+   *
+   * @see InputHandler#hasGrabber(Grabber)
+   */
+  public boolean hasGrabber(Grabber grabber) {
+    return inputHandler().hasGrabber(grabber);
   }
 
   /**
@@ -2247,7 +2256,6 @@ public class Graph {
    *
    * @see #interpolateTo(Frame, float)
    */
-  //TODO needs testing, e.g., setAvatar
   public void interpolateTo(Frame frame) {
     interpolateTo(frame, 1);
   }
