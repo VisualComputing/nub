@@ -38,13 +38,13 @@ class Boid {
     node = new Node(scene) {
       @Override
       public void visit() {
-        //TODO we uncoupled render from run to be able to set different frequencies for them.
-        //as we want to appreciate the visual results (when the freqs are different)
-        //best results I found is when they both are called together every frame:
+        //TODO we uncoupled render() from run(Flock) to be able to set different frequencies
+        //for them, as we want to appreciate the visual results (when the freqs are different).
+        //The best results I found is when they both are called together every frame:
         run(Flock.flock);
         render();
         if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node)
-          Flock.thirdPerson = node;
+          Flock.avatar = node;
       }
     };
     node.setPosition(new Vector(pos.x, pos.y, pos.z));

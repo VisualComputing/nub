@@ -24,7 +24,7 @@ public class Flock extends PApplet {
 
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
-  static Node thirdPerson;
+  static Node avatar;
 
   public void settings() {
     size(1000, 800, P3D);
@@ -69,11 +69,11 @@ public class Flock extends PApplet {
     line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
-    Node previousThirdPerson = thirdPerson;
+    Node previousAvatar = avatar;
     scene.traverse();
-    if (thirdPerson != null && thirdPerson != previousThirdPerson) {
-      scene.eye().setReference(thirdPerson);
-      scene.interpolateTo(thirdPerson);
+    if (avatar != null && avatar != previousAvatar) {
+      scene.eye().setReference(avatar);
+      scene.interpolateTo(avatar);
     }
   }
 
@@ -103,9 +103,9 @@ public class Flock extends PApplet {
           scene.eye().setReference(null);
           //*/
           scene.resetTrackedGrabber();
-        } else if (thirdPerson != null) {
-          scene.eye().setReference(thirdPerson);
-          scene.interpolateTo(thirdPerson);
+        } else if (avatar != null) {
+          scene.eye().setReference(avatar);
+          scene.interpolateTo(avatar);
         }
         break;
     }
