@@ -1,6 +1,7 @@
 package third;
 
 import frames.core.Node;
+import frames.input.event.TapEvent;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -39,10 +40,18 @@ class Boid {
         //TODO we uncoupled render() from run(Flock) to be able to set different frequencies
         //for them, as we want to appreciate the visual results (when the freqs are different).
         //The best results I found is when they both are called together every frame:
-        run(Flock.flock);
+        if (Flock.animate)
+          run(Flock.flock);
         render();
-        if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node)
+      }
+
+      @Override
+      public void interact(TapEvent event) {
+        if (Flock.avatar != node && scene.eye().reference() != node) {
           Flock.avatar = node;
+          scene.eye().setReference(node);
+          scene.interpolateTo(node);
+        }
       }
     };
     node.setPosition(new Vector(pos.x, pos.y, pos.z));

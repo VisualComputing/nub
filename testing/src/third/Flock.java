@@ -3,7 +3,6 @@ package third;
 import common.InteractiveNode;
 import frames.core.Node;
 import frames.primitives.Vector;
-import frames.processing.Mouse;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PVector;
@@ -25,6 +24,7 @@ public class Flock extends PApplet {
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
   static Node avatar;
+  static boolean animate = true;
 
   public void settings() {
     size(1000, 800, P3D);
@@ -32,7 +32,6 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.mouse().setMode(Mouse.Mode.CLICK);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
     InteractiveNode eye = new InteractiveNode(scene);
@@ -69,20 +68,22 @@ public class Flock extends PApplet {
     line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
 
-    Node previousAvatar = avatar;
+    //call visit on all nodes
     scene.traverse();
-    if (avatar != null && avatar != previousAvatar) {
-      scene.eye().setReference(avatar);
-      scene.interpolateTo(avatar);
-    }
   }
 
   public void keyPressed() {
     switch (key) {
       case 'a':
-        scene.fitBall();
+        animate = !animate;
+        break;
+      case 's':
+        if (scene.eye().reference() != null)
+          scene.fitBallInterpolation();
+        break;
       case 't':
         scene.shiftTimers();
+        break;
       case 'p':
         println("Frame rate: " + frameRate);
         break;
@@ -91,18 +92,9 @@ public class Flock extends PApplet {
         break;
       case ' ':
         if (scene.eye().reference() != null) {
-          /*
-          scene.lookAt(scene.center());
-          scene.eye().setReference(null);
-          scene.fitBallInterpolation();
-          //*/
-          ///*
-          //much better visual results under this order ;)
           scene.lookAt(scene.center());
           scene.fitBallInterpolation();
           scene.eye().setReference(null);
-          //*/
-          scene.resetTrackedGrabber();
         } else if (avatar != null) {
           scene.eye().setReference(avatar);
           scene.interpolateTo(avatar);
