@@ -51,7 +51,7 @@ public class Flock extends PApplet {
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
-    //calls visit on all nodes
+    //calls visit() on all nodes
     scene.traverse();
   }
 

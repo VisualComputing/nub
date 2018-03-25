@@ -46,10 +46,10 @@ class Boid {
 
       @Override
       public void interact(TapEvent event) {
-        if (Flock.avatar != node && scene.eye().reference() != node) {
-          Flock.avatar = node;
-          scene.eye().setReference(node);
-          scene.interpolateTo(node);
+        if (Flock.avatar != this && scene.eye().reference() != this) {
+          Flock.avatar = this;
+          scene.eye().setReference(this);
+          scene.interpolateTo(this);
         }
       }
     };
