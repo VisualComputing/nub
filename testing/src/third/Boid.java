@@ -26,7 +26,6 @@ class Boid {
   float flap = 0;
   float t = 0;
 
-  // constructors
   Boid(Scene scn, PVector inPos) {
     scene = scn;
     pApplet = scene.pApplet();
@@ -37,7 +36,7 @@ class Boid {
     node = new Node(scene) {
       @Override
       public void visit() {
-        //TODO we uncoupled render() from run(Flock) to be able to set different frequencies
+        //We uncoupled render() from run(Flock) to be able to set different frequencies
         //for them, as we want to appreciate the visual results (when the freqs are different).
         //The best results I found is when they both are called together every frame:
         if (Flock.animate)
@@ -122,7 +121,9 @@ class Boid {
 
   void render() {
     pApplet.pushStyle();
+
     scene.drawAxes(10);
+
     pApplet.stroke(Flock.hue);
     pApplet.noFill();
     pApplet.noStroke();

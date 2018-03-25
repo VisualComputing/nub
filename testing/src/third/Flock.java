@@ -50,6 +50,13 @@ public class Flock extends PApplet {
     background(0);
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
+    walls();
+    //calls visit on all nodes
+    scene.traverse();
+  }
+
+  public void walls() {
+    pushStyle();
     noFill();
     stroke(255);
 
@@ -67,9 +74,7 @@ public class Flock extends PApplet {
     line(0, flockHeight, 0, 0, flockHeight, flockDepth);
     line(flockWidth, 0, 0, flockWidth, 0, flockDepth);
     line(flockWidth, flockHeight, 0, flockWidth, flockHeight, flockDepth);
-
-    //call visit on all nodes
-    scene.traverse();
+    popStyle();
   }
 
   public void keyPressed() {
