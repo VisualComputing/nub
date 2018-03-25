@@ -83,7 +83,7 @@ public class Flock extends PApplet {
         animate = !animate;
         break;
       case 's':
-        if (scene.eye().reference() != null)
+        if (scene.eye().reference() == null)
           scene.fitBallInterpolation();
         break;
       case 't':
