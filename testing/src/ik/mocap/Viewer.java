@@ -85,15 +85,27 @@ public class Viewer extends PApplet {
         ArrayList<Node> copy = new ArrayList<Node>();
         Node reference = branch.get(0).reference();
         HashMap<Node, Node> map = new HashMap<Node, Node>();
-        map.put(reference, reference);
+        map.put(branch.get(0), reference);
         for (Node joint : branch) {
             Joint newJoint = new Joint(scene);
-            newJoint.setReference(map.get(joint.reference()));
+            newJoint.setReference(map.get(joint));
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
             newJoint.setConstraint(joint.constraint());
             copy.add(newJoint);
-            map.put(joint, newJoint);
+            //it's no too efficient but it is just executed once
+            for (Node child : joint.children()) {
+                if(joint.children().size() > 1) {
+                    //add a new joint per child
+                    Joint dummy = new Joint(scene);
+                    dummy.setReference(newJoint);
+                    dummy.setPosition(newJoint.position());
+                    copy.add(dummy);
+                    map.put(child, dummy);
+                }else{
+                    map.put(child, newJoint);
+                }
+            }
             if(parser._joint.get(joint)._name.equals("LEFTHAND")){
                 originalLimbs.put("LEFTHAND", joint);
                 limbs.put("LEFTHAND", newJoint);
