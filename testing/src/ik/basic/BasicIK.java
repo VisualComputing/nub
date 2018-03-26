@@ -6,6 +6,7 @@ import frames.core.Node;
 import frames.ik.Solver;
 import frames.primitives.Vector;
 import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
 import frames.primitives.constraint.PlanarPolygon;
 import frames.primitives.constraint.SphericalPolygon;
 import frames.processing.Scene;
@@ -59,10 +60,18 @@ public class BasicIK extends PApplet {
     ArrayList<Node> branchSphericalConstraints = generateChain(num_joints, boneLength, new Vector(scene.radius(), scene.radius(), 0));
 
     //Apply Constraints
-    //Spherical Ellipse Constraints
+    //Hinge constraints
+    for (int i = 1; i < branchUnconstrained.size() - 1; i++) {
+      Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x));
+      constraint.setRestRotation(branchUnconstrained.get(i).rotation().get());
+      branchUnconstrained.get(i).setConstraint(constraint);
+    }
+
+    //Ellipse Constraints
     for (int i = 1; i < branchEllipseConstraint.size() - 1; i++) {
       BallAndSocket constraint = new BallAndSocket(radians(constraint_factor_y), radians(constraint_factor_y), radians(constraint_factor_x), radians(constraint_factor_x));
-      constraint.setRestRotation(branchEllipseConstraint.get(i).rotation().get());
+      Vector twist = branchEllipseConstraint.get(i+1).translation().get();
+      constraint.setRestRotation(branchEllipseConstraint.get(i).rotation().get(), new Vector(0,1,0), twist);
       branchEllipseConstraint.get(i).setConstraint(constraint);
     }
 
@@ -78,7 +87,8 @@ public class BasicIK extends PApplet {
     for (int i = 1; i < branchPlanarConstraints.size() - 1; i++) {
       PlanarPolygon constraint = new PlanarPolygon(vertices);
       constraint.setHeight(boneLength / 2.f);
-      constraint.setRestRotation(branchPlanarConstraints.get(i).rotation().get());
+      Vector twist = branchPlanarConstraints.get(i+1).translation().get();
+      constraint.setRestRotation(branchPlanarConstraints.get(i).rotation().get(), new Vector(0,1,0), twist);
       branchPlanarConstraints.get(i).setConstraint(constraint);
     }
 
@@ -92,7 +102,8 @@ public class BasicIK extends PApplet {
 
     for (int i = 1; i < branchSphericalConstraints.size() - 1; i++) {
       SphericalPolygon constraint = new SphericalPolygon(verticesSpherical);
-      constraint.setRestRotation(branchSphericalConstraints.get(i).rotation().get());
+      Vector twist = branchSphericalConstraints.get(i+1).translation().get();
+      constraint.setRestRotation(branchSphericalConstraints.get(i).rotation().get(), new Vector(0,1,0), twist);
       branchSphericalConstraints.get(i).setConstraint(constraint);
     }
 
@@ -128,7 +139,7 @@ public class BasicIK extends PApplet {
     }
     //Consider Standard Form: Parent Z Axis is Pointing at its Child
     chainRoot.setTranslation(translation);
-    chainRoot.setupHierarchy();
+    //chainRoot.setupHierarchy();
     return scene.branch(chainRoot);
   }
 
