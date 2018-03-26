@@ -66,20 +66,29 @@ public class InteractiveNode extends Node {
   }
 
   public void profile3(Event event) {
-    if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
-      translate(event);
-    else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
-      rotate(event);
-    if (event.shortcut().matches(new Shortcut(Event.SHIFT, PApplet.CENTER)))
-      rotate(event);
-    else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
-      center();
-    else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
-      align();
-    else if (event.shortcut().matches(new Shortcut(Event.CTRL, processing.event.MouseEvent.WHEEL)))
-      if (isEye() && graph().is3D())
-        translateZ(event);
-      else
-        scale(event);
+    if (graph().eye().reference() == null) {
+      if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+        translate(event);
+      else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+        rotate(event);
+      if (event.shortcut().matches(new Shortcut(Event.SHIFT, PApplet.CENTER)))
+        rotate(event);
+      else if (event.shortcut().matches(new TapShortcut(PApplet.CENTER, 2)))
+        center();
+      else if (event.shortcut().matches(new TapShortcut(PApplet.RIGHT)))
+        align();
+      else if (event.shortcut().matches(new Shortcut(Event.CTRL, processing.event.MouseEvent.WHEEL)))
+        if (isEye() && graph().is3D())
+          translateZ(event);
+        else
+          scale(event);
+    } else {
+      if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
+        moveBackward(event);
+      else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
+        moveForward(event);
+      else if (event.shortcut().matches(new Shortcut(frames.input.Event.NO_ID)))
+        lookAround(event);
+    }
   }
 }
