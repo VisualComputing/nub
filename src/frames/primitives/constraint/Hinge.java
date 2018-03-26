@@ -37,6 +37,7 @@ public class Hinge extends Constraint {
   protected Quaternion _restRotation;
   protected Vector _axis;
 
+
   public Vector axis() {
     return _axis;
   }
@@ -73,7 +74,12 @@ public class Hinge extends Constraint {
 
   public Hinge(float min, float max, Quaternion rotation) {
     this(min, max);
-    this._restRotation = rotation;
+    this._restRotation = rotation.get();
+  }
+
+  public Hinge(float min, float max, Quaternion rotation, Vector axis) {
+    this(min, max, rotation);
+    this._axis = axis;
   }
 
   public Hinge(boolean is2D, float min, float max) {
