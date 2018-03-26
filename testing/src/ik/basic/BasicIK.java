@@ -54,17 +54,18 @@ public class BasicIK extends PApplet {
     target.translate(0, 0, 0);
 
     //Four identical chains that will have different constraints
-    ArrayList<Node> branchUnconstrained = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+    ArrayList<Node> branchHingeConstraint = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
     ArrayList<Node> branchEllipseConstraint = generateChain(num_joints, boneLength, new Vector(-scene.radius(), scene.radius(), 0));
     ArrayList<Node> branchPlanarConstraints = generateChain(num_joints, boneLength, new Vector(scene.radius(), -scene.radius(), 0));
     ArrayList<Node> branchSphericalConstraints = generateChain(num_joints, boneLength, new Vector(scene.radius(), scene.radius(), 0));
 
     //Apply Constraints
     //Hinge constraints
-    for (int i = 1; i < branchUnconstrained.size() - 1; i++) {
+    for (int i = 1; i < branchHingeConstraint.size() - 1; i++) {
       Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x));
-      constraint.setRestRotation(branchUnconstrained.get(i).rotation().get());
-      branchUnconstrained.get(i).setConstraint(constraint);
+      constraint.setRestRotation(branchHingeConstraint.get(i).rotation().get());
+      constraint.setAxis(Vector.projectVectorOnPlane(new Vector(0,1,0), branchHingeConstraint.get(i+1).translation()));
+      branchHingeConstraint.get(i).setConstraint(constraint);
     }
 
     //Ellipse Constraints
@@ -107,8 +108,8 @@ public class BasicIK extends PApplet {
       branchSphericalConstraints.get(i).setConstraint(constraint);
     }
 
-    Solver solverUnconstrained = scene.registerTreeSolver(branchUnconstrained.get(0));
-    scene.addIKTarget(branchUnconstrained.get(branchUnconstrained.size() - 1), target);
+    Solver solverUnconstrained = scene.registerTreeSolver(branchHingeConstraint.get(0));
+    scene.addIKTarget(branchHingeConstraint.get(branchHingeConstraint.size() - 1), target);
 
     Solver solverEllipseConstraint = scene.registerTreeSolver(branchEllipseConstraint.get(0));
     scene.addIKTarget(branchEllipseConstraint.get(branchEllipseConstraint.size() - 1), target);
