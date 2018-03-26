@@ -21,7 +21,7 @@ public class InteractiveSkeleton  extends PApplet {
   Node eye;
   InteractiveShape shape;
   Joint root;
-  String shapePath = "/testing/data/objs/TropicalFish01.obj";
+  String shapePath = "/testing/data/objs/Female_low_poly.obj";
 
 
   public void settings() {
