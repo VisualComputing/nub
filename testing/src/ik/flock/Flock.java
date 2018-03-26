@@ -25,7 +25,7 @@ public class Flock extends PApplet {
     static float hue = 255;
     static int FPS = 100;
 
-    int initBoidNum = 30; // amount of boids to start the program with
+    int initBoidNum = 100; // amount of boids to start the program with
     static ArrayList<Boid> flock;
     static Node thirdPerson;
 
