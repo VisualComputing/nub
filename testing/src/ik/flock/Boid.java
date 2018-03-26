@@ -346,6 +346,7 @@ class Boid extends AnimatorObject {
     public Joint fishSkeleton(Node reference){
         Joint j1 = new Joint(scene);
         j1.setReference(reference);
+        j1.setScaling(1.f/reference.scaling());
         j1.setPosition(0, 10.8f, 93);
         Joint j2 = new Joint(scene);
         j2.setReference(j1);

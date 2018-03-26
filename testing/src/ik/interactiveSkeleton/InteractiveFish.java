@@ -8,7 +8,6 @@ import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import ik.common.LinearBlendSkinningGPU;
 import ik.common.Target;
@@ -53,13 +52,14 @@ public class InteractiveFish extends PApplet {
         Vector[] box = getBoundingBox(model);
         //Scale model
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
-        model.scale(200.f*1.f/max);
+        //model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
         shape = new InteractiveShape(scene, model);
         shape.setPrecision(Node.Precision.FIXED);
         shape.setPrecisionThreshold(1);
 
         shape.rotate(new Quaternion(new Vector(0,0,1), PI));
+        shape.scale(200.f*1.f/max);
         root = fishSkeleton(shape);
 
         ArrayList<Node> skeleton = scene.branch(root);
@@ -120,6 +120,7 @@ public class InteractiveFish extends PApplet {
         Joint j1 = new Joint(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
+        j1.setScaling(1.f/reference.scaling());
         Joint j2 = new Joint(scene);
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
