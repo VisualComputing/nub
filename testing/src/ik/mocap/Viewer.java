@@ -23,7 +23,7 @@ import java.util.Map;
 public class Viewer extends PApplet {
     Scene scene;
     Node eye;
-    String path = "/media/sebchaparr/Datos1/MOCAP/walk/sneak/walk-03-sneak-yokoyama.bvh";
+    String path = "/testing/data/bvh/walk-03-sneak-yokoyama.bvh";
     BVHParser parser;
     HashMap<String,Node> originalLimbs = new HashMap<String, Node>();
     HashMap<String,Joint> limbs = new HashMap<String, Joint>();
@@ -52,7 +52,7 @@ public class Viewer extends PApplet {
 
 
         parser = new BVHParser(Joint.class);
-        root = parser.readHeader(path, scene, null);
+        root = parser.readHeader(sketchPath() + path, scene, null);
         //make a copy of the skeleton
         rootIK = (Joint) copy(scene.branch(root));
         //rootIK.translate(50, 50, 50);
@@ -77,7 +77,7 @@ public class Viewer extends PApplet {
         }
         if(read){
             parser.readNextFrame();
-            updateTargets();
+            //updateTargets();
         }
     }
 
