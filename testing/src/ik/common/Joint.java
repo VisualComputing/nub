@@ -77,9 +77,8 @@ public class Joint extends InteractiveShape {
           Vector axis = constraint.restRotation().rotate(constraint.axis());
           reference.rotate(constraint.restRotation());
           Vector rest = Vector.projectVectorOnPlane(rotation().inverse().rotate(children().get(0).translation()), axis);
-          System.out.println("tr: " + rest);
           //Align Z-Axis with Axis
-          reference.rotate(new Quaternion(new Vector(0,0,1), reference.rotation().inverse().rotate(axis)));
+          reference.rotate(new Quaternion(new Vector(0,0,1), axis));
           //Align X-Axis with rest Axis
           reference.rotate(new Quaternion(new Vector(1,0,0), reference.rotation().inverse().rotate(rest)));
           graph().applyTransformation(reference);
