@@ -51,7 +51,6 @@ public class Joint extends InteractiveShape {
       }
     }
     pg.popStyle();
-    graph().drawAxes(5);
 
     if (constraint() != null) {
       pg.pushMatrix();
@@ -60,14 +59,17 @@ public class Joint extends InteractiveShape {
       if (constraint() instanceof BallAndSocket) {
         reference.rotate(((BallAndSocket) constraint()).restRotation());
         graph().applyTransformation(reference);
+        graph().drawAxes(5);
         drawCone(pg, boneLength / 2.f, (boneLength / 2.f) * PApplet.tan(PApplet.radians(constraint_factor_x)), (boneLength / 2.f) * PApplet.tan(PApplet.radians(constraint_factor_y)), 20);
       } else if (constraint() instanceof PlanarPolygon) {
         reference.rotate(((PlanarPolygon) constraint()).restRotation());
         graph().applyTransformation(reference);
+        graph().drawAxes(5);
         drawCone(pg, ((PlanarPolygon) constraint()).height(), ((PlanarPolygon) constraint()).vertices());
       } else if (constraint() instanceof SphericalPolygon) {
         reference.rotate(((SphericalPolygon) constraint()).restRotation());
         graph().applyTransformation(reference);
+        graph().drawAxes(5);
         drawCone(pg, ((SphericalPolygon) constraint()).vertices(), boneLength);
       } else if (constraint() instanceof Hinge) {
         Hinge constraint = (Hinge) constraint();
@@ -81,6 +83,7 @@ public class Joint extends InteractiveShape {
           reference.rotate(new Quaternion(reference.rotation().rotate(rest), new Vector(1,0,0)));
 
           graph().applyTransformation(reference);
+          graph().drawAxes(5);
           drawArc(pg, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
         }
       }
