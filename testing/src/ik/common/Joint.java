@@ -74,14 +74,14 @@ public class Joint extends InteractiveShape {
       } else if (constraint() instanceof Hinge) {
         Hinge constraint = (Hinge) constraint();
         if(children().size() == 1){
+          Vector axis = constraint.restRotation().rotate(constraint.axis());
           reference.rotate(constraint.restRotation());
-          Vector axis = rotation().rotate(constraint.axis());
-          Vector rest = children().get(0).translation();
+          Vector rest = Vector.projectVectorOnPlane(rotation().inverse().rotate(children().get(0).translation()), axis);
+          System.out.println("tr: " + rest);
           //Align Z-Axis with Axis
-          reference.rotate(new Quaternion(reference.rotation().rotate(axis), new Vector(0,0,1)));
+          reference.rotate(new Quaternion(new Vector(0,0,1), reference.rotation().inverse().rotate(axis)));
           //Align X-Axis with rest Axis
-          reference.rotate(new Quaternion(reference.rotation().rotate(rest), new Vector(1,0,0)));
-
+          reference.rotate(new Quaternion(new Vector(1,0,0), reference.rotation().inverse().rotate(rest)));
           graph().applyTransformation(reference);
           graph().drawAxes(5);
           drawArc(pg, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
