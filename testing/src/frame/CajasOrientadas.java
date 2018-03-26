@@ -3,10 +3,10 @@ package frame;
 import common.InteractiveNode;
 import frames.core.Graph;
 import frames.core.Node;
+import frames.input.Shortcut;
 import frames.input.event.MotionEvent;
 import frames.primitives.Matrix;
 import frames.primitives.Vector;
-import frames.processing.Mouse;
 import frames.processing.Scene;
 import processing.core.PApplet;
 
@@ -54,11 +54,11 @@ public class CajasOrientadas extends PApplet {
     eye2 = new Node(graph) {
       @Override
       public void interact(MotionEvent event) {
-        if (event.shortcut().matches(Mouse.LEFT))
+        if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
           translate(event);
-        else if (event.shortcut().matches(Mouse.RIGHT))
+        else if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
           rotate(event);
-        else if (event.shortcut().matches(Mouse.WHEEL))
+        else if (event.shortcut().matches(new Shortcut(processing.event.MouseEvent.WHEEL)))
           if (isEye() && graph().is3D())
             translateZ(event);
           else

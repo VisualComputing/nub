@@ -80,6 +80,20 @@ public class BallAndSocket extends Constraint {
     this._restRotation = restRotation.get();
   }
 
+  /**
+   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
+   * result will be stored on restRotation.
+   * twist and up axis are defined locally on reference rotation
+  * */
+  public void setRestRotation(Quaternion reference, Vector up, Vector twist){
+    _restRotation = reference.get();
+    Vector Z = _restRotation.inverse().rotate(twist);
+    //Align Y-Axis with Up Axis
+    _restRotation.compose(new Quaternion(new Vector(0,1,0), up));
+    //Align y-Axis with twist vector
+    _restRotation.compose(new Quaternion(new Vector(0,0,1), twist));
+  }
+
   public BallAndSocket() {
     _down = (float) (PI / 2.f);
     _left = (float) (PI / 2.f);
@@ -112,10 +126,12 @@ public class BallAndSocket extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-    Vector new_pos = Quaternion.multiply(desired, new Vector(0, 0, 1));
+    //twist to frame
+    Vector twist = _restRotation.rotate(new Vector(0,0,1));
+    Vector new_pos = Quaternion.multiply(desired, twist);
     Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion
-    return new Quaternion(new Vector(0, 0, 1), Quaternion.multiply(frame.rotation().inverse(), constrained));
+    return new Quaternion(twist, Quaternion.multiply(frame.rotation().inverse(), constrained));
   }
 
 
@@ -137,6 +153,7 @@ public class BallAndSocket extends Constraint {
   */
 
   //TODO : rename, discard?
+  //TODO : remove unnecessary calculations (consider this restriction only from 0 to PI)
   public Vector apply(Vector target, Quaternion restRotation) {
     Vector uvec = Quaternion.multiply(restRotation, new Vector(0, 1, 0));
     Vector rvec = Quaternion.multiply(restRotation, new Vector(1, 0, 0));
@@ -175,37 +192,19 @@ public class BallAndSocket extends Constraint {
           : proj.magnitude() * (float) (Math.tan(ybound));
     }
 
-    xbound = xbound > Math.pow(10, 2) ? (float) Math.pow(10, 2) : xbound;
-    ybound = ybound > Math.pow(10, 2) ? (float) Math.pow(10, 2) : ybound;
-    xbound = xbound < -Math.pow(10, 2) ? (float) -Math.pow(10, 2) : xbound;
-    ybound = ybound < -Math.pow(10, 2) ? (float) -Math.pow(10, 2) : ybound;
-
     float ellipse = ((xaspect * xaspect) / (xbound * xbound)) + ((yaspect * yaspect) / (ybound * ybound));
     inbounds = inbounds && ellipse <= 1;
     if ((!inbounds && !inv && proj.magnitude() > Float.MIN_VALUE) || (inbounds && inv && proj.magnitude() > Float.MIN_VALUE)) {
       float a = (float) (Math.atan2(yaspect, xaspect));
       float cos = (float) (Math.cos(a));
-      if (cos < 0) cos = -cos < Math.pow(10, -4) ? -Float.MIN_VALUE : cos;
-      else cos = cos < Math.pow(10, -4) ? Float.MIN_VALUE : cos;
       float sin = (float) (Math.sin(a));
-      if (sin < 0) sin = -sin < Math.pow(10, -4) ? -Float.MIN_VALUE : sin;
-      else sin = sin < Math.pow(10, -4) ? Float.MIN_VALUE : sin;
       float rad = 1.f / (float) Math.sqrt(((cos * cos) / (xbound * xbound)) + ((sin * sin) / (ybound * ybound)));
-      if (Math.abs(cos) <= Float.MIN_VALUE) {
-        rad = (float) Math.sqrt((ybound * ybound) / (sin * sin));
-      }
-      if (Math.abs(sin) <= Float.MIN_VALUE) {
-        rad = (float) Math.sqrt((xbound * xbound) / (cos * cos));
-      }
       float x = rad * cos;
       float y = rad * sin;
 
       f = Vector.add(proj, Vector.multiply(rvec, x));
       f = Vector.add(f, Vector.multiply(uvec, y));
 
-      if (Math.abs(f.x()) < Math.pow(10, -4)) f.setX(0);
-      if (Math.abs(f.y()) < Math.pow(10, -4)) f.setY(0);
-      if (Math.abs(f.z()) < Math.pow(10, -4)) f.setZ(0);
       f.normalize();
       f.multiply(target.magnitude());
     }

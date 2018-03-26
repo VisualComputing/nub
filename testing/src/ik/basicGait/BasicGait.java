@@ -57,12 +57,9 @@ public class BasicGait extends PApplet {
 
     Solver solver = scene.registerTreeSolver(leftLeg.get(0));
     scene.addIKTarget(leftLeg.get(2), leftTarget);
-    solver.setTIMESPERFRAME(TimesPerFrame);
 
     solver = scene.registerTreeSolver(rightLeg.get(0));
     scene.addIKTarget(rightLeg.get(2), rightTarget);
-    solver.setTIMESPERFRAME(TimesPerFrame);
-
   }
 
   public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation, float theta) {
@@ -71,7 +68,7 @@ public class BasicGait extends PApplet {
     int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
     for (int i = 0; i < num_joints; i++) {
       Joint iFrame;
-      iFrame = new Joint(scene, i == 0, color);
+      iFrame = new Joint(scene, color);
       if (i == 0)
         chainRoot = iFrame;
       if (prevFrame != null) iFrame.setReference(prevFrame);

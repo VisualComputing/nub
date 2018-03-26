@@ -1,11 +1,11 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
 package frames.core;
@@ -92,17 +92,16 @@ import java.util.List;
  * your custom node will then accordingly react to the LEFT and RIGHT mouse buttons,
  * provided it's added to the mouse-agent first (see {@link Agent#addGrabber(Grabber)}.
  * <p>
+ * Note that actions are bound to the node using the event {@link frames.input.Shortcut}
+ * attribute which identifies it. For instance {@code Shortcut(PApplet.LEFT))} tells us
+ * the {@code event} is a {@link MotionEvent2} mouse drag.
+ * <p>
  * Note that a node implements by default several gesture-to-motion converting methods,
  * such as: {@link #rotate(Event)}, {@link #moveForward(Event)},
  * {@link #translateXPos()}, etc.
  * <h2>Picking</h2>
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
- * <h2>Syncing</h2>
- * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that hasGrabber been most recently updated. Syncing can be useful to share nodes
- * among different off-screen graphs.
  */
 public class Node extends Frame implements Grabber {
   // according to space-nav fine tuning it turned out that the space-nav is
@@ -137,9 +136,12 @@ public class Node extends Frame implements Grabber {
   protected Vector _flyDirection;
   protected float _flySpeed;
   protected TimingTask _flyTask;
-  protected Vector _fly;
   protected long _flyUpdatePeriod = 20;
-  //TODO move to Frame? see Graph.setUpVector
+  protected boolean _applyFlyDamping;
+
+  // Inverse the direction of an horizontal mouse motion. Depends on the projected
+  // screen orientation of the vertical axis when the mouse button is pressed.
+  public boolean _cadRotationIsReversed;
   protected Vector _upVector;
   protected Graph _graph;
 
@@ -160,7 +162,6 @@ public class Node extends Frame implements Grabber {
   protected Precision _Precision;
 
   protected MotionEvent2 _initEvent;
-  protected float _flySpeedCache;
 
   protected List<Node> _children;
 
@@ -239,7 +240,6 @@ public class Node extends Frame implements Grabber {
     };
     graph().registerTask(_spinningTask);
 
-    _fly = new Vector(0.0f, 0.0f, 0.0f);
     _flyTask = new TimingTask() {
       public void execute() {
         _fly();
@@ -253,7 +253,6 @@ public class Node extends Frame implements Grabber {
     graph().inputHandler().addGrabber(this);
     _Precision = Precision.FIXED;
     setPrecisionThreshold(20);
-    setFlySpeed(0.01f * graph().radius());
   }
 
   protected Node(Graph graph, Node other) {
@@ -285,8 +284,6 @@ public class Node extends Frame implements Grabber {
 
     this._graph.registerTask(_spinningTask);
 
-    this._fly = new Vector();
-    this._fly.set(other._fly.get());
     this._flyTask = new TimingTask() {
       public void execute() {
         _fly();
@@ -774,39 +771,6 @@ public class Node extends Frame implements Grabber {
         child._modified();
   }
 
-  // SYNC
-
-  /**
-   * Same as {@code sync(this, other)}.
-   *
-   * @see #sync(Node, Node)
-   */
-  public void sync(Node other) {
-    sync(this, other);
-  }
-
-  /**
-   * If {@code node1} has been more recently updated than {@code node2}, calls
-   * {@code node2.setWorldMatrix(node1)}, otherwise calls {@code node1.setWorldMatrix(node2)}.
-   * Does nothing if both objects were updated at the same frame.
-   * <p>
-   * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
-   * separately.
-   *
-   * @see #setWorldMatrix(Frame)
-   */
-  public static void sync(Node node1, Node node2) {
-    if (node1 == null || node2 == null)
-      return;
-    if (node1.lastUpdate() == node2.lastUpdate())
-      return;
-    Node source = (node1.lastUpdate() > node2.lastUpdate()) ? node1 : node2;
-    Node target = (node1.lastUpdate() > node2.lastUpdate()) ? node2 : node1;
-    target.setWorldMatrix(source);
-  }
-
   /**
    * Defines the spinning deceleration.
    * <p>
@@ -926,10 +890,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Returns the minimum gesture speed required to make the node spin.
-   * Spinning requires to set {@link #damping()} to 0.
-   * <p>
-   * See {@link #_spin()}, {@link #spinningQuaternion()} and
-   * {@link #startSpinning(Quaternion, float, long)} for details.
+   * Continuously spinning requires to set {@link #damping()} to 0.
    * <p>
    * Gesture speed is expressed in pixels per milliseconds. Default value is 0.3 (300
    * pixels per second). Use {@link #setSpinningSensitivity(float)} to tune this value. A
@@ -984,27 +945,23 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns {@code true} when the node is spinning.
-   * <p>
-   * During spinning, {@link #_spin()} rotates the node by its
-   * {@link #spinningQuaternion()} at a frequency defined when the node
-   * {@link #startSpinning(Quaternion, float, long)}.
-   * <p>
-   * Use {@link #startSpinning(Quaternion, float, long)} and {@link #stopSpinning()} to
-   * change this state. Default value is {@code false}.
+   * Returns {@code true} when the node is spinning. Spinning is started by user
+   * interaction, e.g., {@link #rotate(Event)}.
    *
    * @see #isFlying()
+   * @see #stopSpinning()
    */
   public boolean isSpinning() {
     return _spinningTask.isActive();
   }
 
   /**
-   * Stops the spinning motion _started using {@link #startSpinning(Quaternion, float, long)}.
-   * Note that {@link #isSpinning()} will return {@code false} after this call.
+   * Stops the spinning motion. Spinning is started by user interaction, e.g.,
+   * {@link #rotate(Event)}. Note that {@link #isSpinning()} will return {@code false}
+   * after this call.
    * <p>
-   * <b>Attention: </b>This method may be called by {@link #_spin()}, since spinning may be
-   * decelerated according to {@link #damping()} till it stops completely.
+   * <b>Attention: Spinning may be decelerated according to {@link #damping()} till it stops
+   * completely.
    *
    * @see #damping()
    */
@@ -1013,101 +970,64 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Starts the spinning of the node.
-   * <p>
-   * This method starts a timer that will call {@link #_spin()} every
-   * {@code updateInterval} milliseconds. The node {@link #isSpinning()} until
-   * you call {@link #stopSpinning()}.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
+   * Called by the timer.
    *
-   * @see #damping()
-   * @see #startFlying(Vector, float)
+   * @see #_fly()
    */
-  public void startSpinning(Quaternion quaternion, float speed, long delay) {
-    _spinningQuaternion = quaternion;
-    _eventSpeed = speed;
-    _eventDelay = delay;
-    if (damping() == 0 && _eventSpeed < spinningSensitivity())
+  protected void _spin() {
+    if (_eventSpeed == 0) {
+      stopSpinning();
       return;
-    if (delay > 0)
-      _spinningTask.run(delay);
-  }
-
-  /**
-   * Cache version. Used by rotate methods when damping is 0.
-   */
-  protected void _startSpinning() {
-    startSpinning(_spinningQuaternion, _eventSpeed, _eventDelay);
-  }
-
-  protected void _spin() {
-    if (damping() == 0)
-      spin(_spinningQuaternion);
-    else {
-      if (_eventSpeed == 0) {
-        stopSpinning();
-        return;
-      }
-      spin(_spinningQuaternion);
-      _recomputeSpinningQuaternion();
     }
-  }
-
-  protected void _spin(Quaternion quaternion, float speed, long delay) {
-    if (damping() == 0) {
-      _spinningQuaternion = quaternion;
-      _eventSpeed = speed;
-      _eventDelay = delay;
-      spin(_spinningQuaternion);
-    } else
-      startSpinning(quaternion, speed, delay);
-  }
-
-  /*
-  protected void _spin(Quaternion quaternion) {
-    setSpinningQuaternion(quaternion);
-    _spin();
-  }
-  */
-
-  public void spin(Quaternion quaternion) {
-    if (isEye())
-      rotateAroundPoint(quaternion, graph().anchor());
-    else
-      rotate(quaternion);
-  }
-
-  /**
-   * Rotates the node by its {@link #spinningQuaternion()} or around the {@link Graph#anchor()}
-   * when this node is the {@link Graph#eye()}. Called by a timer when the node {@link #isSpinning()}.
-   * <p>
-   * <b>Attention: </b>Spinning may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   *
-   * @see #damping()
-   */
-  /*
-  protected void _spin() {
-    if (isEye())
-      rotateAroundPoint(_spinningQuaternion, graph().anchor());
-    else
-      rotate(_spinningQuaternion);
-  }
-  */
-
-  /**
-   * Internal method. Recomputes the {@link #spinningQuaternion()} according to {@link #damping()}.
-   */
-  protected void _recomputeSpinningQuaternion() {
+    spin(_spinningQuaternion);
+    if (damping() == 0)
+      return;
+    //recompute spinning quaternion
     float prevSpeed = _eventSpeed;
     float damping = 1.0f - (float) Math.pow(damping(), 3);
     _eventSpeed *= damping;
-    if (Math.abs(_eventSpeed) < .001f)
+    if (Math.abs(_eventSpeed) < .01f)
       _eventSpeed = 0;
-    // float currSpeed = eventSpeed;
     _spinningQuaternion.fromAxisAngle((_spinningQuaternion).axis(), _spinningQuaternion.angle() * (_eventSpeed / prevSpeed));
+  }
+
+  /**
+   * Implementation of the spinning behavior. Performs:
+   * <p>
+   * <ol>
+   * <li>If event isn't flushed (see {@link Event#flush()}), caches its speed and delay.</li>
+   * <li>Calls {@link #stopSpinning()} if the cached event speed <
+   * {@link #spinningSensitivity()}.</li>
+   * <li>Runs the spinning timer if cached event delay > 0.</li>
+   * <li>Calls {@link #spin(Quaternion)} if the timer isn't running.</li>
+   * </ol>
+   *
+   * @see #_fly(Vector, MotionEvent)
+   */
+  protected void _spin(Quaternion quaternion, MotionEvent event) {
+    if (isSpinning())
+      stopSpinning();
+    if (!event.flushed()) {
+      _spinningQuaternion = quaternion;
+      _eventSpeed = event.speed();
+      _eventDelay = event.delay();
+      spin(quaternion);
+    } else if (_eventSpeed >= spinningSensitivity() && _eventDelay > 0)
+      _spinningTask.run(20);
+  }
+
+  /**
+   * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
+   * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}. Called
+   * by a timer when the node {@link #isSpinning()}.
+   *
+   * @see #damping()
+   */
+  public void spin(Quaternion quaternion) {
+    if (isEye())
+      rotate(quaternion, graph().anchor());
+    else
+      rotate(quaternion);
   }
 
   protected int _originalDirection(MotionEvent event) {
@@ -1668,7 +1588,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-rotation conversion routine.
    */
   protected void _rotateX(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event);
   }
 
   /**
@@ -1729,7 +1649,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event.speed(), event.delay());
+    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event);
   }
 
   /**
@@ -1750,8 +1670,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(boolean up) {
-    Quaternion rt = screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0);
-    rotate(rt);
+    rotate(screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0));
   }
 
   /**
@@ -1791,7 +1710,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-rotation conversion routine.
    */
   protected void _rotateZ(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event.speed(), event.delay());
+    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event);
   }
 
   /**
@@ -1841,7 +1760,7 @@ public class Node extends Frame implements Grabber {
    */
   public void rotateXYZ(MotionEvent3 event) {
     if (event.fired())
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -1878,27 +1797,21 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
-    if (event.flushed() && damping() == 0) {
-      _startSpinning();
-      return;
+    Quaternion quaternion;
+    Vector vector;
+    if (isEye())
+      quaternion = _deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
+    else {
+      vector = _graph.projectedCoordinatesOf(position());
+      quaternion = _deformedBallQuaternion(event, vector);
+      vector = quaternion.axis();
+      vector = _graph.eye().orientation().rotate(vector);
+      vector = transformOf(vector);
+      quaternion = new Quaternion(vector, -quaternion.angle());
     }
-    if (!event.flushed()) {
-      Quaternion rt;
-      Vector trns;
-      if (isEye())
-        rt = _deformedBallQuaternion(event, graph().projectedCoordinatesOf(graph().anchor()));
-      else {
-        trns = _graph.projectedCoordinatesOf(position());
-        rt = _deformedBallQuaternion(event, trns);
-        trns = rt.axis();
-        trns = _graph.eye().orientation().rotate(trns);
-        trns = transformOf(trns);
-        rt = new Quaternion(trns, -rt.angle());
-      }
-      _spin(rt, event.speed(), event.delay());
-    }
+    _spin(quaternion, event);
   }
 
   /**
@@ -1965,13 +1878,6 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Use for first person (move forward/backward, lookAround) and cad motion actions.
-   */
-  protected void _updateUpVector() {
-    _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-  }
-
-  /**
    * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
    */
   public void lookAround(Event event) {
@@ -2021,6 +1927,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * User gesture into move-forward conversion routine. Only meaningful if {@link #isEye()}.
+   * <p>
+   * Note that {@link #isFlying()} will return true after a call to this function.
    */
   public void moveForward(MotionEvent event) {
     _moveForward(event, true);
@@ -2041,20 +1949,18 @@ public class Node extends Frame implements Grabber {
    * User gesture into move-forward conversion routine.
    */
   protected void _moveForward(MotionEvent2 event, boolean forward) {
+    if (graph().is2D()) {
+      System.out.println("moveForward(Event) only makes sense in 3D");
+      return;
+    }
     if (!isEye()) {
       System.out.println("moveForward(Event) only makes sense for the eye");
       return;
     }
     if (event.fired())
-      _updateUpVector();
-    else if (event.flushed()) {
-      stopFlying();
-      return;
-    }
-    float fSpeed = forward ? -flySpeed() : flySpeed();
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
     rotate(_rollPitchQuaternion(event));
-    _fly.set(0.0f, 0.0f, fSpeed);
-    startFlying(rotation().rotate(_fly), event.speed());
+    _fly(rotation().rotate(new Vector(0.0f, 0.0f, forward ? -flySpeed() : flySpeed())), event);
   }
 
   /**
@@ -2082,23 +1988,21 @@ public class Node extends Frame implements Grabber {
    * User gesture into drive conversion routine. Only meaningful if {@link #isEye()}.
    */
   public void drive(MotionEvent2 event) {
+    if (graph().is2D()) {
+      System.out.println("drive(Event) only makes sense in 3D");
+      return;
+    }
     if (!isEye()) {
       System.out.println("drive(Event) only makes sense for the eye");
       return;
     }
     if (event.fired()) {
       _initEvent = event.get();
-      _updateUpVector();
-      _flySpeedCache = flySpeed();
-    } else if (event.flushed()) {
-      setFlySpeed(_flySpeedCache);
-      stopFlying();
-      return;
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
     }
-    setFlySpeed(0.01f * _graph.radius() * 0.01f * (event.y() - _initEvent.y()));
+    float speed = flySpeed() * 0.01f * (event.y() - _initEvent.y());
     rotate(_turnQuaternion(event.event1()));
-    _fly.set(0.0f, 0.0f, flySpeed());
-    startFlying(rotation().rotate(_fly), event.speed());
+    _fly(rotation().rotate(new Vector(0.0f, 0.0f, speed)), event);
   }
 
   /**
@@ -2124,6 +2028,8 @@ public class Node extends Frame implements Grabber {
 
   /**
    * User gesture into CAD-rotation conversion routine. Only meaningful if {@link #isEye()}.
+   * <p>
+   * Current implementation doesn't spin.
    */
   public void rotateCAD(MotionEvent2 event) {
     if (!isEye()) {
@@ -2134,26 +2040,21 @@ public class Node extends Frame implements Grabber {
       System.out.println("rotateCAD(Event) requires a relative motion-event");
       return;
     }
-    if (event.fired())
+    if (event.fired()) {
       stopSpinning();
-    if (event.fired())
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
-    if (event.flushed() && damping() == 0) {
-      _startSpinning();
-      return;
-    } else {
-      // Multiply by 2.0 to get on average about the same _speed as with the
-      // deformed ball
-      float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
-      float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
-      if (_graph._cadRotationIsReversed)
-        dx = -dx;
-      if (_graph.isRightHanded())
-        dy = -dy;
-      Vector verticalAxis = transformOf(_upVector);
-      _spin(Quaternion.multiply(new Quaternion(verticalAxis, dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event.speed(),
-          event.delay());
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
+    // Multiply by 2.0 to get on average about the same _speed as with the
+    // deformed ball
+    float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
+    float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
+    if (_cadRotationIsReversed)
+      dx = -dx;
+    if (_graph.isRightHanded())
+      dy = -dy;
+    //TODO spinning breaks upVector orientation
+    //_spin(Quaternion.multiply(new Quaternion(transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
+    spin(Quaternion.multiply(new Quaternion(transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)));
   }
 
   /**
@@ -2295,39 +2196,29 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       //TODO handle me
       //graph.setRotateVisualHint(true); // display visual hint
-      _graph._cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().transformOf(_upVector).y() < 0.0f;
     }
-    if (event.flushed()) {
-      //TODO handle me
-      //graph.setRotateVisualHint(false);
-      if (damping() == 0) {
-        _startSpinning();
-        return;
-      }
+    Quaternion quaternion;
+    Vector vector;
+    float angle;
+    if (isEye()) {
+      vector = graph().projectedCoordinatesOf(graph().anchor());
+      angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]) - (float) Math
+          .atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
+      if (_graph.isLeftHanded())
+        angle = -angle;
+      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
+    } else {
+      vector = _graph.projectedCoordinatesOf(position());
+      float prev_angle = (float) Math.atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
+      angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]);
+      Vector axis = transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
+      if (_graph.isRightHanded())
+        quaternion = new Quaternion(axis, angle - prev_angle);
+      else
+        quaternion = new Quaternion(axis, prev_angle - angle);
     }
-    if (!event.flushed()) {
-      Quaternion rt;
-      Vector trns;
-      float angle;
-      if (isEye()) {
-        trns = graph().projectedCoordinatesOf(graph().anchor());
-        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]) - (float) Math
-            .atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
-        if (_graph.isLeftHanded())
-          angle = -angle;
-        rt = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
-      } else {
-        trns = _graph.projectedCoordinatesOf(position());
-        float prev_angle = (float) Math.atan2(event.previousY() - trns._vector[1], event.previousX() - trns._vector[0]);
-        angle = (float) Math.atan2(event.y() - trns._vector[1], event.x() - trns._vector[0]);
-        Vector axis = transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
-        if (_graph.isRightHanded())
-          rt = new Quaternion(axis, angle - prev_angle);
-        else
-          rt = new Quaternion(axis, prev_angle - angle);
-      }
-      _spin(rt, event.speed(), event.delay());
-    }
+    _spin(quaternion, event);
   }
 
   /**
@@ -2494,25 +2385,13 @@ public class Node extends Frame implements Grabber {
     }
   }
 
-  //TODO needs testing
-  @Override
-  public void rotateAroundFrame(float roll, float pitch, float yaw, Frame frame) {
-    if (frame != null) {
-      Frame axis = frame.detach();
-      Frame copy = detach();
-      copy.setReference(axis);
-      axis.rotate(new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw));
-      setWorldMatrix(copy);
-    }
-  }
-
   /**
    * Returns {@code true} when the node is flying.
    * <p>
-   * When flying, {@link #damping()} translates the node by its {@link #flyDirection()}
-   * at a frequency defined when the node {@link #startFlying(Vector, float)}.
+   * When flying, {@link #damping()} translates the node by its fly direction
+   * at a frequency defined when the node {@link #_fly(Vector, MotionEvent)}.
    * <p>
-   * Use {@link #startFlying(Vector, float)} and {@link #stopFlying()} to change this
+   * Use {@link #_fly(Vector, MotionEvent)} and {@link #stopFlying()} to change this
    * state. Default value is {@code false}.
    * <p>
    * {@link #isSpinning()}
@@ -2522,7 +2401,7 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Stops the flying motion started using {@link #startFlying(Vector, float)}.
+   * Stops the flying motion started using {@link #_fly(Vector, MotionEvent)}.
    * {@link #isFlying()} will return {@code false} after this call.
    * <p>
    * <b>Attention: </b>This method may be called by {@link #damping()}, since flying may
@@ -2536,52 +2415,30 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Returns the incremental translation that is applied by {@link #damping()} to the
-   * node position when it {@link #isFlying()}.
+   * Implementation of the flying behavior.
    * <p>
-   * Default value is no translation. Use {@link #setFlyDirection(Vector)} to change this
-   * value.
-   * <p>
-   * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
-   * stops completely.
-   *
-   * @see #spinningQuaternion()
-   */
-  public Vector flyDirection() {
-    return _flyDirection;
-  }
-
-  /**
-   * Defines the {@link #flyDirection()} in the reference frame coordinate system.
-   *
-   * @see #setSpinningQuaternion(Quaternion)
-   */
-  public void setFlyDirection(Vector dir) {
-    _flyDirection = dir;
-  }
-
-  /**
-   * Starts the flying of the node.
-   * <p>
-   * This method starts a timer that will call {@link #damping()} every 20
-   * milliseconds. The node {@link #isFlying()} until you call
-   * {@link #stopFlying()}.
+   * This method starts a timer that will translate the node along {@code direction} every 20
+   * milliseconds. The node {@link #isFlying()} until you call {@link #stopFlying()}.
    * <p>
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
    * @see #damping()
-   * @see #_spin()
-   * @see #startSpinning(Quaternion, float, long)
+   * @see #_spin(Quaternion, MotionEvent)
    */
-  public void startFlying(Vector direction, float speed) {
-    _eventSpeed = speed;
-    setFlyDirection(direction);
-    _flyTask.run(_flyUpdatePeriod);
+  protected void _fly(Vector direction, MotionEvent event) {
+    _flyDirection = direction;
+    _eventSpeed = event.speed();
+    _eventDelay = event.delay();
+    _applyFlyDamping = event.flushed();
+    if (event.fired() && isFlying())
+      stopFlying();
+    else if (!isFlying())
+      _flyTask.run(_flyUpdatePeriod);
   }
 
   /**
-   * Translates the node by its {@link #flyDirection()}. Invoked by
+   * Translates the node by its fly direction. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
    * <p>
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
@@ -2590,7 +2447,17 @@ public class Node extends Frame implements Grabber {
    * @see #_spin()
    */
   protected void _fly() {
-    translate(flyDirection());
+    if (_flyDirection.magnitude() < .01f) {
+      stopFlying();
+      return;
+    }
+    translate(_flyDirection);
+    if (damping() == 0)
+      return;
+    if (_applyFlyDamping) {
+      float damping = 1.0f - (float) Math.pow(damping(), 3);
+      _flyDirection.multiply(damping);
+    }
   }
 
   /**
@@ -2609,8 +2476,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Sets the {@link #flySpeed()}, defined in  graph units.
    * <p>
-   * Default value is 0, but it is modified according to the {@link Graph#radius()} when the node
-   * is set as the {@link Graph#eye()}.
+   * Default value is {@code 0.01f * graph().radius()}.
    */
   public void setFlySpeed(float speed) {
     _flySpeed = speed;

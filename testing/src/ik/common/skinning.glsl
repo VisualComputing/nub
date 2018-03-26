@@ -35,38 +35,42 @@ vec3 rot(vec4 quaternion, vec3 vector) {
                    (q02 - q13) * vector[0] + (q12 + q03) * vector[1] + (1.0f - q11 - q00) * vector[2]);;
 }
 
-uniform mat4 transform;
+uniform mat4 projection;
+uniform mat4 modelview;
 attribute vec4 color;
 attribute vec4 position;
+varying float dist[30];
+uniform float[120] bonePositionOrig;
 uniform float[120] bonePosition;
 uniform float[120] boneRotation;
 uniform int boneLength;
 varying vec4 vertColor;
 
+uniform mat4 texMatrix;
+attribute vec2 texCoord;
+varying vec4 vertTexCoord;
+
+
+
 void main() {
-  vec4 curPos = transform * position;
+  vec4 curPos = position;
   vec3 v = vec3(0.0);
   float totalDist = 0;
-  //Get distance to each vertex and store weight
-  //Get distance total distance and normalize
-  //apply rotation and average position
-  for(int i = 0, j = 0; i < boneLength -3; i+=3, j+=4){
-    //Apply quat rotation
+
+  for(int i = 0, j = 0, k = 0; i < boneLength -3; i+=3, j+=4, k+=1){
     vec4 quat = vec4(boneRotation[j + 0], boneRotation[j + 1], boneRotation[j + 2], boneRotation[j + 3]);
-    vec3 parent = vec3(bonePosition[i + 0], bonePosition[i + 1], bonePosition[i + 2]);
-    vec3 child = vec3(bonePosition[i + 3], bonePosition[i + 4], bonePosition[i + 5]);
-
+    vec3 parent = vec3(bonePositionOrig[i + 0], bonePositionOrig[i + 1], bonePositionOrig[i + 2]);
+    vec3 child = vec3(bonePositionOrig[i + 3], bonePositionOrig[i + 4], bonePositionOrig[i + 5]);
+    vec3 current = vec3(bonePosition[i + 0], bonePosition[i + 1],     bonePosition[i + 2]);
+    dist[k] = 1.0/pow(distanceToLine(parent, child, curPos.xyz),10);
     vec3 pos = curPos.xyz - parent;
-    pos = parent + rot(quat, pos);
-    float dist = 1.0/length(pos);//1.0/distanceToLine(parent, child, curPos.xyz);
-    v = v + pos * dist;
-
-    totalDist = totalDist + dist;
+    pos = rot(quat, pos) + current;
+    v = v + (pos * dist[k]);
+    totalDist = totalDist + dist[k];
   }
 
   v = 1.0/totalDist * v;
-  //v = normalize(v) * length(curPos);
-  //gl_Position = curPos; //vec4(v,0);
-  gl_Position = vec4(v,1);
+  gl_Position = projection * modelview * vec4(v,1);
   vertColor = color;
+  vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
 }

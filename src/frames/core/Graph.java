@@ -1,11 +1,11 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
 package frames.core;
@@ -107,8 +107,6 @@ import java.util.List;
  * @see #applyTransformation(Frame)
  * @see MatrixHandler
  */
-//TODO
-// (decide) Remove printing stuff (vector, map, ...).
 public class Graph {
   // 1. Eye
   protected Frame _eye;
@@ -125,10 +123,6 @@ public class Graph {
   protected float _distance[];
   // rescale ortho when anchor changes
   protected float _rapK = 1;
-  // Inverse the direction of an horizontal mouse motion. Depends on the
-  // projected
-  // screen orientation of the vertical axis when the mouse button is pressed.
-  public boolean _cadRotationIsReversed;
   // handed and screen drawing
   protected boolean _rightHanded;
   protected int _startCoordCalls;
@@ -821,7 +815,7 @@ public class Graph {
    *
    * @see InputHandler#resetTrackedGrabber()
    */
-  public void resetInputGrabber() {
+  public void resetTrackedGrabber() {
     inputHandler().resetTrackedGrabber();
   }
 
@@ -832,6 +826,15 @@ public class Graph {
    */
   public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
     inputHandler().shiftDefaultGrabber(grabber1, grabber2);
+  }
+
+  /**
+   * Same as {@code inputHandler().hasGrabber(grabber)}.
+   *
+   * @see InputHandler#hasGrabber(Grabber)
+   */
+  public boolean hasGrabber(Grabber grabber) {
+    return inputHandler().hasGrabber(grabber);
   }
 
   /**
@@ -2186,7 +2189,7 @@ public class Graph {
 
     // Useful in fly mode to keep the horizontal direction.
     if (eye() instanceof Node)
-      ((Node) eye())._updateUpVector();
+      ((Node) eye())._upVector = eye().orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
   /**
@@ -2260,7 +2263,6 @@ public class Graph {
    *
    * @see #interpolateTo(Frame, float)
    */
-  //TODO needs testing, e.g., setAvatar
   public void interpolateTo(Frame frame) {
     interpolateTo(frame, 1);
   }
@@ -2279,7 +2281,7 @@ public class Graph {
     _interpolator.stop();
     _interpolator.clear();
     _interpolator.addKeyFrame(eye().detach());
-    _interpolator.addKeyFrame(frame, duration);
+    _interpolator.addKeyFrame(frame.detach(), duration);
     _interpolator.start();
   }
 

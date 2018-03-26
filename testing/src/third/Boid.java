@@ -1,24 +1,21 @@
 package third;
 
 import frames.core.Node;
+import frames.input.event.TapEvent;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.timing.AnimatorObject;
 import processing.core.PApplet;
 import processing.core.PVector;
 
 import java.util.ArrayList;
 
-// this is so obviously an animator object
-class Boid extends AnimatorObject {
+class Boid {
   Scene scene;
-  PApplet p;
+  PApplet pApplet;
   Node node;
-  Quaternion q;
   int grabsMouseColor;//color
   int avatarColor;
-
   // fields
   PVector pos, vel, acc, ali, coh, sep; // pos, velocity, and acceleration in
   // a vector datatype
@@ -29,34 +26,37 @@ class Boid extends AnimatorObject {
   float flap = 0;
   float t = 0;
 
-  // constructors
   Boid(Scene scn, PVector inPos) {
-    super(scn.timingHandler());
     scene = scn;
-    p = scene.pApplet();
-    grabsMouseColor = p.color(0, 0, 255);
-    avatarColor = p.color(255, 0, 0);
+    pApplet = scene.pApplet();
+    grabsMouseColor = pApplet.color(0, 0, 255);
+    avatarColor = pApplet.color(255, 0, 0);
     pos = new PVector();
     pos.set(inPos);
-    node = new Node(scene);
+    node = new Node(scene) {
+      @Override
+      public void visit() {
+        //We uncoupled render() from run(Flock) to be able to set different frequencies
+        //for them, as we want to appreciate the visual results (when the freqs are different).
+        //The best results I found is when they both are called together every frame:
+        if (Flock.animate)
+          run(Flock.flock);
+        render();
+      }
+
+      @Override
+      public void interact(TapEvent event) {
+        if (Flock.avatar != this && scene.eye().reference() != this) {
+          Flock.avatar = this;
+          scene.eye().setReference(this);
+          scene.interpolateTo(this);
+        }
+      }
+    };
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
-    vel = new PVector(p.random(-1, 1), p.random(-1, 1), p.random(1, -1));
+    vel = new PVector(pApplet.random(-1, 1), pApplet.random(-1, 1), pApplet.random(1, -1));
     acc = new PVector(0, 0, 0);
     neighborhoodRadius = 100;
-    setPeriod(1000 / Flock.FPS);
-    start();
-  }
-
-  @Override
-  public void animate() {
-    if (scene.mouse().inputGrabber() == node && scene.eye().reference() != node) {
-      Flock.thirdPerson = node;
-      ((Node) scene.eye()).setReference(node);
-      scene.interpolateTo(node);
-      //scene.resetMouseAgentInputNode();
-    } else
-      run(Flock.flock);
-    render();
   }
 
   public void run(ArrayList bl) {
@@ -99,6 +99,8 @@ class Boid extends AnimatorObject {
     // exceed maxSpeed
     pos.add(vel); // add velocity to position
     node.setPosition(new Vector(pos.x, pos.y, pos.z));
+    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
+        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag()))));
     acc.mult(0); // reset acceleration
   }
 
@@ -117,69 +119,40 @@ class Boid extends AnimatorObject {
       pos.z = Flock.flockDepth;
   }
 
-  public boolean isAvatar() {
-    return scene.mouse().inputGrabber() == node && scene.eye() != node;
-  }
-
-    /*
-    boolean isAvatar() {
-        return scene.avatar() == null ? false : scene.avatar().equals(node) ? true : false;
-    }
-    */
-
   void render() {
-    p.pushStyle();
-    p.stroke(Flock.hue);
-    p.noFill();
-    p.noStroke();
-    p.fill(Flock.hue);
+    pApplet.pushStyle();
 
-    q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
-        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
-    node.setRotation(q);
+    scene.drawAxes(10);
 
-    p.pushMatrix();
-    // Multiply matrix to get in the node coordinate system.
-    node.applyTransformation();
-    scene.drawAxes();
+    pApplet.stroke(Flock.hue);
+    pApplet.noFill();
+    pApplet.noStroke();
+    pApplet.fill(Flock.hue);
 
     // highlight boids under the mouse
-    if (node.track(p.mouseX, p.mouseY))
-      p.fill(grabsMouseColor);
-
-        /*
-        // setAvatar according to scene.motionAgent().inputGrabber()
-        // check if this boid's node is the avatar
-        if (node.grabsInput())
-            if (!isAvatar())
-                scene.setAvatar(node);
-
-        // highlight the boid if its node is the avatar
-        if ( isAvatar() )
-            p.fill( avatarColor );
-        */
+    if (node.track(pApplet.mouseX, pApplet.mouseY))
+      pApplet.fill(grabsMouseColor);
 
     //draw boid
-    p.beginShape(PApplet.TRIANGLES);
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.beginShape(PApplet.TRIANGLES);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
 
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
 
-    p.vertex(3 * sc, 0, 0);
-    p.vertex(-3 * sc, 0, 2 * sc);
-    p.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.vertex(3 * sc, 0, 0);
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
 
-    p.vertex(-3 * sc, 0, 2 * sc);
-    p.vertex(-3 * sc, 2 * sc, 0);
-    p.vertex(-3 * sc, -2 * sc, 0);
-    p.endShape();
+    pApplet.vertex(-3 * sc, 0, 2 * sc);
+    pApplet.vertex(-3 * sc, 2 * sc, 0);
+    pApplet.vertex(-3 * sc, -2 * sc, 0);
+    pApplet.endShape();
 
-    p.popMatrix();
-    p.popStyle();
+    pApplet.popStyle();
   }
 
   // steering. If arrival==true, the boid slows to meet the target. Credit to

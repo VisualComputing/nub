@@ -1,4 +1,4 @@
-package ik.interactiveSkeleton;
+package ik.common;
 
 import frames.core.Node;
 import frames.primitives.Frame;
