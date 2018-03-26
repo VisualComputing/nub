@@ -3,8 +3,10 @@ package ik.common;
 import common.InteractiveShape;
 import frames.core.Node;
 import frames.primitives.Frame;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
 import frames.primitives.constraint.PlanarPolygon;
 import frames.primitives.constraint.SphericalPolygon;
 import frames.processing.Scene;
@@ -67,6 +69,20 @@ public class Joint extends InteractiveShape {
         reference.rotate(((SphericalPolygon) constraint()).restRotation());
         graph().applyTransformation(reference);
         drawCone(pg, ((SphericalPolygon) constraint()).vertices(), boneLength);
+      } else if (constraint() instanceof Hinge) {
+        Hinge constraint = (Hinge) constraint();
+        if(children().size() == 1){
+          reference.rotate(constraint.restRotation());
+          Vector axis = rotation().rotate(constraint.axis());
+          Vector rest = children().get(0).translation();
+          //Align Z-Axis with Axis
+          reference.rotate(new Quaternion(reference.rotation().rotate(axis), new Vector(0,0,1)));
+          //Align X-Axis with rest Axis
+          reference.rotate(new Quaternion(reference.rotation().rotate(rest), new Vector(1,0,0)));
+
+          graph().applyTransformation(reference);
+          drawArc(pg, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
+        }
       }
       pg.popStyle();
       pg.popMatrix();
@@ -123,6 +139,20 @@ public class Joint extends InteractiveShape {
     if (!vertices.isEmpty())
       pg.vertex(scale * vertices.get(0).x(), scale * vertices.get(0).y(), scale * vertices.get(0).z());
     pg.endShape();
+    pg.popStyle();
+  }
+
+  public void drawArc(PGraphics pg, float radius, float minAngle, float maxAngle, int detail){
+    pg.pushStyle();
+    pg.noStroke();
+    pg.fill(246, 117, 19, 80);
+    pg.beginShape(PApplet.TRIANGLE_FAN);
+    pg.vertex(0,0,0);
+    float step = (maxAngle - minAngle)/detail;
+    for(float theta = minAngle; theta <= maxAngle; theta += step) {
+      pg.vertex(radius * cos(theta), radius * sin(theta));
+    }
+    pg.endShape(PApplet.CLOSE);
     pg.popStyle();
   }
 
