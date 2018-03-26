@@ -113,28 +113,29 @@ public class Hinge extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     /*First constraint rotation to be defined with respect to Axis*/
-    Vector rotationAxis = Vector.projectVectorOnAxis(rotation.axis(), this._axis);
+    Vector axis = _restRotation.rotate(this._axis);
+    Vector rotationAxis = Vector.projectVectorOnAxis(rotation.axis(), axis);
     //Get rotation component on Axis direction
     Quaternion rotationTwist = new Quaternion(rotationAxis, rotation.angle());
     float deltaAngle = rotationTwist.angle();
-    if (rotationAxis.dot(_axis) < 0) deltaAngle *= -1;
+    if (rotationAxis.dot(axis) < 0) deltaAngle *= -1;
     /*First rotation of Frame with respect to Axis*/
     Quaternion current = Quaternion.compose(frame.rotation(), _restRotation.inverse());
     /*It is possible that the current rotation axis is not parallel to Axis*/
-    Vector currentAxis = Vector.projectVectorOnAxis(current.axis(), this._axis);
+    Vector currentAxis = Vector.projectVectorOnAxis(current.axis(), axis);
     //Get rotation component on Axis direction
     Quaternion currentTwist = new Quaternion(currentAxis, current.angle());
     float frameAngle = currentTwist.angle();
 
-    if (current.axis().dot(_axis) < 0) frameAngle *= -1;
+    if (current.axis().dot(axis) < 0) frameAngle *= -1;
     if (frameAngle + deltaAngle > _max) {
       float r = _max - frameAngle;
-      return new Quaternion(_axis, r);
+      return new Quaternion(axis, r);
     } else if (frameAngle + deltaAngle < -_min) {
       float r = -_min - frameAngle;
-      return new Quaternion(_axis, r);
+      return new Quaternion(axis, r);
     } else {
-      return new Quaternion(_axis, deltaAngle);
+      return new Quaternion(axis, deltaAngle);
     }
   }
 
