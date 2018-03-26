@@ -12,6 +12,6 @@ varying vec4 vertColor;
 varying vec4 vertTexCoord;
 
 void main() {
-  //gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
-  gl_FragColor = vertColor;
+  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
+  //gl_FragColor = vertColor;
 }
