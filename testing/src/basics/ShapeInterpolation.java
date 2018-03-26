@@ -3,6 +3,8 @@ package basics;
 import common.InteractiveNode;
 import frames.core.Interpolator;
 import frames.core.Node;
+import frames.primitives.Frame;
+import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -16,6 +18,7 @@ public class ShapeInterpolation extends PApplet {
   Scene scene;
   PShape pbox, psphere;
   Shape box, sphere;
+  Frame frame;
   Interpolator interpolator;
   InteractiveNode eye;
   boolean showEyePath = true;
@@ -33,6 +36,7 @@ public class ShapeInterpolation extends PApplet {
     eye = new InteractiveNode(scene);
     eye.setDamping(0);
     scene.setEye(eye);
+    scene.setFieldOfView(PI / 3);
     //interactivity defaults to the eye
     scene.setDefaultGrabber(eye);
     scene.setRadius(150);
@@ -49,6 +53,12 @@ public class ShapeInterpolation extends PApplet {
     psphere.setFill(color(250, 50, 80));
     sphere = new Shape(box, psphere);
     sphere.translate(15, 15, 15);
+    sphere.scale(2);
+
+    frame = Frame.random(sphere.position(), 50);
+    frame.setReference(sphere);
+    frame.scale(3);
+    //frame.setR
 
     // interpolation 2. Custom eye interpolations
     interpolator = new Interpolator(box);
@@ -105,6 +115,24 @@ public class ShapeInterpolation extends PApplet {
         eye.translateXPos();
       else if (keyCode == LEFT)
         eye.translateXNeg();
+    if (key == 'p') {
+      Quaternion q1 = Quaternion.random();
+      Frame ref = sphere.detach();
+
+      Frame copy1 = frame.get();
+      copy1.setReference(ref);
+      Quaternion q2 = new Quaternion(copy1.transformOf(q1.axis()), q1.angle());
+      //copy1.rotateAroundPoint(q2, new Vector(15,15,15));
+      //copy1.position().print();
+      copy1.orientation().print();
+
+      Frame copy2 = frame.get();
+      copy2.setReference(ref);
+      //Quaternion q2 = new Quaternion(copy2.inverseTransformOf(q1.axis()), q1.angle());
+      //copy2._rotate(q1, new Vector(15, 15, 15));
+      //copy2.position().print();
+      copy2.orientation().print();
+    }
   }
 
   public static void main(String args[]) {

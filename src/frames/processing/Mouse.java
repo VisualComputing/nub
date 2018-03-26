@@ -1,11 +1,11 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights refserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
 package frames.processing;
@@ -13,12 +13,11 @@ package frames.processing;
 import frames.core.Graph;
 import frames.input.Agent;
 import frames.input.Event;
-import frames.input.Shortcut;
 import frames.input.event.MotionEvent1;
 import frames.input.event.MotionEvent2;
 import frames.input.event.TapEvent;
-import frames.input.event.TapShortcut;
 import frames.primitives.Point;
+import processing.awt.PGraphicsJava2D;
 import processing.core.PApplet;
 
 /**
@@ -27,21 +26,8 @@ import processing.core.PApplet;
  * @see Agent
  */
 public class Mouse extends Agent {
-  //common mouse shortcuts
-  public static Shortcut NO_BUTTON = new Shortcut(Event.NO_ID);
-  public static Shortcut LEFT = new Shortcut(PApplet.LEFT);
-  public static Shortcut RIGHT = new Shortcut(PApplet.RIGHT);
-  public static Shortcut CENTER = new Shortcut(PApplet.CENTER);
-  public static Shortcut WHEEL = new Shortcut(processing.event.MouseEvent.WHEEL);
-  public static TapShortcut LEFT_TAP = new TapShortcut(PApplet.LEFT);
-  public static TapShortcut RIGHT_TAP = new TapShortcut(PApplet.RIGHT);
-  public static TapShortcut CENTER_TAP = new TapShortcut(PApplet.CENTER);
-  public static TapShortcut LEFT_TAP2 = new TapShortcut(PApplet.LEFT, 2);
-  public static TapShortcut RIGHT_TAP2 = new TapShortcut(PApplet.RIGHT, 2);
-  public static TapShortcut CENTER_TAP2 = new TapShortcut(PApplet.CENTER, 2);
-
   protected Point _upperLeftCorner;
-  //protected Graph _graph;
+  protected Graph _graph;
   protected MotionEvent2 _currentEvent, _previousEvent;
   protected boolean _move, _press, _drag, _release;
   protected Mode _mode;
@@ -66,6 +52,7 @@ public class Mouse extends Agent {
    */
   public Mouse(Graph graph, Point upperLeftCorner) {
     super(graph.inputHandler());
+    _graph = graph;
     _upperLeftCorner = upperLeftCorner;
     setMode(Mode.MOVE);
   }
@@ -98,7 +85,7 @@ public class Mouse extends Agent {
     _release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
     if (_move || _press || _drag || _release) {
       _currentEvent = new MotionEvent2(_previousEvent, mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
-          mouseEvent.getModifiers(), _move ? Event.NO_ID : mouseEvent.getButton());
+          _modifiers(mouseEvent), _move ? Event.NO_ID : mouseEvent.getButton());
       if (_move && (mode() == Mode.MOVE))
         poll(_currentEvent);
       handle(_press ? _currentEvent.fire() : _release ? _currentEvent.flush() : _currentEvent);
@@ -111,11 +98,27 @@ public class Mouse extends Agent {
     }
     if (mouseEvent.getAction() == processing.event.MouseEvent.CLICK) {
       TapEvent tapEvent = new TapEvent(mouseEvent.getX() - _upperLeftCorner.x(), mouseEvent.getY() - _upperLeftCorner.y(),
-          mouseEvent.getModifiers(), mouseEvent.getButton(), mouseEvent.getCount());
+          _modifiers(mouseEvent), mouseEvent.getButton(), mouseEvent.getCount());
       if (mode() == Mode.CLICK)
         poll(tapEvent);
       handle(tapEvent);
       return;
     }
+  }
+
+  /**
+   * PGraphicsJava2D mouse event modifiers fix.
+   * <p>
+   * See: https://github.com/processing/processing/issues/1693
+   */
+  protected int _modifiers(processing.event.MouseEvent event) {
+    int modifiers = event.getModifiers();
+    if (_graph instanceof Scene)
+      if (((Scene) _graph).frontBuffer() instanceof PGraphicsJava2D)
+        if (event.getButton() == PApplet.CENTER)
+          modifiers = Event.ALT ^ event.getModifiers();
+        else if (event.getButton() == PApplet.RIGHT)
+          modifiers = Event.META ^ event.getModifiers();
+    return modifiers;
   }
 }

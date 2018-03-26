@@ -1,11 +1,11 @@
 /****************************************************************************************
- * framesjs
+ * frames
  * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights refserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
 package frames.processing;
@@ -92,6 +92,7 @@ import java.util.List;
  *         translate(event);
  *     }
  *   };
+ *   scene.setEye(eye);
  *   scene.setDefaultGrabber(eye);
  * }
  * }
@@ -195,7 +196,7 @@ public class Scene extends Graph implements PConstants {
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
-  protected PGraphics _fg;
+  protected PGraphics _fb;
 
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
@@ -267,7 +268,7 @@ public class Scene extends Graph implements PConstants {
     super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
-    _fg = pGraphics;
+    _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
@@ -302,126 +303,6 @@ public class Scene extends Graph implements PConstants {
     setLeftHanded();
   }
 
-  //TODO experimental rename and add api docs.
-  // decide later
-  /*
-  public Node orbitNode() {
-    class OrbitNode extends Node {
-      Shortcut left = new Shortcut(PApplet.LEFT);
-      Shortcut right = new Shortcut(PApplet.RIGHT);
-      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
-      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-
-      public OrbitNode(Graph graph) {
-        super(graph);
-      }
-
-      // this one gotta be overridden because we want a copied frame (e.g., line 100 above, i.e.,
-      // scene.eye().get()) to have the same behavior as its original.
-      protected OrbitNode(Graph otherGraph, OrbitNode otherNode) {
-        super(otherGraph, otherNode);
-      }
-
-      @Override
-      public OrbitNode get() {
-        return new OrbitNode(this.graph(), this);
-      }
-
-      @Override
-      public void interact(MotionEvent2 event) {
-        if (left.matches(event.shortcut()))
-          rotate(event);
-        if (right.matches(event.shortcut()))
-          translate(event);
-      }
-
-      @Override
-      public void interact(MotionEvent1 event) {
-        if (event.shortcut().matches(wheel))
-          if (isEye() && graph().is3D())
-            translateZ(event);
-          else
-            scale(event);
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.shortcut().matches(upArrow))
-          translateYPos();
-        else if (event.shortcut().matches(downArrow))
-          translateYNeg();
-        else if (event.shortcut().matches(leftArrow))
-          translateXNeg();
-        else if (event.shortcut().matches(rightArrow))
-          translateXPos();
-      }
-    }
-    return new OrbitNode(this);
-  }
-  //*/
-
-  /*
-  public Shape orbitShape() {
-    class OrbitShape extends Shape {
-      Shortcut left = new Shortcut(PApplet.LEFT);
-      Shortcut right = new Shortcut(PApplet.RIGHT);
-      Shortcut wheel = new Shortcut(processing.event.MouseEvent.WHEEL);
-      KeyShortcut upArrow = new KeyShortcut(PApplet.UP);
-      KeyShortcut downArrow = new KeyShortcut(PApplet.DOWN);
-      KeyShortcut leftArrow = new KeyShortcut(PApplet.LEFT);
-      KeyShortcut rightArrow = new KeyShortcut(PApplet.RIGHT);
-
-      public OrbitShape(Scene scene) {
-        super(scene);
-      }
-
-      // this one gotta be overridden because we want a copied frame (e.g., line 141 above, i.e.,
-      // scene.eye().get()) to have the same behavior as its original.
-      protected OrbitShape(Scene otherScene, OrbitShape otherShape) {
-        super(otherScene, otherShape);
-      }
-
-      @Override
-      public OrbitShape get() {
-        return new OrbitShape(this.scene(), this);
-      }
-
-      @Override
-      public void interact(KeyEvent event) {
-        if (event.shortcut().matches(upArrow))
-          translateYPos();
-        else if (event.shortcut().matches(downArrow))
-          translateYNeg();
-        else if (event.shortcut().matches(leftArrow))
-          translateXNeg();
-        else if (event.shortcut().matches(rightArrow))
-          translateXPos();
-      }
-
-      @Override
-      public void interact(MotionEvent2 event) {
-        if (left.matches(event.shortcut()))
-          rotate(event);
-        if (right.matches(event.shortcut()))
-          translate(event);
-      }
-
-      @Override
-      public void interact(MotionEvent1 event) {
-        if (event.shortcut().matches(wheel))
-          if (isEye() && graph().is3D())
-            translateZ(event);
-          else
-            scale(event);
-      }
-    }
-    return new OrbitShape(this);
-  }
-  //*/
-
   /**
    * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
    * scenes, but off-screen scenes may define it elsewhere on a canvas.
@@ -444,7 +325,7 @@ public class Scene extends Graph implements PConstants {
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
   public PGraphics frontBuffer() {
-    return _fg;
+    return _fb;
   }
 
   // PICKING BUFFER
@@ -2171,28 +2052,37 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawAxes(frontBuffer(), length)}.
+   * Same as {@code drawAxes(frontBuffer(), length, isLeftHanded())}.
    *
-   * @see #drawAxes(PGraphics, float)
-   * @see #drawGrid(float, int)
+   * @see #drawAxes(PGraphics, float, boolean)
    */
   public void drawAxes(float length) {
-    drawAxes(frontBuffer(), length);
+    drawAxes(frontBuffer(), length, isLeftHanded());
   }
 
   /**
-   * Same as {@code drawAxes(pGraphics, radius())}.
+   * Same as {@code drawAxes(pGraphics, radius(), isLeftHanded())}.
+   *
+   * @see #drawAxes(PGraphics, float, boolean)
+   */
+  public void drawAxes(PGraphics pGraphics) {
+    drawAxes(pGraphics, radius(), isLeftHanded());
+  }
+
+  /**
+   * Same as {@code drawAxes(pGraphics, length, true)}.
    *
    * @see #drawAxes(PGraphics, float)
    */
-  public void drawAxes(PGraphics pGraphics) {
-    drawAxes(pGraphics, radius());
+  public static void drawAxes(PGraphics pGraphics, float length) {
+    drawAxes(pGraphics, length, true);
   }
 
   /**
-   * Draws axes of {@code length} onto {@code pGraphics}.
+   * Draws axes of {@code length} onto {@code pGraphics} taking into account
+   * {@code leftHanded}.
    */
-  public void drawAxes(PGraphics pGraphics, float length) {
+  public static void drawAxes(PGraphics pGraphics, float length, boolean leftHanded) {
     pGraphics.pushStyle();
     pGraphics.colorMode(PApplet.RGB, 255);
     float charWidth = length / 40.0f;
@@ -2202,7 +2092,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.beginShape(PApplet.LINES);
     pGraphics.strokeWeight(2);
-    if (is2D()) {
+    if (pGraphics.is2D()) {
       // The X
       pGraphics.stroke(200, 0, 0);
       pGraphics.vertex(charShift + charWidth, -charHeight);
@@ -2213,12 +2103,12 @@ public class Scene extends Graph implements PConstants {
       // The Y
       charShift *= 1.02;
       pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift + (isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(-charWidth, charShift + (isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(-charWidth, charShift + (!leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift + 0.0f);
       pGraphics.vertex(0.0f, charShift + 0.0f);
-      pGraphics.vertex(0.0f, charShift + -(isRightHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift + -(!leftHanded ? charHeight : -charHeight));
     } else {
       // The X
       pGraphics.stroke(200, 0, 0);
@@ -2228,39 +2118,39 @@ public class Scene extends Graph implements PConstants {
       pGraphics.vertex(charShift, charWidth, charHeight);
       // The Y
       pGraphics.stroke(0, 200, 0);
-      pGraphics.vertex(charWidth, charShift, (isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(charWidth, charShift, (leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(-charWidth, charShift, (isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(-charWidth, charShift, (leftHanded ? charHeight : -charHeight));
       pGraphics.vertex(0.0f, charShift, 0.0f);
       pGraphics.vertex(0.0f, charShift, 0.0f);
-      pGraphics.vertex(0.0f, charShift, -(isLeftHanded() ? charHeight : -charHeight));
+      pGraphics.vertex(0.0f, charShift, -(leftHanded ? charHeight : -charHeight));
       // The Z
       pGraphics.stroke(0, 100, 200);
-      pGraphics.vertex(-charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? charHeight : -charHeight, charShift);
-      pGraphics.vertex(-charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(-charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
-      pGraphics.vertex(charWidth, isRightHanded() ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? charHeight : -charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(-charWidth, !leftHanded ? -charHeight : charHeight, charShift);
+      pGraphics.vertex(charWidth, !leftHanded ? -charHeight : charHeight, charShift);
     }
     pGraphics.endShape();
     pGraphics.popStyle();
 
     // X Axis
     pGraphics.stroke(200, 0, 0);
-    if (is2D())
+    if (pGraphics.is2D())
       pGraphics.line(0, 0, length, 0);
     else
       pGraphics.line(0, 0, 0, length, 0, 0);
     // Y Axis
     pGraphics.stroke(0, 200, 0);
-    if (is2D())
+    if (pGraphics.is2D())
       pGraphics.line(0, 0, 0, length);
     else
       pGraphics.line(0, 0, 0, 0, length, 0);
 
     // Z Axis
-    if (is3D()) {
+    if (pGraphics.is3D()) {
       pGraphics.stroke(0, 100, 200);
       pGraphics.line(0, 0, 0, 0, 0, length);
     }
@@ -2305,7 +2195,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawGrid(frontBuffer, radius(), 10)}.
+   * Same as {@code drawGrid(pGraphics, radius(), 10)}.
+   *
+   * @see #drawGrid(PGraphics, float, int)
+   * @see #drawAxes(float)
    */
   public void drawGrid(PGraphics pGraphics) {
     drawGrid(pGraphics, radius(), 10);
@@ -2315,7 +2208,7 @@ public class Scene extends Graph implements PConstants {
    * Draws a grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
    * having {@code subdivisions}.
    */
-  public void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
+  public static void drawGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
     pGraphics.beginShape(LINES);
     for (int i = 0; i <= subdivisions; ++i) {
@@ -2378,7 +2271,7 @@ public class Scene extends Graph implements PConstants {
    * Draws a dotted-grid of {@code size} onto {@code pGraphics} in the XY plane, centered on (0,0,0),
    * having {@code subdivisions}.
    */
-  public void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
+  public static void drawDottedGrid(PGraphics pGraphics, float size, int subdivisions) {
     pGraphics.pushStyle();
     float posi, posj;
     pGraphics.beginShape(POINTS);
