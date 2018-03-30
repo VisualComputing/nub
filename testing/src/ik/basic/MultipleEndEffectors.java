@@ -43,10 +43,11 @@ public class MultipleEndEffectors extends PApplet {
         rightTarget = new Target(scene);
 
         Joint root = new Joint(scene);
-        Joint root1 = new Joint(scene);
+        root.setRoot(true);
+        Node root1 = new Node(scene);
         root1.setReference(root);
         scene.inputHandler().removeGrabber(root1);
-        Joint root2 = new Joint(scene);
+        Node root2 = new Node(scene);
         root2.setReference(root);
         scene.inputHandler().removeGrabber(root2);
 

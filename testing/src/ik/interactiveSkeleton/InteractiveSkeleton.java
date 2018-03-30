@@ -42,6 +42,7 @@ public class InteractiveSkeleton  extends PApplet {
 
     //Create an initial Joint at the center of the Shape
     root = new InteractiveJoint(scene);
+    root.setRoot(true);
     //Create and load an InteractiveShape
     PShape model = loadShape(sketchPath() + shapePath);
     model.setFill(color(255,0,0, 50));

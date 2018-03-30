@@ -136,6 +136,7 @@ public class InteractiveFish extends PApplet {
         Joint j6 = new Joint(scene);
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
+        j1.setRoot(true);
         return j1;
     }
 

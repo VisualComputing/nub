@@ -81,6 +81,7 @@ public class BasicGait extends PApplet {
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
         chainRoot.setTranslation(translation);
         //chainRoot.setupHierarchy();
+        chainRoot.setRoot(true);
         return scene.branch(chainRoot);
     }
 
