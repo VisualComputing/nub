@@ -137,10 +137,12 @@ public class InteractiveHuman extends PApplet{
         j1.setReference(reference);
         j1.setScaling(1.f/reference.scaling());
         j1.setPosition(-0.6260768f, -103.30267f, -7.696819E-6f);
+        j1.setRoot(true);
         //Right leg
-        Joint j1_1 = new Joint(scene);
+        Node j1_1 = new Node(scene);
         j1_1.setReference(j1);
         j1_1.setPosition(j1.position());
+        scene.inputHandler().removeGrabber(j1_1);
         Joint j2 = new Joint(scene);
         j2.setReference(j1_1);
         j2.setPosition(11.2693815f, -103.30267f, -7.692007E-6f);
@@ -154,9 +156,10 @@ public class InteractiveHuman extends PApplet{
         limbs.put("RIGHTFOOT", j4);
         targets.get("RIGHTFOOT").setPosition(10.480495f, -5.253174f, -4.9646983f);
         //Left Leg
-        Joint j1_2 = new Joint(scene);
+        Node j1_2 = new Node(scene);
         j1_2.setReference(j1);
         j1_2.setPosition(j1.position());
+        scene.inputHandler().removeGrabber(j1_2);
         Joint j5 = new Joint(scene);
         j5.setReference(j1_2);
         j5.setPosition(-10.643305f, -103.30267f, -7.692444E-6f);
@@ -169,9 +172,10 @@ public class InteractiveHuman extends PApplet{
         limbs.put("LEFTFOOT", j7);
         targets.get("LEFTFOOT").setPosition(-10.802915f, -6.01915f, -4.9398084f);
         //middle
-        Joint j1_3 = new Joint(scene);
+        Node j1_3 = new Node(scene);
         j1_3.setReference(j1);
         j1_3.setPosition(j1.position());
+        scene.inputHandler().removeGrabber(j1_3);
         Joint j8 = new Joint(scene);
         j8.setReference(j1_3);
         j8.setPosition(0.07123697f, -116.91087f, 0.48342294f);
