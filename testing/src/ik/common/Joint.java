@@ -22,6 +22,7 @@ import static ik.basic.BasicIK.*;
  */
 public class Joint extends InteractiveShape {
   private int color;
+  private boolean root = false;
 
   public Joint(Scene scene) {
     this(scene, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)));
@@ -32,6 +33,10 @@ public class Joint extends InteractiveShape {
     this.color = color;
   }
 
+  public void setRoot(boolean root){
+    this.root = root;
+  }
+
   public void set(PGraphics pg) {
     pg.pushStyle();
     pg.fill(color);
@@ -39,18 +44,17 @@ public class Joint extends InteractiveShape {
     if (pg.is2D()) pg.ellipse(0, 0, 3, 3);
     else pg.sphere(3);
 
-    pg.strokeWeight(5);
-    pg.stroke(color);
-
-    for(Node node : this._children){
-      Vector v = node.translation();
+    if(!root) {
+      pg.strokeWeight(5);
+      pg.stroke(color);
+      Vector v = localCoordinatesOf(new Vector());
       if (pg.is2D()) {
         pg.line(0, 0, v.x(), v.y());
       } else {
         pg.line(0, 0, 0, v.x(), v.y(), v.z());
       }
+      pg.popStyle();
     }
-    pg.popStyle();
 
     if (constraint() != null) {
       pg.pushMatrix();
