@@ -184,7 +184,7 @@ public class ChainSolver extends FABRIKSolver {
     } else if (_prevTarget == null) {
       return true;
     }
-    return !(_prevTarget.position().equals(_target.position()) && _prevTarget.orientation().equals(_target.orientation()));
+    return !(_prevTarget.position().matches(_target.position()) && _prevTarget.orientation().matches(_target.orientation()));
   }
 
   @Override
