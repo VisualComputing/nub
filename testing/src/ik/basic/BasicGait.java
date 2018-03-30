@@ -45,13 +45,11 @@ public class BasicGait extends PApplet {
         //Create the Structure of the left Leg
         leftLeg = generateChain(3, boneLength, new Vector(0, 0, boneLength * 2), 0);
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        leftLeg.get(0).setupHierarchy();
         leftTarget.setPosition(leftLeg.get(2).position());
 
         //Create the Structure of the right Leg
         rightLeg = generateChain(3, boneLength, new Vector(20, 0, boneLength * 2), 0);
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        rightLeg.get(0).setupHierarchy();
         rightTarget.setPosition(rightLeg.get(2).position());
 
         Solver solver = scene.registerTreeSolver(leftLeg.get(0));
