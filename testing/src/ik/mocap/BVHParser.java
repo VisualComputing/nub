@@ -201,7 +201,6 @@ public class BVHParser {
             e.printStackTrace();
             return;
         }
-        System.out.println(line);
 
         //clean line
         line.replace("\t", " ");
@@ -214,7 +213,6 @@ public class BVHParser {
         int i = 0;
         for(Node node : _branch){
             Properties properties = _joint.get(node);
-            System.out.println("BONE : " + properties._name);
             boolean translationInfo = false;
             boolean rotationInfo = false;
             Vector translation = new Vector();
