@@ -42,10 +42,30 @@ public class Hinge extends Constraint {
     return _axis;
   }
 
+  /**
+   * Set the twist axis.
+   * The axis must be defined with respect to {@link #restRotation()} Quaternion
+   * @param axis
+   */
   public void setAxis(Vector axis) {
     this._axis = axis;
   }
 
+  /**
+   * Set the twist axis.
+   * The axis must be defined with respect to reference Quaternion.
+   * Call this method only after setting {@link #restRotation()} Quaternion
+   * @param reference
+   * @param axis
+   */
+  public void setAxis(Quaternion reference, Vector axis){
+    this._axis = _restRotation.inverse().rotate(reference.rotate(axis));
+  }
+
+  /**
+   * Get the restRotation Quaternion.
+   * @return
+   */
   public Quaternion restRotation() {
     return _restRotation;
   }
