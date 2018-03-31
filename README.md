@@ -162,7 +162,51 @@ To control your scene nodes by [means](https://en.wikipedia.org/wiki/Human_inter
 
 ## Kinematics
 
-TODO complete me!
+The goal of Kinematics is to animate a [Skeleton](https://en.wikipedia.org/wiki/Skeletal_animation), which is a rigid body system composed by Joints and Bones.
+
+As a Skeleton could be built using a hierarchical tree structure where each Node keeps information about Joints and Bones configuration by means of relative geometric transformations (at least rotation and translation) we could consider a Skeleton as a subset of the scene graph.
+
+There are some positions of interest at the Skeleton called End Effectors which depends on the Joint configuration and that an animator would like to manipulate in order to reach some given Target positions and obtain a desired pose.
+
+[Forward Kinematics](https://en.wikipedia.org/wiki/Forward_kinematics#Computer_animation) attemps to obtain the position of an end-effector from some given values for the joint parametes (usually rotation information). This task could be done easily thanks to the scene graph structure provided by Frames.
+
+[Inverse Kinematics](https://en.wikipedia.org/wiki/Inverse_kinematics#Inverse_kinematics_and_3D_animation) or IK for short, on the other hand, is a harder problem that attemps to obtain the joint parameters given a desired pose.
+
+This short [video](https://www.youtube.com/watch?v=euFe1S0OltQ) summarizes the different between this two problems.
+
+Whenever IK is required to be solved follow the next steps:
+
+#### Define the Skeleton (List or Hierarchy of Joints) 
+
+The Skeleton must be a branch from a `Graph` (for instance see `branch(Node)`[https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#branch-frames.core.Node-]). Where each of the leaf nodes (i.e Nodes without children) could be treated as an End Effector.
+
+#### Define the Target(s)
+Create the Target(s) that the End Effector(s) must Follow. A Target is `Node` that indicates which is de desired position of an End Effector. It's important to instantiate the Target before the Skeleton.
+
+#### Register a Solver
+Once you have specified an Skeleton and the Target(s). It is required to register a Solver task managed by the `scene`. To do this call `registerTreeSolver(Node)` method, where `Node` is the root of the Skeleton.
+
+#### Relate Target(s) and end Effector(s)
+You must pecify explicitly which leaf `node` (End Effector) is related to which target `node`. To do this call scene method `addIKTarget(Node, Node)`. Where the first node is the End Effector, whereas the second one is the Target.
+
+Optionally, it is usual to set initial target(s) position to be the same as end effector(s) position.
+
+Assuming that the Skeleton is determined by `branch(Node)` and it is a single chain (i.e each `Node` has at much one child) the code must look like:
+
+```java
+...
+void setup() {
+  Node target = new Node(scene);
+  Node root = new Node(scene);
+  ...
+  ArrayList<Node> chain = scene.branch(root);
+  Node endEffector = chain.get(chain.size()-1);
+  ...
+  scene.registerTreeSolver(root);
+  target.setPosition(endEffector.position());  
+  scene.addIKTarget(endEffector, target);
+}
+```
 
 ## Drawing
 
