@@ -141,14 +141,14 @@ public void setup() {
   }
 
 
-  //4. Tell the scene that a Solver must be register passing as parameter the root of each Skeleton (chain) in 3.
+  //5. Tell the scene that a Solver must be register passing as parameter the root of each Skeleton (chain) in 3.
   /*
     The method registerTreeSolver returns a Solver class that could be used to modify some of its Parameters
     Here we use the default Solver configuration
   */
-  //5. After 4. is applied to each chain associate the Target in 2. with the End Effector of the chain (leaf Node)
+  //6. After 4. is applied to each chain associate the Target in 2. with the End Effector of the chain (leaf Node)
 
-  //Apply 4. and 5. to each chain
+  //Apply 5. and 6. to each chain
   scene.registerTreeSolver(chainHinge.get(0));
   scene.addIKTarget(chainHinge.get(chainHinge.size() - 1), target);
 
