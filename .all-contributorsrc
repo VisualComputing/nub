@@ -8,10 +8,10 @@
   "commit": true,
   "contributors": [
     {
-      "login": "nakednous",
-      "name": "Jean Pierre Charalambos",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/645599?v=4",
-      "profile": "https://github.com/nakednous",
+      "login": "sechaparroc",
+      "name": "sechaparroc",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/9769647?v=4",
+      "profile": "https://github.com/sechaparroc",
       "contributions": [
         "blog",
         "bug",
@@ -34,10 +34,10 @@
       ]
     },
     {
-      "login": "sechaparroc",
-      "name": "sechaparroc",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/9769647?v=4",
-      "profile": "https://github.com/sechaparroc",
+      "login": "nakednous",
+      "name": "Jean Pierre Charalambos",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/645599?v=4",
+      "profile": "https://github.com/nakednous",
       "contributions": [
         "blog",
         "bug",
