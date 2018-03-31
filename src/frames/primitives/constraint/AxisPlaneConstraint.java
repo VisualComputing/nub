@@ -184,7 +184,7 @@ public class AxisPlaneConstraint extends Constraint {
    * <p>
    * Use {@link Frame#setOrientation(Quaternion)} to define the
    * orientation of the constrained Frame before it gets constrained.
-   * <p>
+   *
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational
    * constraints and will be ignored.
    */

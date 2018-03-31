@@ -213,7 +213,7 @@ public class TreeSolver extends FABRIKSolver {
   protected boolean _iterate() {
     int modifiedChains = _forwardReaching(root);
     float change = _backwardReaching(root);
-    change = modifiedChains > 0 ? change/(modifiedChains*1.f) : change;
+    change = modifiedChains > 0 ? change / (modifiedChains * 1.f) : change;
     //Check total position change
     if (change / (modifiedChains * 1.) <= minDistance) return true;
     return false;

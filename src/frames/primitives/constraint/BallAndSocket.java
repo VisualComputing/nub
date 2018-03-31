@@ -84,14 +84,14 @@ public class BallAndSocket extends Constraint {
    * reference is a Quaternion that will be aligned to point to the given Basis Vectors
    * result will be stored on restRotation.
    * twist and up axis are defined locally on reference rotation
-  * */
-  public void setRestRotation(Quaternion reference, Vector up, Vector twist){
+   */
+  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _restRotation = reference.get();
     Vector Z = _restRotation.inverse().rotate(twist);
     //Align Y-Axis with Up Axis
-    _restRotation.compose(new Quaternion(new Vector(0,1,0), up));
+    _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
     //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0,0,1), twist));
+    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
   }
 
   public BallAndSocket() {
@@ -127,7 +127,7 @@ public class BallAndSocket extends Constraint {
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     //twist to frame
-    Vector twist = _restRotation.rotate(new Vector(0,0,1));
+    Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
     Vector new_pos = Quaternion.multiply(desired, twist);
     Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion

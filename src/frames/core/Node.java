@@ -46,7 +46,7 @@ import java.util.List;
  * Alternatively, the node geometry transformation may be automatically handled by the graph
  * traversal algorithm (see {@link frames.core.Graph#traverse()}), provided
  * that the node {@link #visit()} method is overridden, as shown below:
- * <p>
+ *
  * <pre>
  * {@code
  * node = new Node(graph) {
@@ -73,7 +73,7 @@ import java.util.List;
  * <h2>Behaviors</h2>
  * To implement a node behavior derive from this class and override {@code interact()}.
  * For example, with the following code:
- * <p>
+ *
  * <pre>
  * {@code
  * Shortcut left = new Shortcut(PApplet.LEFT);
@@ -468,7 +468,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
-   * <p>
+   *
    * <pre>
    * {@code
    * node = new Node(graph) {
@@ -959,7 +959,7 @@ public class Node extends Frame implements Grabber {
    * Stops the spinning motion. Spinning is started by user interaction, e.g.,
    * {@link #rotate(Event)}. Note that {@link #isSpinning()} will return {@code false}
    * after this call.
-   * <p>
+   *
    * <b>Attention: Spinning may be decelerated according to {@link #damping()} till it stops
    * completely.
    *
@@ -993,7 +993,7 @@ public class Node extends Frame implements Grabber {
 
   /**
    * Implementation of the spinning behavior. Performs:
-   * <p>
+   *
    * <ol>
    * <li>If event isn't flushed (see {@link Event#flush()}), caches its speed and delay.</li>
    * <li>Calls {@link #stopSpinning()} if the cached event speed <
@@ -2403,7 +2403,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Stops the flying motion started using {@link #_fly(Vector, MotionEvent)}.
    * {@link #isFlying()} will return {@code false} after this call.
-   * <p>
+   *
    * <b>Attention: </b>This method may be called by {@link #damping()}, since flying may
    * be decelerated according to {@link #damping()} till it stops completely.
    *
@@ -2419,7 +2419,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * This method starts a timer that will translate the node along {@code direction} every 20
    * milliseconds. The node {@link #isFlying()} until you call {@link #stopFlying()}.
-   * <p>
+   *
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
@@ -2440,7 +2440,7 @@ public class Node extends Frame implements Grabber {
   /**
    * Translates the node by its fly direction. Invoked by
    * {@link #_moveForward(MotionEvent, boolean)} and {@link #drive(MotionEvent)}.
-   * <p>
+   *
    * <b>Attention: </b>Flying may be decelerated according to {@link #damping()} till it
    * stops completely.
    *
@@ -2465,7 +2465,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * It corresponds to the incremental displacement that is periodically applied to the
    * node by {@link #_moveForward(MotionEvent, boolean)}.
-   * <p>
+   *
    * <b>Attention:</b> When the node is set as the {@link Graph#eye()}, this value is set according
    * to the {@link Graph#radius()} by {@link Graph#setRadius(float)}.
    */

@@ -18,7 +18,10 @@ import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Grabber;
 import frames.primitives.*;
-import frames.primitives.constraint.*;
+import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
+import frames.primitives.constraint.PlanarPolygon;
+import frames.primitives.constraint.SphericalPolygon;
 import frames.timing.SequentialTimer;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -36,7 +39,7 @@ import java.util.List;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
- * <p>
+ *
  * <h2>Usage</h2>
  * Typical usage comprises three steps: scene instantiation, setting an eye
  * and setting some shapes.
@@ -741,7 +744,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Only if the dcene {@link #isOffscreen()}. Calls:
-   * <p>
+   *
    * <ol>
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@code _renderBackBuffer()}: Render the back buffer (useful for picking)</li>
@@ -861,7 +864,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * When having multiple off-screen scenes displayed at once, it should be decided which
    * one will grab input from the {@link #mouse()}, so that code like this:
-   * <p>
+   *
    * <pre>
    * {@code
    * scene1.beginDraw();
@@ -881,13 +884,13 @@ public class Scene extends Graph implements PConstants {
    * expected.
    * <p>
    * To implement a different policy either:
-   * <p>
+   *
    * <ol>
    * <li>Override the {@link #_hasFocus()} scene method; or,</li>
    * <li>Call {@link #disableAutoFocus()} and implement your own focus policy at the
    * sketch space.</li>
    * </ol>
-   * <p>
+   *
    * <b>Note</b> that for this policy to work, you should call {@link #display()} instead
    * of the papplet image() function on the {@link #frontBuffer()}.
    *
@@ -1184,7 +1187,7 @@ public class Scene extends Graph implements PConstants {
    * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the nodes
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
-   * <p>
+   *
    * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
    * (i.e., manual eye update) and before any other transformation of the modelview takes
    * place.
@@ -2962,9 +2965,10 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} having
    * Semi-axis {@code a} and {@code b} and  {@code height} dimensions.
-   *
+   * <p>
    * {@code a} represents the horizontal semi-axis
    * {@code b} represents the horizontal semi-axis
+   *
    * @param pGraphics
    * @param height
    * @param a
@@ -3010,8 +3014,9 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (0,0,0)} where
    * {@code vertices} represents the base of the Polygon and with {@code scale} as maximum height.
-   *
+   * <p>
    * It is desirable that each point in {@code vertices} lie inside the unit Sphere
+   *
    * @param pGraphics
    * @param vertices
    * @param scale
@@ -3037,11 +3042,11 @@ public class Scene extends Graph implements PConstants {
    * @param maxAngle
    * @param detail
    */
-  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail){
+  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    pGraphics.vertex(0,0,0);
-    float step = (maxAngle - minAngle)/detail;
-    for(float theta = minAngle; theta <= maxAngle; theta += step) {
+    pGraphics.vertex(0, 0, 0);
+    float step = (maxAngle - minAngle) / detail;
+    for (float theta = minAngle; theta <= maxAngle; theta += step) {
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
     }
     pGraphics.endShape(PApplet.CLOSE);
@@ -3051,18 +3056,18 @@ public class Scene extends Graph implements PConstants {
     drawConstraint(frontBuffer(), node);
   }
 
-  public void drawConstraint(PGraphics pGraphics, Node node){
-    if(node.constraint() == null) return;
+  public void drawConstraint(PGraphics pGraphics, Node node) {
+    if (node.constraint() == null) return;
     float boneLength = 0;
-    if(!node.children().isEmpty()){
-      for(Node child : node.children()) {
+    if (!node.children().isEmpty()) {
+      for (Node child : node.children()) {
         boneLength += child.translation().magnitude();
       }
-      boneLength = boneLength/(1.f*node.children().size());
-    }else{
+      boneLength = boneLength / (1.f * node.children().size());
+    } else {
       boneLength = node.translation().magnitude();
     }
-    if(boneLength == 0) return;
+    if (boneLength == 0) return;
 
     pGraphics.pushMatrix();
     pGraphics.pushStyle();
@@ -3077,8 +3082,8 @@ public class Scene extends Graph implements PConstants {
       applyTransformation(reference);
       drawAxes(5);
       drawCone(pGraphics, boneLength / 2.f,
-              (boneLength / 2.f) * PApplet.tan(constraint.left()),
-              (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
+          (boneLength / 2.f) * PApplet.tan(constraint.left()),
+          (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
     } else if (node.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) node.constraint()).restRotation());
       applyTransformation(reference);
@@ -3091,17 +3096,17 @@ public class Scene extends Graph implements PConstants {
       drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
     } else if (node.constraint() instanceof Hinge) {
       Hinge constraint = (Hinge) node.constraint();
-      if(node.children().size() == 1){
+      if (node.children().size() == 1) {
         Vector axis = constraint.restRotation().rotate(constraint.axis());
         reference.rotate(constraint.restRotation());
         Vector rest = Vector.projectVectorOnPlane(node.rotation().inverse().rotate(node.children().get(0).translation()), axis);
         //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0,0,1), axis));
+        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1,0,0), reference.rotation().inverse().rotate(rest)));
+        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
         applyTransformation(reference);
         drawAxes(5);
-        drawArc(pGraphics, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
+        drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }
     pGraphics.popStyle();

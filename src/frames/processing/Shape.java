@@ -48,7 +48,7 @@ import processing.opengl.PGraphicsOpenGL;
  * <h2>Highlighting</h2>
  * The shape may be highlighted when picking takes place according to a
  * {@link #highlighting()} policy as follows:
- * <p>
+ *
  * <ol>
  * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
  * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFront(PShape)}
@@ -131,7 +131,7 @@ public class Shape extends Node {
 
   /**
    * Highlights the shape when picking takes place as follows:
-   * <p>
+   *
    * <ol>
    * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
    * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFront(PShape)}

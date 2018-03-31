@@ -53,7 +53,7 @@ import frames.timing.TimingHandler;
  * a {@link #reference()} frame. The default {@link #reference()} is the world
  * coordinate system (represented by a {@code null} {@link #reference()}). If you
  * {@link #setReference(Frame)} to a different frame, you must then differentiate:
- * <p>
+ *
  * <ul>
  * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
  * defined with respect to the {@link #reference()}.</li>
@@ -866,7 +866,7 @@ public class Frame {
   /**
    * Rotates the frame so that its {@link #xAxis()} becomes {@code axis} defined in the
    * world coordinate system.
-   * <p>
+   *
    * <b>Attention:</b> this rotation is not uniquely defined. See
    * {@link Quaternion#fromTo(Vector, Vector)}.
    *
@@ -881,7 +881,7 @@ public class Frame {
   /**
    * Rotates the frame so that its {@link #yAxis()} becomes {@code axis} defined in the
    * world coordinate system.
-   * <p>
+   *
    * <b>Attention:</b> this rotation is not uniquely defined. See
    * {@link Quaternion#fromTo(Vector, Vector)}.
    *
@@ -896,7 +896,7 @@ public class Frame {
   /**
    * Rotates the frame so that its {@link #zAxis()} becomes {@code axis} defined in the
    * world coordinate system.
-   * <p>
+   *
    * <b>Attention:</b> this rotation is not uniquely defined. See
    * {@link Quaternion#fromTo(Vector, Vector)}.
    *
@@ -1017,7 +1017,7 @@ public class Frame {
    * {@link #reference()}). Use {@link #worldMatrix()} to get the full Frame
    * transformation matrix (i.e., from the world to the Frame coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
-   * <p>
+   *
    * <b>Attention:</b> In Processing this technique is inefficient because
    * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
    * Use {@link frames.core.Graph#applyTransformation(Frame)} instead.
