@@ -18,6 +18,7 @@ import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Grabber;
 import frames.primitives.*;
+import frames.primitives.constraint.*;
 import frames.timing.SequentialTimer;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -2956,5 +2957,154 @@ public class Scene extends Graph implements PConstants {
       pGraphics.endShape();
     }
     pGraphics.popStyle();
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} having
+   * Semi-axis {@code a} and {@code b} and  {@code height} dimensions.
+   *
+   * {@code a} represents the horizontal semi-axis
+   * {@code b} represents the horizontal semi-axis
+   * @param pGraphics
+   * @param height
+   * @param a
+   * @param b
+   * @param detail
+   */
+  public void drawCone(PGraphics pGraphics, float height, float a, float b, int detail) {
+    float x[] = new float[detail + 1];
+    float y[] = new float[detail + 1];
+
+    for (int i = 0; i <= detail; i++) {
+      float theta = PApplet.TWO_PI * i / detail;
+      float r = a * b / (float) (Math.sqrt(b * b * Math.cos(theta) * Math.cos(theta) + a * a * Math.sin(theta) * Math.sin(theta)));
+      x[i] = r * (float) Math.cos(theta);
+      y[i] = r * (float) Math.sin(theta);
+    }
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (int i = 0; i <= detail; i++) {
+      pGraphics.vertex(x[i], y[i], height);
+    }
+    pGraphics.endShape(PApplet.CLOSE);
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} where
+   * {@code vertices} represents a polygon on XY Plane and with {@code height} as height.
+   *
+   * @param pGraphics
+   * @param height
+   * @param vertices
+   */
+  public void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (Vector v : vertices) {
+      pGraphics.vertex(v.x(), v.y(), height);
+    }
+    if (!vertices.isEmpty()) pGraphics.vertex(vertices.get(0).x(), vertices.get(0).y(), height);
+    pGraphics.endShape();
+  }
+
+  /**
+   * Draws a cone onto {@code pGraphics} centered at {@code (0,0,0)} where
+   * {@code vertices} represents the base of the Polygon and with {@code scale} as maximum height.
+   *
+   * It is desirable that each point in {@code vertices} lie inside the unit Sphere
+   * @param pGraphics
+   * @param vertices
+   * @param scale
+   */
+  public void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0, 0, 0);
+    for (Vector v : vertices) {
+      pGraphics.vertex(scale * v.x(), scale * v.y(), scale * v.z());
+    }
+    if (!vertices.isEmpty())
+      pGraphics.vertex(scale * vertices.get(0).x(), scale * vertices.get(0).y(), scale * vertices.get(0).z());
+    pGraphics.endShape();
+  }
+
+  /**
+   * Draws an Arc onto {@code pGraphics} centered at {@code (0,0)} on the XY Plane
+   * {@code minAngle} and {@code maxAngle} represents the Arc's width.
+   *
+   * @param pGraphics
+   * @param radius
+   * @param minAngle
+   * @param maxAngle
+   * @param detail
+   */
+  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail){
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    pGraphics.vertex(0,0,0);
+    float step = (maxAngle - minAngle)/detail;
+    for(float theta = minAngle; theta <= maxAngle; theta += step) {
+      pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
+    }
+    pGraphics.endShape(PApplet.CLOSE);
+  }
+
+  public void drawConstraint(Node node) {
+    drawConstraint(frontBuffer(), node);
+  }
+
+  public void drawConstraint(PGraphics pGraphics, Node node){
+    if(node.constraint() == null) return;
+    float boneLength = 0;
+    if(!node.children().isEmpty()){
+      for(Node child : node.children()) {
+        boneLength += child.translation().magnitude();
+      }
+      boneLength = boneLength/(1.f*node.children().size());
+    }else{
+      boneLength = node.translation().magnitude();
+    }
+    if(boneLength == 0) return;
+
+    pGraphics.pushMatrix();
+    pGraphics.pushStyle();
+    pGraphics.noStroke();
+    //TODO: use different colors
+    pGraphics.fill(246, 117, 19, 80);
+    Frame reference = new Frame(new Vector(), node.rotation().inverse());
+    //TODO: Check implementation for non symmetric semi-axes
+    if (node.constraint() instanceof BallAndSocket) {
+      BallAndSocket constraint = (BallAndSocket) node.constraint();
+      reference.rotate(constraint.restRotation());
+      applyTransformation(reference);
+      drawAxes(5);
+      drawCone(pGraphics, boneLength / 2.f,
+              (boneLength / 2.f) * PApplet.tan(constraint.left()),
+              (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
+    } else if (node.constraint() instanceof PlanarPolygon) {
+      reference.rotate(((PlanarPolygon) node.constraint()).restRotation());
+      applyTransformation(reference);
+      drawAxes(5);
+      drawCone(pGraphics, ((PlanarPolygon) node.constraint()).height(), ((PlanarPolygon) node.constraint()).vertices());
+    } else if (node.constraint() instanceof SphericalPolygon) {
+      reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
+      applyTransformation(reference);
+      drawAxes(5);
+      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
+    } else if (node.constraint() instanceof Hinge) {
+      Hinge constraint = (Hinge) node.constraint();
+      if(node.children().size() == 1){
+        Vector axis = constraint.restRotation().rotate(constraint.axis());
+        reference.rotate(constraint.restRotation());
+        Vector rest = Vector.projectVectorOnPlane(node.rotation().inverse().rotate(node.children().get(0).translation()), axis);
+        //Align Z-Axis with Axis
+        reference.rotate(new Quaternion(new Vector(0,0,1), axis));
+        //Align X-Axis with rest Axis
+        reference.rotate(new Quaternion(new Vector(1,0,0), reference.rotation().inverse().rotate(rest)));
+        applyTransformation(reference);
+        drawAxes(5);
+        drawArc(pGraphics, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
+      }
+    }
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
   }
 }

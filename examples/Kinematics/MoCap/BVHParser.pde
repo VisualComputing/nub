@@ -1,10 +1,3 @@
-package ik.mocap;
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import processing.core.PApplet;
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -28,12 +21,10 @@ public class BVHParser {
     protected HashMap<Node, Properties> _joint;
     protected int _frames;
     protected int _period;
-    protected Class< ? extends  Node> _nodeClass;
     protected Node _root;
     protected List<Node> _branch;
 
-    public BVHParser(Class<? extends Node> nodeClass){
-        _nodeClass = nodeClass;
+    public BVHParser(){
         _init();
     }
 
@@ -58,7 +49,7 @@ public class BVHParser {
     protected void _init(){
         _frames = 0;
         _period = 0;
-        _joint = new HashMap<>();
+        _joint = new HashMap<Node, Properties>();
     }
 
     /**
@@ -118,17 +109,7 @@ public class BVHParser {
                     return root;
                 }
                 //Create a node
-                try {
-                    root = _nodeClass.getConstructor(Scene.class).newInstance(scene);
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+                root = new Joint(scene);
                 root.setReference(reference);
                 currentNode = root;
                 currentRoot = root;
@@ -147,17 +128,7 @@ public class BVHParser {
                     currentProperties.addChannelType(expression[i+2]);
             } else if(expression[0].equals("JOINT")) {
                 //Create a node
-                try {
-                    currentNode = _nodeClass.getConstructor(Scene.class).newInstance(scene);
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }
+                currentNode = new Joint(scene);
                 currentNode.setReference(currentRoot);
                 currentRoot = currentNode;
                 currentProperties = new Properties(expression[1]);
@@ -257,4 +228,3 @@ public class BVHParser {
         }
     }
 }
-

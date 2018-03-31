@@ -143,11 +143,11 @@ public class TreeSolver extends FABRIKSolver {
     //Execute Until the distance between the end effector and the target is below a threshold
     if (solver.target() == null) {
       treeNode._modified = false;
-      return 0;
+      return chains;
     }
     if (Vector.distance(solver.endEffector().position(), solver.target().position()) <= error) {
       treeNode._modified = false;
-      return 0;
+      return chains;
     }
     solver._positions().set(solver.chain().size() - 1, solver._target.position().get());
     solver._forwardReaching();
@@ -213,6 +213,7 @@ public class TreeSolver extends FABRIKSolver {
   protected boolean _iterate() {
     int modifiedChains = _forwardReaching(root);
     float change = _backwardReaching(root);
+    change = modifiedChains > 0 ? change/(modifiedChains*1.f) : change;
     //Check total position change
     if (change / (modifiedChains * 1.) <= minDistance) return true;
     return false;

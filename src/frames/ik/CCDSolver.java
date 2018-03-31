@@ -101,7 +101,7 @@ public class CCDSolver extends Solver {
     } else if (_previousTarget == null) {
       return true;
     }
-    return !(_previousTarget.position().equals(_target.position()) && _previousTarget.orientation().equals(_target.orientation()));
+    return !(_previousTarget.position().matches(_target.position()) && _previousTarget.orientation().matches(_target.orientation()));
   }
 
   @Override

@@ -53,6 +53,7 @@ public class Viewer extends PApplet {
 
         parser = new BVHParser(Joint.class);
         root = parser.readHeader(sketchPath() + path, scene, null);
+        ((Joint) root).setRoot(true);
         //make a copy of the skeleton
         rootIK = (Joint) copy(scene.branch(root));
         //rootIK.translate(50, 50, 50);
@@ -77,7 +78,7 @@ public class Viewer extends PApplet {
         }
         if(read){
             parser.readNextFrame();
-            //updateTargets();
+            updateTargets();
         }
     }
 
@@ -97,9 +98,10 @@ public class Viewer extends PApplet {
             for (Node child : joint.children()) {
                 if(joint.children().size() > 1) {
                     //add a new joint per child
-                    Joint dummy = new Joint(scene);
+                    Node dummy = new Node(scene);
                     dummy.setReference(newJoint);
                     dummy.setPosition(newJoint.position());
+                    scene.inputHandler().removeGrabber(dummy);
                     copy.add(dummy);
                     map.put(child, dummy);
                 }else{
@@ -128,12 +130,12 @@ public class Viewer extends PApplet {
                 targets.get("HEAD").setPosition(newJoint.position());
             }
         }
+        ((Joint) copy.get(0)).setRoot(true);
         return copy.get(0);
     }
 
     public void updateTargets() {
         rootIK.setPosition(root.position());
-        rootIK.setOrientation(root.orientation());
         for (Map.Entry<String, Node> entry : originalLimbs.entrySet()) {
             targets.get(entry.getKey()).setPosition(entry.getValue().position());
        }
