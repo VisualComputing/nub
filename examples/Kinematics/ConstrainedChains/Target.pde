@@ -10,12 +10,13 @@
  * Feel free to copy paste it.
  */
 
-public class Target extends OrbitShape  {
+public class Target extends OrbitShape {
   public Target(Scene scene) {
     super(scene);
   }
 
   /* Draws an Sphere that represents the desired End Effector position. */
+  @Override
   public void set(PGraphics pg) {
     pg.pushStyle();
     pg.noStroke();
@@ -26,6 +27,5 @@ public class Target extends OrbitShape  {
       pg.sphere(5);
     pg.popStyle();
     graph().drawAxes(5);
-
   }
 }

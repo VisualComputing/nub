@@ -25,9 +25,9 @@ Scene scene;
 Node eye;
 String path = "walk-03-sneak-yokoyama.bvh";
 BVHParser parser;
-HashMap<String,Node> originalLimbs = new HashMap<String, Node>();
-HashMap<String,Joint> limbs = new HashMap<String, Joint>();
-HashMap<String,Target> targets = new HashMap<String, Target>();
+HashMap<String, Node> originalLimbs = new HashMap<String, Node>();
+HashMap<String, Joint> limbs = new HashMap<String, Joint>();
+HashMap<String, Target> targets = new HashMap<String, Target>();
 Node root, rootIK;
 
 void setup() {
@@ -36,7 +36,7 @@ void setup() {
   scene = new Scene(this);
   scene.setType(Graph.Type.ORTHOGRAPHIC);
   eye = new OrbitShape(scene);
-  eye.rotate(new Quaternion(new Vector(1,0,0), PI));
+  eye.rotate(new Quaternion(new Vector(1, 0, 0), PI));
   scene.setEye(eye);
   scene.setRadius(200);
   scene.setDefaultGrabber(eye);
@@ -64,9 +64,9 @@ void setup() {
   //6. Tell the scene that a Solver must be register passing as parameter the root of the Skeleton
   /*
     The method registerTreeSolver returns a Solver class that could be used to modify some of its Parameters
-    Here we are setting how many times the solver will be executed per Frame and which is the allowed error
-    between the Target and the End Effector to consider that the solver find a solution
-  */
+   Here we are setting how many times the solver will be executed per Frame and which is the allowed error
+   between the Target and the End Effector to consider that the solver find a solution
+   */
   Solver solver = scene.registerTreeSolver(rootIK);
   solver.timesPerFrame = 100;
   solver.error = 0.05f;
@@ -84,7 +84,7 @@ void draw() {
   //Draw Constraints
   scene.drawAxes();
   scene.traverse();
-  if(read){
+  if (read) {
     parser.readNextFrame();
     updateTargets();
   }
@@ -104,7 +104,7 @@ Node copy(ArrayList<Node> branch) {
     copy.add(newJoint);
     //it's no too efficient but it is just executed once
     for (Node child : joint.children()) {
-      if(joint.children().size() > 1) {
+      if (joint.children().size() > 1) {
         //add a new joint per child
         Node dummy = new Node(scene);
         dummy.setReference(newJoint);
@@ -112,27 +112,27 @@ Node copy(ArrayList<Node> branch) {
         scene.inputHandler().removeGrabber(dummy);
         copy.add(dummy);
         map.put(child, dummy);
-      }else{
+      } else {
         map.put(child, newJoint);
       }
     }
-    if(parser._joint.get(joint)._name.equals("LEFTHAND")){
+    if (parser._joint.get(joint)._name.equals("LEFTHAND")) {
       originalLimbs.put("LEFTHAND", joint);
       limbs.put("LEFTHAND", newJoint);
       targets.get("LEFTHAND").setPosition(newJoint.position());
-    } else if(parser._joint.get(joint)._name.equals("RIGHTHAND")){
+    } else if (parser._joint.get(joint)._name.equals("RIGHTHAND")) {
       originalLimbs.put("RIGHTHAND", joint);
       limbs.put("RIGHTHAND", newJoint);
       targets.get("RIGHTHAND").setPosition(newJoint.position());
-    } else if(parser._joint.get(joint)._name.equals("LEFTFOOT")){
+    } else if (parser._joint.get(joint)._name.equals("LEFTFOOT")) {
       originalLimbs.put("LEFTFOOT", joint);
       limbs.put("LEFTFOOT", newJoint);
       targets.get("LEFTFOOT").setPosition(newJoint.position());
-    } else if(parser._joint.get(joint)._name.equals("RIGHTFOOT")){
+    } else if (parser._joint.get(joint)._name.equals("RIGHTFOOT")) {
       originalLimbs.put("RIGHTFOOT", joint);
       limbs.put("RIGHTFOOT", newJoint);
       targets.get("RIGHTFOOT").setPosition(newJoint.position());
-    } else if(parser._joint.get(joint)._name.equals("HEAD")){
+    } else if (parser._joint.get(joint)._name.equals("HEAD")) {
       originalLimbs.put("HEAD", joint);
       limbs.put("HEAD", newJoint);
       targets.get("HEAD").setPosition(newJoint.position());
@@ -149,6 +149,6 @@ void updateTargets() {
   }
 }
 
-void keyPressed(){
+void keyPressed() {
   read = !read;
 }

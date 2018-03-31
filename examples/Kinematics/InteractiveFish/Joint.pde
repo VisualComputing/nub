@@ -31,13 +31,13 @@ public class Joint extends OrbitShape  {
 
   /* Draws the bone that connects the previous Joint with this Joint
   and the kind of constraint that is used by this Joint. */
+  @Override
   public void set(PGraphics pg) {
     pg.pushStyle();
     pg.fill(colour);
     pg.noStroke();
     if (pg.is2D()) pg.ellipse(0, 0, 3, 3);
     else pg.sphere(3);
-
     if(!root) {
       pg.strokeWeight(5);
       pg.stroke(colour);
@@ -49,9 +49,7 @@ public class Joint extends OrbitShape  {
       }
       pg.popStyle();
     }
-
-    if (constraint() != null) {
+    if (constraint() != null)
       graph().drawConstraint(this);
-    }
   }
 }
