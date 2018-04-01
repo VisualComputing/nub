@@ -19,13 +19,16 @@ PGraphics canvas;
 
 //Choose one of P3D for a 3D scene or P2D.
 String renderer = P3D;
-int w = 1110;
-int h = 1110;
+int w = 1000;
+int h = 1000;
+
+void settings() {
+  size(w, h, renderer);
+}
 
 void setup() {
-  size(1000, 1000, renderer);
   scene = new Scene(this, createGraphics(w, h / 2, renderer));
-  scene.setRadius(1000);
+  scene.setRadius(max(w, h));
 
   models = new OrbitShape[100];
   for (int i = 0; i < models.length; i++) {
