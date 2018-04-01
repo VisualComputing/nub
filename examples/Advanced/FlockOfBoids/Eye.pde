@@ -25,11 +25,8 @@ public class Eye extends Node {
         center();
       else if (event.shortcut().matches(new TapShortcut(RIGHT)))
         align();
-      else if (event.shortcut().matches(new Shortcut(frames.input.Event.CTRL, processing.event.MouseEvent.WHEEL)))
-        if (isEye() && graph().is3D())
-          translateZ(event);
-        else
-          scale(event);
+      else if (event.shortcut().matches(new Shortcut(MouseEvent.WHEEL)))
+        translateZ(event);
     } else {
       if (event.shortcut().matches(new Shortcut(RIGHT)))
         moveBackward(event);

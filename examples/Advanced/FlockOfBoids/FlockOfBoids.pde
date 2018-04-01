@@ -34,11 +34,8 @@ ArrayList<Boid> flock;
 Node avatar;
 boolean animate = true;
 
-void settings() {
-  size(1000, 800, P3D);
-}
-
 void setup() {
+  size(1000, 800, P3D);
   scene = new Scene(this);
   scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
   scene.setAnchor(scene.center());
