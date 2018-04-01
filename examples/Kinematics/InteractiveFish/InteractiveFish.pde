@@ -17,7 +17,7 @@
  */
 
 import frames.core.*;
-import frames.ik.*;
+import frames.kinematics.*;
 import frames.primitives.*;
 import frames.processing.*;
 import frames.primitives.constraint.*;

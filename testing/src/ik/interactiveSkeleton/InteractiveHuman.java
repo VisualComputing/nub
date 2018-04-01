@@ -4,7 +4,7 @@ import common.InteractiveNode;
 import common.InteractiveShape;
 import frames.core.Graph;
 import frames.core.Node;
-import frames.ik.Solver;
+import frames.kinematics.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -228,7 +228,7 @@ public class InteractiveHuman extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveHuman"});
+    PApplet.main(new String[]{"kinematics.interactiveSkeleton.InteractiveHuman"});
   }
 
 }

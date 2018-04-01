@@ -3,7 +3,7 @@ package ik.basic;
 import common.InteractiveNode;
 import frames.core.Graph;
 import frames.core.Node;
-import frames.ik.Solver;
+import frames.kinematics.Solver;
 import frames.primitives.Vector;
 import frames.primitives.constraint.BallAndSocket;
 import frames.primitives.constraint.Hinge;
@@ -157,7 +157,7 @@ public class BasicIK extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"ik.basic.BasicIK"});
+    PApplet.main(new String[]{"kinematics.basic.BasicIK"});
   }
 
 }

@@ -3,7 +3,7 @@ package ik.basic;
 import common.InteractiveNode;
 import frames.core.Graph;
 import frames.core.Node;
-import frames.ik.Solver;
+import frames.kinematics.Solver;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -115,7 +115,7 @@ public class BasicGait extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"ik.basic.BasicGait"});
+    PApplet.main(new String[]{"kinematics.basic.BasicGait"});
   }
 
 }
