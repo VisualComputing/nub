@@ -170,7 +170,7 @@ There are some positions of interest at the Skeleton called End Effectors which 
 
 [Forward Kinematics](https://en.wikipedia.org/wiki/Forward_kinematics#Computer_animation) attempts to obtain the position of an end-effector from some given values for the joint parameters (usually rotation information). This task could be done easily thanks to the scene graph structure provided by Frames.
 
-[Inverse Kinematics](https://en.wikipedia.org/wiki/Inverse_kinematics#Inverse_kinematics_and_3D_animation) or IK for short, on the other hand, is a harder problem that attempts to obtain the joint parameters given the desired pose.
+[Inverse Kinematics](https://en.wikipedia.org/wiki/Inverse_kinematics#Inverse_kinematics_and_3D_animation) on the other hand is a harder problem that attempts to obtain the joint parameters given the desired pose.
 
 This short [video](https://www.youtube.com/watch?v=euFe1S0OltQ) summarizes the difference between this two problems.
 
