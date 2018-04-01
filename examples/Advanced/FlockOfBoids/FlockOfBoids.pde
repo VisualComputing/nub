@@ -1,24 +1,19 @@
 /**
  * Flock of Boids
- * by Jean Pierre Charalambos. 
- * 
- * A more complex example which interactively enables the selection of a frame
- * "avatar" for the camera to follow.
+ * by Jean Pierre Charalambos.
  * 
  * This example displays the famous artificial life program "Boids", developed by
  * Craig Reynolds in 1986 and then adapted to Processing by Matt Wetmore in 2010
- * (https://www.openprocessing.org/sketch/6910#).
- * 
+ * (https://www.openprocessing.org/sketch/6910#), in 'third person' eye mode.
  * Boids under the mouse will be colored blue. If you click on a boid it will be
- * selected as the avatar, useful for the third person camera mode.
- * Click the space bar to switch between the different camera modes.
+ * selected as the scene avatar for the eye to follow it.
  *
- * Press 'm' to toggle (start/stop) animation.
- * Press '+' to decrease the animation period (animation speeds up).
- * Press '-' to increase the animation period (animation speeds down).
+ * Press ' ' to switch between the different eye modes.
+ * Press 'a' to toggle (start/stop) animation.
+ * Press 'p' to print the current frame rate.
+ * Press 't' to shift timers: sequential and parallel.
  * Press 'v' to toggle boids' wall skipping.
- * Press 'f' to toggle the drawing of the frame selection hits.
- * Press 'h' to display the key shortcuts and mouse bindings in the console.
+ * Press 's' to call scene.fitBallInterpolation().
  */
 
 import frames.input.*;
@@ -64,6 +59,7 @@ void draw() {
   ambientLight(128, 128, 128);
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
+  // Calls Node.visit() on all scene nodes.
   scene.traverse();
 }
 

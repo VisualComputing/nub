@@ -18,6 +18,8 @@ class Boid {
     pos = new PVector();
     pos.set(inPos);
     node = new Node(scene) {
+      // Note that within visit() geometry is defined at the
+      // node local coordinate system.
       @Override
       public void visit() {
         if (animate)
@@ -25,6 +27,8 @@ class Boid {
         render();
       }
 
+      // Behaviour: tapping over a boid will select the node as
+      // the eye reference and perform an eye interpolation to it.
       @Override
       public void interact(TapEvent event) {
         if (avatar != this && scene.eye().reference() != this) {
@@ -56,48 +60,6 @@ class Boid {
     flock(bl);
     move();
     checkBounds();
-    //render();
-  }
-
-  // ///-----------behaviors---------------
-  void flock(ArrayList bl) {
-    ali = alignment(bl);
-    coh = cohesion(bl);
-    sep = seperation(bl);
-    acc.add(PVector.mult(ali, 1));
-    acc.add(PVector.mult(coh, 3));
-    acc.add(PVector.mult(sep, 1));
-  }
-
-  void scatter() {
-  }
-
-  // //------------------------------------
-
-  void move() {
-    vel.add(acc); // add acceleration to velocity
-    vel.limit(maxSpeed); // make sure the velocity vector magnitude does not
-    // exceed maxSpeed
-    pos.add(vel); // add velocity to position
-    node.setPosition(new Vector(pos.x, pos.y, pos.z));
-    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-vel.z, vel.x)),
-        new Quaternion(new Vector(0, 0, 1), asin(vel.y / vel.mag()))));
-    acc.mult(0); // reset acceleration
-  }
-
-  void checkBounds() {
-    if (pos.x > flockWidth)
-      pos.x = 0;
-    if (pos.x < 0)
-      pos.x = flockWidth;
-    if (pos.y > flockHeight)
-      pos.y = 0;
-    if (pos.y < 0)
-      pos.y = flockHeight;
-    if (pos.z > flockDepth)
-      pos.z = 0;
-    if (pos.z < 0)
-      pos.z = flockDepth;
   }
 
   void render() {
@@ -137,6 +99,47 @@ class Boid {
     popStyle();
   }
 
+  // ///-----------behaviors---------------
+  void flock(ArrayList bl) {
+    ali = alignment(bl);
+    coh = cohesion(bl);
+    sep = seperation(bl);
+    acc.add(PVector.mult(ali, 1));
+    acc.add(PVector.mult(coh, 3));
+    acc.add(PVector.mult(sep, 1));
+  }
+
+  void scatter() {
+  }
+
+  // //------------------------------------
+
+  void move() {
+    vel.add(acc); // add acceleration to velocity
+    vel.limit(maxSpeed); // make sure the velocity vector magnitude does not
+    // exceed maxSpeed
+    pos.add(vel); // add velocity to position
+    node.setPosition(new Vector(pos.x, pos.y, pos.z));
+    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-vel.z, vel.x)), 
+      new Quaternion(new Vector(0, 0, 1), asin(vel.y / vel.mag()))));
+    acc.mult(0); // reset acceleration
+  }
+
+  void checkBounds() {
+    if (pos.x > flockWidth)
+      pos.x = 0;
+    if (pos.x < 0)
+      pos.x = flockWidth;
+    if (pos.y > flockHeight)
+      pos.y = 0;
+    if (pos.y < 0)
+      pos.y = flockHeight;
+    if (pos.z > flockDepth)
+      pos.z = 0;
+    if (pos.z < 0)
+      pos.z = flockDepth;
+  }
+
   // steering. If arrival==true, the boid slows to meet the target. Credit to
   // Craig Reynolds
   PVector steer(PVector target, boolean arrival) {
@@ -150,8 +153,8 @@ class Boid {
       float distance = targetOffset.mag();
       float rampedSpeed = maxSpeed * (distance / 100);
       float clippedSpeed = min(rampedSpeed, maxSpeed);
-      PVector desiredVelocity = PVector.mult(targetOffset,
-          (clippedSpeed / distance));
+      PVector desiredVelocity = PVector.mult(targetOffset, 
+        (clippedSpeed / distance));
       steer.set(PVector.sub(desiredVelocity, vel));
     }
     return steer;
