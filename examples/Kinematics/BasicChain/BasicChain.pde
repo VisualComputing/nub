@@ -9,7 +9,7 @@
  */
 
 import frames.core.*;
-import frames.kinematics.*;
+import frames.ik.*;
 import frames.primitives.*;
 import frames.processing.*;
 import frames.primitives.constraint.*;

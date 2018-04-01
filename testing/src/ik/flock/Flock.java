@@ -220,6 +220,6 @@ public class Flock extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"kinematics.flock.Flock"});
+    PApplet.main(new String[]{"ik.flock.Flock"});
   }
 }

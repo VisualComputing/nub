@@ -3,7 +3,7 @@ package ik.mocap;
 import common.InteractiveNode;
 import frames.core.Graph;
 import frames.core.Node;
-import frames.kinematics.Solver;
+import frames.ik.Solver;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
@@ -145,7 +145,7 @@ public class Viewer extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"kinematics.mocap.Viewer"});
+    PApplet.main(new String[]{"ik.mocap.Viewer"});
   }
 
 }

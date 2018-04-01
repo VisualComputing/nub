@@ -174,6 +174,6 @@ public class InteractiveFish extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"kinematics.interactiveSkeleton.InteractiveFish"});
+    PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveFish"});
   }
 }

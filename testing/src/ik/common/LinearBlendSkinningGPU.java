@@ -30,8 +30,8 @@ public class LinearBlendSkinningGPU {
   }
 
   public void setSkinning(PApplet applet, Scene scene) {
-    shader = applet.loadShader(applet.sketchPath() + "/testing/src/kinematics/common/frag.glsl",
-        applet.sketchPath() + "/testing/src/kinematics/common/skinning.glsl");
+    shader = applet.loadShader(applet.sketchPath() + "/testing/src/ik/common/frag.glsl",
+        applet.sketchPath() + "/testing/src/ik/common/skinning.glsl");
     int i = 0, j = 0;
     for (Node node : skeleton) {
       Vector position;

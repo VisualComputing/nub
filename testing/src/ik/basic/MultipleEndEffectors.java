@@ -3,7 +3,7 @@ package ik.basic;
 import common.InteractiveNode;
 import frames.core.Graph;
 import frames.core.Node;
-import frames.kinematics.Solver;
+import frames.ik.Solver;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
@@ -78,7 +78,7 @@ public class MultipleEndEffectors extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"kinematics.basic.MultipleEndEffectors"});
+    PApplet.main(new String[]{"ik.basic.MultipleEndEffectors"});
   }
 
 }

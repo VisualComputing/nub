@@ -10,8 +10,8 @@
 
 package frames.core;
 
-import frames.kinematics.Solver;
-import frames.kinematics.TreeSolver;
+import frames.ik.Solver;
+import frames.ik.TreeSolver;
 import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Grabber;
@@ -2620,7 +2620,7 @@ public class Graph {
     return _lastNonEyeUpdate;
   }
 
-  //TODO: high-level kinematics api handling
+  //TODO: high-level ik api handling
 
   /**
    * Return registered solvers

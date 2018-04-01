@@ -116,6 +116,6 @@ public class InteractiveSkeleton extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"kinematics.interactiveSkeleton.InteractiveSkeleton"});
+    PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveSkeleton"});
   }
 }
