@@ -17,7 +17,7 @@ Scene scene;
 OrbitShape[] models;
 PGraphics canvas;
 
-//Choose one of P3D for a 3D scene or P2D.
+//Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
 int w = 1000;
 int h = 1000;
@@ -27,13 +27,14 @@ void settings() {
 }
 
 void setup() {
+  rectMode(CENTER);
   scene = new Scene(this, createGraphics(w, h / 2, renderer));
   scene.setRadius(max(w, h));
 
   models = new OrbitShape[100];
   for (int i = 0; i < models.length; i++) {
     models[i] = new OrbitShape(scene);
-    models[i].set(boxShape());
+    models[i].set(caja());
     models[i].randomize();
   }
   OrbitShape eye = new OrbitShape(scene);
@@ -54,8 +55,10 @@ void draw() {
   image(scene.backBuffer(), 0, h / 2);
 }
 
-PShape boxShape() {
-  PShape box = createShape(BOX, 60);
-  box.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
-  return box;
+PShape caja() {
+  PShape caja = scene.is3D() ? createShape(BOX, random(60, 100)) : createShape(RECT, 0, 0, random(60, 100), random(60, 100));
+  caja.setStrokeWeight(3);
+  caja.setStroke(color(random(0, 255), random(0, 255), random(0, 255)));
+  caja.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
+  return caja;
 }
