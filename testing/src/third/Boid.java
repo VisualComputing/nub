@@ -74,20 +74,63 @@ class Boid {
     flock(bl);
     move();
     checkBounds();
-    //render();
   }
 
   // ///-----------behaviors---------------
-  void flock(ArrayList<Boid> bl) {
-    ali = alignment(bl);
-    coh = cohesion(bl);
-    sep = seperation(bl);
+  void flock(ArrayList<Boid> boids) {
+    //ali = alignment(boids);
+    //coh = cohesion(boids);
+    //sep = seperation(boids);
+
+    // alignment
+    ali = new Vector(0, 0, 0);
+    int count = 0;
+    for (int i = 0; i < boids.size(); i++) {
+      Boid b = boids.get(i);
+      float d = Vector.distance(pos, b.pos);
+      if (d > 0 && d <= neighborhoodRadius) {
+        ali.add(b.vel);
+        count++;
+      }
+    }
+    if (count > 0) {
+      ali.divide((float) count);
+      ali.limit(maxSteerForce);
+    }
+
+    // cohesion
+    Vector posSum = new Vector();
+    count = 0;
+    for (int i = 0; i < boids.size(); i++) {
+      Boid b = boids.get(i);
+      float d = PApplet.dist(pos.x(), pos.y(), b.pos.x(), b.pos.y());
+      if (d > 0 && d <= neighborhoodRadius) {
+        posSum.add(b.pos);
+        count++;
+      }
+    }
+    if (count > 0)
+      posSum.divide((float) count);
+    coh = Vector.subtract(posSum, pos);
+    coh.limit(maxSteerForce);
+
+    //separation
+    sep = new Vector(0, 0, 0);
+    Vector repulse;
+    for (int i = 0; i < boids.size(); i++) {
+      Boid b = boids.get(i);
+      float d = Vector.distance(pos, b.pos);
+      if (d > 0 && d <= neighborhoodRadius) {
+        repulse = Vector.subtract(pos, b.pos);
+        repulse.normalize();
+        repulse.divide(d);
+        sep.add(repulse);
+      }
+    }
+
     acc.add(Vector.multiply(ali, 1));
     acc.add(Vector.multiply(coh, 3));
     acc.add(Vector.multiply(sep, 1));
-  }
-
-  void scatter() {
   }
 
   // //------------------------------------
@@ -154,29 +197,6 @@ class Boid {
     pApplet.popStyle();
   }
 
-  // steering. If arrival==true, the boid slows to meet the target. Credit to
-  // Craig Reynolds
-  Vector steer(Vector target, boolean arrival) {
-    Vector steer = new Vector(); // creates vector for steering
-    if (!arrival) {
-      steer.set(Vector.subtract(target, pos)); // steering vector points
-      // towards target (switch
-      // target and pos for
-      // avoiding)
-      steer.limit(maxSteerForce); // limits the steering force to
-      // maxSteerForce
-    } else {
-      Vector targetOffset = Vector.subtract(target, pos);
-      float distance = targetOffset.magnitude();
-      float rampedSpeed = maxSpeed * (distance / 100);
-      float clippedSpeed = PApplet.min(rampedSpeed, maxSpeed);
-      Vector desiredVelocity = Vector.multiply(targetOffset,
-          (clippedSpeed / distance));
-      steer.set(Vector.subtract(desiredVelocity, vel));
-    }
-    return steer;
-  }
-
   // avoid. If weight == true avoidance vector is larger the closer the boid
   // is to the target
   Vector avoid(Vector target, boolean weight) {
@@ -187,59 +207,6 @@ class Boid {
       steer.multiply(1 / PApplet.sq(Vector.distance(pos, target)));
     // steer.limit(maxSteerForce); //limits the steering force to
     // maxSteerForce
-    return steer;
-  }
-
-  Vector seperation(ArrayList<Boid> boids) {
-    Vector posSum = new Vector(0, 0, 0);
-    Vector repulse;
-    for (int i = 0; i < boids.size(); i++) {
-      Boid b = boids.get(i);
-      float d = Vector.distance(pos, b.pos);
-      if (d > 0 && d <= neighborhoodRadius) {
-        repulse = Vector.subtract(pos, b.pos);
-        repulse.normalize();
-        repulse.divide(d);
-        posSum.add(repulse);
-      }
-    }
-    return posSum;
-  }
-
-  Vector alignment(ArrayList<Boid> boids) {
-    Vector velSum = new Vector(0, 0, 0);
-    int count = 0;
-    for (int i = 0; i < boids.size(); i++) {
-      Boid b = boids.get(i);
-      float d = Vector.distance(pos, b.pos);
-      if (d > 0 && d <= neighborhoodRadius) {
-        velSum.add(b.vel);
-        count++;
-      }
-    }
-    if (count > 0) {
-      velSum.divide((float) count);
-      velSum.limit(maxSteerForce);
-    }
-    return velSum;
-  }
-
-  Vector cohesion(ArrayList<Boid> boids) {
-    Vector posSum = new Vector();
-    Vector steer;
-    int count = 0;
-    for (int i = 0; i < boids.size(); i++) {
-      Boid b = boids.get(i);
-      float d = PApplet.dist(pos.x(), pos.y(), b.pos.x(), b.pos.y());
-      if (d > 0 && d <= neighborhoodRadius) {
-        posSum.add(b.pos);
-        count++;
-      }
-    }
-    if (count > 0)
-      posSum.divide((float) count);
-    steer = Vector.subtract(posSum, pos);
-    steer.limit(maxSteerForce);
     return steer;
   }
 }
