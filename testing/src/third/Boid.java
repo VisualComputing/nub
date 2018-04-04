@@ -97,7 +97,7 @@ class Boid {
     vel.limit(maxSpeed); // make sure the velocity vector magnitude does not
     // exceed maxSpeed
     pos.add(vel); // add velocity to position
-    node.setPosition(new Vector(pos.x(), pos.y(), pos.z()));
+    node.setPosition(pos);
     node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z(), vel.x())),
         new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y() / vel.magnitude()))));
     acc.multiply(0); // reset acceleration
