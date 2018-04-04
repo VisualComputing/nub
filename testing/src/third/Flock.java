@@ -5,7 +5,6 @@ import frames.core.Node;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PVector;
 
 import java.util.ArrayList;
 
@@ -43,7 +42,7 @@ public class Flock extends PApplet {
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
-      flock.add(new Boid(scene, new PVector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+      flock.add(new Boid(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
   }
 
   public void draw() {
