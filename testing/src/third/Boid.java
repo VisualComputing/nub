@@ -58,7 +58,7 @@ class Boid {
     neighborhoodRadius = 100;
   }
 
-  public void run(ArrayList bl) {
+  public void run(ArrayList<Boid> bl) {
     t += .1;
     flap = 10 * PApplet.sin(t);
     // acc.add(steer(new Vector(mouseX,mouseY,300),true));
@@ -78,7 +78,7 @@ class Boid {
   }
 
   // ///-----------behaviors---------------
-  void flock(ArrayList bl) {
+  void flock(ArrayList<Boid> bl) {
     ali = alignment(bl);
     coh = cohesion(bl);
     sep = seperation(bl);
@@ -190,11 +190,11 @@ class Boid {
     return steer;
   }
 
-  Vector seperation(ArrayList boids) {
+  Vector seperation(ArrayList<Boid> boids) {
     Vector posSum = new Vector(0, 0, 0);
     Vector repulse;
     for (int i = 0; i < boids.size(); i++) {
-      Boid b = (Boid) boids.get(i);
+      Boid b = boids.get(i);
       float d = Vector.distance(pos, b.pos);
       if (d > 0 && d <= neighborhoodRadius) {
         repulse = Vector.subtract(pos, b.pos);
@@ -206,11 +206,11 @@ class Boid {
     return posSum;
   }
 
-  Vector alignment(ArrayList boids) {
+  Vector alignment(ArrayList<Boid> boids) {
     Vector velSum = new Vector(0, 0, 0);
     int count = 0;
     for (int i = 0; i < boids.size(); i++) {
-      Boid b = (Boid) boids.get(i);
+      Boid b = boids.get(i);
       float d = Vector.distance(pos, b.pos);
       if (d > 0 && d <= neighborhoodRadius) {
         velSum.add(b.vel);
@@ -224,12 +224,12 @@ class Boid {
     return velSum;
   }
 
-  Vector cohesion(ArrayList boids) {
-    Vector posSum = new Vector(0, 0, 0);
-    Vector steer = new Vector(0, 0, 0);
+  Vector cohesion(ArrayList<Boid> boids) {
+    Vector posSum = new Vector();
+    Vector steer;
     int count = 0;
     for (int i = 0; i < boids.size(); i++) {
-      Boid b = (Boid) boids.get(i);
+      Boid b = boids.get(i);
       float d = PApplet.dist(pos.x(), pos.y(), b.pos.x(), b.pos.y());
       if (d > 0 && d <= neighborhoodRadius) {
         posSum.add(b.pos);
