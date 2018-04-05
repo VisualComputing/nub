@@ -38,17 +38,15 @@ class Boid {
         }
       }
     };
-    node.setPosition(new Vector(position.x(), position.y(), position.z()));
+    node.setPosition(position);
     velocity = new Vector(random(-1, 1), random(-1, 1), random(1, -1));
-    acceleration = new Vector(0, 0, 0);
+    acceleration = new Vector();
     neighborhoodRadius = 100;
   }
 
-  public void run(ArrayList<Boid> boids) {
+  void run(ArrayList<Boid> boids) {
     t += .1;
     flap = 10 * sin(t);
-    // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
-    // acceleration.add(new Vector(0,.05,0));
     if (avoidWalls) {
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), flockHeight, position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), 0, position.z())), 5));
@@ -73,13 +71,13 @@ class Boid {
 
   void flock(ArrayList<Boid> boids) {
     //alignment
-    alignment = new Vector(0, 0, 0);
+    alignment = new Vector();
     int alignmentCount = 0;
     //cohesion
     Vector posSum = new Vector();
     int cohesionCount = 0;
     //separation
-    separation = new Vector(0, 0, 0);
+    separation = new Vector();
     Vector repulse;
     for (int i = 0; i < boids.size(); i++) {
       Boid boid = boids.get(i);
@@ -178,6 +176,7 @@ class Boid {
 
     // highlight avatar
     if (node == avatar) {
+      kind = TRIANGLES;
       noStroke();
       fill(avatarColor);
     }

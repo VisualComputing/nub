@@ -11,8 +11,7 @@
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
  * Press 'p' to print the current frame rate.
- * Press 'm' to change the mesh visual mode.
- * Press 't' to shift timers: sequential and parallel.
+ * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
  * Press 's' to call scene.fitBallInterpolation().
  */
@@ -59,7 +58,7 @@ void setup() {
 }
 
 void draw() {
-  background(0);
+  background(color(10,50,25));
   ambientLight(128, 128, 128);
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
@@ -97,9 +96,6 @@ void keyPressed() {
   case 's':
     if (scene.eye().reference() == null)
       scene.fitBallInterpolation();
-    break;
-  case 't':
-    scene.shiftTimers();
     break;
   case 'p':
     println("Frame rate: " + frameRate);

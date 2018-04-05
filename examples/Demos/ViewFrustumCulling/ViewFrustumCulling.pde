@@ -8,6 +8,8 @@
  * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
  * A second viewer displays an external view of the scene that exhibits the clipping
  * (using scene.drawEye(Scene otherScene) to display the frustum).
+ *
+ * Press any key to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
 
 import frames.input.*;
@@ -19,13 +21,14 @@ OctreeNode root;
 Scene scene, auxScene;
 PGraphics canvas, auxCanvas;
 
-//Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-String renderer = P3D;
-int w = 1110;
-int h = 1110;
+int w = 1000;
+int h = 1000;
+
+void settings() {
+  size(w, h, P3D);
+}
 
 void setup() {
-  size(1000, 1000, renderer);
   // declare and build the octree hierarchy
   Vector p = new Vector(100, 70, 130);
   root = new OctreeNode(p, Vector.multiply(p, -1.0f));
@@ -49,7 +52,7 @@ void setup() {
   OrbitShape auxEye = new OrbitShape(auxScene);
   auxScene.setEye(auxEye);
   auxScene.setDefaultGrabber(auxEye);
-  auxScene.setRadius(200);
+  auxScene.setRadius(250);
   scene.setFieldOfView(PI / 3);
   auxScene.fitBall();
 }
@@ -72,4 +75,8 @@ void draw() {
   auxScene.frontBuffer().popStyle();
   auxScene.endDraw();
   auxScene.display();
+}
+
+void keyPressed() {
+  scene.setType(scene.type() == Graph.Type.PERSPECTIVE ? Graph.Type.ORTHOGRAPHIC : Graph.Type.PERSPECTIVE);
 }
