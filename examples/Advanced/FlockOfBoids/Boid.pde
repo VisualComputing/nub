@@ -3,7 +3,7 @@ class Boid {
   int grabsMouseColor;
   int avatarColor;
   // fields
-  Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
+  Vector position, velocity, acceleration, alignment, cohesion, separation;
   // a vector datatype
   float neighborhoodRadius; // radius in which it looks for fellow boids
   float maxSpeed = 4; // maximum magnitude for the velocity vector
