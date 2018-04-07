@@ -30,12 +30,14 @@ class Boid {
       // Behaviour: tapping over a boid will select the node as
       // the eye reference and perform an eye interpolation to it.
       @Override
-      public void interact(TapEvent event) {
-        if (avatar != this && scene.eye().reference() != this) {
-          avatar = this;
-          scene.eye().setReference(this);
-          scene.interpolateTo(this);
-        }
+      public void interact(frames.input.Event event) {
+        // the event shortcut type tell us about the event type itself:
+        if(event.shortcut() instanceof TapShortcut)
+          if (avatar != this && scene.eye().reference() != this) {
+            avatar = this;
+            scene.eye().setReference(this);
+            scene.interpolateTo(this);
+          }
       }
     };
     node.setPosition(position);

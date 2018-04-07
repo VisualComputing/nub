@@ -134,6 +134,6 @@ public class BasicUse extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.BasicUse"});
+    PApplet.main(new String[]{"basics.SubTyping"});
   }
 }
