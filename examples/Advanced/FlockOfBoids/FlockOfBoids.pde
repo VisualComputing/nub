@@ -2,11 +2,17 @@
  * Flock of Boids
  * by Jean Pierre Charalambos.
  * 
- * This example displays the 2D famous artificial life program "Boids", developed by
- * Craig Reynolds in 1986 and then adapted to Processing in 3D by Matt Wetmore in
+ * This example displays the famous artificial life program "Boids", developed by
+ * Craig Reynolds in 1986 [1] and then adapted to Processing by Matt Wetmore in
  * 2010 (https://www.openprocessing.org/sketch/6910#), in 'third person' eye mode.
  * Boids under the mouse will be colored blue. If you click on a boid it will be
  * selected as the scene avatar for the eye to follow it.
+ * 
+ * 1. Reynolds, C. W. Flocks, Herds and Schools: A Distributed Behavioral Model. 87.
+ * http://www.cs.toronto.edu/~dt/siggraph97-course/cwr87/
+ * 2. Check also this nice presentation about the paper:
+ * https://pdfs.semanticscholar.org/73b1/5c60672971c44ef6304a39af19dc963cd0af.pdf
+ * 3. Google for more...
  *
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
