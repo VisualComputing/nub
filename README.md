@@ -89,7 +89,7 @@ void setup() {
 }
 ```
 
-The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)).
+The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)). Note that the node [interactivity](#user-content-interactivity) itself is programmable.
 
 Observe the anonymous inner [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) class intance which is used to define how the node will behave: actions are bound to the node using the event `Shortcut` attribute which identifies it. For instance `Shortcut(PApplet.LEFT))` tells us the `event` is a `MotionEvent2` mouse left drag (refer to the [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details).
 
