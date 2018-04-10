@@ -135,7 +135,7 @@ import java.util.List;
  * }
  * </pre>
  * <p>
- * Note tha shapes like nodes can be control interactively. Override
+ * Note that shapes like nodes can be control interactively. Override
  * {@link Node#interact(Event)}, like it has been done above.
  * <h2>Key-frame interpolators</h2>
  * A frame (and hence a node or a shape) can be animated through a key-frame
