@@ -3,10 +3,9 @@
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
  * This example illustrates shader chaining which requires drawing the scene
- * frames into an arbitrary PGraphics (see line 116).
+ * frames into an arbitrary PGraphics (see line 111).
  *
- * Press '1' to '9' to (de)activate effect.
- * Press 'h' to display the key shortcuts and mouse bindings in the console.
+ * Press '1' to '8' to (de)activate effect.
  */
 
 import frames.input.*;
