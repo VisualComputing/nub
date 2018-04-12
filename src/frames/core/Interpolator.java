@@ -183,7 +183,7 @@ public class Interpolator {
   protected Graph _graph;
 
   /**
-   * Convenience constructor that simply calls {@code this(graph, new Node(graph))}.
+   * Convenience constructor that simply calls {@code this(graph, new Frame())}.
    * <p>
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * interpolator.
@@ -191,7 +191,7 @@ public class Interpolator {
    * @see #Interpolator(Graph, Frame)
    */
   public Interpolator(Graph graph) {
-    this(graph, new Node(graph));
+    this(graph, new Frame());
   }
 
   public Interpolator(Node node) {

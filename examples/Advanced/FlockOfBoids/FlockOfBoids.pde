@@ -75,7 +75,7 @@ void draw() {
 void walls() {
   pushStyle();
   noFill();
-  stroke(255);
+  stroke(0, 255, 255);
 
   line(0, 0, 0, 0, flockHeight, 0);
   line(0, 0, flockDepth, 0, flockHeight, flockDepth);

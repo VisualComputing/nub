@@ -271,11 +271,25 @@ public class Vector {
   // end new
 
   /**
+   * Set x and y coordinates. The z coordinate is set to 0.
+   *
+   * @param x the x coordinate.
+   * @param y the y coordinate.
+   * @see #set(float, float, float)
+   */
+  public void set(float x, float y) {
+    this._vector[0] = x;
+    this._vector[1] = y;
+    this._vector[2] = 0;
+  }
+
+  /**
    * Set x, y, and z coordinates.
    *
    * @param x the x coordinate.
    * @param y the y coordinate.
    * @param z the z coordinate.
+   * @see #set(float, float)
    */
   public void set(float x, float y, float z) {
     this._vector[0] = x;
