@@ -216,7 +216,6 @@ public class Graph {
     setRadius(100);
     setCenter(new Vector());
     _anchor = center().get();
-    _interpolator = new Interpolator(this);
     setEye(new Frame());
     fitBall();
 
@@ -829,6 +828,33 @@ public class Graph {
   }
 
   /**
+   * Same as {@code inputHandler().addGrabber(grabber)}.
+   *
+   * @see InputHandler#addGrabber(Grabber)
+   */
+  public void addGrabber(Grabber grabber) {
+    inputHandler().addGrabber(grabber);
+  }
+
+  /**
+   * Same as {@code inputHandler().removeGrabbers()}.
+   *
+   * @see InputHandler#removeGrabbers()
+   */
+  public void removeGrabbers() {
+    inputHandler().removeGrabbers();
+  }
+
+  /**
+   * Same as {@code inputHandler().removeGrabber(grabber)}.
+   *
+   * @see InputHandler#removeGrabber(Grabber)
+   */
+  public void removeGrabber(Grabber grabber) {
+    inputHandler().removeGrabber(grabber);
+  }
+
+  /**
    * Same as {@code inputHandler().hasGrabber(grabber)}.
    *
    * @see InputHandler#hasGrabber(Grabber)
@@ -1196,11 +1222,16 @@ public class Graph {
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
-    if (eye instanceof Node)
-      if (((Node) eye).graph() != this)
-        return;
+    // TODO experimental. Should be checked
+    // Note that if (((Node) eye).graph() != this) the interpolator throws an exception
+    //if (eye instanceof Node)
+    //if (((Node) eye).graph() != this)
+    //return;
     _eye = eye;
-    _interpolator.setFrame(eye);
+    if (_interpolator == null)
+      _interpolator = new Interpolator(this, _eye);
+    else
+      _interpolator.setFrame(_eye);
     _modified();
   }
 
