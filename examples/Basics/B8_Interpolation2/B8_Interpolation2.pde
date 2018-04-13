@@ -101,7 +101,7 @@ void keyPressed() {
     if (key == 'a')
       eyeInterpolator.toggle();
     if (key == 'b')
-      eyeInterpolator.clear();
+      eyeInterpolator.purge();
   if (key == 's')
     scene.fitBallInterpolation();
   if (key == CODED)

@@ -2310,7 +2310,7 @@ public class Graph {
    */
   public void interpolateTo(Frame frame, float duration) {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     _interpolator.addKeyFrame(eye().detach());
     _interpolator.addKeyFrame(frame.detach(), duration);
     _interpolator.start();
@@ -2330,7 +2330,7 @@ public class Graph {
    */
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     Frame eye = eye();
     setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
@@ -2350,7 +2350,7 @@ public class Graph {
    */
   public void fitBallInterpolation() {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     Frame eye = eye();
     setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());

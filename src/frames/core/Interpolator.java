@@ -631,8 +631,24 @@ public class Interpolator {
 
   /**
    * Removes all key frames from the path. The {@link #size()} is set to 0.
+   *
+   * @see #purge()
    */
   public void clear() {
+    stop();
+    _list.clear();
+    _pathIsValid = false;
+    _valuesAreValid = false;
+    _currentFrameValid = false;
+  }
+
+  /**
+   * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
+   *
+   * @see #clear()
+   * @see frames.core.Graph#pruneBranch(Node)
+   */
+  public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {

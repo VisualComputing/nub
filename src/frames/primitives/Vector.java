@@ -278,9 +278,7 @@ public class Vector {
    * @see #set(float, float, float)
    */
   public void set(float x, float y) {
-    this._vector[0] = x;
-    this._vector[1] = y;
-    this._vector[2] = 0;
+    set(x, y, 0);
   }
 
   /**
