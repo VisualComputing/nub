@@ -1620,8 +1620,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      if (frame instanceof Node)
-        drawPickingTarget((Node) frame);
+      drawPickingTarget(frame);
     frontBuffer().popStyle();
   }
 
@@ -2814,19 +2813,36 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * If frame {@code instanceof} {@link frames.core.Node} calls {@link #drawPickingTarget(Node)} otherwise
+   * calls {@code drawPickingTarget(frame, radius()/5)}.
+   *
+   * @see #drawPickingTarget(Node)
+   * @see #drawPickingTarget(Frame, float)
+   */
+  public void drawPickingTarget(Frame frame) {
+    if (frame instanceof Node)
+      drawPickingTarget((Node) frame);
+    else
+      drawPickingTarget(frame, radius() / 5);
+  }
+
+  /**
+   * {@link #drawShooterTarget(Vector, float)} at the frame origin and {@code size} pixels.
+   */
+  public void drawPickingTarget(Frame frame, float size) {
+    Vector center = projectedCoordinatesOf(frame.position());
+    drawShooterTarget(center, size);
+  }
+
+  /**
    * Draws the node picking target: a shooter target visual hint of
    * {@link Node#precisionThreshold()} pixels size.
    */
-  //TODO better to implement it from Frame param, but I'm just too lazy to do that ;)
   public void drawPickingTarget(Node node) {
     if (node.isEye()) {
       System.err.println("eye nodes don't have a picking target");
       return;
     }
-    // if (!inputHandler().hasGrabber(iFrame)) {
-    // System.err.println("addGrabber iFrame to motionAgent before drawing picking target");
-    // return;
-    // }
     Vector center = projectedCoordinatesOf(node.position());
     if (inputHandler().isInputGrabber(node)) {
       frontBuffer().pushStyle();
