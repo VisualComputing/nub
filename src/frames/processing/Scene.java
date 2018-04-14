@@ -1621,7 +1621,7 @@ public class Scene extends Graph implements PConstants {
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
       if (frame instanceof Node)
-        drawPickingTarget((Node) frame);
+        drawShooterTarget(frame);
       else
         drawCross(frame);
     frontBuffer().popStyle();
@@ -2651,23 +2651,36 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawCross(frame, radius() / 5)}.
+   * {@link #drawCross(float, float, float)} centered at the projected frame origin.
+   * If frame is a Node instance the length of the cross is the node
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * a stroke highlight.
    *
-   * @see #drawCross(Frame, float)
+   * @see #drawShooterTarget(Frame, float)
    */
   public void drawCross(Frame frame) {
-    drawCross(frame, radius() / 5);
+    frontBuffer().pushStyle();
+    if (frame instanceof Node)
+      if (isInputGrabber((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    frontBuffer().popStyle();
   }
 
   /**
    * {@link #drawCross(float, float, float)} centered at the projected frame origin, having
-   * {@code size} pixels.
+   * {@code length} pixels.
    *
    * @see #drawCross(float, float, float)
    */
-  public void drawCross(Frame frame, float size) {
+  public void drawCross(Frame frame, float length) {
+    if (eye() == frame) {
+      System.err.println("eye frames don't have an screen target");
+      return;
+    }
     Vector center = projectedCoordinatesOf(frame.position());
-    drawCross(center.x(), center.y(), size);
+    drawCross(center.x(), center.y(), length);
   }
 
   /**
@@ -2680,20 +2693,20 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawCross(frontBuffer(), x, y, size)}.
+   * Same as {@code drawCross(frontBuffer(), x, y, length)}.
    *
    * @see #drawCross(PGraphics, float, float, float)
    */
-  public void drawCross(float x, float y, float size) {
-    drawCross(frontBuffer(), x, y, size);
+  public void drawCross(float x, float y, float length) {
+    drawCross(frontBuffer(), x, y, length);
   }
 
   /**
    * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
-   * {@code size} onto {@code pGraphics}.
+   * {@code length} onto {@code pGraphics}.
    */
-  public void drawCross(PGraphics pGraphics, float x, float y, float size) {
-    float half_size = size / 2f;
+  public void drawCross(PGraphics pGraphics, float x, float y, float length) {
+    float half_size = length / 2f;
     pGraphics.pushStyle();
     beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
@@ -2708,101 +2721,55 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
+   * Use {@link #drawShooterTarget(Frame)} instead.
    *
-   * @see #drawFilledCircle(int, Vector, float)
+   * @deprecated Please refrain from using this method, it will be removed from future releases.
    */
-  public void drawFilledCircle(Vector center, float radius) {
-    drawFilledCircle(40, center, radius);
+  @Deprecated
+  public void drawPickingTarget(Frame frame) {
+    drawShooterTarget(frame);
   }
 
   /**
-   * Same as {@code drawFilledCircle(frontBuffer(), subdivisions, center, radius)}.
+   * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
+   * If frame is a Node instance the length of the target is the node
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * a stroke highlight.
    *
-   * @see #drawFilledCircle(PGraphics, int, Vector, float)
-   */
-  public void drawFilledCircle(int subdivisions, Vector center, float radius) {
-    drawFilledCircle(frontBuffer(), subdivisions, center, radius);
-  }
-
-  /**
-   * Draws a filled circle onto {@code pGraphics} using screen coordinates.
-   *
-   * @param subdivisions Number of triangles approximating the circle.
-   * @param center       Circle screen center.
-   * @param radius       Circle screen radius.
-   */
-  public void drawFilledCircle(PGraphics pGraphics, int subdivisions, Vector center, float radius) {
-    pGraphics.pushStyle();
-    float precision = PApplet.TWO_PI / subdivisions;
-    float x = center.x();
-    float y = center.y();
-    float angle, x2, y2;
-    beginScreenCoordinates(pGraphics);
-    pGraphics.noStroke();
-    pGraphics.beginShape(TRIANGLE_FAN);
-    vertex(pGraphics, x, y);
-    for (angle = 0.0f; angle <= PApplet.TWO_PI + 1.1 * precision; angle += precision) {
-      x2 = x + PApplet.sin(angle) * radius;
-      y2 = y + PApplet.cos(angle) * radius;
-      vertex(pGraphics, x2, y2);
-    }
-    pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
-    pGraphics.popStyle();
-  }
-
-  /**
-   * Same as {@code drawFilledSquare(frontBuffer(), center, edge)}.
-   *
-   * @see #drawFilledSquare(PGraphics, Vector, float)
-   */
-  public void drawFilledSquare(Vector center, float edge) {
-    drawFilledSquare(frontBuffer(), center, edge);
-  }
-
-  /**
-   * Draws a filled square onto {@code pGraphics} using screen coordinates.
-   *
-   * @param center Square screen center.
-   * @param edge   Square edge length.
-   */
-  public void drawFilledSquare(PGraphics pGraphics, Vector center, float edge) {
-    float half_edge = edge / 2f;
-    pGraphics.pushStyle();
-    float x = center.x();
-    float y = center.y();
-    beginScreenCoordinates(pGraphics);
-    pGraphics.noStroke();
-    pGraphics.beginShape(QUADS);
-    vertex(pGraphics, x - half_edge, y + half_edge);
-    vertex(pGraphics, x + half_edge, y + half_edge);
-    vertex(pGraphics, x + half_edge, y - half_edge);
-    vertex(pGraphics, x - half_edge, y - half_edge);
-    pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
-    pGraphics.popStyle();
-  }
-
-  /**
-   * Same as {@code drawShooterTarget(frame, radius() / 5)}.
-   *
-   * @see #drawPickingTarget(Node)
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawShooterTarget(Frame frame) {
-    drawShooterTarget(frame, radius() / 5);
+    frontBuffer().pushStyle();
+    if (frame instanceof Node)
+      if (isInputGrabber((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    frontBuffer().popStyle();
   }
 
   /**
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin, having
-   * {@code size} pixels.
+   * {@code length} pixels.
    *
    * @see #drawShooterTarget(float, float, float)
    */
-  public void drawShooterTarget(Frame frame, float size) {
+  public void drawShooterTarget(Frame frame, float length) {
+    if (eye() == frame) {
+      System.err.println("eye frames don't have an screen target");
+      return;
+    }
     Vector center = projectedCoordinatesOf(frame.position());
-    drawShooterTarget(center.x(), center.y(), size);
+    drawShooterTarget(center.x(), center.y(), length);
+  }
+
+  /**
+   * Same as {@code drawShooterTarget(frontBuffer(), x, y, radius() / 5)}.
+   *
+   * @see #drawShooterTarget(float, float, float)
+   */
+  public void drawShooterTarget(float x, float y) {
+    drawShooterTarget(frontBuffer(), x, y, radius() / 5);
   }
 
   /**
@@ -2850,38 +2817,6 @@ public class Scene extends Graph implements PConstants {
     endScreenCoordinates(pGraphics);
     drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
-  }
-
-  /**
-   * Draws the node picking target: a shooter target visual hint of
-   * {@link Node#precisionThreshold()} pixels size.
-   */
-  public void drawPickingTarget(Node node) {
-    if (node.isEye()) {
-      System.err.println("eye nodes don't have a picking target");
-      return;
-    }
-    Vector center = projectedCoordinatesOf(node.position());
-    if (isInputGrabber(node)) {
-      frontBuffer().pushStyle();
-      frontBuffer().strokeWeight(2 * frontBuffer().strokeWeight);
-      frontBuffer().colorMode(HSB, 255);
-      float hue = frontBuffer().hue(frontBuffer().strokeColor);
-      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
-      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
-      frontBuffer().stroke(hue, saturation * 1.4f, brightness * 1.4f);
-      drawShooterTarget(center.x(), center.y(), (node.precisionThreshold() + 1));
-      frontBuffer().popStyle();
-    } else {
-      frontBuffer().pushStyle();
-      frontBuffer().colorMode(HSB, 255);
-      float hue = frontBuffer().hue(frontBuffer().strokeColor);
-      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
-      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
-      frontBuffer().stroke(hue, saturation * 1.4f, brightness);
-      drawShooterTarget(center.x(), center.y(), node.precisionThreshold());
-      frontBuffer().popStyle();
-    }
   }
 
   /**
