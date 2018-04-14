@@ -1620,7 +1620,10 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      drawPickingTarget(frame);
+      if (frame instanceof Node)
+        drawPickingTarget((Node) frame);
+      else
+        drawCross(frame);
     frontBuffer().popStyle();
   }
 
@@ -2648,37 +2651,57 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawCross(px, py, 30)}.
+   * Same as {@code drawCross(frame, radius() / 5)}.
+   *
+   * @see #drawCross(Frame, float)
+   */
+  public void drawCross(Frame frame) {
+    drawCross(frame, radius() / 5);
+  }
+
+  /**
+   * {@link #drawCross(float, float, float)} centered at the projected frame origin, having
+   * {@code size} pixels.
    *
    * @see #drawCross(float, float, float)
    */
-  public void drawCross(float px, float py) {
-    drawCross(px, py, 30);
+  public void drawCross(Frame frame, float size) {
+    Vector center = projectedCoordinatesOf(frame.position());
+    drawCross(center.x(), center.y(), size);
   }
 
   /**
-   * Same as {@code drawCross(frontBuffer(), px, py, size)}.
+   * Convenience function that simply calls {@code drawCross(x, y, radius()/5)}.
+   *
+   * @see #drawCross(float, float, float)
+   */
+  public void drawCross(float x, float y) {
+    drawCross(x, y, radius() / 5);
+  }
+
+  /**
+   * Same as {@code drawCross(frontBuffer(), x, y, size)}.
    *
    * @see #drawCross(PGraphics, float, float, float)
    */
-  public void drawCross(float px, float py, float size) {
-    drawCross(frontBuffer(), px, py, size);
+  public void drawCross(float x, float y, float size) {
+    drawCross(frontBuffer(), x, y, size);
   }
 
   /**
-   * Draws a cross on the screen centered under pixel {@code (px, py)}, and edge of size
+   * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
    * {@code size} onto {@code pGraphics}.
    */
-  public void drawCross(PGraphics pGraphics, float px, float py, float size) {
+  public void drawCross(PGraphics pGraphics, float x, float y, float size) {
     float half_size = size / 2f;
     pGraphics.pushStyle();
     beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
-    vertex(pGraphics, px - half_size, py);
-    vertex(pGraphics, px + half_size, py);
-    vertex(pGraphics, px, py - half_size);
-    vertex(pGraphics, px, py + half_size);
+    vertex(pGraphics, x - half_size, y);
+    vertex(pGraphics, x + half_size, y);
+    vertex(pGraphics, x, y - half_size);
+    vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
@@ -2762,25 +2785,42 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawShooterTarget(frontBuffer(), center, length)}.
+   * Same as {@code drawShooterTarget(frame, radius() / 5)}.
    *
-   * @see #drawShooterTarget(PGraphics, Vector, float)
+   * @see #drawPickingTarget(Node)
+   * @see #drawShooterTarget(Frame, float)
    */
-  public void drawShooterTarget(Vector center, float length) {
-    drawShooterTarget(frontBuffer(), center, length);
+  public void drawShooterTarget(Frame frame) {
+    drawShooterTarget(frame, radius() / 5);
   }
 
   /**
-   * Draws the classical shooter target onto {@code pGraphics}.
+   * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin, having
+   * {@code size} pixels.
    *
-   * @param center Center of the target on the screen
-   * @param length Length of the target in pixels
+   * @see #drawShooterTarget(float, float, float)
    */
-  public void drawShooterTarget(PGraphics pGraphics, Vector center, float length) {
+  public void drawShooterTarget(Frame frame, float size) {
+    Vector center = projectedCoordinatesOf(frame.position());
+    drawShooterTarget(center.x(), center.y(), size);
+  }
+
+  /**
+   * Same as {@code drawShooterTarget(frontBuffer(), center, length)}.
+   *
+   * @see #drawShooterTarget(PGraphics, float, float, float)
+   */
+  public void drawShooterTarget(float x, float y, float length) {
+    drawShooterTarget(frontBuffer(), x, y, length);
+  }
+
+  /**
+   * Draws the classical shooter target onto {@code pGraphics}, centered at {@code (x, y)},
+   * having {@code length} pixels.
+   */
+  public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    float x = center.x();
-    float y = center.y();
     beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
 
@@ -2808,30 +2848,8 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
-    drawCross(center.x(), center.y(), 0.6f * length);
+    drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
-  }
-
-  /**
-   * If frame {@code instanceof} {@link frames.core.Node} calls {@link #drawPickingTarget(Node)} otherwise
-   * calls {@code drawPickingTarget(frame, radius()/5)}.
-   *
-   * @see #drawPickingTarget(Node)
-   * @see #drawPickingTarget(Frame, float)
-   */
-  public void drawPickingTarget(Frame frame) {
-    if (frame instanceof Node)
-      drawPickingTarget((Node) frame);
-    else
-      drawPickingTarget(frame, radius() / 5);
-  }
-
-  /**
-   * {@link #drawShooterTarget(Vector, float)} at the frame origin and {@code size} pixels.
-   */
-  public void drawPickingTarget(Frame frame, float size) {
-    Vector center = projectedCoordinatesOf(frame.position());
-    drawShooterTarget(center, size);
   }
 
   /**
@@ -2844,7 +2862,7 @@ public class Scene extends Graph implements PConstants {
       return;
     }
     Vector center = projectedCoordinatesOf(node.position());
-    if (inputHandler().isInputGrabber(node)) {
+    if (isInputGrabber(node)) {
       frontBuffer().pushStyle();
       frontBuffer().strokeWeight(2 * frontBuffer().strokeWeight);
       frontBuffer().colorMode(HSB, 255);
@@ -2852,7 +2870,7 @@ public class Scene extends Graph implements PConstants {
       float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
       float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
       frontBuffer().stroke(hue, saturation * 1.4f, brightness * 1.4f);
-      drawShooterTarget(center, (node.precisionThreshold() + 1));
+      drawShooterTarget(center.x(), center.y(), (node.precisionThreshold() + 1));
       frontBuffer().popStyle();
     } else {
       frontBuffer().pushStyle();
@@ -2861,7 +2879,7 @@ public class Scene extends Graph implements PConstants {
       float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
       float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
       frontBuffer().stroke(hue, saturation * 1.4f, brightness);
-      drawShooterTarget(center, node.precisionThreshold());
+      drawShooterTarget(center.x(), center.y(), node.precisionThreshold());
       frontBuffer().popStyle();
     }
   }
