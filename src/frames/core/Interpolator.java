@@ -48,7 +48,7 @@ import java.util.ListIterator;
  * 1 (default value), these times correspond to actual user's seconds during
  * interpolation (provided that your main loop is fast enough). The interpolation is then
  * real-time: the key frames will be reached at their {@link #time(int)}.
- * <p>
+ *
  * <h3>Interpolation details</h3>
  * <p>
  * When {@link #start()} is called, a timer is started which will update the
@@ -63,7 +63,7 @@ import java.util.ListIterator;
  * <p>
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
- * <p>
+ *
  * <b>Attention:</b> If a {@link frames.primitives.constraint.Constraint} is attached to
  * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
@@ -183,7 +183,7 @@ public class Interpolator {
   protected Graph _graph;
 
   /**
-   * Convenience constructor that simply calls {@code this(graph, new Node(graph))}.
+   * Convenience constructor that simply calls {@code this(graph, new Frame())}.
    * <p>
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * interpolator.
@@ -191,7 +191,7 @@ public class Interpolator {
    * @see #Interpolator(Graph, Frame)
    */
   public Interpolator(Graph graph) {
-    this(graph, new Node(graph));
+    this(graph, new Frame());
   }
 
   public Interpolator(Node node) {
@@ -394,7 +394,7 @@ public class Interpolator {
 
   /**
    * Sets the {@link #time()}.
-   * <p>
+   *
    * <b>Attention:</b> The {@link #frame()} state is not affected by this method. Use this
    * function to define the starting time of a future interpolation (see
    * {@link #start()}). Use {@link #interpolate(float)} to actually
@@ -511,7 +511,7 @@ public class Interpolator {
    * <p>
    * Use {@link #setTime(float)} before calling this method to change the
    * starting {@link #time()}.
-   * <p>
+   *
    * <b>Attention:</b> The key frames must be defined (see
    * {@link #addKeyFrame(Frame, float)}) before you start(), or else
    * the interpolation will naturally immediately stop.
@@ -631,8 +631,24 @@ public class Interpolator {
 
   /**
    * Removes all key frames from the path. The {@link #size()} is set to 0.
+   *
+   * @see #purge()
    */
   public void clear() {
+    stop();
+    _list.clear();
+    _pathIsValid = false;
+    _valuesAreValid = false;
+    _currentFrameValid = false;
+  }
+
+  /**
+   * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
+   *
+   * @see #clear()
+   * @see frames.core.Graph#pruneBranch(Node)
+   */
+  public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {

@@ -2,9 +2,9 @@
  * Mini Map
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates how to use proscene off-screen rendering to build
- * a mini-map of the main Scene where all objetcs are interactive. It also
- * shows Frame syncing among views.
+ * This example illustrates how to use off-screen rendering to build
+ * a mini-map of the main Scene where all objetcs are interactive. It
+ * also shows Frame syncing among views.
  */
 
 import frames.input.*;

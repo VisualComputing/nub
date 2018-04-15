@@ -1,14 +1,13 @@
-/**************************************************************************************
- * dandelion_tree
- * Copyright (c) 2014-2017 National University of Colombia, https://github.com/remixlab
+/****************************************************************************************
+ * frames
+ * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Sebastian Chaparro, https://github.com/sechaparroc
- * @author Jean Pierre Charalambos, http://otrolado.info/
+ * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
- **************************************************************************************/
-
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
+ ****************************************************************************************/
 
 package frames.primitives.constraint;
 
@@ -44,14 +43,14 @@ public class PlanarPolygon extends Constraint {
    * reference is a Quaternion that will be aligned to point to the given Basis Vectors
    * result will be stored on restRotation.
    * twist and up axis are defined locally on reference rotation
-   * */
-  public void setRestRotation(Quaternion reference, Vector up, Vector twist){
+   */
+  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _restRotation = reference.get();
     Vector Z = _restRotation.inverse().rotate(twist);
     //Align Y-Axis with Up Axis
-    _restRotation.compose(new Quaternion(new Vector(0,1,0), up));
+    _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
     //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0,0,1), twist));
+    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
   }
 
   public ArrayList<Vector> vertices() {
@@ -111,7 +110,7 @@ public class PlanarPolygon extends Constraint {
     */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     //twist to frame
-    Vector twist = _restRotation.rotate(new Vector(0,0,1));
+    Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
     Vector new_pos = Quaternion.multiply(desired, twist);
     Vector constrained = apply(new_pos, _restRotation);
     //Get Quaternion

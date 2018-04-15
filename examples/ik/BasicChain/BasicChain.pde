@@ -35,18 +35,18 @@ public void setup() {
   //2. Create the Targets
   /*
   create the Target that the End Effector must Follow.
-  It is important to first create the Targets and then
-  the Skeleton (Hierarchy of Joints or Nodes), otherwise
-  the interaction will not be handled properly.
-  */
+   It is important to first create the Targets and then
+   the Skeleton (Hierarchy of Joints or Nodes), otherwise
+   the interaction will not be handled properly.
+   */
   target = new Target(scene);
   target.translate(0, 0, 0);
 
   //3. Create the Skeleton (List or Hierarchy of Joints).
   ArrayList<Node> chain = generateChain(numJoints, boneLength, new Vector());
   /*Due to the way the Skeleton was built, its root will  be the first element in the list.
-    Its endEffector (a leaf) will be the las element on the list
-  */
+   Its endEffector (a leaf) will be the las element on the list
+   */
   Node root = chain.get(0);
   Node endEffector = chain.get(chain.size()-1);
 

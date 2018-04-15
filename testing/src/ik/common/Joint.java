@@ -1,21 +1,9 @@
 package ik.common;
 
 import common.InteractiveShape;
-import frames.core.Node;
-import frames.primitives.Frame;
-import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.Hinge;
-import frames.primitives.constraint.PlanarPolygon;
-import frames.primitives.constraint.SphericalPolygon;
 import frames.processing.Scene;
-import processing.core.PApplet;
 import processing.core.PGraphics;
-
-import java.util.ArrayList;
-
-import static ik.basic.BasicIK.*;
 
 /**
  * Created by sebchaparr on 28/01/18.
@@ -33,7 +21,7 @@ public class Joint extends InteractiveShape {
     this.color = color;
   }
 
-  public void setRoot(boolean root){
+  public void setRoot(boolean root) {
     this.root = root;
   }
 
@@ -44,7 +32,7 @@ public class Joint extends InteractiveShape {
     if (pg.is2D()) pg.ellipse(0, 0, 3, 3);
     else pg.sphere(3);
 
-    if(!root) {
+    if (!root) {
       pg.strokeWeight(5);
       pg.stroke(color);
       Vector v = localCoordinatesOf(new Vector());

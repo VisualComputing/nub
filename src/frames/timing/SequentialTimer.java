@@ -59,7 +59,7 @@ public class SequentialTimer implements Timer {
 
   /**
    * Executes the callback method defined by the {@link #timingTask()}.
-   * <p>
+   *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link frames.timing.TimingHandler#handle()}).
    */
@@ -121,7 +121,7 @@ public class SequentialTimer implements Timer {
 
   /**
    * Returns {@code true} if the timer was triggered at the given frame.
-   * <p>
+   *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link frames.timing.TimingHandler#handle()}).
    */

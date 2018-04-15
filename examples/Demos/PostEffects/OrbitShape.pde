@@ -1,7 +1,7 @@
 /**
  * OrbitShape.
  * by Jean Pierre Charalambos.
- *
+ * 
  * This class implements a shape behavior which requires
  * overriding the interact(Event) method.
  *
@@ -12,7 +12,7 @@ public class OrbitShape extends Shape {
   public OrbitShape(Scene scene) {
     super(scene);
   }
-
+  
   public OrbitShape(Node node) {
     super(node);
   }

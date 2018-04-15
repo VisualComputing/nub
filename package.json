@@ -4,6 +4,6 @@
     "contributors:generate": "all-contributors generate"
   },
   "devDependencies": {
-    "all-contributors-cli": "^4.11.0"
+    "all-contributors-cli": "^4.11.1"
   }
 }

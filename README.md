@@ -1,5 +1,5 @@
 frames
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -8,7 +8,7 @@ frames
 - [Usage](#user-content-usage)
 - [Interpolators](#user-content-interpolators)
 - [Interactivity](#user-content-interactivity)
-- [Kinematics](#user-content-kinematics)
+- [IK](#user-content-ik)
 - [Drawing](#user-content-drawing)
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
@@ -89,7 +89,7 @@ void setup() {
 }
 ```
 
-The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)).
+The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)). Note that the node [interactivity](#user-content-interactivity) itself is programmable.
 
 Observe the anonymous inner [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) class intance which is used to define how the node will behave: actions are bound to the node using the event `Shortcut` attribute which identifies it. For instance `Shortcut(PApplet.LEFT))` tells us the `event` is a `MotionEvent2` mouse left drag (refer to the [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details).
 
@@ -160,9 +160,61 @@ while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)`
  
 To control your scene nodes by [means](https://en.wikipedia.org/wiki/Human_interface_device) different than the [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) (see [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)), implement an [Agent](https://visualcomputing.github.io/frames-javadocs/frames/input/Agent.html) and call [registerAgent(Agent)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#registerAgent-frames.input.Agent-).
 
-## Kinematics
+## IK
 
-TODO complete me!
+The goal of Inverse Kinematics (IK for short) is to animate a [Skeleton](https://en.wikipedia.org/wiki/Skeletal_animation), which is a rigid body system composed of Joints and Bones.
+
+As a Skeleton could be built using a hierarchical tree structure where each Node keeps information about Joints and Bones configuration by means of relative geometric transformations (at least rotation and translation) we could consider a Skeleton as a subset of the scene graph.
+
+There are some positions of interest at the Skeleton called End Effectors which depends on the Joint configuration and that an animator would like to manipulate in order to reach some given Target positions and obtain the desired pose.
+
+[Forward Kinematics](https://en.wikipedia.org/wiki/Forward_kinematics#Computer_animation) attempts to obtain the position of an end-effector from some given values for the joint parameters (usually rotation information). This task could be done easily thanks to the scene graph structure provided by Frames.
+
+[Inverse Kinematics](https://en.wikipedia.org/wiki/Inverse_kinematics#Inverse_kinematics_and_3D_animation) on the other hand is a harder problem that attempts to obtain the joint parameters given the desired pose.
+
+This short [video](https://www.youtube.com/watch?v=euFe1S0OltQ) summarizes the difference between this two problems.
+
+Whenever IK is required to be solved follow the next steps:
+
+#### Define the Skeleton (List or Hierarchy of Joints) 
+
+The Skeleton must be a branch from a `Graph` (for instance see [`branch(Node)`](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#branch-frames.core.Node-)). Where each of the leaf nodes (i.e Nodes without children) could be treated as an End Effector.
+
+#### Define the Target(s)
+Create the Target(s) that the End Effector(s) must Follow. A Target is a `Node` that indicates which is de desired position of an End Effector. It's important to instantiate the Target before the Skeleton.
+
+#### Register a Solver
+Once you have specified a Skeleton and the Target(s). It is required to register a Solver task managed by the `scene`. To do this call `registerTreeSolver(Node)` method, where `Node` is the root of the Skeleton.
+
+#### Relate Target(s) and End Effector(s)
+You must specify explicitly which leaf `node` (End Effector) is related to which target `node`. To do this call scene method `addIKTarget(Node, Node)`. Where the first node is the End Effector, whereas the second one is the Target.
+
+Optionally, it is usual to set initial target(s) position to be the same as end effector(s) position.
+
+Assuming that the Skeleton is determined by `branch(Node)` and it is a single chain (i.e each `Node` has as much one child) the code must look like:
+
+```java
+...
+void setup() {
+  Node target = new Node(scene);
+  Node root = new Node(scene);
+  ...
+  ArrayList<Node> chain = scene.branch(root);
+  Node endEffector = chain.get(chain.size()-1);
+  ...
+  scene.registerTreeSolver(root);
+  target.setPosition(endEffector.position());  
+  scene.addIKTarget(endEffector, target);
+}
+```
+#### Using constraints
+
+It is desirable to obtain natural, predictable and intuitive poses when End Effectors are manipulated, however it could exist many solutions (i.e many different poses) that satisfy the IK problem. In such cases you could add constraints to some `nodes` (see [`setConstraint(Constraint)`](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html#setConstraint-frames.primitives.constraint.Constraint-)) in the Skeleton to improve the `Solver` performance (e.g see [Human Skeleton](https://en.wikipedia.org/wiki/Synovial_joint#/media/File:909_Types_of_Synovial_Joints.jpg)). Currently the supported rotation constraints for Kinematics are:
+
+* **`Hinge`**:   1-DOF constraint. i.e the joint will rotate just in one direction defined by a given Axis (Called Twist Axis).
+* **`BallAndSocket`**: 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with an elliptical base. User must specify ellipse semi-axis to constraint the movement. (for further info look [here](http://wiki.roblox.com/index.php?title=Inverse_kinematics))
+* **`PlanarPolygon`**: As Ball and Socket, is a 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with a polygonal base. A set of vertices on XY plane in Clockwise or Counter Clockwise order must be given to constraint the movement.
+ * **`SphericalPolygon`**: As Ball and Socket, is a 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone defined by an spherical polygon. A set of vertices that lies in a unit sphere must be given in Counter Clockwise order  to constraint the movement. (for further info look [here]( https://pdfs.semanticscholar.org/d535/e562effd08694821ea6a8a5769fe10ffb5b6.pdf))
 
 ## Drawing
 
@@ -184,8 +236,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;"/><br /><sub><b>Jean Pierre Charalambos</b></sub>](https://github.com/nakednous)<br />[📝](#blog-nakednous "Blogposts") [🐛](/VisualComputing/framesjs/issues?q=author%3Anakednous "Bug reports") [💻](/VisualComputing/framesjs/commits?author=nakednous "Code") [🎨](#design-nakednous "Design") [📖](/VisualComputing/framesjs/commits?author=nakednous "Documentation") [📋](#eventOrganizing-nakednous "Event Organizing") [💡](#example-nakednous "Examples") [💵](#financial-nakednous "Financial") [🔍](#fundingFinding-nakednous "Funding Finding") [🤔](#ideas-nakednous "Ideas, Planning, & Feedback") [📦](#platform-nakednous "Packaging/porting to new platform") [🔌](#plugin-nakednous "Plugin/utility libraries") [💬](#question-nakednous "Answering Questions") [👀](#review-nakednous "Reviewed Pull Requests") [📢](#talk-nakednous "Talks") [⚠️](/VisualComputing/framesjs/commits?author=nakednous "Tests") [✅](#tutorial-nakednous "Tutorials") [📹](#video-nakednous "Videos") |
-| :---: |
+| [<img src="https://avatars2.githubusercontent.com/u/9769647?v=4" width="100px;"/><br /><sub><b>sechaparroc</b></sub>](https://github.com/sechaparroc)<br />[📝](#blog-sechaparroc "Blogposts") [🐛](https://github.com/VisualComputing/framesjs/issues?q=author%3Asechaparroc "Bug reports") [💻](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Code") [🎨](#design-sechaparroc "Design") [📖](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Documentation") [📋](#eventOrganizing-sechaparroc "Event Organizing") [💡](#example-sechaparroc "Examples") [💵](#financial-sechaparroc "Financial") [🔍](#fundingFinding-sechaparroc "Funding Finding") [🤔](#ideas-sechaparroc "Ideas, Planning, & Feedback") [📦](#platform-sechaparroc "Packaging/porting to new platform") [🔌](#plugin-sechaparroc "Plugin/utility libraries") [💬](#question-sechaparroc "Answering Questions") [👀](#review-sechaparroc "Reviewed Pull Requests") [📢](#talk-sechaparroc "Talks") [⚠️](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Tests") [✅](#tutorial-sechaparroc "Tutorials") [📹](#video-sechaparroc "Videos") | [<img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;"/><br /><sub><b>Jean Pierre Charalambos</b></sub>](https://github.com/nakednous)<br />[📝](#blog-nakednous "Blogposts") [🐛](https://github.com/VisualComputing/framesjs/issues?q=author%3Anakednous "Bug reports") [💻](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Code") [🎨](#design-nakednous "Design") [📖](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Documentation") [📋](#eventOrganizing-nakednous "Event Organizing") [💡](#example-nakednous "Examples") [💵](#financial-nakednous "Financial") [🔍](#fundingFinding-nakednous "Funding Finding") [🤔](#ideas-nakednous "Ideas, Planning, & Feedback") [📦](#platform-nakednous "Packaging/porting to new platform") [🔌](#plugin-nakednous "Plugin/utility libraries") [💬](#question-nakednous "Answering Questions") [👀](#review-nakednous "Reviewed Pull Requests") [📢](#talk-nakednous "Talks") [⚠️](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Tests") [✅](#tutorial-nakednous "Tutorials") [📹](#video-nakednous "Videos") |
+| :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!

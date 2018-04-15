@@ -61,7 +61,7 @@ void setup() {
   shape.set(model);
 
   //Invert Y Axis
-  shape.rotate(new Quaternion(new Vector(0,0,1), PI));
+  shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
   //Scale model
   shape.scale(200.f*1.f/max);
 
@@ -69,7 +69,7 @@ void setup() {
   //Here fishSkeleton method will create the desired Hierarchy
   /*
   It's important that the Skeleton fit properly the model to get a good animation
-  */
+   */
   root = fishSkeleton(shape);
 
   //convenient method to get the Hierarchy defined in 5.
@@ -84,28 +84,28 @@ void setup() {
   //7. set the target position to a desirable place
   /*
   Here we're setting it to be at the fish' tail
-  */
+   */
   target.setPosition(skeleton.get(skeleton.size()-1).position());
 
 
   //8. Making a default Path that target must follow
   /*
   It creates an Interpolator with some KeyFrames
-  */
+   */
   targetInterpolator = setupTargetInterpolator(target);
 
   //Adding IK behavior
   //9. Tell the scene that a Solver must be register passing as parameter the root of the Skeleton (chain)
   /*
     The method registerTreeSolver returns a Solver class that could be used to modify some of its Parameters
-    Here we use the default Solver configuration
-  */
+   Here we use the default Solver configuration
+   */
   scene.registerTreeSolver(root);
   //8. Associate the Target with the End Effector of the Skeleton (leaf Node)
   scene.addIKTarget(skeleton.get(skeleton.size()-1), target);
 }
 
-void draw(){
+void draw() {
   background(0);
   lights();
   //Draw Constraints
@@ -117,12 +117,15 @@ void draw(){
 //Get the max and min point that encloses the PShape
 Vector[] getBoundingBox(PShape shape) {
   Vector v[] = new Vector[2];
-  float minx = 999;  float miny = 999;
-  float maxx = -999; float maxy = -999;
-  float minz = 999;  float maxz = -999;
-  for(int j = 0; j < shape.getChildCount(); j++){
+  float minx = 999;  
+  float miny = 999;
+  float maxx = -999; 
+  float maxy = -999;
+  float minz = 999;  
+  float maxz = -999;
+  for (int j = 0; j < shape.getChildCount(); j++) {
     PShape aux = shape.getChild(j);
-    for(int i = 0; i < aux.getVertexCount(); i++){
+    for (int i = 0; i < aux.getVertexCount(); i++) {
       float x = aux.getVertex(i).x;
       float y = aux.getVertex(i).y;
       float z = aux.getVertex(i).z;
@@ -135,23 +138,23 @@ Vector[] getBoundingBox(PShape shape) {
     }
   }
 
-  v[0] = new Vector(minx,miny, minz);
-  v[1] = new Vector(maxx,maxy, maxz);
+  v[0] = new Vector(minx, miny, minz);
+  v[1] = new Vector(maxx, maxy, maxz);
   return v;
 }
 
 /*
 Creates a Hierarchy that will be related with the Fish model
-*/
-Joint fishSkeleton(Node reference){
+ */
+Joint fishSkeleton(Node reference) {
   Joint j1 = new Joint(scene);
   j1.setReference(reference);
   j1.setPosition(0, 10.8f, 93);
   scene.inputHandler().removeGrabber(j1);
   /*
   consider to use this scaling if the reference scale factor
-  has been modified
-  */
+   has been modified
+   */
   j1.setScaling(1.f/reference.scaling());
   Joint j2 = new Joint(scene);
   j2.setReference(j1);
@@ -179,8 +182,8 @@ Joint fishSkeleton(Node reference){
 
 /*
 Plans a target path
-*/
-Interpolator setupTargetInterpolator(Node target){
+ */
+Interpolator setupTargetInterpolator(Node target) {
   Interpolator targetInterpolator = new Interpolator(target);
   targetInterpolator.setLoop();
   targetInterpolator.setSpeed(3.2f);

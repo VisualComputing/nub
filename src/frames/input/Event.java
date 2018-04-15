@@ -27,7 +27,7 @@ import frames.input.event.TapEvent;
  * declare a shortcut type for your event (overriding the {@link #shortcut()). For details
  * refer to the {@link Shortcut}. If your custom event class defines it's own attributes, its
  * {@link #get()} method should be overridden.
- * <p>
+ *
  * <b>Note</b> Event detection/reduction could happened in several different ways.
  * For instance, in the context of Java-based application, it typically takes place when
  * implementing a mouse listener interface. In Processing, it does it when registering at

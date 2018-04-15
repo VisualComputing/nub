@@ -1,13 +1,13 @@
-/**************************************************************************************
- * dandelion_tree
- * Copyright (c) 2014-2017 National University of Colombia, https://github.com/remixlab
+/****************************************************************************************
+ * frames
+ * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Sebastian Chaparro, https://github.com/sechaparroc
- * @author Jean Pierre Charalambos, http://otrolado.info/
+ * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
- **************************************************************************************/
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
+ ****************************************************************************************/
 
 package frames.ik;
 
@@ -213,7 +213,7 @@ public class TreeSolver extends FABRIKSolver {
   protected boolean _iterate() {
     int modifiedChains = _forwardReaching(root);
     float change = _backwardReaching(root);
-    change = modifiedChains > 0 ? change/(modifiedChains*1.f) : change;
+    change = modifiedChains > 0 ? change / (modifiedChains * 1.f) : change;
     //Check total position change
     if (change / (modifiedChains * 1.) <= minDistance) return true;
     return false;

@@ -10,7 +10,7 @@
  * Feel free to copy paste it.
  */
 
-public class Target extends OrbitShape  {
+public class Target extends OrbitShape {
   public Target(Scene scene) {
     super(scene);
   }
@@ -26,6 +26,5 @@ public class Target extends OrbitShape  {
       pg.sphere(5);
     pg.popStyle();
     graph().drawAxes(5);
-
   }
 }

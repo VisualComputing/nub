@@ -109,14 +109,14 @@ public class FrameInterpolation extends PApplet {
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
-      eyeInterpolator1.clear();
+      eyeInterpolator1.purge();
 
     if (key == '2')
       eyeInterpolator2.addKeyFrame(scene.eye().get());
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
-      eyeInterpolator2.clear();
+      eyeInterpolator2.purge();
 
     if (key == '-')
       nodeInterpolator.setSpeed(nodeInterpolator.speed() - 0.25f);

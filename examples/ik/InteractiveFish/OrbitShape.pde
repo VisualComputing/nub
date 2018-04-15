@@ -28,7 +28,7 @@ public class OrbitShape extends Shape {
     return new OrbitShape(this.graph(), this);
   }
 
-  // behavior is here :P
+  // behavior is here
   @Override
   public void interact(frames.input.Event event) {
     if (event.shortcut().matches(new Shortcut(RIGHT)))

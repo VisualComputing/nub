@@ -24,7 +24,6 @@
  *      (for further info look at https://pdfs.semanticscholar.org/d535/e562effd08694821ea6a8a5769fe10ffb5b6.pdf)
  *
  * Each important step is enumerated
- *
  */
 
 import frames.core.*;
@@ -54,12 +53,12 @@ public void setup() {
   //2. Create the Targets
   /*
   create the Targets that the End Effectors must Follow.
-  It is important to first create the Targets and then
-  the Skeleton (Hierarchy of Joints or Nodes), otherwise
-  the interaction will not be handled properly.
-
-  Here is just one Target followed by all the End Effectors
-  */
+   It is important to first create the Targets and then
+   the Skeleton (Hierarchy of Joints or Nodes), otherwise
+   the interaction will not be handled properly.
+   
+   Here is just one Target followed by all the End Effectors
+   */
 
   target = new Target(scene);
   target.translate(0, 0, 0);
@@ -67,9 +66,9 @@ public void setup() {
   //3. Create the Skeleton (List or Hierarchy of Joints).
   /*
   Here four identical chains that will have different constraints
-  generateChain method just create a chain of Joints with the specified number of joints, bonelength per Joint.
-  The initial root position of the created chain is determined by a Vector.
-  */
+   generateChain method just create a chain of Joints with the specified number of joints, bonelength per Joint.
+   The initial root position of the created chain is determined by a Vector.
+   */
   ArrayList<Node> chainHinge = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
   ArrayList<Node> chainBallSocket = generateChain(numJoints, boneLength, new Vector(-scene.radius(), scene.radius(), 0));
   ArrayList<Node> chainPlanarPoly = generateChain(numJoints, boneLength, new Vector(scene.radius(), -scene.radius(), 0));
@@ -84,7 +83,7 @@ public void setup() {
     constraint.setRestRotation(chainHinge.get(i).rotation().get());
     //An axis pointing to Y Direction and Perpendicular to Child Translation
     //This Axis must be specified in terms of restRotation coordinates.
-    constraint.setAxis(Vector.projectVectorOnPlane(new Vector(0,1,0), chainHinge.get(i+1).translation()));
+    constraint.setAxis(Vector.projectVectorOnPlane(new Vector(0, 1, 0), chainHinge.get(i+1).translation()));
     chainHinge.get(i).setConstraint(constraint);
   }
 
@@ -95,7 +94,7 @@ public void setup() {
     Vector twist = chainBallSocket.get(i+1).translation().get();
     //A rest rotation must be given always! it determines where the Twist Axis will point to.
     //Here Twist Axis points to Child (it is the most common case)
-    constraint.setRestRotation(chainBallSocket.get(i).rotation().get(), new Vector(0,1,0), twist);
+    constraint.setRestRotation(chainBallSocket.get(i).rotation().get(), new Vector(0, 1, 0), twist);
     chainBallSocket.get(i).setConstraint(constraint);
   }
 
@@ -114,7 +113,7 @@ public void setup() {
     Vector twist = chainPlanarPoly.get(i+1).translation().get();
     //A rest rotation must be given always! it determines where the Twist Axis will point to.
     //Here Twist Axis points to Child (it is the most common case)
-    constraint.setRestRotation(chainPlanarPoly.get(i).rotation().get(), new Vector(0,1,0), twist);
+    constraint.setRestRotation(chainPlanarPoly.get(i).rotation().get(), new Vector(0, 1, 0), twist);
     chainPlanarPoly.get(i).setConstraint(constraint);
   }
 
@@ -130,13 +129,13 @@ public void setup() {
 
   for (int i = 1; i < chainSphericalPoly.size() - 1; i++) {
     /* New Spherical Polygon constraint.
-    It constrains the movement of Twist axis inside a Cone with a base defined by the vertices at verticesSpherical
-    */
+     It constrains the movement of Twist axis inside a Cone with a base defined by the vertices at verticesSpherical
+     */
     SphericalPolygon constraint = new SphericalPolygon(verticesSpherical);
     //A rest rotation must be given always! it determines where the Twist Axis will point to.
     //Here Twist Axis points to Child (it is the most common case)
     Vector twist = chainSphericalPoly.get(i+1).translation().get();
-    constraint.setRestRotation(chainSphericalPoly.get(i).rotation().get(), new Vector(0,1,0), twist);
+    constraint.setRestRotation(chainSphericalPoly.get(i).rotation().get(), new Vector(0, 1, 0), twist);
     chainSphericalPoly.get(i).setConstraint(constraint);
   }
 
@@ -144,8 +143,8 @@ public void setup() {
   //5. Tell the scene that a Solver must be register passing as parameter the root of each Skeleton (chain) in 3.
   /*
     The method registerTreeSolver returns a Solver class that could be used to modify some of its Parameters
-    Here we use the default Solver configuration
-  */
+   Here we use the default Solver configuration
+   */
   //6. After 4. is applied to each chain associate the Target in 2. with the End Effector of the chain (leaf Node)
 
   //Apply 5. and 6. to each chain
@@ -171,8 +170,8 @@ public void draw() {
 
 /*
 given a number of Joints, a bone Length and an initial translation of
-the root this method will generate a Chain of Joints
-*/
+ the root this method will generate a Chain of Joints
+ */
 ArrayList<Node> generateChain(int numJoints, float boneLength, Vector translation) {
   Joint prevFrame = null;
   Joint chainRoot = null;

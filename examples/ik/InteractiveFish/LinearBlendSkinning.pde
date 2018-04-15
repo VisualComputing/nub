@@ -46,9 +46,9 @@ public class LinearBlendSkinning {
       Vector newPosition = new Vector(0, 0, 0);
       float total = 0;
       for (Vertex.Properties properties : this.properties) {
-        newPosition = Vector.add(newPosition,
-            Vector.multiply(reference.coordinatesOfFrom(properties.local, properties.joint),
-                properties.weight));
+        newPosition = Vector.add(newPosition, 
+          Vector.multiply(reference.coordinatesOfFrom(properties.local, properties.joint), 
+          properties.weight));
         total += properties.weight;
       }
       setVertexPosition(new Vector(newPosition.x() / total, newPosition.y() / total, newPosition.z() / total));
@@ -64,7 +64,6 @@ public class LinearBlendSkinning {
     public void addProperties(Node joint, Vector local, float dist) {
       properties.add(new Vertex.Properties(joint, local, dist));
     }
-
   }
 
   public void setup(ArrayList<Node> branch) {
@@ -90,8 +89,8 @@ public class LinearBlendSkinning {
             float dist = getDistance(position, joint, reference);
             dist = 1 / ((float) Math.pow(dist, 10));
             total_dist += dist;
-            vertex.addProperties(joint.reference(),
-                joint.reference().coordinatesOfFrom(position, reference), dist);
+            vertex.addProperties(joint.reference(), 
+              joint.reference().coordinatesOfFrom(position, reference), dist);
           }
           //The more near, the more weight the bone applies
           float sum = 0;
@@ -115,7 +114,6 @@ public class LinearBlendSkinning {
     }
   }
 
-
   /*
    * Get the distance from vertex to line formed by frame and the reference frame of frame
    * Distance will be measure according to root coordinates.
@@ -136,16 +134,14 @@ public class LinearBlendSkinning {
     float u = dot * (float) 1. / (magnitude * magnitude);
     Vector distance = new Vector();
     if (u >= 0 && u <= 1) {
-      distance = new Vector(parentPosition.x() + u * line.x(), parentPosition.y() + u * line.y(),
-          parentPosition.z() + u * line.z());
+      distance = new Vector(parentPosition.x() + u * line.x(), parentPosition.y() + u * line.y(), 
+        parentPosition.z() + u * line.z());
       distance = Vector.subtract(distance, vertex);
     }
-    if (u < 0) {
+    if (u < 0)
       distance = Vector.subtract(position, vertex);
-    }
-    if (u > 1) {
+    if (u > 1)
       distance = Vector.subtract(position, vertex);
-    }
     return distance.magnitude();
   }
 }

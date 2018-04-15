@@ -1,13 +1,13 @@
-/**************************************************************************************
- * dandelion_tree
- * Copyright (c) 2014-2017 National University of Colombia, https://github.com/remixlab
+/****************************************************************************************
+ * frames
+ * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
  * @author Sebastian Chaparro, https://github.com/sechaparroc
- * @author Jean Pierre Charalambos, http://otrolado.info/
+ * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
- * All rights reserved. Library that eases the creation of interactive
- * scenes, released under the terms of the GNU Public License v3.0
- * which is available at http://www.gnu.org/licenses/gpl.html
- **************************************************************************************/
+ * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
+ * handling to a third party (real or non-real time) renderer. Released under the terms
+ * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
+ ****************************************************************************************/
 
 package frames.primitives.constraint;
 
@@ -45,6 +45,7 @@ public class Hinge extends Constraint {
   /**
    * Set the twist axis.
    * The axis must be defined with respect to {@link #restRotation()} Quaternion
+   *
    * @param axis
    */
   public void setAxis(Vector axis) {
@@ -55,15 +56,17 @@ public class Hinge extends Constraint {
    * Set the twist axis.
    * The axis must be defined with respect to reference Quaternion.
    * Call this method only after setting {@link #restRotation()} Quaternion
+   *
    * @param reference
    * @param axis
    */
-  public void setAxis(Quaternion reference, Vector axis){
+  public void setAxis(Quaternion reference, Vector axis) {
     this._axis = _restRotation.inverse().rotate(reference.rotate(axis));
   }
 
   /**
    * Get the restRotation Quaternion.
+   *
    * @return
    */
   public Quaternion restRotation() {

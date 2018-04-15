@@ -2,7 +2,10 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  * 
- * Cajas Orientadas proscene example ported to frames.
+ * This example illustrates some basic Frame properties, particularly how to orient them.
+ * Select and move the sphere (holding the right mouse button pressed) to see how the
+ * boxes will immediately be oriented towards it. You can also pick and move the boxes
+ * and still they will be oriented towards the sphere.
  */
 
 import frames.input.*;

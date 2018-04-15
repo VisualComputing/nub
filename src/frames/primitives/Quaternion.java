@@ -709,7 +709,7 @@ public class Quaternion {
    * inverse operation. The code was adapted from:
    * http://www.euclideanspace.com/maths/geometry/rotations/conversions/
    * quaternionToEuler/index.htm.
-   * <p>
+   *
    * <b>Attention:</b> This method assumes that this quaternion is normalized.
    *
    * @return the Vector holding the roll (x coordinate of the vector), pitch (y coordinate of
@@ -745,7 +745,7 @@ public class Quaternion {
   /**
    * Sets the quaternion as a rotation from the {@code from} direction to the {@code to}
    * direction.
-   * <p>
+   *
    * <b>Attention:</b> this rotation is not uniquely defined. The selected axis is usually
    * orthogonal to {@code from} and {@code to}, minimizing the rotation angle. This method
    * is robust and can handle small or almost identical vectors.
@@ -937,7 +937,7 @@ public class Quaternion {
   /**
    * Returns the associated inverse rotation matrix. This is simply {@link #matrix()} of the
    * {@link #inverse()}.
-   * <p>
+   *
    * <b>Attention:</b> The result is only valid until the next call to
    * {@link #inverseMatrix()}. Use it immediately (as in
    * {@code applyMatrix(q.inverseMatrix())}).

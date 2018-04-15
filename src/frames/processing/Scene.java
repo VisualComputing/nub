@@ -18,7 +18,10 @@ import frames.input.Agent;
 import frames.input.Event;
 import frames.input.Grabber;
 import frames.primitives.*;
-import frames.primitives.constraint.*;
+import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
+import frames.primitives.constraint.PlanarPolygon;
+import frames.primitives.constraint.SphericalPolygon;
 import frames.timing.SequentialTimer;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -36,7 +39,7 @@ import java.util.List;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
- * <p>
+ *
  * <h2>Usage</h2>
  * Typical usage comprises three steps: scene instantiation, setting an eye
  * and setting some shapes.
@@ -132,7 +135,7 @@ import java.util.List;
  * }
  * </pre>
  * <p>
- * Note tha shapes like nodes can be control interactively. Override
+ * Note that shapes like nodes can be control interactively. Override
  * {@link Node#interact(Event)}, like it has been done above.
  * <h2>Key-frame interpolators</h2>
  * A frame (and hence a node or a shape) can be animated through a key-frame
@@ -192,8 +195,8 @@ import java.util.List;
 public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean _javaTiming;
-  public static String prettyVersion = "0.1.0";
-  public static String version = "1";
+  public static String prettyVersion = "0.1.3";
+  public static String version = "4";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -741,7 +744,7 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Only if the dcene {@link #isOffscreen()}. Calls:
-   * <p>
+   *
    * <ol>
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@code _renderBackBuffer()}: Render the back buffer (useful for picking)</li>
@@ -861,7 +864,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * When having multiple off-screen scenes displayed at once, it should be decided which
    * one will grab input from the {@link #mouse()}, so that code like this:
-   * <p>
+   *
    * <pre>
    * {@code
    * scene1.beginDraw();
@@ -881,13 +884,13 @@ public class Scene extends Graph implements PConstants {
    * expected.
    * <p>
    * To implement a different policy either:
-   * <p>
+   *
    * <ol>
    * <li>Override the {@link #_hasFocus()} scene method; or,</li>
    * <li>Call {@link #disableAutoFocus()} and implement your own focus policy at the
    * sketch space.</li>
    * </ol>
-   * <p>
+   *
    * <b>Note</b> that for this policy to work, you should call {@link #display()} instead
    * of the papplet image() function on the {@link #frontBuffer()}.
    *
@@ -1184,7 +1187,7 @@ public class Scene extends Graph implements PConstants {
    * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the nodes
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
-   * <p>
+   *
    * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
    * (i.e., manual eye update) and before any other transformation of the modelview takes
    * place.
@@ -1618,7 +1621,9 @@ public class Scene extends Graph implements PConstants {
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
       if (frame instanceof Node)
-        drawPickingTarget((Node) frame);
+        drawShooterTarget(frame);
+      else
+        drawCross(frame);
     frontBuffer().popStyle();
   }
 
@@ -2646,139 +2651,143 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Convenience function that simply calls {@code drawCross(px, py, 30)}.
+   * {@link #drawCross(float, float, float)} centered at the projected frame origin.
+   * If frame is a Node instance the length of the cross is the node
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * a stroke highlight.
+   *
+   * @see #drawShooterTarget(Frame, float)
+   */
+  public void drawCross(Frame frame) {
+    frontBuffer().pushStyle();
+    if (frame instanceof Node)
+      if (isInputGrabber((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    frontBuffer().popStyle();
+  }
+
+  /**
+   * {@link #drawCross(float, float, float)} centered at the projected frame origin, having
+   * {@code length} pixels.
    *
    * @see #drawCross(float, float, float)
    */
-  public void drawCross(float px, float py) {
-    drawCross(px, py, 30);
+  public void drawCross(Frame frame, float length) {
+    if (eye() == frame) {
+      System.err.println("eye frames don't have an screen target");
+      return;
+    }
+    Vector center = projectedCoordinatesOf(frame.position());
+    drawCross(center.x(), center.y(), length);
   }
 
   /**
-   * Same as {@code drawCross(frontBuffer(), px, py, size)}.
+   * Convenience function that simply calls {@code drawCross(x, y, radius()/5)}.
+   *
+   * @see #drawCross(float, float, float)
+   */
+  public void drawCross(float x, float y) {
+    drawCross(x, y, radius() / 5);
+  }
+
+  /**
+   * Same as {@code drawCross(frontBuffer(), x, y, length)}.
    *
    * @see #drawCross(PGraphics, float, float, float)
    */
-  public void drawCross(float px, float py, float size) {
-    drawCross(frontBuffer(), px, py, size);
+  public void drawCross(float x, float y, float length) {
+    drawCross(frontBuffer(), x, y, length);
   }
 
   /**
-   * Draws a cross on the screen centered under pixel {@code (px, py)}, and edge of size
-   * {@code size} onto {@code pGraphics}.
+   * Draws a cross on the screen centered under pixel {@code (x, y)}, and edge of size
+   * {@code length} onto {@code pGraphics}.
    */
-  public void drawCross(PGraphics pGraphics, float px, float py, float size) {
-    float half_size = size / 2f;
+  public void drawCross(PGraphics pGraphics, float x, float y, float length) {
+    float half_size = length / 2f;
     pGraphics.pushStyle();
     beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
-    vertex(pGraphics, px - half_size, py);
-    vertex(pGraphics, px + half_size, py);
-    vertex(pGraphics, px, py - half_size);
-    vertex(pGraphics, px, py + half_size);
+    vertex(pGraphics, x - half_size, y);
+    vertex(pGraphics, x + half_size, y);
+    vertex(pGraphics, x, y - half_size);
+    vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
   }
 
   /**
-   * Convenience function that simply calls {@code drawFilledCircle(40, center, radius)}.
+   * Use {@link #drawShooterTarget(Frame)} instead.
    *
-   * @see #drawFilledCircle(int, Vector, float)
+   * @deprecated Please refrain from using this method, it will be removed from future releases.
    */
-  public void drawFilledCircle(Vector center, float radius) {
-    drawFilledCircle(40, center, radius);
+  @Deprecated
+  public void drawPickingTarget(Frame frame) {
+    drawShooterTarget(frame);
   }
 
   /**
-   * Same as {@code drawFilledCircle(frontBuffer(), subdivisions, center, radius)}.
+   * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
+   * If frame is a Node instance the length of the target is the node
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * a stroke highlight.
    *
-   * @see #drawFilledCircle(PGraphics, int, Vector, float)
+   * @see #drawShooterTarget(Frame, float)
    */
-  public void drawFilledCircle(int subdivisions, Vector center, float radius) {
-    drawFilledCircle(frontBuffer(), subdivisions, center, radius);
+  public void drawShooterTarget(Frame frame) {
+    frontBuffer().pushStyle();
+    if (frame instanceof Node)
+      if (isInputGrabber((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    frontBuffer().popStyle();
   }
 
   /**
-   * Draws a filled circle onto {@code pGraphics} using screen coordinates.
+   * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin, having
+   * {@code length} pixels.
    *
-   * @param subdivisions Number of triangles approximating the circle.
-   * @param center       Circle screen center.
-   * @param radius       Circle screen radius.
+   * @see #drawShooterTarget(float, float, float)
    */
-  public void drawFilledCircle(PGraphics pGraphics, int subdivisions, Vector center, float radius) {
-    pGraphics.pushStyle();
-    float precision = PApplet.TWO_PI / subdivisions;
-    float x = center.x();
-    float y = center.y();
-    float angle, x2, y2;
-    beginScreenCoordinates(pGraphics);
-    pGraphics.noStroke();
-    pGraphics.beginShape(TRIANGLE_FAN);
-    vertex(pGraphics, x, y);
-    for (angle = 0.0f; angle <= PApplet.TWO_PI + 1.1 * precision; angle += precision) {
-      x2 = x + PApplet.sin(angle) * radius;
-      y2 = y + PApplet.cos(angle) * radius;
-      vertex(pGraphics, x2, y2);
+  public void drawShooterTarget(Frame frame, float length) {
+    if (eye() == frame) {
+      System.err.println("eye frames don't have an screen target");
+      return;
     }
-    pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
-    pGraphics.popStyle();
+    Vector center = projectedCoordinatesOf(frame.position());
+    drawShooterTarget(center.x(), center.y(), length);
   }
 
   /**
-   * Same as {@code drawFilledSquare(frontBuffer(), center, edge)}.
+   * Same as {@code drawShooterTarget(frontBuffer(), x, y, radius() / 5)}.
    *
-   * @see #drawFilledSquare(PGraphics, Vector, float)
+   * @see #drawShooterTarget(float, float, float)
    */
-  public void drawFilledSquare(Vector center, float edge) {
-    drawFilledSquare(frontBuffer(), center, edge);
-  }
-
-  /**
-   * Draws a filled square onto {@code pGraphics} using screen coordinates.
-   *
-   * @param center Square screen center.
-   * @param edge   Square edge length.
-   */
-  public void drawFilledSquare(PGraphics pGraphics, Vector center, float edge) {
-    float half_edge = edge / 2f;
-    pGraphics.pushStyle();
-    float x = center.x();
-    float y = center.y();
-    beginScreenCoordinates(pGraphics);
-    pGraphics.noStroke();
-    pGraphics.beginShape(QUADS);
-    vertex(pGraphics, x - half_edge, y + half_edge);
-    vertex(pGraphics, x + half_edge, y + half_edge);
-    vertex(pGraphics, x + half_edge, y - half_edge);
-    vertex(pGraphics, x - half_edge, y - half_edge);
-    pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
-    pGraphics.popStyle();
+  public void drawShooterTarget(float x, float y) {
+    drawShooterTarget(frontBuffer(), x, y, radius() / 5);
   }
 
   /**
    * Same as {@code drawShooterTarget(frontBuffer(), center, length)}.
    *
-   * @see #drawShooterTarget(PGraphics, Vector, float)
+   * @see #drawShooterTarget(PGraphics, float, float, float)
    */
-  public void drawShooterTarget(Vector center, float length) {
-    drawShooterTarget(frontBuffer(), center, length);
+  public void drawShooterTarget(float x, float y, float length) {
+    drawShooterTarget(frontBuffer(), x, y, length);
   }
 
   /**
-   * Draws the classical shooter target onto {@code pGraphics}.
-   *
-   * @param center Center of the target on the screen
-   * @param length Length of the target in pixels
+   * Draws the classical shooter target onto {@code pGraphics}, centered at {@code (x, y)},
+   * having {@code length} pixels.
    */
-  public void drawShooterTarget(PGraphics pGraphics, Vector center, float length) {
+  public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    float x = center.x();
-    float y = center.y();
     beginScreenCoordinates(pGraphics);
     pGraphics.noFill();
 
@@ -2806,45 +2815,8 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
-    drawCross(center.x(), center.y(), 0.6f * length);
+    drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
-  }
-
-  /**
-   * Draws the node picking target: a shooter target visual hint of
-   * {@link Node#precisionThreshold()} pixels size.
-   */
-  //TODO better to implement it from Frame param, but I'm just too lazy to do that ;)
-  public void drawPickingTarget(Node node) {
-    if (node.isEye()) {
-      System.err.println("eye nodes don't have a picking target");
-      return;
-    }
-    // if (!inputHandler().hasGrabber(iFrame)) {
-    // System.err.println("addGrabber iFrame to motionAgent before drawing picking target");
-    // return;
-    // }
-    Vector center = projectedCoordinatesOf(node.position());
-    if (inputHandler().isInputGrabber(node)) {
-      frontBuffer().pushStyle();
-      frontBuffer().strokeWeight(2 * frontBuffer().strokeWeight);
-      frontBuffer().colorMode(HSB, 255);
-      float hue = frontBuffer().hue(frontBuffer().strokeColor);
-      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
-      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
-      frontBuffer().stroke(hue, saturation * 1.4f, brightness * 1.4f);
-      drawShooterTarget(center, (node.precisionThreshold() + 1));
-      frontBuffer().popStyle();
-    } else {
-      frontBuffer().pushStyle();
-      frontBuffer().colorMode(HSB, 255);
-      float hue = frontBuffer().hue(frontBuffer().strokeColor);
-      float saturation = frontBuffer().saturation(frontBuffer().strokeColor);
-      float brightness = frontBuffer().brightness(frontBuffer().strokeColor);
-      frontBuffer().stroke(hue, saturation * 1.4f, brightness);
-      drawShooterTarget(center, node.precisionThreshold());
-      frontBuffer().popStyle();
-    }
   }
 
   /**
@@ -2962,9 +2934,10 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (0,0)} having
    * Semi-axis {@code a} and {@code b} and  {@code height} dimensions.
-   *
+   * <p>
    * {@code a} represents the horizontal semi-axis
    * {@code b} represents the horizontal semi-axis
+   *
    * @param pGraphics
    * @param height
    * @param a
@@ -3010,8 +2983,9 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a cone onto {@code pGraphics} centered at {@code (0,0,0)} where
    * {@code vertices} represents the base of the Polygon and with {@code scale} as maximum height.
-   *
+   * <p>
    * It is desirable that each point in {@code vertices} lie inside the unit Sphere
+   *
    * @param pGraphics
    * @param vertices
    * @param scale
@@ -3037,11 +3011,11 @@ public class Scene extends Graph implements PConstants {
    * @param maxAngle
    * @param detail
    */
-  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail){
+  public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    pGraphics.vertex(0,0,0);
-    float step = (maxAngle - minAngle)/detail;
-    for(float theta = minAngle; theta <= maxAngle; theta += step) {
+    pGraphics.vertex(0, 0, 0);
+    float step = (maxAngle - minAngle) / detail;
+    for (float theta = minAngle; theta <= maxAngle; theta += step) {
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
     }
     pGraphics.endShape(PApplet.CLOSE);
@@ -3051,18 +3025,18 @@ public class Scene extends Graph implements PConstants {
     drawConstraint(frontBuffer(), node);
   }
 
-  public void drawConstraint(PGraphics pGraphics, Node node){
-    if(node.constraint() == null) return;
+  public void drawConstraint(PGraphics pGraphics, Node node) {
+    if (node.constraint() == null) return;
     float boneLength = 0;
-    if(!node.children().isEmpty()){
-      for(Node child : node.children()) {
+    if (!node.children().isEmpty()) {
+      for (Node child : node.children()) {
         boneLength += child.translation().magnitude();
       }
-      boneLength = boneLength/(1.f*node.children().size());
-    }else{
+      boneLength = boneLength / (1.f * node.children().size());
+    } else {
       boneLength = node.translation().magnitude();
     }
-    if(boneLength == 0) return;
+    if (boneLength == 0) return;
 
     pGraphics.pushMatrix();
     pGraphics.pushStyle();
@@ -3077,8 +3051,8 @@ public class Scene extends Graph implements PConstants {
       applyTransformation(reference);
       drawAxes(5);
       drawCone(pGraphics, boneLength / 2.f,
-              (boneLength / 2.f) * PApplet.tan(constraint.left()),
-              (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
+          (boneLength / 2.f) * PApplet.tan(constraint.left()),
+          (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
     } else if (node.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) node.constraint()).restRotation());
       applyTransformation(reference);
@@ -3091,17 +3065,17 @@ public class Scene extends Graph implements PConstants {
       drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
     } else if (node.constraint() instanceof Hinge) {
       Hinge constraint = (Hinge) node.constraint();
-      if(node.children().size() == 1){
+      if (node.children().size() == 1) {
         Vector axis = constraint.restRotation().rotate(constraint.axis());
         reference.rotate(constraint.restRotation());
         Vector rest = Vector.projectVectorOnPlane(node.rotation().inverse().rotate(node.children().get(0).translation()), axis);
         //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0,0,1), axis));
+        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1,0,0), reference.rotation().inverse().rotate(rest)));
+        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
         applyTransformation(reference);
         drawAxes(5);
-        drawArc(pGraphics, boneLength/2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
+        drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }
     pGraphics.popStyle();

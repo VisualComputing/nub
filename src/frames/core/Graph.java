@@ -216,7 +216,6 @@ public class Graph {
     setRadius(100);
     setCenter(new Vector());
     _anchor = center().get();
-    _interpolator = new Interpolator(this);
     setEye(new Frame());
     fitBall();
 
@@ -355,7 +354,7 @@ public class Graph {
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link Graph#lookAt(Vector)},
    * {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
-   * <p>
+   *
    * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
@@ -407,7 +406,7 @@ public class Graph {
    * <p>
    * If you need a completely different zNear computation, overload the {@link #zNear()}
    * and {@link #zFar()} methods.
-   * <p>
+   *
    * <b>Attention:</b> The value is always positive, although the clipping plane is
    * positioned at a negative z value in the eye coordinate system.
    *
@@ -610,7 +609,7 @@ public class Graph {
    * by each traversed node, and calling {@link Node#visit()} on it.
    * <p>
    * Note that only reachable nodes are visited by this algorithm.
-   * <p>
+   *
    * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
    * eye update) and before any other transformation of the modelview matrix takes place.
    *
@@ -829,6 +828,33 @@ public class Graph {
   }
 
   /**
+   * Same as {@code inputHandler().addGrabber(grabber)}.
+   *
+   * @see InputHandler#addGrabber(Grabber)
+   */
+  public void addGrabber(Grabber grabber) {
+    inputHandler().addGrabber(grabber);
+  }
+
+  /**
+   * Same as {@code inputHandler().removeGrabbers()}.
+   *
+   * @see InputHandler#removeGrabbers()
+   */
+  public void removeGrabbers() {
+    inputHandler().removeGrabbers();
+  }
+
+  /**
+   * Same as {@code inputHandler().removeGrabber(grabber)}.
+   *
+   * @see InputHandler#removeGrabber(Grabber)
+   */
+  public void removeGrabber(Grabber grabber) {
+    inputHandler().removeGrabber(grabber);
+  }
+
+  /**
    * Same as {@code inputHandler().hasGrabber(grabber)}.
    *
    * @see InputHandler#hasGrabber(Grabber)
@@ -994,9 +1020,9 @@ public class Graph {
    * they best fit the graph size.
    * <p>
    * Override {@link #computeProjection()} to define a CUSTOM projection.
-   * <p>
+   *
    * <b>Note 1:</b> This method is called by {@link #preDraw()}.
-   * <p>
+   *
    * <b>Note 2:</b> Note that the computation of both, the PERSPECTIVE and ORTHOGRAPHIC frustum
    * shapes depend on the eye magnitude, see {@link #fieldOfView()} and {@link #boundaryWidthHeight()}.
    */
@@ -1196,11 +1222,16 @@ public class Graph {
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
-    if (eye instanceof Node)
-      if (((Node) eye).graph() != this)
-        return;
+    // TODO experimental. Should be checked
+    // Note that if (((Node) eye).graph() != this) the interpolator throws an exception
+    //if (eye instanceof Node)
+    //if (((Node) eye).graph() != this)
+    //return;
     _eye = eye;
-    _interpolator.setFrame(eye);
+    if (_interpolator == null)
+      _interpolator = new Interpolator(this, _eye);
+    else
+      _interpolator.setFrame(_eye);
     _modified();
   }
 
@@ -1227,7 +1258,7 @@ public class Graph {
   /**
    * Returns {@code true} if {@code point} is visible (i.e, lies within the eye boundary)
    * and {@code false} otherwise.
-   * <p>
+   *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling {@link #computeBoundaryEquations()})
    * or enable them to be automatic updated in your graph setup (with
@@ -1255,7 +1286,7 @@ public class Graph {
    * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
    * {@link Visibility#SEMIVISIBLE}, depending whether the sphere (of radius {@code radius}
    * and center {@code center}) is visible, invisible, or semi-visible, respectively.
-   * <p>
+   *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
@@ -1291,7 +1322,7 @@ public class Graph {
    * {@link Visibility#SEMIVISIBLE}, depending whether the axis aligned box
    * (defined by corners {@code p1} and {@code p2}) is visible, invisible,
    * or semi-visible, respectively.
-   * <p>
+   *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
@@ -1350,7 +1381,7 @@ public class Graph {
    * <p>
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
-   * <p>
+   *
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
@@ -1542,7 +1573,7 @@ public class Graph {
   /**
    * Updates the boundary plane equations according to the current eye setup, by simply
    * calling {@link #computeBoundaryEquations()}.
-   * <p>
+   *
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * boundary equations to be updated only occasionally (rare). Use
    * {@link #enableBoundaryEquations()} which automatically update the boundary equations
@@ -1578,7 +1609,7 @@ public class Graph {
    * <p>
    * where {@code a}, {@code b}, {@code c} and {@code d} are the 4 components of each
    * vector, in that order.
-   * <p>
+   *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
@@ -1609,7 +1640,7 @@ public class Graph {
    * <p>
    * In 3D {@code index} is a value between {@code 0} and {@code 5} which respectively
    * correspond to the left, right, near, far, top and bottom eye boundary planes.
-   * <p>
+   *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
    * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
@@ -2279,7 +2310,7 @@ public class Graph {
    */
   public void interpolateTo(Frame frame, float duration) {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     _interpolator.addKeyFrame(eye().detach());
     _interpolator.addKeyFrame(frame.detach(), duration);
     _interpolator.start();
@@ -2299,7 +2330,7 @@ public class Graph {
    */
   public void fitScreenRegionInterpolation(Rectangle rectangle) {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     Frame eye = eye();
     setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
@@ -2319,7 +2350,7 @@ public class Graph {
    */
   public void fitBallInterpolation() {
     _interpolator.stop();
-    _interpolator.clear();
+    _interpolator.purge();
     Frame eye = eye();
     setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());

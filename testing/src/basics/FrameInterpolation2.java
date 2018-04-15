@@ -146,7 +146,7 @@ public class FrameInterpolation2 extends PApplet {
     if (key == 'm')
       eyeInterpolator.toggle();
     if (key == 'n')
-      eyeInterpolator.clear();
+      eyeInterpolator.purge();
     if (key == 'u')
       nodeInterpolator.setSpeed(nodeInterpolator.speed() - 0.25f);
     if (key == 'v')
