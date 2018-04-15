@@ -51,13 +51,13 @@ public class Viewer extends PApplet {
         targets.put("HEAD", new Target(scene));
 
 
-        parser = new BVHParser(Joint.class);
-        root = parser.readHeader(sketchPath() + path, scene, null);
+        parser = new BVHParser(Joint.class, sketchPath() + path, scene, null);
+        root = parser.root();
         ((Joint) root).setRoot(true);
         //make a copy of the skeleton
-        rootIK = (Joint) copy(scene.branch(root));
+        //rootIK = (Joint) copy(scene.branch(root));
         //rootIK.translate(50, 50, 50);
-
+        /*
         Solver solver = scene.registerTreeSolver(rootIK);
         solver.timesPerFrame = 100;
         solver.error = 0.05f;
@@ -66,6 +66,7 @@ public class Viewer extends PApplet {
         scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
         scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
+        */
     }
 
     public void draw() {
@@ -77,9 +78,10 @@ public class Viewer extends PApplet {
             if (frame instanceof Shape) ((Shape) frame).draw();
         }
         if(read){
-            parser.readNextFrame();
+            parser.nextPose();
             updateTargets();
         }
+        parser.drawFeasibleRegion(this.getGraphics());
     }
 
     public Node copy(ArrayList<Node> branch) {
