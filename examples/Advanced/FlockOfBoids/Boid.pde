@@ -15,8 +15,7 @@ class Boid {
   Boid(Vector inPos) {
     grabsMouseColor = color(0, 0, 255);
     avatarColor = color(255, 255, 0);
-    position = new Vector();
-    position.set(inPos);
+    position = inPos;
     node = new Node(scene) {
       // Note that within visit() geometry is defined at the
       // node local coordinate system.
