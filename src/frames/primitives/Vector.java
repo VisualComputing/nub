@@ -658,7 +658,7 @@ public class Vector {
     }
     float m = magnitude();
     if (m > 0) {
-      target.set(_vector[0] / m, _vector[1] / m, _vector[02] / m);
+      target.set(_vector[0] / m, _vector[1] / m, _vector[2] / m);
     } else {
       target.set(_vector[0], _vector[1], _vector[2]);
     }
