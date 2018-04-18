@@ -888,7 +888,9 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code return axis().vec[2] > 0 ? angle() : -angle()}.
+   * Same as {@code return axis().z() > 0 ? angle() : -angle()}.
+   *
+   * @see #angle()
    */
   public float angle2D() {
     return axis()._vector[2] > 0 ? angle() : -angle();
