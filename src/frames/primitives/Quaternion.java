@@ -868,11 +868,11 @@ public class Quaternion {
    * @see #angle()
    */
   public Vector axis() {
-    Vector res = new Vector(x(), y(), z());
-    float sinus = res.magnitude();
+    Vector axis = new Vector(x(), y(), z());
+    float sinus = axis.magnitude();
     if (sinus != 0)
-      res.divide(sinus);
-    return res;
+      axis.divide(sinus);
+    return axis;
   }
 
   /**

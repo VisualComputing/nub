@@ -65,7 +65,7 @@ public class TwoD extends PApplet {
       pushStyle();
       stroke(255);
       strokeWeight(2);
-      scene.drawPickingTarget(node);
+      scene.drawShooterTarget(node);
       popStyle();
     }
 
