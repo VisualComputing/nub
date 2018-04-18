@@ -390,7 +390,7 @@ public class Node extends Frame implements Grabber {
    * Same as {@link #setReference(Frame)} but using a Node parameter.
    */
   public void setReference(Node node) {
-    if (settingAsReferenceWillCreateALoop(node)) {
+    if (isDescendant(node)) {
       System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
       return;
     }

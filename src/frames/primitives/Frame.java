@@ -75,7 +75,7 @@ import frames.timing.TimingHandler;
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
- * frame definition. Therefore {@link #settingAsReferenceWillCreateALoop(Frame)}
+ * frame definition. Therefore {@link #isDescendant(Frame)}
  * checks this and prevents {@link #reference()} from creating such a loop.
  * <p>
  * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vector, Frame)},
@@ -341,7 +341,7 @@ public class Frame {
    * {@link #reference()} would create a loop in the hierarchy.
    */
   public void setReference(Frame reference) {
-    if (settingAsReferenceWillCreateALoop(reference)) {
+    if (isDescendant(reference)) {
       System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
       return;
     }
@@ -355,12 +355,12 @@ public class Frame {
    * Returns {@code true} if setting {@code frame} as the frame's
    * {@link #reference()} would create a loop in the frame hierarchy.
    */
-  public boolean settingAsReferenceWillCreateALoop(Frame frame) {
-    Frame f = frame;
-    while (f != null) {
-      if (f == Frame.this)
+  public boolean isDescendant(Frame frame) {
+    Frame descendant = frame;
+    while (descendant != null) {
+      if (descendant == this)
         return true;
-      f = f.reference();
+      descendant = descendant.reference();
     }
     return false;
   }
@@ -707,9 +707,9 @@ public class Frame {
    * {@link #reference()}).
    */
   public void setMagnitude(float magnitude) {
-    Frame refFrame = reference();
-    if (refFrame != null)
-      setScaling(magnitude / refFrame.magnitude());
+    Frame reference = reference();
+    if (reference != null)
+      setScaling(magnitude / reference.magnitude());
     else
       setScaling(magnitude);
   }
@@ -1316,20 +1316,20 @@ public class Frame {
    * {@link #coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
    */
   public Vector coordinatesOfIn(Vector vector, Frame in) {
-    Frame fr = this;
-    Vector res = vector;
-    while ((fr != null) && (fr != in)) {
-      res = fr.localInverseCoordinatesOf(res);
-      fr = fr.reference();
+    Frame frame = this;
+    Vector result = vector;
+    while ((frame != null) && (frame != in)) {
+      result = frame.localInverseCoordinatesOf(result);
+      frame = frame.reference();
     }
 
-    if (fr != in)
+    if (frame != in)
       // in was not found in the branch of this, res is now expressed in the
       // world
       // coordinate system. Simply convert to in coordinate system.
-      res = in.coordinatesOf(res);
+      result = in.coordinatesOf(result);
 
-    return res;
+    return result;
   }
 
   /**
@@ -1383,19 +1383,19 @@ public class Frame {
    * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
    */
   public Vector transformOfIn(Vector vector, Frame in) {
-    Frame fr = this;
-    Vector res = vector;
-    while ((fr != null) && (fr != in)) {
-      res = fr.localInverseTransformOf(res);
-      fr = fr.reference();
+    Frame frame = this;
+    Vector result = vector;
+    while ((frame != null) && (frame != in)) {
+      result = frame.localInverseTransformOf(result);
+      frame = frame.reference();
     }
 
-    if (fr != in)
+    if (frame != in)
       // in was not found in the branch of this, res is now expressed in
       // the world coordinate system. Simply convert to in coordinate system.
-      res = in.transformOf(res);
+      result = in.transformOf(result);
 
-    return res;
+    return result;
   }
 
   /**
@@ -1418,13 +1418,13 @@ public class Frame {
    * {@link #inverseTransformOf(Vector)} to transform vectors instead of coordinates.
    */
   public Vector inverseCoordinatesOf(Vector vector) {
-    Frame fr = this;
-    Vector res = vector;
-    while (fr != null) {
-      res = fr.localInverseCoordinatesOf(res);
-      fr = fr.reference();
+    Frame frame = this;
+    Vector result = vector;
+    while (frame != null) {
+      result = frame.localInverseCoordinatesOf(result);
+      frame = frame.reference();
     }
-    return res;
+    return result;
   }
 
   /**
@@ -1450,13 +1450,13 @@ public class Frame {
    * {@link #inverseCoordinatesOf(Vector)} to transform coordinates instead of vectors.
    */
   public Vector inverseTransformOf(Vector vector) {
-    Frame fr = this;
-    Vector res = vector;
-    while (fr != null) {
-      res = fr.localInverseTransformOf(res);
-      fr = fr.reference();
+    Frame frame = this;
+    Vector result = vector;
+    while (frame != null) {
+      result = frame.localInverseTransformOf(result);
+      frame = frame.reference();
     }
-    return res;
+    return result;
   }
 
   /**

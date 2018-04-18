@@ -2993,9 +2993,8 @@ public class Scene extends Graph implements PConstants {
   public void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
-    for (Vector v : vertices) {
+    for (Vector v : vertices)
       pGraphics.vertex(scale * v.x(), scale * v.y(), scale * v.z());
-    }
     if (!vertices.isEmpty())
       pGraphics.vertex(scale * vertices.get(0).x(), scale * vertices.get(0).y(), scale * vertices.get(0).z());
     pGraphics.endShape();
