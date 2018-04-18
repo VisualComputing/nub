@@ -3014,9 +3014,8 @@ public class Scene extends Graph implements PConstants {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     float step = (maxAngle - minAngle) / detail;
-    for (float theta = minAngle; theta <= maxAngle; theta += step) {
+    for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
-    }
     pGraphics.endShape(PApplet.CLOSE);
   }
 
@@ -3028,13 +3027,11 @@ public class Scene extends Graph implements PConstants {
     if (node.constraint() == null) return;
     float boneLength = 0;
     if (!node.children().isEmpty()) {
-      for (Node child : node.children()) {
+      for (Node child : node.children())
         boneLength += child.translation().magnitude();
-      }
       boneLength = boneLength / (1.f * node.children().size());
-    } else {
+    } else
       boneLength = node.translation().magnitude();
-    }
     if (boneLength == 0) return;
 
     pGraphics.pushMatrix();
