@@ -75,7 +75,7 @@ import frames.timing.TimingHandler;
  * <p>
  * Frames can hence easily be organized in a tree hierarchy, which root is the world
  * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
- * frame definition. Therefore {@link #isDescendant(Frame)}
+ * frame definition. Therefore {@link #isAscendantOf(Frame)}
  * checks this and prevents {@link #reference()} from creating such a loop.
  * <p>
  * This frame hierarchy is used in methods like {@link #coordinatesOfIn(Vector, Frame)},
@@ -345,7 +345,7 @@ public class Frame {
       System.out.println("A frame cannot be a reference of itself.");
       return;
     }
-    if (isDescendant(frame)) {
+    if (isAscendantOf(frame)) {
       System.out.println("A frame descendant cannot be set as its reference.");
       return;
     }
@@ -358,9 +358,9 @@ public class Frame {
   /**
    * Returns {@code true} if {@code frame} is descendant of this frame.
    *
-   * @see #isAscendant(Frame)
+   * @see #isDescendantOf(Frame)
    */
-  public boolean isDescendant(Frame frame) {
+  public boolean isAscendantOf(Frame frame) {
     if (frame == this || frame == null)
       return false;
     Frame ascendant = frame.reference();
@@ -375,9 +375,9 @@ public class Frame {
   /**
    * Returns {@code true} if {@code frame} is ascendant of this frame.
    *
-   * @see #isDescendant(Frame)
+   * @see #isAscendantOf(Frame)
    */
-  public boolean isAscendant(Frame frame) {
+  public boolean isDescendantOf(Frame frame) {
     if (frame == null)
       return true;
     if (frame == this)

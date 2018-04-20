@@ -394,7 +394,7 @@ public class Node extends Frame implements Grabber {
       System.out.println("A node cannot be a reference of itself.");
       return;
     }
-    if (isDescendant(node)) {
+    if (isAscendantOf(node)) {
       System.out.println("A node descendant cannot be set as its reference.");
       return;
     }
