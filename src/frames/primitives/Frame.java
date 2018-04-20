@@ -1238,7 +1238,7 @@ public class Frame {
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code frame} frame. This frame {@link #constraint()} and {@link #reference()}
+   * those of the {@code frame}. This frame {@link #constraint()} and {@link #reference()}
    * are not affected by this call.
    * <p>
    * After calling {@code set(frame)} a call to {@code this.matches(other)} should

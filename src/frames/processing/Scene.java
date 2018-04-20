@@ -1506,7 +1506,7 @@ public class Scene extends Graph implements PConstants {
    * Converts a {@link Matrix} to a PMatrix3D.
    */
   public static PMatrix3D toPMatrix(Matrix matrix) {
-    float[] a = matrix.getTransposed(new float[16]);
+    float[] a = matrix.get(new float[16], false);
     return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
         a[15]);
   }
@@ -1515,7 +1515,7 @@ public class Scene extends Graph implements PConstants {
    * Converts a PMatrix3D to a {@link Matrix}.
    */
   public static Matrix toMat(PMatrix3D pMatrix3D) {
-    return new Matrix(pMatrix3D.get(new float[16]), true);
+    return new Matrix(pMatrix3D.get(new float[16]), false);
   }
 
   /**
@@ -1529,7 +1529,7 @@ public class Scene extends Graph implements PConstants {
    * Converts a {@link Matrix} to a PMatrix2D.
    */
   public static PMatrix2D toPMatrix2D(Matrix matrix) {
-    float[] a = matrix.getTransposed(new float[16]);
+    float[] a = matrix.get(new float[16], false);
     return new PMatrix2D(a[0], a[1], a[3], a[4], a[5], a[7]);
   }
 
