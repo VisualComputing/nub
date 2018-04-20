@@ -763,7 +763,7 @@ public class Matrix {
       target[0] = _matrix[0] * source[0] + _matrix[4] * source[1] + _matrix[8] * source[2] + _matrix[12];
       target[1] = _matrix[1] * source[0] + _matrix[5] * source[1] + _matrix[9] * source[2] + _matrix[13];
       target[2] = _matrix[2] * source[0] + _matrix[6] * source[1] + _matrix[10] * source[2] + _matrix[14];
-    } else if (target.length > 3) {
+    } else {
       target[0] = _matrix[0] * source[0] + _matrix[4] * source[1] + _matrix[8] * source[2] + _matrix[12] * source[3];
       target[1] = _matrix[1] * source[0] + _matrix[5] * source[1] + _matrix[9] * source[2] + _matrix[13] * source[3];
       target[2] = _matrix[2] * source[0] + _matrix[6] * source[1] + _matrix[10] * source[2] + _matrix[14] * source[3];
