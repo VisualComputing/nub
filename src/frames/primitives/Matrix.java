@@ -39,13 +39,20 @@ public class Matrix {
     reset();
   }
 
+  /**
+   * Same as {@code this(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true)}.
+   *
+   * @see #Matrix(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, boolean)
+   */
   public Matrix(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
                 float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
-    set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true);
+    this(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true);
   }
 
   /**
-   * 16 consecutive values that are used as the elements of a 4 x 4 column-major matrix.
+   * Same as {@code set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, columnMajorOrder)}.
+   *
+   * @see #set(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, boolean)
    */
   public Matrix(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
                 float m9, float m10, float m11, float m12, float m13, float m14, float m15, boolean columnMajorOrder) {
@@ -66,9 +73,8 @@ public class Matrix {
   }
 
   /**
-   * Sets the matrix contents from the 16 entry float array. If {@code transpose} is false
-   * the matrix contents are set in column major order, otherwise they're set in row-major
-   * order.
+   * Sets the matrix contents from the 16 entry {@code source} float array given in
+   * {@code columnMajorOrder} or row major order (if {@code columnMajorOrder} is {@code false}).
    */
   public Matrix(float[] source, boolean columnMajorOrder) {
     set(source, columnMajorOrder);
@@ -340,9 +346,9 @@ public class Matrix {
   }
 
   /**
-   * Copies the matrix contents into a 16 entry float array. If target is null (or not the
-   * correct size), a new array will be created. Column or row major order is defined by
-   * the {@code columnMajorOrder} boolean parameter.
+   * Copies the matrix contents into a 16 entry {@code target} float array. If target is null
+   * (or not the correct size), a new array will be created. Column or row major order is defined
+   * by the {@code columnMajorOrder} boolean parameter.
    */
   public float[] get(float[] target, boolean columnMajorOrder) {
     if ((target == null) || (target.length != 16)) {
@@ -410,8 +416,8 @@ public class Matrix {
   }
 
   /**
-   * Sets the matrix contents from the 16 entry float array. Column or row major order
-   * is defined by the {@code columnMajorOrder} boolean parameter.
+   * Sets the matrix contents from the 16 entry float {@code source} array. Column or row major
+   * order is defined by the {@code columnMajorOrder} boolean parameter.
    */
   public void set(float[] source, boolean columnMajorOrder) {
     if (source.length == 16) {
@@ -735,8 +741,8 @@ public class Matrix {
   }
 
   /**
-   * Multiply this matrix by the {@code source} Vector and stores the result in the
-   * {@code target} Vector which is then returned.
+   * Multiply this matrix by the {@code source} vector and stores the result in the
+   * {@code target} vector which is then returned.
    */
   public Vector multiply(Vector source, Vector target) {
     if (target == null) {
@@ -749,8 +755,9 @@ public class Matrix {
   }
 
   /**
-   * Multiply a three or four element vector against this matrix. If out is null or not
-   * length 3 or 4, a new float array (length 3) will be returned.
+   * Multiply a three or four element vector {@code source} against this matrix and store the result
+   * in {@code target}. If {@code target} is null or not length 3 or 4, a new float array (length 3)
+   * will be returned.
    */
   public float[] multiply(float[] source, float[] target) {
     if (target == null || target.length < 3) {
@@ -798,9 +805,9 @@ public class Matrix {
   }
 
   /**
-   * Invert this matrix into {@code m}, i.e., doesn't modify this matrix.
+   * Invert this matrix into {@code matrix}, i.e., doesn't modify this matrix.
    * <p>
-   * {@code m} should be non-null.
+   * {@code matrix} should be non-null.
    */
   public boolean invert(Matrix matrix) {
     float determinant = determinant();
