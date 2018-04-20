@@ -51,12 +51,12 @@ public class MotionEvent extends Event {
     super(modifiers, id);
   }
 
-  protected MotionEvent(MotionEvent other) {
-    super(other);
-    this._delay = other._delay;
-    this._distance = other._distance;
-    this._speed = other._speed;
-    this._relative = other._relative;
+  protected MotionEvent(MotionEvent motionEvent) {
+    super(motionEvent);
+    this._delay = motionEvent._delay;
+    this._distance = motionEvent._distance;
+    this._speed = motionEvent._speed;
+    this._relative = motionEvent._relative;
   }
 
   @Override

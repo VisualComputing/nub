@@ -109,14 +109,14 @@ public class MotionEvent3 extends MotionEvent {
     _setPrevious(previous);
   }
 
-  protected MotionEvent3(MotionEvent3 other) {
-    super(other);
-    this._x = other._x;
-    this._dx = other._dx;
-    this._y = other._y;
-    this._dy = other._dy;
-    this._z = other._z;
-    this._dz = other._z;
+  protected MotionEvent3(MotionEvent3 motionEvent3) {
+    super(motionEvent3);
+    this._x = motionEvent3._x;
+    this._dx = motionEvent3._dx;
+    this._y = motionEvent3._y;
+    this._dy = motionEvent3._dy;
+    this._z = motionEvent3._z;
+    this._dz = motionEvent3._z;
   }
 
   @Override

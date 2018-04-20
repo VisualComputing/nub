@@ -73,12 +73,12 @@ public class Interpolator {
   /**
    * Returns whether or not this interpolator matches other.
    *
-   * @param other Interpolator
+   * @param interpolator other interpolator
    */
-  public boolean matches(Interpolator other) {
+  public boolean matches(Interpolator interpolator) {
     boolean result = true;
     for (int i = 0; i < _list.size(); i++) {
-      if (!_list.get(i).matches(other._list.get(i)))
+      if (!_list.get(i).matches(interpolator._list.get(i)))
         result = false;
       break;
     }
@@ -92,10 +92,10 @@ public class Interpolator {
     /**
      * Returns whether or not this key frame matches the {@code other}.
      *
-     * @param other KeyFrame
+     * @param keyFrame other keyFrame
      */
-    public boolean matches(KeyFrame other) {
-      return frame().matches(other.frame()) && time() == other.time();
+    public boolean matches(KeyFrame keyFrame) {
+      return frame().matches(keyFrame.frame()) && time() == keyFrame.time();
     }
 
     protected Quaternion _tangentQuaternion;

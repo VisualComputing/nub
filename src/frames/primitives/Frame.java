@@ -105,10 +105,10 @@ public class Frame {
    * Returns whether or not this frame matches other taking into account the {@link #translation()},
    * {@link #rotation()} and {@link #scaling()} frame parameters, but not its {@link #reference()}.
    *
-   * @param other frame
+   * @param frame frame
    */
-  public boolean matches(Frame other) {
-    return translation().matches(other.translation()) && rotation().matches(other.rotation()) && scaling() == other.scaling();
+  public boolean matches(Frame frame) {
+    return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
   }
 
   protected Vector _translation;
@@ -184,12 +184,12 @@ public class Frame {
     setReference(reference);
   }
 
-  protected Frame(Frame other) {
-    _translation = other.translation().get();
-    _rotation = other.rotation().get();
-    _scaling = other.scaling();
-    _reference = other.reference();
-    _constraint = other.constraint();
+  protected Frame(Frame frame) {
+    _translation = frame.translation().get();
+    _rotation = frame.rotation().get();
+    _scaling = frame.scaling();
+    _reference = frame.reference();
+    _constraint = frame.constraint();
   }
 
   /**
@@ -272,8 +272,8 @@ public class Frame {
    *
    * @see #sync(Frame, Frame)
    */
-  public void sync(Frame other) {
-    sync(this, other);
+  public void sync(Frame frame) {
+    sync(this, frame);
   }
 
   /**
@@ -1246,12 +1246,12 @@ public class Frame {
    * @see #worldMatrix()
    * @see #setMatrix(Frame)
    */
-  public void setWorldMatrix(Frame other) {
-    if (other == null)
+  public void setWorldMatrix(Frame frame) {
+    if (frame == null)
       return;
-    setPosition(other.position());
-    setOrientation(other.orientation());
-    setMagnitude(other.magnitude());
+    setPosition(frame.position());
+    setOrientation(frame.orientation());
+    setMagnitude(frame.magnitude());
   }
 
   /**
@@ -1261,12 +1261,12 @@ public class Frame {
    * @see #matrix()
    * @see #setWorldMatrix(Frame)
    */
-  public void setMatrix(Frame other) {
-    if (other == null)
+  public void setMatrix(Frame frame) {
+    if (frame == null)
       return;
-    setTranslation(other.translation());
-    setRotation(other.rotation());
-    setScaling(other.scaling());
+    setTranslation(frame.translation());
+    setRotation(frame.rotation());
+    setScaling(frame.scaling());
   }
 
   /**
@@ -1326,13 +1326,13 @@ public class Frame {
    * <p>
    * {@link #coordinatesOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public Vector coordinatesOfFrom(Vector src, Frame from) {
-    if (this == from)
-      return src;
+  public Vector coordinatesOfFrom(Vector vector, Frame frame) {
+    if (this == frame)
+      return vector;
     else if (reference() != null)
-      return localCoordinatesOf(reference().coordinatesOfFrom(src, from));
+      return localCoordinatesOf(reference().coordinatesOfFrom(vector, frame));
     else
-      return localCoordinatesOf(from.inverseCoordinatesOf(src));
+      return localCoordinatesOf(frame.inverseCoordinatesOf(vector));
   }
 
   /**
@@ -1341,19 +1341,19 @@ public class Frame {
    * <p>
    * {@link #coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public Vector coordinatesOfIn(Vector vector, Frame in) {
-    Frame frame = this;
+  public Vector coordinatesOfIn(Vector vector, Frame frame) {
     Vector result = vector;
-    while ((frame != null) && (frame != in)) {
-      result = frame.localInverseCoordinatesOf(result);
-      frame = frame.reference();
+    Frame aux = this;
+    while ((aux != null) && (aux != frame)) {
+      result = aux.localInverseCoordinatesOf(result);
+      aux = aux.reference();
     }
 
-    if (frame != in)
+    if (aux != frame)
       // in was not found in the branch of this, res is now expressed in the
       // world
       // coordinate system. Simply convert to in coordinate system.
-      result = in.coordinatesOf(result);
+      result = frame.coordinatesOf(result);
 
     return result;
   }
@@ -1393,13 +1393,13 @@ public class Frame {
    * <p>
    * {@link #transformOfIn(Vector, Frame)} performs the inverse transformation.
    */
-  public Vector transformOfFrom(Vector vector, Frame from) {
-    if (this == from)
+  public Vector transformOfFrom(Vector vector, Frame frame) {
+    if (this == frame)
       return vector;
     else if (reference() != null)
-      return localTransformOf(reference().transformOfFrom(vector, from));
+      return localTransformOf(reference().transformOfFrom(vector, frame));
     else
-      return localTransformOf(from.inverseTransformOf(vector));
+      return localTransformOf(frame.inverseTransformOf(vector));
   }
 
   /**
@@ -1408,18 +1408,18 @@ public class Frame {
    * <p>
    * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
    */
-  public Vector transformOfIn(Vector vector, Frame in) {
-    Frame frame = this;
+  public Vector transformOfIn(Vector vector, Frame frame) {
+    Frame aux = this;
     Vector result = vector;
-    while ((frame != null) && (frame != in)) {
-      result = frame.localInverseTransformOf(result);
-      frame = frame.reference();
+    while ((aux != null) && (aux != frame)) {
+      result = aux.localInverseTransformOf(result);
+      aux = aux.reference();
     }
 
-    if (frame != in)
+    if (aux != frame)
       // in was not found in the branch of this, res is now expressed in
       // the world coordinate system. Simply convert to in coordinate system.
-      result = in.transformOf(result);
+      result = frame.transformOf(result);
 
     return result;
   }
@@ -1454,7 +1454,7 @@ public class Frame {
   }
 
   /**
-   * Returns the frame transform of a vector {@code src} defined in the world coordinate
+   * Returns the frame transform of a vector {@code vector} defined in the world coordinate
    * system (converts vectors from world to this frame).
    * <p>
    * {@link #inverseTransformOf(Vector)} performs the inverse transformation.

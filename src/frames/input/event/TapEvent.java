@@ -70,11 +70,11 @@ public class TapEvent extends Event {
     this._count = count;
   }
 
-  protected TapEvent(TapEvent other) {
-    super(other);
-    this._x = other._x;
-    this._y = other._y;
-    this._count = other._count;
+  protected TapEvent(TapEvent tapEvent) {
+    super(tapEvent);
+    this._x = tapEvent._x;
+    this._y = tapEvent._y;
+    this._count = tapEvent._count;
   }
 
   @Override

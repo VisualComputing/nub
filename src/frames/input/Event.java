@@ -70,12 +70,12 @@ public class Event {
     _timestamp = System.currentTimeMillis();
   }
 
-  protected Event(Event other) {
-    this._modifiers = other._modifiers;
-    this._id = other._id;
+  protected Event(Event event) {
+    this._modifiers = event._modifiers;
+    this._id = event._id;
     this._timestamp = System.currentTimeMillis();
-    this._fire = other._fire;
-    this._flush = other._flush;
+    this._fire = event._fire;
+    this._flush = event._flush;
   }
 
   public Event get() {

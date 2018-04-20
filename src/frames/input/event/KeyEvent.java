@@ -53,11 +53,11 @@ public class KeyEvent extends Event {
   }
 
   /**
-   * @param other
+   * @param keyEvent
    */
-  protected KeyEvent(KeyEvent other) {
-    super(other);
-    this._key = other._key;
+  protected KeyEvent(KeyEvent keyEvent) {
+    super(keyEvent);
+    this._key = keyEvent._key;
   }
 
   @Override

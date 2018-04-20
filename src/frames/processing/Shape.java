@@ -113,10 +113,10 @@ public class Shape extends Node {
     set(pShape);
   }
 
-  protected Shape(Scene otherGraph, Shape otherShape) {
-    super(otherGraph, otherShape);
-    this._frontShape = otherShape._frontShape;
-    this._backShape = otherShape._backShape;
+  protected Shape(Scene scene, Shape shape) {
+    super(scene, shape);
+    this._frontShape = shape._frontShape;
+    this._backShape = shape._backShape;
   }
 
   @Override

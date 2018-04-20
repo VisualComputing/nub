@@ -100,12 +100,12 @@ public class MotionEvent2 extends MotionEvent {
     _setPrevious(previous);
   }
 
-  protected MotionEvent2(MotionEvent2 other) {
-    super(other);
-    this._x = other._x;
-    this._dx = other._dx;
-    this._y = other._y;
-    this._dy = other._dy;
+  protected MotionEvent2(MotionEvent2 motionEvent2) {
+    super(motionEvent2);
+    this._x = motionEvent2._x;
+    this._dx = motionEvent2._dx;
+    this._y = motionEvent2._y;
+    this._dy = motionEvent2._dy;
   }
 
   @Override

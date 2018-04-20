@@ -30,10 +30,10 @@ public class Vector {
   /**
    * Returns whether or not this vector matches other.
    *
-   * @param other vec
+   * @param vector other vector
    */
-  public boolean matches(Vector other) {
-    return this._vector[0] == other._vector[0] && this._vector[1] == other._vector[1] && this._vector[2] == other._vector[2];
+  public boolean matches(Vector vector) {
+    return this._vector[0] == vector._vector[0] && this._vector[1] == vector._vector[1] && this._vector[2] == vector._vector[2];
   }
 
   /**

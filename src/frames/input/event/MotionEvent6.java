@@ -138,20 +138,20 @@ public class MotionEvent6 extends MotionEvent {
     _setPrevious(previous);
   }
 
-  protected MotionEvent6(MotionEvent6 other) {
-    super(other);
-    this._x = other._x;
-    this._dx = other._dx;
-    this._y = other._y;
-    this._dy = other._dy;
-    this._z = other._z;
-    this._dz = other._z;
-    this._rx = other._rx;
-    this._drx = other._drx;
-    this._ry = other._ry;
-    this._dry = other._dry;
-    this._rz = other._rz;
-    this._drz = other._drz;
+  protected MotionEvent6(MotionEvent6 motionEvent6) {
+    super(motionEvent6);
+    this._x = motionEvent6._x;
+    this._dx = motionEvent6._dx;
+    this._y = motionEvent6._y;
+    this._dy = motionEvent6._dy;
+    this._z = motionEvent6._z;
+    this._dz = motionEvent6._z;
+    this._rx = motionEvent6._rx;
+    this._drx = motionEvent6._drx;
+    this._ry = motionEvent6._ry;
+    this._dry = motionEvent6._dry;
+    this._rz = motionEvent6._rz;
+    this._drz = motionEvent6._drz;
   }
 
   @Override

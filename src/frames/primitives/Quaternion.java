@@ -20,13 +20,13 @@ public class Quaternion {
   /**
    * Returns whether or not this quaternion matches other.
    *
-   * @param other quaternion
+   * @param quaternion other quaternion
    */
-  public boolean matches(Quaternion other) {
-    return _quaternion[0] == other._quaternion[0]
-        && _quaternion[1] == other._quaternion[1]
-        && _quaternion[2] == other._quaternion[2]
-        && _quaternion[3] == other._quaternion[3];
+  public boolean matches(Quaternion quaternion) {
+    return _quaternion[0] == quaternion._quaternion[0]
+        && _quaternion[1] == quaternion._quaternion[1]
+        && _quaternion[2] == quaternion._quaternion[2]
+        && _quaternion[3] == quaternion._quaternion[3];
   }
 
   /**

@@ -76,11 +76,11 @@ public class Shortcut {
   /**
    * Returns whether or not this shortcut matches the other.
    *
-   * @param other shortcut
+   * @param shortcut other shortcut
    */
-  public boolean matches(Shortcut other) {
-    if (this.getClass() == other.getClass())
-      return id() == other.id() && modifiers() == other.modifiers();
+  public boolean matches(Shortcut shortcut) {
+    if (this.getClass() == shortcut.getClass())
+      return id() == shortcut.id() && modifiers() == shortcut.modifiers();
     return false;
   }
 }

@@ -18,12 +18,12 @@ public class Matrix {
   /**
    * Returns whether or not this matrix matches other.
    *
-   * @param other rect
+   * @param matrix other matrix
    */
-  public boolean matches(Matrix other) {
+  public boolean matches(Matrix matrix) {
     boolean result = true;
     for (int i = 0; i < _matrix.length; i++) {
-      if (_matrix[i] != other._matrix[i])
+      if (_matrix[i] != matrix._matrix[i])
         result = false;
       break;
     }

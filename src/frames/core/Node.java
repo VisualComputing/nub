@@ -255,24 +255,24 @@ public class Node extends Frame implements Grabber {
     setPrecisionThreshold(20);
   }
 
-  protected Node(Graph graph, Node other) {
-    super(other);
+  protected Node(Graph graph, Node node) {
+    super(node);
     this._graph = graph;
-    if (this.graph() == other.graph()) {
+    if (this.graph() == node.graph()) {
       this._id = ++graph()._nodeCount;
       // unlikely but theoretically possible
       if (this._id == 16777216)
         throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     } else {
-      this._id = other._id();
-      this.setWorldMatrix(other);
+      this._id = node._id();
+      this.setWorldMatrix(node);
     }
 
-    this._upVector = other._upVector.get();
-    this._culled = other._culled;
+    this._upVector = node._upVector.get();
+    this._culled = node._culled;
 
     this._children = new ArrayList<Node>();
-    if (this.graph() == other.graph()) {
+    if (this.graph() == node.graph()) {
       this.setReference(reference());// _restorePath
     }
 
@@ -290,29 +290,29 @@ public class Node extends Frame implements Grabber {
       }
     };
     this._graph.registerTask(_flyTask);
-    _lastUpdate = other.lastUpdate();
+    _lastUpdate = node.lastUpdate();
     // end
     // this.isInCamPath = otherFrame.isInCamPath;
     //
     // this.setPrecisionThreshold(otherFrame.precisionThreshold(),
     // otherFrame.adaptiveGrabsInputThreshold());
-    this._Precision = other._Precision;
-    this._threshold = other._threshold;
+    this._Precision = node._Precision;
+    this._threshold = node._threshold;
 
-    this.setRotationSensitivity(other.rotationSensitivity());
-    this.setScalingSensitivity(other.scalingSensitivity());
-    this.setTranslationSensitivity(other.translationSensitivity());
-    this.setWheelSensitivity(other.wheelSensitivity());
-    this.setKeySensitivity(other.keySensitivity());
+    this.setRotationSensitivity(node.rotationSensitivity());
+    this.setScalingSensitivity(node.scalingSensitivity());
+    this.setTranslationSensitivity(node.translationSensitivity());
+    this.setWheelSensitivity(node.wheelSensitivity());
+    this.setKeySensitivity(node.keySensitivity());
     //
-    this.setSpinningSensitivity(other.spinningSensitivity());
-    this.setDamping(other.damping());
+    this.setSpinningSensitivity(node.spinningSensitivity());
+    this.setDamping(node.damping());
     //
-    this.setFlySpeed(other.flySpeed());
+    this.setFlySpeed(node.flySpeed());
 
-    if (this.graph() == other.graph()) {
+    if (this.graph() == node.graph()) {
       for (Agent agent : this._graph.inputHandler().agents())
-        if (agent.hasGrabber(other))
+        if (agent.hasGrabber(node))
           agent.addGrabber(this);
     } else {
       this.graph().inputHandler().addGrabber(this);
