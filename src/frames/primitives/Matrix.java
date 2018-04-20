@@ -508,8 +508,7 @@ public class Matrix {
   public void rotateX(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1);
-    apply(1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -518,8 +517,7 @@ public class Matrix {
   public void rotateY(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1);
-    apply(c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1);
+    apply(new Matrix(c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -528,8 +526,7 @@ public class Matrix {
   public void rotateZ(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    apply(c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -556,16 +553,15 @@ public class Matrix {
     float s = (float) Math.sin(angle);
     float t = 1.0f - c;
 
-    apply((t * v0 * v0) + c, (t * v0 * v1) + (s * v2), (t * v0 * v2) - (s * v1), 0, (t * v0 * v1) - (s * v2),
+    apply(new Matrix((t * v0 * v0) + c, (t * v0 * v1) + (s * v2), (t * v0 * v2) - (s * v1), 0, (t * v0 * v1) - (s * v2),
         (t * v1 * v1) + c, (t * v1 * v2) + (s * v0), 0, (t * v0 * v2) + (s * v1), (t * v1 * v2) - (s * v0),
-        (t * v2 * v2) + c, 0, 0, 0, 0, 1);
+        (t * v2 * v2) + c, 0, 0, 0, 0, 1));
   }
 
   /**
    * Multiply this matrix by the scaling matrix defined from {@code s}.
    */
   public void scale(float s) {
-    // apply(s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1);
     scale(s, s, s);
   }
 
@@ -573,7 +569,6 @@ public class Matrix {
    * Multiply this matrix by the scaling matrix defined from {@code sx} and {@code sy}.
    */
   public void scale(float sx, float sy) {
-    // apply(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     scale(sx, sy, 1);
   }
 
@@ -582,7 +577,6 @@ public class Matrix {
    * {@code z}.
    */
   public void scale(float x, float y, float z) {
-    // apply(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
     _matrix[0] *= x;
     _matrix[4] *= y;
     _matrix[8] *= z;
@@ -602,7 +596,7 @@ public class Matrix {
    */
   public void shearX(float angle) {
     float t = (float) Math.tan(angle);
-    apply(1, 0, 0, 0, t, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, 0, 0, 0, t, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -610,34 +604,49 @@ public class Matrix {
    */
   public void shearY(float angle) {
     float t = (float) Math.tan(angle);
-    apply(1, t, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, t, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
-   * Multiply this matrix by the 16 consecutive float array defined by {@code source}.
-   */
-  public void apply(float[] source) {
-    if (source != null) {
-      if (source.length == 16) {
-        apply(source[0], source[1], source[2], source[3], source[4], source[5], source[6], source[7], source[8], source[9],
-            source[10], source[11], source[12], source[13], source[14], source[15]);
-      }
-    }
-  }
-
-  /**
-   * Multiply this matrix by the one defined from {@code source}.
+   * Multiply this matrix by {@code matrix}.
    */
   public void apply(Matrix matrix) {
-    // applyTranspose(source.mat[0], source.mat[4], source.mat[8],
-    // source.mat[12], source.mat[1], source.mat[5],
-    // source.mat[9], source.mat[13], source.mat[2], source.mat[6],
-    // source.mat[10], source.mat[14], source.mat[3],
-    // source.mat[7], source.mat[11], source.mat[15]);
-    // Same as the previous line:
-    apply(matrix._matrix[0], matrix._matrix[1], matrix._matrix[2], matrix._matrix[3], matrix._matrix[4], matrix._matrix[5], matrix._matrix[6],
-        matrix._matrix[7], matrix._matrix[8], matrix._matrix[9], matrix._matrix[10], matrix._matrix[11], matrix._matrix[12], matrix._matrix[13],
-        matrix._matrix[14], matrix._matrix[15]);
+    float r00 = _matrix[0] * matrix._matrix[0] + _matrix[4] * matrix._matrix[1] + _matrix[8] * matrix._matrix[2] + _matrix[12] * matrix._matrix[3];
+    float r01 = _matrix[0] * matrix._matrix[4] + _matrix[4] * matrix._matrix[5] + _matrix[8] * matrix._matrix[6] + _matrix[12] * matrix._matrix[7];
+    float r02 = _matrix[0] * matrix._matrix[8] + _matrix[4] * matrix._matrix[9] + _matrix[8] * matrix._matrix[10] + _matrix[12] * matrix._matrix[11];
+    float r03 = _matrix[0] * matrix._matrix[12] + _matrix[4] * matrix._matrix[13] + _matrix[8] * matrix._matrix[14] + _matrix[12] * matrix._matrix[15];
+
+    float r10 = _matrix[1] * matrix._matrix[0] + _matrix[5] * matrix._matrix[1] + _matrix[9] * matrix._matrix[2] + _matrix[13] * matrix._matrix[3];
+    float r11 = _matrix[1] * matrix._matrix[4] + _matrix[5] * matrix._matrix[5] + _matrix[9] * matrix._matrix[6] + _matrix[13] * matrix._matrix[7];
+    float r12 = _matrix[1] * matrix._matrix[8] + _matrix[5] * matrix._matrix[9] + _matrix[9] * matrix._matrix[10] + _matrix[13] * matrix._matrix[11];
+    float r13 = _matrix[1] * matrix._matrix[12] + _matrix[5] * matrix._matrix[13] + _matrix[9] * matrix._matrix[14] + _matrix[13] * matrix._matrix[15];
+
+    float r20 = _matrix[2] * matrix._matrix[0] + _matrix[6] * matrix._matrix[1] + _matrix[10] * matrix._matrix[2] + _matrix[14] * matrix._matrix[3];
+    float r21 = _matrix[2] * matrix._matrix[4] + _matrix[6] * matrix._matrix[5] + _matrix[10] * matrix._matrix[6] + _matrix[14] * matrix._matrix[7];
+    float r22 = _matrix[2] * matrix._matrix[8] + _matrix[6] * matrix._matrix[9] + _matrix[10] * matrix._matrix[10] + _matrix[14] * matrix._matrix[11];
+    float r23 = _matrix[2] * matrix._matrix[12] + _matrix[6] * matrix._matrix[13] + _matrix[10] * matrix._matrix[14] + _matrix[14] * matrix._matrix[15];
+
+    float r30 = _matrix[3] * matrix._matrix[0] + _matrix[7] * matrix._matrix[1] + _matrix[11] * matrix._matrix[2] + _matrix[15] * matrix._matrix[3];
+    float r31 = _matrix[3] * matrix._matrix[4] + _matrix[7] * matrix._matrix[5] + _matrix[11] * matrix._matrix[6] + _matrix[15] * matrix._matrix[7];
+    float r32 = _matrix[3] * matrix._matrix[8] + _matrix[7] * matrix._matrix[9] + _matrix[11] * matrix._matrix[10] + _matrix[15] * matrix._matrix[11];
+    float r33 = _matrix[3] * matrix._matrix[12] + _matrix[7] * matrix._matrix[13] + _matrix[11] * matrix._matrix[14] + _matrix[15] * matrix._matrix[15];
+
+    _matrix[0] = r00;
+    _matrix[4] = r01;
+    _matrix[8] = r02;
+    _matrix[12] = r03;
+    _matrix[1] = r10;
+    _matrix[5] = r11;
+    _matrix[9] = r12;
+    _matrix[13] = r13;
+    _matrix[2] = r20;
+    _matrix[6] = r21;
+    _matrix[10] = r22;
+    _matrix[14] = r23;
+    _matrix[3] = r30;
+    _matrix[7] = r31;
+    _matrix[11] = r32;
+    _matrix[15] = r33;
   }
 
   /**
@@ -675,95 +684,28 @@ public class Matrix {
   }
 
   /**
-   * Multiply this matrix by the 16 consecutive values that are used as the elements of a
-   * 4 x 4 column-major matrix.
+   * Pre-multiply this matrix by {@code matrix}.
    */
-  public void apply(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8, float m9,
-                    float m10, float m11, float m12, float m13, float m14, float m15) {
+  public void preApply(Matrix matrix) {
+    float r00 = matrix._matrix[0] * _matrix[0] + matrix._matrix[4] * _matrix[1] + matrix._matrix[8] * _matrix[2] + matrix._matrix[12] * _matrix[3];
+    float r01 = matrix._matrix[0] * _matrix[4] + matrix._matrix[4] * _matrix[5] + matrix._matrix[8] * _matrix[6] + matrix._matrix[12] * _matrix[7];
+    float r02 = matrix._matrix[0] * _matrix[8] + matrix._matrix[4] * _matrix[9] + matrix._matrix[8] * _matrix[10] + matrix._matrix[12] * _matrix[11];
+    float r03 = matrix._matrix[0] * _matrix[12] + matrix._matrix[4] * _matrix[13] + matrix._matrix[8] * _matrix[14] + matrix._matrix[12] * _matrix[15];
 
-    float r00 = _matrix[0] * m0 + _matrix[4] * m1 + _matrix[8] * m2 + _matrix[12] * m3;
-    float r01 = _matrix[0] * m4 + _matrix[4] * m5 + _matrix[8] * m6 + _matrix[12] * m7;
-    float r02 = _matrix[0] * m8 + _matrix[4] * m9 + _matrix[8] * m10 + _matrix[12] * m11;
-    float r03 = _matrix[0] * m12 + _matrix[4] * m13 + _matrix[8] * m14 + _matrix[12] * m15;
+    float r10 = matrix._matrix[1] * _matrix[0] + matrix._matrix[5] * _matrix[1] + matrix._matrix[9] * _matrix[2] + matrix._matrix[13] * _matrix[3];
+    float r11 = matrix._matrix[1] * _matrix[4] + matrix._matrix[5] * _matrix[5] + matrix._matrix[9] * _matrix[6] + matrix._matrix[13] * _matrix[7];
+    float r12 = matrix._matrix[1] * _matrix[8] + matrix._matrix[5] * _matrix[9] + matrix._matrix[9] * _matrix[10] + matrix._matrix[13] * _matrix[11];
+    float r13 = matrix._matrix[1] * _matrix[12] + matrix._matrix[5] * _matrix[13] + matrix._matrix[9] * _matrix[14] + matrix._matrix[13] * _matrix[15];
 
-    float r10 = _matrix[1] * m0 + _matrix[5] * m1 + _matrix[9] * m2 + _matrix[13] * m3;
-    float r11 = _matrix[1] * m4 + _matrix[5] * m5 + _matrix[9] * m6 + _matrix[13] * m7;
-    float r12 = _matrix[1] * m8 + _matrix[5] * m9 + _matrix[9] * m10 + _matrix[13] * m11;
-    float r13 = _matrix[1] * m12 + _matrix[5] * m13 + _matrix[9] * m14 + _matrix[13] * m15;
+    float r20 = matrix._matrix[2] * _matrix[0] + matrix._matrix[6] * _matrix[1] + matrix._matrix[10] * _matrix[2] + matrix._matrix[14] * _matrix[3];
+    float r21 = matrix._matrix[2] * _matrix[4] + matrix._matrix[6] * _matrix[5] + matrix._matrix[10] * _matrix[6] + matrix._matrix[14] * _matrix[7];
+    float r22 = matrix._matrix[2] * _matrix[8] + matrix._matrix[6] * _matrix[9] + matrix._matrix[10] * _matrix[10] + matrix._matrix[14] * _matrix[11];
+    float r23 = matrix._matrix[2] * _matrix[12] + matrix._matrix[6] * _matrix[13] + matrix._matrix[10] * _matrix[14] + matrix._matrix[14] * _matrix[15];
 
-    float r20 = _matrix[2] * m0 + _matrix[6] * m1 + _matrix[10] * m2 + _matrix[14] * m3;
-    float r21 = _matrix[2] * m4 + _matrix[6] * m5 + _matrix[10] * m6 + _matrix[14] * m7;
-    float r22 = _matrix[2] * m8 + _matrix[6] * m9 + _matrix[10] * m10 + _matrix[14] * m11;
-    float r23 = _matrix[2] * m12 + _matrix[6] * m13 + _matrix[10] * m14 + _matrix[14] * m15;
-
-    float r30 = _matrix[3] * m0 + _matrix[7] * m1 + _matrix[11] * m2 + _matrix[15] * m3;
-    float r31 = _matrix[3] * m4 + _matrix[7] * m5 + _matrix[11] * m6 + _matrix[15] * m7;
-    float r32 = _matrix[3] * m8 + _matrix[7] * m9 + _matrix[11] * m10 + _matrix[15] * m11;
-    float r33 = _matrix[3] * m12 + _matrix[7] * m13 + _matrix[11] * m14 + _matrix[15] * m15;
-
-    _matrix[0] = r00;
-    _matrix[4] = r01;
-    _matrix[8] = r02;
-    _matrix[12] = r03;
-    _matrix[1] = r10;
-    _matrix[5] = r11;
-    _matrix[9] = r12;
-    _matrix[13] = r13;
-    _matrix[2] = r20;
-    _matrix[6] = r21;
-    _matrix[10] = r22;
-    _matrix[14] = r23;
-    _matrix[3] = r30;
-    _matrix[7] = r31;
-    _matrix[11] = r32;
-    _matrix[15] = r33;
-  }
-
-  /**
-   * Pre-multiply this matrix by the 16 consecutive float array defined by {@code source}.
-   */
-  public void preApply(float[] source) {
-    if (source != null) {
-      if (source.length == 16) {
-        preApply(source[0], source[1], source[2], source[3], source[4], source[5], source[6], source[7], source[8],
-            source[9], source[10], source[11], source[12], source[13], source[14], source[15]);
-      }
-    }
-  }
-
-  /**
-   * Pre-multiply this matrix by the one defined from {@code left}.
-   */
-  public void preApply(Matrix left) {
-    preApply(left._matrix[0], left._matrix[1], left._matrix[2], left._matrix[3], left._matrix[4], left._matrix[5], left._matrix[6], left._matrix[7],
-        left._matrix[8], left._matrix[9], left._matrix[10], left._matrix[11], left._matrix[12], left._matrix[13], left._matrix[14], left._matrix[15]);
-  }
-
-  /**
-   * Pre-multiply this matrix by the 16 consecutive values that are used as the elements
-   * of a 4 x 4 column-major matrix.
-   */
-  public void preApply(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
-                       float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
-    float r00 = m0 * _matrix[0] + m4 * _matrix[1] + m8 * _matrix[2] + m12 * _matrix[3];
-    float r01 = m0 * _matrix[4] + m4 * _matrix[5] + m8 * _matrix[6] + m12 * _matrix[7];
-    float r02 = m0 * _matrix[8] + m4 * _matrix[9] + m8 * _matrix[10] + m12 * _matrix[11];
-    float r03 = m0 * _matrix[12] + m4 * _matrix[13] + m8 * _matrix[14] + m12 * _matrix[15];
-
-    float r10 = m1 * _matrix[0] + m5 * _matrix[1] + m9 * _matrix[2] + m13 * _matrix[3];
-    float r11 = m1 * _matrix[4] + m5 * _matrix[5] + m9 * _matrix[6] + m13 * _matrix[7];
-    float r12 = m1 * _matrix[8] + m5 * _matrix[9] + m9 * _matrix[10] + m13 * _matrix[11];
-    float r13 = m1 * _matrix[12] + m5 * _matrix[13] + m9 * _matrix[14] + m13 * _matrix[15];
-
-    float r20 = m2 * _matrix[0] + m6 * _matrix[1] + m10 * _matrix[2] + m14 * _matrix[3];
-    float r21 = m2 * _matrix[4] + m6 * _matrix[5] + m10 * _matrix[6] + m14 * _matrix[7];
-    float r22 = m2 * _matrix[8] + m6 * _matrix[9] + m10 * _matrix[10] + m14 * _matrix[11];
-    float r23 = m2 * _matrix[12] + m6 * _matrix[13] + m10 * _matrix[14] + m14 * _matrix[15];
-
-    float r30 = m3 * _matrix[0] + m7 * _matrix[1] + m11 * _matrix[2] + m15 * _matrix[3];
-    float r31 = m3 * _matrix[4] + m7 * _matrix[5] + m11 * _matrix[6] + m15 * _matrix[7];
-    float r32 = m3 * _matrix[8] + m7 * _matrix[9] + m11 * _matrix[10] + m15 * _matrix[11];
-    float r33 = m3 * _matrix[12] + m7 * _matrix[13] + m11 * _matrix[14] + m15 * _matrix[15];
+    float r30 = matrix._matrix[3] * _matrix[0] + matrix._matrix[7] * _matrix[1] + matrix._matrix[11] * _matrix[2] + matrix._matrix[15] * _matrix[3];
+    float r31 = matrix._matrix[3] * _matrix[4] + matrix._matrix[7] * _matrix[5] + matrix._matrix[11] * _matrix[6] + matrix._matrix[15] * _matrix[7];
+    float r32 = matrix._matrix[3] * _matrix[8] + matrix._matrix[7] * _matrix[9] + matrix._matrix[11] * _matrix[10] + matrix._matrix[15] * _matrix[11];
+    float r33 = matrix._matrix[3] * _matrix[12] + matrix._matrix[7] * _matrix[13] + matrix._matrix[11] * _matrix[14] + matrix._matrix[15] * _matrix[15];
 
     _matrix[0] = r00;
     _matrix[4] = r01;
