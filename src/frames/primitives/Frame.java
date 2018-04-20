@@ -340,27 +340,53 @@ public class Frame {
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
-  public void setReference(Frame reference) {
-    if (isDescendant(reference)) {
-      System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
+  public void setReference(Frame frame) {
+    if (frame == this) {
+      System.out.println("A frame cannot be a reference of itself.");
       return;
     }
-    if (reference() == reference)
+    if (isDescendant(frame)) {
+      System.out.println("A frame descendant cannot be set as its reference.");
       return;
-    _reference = reference;
+    }
+    if (reference() == frame)
+      return;
+    _reference = frame;
     _modified();
   }
 
   /**
-   * Returns {@code true} if setting {@code frame} as the frame's
-   * {@link #reference()} would create a loop in the frame hierarchy.
+   * Returns {@code true} if {@code frame} is descendant of this frame.
+   *
+   * @see #isAscendant(Frame)
    */
   public boolean isDescendant(Frame frame) {
-    Frame descendant = frame;
-    while (descendant != null) {
-      if (descendant == this)
+    if (frame == this || frame == null)
+      return false;
+    Frame ascendant = frame.reference();
+    while (ascendant != null) {
+      if (ascendant == this)
         return true;
-      descendant = descendant.reference();
+      ascendant = ascendant.reference();
+    }
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if {@code frame} is ascendant of this frame.
+   *
+   * @see #isDescendant(Frame)
+   */
+  public boolean isAscendant(Frame frame) {
+    if (frame == null)
+      return true;
+    if (frame == this)
+      return false;
+    Frame ascendant = this.reference();
+    while (ascendant != null) {
+      if (ascendant == frame)
+        return true;
+      ascendant = ascendant.reference();
     }
     return false;
   }

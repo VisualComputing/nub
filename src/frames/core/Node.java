@@ -390,8 +390,12 @@ public class Node extends Frame implements Grabber {
    * Same as {@link #setReference(Frame)} but using a Node parameter.
    */
   public void setReference(Node node) {
+    if (node == this) {
+      System.out.println("A node cannot be a reference of itself.");
+      return;
+    }
     if (isDescendant(node)) {
-      System.out.println("Frame.setReference would create a loop in Frame hierarchy. Nothing done.");
+      System.out.println("A node descendant cannot be set as its reference.");
       return;
     }
     // 1. no need to re-parent, just check this needs to be added as leadingFrame
