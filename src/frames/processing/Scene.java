@@ -1058,11 +1058,11 @@ public class Scene extends Graph implements PConstants {
       String type = json.getString("type");
       setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
           type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
-      eye().setWorldMatrix(_toFrame(json.getJSONObject("eye")));
+      eye().set(_toFrame(json.getJSONObject("eye")));
 
       /*
       JSONObject jsonEye = json.getJSONObject("eye");
-      eye().setWorldMatrix(_toFrame(jsonEye));
+      eye().set(_toFrame(jsonEye));
       JSONArray paths = jsonEye.getJSONArray("paths");
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
@@ -1083,7 +1083,7 @@ public class Scene extends Graph implements PConstants {
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node keyFrame = new Node(this);
       pruneBranch(keyFrame);
-      keyFrame.setWorldMatrix(_toFrame(jsonInterpolator.getJSONObject(j)));
+      keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
       keyFrame.setPrecision(Node.Precision.FIXED);
       keyFrame.setPrecisionThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));

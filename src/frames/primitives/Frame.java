@@ -245,7 +245,7 @@ public class Frame {
    */
   public Frame detach() {
     Frame frame = new Frame();
-    frame.setWorldMatrix(this);
+    frame.set(this);
     return frame;
   }
 
@@ -278,7 +278,7 @@ public class Frame {
 
   /**
    * If {@code frame1} has been more recently updated than {@code frame2}, calls
-   * {@code frame2.setWorldMatrix(frame1)}, otherwise calls {@code frame1.setWorldMatrix(frame2)}.
+   * {@code frame2.set(frame1)}, otherwise calls {@code frame1.set(frame2)}.
    * Does nothing if both objects were updated at the same time.
    * <p>
    * This method syncs only the global geometry attributes ({@link #position()},
@@ -286,7 +286,7 @@ public class Frame {
    * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
    * separately.
    *
-   * @see #setWorldMatrix(Frame)
+   * @see #set(Frame)
    */
   public static void sync(Frame frame1, Frame frame2) {
     if (frame1 == null || frame2 == null)
@@ -295,7 +295,7 @@ public class Frame {
       return;
     Frame source = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame1 : frame2;
     Frame target = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame2 : frame1;
-    target.setWorldMatrix(source);
+    target.set(source);
   }
 
   // REFERENCE_FRAME
@@ -1048,7 +1048,7 @@ public class Frame {
    * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
    * Use {@link frames.core.Graph#applyTransformation(Frame)} instead.
    *
-   * @see #setMatrix(Frame)
+   * @see #set(Frame)
    * @see #worldMatrix()
    * @see #view()
    */
@@ -1096,7 +1096,7 @@ public class Frame {
    * {@link #reference()}). These two match when the {@link #reference()} is
    * {@code null}.
    *
-   * @see #setWorldMatrix(Frame)
+   * @see #set(Frame)
    * @see #matrix()
    * @see #view()
    */
@@ -1117,8 +1117,8 @@ public class Frame {
    *
    * @see #matrix()
    * @see #worldMatrix()
-   * @see #setMatrix(Frame)
-   * @see #setWorldMatrix(Frame)
+   * @see #set(Frame)
+   * @see #set(Frame)
    */
   public Matrix view() {
     Matrix view = new Matrix();
@@ -1238,35 +1238,20 @@ public class Frame {
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code other} frame.
+   * those of the {@code frame} frame. This frame {@link #constraint()} and {@link #reference()}
+   * are not affected by this call.
    * <p>
-   * After calling {@code setWorldMatrix(other)} a call to {@code this.matches(other)} should
+   * After calling {@code set(frame)} a call to {@code this.matches(other)} should
    * return {@code true}.
    *
    * @see #worldMatrix()
-   * @see #setMatrix(Frame)
    */
-  public void setWorldMatrix(Frame frame) {
+  public void set(Frame frame) {
     if (frame == null)
       return;
     setPosition(frame.position());
     setOrientation(frame.orientation());
     setMagnitude(frame.magnitude());
-  }
-
-  /**
-   * Sets {@link #translation()}, {@link #rotation()} and {@link #scaling()} values from
-   * those of the {@code other} frame.
-   *
-   * @see #matrix()
-   * @see #setWorldMatrix(Frame)
-   */
-  public void setMatrix(Frame frame) {
-    if (frame == null)
-      return;
-    setTranslation(frame.translation());
-    setRotation(frame.rotation());
-    setScaling(frame.scaling());
   }
 
   /**

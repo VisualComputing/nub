@@ -62,7 +62,7 @@ void setup() {
   eye = new EyeShape(minimap);
   //to not scale the eye on mouse hover uncomment:
   eye.setHighlighting(Shape.Highlighting.NONE);
-  eye.setWorldMatrix(scene.eye());
+  eye.set(scene.eye());
 }
 
 void draw() {

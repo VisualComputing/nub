@@ -265,7 +265,7 @@ public class Node extends Frame implements Grabber {
         throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
     } else {
       this._id = node._id();
-      this.setWorldMatrix(node);
+      this.set(node);
     }
 
     this._upVector = node._upVector.get();
