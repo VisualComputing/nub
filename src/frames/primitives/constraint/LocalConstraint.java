@@ -36,12 +36,12 @@ public class LocalConstraint extends AxisPlaneConstraint {
         break;
       case PLANE:
         proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame.localInverseTransformOf(translationConstraintDirection());
+        // proj = frame._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
         proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame.localInverseTransformOf(translationConstraintDirection());
+        // proj = frame._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:

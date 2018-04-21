@@ -37,7 +37,7 @@ public abstract class Constraint {
    * accordingly instead.
    * <p>
    * {@code translation} is expressed in the local Frame coordinate system. Use
-   * {@link Frame#inverseTransformOf(Vector)} to express it in the
+   * {@link Frame#_inverseTransformOf(Vector)} to express it in the
    * world coordinate system if needed.
    */
   public Vector constrainTranslation(Vector translation, Frame frame) {
@@ -51,7 +51,7 @@ public abstract class Constraint {
    * Overload this method in your own Constraint class to define a new rotation
    * constraint. See {@link #constrainTranslation(Vector, Frame)} for details.
    * <p>
-   * Use {@link Frame#inverseTransformOf(Vector)} on the
+   * Use {@link Frame#_inverseTransformOf(Vector)} on the
    * {@code rotation} {@link Quaternion#axis()} to express
    * {@code rotation} in the world coordinate system if needed.
    */

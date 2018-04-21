@@ -153,7 +153,7 @@ class Boid extends AnimatorObject {
     */
 
   void render() {
-    Vector direction = node.transformOf(new Vector(vel.x, vel.y, vel.z));
+    Vector direction = node._transformOf(new Vector(vel.x, vel.y, vel.z));
     //q = Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-vel.z, vel.x)),
     //        new Quaternion(new Vector(0, 0, 1), PApplet.asin(vel.y / vel.mag())));
     q = new Quaternion(new Vector(0, 0, 1), direction);

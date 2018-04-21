@@ -52,8 +52,8 @@ import java.util.List;
  * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
- * {@link #projectedCoordinatesOf(Vector, Frame)} and
- * {@link #unprojectedCoordinatesOf(Vector, Frame)}, are provided for convenience.
+ * {@link #projectedCoordinates(Vector, Frame)} and
+ * {@link #unprojectedCoordinates(Vector, Frame)}, are provided for convenience.
  * <h3>Interpolator</h3>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fitBallInterpolation()}, {@link #fitScreenRegionInterpolation(Rectangle)},
@@ -1145,10 +1145,10 @@ public class Graph {
   /**
    * Wrapper for {@link MatrixHandler#isProjectionViewInverseCached()}.
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
+   * Use it only when continuously calling {@link #unprojectedCoordinates(Vector)}.
    *
    * @see #cacheProjectionViewInverse(boolean)
-   * @see #unprojectedCoordinatesOf(Vector)
+   * @see #unprojectedCoordinates(Vector)
    */
   public boolean isProjectionViewInverseCached() {
     return _matrixHandler.isProjectionViewInverseCached();
@@ -1157,10 +1157,10 @@ public class Graph {
   /**
    * Wrapper for {@link MatrixHandler#cacheProjectionViewInverse(boolean)}.
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinatesOf(Vector)}.
+   * Use it only when continuously calling {@link #unprojectedCoordinates(Vector)}.
    *
    * @see #isProjectionViewInverseCached()
-   * @see #unprojectedCoordinatesOf(Vector)
+   * @see #unprojectedCoordinates(Vector)
    */
   public void cacheProjectionViewInverse(boolean optimise) {
     _matrixHandler.cacheProjectionViewInverse(optimise);
@@ -1699,7 +1699,7 @@ public class Graph {
   public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
+        return 2.0f * Math.abs((eye()._coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
             .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
@@ -1861,13 +1861,15 @@ public class Graph {
     return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
   }
 
+  // TODO names pending
+
   /**
-   * Convenience function that simply returns {@code projectedCoordinatesOf(src, null)}.
+   * Convenience function that simply returns {@code projectedCoordinates(src, null)}.
    *
-   * @see #projectedCoordinatesOf(Vector, Frame)
+   * @see #projectedCoordinates(Vector, Frame)
    */
-  public Vector projectedCoordinatesOf(Vector vector) {
-    return projectedCoordinatesOf(vector, null);
+  public Vector projectedCoordinates(Vector vector) {
+    return projectedCoordinates(vector, null);
   }
 
   /**
@@ -1875,19 +1877,19 @@ public class Graph {
    * {@code frame} coordinate system.
    * <p>
    * When {@code frame} is {@code null}, {@code point} is expressed in the world coordinate
-   * system. See {@link #projectedCoordinatesOf(Vector)}.
+   * system. See {@link #projectedCoordinates(Vector)}.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
    * (near plane) and 1 (excluded, far plane).
    *
-   * @see #unprojectedCoordinatesOf(Vector, Frame)
+   * @see #unprojectedCoordinates(Vector, Frame)
    */
-  public Vector projectedCoordinatesOf(Vector point, Frame frame) {
+  public Vector projectedCoordinates(Vector point, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vector tmp = frame.inverseCoordinatesOf(point);
+      Vector tmp = frame._inverseCoordinatesOf(point);
       _project(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
       _project(point._vector[0], point._vector[1], point._vector[2], xyz);
@@ -1946,12 +1948,12 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code unprojectedCoordinatesOf(point, null)}.
+   * Convenience function that simply returns {@code unprojectedCoordinates(point, null)}.
    * <p>
-   * #see {@link #unprojectedCoordinatesOf(Vector, Frame)}
+   * #see {@link #unprojectedCoordinates(Vector, Frame)}
    */
-  public Vector unprojectedCoordinatesOf(Vector point) {
-    return this.unprojectedCoordinatesOf(point, null);
+  public Vector unprojectedCoordinates(Vector point) {
+    return this.unprojectedCoordinates(point, null);
   }
 
   /**
@@ -1969,7 +1971,7 @@ public class Graph {
    * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
    * account.
    * <p>
-   * {@link #projectedCoordinatesOf(Vector, Frame)} performs the inverse transformation.
+   * {@link #projectedCoordinates(Vector, Frame)} performs the inverse transformation.
    * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
@@ -1979,18 +1981,18 @@ public class Graph {
    * change in the matrices, you should buffer the inverse of the projection times view matrix
    * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
-   * @see #projectedCoordinatesOf(Vector, Frame)
+   * @see #projectedCoordinates(Vector, Frame)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector unprojectedCoordinatesOf(Vector pixel, Frame frame) {
+  public Vector unprojectedCoordinates(Vector pixel, Frame frame) {
     float xyz[] = new float[3];
     // _unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
     _unproject(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (frame != null)
-      return frame.coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
+      return frame._coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
     else
       return new Vector(xyz[0], xyz[1], xyz[2]);
   }
@@ -2145,7 +2147,7 @@ public class Graph {
   /**
    * Returns the normalized view direction of the eye, defined in the world coordinate
    * system. This corresponds to the negative Z axis of the {@link #eye()}
-   * ({@code frame().inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
+   * ({@code frame()._inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
    * it always is (0,0,-1).
    * <p>
    * Xhange this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
@@ -2211,10 +2213,10 @@ public class Graph {
    * @see #lookAt(Vector)
    */
   public void setUpVector(Vector up, boolean noMove) {
-    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().transformOf(up));
+    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye()._transformOf(up));
 
     if (!noMove)
-      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().coordinatesOf(anchor()))));
+      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye()._coordinatesOf(anchor()))));
 
     eye().rotate(q);
 
@@ -2442,7 +2444,7 @@ public class Graph {
         else
           eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
       }
-      lookAt(unprojectedCoordinatesOf(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      lookAt(unprojectedCoordinates(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
       return;
     }
 
@@ -2498,7 +2500,7 @@ public class Graph {
         direction.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
             ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
             -1.0f));
-        direction.set(Vector.subtract(eye().inverseCoordinatesOf(direction), origin));
+        direction.set(Vector.subtract(eye()._inverseCoordinatesOf(direction), origin));
         direction.normalize();
         break;
 
@@ -2508,7 +2510,7 @@ public class Graph {
         origin.set(
             new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
                 0.0f));
-        origin.set(eye().inverseCoordinatesOf(origin));
+        origin.set(eye()._inverseCoordinatesOf(origin));
         direction.set(viewDirection());
         break;
       }

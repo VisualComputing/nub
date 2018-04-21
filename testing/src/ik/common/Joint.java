@@ -35,7 +35,7 @@ public class Joint extends InteractiveShape {
     if (!root) {
       pg.strokeWeight(5);
       pg.stroke(color);
-      Vector v = localCoordinatesOf(new Vector());
+      Vector v = _localCoordinatesOf(new Vector());
       if (pg.is2D()) {
         pg.line(0, 0, v.x(), v.y());
       } else {

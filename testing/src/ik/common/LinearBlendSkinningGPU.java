@@ -36,7 +36,7 @@ public class LinearBlendSkinningGPU {
     for (Node node : skeleton) {
       Vector position;
       boneQuat[j++] = Quaternion.compose(shape.orientation().inverse(), node.orientation().get());
-      position = shape.coordinatesOfFrom(new Vector(), node);
+      position = shape._coordinatesOfFrom(new Vector(), node);
       bonePositionOrig[i + 0] = position.x();
       bonePositionOrig[i + 1] = position.y();
       bonePositionOrig[i + 2] = position.z();
@@ -56,7 +56,7 @@ public class LinearBlendSkinningGPU {
     for (Node node : skeleton) {
       Vector position;
       Quaternion rotation;
-      position = shape.coordinatesOfFrom(new Vector(), node);
+      position = shape._coordinatesOfFrom(new Vector(), node);
       bonePosition[i++] = position.x();
       bonePosition[i++] = position.y();
       bonePosition[i++] = position.z();

@@ -475,7 +475,7 @@ public class Scene extends Graph implements PConstants {
    */
   public Vector pointUnderPixel(Point pixel) {
     float depth = pixelDepth(pixel);
-    Vector point = unprojectedCoordinatesOf(new Vector(pixel.x(), pixel.y(), depth));
+    Vector point = unprojectedCoordinates(new Vector(pixel.x(), pixel.y(), depth));
     return (depth < 1.0f) ? point : null;
   }
 
@@ -2626,11 +2626,11 @@ public class Scene extends Graph implements PConstants {
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = graph.eye().inverseCoordinatesOf(new Vector());
+        o = graph.eye()._inverseCoordinatesOf(new Vector());
       pGraphics.beginShape(PApplet.LINES);
       for (Vector s : points) {
         if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-          Vector v = graph.eye().coordinatesOf(s);
+          Vector v = graph.eye()._coordinatesOf(s);
           Scene.vertex(pGraphics, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
@@ -2679,7 +2679,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinatesOf(frame.position());
+    Vector center = projectedCoordinates(frame.position());
     drawCross(center.x(), center.y(), length);
   }
 
@@ -2759,7 +2759,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinatesOf(frame.position());
+    Vector center = projectedCoordinates(frame.position());
     drawShooterTarget(center.x(), center.y(), length);
   }
 

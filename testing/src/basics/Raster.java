@@ -73,12 +73,12 @@ public class Raster extends PApplet {
   // coordinates are given in the frame coordinate
   // system which has a dimension of 2^n dimension
   public void triangleRaster() {
-    // frame.coordinatesOf converts from world to frame
+    // frame._coordinatesOf converts from world to frame
     // here we convert v1 to illustrate the idea
     if (debug) {
       pushStyle();
       stroke(255, 255, 0, 125);
-      point(round(frame.coordinatesOf(v1).x()), round(frame.coordinatesOf(v1).y()));
+      point(round(frame._coordinatesOf(v1).x()), round(frame._coordinatesOf(v1).y()));
       popStyle();
     }
   }

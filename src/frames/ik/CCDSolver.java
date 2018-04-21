@@ -69,17 +69,17 @@ public class CCDSolver extends Solver {
       return true;
     }
     float change = 0.0f;
-    Vector endLocalPosition = _chain.get(_chain.size() - 2).coordinatesOf(end.position());
-    Vector targetLocalPosition = _chain.get(_chain.size() - 2).coordinatesOf(target);
+    Vector endLocalPosition = _chain.get(_chain.size() - 2)._coordinatesOf(end.position());
+    Vector targetLocalPosition = _chain.get(_chain.size() - 2)._coordinatesOf(target);
     for (int i = _chain.size() - 2; i >= 0; i--) {
       Quaternion delta = null;
       Quaternion initial = _chain.get(i).rotation().get();
       delta = new Quaternion(endLocalPosition, targetLocalPosition);
       //update target local position
-      targetLocalPosition = _chain.get(i).localInverseCoordinatesOf(targetLocalPosition);
+      targetLocalPosition = _chain.get(i)._localInverseCoordinatesOf(targetLocalPosition);
       _chain.get(i).rotate(delta);
       //update end effector local position
-      endLocalPosition = _chain.get(i).localInverseCoordinatesOf(endLocalPosition);
+      endLocalPosition = _chain.get(i)._localInverseCoordinatesOf(endLocalPosition);
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
     }
