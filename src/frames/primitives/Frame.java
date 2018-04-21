@@ -1434,13 +1434,23 @@ public class Frame {
    * {@link #localInverseCoordinatesOf(Vector)} converts locations instead of displacements.
    *
    * @see #inverseTransformOf(Vector)
-   * @see #coordinatesOfFrom(Vector, Frame)
-   * @see #coordinatesOfIn(Vector, Frame)
+   * @see #transformOfFrom(Vector, Frame)
+   * @see #transformOfIn(Vector, Frame)
    */
   public Vector localInverseTransformOf(Vector vector) {
     return rotation().rotate(Vector.multiply(vector, scaling()));
   }
 
+  /**
+   * Converts {@code vector} displacement from world to this frame.
+   * <p>
+   * {@link #inverseTransformOf(Vector)} performs the inverse transformation.
+   * {@link #coordinatesOf(Vector)} converts locations instead of displacements.
+   *
+   * @see #localTransformOf(Vector)
+   * @see #transformOfFrom(Vector, Frame)
+   * @see #transformOfIn(Vector, Frame) OfIn(Vector, Frame)
+   */
   public Vector transformOf(Vector vector) {
     if (reference() != null)
       return localTransformOf(reference().transformOf(vector));
@@ -1448,6 +1458,16 @@ public class Frame {
       return localTransformOf(vector);
   }
 
+  /**
+   * Converts {@code vector} displacement from this frame to world.
+   * <p>
+   * {@link #transformOf(Vector)} performs the inverse transformation.
+   * {@link #inverseCoordinatesOf(Vector)} converts locations instead of displacements.
+   *
+   * @see #localInverseTransformOf(Vector)
+   * @see #transformOfFrom(Vector, Frame)
+   * @see #transformOfIn(Vector, Frame)
+   */
   public Vector inverseTransformOf(Vector vector) {
     Frame frame = this;
     Vector result = vector;
@@ -1458,6 +1478,15 @@ public class Frame {
     return result;
   }
 
+  /**
+   * Converts {@code vector} displacement from {@code frame} to this frame.
+   * <p>
+   * {@link #transformOfIn(Vector, Frame)} performs the inverse transformation.
+   * {@link #coordinatesOfFrom(Vector, Frame)} converts locations instead of displacements.
+   *
+   * @see #transformOf(Vector)
+   * @see #localTransformOf(Vector)
+   */
   public Vector transformOfFrom(Vector vector, Frame frame) {
     if (this == frame)
       return vector;
@@ -1467,6 +1496,15 @@ public class Frame {
       return localTransformOf(frame.inverseTransformOf(vector));
   }
 
+  /**
+   * Converts {@code vector} displacement from this frame to {@code frame}.
+   * <p>
+   * {@link #transformOfFrom(Vector, Frame)} performs the inverse transformation.
+   * {@link #coordinatesOfIn(Vector, Frame)} converts locations instead of displacements.
+   *
+   * @see #transformOf(Vector)
+   * @see #localTransformOf(Vector)
+   */
   public Vector transformOfIn(Vector vector, Frame frame) {
     Frame aux = this;
     Vector result = vector;
