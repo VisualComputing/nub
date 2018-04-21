@@ -337,6 +337,55 @@ public class Matrix {
   }
 
   /**
+   * Internally used by both {@link #set(float[], boolean)} and {@link #get(float[], boolean)}.
+   * <p>
+   * Sets {@code target} array from {@code source} array according to {@code columnMajorOrder}.
+   */
+  protected void _set(float[] target, float[] source, boolean columnMajorOrder) {
+    if (columnMajorOrder) {
+      target[0] = source[0];
+      target[1] = source[1];
+      target[2] = source[2];
+      target[3] = source[3];
+
+      target[4] = source[4];
+      target[5] = source[5];
+      target[6] = source[6];
+      target[7] = source[7];
+
+      target[8] = source[8];
+      target[9] = source[9];
+      target[10] = source[10];
+      target[11] = source[11];
+
+      target[12] = source[12];
+      target[13] = source[13];
+      target[14] = source[14];
+      target[15] = source[15];
+    } else {
+      target[0] = source[0];
+      target[1] = source[4];
+      target[2] = source[8];
+      target[3] = source[12];
+
+      target[4] = source[1];
+      target[5] = source[5];
+      target[6] = source[9];
+      target[7] = source[13];
+
+      target[8] = source[2];
+      target[9] = source[6];
+      target[10] = source[10];
+      target[11] = source[14];
+
+      target[12] = source[3];
+      target[13] = source[7];
+      target[14] = source[11];
+      target[15] = source[15];
+    }
+  }
+
+  /**
    * Same as {@code return get(target, true)}.
    *
    * @see #get(float[], boolean)
@@ -354,47 +403,7 @@ public class Matrix {
     if ((target == null) || (target.length != 16)) {
       target = new float[16];
     }
-    if (columnMajorOrder) {
-      target[0] = _matrix[0];
-      target[1] = _matrix[1];
-      target[2] = _matrix[2];
-      target[3] = _matrix[3];
-
-      target[4] = _matrix[4];
-      target[5] = _matrix[5];
-      target[6] = _matrix[6];
-      target[7] = _matrix[7];
-
-      target[8] = _matrix[8];
-      target[9] = _matrix[9];
-      target[10] = _matrix[10];
-      target[11] = _matrix[11];
-
-      target[12] = _matrix[12];
-      target[13] = _matrix[13];
-      target[14] = _matrix[14];
-      target[15] = _matrix[15];
-    } else {
-      target[0] = _matrix[0];
-      target[1] = _matrix[4];
-      target[2] = _matrix[8];
-      target[3] = _matrix[12];
-
-      target[4] = _matrix[1];
-      target[5] = _matrix[5];
-      target[6] = _matrix[9];
-      target[7] = _matrix[13];
-
-      target[8] = _matrix[2];
-      target[9] = _matrix[6];
-      target[10] = _matrix[10];
-      target[11] = _matrix[14];
-
-      target[12] = _matrix[3];
-      target[13] = _matrix[7];
-      target[14] = _matrix[11];
-      target[15] = _matrix[15];
-    }
+    _set(target, _matrix, columnMajorOrder);
     return target;
   }
 
@@ -420,49 +429,8 @@ public class Matrix {
    * order is defined by the {@code columnMajorOrder} boolean parameter.
    */
   public void set(float[] source, boolean columnMajorOrder) {
-    if (source.length == 16) {
-      if (columnMajorOrder) {
-        _matrix[0] = source[0];
-        _matrix[1] = source[1];
-        _matrix[2] = source[2];
-        _matrix[3] = source[3];
-
-        _matrix[4] = source[4];
-        _matrix[5] = source[5];
-        _matrix[6] = source[6];
-        _matrix[7] = source[7];
-
-        _matrix[8] = source[8];
-        _matrix[9] = source[9];
-        _matrix[10] = source[10];
-        _matrix[11] = source[11];
-
-        _matrix[12] = source[12];
-        _matrix[13] = source[13];
-        _matrix[14] = source[14];
-        _matrix[15] = source[15];
-      } else {
-        _matrix[0] = source[0];
-        _matrix[1] = source[4];
-        _matrix[2] = source[8];
-        _matrix[3] = source[12];
-
-        _matrix[4] = source[1];
-        _matrix[5] = source[5];
-        _matrix[6] = source[9];
-        _matrix[7] = source[13];
-
-        _matrix[8] = source[2];
-        _matrix[9] = source[6];
-        _matrix[10] = source[10];
-        _matrix[11] = source[14];
-
-        _matrix[12] = source[3];
-        _matrix[13] = source[7];
-        _matrix[14] = source[11];
-        _matrix[15] = source[15];
-      }
-    }
+    if (source.length == 16)
+      _set(_matrix, source, columnMajorOrder);
   }
 
   public void set(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
