@@ -372,25 +372,6 @@ public class Frame {
     return false;
   }
 
-  /**
-   * Returns {@code true} if {@code frame} is ascendant of this frame.
-   *
-   * @see #isAscendantOf(Frame)
-   */
-  public boolean isDescendantOf(Frame frame) {
-    if (frame == null)
-      return true;
-    if (frame == this)
-      return false;
-    Frame ascendant = this.reference();
-    while (ascendant != null) {
-      if (ascendant == frame)
-        return true;
-      ascendant = ascendant.reference();
-    }
-    return false;
-  }
-
   // CONSTRAINT
 
   /**
