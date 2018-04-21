@@ -361,11 +361,11 @@ public class Frame {
   public boolean isAncestorOf(Frame frame) {
     if (frame == this || frame == null)
       return false;
-    Frame ascendant = frame.reference();
-    while (ascendant != null) {
-      if (ascendant == this)
+    Frame ancestor = frame.reference();
+    while (ancestor != null) {
+      if (ancestor == this)
         return true;
-      ascendant = ascendant.reference();
+      ancestor = ancestor.reference();
     }
     return false;
   }
