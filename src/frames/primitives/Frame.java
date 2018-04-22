@@ -1291,9 +1291,9 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _localTransformOf(frame == null ? reference().displacement(vector) : reference().displacement(vector, frame));
+      return _transformOf(frame == null ? reference().displacement(vector) : reference().displacement(vector, frame));
     else
-      return _localTransformOf(frame == null ? vector : frame.worldDisplacement(vector));
+      return _transformOf(frame == null ? vector : frame.worldDisplacement(vector));
   }
 
   /**
@@ -1308,7 +1308,7 @@ public class Frame {
     Frame frame = this;
     Vector result = vector;
     while (frame != null) {
-      result = frame._localInverseTransformOf(result);
+      result = frame._inverseTransformOf(result);
       frame = frame.reference();
     }
     return result;
@@ -1317,24 +1317,24 @@ public class Frame {
   /**
    * Converts {@code vector} displacement from {@link #reference()} to this frame.
    * <p>
-   * {@link #_localInverseTransformOf(Vector)} performs the inverse transformation.
-   * {@link #_localCoordinatesOf(Vector)} converts locations instead of displacements.
+   * {@link #_inverseTransformOf(Vector)} performs the inverse transformation.
+   * {@link #_coordinatesOf(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Vector)
    */
-  private Vector _localTransformOf(Vector vector) {
+  private Vector _transformOf(Vector vector) {
     return Vector.divide(rotation().inverseRotate(vector), scaling());
   }
 
   /**
    * Converts {@code vector} displacement from this frame to {@link #reference()}.
    * <p>
-   * {@link #_localTransformOf(Vector)} performs the inverse transformation.
-   * {@link #_localInverseCoordinatesOf(Vector)} converts locations instead of displacements.
+   * {@link #_transformOf(Vector)} performs the inverse transformation.
+   * {@link #_inverseCoordinatesOf(Vector)} converts locations instead of displacements.
    *
    * @see #worldDisplacement(Vector)
    */
-  private Vector _localInverseTransformOf(Vector vector) {
+  private Vector _inverseTransformOf(Vector vector) {
     return rotation().rotate(Vector.multiply(vector, scaling()));
   }
 
@@ -1361,9 +1361,9 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _localCoordinatesOf(frame == null ? reference().location(vector) : reference().location(vector, frame));
+      return _coordinatesOf(frame == null ? reference().location(vector) : reference().location(vector, frame));
     else
-      return _localCoordinatesOf(frame == null ? vector : frame.worldLocation(vector));
+      return _coordinatesOf(frame == null ? vector : frame.worldLocation(vector));
   }
 
   /**
@@ -1378,7 +1378,7 @@ public class Frame {
     Frame frame = this;
     Vector result = vector;
     while (frame != null) {
-      result = frame._localInverseCoordinatesOf(result);
+      result = frame._inverseCoordinatesOf(result);
       frame = frame.reference();
     }
     return result;
@@ -1387,24 +1387,24 @@ public class Frame {
   /**
    * Converts {@code vector} location from {@link #reference()} to this frame.
    * <p>
-   * {@link #_localInverseCoordinatesOf(Vector)} performs the inverse transformation.
-   * {@link #_localTransformOf(Vector)} converts displacements instead of locations.
+   * {@link #_inverseCoordinatesOf(Vector)} performs the inverse transformation.
+   * {@link #_transformOf(Vector)} converts displacements instead of locations.
    *
    * @see #location(Vector)
    */
-  private Vector _localCoordinatesOf(Vector vector) {
+  private Vector _coordinatesOf(Vector vector) {
     return Vector.divide(rotation().inverseRotate(Vector.subtract(vector, translation())), scaling());
   }
 
   /**
    * Converts {@code vector} location from this frame to {@link #reference()}.
    * <p>
-   * {@link #_localCoordinatesOf(Vector)} performs the inverse transformation.
-   * {@link #_localInverseTransformOf(Vector)} converts displacements instead of locations.
+   * {@link #_coordinatesOf(Vector)} performs the inverse transformation.
+   * {@link #_inverseTransformOf(Vector)} converts displacements instead of locations.
    *
    * @see #worldLocation(Vector)
    */
-  private Vector _localInverseCoordinatesOf(Vector vector) {
+  private Vector _inverseCoordinatesOf(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
   }
 }
