@@ -47,7 +47,7 @@ public class LinearBlendSkinning {
       float total = 0;
       for (Vertex.Properties properties : this.properties) {
         newPosition = Vector.add(newPosition, 
-          Vector.multiply(reference.coordinatesOfFrom(properties.local, properties.joint), 
+          Vector.multiply(reference.location(properties.local, properties.joint), 
           properties.weight));
         total += properties.weight;
       }
@@ -90,7 +90,7 @@ public class LinearBlendSkinning {
             dist = 1 / ((float) Math.pow(dist, 10));
             total_dist += dist;
             vertex.addProperties(joint.reference(), 
-              joint.reference().coordinatesOfFrom(position, reference), dist);
+              joint.reference().location(position, reference), dist);
           }
           //The more near, the more weight the bone applies
           float sum = 0;
@@ -121,8 +121,8 @@ public class LinearBlendSkinning {
    * */
   public float getDistance(Vector vertex, Frame frame, Frame root) {
     if (frame == null) return 9999;
-    Vector position = root.coordinatesOf(frame.position());
-    Vector parentPosition = root.coordinatesOf(frame.reference().position());
+    Vector position = root.location(frame.position());
+    Vector parentPosition = root.location(frame.reference().position());
     if (frame.reference() == root) {
       return Vector.distance(position, vertex);
     }

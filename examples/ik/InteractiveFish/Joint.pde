@@ -41,7 +41,7 @@ public class Joint extends OrbitShape  {
     if(!root) {
       pg.strokeWeight(5);
       pg.stroke(colour);
-      Vector v = localCoordinatesOf(new Vector());
+      Vector v = location(new Vector(), reference());
       if (pg.is2D()) {
         pg.line(0, 0, v.x(), v.y());
       } else {

@@ -16,7 +16,6 @@
  * Instantiate a graph object to use an eye frame.
  *
  * Press ' ' to toggle spinning.
- * Press 's' to fit scene smoothly.
  * press 'y' to change the eye spinning axis.
  */
 
@@ -102,8 +101,6 @@ public void spin() {
 }
 
 void keyPressed() {
-  if (key == 's')
-    graph.fitBallInterpolation();
   if (key == ' ')
     if (spinningTask.isActive())
       spinningTask.stop();

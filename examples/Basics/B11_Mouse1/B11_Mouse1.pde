@@ -1,5 +1,5 @@
 /**
- * Shapes.
+ * Mouse1.
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates the following frame hierarchy:

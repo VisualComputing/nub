@@ -27,7 +27,7 @@ boolean wC = true;
 String renderer = P3D;
 
 void setup() {
-  size(640, 360, renderer);
+  size(800, 800, renderer);
   myFont = loadFont("FreeSans-13.vlw");
   textFont(myFont);
 
