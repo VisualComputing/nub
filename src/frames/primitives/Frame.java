@@ -1271,9 +1271,12 @@ public class Frame {
   // VECTOR CONVERSION
 
   /**
+   * Converts {@code vector} displacement from world to this frame.
    * Same as {@code return displacement(vector, null)}.
+   * {@link #location(Vector)} converts locations instead of displacements.
    *
    * @see #displacement(Vector, Frame)
+   * @see #location(Vector)
    */
   public Vector displacement(Vector vector) {
     return displacement(vector, null);
@@ -1341,9 +1344,12 @@ public class Frame {
   // POINT CONVERSION
 
   /**
+   * Converts {@code vector} location from world to this frame.
    * Same as {@code return location(vector, null)}.
+   * {@link #displacement(Vector)} converts displacements instead of locations.
    *
    * @see #location(Vector, Frame)
+   * @see #displacement(Vector)
    */
   public Vector location(Vector vector) {
     return location(vector, null);
