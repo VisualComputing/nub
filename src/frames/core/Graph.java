@@ -1699,7 +1699,7 @@ public class Graph {
   public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye()._coordinatesOf(position))._vector[2] * eye().magnitude()) * (float) Math
+        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math
             .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
@@ -1889,7 +1889,7 @@ public class Graph {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vector tmp = frame._inverseCoordinatesOf(point);
+      Vector tmp = frame.worldLocation(point);
       _project(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
       _project(point._vector[0], point._vector[1], point._vector[2], xyz);
@@ -1992,7 +1992,7 @@ public class Graph {
     // getViewport(), xyz);
     _unproject(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (frame != null)
-      return frame._coordinatesOf(new Vector(xyz[0], xyz[1], xyz[2]));
+      return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
     else
       return new Vector(xyz[0], xyz[1], xyz[2]);
   }
@@ -2213,10 +2213,10 @@ public class Graph {
    * @see #lookAt(Vector)
    */
   public void setUpVector(Vector up, boolean noMove) {
-    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye()._transformOf(up));
+    Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().displacement(up));
 
     if (!noMove)
-      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye()._coordinatesOf(anchor()))));
+      eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().location(anchor()))));
 
     eye().rotate(q);
 
@@ -2500,7 +2500,7 @@ public class Graph {
         direction.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
             ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
             -1.0f));
-        direction.set(Vector.subtract(eye()._inverseCoordinatesOf(direction), origin));
+        direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
         break;
 
@@ -2510,7 +2510,7 @@ public class Graph {
         origin.set(
             new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
                 0.0f));
-        origin.set(eye()._inverseCoordinatesOf(origin));
+        origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
         break;
       }

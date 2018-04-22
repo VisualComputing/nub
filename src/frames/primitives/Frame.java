@@ -33,20 +33,19 @@ import frames.timing.TimingHandler;
  * {@code // Draw your object here, in the local frame coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
- * Many functions are provided to transform a point from one frame to another, see
- * {@link #_coordinatesOf(Vector)}, {@link #_inverseCoordinatesOf(Vector)},
- * {@link #_coordinatesOfIn(Vector, Frame)}, {@link #_coordinatesOfFrom(Vector, Frame)}...
- * <p>
+ * To transform a point from one frame to another use {@link #location(Vector, Frame)} and
+ * {@link #worldLocation(Vector)}. To instead transform a vector use
+ * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
  * You may also want to transform a vector (such as a normal), which corresponds to
  * applying only the rotational part of the frame transformation: see
- * {@link #_transformOf(Vector)} and {@link #_inverseTransformOf(Vector)}.
+ * {@link #displacement(Vector)} and {@link #worldDisplacement(Vector)}.
  * <p>
  * The {@link #translation()}, {@link #rotation()} and uniform positive {@link #scaling()}
  * that are encapsulated in a frame can also be used to represent an angle preserving
  * transformation of space. Such a transformation can also be interpreted as a change of
  * coordinate system, and the coordinate system conversion functions actually allow you to
  * use a frame as an angle preserving transformation. Use
- * {@link #_inverseCoordinatesOf(Vector)} (resp. {@link #_coordinatesOf(Vector)}) to apply
+ * {@link #worldLocation(Vector)} (resp. {@link #location(Vector)}) to apply
  * the transformation (resp. its inverse). Note the inversion.
  * <h2>Hierarchy of frames</h2>
  * The frame position, orientation and magnitude are actually defined with respect to
@@ -72,15 +71,6 @@ import frames.timing.TimingHandler;
  * enough to prevent ambiguities. These notions are obviously identical when the
  * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
  * coordinate system (the one you are left with after calling a graph preDraw() method).
- * <p>
- * Frames can hence easily be organized in a tree hierarchy, which root is the world
- * coordinate system. A loop in the hierarchy would result in an inconsistent (multiple)
- * frame definition. Therefore {@link #isAncestor(Frame)}
- * checks this and prevents {@link #reference()} from creating such a loop.
- * <p>
- * This frame hierarchy is used in methods like {@link #_coordinatesOfIn(Vector, Frame)},
- * {@link #_coordinatesOfFrom(Vector, Frame)} ... which allow coordinates (or vector)
- * conversions from a frame to any other one (including the world coordinate system).
  * <h2>Constraints</h2>
  * One interesting feature of a frame is that its displacements can be constrained. When a
  * {@link frames.primitives.constraint.Constraint} is attached to a frame, it filters
@@ -314,13 +304,9 @@ public class Frame {
    * is {@code null}.
    * <p>
    * Use {@link #setReference(Frame)} to set this value and create a frame hierarchy.
-   * Convenient functions allow you to convert coordinates from one frame to another: see
-   * {@link #_coordinatesOf(Vector)}, {@link #_localCoordinatesOf(Vector)} ,
-   * {@link #_coordinatesOfIn(Vector, Frame)} and their inverse functions.
-   * <p>
-   * Vectors can also be converted using {@link #_transformOf(Vector)},
-   * {@link #_transformOfIn(Vector, Frame)}, {@link #_localTransformOf(Vector)} and their inverse
-   * functions.
+   * Convenient functions allow you to convert coordinates and vectors from one frame to
+   * another: see {@link #location(Vector, Frame)} and {@link #displacement(Vector, Frame)},
+   * respectively.
    */
   public Frame reference() {
     return _reference;
@@ -482,7 +468,7 @@ public class Frame {
    * @see #translation()
    */
   public Vector position() {
-    return _inverseCoordinatesOf(new Vector(0, 0, 0));
+    return worldLocation(new Vector(0, 0, 0));
   }
 
   /**
@@ -497,7 +483,7 @@ public class Frame {
    * @see #setConstraint(Constraint)
    */
   public void setPosition(Vector position) {
-    setTranslation(reference() != null ? reference()._coordinatesOf(position) : position);
+    setTranslation(reference() != null ? reference().location(position) : position);
   }
 
   /**
@@ -601,7 +587,7 @@ public class Frame {
     this.rotation().normalize(); // Prevents numerical drift
 
     Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
-    //Vector vector = Vector.add(point, (new Quaternion(_inverseTransformOf(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+    //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
     vector.subtract(translation());
     if (constraint() != null)
       translate(constraint().constrainTranslation(vector, this));
@@ -759,7 +745,7 @@ public class Frame {
    * <p>
    * When {@code move} is set to {@code true}, the Frame {@link #position()} is also
    * affected by the alignment. The new Frame {@link #position()} is such that the
-   * {@code frame} frame position (computed with {@link #_coordinatesOf(Vector)}, in the Frame
+   * {@code frame} frame position (computed with {@link #location(Vector)}, in the Frame
    * coordinates system) does not change.
    * <p>
    * {@code frame} may be {@code null} and then represents the world coordinate system
@@ -847,7 +833,7 @@ public class Frame {
       if (frame != null)
         center = frame.position();
 
-      vector = Vector.subtract(center, _inverseTransformOf(old._coordinatesOf(center)));
+      vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
       translate(vector);
     }
@@ -880,7 +866,7 @@ public class Frame {
    * @see #setZAxis(Vector)
    */
   public void setXAxis(Vector axis) {
-    rotate(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _transformOf(axis)));
+    rotate(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), displacement(axis)));
   }
 
   /**
@@ -895,7 +881,7 @@ public class Frame {
    * @see #setZAxis(Vector)
    */
   public void setYAxis(Vector axis) {
-    rotate(new Quaternion(new Vector(0.0f, 1.0f, 0.0f), _transformOf(axis)));
+    rotate(new Quaternion(new Vector(0.0f, 1.0f, 0.0f), displacement(axis)));
   }
 
   /**
@@ -910,7 +896,7 @@ public class Frame {
    * @see #setZAxis(Vector)
    */
   public void setZAxis(Vector axis) {
-    rotate(new Quaternion(new Vector(0.0f, 0.0f, 1.0f), _transformOf(axis)));
+    rotate(new Quaternion(new Vector(0.0f, 0.0f, 1.0f), displacement(axis)));
   }
 
   /**
@@ -931,7 +917,7 @@ public class Frame {
    * @see #zAxis()
    */
   public Vector xAxis(boolean positive) {
-    Vector axis = _inverseTransformOf(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
+    Vector axis = worldDisplacement(new Vector(positive ? 1.0f : -1.0f, 0.0f, 0.0f));
     if (magnitude() != 1)
       axis.normalize();
     return axis;
@@ -955,7 +941,7 @@ public class Frame {
    * @see #zAxis()
    */
   public Vector yAxis(boolean positive) {
-    Vector axis = _inverseTransformOf(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
+    Vector axis = worldDisplacement(new Vector(0.0f, positive ? 1.0f : -1.0f, 0.0f));
     if (magnitude() != 1)
       axis.normalize();
     return axis;
@@ -979,7 +965,7 @@ public class Frame {
    * @see #yAxis()
    */
   public Vector zAxis(boolean positive) {
-    Vector axis = _inverseTransformOf(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
+    Vector axis = worldDisplacement(new Vector(0.0f, 0.0f, positive ? 1.0f : -1.0f));
     if (magnitude() != 1)
       axis.normalize();
     return axis;
@@ -1168,7 +1154,7 @@ public class Frame {
    * Using this conversion, you can benefit from the powerful frame transformation methods
    * to translate points and vectors to and from the frame coordinate system to any other
    * frame coordinate system (including the world coordinate system). See
-   * {@link #_coordinatesOf(Vector)} and {@link #_transformOf(Vector)}.
+   * {@link #location(Vector)} and {@link #displacement(Vector)}.
    */
   public void fromMatrix(Matrix matrix, float scaling) {
     if (matrix._matrix[15] == 0) {
@@ -1284,9 +1270,6 @@ public class Frame {
 
   // VECTOR CONVERSION
 
-  //TODO (1) api docs (move the Of in *Of(...) methods? location and displacement!), (2) make protected and (3) delete unused methods!
-  // (4) test with frame api example -> 0.2
-
   /**
    * Same as {@code return displacement(vector, null)}.
    *
@@ -1308,9 +1291,9 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _localTransformOf(frame == null ? reference()._transformOf(vector) : reference()._transformOfFrom(vector, frame));
+      return _localTransformOf(frame == null ? reference().displacement(vector) : reference().displacement(vector, frame));
     else
-      return _localTransformOf(frame == null ? vector : frame._inverseTransformOf(vector));
+      return _localTransformOf(frame == null ? vector : frame.worldDisplacement(vector));
   }
 
   /**
@@ -1329,6 +1312,30 @@ public class Frame {
       frame = frame.reference();
     }
     return result;
+  }
+
+  /**
+   * Converts {@code vector} displacement from {@link #reference()} to this frame.
+   * <p>
+   * {@link #_localInverseTransformOf(Vector)} performs the inverse transformation.
+   * {@link #_localCoordinatesOf(Vector)} converts locations instead of displacements.
+   *
+   * @see #displacement(Vector)
+   */
+  private Vector _localTransformOf(Vector vector) {
+    return Vector.divide(rotation().inverseRotate(vector), scaling());
+  }
+
+  /**
+   * Converts {@code vector} displacement from this frame to {@link #reference()}.
+   * <p>
+   * {@link #_localTransformOf(Vector)} performs the inverse transformation.
+   * {@link #_localInverseCoordinatesOf(Vector)} converts locations instead of displacements.
+   *
+   * @see #worldDisplacement(Vector)
+   */
+  private Vector _localInverseTransformOf(Vector vector) {
+    return rotation().rotate(Vector.multiply(vector, scaling()));
   }
 
   // POINT CONVERSION
@@ -1354,9 +1361,9 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _localCoordinatesOf(frame == null ? reference()._coordinatesOf(vector) : reference()._coordinatesOfFrom(vector, frame));
+      return _localCoordinatesOf(frame == null ? reference().location(vector) : reference().location(vector, frame));
     else
-      return _localCoordinatesOf(frame == null ? vector : frame._inverseCoordinatesOf(vector));
+      return _localCoordinatesOf(frame == null ? vector : frame.worldLocation(vector));
   }
 
   /**
@@ -1383,11 +1390,9 @@ public class Frame {
    * {@link #_localInverseCoordinatesOf(Vector)} performs the inverse transformation.
    * {@link #_localTransformOf(Vector)} converts displacements instead of locations.
    *
-   * @see #_coordinatesOf(Vector)
-   * @see #_coordinatesOfFrom(Vector, Frame)
-   * @see #_coordinatesOfIn(Vector, Frame)
+   * @see #location(Vector)
    */
-  public Vector _localCoordinatesOf(Vector vector) {
+  private Vector _localCoordinatesOf(Vector vector) {
     return Vector.divide(rotation().inverseRotate(Vector.subtract(vector, translation())), scaling());
   }
 
@@ -1397,197 +1402,9 @@ public class Frame {
    * {@link #_localCoordinatesOf(Vector)} performs the inverse transformation.
    * {@link #_localInverseTransformOf(Vector)} converts displacements instead of locations.
    *
-   * @see #_inverseCoordinatesOf(Vector)
-   * @see #_coordinatesOfFrom(Vector, Frame)
-   * @see #_coordinatesOfIn(Vector, Frame)
+   * @see #worldLocation(Vector)
    */
-  public Vector _localInverseCoordinatesOf(Vector vector) {
+  private Vector _localInverseCoordinatesOf(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
-  }
-
-  /**
-   * Converts {@code vector} location from world to this frame.
-   * <p>
-   * {@link #_inverseCoordinatesOf(Vector)} performs the inverse transformation.
-   * {@link #_transformOf(Vector)} converts displacements instead of locations.
-   *
-   * @see #_localCoordinatesOf(Vector)
-   * @see #_coordinatesOfFrom(Vector, Frame)
-   * @see #_coordinatesOfIn(Vector, Frame)
-   */
-  public Vector _coordinatesOf(Vector vector) {
-    if (reference() != null)
-      return _localCoordinatesOf(reference()._coordinatesOf(vector));
-    else
-      return _localCoordinatesOf(vector);
-  }
-
-  /**
-   * Converts {@code vector} location from this frame to world.
-   * <p>
-   * {@link #_coordinatesOf(Vector)} performs the inverse transformation.
-   * {@link #_inverseTransformOf(Vector)} converts displacements instead of locations.
-   *
-   * @see #_localInverseCoordinatesOf(Vector)
-   * @see #_coordinatesOfFrom(Vector, Frame)
-   * @see #_coordinatesOfIn(Vector, Frame)
-   */
-  public Vector _inverseCoordinatesOf(Vector vector) {
-    Frame frame = this;
-    Vector result = vector;
-    while (frame != null) {
-      result = frame._localInverseCoordinatesOf(result);
-      frame = frame.reference();
-    }
-    return result;
-  }
-
-  /**
-   * Converts {@code vector} location from {@code frame} to this frame.
-   * <p>
-   * {@link #_coordinatesOfIn(Vector, Frame)} performs the inverse transformation.
-   * {@link #_transformOfFrom(Vector, Frame)} converts displacements instead of locations.
-   *
-   * @see #_coordinatesOf(Vector)
-   * @see #_localCoordinatesOf(Vector)
-   */
-  public Vector _coordinatesOfFrom(Vector vector, Frame frame) {
-    if (this == frame)
-      return vector;
-    else if (reference() != null)
-      return _localCoordinatesOf(reference()._coordinatesOfFrom(vector, frame));
-    else
-      return _localCoordinatesOf(frame._inverseCoordinatesOf(vector));
-  }
-
-  /**
-   * Converts {@code vector} location from this frame to {@code frame}.
-   * <p>
-   * {@link #_coordinatesOfFrom(Vector, Frame)} performs the inverse transformation.
-   * {@link #_transformOfIn(Vector, Frame)} converts displacements instead of locations.
-   *
-   * @see #_coordinatesOf(Vector)
-   * @see #_localCoordinatesOf(Vector)
-   */
-  public Vector _coordinatesOfIn(Vector vector, Frame frame) {
-    Vector result = vector;
-    Frame aux = this;
-    while ((aux != null) && (aux != frame)) {
-      result = aux._localInverseCoordinatesOf(result);
-      aux = aux.reference();
-    }
-    if (aux != frame)
-      // in was not found in the branch of this, res is now expressed in the
-      // world coordinate system. Simply convert to in coordinate system.
-      result = frame._coordinatesOf(result);
-    return result;
-  }
-
-  // VECTOR CONVERSION
-
-  /**
-   * Converts {@code vector} displacement from {@link #reference()} to this frame.
-   * <p>
-   * {@link #_localInverseTransformOf(Vector)} performs the inverse transformation.
-   * {@link #_localCoordinatesOf(Vector)} converts locations instead of displacements.
-   *
-   * @see #_transformOf(Vector)
-   * @see #_transformOfFrom(Vector, Frame)
-   * @see #_transformOfIn(Vector, Frame)
-   */
-  public Vector _localTransformOf(Vector vector) {
-    return Vector.divide(rotation().inverseRotate(vector), scaling());
-  }
-
-  /**
-   * Converts {@code vector} displacement from this frame to {@link #reference()}.
-   * <p>
-   * {@link #_localTransformOf(Vector)} performs the inverse transformation.
-   * {@link #_localInverseCoordinatesOf(Vector)} converts locations instead of displacements.
-   *
-   * @see #_inverseTransformOf(Vector)
-   * @see #_transformOfFrom(Vector, Frame)
-   * @see #_transformOfIn(Vector, Frame)
-   */
-  public Vector _localInverseTransformOf(Vector vector) {
-    return rotation().rotate(Vector.multiply(vector, scaling()));
-  }
-
-  /**
-   * Converts {@code vector} displacement from world to this frame.
-   * <p>
-   * {@link #_inverseTransformOf(Vector)} performs the inverse transformation.
-   * {@link #_coordinatesOf(Vector)} converts locations instead of displacements.
-   *
-   * @see #_localTransformOf(Vector)
-   * @see #_transformOfFrom(Vector, Frame)
-   * @see #_transformOfIn(Vector, Frame) OfIn(Vector, Frame)
-   */
-  public Vector _transformOf(Vector vector) {
-    if (reference() != null)
-      return _localTransformOf(reference()._transformOf(vector));
-    else
-      return _localTransformOf(vector);
-  }
-
-  /**
-   * Converts {@code vector} displacement from this frame to world.
-   * <p>
-   * {@link #_transformOf(Vector)} performs the inverse transformation.
-   * {@link #_inverseCoordinatesOf(Vector)} converts locations instead of displacements.
-   *
-   * @see #_localInverseTransformOf(Vector)
-   * @see #_transformOfFrom(Vector, Frame)
-   * @see #_transformOfIn(Vector, Frame)
-   */
-  public Vector _inverseTransformOf(Vector vector) {
-    Frame frame = this;
-    Vector result = vector;
-    while (frame != null) {
-      result = frame._localInverseTransformOf(result);
-      frame = frame.reference();
-    }
-    return result;
-  }
-
-  /**
-   * Converts {@code vector} displacement from {@code frame} to this frame.
-   * <p>
-   * {@link #_transformOfIn(Vector, Frame)} performs the inverse transformation.
-   * {@link #_coordinatesOfFrom(Vector, Frame)} converts locations instead of displacements.
-   *
-   * @see #_transformOf(Vector)
-   * @see #_localTransformOf(Vector)
-   */
-  public Vector _transformOfFrom(Vector vector, Frame frame) {
-    if (this == frame)
-      return vector;
-    else if (reference() != null)
-      return _localTransformOf(reference()._transformOfFrom(vector, frame));
-    else
-      return _localTransformOf(frame._inverseTransformOf(vector));
-  }
-
-  /**
-   * Converts {@code vector} displacement from this frame to {@code frame}.
-   * <p>
-   * {@link #_transformOfFrom(Vector, Frame)} performs the inverse transformation.
-   * {@link #_coordinatesOfIn(Vector, Frame)} converts locations instead of displacements.
-   *
-   * @see #_transformOf(Vector)
-   * @see #_localTransformOf(Vector)
-   */
-  public Vector _transformOfIn(Vector vector, Frame frame) {
-    Frame aux = this;
-    Vector result = vector;
-    while ((aux != null) && (aux != frame)) {
-      result = aux._localInverseTransformOf(result);
-      aux = aux.reference();
-    }
-    if (aux != frame)
-      // in was not found in the branch of this, res is now expressed in
-      // the world coordinate system. Simply convert to in coordinate system.
-      result = frame._transformOf(result);
-    return result;
   }
 }

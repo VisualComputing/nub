@@ -177,10 +177,10 @@ public class TreeSolver extends FABRIKSolver {
           if (child._solver().target() == null) continue;
           if (child._solver().chain().size() < 2) continue;
           if (child._solver().chain().get(1).translation().magnitude() == 0) continue;
-          Vector diff = solver.endEffector()._coordinatesOf(child._solver().chain().get(1).position());
+          Vector diff = solver.endEffector().location(child._solver().chain().get(1).position());
           centroid.add(Vector.multiply(diff, child._weight()));
           if (child._modified) {
-            diff = solver.endEffector()._coordinatesOf(child._solver()._positions().get(1));
+            diff = solver.endEffector().location(child._solver()._positions().get(1));
             newCentroid.add(Vector.multiply(diff, child._weight()));
           } else {
             newCentroid.add(Vector.multiply(diff, child._weight()));

@@ -78,7 +78,7 @@ public class Raster extends PApplet {
     if (debug) {
       pushStyle();
       stroke(255, 255, 0, 125);
-      point(round(frame._coordinatesOf(v1).x()), round(frame._coordinatesOf(v1).y()));
+      point(round(frame.location(v1).x()), round(frame.location(v1).y()));
       popStyle();
     }
   }

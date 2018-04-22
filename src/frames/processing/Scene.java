@@ -2626,11 +2626,11 @@ public class Scene extends Graph implements PConstants {
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = graph.eye()._inverseCoordinatesOf(new Vector());
+        o = graph.eye().worldLocation(new Vector());
       pGraphics.beginShape(PApplet.LINES);
       for (Vector s : points) {
         if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-          Vector v = graph.eye()._coordinatesOf(s);
+          Vector v = graph.eye().location(s);
           Scene.vertex(pGraphics, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
@@ -2718,16 +2718,6 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape();
     endScreenCoordinates(pGraphics);
     pGraphics.popStyle();
-  }
-
-  /**
-   * Use {@link #drawShooterTarget(Frame)} instead.
-   *
-   * @deprecated Please refrain from using this method, it will be removed from future releases.
-   */
-  @Deprecated
-  public void drawPickingTarget(Frame frame) {
-    drawShooterTarget(frame);
   }
 
   /**

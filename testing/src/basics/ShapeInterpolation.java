@@ -121,7 +121,7 @@ public class ShapeInterpolation extends PApplet {
 
       Frame copy1 = frame.get();
       copy1.setReference(ref);
-      Quaternion q2 = new Quaternion(copy1._transformOf(q1.axis()), q1.angle());
+      Quaternion q2 = new Quaternion(copy1.displacement(q1.axis()), q1.angle());
       //copy1.rotateAroundPoint(q2, new Vector(15,15,15));
       //copy1.position().print();
       copy1.orientation().print();

@@ -35,14 +35,14 @@ public class WorldConstraint extends AxisPlaneConstraint {
         break;
       case PLANE:
         if (frame.reference() != null) {
-          proj = frame.reference()._transformOf(translationConstraintDirection());
+          proj = frame.reference().displacement(translationConstraintDirection());
           res = Vector.projectVectorOnPlane(translation, proj);
         } else
           res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
         break;
       case AXIS:
         if (frame.reference() != null) {
-          proj = frame.reference()._transformOf(translationConstraintDirection());
+          proj = frame.reference().displacement(translationConstraintDirection());
           res = Vector.projectVectorOnAxis(translation, proj);
         } else
           res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());
@@ -69,7 +69,7 @@ public class WorldConstraint extends AxisPlaneConstraint {
         break;
       case AXIS:
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-        Vector axis = frame._transformOf(rotationConstraintDirection());
+        Vector axis = frame.displacement(rotationConstraintDirection());
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
         break;

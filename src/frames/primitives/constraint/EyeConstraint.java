@@ -54,15 +54,15 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        proj = eye()._inverseTransformOf(translationConstraintDirection());
+        proj = eye().worldDisplacement(translationConstraintDirection());
         if (frame.reference() != null)
-          proj = frame.reference()._transformOf(proj);
+          proj = frame.reference().displacement(proj);
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        proj = eye()._inverseTransformOf(translationConstraintDirection());
+        proj = eye().worldDisplacement(translationConstraintDirection());
         if (frame.reference() != null)
-          proj = frame.reference()._transformOf(proj);
+          proj = frame.reference().displacement(proj);
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
@@ -86,7 +86,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case PLANE:
         break;
       case AXIS:
-        Vector axis = frame._transformOf(eye()._inverseTransformOf(rotationConstraintDirection()));
+        Vector axis = frame.displacement(eye().worldDisplacement(rotationConstraintDirection()));
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));

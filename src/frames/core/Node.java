@@ -1466,7 +1466,7 @@ public class Node extends Frame implements Grabber {
   protected void _zoomOnAnchor(MotionEvent1 event, float sensitivity) {
     Vector direction = Vector.subtract(_graph.anchor(), position());
     if (reference() != null)
-      direction = reference()._transformOf(direction);
+      direction = reference().displacement(direction);
     float delta = event.dx() * sensitivity / _graph.height();
     if (direction.magnitude() > 0.02f * _graph.radius() || delta > 0.0f)
       translate(Vector.multiply(direction, delta));
@@ -1498,7 +1498,7 @@ public class Node extends Frame implements Grabber {
   protected void _zoomOnAnchor(boolean in) {
     Vector direction = Vector.subtract(_graph.anchor(), position());
     if (reference() != null)
-      direction = reference()._transformOf(direction);
+      direction = reference().displacement(direction);
     float delta = (in ? keySensitivity() : -keySensitivity()) / _graph.height();
     if (direction.magnitude() > 0.02f * _graph.radius() || delta > 0.0f)
       translate(Vector.multiply(direction, delta));
@@ -1764,7 +1764,7 @@ public class Node extends Frame implements Grabber {
    */
   public void rotateXYZ(MotionEvent3 event) {
     if (event.fired())
-      _cadRotationIsReversed = _graph.eye()._transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -1801,7 +1801,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _cadRotationIsReversed = _graph.eye()._transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     }
     Quaternion quaternion;
     Vector vector;
@@ -1812,7 +1812,7 @@ public class Node extends Frame implements Grabber {
       quaternion = _deformedBallQuaternion(event, vector);
       vector = quaternion.axis();
       vector = _graph.eye().orientation().rotate(vector);
-      vector = _transformOf(vector);
+      vector = displacement(vector);
       quaternion = new Quaternion(vector, -quaternion.angle());
     }
     _spin(quaternion, event);
@@ -2046,7 +2046,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _cadRotationIsReversed = _graph.eye()._transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     }
     // Multiply by 2.0 to get on average about the same _speed as with the
     // deformed ball
@@ -2057,8 +2057,8 @@ public class Node extends Frame implements Grabber {
     if (_graph.isRightHanded())
       dy = -dy;
     //TODO spinning breaks upVector orientation
-    //_spin(Quaternion.multiply(new Quaternion(_transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
-    spin(Quaternion.multiply(new Quaternion(_transformOf(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)));
+    //_spin(Quaternion.multiply(new Quaternion(displacement(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
+    spin(Quaternion.multiply(new Quaternion(displacement(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)));
   }
 
   /**
@@ -2200,7 +2200,7 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       //TODO handle me
       //graph.setRotateVisualHint(true); // display visual hint
-      _cadRotationIsReversed = _graph.eye()._transformOf(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     }
     Quaternion quaternion;
     Vector vector;
@@ -2216,7 +2216,7 @@ public class Node extends Frame implements Grabber {
       vector = _graph.projectedCoordinates(position());
       float prev_angle = (float) Math.atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
       angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]);
-      Vector axis = _transformOf(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
+      Vector axis = displacement(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
       if (_graph.isRightHanded())
         quaternion = new Quaternion(axis, angle - prev_angle);
       else
@@ -2281,9 +2281,9 @@ public class Node extends Frame implements Grabber {
    */
   public Vector eyeToReferenceFrame(Vector vector) {
     Frame gFrame = isEye() ? this : /* respectToEye() ? */_graph.eye() /* : this */;
-    Vector t = gFrame._inverseTransformOf(vector);
+    Vector t = gFrame.worldDisplacement(vector);
     if (reference() != null)
-      t = reference()._transformOf(t);
+      t = reference().displacement(t);
     return t;
   }
 
@@ -2316,8 +2316,8 @@ public class Node extends Frame implements Grabber {
     switch (_graph.type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(_graph.fieldOfView() / 2.0f) * Math.abs(
-            _graph.eye()._coordinatesOf(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
-        // * Math.abs(graph.eye().frame()._coordinatesOf(isEye() ?
+            _graph.eye().location(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
+        // * Math.abs(graph.eye().frame().location(isEye() ?
         // graph.eye().anchor() : position()).vec[2]);
         //TODO check me weird to find height instead of width working (may it has to do with fov?)
         eyeVector._vector[0] *= 2.0 * k / _graph.height();
@@ -2334,7 +2334,7 @@ public class Node extends Frame implements Grabber {
     float coef;
     if (isEye()) {
       // float coef = 8E-4f;
-      coef = Math.max(Math.abs((_coordinatesOf(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
+      coef = Math.max(Math.abs((location(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
       eyeVector._vector[2] *= coef / graph().height();
       // eye _wheel seems different
       // trns.vec[2] *= coef * 8E-4f;
@@ -2381,7 +2381,7 @@ public class Node extends Frame implements Grabber {
       Quaternion q = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
       trns.set(-q.x(), -q.y(), -q.z());
       trns = _graph.eye().orientation().rotate(trns);
-      trns = _transformOf(trns);
+      trns = displacement(trns);
       q.setX(trns.x());
       q.setY(trns.y());
       q.setZ(trns.z());
@@ -2508,7 +2508,7 @@ public class Node extends Frame implements Grabber {
       deltaY = -deltaY;
 
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
-    Quaternion rotY = new Quaternion(_transformOf(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
+    Quaternion rotY = new Quaternion(displacement(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
     return Quaternion.multiply(rotY, rotX);
   }
 

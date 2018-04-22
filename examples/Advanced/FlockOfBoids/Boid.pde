@@ -31,7 +31,7 @@ class Boid {
       @Override
       public void interact(frames.input.Event event) {
         // the event shortcut type tell us about the event type itself:
-        if(event.shortcut() instanceof TapShortcut)
+        if(event instanceof TapEvent)
           if (avatar != this && scene.eye().reference() != this) {
             avatar = this;
             scene.eye().setReference(this);
