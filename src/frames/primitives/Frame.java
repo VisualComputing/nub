@@ -1325,7 +1325,7 @@ public class Frame {
    *
    * @see #displacement(Vector)
    */
-  private Vector _transformOf(Vector vector) {
+  protected Vector _transformOf(Vector vector) {
     return Vector.divide(rotation().inverseRotate(vector), scaling());
   }
 
@@ -1337,7 +1337,7 @@ public class Frame {
    *
    * @see #worldDisplacement(Vector)
    */
-  private Vector _inverseTransformOf(Vector vector) {
+  protected Vector _inverseTransformOf(Vector vector) {
     return rotation().rotate(Vector.multiply(vector, scaling()));
   }
 
@@ -1398,7 +1398,7 @@ public class Frame {
    *
    * @see #location(Vector)
    */
-  private Vector _coordinatesOf(Vector vector) {
+  protected Vector _coordinatesOf(Vector vector) {
     return Vector.divide(rotation().inverseRotate(Vector.subtract(vector, translation())), scaling());
   }
 
@@ -1410,7 +1410,7 @@ public class Frame {
    *
    * @see #worldLocation(Vector)
    */
-  private Vector _inverseCoordinatesOf(Vector vector) {
+  protected Vector _inverseCoordinatesOf(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
   }
 }
