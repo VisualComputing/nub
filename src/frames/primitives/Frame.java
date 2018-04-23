@@ -21,8 +21,11 @@ import frames.timing.TimingHandler;
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
  * Frame</a>, but it adds {@link #magnitude()} to it.
  * <h2>Geometry transformations</h2>
- * A frame is useful to define the position, orientation and magnitude of an object, using
- * its {@link #matrix()} method, as shown below:
+ * A frame is useful to define the position, orientation and magnitude of an arbitrary object
+ * which may represent a scene point-of-view.
+ * <p>
+ * Use {@link #matrix()} to access the frame coordinate system, as when drawing an object
+ * locally:
  * <p>
  * {@code // Builds a frame at position (0.5,0,0) and oriented such that its Y axis is
  * along the (1,1,1)} direction<br>
@@ -33,26 +36,21 @@ import frames.timing.TimingHandler;
  * {@code // Draw your object here, in the local frame coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
+ * Use {@link #view()} when rendering the scene from the frame point-of-view. Note this
+ * this method is used by the graph when a frame is set as its eye.
+ * <p>
  * To transform a point from one frame to another use {@link #location(Vector, Frame)} and
- * {@link #worldLocation(Vector)}. To instead transform a vector use
+ * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
- * You may also want to transform a vector (such as a normal), which corresponds to
- * applying only the rotational part of the frame transformation: see
- * {@link #displacement(Vector)} and {@link #worldDisplacement(Vector)}.
  * <p>
  * The {@link #translation()}, {@link #rotation()} and uniform positive {@link #scaling()}
  * that are encapsulated in a frame can also be used to represent an angle preserving
- * transformation of space. Such a transformation can also be interpreted as a change of
- * coordinate system, and the coordinate system conversion functions actually allow you to
- * use a frame as an angle preserving transformation. Use
- * {@link #worldLocation(Vector)} (resp. {@link #location(Vector)}) to apply
- * the transformation (resp. its inverse). Note the inversion.
+ * transformation of space.
  * <h2>Hierarchy of frames</h2>
  * The frame position, orientation and magnitude are actually defined with respect to
  * a {@link #reference()} frame. The default {@link #reference()} is the world
  * coordinate system (represented by a {@code null} {@link #reference()}). If you
  * {@link #setReference(Frame)} to a different frame, you must then differentiate:
- *
  * <ul>
  * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
  * defined with respect to the {@link #reference()}.</li>
@@ -1076,9 +1074,9 @@ public class Frame {
   }
 
   /**
-   * Same as {@link #worldMatrix()}, but the view matrix is computing with the frame magnitude
-   * set to 1, i.e., returns the matrix associated with the frame position and orientation.
-   * To be used when the frame represents an eye.
+   * Returns the inverse of the matrix associated with the frame position and orientation that
+   * is to be used when the frame represents an eye. This matrix matches the inverted of the
+   * {@link #worldMatrix()} when {@link #scaling()} is {@code 1}.
    * <p>
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.

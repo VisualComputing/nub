@@ -4,6 +4,7 @@ import common.InteractiveNode;
 import frames.core.Interpolator;
 import frames.core.Node;
 import frames.primitives.Frame;
+import frames.primitives.Matrix;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -132,6 +133,12 @@ public class ShapeInterpolation extends PApplet {
       //copy2._rotate(q1, new Vector(15, 15, 15));
       //copy2.position().print();
       copy2.orientation().print();
+    }
+    if(key == 'q') {
+      scene.eye().view().print();
+      Matrix matrix = scene.eye().worldMatrix();
+      if(matrix.invert())
+        matrix.print();
     }
   }
 
