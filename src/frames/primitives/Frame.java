@@ -98,7 +98,7 @@ public class Frame {
    * @param frame frame
    */
   public boolean matches(Frame frame) {
-    if(frame == null)
+    if (frame == null)
       frame = new Frame();
     return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
   }
@@ -1131,8 +1131,8 @@ public class Frame {
   }
 
   /**
-   * Sets the frame from a Matrix representation: rotation and scaling in the upper left 3x3
-   * matrix and translation on the last column.
+   * Sets the frame from a {@link #matrix()} representation: rotation and scaling in the upper
+   * left 3x3 matrix and translation on the last column.
    * <p>
    * Hence, if your openGL code fragment looks like:
    * <p>
@@ -1148,11 +1148,12 @@ public class Frame {
    * {@code // You are in the local frame coordinate system.} <br>
    * {@code graph.popModelView();} <br>
    * <p>
-   * Which allows to apply local transformations to the {@code frame} even using geometry
-   * data from other frame instances (see {@link #location(Vector, Frame)} and
+   * Which allows to apply local transformations to the {@code frame} while using geometry
+   * data from other frame instances when necessary (see {@link #location(Vector, Frame)} and
    * {@link #displacement(Vector, Frame)}).
    *
    * @see #fromWorldMatrix(Matrix)
+   * @see #matrix()
    */
   public void fromMatrix(Matrix matrix) {
     if (matrix._matrix[15] == 0) {
@@ -1169,7 +1170,7 @@ public class Frame {
     float r00 = matrix._matrix[0] / matrix._matrix[15];
     float r01 = matrix._matrix[4] / matrix._matrix[15];
     float r02 = matrix._matrix[8] / matrix._matrix[15];
-    setScaling(new Vector(r00,r01,r02).magnitude());// calls _modified() :P
+    setScaling(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
 
     float[][] r = new float[3][3];
     r[0][0] = r00 / scaling();
@@ -1188,6 +1189,29 @@ public class Frame {
     );
   }
 
+  /**
+   * Sets the frame from {@link #worldMatrix()} representation: orientation and magnitude
+   * in the upper left 3x3 matrix and position on the last column.
+   * <p>
+   * Hence, if your openGL code fragment looks like:
+   * <p>
+   * {@code float [] m = new float [16]; m[0]=...;} <br>
+   * {@code gl.glMultMatrixf(m);} <br>
+   * <p>
+   * It is equivalent to write:
+   * <p>
+   * {@code Frame frame = new Frame();} <br>
+   * {@code frame.fromWorldMatrix(m);} <br>
+   * {@code graph.applyModelView(frame.matrix());} <br>
+   * {@code // You are in the local frame coordinate system.} <br>
+   * <p>
+   * Which allows to apply local transformations to the {@code frame} while using geometry
+   * data from other frame instances when necessary (see {@link #location(Vector, Frame)} and
+   * {@link #displacement(Vector, Frame)}).
+   *
+   * @see #fromMatrix(Matrix)
+   * @see #worldMatrix()
+   */
   public void fromWorldMatrix(Matrix matrix) {
     if (matrix._matrix[15] == 0) {
       System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
@@ -1203,7 +1227,7 @@ public class Frame {
     float r00 = matrix._matrix[0] / matrix._matrix[15];
     float r01 = matrix._matrix[4] / matrix._matrix[15];
     float r02 = matrix._matrix[8] / matrix._matrix[15];
-    setMagnitude(new Vector(r00,r01,r02).magnitude());// calls _modified() :P
+    setMagnitude(new Vector(r00, r01, r02).magnitude());// calls _modified() :P
 
     float[][] r = new float[3][3];
     r[0][0] = r00 / scaling();

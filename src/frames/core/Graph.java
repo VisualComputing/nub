@@ -2147,7 +2147,7 @@ public class Graph {
   /**
    * Returns the normalized view direction of the eye, defined in the world coordinate
    * system. This corresponds to the negative Z axis of the {@link #eye()}
-   * ({@code frame()._inverseTransformOf(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
+   * ({@code frame().worldDisplacement(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
    * it always is (0,0,-1).
    * <p>
    * Xhange this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
