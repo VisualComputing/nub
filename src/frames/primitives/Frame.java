@@ -98,6 +98,8 @@ public class Frame {
    * @param frame frame
    */
   public boolean matches(Frame frame) {
+    if(frame == null)
+      frame = new Frame();
     return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
   }
 
@@ -1213,7 +1215,7 @@ public class Frame {
    */
   public void set(Frame frame) {
     if (frame == null)
-      return;
+      frame = new Frame();
     setPosition(frame.position());
     setOrientation(frame.orientation());
     setMagnitude(frame.magnitude());
