@@ -118,12 +118,30 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(null, new Vector(), rotation, scaling)}.
+   * Same as {@code this(translation, new Quaternion(), 1)}.
    *
    * @see #Frame(Vector, Quaternion, float)
    */
-  public Frame(Quaternion rotation, float scaling) {
-    this(null, new Vector(), rotation, scaling);
+  public Frame(Vector translation) {
+    this(translation, new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(new Vector(), rotation, 1)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(Quaternion rotation) {
+    this(new Vector(), rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(new Vector(), new Quaternion(), scaling)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(float scaling) {
+    this(new Vector(), new Quaternion(), scaling);
   }
 
   /**
@@ -145,12 +163,12 @@ public class Frame {
   }
 
   /**
-   * Same as {@code this(reference, translation, rotation, 1)}.
+   * Same as {@code this(reference, translation, new Quaternion(), 1)}.
    *
    * @see #Frame(Frame, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Vector translation, Quaternion rotation) {
-    this(reference, translation, rotation, 1);
+  public Frame(Frame reference, Vector translation) {
+    this(reference, translation, new Quaternion(), 1);
   }
 
   /**
@@ -158,8 +176,26 @@ public class Frame {
    *
    * @see #Frame(Frame, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Quaternion rotation, float scaling) {
+  public Frame(Frame reference, Quaternion rotation) {
     this(reference, new Vector(), rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, float scaling) {
+    this(reference, new Vector(), new Quaternion(), scaling);
+  }
+
+  /**
+   * Same as {@code this(reference, translation, rotation, 1)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Vector translation, Quaternion rotation) {
+    this(reference, translation, rotation, 1);
   }
 
   /**
@@ -1212,7 +1248,7 @@ public class Frame {
    */
   public void fromWorldMatrix(Matrix matrix) {
     if (matrix._matrix[15] == 0) {
-      System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
+      System.out.println("Doing nothing: matrix.mat[15] should be non-zero!");
       return;
     }
 
