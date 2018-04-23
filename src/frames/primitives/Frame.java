@@ -978,8 +978,9 @@ public class Frame {
   /**
    * Returns the local transformation matrix represented by the frame.
    * <p>
-   * This method could be used in conjunction with {@code applyMatrix()} to modify a graph
-   * modelView() matrix from a frame hierarchy. For example, with this frame hierarchy:
+   * This method could be used in conjunction with {@code pushMatrix()}, {@code popMatrix()}
+   * and {@code applyMatrix()} to modify a graph modelView() matrix from a frame hierarchy.
+   * For example, with this frame hierarchy:
    * <p>
    * {@code Frame body = new Frame();} <br>
    * {@code Frame leftArm = new Frame();} <br>
@@ -1044,17 +1045,17 @@ public class Frame {
   }
 
   /**
-   * Returns the global transformation matrix represented by the frame.
+   * Returns the global transformation matrix represented by the frame which grants
+   * direct access to it, without the need to traverse its ancestor hierarchy first
+   * (as it is the case with {@link #matrix()}).
    * <p>
    * This method should be used in conjunction with {@code applyMatrix()} to modify a
    * graph modelView() matrix from a frame:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
    * {@code Frame frame = new Frame(translation, new Rotation(from, to));} <br>
-   * {@code graph.pushModelView();} <br>
    * {@code graph.applyModelView(frame.worldMatrix());} <br>
    * {@code // draw object in the frame coordinate system.} <br>
-   * {@code graph.popModelView();} <br>
    * <p>
    * This matrix represents the global frame transformation: the entire
    * {@link #reference()} hierarchy is taken into account to define the frame
@@ -1130,17 +1131,8 @@ public class Frame {
   }
 
   /**
-   * Convenience function that simply calls {@code fromMatrix(matrix, 1))}.
-   *
-   * @see #fromMatrix(Matrix, float)
-   */
-  public void fromMatrix(Matrix matrix) {
-    fromMatrix(matrix, 1);
-  }
-
-  /**
-   * Sets the frame from a Matrix representation: rotation in the upper left 3x3 matrix and
-   * translation on the last column. Scaling is defined separately in {@code scaling}.
+   * Sets the frame from a Matrix representation: rotation and scaling in the upper left 3x3
+   * matrix and translation on the last column.
    * <p>
    * Hence, if your openGL code fragment looks like:
    * <p>
@@ -1151,56 +1143,83 @@ public class Frame {
    * <p>
    * {@code Frame frame = new Frame();} <br>
    * {@code frame.fromMatrix(m);} <br>
+   * {@code graph.pushModelView();} <br>
    * {@code graph.applyModelView(frame.matrix());} <br>
+   * {@code // You are in the local frame coordinate system.} <br>
+   * {@code graph.popModelView();} <br>
    * <p>
-   * Using this conversion, you can benefit from the powerful frame transformation methods
-   * to translate points and vectors to and from the frame coordinate system to any other
-   * frame coordinate system (including the world coordinate system). See
-   * {@link #location(Vector)} and {@link #displacement(Vector)}.
+   * Which allows to apply local transformations to the {@code frame} even using geometry
+   * data from other frame instances (see {@link #location(Vector, Frame)} and
+   * {@link #displacement(Vector, Frame)}).
+   *
+   * @see #fromWorldMatrix(Matrix)
    */
-  public void fromMatrix(Matrix matrix, float scaling) {
+  public void fromMatrix(Matrix matrix) {
     if (matrix._matrix[15] == 0) {
       System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
       return;
     }
 
-    translation()._vector[0] = matrix._matrix[12] / matrix._matrix[15];
-    translation()._vector[1] = matrix._matrix[13] / matrix._matrix[15];
-    translation()._vector[2] = matrix._matrix[14] / matrix._matrix[15];
+    setTranslation(
+        matrix._matrix[12] / matrix._matrix[15],
+        matrix._matrix[13] / matrix._matrix[15],
+        matrix._matrix[14] / matrix._matrix[15]
+    );
+
+    float r00 = matrix._matrix[0] / matrix._matrix[15];
+    float r01 = matrix._matrix[4] / matrix._matrix[15];
+    float r02 = matrix._matrix[8] / matrix._matrix[15];
+    setScaling(new Vector(r00,r01,r02).magnitude());// calls _modified() :P
 
     float[][] r = new float[3][3];
+    r[0][0] = r00 / scaling();
+    r[0][1] = r01 / scaling();
+    r[0][2] = r02 / scaling();
+    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / scaling();
+    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / scaling();
+    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / scaling();
+    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / scaling();
+    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / scaling();
+    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / scaling();
+    setRotation(new Quaternion(
+        new Vector(r[0][0], r[1][0], r[2][0]),
+        new Vector(r[0][1], r[1][1], r[2][1]),
+        new Vector(r[0][2], r[1][2], r[2][2]))
+    );
+  }
 
-    r[0][0] = matrix._matrix[0] / matrix._matrix[15];
-    r[0][1] = matrix._matrix[4] / matrix._matrix[15];
-    r[0][2] = matrix._matrix[8] / matrix._matrix[15];
-    r[1][0] = matrix._matrix[1] / matrix._matrix[15];
-    r[1][1] = matrix._matrix[5] / matrix._matrix[15];
-    r[1][2] = matrix._matrix[9] / matrix._matrix[15];
-    r[2][0] = matrix._matrix[2] / matrix._matrix[15];
-    r[2][1] = matrix._matrix[6] / matrix._matrix[15];
-    r[2][2] = matrix._matrix[10] / matrix._matrix[15];
-
-    setScaling(scaling);// calls _modified() :P
-
-    if (scaling() != 1) {
-      r[0][0] = r[0][0] / scaling();
-      r[1][0] = r[1][0] / scaling();
-      r[2][0] = r[2][0] / scaling();
-
-      r[0][1] = r[0][1] / scaling();
-      r[1][1] = r[1][1] / scaling();
-      r[2][1] = r[2][1] / scaling();
-
-      r[0][2] = r[0][2] / scaling();
-      r[1][2] = r[1][2] / scaling();
-      r[2][2] = r[2][2] / scaling();
+  public void fromWorldMatrix(Matrix matrix) {
+    if (matrix._matrix[15] == 0) {
+      System.out.println("Doing nothing: pM.mat[15] should be non-zero!");
+      return;
     }
 
-    Vector x = new Vector(r[0][0], r[1][0], r[2][0]);
-    Vector y = new Vector(r[0][1], r[1][1], r[2][1]);
-    Vector z = new Vector(r[0][2], r[1][2], r[2][2]);
+    setPosition(
+        matrix._matrix[12] / matrix._matrix[15],
+        matrix._matrix[13] / matrix._matrix[15],
+        matrix._matrix[14] / matrix._matrix[15]
+    );
 
-    rotation().fromRotatedBasis(x, y, z);
+    float r00 = matrix._matrix[0] / matrix._matrix[15];
+    float r01 = matrix._matrix[4] / matrix._matrix[15];
+    float r02 = matrix._matrix[8] / matrix._matrix[15];
+    setMagnitude(new Vector(r00,r01,r02).magnitude());// calls _modified() :P
+
+    float[][] r = new float[3][3];
+    r[0][0] = r00 / scaling();
+    r[0][1] = r01 / scaling();
+    r[0][2] = r02 / scaling();
+    r[1][0] = (matrix._matrix[1] / matrix._matrix[15]) / scaling();
+    r[1][1] = (matrix._matrix[5] / matrix._matrix[15]) / scaling();
+    r[1][2] = (matrix._matrix[9] / matrix._matrix[15]) / scaling();
+    r[2][0] = (matrix._matrix[2] / matrix._matrix[15]) / scaling();
+    r[2][1] = (matrix._matrix[6] / matrix._matrix[15]) / scaling();
+    r[2][2] = (matrix._matrix[10] / matrix._matrix[15]) / scaling();
+    setOrientation(new Quaternion(
+        new Vector(r[0][0], r[1][0], r[2][0]),
+        new Vector(r[0][1], r[1][1], r[2][1]),
+        new Vector(r[0][2], r[1][2], r[2][2]))
+    );
   }
 
   /**
