@@ -6,6 +6,7 @@ frames
 
 - [Description](#user-content-description)
 - [Usage](#user-content-usage)
+- [Eye](#user-content-eye)
 - [Interpolators](#user-content-interpolators)
 - [Interactivity](#user-content-interactivity)
 - [IK](#user-content-ik)
@@ -23,7 +24,7 @@ If looking for the API docs, check them [here](https://visualcomputing.github.io
 
 ## Usage
 
-Typical usage comprises three steps: scene instantiation, setting an eye and setting some shapes.
+Typical usage comprises scene instantiation and setting some scene objects. Setting an [eye](#user-content-eye) is discuss separately.
 
 ### Scene instantiation
 
@@ -51,61 +52,136 @@ void setup() {
 
 In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the `canvas`.
 
-### The eye
+### Scene objects
 
-The default scene eye is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) instance, but it can also be a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) one.
+Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html),
+a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) (which is a Frame specializarions) or a 
+[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) (which in turn is a Node
+specialization) instance.
 
-To set the eye from whatever `frame` instance, different than the default one, use code such as the following:
+To illustrate their use, suppose the following scene graph hierarchy is being implemented:
 
-```java
-...
-Frame eye;
+```processing
+ World
+  ^
+  |\
+  1 eye
+  ^
+  |\
+  2 3
+```
+
+#### Frames
+
+To setup the _frame_ hierarchy use code such as the following:
+
+```processing
+Scene scene;
+Frame f1, f2, f3, eye;
 void setup() {
-  ...
+  scene = new Scene(this);
+  f1 = new Frame();
+  f2 = new Frame(f1, 1);
+  f3 = new Frame(f1, 1);
   eye = new Frame();
   scene.setEye(eye);
 }
 ```
 
-The eye can be controlled programmatically using the powerful [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) API.
+To traverse the hierarchy implement code such as the following:
 
-To set the eye from a node instance use code such as the following:
+```processing
+void draw() {
+  // enter f1
+  pushMatrix();
+  scene.applyTransformation(f1);
+  drawF1();
+  // enter f2
+  pushMatrix();
+  scene.applyTransformation(f1);
+  drawF2();
+  // "return" to f1
+  popMatrix();
+  // enter f3
+  pushMatrix();
+  scene.applyTransformation(f3);
+  drawF3();
+  // return to f1
+  popMatrix();
+  // return to World
+  popMatrix();
+}
+```
 
-```java
-...
-Node eye;
+Some advantages of using frames are:
+
+* The scene gets automatically rendered respect to the `eye` frame
+* `setTranslation(Vector)`, `translate(Vector)`, `setRotation(Quaterion)`, `rotate(Quaterion)`, `setScaling(float)` and `scale(float)`, locally manipulates a frame instance
+* `setPosition(Vector)`, `setOrientation(Quaterion)`, and `setMagnitude(float)`, globally manipulates a frame instance
+* `location(Vector, Frame)` and `displacement(Vector, Frame)` transforms coordinates and vectors (resp.) from other frame instances
+* `worldLocation(Vector)` and `worldDisplacement(Vector)` transforms coordinates and vectors (resp.) to the world
+* `setConstraint(Constrain)` applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion
+
+The main disadvantage of using frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it.
+
+#### Nodes
+
+To setup the _node_ hierarchy use code such as the following:
+
+```processing
+Scene scene;
+Node n1, n2, n3, eye;
 void setup() {
-  ...
-  eye = new Node(scene) {
+  scene = new Scene(this);
+  n1 = new Node(scene);
+  n2 = new Node(n1);
+  n3 = new Node(n1);
+  eye = new Node(scene);
+  scene.setEye(eye);
+}
+```
+
+To traverse the hierarchy implement code such as the following:
+
+```processing
+void draw() {
+  // calls visit() on each node instance
+  scene.traverse();
+}
+```
+
+Some advantages of using nodes are:
+
+* Same as with frames, but traversing the hierarchy doesn't require any prior knowledge over it.
+* Nodes have [inverse kinematics](https://github.com/VisualComputing/framesjs/tree/processing/examples/ik) behavior.
+* Nodes can be manipulated interactively by overriding `interact(Event)`, e.g., 
+    ```java
     @Override
     public void interact(Event event) {
       // translate the node from a LEFT mouse button drag
       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
-        translate(event);
+        translate(event);  
     }
-  };
-  scene.setEye(eye);
-  scene.setDefaultGrabber(eye);
-}
-```
+    ```
+    tells us the `event` is a `MotionEvent2` mouse left drag (refer to the
+    [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details).
+* Nodes are picked using ray-tracing against a rectangular area around their projected `position()`.
+* Nodes can be drawn by overriding `visit()` with your drawing code.
 
-The eye can be controlled both programmatically (since a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) specialization) and interactively (using the mouse, see [mouse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#mouse--) and [Mouse](https://visualcomputing.github.io/frames-javadocs/frames/processing/Mouse.html)). Note that the node [interactivity](#user-content-interactivity) itself is programmable.
+Note that nodes are picked using the ray tracing against a square region having the node projected position as its center.
+See []().
 
-Observe the anonymous inner [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) class intance which is used to define how the node will behave: actions are bound to the node using the event `Shortcut` attribute which identifies it. For instance `Shortcut(PApplet.LEFT))` tells us the `event` is a `MotionEvent2` mouse left drag (refer to the [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details).
+#### Shapes
 
-Note also the [setDefaultGrabber(Grabber)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setDefaultGrabber-frames.input.Grabber-) call which will direct user input (e.g., mouse) to the eye when no other node is being picked.
-
-### Shapes
-
-A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) is a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) specialization that can be set from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) or from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure. Shapes can be picked precisely using their projection onto the screen, see [setPrecision(Node.Precision)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Node.Precision-). Use [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) to render all scene-graph shapes or [draw()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#draw--) to render a specific one instead.
-
-#### Retained-mode shapes
+A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) is a
+[Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) specialization that can be set from a
+[retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing
+[PShape](https://processing.org/reference/PShape.html) or from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure. Shapes can be picked precisely using their projection onto the screen, see [setPrecision(Node.Precision)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Node.Precision-). Use [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) to render all scene-graph shapes or [draw()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#draw--) to render a specific one instead.
 
 To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.set(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
-#### Immediate-mode shapes
-
-Immediate-mode shapes should override `Shape.set(PGraphics)`, e.g., using an anonymous inner [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
+Immediate-mode shapes should override `Shape.set(PGraphics)`, e.g., using an anonymous inner
+[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
  
 ```java
 ...
@@ -121,9 +197,31 @@ void setup() {
 }
 ```
 
-Note that shapes like nodes can be controlled interactively by overriding [interact(Event)](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#interact-frames.input.Event-) (like it has been done above) and, like frames, they can be set as the scene eye which may be useful to depict the viewer in first person camera style.
+To render the shape hierarchy implement code such as the following:
 
-Note also that shapes override the `Node` [visit](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#visit--) method to actually render its contents.
+```processing
+void draw() {
+  // calls visit() on each node instance
+  scene.traverse();
+}
+```
+
+Some advantages of using shapes are:
+
+* Same as with nodes.
+* Shapes are picked precisely using ray-tracing against the pixels of their projection.
+See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Node.Precision-).
+
+## Eye
+
+The scene eye can be set from any [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html), [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html)
+or [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance, by simply calling
+[setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.primitives.Frame-).
+
+The default scene eye is a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html) instance
+which better suits non-real time renderers.
+
+Note that shapes can be set as the scene eye which may be useful to depict the viewer in first person camera style.
 
 ## Interpolators
 

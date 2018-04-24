@@ -1,6 +1,3 @@
-
-
-
 /**
  * Lamp by Jean Pierre Charalambos.
  * 
