@@ -55,7 +55,7 @@ In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/fram
 ### Scene objects
 
 Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html),
-a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) (which is a Frame specializarions) or a 
+a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) (which is a Frame specialization) or a 
 [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) (which in turn is a Node
 specialization) instance.
 
@@ -167,9 +167,8 @@ Some advantages of using nodes are:
     [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) API for details).
 * Nodes are picked using ray-tracing against a rectangular area around their projected `position()`.
 * Nodes can be drawn by overriding `visit()` with your drawing code.
-
-Note that nodes are picked using the ray tracing against a square region having the node projected position as its center.
-See []().
+* Nodes are picked using the ray tracing against a square region having the node projected position as its center.
+See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html#setPrecision-frames.core.Node.Precision-).
 
 #### Shapes
 
