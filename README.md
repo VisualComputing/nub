@@ -24,7 +24,7 @@ If looking for the API docs, check them [here](https://visualcomputing.github.io
 
 ## Usage
 
-Typical usage comprises scene instantiation and setting some scene objects. Setting an [eye](#user-content-eye) is discuss separately.
+Typical usage comprises scene instantiation and setting some scene objects. Setting an [eye](#user-content-eye) is discussed separately.
 
 ### Scene instantiation
 
