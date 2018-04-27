@@ -623,9 +623,23 @@ public class Interpolator {
     _currentFrameValid = false;
     if (started())
       stop();
-    KeyFrame kf = _list.remove(index);
-    if (kf.frame() instanceof Node)
-      _graph.pruneBranch((Node) kf._frame);
+    _list.remove(index);
+  }
+
+  /**
+   * Same as {@link #removeKeyFrame(int)}, but also removes the key frame from the scene if it is a node instance.
+   */
+  public void purgeKeyFrame(int index) {
+    if (index < 0 || index >= _list.size())
+      return;
+    _valuesAreValid = false;
+    _pathIsValid = false;
+    _currentFrameValid = false;
+    if (started())
+      stop();
+    KeyFrame keyFrame = _list.remove(index);
+    if (keyFrame.frame() instanceof Node)
+      _graph.pruneBranch((Node) keyFrame._frame);
     setTime(firstTime());
   }
 
