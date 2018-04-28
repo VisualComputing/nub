@@ -16,7 +16,6 @@ import frames.core.MatrixHandler;
 import frames.core.Node;
 import frames.input.Agent;
 import frames.input.Event;
-import frames.input.Grabber;
 import frames.primitives.*;
 import frames.primitives.constraint.BallAndSocket;
 import frames.primitives.constraint.Hinge;
@@ -2654,7 +2653,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Node instance the length of the cross is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputNode(Grabber)} it also applies
+   * If frame a Node instance and it is {@link #isInputNode(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
@@ -2724,7 +2723,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Node instance the length of the target is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputNode(Grabber)} it also applies
+   * If frame a Node instance and it is {@link #isInputNode(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
