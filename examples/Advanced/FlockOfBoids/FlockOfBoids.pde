@@ -55,7 +55,7 @@ void setup() {
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
   //interactivity defaults to the eye
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBall();
   // create and fill the list of boids
   flock = new ArrayList();

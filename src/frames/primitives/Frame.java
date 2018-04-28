@@ -392,6 +392,15 @@ public class Frame {
     return false;
   }
 
+  /**
+   * Same as {@code return ancestor.isAncestor(frame)}.
+   *
+   * @see #isAncestor(Frame)
+   */
+  public static boolean isAncestor(Frame ancestor, Frame frame) {
+    return ancestor.isAncestor(frame);
+  }
+
   // CONSTRAINT
 
   /**
@@ -818,7 +827,7 @@ public class Frame {
     }
     Frame old = new Frame(this); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
-    // hence addGrabber the frame to the mouse _grabber
+    // hence add the frame to the mouse _grabber
 
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);

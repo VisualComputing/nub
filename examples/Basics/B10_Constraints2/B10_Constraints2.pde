@@ -38,7 +38,7 @@ void setup() {
   eye.setSpinningSensitivity(1);
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBallInterpolation();
 
   constraints[0] = new LocalConstraint();
@@ -61,7 +61,7 @@ void draw() {
   pushMatrix();
   node.applyTransformation();
   scene.drawAxes(40);
-  if (scene.isInputGrabber(node)) {
+  if (scene.isInputNode(node)) {
     fill(0, 255, 255);
     scene.drawTorusSolenoid();
   } else if (node.grabsInput()) {
@@ -81,7 +81,7 @@ void draw() {
 
 void keyPressed() {
   if ( key == 'i') {
-    scene.inputHandler().shiftDefaultGrabber(eye, node);
+    scene.shiftDefaultNode(eye, node);
   }
   if (key == 'b' || key == 'B') {
     rotDir = (rotDir + 1) % 3;

@@ -35,7 +35,7 @@ void setup() {
   eye.setDamping(0);
   scene.setEye(eye);
   //interactivity defaults to the eye
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.setRadius(150);
 
   // interpolation 1. Default eye interpolations

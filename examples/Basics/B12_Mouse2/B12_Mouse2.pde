@@ -38,7 +38,7 @@ void setup() {
   scene.setFieldOfView(PI / 3);
   // user gesture input data is directed towards
   // the eye when no other node is being picked
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBallInterpolation();
 }
 

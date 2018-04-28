@@ -67,8 +67,8 @@ import java.util.List;
  * {@link #areBoundaryEquationsEnabled()}).
  * <h2>Input handling</h2>
  * The graph performs input handling through an {@link #inputHandler()}. Several
- * {@link InputHandler} wrapper functions, such as {@link #isInputGrabber(Grabber)},
- * {@link #setDefaultGrabber(Grabber)}, {@link #shiftDefaultGrabber(Grabber, Grabber)},
+ * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
+ * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
  * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
  * convenience.
  * <p>
@@ -752,21 +752,12 @@ public class Graph {
   /**
    * Returns a straight path of nodes between {@code tail} and {@code tip}.
    * <p>
-   * If {@code tip} is descendant of {@code tail} the returned list will include both of them.
+   * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
    * Otherwise it will be empty.
    */
-  public ArrayList<Node> branch(Node tail, Node tip) {
+  public static ArrayList<Node> path(Node tail, Node tip) {
     ArrayList<Node> list = new ArrayList<Node>();
-    //1. Check if tip is a tail descendant
-    boolean desc = false;
-    ArrayList<Node> descList = branch(tail);
-    for (Node node : descList)
-      if (node == tip) {
-        desc = true;
-        break;
-      }
-    //2. If so, return the path between the two
-    if (desc) {
+    if (tail.isAncestor(tip)) {
       Node _tip = tip;
       while (_tip != tail) {
         list.add(0, _tip);
@@ -801,12 +792,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code inputHandler().setDefaultGrabber(grabber)}.
+   * Same as {@code inputHandler().setDefaultGrabber(node)}.
    *
    * @see {@link InputHandler#setDefaultGrabber(Grabber)}
    */
-  public void setDefaultGrabber(Grabber grabber) {
-    inputHandler().setDefaultGrabber(grabber);
+  public void setDefaultNode(Node node) {
+    inputHandler().setDefaultGrabber(node);
   }
 
   /**
@@ -814,62 +805,65 @@ public class Graph {
    *
    * @see InputHandler#resetTrackedGrabber()
    */
-  public void resetTrackedGrabber() {
-    inputHandler().resetTrackedGrabber();
+  public void resetTrackedNode() {
+    for (Agent agent : agents())
+      if (agent.trackedGrabber() instanceof Node)
+        agent.resetTrackedGrabber();
   }
 
   /**
-   * Same as {@code inputHandler().shiftDefaultGrabber(grabber1, grabber2)}.
+   * Same as {@code inputHandler().shiftDefaultGrabber(node1, node2)}.
    *
    * @see InputHandler#shiftDefaultGrabber(Grabber, Grabber)
    */
-  public void shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
-    inputHandler().shiftDefaultGrabber(grabber1, grabber2);
+  public void shiftDefaultNode(Node node1, Node node2) {
+    inputHandler().shiftDefaultGrabber(node1, node2);
   }
 
   /**
-   * Same as {@code inputHandler().addGrabber(grabber)}.
+   * Same as {@code inputHandler().addGrabber(node)}.
    *
    * @see InputHandler#addGrabber(Grabber)
    */
-  public void addGrabber(Grabber grabber) {
-    inputHandler().addGrabber(grabber);
+  public void addNode(Node node) {
+    inputHandler().addGrabber(node);
   }
 
   /**
-   * Same as {@code inputHandler().removeGrabbers()}.
+   * Same as {@code for(Node node : nodes() removeNode(node)}.
    *
-   * @see InputHandler#removeGrabbers()
+   * @see #removeNode(Node)
    */
-  public void removeGrabbers() {
-    inputHandler().removeGrabbers();
+  public void removeNodes() {
+    for (Node node : nodes())
+      removeNode(node);
   }
 
   /**
-   * Same as {@code inputHandler().removeGrabber(grabber)}.
+   * Same as {@code inputHandler().removeGrabber(node)}.
    *
    * @see InputHandler#removeGrabber(Grabber)
    */
-  public void removeGrabber(Grabber grabber) {
-    inputHandler().removeGrabber(grabber);
+  public void removeNode(Node node) {
+    inputHandler().removeGrabber(node);
   }
 
   /**
-   * Same as {@code inputHandler().hasGrabber(grabber)}.
+   * Same as {@code inputHandler().hasGrabber(node)}.
    *
    * @see InputHandler#hasGrabber(Grabber)
    */
-  public boolean hasGrabber(Grabber grabber) {
-    return inputHandler().hasGrabber(grabber);
+  public boolean hasNode(Node node) {
+    return inputHandler().hasGrabber(node);
   }
 
   /**
-   * Same as {@code return inputHandler().isInputGrabber(grabber)}.
+   * Same as {@code return inputHandler().isInputNode(node)}.
    *
    * @see InputHandler#isInputGrabber(Grabber)
    */
-  public boolean isInputGrabber(Grabber grabber) {
-    return inputHandler().isInputGrabber(grabber);
+  public boolean isInputNode(Node node) {
+    return inputHandler().isInputGrabber(node);
   }
 
   /**
@@ -906,6 +900,10 @@ public class Graph {
    */
   public void unregisterAgents() {
     inputHandler().unregisterAgents();
+  }
+
+  public List<Agent> agents() {
+    return inputHandler().agents();
   }
 
   // Timing stuff
@@ -1691,7 +1689,7 @@ public class Graph {
    * <p>
    * {@code beginShape(LINES);}<br>
    * {@code vertex(sceneCenter().x, sceneCenter().y, sceneCenter().z);}<br>
-   * {@code Vector v = Vector.addGrabber(sceneCenter(), Vector.mult(upVector(), 20 * graphToPixelRatio(sceneCenter())));}
+   * {@code Vector v = Vector.add(sceneCenter(), Vector.mult(upVector(), 20 * graphToPixelRatio(sceneCenter())));}
    * <br>
    * {@code vertex(v.x, v.y, v.z);}<br>
    * {@code endShape();}<br>
@@ -2666,11 +2664,10 @@ public class Graph {
    * Registers the given chain to solve IK.
    */
   public TreeSolver registerTreeSolver(Node node) {
-    for (TreeSolver solver : _solvers) {
+    for (TreeSolver solver : _solvers)
       //If Head is Contained in any structure do nothing
-      if (!branch(solver.head(), node).isEmpty())
+      if (!path(solver.head(), node).isEmpty())
         return null;
-    }
     TreeSolver solver = new TreeSolver(node);
     _solvers.add(solver);
     //Add task

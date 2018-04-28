@@ -40,7 +40,7 @@ void setup() {
   scene.enableBoundaryEquations();
   OrbitShape eye = new OrbitShape(scene);
   scene.setEye(eye);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 
@@ -51,7 +51,7 @@ void setup() {
   auxScene.setType(Graph.Type.ORTHOGRAPHIC);
   OrbitShape auxEye = new OrbitShape(auxScene);
   auxScene.setEye(auxEye);
-  auxScene.setDefaultGrabber(auxEye);
+  auxScene.setDefaultNode(auxEye);
   auxScene.setRadius(250);
   scene.setFieldOfView(PI / 3);
   auxScene.fitBall();

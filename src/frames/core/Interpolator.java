@@ -615,32 +615,26 @@ public class Interpolator {
    * {@link #stop()} if {@link #started()}. If
    * {@code index < 0 || index >= keyFr.size()} the call is silently ignored.
    */
-  public void removeKeyFrame(int index) {
+  public Frame removeKeyFrame(int index) {
     if (index < 0 || index >= _list.size())
-      return;
-    _valuesAreValid = false;
-    _pathIsValid = false;
-    _currentFrameValid = false;
-    if (started())
-      stop();
-    _list.remove(index);
-  }
-
-  /**
-   * Same as {@link #removeKeyFrame(int)}, but also removes the key frame from the scene if it is a node instance.
-   */
-  public void purgeKeyFrame(int index) {
-    if (index < 0 || index >= _list.size())
-      return;
+      return null;
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentFrameValid = false;
     if (started())
       stop();
     KeyFrame keyFrame = _list.remove(index);
-    if (keyFrame.frame() instanceof Node)
-      _graph.pruneBranch((Node) keyFrame._frame);
     setTime(firstTime());
+    return keyFrame.frame();
+  }
+
+  /**
+   * Same as {@link #removeKeyFrame(int)}, but also removes the key frame from the scene if it is a node instance.
+   */
+  public void purgeKeyFrame(int index) {
+    Frame frame = removeKeyFrame(index);
+    if (frame instanceof Node)
+      _graph.pruneBranch((Node) frame);
   }
 
   /**

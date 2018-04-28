@@ -19,7 +19,7 @@ public class Animation extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.setRadius(150);
     scene.fitBall();
 

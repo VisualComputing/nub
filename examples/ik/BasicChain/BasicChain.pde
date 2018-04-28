@@ -29,7 +29,7 @@ public void setup() {
   eye = new OrbitShape(scene);
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBallInterpolation();
 
   //2. Create the Targets

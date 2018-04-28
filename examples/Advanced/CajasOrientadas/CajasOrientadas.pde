@@ -36,7 +36,7 @@ void setup() {
 
   scene.setEye(eye);
   scene.setFieldOfView((float) Math.PI / 3);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBall();
 }
 
@@ -68,5 +68,5 @@ void keyPressed() {
   if (key == 'S')
     scene.fitBall();
   if (key == 'u')
-    scene.shiftDefaultGrabber((Node) scene.eye(), esfera.iFrame);
+    scene.shiftDefaultNode(eye, esfera.iFrame);
 }

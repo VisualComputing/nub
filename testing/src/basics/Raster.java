@@ -51,7 +51,7 @@ public class Raster extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     randomizeTriangle();
   }
 

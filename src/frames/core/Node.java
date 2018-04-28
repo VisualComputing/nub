@@ -188,7 +188,7 @@ public class Node extends Frame implements Grabber {
    * {@code translation}, {@code rotation} and {@code scaling} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * The {@link Graph#inputHandler()} will attempt to addGrabber the node to all its
+   * The {@link Graph#inputHandler()} will attempt to add the node to all its
    * {@link InputHandler#agents()}.
    * <p>
    * The node sensitivities are set to their default values, see

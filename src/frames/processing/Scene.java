@@ -97,7 +97,7 @@ import java.util.List;
  *     }
  *   };
  *   scene.setEye(eye);
- *   scene.setDefaultGrabber(eye);
+ *   scene.setDefaultNode(eye);
  * }
  * }
  * </pre>
@@ -105,7 +105,7 @@ import java.util.List;
  * {@link Frame} specialization) and interactively (using the mouse, see
  * {@link #mouse()} and {@link Mouse}). Note the use of the anonymous
  * inner {@link Node} class used to define how the node will behave, refer to the
- * {@link Node} API for details. Note also the {@link #setDefaultGrabber(Grabber)}
+ * {@link Node} API for details. Note also the {@link #setDefaultNode(Node)}
  * call which will direct input to the eye when no other node is being picked.
  * <h3>Shapes</h3>
  * A {@link Shape} is a {@link Node} specialization that can be set from a
@@ -1089,7 +1089,7 @@ public class Scene extends Graph implements PConstants {
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
       if (pathsVisualHint())
-        inputHandler().addGrabber(keyFrame);
+        inputHandler().addNode(keyFrame);
       if (!eye().keyFrameInterpolatorMap().containsKey(_id))
         eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
       eye().keyFrameInterpolator(_id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
@@ -2654,7 +2654,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Node instance the length of the cross is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * If frame a Node instance and it is {@link #isInputNode(Grabber)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
@@ -2662,7 +2662,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
     if (frame instanceof Node)
-      if (isInputGrabber((Node) frame))
+      if (isInputNode((Node) frame))
         frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();
@@ -2724,7 +2724,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Node instance the length of the target is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * If frame a Node instance and it is {@link #isInputNode(Grabber)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
@@ -2732,7 +2732,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
     if (frame instanceof Node)
-      if (isInputGrabber((Node) frame))
+      if (isInputNode((Node) frame))
         frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();

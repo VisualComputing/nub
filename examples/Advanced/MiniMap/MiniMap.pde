@@ -42,7 +42,7 @@ void setup() {
   scene.setEye(sceneEye);
   scene.setFieldOfView((float) Math.PI / 3);
   //interactivity defaults to the eye
-  scene.setDefaultGrabber(sceneEye);
+  scene.setDefaultNode(sceneEye);
   scene.setRadius(150);
   scene.fitBall();
 
@@ -55,7 +55,7 @@ void setup() {
   OrbitShape minimapEye = new OrbitShape(minimap);
   minimap.setEye(minimapEye);
   //interactivity defaults to the eye
-  minimap.setDefaultGrabber(minimapEye);
+  minimap.setDefaultNode(minimapEye);
   minimap.setRadius(500);
   minimap.fitBall();
 

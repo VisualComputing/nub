@@ -38,7 +38,7 @@ public class BasicGait extends PApplet {
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     leftTarget = new Target(scene);

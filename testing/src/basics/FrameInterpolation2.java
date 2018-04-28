@@ -45,7 +45,7 @@ public class FrameInterpolation2 extends PApplet {
     InteractiveNode eye = new InteractiveNode(scene);
     scene.setEye(eye);
     //interactivity defaults to the eye
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations
@@ -76,7 +76,7 @@ public class FrameInterpolation2 extends PApplet {
     InteractiveNode eye1 = new InteractiveNode(auxScene);
     auxScene.setEye(eye1);
     //interactivity defaults to the eye
-    auxScene.setDefaultGrabber(eye1);
+    auxScene.setDefaultNode(eye1);
     button = new Button(100, 60);
     //button.setPosition(200,50);
     auxScene.setRadius(200);

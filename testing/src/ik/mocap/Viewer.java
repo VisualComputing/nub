@@ -38,7 +38,7 @@ public class Viewer extends PApplet {
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     targets.put("LEFTHAND", new Target(scene));

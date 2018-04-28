@@ -42,7 +42,7 @@ public class InteractiveFish extends PApplet {
     eye = new InteractiveNode(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
     target = new Target(scene);
 

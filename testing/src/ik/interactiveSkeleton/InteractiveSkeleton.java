@@ -37,7 +37,7 @@ public class InteractiveSkeleton extends PApplet {
     eye = new InteractiveNode(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     //Create an initial Joint at the center of the Shape

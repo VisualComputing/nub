@@ -39,7 +39,7 @@ void setup() {
   eye.rotate(new Quaternion(new Vector(1, 0, 0), PI));
   scene.setEye(eye);
   scene.setRadius(200);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBallInterpolation();
 
   //2. Create the Targets to each limb

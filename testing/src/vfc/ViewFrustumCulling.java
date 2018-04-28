@@ -34,7 +34,7 @@ public class ViewFrustumCulling extends PApplet {
     scene.enableBoundaryEquations();
     InteractiveShape eye = new InteractiveShape(scene);
     scene.setEye(eye);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
@@ -45,7 +45,7 @@ public class ViewFrustumCulling extends PApplet {
     auxScene.setType(Graph.Type.ORTHOGRAPHIC);
     InteractiveShape auxEye = new InteractiveShape(auxScene);
     auxScene.setEye(auxEye);
-    auxScene.setDefaultGrabber(auxEye);
+    auxScene.setDefaultNode(auxEye);
     auxScene.setRadius(200);
     scene.setFieldOfView(PI / 3);
     auxScene.fitBall();

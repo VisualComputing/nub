@@ -39,7 +39,7 @@ void setup() {
   }
   OrbitShape eye = new OrbitShape(scene);
   scene.setEye(eye);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 }

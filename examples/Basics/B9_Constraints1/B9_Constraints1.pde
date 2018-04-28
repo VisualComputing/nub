@@ -35,7 +35,7 @@ void setup() {
   eye.setDamping(0);
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
-  scene.setDefaultGrabber(eye);
+  scene.setDefaultNode(eye);
   scene.fitBallInterpolation();
 
   constraints[0] = new WorldConstraint();

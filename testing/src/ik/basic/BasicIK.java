@@ -47,7 +47,7 @@ public class BasicIK extends PApplet {
 
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     target = new Target(scene);

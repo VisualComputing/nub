@@ -44,7 +44,7 @@ public class InteractiveHuman extends PApplet {
     eye = new InteractiveNode(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     targets = new HashMap<String, Target>();

@@ -41,7 +41,7 @@ public class ConstrainedEye extends PApplet {
     //eye.setSpinningSensitivity(1);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultGrabber(eye);
+    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     constraints[0] = new WorldConstraint();

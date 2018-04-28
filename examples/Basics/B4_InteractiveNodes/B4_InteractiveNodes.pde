@@ -34,7 +34,7 @@ void setup() {
       pushStyle();
       stroke(0, 255, 0);
       fill(255, 0, 255, 125);
-      float dim = graph.isInputGrabber(this) ? length*1.1 : length;
+      float dim = graph.isInputNode(this) ? length*1.1 : length;
       if (graph().is3D())
         sphere(dim);
       else
@@ -48,7 +48,7 @@ void setup() {
       pushStyle();
       stroke(255, 0, 0);
       fill(0, 255, 255);
-      float dim = graph.isInputGrabber(this) ? length*1.1 : length;
+      float dim = graph.isInputNode(this) ? length*1.1 : length;
       if (graph().is3D())
         box(dim);
       else
