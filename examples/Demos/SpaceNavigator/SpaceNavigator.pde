@@ -62,10 +62,12 @@ void setup() {
   texmap = loadImage("world32k.jpg");    
   initializeSphere(sDetail);
   scene = new Scene(this);
-  //add custom user agent:
+  // add custom user agent:
   agent6 = new Agent6(scene);
-  
+
   // do the rest as always
+  // both the eye and the rocket have 6-DOFs
+  // 1. the eye
   eye = new Shape6(scene);
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
@@ -74,8 +76,7 @@ void setup() {
   scene.setRadius(260);
   scene.fitBallInterpolation();
   
-  // the iFrame is added to all scene agents (that's why we previously instantiated the hidAgent)
-  // Thanks to the Processing Foundation for providing the rocket shape
+  // 2. the rocket shape
   rocket = new Shape6(scene, loadShape("rocket.obj"));
   rocket.translate(new Vector(275, 180, 0));
   rocket.scale(0.3);
@@ -92,13 +93,12 @@ void draw() {
 void keyPressed() {
   if (key == 'y')
       scene.flip();
-  //Shift the default node for all agents: mouse and agent6
+  // shift the agents' (mouse and agent6) default node
   if ( key == 'i')
     scene.shiftDefaultNode(eye, rocket);
 }
 
-void renderGlobe() {  
-  //lights();
+void renderGlobe() {
   fill(200);
   noStroke();
   textureMode(IMAGE);  
