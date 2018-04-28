@@ -636,8 +636,12 @@ public class Graph {
 
   /**
    * Same as {@code for(Node node : leadingNodes()) pruneBranch(node)}.
+   * Call {@link #removeNodes()} if you just want to remove all the nodes from the
+   * input handler ({@link #inputHandler()}), but keep traversing them
+   * ({@link #traverse()}).
    *
    * @see #pruneBranch(Node)
+   * @see #removeNodes()
    */
   public void clear() {
     for (Node node : leadingNodes())
@@ -646,6 +650,8 @@ public class Graph {
 
   /**
    * Make all the nodes in the {@code node} branch eligible for garbage collection.
+   * Call {@link #removeNode(Node)} if you just want to remove the node from the
+   * input handler ({@link #inputHandler()}), but keep traversing it ({@link #traverse()}).
    * <p>
    * A call to {@link #isNodeReachable(Node)} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
@@ -671,6 +677,7 @@ public class Graph {
    * @see #clear()
    * @see #appendBranch(List)
    * @see #isNodeReachable(Node)
+   * @see #removeNode(Node)
    */
   public ArrayList<Node> pruneBranch(Node node) {
     if (!isNodeReachable(node))
@@ -831,8 +838,11 @@ public class Graph {
 
   /**
    * Same as {@code for(Node node : nodes() removeNode(node)}.
+   * Call {@link #clear()} if you want to remove all nodes from
+   * the traversal routine ({@link #traverse()}) too.
    *
    * @see #removeNode(Node)
+   * @see #clear()
    */
   public void removeNodes() {
     for (Node node : nodes())
@@ -841,8 +851,12 @@ public class Graph {
 
   /**
    * Same as {@code inputHandler().removeGrabber(node)}.
+   * Call {@link #pruneBranch(Node)} if you want to remove the node from
+   * the traversal routine ({@link #traverse()}) too.
    *
    * @see InputHandler#removeGrabber(Grabber)
+   * @see #removeNodes()
+   * @see #pruneBranch(Node)
    */
   public void removeNode(Node node) {
     inputHandler().removeGrabber(node);
