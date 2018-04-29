@@ -759,14 +759,19 @@ public class Graph {
   }
 
   /**
-   * Returns a straight path of nodes between {@code tail} and {@code tip}.
+   * Returns a straight path of nodes between {@code tail} and {@code tip}. Returns an empty list
+   * if either {@code tail} or {@code tip} aren't reachable. Use {@link Frame#path(Frame, Frame)}
+   * to include all nodes even if they aren't reachable.
    * <p>
    * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
    * Otherwise it will be empty.
+   *
+   * @see #isNodeReachable(Node)
+   * @see Frame#path(Frame, Frame)
    */
-  public static ArrayList<Node> path(Node tail, Node tip) {
+  public ArrayList<Node> path(Node tail, Node tip) {
     ArrayList<Node> list = new ArrayList<Node>();
-    if (tail.isAncestor(tip)) {
+    if (isNodeReachable(tail) && isNodeReachable(tip) && tail.isAncestor(tip)) {
       Node _tip = tip;
       while (_tip != tail) {
         list.add(0, _tip);
@@ -830,12 +835,17 @@ public class Graph {
   }
 
   /**
-   * Same as {@code inputHandler().addGrabber(node)}.
+   * Same as {@code inputHandler().addGrabber(node)}. Checks first if node {@link #isNodeReachable(Node)}
+   * otherwise does nothing.
    *
    * @see InputHandler#addGrabber(Grabber)
+   * @see #appendBranch(List)
    */
   public void addNode(Node node) {
-    inputHandler().addGrabber(node);
+    if (isNodeReachable(node))
+      inputHandler().addGrabber(node);
+    else
+      System.out.println("Adding a node to the graph inputHandler() requires to append it first (use appendBranch()).");
   }
 
   /**
@@ -1239,11 +1249,6 @@ public class Graph {
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
-    // TODO experimental. Should be checked
-    // Note that if (((Node) eye).graph() != this) the interpolator throws an exception
-    //if (eye instanceof Node)
-    //if (((Node) eye).graph() != this)
-    //return;
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(this, _eye);
@@ -1877,8 +1882,6 @@ public class Graph {
     faceNormal.normalize();
     return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
   }
-
-  // TODO names pending
 
   /**
    * Convenience function that simply returns {@code projectedCoordinates(src, null)}.
@@ -2669,8 +2672,6 @@ public class Graph {
   protected long _lastNonEyeUpdate() {
     return _lastNonEyeUpdate;
   }
-
-  //TODO: high-level ik api handling
 
   /**
    * Return registered solvers

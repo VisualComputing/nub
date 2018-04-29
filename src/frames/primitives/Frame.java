@@ -396,9 +396,35 @@ public class Frame {
    * Same as {@code return ancestor.isAncestor(frame)}.
    *
    * @see #isAncestor(Frame)
+   * @see #path(Frame, Frame)
    */
   public static boolean isAncestor(Frame ancestor, Frame frame) {
     return ancestor.isAncestor(frame);
+  }
+
+  /**
+   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
+   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
+   *
+   * @see #isAncestor(Frame, Frame)
+   */
+  public static Frame[] path(Frame tail, Frame tip) {
+    Frame[] path = null;
+    if (tail.isAncestor(tip)) {
+      int steps = 0;
+      Frame _tip = tip;
+      while (_tip != tail) {
+        steps++;
+        _tip = _tip.reference();
+      }
+      path = new Frame[steps + 1];
+      _tip = tip;
+      for (int i = steps; i >= 0; i--) {
+        path[i] = _tip;
+        _tip = _tip.reference();
+      }
+    }
+    return path;
   }
 
   // CONSTRAINT
