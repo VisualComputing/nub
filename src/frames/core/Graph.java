@@ -716,13 +716,15 @@ public class Graph {
 
   /**
    * Returns {@code true} if the node is reachable by the {@link #traverse()}
-   * algorithm and {@code false} otherwise.
+   * algorithm and {@code false} otherwise. Call {@link #hasNode(Node)}
+   * to see whether or not the node belongs to the {@link #inputHandler()} too.
    * <p>
    * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
    *
    * @see #traverse()
    * @see #nodes()
+   * @see #hasNode(Node)
    */
   public boolean isNodeReachable(Node node) {
     if (node == null)
@@ -864,8 +866,11 @@ public class Graph {
 
   /**
    * Same as {@code inputHandler().hasGrabber(node)}.
+   * Call {@link #isNodeReachable(Node)} to see whether or not the node
+   * is reachable by the traversal routine ({@link #traverse()}) too.
    *
    * @see InputHandler#hasGrabber(Grabber)
+   * @see #isNodeReachable(Node)
    */
   public boolean hasNode(Node node) {
     return inputHandler().hasGrabber(node);
