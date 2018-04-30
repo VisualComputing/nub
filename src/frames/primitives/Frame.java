@@ -1407,10 +1407,8 @@ public class Frame {
   public Vector displacement(Vector vector, Frame frame) {
     if (this == frame)
       return vector;
-    else if (reference() != null)
-      return _displacement(reference().displacement(vector, frame));
-    else
-      return _displacement(frame == null ? vector : frame.worldDisplacement(vector));
+    return _displacement(reference() != null ? reference().displacement(vector, frame) :
+        frame == null ? vector : frame.worldDisplacement(vector));
   }
 
   /**
@@ -1480,10 +1478,8 @@ public class Frame {
   public Vector location(Vector vector, Frame frame) {
     if (this == frame)
       return vector;
-    else if (reference() != null)
-      return _location(reference().location(vector, frame));
-    else
-      return _location(frame == null ? vector : frame.worldLocation(vector));
+    return _location(reference() != null ? reference().location(vector, frame) :
+        frame == null ? vector : frame.worldLocation(vector));
   }
 
   /**
