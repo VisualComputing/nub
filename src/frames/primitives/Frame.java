@@ -1408,7 +1408,7 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _displacement(frame == null ? reference().displacement(vector) : reference().displacement(vector, frame));
+      return _displacement(reference().displacement(vector, frame));
     else
       return _displacement(frame == null ? vector : frame.worldDisplacement(vector));
   }
@@ -1481,7 +1481,7 @@ public class Frame {
     if (this == frame)
       return vector;
     else if (reference() != null)
-      return _location(frame == null ? reference().location(vector) : reference().location(vector, frame));
+      return _location(reference().location(vector, frame));
     else
       return _location(frame == null ? vector : frame.worldLocation(vector));
   }
