@@ -1,7 +1,9 @@
 package basics;
 
-import frames.primitives.*;
-import frames.processing.*;
+import frames.primitives.Frame;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
+import frames.processing.Scene;
 import processing.core.PApplet;
 
 public class Frames extends PApplet {
@@ -11,13 +13,14 @@ public class Frames extends PApplet {
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
+
   public void settings() {
     size(800, 800, renderer);
   }
 
-  public  void setup() {
+  public void setup() {
     frame1 = new Frame();
-    frame1.translate(0, height/2);
+    frame1.translate(0, height / 2);
     frame2 = new Frame();
     frame2.translate(50, 0);
     frame2.setReference(frame1);
@@ -91,7 +94,7 @@ public class Frames extends PApplet {
       translation++;
     else
       --rotation;
-    frame1.setTranslation(translation % width, height/2);
+    frame1.setTranslation(translation % width, height / 2);
     frame2.setRotation(new Quaternion(radians(rotation)));
   }
 

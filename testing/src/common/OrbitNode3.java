@@ -25,8 +25,8 @@ public class OrbitNode3 extends Node {
 
   public OrbitNode3(Graph graph, int color) {
     super(graph);
-    if(graph() instanceof Scene) {
-      scene = (Scene)graph();
+    if (graph() instanceof Scene) {
+      scene = (Scene) graph();
       parent = scene.pApplet();
     }
     _c = color;
@@ -35,8 +35,8 @@ public class OrbitNode3 extends Node {
 
   public OrbitNode3(Node node, int color) {
     super(node);
-    if(graph() instanceof Scene) {
-      scene = (Scene)graph();
+    if (graph() instanceof Scene) {
+      scene = (Scene) graph();
       parent = scene.pApplet();
     }
     _c = color;
@@ -56,7 +56,7 @@ public class OrbitNode3 extends Node {
 
   @Override
   public void visit() {
-    if(isEye())
+    if (isEye())
       return;
     parent.pushStyle();
     scene.drawAxes(40);

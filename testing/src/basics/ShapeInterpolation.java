@@ -134,10 +134,10 @@ public class ShapeInterpolation extends PApplet {
       //copy2.position().print();
       copy2.orientation().print();
     }
-    if(key == 'q') {
+    if (key == 'q') {
       scene.eye().view().print();
       Matrix matrix = scene.eye().worldMatrix();
-      if(matrix.invert())
+      if (matrix.invert())
         matrix.print();
     }
   }

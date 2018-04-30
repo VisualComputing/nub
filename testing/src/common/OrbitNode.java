@@ -3,7 +3,6 @@ package common;
 import frames.core.Graph;
 import frames.core.Node;
 import frames.input.Shortcut;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
 
@@ -23,16 +22,16 @@ public class OrbitNode extends Node {
 
   public OrbitNode(Graph graph) {
     super(graph);
-    if(graph() instanceof Scene) {
-      scene = (Scene)graph();
+    if (graph() instanceof Scene) {
+      scene = (Scene) graph();
       parent = scene.pApplet();
     }
   }
 
   public OrbitNode(Node node) {
     super(node);
-    if(graph() instanceof Scene) {
-      scene = (Scene)graph();
+    if (graph() instanceof Scene) {
+      scene = (Scene) graph();
       parent = scene.pApplet();
     }
   }

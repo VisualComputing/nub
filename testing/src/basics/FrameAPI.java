@@ -1,39 +1,42 @@
 /**
  * Frame API.
  * by Jean Pierre Charalambos.
- *
+ * <p>
  * This example illustrates the powerful Frame API used to convert points and
  * vectors along a frame hierarchy. The following frame hierarchy is implemented:
- *
- *  world
- *  ^
- *  |\
- *  | \
- *  f1 eye
- *  ^   ^
- *  |\   \
- *  | \   \
- *  f2 f3  f5
- *  ^
- *  |
- *  |
- *  f4
- *
+ * <p>
+ * world
+ * ^
+ * |\
+ * | \
+ * f1 eye
+ * ^   ^
+ * |\   \
+ * | \   \
+ * f2 f3  f5
+ * ^
+ * |
+ * |
+ * f4
+ * <p>
  * Press the space bar to browse the different conversion methods shown here.
  */
 
 package basics;
 
 import common.OrbitNode3;
-import frames.primitives.*;
-import frames.processing.*;
-import processing.core.*;
+import frames.primitives.Frame;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
+import frames.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PFont;
 
 public class FrameAPI extends PApplet {
   Scene scene;
   OrbitNode3 eye, f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
-  Vector vec	= new Vector(50, 50, 50);
+  Vector vec = new Vector(50, 50, 50);
   PFont font16, font13;
   Mode mode;
   int wColor = color(255, 255, 255);
@@ -49,6 +52,7 @@ public class FrameAPI extends PApplet {
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
+
   public void settings() {
     size(900, 900, renderer);
   }
@@ -81,7 +85,8 @@ public class FrameAPI extends PApplet {
 
     f4 = new OrbitNode3(f2, f4Color);
 
-    f3.position().print();  f4.translate(60, -55, 30);
+    f3.position().print();
+    f4.translate(60, -55, 30);
     f4.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
     f4.scale(0.9f);
 
@@ -115,6 +120,7 @@ public class FrameAPI extends PApplet {
     noStroke();
     fill(0, 255, 255);
     switch (mode) {
+      ///*
       case m1: // f2 -> world
         drawArrowConnectingPoints(f2.worldLocation(pnt));
         break;
@@ -133,6 +139,27 @@ public class FrameAPI extends PApplet {
       case m6: // f5 -> f4
         drawArrowConnectingPoints(f4, f4.location(pnt, f5));
         break;
+      //*/
+      /*
+      case m1: // f2 -> world
+        drawArrowConnectingPoints(f2.worldLocation(pnt));
+        break;
+      case m2: // f2 -> f1
+        drawArrowConnectingPoints(f1, f1.location(f2.worldLocation(pnt)));
+        break;
+      case m3: // f1 -> f2
+        drawArrowConnectingPoints(f2, f2.location(f1.worldLocation(pnt)));
+        break;
+      case m4: // f3 -> f4
+        drawArrowConnectingPoints(f4, f4.location(f3.worldLocation(pnt)));
+        break;
+      case m5: // f4 -> f3
+        drawArrowConnectingPoints(f3, f3.location(f4.worldLocation(pnt)));
+        break;
+      case m6: // f5 -> f4
+        drawArrowConnectingPoints(f4, f4.location(f5.worldLocation(pnt)));
+        break;
+        // */
     }
     popStyle();
 
@@ -141,6 +168,7 @@ public class FrameAPI extends PApplet {
     noStroke();
     fill(125);
     switch (mode) {
+      ///*
       case m1: // f2 -> world
         drawVector(f2, vec);
         drawVector(f2.worldDisplacement(vec));
@@ -165,6 +193,33 @@ public class FrameAPI extends PApplet {
         drawVector(f5, vec);
         drawVector(f4, f4.displacement(vec, f5));
         break;
+      //*/
+      /*
+      case m1: // f2 -> world
+        drawVector(f2, vec);
+        drawVector(f2.worldDisplacement(vec));
+        break;
+      case m2: // f2 -> f1
+        drawVector(f2, vec);
+        drawVector(f1, f1.displacement(f2.worldDisplacement(vec)));
+        break;
+      case m3: // f1 -> f2
+        drawVector(f1, vec);
+        drawVector(f2, f2.displacement(f1.worldDisplacement(vec)));
+        break;
+      case m4: // f3 -> f4
+        drawVector(f3, vec);
+        drawVector(f4, f4.displacement(f3.worldDisplacement(vec)));
+        break;
+      case m5: // f4 -> f3
+        drawVector(f4, vec);
+        drawVector(f3, f3.displacement(f4.worldDisplacement(vec)));
+        break;
+      case m6: // f5 -> f4
+        drawVector(f5, vec);
+        drawVector(f4, f4.displacement(f5.worldDisplacement(vec)));
+        break;
+        //*/
     }
     popStyle();
   }
