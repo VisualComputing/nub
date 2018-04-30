@@ -1,6 +1,6 @@
 package basics;
 
-import common.OrbitNode;
+import common.OrbitNode2;
 import frames.core.Node;
 import frames.input.Event;
 import frames.input.Shortcut;
@@ -53,7 +53,7 @@ public class BasicUse extends PApplet {
 
     ///*
     //eye = new InteractiveNode(scene);
-    eye = new OrbitNode(scene);
+    eye = new OrbitNode2(scene);
     //eye.setDamping(0f);
     //eye.setDamping(1);
     //eye.setRotationSensitivity(0.1f);

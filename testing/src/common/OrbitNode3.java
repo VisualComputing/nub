@@ -17,35 +17,54 @@ import processing.core.PApplet;
  * Feel free to copy paste it.
  */
 
-public class OrbitNode extends Node {
+public class OrbitNode3 extends Node {
+  int _c;
+  Vector pnt;
   Scene scene;
   PApplet parent;
 
-  public OrbitNode(Graph graph) {
+  public OrbitNode3(Graph graph, int color) {
     super(graph);
     if(graph() instanceof Scene) {
       scene = (Scene)graph();
       parent = scene.pApplet();
     }
+    _c = color;
+    pnt = new Vector(40, 30, 20);
   }
 
-  public OrbitNode(Node node) {
+  public OrbitNode3(Node node, int color) {
     super(node);
     if(graph() instanceof Scene) {
       scene = (Scene)graph();
       parent = scene.pApplet();
     }
+    _c = color;
+    pnt = new Vector(40, 30, 20);
   }
 
   // this one gotta be overridden because we want a copied node
   // to have the same behavior as its original.
-  protected OrbitNode(Graph otherGraph, OrbitNode otherNode) {
+  protected OrbitNode3(Graph otherGraph, OrbitNode3 otherNode) {
     super(otherGraph, otherNode);
   }
 
   @Override
-  public OrbitNode get() {
-    return new OrbitNode(this.graph(), this);
+  public OrbitNode3 get() {
+    return new OrbitNode3(this.graph(), this);
+  }
+
+  @Override
+  public void visit() {
+    if(isEye())
+      return;
+    parent.pushStyle();
+    scene.drawAxes(40);
+    parent.stroke(_c);
+    scene.drawShooterTarget(this);
+    parent.strokeWeight(10);
+    parent.point(pnt.x(), pnt.y(), pnt.z());
+    parent.popStyle();
   }
 
   // behavior is here
