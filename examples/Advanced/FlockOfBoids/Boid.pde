@@ -30,7 +30,7 @@ class Boid {
       // the eye reference and perform an eye interpolation to it.
       @Override
       public void interact(frames.input.Event event) {
-        // the event shortcut type tell us about the event type itself:
+        // any tap event (single, double tapping, ...) will do it.
         if(event instanceof TapEvent)
           if (avatar != this && scene.eye().reference() != this) {
             avatar = this;
