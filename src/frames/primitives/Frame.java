@@ -1405,13 +1405,7 @@ public class Frame {
    * @see #worldDisplacement(Vector)
    */
   public Vector displacement(Vector vector, Frame frame) {
-    return this == frame ?
-        vector :
-        _displacement(reference() != null ?
-            reference().displacement(vector, frame) :
-            frame == null ?
-                vector :
-                frame.worldDisplacement(vector));
+    return this == frame ? vector : _displacement(reference() != null ? reference().displacement(vector, frame) : frame == null ? vector : frame.worldDisplacement(vector));
   }
 
   /**
@@ -1479,13 +1473,7 @@ public class Frame {
    * @see #worldLocation(Vector)
    */
   public Vector location(Vector vector, Frame frame) {
-    return this == frame ?
-        vector :
-        _location(reference() != null ?
-            reference().location(vector, frame) :
-            frame == null ?
-                vector :
-                frame.worldLocation(vector));
+    return this == frame ? vector : _location(reference() != null ? reference().location(vector, frame) : frame == null ? vector : frame.worldLocation(vector));
   }
 
   /**
