@@ -35,7 +35,7 @@ public class Shape6 extends Shape {
   // behavior is here
   @Override
   public void interact(frames.input.Event event) {
-    // The SN_ID shorcut is fired by agent6 (the one handling the space-navigator)
+    // The SN_ID shortcut is fired by agent6 (the one handling the space-navigator)
     if (event.shortcut().matches(new Shortcut(SN_ID)))
       // its safe to call node methods having 6-DOFs or less.
       translateRotateXYZ(event);

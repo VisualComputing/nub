@@ -2,15 +2,13 @@
  * Space Navigator
  * by Jean Pierre Charalambos.
  *
- * This demo shows how to control your scene Eye and iFrames using a Space Navigator
+ * This demo shows how to control your scene shapes using a Space Navigator
  * (3D mouse), with 6 degrees-of-freedom (DOFs). It requires the GameControlPlus
  * library and a Space Navigator and it has been tested only under Linux.
  *
- * We implement the (non-conventional) user interaction mechanism as an HIDAgent
- * which provides up to 6 DOFs. The Agent gathers Space Navigator input data and reduces
- * it as "bogus" DOF6 event from which some proscene actions may be bound.
- * 
- * Press 'h' to display the key shortcuts, mouse and SpaceNavigator bindings in the console.
+ * We implement the (non-conventional) user interaction mechanism as an Agent6
+ * which provides up to 6 DOFs. The Agent gathers Space Navigator input data
+ * and reduces it into Event6 events.
  */
 
 import frames.input.*;
@@ -40,7 +38,7 @@ float SINCOS_PRECISION = 0.5;
 int SINCOS_LENGTH = int(360.0 / SINCOS_PRECISION);
 
 Scene scene;
-// space navigator gesture id
+// Space navigator gesture id
 int SN_ID = 101;
 Shape6 eye, rocket;
 Agent6 agent6;
@@ -65,8 +63,9 @@ void setup() {
   // add custom user agent:
   agent6 = new Agent6(scene);
 
-  // do the rest as always
-  // both the eye and the rocket have 6-DOFs
+  // Do the rest as always...
+  // both the eye and the rocket shapes have 6-DOFs
+
   // 1. the eye
   eye = new Shape6(scene);
   scene.setEye(eye);
@@ -92,7 +91,7 @@ void draw() {
 
 void keyPressed() {
   if (key == 'y')
-      scene.flip();
+    scene.flip();
   // shift the agents' (mouse and agent6) default node
   if ( key == 'i')
     scene.shiftDefaultNode(eye, rocket);

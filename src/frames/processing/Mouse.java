@@ -11,8 +11,10 @@
 package frames.processing;
 
 import frames.core.Graph;
+import frames.core.Node;
 import frames.input.Agent;
 import frames.input.Event;
+import frames.input.Grabber;
 import frames.input.event.MotionEvent1;
 import frames.input.event.MotionEvent2;
 import frames.input.event.TapEvent;
@@ -120,5 +122,56 @@ public class Mouse extends Agent {
         else if (event.getButton() == PApplet.RIGHT)
           modifiers = Event.META ^ event.getModifiers();
     return modifiers;
+  }
+
+  // Agent wrappers (translates grabber jargon to nodes)
+
+  /**
+   * Same as {@code setDefaultGrabber(node)}.
+   *
+   * @see #defaultNode()
+   * @see #inputNode()
+   * @see #isInputNode(Node)
+   * @see Agent#setDefaultGrabber(Grabber)
+   */
+  public void setDefaultNode(Node node) {
+    setDefaultGrabber(node);
+  }
+
+  /**
+   * Returns the default mouse node, which may be {@code null}.
+   * Set it either with {@link #setDefaultNode(Node)} or
+   * {@link Graph#setDefaultNode(Node)}.
+   *
+   * @see #setDefaultNode(Node)
+   * @see #inputNode()
+   * @see #isInputNode(Node)
+   * @see Agent#defaultGrabber()
+   */
+  public Node defaultNode() {
+    Grabber grabber = defaultGrabber();
+    if (grabber instanceof Node)
+      return (Node) grabber;
+    return null;
+  }
+
+  /**
+   * Returns the mouse input node which may be null. Picking will set the input node
+   * (see {@link #mode()}) or it may be enforced with {@link #setDefaultNode(Node)}.
+   */
+  public Node inputNode() {
+    Grabber grabber = inputGrabber();
+    if (grabber instanceof Node)
+      return (Node) grabber;
+    return null;
+  }
+
+  /**
+   * Same as {@code return isInputGrabber(node)}.
+   *
+   * @see #isInputGrabber(Grabber)
+   */
+  public boolean isInputNode(Node node) {
+    return isInputGrabber(node);
   }
 }

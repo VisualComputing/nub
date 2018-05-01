@@ -271,8 +271,8 @@ public abstract class Agent {
   /**
    * Returns true if {@code g} is the agent's {@link #inputGrabber()} and false otherwise.
    */
-  public boolean isInputGrabber(Grabber g) {
-    return inputGrabber() == g;
+  public boolean isInputGrabber(Grabber grabber) {
+    return inputGrabber() == grabber;
   }
 
   /**
@@ -336,8 +336,8 @@ public abstract class Agent {
    * {@code defaultGrabber() != g1 ? setDefaultGrabber(g1) ? true : setDefaultGrabber(g2) : setDefaultGrabber(g2)}
    * which is ubiquitous among the examples.
    */
-  public boolean shiftDefaultGrabber(Grabber g1, Grabber g2) {
-    return defaultGrabber() != g1 ? setDefaultGrabber(g1) ? true : setDefaultGrabber(g2) : setDefaultGrabber(g2);
+  public boolean shiftDefaultGrabber(Grabber grabber1, Grabber grabber2) {
+    return defaultGrabber() != grabber1 ? setDefaultGrabber(grabber1) ? true : setDefaultGrabber(grabber2) : setDefaultGrabber(grabber2);
     // return defaultGrabber() == g1 ? setDefaultGrabber(g2) ? true : false :
     // defaultGrabber() == g2 ? setDefaultGrabber(g1) : false;
   }
