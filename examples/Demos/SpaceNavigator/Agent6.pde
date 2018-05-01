@@ -2,8 +2,7 @@
  * Agent6.
  * by Jean Pierre Charalambos.
  * 
- * This class parses space navigator input data into MotionEvent6
- * events.
+ * This class parses space navigator input data into MotionEvent6 events.
  *
  * Data is allocated into 'control sliders' (sliderY* vars) by
  * gamecontrolplus every frame.
@@ -21,8 +20,8 @@ public class Agent6 extends Agent {
   }
   
   // Parsing of the Space Navigator input data which is stored in the
-  // the slider* variables. The MotionEvent6 output generated is sent
-  // to the scene input node (either the default node or the one picked
+  // slider* variables. The MotionEvent6 output generated is sent to
+  // the scene input node (either the default node or the one picked
   // by the agent) to interact with.
   //
   // To set a default node call scene.setDefaultNode(Node).

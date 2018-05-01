@@ -6,9 +6,10 @@
  * (3D mouse), with 6 degrees-of-freedom (DOFs). It requires the GameControlPlus
  * library and a Space Navigator and it has been tested only under Linux.
  *
- * We implement the (non-conventional) user interaction mechanism as an Agent6
- * which provides up to 6 DOFs. The Agent gathers Space Navigator input data
- * and reduces it into Event6 events.
+ * Nodes can handle 6DOFs (see all Node methods that take a MotionEvent param),
+ * but require input formatted properly. That's precisely what Agent6 does: it
+ * gathers Space Navigator input data and reduces it into MotionEvent6 events.
+ * Shape6 can then interact (see Shape6.interact(Event)) to the Space Navigator.
  */
 
 import frames.input.*;
