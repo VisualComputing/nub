@@ -1193,7 +1193,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(MotionEvent1 event, float sensitivity) {
-    translate(screenToVector(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
+    translate(screenToReference(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
   }
 
   /**
@@ -1214,7 +1214,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(boolean right) {
-    translate(screenToVector(
+    translate(screenToReference(
         Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keySensitivity() : -keySensitivity())));
   }
 
@@ -1256,7 +1256,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void _translateY(MotionEvent1 event, float sensitivity) {
     translate(
-        screenToVector(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
+        screenToReference(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
@@ -1277,7 +1277,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-translation conversion routine.
    */
   protected void _translateY(boolean up) {
-    translate(screenToVector(
+    translate(screenToReference(
         Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keySensitivity())));
   }
 
@@ -1318,7 +1318,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(MotionEvent1 event, float sensitivity) {
-    translate(screenToVector(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
+    translate(screenToReference(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
@@ -1339,7 +1339,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(boolean up) {
-    translate(screenToVector(
+    translate(screenToReference(
         Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
   }
 
@@ -1375,7 +1375,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xy-translation conversion routine.
    */
   public void translate(MotionEvent2 event) {
-    translate(screenToVector(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
+    translate(screenToReference(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
         (_graph.isRightHanded() ^ isEye()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
   }
 
@@ -1423,7 +1423,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xyz-translation conversion routine.
    */
   public void translateXYZ(MotionEvent3 event) {
-    translate(screenToVector(
+    translate(screenToReference(
         Vector.multiply(new Vector(event.dx(), _graph.isRightHanded() ? -event.dy() : event.dy(), -event.dz()),
             this.translationSensitivity())));
   }
@@ -2240,12 +2240,12 @@ public class Node extends Frame implements Grabber {
   // Quite nice
 
   /**
-   * Same as {@code return screenToVector(new Vector(x, y, z))}.
+   * Same as {@code return screenToReference(new Vector(x, y, z))}.
    *
-   * @see #screenToVector(Vector)
+   * @see #screenToReference(Vector)
    */
-  public Vector screenToVector(float x, float y, float z) {
-    return screenToVector(new Vector(x, y, z));
+  public Vector screenToReference(float x, float y, float z) {
+    return screenToReference(new Vector(x, y, z));
   }
 
   /**
@@ -2253,7 +2253,7 @@ public class Node extends Frame implements Grabber {
    *
    * @see #screenToEye(Vector)
    */
-  public Vector screenToVector(Vector vector) {
+  public Vector screenToReference(Vector vector) {
     return reference() == null ? _graph.eye().worldDisplacement(screenToEye(vector)) : reference().displacement(screenToEye(vector), _graph.eye());
   }
 
