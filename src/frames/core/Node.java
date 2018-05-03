@@ -2250,37 +2250,12 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code return eyeToReferenceFrame(screenToEye(vector))}. Transforms the vector
-   * from screen (device) coordinates to {@link #reference()} coordinates.
+   * Transforms the vector from screen (device) coordinates to {@link #reference()} coordinates.
    *
    * @see #screenToEye(Vector)
-   * @see #eyeToReferenceFrame(Vector)
    */
   public Vector screenToVector(Vector vector) {
-    return eyeToReferenceFrame(screenToEye(vector));
-  }
-
-  /**
-   * Same as {@code return eyeToReferenceFrame(new Vector(x, y, z))}.
-   *
-   * @see #eyeToReferenceFrame(Vector)
-   */
-  public Vector eyeToReferenceFrame(float x, float y, float z) {
-    return eyeToReferenceFrame(new Vector(x, y, z));
-  }
-
-  /**
-   * Converts the vector from eye coordinates to {@link #reference()} coordinates.
-   * <p>
-   * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuaternion(float, float, float)}.
-   *
-   * @see #screenToEye(Vector)
-   * @see #screenToQuaternion(float, float, float)
-   */
-  public Vector eyeToReferenceFrame(Vector vector) {
-    return reference() == null ? _graph.eye().worldDisplacement(vector) : reference().displacement(vector, _graph.eye());
+    return reference() == null ? _graph.eye().worldDisplacement(screenToEye(vector)) : reference().displacement(screenToEye(vector), _graph.eye());
   }
 
   /**
@@ -2296,10 +2271,9 @@ public class Node extends Frame implements Grabber {
    * Converts the vector from screen (device) coordinates into eye coordinates.
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuaternion(float, float, float)}.
+   * implemented from just {@link #screenToEye(Vector)} and
+   * {@link #screenToQuaternion(float, float, float)}.
    *
-   * @see #eyeToReferenceFrame(Vector)
    * @see #screenToQuaternion(float, float, float)
    */
   public Vector screenToEye(Vector vector) {
@@ -2359,8 +2333,8 @@ public class Node extends Frame implements Grabber {
    * rotation</a> into a {@link Quaternion}.
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just {@link #screenToEye(Vector)}, {@link #eyeToReferenceFrame(Vector)}
-   * and {@link #screenToQuaternion(float, float, float)}.
+   * implemented from just {@link #screenToEye(Vector)} and
+   * {@link #screenToQuaternion(float, float, float)}.
    *
    * @param roll  Rotation angle in radians around the screen x-Axis
    * @param pitch Rotation angle in radians around the screen y-Axis
