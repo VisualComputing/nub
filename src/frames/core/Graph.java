@@ -2234,15 +2234,9 @@ public class Graph {
    */
   public void setUpVector(Vector up, boolean noMove) {
     Quaternion q = new Quaternion(new Vector(0.0f, 1.0f, 0.0f), eye().displacement(up));
-
     if (!noMove)
       eye().setPosition(Vector.subtract(anchor(), (Quaternion.multiply(eye().orientation(), q)).rotate(eye().location(anchor()))));
-
     eye().rotate(q);
-
-    // Useful in fly mode to keep the horizontal direction.
-    if (eye() instanceof Node)
-      ((Node) eye())._upVector = eye().orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
   }
 
   /**

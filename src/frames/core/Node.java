@@ -141,7 +141,7 @@ public class Node extends Frame implements Grabber {
 
   // Inverse the direction of an horizontal mouse motion. Depends on the projected
   // screen orientation of the vertical axis when the mouse button is pressed.
-  public boolean _cadRotationIsReversed;
+  protected boolean _cadRotationIsReversed;
   protected Vector _upVector;
   protected Graph _graph;
 
@@ -1763,8 +1763,6 @@ public class Node extends Frame implements Grabber {
    * User gesture into xyz-rotation conversion routine.
    */
   public void rotateXYZ(MotionEvent3 event) {
-    if (event.fired())
-      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     rotate(screenToQuaternion(
         Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
             rotationSensitivity())));
@@ -1799,10 +1797,8 @@ public class Node extends Frame implements Grabber {
       System.out.println("rotate(Event) requires a relative motion-event");
       return;
     }
-    if (event.fired()) {
+    if (event.fired())
       stopSpinning();
-      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
-    }
     Quaternion quaternion;
     Vector vector;
     if (isEye())
@@ -1961,8 +1957,6 @@ public class Node extends Frame implements Grabber {
       System.out.println("moveForward(Event) only makes sense for the eye");
       return;
     }
-    if (event.fired())
-      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
     rotate(_rollPitchQuaternion(event));
     _fly(rotation().rotate(new Vector(0.0f, 0.0f, forward ? -flySpeed() : flySpeed())), event);
   }
@@ -2002,7 +1996,6 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       _initEvent = event.get();
-      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
     }
     float speed = flySpeed() * 0.01f * (event.y() - _initEvent.y());
     rotate(_turnQuaternion(event.event1()));
@@ -2046,7 +2039,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired()) {
       stopSpinning();
-      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
+      _cadRotationIsReversed = displacement(_upVector).y() < 0.0f;
     }
     // Multiply by 2.0 to get on average about the same _speed as with the
     // deformed ball
@@ -2199,7 +2192,6 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       //TODO handle me
       //graph.setRotateVisualHint(true); // display visual hint
-      _cadRotationIsReversed = _graph.eye().displacement(_upVector).y() < 0.0f;
     }
     Quaternion quaternion;
     Vector vector;
@@ -2313,7 +2305,6 @@ public class Node extends Frame implements Grabber {
       eyeVector._vector[2] *= coef / _graph.height();
       eyeVector.divide(_graph.eye().magnitude());
     }
-    // if( isEye() )
     return eyeVector;
   }
 
@@ -2474,6 +2465,9 @@ public class Node extends Frame implements Grabber {
 
     if (_graph.isRightHanded())
       deltaY = -deltaY;
+
+    if (event.fired())
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
 
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
     Quaternion rotY = new Quaternion(displacement(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
