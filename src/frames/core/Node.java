@@ -2106,7 +2106,6 @@ public class Node extends Frame implements Grabber {
     // 2. Translate the refFrame along its Z-axis:
     float deltaZ = event.dz();
     trns = new Vector(0, deltaZ, 0);
-    screenToEye(trns);
     float pmag = trns.magnitude();
     translate(0, 0, (deltaZ > 0) ? -pmag : pmag);
     // 3. Rotate the refFrame around its X-axis -> translate forward-backward
