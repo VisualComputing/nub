@@ -2280,11 +2280,7 @@ public class Node extends Frame implements Grabber {
    * @see #screenToQuaternion(float, float, float)
    */
   public Vector eyeToReferenceFrame(Vector vector) {
-    Frame gFrame = isEye() ? this : /* respectToEye() ? */_graph.eye() /* : this */;
-    Vector t = gFrame.worldDisplacement(vector);
-    if (reference() != null)
-      t = reference().displacement(t);
-    return t;
+    return reference() == null ? _graph.eye().worldDisplacement(vector) : reference().displacement(vector, _graph.eye());
   }
 
   /**
@@ -2372,8 +2368,7 @@ public class Node extends Frame implements Grabber {
    * @see Quaternion#fromEulerAngles(float, float, float)
    */
   public Quaternion screenToQuaternion(float roll, float pitch, float yaw) {
-    // don't really need to differentiate among the two cases, but eyeFrame can
-    // be speeded up
+    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
       return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
     } else {
