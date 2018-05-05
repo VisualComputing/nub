@@ -75,7 +75,7 @@ public class OrbitNode4 extends Node {
   @Override
   public void interact(frames.input.Event event) {
     if (event.shortcut().matches(new Shortcut(PApplet.RIGHT)))
-      translate(event);
+      drive(event);
     else if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
       rotateCAD(event);
     else if (event.shortcut().matches(new Shortcut(PApplet.CENTER)))

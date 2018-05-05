@@ -1850,6 +1850,19 @@ public class Node extends Frame implements Grabber {
     rotate(gestureLookAround(event));
   }
 
+  protected Quaternion gestureLookAround(MotionEvent event) {
+    MotionEvent2 motionEvent2 = MotionEvent.event2(event);
+    if (motionEvent2 != null) {
+      if (event.fired())
+        _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
+      return gestureLookAround(motionEvent2.dx(), motionEvent2.dy(), _upVector);
+    }
+    else {
+      System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
+      return null;
+    }
+  }
+
   /**
    * Java ugliness and madness requires this one. Should NOT be implemented in JS (due to its dynamism).
    */
@@ -1950,7 +1963,7 @@ public class Node extends Frame implements Grabber {
       _initEvent = event.get();
     }
     float speed = flySpeed() * 0.01f * (event.y() - _initEvent.y());
-    rotate(_turnQuaternion(event.event1()));
+    rotate(gestureRotate(0,rotationSensitivity() * -_computeAngle(event.event1().dx()),0));
     _fly(rotation().rotate(new Vector(0.0f, 0.0f, speed)), event);
   }
 
@@ -2516,19 +2529,6 @@ public class Node extends Frame implements Grabber {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
-  protected Quaternion gestureLookAround(MotionEvent event) {
-    MotionEvent2 motionEvent2 = MotionEvent.event2(event);
-    if (motionEvent2 != null) {
-      if (event.fired())
-        _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-      return gestureLookAround(motionEvent2.dx(), motionEvent2.dy(), _upVector);
-    }
-    else {
-      System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
-      return null;
-    }
-  }
-
   /**
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
@@ -2545,16 +2545,5 @@ public class Node extends Frame implements Grabber {
     return Quaternion.multiply(rotY, rotX);
   }
 
-  // drive:
-
-  /**
-   * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
-   * event X-displacement.
-   */
-  protected Quaternion _turnQuaternion(MotionEvent1 event) {
-    float deltaX = event.dx();
-    return new Quaternion(new Vector(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / graph().width());
-  }
-
-  // end decide
+  // gestureRotateCAD missing
 }
