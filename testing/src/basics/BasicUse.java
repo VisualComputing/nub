@@ -93,7 +93,6 @@ public class BasicUse extends PApplet {
 
     node.setDamping(0.2f);
     node.setSpinningSensitivity(0);
-    //node.startSpinning(Quaternion.random(), 10,1);
   }
 
   public void draw() {
@@ -110,10 +109,6 @@ public class BasicUse extends PApplet {
       ellipse(0, 0, radius, radius);
     scene.popModelView();
     popStyle();
-
-    if (mousePressed && (mouseButton == LEFT)) {
-      eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
-    }
   }
 
   public void keyPressed() {
