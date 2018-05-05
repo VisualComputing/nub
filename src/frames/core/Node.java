@@ -1076,16 +1076,19 @@ public class Node extends Frame implements Grabber {
       System.out.println("deformedBallQuaternion(Event) requires a relative motion-event");
       return null;
     }
-    float cx = center.x();
-    float cy = center.y();
-    float x = event.x();
-    float y = event.y();
-    float prevX = event.previousX();
-    float prevY = event.previousY();
+    return gestureRotate(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()), new Point(center.x(), center.y()));
+  }
+
+  public Quaternion gestureRotate(Point point1, Point point2, Point pixel) {
+    float cx = pixel.x();
+    float cy = pixel.y();
+    float x = point2.x();
+    float y = point2.y();
+    float prevX = point1.x();
+    float prevY = point1.y();
     // Points on the deformed ball
     float px = rotationSensitivity() * ((int) prevX - cx) / _graph.width();
-    float py =
-        rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
+    float py = rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
     float dx = rotationSensitivity() * (x - cx) / _graph.width();
     float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
 
