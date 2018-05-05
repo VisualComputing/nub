@@ -1847,7 +1847,7 @@ public class Node extends Frame implements Grabber {
       System.out.println("lookAround(Event) only makes sense for the eye");
       return;
     }
-    rotate(_rollPitchQuaternion(event));
+    rotate(gestureLookAround(event));
   }
 
   /**
@@ -1909,7 +1909,7 @@ public class Node extends Frame implements Grabber {
       System.out.println("moveForward(Event) only makes sense for the eye");
       return;
     }
-    rotate(_rollPitchQuaternion(event));
+    rotate(gestureLookAround(event));
     _fly(rotation().rotate(new Vector(0.0f, 0.0f, forward ? -flySpeed() : flySpeed())), event);
   }
 
@@ -2525,10 +2525,13 @@ public class Node extends Frame implements Grabber {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
-  protected Quaternion _rollPitchQuaternion(MotionEvent event) {
+  protected Quaternion gestureLookAround(MotionEvent event) {
     MotionEvent2 motionEvent2 = MotionEvent.event2(event);
-    if (motionEvent2 != null)
-      return _rollPitchQuaternion(motionEvent2);
+    if (motionEvent2 != null) {
+      if (event.fired())
+        _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
+      return gestureLookAround(motionEvent2.dx(), motionEvent2.dy(), _upVector);
+    }
     else {
       System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
       return null;
@@ -2539,18 +2542,15 @@ public class Node extends Frame implements Grabber {
    * Returns a Quaternion that is the composition of two rotations, inferred from the
    * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
    */
-  protected Quaternion _rollPitchQuaternion(MotionEvent2 event) {
-    float deltaX = event.dx();
-    float deltaY = event.dy();
-
+  public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector) {
+    if (!isEye()) {
+      System.out.println("lookAround(Event) only makes sense for the eye. Returns identity rotation");
+      return new Quaternion();
+    }
     if (_graph.isRightHanded())
       deltaY = -deltaY;
-
-    if (event.fired())
-      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
-    Quaternion rotY = new Quaternion(displacement(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
+    Quaternion rotY = new Quaternion(displacement(upVector), rotationSensitivity() * (-deltaX) / graph().width());
     return Quaternion.multiply(rotY, rotX);
   }
 
