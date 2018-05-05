@@ -52,13 +52,6 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
 
-    eye = new Node(scene);
-    scene.setEye(eye);
-    scene.setFieldOfView(PI / 3);
-    scene.removeNode(eye);
-    scene.fitBallInterpolation();
-    /*
-    //eye = new InteractiveNode(scene);
     eye = new OrbitNode4(scene);
     //eye.setDamping(0f);
     //eye.setDamping(1);
@@ -68,7 +61,6 @@ public class BasicUse extends PApplet {
     scene.setFieldOfView(PI / 3);
     scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
-    //*/
 
     node = new Shape(scene) {
       @Override
@@ -142,12 +134,6 @@ public class BasicUse extends PApplet {
     if (key == 'y')
       yDirection = true;
   }
-
-  /*
-  public void mouseDragged() {
-    eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
-  }
-  */
 
   public static void main(String args[]) {
     PApplet.main(new String[]{"basics.BasicUse"});

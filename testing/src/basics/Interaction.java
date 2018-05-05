@@ -22,6 +22,8 @@ public class Interaction extends PApplet {
   Scene scene;
   Node eye, node;
   Node defaultNode;
+  Vector upVector = new Vector();
+  boolean cadRotationIsReversed;
 
   public void settings() {
     size(800, 800, P3D);
@@ -42,6 +44,7 @@ public class Interaction extends PApplet {
     node = new Shape(scene) {
       @Override
       public void set(PGraphics pGraphics) {
+        scene.drawAxes(pGraphics, scene.radius()/3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -54,6 +57,7 @@ public class Interaction extends PApplet {
     };
 
     scene.removeNodes();
+    node.translate(75,75,75);
     defaultNode = eye;
   }
 
@@ -68,7 +72,14 @@ public class Interaction extends PApplet {
 
   public void keyPressed() {
     if (key == 'f')
-      scene.flip();
+      if (scene.isLeftHanded()) {
+        scene.setRightHanded();
+        println("right");
+    }
+      else {
+        scene.setLeftHanded();
+        println("left");
+    }
     if(key == ' ')
       if(defaultNode == eye)
         defaultNode = node;
@@ -76,12 +87,25 @@ public class Interaction extends PApplet {
         defaultNode = eye;
   }
 
+  public void mousePressed() {
+    upVector = eye.yAxis();
+    cadRotationIsReversed = eye.displacement(upVector).y() < 0.0f;
+  }
+
   public void mouseDragged() {
+    //if(mouseY-pmouseY > 0)
+      //println("deltaY positive");
     //defaultNode.translate(defaultNode.gestureTranslate(new Vector(mouseX-pmouseX, mouseY-pmouseY)));
     //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
     //defaultNode.translate(defaultNode.gestureTranslate(new Vector(mouseX-pmouseX, 0)));
     //defaultNode.translate(defaultNode.gestureTranslate(new Vector(0, mouseY-pmouseY)));
-    defaultNode.translate(defaultNode.gestureTranslate(new Vector(0, 0, mouseX-pmouseX)));
+    //defaultNode.translate(defaultNode.gestureTranslate(new Vector(0, 0, mouseX-pmouseX)));
+    //defaultNode.rotate(defaultNode.gestureRotate(0,(mouseY-pmouseY),0, PI / width));
+    //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    //defaultNode.rotate(defaultNode.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
+    //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
+    //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
+    eye.spin(eye.gestureRotateCAD(cadRotationIsReversed ? pmouseX-mouseX : mouseX-pmouseX, mouseY-pmouseY, upVector, 2/width));
   }
 
   public static void main(String args[]) {
