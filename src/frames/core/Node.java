@@ -1071,12 +1071,12 @@ public class Node extends Frame implements Grabber {
    * from mice (mouse positions are projected on a deformed ball, centered on ({@code center.x()},
    * {@code center.y()})).
    */
-  protected Quaternion _deformedBallQuaternion(MotionEvent2 event, Vector center) {
+  protected Quaternion _deformedBallQuaternion(MotionEvent2 event) {
     if (event.isAbsolute()) {
       System.out.println("deformedBallQuaternion(Event) requires a relative motion-event");
       return null;
     }
-    return gestureSpin(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()), new Point(center.x(), center.y()));
+    return gestureSpin(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()));
   }
 
   // macro's
@@ -1763,19 +1763,7 @@ public class Node extends Frame implements Grabber {
     }
     if (event.fired())
       stopSpinning();
-    Quaternion quaternion;
-    Vector vector;
-    if (isEye())
-      quaternion = _deformedBallQuaternion(event, graph().screenLocation(graph().anchor()));
-    else {
-      vector = _graph.screenLocation(position());
-      quaternion = _deformedBallQuaternion(event, vector);
-      vector = quaternion.axis();
-      vector = _graph.eye().orientation().rotate(vector);
-      vector = displacement(vector);
-      quaternion = new Quaternion(vector, -quaternion.angle());
-    }
-    _spin(quaternion, event);
+    _spin(_deformedBallQuaternion(event), event);
   }
 
   /**
@@ -2482,14 +2470,10 @@ public class Node extends Frame implements Grabber {
     }
   }
 
-  /*
   public Quaternion gestureSpin(Point point1, Point point2) {
-    if(isEye())
-      return gestureSpin(point1, point2, graph().anchor());
-    else
-      return gestureSpin(point1, point2, graph().anchor())
+    Vector center = graph().screenLocation(isEye() ? graph().anchor() : position());
+    return gestureSpin(point1, point2, new Point(center.x(), center.y()));
   }
-  */
 
   /**
    *
@@ -2513,19 +2497,13 @@ public class Node extends Frame implements Grabber {
     Vector axis = p2.cross(p1);
     float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
 
-    Quaternion quaternion =  new Quaternion(axis, angle);
-
-    /*
-    if(isEye())
-      return quaternion;
-    else {
-      Vector vector = _graph.screenLocation(position());
-      vector = quaternion.axis();
+    Quaternion quaternion = new Quaternion(axis, angle);
+    if(!isEye()) {
+      Vector vector = quaternion.axis();
       vector = _graph.eye().orientation().rotate(vector);
       vector = displacement(vector);
-      return new Quaternion(vector, -quaternion.angle());
+      quaternion = new Quaternion(vector, -quaternion.angle());
     }
-    */
 
     return quaternion;
   }
