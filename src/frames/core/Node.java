@@ -2006,17 +2006,12 @@ public class Node extends Frame implements Grabber {
       stopSpinning();
       _cadRotationIsReversed = displacement(_upVector).y() < 0.0f;
     }
-    // Multiply by 2.0 to get on average about the same _speed as with the
-    // deformed ball
+    // Multiply by 2.0 to get on average about the same speed as with the deformed ball
     float dx = -2.0f * rotationSensitivity() * event.dx() / _graph.width();
     float dy = 2.0f * rotationSensitivity() * event.dy() / _graph.height();
     if (_cadRotationIsReversed)
       dx = -dx;
-    if (_graph.isRightHanded())
-      dy = -dy;
-    //TODO spinning breaks upVector orientation
-    //_spin(Quaternion.multiply(new Quaternion(displacement(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)), event);
-    spin(Quaternion.multiply(new Quaternion(displacement(_upVector), dx), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), dy)));
+    spin(gestureRotateCAD(dx,dy, _upVector));
   }
 
   /**
@@ -2545,5 +2540,7 @@ public class Node extends Frame implements Grabber {
     return Quaternion.multiply(rotY, rotX);
   }
 
-  // gestureRotateCAD missing
+  public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector) {
+    return Quaternion.multiply(new Quaternion(displacement(upVector), roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -pitch : pitch));
+  }
 }
