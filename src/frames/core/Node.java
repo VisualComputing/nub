@@ -2530,7 +2530,7 @@ public class Node extends Frame implements Grabber {
    */
   public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector) {
     if (!isEye()) {
-      System.out.println("lookAround(Event) only makes sense for the eye. Returns identity rotation");
+      System.out.println("gestureLookAround only makes sense for the eye. Identity rotation returned");
       return new Quaternion();
     }
     if (_graph.isRightHanded())
@@ -2541,6 +2541,10 @@ public class Node extends Frame implements Grabber {
   }
 
   public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector) {
+    if (!isEye()) {
+      System.out.println("gestureRotateCAD only makes sense for the eye. Identity rotation returned");
+      return new Quaternion();
+    }
     return Quaternion.multiply(new Quaternion(displacement(upVector), roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -pitch : pitch));
   }
 }

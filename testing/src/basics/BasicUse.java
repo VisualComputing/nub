@@ -6,6 +6,7 @@ import frames.input.Event;
 import frames.input.Shortcut;
 import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
+import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Mouse;
@@ -51,7 +52,12 @@ public class BasicUse extends PApplet {
 
     frame = new Frame();
 
-    ///*
+    eye = new Node(scene);
+    scene.setEye(eye);
+    scene.setFieldOfView(PI / 3);
+    scene.removeNode(eye);
+    scene.fitBallInterpolation();
+    /*
     //eye = new InteractiveNode(scene);
     eye = new OrbitNode4(scene);
     //eye.setDamping(0f);
@@ -112,6 +118,10 @@ public class BasicUse extends PApplet {
       ellipse(0, 0, radius, radius);
     scene.popModelView();
     popStyle();
+
+    if (mousePressed && (mouseButton == LEFT)) {
+      eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
+    }
   }
 
   public void keyPressed() {
@@ -132,6 +142,12 @@ public class BasicUse extends PApplet {
     if (key == 'y')
       yDirection = true;
   }
+
+  /*
+  public void mouseDragged() {
+    eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
+  }
+  */
 
   public static void main(String args[]) {
     PApplet.main(new String[]{"basics.BasicUse"});
