@@ -1079,45 +1079,6 @@ public class Node extends Frame implements Grabber {
     return gestureRotate(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()), new Point(center.x(), center.y()));
   }
 
-  public Quaternion gestureRotate(Point point1, Point point2, Point pixel) {
-    float cx = pixel.x();
-    float cy = pixel.y();
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    // Points on the deformed ball
-    float px = rotationSensitivity() * ((int) prevX - cx) / _graph.width();
-    float py = rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
-    float dx = rotationSensitivity() * (x - cx) / _graph.width();
-    float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
-
-    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
-    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle Should be divided by the _projectOnBall
-    // size, but it is 1.0
-    Vector axis = p2.cross(p1);
-    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-    return new Quaternion(axis, angle);
-  }
-
-  /**
-   * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
-   * ball, it is proportional to the euclidean distance to the ball. For a point outside
-   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
-   * ball, the function is continuous.
-   */
-  protected float _projectOnBall(float x, float y) {
-    // If you change the size value, change angle computation in
-    // deformedBallQuaternion().
-    float size = 1.0f;
-    float size2 = size * size;
-    float size_limit = size2 * 0.5f;
-
-    float d = x * x + y * y;
-    return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
-  }
-
   // macro's
 
   protected float _computeAngle(MotionEvent1 event) {
@@ -1196,7 +1157,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(MotionEvent1 event, float sensitivity) {
-    translate(screenToReference(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
+    translate(gestureTranslate(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
   }
 
   /**
@@ -1217,7 +1178,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(boolean right) {
-    translate(screenToReference(
+    translate(gestureTranslate(
         Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keySensitivity() : -keySensitivity())));
   }
 
@@ -1259,7 +1220,7 @@ public class Node extends Frame implements Grabber {
    */
   protected void _translateY(MotionEvent1 event, float sensitivity) {
     translate(
-        screenToReference(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
+        gestureTranslate(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
@@ -1280,7 +1241,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-translation conversion routine.
    */
   protected void _translateY(boolean up) {
-    translate(screenToReference(
+    translate(gestureTranslate(
         Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keySensitivity())));
   }
 
@@ -1321,7 +1282,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(MotionEvent1 event, float sensitivity) {
-    translate(screenToReference(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
+    translate(gestureTranslate(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
   }
 
   /**
@@ -1342,7 +1303,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(boolean up) {
-    translate(screenToReference(
+    translate(gestureTranslate(
         Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
   }
 
@@ -1378,7 +1339,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xy-translation conversion routine.
    */
   public void translate(MotionEvent2 event) {
-    translate(screenToReference(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
+    translate(gestureTranslate(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
         (_graph.isRightHanded() ^ isEye()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
   }
 
@@ -1426,7 +1387,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xyz-translation conversion routine.
    */
   public void translateXYZ(MotionEvent3 event) {
-    translate(screenToReference(
+    translate(gestureTranslate(
         Vector.multiply(new Vector(event.dx(), _graph.isRightHanded() ? -event.dy() : event.dy(), -event.dz()),
             this.translationSensitivity())));
   }
@@ -2232,125 +2193,6 @@ public class Node extends Frame implements Grabber {
   }
   */
 
-  // Quite nice
-
-  /**
-   * Same as {@code return screenToReference(new Vector(x, y, z))}.
-   *
-   * @see #screenToReference(Vector)
-   */
-  public Vector screenToReference(float x, float y, float z) {
-    return screenToReference(new Vector(x, y, z));
-  }
-
-  /**
-   * Transforms the vector from screen (device) coordinates to {@link #reference()} coordinates.
-   *
-   * @see #screenToEye(Vector)
-   */
-  public Vector screenToReference(Vector vector) {
-    return reference() == null ? _graph.eye().worldDisplacement(screenToEye(vector)) : reference().displacement(screenToEye(vector), _graph.eye());
-  }
-
-  /**
-   * Same as {@code return screenToEye(new Vector(x, y, z))}.
-   *
-   * @see #screenToEye(Vector)
-   */
-  public Vector screenToEye(float x, float y, float z) {
-    return screenToEye(new Vector(x, y, z));
-  }
-
-  /**
-   * Converts the vector from screen (device) coordinates into eye coordinates.
-   * <p>
-   * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just {@link #screenToEye(Vector)} and
-   * {@link #screenToQuaternion(float, float, float)}.
-   *
-   * @see #screenToQuaternion(float, float, float)
-   */
-  public Vector screenToEye(Vector vector) {
-    Vector eyeVector = vector.get();
-    // Scale to fit the screen relative _event displacement
-    // Quite excited to see how simple it's in 2d:
-    //if (_graph.is2D())
-    //return eyeVector;
-    // ... and amazed as to how dirty it's in 3d:
-    switch (_graph.type()) {
-      case PERSPECTIVE:
-        float k = (float) Math.tan(_graph.fieldOfView() / 2.0f) * Math.abs(
-            _graph.eye().location(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
-        // * Math.abs(graph.eye().frame().location(isEye() ?
-        // graph.eye().anchor() : position()).vec[2]);
-        //TODO check me weird to find height instead of width working (may it has to do with fov?)
-        eyeVector._vector[0] *= 2.0 * k / _graph.height();
-        eyeVector._vector[1] *= 2.0 * k / _graph.height();
-        break;
-      case TWO_D:
-      case ORTHOGRAPHIC:
-        float[] wh = _graph.boundaryWidthHeight();
-        // float[] wh = graph.eye().getOrthoWidthHeight();
-        eyeVector._vector[0] *= 2.0 * wh[0] / _graph.width();
-        eyeVector._vector[1] *= 2.0 * wh[1] / _graph.height();
-        break;
-    }
-    float coef;
-    if (isEye()) {
-      // float coef = 8E-4f;
-      coef = Math.max(Math.abs((location(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
-      eyeVector._vector[2] *= coef / graph().height();
-      // eye _wheel seems different
-      // trns.vec[2] *= coef * 8E-4f;
-      eyeVector.divide(graph().eye().magnitude());
-    } else {
-      coef = Vector.subtract(_graph.eye().position(), position()).magnitude();
-      eyeVector._vector[2] *= coef / _graph.height();
-      eyeVector.divide(_graph.eye().magnitude());
-    }
-    return eyeVector;
-  }
-
-  /**
-   * Same as {@code return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2])}.
-   *
-   * @see #screenToQuaternion(float, float, float)
-   */
-  public Quaternion screenToQuaternion(Vector angles) {
-    return screenToQuaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
-  }
-
-  /**
-   * Reduces the screen (device)
-   * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
-   * rotation</a> into a {@link Quaternion}.
-   * <p>
-   * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just {@link #screenToEye(Vector)} and
-   * {@link #screenToQuaternion(float, float, float)}.
-   *
-   * @param roll  Rotation angle in radians around the screen x-Axis
-   * @param pitch Rotation angle in radians around the screen y-Axis
-   * @param yaw   Rotation angle in radians around the screen z-Axis
-   * @see Quaternion#fromEulerAngles(float, float, float)
-   */
-  public Quaternion screenToQuaternion(float roll, float pitch, float yaw) {
-    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
-    if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
-      return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
-    } else {
-      Vector trns = new Vector();
-      Quaternion q = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
-      trns.set(-q.x(), -q.y(), -q.z());
-      trns = _graph.eye().orientation().rotate(trns);
-      trns = displacement(trns);
-      q.setX(trns.x());
-      q.setY(trns.y());
-      q.setZ(trns.z());
-      return q;
-    }
-  }
-
   /**
    * Returns {@code true} when the node is flying.
    * <p>
@@ -2448,48 +2290,6 @@ public class Node extends Frame implements Grabber {
     _flySpeed = speed;
   }
 
-  protected Quaternion _rollPitchQuaternion(MotionEvent event) {
-    MotionEvent2 motionEvent2 = MotionEvent.event2(event);
-    if (motionEvent2 != null)
-      return _rollPitchQuaternion(motionEvent2);
-    else {
-      System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
-      return null;
-    }
-  }
-
-  /**
-   * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
-   */
-  protected Quaternion _rollPitchQuaternion(MotionEvent2 event) {
-    float deltaX = event.dx();
-    float deltaY = event.dy();
-
-    if (_graph.isRightHanded())
-      deltaY = -deltaY;
-
-    if (event.fired())
-      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
-
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
-    Quaternion rotY = new Quaternion(displacement(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
-    return Quaternion.multiply(rotY, rotX);
-  }
-
-  // drive:
-
-  /**
-   * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
-   * event X-displacement.
-   */
-  protected Quaternion _turnQuaternion(MotionEvent1 event) {
-    float deltaX = event.dx();
-    return new Quaternion(new Vector(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / graph().width());
-  }
-
-  // end decide
-
   /**
    * Returns the picking precision threshold in pixels used by the node to {@link #track(Event)}.
    *
@@ -2586,4 +2386,183 @@ public class Node extends Frame implements Grabber {
     }
     return false;
   }
+
+  // Gesture physical interface is quite nice!
+
+  /**
+   * Transforms the vector from device (screen) coordinates to {@link #reference()} coordinates so that...
+   *
+   * Converts the vector from screen (device) coordinates into eye coordinates.
+   * <p>
+   * It's worth noting that all gesture to node motion converting methods, are
+   * implemented from just... and
+   * {@link #screenToQuaternion(float, float, float)}.
+   *
+   * @see #gestureRotate(Point, Point, Point)
+   */
+  public Vector gestureTranslate(Vector vector) {
+    Vector eyeVector = vector.get();
+    // Scale to fit the screen relative _event displacement
+    // Quite excited to see how simple it's in 2d:
+    //if (_graph.is2D())
+    //return eyeVector;
+    // ... and amazed as to how dirty it's in 3d:
+    switch (_graph.type()) {
+      case PERSPECTIVE:
+        float k = (float) Math.tan(_graph.fieldOfView() / 2.0f) * Math.abs(
+            _graph.eye().location(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
+        // * Math.abs(graph.eye().frame().location(isEye() ?
+        // graph.eye().anchor() : position()).vec[2]);
+        //TODO check me weird to find height instead of width working (may it has to do with fov?)
+        eyeVector._vector[0] *= 2.0 * k / _graph.height();
+        eyeVector._vector[1] *= 2.0 * k / _graph.height();
+        break;
+      case TWO_D:
+      case ORTHOGRAPHIC:
+        float[] wh = _graph.boundaryWidthHeight();
+        // float[] wh = graph.eye().getOrthoWidthHeight();
+        eyeVector._vector[0] *= 2.0 * wh[0] / _graph.width();
+        eyeVector._vector[1] *= 2.0 * wh[1] / _graph.height();
+        break;
+    }
+    float coef;
+    if (isEye()) {
+      // float coef = 8E-4f;
+      coef = Math.max(Math.abs((location(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
+      eyeVector._vector[2] *= coef / graph().height();
+      // eye _wheel seems different
+      // trns.vec[2] *= coef * 8E-4f;
+      eyeVector.divide(graph().eye().magnitude());
+    } else {
+      coef = Vector.subtract(_graph.eye().position(), position()).magnitude();
+      eyeVector._vector[2] *= coef / _graph.height();
+      eyeVector.divide(_graph.eye().magnitude());
+    }
+
+    return reference() == null ? _graph.eye().worldDisplacement(eyeVector) : reference().displacement(eyeVector, _graph.eye());
+  }
+
+  /**
+   * Same as {@code return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2])}.
+   *
+   * @see #screenToQuaternion(float, float, float)
+   */
+  public Quaternion screenToQuaternion(Vector angles) {
+    return screenToQuaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
+  }
+
+  /**
+   * Reduces the screen (device)
+   * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
+   * rotation</a> into a {@link Quaternion}.
+   * <p>
+   * It's worth noting that all gesture to node motion converting methods, are
+   * implemented from just ... and
+   * {@link #screenToQuaternion(float, float, float)}.
+   *
+   * @param roll  Rotation angle in radians around the screen x-Axis
+   * @param pitch Rotation angle in radians around the screen y-Axis
+   * @param yaw   Rotation angle in radians around the screen z-Axis
+   * @see Quaternion#fromEulerAngles(float, float, float)
+   */
+  public Quaternion screenToQuaternion(float roll, float pitch, float yaw) {
+    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
+    if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
+      return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
+    } else {
+      Vector trns = new Vector();
+      Quaternion q = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
+      trns.set(-q.x(), -q.y(), -q.z());
+      trns = _graph.eye().orientation().rotate(trns);
+      trns = displacement(trns);
+      q.setX(trns.x());
+      q.setY(trns.y());
+      q.setZ(trns.z());
+      return q;
+    }
+  }
+
+  /**
+   *
+   * @see #gestureTranslate(Vector)
+   */
+  public Quaternion gestureRotate(Point point1, Point point2, Point pixel) {
+    float cx = pixel.x();
+    float cy = pixel.y();
+    float x = point2.x();
+    float y = point2.y();
+    float prevX = point1.x();
+    float prevY = point1.y();
+    // Points on the deformed ball
+    float px = rotationSensitivity() * ((int) prevX - cx) / _graph.width();
+    float py = rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
+    float dx = rotationSensitivity() * (x - cx) / _graph.width();
+    float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
+
+    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    Vector axis = p2.cross(p1);
+    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    return new Quaternion(axis, angle);
+  }
+
+  /**
+   * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
+   * ball, it is proportional to the euclidean distance to the ball. For a point outside
+   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
+   * ball, the function is continuous.
+   */
+  protected float _projectOnBall(float x, float y) {
+    // If you change the size value, change angle computation in
+    // deformedBallQuaternion().
+    float size = 1.0f;
+    float size2 = size * size;
+    float size_limit = size2 * 0.5f;
+
+    float d = x * x + y * y;
+    return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
+  }
+
+  protected Quaternion _rollPitchQuaternion(MotionEvent event) {
+    MotionEvent2 motionEvent2 = MotionEvent.event2(event);
+    if (motionEvent2 != null)
+      return _rollPitchQuaternion(motionEvent2);
+    else {
+      System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
+      return null;
+    }
+  }
+
+  /**
+   * Returns a Quaternion that is the composition of two rotations, inferred from the
+   * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
+   */
+  protected Quaternion _rollPitchQuaternion(MotionEvent2 event) {
+    float deltaX = event.dx();
+    float deltaY = event.dy();
+
+    if (_graph.isRightHanded())
+      deltaY = -deltaY;
+
+    if (event.fired())
+      _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
+
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
+    Quaternion rotY = new Quaternion(displacement(_upVector), rotationSensitivity() * (-deltaX) / graph().width());
+    return Quaternion.multiply(rotY, rotX);
+  }
+
+  // drive:
+
+  /**
+   * Returns a Quaternion that is a rotation around Y-axis, proportional to the horizontal
+   * event X-displacement.
+   */
+  protected Quaternion _turnQuaternion(MotionEvent1 event) {
+    float deltaX = event.dx();
+    return new Quaternion(new Vector(0.0f, 1.0f, 0.0f), rotationSensitivity() * (-deltaX) / graph().width());
+  }
+
+  // end decide
 }
