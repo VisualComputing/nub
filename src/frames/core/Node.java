@@ -1848,8 +1848,7 @@ public class Node extends Frame implements Grabber {
       if (event.fired())
         _upVector = orientation().rotate(new Vector(0.0f, 1.0f, 0.0f));
       return gestureLookAround(motionEvent2.dx(), motionEvent2.dy(), _upVector);
-    }
-    else {
+    } else {
       System.out.println("rollPitchQuaternion(Event) requires a motion event of at least 2 DOFs");
       return null;
     }
@@ -1955,7 +1954,7 @@ public class Node extends Frame implements Grabber {
       _initEvent = event.get();
     }
     float speed = flySpeed() * 0.01f * (event.y() - _initEvent.y());
-    rotate(gestureRotate(0,rotationSensitivity() * -_computeAngle(event.event1().dx()),0));
+    rotate(gestureRotate(0, rotationSensitivity() * -_computeAngle(event.event1().dx()), 0));
     _fly(rotation().rotate(new Vector(0.0f, 0.0f, speed)), event);
   }
 
@@ -2473,7 +2472,7 @@ public class Node extends Frame implements Grabber {
     float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
 
     Quaternion quaternion = new Quaternion(axis, angle);
-    if(!isEye()) {
+    if (!isEye()) {
       Vector vector = quaternion.axis();
       vector = _graph.eye().orientation().rotate(vector);
       vector = displacement(vector);

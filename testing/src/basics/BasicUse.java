@@ -6,7 +6,6 @@ import frames.input.Event;
 import frames.input.Shortcut;
 import frames.input.event.TapShortcut;
 import frames.primitives.Frame;
-import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Mouse;
