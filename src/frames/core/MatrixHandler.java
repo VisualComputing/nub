@@ -298,7 +298,7 @@ public class MatrixHandler {
 
   /**
    * Cache projection * view inverse matrix (and also projection * view}) so that
-   * {@link Graph#unprojectedCoordinates(Vector)} is optimized.
+   * {@link Graph#location(Vector)} is optimized.
    *
    * @see #isProjectionViewInverseCached()
    * @see #cacheProjectionView()

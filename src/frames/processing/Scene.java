@@ -474,7 +474,7 @@ public class Scene extends Graph implements PConstants {
    */
   public Vector pointUnderPixel(Point pixel) {
     float depth = pixelDepth(pixel);
-    Vector point = unprojectedCoordinates(new Vector(pixel.x(), pixel.y(), depth));
+    Vector point = location(new Vector(pixel.x(), pixel.y(), depth));
     return (depth < 1.0f) ? point : null;
   }
 
@@ -2678,7 +2678,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinates(frame.position());
+    Vector center = screenLocation(frame.position());
     drawCross(center.x(), center.y(), length);
   }
 
@@ -2748,7 +2748,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinates(frame.position());
+    Vector center = screenLocation(frame.position());
     drawShooterTarget(center.x(), center.y(), length);
   }
 

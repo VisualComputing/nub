@@ -52,8 +52,8 @@ import java.util.List;
  * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
- * {@link #projectedCoordinates(Vector, Frame)} and
- * {@link #unprojectedCoordinates(Vector, Frame)}, are provided for convenience.
+ * {@link #screenLocation(Vector, Frame)} and
+ * {@link #location(Vector, Frame)}, are provided for convenience.
  * <h3>Interpolator</h3>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fitBallInterpolation()}, {@link #fitScreenRegionInterpolation(Rectangle)},
@@ -1172,10 +1172,10 @@ public class Graph {
   /**
    * Wrapper for {@link MatrixHandler#isProjectionViewInverseCached()}.
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinates(Vector)}.
+   * Use it only when continuously calling {@link #location(Vector)}.
    *
    * @see #cacheProjectionViewInverse(boolean)
-   * @see #unprojectedCoordinates(Vector)
+   * @see #location(Vector)
    */
   public boolean isProjectionViewInverseCached() {
     return _matrixHandler.isProjectionViewInverseCached();
@@ -1184,10 +1184,10 @@ public class Graph {
   /**
    * Wrapper for {@link MatrixHandler#cacheProjectionViewInverse(boolean)}.
    * <p>
-   * Use it only when continuously calling {@link #unprojectedCoordinates(Vector)}.
+   * Use it only when continuously calling {@link #location(Vector)}.
    *
    * @see #isProjectionViewInverseCached()
-   * @see #unprojectedCoordinates(Vector)
+   * @see #location(Vector)
    */
   public void cacheProjectionViewInverse(boolean optimise) {
     _matrixHandler.cacheProjectionViewInverse(optimise);
@@ -1884,41 +1884,40 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code projectedCoordinates(src, null)}.
+   * Convenience function that simply returns {@code screenLocation(src, null)}.
    *
-   * @see #projectedCoordinates(Vector, Frame)
+   * @see #screenLocation(Vector, Frame)
    */
-  public Vector projectedCoordinates(Vector vector) {
-    return projectedCoordinates(vector, null);
+  public Vector screenLocation(Vector vector) {
+    return screenLocation(vector, null);
   }
 
   /**
-   * Returns the screen projected coordinates of {@code point} defined in the
-   * {@code frame} coordinate system.
-   * <p>
-   * When {@code frame} is {@code null}, {@code point} is expressed in the world coordinate
-   * system. See {@link #projectedCoordinates(Vector)}.
+   * Converts {@code vector} location from {@code frame} to screen.
+   * Use {@code location(vector, frame)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
    * (near plane) and 1 (excluded, far plane).
    *
-   * @see #unprojectedCoordinates(Vector, Frame)
+   * @see #screenLocation(Vector)
+   * @see #location(Vector, Frame)
+   * @see #location(Vector)
    */
-  public Vector projectedCoordinates(Vector point, Frame frame) {
+  public Vector screenLocation(Vector vector, Frame frame) {
     float xyz[] = new float[3];
 
     if (frame != null) {
-      Vector tmp = frame.worldLocation(point);
-      _project(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
+      Vector tmp = frame.worldLocation(vector);
+      _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
-      _project(point._vector[0], point._vector[1], point._vector[2], xyz);
+      _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
 
     return new Vector(xyz[0], xyz[1], xyz[2]);
   }
 
   // cached version
-  protected boolean _project(float objx, float objy, float objz, float[] windowCoordinate) {
+  protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
     Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
 
     float in[] = new float[4];
@@ -1968,16 +1967,16 @@ public class Graph {
   }
 
   /**
-   * Convenience function that simply returns {@code unprojectedCoordinates(point, null)}.
+   * Convenience function that simply returns {@code location(pixel, null)}.
    * <p>
-   * #see {@link #unprojectedCoordinates(Vector, Frame)}
+   * #see {@link #location(Vector, Frame)}
    */
-  public Vector unprojectedCoordinates(Vector point) {
-    return this.unprojectedCoordinates(point, null);
+  public Vector location(Vector pixel) {
+    return this.location(pixel, null);
   }
 
   /**
-   * Returns the world unprojected coordinates of the {@code pixel}.
+   * Returns the {@code frame} coordinates of {@code pixel}.
    * <p>
    * The pixel (0,0) corresponds to the upper left corner of the window. The
    * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
@@ -1991,7 +1990,7 @@ public class Graph {
    * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
    * account.
    * <p>
-   * {@link #projectedCoordinates(Vector, Frame)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Frame)} performs the inverse transformation.
    * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
@@ -2001,16 +2000,16 @@ public class Graph {
    * change in the matrices, you should buffer the inverse of the projection times view matrix
    * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
-   * @see #projectedCoordinates(Vector, Frame)
+   * @see #screenLocation(Vector, Frame)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector unprojectedCoordinates(Vector pixel, Frame frame) {
+  public Vector location(Vector pixel, Frame frame) {
     float xyz[] = new float[3];
-    // _unproject(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
+    // _location(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
     // this.getProjectionMatrix(true),
     // getViewport(), xyz);
-    _unproject(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
+    _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (frame != null)
       return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
     else
@@ -2025,7 +2024,7 @@ public class Graph {
    * @param winz          Specify the window z coordinate.
    * @param objCoordinate Return the computed object coordinates.
    */
-  protected boolean _unproject(float winx, float winy, float winz, float[] objCoordinate) {
+  protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
     if (matrixHandler().isProjectionViewInverseCached())
       projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
@@ -2458,7 +2457,7 @@ public class Graph {
         else
           eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
       }
-      lookAt(unprojectedCoordinates(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      lookAt(location(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
       return;
     }
 

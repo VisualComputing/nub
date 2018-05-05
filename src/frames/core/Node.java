@@ -618,7 +618,7 @@ public class Node extends Frame implements Grabber {
    * @see #setPrecision(Precision)
    */
   public boolean track(float x, float y) {
-    Vector proj = _graph.projectedCoordinates(position());
+    Vector proj = _graph.screenLocation(position());
     float halfThreshold = precisionThreshold() / 2;
     return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
@@ -1076,7 +1076,7 @@ public class Node extends Frame implements Grabber {
       System.out.println("deformedBallQuaternion(Event) requires a relative motion-event");
       return null;
     }
-    return gestureRotate(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()), new Point(center.x(), center.y()));
+    return gestureSpin(new Point(event.previousX(), event.previousY()), new Point(event.x(), event.y()), new Point(center.x(), center.y()));
   }
 
   // macro's
@@ -1766,9 +1766,9 @@ public class Node extends Frame implements Grabber {
     Quaternion quaternion;
     Vector vector;
     if (isEye())
-      quaternion = _deformedBallQuaternion(event, graph().projectedCoordinates(graph().anchor()));
+      quaternion = _deformedBallQuaternion(event, graph().screenLocation(graph().anchor()));
     else {
-      vector = _graph.projectedCoordinates(position());
+      vector = _graph.screenLocation(position());
       quaternion = _deformedBallQuaternion(event, vector);
       vector = quaternion.axis();
       vector = _graph.eye().orientation().rotate(vector);
@@ -2161,14 +2161,14 @@ public class Node extends Frame implements Grabber {
     Vector vector;
     float angle;
     if (isEye()) {
-      vector = graph().projectedCoordinates(graph().anchor());
+      vector = graph().screenLocation(graph().anchor());
       angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]) - (float) Math
           .atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
       if (_graph.isLeftHanded())
         angle = -angle;
       quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
     } else {
-      vector = _graph.projectedCoordinates(position());
+      vector = _graph.screenLocation(position());
       float prev_angle = (float) Math.atan2(event.previousY() - vector._vector[1], event.previousX() - vector._vector[0]);
       angle = (float) Math.atan2(event.y() - vector._vector[1], event.x() - vector._vector[0]);
       Vector axis = displacement(_graph.eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
@@ -2398,7 +2398,7 @@ public class Node extends Frame implements Grabber {
    * implemented from just... and
    * {@link #screenToQuaternion(float, float, float)}.
    *
-   * @see #gestureRotate(Point, Point, Point)
+   * @see #gestureSpin(Point, Point, Point)
    */
   public Vector gestureTranslate(Vector vector) {
     Vector eyeVector = vector.get();
@@ -2482,13 +2482,22 @@ public class Node extends Frame implements Grabber {
     }
   }
 
+  /*
+  public Quaternion gestureSpin(Point point1, Point point2) {
+    if(isEye())
+      return gestureSpin(point1, point2, graph().anchor());
+    else
+      return gestureSpin(point1, point2, graph().anchor())
+  }
+  */
+
   /**
    *
    * @see #gestureTranslate(Vector)
    */
-  public Quaternion gestureRotate(Point point1, Point point2, Point pixel) {
-    float cx = pixel.x();
-    float cy = pixel.y();
+  public Quaternion gestureSpin(Point point1, Point point2, Point center) {
+    float cx = center.x();
+    float cy = center.y();
     float x = point2.x();
     float y = point2.y();
     float prevX = point1.x();
@@ -2498,13 +2507,27 @@ public class Node extends Frame implements Grabber {
     float py = rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
     float dx = rotationSensitivity() * (x - cx) / _graph.width();
     float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
-
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
     float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-    return new Quaternion(axis, angle);
+
+    Quaternion quaternion =  new Quaternion(axis, angle);
+
+    /*
+    if(isEye())
+      return quaternion;
+    else {
+      Vector vector = _graph.screenLocation(position());
+      vector = quaternion.axis();
+      vector = _graph.eye().orientation().rotate(vector);
+      vector = displacement(vector);
+      return new Quaternion(vector, -quaternion.angle());
+    }
+    */
+
+    return quaternion;
   }
 
   /**
