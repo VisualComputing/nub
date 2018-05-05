@@ -22,8 +22,7 @@ public class Interaction extends PApplet {
   Scene scene;
   Node eye, node;
   Node defaultNode;
-  Vector upVector = new Vector();
-  boolean cadRotationIsReversed;
+  Vector upVector;
 
   public void settings() {
     size(800, 800, P3D);
@@ -89,7 +88,6 @@ public class Interaction extends PApplet {
 
   public void mousePressed() {
     upVector = eye.yAxis();
-    cadRotationIsReversed = eye.displacement(upVector).y() < 0.0f;
   }
 
   public void mouseDragged() {
@@ -104,8 +102,8 @@ public class Interaction extends PApplet {
     //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     //defaultNode.rotate(defaultNode.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
     //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
-    //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
-    eye.spin(eye.gestureRotateCAD(cadRotationIsReversed ? pmouseX-mouseX : mouseX-pmouseX, mouseY-pmouseY, upVector, 2/width));
+    eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
+    //eye.spin(eye.gestureRotateCAD(mouseX-pmouseX, mouseY-pmouseY, 2.0f / height));
   }
 
   public static void main(String args[]) {
