@@ -1157,7 +1157,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(MotionEvent1 event, float sensitivity) {
-    translate(gestureTranslate(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(), 0, 0), sensitivity)));
+    translate(gestureTranslate(new Vector(event.dx(), 0, 0), sensitivity));
   }
 
   /**
@@ -1178,8 +1178,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-translation conversion routine.
    */
   protected void _translateX(boolean right) {
-    translate(gestureTranslate(
-        Vector.multiply(new Vector(1, 0), (right ^ this.isEye()) ? keySensitivity() : -keySensitivity())));
+    translate(gestureTranslate(new Vector(1, 0), right ? keySensitivity() : -keySensitivity()));
   }
 
   /**
@@ -1219,8 +1218,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-translation conversion routine.
    */
   protected void _translateY(MotionEvent1 event, float sensitivity) {
-    translate(
-        gestureTranslate(Vector.multiply(new Vector(0, isEye() ^ _graph.isRightHanded() ? -event.dx() : event.dx()), sensitivity)));
+    translate(gestureTranslate(new Vector(0, event.dx()), sensitivity));
   }
 
   /**
@@ -1241,8 +1239,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-translation conversion routine.
    */
   protected void _translateY(boolean up) {
-    translate(gestureTranslate(
-        Vector.multiply(new Vector(0, (up ^ this.isEye() ^ _graph.isLeftHanded()) ? 1 : -1), this.keySensitivity())));
+    translate(gestureTranslate(new Vector(0, up ? 1 : -1), this.keySensitivity()));
   }
 
   /**
@@ -1282,7 +1279,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(MotionEvent1 event, float sensitivity) {
-    translate(gestureTranslate(Vector.multiply(new Vector(0.0f, 0.0f, isEye() ? -event.dx() : event.dx()), sensitivity)));
+    translate(gestureTranslate(new Vector(0.0f, 0.0f, event.dx()), sensitivity));
   }
 
   /**
@@ -1303,8 +1300,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-translation conversion routine.
    */
   protected void _translateZ(boolean up) {
-    translate(gestureTranslate(
-        Vector.multiply(new Vector(0.0f, 0.0f, 1), (up ^ this.isEye()) ? -keySensitivity() : keySensitivity())));
+    translate(gestureTranslate(new Vector(0.0f, 0.0f, 1), up ? -keySensitivity() : keySensitivity()));
   }
 
   /**
@@ -1339,8 +1335,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xy-translation conversion routine.
    */
   public void translate(MotionEvent2 event) {
-    translate(gestureTranslate(Vector.multiply(new Vector(isEye() ? -event.dx() : event.dx(),
-        (_graph.isRightHanded() ^ isEye()) ? -event.dy() : event.dy(), 0.0f), this.translationSensitivity())));
+    translate(gestureTranslate(new Vector(event.dx(), event.dy(), 0.0f), this.translationSensitivity()));
   }
 
   /**
@@ -1387,9 +1382,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into xyz-translation conversion routine.
    */
   public void translateXYZ(MotionEvent3 event) {
-    translate(gestureTranslate(
-        Vector.multiply(new Vector(event.dx(), _graph.isRightHanded() ? -event.dy() : event.dy(), -event.dz()),
-            this.translationSensitivity())));
+    translate(gestureTranslate(new Vector(event.dx(), event.dy(), event.dz()), this.translationSensitivity()));
   }
 
   /**
@@ -2385,20 +2378,13 @@ public class Node extends Frame implements Grabber {
 
   // Gesture physical interface is quite nice!
 
-  /**
-   * Transforms the vector from device (screen) coordinates to {@link #reference()} coordinates so that...
-   *
-   * Converts the vector from screen (device) coordinates into eye coordinates.
-   * <p>
-   * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just... and
-   * {@link #gestureRotate(float, float, float)}.
-   *
-   * @see #gestureSpin(Point, Point, Point)
-   */
   public Vector gestureTranslate(Vector vector) {
-    Vector eyeVector = vector.get();
-    // Scale to fit the screen relative _event displacement
+    return gestureTranslate(vector, 1);
+  }
+
+  public Vector gestureTranslate(Vector vector, float sensitivity) {
+    Vector eyeVector = Vector.multiply(new Vector(isEye() ? -vector.x() : vector.x(), (_graph.isRightHanded() ^ isEye()) ? -vector.y() : vector.y(), isEye() ? -vector.z() : vector.z()), sensitivity);
+    // Scale to fit the screen relative vector displacement
     // Quite excited to see how simple it's in 2d:
     //if (_graph.is2D())
     //return eyeVector;
@@ -2438,47 +2424,44 @@ public class Node extends Frame implements Grabber {
     return reference() == null ? _graph.eye().worldDisplacement(eyeVector) : reference().displacement(eyeVector, _graph.eye());
   }
 
-  /**
-   * Reduces the screen (device)
-   * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
-   * rotation</a> into a {@link Quaternion}.
-   * <p>
-   * It's worth noting that all gesture to node motion converting methods, are
-   * implemented from just ... and
-   * {@link #gestureRotate(float, float, float)}.
-   *
-   * @param roll  Rotation angle in radians around the screen x-Axis
-   * @param pitch Rotation angle in radians around the screen y-Axis
-   * @param yaw   Rotation angle in radians around the screen z-Axis
-   * @see Quaternion#fromEulerAngles(float, float, float)
-   */
   public Quaternion gestureRotate(float roll, float pitch, float yaw) {
+    return gestureRotate(roll, pitch, yaw, 1);
+  }
+
+  public Quaternion gestureRotate(float roll, float pitch, float yaw, float sensitivity) {
+    roll *= sensitivity;
+    pitch *= sensitivity;
+    yaw *= sensitivity;
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
       return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
     } else {
-      Vector trns = new Vector();
-      Quaternion q = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
-      trns.set(-q.x(), -q.y(), -q.z());
-      trns = _graph.eye().orientation().rotate(trns);
-      trns = displacement(trns);
-      q.setX(trns.x());
-      q.setY(trns.y());
-      q.setZ(trns.z());
-      return q;
+      Vector vector = new Vector();
+      Quaternion quaternion = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
+      vector.set(-quaternion.x(), -quaternion.y(), -quaternion.z());
+      vector = _graph.eye().orientation().rotate(vector);
+      vector = displacement(vector);
+      quaternion.setX(vector.x());
+      quaternion.setY(vector.y());
+      quaternion.setZ(vector.z());
+      return quaternion;
     }
   }
 
   public Quaternion gestureSpin(Point point1, Point point2) {
-    Vector center = graph().screenLocation(isEye() ? graph().anchor() : position());
-    return gestureSpin(point1, point2, new Point(center.x(), center.y()));
+    return gestureSpin(point1, point2, 1);
   }
 
-  /**
-   *
-   * @see #gestureTranslate(Vector)
-   */
+  public Quaternion gestureSpin(Point point1, Point point2, float sensitivity) {
+    Vector center = graph().screenLocation(isEye() ? graph().anchor() : position());
+    return gestureSpin(point1, point2, new Point(center.x(), center.y()), sensitivity);
+  }
+
   public Quaternion gestureSpin(Point point1, Point point2, Point center) {
+    return gestureSpin(point1, point2, center, 1);
+  }
+
+  public Quaternion gestureSpin(Point point1, Point point2, Point center, float sensitivity) {
     float cx = center.x();
     float cy = center.y();
     float x = point2.x();
@@ -2486,10 +2469,10 @@ public class Node extends Frame implements Grabber {
     float prevX = point1.x();
     float prevY = point1.y();
     // Points on the deformed ball
-    float px = rotationSensitivity() * ((int) prevX - cx) / _graph.width();
-    float py = rotationSensitivity() * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
-    float dx = rotationSensitivity() * (x - cx) / _graph.width();
-    float dy = rotationSensitivity() * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
+    float px = sensitivity * ((int) prevX - cx) / _graph.width();
+    float py = sensitivity * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
+    float dx = sensitivity * (x - cx) / _graph.width();
+    float dy = sensitivity * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
     Vector p1 = new Vector(px, py, _projectOnBall(px, py));
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
@@ -2524,27 +2507,33 @@ public class Node extends Frame implements Grabber {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
-  /**
-   * Returns a Quaternion that is the composition of two rotations, inferred from the
-   * 2-DOF gesture (e.g., mouse) roll (X axis) and pitch.
-   */
   public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector) {
+    return gestureLookAround(deltaX, deltaY, upVector, 1);
+  }
+
+  public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
     if (!isEye()) {
       System.out.println("gestureLookAround only makes sense for the eye. Identity rotation returned");
       return new Quaternion();
     }
-    if (_graph.isRightHanded())
-      deltaY = -deltaY;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), rotationSensitivity() * deltaY / graph().height());
-    Quaternion rotY = new Quaternion(displacement(upVector), rotationSensitivity() * (-deltaX) / graph().width());
+    deltaX *= -sensitivity;
+    deltaY *= sensitivity;
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -deltaY : deltaY);
+    Quaternion rotY = new Quaternion(displacement(upVector), deltaX);
     return Quaternion.multiply(rotY, rotX);
   }
 
   public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector) {
+    return gestureRotateCAD(roll, pitch, upVector, 1);
+  }
+
+  public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     if (!isEye()) {
       System.out.println("gestureRotateCAD only makes sense for the eye. Identity rotation returned");
       return new Quaternion();
     }
+    roll *= sensitivity;
+    pitch *= sensitivity;
     return Quaternion.multiply(new Quaternion(displacement(upVector), roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -pitch : pitch));
   }
 }
