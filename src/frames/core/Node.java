@@ -1556,7 +1556,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-rotation conversion routine.
    */
   protected void _rotateX(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event);
+    _spin(gestureRotate(_computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0, 0), event);
   }
 
   /**
@@ -1577,7 +1577,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into x-rotation conversion routine.
    */
   protected void _rotateX(boolean up) {
-    rotate(screenToQuaternion(_computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0, 0));
+    rotate(gestureRotate(_computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0, 0));
   }
 
   /**
@@ -1617,7 +1617,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event);
+    _spin(gestureRotate(0, _computeAngle(event) * (isEye() ? -sensitivity : sensitivity), 0), event);
   }
 
   /**
@@ -1638,7 +1638,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into y-rotation conversion routine.
    */
   protected void _rotateY(boolean up) {
-    rotate(screenToQuaternion(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0));
+    rotate(gestureRotate(0, _computeAngle() * (up ? keySensitivity() : -keySensitivity()), 0));
   }
 
   /**
@@ -1678,7 +1678,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-rotation conversion routine.
    */
   protected void _rotateZ(MotionEvent1 event, float sensitivity) {
-    _spin(screenToQuaternion(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event);
+    _spin(gestureRotate(0, 0, sensitivity * (isEye() ? -_computeAngle(event) : _computeAngle(event))), event);
   }
 
   /**
@@ -1699,7 +1699,7 @@ public class Node extends Frame implements Grabber {
    * User gesture into z-rotation conversion routine.
    */
   protected void _rotateZ(boolean up) {
-    rotate(screenToQuaternion(0, 0, _computeAngle() * (up ? keySensitivity() : -keySensitivity())));
+    rotate(gestureRotate(0, 0, _computeAngle() * (up ? keySensitivity() : -keySensitivity())));
   }
 
   /**
@@ -1727,9 +1727,9 @@ public class Node extends Frame implements Grabber {
    * User gesture into xyz-rotation conversion routine.
    */
   public void rotateXYZ(MotionEvent3 event) {
-    rotate(screenToQuaternion(
-        Vector.multiply(new Vector(_computeAngle(event.dx()), _computeAngle(-event.dy()), _computeAngle(-event.dz())),
-            rotationSensitivity())));
+    rotate(gestureRotate(rotationSensitivity() * _computeAngle(event.dx()),
+        rotationSensitivity() * _computeAngle(-event.dy()),
+        rotationSensitivity() * _computeAngle(-event.dz())));
   }
 
   /**
@@ -2384,7 +2384,7 @@ public class Node extends Frame implements Grabber {
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
    * implemented from just... and
-   * {@link #screenToQuaternion(float, float, float)}.
+   * {@link #gestureRotate(float, float, float)}.
    *
    * @see #gestureSpin(Point, Point, Point)
    */
@@ -2431,29 +2431,20 @@ public class Node extends Frame implements Grabber {
   }
 
   /**
-   * Same as {@code return screenToQuaternion(angles.vec[0], angles.vec[1], angles.vec[2])}.
-   *
-   * @see #screenToQuaternion(float, float, float)
-   */
-  public Quaternion screenToQuaternion(Vector angles) {
-    return screenToQuaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
-  }
-
-  /**
    * Reduces the screen (device)
    * <a href="http://en.wikipedia.org/wiki/Euler_angles#Extrinsic_rotations"> Extrinsic
    * rotation</a> into a {@link Quaternion}.
    * <p>
    * It's worth noting that all gesture to node motion converting methods, are
    * implemented from just ... and
-   * {@link #screenToQuaternion(float, float, float)}.
+   * {@link #gestureRotate(float, float, float)}.
    *
    * @param roll  Rotation angle in radians around the screen x-Axis
    * @param pitch Rotation angle in radians around the screen y-Axis
    * @param yaw   Rotation angle in radians around the screen z-Axis
    * @see Quaternion#fromEulerAngles(float, float, float)
    */
-  public Quaternion screenToQuaternion(float roll, float pitch, float yaw) {
+  public Quaternion gestureRotate(float roll, float pitch, float yaw) {
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
       return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
