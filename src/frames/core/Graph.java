@@ -1113,7 +1113,7 @@ public class Graph {
       return;
     _eye = eye;
     if (_interpolator == null)
-      _interpolator = new Interpolator(this, _eye);
+      _interpolator = new Interpolator(_eye);
     else
       _interpolator.setFrame(_eye);
     _modified();
@@ -2622,6 +2622,7 @@ public class Graph {
 
   /**
    * Converts physical (device) space
+   *
    * @param vector
    * @return
    */

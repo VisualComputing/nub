@@ -10,11 +10,11 @@
 
 package frames.core;
 
+import frames.core.constraint.Constraint;
+import frames.core.constraint.WorldConstraint;
 import frames.primitives.Matrix;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.core.constraint.Constraint;
-import frames.core.constraint.WorldConstraint;
 import frames.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -117,12 +117,14 @@ public class Frame {
   protected long _lastUpdate;
 
   //TODO new attributes
+
   /**
    * Enumerates the Picking precision modes.
    */
   public enum Precision {
     FIXED, ADAPTIVE, EXACT
   }
+
   protected Precision _precision;
   protected int _id;
   protected Graph _graph;
@@ -130,20 +132,12 @@ public class Frame {
   protected float _threshold;
   protected boolean _culled;
 
-  /**
-   * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
+  //TODO check new Frame() vs detach() al over the place
+
   public Frame(Graph graph) {
     this(graph, null, new Vector(), new Quaternion(), 1);
   }
 
-  /**
-   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
   public Frame(Frame reference) {
     this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
   }
@@ -234,7 +228,311 @@ public class Frame {
    * Returns a deep copy of this frame.
    */
   public Frame get(Graph graph) {
+    if (graph == null)
+      throw new RuntimeException("Frame graph should be non-null!");
     return new Frame(this, graph);
+  }
+
+  /**
+   * Returns a new frame defined in the world coordinate system, with the same {@link #position()},
+   * {@link #orientation()} and {@link #magnitude()} as this frame.
+   *
+   * @see #reference()
+   */
+  //TODO pending detach
+  public Frame detach() {
+    Frame frame = new Frame(graph());
+    frame.set(this);
+    return frame;
+  }
+
+  /**
+   * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
+   * those of the {@code frame}. This frame {@link #constraint()} and {@link #reference()}
+   * are not affected by this call.
+   * <p>
+   * After calling {@code set(frame)} a call to {@code this.matches(other)} should
+   * return {@code true}.
+   *
+   * @see #worldMatrix()
+   */
+  public void set(Frame frame) {
+    if (frame != null) {
+      setPosition(frame.position());
+      setOrientation(frame.orientation());
+      setMagnitude(frame.magnitude());
+    } else
+      throw new RuntimeException("Frame should be non-null!");
+  }
+
+  public void reset() {
+    setPosition(new Vector());
+    setOrientation(new Quaternion());
+    setMagnitude(1);
+  }
+
+  /**
+   * Internal use. Frame graphics color to be used for picking with a color buffer.
+   */
+  protected int _id() {
+    // see here:
+    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
+    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
+  }
+
+  public boolean isEye() {
+    return graph().eye() == this;
+  }
+
+  public Graph graph() {
+    return _graph;
+  }
+
+  // MODIFIED
+
+  /**
+   * @return the last frame the this obect was updated.
+   */
+  public long lastUpdate() {
+    return _lastUpdate;
+  }
+
+  // SYNC
+
+  /**
+   * Same as {@code sync(this, other)}.
+   *
+   * @see #sync(Frame, Frame)
+   */
+  public void sync(Frame frame) {
+    sync(this, frame);
+  }
+
+  /**
+   * If {@code frame1} has been more recently updated than {@code frame2}, calls
+   * {@code frame2.set(frame1)}, otherwise calls {@code frame1.set(frame2)}.
+   * Does nothing if both objects were updated at the same time.
+   * <p>
+   * This method syncs only the global geometry attributes ({@link #position()},
+   * {@link #orientation()} and {@link #magnitude()}) among the two frames. The
+   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
+   * separately.
+   *
+   * @see #set(Frame)
+   */
+  public static void sync(Frame frame1, Frame frame2) {
+    if (frame1 == null || frame2 == null)
+      return;
+    if (frame1.lastUpdate() == frame2.lastUpdate())
+      return;
+    Frame source = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame1 : frame2;
+    Frame target = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame2 : frame1;
+    target.set(source);
+  }
+
+  /**
+   * Internal use. Automatically call by all methods which change the frame state.
+   */
+  protected void _modified() {
+    _lastUpdate = TimingHandler.frameCount;
+    if (children() != null)
+      for (Frame child : children())
+        child._modified();
+  }
+
+  // REFERENCE_FRAME
+
+  /**
+   * Returns {@code true} if this frame is ancestor of {@code frame}.
+   */
+  public boolean isAncestor(Frame frame) {
+    if (frame == this || frame == null)
+      return false;
+    Frame ancestor = frame.reference();
+    while (ancestor != null) {
+      if (ancestor == this)
+        return true;
+      ancestor = ancestor.reference();
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code return ancestor.isAncestor(frame)}.
+   *
+   * @see #isAncestor(Frame)
+   * @see #path(Frame, Frame)
+   */
+  public static boolean isAncestor(Frame ancestor, Frame frame) {
+    return ancestor.isAncestor(frame);
+  }
+
+  /**
+   * Returns the reference frame, in which this frame is defined.
+   * <p>
+   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
+   * defined with respect to the {@link #reference()} coordinate system. A
+   * {@code null} reference frame (default value) means that the frame is defined in the
+   * world coordinate system.
+   * <p>
+   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to
+   * recursively convert values along the reference frame chain and to get values
+   * expressed in the world coordinate system. The values match when the reference frame
+   * is {@code null}.
+   * <p>
+   * Use {@link #setReference(Frame)} to set this value and create a frame hierarchy.
+   * Convenient functions allow you to convert coordinates and vectors from one frame to
+   * another: see {@link #location(Vector, Frame)} and {@link #displacement(Vector, Frame)},
+   * respectively.
+   */
+  public Frame reference() {
+    return _reference;
+  }
+
+  /**
+   * Sets the {@link #reference()} of the frame.
+   * <p>
+   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
+   * defined in the {@link #reference()} coordinate system.
+   * <p>
+   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to express
+   * the frame global transformation in the world coordinate system.
+   * <p>
+   * Using this method, you can create a hierarchy of frames. This hierarchy needs to be a
+   * tree, which root is the world coordinate system (i.e., {@code null}
+   * {@link #reference()}). No action is performed if setting {@code reference} as the
+   * {@link #reference()} would create a loop in the hierarchy.
+   */
+  public void setReference(Frame frame) {
+    if (frame == this) {
+      System.out.println("A node cannot be a reference of itself.");
+      return;
+    }
+    if (isAncestor(frame)) {
+      System.out.println("A node descendant cannot be set as its reference.");
+      return;
+    }
+    // 1. no need to re-parent, just check this needs to be added as leadingFrame
+    if (reference() == frame) {
+      _restorePath(reference(), this);
+      return;
+    }
+    // 2. else re-parenting
+    // 2a. before assigning new reference frame
+    if (reference() != null) // old
+      reference()._removeChild(this);
+    else if (graph() != null)
+      graph()._removeLeadingNode(this);
+    // finally assign the reference frame
+    _reference = frame;// reference() returns now the new value
+    // 2b. after assigning new reference frame
+    _restorePath(reference(), this);
+    _modified();
+  }
+
+  protected void _restorePath(Frame parent, Frame child) {
+    if (parent == null) {
+      if (graph() != null)
+        graph()._addLeadingNode(child);
+    } else {
+      if (!parent._hasChild(child)) {
+        parent._addChild(child);
+        _restorePath(parent.reference(), parent);
+      }
+    }
+  }
+
+  public List<Frame> children() {
+    return _children;
+  }
+
+  protected boolean _addChild(Frame node) {
+    if (node == null)
+      return false;
+    if (_hasChild(node))
+      return false;
+    return children().add(node);
+  }
+
+  /**
+   * Removes the leading node if present. Typically used when re-parenting the node.
+   */
+  protected boolean _removeChild(Frame node) {
+    boolean result = false;
+    Iterator<Frame> it = children().iterator();
+    while (it.hasNext()) {
+      if (it.next() == node) {
+        it.remove();
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  protected boolean _hasChild(Frame node) {
+    for (Frame frame : children())
+      if (frame == node)
+        return true;
+    return false;
+  }
+
+  /**
+   * Procedure called on the node by the graph traversal algorithm. Default implementation is
+   * empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * node = new Node(graph) {
+   *   public void visit() {
+   *     //hierarchical culling is optional and disabled by default
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#traverse()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+  public void visit() {
+  }
+
+  /**
+   * Same as {@code cull(true)}.
+   *
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+
+  public void cull() {
+    cull(true);
+  }
+
+  /**
+   * Enables or disables {@link #visit()} of this node and its children during
+   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   *
+   * @see #isCulled()
+   */
+  public void cull(boolean cull) {
+    _culled = cull;
+  }
+
+  /**
+   * Returns whether or not the node culled or not. Culled nodes (and their children)
+   * will not be visited by the {@link Graph#traverse()} algoruthm.
+   *
+   * @see #cull(boolean)
+   */
+  public boolean isCulled() {
+    return _culled;
   }
 
   /**
@@ -284,161 +582,97 @@ public class Frame {
     return frame;
   }
 
+  // PRECISION
+
   /**
-   * Returns a new frame defined in the world coordinate system, with the same {@link #position()},
-   * {@link #orientation()} and {@link #magnitude()} as this frame.
+   * Returns the picking precision threshold in pixels used by the node to {@link #track(float, float)}.
    *
-   * @see #reference()
+   * @see #setPrecisionThreshold(float)
    */
-  public Frame detach() {
-    Frame frame = new Frame(_graph);
-    frame.set(this);
-    return frame;
+  public float precisionThreshold() {
+    if (precision() == Precision.ADAPTIVE)
+      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
+    return _threshold;
   }
 
-  // MODIFIED
-
   /**
-   * @return the last frame the this obect was updated.
-   */
-  public long lastUpdate() {
-    return _lastUpdate;
-  }
-
-  // SYNC
-
-  /**
-   * Same as {@code sync(this, other)}.
+   * Returns the node picking precision. See {@link #setPrecision(Precision)} for details.
    *
-   * @see #sync(Frame, Frame)
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
    */
-  public void sync(Frame frame) {
-    sync(this, frame);
+  public Precision precision() {
+    return _precision;
   }
 
   /**
-   * If {@code frame1} has been more recently updated than {@code frame2}, calls
-   * {@code frame2.set(frame1)}, otherwise calls {@code frame1.set(frame2)}.
-   * Does nothing if both objects were updated at the same time.
+   * Sets the node picking precision.
    * <p>
-   * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two frames. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
-   * separately.
+   * When {@link #precision()} is {@link Precision#FIXED} or
+   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
+   * within a squared area around the node {@link #center()} screen projection which size
+   * is defined by {@link #setPrecisionThreshold(float)}.
+   * <p>
+   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
+   * in a precise manner according to the projected pixels of the visual representation
+   * related to the node. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the node) and requires the graph to implement
+   * a back buffer.
+   * <p>
+   * Default implementation of this policy will behave like {@link Precision#FIXED}.
    *
-   * @see #set(Frame)
+   * @see #precision()
+   * @see #setPrecisionThreshold(float)
    */
-  public static void sync(Frame frame1, Frame frame2) {
-    if (frame1 == null || frame2 == null)
-      return;
-    if (frame1.lastUpdate() == frame2.lastUpdate())
-      return;
-    Frame source = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame1 : frame2;
-    Frame target = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame2 : frame1;
-    target.set(source);
-  }
-
-  // REFERENCE_FRAME
-
-  /**
-   * Returns the reference frame, in which this frame is defined.
-   * <p>
-   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
-   * defined with respect to the {@link #reference()} coordinate system. A
-   * {@code null} reference frame (default value) means that the frame is defined in the
-   * world coordinate system.
-   * <p>
-   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to
-   * recursively convert values along the reference frame chain and to get values
-   * expressed in the world coordinate system. The values match when the reference frame
-   * is {@code null}.
-   * <p>
-   * Use {@link #setReference(Frame)} to set this value and create a frame hierarchy.
-   * Convenient functions allow you to convert coordinates and vectors from one frame to
-   * another: see {@link #location(Vector, Frame)} and {@link #displacement(Vector, Frame)},
-   * respectively.
-   */
-  public Frame reference() {
-    return _reference;
+  public void setPrecision(Precision precision) {
+    if (precision == Precision.EXACT)
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
+    _precision = precision;
   }
 
   /**
-   * Sets the {@link #reference()} of the frame.
+   * Sets the length of the squared area around the node {@link #center()} screen
+   * projection that defined the {@link #track(float, float)} condition used for
+   * node picking.
    * <p>
-   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
-   * defined in the {@link #reference()} coordinate system.
+   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * in pixels and directly defines the fixed length of a 'shooter target', centered
+   * at the projection of the node origin onto the screen.
    * <p>
-   * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to express
-   * the frame global transformation in the world coordinate system.
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * in object space (world units) and defines the edge length of a squared bounding box that
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the node
+   * origin onto the screen. Use this version only if you have a good idea of the bounding box
+   * size of the object you are attaching to the node shape.
    * <p>
-   * Using this method, you can create a hierarchy of frames. This hierarchy needs to be a
-   * tree, which root is the world coordinate system (i.e., {@code null}
-   * {@link #reference()}). No action is performed if setting {@code reference} as the
-   * {@link #reference()} would create a loop in the hierarchy.
+   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
+   * {@link #setPrecision(Precision)} for details.
+   * <p>
+   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
+   * manner) to 20.
+   * <p>
+   * Negative {@code threshold} values are silently ignored.
+   *
+   * @see #precision()
+   * @see #precisionThreshold()
    */
-  public void setReference(Frame frame) {
-    if (frame == this) {
-      System.out.println("A frame cannot be a reference of itself.");
-      return;
-    }
-    if (isAncestor(frame)) {
-      System.out.println("A frame descendant cannot be set as its reference.");
-      return;
-    }
-    if (reference() == frame)
-      return;
-    _reference = frame;
-    _modified();
+  public void setPrecisionThreshold(float threshold) {
+    if (threshold >= 0)
+      _threshold = threshold;
   }
 
   /**
-   * Returns {@code true} if this frame is ancestor of {@code frame}.
+   * Picks the node according to the {@link #precision()}.
+   *
+   * @see #precision()
+   * @see #setPrecision(Precision)
    */
-  public boolean isAncestor(Frame frame) {
-    if (frame == this || frame == null)
+  public boolean track(float x, float y) {
+    if (isEye())
       return false;
-    Frame ancestor = frame.reference();
-    while (ancestor != null) {
-      if (ancestor == this)
-        return true;
-      ancestor = ancestor.reference();
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code return ancestor.isAncestor(frame)}.
-   *
-   * @see #isAncestor(Frame)
-   * @see #path(Frame, Frame)
-   */
-  public static boolean isAncestor(Frame ancestor, Frame frame) {
-    return ancestor.isAncestor(frame);
-  }
-
-  /**
-   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
-   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
-   *
-   * @see #isAncestor(Frame, Frame)
-   */
-  public static Frame[] path(Frame tail, Frame tip) {
-    Frame[] path = null;
-    if (tail.isAncestor(tip)) {
-      int steps = 0;
-      Frame _tip = tip;
-      while (_tip != tail) {
-        steps++;
-        _tip = _tip.reference();
-      }
-      path = new Frame[steps + 1];
-      _tip = tip;
-      for (int i = steps; i >= 0; i--) {
-        path[i] = _tip;
-        _tip = _tip.reference();
-      }
-    }
-    return path;
+    Vector proj = _graph.screenLocation(position());
+    float halfThreshold = precisionThreshold() / 2;
+    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 
   // CONSTRAINT
@@ -865,7 +1099,9 @@ public class Frame {
         }
       }
     }
-    Frame old = new Frame(this, graph()); // correct line
+    //TODO test
+    Frame old = detach(); // correct line
+    //Frame old = new Frame(this, graph()); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
     // hence add the frame to the mouse _grabber
 
@@ -1057,6 +1293,34 @@ public class Frame {
   }
 
   // CONVERSION
+
+  /**
+   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
+   * apply the transformation represented by this node to any graph you want using this
+   * method.
+   * <p>
+   * Very efficient prefer always this than
+   *
+   * @see #applyTransformation()
+   * @see #matrix()
+   * @see Graph#applyTransformation(Frame)
+   */
+  public void applyTransformation() {
+    graph().applyTransformation(this);
+  }
+
+  /**
+   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
+   * You may apply the world transformation represented by this node to any graph you
+   * want using this method.
+   *
+   * @see #applyWorldTransformation()
+   * @see #worldMatrix()
+   * @see Graph#applyWorldTransformation(Frame)
+   */
+  public void applyWorldTransformation() {
+    graph().applyWorldTransformation(this);
+  }
 
   /**
    * Returns the local transformation matrix represented by the frame.
@@ -1330,24 +1594,6 @@ public class Frame {
   }
 
   /**
-   * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code frame}. This frame {@link #constraint()} and {@link #reference()}
-   * are not affected by this call.
-   * <p>
-   * After calling {@code set(frame)} a call to {@code this.matches(other)} should
-   * return {@code true}.
-   *
-   * @see #worldMatrix()
-   */
-  public void set(Frame frame) {
-    if (frame == null)
-      frame = new Frame(_graph);
-    setPosition(frame.position());
-    setOrientation(frame.orientation());
-    setMagnitude(frame.magnitude());
-  }
-
-  /**
    * Returns a frame representing the inverse of this frame space transformation.
    * <p>
    * The the new frame {@link #rotation()} is the
@@ -1532,17 +1778,6 @@ public class Frame {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
   }
 
-  // TODO from node
-
-  /**
-   * Internal use. Frame graphics color to be used for picking with a color buffer.
-   */
-  protected int _id() {
-    // see here:
-    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
-    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
-  }
-
   /**
    * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
    * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}.
@@ -1578,256 +1813,30 @@ public class Frame {
       projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
   }
 
-  public boolean isEye() {
-    return graph().eye() == this;
-  }
-
-  public Graph graph() {
-    return _graph;
-  }
-
-  public List<Frame> children() {
-    return _children;
-  }
-
-  protected boolean _addChild(Frame node) {
-    if (node == null)
-      return false;
-    if (_hasChild(node))
-      return false;
-    return children().add(node);
-  }
+  //TODO pending, see graph.path
 
   /**
-   * Removes the leading node if present. Typically used when re-parenting the node.
+   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
+   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
+   *
+   * @see #isAncestor(Frame, Frame)
    */
-  protected boolean _removeChild(Frame node) {
-    boolean result = false;
-    Iterator<Frame> it = children().iterator();
-    while (it.hasNext()) {
-      if (it.next() == node) {
-        it.remove();
-        result = true;
-        break;
+  public static Frame[] path(Frame tail, Frame tip) {
+    Frame[] path = null;
+    if (tail.isAncestor(tip)) {
+      int steps = 0;
+      Frame _tip = tip;
+      while (_tip != tail) {
+        steps++;
+        _tip = _tip.reference();
+      }
+      path = new Frame[steps + 1];
+      _tip = tip;
+      for (int i = steps; i >= 0; i--) {
+        path[i] = _tip;
+        _tip = _tip.reference();
       }
     }
-    return result;
-  }
-
-  protected boolean _hasChild(Frame node) {
-    for (Frame frame : children())
-      if (frame == node)
-        return true;
-    return false;
-  }
-
-  /**
-   * Procedure called on the node by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes.
-   * <p>
-   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
-   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
-   *
-   * <pre>
-   * {@code
-   * node = new Node(graph) {
-   *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
-   *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#traverse()
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-  public void visit() {
-  }
-
-  /**
-   * Same as {@code cull(true)}.
-   *
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-
-  public void cull() {
-    cull(true);
-  }
-
-  /**
-   * Enables or disables {@link #visit()} of this node and its children during
-   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
-   *
-   * @see #isCulled()
-   */
-  public void cull(boolean cull) {
-    _culled = cull;
-  }
-
-  /**
-   * Returns whether or not the node culled or not. Culled nodes (and their children)
-   * will not be visited by the {@link Graph#traverse()} algoruthm.
-   *
-   * @see #cull(boolean)
-   */
-  public boolean isCulled() {
-    return _culled;
-  }
-
-  /**
-   * Convenience function that simply calls {@code applyTransformation(graph())}. It applies
-   * the transformation defined by this node to {@link #graph()}.
-   *
-   * @see #applyTransformation(Graph)
-   * @see #matrix()
-   * @see #graph()
-   */
-  public void applyTransformation() {
-    applyTransformation(graph());
-  }
-
-  /**
-   * Convenience function that simply calls {@code applyWorldTransformation(graph())}. It
-   * applies the world transformation defined by this node to {@link #graph()}.
-   *
-   * @see #applyWorldTransformation(Graph)
-   * @see #worldMatrix()
-   * @see #graph()
-   */
-  public void applyWorldTransformation() {
-    applyWorldTransformation(graph());
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this node to any graph you want using this
-   * method.
-   * <p>
-   * Very efficient prefer always this than
-   *
-   * @see #applyTransformation()
-   * @see #matrix()
-   * @see Graph#applyTransformation(Frame)
-   */
-  public void applyTransformation(Graph graph) {
-    graph.applyTransformation(this);
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this node to any graph you
-   * want using this method.
-   *
-   * @see #applyWorldTransformation()
-   * @see #worldMatrix()
-   * @see Graph#applyWorldTransformation(Frame)
-   */
-  public void applyWorldTransformation(Graph graph) {
-    graph.applyWorldTransformation(this);
-  }
-
-  // MODIFIED
-  /**
-   * Internal use. Automatically call by all methods which change the frame state.
-   */
-  protected void _modified() {
-    _lastUpdate = TimingHandler.frameCount;
-    if (children() != null)
-      for (Frame child : children())
-        child._modified();
-  }
-
-  /**
-   * Returns the picking precision threshold in pixels used by the node to {@link #track(float, float)}.
-   *
-   * @see #setPrecisionThreshold(float)
-   */
-  public float precisionThreshold() {
-    if (precision() == Precision.ADAPTIVE)
-      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
-    return _threshold;
-  }
-
-  /**
-   * Returns the node picking precision. See {@link #setPrecision(Precision)} for details.
-   *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
-   * Sets the node picking precision.
-   * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or
-   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the node {@link #center()} screen projection which size
-   * is defined by {@link #setPrecisionThreshold(float)}.
-   * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the node. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the node) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
-   *
-   * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   */
-  public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
-    _precision = precision;
-  }
-
-  /**
-   * Sets the length of the squared area around the node {@link #center()} screen
-   * projection that defined the {@link #track(float, float)} condition used for
-   * node picking.
-   * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the node origin onto the screen.
-   * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the node
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the node shape.
-   * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
-   * <p>
-   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #precision()
-   * @see #precisionThreshold()
-   */
-  public void setPrecisionThreshold(float threshold) {
-    if (threshold >= 0)
-      _threshold = threshold;
-  }
-
-  /**
-   * Picks the node according to the {@link #precision()}.
-   *
-   * @see #precision()
-   * @see #setPrecision(Precision)
-   */
-  public boolean track(float x, float y) {
-    Vector proj = _graph.screenLocation(position());
-    float halfThreshold = precisionThreshold() / 2;
-    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
+    return path;
   }
 }

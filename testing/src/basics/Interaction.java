@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -13,8 +14,8 @@ import processing.core.PGraphics;
  */
 public class Interaction extends PApplet {
   Scene scene;
-  Node eye, node;
-  Node defaultNode;
+  Frame eye, node;
+  Frame defaultNode;
   Vector upVector;
 
   public void settings() {
@@ -27,7 +28,7 @@ public class Interaction extends PApplet {
     scene.setRadius(400);
     scene.fitBallInterpolation();
 
-    eye = new Node(scene);
+    eye = new Frame(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.removeNode(eye);
@@ -49,7 +50,7 @@ public class Interaction extends PApplet {
     };
     node.setRotation(Quaternion.random());
 
-    scene.removeNodes();
+    //scene.removeNodes();
     node.translate(75, 75, 75);
     defaultNode = eye;
   }
@@ -97,12 +98,12 @@ public class Interaction extends PApplet {
     //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
     //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
     //eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
-    if(defaultNode == eye)
+    if (defaultNode == eye)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
-      scene.rotate((mouseY-pmouseY),0, 0, PI / width, defaultNode);
-      //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-      //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, defaultNode);
+    //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
   }
 
   public static void main(String args[]) {

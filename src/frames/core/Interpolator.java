@@ -187,14 +187,10 @@ public class Interpolator {
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * interpolator.
    *
-   * @see #Interpolator(Graph, Frame)
+   * @see #Interpolator(Frame)
    */
   public Interpolator(Graph graph) {
-    this(graph, new Frame());
-  }
-
-  public Interpolator(Node node) {
-    this(node.graph(), node);
+    this(new Frame(graph));
   }
 
   /**
@@ -204,8 +200,8 @@ public class Interpolator {
    * <p>
    * {@link #time()}, {@link #speed()} and {@link #period()} are set to their default values.
    */
-  public Interpolator(Graph graph, Frame frame) {
-    _graph = graph;
+  public Interpolator(Frame frame) {
+    _graph = frame.graph();
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Frame>();
     setFrame(frame);
@@ -302,15 +298,14 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Node},
-   * the frame graph ({@link Node#graph()}) and {@link #graph()} should match.
+   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Frame},
+   * the frame graph ({@link Frame#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {
     if (frame == _frame)
       return;
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (graph() != frame._graph)
+      throw new RuntimeException("Node and Interpolator graphs should match");
     _frame = frame;
   }
 
@@ -591,9 +586,8 @@ public class Interpolator {
     if (frame == null)
       return;
 
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (graph() != frame.graph())
+      throw new RuntimeException("Node and Interpolator graphs should match");
 
     if (_list.isEmpty())
       _time = time;
@@ -632,8 +626,7 @@ public class Interpolator {
    */
   public void purgeKeyFrame(int index) {
     Frame frame = removeKeyFrame(index);
-    if (frame instanceof Node)
-      _graph.pruneBranch((Node) frame);
+    _graph.pruneBranch(frame);
   }
 
   /**
@@ -653,15 +646,14 @@ public class Interpolator {
    * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
    *
    * @see #clear()
-   * @see frames.core.Graph#pruneBranch(Node)
+   * @see frames.core.Graph#pruneBranch(Frame)
    */
   public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      if (keyFrame.frame() instanceof Node)
-        _graph.pruneBranch((Node) keyFrame._frame);
+      _graph.pruneBranch(keyFrame._frame);
     }
     _list.clear();
     _pathIsValid = false;
@@ -727,8 +719,8 @@ public class Interpolator {
         _updateModifiedFrames();
 
       if (_list.get(0) == _list.get(_list.size() - 1))
-        _path.add(
-            new Frame(_list.get(0).position(), _list.get(0).orientation(), _list.get(0).magnitude()));
+        //TODO pending
+        _path.add(new Frame(graph(), _list.get(0).position(), _list.get(0).orientation(), _list.get(0).magnitude()));
       else {
         KeyFrame[] kf = new KeyFrame[4];
         kf[0] = _list.get(0);
@@ -748,7 +740,8 @@ public class Interpolator {
 
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
-            _path.add(new Frame(
+            //TODO pending
+            _path.add(new Frame(graph(),
                 Vector.add(kf[1].position(), Vector.multiply(Vector.add(kf[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
                 Quaternion.squad(kf[1].orientation(), kf[1].tangentQuaternion(), kf[2].tangentQuaternion(), kf[2].orientation(), alpha),
                 Vector.lerp(kf[1].magnitude(), kf[2].magnitude(), alpha))
@@ -764,7 +757,8 @@ public class Interpolator {
           kf[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Frame(kf[1].position(), kf[1].orientation(), kf[1].magnitude()));
+        //TODO pending
+        _path.add(new Frame(graph(), kf[1].position(), kf[1].orientation(), kf[1].magnitude()));
       }
       _pathIsValid = true;
     }

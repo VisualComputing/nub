@@ -12,11 +12,11 @@
 package frames.ik;
 
 import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 
 import java.util.ArrayList;
 

@@ -18,7 +18,7 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
- * A shape is a {@link Node} specialization that can be set from a retained-mode rendering
+ * A shape is a {@link Frame} specialization that can be set from a retained-mode rendering
  * Processing {@code PShape} or from an immediate-mode rendering Processing procedure. Either
  * case the shape is split in two a front and a back shape. The front shape will be used for
  * rendering and the back shape for picking with exact precision by default, see
@@ -40,7 +40,7 @@ import processing.opengl.PGraphicsOpenGL;
  * <h2>Picking</h2>
  * Picking a shape is done according to a precision which can either be:
  * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
- * to the {@link Node} documentation for both, {@link Precision#FIXED} and
+ * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
  * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
  * of the pointer device over the projected pixels of the back shape. To set a different
  * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
@@ -112,15 +112,15 @@ public class Shape extends Frame {
     set(pShape);
   }
 
-  protected Shape(Scene scene, Shape shape) {
-    super(scene, shape);
+  protected Shape(Shape shape, Scene scene) {
+    super(shape, scene);
     this._frontShape = shape._frontShape;
     this._backShape = shape._backShape;
   }
 
   @Override
   public Shape get() {
-    return new Shape(graph(), this);
+    return new Shape(this, graph());
   }
 
   @Override
@@ -171,7 +171,7 @@ public class Shape extends Frame {
       graph()._bbEnabled = true;
       return;
     }
-    for (Node node : graph().nodes())
+    for (Frame node : graph().nodes())
       if (node instanceof Shape)
         if (node.precision() == Precision.EXACT) {
           graph()._bbEnabled = true;
@@ -230,7 +230,9 @@ public class Shape extends Frame {
       //TODO needs more thinking
       switch (highlighting()) {
         case FRONT:
-          if (grabsInput())
+          //TODO pending
+          //if (grabsInput())
+          if (track(graph().pApplet().mouseX, graph().pApplet().mouseY))
             pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
@@ -243,7 +245,9 @@ public class Shape extends Frame {
             pGraphics.shape(_frontShape);
           else
             setFront(pGraphics);
-          if (grabsInput()) {
+          //TODO pending
+          //if (grabsInput()) {
+          if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
@@ -251,7 +255,9 @@ public class Shape extends Frame {
           }
           break;
         case BACK:
-          if (grabsInput()) {
+          //TODO pending
+          //if (grabsInput()) {
+          if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else

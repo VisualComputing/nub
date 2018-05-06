@@ -10,8 +10,8 @@
 
 package frames.core.constraint;
 
-import frames.core.Graph;
 import frames.core.Frame;
+import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
