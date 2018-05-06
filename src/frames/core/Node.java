@@ -103,66 +103,20 @@ import java.util.List;
  * Picking a node is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
  */
-public class Node extends Frame implements Grabber {
-  // according to space-nav fine tuning it turned out that the space-nav is
-  // right handed
-  // we thus define our gesture physical space as right-handed as follows:
-  // hid.sens should be non-negative for the space-nav to behave as expected
-  // from the physical interface
-  // TODO: really need to check the second part above. For a fact it's known
-  // 1. from the space-bav pov LH vs RH works the same way
-  // 2. all space-nav sens are positive
-  // Sens
-  protected float _rotationSensitivity;
-  protected float _translationSensitivity;
-  protected float _scalingSensitivity;
-  protected float _wheelSensitivity;
-  protected float _keySensitivity;
-
-  // spinning stuff:
-  protected float _spinningSensitivity;
-  protected TimingTask _spinningTask;
-  protected Quaternion _spinningQuaternion;
-  protected float _damping; // new
-
-  // Whether the SCREEN_TRANS direction (horizontal or vertical) is fixed or not
-  public boolean _directionIsFixed;
-  protected boolean _horizontal = true; // Two simultaneous nodes require two mice!
-
-  protected float _eventSpeed; // spinning and flying
-  protected long _eventDelay;
-
-  // _fly
-  protected Vector _flyDirection;
-  protected float _flySpeed;
-  protected TimingTask _flyTask;
-  protected long _flyUpdatePeriod = 20;
-  protected boolean _applyFlyDamping;
-
-  // Inverse the direction of an horizontal mouse motion. Depends on the projected
-  // screen orientation of the vertical axis when the mouse button is pressed.
-  protected Vector _upVector;
-  protected Graph _graph;
-
-  protected float _threshold;
-
-  protected boolean _culled;
-
-  // id
-  protected int _id;
-
+public class Node extends Frame {
+  //TODO new attributes
   /**
    * Enumerates the Picking precision modes.
    */
   public enum Precision {
     FIXED, ADAPTIVE, EXACT
   }
-
   protected Precision _Precision;
-
-  protected MotionEvent2 _initEvent;
-
-  protected List<Node> _children;
+  protected int _id;
+  protected Graph _graph;
+  protected List<Frame> _children;
+  protected float _threshold;
+  protected boolean _culled;
 
   /**
    * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
@@ -182,23 +136,6 @@ public class Node extends Frame implements Grabber {
     this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
   }
 
-  /**
-   * Creates a graph node with {@code reference} as {@link #reference()}, and
-   * {@code translation}, {@code rotation} and {@code scaling} as the frame
-   * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * <p>
-   * The {@link Graph#inputHandler()} will attempt to add the node to all its
-   * {@link InputHandler#agents()}.
-   * <p>
-   * The node sensitivities are set to their default values, see
-   * {@link #spinningSensitivity()}, {@link #wheelSensitivity()},
-   * {@link #keySensitivity()}, {@link #rotationSensitivity()},
-   * {@link #translationSensitivity()} and {@link #scalingSensitivity()}.
-   * <p>
-   * Sets the {@link #precision()} to {@link Precision#FIXED}.
-   * <p>
-   * After object creation a call to {@link #isEye()} will return {@code false}.
-   */
   protected Node(Graph graph, Node reference, Vector translation, Quaternion rotation, float scaling) {
     super(reference, translation, rotation, scaling);
     _graph = graph;
@@ -218,38 +155,10 @@ public class Node extends Frame implements Grabber {
       setConstraint(constraint2D);
     }
 
-    setFlySpeed(0.01f * graph().radius());
-    _upVector = new Vector(0.0f, 1.0f, 0.0f);
     _culled = false;
-    _children = new ArrayList<Node>();
+    _children = new ArrayList<Frame>();
     // graph()._addLeadingNode(this);
     setReference(reference());// _restorePath seems more robust
-    setRotationSensitivity(1.0f);
-    setScalingSensitivity(1.0f);
-    setTranslationSensitivity(1.0f);
-    setWheelSensitivity(15f);
-    setKeySensitivity(10f);
-    setSpinningSensitivity(0.3f);
-    setDamping(0.5f);
-
-    _spinningTask = new TimingTask() {
-      public void execute() {
-        _spin();
-      }
-    };
-    graph().registerTask(_spinningTask);
-
-    _flyTask = new TimingTask() {
-      public void execute() {
-        _fly();
-      }
-    };
-    graph().registerTask(_flyTask);
-    // end
-
-    // pkgnPrecision = Precision.ADAPTIVE;
-    // setPrecisionThreshold(Math.round(scn.radius()/4));
-    graph().inputHandler().addGrabber(this);
     _Precision = Precision.FIXED;
     setPrecisionThreshold(20);
   }
@@ -267,28 +176,13 @@ public class Node extends Frame implements Grabber {
       this.set(node);
     }
 
-    this._upVector = node._upVector.get();
     this._culled = node._culled;
 
-    this._children = new ArrayList<Node>();
+    this._children = new ArrayList<Frame>();
     if (this.graph() == node.graph()) {
       this.setReference(reference());// _restorePath
     }
 
-    this._spinningTask = new TimingTask() {
-      public void execute() {
-        _spin();
-      }
-    };
-
-    this._graph.registerTask(_spinningTask);
-
-    this._flyTask = new TimingTask() {
-      public void execute() {
-        _fly();
-      }
-    };
-    this._graph.registerTask(_flyTask);
     _lastUpdate = node.lastUpdate();
     // end
     // this.isInCamPath = otherFrame.isInCamPath;
@@ -297,25 +191,6 @@ public class Node extends Frame implements Grabber {
     // otherFrame.adaptiveGrabsInputThreshold());
     this._Precision = node._Precision;
     this._threshold = node._threshold;
-
-    this.setRotationSensitivity(node.rotationSensitivity());
-    this.setScalingSensitivity(node.scalingSensitivity());
-    this.setTranslationSensitivity(node.translationSensitivity());
-    this.setWheelSensitivity(node.wheelSensitivity());
-    this.setKeySensitivity(node.keySensitivity());
-    //
-    this.setSpinningSensitivity(node.spinningSensitivity());
-    this.setDamping(node.damping());
-    //
-    this.setFlySpeed(node.flySpeed());
-
-    if (this.graph() == node.graph()) {
-      for (Agent agent : this._graph.inputHandler().agents())
-        if (agent.hasGrabber(node))
-          agent.addGrabber(this);
-    } else {
-      this.graph().inputHandler().addGrabber(this);
-    }
   }
 
   /**
@@ -2366,238 +2241,5 @@ public class Node extends Frame implements Grabber {
         return true;
     }
     return false;
-  }
-
-  // Gesture physical interface is quite nice!
-  // It always maps physical (screen) space geom data respect to the eye
-
-  public void mapTranslate(Vector vector) {
-    translate(gestureTranslate(vector));
-  }
-
-  /**
-   * Converts physical (device) space
-   * @param vector
-   * @return
-   */
-  public Vector gestureTranslate(Vector vector) {
-    return gestureTranslate(vector, 1);
-  }
-
-  public void mapTranslate(Vector vector, float sensitivity) {
-    translate(gestureTranslate(vector, sensitivity));
-  }
-
-  public Vector gestureTranslate(Vector vector, float sensitivity) {
-    Vector eyeVector = Vector.multiply(new Vector(isEye() ? -vector.x() : vector.x(), (_graph.isRightHanded() ^ isEye()) ? -vector.y() : vector.y(), isEye() ? -vector.z() : vector.z()), sensitivity);
-    // Scale to fit the screen relative vector displacement
-    // Quite excited to see how simple it's in 2d:
-    //if (_graph.is2D())
-    //return eyeVector;
-    // ... and amazed as to how dirty it's in 3d:
-    switch (_graph.type()) {
-      case PERSPECTIVE:
-        float k = (float) Math.tan(_graph.fieldOfView() / 2.0f) * Math.abs(
-            _graph.eye().location(isEye() ? graph().anchor() : position())._vector[2] * _graph.eye().magnitude());
-        // * Math.abs(graph.eye().frame().location(isEye() ?
-        // graph.eye().anchor() : position()).vec[2]);
-        //TODO check me weird to find height instead of width working (may it has to do with fov?)
-        eyeVector._vector[0] *= 2.0 * k / _graph.height();
-        eyeVector._vector[1] *= 2.0 * k / _graph.height();
-        break;
-      case TWO_D:
-      case ORTHOGRAPHIC:
-        float[] wh = _graph.boundaryWidthHeight();
-        // float[] wh = graph.eye().getOrthoWidthHeight();
-        eyeVector._vector[0] *= 2.0 * wh[0] / _graph.width();
-        eyeVector._vector[1] *= 2.0 * wh[1] / _graph.height();
-        break;
-    }
-    float coef;
-    if (isEye()) {
-      // float coef = 8E-4f;
-      coef = Math.max(Math.abs((location(graph().anchor()))._vector[2] * magnitude()), 0.2f * graph().radius());
-      eyeVector._vector[2] *= coef / graph().height();
-      // eye _wheel seems different
-      // trns.vec[2] *= coef * 8E-4f;
-      eyeVector.divide(graph().eye().magnitude());
-    } else {
-      coef = Vector.subtract(_graph.eye().position(), position()).magnitude();
-      eyeVector._vector[2] *= coef / _graph.height();
-      eyeVector.divide(_graph.eye().magnitude());
-    }
-
-    return reference() == null ? _graph.eye().worldDisplacement(eyeVector) : reference().displacement(eyeVector, _graph.eye());
-  }
-
-  // TODO research if spin(gestureRotate(roll, pitch, yaw)); is missed
-
-  public void mapRotate(float roll, float pitch, float yaw) {
-    rotate(gestureRotate(roll, pitch, yaw));
-  }
-
-  public Quaternion gestureRotate(float roll, float pitch, float yaw) {
-    return gestureRotate(roll, pitch, yaw, 1);
-  }
-
-  public void mapRotate(float roll, float pitch, float yaw, float sensitivity) {
-    rotate(gestureRotate(roll, pitch, yaw, sensitivity));
-  }
-
-  public Quaternion gestureRotate(float roll, float pitch, float yaw, float sensitivity) {
-    roll *= sensitivity;
-    pitch *= sensitivity;
-    yaw *= sensitivity;
-    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
-    if (isEye() /* || (!isEye() && !this.respectToEye()) */) {
-      return new Quaternion(_graph.isLeftHanded() ? -roll : roll, pitch, _graph.isLeftHanded() ? -yaw : yaw);
-    } else {
-      Vector vector = new Vector();
-      Quaternion quaternion = new Quaternion(_graph.isLeftHanded() ? roll : -roll, -pitch, _graph.isLeftHanded() ? yaw : -yaw);
-      vector.set(-quaternion.x(), -quaternion.y(), -quaternion.z());
-      vector = _graph.eye().orientation().rotate(vector);
-      vector = displacement(vector);
-      quaternion.setX(vector.x());
-      quaternion.setY(vector.y());
-      quaternion.setZ(vector.z());
-      return quaternion;
-    }
-  }
-
-  public void mapSpin(Point point1, Point point2) {
-    spin(gestureSpin(point1, point2));
-  }
-
-  public Quaternion gestureSpin(Point point1, Point point2) {
-    return gestureSpin(point1, point2, 1);
-  }
-
-  public void mapSpin(Point point1, Point point2, float sensitivity) {
-    spin(gestureSpin(point1, point2, sensitivity));
-  }
-
-  public Quaternion gestureSpin(Point point1, Point point2, float sensitivity) {
-    Vector center = graph().screenLocation(isEye() ? graph().anchor() : position());
-    return gestureSpin(point1, point2, new Point(center.x(), center.y()), sensitivity);
-  }
-
-  public void mapSpin(Point point1, Point point2, Point center) {
-    spin(gestureSpin(point1, point2, center));
-  }
-
-  public Quaternion gestureSpin(Point point1, Point point2, Point center) {
-    return gestureSpin(point1, point2, center, 1);
-  }
-
-  public void mapSpin(Point point1, Point point2, Point center, float sensitivity) {
-    spin(gestureSpin(point1, point2, center, sensitivity));
-  }
-
-  public Quaternion gestureSpin(Point point1, Point point2, Point center, float sensitivity) {
-    float cx = center.x();
-    float cy = center.y();
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    // Points on the deformed ball
-    float px = sensitivity * ((int) prevX - cx) / _graph.width();
-    float py = sensitivity * (_graph.isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / _graph.height();
-    float dx = sensitivity * (x - cx) / _graph.width();
-    float dy = sensitivity * (_graph.isLeftHanded() ? (y - cy) : (cy - y)) / _graph.height();
-    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
-    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
-    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
-    Vector axis = p2.cross(p1);
-    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-
-    Quaternion quaternion = new Quaternion(axis, angle);
-    if (!isEye()) {
-      Vector vector = quaternion.axis();
-      vector = _graph.eye().orientation().rotate(vector);
-      vector = displacement(vector);
-      quaternion = new Quaternion(vector, -quaternion.angle());
-    }
-
-    return quaternion;
-  }
-
-  /**
-   * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
-   * ball, it is proportional to the euclidean distance to the ball. For a point outside
-   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
-   * ball, the function is continuous.
-   */
-  protected float _projectOnBall(float x, float y) {
-    // If you change the size value, change angle computation in
-    // deformedBallQuaternion().
-    float size = 1.0f;
-    float size2 = size * size;
-    float size_limit = size2 * 0.5f;
-
-    float d = x * x + y * y;
-    return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
-  }
-
-  public void mapLookAround(float deltaX, float deltaY, Vector upVector) {
-    rotate(gestureLookAround(deltaX, deltaY, upVector));
-  }
-
-  public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector) {
-    return gestureLookAround(deltaX, deltaY, upVector, 1);
-  }
-
-  public void mapLookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    rotate(gestureLookAround(deltaX, deltaY, upVector, sensitivity));
-  }
-
-  public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    if (!isEye()) {
-      System.out.println("gestureLookAround only makes sense for the eye. Identity rotation returned");
-      return new Quaternion();
-    }
-    deltaX *= -sensitivity;
-    deltaY *= sensitivity;
-    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(displacement(upVector), deltaX);
-    return Quaternion.multiply(rotY, rotX);
-  }
-
-  public void mapRotateCAD(float roll, float pitch) {
-    spin(gestureRotateCAD(roll, pitch));
-  }
-
-  public Quaternion gestureRotateCAD(float roll, float pitch) {
-    return gestureRotateCAD(roll, pitch, new Vector(0, 1, 0), 1);
-  }
-
-  public void mapRotateCAD(float roll, float pitch, Vector upVector) {
-    spin(gestureRotateCAD(roll, pitch, upVector));
-  }
-
-  public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector) {
-    return gestureRotateCAD(roll, pitch, upVector, 1);
-  }
-
-  public void mapRotateCAD(float roll, float pitch, float sensitivity) {
-    spin(gestureRotateCAD(roll, pitch, sensitivity));
-  }
-
-  public Quaternion gestureRotateCAD(float roll, float pitch, float sensitivity) {
-    return gestureRotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
-  }
-
-  public void mapRotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
-    spin(gestureRotateCAD(roll, pitch, upVector, sensitivity));
-  }
-
-  public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
-    if (!isEye()) {
-      System.out.println("gestureRotateCAD only makes sense for the eye. Identity rotation returned");
-      return new Quaternion();
-    }
-    roll *= sensitivity;
-    pitch *= sensitivity;
-    return Quaternion.multiply(new Quaternion(displacement(upVector), displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), _graph.isRightHanded() ? -pitch : pitch));
   }
 }

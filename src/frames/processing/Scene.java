@@ -14,8 +14,6 @@ import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
 import frames.core.Node;
-import frames.input.Agent;
-import frames.input.Event;
 import frames.primitives.*;
 import frames.primitives.constraint.BallAndSocket;
 import frames.primitives.constraint.Hinge;
@@ -101,11 +99,7 @@ import java.util.List;
  * }
  * </pre>
  * The eye can be controlled both programmatically (since a {@link Node} is a
- * {@link Frame} specialization) and interactively (using the mouse, see
- * {@link #mouse()} and {@link Mouse}). Note the use of the anonymous
- * inner {@link Node} class used to define how the node will behave, refer to the
- * {@link Node} API for details. Note also the {@link #setDefaultNode(Node)}
- * call which will direct input to the eye when no other node is being picked.
+ * {@link Frame} specialization) and interactively.
  * <h3>Shapes</h3>
  * A {@link Shape} is a {@link Node} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
@@ -133,9 +127,6 @@ import java.util.List;
  * }
  * }
  * </pre>
- * <p>
- * Note that shapes like nodes can be control interactively. Override
- * {@link Node#interact(Event)}, like it has been done above.
  * <h2>Key-frame interpolators</h2>
  * A frame (and hence a node or a shape) can be animated through a key-frame
  * Catmull-Rom interpolator path. Use code such as the following:
@@ -170,9 +161,6 @@ import java.util.List;
  * </pre>
  * while {@link #traverse()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
- * <h2>Non-standard interactivity</h2>
- * To control your scene nodes by means different than the {@link #mouse()} (see
- * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
  * <h2>Drawing functionality</h2>
  * There are several static drawing functions that complements those already provided
  * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
@@ -215,9 +203,6 @@ public class Scene extends Graph implements PConstants {
   protected Point _upperLeftCorner;
   protected boolean _offscreen;
 
-  // 4. Agents
-  protected Mouse _mouse;
-
   // _bb : picking buffer
   protected PGraphics _targetPGraphics;
   protected PGraphics _bb;
@@ -251,8 +236,7 @@ public class Scene extends Graph implements PConstants {
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@link #frontBuffer()} type (see
-   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor
-   * instantiates also the {@link #mouse()}.
+   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}).
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -289,8 +273,6 @@ public class Scene extends Graph implements PConstants {
     }
 
     // 4. Create _agents and register P5 methods
-    _mouse = new Mouse(this, originCorner());
-    _parent.registerMethod("mouseEvent", mouse());
 
     // this.setDefaultKeyBindings();
     if (!isOffscreen()) {
@@ -298,7 +280,6 @@ public class Scene extends Graph implements PConstants {
       pApplet().registerMethod("draw", this);
     } else
       _offScreenScenes++;
-    enableAutoFocus();
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
@@ -359,60 +340,6 @@ public class Scene extends Graph implements PConstants {
     backBuffer().endDraw();
     // if (frames().size() > 0)
     backBuffer().loadPixels();
-  }
-
-  // Mouse agent
-
-  /**
-   * Returns the default mouse.
-   *
-   * @see #enableMouse()
-   * @see #isMouseEnabled()
-   * @see #disableMouse()
-   */
-  public Mouse mouse() {
-    return _mouse;
-  }
-
-  /**
-   * Enables the {@link #mouse()}.
-   *
-   * @see #mouse()
-   * @see #isMouseEnabled()
-   * @see #disableMouse()
-   */
-  public void enableMouse() {
-    if (!isMouseEnabled()) {
-      registerAgent(mouse());
-      _parent.registerMethod("mouseEvent", mouse());
-    }
-  }
-
-  /**
-   * Disables the {@link #mouse()}.
-   *
-   * @see #mouse()
-   * @see #isMouseEnabled()
-   * @see #enableMouse()
-   */
-  public boolean disableMouse() {
-    if (isMouseEnabled()) {
-      _parent.unregisterMethod("mouseEvent", mouse());
-      return unregisterAgent(mouse());
-    }
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #mouse()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #mouse()
-   * @see #enableMouse()
-   * @see #disableMouse()
-   */
-  public boolean isMouseEnabled() {
-    return isAgentRegistered(mouse());
   }
 
   // OPENGL
@@ -693,8 +620,6 @@ public class Scene extends Graph implements PConstants {
     popModelView();
     _renderBackBuffer();
     postDraw();
-    if (hasAutoFocus())
-      _handleFocus();
   }
 
   // Off-screen
@@ -748,7 +673,6 @@ public class Scene extends Graph implements PConstants {
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@code _renderBackBuffer()}: Render the back buffer (useful for picking)</li>
    * <li>{@link #postDraw()}</li>
-   * <li>{@link #_handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * </ol>
    * <p>
    * {@link #postDraw()}.
@@ -774,8 +698,6 @@ public class Scene extends Graph implements PConstants {
     _renderBackBuffer();
     postDraw();
     _lastDisplay = TimingHandler.frameCount;
-    if (hasAutoFocus())
-      _handleFocus();
   }
 
   /**
@@ -795,166 +717,6 @@ public class Scene extends Graph implements PConstants {
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
       pApplet().image(pgraphics, originCorner().x(), originCorner().y());
-  }
-
-  /**
-   * Implementation of the "Focus follows mouse" policy. Used by {@link #_hasFocus()}.
-   */
-  protected boolean _hasMouseFocus() {
-    return originCorner().x() < pApplet().mouseX && pApplet().mouseX < originCorner().x() + this.width()
-        && originCorner().y() < pApplet().mouseY && pApplet().mouseY < originCorner().y() + this.height();
-  }
-
-  /**
-   * Main condition evaluated by the {@link #_handleFocus()} algorithm, which defaults to
-   * {@link #_hasMouseFocus()}.
-   * <p>
-   * Override this method to define a focus policy different than "focus follows mouse".
-   */
-  protected boolean _hasFocus() {
-    return _hasMouseFocus();
-  }
-
-  /**
-   * Called by {@link #endDraw()} if {@link #hasAutoFocus()} is {@code true}.
-   */
-  protected void _handleFocus() {
-    if (_offScreenScenes == 0)
-      return;
-    if (isOffscreen()) {
-      // Handling focus of non-overlapping scenes is trivial.
-      // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
-      // scn2.display() is to be called after scn1.display() (which is the _key observation).
-      // Then, for a given frame either only scn1 _hasFocus() (which is handled trivially);
-      // or, both, scn1 and scn2 _hasFocus(), which means only scn2 should retain focus
-      // (while scn1 lose it).
-      boolean available = true;
-      if (_lastScene != null)
-        if (_lastScene != this)
-          // Note that _lastScene._lastDisplay == TimingHandler.frameCount - 1 returns true only
-          // if the lastScene was assigned in the previous frame and false otherwise
-          // (particularly, if it was assigned in the current frame) which means both: 1. If scn1
-          // gained focus on the current frame it will lose it when the routine is run on scn2 in
-          // the current frame; and, 2. If scn2 has gained focus in the previous frame, it will
-          // prevent scn1 from having it back in the current frame.
-          if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
-            available = false;
-      if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
-        enableMouse();
-        _lastScene = this;
-      } else
-        disableMouse();
-    } else {
-      if (_lastScene != null) {
-        boolean available = true;
-        if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
-            || _lastScene._lastDisplay == TimingHandler.frameCount) && _lastScene._hasFocus()) {
-          disableMouse();
-          available = false;
-        }
-        if (_hasFocus() && available) {
-          enableMouse();
-          _lastScene = this;
-        }
-      }
-    }
-  }
-
-  /**
-   * When having multiple off-screen scenes displayed at once, it should be decided which
-   * one will grab input from the {@link #mouse()}, so that code like this:
-   *
-   * <pre>
-   * {@code
-   * scene1.beginDraw();
-   * drawScene1();
-   * graph.endDraw();
-   * graph.display();
-   * scene2.beginDraw();
-   * drawScene2();
-   * scene2.endDraw();
-   * scene2.display();
-   * }
-   * </pre>
-   * <p>
-   * will behave according to a given focus policy. This property is enabled by default
-   * and it implements a "focus follows mouse" policy, so that the scene under the cursor
-   * will grab input. If multiple scenes overlaps the scene on top will grab the input as
-   * expected.
-   * <p>
-   * To implement a different policy either:
-   *
-   * <ol>
-   * <li>Override the {@link #_hasFocus()} scene method; or,</li>
-   * <li>Call {@link #disableAutoFocus()} and implement your own focus policy at the
-   * sketch space.</li>
-   * </ol>
-   *
-   * <b>Note</b> that for this policy to work, you should call {@link #display()} instead
-   * of the papplet image() function on the {@link #frontBuffer()}.
-   *
-   * @see #beginDraw()
-   * @see #endDraw()
-   * @see #display()
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public boolean hasAutoFocus() {
-    return _autofocus;
-  }
-
-  /**
-   * Toggles the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   */
-  public void toggleAutoFocus() {
-    if (hasAutoFocus())
-      disableAutoFocus();
-    else
-      enableAutoFocus();
-  }
-
-  /**
-   * Disables the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #enableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void disableAutoFocus() {
-    enableAutoFocus(false);
-  }
-
-  /**
-   * Enables the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void enableAutoFocus() {
-    enableAutoFocus(true);
-  }
-
-  /**
-   * Turns on or off the scene auto-focus property according to {@code flag}.
-   * <p>
-   * The {@link #hasAutoFocus()} property is {@code true} by default.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void enableAutoFocus(boolean autoFocus) {
-    _autofocus = autoFocus;
   }
 
   // TODO: Future work should include the eye and graph profiles.

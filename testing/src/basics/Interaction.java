@@ -99,9 +99,9 @@ public class Interaction extends PApplet {
     //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
     //eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
     if(defaultNode == eye)
-      defaultNode.mapSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
-      defaultNode.mapRotate((mouseY-pmouseY),0, 0, PI / width);
+      scene.rotate((mouseY-pmouseY),0, 0, PI / width, defaultNode);
       //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
       //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
   }

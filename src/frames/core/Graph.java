@@ -12,10 +12,6 @@ package frames.core;
 
 import frames.ik.Solver;
 import frames.ik.TreeSolver;
-import frames.input.Agent;
-import frames.input.Event;
-import frames.input.Grabber;
-import frames.input.InputHandler;
 import frames.primitives.*;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
@@ -65,19 +61,6 @@ import java.util.List;
  * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
- * <h2>Input handling</h2>
- * The graph performs input handling through an {@link #inputHandler()}. Several
- * {@link InputHandler} wrapper functions, such as {@link #isInputNode(Node)},
- * {@link #setDefaultNode(Node)}, {@link #shiftDefaultNode(Node, Node)},
- * {@link #registerAgent(Agent)} and {@link #unregisterAgent(Agent)}, are provided for
- * convenience.
- * <p>
- * To define an interaction metaphor through a
- * <a href="https://en.wikipedia.org/wiki/Human_interface_device">human interface device</a>
- * implement an {@link Agent} and call {@link #registerAgent(Agent)} (see also
- * {@link #unregisterAgent(Agent)}). The interaction is implemented by the
- * nodes (see {@link Node#interact(Event)}) which parse the {@link frames.input.Shortcut}s
- * defined by agent. Refer to the {@link Node} documentation for details.
  * <h2>Timing handling</h2>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
@@ -102,7 +85,6 @@ import java.util.List;
  * with {@link #setMatrixHandler(MatrixHandler)} (refer to the {@link MatrixHandler}
  * documentation for details).
  *
- * @see InputHandler
  * @see TimingHandler
  * @see #applyTransformation(Frame)
  * @see MatrixHandler
@@ -134,7 +116,6 @@ public class Graph {
 
   // 3. Handlers
   protected TimingHandler _timingHandler;
-  protected InputHandler _inputHandler;
 
   // 4. Graph
   protected List<Node> _seeds;
@@ -182,23 +163,15 @@ public class Graph {
    * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
    * <p>
    * The constructor sets a {@link Frame} instance as the graph {@link #eye()} and then
-   * calls {@link #fitBall()}, so that the entire scene fits the screen dimensions. To set
-   * an interactive eye override {@link Node#interact(Event)} and set the node as the eye,
-   * see {@link #setEye(Frame)}.
-   * <p>
-   * The constructor also instantiates the graph {@link #matrixHandler()},
-   * {@link #inputHandler()} and {@link #timingHandler()}.
+   * calls {@link #fitBall()}, so that the entire scene fits the screen dimensions.
    * <p>
    * Third party graphs should additionally:
    * <ol>
    * <li>(Optionally) Define a custom {@link #matrixHandler()}. Only if the target platform
    * (such as Processing) provides its own matrix handling.</li>
-   * <li>Instantiate some agents, such as the mouse, and enable them (register them at the
-   * {@link #inputHandler()}).</li>
    * </ol>
    *
    * @see #timingHandler()
-   * @see #inputHandler()
    * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
    * @see #setEye(Frame)
@@ -211,7 +184,6 @@ public class Graph {
     _seeds = new ArrayList<Node>();
     _solvers = new ArrayList<TreeSolver>();
     _timingHandler = new TimingHandler();
-    _inputHandler = new InputHandler();
 
     setRadius(100);
     setCenter(new Vector());
@@ -637,8 +609,7 @@ public class Graph {
   /**
    * Same as {@code for(Node node : leadingNodes()) pruneBranch(node)}.
    * Call {@link #removeNodes()} if you just want to remove all the nodes from the
-   * input handler ({@link #inputHandler()}), but keep traversing them
-   * ({@link #traverse()}).
+   * input handler, but keep traversing them ({@link #traverse()}).
    *
    * @see #pruneBranch(Node)
    * @see #removeNodes()
@@ -651,15 +622,12 @@ public class Graph {
   /**
    * Make all the nodes in the {@code node} branch eligible for garbage collection.
    * Call {@link #removeNode(Node)} if you just want to remove the node from the
-   * input handler ({@link #inputHandler()}), but keep traversing it ({@link #traverse()}).
+   * input handler, but keep traversing it ({@link #traverse()}).
    * <p>
    * A call to {@link #isNodeReachable(Node)} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #traverse()} algorithm.
-   * <p>
-   * Nodes in the {@code node} branch will also be removed from all the agents currently
-   * registered at the {@link #inputHandler()}.
    * <p>
    * To make all the nodes in the branch reachable again, first cache the nodes
    * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
@@ -685,7 +653,7 @@ public class Graph {
     ArrayList<Node> list = new ArrayList<Node>();
     _collectNodes(list, node);
     for (Node _node : list) {
-      inputHandler().removeGrabber(_node);
+      removeNode(_node);
       if (_node.reference() != null)
         _node.reference()._removeChild(_node);
       else
@@ -706,7 +674,7 @@ public class Graph {
     if (branch == null)
       return;
     for (Node node : branch) {
-      inputHandler().addGrabber(node);
+      addNode(node);
       if (node.reference() != null)
         node.reference()._addChild(node);
       else
@@ -717,7 +685,7 @@ public class Graph {
   /**
    * Returns {@code true} if the node is reachable by the {@link #traverse()}
    * algorithm and {@code false} otherwise. Call {@link #hasNode(Node)}
-   * to see whether or not the node belongs to the {@link #inputHandler()} too.
+   * to see whether or not the node belongs to the input handler too.
    * <p>
    * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
@@ -796,143 +764,36 @@ public class Graph {
       _collectNodes(list, child);
   }
 
-  // Input stuff
+  // TODO implement me
 
-  /**
-   * Returns the graph {@link InputHandler}.
-   */
-  public InputHandler inputHandler() {
-    return _inputHandler;
-  }
-
-  /**
-   * Same as {@code inputHandler().setDefaultGrabber(node)}.
-   *
-   * @see {@link InputHandler#setDefaultGrabber(Grabber)}
-   */
-  public void setDefaultNode(Node node) {
-    inputHandler().setDefaultGrabber(node);
-  }
-
-  /**
-   * Same as {@code inputHandler().resetTrackedGrabber()}.
-   *
-   * @see InputHandler#resetTrackedGrabber()
-   */
   public void resetTrackedNode() {
-    for (Agent agent : agents())
-      if (agent.trackedGrabber() instanceof Node)
-        agent.resetTrackedGrabber();
+
   }
 
-  /**
-   * Same as {@code inputHandler().shiftDefaultGrabber(node1, node2)}.
-   *
-   * @see InputHandler#shiftDefaultGrabber(Grabber, Grabber)
-   */
-  public void shiftDefaultNode(Node node1, Node node2) {
-    inputHandler().shiftDefaultGrabber(node1, node2);
-  }
-
-  /**
-   * Same as {@code inputHandler().addGrabber(node)}. Checks first if node {@link #isNodeReachable(Node)}
-   * otherwise does nothing.
-   *
-   * @see InputHandler#addGrabber(Grabber)
-   * @see #appendBranch(List)
-   */
   public void addNode(Node node) {
     if (isNodeReachable(node))
-      inputHandler().addGrabber(node);
+      ;
+      //inputHandler().addGrabber(node);
     else
       System.out.println("Adding a node to the graph inputHandler() requires to append it first (use appendBranch()).");
   }
 
-  /**
-   * Same as {@code for(Node node : nodes() removeNode(node)}.
-   * Call {@link #clear()} if you want to remove all nodes from
-   * the traversal routine ({@link #traverse()}) too.
-   *
-   * @see #removeNode(Node)
-   * @see #clear()
-   */
+
   public void removeNodes() {
     for (Node node : nodes())
       removeNode(node);
   }
 
-  /**
-   * Same as {@code inputHandler().removeGrabber(node)}.
-   * Call {@link #pruneBranch(Node)} if you want to remove the node from
-   * the traversal routine ({@link #traverse()}) too.
-   *
-   * @see InputHandler#removeGrabber(Grabber)
-   * @see #removeNodes()
-   * @see #pruneBranch(Node)
-   */
   public void removeNode(Node node) {
-    inputHandler().removeGrabber(node);
+
   }
 
-  /**
-   * Same as {@code inputHandler().hasGrabber(node)}.
-   * Call {@link #isNodeReachable(Node)} to see whether or not the node
-   * is reachable by the traversal routine ({@link #traverse()}) too.
-   *
-   * @see InputHandler#hasGrabber(Grabber)
-   * @see #isNodeReachable(Node)
-   */
   public boolean hasNode(Node node) {
-    return inputHandler().hasGrabber(node);
+    return true;
   }
 
-  /**
-   * Same as {@code return inputHandler().isInputNode(node)}.
-   *
-   * @see InputHandler#isInputGrabber(Grabber)
-   */
   public boolean isInputNode(Node node) {
-    return inputHandler().isInputGrabber(node);
-  }
-
-  /**
-   * Same as {@code return inputHandler().registerAgent(agent)}.
-   *
-   * @see InputHandler#registerAgent(Agent)
-   */
-  public boolean registerAgent(Agent agent) {
-    return inputHandler().registerAgent(agent);
-  }
-
-  /**
-   * Same as {@code return inputHandler().isAgentRegistered(agent)}.
-   *
-   * @see InputHandler#isAgentRegistered(Agent)
-   */
-  public boolean isAgentRegistered(Agent agent) {
-    return inputHandler().isAgentRegistered(agent);
-  }
-
-  /**
-   * Same as {@code return inputHandler().unregisterAgent(agent)}.
-   *
-   * @see InputHandler#unregisterAgent(Agent)
-   */
-  public boolean unregisterAgent(Agent agent) {
-    return inputHandler().unregisterAgent(agent);
-  }
-
-  /**
-   * Same as {@code inputHandler().unregisterAgents()}.
-   *
-   * @see InputHandler#unregisterAgents()
-   */
-  public void unregisterAgents() {
-    inputHandler().unregisterAgents();
-  }
-
-  public List<Agent> agents() {
-    return inputHandler().agents();
+    return true;
   }
 
   // Timing stuff
@@ -1217,7 +1078,6 @@ public class Graph {
    * Called after your main drawing and performs the following:
    * <ol>
    * <li>Calls {@link frames.timing.TimingHandler#handle()}.</li>
-   * <li>Calls {@link InputHandler#handle()}</li>
    * </ol>
    *
    * @see #preDraw()
@@ -1225,11 +1085,13 @@ public class Graph {
   public void postDraw() {
     // 1. timers (include IK Solvers' execution in the order they were registered)
     timingHandler().handle();
-    // 2. Agents
-    inputHandler().handle();
   }
 
   // Eye stuff
+
+  public boolean isEye(Frame frame) {
+    return _eye == frame;
+  }
 
   /**
    * Returns the associated eye. Never null.
@@ -1881,194 +1743,6 @@ public class Graph {
     Vector faceNormal = axis.get();
     faceNormal.normalize();
     return Math.acos(Vector.dot(camAxis, faceNormal)) + absAngle < Math.PI / 2;
-  }
-
-  /**
-   * Convenience function that simply returns {@code screenLocation(src, null)}.
-   *
-   * @see #screenLocation(Vector, Frame)
-   */
-  public Vector screenLocation(Vector vector) {
-    return screenLocation(vector, null);
-  }
-
-  /**
-   * Converts {@code vector} location from {@code frame} to screen.
-   * Use {@code location(vector, frame)} to perform the inverse transformation.
-   * <p>
-   * The x and y coordinates of the returned vector are expressed in screen coordinates,
-   * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
-   * (near plane) and 1 (excluded, far plane).
-   *
-   * @see #screenLocation(Vector)
-   * @see #location(Vector, Frame)
-   * @see #location(Vector)
-   */
-  public Vector screenLocation(Vector vector, Frame frame) {
-    float xyz[] = new float[3];
-
-    if (frame != null) {
-      Vector tmp = frame.worldLocation(vector);
-      _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
-    } else
-      _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
-
-    return new Vector(xyz[0], xyz[1], xyz[2]);
-  }
-
-  // cached version
-  protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
-
-    float in[] = new float[4];
-    float out[] = new float[4];
-
-    in[0] = objx;
-    in[1] = objy;
-    in[2] = objz;
-    in[3] = 1.0f;
-
-    out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
-        + projectionViewMatrix._matrix[12] * in[3];
-    out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
-        + projectionViewMatrix._matrix[13] * in[3];
-    out[2] = projectionViewMatrix._matrix[2] * in[0] + projectionViewMatrix._matrix[6] * in[1] + projectionViewMatrix._matrix[10] * in[2]
-        + projectionViewMatrix._matrix[14] * in[3];
-    out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
-        + projectionViewMatrix._matrix[15] * in[3];
-
-    if (out[3] == 0.0)
-      return false;
-
-    int[] viewport = new int[4];
-    viewport[0] = 0;
-    viewport[1] = height();
-    viewport[2] = width();
-    viewport[3] = -height();
-
-    out[0] /= out[3];
-    out[1] /= out[3];
-    out[2] /= out[3];
-
-    // Map x, y and z to range 0-1
-    out[0] = out[0] * 0.5f + 0.5f;
-    out[1] = out[1] * 0.5f + 0.5f;
-    out[2] = out[2] * 0.5f + 0.5f;
-
-    // Map x,y to viewport
-    out[0] = out[0] * viewport[2] + viewport[0];
-    out[1] = out[1] * viewport[3] + viewport[1];
-
-    windowCoordinate[0] = out[0];
-    windowCoordinate[1] = out[1];
-    windowCoordinate[2] = out[2];
-
-    return true;
-  }
-
-  /**
-   * Convenience function that simply returns {@code location(pixel, null)}.
-   * <p>
-   * #see {@link #location(Vector, Frame)}
-   */
-  public Vector location(Vector pixel) {
-    return this.location(pixel, null);
-  }
-
-  /**
-   * Returns the {@code frame} coordinates of {@code pixel}.
-   * <p>
-   * The pixel (0,0) corresponds to the upper left corner of the window. The
-   * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
-   * In 3D note that {@code pixel.z} is not a linear interpolation between {@link #zNear()} and
-   * {@link #zFar()};
-   * {@code pixel.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
-   * is the distance from the point you project to the camera, along the {@link #viewDirection()}.
-   * <p>
-   * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
-   * {@code null}, the result is expressed in the world coordinates system. The possible
-   * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
-   * account.
-   * <p>
-   * {@link #screenLocation(Vector, Frame)} performs the inverse transformation.
-   * <p>
-   * This method only uses the intrinsic eye parameters (view and projection matrices),
-   * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
-   * this method to compute un-projections out of a classical rendering context.
-   * <p>
-   * This method is not computationally optimized by default. If you call it several times with no
-   * change in the matrices, you should buffer the inverse of the projection times view matrix
-   * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
-   *
-   * @see #screenLocation(Vector, Frame)
-   * @see #setWidth(int)
-   * @see #setHeight(int)
-   */
-  public Vector location(Vector pixel, Frame frame) {
-    float xyz[] = new float[3];
-    // _location(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
-    // this.getProjectionMatrix(true),
-    // getViewport(), xyz);
-    _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
-    if (frame != null)
-      return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
-    else
-      return new Vector(xyz[0], xyz[1], xyz[2]);
-  }
-
-  /**
-   * Similar to {@code gluUnProject}: map window coordinates to object coordinates.
-   *
-   * @param winx          Specify the window x coordinate.
-   * @param winy          Specify the window y coordinate.
-   * @param winz          Specify the window z coordinate.
-   * @param objCoordinate Return the computed object coordinates.
-   */
-  protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
-    Matrix projectionViewInverseMatrix;
-    if (matrixHandler().isProjectionViewInverseCached())
-      projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
-    else {
-      projectionViewInverseMatrix = Matrix.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
-      projectionViewInverseMatrix.invert();
-    }
-
-    int[] viewport = new int[4];
-    viewport[0] = 0;
-    viewport[1] = height();
-    viewport[2] = width();
-    viewport[3] = -height();
-
-    float in[] = new float[4];
-    float out[] = new float[4];
-
-    in[0] = winx;
-    in[1] = winy;
-    in[2] = winz;
-    in[3] = 1.0f;
-
-    /* Map x and y from window coordinates */
-    in[0] = (in[0] - viewport[0]) / viewport[2];
-    in[1] = (in[1] - viewport[1]) / viewport[3];
-
-    /* Map to range -1 to 1 */
-    in[0] = in[0] * 2 - 1;
-    in[1] = in[1] * 2 - 1;
-    in[2] = in[2] * 2 - 1;
-
-    projectionViewInverseMatrix.multiply(in, out);
-    if (out[3] == 0)
-      return false;
-
-    out[0] /= out[3];
-    out[1] /= out[3];
-    out[2] /= out[3];
-
-    objCoordinate[0] = out[0];
-    objCoordinate[1] = out[1];
-    objCoordinate[2] = out[2];
-
-    return true;
   }
 
   /**
@@ -2743,5 +2417,455 @@ public class Graph {
   public void executeSolver(Solver solver, long period) {
     registerTask(solver.task());
     solver.task().run(period);
+  }
+
+  // Screen to frame conversion
+
+  /**
+   * Convenience function that simply returns {@code screenLocation(src, null)}.
+   *
+   * @see #screenLocation(Vector, Frame)
+   */
+  public Vector screenLocation(Vector vector) {
+    return screenLocation(vector, null);
+  }
+
+  /**
+   * Converts {@code vector} location from {@code frame} to screen.
+   * Use {@code location(vector, frame)} to perform the inverse transformation.
+   * <p>
+   * The x and y coordinates of the returned vector are expressed in screen coordinates,
+   * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
+   * (near plane) and 1 (excluded, far plane).
+   *
+   * @see #screenLocation(Vector)
+   * @see #location(Vector, Frame)
+   * @see #location(Vector)
+   */
+  public Vector screenLocation(Vector vector, Frame frame) {
+    float xyz[] = new float[3];
+
+    if (frame != null) {
+      Vector tmp = frame.worldLocation(vector);
+      _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
+    } else
+      _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
+
+    return new Vector(xyz[0], xyz[1], xyz[2]);
+  }
+
+  // cached version
+  protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
+    Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
+
+    float in[] = new float[4];
+    float out[] = new float[4];
+
+    in[0] = objx;
+    in[1] = objy;
+    in[2] = objz;
+    in[3] = 1.0f;
+
+    out[0] = projectionViewMatrix._matrix[0] * in[0] + projectionViewMatrix._matrix[4] * in[1] + projectionViewMatrix._matrix[8] * in[2]
+        + projectionViewMatrix._matrix[12] * in[3];
+    out[1] = projectionViewMatrix._matrix[1] * in[0] + projectionViewMatrix._matrix[5] * in[1] + projectionViewMatrix._matrix[9] * in[2]
+        + projectionViewMatrix._matrix[13] * in[3];
+    out[2] = projectionViewMatrix._matrix[2] * in[0] + projectionViewMatrix._matrix[6] * in[1] + projectionViewMatrix._matrix[10] * in[2]
+        + projectionViewMatrix._matrix[14] * in[3];
+    out[3] = projectionViewMatrix._matrix[3] * in[0] + projectionViewMatrix._matrix[7] * in[1] + projectionViewMatrix._matrix[11] * in[2]
+        + projectionViewMatrix._matrix[15] * in[3];
+
+    if (out[3] == 0.0)
+      return false;
+
+    int[] viewport = new int[4];
+    viewport[0] = 0;
+    viewport[1] = height();
+    viewport[2] = width();
+    viewport[3] = -height();
+
+    out[0] /= out[3];
+    out[1] /= out[3];
+    out[2] /= out[3];
+
+    // Map x, y and z to range 0-1
+    out[0] = out[0] * 0.5f + 0.5f;
+    out[1] = out[1] * 0.5f + 0.5f;
+    out[2] = out[2] * 0.5f + 0.5f;
+
+    // Map x,y to viewport
+    out[0] = out[0] * viewport[2] + viewport[0];
+    out[1] = out[1] * viewport[3] + viewport[1];
+
+    windowCoordinate[0] = out[0];
+    windowCoordinate[1] = out[1];
+    windowCoordinate[2] = out[2];
+
+    return true;
+  }
+
+  /**
+   * Convenience function that simply returns {@code location(pixel, null)}.
+   * <p>
+   * #see {@link #location(Vector, Frame)}
+   */
+  public Vector location(Vector pixel) {
+    return this.location(pixel, null);
+  }
+
+  /**
+   * Returns the {@code frame} coordinates of {@code pixel}.
+   * <p>
+   * The pixel (0,0) corresponds to the upper left corner of the window. The
+   * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
+   * In 3D note that {@code pixel.z} is not a linear interpolation between {@link #zNear()} and
+   * {@link #zFar()};
+   * {@code pixel.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
+   * is the distance from the point you project to the camera, along the {@link #viewDirection()}.
+   * <p>
+   * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
+   * {@code null}, the result is expressed in the world coordinates system. The possible
+   * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
+   * account.
+   * <p>
+   * {@link #screenLocation(Vector, Frame)} performs the inverse transformation.
+   * <p>
+   * This method only uses the intrinsic eye parameters (view and projection matrices),
+   * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
+   * this method to compute un-projections out of a classical rendering context.
+   * <p>
+   * This method is not computationally optimized by default. If you call it several times with no
+   * change in the matrices, you should buffer the inverse of the projection times view matrix
+   * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
+   *
+   * @see #screenLocation(Vector, Frame)
+   * @see #setWidth(int)
+   * @see #setHeight(int)
+   */
+  public Vector location(Vector pixel, Frame frame) {
+    float xyz[] = new float[3];
+    // _location(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
+    // this.getProjectionMatrix(true),
+    // getViewport(), xyz);
+    _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
+    if (frame != null)
+      return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
+    else
+      return new Vector(xyz[0], xyz[1], xyz[2]);
+  }
+
+  /**
+   * Similar to {@code gluUnProject}: map window coordinates to object coordinates.
+   *
+   * @param winx          Specify the window x coordinate.
+   * @param winy          Specify the window y coordinate.
+   * @param winz          Specify the window z coordinate.
+   * @param objCoordinate Return the computed object coordinates.
+   */
+  protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
+    Matrix projectionViewInverseMatrix;
+    if (matrixHandler().isProjectionViewInverseCached())
+      projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
+    else {
+      projectionViewInverseMatrix = Matrix.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
+      projectionViewInverseMatrix.invert();
+    }
+
+    int[] viewport = new int[4];
+    viewport[0] = 0;
+    viewport[1] = height();
+    viewport[2] = width();
+    viewport[3] = -height();
+
+    float in[] = new float[4];
+    float out[] = new float[4];
+
+    in[0] = winx;
+    in[1] = winy;
+    in[2] = winz;
+    in[3] = 1.0f;
+
+    /* Map x and y from window coordinates */
+    in[0] = (in[0] - viewport[0]) / viewport[2];
+    in[1] = (in[1] - viewport[1]) / viewport[3];
+
+    /* Map to range -1 to 1 */
+    in[0] = in[0] * 2 - 1;
+    in[1] = in[1] * 2 - 1;
+    in[2] = in[2] * 2 - 1;
+
+    projectionViewInverseMatrix.multiply(in, out);
+    if (out[3] == 0)
+      return false;
+
+    out[0] /= out[3];
+    out[1] /= out[3];
+    out[2] /= out[3];
+
+    objCoordinate[0] = out[0];
+    objCoordinate[1] = out[1];
+    objCoordinate[2] = out[2];
+
+    return true;
+  }
+
+  // Gesture physical interface is quite nice!
+  // It always maps physical (screen) space geom data respect to the eye
+
+  public void translate(Vector vector) {
+    translate(vector, eye());
+  }
+
+  public void translate(Vector vector, Frame frame) {
+    frame.translate(_translate(vector, frame));
+  }
+
+  /**
+   * Converts physical (device) space
+   * @param vector
+   * @return
+   */
+  protected Vector _translate(Vector vector, Frame frame) {
+    return _translate(vector, 1, frame);
+  }
+
+  public void translate(Vector vector, float sensitivity) {
+    translate(vector, sensitivity, eye());
+  }
+
+  public void translate(Vector vector, float sensitivity, Frame frame) {
+    frame.translate(_translate(vector, sensitivity, frame));
+  }
+
+  protected Vector _translate(Vector vector, float sensitivity, Frame frame) {
+    Vector eyeVector = Vector.multiply(new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z()), sensitivity);
+    // Scale to fit the screen relative vector displacement
+    // Quite excited to see how simple it's in 2d:
+    //if (_graph.is2D())
+    //return eyeVector;
+    // ... and amazed as to how dirty it's in 3d:
+    switch (type()) {
+      case PERSPECTIVE:
+        float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
+            eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
+        // * Math.abs(graph.eye().frame().location(isEye() ?
+        // graph.eye().anchor() : position()).vec[2]);
+        //TODO check me weird to find height instead of width working (may it has to do with fov?)
+        eyeVector._vector[0] *= 2.0 * k / height();
+        eyeVector._vector[1] *= 2.0 * k / height();
+        break;
+      case TWO_D:
+      case ORTHOGRAPHIC:
+        float[] wh = boundaryWidthHeight();
+        // float[] wh = graph.eye().getOrthoWidthHeight();
+        eyeVector._vector[0] *= 2.0 * wh[0] / width();
+        eyeVector._vector[1] *= 2.0 * wh[1] / height();
+        break;
+    }
+    float coef;
+    if (isEye(frame)) {
+      // float coef = 8E-4f;
+      coef = Math.max(Math.abs((location(anchor()))._vector[2] * frame.magnitude()), 0.2f * radius());
+      eyeVector._vector[2] *= coef / height();
+      // eye _wheel seems different
+      // trns.vec[2] *= coef * 8E-4f;
+      eyeVector.divide(eye().magnitude());
+    } else {
+      coef = Vector.subtract(eye().position(), frame.position()).magnitude();
+      eyeVector._vector[2] *= coef / height();
+      eyeVector.divide(eye().magnitude());
+    }
+
+    return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
+  }
+
+  // TODO research if spin(gestureRotate(roll, pitch, yaw)); is missed
+  // see f40a95b
+
+  //TODO screenRotate is missing!
+
+  public void rotate(float roll, float pitch, float yaw) {
+    rotate(roll, pitch, yaw, eye());
+  }
+
+  public void rotate(float roll, float pitch, float yaw, Frame frame) {
+    frame.rotate(_rotate(roll, pitch, yaw, frame));
+  }
+
+  protected Quaternion _rotate(float roll, float pitch, float yaw, Frame frame) {
+    return _rotate(roll, pitch, yaw, 1, frame);
+  }
+
+  public void rotate(float roll, float pitch, float yaw, float sensitivity) {
+    rotate(roll, pitch, yaw, sensitivity, eye());
+  }
+
+  public void rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
+    frame.rotate(_rotate(roll, pitch, yaw, sensitivity, frame));
+  }
+
+  protected Quaternion _rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
+    roll *= sensitivity;
+    pitch *= sensitivity;
+    yaw *= sensitivity;
+    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
+    if (isEye(frame) /* || (!isEye() && !this.respectToEye()) */) {
+      return new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
+    } else {
+      Vector vector = new Vector();
+      Quaternion quaternion = new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw);
+      vector.set(-quaternion.x(), -quaternion.y(), -quaternion.z());
+      vector = eye().orientation().rotate(vector);
+      vector = frame.displacement(vector);
+      quaternion.setX(vector.x());
+      quaternion.setY(vector.y());
+      quaternion.setZ(vector.z());
+      return quaternion;
+    }
+  }
+
+  public void spin(Point point1, Point point2) {
+    spin(point1, point2, eye());
+  }
+
+  public void spin(Point point1, Point point2, Frame frame) {
+    frame.spin(_spin(point1, point2, frame));
+  }
+
+  protected Quaternion _spin(Point point1, Point point2, Frame frame) {
+    return _spin(point1, point2, 1, frame);
+  }
+
+  public void spin(Point point1, Point point2, float sensitivity) {
+    spin(point1, point2, sensitivity, eye());
+  }
+
+  public void spin(Point point1, Point point2, float sensitivity, Frame frame) {
+    frame.spin(_spin(point1, point2, sensitivity, frame));
+  }
+
+  protected Quaternion _spin(Point point1, Point point2, float sensitivity, Frame frame) {
+    Vector center = screenLocation(isEye(frame) ? anchor() : frame.position());
+    return _spin(point1, point2, new Point(center.x(), center.y()), sensitivity, frame);
+  }
+
+  public void spin(Point point1, Point point2, Point center) {
+    spin(point1, point2, center, eye());
+  }
+
+  public void spin(Point point1, Point point2, Point center, Frame frame) {
+    frame.spin(_spin(point1, point2, center, frame));
+  }
+
+  protected Quaternion _spin(Point point1, Point point2, Point center, Frame frame) {
+    return _spin(point1, point2, center, 1, frame);
+  }
+
+  public void spin(Point point1, Point point2, Point center, float sensitivity) {
+    spin(point1, point2, center, sensitivity, eye());
+  }
+
+  public void spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
+    frame.spin(_spin(point1, point2, center, sensitivity, frame));
+  }
+
+  protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
+    float cx = center.x();
+    float cy = center.y();
+    float x = point2.x();
+    float y = point2.y();
+    float prevX = point1.x();
+    float prevY = point1.y();
+    // Points on the deformed ball
+    float px = sensitivity * ((int) prevX - cx) / width();
+    float py = sensitivity * (isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / height();
+    float dx = sensitivity * (x - cx) / width();
+    float dy = sensitivity * (isLeftHanded() ? (y - cy) : (cy - y)) / height();
+    Vector p1 = new Vector(px, py, _projectOnBall(px, py));
+    Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
+    // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
+    Vector axis = p2.cross(p1);
+    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+
+    Quaternion quaternion = new Quaternion(axis, angle);
+    if (!isEye(frame)) {
+      Vector vector = quaternion.axis();
+      vector = eye().orientation().rotate(vector);
+      vector = frame.displacement(vector);
+      quaternion = new Quaternion(vector, -quaternion.angle());
+    }
+
+    return quaternion;
+  }
+
+  /**
+   * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
+   * ball, it is proportional to the euclidean distance to the ball. For a point outside
+   * the ball, it is proportional to the inverse of this distance (tends to zero) on the
+   * ball, the function is continuous.
+   */
+  protected float _projectOnBall(float x, float y) {
+    // If you change the size value, change angle computation in
+    // deformedBallQuaternion().
+    float size = 1.0f;
+    float size2 = size * size;
+    float size_limit = size2 * 0.5f;
+
+    float d = x * x + y * y;
+    return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
+  }
+
+  public void lookAround(float deltaX, float deltaY, Vector upVector) {
+    eye().rotate(_lookAround(deltaX, deltaY, upVector));
+  }
+
+  protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector) {
+    return _lookAround(deltaX, deltaY, upVector, 1);
+  }
+
+  public void lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
+    eye().rotate(_lookAround(deltaX, deltaY, upVector, sensitivity));
+  }
+
+  protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
+    deltaX *= -sensitivity;
+    deltaY *= sensitivity;
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+    Quaternion rotY = new Quaternion(eye().displacement(upVector), deltaX);
+    return Quaternion.multiply(rotY, rotX);
+  }
+
+  public void rotateCAD(float roll, float pitch) {
+    eye().spin(_rotateCAD(roll, pitch));
+  }
+
+  protected Quaternion _rotateCAD(float roll, float pitch) {
+    return _rotateCAD(roll, pitch, new Vector(0, 1, 0), 1);
+  }
+
+  public void rotateCAD(float roll, float pitch, Vector upVector) {
+    eye().spin(_rotateCAD(roll, pitch, upVector));
+  }
+
+  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector) {
+    return _rotateCAD(roll, pitch, upVector, 1);
+  }
+
+  public void rotateCAD(float roll, float pitch, float sensitivity) {
+    eye().spin(_rotateCAD(roll, pitch, sensitivity));
+  }
+
+  protected Quaternion _rotateCAD(float roll, float pitch, float sensitivity) {
+    return _rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
+  }
+
+  public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
+    eye().spin(_rotateCAD(roll, pitch, upVector, sensitivity));
+  }
+
+  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
+    roll *= sensitivity;
+    pitch *= sensitivity;
+    return Quaternion.multiply(new Quaternion(eye().displacement(upVector), eye().displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }
 }

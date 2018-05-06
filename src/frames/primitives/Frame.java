@@ -10,8 +10,14 @@
 
 package frames.primitives;
 
+import frames.core.Graph;
 import frames.primitives.constraint.Constraint;
+import frames.primitives.constraint.WorldConstraint;
 import frames.timing.TimingHandler;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -107,6 +113,20 @@ public class Frame {
   protected Frame _reference;
   protected Constraint _constraint;
   protected long _lastUpdate;
+
+  //TODO new attributes
+  /**
+   * Enumerates the Picking precision modes.
+   */
+  public enum Precision {
+    FIXED, ADAPTIVE, EXACT
+  }
+  protected Precision _Precision;
+  protected int _id;
+  protected Graph _graph;
+  protected List<Frame> _children;
+  protected float _threshold;
+  protected boolean _culled;
 
   /**
    * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
@@ -208,6 +228,30 @@ public class Frame {
     setRotation(rotation);
     setScaling(scaling);
     setReference(reference);
+
+    _graph = graph;
+    _id = ++graph()._nodeCount;
+    // unlikely but theoretically possible
+    if (_id == 16777216)
+      throw new RuntimeException("Maximum node instances reached. Exiting now!");
+
+    if (graph().is2D()) {
+      if (position().z() != 0)
+        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y)");
+      if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
+        throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
+      WorldConstraint constraint2D = new WorldConstraint();
+      constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
+      constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
+      setConstraint(constraint2D);
+    }
+
+    _culled = false;
+    _children = new ArrayList<Frame>();
+    // graph()._addLeadingNode(this);
+    setReference(reference());// _restorePath seems more robust
+    _Precision = Precision.FIXED;
+    setPrecisionThreshold(20);
   }
 
   protected Frame(Frame frame) {
@@ -216,6 +260,33 @@ public class Frame {
     _scaling = frame.scaling();
     _reference = frame.reference();
     _constraint = frame.constraint();
+
+    this._graph = graph;
+    if (this.graph() == frame.graph()) {
+      this._id = ++graph()._nodeCount;
+      // unlikely but theoretically possible
+      if (this._id == 16777216)
+        throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
+    } else {
+      this._id = frame._id();
+      this.set(frame);
+    }
+
+    this._culled = frame._culled;
+
+    this._children = new ArrayList<Frame>();
+    if (this.graph() == frame.graph()) {
+      this.setReference(reference());// _restorePath
+    }
+
+    _lastUpdate = frame.lastUpdate();
+    // end
+    // this.isInCamPath = otherFrame.isInCamPath;
+    //
+    // this.setPrecisionThreshold(otherFrame.precisionThreshold(),
+    // otherFrame.adaptiveGrabsInputThreshold());
+    this._Precision = frame._Precision;
+    this._threshold = frame._threshold;
   }
 
   /**
@@ -257,6 +328,35 @@ public class Frame {
   }
 
   /**
+   * Same as {@code randomize(graph().center(), graph().radius())}.
+   *
+   * @see #random(Graph)
+   */
+  public void randomize() {
+    randomize(graph().center(), graph().radius());
+  }
+
+  /**
+   * Returns a random graph node. The node is randomly positioned inside the ball defined
+   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
+   * is a random in [0,5...2].
+   *
+   * @see #randomize()
+   */
+  public static Node random(Graph graph) {
+    Node node = new Node(graph);
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(graph.radius());
+    node.setPosition(Vector.add(graph.center(), displacement));
+    node.setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    node.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    return node;
+  }
+
+  /**
    * Returns a deep copy of this frame.
    */
   public Frame get() {
@@ -276,13 +376,6 @@ public class Frame {
   }
 
   // MODIFIED
-
-  /**
-   * Internal use. Automatically call by all methods which change the frame state.
-   */
-  protected void _modified() {
-    _lastUpdate = TimingHandler.frameCount;
-  }
 
   /**
    * @return the last frame the this obect was updated.
@@ -1516,5 +1609,304 @@ public class Frame {
    */
   protected Vector _referenceLocation(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
+  }
+
+  // TODO from node
+
+  /**
+   * Internal use. Frame graphics color to be used for picking with a color buffer.
+   */
+  protected int _id() {
+    // see here:
+    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
+    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
+  }
+
+  /**
+   * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
+   * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}.
+   */
+  //TODO discard in favor of graph spin!
+  public void spin(Quaternion quaternion) {
+    if (isEye())
+      rotate(quaternion, graph().anchor());
+    else
+      rotate(quaternion);
+  }
+
+  /**
+   * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
+   * between eye and non-eye nodes.
+   *
+   * @see #isEye()
+   */
+  public void align() {
+    if (isEye())
+      alignWithFrame(null, true);
+    else
+      alignWithFrame(_graph.eye());
+  }
+
+  /**
+   * Centers the node into the graph.
+   */
+  public void center() {
+    if (isEye())
+      projectOnLine(graph().center(), graph().viewDirection());
+    else
+      projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
+  }
+
+  public boolean isEye() {
+    return graph().eye() == this;
+  }
+
+  public Graph graph() {
+    return _graph;
+  }
+
+  public List<Frame> children() {
+    return _children;
+  }
+
+  protected boolean _addChild(Frame node) {
+    if (node == null)
+      return false;
+    if (_hasChild(node))
+      return false;
+    return children().add(node);
+  }
+
+  /**
+   * Removes the leading node if present. Typically used when re-parenting the node.
+   */
+  protected boolean _removeChild(Frame node) {
+    boolean result = false;
+    Iterator<Frame> it = children().iterator();
+    while (it.hasNext()) {
+      if (it.next() == node) {
+        it.remove();
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  protected boolean _hasChild(Frame node) {
+    for (Frame frame : children())
+      if (frame == node)
+        return true;
+    return false;
+  }
+
+  /**
+   * Procedure called on the node by the graph traversal algorithm. Default implementation is
+   * empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * node = new Node(graph) {
+   *   public void visit() {
+   *     //hierarchical culling is optional and disabled by default
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#traverse()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+  public void visit() {
+  }
+
+  /**
+   * Same as {@code cull(true)}.
+   *
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+
+  public void cull() {
+    cull(true);
+  }
+
+  /**
+   * Enables or disables {@link #visit()} of this node and its children during
+   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   *
+   * @see #isCulled()
+   */
+  public void cull(boolean cull) {
+    _culled = cull;
+  }
+
+  /**
+   * Returns whether or not the node culled or not. Culled nodes (and their children)
+   * will not be visited by the {@link Graph#traverse()} algoruthm.
+   *
+   * @see #cull(boolean)
+   */
+  public boolean isCulled() {
+    return _culled;
+  }
+
+  /**
+   * Convenience function that simply calls {@code applyTransformation(graph())}. It applies
+   * the transformation defined by this node to {@link #graph()}.
+   *
+   * @see #applyTransformation(Graph)
+   * @see #matrix()
+   * @see #graph()
+   */
+  public void applyTransformation() {
+    applyTransformation(graph());
+  }
+
+  /**
+   * Convenience function that simply calls {@code applyWorldTransformation(graph())}. It
+   * applies the world transformation defined by this node to {@link #graph()}.
+   *
+   * @see #applyWorldTransformation(Graph)
+   * @see #worldMatrix()
+   * @see #graph()
+   */
+  public void applyWorldTransformation() {
+    applyWorldTransformation(graph());
+  }
+
+  /**
+   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
+   * apply the transformation represented by this node to any graph you want using this
+   * method.
+   * <p>
+   * Very efficient prefer always this than
+   *
+   * @see #applyTransformation()
+   * @see #matrix()
+   * @see Graph#applyTransformation(Frame)
+   */
+  public void applyTransformation(Graph graph) {
+    graph.applyTransformation(this);
+  }
+
+  /**
+   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
+   * You may apply the world transformation represented by this node to any graph you
+   * want using this method.
+   *
+   * @see #applyWorldTransformation()
+   * @see #worldMatrix()
+   * @see Graph#applyWorldTransformation(Frame)
+   */
+  public void applyWorldTransformation(Graph graph) {
+    graph.applyWorldTransformation(this);
+  }
+
+  // MODIFIED
+  /**
+   * Internal use. Automatically call by all methods which change the frame state.
+   */
+  protected void _modified() {
+    _lastUpdate = TimingHandler.frameCount;
+    if (children() != null)
+      for (Frame child : children())
+        child._modified();
+  }
+
+  /**
+   * Returns the picking precision threshold in pixels used by the node to {@link #track(float, float)}.
+   *
+   * @see #setPrecisionThreshold(float)
+   */
+  public float precisionThreshold() {
+    if (precision() == Precision.ADAPTIVE)
+      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
+    return _threshold;
+  }
+
+  /**
+   * Returns the node picking precision. See {@link #setPrecision(Precision)} for details.
+   *
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
+   */
+  public Precision precision() {
+    return _Precision;
+  }
+
+  /**
+   * Sets the node picking precision.
+   * <p>
+   * When {@link #precision()} is {@link Precision#FIXED} or
+   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
+   * within a squared area around the node {@link #center()} screen projection which size
+   * is defined by {@link #setPrecisionThreshold(float)}.
+   * <p>
+   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
+   * in a precise manner according to the projected pixels of the visual representation
+   * related to the node. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the node) and requires the graph to implement
+   * a back buffer.
+   * <p>
+   * Default implementation of this policy will behave like {@link Precision#FIXED}.
+   *
+   * @see #precision()
+   * @see #setPrecisionThreshold(float)
+   */
+  public void setPrecision(Precision precision) {
+    if (precision == Precision.EXACT)
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
+    _Precision = precision;
+  }
+
+  /**
+   * Sets the length of the squared area around the node {@link #center()} screen
+   * projection that defined the {@link #track(float, float)} condition used for
+   * node picking.
+   * <p>
+   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * in pixels and directly defines the fixed length of a 'shooter target', centered
+   * at the projection of the node origin onto the screen.
+   * <p>
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * in object space (world units) and defines the edge length of a squared bounding box that
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the node
+   * origin onto the screen. Use this version only if you have a good idea of the bounding box
+   * size of the object you are attaching to the node shape.
+   * <p>
+   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
+   * {@link #setPrecision(Precision)} for details.
+   * <p>
+   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
+   * manner) to 20.
+   * <p>
+   * Negative {@code threshold} values are silently ignored.
+   *
+   * @see #precision()
+   * @see #precisionThreshold()
+   */
+  public void setPrecisionThreshold(float threshold) {
+    if (threshold >= 0)
+      _threshold = threshold;
+  }
+
+  /**
+   * Picks the node according to the {@link #precision()}.
+   *
+   * @see #precision()
+   * @see #setPrecision(Precision)
+   */
+  public boolean track(float x, float y) {
+    Vector proj = _graph.screenLocation(position());
+    float halfThreshold = precisionThreshold() / 2;
+    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 }
