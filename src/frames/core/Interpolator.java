@@ -304,8 +304,9 @@ public class Interpolator {
   public void setFrame(Frame frame) {
     if (frame == _frame)
       return;
-    if (graph() != frame._graph)
-      throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.isAttached())
+      if (graph() != frame._graph)
+        throw new RuntimeException("Node and Interpolator graphs should match");
     _frame = frame;
   }
 
@@ -586,8 +587,9 @@ public class Interpolator {
     if (frame == null)
       return;
 
-    if (graph() != frame.graph())
-      throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.isAttached())
+      if (graph() != frame.graph())
+        throw new RuntimeException("Node and Interpolator graphs should match");
 
     if (_list.isEmpty())
       _time = time;
@@ -621,12 +623,15 @@ public class Interpolator {
     return keyFrame.frame();
   }
 
+  //TODO merge remove and purge
+
   /**
    * Same as {@link #removeKeyFrame(int)}, but also removes the key frame from the scene if it is a node instance.
    */
   public void purgeKeyFrame(int index) {
     Frame frame = removeKeyFrame(index);
-    _graph.pruneBranch(frame);
+    if (frame.isAttached())
+      _graph.pruneBranch(frame);
   }
 
   /**
@@ -642,6 +647,8 @@ public class Interpolator {
     _currentFrameValid = false;
   }
 
+  //TODO merge this two
+
   /**
    * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
    *
@@ -653,7 +660,8 @@ public class Interpolator {
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      _graph.pruneBranch(keyFrame._frame);
+      if (keyFrame.frame().isAttached())
+        _graph.pruneBranch(keyFrame._frame);
     }
     _list.clear();
     _pathIsValid = false;

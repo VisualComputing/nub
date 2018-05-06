@@ -134,6 +134,14 @@ public class Frame {
 
   //TODO check new Frame() vs detach() al over the place
 
+  public Frame() {
+    this(null, null, new Vector(), new Quaternion(), 1);
+  }
+
+  public Frame(Vector translation, Quaternion rotation, float scaling) {
+    this(null, null, translation, rotation, scaling);
+  }
+
   public Frame(Graph graph) {
     this(graph, null, new Vector(), new Quaternion(), 1);
   }
@@ -155,16 +163,16 @@ public class Frame {
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
-  public Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
+    _graph = graph;
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
     setReference(reference);
 
     if (graph == null)
-      throw new RuntimeException("Frame graph should be non-null!");
+      return;
 
-    _graph = graph;
     _id = ++graph()._nodeCount;
 
     // unlikely but theoretically possible
@@ -184,19 +192,21 @@ public class Frame {
 
     _culled = false;
     _children = new ArrayList<Frame>();
-    // graph()._addLeadingNode(this);
-    setReference(reference());// _restorePath seems more robust
+    //setReference(reference());// _restorePath seems more robust
     _precision = Precision.FIXED;
     setPrecisionThreshold(20);
   }
 
   protected Frame(Frame frame, Graph graph) {
-    _translation = frame.translation().get();
-    _rotation = frame.rotation().get();
-    _scaling = frame.scaling();
-    _reference = frame.reference();
-    _constraint = frame.constraint();
     _graph = graph;
+    this.setTranslation(frame.translation().get());
+    this.setRotation(frame.rotation().get());
+    this.setScaling(frame.scaling());
+    this.setReference(frame.reference());
+    this.setConstraint(frame.constraint());
+
+    if (graph == null)
+      return;
 
     if (this.graph() == frame.graph()) {
       this._id = ++graph()._nodeCount;
@@ -211,9 +221,11 @@ public class Frame {
     this._culled = frame._culled;
 
     this._children = new ArrayList<Frame>();
+    /*
     if (this.graph() == frame.graph()) {
       this.setReference(reference());// _restorePath
     }
+    */
 
     _lastUpdate = frame.lastUpdate();
     this._precision = frame._precision;
@@ -239,11 +251,18 @@ public class Frame {
    *
    * @see #reference()
    */
-  //TODO pending detach
   public Frame detach() {
-    Frame frame = new Frame(graph());
+    Frame frame = new Frame();
     frame.set(this);
     return frame;
+  }
+
+  public boolean isDetached() {
+    return graph() == null;
+  }
+
+  public boolean isAttached() {
+    return graph() != null;
   }
 
   /**
@@ -405,29 +424,46 @@ public class Frame {
    */
   public void setReference(Frame frame) {
     if (frame == this) {
-      System.out.println("A node cannot be a reference of itself.");
+      System.out.println("A frame cannot be a reference of itself.");
       return;
     }
     if (isAncestor(frame)) {
-      System.out.println("A node descendant cannot be set as its reference.");
+      System.out.println("A frame descendant cannot be set as its reference.");
       return;
     }
-    // 1. no need to re-parent, just check this needs to be added as leadingFrame
-    if (reference() == frame) {
+    if (frame != null) {
+      if (isDetached() && !frame.isDetached()) {
+        System.out.println("An attached frame cannot be set as reference of a detached one.");
+        return;
+      }
+      if (!isDetached() && frame.isDetached()) {
+        System.out.println("An detached frame cannot be set as reference of an attached one.");
+        return;
+      }
+    }
+    if (isDetached()) {
+      if (reference() == frame)
+        return;
+      _reference = frame;
+      _modified();
+    } else {
+      // 1. no need to re-parent, just check this needs to be added as leadingFrame
+      if (reference() == frame) {
+        _restorePath(reference(), this);
+        return;
+      }
+      // 2. else re-parenting
+      // 2a. before assigning new reference frame
+      if (reference() != null) // old
+        reference()._removeChild(this);
+      else if (graph() != null)
+        graph()._removeLeadingNode(this);
+      // finally assign the reference frame
+      _reference = frame;// reference() returns now the new value
+      // 2b. after assigning new reference frame
       _restorePath(reference(), this);
-      return;
+      _modified();
     }
-    // 2. else re-parenting
-    // 2a. before assigning new reference frame
-    if (reference() != null) // old
-      reference()._removeChild(this);
-    else if (graph() != null)
-      graph()._removeLeadingNode(this);
-    // finally assign the reference frame
-    _reference = frame;// reference() returns now the new value
-    // 2b. after assigning new reference frame
-    _restorePath(reference(), this);
-    _modified();
   }
 
   protected void _restorePath(Frame parent, Frame child) {
@@ -575,6 +611,19 @@ public class Frame {
     Vector displacement = Vector.random();
     displacement.setMagnitude(graph.radius());
     frame.setPosition(Vector.add(graph.center(), displacement));
+    frame.setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    return frame;
+  }
+
+  //detached version
+  public static Frame random(Vector center, float radius) {
+    Frame frame = new Frame();
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(radius);
+    frame.setPosition(Vector.add(center, displacement));
     frame.setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
@@ -1154,6 +1203,7 @@ public class Frame {
       if (frame != null)
         center = frame.position();
 
+      //TODO really needs checking!
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
       translate(vector);
@@ -1417,7 +1467,7 @@ public class Frame {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return new Frame(graph(), position(), orientation(), magnitude()).matrix();
+      return new Frame(position(), orientation(), magnitude()).matrix();
     else
       return matrix();
   }
@@ -1615,7 +1665,7 @@ public class Frame {
    * @see #worldInverse()
    */
   public Frame inverse() {
-    Frame frame = new Frame(graph(), Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    Frame frame = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
     frame.setReference(reference());
     return frame;
   }
@@ -1638,7 +1688,7 @@ public class Frame {
    * @see #inverse()
    */
   public Frame worldInverse() {
-    return (new Frame(graph(), Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
+    return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
         1 / magnitude()));
   }
 

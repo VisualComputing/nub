@@ -8,6 +8,7 @@ import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PShape;
 
 /**
  * Created by pierre on 11/15/16.
@@ -15,6 +16,7 @@ import processing.core.PGraphics;
 public class Interaction extends PApplet {
   Scene scene;
   Frame eye, node;
+  Shape frame;
   Frame defaultNode;
   Vector upVector;
 
@@ -25,7 +27,7 @@ public class Interaction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setRadius(400);
+    scene.setRadius(1000);
     scene.fitBallInterpolation();
 
     eye = new Frame(scene);
@@ -36,7 +38,7 @@ public class Interaction extends PApplet {
 
     node = new Shape(scene) {
       @Override
-      public void set(PGraphics pGraphics) {
+      public void setShape(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -52,6 +54,11 @@ public class Interaction extends PApplet {
 
     //scene.removeNodes();
     node.translate(75, 75, 75);
+
+    frame = new Shape(node);
+    frame.setShape(shape());
+    frame.translate(275, 275, 275);
+
     defaultNode = eye;
   }
 
@@ -73,11 +80,19 @@ public class Interaction extends PApplet {
         scene.setLeftHanded();
         println("left");
       }
-    if (key == ' ')
-      if (defaultNode == eye)
-        defaultNode = node;
-      else
-        defaultNode = eye;
+    if (key == '1')
+      defaultNode = eye;
+    if (key == '2')
+      defaultNode = node;
+    if (key == '3')
+      defaultNode = frame;
+    if (key == ' ') {
+      if (eye.isAttached())
+        println("win1!");
+      Frame f1 = eye.detach();
+      if (f1.isDetached())
+        println("win2!");
+    }
   }
 
   public void mousePressed() {
@@ -104,6 +119,17 @@ public class Interaction extends PApplet {
       scene.rotate((mouseY - pmouseY), 0, 0, PI / width, defaultNode);
     //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+  }
+
+  PShape shape() {
+    PShape fig;
+    if ((int) (random(2)) % 2 == 0)
+      fig = createShape(BOX, 160);
+    else
+      fig = createShape(SPHERE, 130);
+    fig.setStroke(255);
+    fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
+    return fig;
   }
 
   public static void main(String args[]) {

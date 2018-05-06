@@ -36,11 +36,14 @@ public class ChainSolver extends FABRIKSolver {
     ArrayList<Frame> copy = new ArrayList<Frame>();
     Frame reference = chain.get(0).reference();
     if (reference != null) {
-      //TODO needs testing
+      // reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
+      //TODO needs testing, but I prefer:
       reference = reference.detach();
     }
     for (Frame joint : chain) {
-      //TODO needs testing
+      //Frame newJoint = new Frame();
+      //newJoint.setReference(reference);
+      //TODO needs testing, but I prefer:
       Frame newJoint = new Frame(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
@@ -94,6 +97,7 @@ public class ChainSolver extends FABRIKSolver {
     }
     this._target = target;
     this._prevTarget =
+        //target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
         //TODO needs testing
         target == null ? null : target.detach();
   }
@@ -191,6 +195,7 @@ public class ChainSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
+    //_prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
     //TODO needs testing
     _prevTarget = _target == null ? null : _target.detach();
     iterations = 0;

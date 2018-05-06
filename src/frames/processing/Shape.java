@@ -29,11 +29,11 @@ import processing.opengl.PGraphicsOpenGL;
  * {@link #precision()} different than {@link Precision#EXACT} or a simpler representation
  * for the back shape.
  * <h2>Retained mode</h2>
- * To set a retained mode shape call {@link #set(PShape)} which will set both the front and
+ * To set a retained mode shape call {@link #setShape(PShape)} which will set both the front and
  * the back shape to be the same pshape. Call {@link #setFront(PShape)} and
  * {@link #setFront(PShape)} to set different pshapes for rendering and picking, respectively.
  * <h2>Immediate mode</h2>
- * To set an immediate mode shape override {@link #set(PGraphics)} which will set both the
+ * To set an immediate mode shape override {@link #setShape(PGraphics)} which will set both the
  * front and the back shape to be the same graphics procedure. Override
  * {@link #setFront(PGraphics)} and {@link #setFront(PGraphics)} to set different
  * graphics procedures for rendering and picking, respectively.
@@ -99,7 +99,7 @@ public class Shape extends Frame {
    */
   public Shape(Scene scene, PShape pShape) {
     this(scene);
-    set(pShape);
+    setShape(pShape);
   }
 
   /**
@@ -109,7 +109,7 @@ public class Shape extends Frame {
    */
   public Shape(Frame reference, PShape pShape) {
     this(reference);
-    set(pShape);
+    setShape(pShape);
   }
 
   protected Shape(Shape shape, Scene scene) {
@@ -238,7 +238,7 @@ public class Shape extends Frame {
           if (_frontShape != null)
             pGraphics.shape(_frontShape);
           else
-            set(pGraphics);
+            setShape(pGraphics);
           break;
         case FRONT_BACK:
           if (_frontShape != null)
@@ -301,7 +301,7 @@ public class Shape extends Frame {
         if (_backShape != null)
           pGraphics.shape(_backShape);
         else {
-          set(pGraphics);
+          setShape(pGraphics);
           setBack(pGraphics);
         }
         //*/
@@ -311,6 +311,8 @@ public class Shape extends Frame {
     }
   }
 
+  // TODO find better names for setShape (not conflicting with frame.set)
+
   /**
    * Override this method to set an immediate mode graphics procedure to draw the shape.
    * <p>
@@ -318,17 +320,17 @@ public class Shape extends Frame {
    *
    * @see #setFront(PGraphics)
    * @see #setBack(PGraphics)
-   * @see #set(PShape)
+   * @see #setShape(PShape)
    */
-  protected void set(PGraphics pGraphics) {
+  protected void setShape(PGraphics pGraphics) {
   }
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
    * front shape. Use it in conjunction with @see #setBack(PGraphics).
    *
-   * @see #set(PGraphics)
-   * @see #set(PShape)
+   * @see #setShape(PGraphics)
+   * @see #setShape(PShape)
    */
   protected void setFront(PGraphics pGraphics) {
   }
@@ -337,8 +339,8 @@ public class Shape extends Frame {
    * Override this method to set an immediate mode graphics procedure to draw the
    * back shape. Use it in conjunction with @see #setFront(PGraphics).
    *
-   * @see #set(PGraphics)
-   * @see #set(PShape)
+   * @see #setShape(PGraphics)
+   * @see #setShape(PShape)
    */
   protected void setBack(PGraphics pGraphics) {
   }
@@ -348,9 +350,9 @@ public class Shape extends Frame {
    *
    * @see #setFront(PShape)
    * @see #setBack(PShape)
-   * @see #set(PGraphics)
+   * @see #setShape(PGraphics)
    */
-  public void set(PShape shape) {
+  public void setShape(PShape shape) {
     setFront(shape);
     setBack(shape);
   }
@@ -359,8 +361,8 @@ public class Shape extends Frame {
    * Sets the retained mode pshape for the front shape. Use it in conjunction
    * with @see #setBack(PShape)}.
    *
-   * @see #set(PShape)
-   * @see #set(PGraphics)
+   * @see #setShape(PShape)
+   * @see #setShape(PGraphics)
    */
   public void setFront(PShape shape) {
     _frontShape = shape;
@@ -370,8 +372,8 @@ public class Shape extends Frame {
    * Sets the retained mode pshape for the back shape. Use it in conjunction
    * with @see #setFront(PShape)}.
    *
-   * @see #set(PShape)
-   * @see #set(PGraphics)
+   * @see #setShape(PShape)
+   * @see #setShape(PGraphics)
    */
   public void setBack(PShape shape) {
     _backShape = shape;
