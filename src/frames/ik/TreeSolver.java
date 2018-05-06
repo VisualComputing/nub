@@ -11,8 +11,7 @@
 
 package frames.ik;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 

@@ -10,10 +10,10 @@
 
 package frames.processing;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
-import frames.core.Node;
 import frames.primitives.*;
 import frames.primitives.constraint.BallAndSocket;
 import frames.primitives.constraint.Hinge;

@@ -11,7 +11,7 @@
 
 package frames.ik;
 
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.primitives.constraint.BallAndSocket;

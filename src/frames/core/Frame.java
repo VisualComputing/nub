@@ -8,9 +8,11 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.primitives;
+package frames.core;
 
-import frames.core.Graph;
+import frames.primitives.Matrix;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.primitives.constraint.Constraint;
 import frames.primitives.constraint.WorldConstraint;
 import frames.timing.TimingHandler;
@@ -103,7 +105,7 @@ public class Frame {
    */
   public boolean matches(Frame frame) {
     if (frame == null)
-      frame = new Frame();
+      frame = new Frame(_graph);
     return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
   }
 
@@ -121,7 +123,7 @@ public class Frame {
   public enum Precision {
     FIXED, ADAPTIVE, EXACT
   }
-  protected Precision _Precision;
+  protected Precision _precision;
   protected int _id;
   protected Graph _graph;
   protected List<Frame> _children;
@@ -129,93 +131,29 @@ public class Frame {
   protected boolean _culled;
 
   /**
-   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
-  public Frame() {
-    this(null, new Vector(), new Quaternion(), 1);
+  public Frame(Graph graph) {
+    this(graph, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(translation, new Quaternion(), 1)}.
+   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
-  public Frame(Vector translation) {
-    this(translation, new Quaternion(), 1);
+  public Frame(Frame reference) {
+    this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
   }
 
-  /**
-   * Same as {@code this(new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Quaternion rotation) {
-    this(new Vector(), rotation, 1);
+  public Frame(Graph graph, Vector translation, Quaternion rotation, float scaling) {
+    this(graph, null, translation, rotation, scaling);
   }
 
-  /**
-   * Same as {@code this(new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(float scaling) {
-    this(new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(translation, rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation) {
-    this(translation, rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(null, translation, rotation, scaling)}.
-   *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation, float scaling) {
-    this(null, translation, rotation, scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, new Quaternion(), 1)}.
-   *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation) {
-    this(reference, translation, new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Quaternion rotation) {
-    this(reference, new Vector(), rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, float scaling) {
-    this(reference, new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, rotation, 1)}.
-   *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation, Quaternion rotation) {
-    this(reference, translation, rotation, 1);
+  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+    this(reference.graph(), reference, translation, rotation, scaling);
   }
 
   /**
@@ -223,14 +161,18 @@ public class Frame {
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
-  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  public Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
     setReference(reference);
 
+    if (graph == null)
+      throw new RuntimeException("Frame graph should be non-null!");
+
     _graph = graph;
     _id = ++graph()._nodeCount;
+
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum node instances reached. Exiting now!");
@@ -250,18 +192,18 @@ public class Frame {
     _children = new ArrayList<Frame>();
     // graph()._addLeadingNode(this);
     setReference(reference());// _restorePath seems more robust
-    _Precision = Precision.FIXED;
+    _precision = Precision.FIXED;
     setPrecisionThreshold(20);
   }
 
-  protected Frame(Frame frame) {
+  protected Frame(Frame frame, Graph graph) {
     _translation = frame.translation().get();
     _rotation = frame.rotation().get();
     _scaling = frame.scaling();
     _reference = frame.reference();
     _constraint = frame.constraint();
+    _graph = graph;
 
-    this._graph = graph;
     if (this.graph() == frame.graph()) {
       this._id = ++graph()._nodeCount;
       // unlikely but theoretically possible
@@ -280,51 +222,19 @@ public class Frame {
     }
 
     _lastUpdate = frame.lastUpdate();
-    // end
-    // this.isInCamPath = otherFrame.isInCamPath;
-    //
-    // this.setPrecisionThreshold(otherFrame.precisionThreshold(),
-    // otherFrame.adaptiveGrabsInputThreshold());
-    this._Precision = frame._Precision;
+    this._precision = frame._precision;
     this._threshold = frame._threshold;
   }
 
-  /**
-   * Randomized this frame. The frame is randomly re-positioned inside the ball
-   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
-   * magnitude is a random in oldMagnitude * [0,5...2].
-   *
-   * @see #random(Vector, float)
-   */
-  public void randomize(Vector center, float radius) {
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius);
-    setPosition(Vector.add(center, displacement));
-    setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
+  public Frame get() {
+    return get(_graph);
   }
 
   /**
-   * Returns a random frame. The frame is randomly positioned inside the ball defined
-   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
-   *
-   * @see #randomize(Vector, float)
+   * Returns a deep copy of this frame.
    */
-  public static Frame random(Vector center, float radius) {
-    Frame frame = new Frame();
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius);
-    frame.setPosition(Vector.add(center, displacement));
-    frame.setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
-    return frame;
+  public Frame get(Graph graph) {
+    return new Frame(this, graph);
   }
 
   /**
@@ -337,6 +247,24 @@ public class Frame {
   }
 
   /**
+   * Randomized this frame. The frame is randomly re-positioned inside the ball
+   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
+   * magnitude is a random in oldMagnitude * [0,5...2].
+   *
+   * @see #random(Graph)
+   */
+  public void randomize(Vector center, float radius) {
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(radius);
+    setPosition(Vector.add(center, displacement));
+    setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
+  }
+
+  /**
    * Returns a random graph node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}). The
    * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
@@ -344,23 +272,16 @@ public class Frame {
    *
    * @see #randomize()
    */
-  public static Node random(Graph graph) {
-    Node node = new Node(graph);
+  public static Frame random(Graph graph) {
+    Frame frame = new Frame(graph);
     Vector displacement = Vector.random();
     displacement.setMagnitude(graph.radius());
-    node.setPosition(Vector.add(graph.center(), displacement));
-    node.setOrientation(Quaternion.random());
+    frame.setPosition(Vector.add(graph.center(), displacement));
+    frame.setOrientation(Quaternion.random());
     float lower = 0.5f;
     float upper = 2;
-    node.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
-    return node;
-  }
-
-  /**
-   * Returns a deep copy of this frame.
-   */
-  public Frame get() {
-    return new Frame(this);
+    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    return frame;
   }
 
   /**
@@ -370,7 +291,7 @@ public class Frame {
    * @see #reference()
    */
   public Frame detach() {
-    Frame frame = new Frame();
+    Frame frame = new Frame(_graph);
     frame.set(this);
     return frame;
   }
@@ -944,7 +865,7 @@ public class Frame {
         }
       }
     }
-    Frame old = new Frame(this); // correct line
+    Frame old = new Frame(this, graph()); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
     // hence add the frame to the mouse _grabber
 
@@ -1232,7 +1153,7 @@ public class Frame {
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return new Frame(position(), orientation(), magnitude()).matrix();
+      return new Frame(graph(), position(), orientation(), magnitude()).matrix();
     else
       return matrix();
   }
@@ -1420,7 +1341,7 @@ public class Frame {
    */
   public void set(Frame frame) {
     if (frame == null)
-      frame = new Frame();
+      frame = new Frame(_graph);
     setPosition(frame.position());
     setOrientation(frame.orientation());
     setMagnitude(frame.magnitude());
@@ -1448,7 +1369,7 @@ public class Frame {
    * @see #worldInverse()
    */
   public Frame inverse() {
-    Frame frame = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    Frame frame = new Frame(graph(), Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
     frame.setReference(reference());
     return frame;
   }
@@ -1471,7 +1392,7 @@ public class Frame {
    * @see #inverse()
    */
   public Frame worldInverse() {
-    return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
+    return (new Frame(graph(), Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
         1 / magnitude()));
   }
 
@@ -1839,7 +1760,7 @@ public class Frame {
    * @see #setPrecisionThreshold(float)
    */
   public Precision precision() {
-    return _Precision;
+    return _precision;
   }
 
   /**
@@ -1864,7 +1785,7 @@ public class Frame {
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
       System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
-    _Precision = precision;
+    _precision = precision;
   }
 
   /**

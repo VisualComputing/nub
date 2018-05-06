@@ -10,7 +10,6 @@
 
 package frames.core;
 
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;

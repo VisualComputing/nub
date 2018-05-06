@@ -86,7 +86,7 @@ public class MatrixHandler {
    * @see Graph#preDraw()
    * @see Graph#computeProjection()
    * @see Graph#computeCustomProjection()
-   * @see frames.primitives.Frame#view()
+   * @see Frame#view()
    * @see #bindProjection(Matrix)
    * @see #bindModelView(Matrix)
    */

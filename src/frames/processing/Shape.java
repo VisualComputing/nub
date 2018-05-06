@@ -10,8 +10,7 @@
 
 package frames.processing;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -62,7 +61,7 @@ import processing.opengl.PGraphicsOpenGL;
  * Default is {@link Highlighting#FRONT}. Set the policy with
  * {@link #setHighlighting(Highlighting)}).
  */
-public class Shape extends Node {
+public class Shape extends Frame {
   PShape _frontShape, _backShape;
 
   public enum Highlighting {
@@ -85,7 +84,7 @@ public class Shape extends Node {
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    * Sets {@code reference} as its {@link #reference()} node.
    */
-  public Shape(Node reference) {
+  public Shape(Frame reference) {
     super(reference);
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
@@ -108,7 +107,7 @@ public class Shape extends Node {
    * Sets {@code reference} as its {@link #reference() node and {@code pShape} as its retained mode
    * pshape.
    */
-  public Shape(Node reference, PShape pShape) {
+  public Shape(Frame reference, PShape pShape) {
     this(reference);
     set(pShape);
   }
@@ -166,7 +165,7 @@ public class Shape extends Node {
         System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
         return;
       }
-    this._Precision = precision;
+    this._precision = precision;
     // enables or disables the grabbing buffer
     if (precision() == Precision.EXACT) {
       graph()._bbEnabled = true;
