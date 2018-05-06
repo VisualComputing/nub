@@ -1,6 +1,8 @@
 package basics;
 
 import frames.core.Node;
+import frames.primitives.Point;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -46,6 +48,7 @@ public class Interaction extends PApplet {
         pGraphics.popStyle();
       }
     };
+    node.setRotation(Quaternion.random());
 
     scene.removeNodes();
     node.translate(75, 75, 75);
@@ -94,7 +97,13 @@ public class Interaction extends PApplet {
     //defaultNode.rotate(defaultNode.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
     //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
     //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
-    eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
+    //eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
+    if(defaultNode == eye)
+      defaultNode.mapSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+    else
+      defaultNode.mapRotate((mouseY-pmouseY),0, 0, PI / width);
+      //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+      //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
   }
 
   public static void main(String args[]) {

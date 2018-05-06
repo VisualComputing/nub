@@ -2369,9 +2369,23 @@ public class Node extends Frame implements Grabber {
   }
 
   // Gesture physical interface is quite nice!
+  // It always maps physical (screen) space geom data respect to the eye
 
+  public void mapTranslate(Vector vector) {
+    translate(gestureTranslate(vector));
+  }
+
+  /**
+   * Converts physical (device) space
+   * @param vector
+   * @return
+   */
   public Vector gestureTranslate(Vector vector) {
     return gestureTranslate(vector, 1);
+  }
+
+  public void mapTranslate(Vector vector, float sensitivity) {
+    translate(gestureTranslate(vector, sensitivity));
   }
 
   public Vector gestureTranslate(Vector vector, float sensitivity) {
@@ -2416,8 +2430,18 @@ public class Node extends Frame implements Grabber {
     return reference() == null ? _graph.eye().worldDisplacement(eyeVector) : reference().displacement(eyeVector, _graph.eye());
   }
 
+  // TODO research if spin(gestureRotate(roll, pitch, yaw)); is missed
+
+  public void mapRotate(float roll, float pitch, float yaw) {
+    rotate(gestureRotate(roll, pitch, yaw));
+  }
+
   public Quaternion gestureRotate(float roll, float pitch, float yaw) {
     return gestureRotate(roll, pitch, yaw, 1);
+  }
+
+  public void mapRotate(float roll, float pitch, float yaw, float sensitivity) {
+    rotate(gestureRotate(roll, pitch, yaw, sensitivity));
   }
 
   public Quaternion gestureRotate(float roll, float pitch, float yaw, float sensitivity) {
@@ -2440,8 +2464,16 @@ public class Node extends Frame implements Grabber {
     }
   }
 
+  public void mapSpin(Point point1, Point point2) {
+    spin(gestureSpin(point1, point2));
+  }
+
   public Quaternion gestureSpin(Point point1, Point point2) {
     return gestureSpin(point1, point2, 1);
+  }
+
+  public void mapSpin(Point point1, Point point2, float sensitivity) {
+    spin(gestureSpin(point1, point2, sensitivity));
   }
 
   public Quaternion gestureSpin(Point point1, Point point2, float sensitivity) {
@@ -2449,8 +2481,16 @@ public class Node extends Frame implements Grabber {
     return gestureSpin(point1, point2, new Point(center.x(), center.y()), sensitivity);
   }
 
+  public void mapSpin(Point point1, Point point2, Point center) {
+    spin(gestureSpin(point1, point2, center));
+  }
+
   public Quaternion gestureSpin(Point point1, Point point2, Point center) {
     return gestureSpin(point1, point2, center, 1);
+  }
+
+  public void mapSpin(Point point1, Point point2, Point center, float sensitivity) {
+    spin(gestureSpin(point1, point2, center, sensitivity));
   }
 
   public Quaternion gestureSpin(Point point1, Point point2, Point center, float sensitivity) {
@@ -2499,8 +2539,16 @@ public class Node extends Frame implements Grabber {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
+  public void mapLookAround(float deltaX, float deltaY, Vector upVector) {
+    rotate(gestureLookAround(deltaX, deltaY, upVector));
+  }
+
   public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector) {
     return gestureLookAround(deltaX, deltaY, upVector, 1);
+  }
+
+  public void mapLookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
+    rotate(gestureLookAround(deltaX, deltaY, upVector, sensitivity));
   }
 
   public Quaternion gestureLookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
@@ -2515,16 +2563,32 @@ public class Node extends Frame implements Grabber {
     return Quaternion.multiply(rotY, rotX);
   }
 
+  public void mapRotateCAD(float roll, float pitch) {
+    spin(gestureRotateCAD(roll, pitch));
+  }
+
   public Quaternion gestureRotateCAD(float roll, float pitch) {
     return gestureRotateCAD(roll, pitch, new Vector(0, 1, 0), 1);
+  }
+
+  public void mapRotateCAD(float roll, float pitch, Vector upVector) {
+    spin(gestureRotateCAD(roll, pitch, upVector));
   }
 
   public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector) {
     return gestureRotateCAD(roll, pitch, upVector, 1);
   }
 
+  public void mapRotateCAD(float roll, float pitch, float sensitivity) {
+    spin(gestureRotateCAD(roll, pitch, sensitivity));
+  }
+
   public Quaternion gestureRotateCAD(float roll, float pitch, float sensitivity) {
     return gestureRotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
+  }
+
+  public void mapRotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
+    spin(gestureRotateCAD(roll, pitch, upVector, sensitivity));
   }
 
   public Quaternion gestureRotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
