@@ -188,6 +188,7 @@ public class Graph {
     setRadius(100);
     setCenter(new Vector());
     _anchor = center().get();
+    //TODO check detached eyes too ;)
     setEye(new Frame(this));
     fitBall();
 
