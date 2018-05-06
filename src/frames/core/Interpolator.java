@@ -63,7 +63,7 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  *
- * <b>Attention:</b> If a {@link frames.primitives.constraint.Constraint} is attached to
+ * <b>Attention:</b> If a {@link frames.core.constraint.Constraint} is attached to
  * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.

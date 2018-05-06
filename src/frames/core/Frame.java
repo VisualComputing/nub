@@ -13,8 +13,8 @@ package frames.core;
 import frames.primitives.Matrix;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.Constraint;
-import frames.primitives.constraint.WorldConstraint;
+import frames.core.constraint.Constraint;
+import frames.core.constraint.WorldConstraint;
 import frames.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -79,16 +79,16 @@ import java.util.List;
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Constraints</h2>
  * One interesting feature of a frame is that its displacements can be constrained. When a
- * {@link frames.primitives.constraint.Constraint} is attached to a frame, it filters
+ * {@link frames.core.constraint.Constraint} is attached to a frame, it filters
  * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the
  * resulting filtered motion is applied to the frame. The default {@link #constraint()}
  * is {@code null} resulting in no filtering. Use {@link #setConstraint(Constraint)} to
  * attach a constraint to a frame.
  * <p>
  * Classical constraints are provided for convenience (see
- * {@link frames.primitives.constraint.LocalConstraint},
- * {@link frames.primitives.constraint.WorldConstraint} and
- * {@link frames.primitives.constraint.EyeConstraint}) and new constraints can very
+ * {@link frames.core.constraint.LocalConstraint},
+ * {@link frames.core.constraint.WorldConstraint} and
+ * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Syncing</h2>
  * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
@@ -444,7 +444,7 @@ public class Frame {
   // CONSTRAINT
 
   /**
-   * Returns the current {@link frames.primitives.constraint.Constraint} applied to the
+   * Returns the current {@link frames.core.constraint.Constraint} applied to the
    * frame.
    * <p>
    * A {@code null} value (default) means that no constraint is used to filter the frame

@@ -9,7 +9,7 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.primitives.constraint;
+package frames.core.constraint;
 
 import frames.core.Frame;
 import frames.primitives.Quaternion;
@@ -17,23 +17,27 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
-public class SphericalPolygon extends Constraint {
+public class PlanarPolygon extends Constraint {
     /*
     TODO: Enable Setting different Axis Direction
     * With this Kind of Constraint no Translation is allowed
-    * and the rotation depends on a Cone which base is a Spherical Polygon. This kind of constraint always
+    * and the rotation depends on a Cone which base is a Polygon. This kind of constraint always
     * look for the reference frame (local constraint), if no initial position is
     * set a Quat() is assumed as rest position
     * */
 
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
-  protected Vector _visiblePoint = new Vector();
+  protected float _height = 1.f;
   protected Quaternion _restRotation = new Quaternion();
   protected Vector _min, _max;
 
-  //Some pre-computations
-  protected ArrayList<Vector> _b = new ArrayList<Vector>();
-  protected ArrayList<Vector> _s = new ArrayList<Vector>();
+  public Quaternion restRotation() {
+    return _restRotation;
+  }
+
+  public void setRestRotation(Quaternion restRotation) {
+    this._restRotation = restRotation.get();
+  }
 
   /**
    * reference is a Quaternion that will be aligned to point to the given Basis Vectors
@@ -49,61 +53,61 @@ public class SphericalPolygon extends Constraint {
     _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
   }
 
-  public Quaternion restRotation() {
-    return _restRotation;
-  }
-
-  public void setRestRotation(Quaternion restRotation) {
-    this._restRotation = restRotation.get();
-  }
-
   public ArrayList<Vector> vertices() {
     return _vertices;
   }
 
   public void setVertices(ArrayList<Vector> vertices) {
-    this._vertices = _projectOnUnitSphere(vertices);
-    this._visiblePoint = _setVisiblePoint();
-    _setBoundingBox();
-    _init();
+    this._vertices = vertices;
   }
 
-  public SphericalPolygon() {
+  public float height() {
+    return _height;
+  }
+
+  public void setHeight(float height) {
+    this._height = height;
+  }
+
+  public PlanarPolygon() {
     _vertices = new ArrayList<Vector>();
     _restRotation = new Quaternion();
-    _visiblePoint = new Vector(0, 0, 1);
+    _height = 5.f;
   }
 
-  public SphericalPolygon(ArrayList<Vector> vertices, Quaternion restRotation, Vector visiblePoint) {
-    this._vertices = _projectOnUnitSphere(vertices);
+  public PlanarPolygon(ArrayList<Vector> vertices, Quaternion restRotation, float height) {
+    this._vertices = vertices;
     this._restRotation = restRotation.get();
-    this._visiblePoint = visiblePoint;
-    visiblePoint.normalize();
+    this._height = height;
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
     _setBoundingBox();
-    _init();
   }
 
-  public SphericalPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
-    this._vertices = _projectOnUnitSphere(vertices);
+  public PlanarPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
+    this._vertices = vertices;
     this._restRotation = restRotation.get();
-    this._visiblePoint = _setVisiblePoint();
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
     _setBoundingBox();
-    _init();
   }
 
-  public SphericalPolygon(ArrayList<Vector> vertices) {
-    this._vertices = _projectOnUnitSphere(vertices);
-    this._visiblePoint = _setVisiblePoint();
+  public PlanarPolygon(ArrayList<Vector> vertices) {
+    this._vertices = vertices;
+    for (Vector v : _vertices)
+      //Just not consider Z
+      v.setZ(0);
     _setBoundingBox();
-    _init();
   }
 
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-        /*
+    /*
         if(frame.is2D())
-            throw new RuntimeException("This constrained not supports 2D Frames");
-        */
+        throw new RuntimeException("This constrained not supports 2D Frames");
+    */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     //twist to frame
     Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
@@ -125,11 +129,16 @@ public class SphericalPolygon extends Constraint {
 
   public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
-    if (!_isInside(point)) {
-      Vector constrained = _closestPoint(point);
+    Vector proj = new Vector(_height * point.x() / point.z(), _height * point.y() / point.z());
+    float inverse = (_height < 0) == (point.z() < 0) ? 1 : -1;
+    if (!_isInside(proj)) {
+      proj.multiply(inverse);
+      Vector constrained = _closestPoint(proj);
+      constrained.setZ(_height);
+      constrained.multiply(inverse * point.z() / _height);
       return restRotation.rotate(constrained);
     }
-    return target;
+    return inverse == -1 ? new Vector(target.x(), target.y(), -target.z()) : target;
   }
 
   protected void _setBoundingBox() {
@@ -138,56 +147,25 @@ public class SphericalPolygon extends Constraint {
     for (Vector v : _vertices) {
       if (v.x() < _min.x()) _min.setX(v.x());
       if (v.y() < _min.y()) _min.setY(v.y());
-      if (v.z() < _min.z()) _min.setZ(v.z());
       if (v.x() > _max.x()) _max.setX(v.x());
       if (v.y() > _max.y()) _max.setY(v.y());
-      if (v.z() > _max.z()) _max.setZ(v.z());
     }
   }
 
-  //Compute centroid
-  //TODO: Choose a Visible point which works well for non convex Polygons
-  protected Vector _setVisiblePoint() {
-    if (_vertices.isEmpty()) return null;
-    Vector centroid = new Vector();
-    //Assume that every vertex lie in the sphere boundary
-    for (Vector vertex : _vertices) {
-      centroid.add(vertex);
+  /*Code was transcript from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html*/
+  protected boolean _isInside(Vector point) {
+    if (point.x() < _min.x() || point.x() > _max.x() ||
+        point.y() < _min.y() || point.y() > _max.y()) return false;
+    //Ray-casting algorithm
+    boolean c = false;
+    for (int i = 0, j = _vertices.size() - 1; i < _vertices.size(); j = i++) {
+      Vector v_i = _vertices.get(i);
+      Vector v_j = _vertices.get(j);
+      if (((v_i.y() > point.y()) != (v_j.y() > point.y())) &&
+          (point.x() < (v_j.x() - v_i.x()) * (point.y() - v_i.y()) / (v_j.y() - v_i.y()) + v_i.x()))
+        c = !c;
     }
-    centroid.normalize();
-    return centroid;
-  }
-
-  protected ArrayList<Vector> _projectOnUnitSphere(ArrayList<Vector> vertices) {
-    ArrayList<Vector> newVertices = new ArrayList<Vector>();
-    for (Vector vertex : vertices) {
-      newVertices.add(vertex.normalize(new Vector()));
-    }
-    return newVertices;
-  }
-
-  //TODO: seems this one should be protected
-  protected void _init() {
-    _b = new ArrayList<Vector>();
-    _s = new ArrayList<Vector>();
-    for (int i = 0; i < _vertices.size(); i++) {
-      Vector p_i = _vertices.get(i);
-      Vector p_j = i + 1 == _vertices.size() ? _vertices.get(0) : _vertices.get(i + 1);
-      _s.add(Vector.cross(_visiblePoint, p_i, null));
-      _b.add(Vector.cross(p_i, p_j, null));
-    }
-  }
-
-  protected boolean _isInside(Vector L) {
-    //1. Find i s.t p_i = S_i . L >= 0 and p_j = S_j . L < 0 with j = i + 1
-    int index = 0;
-    for (int i = 0; i < _vertices.size(); i++) {
-      if (Vector.dot(_s.get(i), L) >= 0 && Vector.dot(_s.get((i + 1) % _vertices.size()), L) < 0) {
-        index = i;
-        break;
-      }
-    }
-    return Vector.dot(_b.get(index), L) >= 0;
+    return c;
   }
 
   protected Vector _closestPoint(Vector point) {

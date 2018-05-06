@@ -8,44 +8,62 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.primitives.constraint;
+package frames.core.constraint;
 
+import frames.core.Graph;
 import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 /**
- * An AxisPlaneConstraint defined in the world coordinate system.
+ * An AxisPlaneConstraint defined in the Eye coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
- * {@link #rotationConstraintDirection()} are expressed in the world coordinate system.
+ * {@link #rotationConstraintDirection()} are expressed in the associated {@link #eye()}
+ * coordinate system.
  */
-public class WorldConstraint extends AxisPlaneConstraint {
+public class EyeConstraint extends AxisPlaneConstraint {
+  private Graph scene;
+
+  /**
+   * Creates an EyeConstraint, whose constrained directions are defined in the
+   * {@link #eye()} coordinate system.
+   */
+  public EyeConstraint(Graph scn) {
+    super();
+    scene = scn;
+  }
+
+  /**
+   * Returns the associated Eye. Set using the EyeConstraint constructor.
+   */
+  public Frame eye() {
+    return scene.eye();
+  }
+
   /**
    * Depending on {@link #translationConstraintType()}, {@code constrain} translation to
-   * be along an axis or limited to a plane defined in the world coordinate system by
-   * {@link #translationConstraintDirection()}.
+   * be along an axis or limited to a plane defined in the {@link #eye()} coordinate
+   * system by {@link #translationConstraintDirection()}.
    */
   @Override
   public Vector constrainTranslation(Vector translation, Frame frame) {
-    Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
+    Vector res = translation.get();
     Vector proj;
     switch (translationConstraintType()) {
       case FREE:
         break;
       case PLANE:
-        if (frame.reference() != null) {
-          proj = frame.reference().displacement(translationConstraintDirection());
-          res = Vector.projectVectorOnPlane(translation, proj);
-        } else
-          res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
+        proj = eye().worldDisplacement(translationConstraintDirection());
+        if (frame.reference() != null)
+          proj = frame.reference().displacement(proj);
+        res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        if (frame.reference() != null) {
-          proj = frame.reference().displacement(translationConstraintDirection());
-          res = Vector.projectVectorOnAxis(translation, proj);
-        } else
-          res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());
+        proj = eye().worldDisplacement(translationConstraintDirection());
+        if (frame.reference() != null)
+          proj = frame.reference().displacement(proj);
+        res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
         res = new Vector(0.0f, 0.0f, 0.0f);
@@ -56,8 +74,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
 
   /**
    * When {@link #rotationConstraintType()} is of type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the Frame world coordinate
-   * system by {@link #rotationConstraintDirection()}.
+   * be a rotation around an axis whose direction is defined in the {@link #eye()}
+   * coordinate system by {@link #rotationConstraintDirection()}.
    */
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
@@ -68,8 +86,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case PLANE:
         break;
       case AXIS:
+        Vector axis = frame.displacement(eye().worldDisplacement(rotationConstraintDirection()));
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-        Vector axis = frame.displacement(rotationConstraintDirection());
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
         break;
