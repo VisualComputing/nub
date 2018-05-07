@@ -935,7 +935,7 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   public void cast() {
-    _targetPGraphics  = frontBuffer();
+    _targetPGraphics = frontBuffer();
     super.cast();
   }
 

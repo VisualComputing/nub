@@ -5,10 +5,7 @@ import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PShape;
 
 /**
  * Created by pierre on 11/15/16.
@@ -81,7 +78,7 @@ public class Basics extends PApplet {
     background(0);
     scene.drawAxes();
     //scene.cast();
-    if(mouseDragged)
+    if (mouseDragged)
       scene.cast();
     else
       trackedFrame = scene.cast(mouseX, mouseY);

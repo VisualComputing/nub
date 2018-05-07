@@ -66,7 +66,7 @@ public class Interaction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    if(mouseDragged)
+    if (mouseDragged)
       scene.cast();
     else
       trackedFrame = scene.cast(mouseX, mouseY);

@@ -233,7 +233,7 @@ public class Shape extends Frame {
           //TODO pending
           //if (grabsInput())
           //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY))
-          if(graph().isTrackedFrame(this))
+          if (graph().isTrackedFrame(this))
             pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
@@ -249,7 +249,7 @@ public class Shape extends Frame {
           //TODO pending
           //if (grabsInput()) {
           //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
-          if(graph().isTrackedFrame(this)) {
+          if (graph().isTrackedFrame(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
@@ -260,7 +260,7 @@ public class Shape extends Frame {
           //TODO pending
           //if (grabsInput()) {
           //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
-          if(graph().isTrackedFrame(this)) {
+          if (graph().isTrackedFrame(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
