@@ -116,7 +116,7 @@ public class Frame {
   protected Constraint _constraint;
   protected long _lastUpdate;
 
-  //TODO new attributes
+  //TODO new attributes (attached frames only)
 
   /**
    * Enumerates the Picking precision modes.
@@ -1371,34 +1371,6 @@ public class Frame {
   }
 
   // CONVERSION
-
-  /**
-   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this frame to any graph you want using this
-   * method.
-   * <p>
-   * Very efficient prefer always this than
-   *
-   * @see #applyTransformation()
-   * @see #matrix()
-   * @see Graph#applyTransformation(Frame)
-   */
-  public void applyTransformation() {
-    graph().applyTransformation(this);
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this frame to any graph you
-   * want using this method.
-   *
-   * @see #applyWorldTransformation()
-   * @see #worldMatrix()
-   * @see Graph#applyWorldTransformation(Frame)
-   */
-  public void applyWorldTransformation() {
-    graph().applyWorldTransformation(this);
-  }
 
   /**
    * Returns the local transformation matrix represented by the frame.
