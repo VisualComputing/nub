@@ -627,10 +627,10 @@ public class Graph {
   }
 
   public Frame cast(float x, float y) {
-    _trackedFrame = null;
+    resetTrackedFrame();
     for (Frame frame : leadingFrames())
       _visit(frame, x, y);
-    return _trackedFrame;
+    return trackedFrame();
   }
 
   protected void _visit(Frame frame, float x, float y) {

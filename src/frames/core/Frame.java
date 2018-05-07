@@ -516,7 +516,7 @@ public class Frame {
   //TODO enable disable tracking per frame basis
 
   public void visit(float x, float y) {
-    if (_graph._trackedFrame == null)
+    if (graph().trackedFrame() == null)
       if (track(x, y))
         graph().setTrackedFrame(this);
     visit();
