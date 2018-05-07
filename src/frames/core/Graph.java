@@ -636,10 +636,10 @@ public class Graph {
   protected void _visit(Frame frame, float x, float y) {
     pushModelView();
     applyTransformation(frame);
-    frame.visit(x, y);
+    frame._visit(x, y);
     if (!frame.isCulled())
       for (Frame child : frame.children())
-        _visit(child);
+        _visit(child, x, y);
     popModelView();
   }
 

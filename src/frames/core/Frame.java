@@ -131,6 +131,7 @@ public class Frame {
   protected List<Frame> _children;
   protected float _threshold;
   protected boolean _culled;
+  protected boolean _tracking;
 
   //TODO check new Frame() vs detach() al over the place
 
@@ -195,6 +196,7 @@ public class Frame {
     //setReference(reference());// _restorePath seems more robust
     _precision = Precision.FIXED;
     setPrecisionThreshold(20);
+    enableTracking(true);
   }
 
   protected Frame(Frame frame, Graph graph) {
@@ -230,6 +232,7 @@ public class Frame {
     _lastUpdate = frame.lastUpdate();
     this._precision = frame._precision;
     this._threshold = frame._threshold;
+    this._tracking = frame._tracking;
   }
 
   public Frame get() {
@@ -513,10 +516,26 @@ public class Frame {
     return false;
   }
 
-  //TODO enable disable tracking per frame basis
+  /**
+   * Returns {@code true} if tracking is enabled.
+   *
+   * @see #enableTracking(boolean)
+   */
+  public boolean isTrackingEnabled() {
+    return _tracking;
+  }
 
-  public void visit(float x, float y) {
-    if (graph().trackedFrame() == null)
+  /**
+   * Enables frame tracking according to {@code flag}.
+   *
+   * @see #isTrackingEnabled()
+   */
+  public void enableTracking(boolean flag) {
+    _tracking = flag;
+  }
+
+  protected void _visit(float x, float y) {
+    if (graph().trackedFrame() == null && isTrackingEnabled())
       if (track(x, y))
         graph().setTrackedFrame(this);
     visit();

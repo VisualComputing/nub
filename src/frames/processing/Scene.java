@@ -933,15 +933,16 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  /**
-   * Same as {@code cast(frontBuffer())}.
-   *
-   * @see #frontBuffer()
-   * @see #cast(PGraphics)
-   */
   @Override
   public void cast() {
-    cast(frontBuffer());
+    _targetPGraphics  = frontBuffer();
+    super.cast();
+  }
+
+  @Override
+  public Frame cast(float x, float y) {
+    _targetPGraphics = frontBuffer();
+    return super.cast(x, y);
   }
 
   /**

@@ -13,10 +13,10 @@ import processing.core.PShape;
 /**
  * Created by pierre on 11/15/16.
  */
-public class Interaction extends PApplet {
+public class Basics extends PApplet {
   Scene scene;
   Frame eye;
-  Shape node, frame;
+  Frame node, frame;
   Frame trackedFrame;
   Frame defaultNode;
   Vector upVector;
@@ -37,18 +37,19 @@ public class Interaction extends PApplet {
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
-    node = new Shape(scene) {
+    node = new Frame(scene) {
       @Override
-      public void setShape(PGraphics pGraphics) {
-        scene.drawAxes(pGraphics, scene.radius() / 3);
-        pGraphics.pushStyle();
-        pGraphics.rectMode(CENTER);
-        pGraphics.fill(255, 0, 255);
+      public void visit() {
+        scene.drawAxes(scene.radius() / 3);
+        pushStyle();
+        rectMode(CENTER);
+        fill(255, 0, 255);
         if (scene.is3D())
-          Scene.drawCylinder(pGraphics, 30, scene.radius() / 4, 200);
+          scene.drawCylinder(30, scene.radius() / 4, 200);
         else
-          pGraphics.rect(10, 10, 200, 200);
-        pGraphics.popStyle();
+          rect(10, 10, 200, 200);
+        popStyle();
+        scene.drawShooterTarget(this);
       }
     };
     node.setRotation(Quaternion.random());
@@ -56,20 +57,37 @@ public class Interaction extends PApplet {
     //scene.removeNodes();
     node.translate(75, 75, 75);
 
-    frame = new Shape(node);
-    frame.setShape(shape());
+    frame = new Frame(node) {
+      @Override
+      public void visit() {
+        scene.drawAxes(scene.radius() / 3);
+        pushStyle();
+        rectMode(CENTER);
+        fill(255, 255, 0);
+        if (scene.is3D())
+          scene.drawCylinder(30, scene.radius() / 4, 200);
+        else
+          rect(10, 10, 200, 200);
+        popStyle();
+        scene.drawShooterTarget(this);
+      }
+    };
     frame.translate(275, 275, 275);
 
-    defaultNode = eye;
+    //defaultNode = eye;
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
+    //scene.cast();
     if(mouseDragged)
       scene.cast();
     else
       trackedFrame = scene.cast(mouseX, mouseY);
+
+    //if (mousePressed && (mouseButton == LEFT))
+    //eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
   }
 
   public void keyPressed() {
@@ -133,14 +151,7 @@ public class Interaction extends PApplet {
     mouseDragged = false;
   }
 
-  PShape shape() {
-    PShape fig = createShape(BOX, 160);
-    fig.setStroke(255);
-    fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
-    return fig;
-  }
-
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.Interaction"});
+    PApplet.main(new String[]{"basics.Basics"});
   }
 }
