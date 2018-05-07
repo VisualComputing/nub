@@ -108,7 +108,7 @@ import java.util.List;
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
  * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #traverse()} to render all scene-graph shapes or {@link Shape#draw()} to
+ * {@link #cast()} to render all scene-graph shapes or {@link Shape#draw()} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
@@ -157,12 +157,12 @@ import java.util.List;
  * {@code
  * ...
  * void draw() {
- *   scene.traverse();
+ *   scene.cast();
  *   scene.drawPath(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #traverse()} will draw the animated shape(s),
+ * while {@link #cast()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
  * <h2>Drawing functionality</h2>
  * There are several static drawing functions that complements those already provided
@@ -326,8 +326,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * Internal use. Traverse the scene {@link #frames()}) into the
+   * {@link #backBuffer()} to perform picking on the scene {@link #frames()}.
    * <p>
    * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
    * scenes).
@@ -338,7 +338,7 @@ public class Scene extends Graph implements PConstants {
     backBuffer().beginDraw();
     backBuffer().pushStyle();
     backBuffer().background(0);
-    traverse(backBuffer());
+    cast(backBuffer());
     backBuffer().popStyle();
     backBuffer().endDraw();
     // if (frames().size() > 0)
@@ -934,22 +934,22 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code traverse(frontBuffer())}.
+   * Same as {@code cast(frontBuffer())}.
    *
    * @see #frontBuffer()
-   * @see #traverse(PGraphics)
+   * @see #cast(PGraphics)
    */
   @Override
-  public void traverse() {
-    traverse(frontBuffer());
+  public void cast() {
+    cast(frontBuffer());
   }
 
   /**
-   * Draw all {@link #nodes()} into the given pGraphics. No
+   * Draw all {@link #frames()} into the given pGraphics. No
    * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
-   * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the nodes
+   * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #postDraw()}.
    *
@@ -958,14 +958,14 @@ public class Scene extends Graph implements PConstants {
    * place.
    *
    * @param pGraphics
-   * @see #nodes()
-   * @see #traverse()
+   * @see #frames()
+   * @see #cast()
    */
-  public void traverse(PGraphics pGraphics) {
+  public void cast(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
     if (pGraphics != frontBuffer())
       _bind(pGraphics);
-    super.traverse();
+    super.cast();
   }
 
   @Override
@@ -1385,7 +1385,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      if (frame instanceof Frame)
+      if (frame.isAttached())
         drawShooterTarget(frame);
       else
         drawCross(frame);
@@ -2419,17 +2419,16 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the cross is the node
    * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isInputNode(Frame)} it also applies
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
-    if (frame instanceof Frame)
-      if (isInputNode((Frame) frame))
-        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame instanceof Frame ? ((Frame) frame).precisionThreshold() : radius() / 5);
+    if (isTrackedFrame(frame))
+      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawCross(frame, frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2489,17 +2488,16 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the target is the node
    * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isInputNode(Frame)} it also applies
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
-    if (frame instanceof Frame)
-      if (isInputNode((Frame) frame))
-        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame instanceof Frame ? ((Frame) frame).precisionThreshold() : radius() / 5);
+    if (isTrackedFrame(frame))
+      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawShooterTarget(frame, frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 

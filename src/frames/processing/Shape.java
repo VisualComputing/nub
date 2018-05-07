@@ -171,7 +171,7 @@ public class Shape extends Frame {
       graph()._bbEnabled = true;
       return;
     }
-    for (Frame node : graph().nodes())
+    for (Frame node : graph().frames())
       if (node instanceof Shape)
         if (node.precision() == Precision.EXACT) {
           graph()._bbEnabled = true;
@@ -183,9 +183,9 @@ public class Shape extends Frame {
   /**
    * Same as {@code draw(scene.frontBuffer())}.
    * <p>
-   * Call it only instead of {@link Scene#traverse()}.
+   * Call it only instead of {@link Scene#cast()}.
    *
-   * @see frames.processing.Scene#traverse(PGraphics)
+   * @see frames.processing.Scene#cast(PGraphics)
    */
   public void draw() {
     draw(graph().frontBuffer());
@@ -195,11 +195,11 @@ public class Shape extends Frame {
    * Draws the shape into {@code pGraphics} using the current point of view (see
    * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
    * <p>
-   * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
+   * This method is internally called by {@link Scene#cast(PGraphics)} to draw
    * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
    * the node into the scene main {@link Scene#frontBuffer()}.
    * <p>
-   * Call it only instead of {@link Scene#traverse(PGraphics)}.
+   * Call it only instead of {@link Scene#cast(PGraphics)}.
    */
   public void draw(PGraphics pGraphics) {
     pGraphics.pushMatrix();

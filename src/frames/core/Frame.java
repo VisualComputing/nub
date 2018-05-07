@@ -177,7 +177,7 @@ public class Frame {
 
     // unlikely but theoretically possible
     if (_id == 16777216)
-      throw new RuntimeException("Maximum node instances reached. Exiting now!");
+      throw new RuntimeException("Maximum frame instances reached. Exiting now!");
 
     if (graph().is2D()) {
       if (position().z() != 0)
@@ -482,22 +482,22 @@ public class Frame {
     return _children;
   }
 
-  protected boolean _addChild(Frame node) {
-    if (node == null)
+  protected boolean _addChild(Frame frame) {
+    if (frame == null)
       return false;
-    if (_hasChild(node))
+    if (_hasChild(frame))
       return false;
-    return children().add(node);
+    return children().add(frame);
   }
 
   /**
-   * Removes the leading node if present. Typically used when re-parenting the node.
+   * Removes the leading frame if present. Typically used when re-parenting the frame.
    */
-  protected boolean _removeChild(Frame node) {
+  protected boolean _removeChild(Frame frame) {
     boolean result = false;
     Iterator<Frame> it = children().iterator();
     while (it.hasNext()) {
-      if (it.next() == node) {
+      if (it.next() == frame) {
         it.remove();
         result = true;
         break;
@@ -506,23 +506,32 @@ public class Frame {
     return result;
   }
 
-  protected boolean _hasChild(Frame node) {
-    for (Frame frame : children())
-      if (frame == node)
+  protected boolean _hasChild(Frame frame) {
+    for (Frame child : children())
+      if (child == frame)
         return true;
     return false;
   }
 
+  //TODO enable disable tracking per frame basis
+
+  public void visit(float x, float y) {
+    if (_graph._trackedFrame == null)
+      if (track(x, y))
+        graph().setTrackedFrame(this);
+    visit();
+  }
+
   /**
-   * Procedure called on the node by the graph traversal algorithm. Default implementation is
+   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes.
    * <p>
-   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
+   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
    *
    * <pre>
    * {@code
-   * node = new Node(graph) {
+   * frame = new Frame(graph) {
    *   public void visit() {
    *     //hierarchical culling is optional and disabled by default
    *     cull(cullingCondition);
@@ -533,7 +542,7 @@ public class Frame {
    * }
    * </pre>
    *
-   * @see Graph#traverse()
+   * @see Graph#cast()
    * @see #cull(boolean)
    * @see #isCulled()
    */
@@ -552,8 +561,8 @@ public class Frame {
   }
 
   /**
-   * Enables or disables {@link #visit()} of this node and its children during
-   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   * Enables or disables {@link #visit()} of this frame and its children during
+   * {@link Graph#cast()}. Culling should be decided within {@link #visit()}.
    *
    * @see #isCulled()
    */
@@ -562,8 +571,8 @@ public class Frame {
   }
 
   /**
-   * Returns whether or not the node culled or not. Culled nodes (and their children)
-   * will not be visited by the {@link Graph#traverse()} algoruthm.
+   * Returns whether or not the frame culled or not. Culled frames (and their children)
+   * will not be visited by the {@link Graph#cast()} algoruthm.
    *
    * @see #cull(boolean)
    */
@@ -599,7 +608,7 @@ public class Frame {
   }
 
   /**
-   * Returns a random graph node. The node is randomly positioned inside the ball defined
+   * Returns a random graph frame. The frame is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}). The
    * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
    * is a random in [0,5...2].
@@ -634,7 +643,7 @@ public class Frame {
   // PRECISION
 
   /**
-   * Returns the picking precision threshold in pixels used by the node to {@link #track(float, float)}.
+   * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
    *
    * @see #setPrecisionThreshold(float)
    */
@@ -645,7 +654,7 @@ public class Frame {
   }
 
   /**
-   * Returns the node picking precision. See {@link #setPrecision(Precision)} for details.
+   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
    *
    * @see #setPrecision(Precision)
    * @see #setPrecisionThreshold(float)
@@ -655,17 +664,17 @@ public class Frame {
   }
 
   /**
-   * Sets the node picking precision.
+   * Sets the frame picking precision.
    * <p>
    * When {@link #precision()} is {@link Precision#FIXED} or
    * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the node {@link #center()} screen projection which size
+   * within a squared area around the frame {@link #center()} screen projection which size
    * is defined by {@link #setPrecisionThreshold(float)}.
    * <p>
    * When {@link #precision()} is {@link Precision#EXACT}, picking is done
    * in a precise manner according to the projected pixels of the visual representation
-   * related to the node. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the node) and requires the graph to implement
+   * related to the frame. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the frame) and requires the graph to implement
    * a back buffer.
    * <p>
    * Default implementation of this policy will behave like {@link Precision#FIXED}.
@@ -675,24 +684,24 @@ public class Frame {
    */
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived nodes and scenes that support a backBuffer.");
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
     _precision = precision;
   }
 
   /**
-   * Sets the length of the squared area around the node {@link #center()} screen
+   * Sets the length of the squared area around the frame {@link #center()} screen
    * projection that defined the {@link #track(float, float)} condition used for
-   * node picking.
+   * frame picking.
    * <p>
    * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
    * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the node origin onto the screen.
+   * at the projection of the frame origin onto the screen.
    * <p>
    * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
    * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the node
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
    * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the node shape.
+   * size of the object you are attaching to the frame shape.
    * <p>
    * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
    * {@link #setPrecision(Precision)} for details.
@@ -711,7 +720,7 @@ public class Frame {
   }
 
   /**
-   * Picks the node according to the {@link #precision()}.
+   * Picks the frame according to the {@link #precision()}.
    *
    * @see #precision()
    * @see #setPrecision(Precision)
@@ -1346,7 +1355,7 @@ public class Frame {
 
   /**
    * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this node to any graph you want using this
+   * apply the transformation represented by this frame to any graph you want using this
    * method.
    * <p>
    * Very efficient prefer always this than
@@ -1361,7 +1370,7 @@ public class Frame {
 
   /**
    * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this node to any graph you
+   * You may apply the world transformation represented by this frame to any graph you
    * want using this method.
    *
    * @see #applyWorldTransformation()
@@ -1829,8 +1838,8 @@ public class Frame {
   }
 
   /**
-   * Rotates the node using {@code quaternion} around its {@link #position()} (non-eye nodes)
-   * or around the {@link Graph#anchor()} when this node is the {@link Graph#eye()}.
+   * Rotates the frame using {@code quaternion} around its {@link #position()} (non-eye frames)
+   * or around the {@link Graph#anchor()} when this frame is the {@link Graph#eye()}.
    */
   //TODO discard in favor of graph spin!
   public void spin(Quaternion quaternion) {
@@ -1842,7 +1851,7 @@ public class Frame {
 
   /**
    * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye nodes.
+   * between eye and non-eye frames.
    *
    * @see #isEye()
    */
@@ -1854,7 +1863,7 @@ public class Frame {
   }
 
   /**
-   * Centers the node into the graph.
+   * Centers the frame into the graph.
    */
   public void center() {
     if (isEye())

@@ -33,7 +33,6 @@ public class Interaction extends PApplet {
     eye = new Frame(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.removeNode(eye);
     scene.fitBallInterpolation();
 
     node = new Shape(scene) {
@@ -65,7 +64,7 @@ public class Interaction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.cast();
 
     //if (mousePressed && (mouseButton == LEFT))
     //eye.spin(eye.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
