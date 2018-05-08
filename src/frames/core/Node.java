@@ -10,7 +10,9 @@
 
 package frames.core;
 
-import frames.primitives.*;
+import frames.primitives.Frame;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.primitives.constraint.WorldConstraint;
 import frames.timing.TimingHandler;
 
@@ -71,9 +73,11 @@ public class Node extends Frame {
   protected float _threshold;
   protected boolean _culled;
   protected boolean _tracking;
+
   public enum Precision {
     FIXED, ADAPTIVE, EXACT
   }
+
   protected Precision _precision;
 
   /**
@@ -118,7 +122,7 @@ public class Node extends Frame {
     }
     _culled = false;
     _children = new ArrayList<Node>();
-    //setReference(reference());// _restorePath seems more robust
+    setReference(reference());// _restorePath is completely needed here
     _precision = Precision.FIXED;
     setPrecisionThreshold(20);
     enableTracking(true);
@@ -129,11 +133,9 @@ public class Node extends Frame {
     _graph = graph;
     this._culled = node._culled;
     this._children = new ArrayList<Node>();
-    /*
-    if (this.graph() == frame.graph()) {
+    if (this.graph() == node.graph()) {
       this.setReference(reference());// _restorePath
     }
-    */
     this._precision = node._precision;
     this._threshold = node._threshold;
     this._tracking = node._tracking;
@@ -309,9 +311,9 @@ public class Node extends Frame {
 
   //TODO docs
   protected void _visit(float x, float y) {
-    if (graph().trackedFrame() == null && isTrackingEnabled())
+    if (graph().trackedNode() == null && isTrackingEnabled())
       if (track(x, y))
-        graph().setTrackedFrame(this);
+        graph().setTrackedNode(this);
     visit();
   }
 
@@ -401,41 +403,6 @@ public class Node extends Frame {
     graph().applyWorldTransformation(this);
   }
 
-  /**
-   * Rotates the frame using {@code quaternion} around its {@link #position()} (non-eye frames)
-   * or around the {@link Graph#anchor()} when this frame is the {@link Graph#eye()}.
-   */
-  //TODO discard in favor of graph spin!
-  public void spin(Quaternion quaternion) {
-    if (isEye())
-      rotate(quaternion, graph().anchor());
-    else
-      rotate(quaternion);
-  }
-
-  /**
-   * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye frames.
-   *
-   * @see #isEye()
-   */
-  public void align() {
-    if (isEye())
-      alignWithFrame(null, true);
-    else
-      alignWithFrame(_graph.eye());
-  }
-
-  /**
-   * Centers the frame into the graph.
-   */
-  public void center() {
-    if (isEye())
-      projectOnLine(graph().center(), graph().viewDirection());
-    else
-      projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
-  }
-
   // PRECISION
 
   /**
@@ -464,7 +431,7 @@ public class Node extends Frame {
    * <p>
    * When {@link #precision()} is {@link Precision#FIXED} or
    * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #center()} screen projection which size
+   * within a squared area around the frame {@link #position()} screen projection which size
    * is defined by {@link #setPrecisionThreshold(float)}.
    * <p>
    * When {@link #precision()} is {@link Precision#EXACT}, picking is done
@@ -485,7 +452,7 @@ public class Node extends Frame {
   }
 
   /**
-   * Sets the length of the squared area around the frame {@link #center()} screen
+   * Sets the length of the squared area around the frame {@link #position()} screen
    * projection that defined the {@link #track(float, float)} condition used for
    * frame picking.
    * <p>

@@ -109,6 +109,7 @@ public class Frame {
   protected long _lastUpdate;
 
   // ID
+  protected static int _nodeCount;
   protected int _id;
 
   /**
@@ -211,7 +212,7 @@ public class Frame {
     setRotation(rotation);
     setScaling(scaling);
     setReference(reference);
-    _id = ++graph()._nodeCount;
+    _id = ++_nodeCount;
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
@@ -224,16 +225,10 @@ public class Frame {
     this.setScaling(frame.scaling());
     this.setReference(frame.reference());
     this.setConstraint(frame.constraint());
-
-    if (this.graph() == frame.graph()) {
-      this._id = ++graph()._nodeCount;
-      // unlikely but theoretically possible
-      if (this._id == 16777216)
-        throw new RuntimeException("Maximum iFrame instances reached. Exiting now!");
-    } else {
-      this._id = frame._id();
-      this.set(frame);
-    }
+    this._id = ++_nodeCount;
+    // unlikely but theoretically possible
+    if (_id == 16777216)
+      throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = frame.lastUpdate();
   }
 
@@ -290,7 +285,7 @@ public class Frame {
   /**
    * Internal use. Frame graphics color to be used for picking with a color buffer.
    */
-  public int _id() {
+  public int id() {
     // see here:
     // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
@@ -910,9 +905,7 @@ public class Frame {
         }
       }
     }
-    //TODO test
-    Frame old = detach(); // correct line
-    //Frame old = new Frame(this, graph()); // correct line
+    Frame old = new Frame(this); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
     // hence add the frame to the mouse _grabber
 
@@ -965,12 +958,12 @@ public class Frame {
       if (frame != null)
         center = frame.position();
 
-      //TODO really needs checking!
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
       translate(vector);
     }
   }
+
 
   /**
    * Translates the frame so that its {@link #position()} lies on the line defined by

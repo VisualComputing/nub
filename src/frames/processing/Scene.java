@@ -10,18 +10,15 @@
 
 package frames.processing;
 
-import frames.primitives.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
+import frames.core.Node;
+import frames.primitives.*;
 import frames.primitives.constraint.BallAndSocket;
 import frames.primitives.constraint.Hinge;
 import frames.primitives.constraint.PlanarPolygon;
 import frames.primitives.constraint.SphericalPolygon;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 import frames.timing.SequentialTimer;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -107,7 +104,7 @@ import java.util.List;
  * A {@link Shape} is a {@link Frame} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
- * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
+ * onto the screen, see {@link Shape#setPrecision(Node.Precision)}. Use
  * {@link #cast()} to render all scene-graph shapes or {@link Shape#draw()} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
@@ -144,12 +141,12 @@ import java.util.List;
  *   shape = new Shape(scene, pshape);
  *   interpolator = new Interpolator(shape);
  *   for (int i = 0; i < random(4, 10); i++)
- *     interpolator.addKeyFrame(Frame.random(scene));
+ *     interpolator.addKeyFrame(Node.random(scene));
  *   interpolator.start();
  * }
  * }
  * </pre>
- * which will create a random (see {@link Frame#random(Graph)}) interpolator path
+ * which will create a random (see {@link Node#random(Graph)}) interpolator path
  * containing [4..10] key-frames (see {@link Interpolator#addKeyFrame(Frame)}).
  * The interpolation is also started (see {@link Interpolator#start()}). The
  * interpolator path may be drawn with code like this:
@@ -326,8 +323,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Internal use. Traverse the scene {@link #frames()}) into the
-   * {@link #backBuffer()} to perform picking on the scene {@link #frames()}.
+   * Internal use. Traverse the scene {@link #nodes()}) into the
+   * {@link #backBuffer()} to perform picking on the scene {@link #nodes()}.
    * <p>
    * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
    * scenes).
@@ -845,10 +842,10 @@ public class Scene extends Graph implements PConstants {
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
     Interpolator interpolator = new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
-      Frame keyFrame = new Frame(this);
+      Node keyFrame = new Node(this);
       pruneBranch(keyFrame);
       keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
-      keyFrame.setPrecision(Frame.Precision.FIXED);
+      keyFrame.setPrecision(Node.Precision.FIXED);
       keyFrame.setPrecisionThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
@@ -861,6 +858,7 @@ public class Scene extends Graph implements PConstants {
     }
     return interpolator;
   }
+
 
   /**
    * Used internally by {@link #saveConfig(String)}. Converts the {@code interpolator}
@@ -880,8 +878,7 @@ public class Scene extends Graph implements PConstants {
    * Used internally by {@link #loadConfig(String)}. Converts the P5 JSONObject into a frame.
    */
   protected Frame _toFrame(JSONObject jsonFrame) {
-    //TODO needs checking
-    Frame frame = new Frame(this);
+    Frame frame = new Frame();
     float x, y, z, w;
     x = jsonFrame.getJSONArray("position").getFloat(0);
     y = jsonFrame.getJSONArray("position").getFloat(1);
@@ -940,13 +937,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  public Frame cast(float x, float y) {
+  public Node cast(float x, float y) {
     _targetPGraphics = frontBuffer();
     return super.cast(x, y);
   }
 
   /**
-   * Draw all {@link #frames()} into the given pGraphics. No
+   * Draw all {@link #nodes()} into the given pGraphics. No
    * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
@@ -959,7 +956,7 @@ public class Scene extends Graph implements PConstants {
    * place.
    *
    * @param pGraphics
-   * @see #frames()
+   * @see #nodes()
    * @see #cast()
    */
   public void cast(PGraphics pGraphics) {
@@ -970,12 +967,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void _visit(Frame node) {
+  protected void _visit(Node node) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, node);
     node.visit();
     if (!node.isCulled())
-      for (Frame child : node.children())
+      for (Node child : node.children())
         _visit(child);
     _targetPGraphics.popMatrix();
   }
@@ -1386,7 +1383,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      if (frame.isAttached())
+      if (frame instanceof Node)
         drawShooterTarget(frame);
       else
         drawCross(frame);
@@ -2419,17 +2416,18 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the cross is the node
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Frame instance and it is {@link #isTrackedNode(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
-    if (isTrackedFrame(frame))
-      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame.precisionThreshold());
+    if (frame instanceof Node)
+      if (isTrackedNode((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();
   }
 
@@ -2488,17 +2486,18 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the target is the node
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
+   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Frame instance and it is {@link #isTrackedNode(Node)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
-    if (isTrackedFrame(frame))
-      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame.precisionThreshold());
+    if (frame instanceof Node)
+      if (isTrackedNode((Node) frame))
+        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();
   }
 
@@ -2773,15 +2772,15 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape(PApplet.CLOSE);
   }
 
-  public void drawConstraint(Frame node) {
+  public void drawConstraint(Node node) {
     drawConstraint(frontBuffer(), node);
   }
 
-  public void drawConstraint(PGraphics pGraphics, Frame node) {
+  public void drawConstraint(PGraphics pGraphics, Node node) {
     if (node.constraint() == null) return;
     float boneLength = 0;
     if (!node.children().isEmpty()) {
-      for (Frame child : node.children())
+      for (Node child : node.children())
         boneLength += child.translation().magnitude();
       boneLength = boneLength / (1.f * node.children().size());
     } else
@@ -2793,8 +2792,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.noStroke();
     //TODO: use different colors
     pGraphics.fill(246, 117, 19, 80);
-    //TODO needs testing
-    Frame reference = new Frame(this, new Vector(), node.rotation().inverse(), 1);
+    Frame reference = new Frame(new Vector(), node.rotation().inverse());
     //TODO: Check implementation for non symmetric semi-axes
     if (node.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) node.constraint();

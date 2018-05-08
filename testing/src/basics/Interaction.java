@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Node;
 import frames.primitives.Frame;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
@@ -32,7 +33,7 @@ public class Interaction extends PApplet {
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    eye = new Frame(scene);
+    eye = new Node(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
@@ -87,13 +88,6 @@ public class Interaction extends PApplet {
       defaultNode = node;
     if (key == '3')
       defaultNode = frame;
-    if (key == ' ') {
-      if (eye.isAttached())
-        println("win1!");
-      Frame f1 = eye.detach();
-      if (f1.isDetached())
-        println("win2!");
-    }
   }
 
   public void mousePressed() {

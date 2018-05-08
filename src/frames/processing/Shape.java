@@ -10,6 +10,7 @@
 
 package frames.processing;
 
+import frames.core.Node;
 import frames.primitives.Frame;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -18,7 +19,7 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
- * A shape is a {@link Frame} specialization that can be set from a retained-mode rendering
+ * A shape is a {@link Node} specialization that can be set from a retained-mode rendering
  * Processing {@code PShape} or from an immediate-mode rendering Processing procedure. Either
  * case the shape is split in two a front and a back shape. The front shape will be used for
  * rendering and the back shape for picking with exact precision by default, see
@@ -40,7 +41,7 @@ import processing.opengl.PGraphicsOpenGL;
  * <h2>Picking</h2>
  * Picking a shape is done according to a precision which can either be:
  * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
- * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
+ * to the {@link Node} documentation for both, {@link Precision#FIXED} and
  * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
  * of the pointer device over the projected pixels of the back shape. To set a different
  * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
@@ -61,7 +62,7 @@ import processing.opengl.PGraphicsOpenGL;
  * Default is {@link Highlighting#FRONT}. Set the policy with
  * {@link #setHighlighting(Highlighting)}).
  */
-public class Shape extends Frame {
+public class Shape extends Node {
   PShape _frontShape, _backShape;
 
   public enum Highlighting {
@@ -84,7 +85,7 @@ public class Shape extends Frame {
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    * Sets {@code reference} as its {@link #reference()} node.
    */
-  public Shape(Frame reference) {
+  public Shape(Node reference) {
     super(reference);
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
@@ -107,20 +108,20 @@ public class Shape extends Frame {
    * Sets {@code reference} as its {@link #reference() node and {@code pShape} as its retained mode
    * pshape.
    */
-  public Shape(Frame reference, PShape pShape) {
+  public Shape(Node reference, PShape pShape) {
     this(reference);
     setShape(pShape);
   }
 
-  protected Shape(Shape shape, Scene scene) {
-    super(shape, scene);
+  protected Shape(Scene scene, Shape shape) {
+    super(scene, shape);
     this._frontShape = shape._frontShape;
     this._backShape = shape._backShape;
   }
 
   @Override
   public Shape get() {
-    return new Shape(this, graph());
+    return new Shape(graph(), this);
   }
 
   @Override
@@ -171,7 +172,7 @@ public class Shape extends Frame {
       graph()._bbEnabled = true;
       return;
     }
-    for (Frame node : graph().frames())
+    for (Node node : graph().nodes())
       if (node instanceof Shape)
         if (node.precision() == Precision.EXACT) {
           graph()._bbEnabled = true;
@@ -230,10 +231,7 @@ public class Shape extends Frame {
       //TODO needs more thinking
       switch (highlighting()) {
         case FRONT:
-          //TODO pending
-          //if (grabsInput())
-          //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY))
-          if (graph().isTrackedFrame(this))
+          if (graph().isTrackedNode(this))
             pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
@@ -246,10 +244,7 @@ public class Shape extends Frame {
             pGraphics.shape(_frontShape);
           else
             setFront(pGraphics);
-          //TODO pending
-          //if (grabsInput()) {
-          //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
-          if (graph().isTrackedFrame(this)) {
+          if (graph().isTrackedNode(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
@@ -257,10 +252,7 @@ public class Shape extends Frame {
           }
           break;
         case BACK:
-          //TODO pending
-          //if (grabsInput()) {
-          //if (track(graph().pApplet().mouseX, graph().pApplet().mouseY)) {
-          if (graph().isTrackedFrame(this)) {
+          if (graph().isTrackedNode(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
@@ -313,8 +305,6 @@ public class Shape extends Frame {
       }
     }
   }
-
-  // TODO find better names for setShape (not conflicting with frame.set)
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the shape.
@@ -396,15 +386,14 @@ public class Shape extends Frame {
    */
   @Override
   public final boolean track(float x, float y) {
-    if (this == graph().eye()) {
+    if (graph().isEye(this))
       return false;
-    }
     if (precision() != Precision.EXACT)
       return super.track(x, y);
     int index = (int) y * graph().width() + (int) x;
     if (graph().backBuffer().pixels != null)
       if ((0 <= index) && (index < graph().backBuffer().pixels.length))
-        return graph().backBuffer().pixels[index] == _id();
+        return graph().backBuffer().pixels[index] == id();
     return false;
   }
 }
