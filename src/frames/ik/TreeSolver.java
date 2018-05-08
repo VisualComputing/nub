@@ -11,6 +11,7 @@
 
 package frames.ik;
 
+import frames.core.Node;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -65,11 +66,11 @@ public class TreeSolver extends FABRIKSolver {
   /*Tree structure that contains a list of Solvers that must be accessed in a BFS way*/
   protected TreeNode root;
 
-  public Frame head() {
-    return root._solver().head();
+  public Node head() {
+    return (Node) root._solver().head();
   }
 
-  protected void _setup(TreeNode parent, Frame frame, ArrayList<Frame> list) {
+  protected void _setup(TreeNode parent, Node frame, ArrayList<Node> list) {
     if (frame == null) return;
     if (frame.children().isEmpty()) {
       list.add(frame);
@@ -81,8 +82,8 @@ public class TreeSolver extends FABRIKSolver {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, null);
       TreeNode treeNode = new TreeNode(parent, solver);
-      for (Frame child : frame.children()) {
-        ArrayList<Frame> newList = new ArrayList<Frame>();
+      for (Node child : frame.children()) {
+        ArrayList<Node> newList = new ArrayList<Node>();
         newList.add(frame);
         _setup(treeNode, child, newList);
       }
@@ -92,7 +93,7 @@ public class TreeSolver extends FABRIKSolver {
     }
   }
 
-  protected boolean _addTarget(TreeNode treeNode, Frame endEffector, Frame target) {
+  protected boolean _addTarget(TreeNode treeNode, Node endEffector, Frame target) {
     if (treeNode == null) return false;
     if (treeNode._solver().endEffector() == endEffector) {
       treeNode._solver().setTarget(target);
@@ -104,14 +105,14 @@ public class TreeSolver extends FABRIKSolver {
     return false;
   }
 
-  public boolean addTarget(Frame endEffector, Frame target) {
+  public boolean addTarget(Node endEffector, Frame target) {
     return _addTarget(root, endEffector, target);
   }
 
-  public TreeSolver(Frame genericFrame) {
+  public TreeSolver(Node genericFrame) {
     super();
     TreeNode dummy = new TreeNode(); //Dummy TreeNode to Keep Reference
-    _setup(dummy, genericFrame, new ArrayList<Frame>());
+    _setup(dummy, genericFrame, new ArrayList<Node>());
     //dummy must have only a child,
     this.root = dummy._children().get(0);
   }
@@ -136,7 +137,7 @@ public class TreeSolver extends FABRIKSolver {
       newTarget.add(Vector.multiply(child._solver()._positions().get(0), 1.f / totalWeight));
     }
     if (newTarget.magnitude() > 0) {
-      solver.setTarget(new Frame(newTarget, solver.endEffector().orientation().get(), 1));
+      solver.setTarget(new Frame(newTarget, solver.endEffector().orientation().get()));
     }
 
     //Execute Until the distance between the end effector and the target is below a threshold
@@ -224,9 +225,9 @@ public class TreeSolver extends FABRIKSolver {
   }
 
   //Update Subtree that have associated Frame as root
-  protected boolean _updateTree(TreeNode treeNode, Frame frame) {
+  protected boolean _updateTree(TreeNode treeNode, Node frame) {
     if (treeNode._solver().endEffector() == frame) {
-      _setup(treeNode, frame, new ArrayList<Frame>());
+      _setup(treeNode, frame, new ArrayList<Node>());
       return true;
     }
     for (TreeNode child : treeNode._children()) {

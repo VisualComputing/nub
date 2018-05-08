@@ -36,15 +36,11 @@ public class ChainSolver extends FABRIKSolver {
     ArrayList<Frame> copy = new ArrayList<Frame>();
     Frame reference = chain.get(0).reference();
     if (reference != null) {
-      // reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
-      //TODO needs testing, but I prefer:
-      reference = reference.detach();
+      reference = new Frame(reference.position().get(), reference.orientation().get());
     }
     for (Frame joint : chain) {
-      //Frame newJoint = new Frame();
-      //newJoint.setReference(reference);
-      //TODO needs testing, but I prefer:
-      Frame newJoint = new Frame(reference);
+      Frame newJoint = new Frame();
+      newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
       newJoint.setConstraint(joint.constraint());
@@ -97,9 +93,7 @@ public class ChainSolver extends FABRIKSolver {
     }
     this._target = target;
     this._prevTarget =
-        //target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
-        //TODO needs testing
-        target == null ? null : target.detach();
+        target == null ? null : new Frame(target.position().get(), target.orientation().get());
   }
 
   /*Get maximum length of a given chain*/
@@ -195,9 +189,7 @@ public class ChainSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
-    //_prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
-    //TODO needs testing
-    _prevTarget = _target == null ? null : _target.detach();
+    _prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
     iterations = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
     _init();
