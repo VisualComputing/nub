@@ -192,13 +192,6 @@ public class Scene extends Graph implements PConstants {
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
 
-  // off-screen scenes:
-  //TODO make protected
-  public static Scene _lastScene;
-  public long _lastDisplay;
-  protected boolean _autofocus;
-  protected static int _offScreenScenes;
-
   // offscreen
   protected Point _upperLeftCorner;
   protected boolean _offscreen;
@@ -278,8 +271,7 @@ public class Scene extends Graph implements PConstants {
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
-    } else
-      _offScreenScenes++;
+    }
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
@@ -697,7 +689,6 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().endDraw();
     _renderBackBuffer();
     postDraw();
-    _lastDisplay = TimingHandler.frameCount;
   }
 
   /**
@@ -2829,5 +2820,18 @@ public class Scene extends Graph implements PConstants {
     }
     pGraphics.popStyle();
     pGraphics.popMatrix();
+  }
+
+  //high-level wrappers
+
+  public boolean track(Frame frame) {
+    return super.track(pApplet().mouseX, pApplet().mouseY,frame);
+  }
+
+  /**
+   * Picks the frame according to the {@code precision}.
+   */
+  public boolean track(float precision, Frame frame) {
+    return super.track(pApplet().mouseX, pApplet().mouseY, precision, frame);
   }
 }

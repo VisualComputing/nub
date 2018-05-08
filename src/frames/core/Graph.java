@@ -2401,6 +2401,10 @@ public class Graph {
     _trackedNode = null;
   }
 
+  public boolean track(float x, float y, Frame frame) {
+    return track(x, y, 20, frame);
+  }
+
   /**
    * Picks the frame according to the {@code precision}.
    */
@@ -2694,6 +2698,8 @@ public class Graph {
   // see f40a95b
 
   //TODO screenRotate is missing! screenTranslate?
+
+  //TODO test when frame == null -> perhaps perform on the eye()?
 
   public void rotate(float roll, float pitch, float yaw) {
     rotate(roll, pitch, yaw, eye());

@@ -1,6 +1,7 @@
 package basics;
 
 import frames.core.Node;
+import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import processing.core.PApplet;
 
@@ -10,6 +11,7 @@ import processing.core.PApplet;
 public class Basics extends PApplet {
   Scene scene;
   Node eye, node;
+  boolean mouseDragged;
 
   public void settings() {
     size(800, 800, P3D);
@@ -29,7 +31,6 @@ public class Basics extends PApplet {
     node = new Node(scene) {
       @Override
       public void visit() {
-        println("called!");
         scene.drawAxes(scene.radius() / 3);
         pushStyle();
         rectMode(CENTER);
@@ -38,24 +39,22 @@ public class Basics extends PApplet {
           scene.drawCylinder(30, scene.radius() / 4, 200);
         else
           rect(10, 10, 200, 200);
-        popStyle();
+        stroke(255,255,0);
         scene.drawShooterTarget(this);
+        popStyle();
       }
     };
-    //node.setRotation(Quaternion.random());
-    //node.translate(75, 75, 75);
+    node.setRotation(Quaternion.random());
+    node.translate(75, 75, 75);
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.cast();
-    /*
     if (mouseDragged)
       scene.cast();
     else
-      trackedFrame = scene.cast(mouseX, mouseY);
-      */
+      scene.cast(mouseX, mouseY);
   }
 
   public void keyPressed() {
@@ -64,7 +63,11 @@ public class Basics extends PApplet {
   }
 
   public void mouseDragged() {
+    mouseDragged = true;
+  }
 
+  public void mouseReleased() {
+    mouseDragged = false;
   }
 
   public static void main(String args[]) {
