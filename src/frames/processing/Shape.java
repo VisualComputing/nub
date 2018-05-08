@@ -386,7 +386,7 @@ public class Shape extends Node {
    */
   @Override
   public final boolean track(float x, float y) {
-    if (graph().isEye(this))
+    if (isEye())
       return false;
     if (precision() != Precision.EXACT)
       return super.track(x, y);
