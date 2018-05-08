@@ -125,7 +125,6 @@ public class Graph {
   // 5. IKinematics solvers
   protected List<TreeSolver> _solvers;
 
-
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
