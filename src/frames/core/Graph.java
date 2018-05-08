@@ -36,7 +36,7 @@ import java.util.List;
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
  * override {@link #computeCustomProjection()}.
  * <h2>Scene graph handling</h2>
- * A graph forms a tree of {@link Frame}s which may be {@link #cast()}, calling
+ * A graph forms a tree of {@link Frame}s which may be {@link #traverse()}, calling
  * {@link Node#visit()} on each visited frame (refer to the {@link Frame} documentation).
  * The frame collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -531,7 +531,7 @@ public class Graph {
   /**
    * Returns the top-level nodes (those which reference is null).
    * <p>
-   * All leading nodes are also reachable by the {@link #cast()} algorithm for which they are the seeds.
+   * All leading nodes are also reachable by the {@link #traverse()} algorithm for which they are the seeds.
    *
    * @see #nodes()
    * @see #isNodeReachable(Node)
@@ -594,7 +594,7 @@ public class Graph {
    * A call to {@link #isNodeReachable(Node)} on all {@code node} descendants
    * (including {@code node}) will return false, after issuing this method. It also means
    * that all nodes in the {@code node} branch will become unreachable by the
-   * {@link #cast()} algorithm.
+   * {@link #traverse()} algorithm.
    * <p>
    * To make all the nodes in the branch reachable again, first cache the nodes
    * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
@@ -645,13 +645,13 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the node is reachable by the {@link #cast()}
+   * Returns {@code true} if the node is reachable by the {@link #traverse()}
    * algorithm and {@code false} otherwise.
    * <p>
    * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
    *
-   * @see #cast()
+   * @see #traverse()
    * @see #nodes()
    */
   public boolean isNodeReachable(Node node) {
@@ -661,7 +661,7 @@ public class Graph {
   }
 
   /**
-   * Returns a list of all the nodes that are reachable by the {@link #cast()}
+   * Returns a list of all the nodes that are reachable by the {@link #traverse()}
    * algorithm.
    *
    * @see #isNodeReachable(Node)
@@ -997,13 +997,14 @@ public class Graph {
    * @see #postDraw()
    */
   public void preDraw() {
-    // 1. Eye, raster graph
     matrixHandler()._bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
   }
+
+  //TODO move timingHandler().handle() to the preDraw
 
   /**
    * Called after your main drawing and performs the following:
@@ -1014,7 +1015,6 @@ public class Graph {
    * @see #preDraw()
    */
   public void postDraw() {
-    // 1. timers (include IK Solvers' execution in the order they were registered)
     timingHandler().handle();
   }
 
@@ -2366,7 +2366,7 @@ public class Graph {
    * @see #isNodeReachable(Node)
    * @see #pruneBranch(Node)
    */
-  public void cast() {
+  public void traverse() {
     for (Node node : leadingNodes())
       _visit(node);
   }
@@ -2726,7 +2726,7 @@ public class Graph {
     pitch *= sensitivity;
     yaw *= sensitivity;
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
-    if (isEye(frame) /* || (!isEye() && !this.respectToEye()) */) {
+    if (isEye(frame)) {
       return new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
     } else {
       Vector vector = new Vector();
@@ -2803,7 +2803,6 @@ public class Graph {
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
     float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
-
     Quaternion quaternion = new Quaternion(axis, angle);
     if (!isEye(frame)) {
       Vector vector = quaternion.axis();
@@ -2811,7 +2810,6 @@ public class Graph {
       vector = frame.displacement(vector);
       quaternion = new Quaternion(vector, -quaternion.angle());
     }
-
     return quaternion;
   }
 

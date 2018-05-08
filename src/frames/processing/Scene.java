@@ -20,7 +20,6 @@ import frames.primitives.constraint.Hinge;
 import frames.primitives.constraint.PlanarPolygon;
 import frames.primitives.constraint.SphericalPolygon;
 import frames.timing.SequentialTimer;
-import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
 import processing.core.*;
 import processing.data.JSONArray;
@@ -105,7 +104,7 @@ import java.util.List;
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
  * onto the screen, see {@link Shape#setPrecision(Node.Precision)}. Use
- * {@link #cast()} to render all scene-graph shapes or {@link Shape#draw()} to
+ * {@link #traverse()} to render all scene-graph shapes or {@link Shape#draw()} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
@@ -154,12 +153,12 @@ import java.util.List;
  * {@code
  * ...
  * void draw() {
- *   scene.cast();
+ *   scene.traverse();
  *   scene.drawPath(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #cast()} will draw the animated shape(s),
+ * while {@link #traverse()} will draw the animated shape(s),
  * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
  * <h2>Drawing functionality</h2>
  * There are several static drawing functions that complements those already provided
@@ -922,9 +921,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  public void cast() {
+  public void traverse() {
     _targetPGraphics = frontBuffer();
-    super.cast();
+    super.traverse();
+  }
+
+  public Node cast() {
+    return cast(pApplet().mouseX, pApplet().mouseY);
   }
 
   @Override
@@ -948,13 +951,13 @@ public class Scene extends Graph implements PConstants {
    *
    * @param pGraphics
    * @see #nodes()
-   * @see #cast()
+   * @see #traverse()
    */
   public void cast(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
     if (pGraphics != frontBuffer())
       _bind(pGraphics);
-    super.cast();
+    super.traverse();
   }
 
   @Override

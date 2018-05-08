@@ -184,7 +184,7 @@ public class Shape extends Node {
   /**
    * Same as {@code draw(scene.frontBuffer())}.
    * <p>
-   * Call it only instead of {@link Scene#cast()}.
+   * Call it only instead of {@link Scene#traverse()}.
    *
    * @see frames.processing.Scene#cast(PGraphics)
    */

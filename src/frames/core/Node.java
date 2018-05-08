@@ -37,7 +37,7 @@ import java.util.List;
  * {@code graph.popModelView();} <br>
  * <p>
  * Alternatively, the node geometry transformation may be automatically handled by the graph
- * traversal algorithm (see {@link frames.core.Graph#cast()}), provided
+ * traversal algorithm (see {@link frames.core.Graph#traverse()}), provided
  * that the node {@link #visit()} method is overridden, as shown below:
  *
  * <pre>
@@ -54,7 +54,7 @@ import java.util.List;
  * </pre>
  * <p>
  * Implement a {@code cullingCondition} to perform hierarchical culling on the node
- * (culling of the node and its descendants by the {@link frames.core.Graph#cast()}
+ * (culling of the node and its descendants by the {@link frames.core.Graph#traverse()}
  * algorithm). The {@link #isCulled()} flag is {@code false} by default, see
  * {@link #cull(boolean)}.
  * <p>
@@ -337,7 +337,7 @@ public class Node extends Frame {
    * }
    * </pre>
    *
-   * @see Graph#cast()
+   * @see Graph#traverse()
    * @see #cull(boolean)
    * @see #isCulled()
    */
@@ -357,7 +357,7 @@ public class Node extends Frame {
 
   /**
    * Enables or disables {@link #visit()} of this frame and its children during
-   * {@link Graph#cast()}. Culling should be decided within {@link #visit()}.
+   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
    *
    * @see #isCulled()
    */
@@ -367,7 +367,7 @@ public class Node extends Frame {
 
   /**
    * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#cast()} algoruthm.
+   * will not be visited by the {@link Graph#traverse()} algoruthm.
    *
    * @see #cull(boolean)
    */

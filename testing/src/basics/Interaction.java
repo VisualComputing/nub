@@ -62,9 +62,9 @@ public class Interaction extends PApplet {
     background(0);
     scene.drawAxes();
     if (mousePressed)
-      scene.cast();
+      scene.traverse();
     else
-      trackedNode = scene.cast(mouseX, mouseY);
+      trackedNode = scene.cast();
   }
 
   public void keyPressed() {
@@ -115,7 +115,7 @@ public class Interaction extends PApplet {
   }
 
   PShape shape() {
-    PShape fig = createShape(BOX, 160);
+    PShape fig = scene.is3D() ? createShape(BOX, 150) : createShape(RECT, 0, 0, 150, 150);
     fig.setStroke(255);
     fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
     return fig;
