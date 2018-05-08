@@ -293,23 +293,6 @@ public class Frame {
     setMagnitude(1);
   }
 
-  /**
-   * Internal use. Frame graphics color to be used for picking with a color buffer.
-   */
-  protected int _id() {
-    // see here:
-    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
-    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
-  }
-
-  public boolean isEye() {
-    return graph().eye() == this;
-  }
-
-  public Graph graph() {
-    return _graph;
-  }
-
   // MODIFIED
 
   /**
@@ -387,6 +370,31 @@ public class Frame {
    */
   public static boolean isAncestor(Frame ancestor, Frame frame) {
     return ancestor.isAncestor(frame);
+  }
+
+  /**
+   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
+   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
+   *
+   * @see #isAncestor(Frame, Frame)
+   */
+  public static Frame[] path(Frame tail, Frame tip) {
+    Frame[] path = null;
+    if (tail.isAncestor(tip)) {
+      int steps = 0;
+      Frame _tip = tip;
+      while (_tip != tail) {
+        steps++;
+        _tip = _tip.reference();
+      }
+      path = new Frame[steps + 1];
+      _tip = tip;
+      for (int i = steps; i >= 0; i--) {
+        path[i] = _tip;
+        _tip = _tip.reference();
+      }
+    }
+    return path;
   }
 
   /**
@@ -469,136 +477,6 @@ public class Frame {
     }
   }
 
-  protected void _restorePath(Frame parent, Frame child) {
-    if (parent == null) {
-      if (graph() != null)
-        graph()._addLeadingNode(child);
-    } else {
-      if (!parent._hasChild(child)) {
-        parent._addChild(child);
-        _restorePath(parent.reference(), parent);
-      }
-    }
-  }
-
-  public List<Frame> children() {
-    return _children;
-  }
-
-  protected boolean _addChild(Frame frame) {
-    if (frame == null)
-      return false;
-    if (_hasChild(frame))
-      return false;
-    return children().add(frame);
-  }
-
-  /**
-   * Removes the leading frame if present. Typically used when re-parenting the frame.
-   */
-  protected boolean _removeChild(Frame frame) {
-    boolean result = false;
-    Iterator<Frame> it = children().iterator();
-    while (it.hasNext()) {
-      if (it.next() == frame) {
-        it.remove();
-        result = true;
-        break;
-      }
-    }
-    return result;
-  }
-
-  protected boolean _hasChild(Frame frame) {
-    for (Frame child : children())
-      if (child == frame)
-        return true;
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if tracking is enabled.
-   *
-   * @see #enableTracking(boolean)
-   */
-  public boolean isTrackingEnabled() {
-    return _tracking;
-  }
-
-  /**
-   * Enables frame tracking according to {@code flag}.
-   *
-   * @see #isTrackingEnabled()
-   */
-  public void enableTracking(boolean flag) {
-    _tracking = flag;
-  }
-
-  protected void _visit(float x, float y) {
-    if (graph().trackedFrame() == null && isTrackingEnabled())
-      if (track(x, y))
-        graph().setTrackedFrame(this);
-    visit();
-  }
-
-  /**
-   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes.
-   * <p>
-   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
-   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
-   *
-   * <pre>
-   * {@code
-   * frame = new Frame(graph) {
-   *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
-   *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#cast()
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-  public void visit() {
-  }
-
-  /**
-   * Same as {@code cull(true)}.
-   *
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-
-  public void cull() {
-    cull(true);
-  }
-
-  /**
-   * Enables or disables {@link #visit()} of this frame and its children during
-   * {@link Graph#cast()}. Culling should be decided within {@link #visit()}.
-   *
-   * @see #isCulled()
-   */
-  public void cull(boolean cull) {
-    _culled = cull;
-  }
-
-  /**
-   * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#cast()} algoruthm.
-   *
-   * @see #cull(boolean)
-   */
-  public boolean isCulled() {
-    return _culled;
-  }
-
   /**
    * Same as {@code randomize(graph().center(), graph().radius())}.
    *
@@ -657,99 +535,6 @@ public class Frame {
     float upper = 2;
     frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     return frame;
-  }
-
-  // PRECISION
-
-  /**
-   * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
-   *
-   * @see #setPrecisionThreshold(float)
-   */
-  public float precisionThreshold() {
-    if (precision() == Precision.ADAPTIVE)
-      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
-    return _threshold;
-  }
-
-  /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
-   *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
-   * Sets the frame picking precision.
-   * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or
-   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #center()} screen projection which size
-   * is defined by {@link #setPrecisionThreshold(float)}.
-   * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the frame. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the frame) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
-   *
-   * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   */
-  public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
-    _precision = precision;
-  }
-
-  /**
-   * Sets the length of the squared area around the frame {@link #center()} screen
-   * projection that defined the {@link #track(float, float)} condition used for
-   * frame picking.
-   * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
-   * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame shape.
-   * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
-   * <p>
-   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #precision()
-   * @see #precisionThreshold()
-   */
-  public void setPrecisionThreshold(float threshold) {
-    if (threshold >= 0)
-      _threshold = threshold;
-  }
-
-  /**
-   * Picks the frame according to the {@link #precision()}.
-   *
-   * @see #precision()
-   * @see #setPrecision(Precision)
-   */
-  public boolean track(float x, float y) {
-    if (isEye())
-      return false;
-    Vector proj = _graph.screenLocation(position());
-    float halfThreshold = precisionThreshold() / 2;
-    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 
   // CONSTRAINT
@@ -1828,6 +1613,183 @@ public class Frame {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
   }
 
+  // NODE
+
+  /**
+   * Internal use. Frame graphics color to be used for picking with a color buffer.
+   */
+  protected int _id() {
+    // see here:
+    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
+    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
+  }
+
+  public boolean isEye() {
+    return graph().eye() == this;
+  }
+
+  public Graph graph() {
+    return _graph;
+  }
+
+  protected void _restorePath(Frame parent, Frame child) {
+    if (parent == null) {
+      if (graph() != null)
+        graph()._addLeadingNode(child);
+    } else {
+      if (!parent._hasChild(child)) {
+        parent._addChild(child);
+        _restorePath(parent.reference(), parent);
+      }
+    }
+  }
+
+  public List<Frame> children() {
+    return _children;
+  }
+
+  protected boolean _addChild(Frame frame) {
+    if (frame == null)
+      return false;
+    if (_hasChild(frame))
+      return false;
+    return children().add(frame);
+  }
+
+  /**
+   * Removes the leading frame if present. Typically used when re-parenting the frame.
+   */
+  protected boolean _removeChild(Frame frame) {
+    boolean result = false;
+    Iterator<Frame> it = children().iterator();
+    while (it.hasNext()) {
+      if (it.next() == frame) {
+        it.remove();
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  protected boolean _hasChild(Frame frame) {
+    for (Frame child : children())
+      if (child == frame)
+        return true;
+    return false;
+  }
+
+  /**
+   * Returns {@code true} if tracking is enabled.
+   *
+   * @see #enableTracking(boolean)
+   */
+  public boolean isTrackingEnabled() {
+    return _tracking;
+  }
+
+  /**
+   * Enables frame tracking according to {@code flag}.
+   *
+   * @see #isTrackingEnabled()
+   */
+  public void enableTracking(boolean flag) {
+    _tracking = flag;
+  }
+
+  protected void _visit(float x, float y) {
+    if (graph().trackedFrame() == null && isTrackingEnabled())
+      if (track(x, y))
+        graph().setTrackedFrame(this);
+    visit();
+  }
+
+  /**
+   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
+   * empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * frame = new Frame(graph) {
+   *   public void visit() {
+   *     //hierarchical culling is optional and disabled by default
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#cast()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+  public void visit() {
+  }
+
+  /**
+   * Same as {@code cull(true)}.
+   *
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+
+  public void cull() {
+    cull(true);
+  }
+
+  /**
+   * Enables or disables {@link #visit()} of this frame and its children during
+   * {@link Graph#cast()}. Culling should be decided within {@link #visit()}.
+   *
+   * @see #isCulled()
+   */
+  public void cull(boolean cull) {
+    _culled = cull;
+  }
+
+  /**
+   * Returns whether or not the frame culled or not. Culled frames (and their children)
+   * will not be visited by the {@link Graph#cast()} algoruthm.
+   *
+   * @see #cull(boolean)
+   */
+  public boolean isCulled() {
+    return _culled;
+  }
+
+  /**
+   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
+   * apply the transformation represented by this frame to any graph you want using this
+   * method.
+   * <p>
+   * Very efficient prefer always this than
+   *
+   * @see #applyTransformation()
+   * @see #matrix()
+   * @see Graph#applyTransformation(Frame)
+   */
+  public void applyTransformation() {
+    graph().applyTransformation(this);
+  }
+
+  /**
+   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
+   * You may apply the world transformation represented by this frame to any graph you
+   * want using this method.
+   *
+   * @see #applyWorldTransformation()
+   * @see #worldMatrix()
+   * @see Graph#applyWorldTransformation(Frame)
+   */
+  public void applyWorldTransformation() {
+    graph().applyWorldTransformation(this);
+  }
+
   /**
    * Rotates the frame using {@code quaternion} around its {@link #position()} (non-eye frames)
    * or around the {@link Graph#anchor()} when this frame is the {@link Graph#eye()}.
@@ -1863,30 +1825,96 @@ public class Frame {
       projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
   }
 
-  //TODO pending, see graph.path
+  // PRECISION
 
   /**
-   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
-   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
+   * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
    *
-   * @see #isAncestor(Frame, Frame)
+   * @see #setPrecisionThreshold(float)
    */
-  public static Frame[] path(Frame tail, Frame tip) {
-    Frame[] path = null;
-    if (tail.isAncestor(tip)) {
-      int steps = 0;
-      Frame _tip = tip;
-      while (_tip != tail) {
-        steps++;
-        _tip = _tip.reference();
-      }
-      path = new Frame[steps + 1];
-      _tip = tip;
-      for (int i = steps; i >= 0; i--) {
-        path[i] = _tip;
-        _tip = _tip.reference();
-      }
-    }
-    return path;
+  public float precisionThreshold() {
+    if (precision() == Precision.ADAPTIVE)
+      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
+    return _threshold;
+  }
+
+  /**
+   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
+   *
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
+   */
+  public Precision precision() {
+    return _precision;
+  }
+
+  /**
+   * Sets the frame picking precision.
+   * <p>
+   * When {@link #precision()} is {@link Precision#FIXED} or
+   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
+   * within a squared area around the frame {@link #center()} screen projection which size
+   * is defined by {@link #setPrecisionThreshold(float)}.
+   * <p>
+   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
+   * in a precise manner according to the projected pixels of the visual representation
+   * related to the frame. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the frame) and requires the graph to implement
+   * a back buffer.
+   * <p>
+   * Default implementation of this policy will behave like {@link Precision#FIXED}.
+   *
+   * @see #precision()
+   * @see #setPrecisionThreshold(float)
+   */
+  public void setPrecision(Precision precision) {
+    if (precision == Precision.EXACT)
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
+    _precision = precision;
+  }
+
+  /**
+   * Sets the length of the squared area around the frame {@link #center()} screen
+   * projection that defined the {@link #track(float, float)} condition used for
+   * frame picking.
+   * <p>
+   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * in pixels and directly defines the fixed length of a 'shooter target', centered
+   * at the projection of the frame origin onto the screen.
+   * <p>
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * in object space (world units) and defines the edge length of a squared bounding box that
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
+   * origin onto the screen. Use this version only if you have a good idea of the bounding box
+   * size of the object you are attaching to the frame shape.
+   * <p>
+   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
+   * {@link #setPrecision(Precision)} for details.
+   * <p>
+   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
+   * manner) to 20.
+   * <p>
+   * Negative {@code threshold} values are silently ignored.
+   *
+   * @see #precision()
+   * @see #precisionThreshold()
+   */
+  public void setPrecisionThreshold(float threshold) {
+    if (threshold >= 0)
+      _threshold = threshold;
+  }
+
+  /**
+   * Picks the frame according to the {@link #precision()}.
+   *
+   * @see #precision()
+   * @see #setPrecision(Precision)
+   */
+  public boolean track(float x, float y) {
+    if (isEye())
+      return false;
+    Vector proj = _graph.screenLocation(position());
+    float halfThreshold = precisionThreshold() / 2;
+    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 }
