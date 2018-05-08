@@ -9,11 +9,11 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core.constraint;
+package frames.primitives.constraint;
 
 //TODO: CHECK FORWARD STEP WITH HINGE 3D
 
-import frames.core.Frame;
+import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 

@@ -1,6 +1,6 @@
 package basics;
 
-import frames.core.Frame;
+import frames.primitives.Frame;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;

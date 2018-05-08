@@ -10,6 +10,7 @@
 
 package frames.core;
 
+import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
@@ -63,7 +64,7 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  *
- * <b>Attention:</b> If a {@link frames.core.constraint.Constraint} is attached to
+ * <b>Attention:</b> If a {@link frames.primitives.constraint.Constraint} is attached to
  * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
@@ -298,7 +299,7 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Frame},
+   * Sets the interpolator {@link #frame()}. If frame is instance of {@link Frame},
    * the frame graph ({@link Frame#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {

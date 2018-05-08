@@ -10,7 +10,7 @@
 
 package frames.processing;
 
-import frames.core.Frame;
+import frames.primitives.Frame;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;

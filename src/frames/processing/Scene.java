@@ -10,14 +10,14 @@
 
 package frames.processing;
 
-import frames.core.Frame;
+import frames.primitives.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.core.constraint.SphericalPolygon;
+import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
+import frames.primitives.constraint.PlanarPolygon;
+import frames.primitives.constraint.SphericalPolygon;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;

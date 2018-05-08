@@ -8,18 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core;
+package frames.primitives;
 
-import frames.core.constraint.Constraint;
-import frames.core.constraint.WorldConstraint;
-import frames.primitives.Matrix;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import frames.primitives.constraint.Constraint;
 import frames.timing.TimingHandler;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 
 /**
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -79,16 +71,16 @@ import java.util.List;
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Constraints</h2>
  * One interesting feature of a frame is that its displacements can be constrained. When a
- * {@link frames.core.constraint.Constraint} is attached to a frame, it filters
+ * {@link frames.primitives.constraint.Constraint} is attached to a frame, it filters
  * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the
  * resulting filtered motion is applied to the frame. The default {@link #constraint()}
  * is {@code null} resulting in no filtering. Use {@link #setConstraint(Constraint)} to
  * attach a constraint to a frame.
  * <p>
  * Classical constraints are provided for convenience (see
- * {@link frames.core.constraint.LocalConstraint},
- * {@link frames.core.constraint.WorldConstraint} and
- * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
+ * {@link frames.primitives.constraint.LocalConstraint},
+ * {@link frames.primitives.constraint.WorldConstraint} and
+ * {@link frames.primitives.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Syncing</h2>
  * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
@@ -105,7 +97,7 @@ public class Frame {
    */
   public boolean matches(Frame frame) {
     if (frame == null)
-      frame = new Frame(_graph);
+      frame = new Frame();
     return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
   }
 
@@ -116,47 +108,97 @@ public class Frame {
   protected Constraint _constraint;
   protected long _lastUpdate;
 
-  //TODO new attributes (attached frames only)
+  // ID
+  protected int _id;
 
   /**
-   * Enumerates the Picking precision modes.
+   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
    */
-  public enum Precision {
-    FIXED, ADAPTIVE, EXACT
-  }
-
-  protected Precision _precision;
-  protected int _id;
-  protected Graph _graph;
-  protected List<Frame> _children;
-  protected float _threshold;
-  protected boolean _culled;
-  protected boolean _tracking;
-
-  //TODO check new Frame() vs detach() al over the place
-
   public Frame() {
-    this(null, null, new Vector(), new Quaternion(), 1);
+    this(null, new Vector(), new Quaternion(), 1);
   }
 
+  /**
+   * Same as {@code this(translation, new Quaternion(), 1)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(Vector translation) {
+    this(translation, new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(new Vector(), rotation, 1)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(Quaternion rotation) {
+    this(new Vector(), rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(new Vector(), new Quaternion(), scaling)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(float scaling) {
+    this(new Vector(), new Quaternion(), scaling);
+  }
+
+  /**
+   * Same as {@code this(translation, rotation, 1)}.
+   *
+   * @see #Frame(Vector, Quaternion, float)
+   */
+  public Frame(Vector translation, Quaternion rotation) {
+    this(translation, rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
   public Frame(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, translation, rotation, scaling);
+    this(null, translation, rotation, scaling);
   }
 
-  public Frame(Graph graph) {
-    this(graph, null, new Vector(), new Quaternion(), 1);
+  /**
+   * Same as {@code this(reference, translation, new Quaternion(), 1)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Vector translation) {
+    this(reference, translation, new Quaternion(), 1);
   }
 
-  public Frame(Frame reference) {
-    this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
+  /**
+   * Same as {@code this(reference, new Vector(), rotation, 1)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Quaternion rotation) {
+    this(reference, new Vector(), rotation, 1);
   }
 
-  public Frame(Graph graph, Vector translation, Quaternion rotation, float scaling) {
-    this(graph, null, translation, rotation, scaling);
+  /**
+   * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, float scaling) {
+    this(reference, new Vector(), new Quaternion(), scaling);
   }
 
-  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
-    this(reference.graph(), reference, translation, rotation, scaling);
+  /**
+   * Same as {@code this(reference, translation, rotation, 1)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Vector translation, Quaternion rotation) {
+    this(reference, translation, rotation, 1);
   }
 
   /**
@@ -164,51 +206,24 @@ public class Frame {
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    */
-  protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
-    _graph = graph;
+  protected Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
     setReference(reference);
-
-    if (graph == null)
-      return;
-
     _id = ++graph()._nodeCount;
-
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
-
-    if (graph().is2D()) {
-      if (position().z() != 0)
-        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y)");
-      if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
-        throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
-      WorldConstraint constraint2D = new WorldConstraint();
-      constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
-      constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
-      setConstraint(constraint2D);
-    }
-
-    _culled = false;
-    _children = new ArrayList<Frame>();
-    //setReference(reference());// _restorePath seems more robust
-    _precision = Precision.FIXED;
-    setPrecisionThreshold(20);
-    enableTracking(true);
+    _lastUpdate = 0;
   }
 
-  protected Frame(Frame frame, Graph graph) {
-    _graph = graph;
+  protected Frame(Frame frame) {
     this.setTranslation(frame.translation().get());
     this.setRotation(frame.rotation().get());
     this.setScaling(frame.scaling());
     this.setReference(frame.reference());
     this.setConstraint(frame.constraint());
-
-    if (graph == null)
-      return;
 
     if (this.graph() == frame.graph()) {
       this._id = ++graph()._nodeCount;
@@ -219,33 +234,14 @@ public class Frame {
       this._id = frame._id();
       this.set(frame);
     }
-
-    this._culled = frame._culled;
-
-    this._children = new ArrayList<Frame>();
-    /*
-    if (this.graph() == frame.graph()) {
-      this.setReference(reference());// _restorePath
-    }
-    */
-
     _lastUpdate = frame.lastUpdate();
-    this._precision = frame._precision;
-    this._threshold = frame._threshold;
-    this._tracking = frame._tracking;
-  }
-
-  public Frame get() {
-    return get(_graph);
   }
 
   /**
    * Returns a deep copy of this frame.
    */
-  public Frame get(Graph graph) {
-    if (graph == null)
-      throw new RuntimeException("Frame graph should be non-null!");
-    return new Frame(this, graph);
+  public Frame get() {
+    return new Frame(this);
   }
 
   /**
@@ -260,13 +256,7 @@ public class Frame {
     return frame;
   }
 
-  public boolean isDetached() {
-    return graph() == null;
-  }
-
-  public boolean isAttached() {
-    return graph() != null;
-  }
+  //TODO Ambiguous: global or local. Check set(), reset and matches().
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
@@ -279,24 +269,37 @@ public class Frame {
    * @see #worldMatrix()
    */
   public void set(Frame frame) {
-    if (frame != null) {
-      setPosition(frame.position());
-      setOrientation(frame.orientation());
-      setMagnitude(frame.magnitude());
-    } else
-      throw new RuntimeException("Frame should be non-null!");
+    if (frame == null)
+      reset();
+    setPosition(frame.position());
+    setOrientation(frame.orientation());
+    setMagnitude(frame.magnitude());
   }
 
+  /**
+   * Sets an identity frame: 0 {}
+   */
   public void reset() {
     setPosition(new Vector());
     setOrientation(new Quaternion());
     setMagnitude(1);
   }
 
+  // id
+
+  /**
+   * Internal use. Frame graphics color to be used for picking with a color buffer.
+   */
+  public int _id() {
+    // see here:
+    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
+    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
+  }
+
   // MODIFIED
 
   /**
-   * @return the last frame the this obect was updated.
+   * @return the last frame the this object was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -340,9 +343,6 @@ public class Frame {
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
-    if (children() != null)
-      for (Frame child : children())
-        child._modified();
   }
 
   // REFERENCE_FRAME
@@ -442,48 +442,10 @@ public class Frame {
       System.out.println("A frame descendant cannot be set as its reference.");
       return;
     }
-    if (frame != null) {
-      if (isDetached() && !frame.isDetached()) {
-        System.out.println("An attached frame cannot be set as reference of a detached one.");
-        return;
-      }
-      if (!isDetached() && frame.isDetached()) {
-        System.out.println("An detached frame cannot be set as reference of an attached one.");
-        return;
-      }
-    }
-    if (isDetached()) {
-      if (reference() == frame)
-        return;
-      _reference = frame;
-      _modified();
-    } else {
-      // 1. no need to re-parent, just check this needs to be added as leadingFrame
-      if (reference() == frame) {
-        _restorePath(reference(), this);
-        return;
-      }
-      // 2. else re-parenting
-      // 2a. before assigning new reference frame
-      if (reference() != null) // old
-        reference()._removeChild(this);
-      else if (graph() != null)
-        graph()._removeLeadingNode(this);
-      // finally assign the reference frame
-      _reference = frame;// reference() returns now the new value
-      // 2b. after assigning new reference frame
-      _restorePath(reference(), this);
-      _modified();
-    }
-  }
-
-  /**
-   * Same as {@code randomize(graph().center(), graph().radius())}.
-   *
-   * @see #random(Graph)
-   */
-  public void randomize() {
-    randomize(graph().center(), graph().radius());
+    if (reference() == frame)
+      return;
+    _reference = frame;
+    _modified();
   }
 
   /**
@@ -492,7 +454,7 @@ public class Frame {
    * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
    * magnitude is a random in oldMagnitude * [0,5...2].
    *
-   * @see #random(Graph)
+   * @see #random(Vector, float)
    */
   public void randomize(Vector center, float radius) {
     Vector displacement = Vector.random();
@@ -505,26 +467,13 @@ public class Frame {
   }
 
   /**
-   * Returns a random graph frame. The frame is randomly positioned inside the ball defined
+   * Returns a random frame. The frame is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}). The
    * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
    * is a random in [0,5...2].
    *
-   * @see #randomize()
+   * @see #randomize(Vector, float)
    */
-  public static Frame random(Graph graph) {
-    Frame frame = new Frame(graph);
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(graph.radius());
-    frame.setPosition(Vector.add(graph.center(), displacement));
-    frame.setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
-    return frame;
-  }
-
-  //detached version
   public static Frame random(Vector center, float radius) {
     Frame frame = new Frame();
     Vector displacement = Vector.random();
@@ -540,7 +489,7 @@ public class Frame {
   // CONSTRAINT
 
   /**
-   * Returns the current {@link frames.core.constraint.Constraint} applied to the
+   * Returns the current {@link frames.primitives.constraint.Constraint} applied to the
    * frame.
    * <p>
    * A {@code null} value (default) means that no constraint is used to filter the frame
@@ -1611,310 +1560,5 @@ public class Frame {
    */
   protected Vector _referenceLocation(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
-  }
-
-  // NODE
-
-  /**
-   * Internal use. Frame graphics color to be used for picking with a color buffer.
-   */
-  protected int _id() {
-    // see here:
-    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
-    return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
-  }
-
-  public boolean isEye() {
-    return graph().eye() == this;
-  }
-
-  public Graph graph() {
-    return _graph;
-  }
-
-  protected void _restorePath(Frame parent, Frame child) {
-    if (parent == null) {
-      if (graph() != null)
-        graph()._addLeadingNode(child);
-    } else {
-      if (!parent._hasChild(child)) {
-        parent._addChild(child);
-        _restorePath(parent.reference(), parent);
-      }
-    }
-  }
-
-  public List<Frame> children() {
-    return _children;
-  }
-
-  protected boolean _addChild(Frame frame) {
-    if (frame == null)
-      return false;
-    if (_hasChild(frame))
-      return false;
-    return children().add(frame);
-  }
-
-  /**
-   * Removes the leading frame if present. Typically used when re-parenting the frame.
-   */
-  protected boolean _removeChild(Frame frame) {
-    boolean result = false;
-    Iterator<Frame> it = children().iterator();
-    while (it.hasNext()) {
-      if (it.next() == frame) {
-        it.remove();
-        result = true;
-        break;
-      }
-    }
-    return result;
-  }
-
-  protected boolean _hasChild(Frame frame) {
-    for (Frame child : children())
-      if (child == frame)
-        return true;
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if tracking is enabled.
-   *
-   * @see #enableTracking(boolean)
-   */
-  public boolean isTrackingEnabled() {
-    return _tracking;
-  }
-
-  /**
-   * Enables frame tracking according to {@code flag}.
-   *
-   * @see #isTrackingEnabled()
-   */
-  public void enableTracking(boolean flag) {
-    _tracking = flag;
-  }
-
-  protected void _visit(float x, float y) {
-    if (graph().trackedFrame() == null && isTrackingEnabled())
-      if (track(x, y))
-        graph().setTrackedFrame(this);
-    visit();
-  }
-
-  /**
-   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes.
-   * <p>
-   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
-   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
-   *
-   * <pre>
-   * {@code
-   * frame = new Frame(graph) {
-   *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
-   *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#cast()
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-  public void visit() {
-  }
-
-  /**
-   * Same as {@code cull(true)}.
-   *
-   * @see #cull(boolean)
-   * @see #isCulled()
-   */
-
-  public void cull() {
-    cull(true);
-  }
-
-  /**
-   * Enables or disables {@link #visit()} of this frame and its children during
-   * {@link Graph#cast()}. Culling should be decided within {@link #visit()}.
-   *
-   * @see #isCulled()
-   */
-  public void cull(boolean cull) {
-    _culled = cull;
-  }
-
-  /**
-   * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#cast()} algoruthm.
-   *
-   * @see #cull(boolean)
-   */
-  public boolean isCulled() {
-    return _culled;
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this frame to any graph you want using this
-   * method.
-   * <p>
-   * Very efficient prefer always this than
-   *
-   * @see #applyTransformation()
-   * @see #matrix()
-   * @see Graph#applyTransformation(Frame)
-   */
-  public void applyTransformation() {
-    graph().applyTransformation(this);
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this frame to any graph you
-   * want using this method.
-   *
-   * @see #applyWorldTransformation()
-   * @see #worldMatrix()
-   * @see Graph#applyWorldTransformation(Frame)
-   */
-  public void applyWorldTransformation() {
-    graph().applyWorldTransformation(this);
-  }
-
-  /**
-   * Rotates the frame using {@code quaternion} around its {@link #position()} (non-eye frames)
-   * or around the {@link Graph#anchor()} when this frame is the {@link Graph#eye()}.
-   */
-  //TODO discard in favor of graph spin!
-  public void spin(Quaternion quaternion) {
-    if (isEye())
-      rotate(quaternion, graph().anchor());
-    else
-      rotate(quaternion);
-  }
-
-  /**
-   * Wrapper method for {@link #alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye frames.
-   *
-   * @see #isEye()
-   */
-  public void align() {
-    if (isEye())
-      alignWithFrame(null, true);
-    else
-      alignWithFrame(_graph.eye());
-  }
-
-  /**
-   * Centers the frame into the graph.
-   */
-  public void center() {
-    if (isEye())
-      projectOnLine(graph().center(), graph().viewDirection());
-    else
-      projectOnLine(_graph.eye().position(), _graph.eye().zAxis(false));
-  }
-
-  // PRECISION
-
-  /**
-   * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
-   *
-   * @see #setPrecisionThreshold(float)
-   */
-  public float precisionThreshold() {
-    if (precision() == Precision.ADAPTIVE)
-      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
-    return _threshold;
-  }
-
-  /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
-   *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
-   * Sets the frame picking precision.
-   * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or
-   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #center()} screen projection which size
-   * is defined by {@link #setPrecisionThreshold(float)}.
-   * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the frame. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the frame) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
-   *
-   * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   */
-  public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
-    _precision = precision;
-  }
-
-  /**
-   * Sets the length of the squared area around the frame {@link #center()} screen
-   * projection that defined the {@link #track(float, float)} condition used for
-   * frame picking.
-   * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
-   * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame shape.
-   * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
-   * <p>
-   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #precision()
-   * @see #precisionThreshold()
-   */
-  public void setPrecisionThreshold(float threshold) {
-    if (threshold >= 0)
-      _threshold = threshold;
-  }
-
-  /**
-   * Picks the frame according to the {@link #precision()}.
-   *
-   * @see #precision()
-   * @see #setPrecision(Precision)
-   */
-  public boolean track(float x, float y) {
-    if (isEye())
-      return false;
-    Vector proj = _graph.screenLocation(position());
-    float halfThreshold = precisionThreshold() / 2;
-    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
   }
 }

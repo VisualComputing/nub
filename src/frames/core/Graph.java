@@ -268,7 +268,7 @@ public class Graph {
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
    * frames will be constrained so that they will remain at the x-y plane. See
-   * {@link frames.core.constraint.Constraint}.
+   * {@link frames.primitives.constraint.Constraint}.
    * <p>
    * To set a {@link Type#CUSTOM} override {@link #computeCustomProjection()}.
    */
@@ -574,72 +574,6 @@ public class Graph {
       }
     }
     return result;
-  }
-
-  /**
-   * Traverse the frame hierarchy, successively applying the local transformation defined
-   * by each traversed frame, and calling {@link Frame#visit()} on it.
-   * <p>
-   * Note that only reachable frames are visited by this algorithm.
-   *
-   * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
-   * eye update) and before any other transformation of the modelview matrix takes place.
-   *
-   * @see #isNodeReachable(Frame)
-   * @see #pruneBranch(Frame)
-   */
-  public void cast() {
-    for (Frame frame : leadingFrames())
-      _visit(frame);
-  }
-
-  /**
-   * Used by the traversal algorithm.
-   */
-  protected void _visit(Frame frame) {
-    pushModelView();
-    applyTransformation(frame);
-    frame.visit();
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child);
-    popModelView();
-  }
-
-  protected Frame _trackedFrame;
-
-  public void setTrackedFrame(Frame frame) {
-    if (frame.graph() == this)
-      _trackedFrame = frame;
-  }
-
-  public Frame trackedFrame() {
-    return _trackedFrame;
-  }
-
-  public boolean isTrackedFrame(Frame frame) {
-    return trackedFrame() == frame;
-  }
-
-  public void resetTrackedFrame() {
-    _trackedFrame = null;
-  }
-
-  public Frame cast(float x, float y) {
-    resetTrackedFrame();
-    for (Frame frame : leadingFrames())
-      _visit(frame, x, y);
-    return trackedFrame();
-  }
-
-  protected void _visit(Frame frame, float x, float y) {
-    pushModelView();
-    applyTransformation(frame);
-    frame._visit(x, y);
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child, x, y);
-    popModelView();
   }
 
   /**
@@ -2409,6 +2343,74 @@ public class Graph {
   public void executeSolver(Solver solver, long period) {
     registerTask(solver.task());
     solver.task().run(period);
+  }
+
+  // traversal
+
+  /**
+   * Traverse the frame hierarchy, successively applying the local transformation defined
+   * by each traversed frame, and calling {@link Frame#visit()} on it.
+   * <p>
+   * Note that only reachable frames are visited by this algorithm.
+   *
+   * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
+   * eye update) and before any other transformation of the modelview matrix takes place.
+   *
+   * @see #isNodeReachable(Frame)
+   * @see #pruneBranch(Frame)
+   */
+  public void cast() {
+    for (Frame frame : leadingFrames())
+      _visit(frame);
+  }
+
+  /**
+   * Used by the traversal algorithm.
+   */
+  protected void _visit(Frame frame) {
+    pushModelView();
+    applyTransformation(frame);
+    frame.visit();
+    if (!frame.isCulled())
+      for (Frame child : frame.children())
+        _visit(child);
+    popModelView();
+  }
+
+  protected Frame _trackedFrame;
+
+  public void setTrackedFrame(Frame frame) {
+    if (frame.graph() == this)
+      _trackedFrame = frame;
+  }
+
+  public Frame trackedFrame() {
+    return _trackedFrame;
+  }
+
+  public boolean isTrackedFrame(Frame frame) {
+    return trackedFrame() == frame;
+  }
+
+  public void resetTrackedFrame() {
+    _trackedFrame = null;
+  }
+
+  public Frame cast(float x, float y) {
+    resetTrackedFrame();
+    for (Frame frame : leadingFrames())
+      _visit(frame, x, y);
+    return trackedFrame();
+  }
+
+  protected void _visit(Frame frame, float x, float y) {
+    pushModelView();
+    applyTransformation(frame);
+    frame._visit(x, y);
+    if (!frame.isCulled())
+      for (Frame child : frame.children())
+        _visit(child, x, y);
+    popModelView();
   }
 
   // Screen to frame conversion

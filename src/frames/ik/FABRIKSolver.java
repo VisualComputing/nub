@@ -11,10 +11,10 @@
 
 package frames.ik;
 
-import frames.core.Frame;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
+import frames.primitives.Frame;
+import frames.primitives.constraint.BallAndSocket;
+import frames.primitives.constraint.Hinge;
+import frames.primitives.constraint.PlanarPolygon;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
