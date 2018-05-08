@@ -2401,6 +2401,17 @@ public class Graph {
     _trackedNode = null;
   }
 
+  /**
+   * Picks the frame according to the {@code precision}.
+   */
+  public boolean track(float x, float y, float precision, Frame frame) {
+    if (isEye(frame))
+      return false;
+    Vector projection = screenLocation(frame.position());
+    float halfThreshold = precision / 2;
+    return ((Math.abs(x - projection._vector[0]) < halfThreshold) && (Math.abs(y - projection._vector[1]) < halfThreshold));
+  }
+
   public Node cast(float x, float y) {
     resetTrackedNode();
     for (Node frame : leadingNodes())

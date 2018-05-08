@@ -491,8 +491,8 @@ public class Node extends Frame {
   public boolean track(float x, float y) {
     if (isEye())
       return false;
-    Vector proj = _graph.screenLocation(position());
+    Vector projection = _graph.screenLocation(position());
     float halfThreshold = precisionThreshold() / 2;
-    return ((Math.abs(x - proj._vector[0]) < halfThreshold) && (Math.abs(y - proj._vector[1]) < halfThreshold));
+    return ((Math.abs(x - projection._vector[0]) < halfThreshold) && (Math.abs(y - projection._vector[1]) < halfThreshold));
   }
 }

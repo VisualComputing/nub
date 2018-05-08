@@ -16,10 +16,10 @@ import processing.core.PShape;
  */
 public class Interaction extends PApplet {
   Scene scene;
-  Frame eye;
+  Node eye;
   Shape node, frame;
   Frame trackedFrame;
-  Frame defaultNode;
+  Frame defaultFrame;
   Vector upVector;
   boolean mouseDragged;
 
@@ -61,7 +61,7 @@ public class Interaction extends PApplet {
     frame.setShape(shape());
     frame.translate(275, 275, 275);
 
-    defaultNode = eye;
+    defaultFrame = eye;
   }
 
   public void draw() {
@@ -83,11 +83,11 @@ public class Interaction extends PApplet {
         println("left");
       }
     if (key == '1')
-      defaultNode = eye;
+      defaultFrame = eye;
     if (key == '2')
-      defaultNode = node;
+      defaultFrame = node;
     if (key == '3')
-      defaultNode = frame;
+      defaultFrame = frame;
   }
 
   public void mousePressed() {
@@ -98,25 +98,25 @@ public class Interaction extends PApplet {
     mouseDragged = true;
     //if(mouseY-pmouseY > 0)
     //println("deltaY positive");
-    //defaultNode.translate(defaultNode.gestureTranslate(new Vector(mouseX-pmouseX, mouseY-pmouseY)));
-    //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
-    //defaultNode.translate(defaultNode.gestureTranslate(new Vector(mouseX-pmouseX, 0)));
-    //defaultNode.translate(defaultNode.gestureTranslate(new Vector(0, mouseY-pmouseY)));
-    //defaultNode.translate(defaultNode.gestureTranslate(new Vector(0, 0, mouseX-pmouseX)));
-    //defaultNode.rotate(defaultNode.gestureRotate(0,(mouseY-pmouseY),0, PI / width));
-    //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    //defaultNode.rotate(defaultNode.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
-    //defaultNode.spin(defaultNode.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
+    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(mouseX-pmouseX, mouseY-pmouseY)));
+    //defaultFrame.spin(defaultFrame.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
+    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(mouseX-pmouseX, 0)));
+    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(0, mouseY-pmouseY)));
+    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(0, 0, mouseX-pmouseX)));
+    //defaultFrame.rotate(defaultFrame.gestureRotate(0,(mouseY-pmouseY),0, PI / width));
+    //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    //defaultFrame.rotate(defaultFrame.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
+    //defaultFrame.spin(defaultFrame.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
     //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
     //eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
     /*
-    if (defaultNode == eye)
+    if (defaultFrame == eye)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
-      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, defaultNode);
+      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, defaultFrame);
       */
-    //defaultNode.rotate(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    //defaultNode.spin(defaultNode.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    //defaultFrame.spin(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     if (trackedFrame == null)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
