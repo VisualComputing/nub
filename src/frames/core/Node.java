@@ -231,22 +231,22 @@ public class Node extends Frame {
     return _children;
   }
 
-  protected boolean _addChild(Node frame) {
-    if (frame == null)
+  protected boolean _addChild(Node node) {
+    if (node == null)
       return false;
-    if (_hasChild(frame))
+    if (_hasChild(node))
       return false;
-    return children().add(frame);
+    return children().add(node);
   }
 
   /**
-   * Removes the leading frame if present. Typically used when re-parenting the frame.
+   * Removes the leading node if present. Typically used when re-parenting the node.
    */
-  protected boolean _removeChild(Frame frame) {
+  protected boolean _removeChild(Node node) {
     boolean result = false;
     Iterator<Node> it = children().iterator();
     while (it.hasNext()) {
-      if (it.next() == frame) {
+      if (it.next() == node) {
         it.remove();
         result = true;
         break;
@@ -255,9 +255,9 @@ public class Node extends Frame {
     return result;
   }
 
-  protected boolean _hasChild(Frame frame) {
-    for (Frame child : children())
-      if (child == frame)
+  protected boolean _hasChild(Node node) {
+    for (Node child : children())
+      if (child == node)
         return true;
     return false;
   }
