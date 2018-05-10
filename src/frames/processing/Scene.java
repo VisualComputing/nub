@@ -699,9 +699,6 @@ public class Scene extends Graph implements PConstants {
       pApplet().image(pgraphics, originCorner().x(), originCorner().y());
   }
 
-  // TODO: Future work should include the eye and graph profiles.
-  // Probably related with iFrame.fromFrame
-
   /**
    * Same as {@link #saveConfig()}.
    * <p>
@@ -2815,7 +2812,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  //high-level wrappers
+  //TODO high-level wrappers
 
   public boolean track(Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, frame);
@@ -2826,5 +2823,21 @@ public class Scene extends Graph implements PConstants {
    */
   public boolean track(float precision, Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, precision, frame);
+  }
+
+  public void screenRotate() {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));
+  }
+
+  public void screenRotate(float sensitivity) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity);
+  }
+
+  public void screenRotate(Frame frame) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), frame);
+  }
+
+  public void screenRotate(float sensitivity, Frame frame) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame);
   }
 }
