@@ -244,24 +244,6 @@ public class Vector {
   }
 
   /**
-   * Link {@code source} array to this vector.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _vector = source;
-  }
-
-  /**
-   * Unlinks this vector if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[3];
-    get(data);
-    set(data);
-  }
-
-  /**
    * Sets all vector components to 0.
    */
   public void reset() {

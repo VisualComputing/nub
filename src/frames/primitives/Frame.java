@@ -283,11 +283,10 @@ public class Frame {
   // id
 
   /**
-   * Internal use. Frame graphics color to be used for picking with a color buffer.
+   * Uniquely identifies the frame. Also the color to be used for picking with a color buffer.
+   * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
   public int id() {
-    // see here:
-    // http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
   }
 

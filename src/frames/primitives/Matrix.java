@@ -312,24 +312,6 @@ public class Matrix {
   }
 
   /**
-   * Link {@code source} array to this matrix.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _matrix = source;
-  }
-
-  /**
-   * Unlinks this matrix if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[16];
-    get(data);
-    set(data);
-  }
-
-  /**
    * Returns a copy of this matrix.
    */
   public Matrix get() {

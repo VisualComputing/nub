@@ -237,24 +237,6 @@ public class Quaternion {
     this._quaternion[3] = 1;
   }
 
-  /**
-   * Link {@code source} array to this quaternion.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _quaternion = source;
-  }
-
-  /**
-   * Unlinks this quaternion if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[4];
-    get(data);
-    set(data);
-  }
-
   public float[] get(float[] target) {
     if ((target == null) || (target.length != 4)) {
       target = new float[4];
