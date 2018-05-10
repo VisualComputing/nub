@@ -46,7 +46,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix projection() {
-    return Scene.toMat(pggl().projection.get());
+    return Scene.toMatrix(pggl().projection.get());
   }
 
   @Override
@@ -71,7 +71,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix modelView() {
-    return Scene.toMat((PMatrix3D) pggl().getMatrix());
+    return Scene.toMatrix((PMatrix3D) pggl().getMatrix());
   }
 
   @Override

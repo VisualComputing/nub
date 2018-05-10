@@ -1255,7 +1255,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Converts a PVector to a {@link Vector}.
    */
-  public static Vector toVec(PVector pVector) {
+  public static Vector toVector(PVector pVector) {
     return new Vector(pVector.x, pVector.y, pVector.z);
   }
 
@@ -1271,15 +1271,15 @@ public class Scene extends Graph implements PConstants {
   /**
    * Converts a PMatrix3D to a {@link Matrix}.
    */
-  public static Matrix toMat(PMatrix3D pMatrix3D) {
+  public static Matrix toMatrix(PMatrix3D pMatrix3D) {
     return new Matrix(pMatrix3D.get(new float[16]), false);
   }
 
   /**
    * Converts a PMatrix2D to a {@link Matrix}.
    */
-  public static Matrix toMat(PMatrix2D pMatrix2D) {
-    return toMat(new PMatrix3D(pMatrix2D));
+  public static Matrix toMatrix(PMatrix2D pMatrix2D) {
+    return toMatrix(new PMatrix3D(pMatrix2D));
   }
 
   /**

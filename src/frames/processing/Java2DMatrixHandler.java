@@ -90,7 +90,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix modelView() {
-    return Scene.toMat(new PMatrix2D(pg().getMatrix()));
+    return Scene.toMatrix(new PMatrix2D(pg().getMatrix()));
   }
 
   @Override

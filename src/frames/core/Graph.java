@@ -1776,7 +1776,7 @@ public class Graph {
    * ({@code frame().worldDisplacement(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
    * it always is (0,0,-1).
    * <p>
-   * Xhange this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
+   * Change this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
    * {@link Node#setOrientation(Quaternion)}. It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
@@ -2107,18 +2107,18 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(Point pixelInput, Vector origin, Vector direction) {
-    Point pixel = new Point(pixelInput.x(), pixelInput.y());
+  public void convertClickToLine(Point pixel, Vector origin, Vector direction) {
+    Point pixelCopy = new Point(pixel.x(), pixel.y());
 
-    // lef-handed coordinate system correction
+    // left-handed coordinate system correction
     if (isLeftHanded())
-      pixel.setY(height() - pixelInput.y());
+      pixelCopy.setY(height() - pixel.y());
 
     switch (type()) {
       case PERSPECTIVE:
-        origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixel.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
-            ((2.0f * (height() - pixel.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
+        origin.set(eye().position()); 
+        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
+            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2128,7 +2128,7 @@ public class Graph {
       case ORTHOGRAPHIC: {
         float[] wh = boundaryWidthHeight();
         origin.set(
-            new Vector((2.0f * pixel.x() / width() - 1.0f) * wh[0], -(2.0f * pixel.y() / height() - 1.0f) * wh[1],
+            new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh[0], -(2.0f * pixelCopy.y() / height() - 1.0f) * wh[1],
                 0.0f));
         origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
