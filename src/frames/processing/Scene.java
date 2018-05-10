@@ -653,7 +653,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Only if the dcene {@link #isOffscreen()}. Calls:
+   * Only if the scene {@link #isOffscreen()}. Calls:
    *
    * <ol>
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
@@ -2818,7 +2818,7 @@ public class Scene extends Graph implements PConstants {
   //high-level wrappers
 
   public boolean track(Frame frame) {
-    return super.track(pApplet().mouseX, pApplet().mouseY,frame);
+    return super.track(pApplet().mouseX, pApplet().mouseY, frame);
   }
 
   /**
