@@ -2683,8 +2683,6 @@ public class Graph {
   // TODO research if spin(gestureRotate(roll, pitch, yaw)); is missed
   // see f40a95b
 
-  //TODO screenRotate is missing! screenTranslate?
-
   //TODO test when frame == null -> perhaps perform on the eye()?
 
   public void rotate(float roll, float pitch, float yaw) {
