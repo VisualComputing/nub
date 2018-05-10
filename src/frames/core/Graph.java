@@ -2797,50 +2797,6 @@ public class Graph {
     return quaternion;
   }
 
-  public void screenRotate(Point point1, Point point2) {
-    screenRotate(point1, point2, 1);
-  }
-
-  public void screenRotate(Point point1, Point point2, float sensitivity) {
-    screenRotate(point1, point2, sensitivity, eye());
-  }
-
-  public void screenRotate(Point point1, Point point2, Frame frame) {
-    screenRotate(point1, point2, 1, frame);
-  }
-
-  public void screenRotate(Point point1, Point point2, float sensitivity, Frame frame) {
-    spin(_spin2(point1, point2, sensitivity, frame), frame);
-  }
-
-  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Frame frame) {
-    Quaternion quaternion;
-    Vector vector;
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
-    float angle;
-    if (isEye(frame)) {
-      vector = screenLocation(anchor());
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]) - (float) Math
-          .atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      if (isLeftHanded())
-        angle = -angle;
-      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
-    } else {
-      vector = screenLocation(frame.position());
-      float prev_angle = (float) Math.atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
-      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]);
-      Vector axis = frame.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
-      if (isRightHanded())
-        quaternion = new Quaternion(axis, angle - prev_angle);
-      else
-        quaternion = new Quaternion(axis, prev_angle - angle);
-    }
-    return quaternion;
-  }
-
   /**
    * Returns "pseudo-_distance" from (x,y) to ball of radius size. For a point inside the
    * ball, it is proportional to the euclidean distance to the ball. For a point outside
@@ -2937,15 +2893,60 @@ public class Graph {
       frame.alignWithFrame(eye());
   }
 
-  //TODO ambiguous with center()
-
   /**
    * Centers the frame into the graph.
    */
-  public void center(Frame frame) {
+  public void focus(Frame frame) {
     if (isEye(frame))
       frame.projectOnLine(center(), viewDirection());
     else
       frame.projectOnLine(eye().position(), eye().zAxis(false));
   }
+
+  /*
+  // Overkill: simply accomplish these with constraints
+  public void screenRotate(Point point1, Point point2) {
+    screenRotate(point1, point2, 1);
+  }
+
+  public void screenRotate(Point point1, Point point2, float sensitivity) {
+    screenRotate(point1, point2, sensitivity, eye());
+  }
+
+  public void screenRotate(Point point1, Point point2, Frame frame) {
+    screenRotate(point1, point2, 1, frame);
+  }
+
+  public void screenRotate(Point point1, Point point2, float sensitivity, Frame frame) {
+    spin(_spin2(point1, point2, sensitivity, frame), frame);
+  }
+
+  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Frame frame) {
+    Quaternion quaternion;
+    Vector vector;
+    float x = point2.x();
+    float y = point2.y();
+    float prevX = point1.x();
+    float prevY = point1.y();
+    float angle;
+    if (isEye(frame)) {
+      vector = screenLocation(anchor());
+      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]) - (float) Math
+          .atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
+      if (isLeftHanded())
+        angle = -angle;
+      quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
+    } else {
+      vector = screenLocation(frame.position());
+      float prev_angle = (float) Math.atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
+      angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]);
+      Vector axis = frame.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
+      if (isRightHanded())
+        quaternion = new Quaternion(axis, angle - prev_angle);
+      else
+        quaternion = new Quaternion(axis, prev_angle - angle);
+    }
+    return quaternion;
+  }
+  */
 }

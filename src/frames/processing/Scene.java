@@ -2825,6 +2825,7 @@ public class Scene extends Graph implements PConstants {
     return super.track(pApplet().mouseX, pApplet().mouseY, precision, frame);
   }
 
+  /*
   public void screenRotate() {
     super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));
   }
@@ -2840,4 +2841,5 @@ public class Scene extends Graph implements PConstants {
   public void screenRotate(float sensitivity, Frame frame) {
     super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame);
   }
+  */
 }

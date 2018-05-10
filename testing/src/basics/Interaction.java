@@ -49,7 +49,7 @@ public class Interaction extends PApplet {
       }
     };
     shape1.setRotation(Quaternion.random());
-    shape1.translate(75, 75, 75);
+    shape1.translate(-375, 175, -275);
 
     shape2 = new Shape(shape1);
     shape2.setShape(shape());
@@ -108,16 +108,10 @@ public class Interaction extends PApplet {
       */
     //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     //defaultFrame.spin(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    /*
     if (trackedNode == null)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
       scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedNode);
-      */
-    if (trackedNode == null)
-      scene.screenRotate();
-    else
-      scene.screenRotate(trackedNode);
   }
 
   PShape shape() {
