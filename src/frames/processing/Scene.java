@@ -577,7 +577,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -593,16 +592,14 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Simply
-   * render the back buffer (useful for picking) and call {@link #postDraw()}. This method
-   * is registered at the PApplet and hence you don't need to call it. Only meaningful if
-   * the graph is on-screen (it the graph {@link #isOffscreen()} it even doesn't get
-   * registered at the PApplet.
+   * render the back buffer (useful for picking). This method is registered at the PApplet
+   * and hence you don't need to call it. Only meaningful if the graph is on-screen (it
+   * the graph {@link #isOffscreen()} it even doesn't get registered at the PApplet.
    * <p>
    * If {@link #isOffscreen()} does nothing.
    *
    * @see #pre()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -610,7 +607,6 @@ public class Scene extends Graph implements PConstants {
   public void draw() {
     popModelView();
     _renderBackBuffer();
-    postDraw();
   }
 
   // Off-screen
@@ -631,7 +627,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #pre()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -663,14 +658,10 @@ public class Scene extends Graph implements PConstants {
    * <ol>
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@code _renderBackBuffer()}: Render the back buffer (useful for picking)</li>
-   * <li>{@link #postDraw()}</li>
    * </ol>
-   * <p>
-   * {@link #postDraw()}.
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #pre()
    * @see #isOffscreen()
@@ -687,7 +678,6 @@ public class Scene extends Graph implements PConstants {
     popModelView();
     frontBuffer().endDraw();
     _renderBackBuffer();
-    postDraw();
   }
 
   /**
@@ -941,9 +931,9 @@ public class Scene extends Graph implements PConstants {
    * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining.
    * <p>
-   * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the frames
+   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
-   * technique is called by {@link #postDraw()}.
+   * technique is called by {@link #draw()}.
    *
    * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
    * (i.e., manual eye update) and before any other transformation of the modelview takes

@@ -993,29 +993,15 @@ public class Graph {
    * <li>Calls {@link MatrixHandler#_bind()}</li>
    * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
    * </ol>
-   *
-   * @see #postDraw()
    */
   public void preDraw() {
+    //TODO test syncing, since timingHandler().handle() was called in postDraw()
+    timingHandler().handle();
     matrixHandler()._bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
     }
-  }
-
-  //TODO move timingHandler().handle() to the preDraw
-
-  /**
-   * Called after your main drawing and performs the following:
-   * <ol>
-   * <li>Calls {@link frames.timing.TimingHandler#handle()}.</li>
-   * </ol>
-   *
-   * @see #preDraw()
-   */
-  public void postDraw() {
-    timingHandler().handle();
   }
 
   // Eye stuff
@@ -2116,7 +2102,7 @@ public class Graph {
 
     switch (type()) {
       case PERSPECTIVE:
-        origin.set(eye().position()); 
+        origin.set(eye().position());
         direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
             ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
             -1.0f));
