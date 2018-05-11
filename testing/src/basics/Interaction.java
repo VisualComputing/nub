@@ -116,6 +116,7 @@ public class Interaction extends PApplet {
     ///*
     if (mouseButton == LEFT)
       scene.mouseSpin();
+      //scene.mouseCAD(PI / height);
     else
       if(mouseButton == RIGHT)
       //scene.mouseTranslate();

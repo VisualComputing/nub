@@ -2875,6 +2875,14 @@ public class Scene extends Graph implements PConstants {
     lookAround(delta.x(), delta.y(), upVector, sensitivity);
   }
 
+  public void mouseCAD(float sensitivity) {
+    rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, sensitivity);
+  }
+
+  public void mouseCAD(Vector upVector, float sensitivity) {
+    rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, upVector, sensitivity);
+  }
+
   /*
   public void screenRotate() {
     super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));

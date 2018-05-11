@@ -21,7 +21,7 @@ public class ConstrainedFrame extends PApplet {
   PFont myFont;
   private int transDir;
   private int rotDir;
-  Node eye, node, defaultNode;
+  Node eye, node;
   AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
   int activeConstraint;
   boolean wC = true;
@@ -36,7 +36,6 @@ public class ConstrainedFrame extends PApplet {
 
     scene = new Scene(this);
     eye = new Node(scene);
-    defaultNode = eye;
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
@@ -53,6 +52,8 @@ public class ConstrainedFrame extends PApplet {
     node = new Node(scene);
     node.translate(new Vector(20, 20, 0));
     node.setConstraint(constraints[activeConstraint]);
+
+    scene.setTrackedFrame(eye);
   }
 
   public void draw() {
@@ -64,7 +65,7 @@ public class ConstrainedFrame extends PApplet {
     if (scene.mouseTrack(node)) {
       fill(0, 255, 255);
       scene.drawTorusSolenoid();
-    } else if (defaultNode == node) {
+    } else if (scene.isTrackedFrame(node)) {
       fill(255, 0, 0);
       scene.drawTorusSolenoid();
     } else {
@@ -79,24 +80,23 @@ public class ConstrainedFrame extends PApplet {
     scene.endScreenCoordinates();
   }
 
-  public void mouseMoved() {
-    scene.setTrackedFrame(scene.mouseTrack(node) ? node : eye);
-  }
-
   public void mouseDragged() {
-    //if(mouseButton == LEFT)
-
+    if (mouseButton == LEFT)
+      scene.mouseSpin();
+    else
+    if(mouseButton == RIGHT)
+      scene.mousePan();
+    else
+      scene.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-
+    scene.zoom(event.getCount() * 20);
   }
 
   public void keyPressed() {
-    /*
     if (key == 'i')
-      defaultNode = defaultNode == eye ? node : eye;
-      */
+      scene.setTrackedFrame(scene.isTrackedFrame(node) ? eye : node);
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }
