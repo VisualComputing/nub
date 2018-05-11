@@ -72,7 +72,7 @@ void setup() {
   scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
   //interactivity defaults to the eye
-  scene.setDefaultNode(eye);
+  scene.setDefaultGrabber(eye);
   scene.setRadius(260);
   scene.fitBallInterpolation();
   
@@ -95,7 +95,7 @@ void keyPressed() {
     scene.flip();
   // shift the agents' (mouse and agent6) default node
   if ( key == 'i')
-    scene.shiftDefaultNode(eye, rocket);
+    scene.shiftDefaultGrabber(eye, rocket);
 }
 
 void renderGlobe() {
