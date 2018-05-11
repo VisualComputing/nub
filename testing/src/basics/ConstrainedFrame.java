@@ -1,6 +1,6 @@
 package basics;
 
-import frames.core.Node;
+import frames.primitives.Frame;
 import frames.primitives.Vector;
 import frames.primitives.constraint.AxisPlaneConstraint;
 import frames.primitives.constraint.EyeConstraint;
@@ -21,7 +21,7 @@ public class ConstrainedFrame extends PApplet {
   PFont myFont;
   private int transDir;
   private int rotDir;
-  Node eye, node;
+  Frame node;
   AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
   int activeConstraint;
   boolean wC = true;
@@ -35,10 +35,6 @@ public class ConstrainedFrame extends PApplet {
     textFont(myFont);
 
     scene = new Scene(this);
-    eye = new Node(scene);
-    scene.setEye(eye);
-    scene.setFieldOfView(PI / 3);
-    scene.fitBallInterpolation();
 
     constraints[0] = new LocalConstraint();
     // Note that an EyeConstraint(eye) would produce the same results:
@@ -49,11 +45,11 @@ public class ConstrainedFrame extends PApplet {
     rotDir = 0;
     activeConstraint = 0;
 
-    node = new Node(scene);
+    node = new Frame();
     node.translate(new Vector(20, 20, 0));
     node.setConstraint(constraints[activeConstraint]);
 
-    scene.setTrackedFrame(eye);
+    scene.setTrackedFrame(scene.eye());
   }
 
   public void draw() {
@@ -96,7 +92,7 @@ public class ConstrainedFrame extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setTrackedFrame(scene.isTrackedFrame(node) ? eye : node);
+      scene.setTrackedFrame(scene.isTrackedFrame(node) ? scene.eye() : node);
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }

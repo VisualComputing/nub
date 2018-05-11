@@ -2886,7 +2886,7 @@ public class Graph {
    */
   public void spin(Quaternion quaternion, Frame frame) {
     if (isEye(frame))
-      frame.rotate(quaternion, anchor());
+      frame._rotate(quaternion, anchor());
     else
       frame.rotate(quaternion);
   }

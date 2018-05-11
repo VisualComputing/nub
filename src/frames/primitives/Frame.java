@@ -693,6 +693,10 @@ public class Frame {
     rotate(new Quaternion(x, y, z, w));
   }
 
+  public void rotate(Quaternion quaternion, Frame frame) {
+
+  }
+
   /**
    * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
    * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
@@ -705,7 +709,7 @@ public class Frame {
    * @see #setConstraint(Constraint)
    */
   //TODO better docs
-  public void rotate(Quaternion quaternion, Vector point) {
+  public void _rotate(Quaternion quaternion, Vector point) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
