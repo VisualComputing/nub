@@ -1,6 +1,6 @@
 package basics;
 
-import common.InteractiveNode;
+import frames.core.Node;
 import frames.primitives.Vector;
 import frames.primitives.constraint.AxisPlaneConstraint;
 import frames.primitives.constraint.EyeConstraint;
@@ -9,6 +9,7 @@ import frames.primitives.constraint.WorldConstraint;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
+import processing.event.MouseEvent;
 
 public class ConstrainedFrame extends PApplet {
 
@@ -20,7 +21,7 @@ public class ConstrainedFrame extends PApplet {
   PFont myFont;
   private int transDir;
   private int rotDir;
-  InteractiveNode eye, node;
+  Node eye, node, defaultNode;
   AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
   int activeConstraint;
   boolean wC = true;
@@ -34,13 +35,10 @@ public class ConstrainedFrame extends PApplet {
     textFont(myFont);
 
     scene = new Scene(this);
-    eye = new InteractiveNode(scene);
-    eye.setDamping(0);
-    eye.setRotationSensitivity(2);
-    eye.setSpinningSensitivity(1);
+    eye = new Node(scene);
+    defaultNode = eye;
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
-    scene.setDefaultNode(eye);
     scene.fitBallInterpolation();
 
     constraints[0] = new LocalConstraint();
@@ -52,7 +50,7 @@ public class ConstrainedFrame extends PApplet {
     rotDir = 0;
     activeConstraint = 0;
 
-    node = new InteractiveNode(scene);
+    node = new Node(scene);
     node.translate(new Vector(20, 20, 0));
     node.setConstraint(constraints[activeConstraint]);
   }
@@ -61,12 +59,12 @@ public class ConstrainedFrame extends PApplet {
     background(0);
     scene.drawAxes();
     pushMatrix();
-    node.applyTransformation();
+    scene.applyTransformation(node);
     scene.drawAxes(40);
-    if (scene.isInputNode(node)) {
+    if (scene.mouseTrack(node)) {
       fill(0, 255, 255);
       scene.drawTorusSolenoid();
-    } else if (node.grabsInput()) {
+    } else if (defaultNode == node) {
       fill(255, 0, 0);
       scene.drawTorusSolenoid();
     } else {
@@ -81,10 +79,24 @@ public class ConstrainedFrame extends PApplet {
     scene.endScreenCoordinates();
   }
 
+  public void mouseMoved() {
+    scene.setTrackedFrame(scene.mouseTrack(node) ? node : eye);
+  }
+
+  public void mouseDragged() {
+    //if(mouseButton == LEFT)
+
+  }
+
+  public void mouseWheel(MouseEvent event) {
+
+  }
+
   public void keyPressed() {
-    if (key == 'i') {
-      scene.shiftDefaultNode(eye, node);
-    }
+    /*
+    if (key == 'i')
+      defaultNode = defaultNode == eye ? node : eye;
+      */
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }

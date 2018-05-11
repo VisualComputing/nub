@@ -1,7 +1,7 @@
 package basics;
 
 import frames.core.Node;
-import frames.primitives.Point;
+import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -13,7 +13,7 @@ import processing.core.PShape;
  */
 public class Basics extends PApplet {
   Scene scene;
-  Node eye, node, trackedNode;
+  Frame eye, node;
   Shape shape;
 
   public void settings() {
@@ -58,16 +58,18 @@ public class Basics extends PApplet {
     background(0);
     scene.drawAxes();
     if (mousePressed)
-      trackedNode = scene.cast();
+      scene.cast();
     else
       scene.traverse();
   }
 
   public void mouseMoved() {
-    if (trackedNode == null)
+    /*
+    if (trackedFrame == null)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
-      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedNode);
+      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedFrame);
+      */
   }
 
   PShape shape() {

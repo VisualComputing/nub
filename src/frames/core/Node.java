@@ -26,13 +26,13 @@ import java.util.List;
  * <p>
  * To define the position, orientation and magnitude of a visual object, use {@link #matrix()}
  * (see the {@link frames.primitives.Frame} class documentation for details) or
- * {@link #applyTransformation()} (or {@link #applyWorldTransformation()}), as shown below:
+ * {@link Graph#applyTransformation(Frame)} (or {@link Graph#applyWorldTransformation(Frame)}), as shown below:
  * <p>
  * {@code // Builds a node located at (0,0,0) with an identity orientation (node and
  * world axes match)} <br>
  * {@code Node node = new Node(graph);} <br>
  * {@code graph.pushModelView();} <br>
- * {@code node.applyWorldTransformation(); //same as graph.applyModelView(node.matrix());} <br>
+ * {@code graph.applyWorldTransformation(node); //same as graph.applyModelView(node.matrix());} <br>
  * {@code // Draw your object here, in the local coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
@@ -207,6 +207,8 @@ public class Node extends Frame {
     _modified();
   }
 
+  // TODO remove
+
   public boolean isEye() {
     return graph().eye() == this;
   }
@@ -271,6 +273,8 @@ public class Node extends Frame {
     randomize(graph().center(), graph().radius());
   }
 
+  //TODO move to the graph
+
   /**
    * Returns a random graph node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}). The
@@ -311,9 +315,9 @@ public class Node extends Frame {
 
   //TODO docs
   protected void _visit(float x, float y) {
-    if (graph().trackedNode() == null && isTrackingEnabled())
+    if (graph().trackedFrame() == null && isTrackingEnabled())
       if (track(x, y))
-        graph().setTrackedNode(this);
+        graph().setTrackedFrame(this);
     visit();
   }
 
@@ -375,35 +379,9 @@ public class Node extends Frame {
     return _culled;
   }
 
-  /**
-   * Convenience function that simply calls {@code graph.applyTransformation(this)}. You may
-   * apply the transformation represented by this frame to any graph you want using this
-   * method.
-   * <p>
-   * Very efficient prefer always this than
-   *
-   * @see #applyTransformation()
-   * @see #matrix()
-   * @see Graph#applyTransformation(Frame)
-   */
-  public void applyTransformation() {
-    graph().applyTransformation(this);
-  }
-
-  /**
-   * Convenience function that simply calls {@code graph.applyWorldTransformation(this)}.
-   * You may apply the world transformation represented by this frame to any graph you
-   * want using this method.
-   *
-   * @see #applyWorldTransformation()
-   * @see #worldMatrix()
-   * @see Graph#applyWorldTransformation(Frame)
-   */
-  public void applyWorldTransformation() {
-    graph().applyWorldTransformation(this);
-  }
-
   // PRECISION
+
+  //TODO move to the frame
 
   /**
    * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
@@ -481,6 +459,8 @@ public class Node extends Frame {
     if (threshold >= 0)
       _threshold = threshold;
   }
+
+  //TODO remove
 
   /**
    * Picks the frame according to the {@link #precision()}.

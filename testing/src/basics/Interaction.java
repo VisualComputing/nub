@@ -1,7 +1,7 @@
 package basics;
 
 import frames.core.Node;
-import frames.primitives.Point;
+import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -16,7 +16,7 @@ import processing.event.MouseEvent;
  */
 public class Interaction extends PApplet {
   Scene scene;
-  Node eye, trackedNode, defaultNode;
+  Frame eye;
   Shape shape1, shape2;
   Vector upVector;
 
@@ -55,8 +55,6 @@ public class Interaction extends PApplet {
     shape2 = new Shape(shape1);
     shape2.setShape(shape());
     shape2.translate(275, 275, 275);
-
-    defaultNode = eye;
   }
 
   public void draw() {
@@ -65,7 +63,7 @@ public class Interaction extends PApplet {
     if (mousePressed)
       scene.traverse();
     else
-      trackedNode = scene.cast();
+      scene.cast();
   }
 
   public void keyPressed() {
@@ -77,12 +75,6 @@ public class Interaction extends PApplet {
         scene.setLeftHanded();
         println("left");
       }
-    if (key == '1')
-      defaultNode = eye;
-    if (key == '2')
-      defaultNode = shape1;
-    if (key == '3')
-      defaultNode = shape2;
   }
 
   public void mousePressed() {
@@ -110,23 +102,28 @@ public class Interaction extends PApplet {
     //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     //defaultFrame.spin(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     /*
-    if (trackedNode == null)
+    if (trackedFrame == null)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
-      scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedNode);
+      scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedFrame);
     // */
     /*
-    if (trackedNode == null)
+    if (trackedFrame == null)
       scene.rotate(0, (mouseX - pmouseX), 0, PI / height);
     else
-      scene.rotate(0, (mouseX - pmouseX), 0,PI / height, trackedNode);
+      scene.rotate(0, (mouseX - pmouseX), 0,PI / height, trackedFrame);
       //*/
     ///*
-    if (trackedNode == null)
-      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+    if (mouseButton == LEFT)
+      scene.mouseSpin();
     else
-      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedNode);
-      //*/
+      if(mouseButton == RIGHT)
+      //scene.mouseTranslate();
+      scene.mousePan();
+    else
+      //scene.zoom(mouseX - pmouseX);
+        scene.scale(mouseX - pmouseX);
+    //*/
     /*
     if (mouseButton == LEFT)
       scene.spinY((pmouseX - mouseX), PI / width);
@@ -140,13 +137,15 @@ public class Interaction extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
+    //scene.zoom(event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
     //scene.spinX(event.getCount(), 20*PI / width);
     //scene.eye().rotate(new Quaternion(event.getCount() * 20*PI / width,0,0), scene.anchor());
-    scene.eye().rotate(new Quaternion(new Vector(1,0,0), event.getCount() * 20*PI / width), scene.anchor());
-    //scene.exp(0, event.getCount(), 0, 20*PI / width, trackedNode);
+    //scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), event.getCount() * 20 * PI / width), scene.anchor());
+    //scene.exp(0, event.getCount(), 0, 20*PI / width, trackedFrame);
     //equivalent to:
-    //scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedNode);
-    //scene.rotate(0, event.getCount(), 0, 20 * PI / width, trackedNode);
+    //scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedFrame);
+    //scene.rotate(0, event.getCount(), 0, 20 * PI / width, trackedFrame);
   }
 
   PShape shape() {

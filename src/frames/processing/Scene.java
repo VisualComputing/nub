@@ -913,12 +913,13 @@ public class Scene extends Graph implements PConstants {
     super.traverse();
   }
 
-  public Node cast() {
+  //TODO name and docs: cast() only makes sense when called from within draw
+  public Frame cast() {
     return cast(pApplet().mouseX, pApplet().mouseY);
   }
 
   @Override
-  public Node cast(float x, float y) {
+  public Frame cast(float x, float y) {
     _targetPGraphics = frontBuffer();
     return super.cast(x, y);
   }
@@ -2398,7 +2399,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the cross is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isTrackedNode(Node)} it also applies
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
@@ -2406,7 +2407,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
     if (frame instanceof Node)
-      if (isTrackedNode((Node) frame))
+      if (isTrackedFrame((Node) frame))
         frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();
@@ -2468,7 +2469,7 @@ public class Scene extends Graph implements PConstants {
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the target is the node
    * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Frame instance and it is {@link #isTrackedNode(Node)} it also applies
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
@@ -2476,7 +2477,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
     if (frame instanceof Node)
-      if (isTrackedNode((Node) frame))
+      if (isTrackedFrame((Node) frame))
         frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
     frontBuffer().popStyle();
@@ -2814,15 +2815,64 @@ public class Scene extends Graph implements PConstants {
 
   //TODO high-level wrappers, including sensitivities(?)
 
-  public boolean track(Frame frame) {
+  public boolean mouseTrack(Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, frame);
   }
 
   /**
    * Picks the frame according to the {@code precision}.
    */
-  public boolean track(float precision, Frame frame) {
+  public boolean mouseTrack(float precision, Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, precision, frame);
+  }
+
+  public void mouseSpin() {
+    mouseSpin(defaultFrame());
+  }
+
+  public void mouseSpin(Frame frame) {
+    spin(_spin(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), frame), frame);
+  }
+
+  public void mouseSpin(float sensitivity) {
+    mouseSpin(sensitivity, defaultFrame());
+  }
+
+  public void mouseSpin(float sensitivity, Frame frame) {
+    spin(_spin(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame), frame);
+  }
+
+  public void mouseTranslate() {
+    mouseTranslate(defaultFrame());
+  }
+
+  public void mouseTranslate(Frame frame) {
+    translate(Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY)), frame);
+  }
+
+  /*
+  public void zoom(float sensitivity) {
+    zoom(sensitivity, defaultFrame());
+  }
+
+  public void zoom(float sensitivity, Frame frame) {
+    translate(new Vector(0, 0, pApplet().mouseX - pApplet().pmouseX), sensitivity, frame);
+  }
+  //*/
+
+  // only eye
+
+  public void mousePan() {
+    mouseTranslate(eye());
+  }
+
+  public void mouseLookAround(Vector upVector) {
+    mouseLookAround(upVector, 1);
+  }
+
+  public void mouseLookAround(Vector upVector, float sensitivity) {
+    Vector delta = Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY));
+    lookAround(delta.x(), delta.y(), upVector, sensitivity);
   }
 
   /*

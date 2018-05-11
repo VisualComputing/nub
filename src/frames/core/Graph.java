@@ -116,7 +116,7 @@ public class Graph {
 
   // 3. Handlers
   protected TimingHandler _timingHandler;
-  protected Node _trackedNode;
+  protected Frame _trackedFrame;
 
   // 4. Graph
   protected List<Node> _seeds;
@@ -2352,6 +2352,7 @@ public class Graph {
    * @see #isNodeReachable(Node)
    * @see #pruneBranch(Node)
    */
+  //TODO return frame (always null)?
   public void traverse() {
     for (Node node : leadingNodes())
       _visit(node);
@@ -2370,21 +2371,27 @@ public class Graph {
     popModelView();
   }
 
-  public void setTrackedNode(Node node) {
-    if (node.graph() == this)
-      _trackedNode = node;
+  public void setTrackedFrame(Frame frame) {
+    if (frame instanceof Node)
+      if (((Node) frame).graph() != this)
+        return;
+    _trackedFrame = frame;
   }
 
-  public Node trackedNode() {
-    return _trackedNode;
+  public Frame trackedFrame() {
+    return _trackedFrame;
   }
 
-  public boolean isTrackedNode(Node node) {
-    return trackedNode() == node;
+  public boolean isTrackedFrame(Frame frame) {
+    return trackedFrame() == frame;
   }
 
-  public void resetTrackedNode() {
-    _trackedNode = null;
+  public void resetTrackedFrame() {
+    _trackedFrame = null;
+  }
+
+  public Frame defaultFrame() {
+    return trackedFrame() == null ? eye() : trackedFrame();
   }
 
   public boolean track(float x, float y, Frame frame) {
@@ -2402,11 +2409,11 @@ public class Graph {
     return ((Math.abs(x - projection._vector[0]) < halfThreshold) && (Math.abs(y - projection._vector[1]) < halfThreshold));
   }
 
-  public Node cast(float x, float y) {
-    resetTrackedNode();
+  public Frame cast(float x, float y) {
+    resetTrackedFrame();
     for (Node frame : leadingNodes())
       _visit(frame, x, y);
-    return trackedNode();
+    return trackedFrame();
   }
 
   protected void _visit(Node node, float x, float y) {
@@ -2420,12 +2427,17 @@ public class Graph {
   }
 
   /**
-   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye frames.
+   * If {@code frame} is {@link #isEye(Frame)} aligns the {@link #eye()} with the world.
+   * Otherwise aligns the {@code frame} with the {@link #eye()}. {@code frame} should be
+   * non-null.
+   * <p>
+   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)}.
    *
    * @see #isEye(Frame)
    */
   public void align(Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("align(frame) requires a non-null frame param");
     if (isEye(frame))
       frame.alignWithFrame(null, true);
     else
@@ -2436,6 +2448,8 @@ public class Graph {
    * Centers the frame into the graph.
    */
   public void focus(Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("focus(frame) requires a non-null frame param");
     if (isEye(frame))
       frame.projectOnLine(center(), viewDirection());
     else
@@ -2640,10 +2654,12 @@ public class Graph {
   //TODO test when frame == null -> perhaps perform on the eye()?
 
   public void translate(Vector vector) {
-    translate(vector, eye());
+    translate(vector, defaultFrame());
   }
 
   public void translate(Vector vector, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("translate(vector, frame) requires a non-null frame param");
     frame.translate(_translate(vector, frame));
   }
 
@@ -2657,11 +2673,9 @@ public class Graph {
     return _translate(vector, 1, frame);
   }
 
-  public void translate(Vector vector, float sensitivity) {
-    translate(vector, sensitivity, eye());
-  }
-
   public void translate(Vector vector, float sensitivity, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("translate(vector, sensitivity, frame) requires a non-null frame param");
     frame.translate(_translate(vector, sensitivity, frame));
   }
 
@@ -2703,15 +2717,36 @@ public class Graph {
       eyeVector._vector[2] *= coef / height();
       eyeVector.divide(eye().magnitude());
     }
-
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
+  public void scale(float delta) {
+    scale(delta, defaultFrame());
+  }
+
+  public void scale(float delta, Frame frame) {
+    float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
+    frame.scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  public void zoom(float delta) {
+    zoom(delta, defaultFrame());
+  }
+
+  public void zoom(float delta, Frame frame) {
+    //if(is3D())
+    translate(new Vector(0, 0, delta), 1, frame);
+    //else
+    //System.out.println("Nothing done, zoom() doesn't make sense in 2d. You may use scale() instead");
+  }
+
   public void rotate(float roll, float pitch, float yaw) {
-    rotate(roll, pitch, yaw, eye());
+    rotate(roll, pitch, yaw, defaultFrame());
   }
 
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
     frame.rotate(_rotate(roll, pitch, yaw, frame));
   }
 
@@ -2720,10 +2755,12 @@ public class Graph {
   }
 
   public void rotate(float roll, float pitch, float yaw, float sensitivity) {
-    rotate(roll, pitch, yaw, sensitivity, eye());
+    rotate(roll, pitch, yaw, sensitivity, defaultFrame());
   }
 
   public void rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("rotate(roll, pitch, yaw, sensitivity, frame) requires a non-null frame param");
     frame.rotate(_rotate(roll, pitch, yaw, sensitivity, frame));
   }
 
@@ -2748,10 +2785,12 @@ public class Graph {
   }
 
   public void spin(Point point1, Point point2) {
-    spin(point1, point2, eye());
+    spin(point1, point2, defaultFrame());
   }
 
   public void spin(Point point1, Point point2, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, frame) requires a non-null frame param");
     spin(_spin(point1, point2, frame), frame);
   }
 
@@ -2760,10 +2799,12 @@ public class Graph {
   }
 
   public void spin(Point point1, Point point2, float sensitivity) {
-    spin(point1, point2, sensitivity, eye());
+    spin(point1, point2, sensitivity, defaultFrame());
   }
 
   public void spin(Point point1, Point point2, float sensitivity, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, sensitivity, frame) requires a non-null frame param");
     spin(_spin(point1, point2, sensitivity, frame), frame);
   }
 
@@ -2773,10 +2814,12 @@ public class Graph {
   }
 
   public void spin(Point point1, Point point2, Point center) {
-    spin(point1, point2, center, eye());
+    spin(point1, point2, center, defaultFrame());
   }
 
   public void spin(Point point1, Point point2, Point center, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, center, frame) requires a non-null frame param");
     spin(_spin(point1, point2, center, frame), frame);
   }
 
@@ -2785,10 +2828,12 @@ public class Graph {
   }
 
   public void spin(Point point1, Point point2, Point center, float sensitivity) {
-    spin(point1, point2, center, sensitivity, eye());
+    spin(point1, point2, center, sensitivity, defaultFrame());
   }
 
   public void spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, center, sensitivity, frame) requires a non-null frame param");
     spin(_spin(point1, point2, center, sensitivity, frame), frame);
   }
 
