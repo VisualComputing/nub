@@ -35,6 +35,7 @@ public class ConstrainedFrame extends PApplet {
     textFont(myFont);
 
     scene = new Scene(this);
+    scene.setFieldOfView(PI / 3);
 
     constraints[0] = new LocalConstraint();
     // Note that an EyeConstraint(eye) would produce the same results:
