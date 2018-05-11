@@ -6,7 +6,6 @@ import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PShape;
 
 /**
@@ -43,7 +42,7 @@ public class Basics extends PApplet {
           scene.drawCylinder(30, scene.radius() / 4, 200);
         else
           rect(10, 10, 200, 200);
-        stroke(255,255,0);
+        stroke(255, 255, 0);
         scene.drawShooterTarget(this);
         popStyle();
       }

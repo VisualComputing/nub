@@ -1,7 +1,6 @@
 package basics;
 
 import frames.core.Node;
-import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -9,6 +8,7 @@ import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
+import processing.event.MouseEvent;
 
 /**
  * Created by pierre on 11/15/16.
@@ -108,10 +108,42 @@ public class Interaction extends PApplet {
       */
     //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
     //defaultFrame.spin(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
+    /*
+    if (trackedNode == null)
+      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
+    else
+      scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedNode);
+    // */
+    /*
+    if (trackedNode == null)
+      scene.rotate(0, (mouseX - pmouseX), 0, PI / height);
+    else
+      scene.rotate(0, (mouseX - pmouseX), 0,PI / height, trackedNode);
+      //*/
+    /*
     if (trackedNode == null)
       scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
     else
       scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedNode);
+      */
+    /*
+    if (mouseButton == LEFT)
+      scene.spinY((pmouseX - mouseX), PI / width);
+    else
+      //scene.spin(0, (pmouseX - mouseX), 0, PI / width);
+      scene.spinX((pmouseY - mouseY), PI / width);
+      //scene.spin((pmouseY - mouseY), (pmouseX - mouseX), 0, PI / width);
+      */
+    //scene.rotateCAD(mouseX - pmouseX, mouseY - pmouseY, upVector, 2.0f / height);
+    scene.rotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    //scene.exp(0, event.getCount(), 0, 20*PI / width);
+    //scene.exp(0, event.getCount(), 0, 20*PI / width, trackedNode);
+    //equivalent to:
+    //scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedNode);
+    scene.rotate(0, event.getCount(), 0, 20 * PI / width, trackedNode);
   }
 
   PShape shape() {

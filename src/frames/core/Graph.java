@@ -2419,6 +2419,29 @@ public class Graph {
     popModelView();
   }
 
+  /**
+   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)} that discriminates
+   * between eye and non-eye frames.
+   *
+   * @see #isEye(Frame)
+   */
+  public void align(Frame frame) {
+    if (isEye(frame))
+      frame.alignWithFrame(null, true);
+    else
+      frame.alignWithFrame(eye());
+  }
+
+  /**
+   * Centers the frame into the graph.
+   */
+  public void focus(Frame frame) {
+    if (isEye(frame))
+      frame.projectOnLine(center(), viewDirection());
+    else
+      frame.projectOnLine(eye().position(), eye().zAxis(false));
+  }
+
   // Screen to frame conversion
 
   /**
@@ -2612,6 +2635,10 @@ public class Graph {
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
 
+  // TODO add 2d conditions
+  //TODO add proper names: classification: 2d/3d, only Eye/Frame-eye
+  //TODO test when frame == null -> perhaps perform on the eye()?
+
   public void translate(Vector vector) {
     translate(vector, eye());
   }
@@ -2679,11 +2706,6 @@ public class Graph {
 
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
-
-  // TODO research if spin(gestureRotate(roll, pitch, yaw)); is missed
-  // see f40a95b
-
-  //TODO test when frame == null -> perhaps perform on the eye()?
 
   public void rotate(float roll, float pitch, float yaw) {
     rotate(roll, pitch, yaw, eye());
@@ -2813,6 +2835,19 @@ public class Graph {
     return d < size_limit ? (float) Math.sqrt(size2 - d) : size_limit / (float) Math.sqrt(d);
   }
 
+  /**
+   * Rotates the frame using {@code quaternion} around its {@link Frame#position()} (non-eye frames)
+   * or around the {@link Graph#anchor()} when the {@code frame} is the {@link Graph#eye()}.
+   */
+  public void spin(Quaternion quaternion, Frame frame) {
+    if (isEye(frame))
+      frame.rotate(quaternion, anchor());
+    else
+      frame.rotate(quaternion);
+  }
+
+  // only 3d eye
+
   public void lookAround(float deltaX, float deltaY, Vector upVector) {
     eye().rotate(_lookAround(deltaX, deltaY, upVector));
   }
@@ -2853,6 +2888,7 @@ public class Graph {
     spin(_rotateCAD(roll, pitch, sensitivity), eye());
   }
 
+  //TODO test
   protected Quaternion _rotateCAD(float roll, float pitch, float sensitivity) {
     return _rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
   }
@@ -2867,40 +2903,28 @@ public class Graph {
     return Quaternion.multiply(new Quaternion(eye().displacement(upVector), eye().displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }
 
-  /**
-   * Rotates the frame using {@code quaternion} around its {@link Frame#position()} (non-eye frames)
-   * or around the {@link Graph#anchor()} when the {@code frame} is the {@link Graph#eye()}.
-   */
-  public void spin(Quaternion quaternion, Frame frame) {
-    if (isEye(frame))
-      frame.rotate(quaternion, anchor());
-    else
-      frame.rotate(quaternion);
+  public void spinX(float roll) {
+    spinX(roll, 1);
   }
 
-  //TODO add high level
-
-  /**
-   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)} that discriminates
-   * between eye and non-eye frames.
-   *
-   * @see #isEye(Frame)
-   */
-  public void align(Frame frame) {
-    if (isEye(frame))
-      frame.alignWithFrame(null, true);
-    else
-      frame.alignWithFrame(eye());
+  public void spinX(float roll, float sensitivity) {
+    spin(_rotate(roll, 0, 0, sensitivity, eye()), eye());
   }
 
-  /**
-   * Centers the frame into the graph.
-   */
-  public void focus(Frame frame) {
-    if (isEye(frame))
-      frame.projectOnLine(center(), viewDirection());
-    else
-      frame.projectOnLine(eye().position(), eye().zAxis(false));
+  public void spinY(float pitch) {
+    spinY(pitch, 1);
+  }
+
+  public void spinY(float pitch, float sensitivity) {
+    spin(_rotate(0, pitch, 0, sensitivity, eye()), eye());
+  }
+
+  public void spinZ(float yaw) {
+    spinZ(yaw, 1);
+  }
+
+  public void spinZ(float yaw, float sensitivity) {
+    spin(_rotate(0, 0, yaw, sensitivity, eye()), eye());
   }
 
   /*

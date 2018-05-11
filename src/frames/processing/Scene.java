@@ -2812,7 +2812,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  //TODO high-level wrappers
+  //TODO high-level wrappers, including sensitivities(?)
 
   public boolean track(Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, frame);
