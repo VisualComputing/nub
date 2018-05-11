@@ -11,7 +11,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
-public class ConstrainedFrame extends PApplet {
+public class ConstrainedEye extends PApplet {
 
   public void settings() {
     size(800, 800, P3D);
@@ -19,57 +19,35 @@ public class ConstrainedFrame extends PApplet {
 
   Scene scene;
   PFont myFont;
+
   int transDir;
   int rotDir;
-  Frame node;
-  AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
+  AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[2];
   int activeConstraint;
-  boolean wC = true;
-
-  //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P3D;
 
   public void setup() {
-    size(800, 800, renderer);
+    size(800, 800, P3D);
     myFont = loadFont("FreeSans-16.vlw");
     textFont(myFont);
-
     scene = new Scene(this);
+    scene.setRadius(400);
+    scene.fitBallInterpolation();
 
-    constraints[0] = new LocalConstraint();
+    constraints[0] = new WorldConstraint();
     // Note that an EyeConstraint(eye) would produce the same results:
-    // An EyeConstraint is a LocalConstraint when applied to the eye
-    constraints[1] = new WorldConstraint();
-    constraints[2] = new EyeConstraint(scene);
+    // An EyeConstraint is a LocalConstraint when applied to the camera frame !
+    constraints[1] = new LocalConstraint();
     transDir = 0;
     rotDir = 0;
     activeConstraint = 0;
-
-    node = new Frame();
-    node.translate(new Vector(20, 20, 0));
-    node.setConstraint(constraints[activeConstraint]);
-
-    scene.setTrackedFrame(scene.eye());
+    scene.eye().setConstraint(constraints[activeConstraint]);
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
-    pushMatrix();
-    scene.applyTransformation(node);
-    scene.drawAxes(40);
-    if (scene.mouseTrack(node)) {
-      fill(0, 255, 255);
-      scene.drawTorusSolenoid();
-    } else if (scene.isTrackedFrame(node)) {
-      fill(255, 0, 0);
-      scene.drawTorusSolenoid();
-    } else {
-      fill(0, 0, 255, 150);
-      scene.drawTorusSolenoid();
-    }
-    popMatrix();
-
+    fill(204, 102, 0, 150);
+    scene.drawTorusSolenoid();
     fill(0, 0, 255);
     scene.beginScreenCoordinates();
     displayText();
@@ -91,8 +69,6 @@ public class ConstrainedFrame extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'i')
-      scene.setTrackedFrame(scene.isTrackedFrame(node) ? scene.eye() : node);
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }
@@ -103,14 +79,10 @@ public class ConstrainedFrame extends PApplet {
       changeConstraint();
     }
     if (key == 't' || key == 'T') {
-      constraints[activeConstraint]
-          .setTranslationConstraintType(nextTranslationConstraintType(constraints[activeConstraint]
-              .translationConstraintType()));
+      constraints[activeConstraint].setTranslationConstraintType(nextTranslationConstraintType(constraints[activeConstraint].translationConstraintType()));
     }
     if (key == 'r' || key == 'R') {
-      constraints[activeConstraint]
-          .setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint]
-              .rotationConstraintType()));
+      constraints[activeConstraint].setRotationConstraintType(nextRotationConstraintType(constraints[activeConstraint].rotationConstraintType()));
     }
 
     Vector dir = new Vector(0.0f, 0.0f, 0.0f);
@@ -125,6 +97,7 @@ public class ConstrainedFrame extends PApplet {
         dir.setZ(1.0f);
         break;
     }
+
     constraints[activeConstraint].setTranslationConstraintDirection(dir);
 
     dir.set(0.0f, 0.0f, 0.0f);
@@ -169,10 +142,12 @@ public class ConstrainedFrame extends PApplet {
       case FREE:
         rType = AxisPlaneConstraint.Type.AXIS;
         break;
+      case PLANE:
+        rType = AxisPlaneConstraint.Type.FREE;
+        break;
       case AXIS:
         rType = AxisPlaneConstraint.Type.FORBIDDEN;
         break;
-      case PLANE:
       case FORBIDDEN:
         rType = AxisPlaneConstraint.Type.FREE;
         break;
@@ -184,22 +159,14 @@ public class ConstrainedFrame extends PApplet {
 
   void changeConstraint() {
     int previous = activeConstraint;
-    activeConstraint = (activeConstraint + 1) % 3;
+    activeConstraint = (activeConstraint + 1) % 2;
 
-    constraints[activeConstraint]
-        .setTranslationConstraintType(constraints[previous]
-            .translationConstraintType());
-    constraints[activeConstraint]
-        .setTranslationConstraintDirection(constraints[previous]
-            .translationConstraintDirection());
-    constraints[activeConstraint]
-        .setRotationConstraintType(constraints[previous]
-            .rotationConstraintType());
-    constraints[activeConstraint]
-        .setRotationConstraintDirection(constraints[previous]
-            .rotationConstraintDirection());
+    constraints[activeConstraint].setTranslationConstraintType(constraints[previous].translationConstraintType());
+    constraints[activeConstraint].setTranslationConstraintDirection(constraints[previous].translationConstraintDirection());
+    constraints[activeConstraint].setRotationConstraintType(constraints[previous].rotationConstraintType());
+    constraints[activeConstraint].setRotationConstraintDirection(constraints[previous].rotationConstraintDirection());
 
-    node.setConstraint(constraints[activeConstraint]);
+    scene.eye().setConstraint(constraints[activeConstraint]);
   }
 
   void displayType(AxisPlaneConstraint.Type type, int x, int y, char c) {
@@ -226,7 +193,6 @@ public class ConstrainedFrame extends PApplet {
         textToDisplay += ")";
         break;
     }
-
     text(textToDisplay, x, y);
   }
 
@@ -248,16 +214,6 @@ public class ConstrainedFrame extends PApplet {
         textToDisplay += c;
         textToDisplay += ")";
         break;
-      case 3:
-        textToDisplay = "All (";
-        textToDisplay += c;
-        textToDisplay += ")";
-        break;
-      case 4:
-        textToDisplay = "None (";
-        textToDisplay += c;
-        textToDisplay += ")";
-        break;
     }
     text(textToDisplay, x, y);
   }
@@ -265,28 +221,23 @@ public class ConstrainedFrame extends PApplet {
   void displayText() {
     text("TRANSLATION :", 350, height - 30);
     displayDir(transDir, (350 + 105), height - 30, 'D');
-    displayType(constraints[activeConstraint].translationConstraintType(),
-        350, height - 60, 'T');
+    displayType(constraints[activeConstraint].translationConstraintType(), 350, height - 60, 'T');
 
     text("ROTATION :", width - 120, height - 30);
     displayDir(rotDir, width - 40, height - 30, 'B');
-    displayType(constraints[activeConstraint].rotationConstraintType(),
-        width - 120, height - 60, 'R');
+    displayType(constraints[activeConstraint].rotationConstraintType(), width - 120, height - 60, 'R');
 
     switch (activeConstraint) {
       case 0:
-        text("Constraint direction defined w/r to LOCAL (U)", 350, 20);
-        break;
-      case 1:
         text("Constraint direction defined w/r to WORLD (U)", 350, 20);
         break;
-      case 2:
-        text("Constraint direction defined w/r to EYE (U)", 350, 20);
+      case 1:
+        text("Constraint direction defined w/r to EYE (U)", 370, 20);
         break;
     }
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.ConstrainedFrame"});
+    PApplet.main(new String[]{"basics.ConstrainedEye"});
   }
 }
