@@ -1,7 +1,6 @@
 package basics;
 
 import common.InteractiveNode;
-import frames.core.Node;
 import frames.primitives.Vector;
 import frames.primitives.constraint.AxisPlaneConstraint;
 import frames.primitives.constraint.EyeConstraint;
@@ -37,7 +36,7 @@ public class ConstrainedFrame extends PApplet {
     scene = new Scene(this);
     eye = new InteractiveNode(scene);
     eye.setDamping(0);
-    eye.setRotationSensitivity(3);
+    eye.setRotationSensitivity(2);
     eye.setSpinningSensitivity(1);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
@@ -83,7 +82,7 @@ public class ConstrainedFrame extends PApplet {
   }
 
   public void keyPressed() {
-    if ( key == 'i') {
+    if (key == 'i') {
       scene.shiftDefaultNode(eye, node);
     }
     if (key == 'b' || key == 'B') {
