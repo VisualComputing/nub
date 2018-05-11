@@ -704,6 +704,7 @@ public class Frame {
    *
    * @see #setConstraint(Constraint)
    */
+  //TODO better docs
   public void rotate(Quaternion quaternion, Vector point) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);

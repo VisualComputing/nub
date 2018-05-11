@@ -2635,7 +2635,7 @@ public class Graph {
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
 
-  // TODO add 2d conditions
+  //TODO add 2d conditions
   //TODO add proper names: classification: 2d/3d, only Eye/Frame-eye
   //TODO test when frame == null -> perhaps perform on the eye()?
 
@@ -2903,6 +2903,10 @@ public class Graph {
     return Quaternion.multiply(new Quaternion(eye().displacement(upVector), eye().displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }
 
+  /*
+  // nice interactivity examples: spinning (spin + timer), moveForward, moveBackward, spinX/Y/Z
+  // screenRotate/Translate.
+
   public void spinX(float roll) {
     spinX(roll, 1);
   }
@@ -2927,8 +2931,11 @@ public class Graph {
     spin(_rotate(0, 0, yaw, sensitivity, eye()), eye());
   }
 
-  /*
-  // Overkill: simply accomplish these with constraints
+  scene.spinX(event.getCount(), 20*PI / width); can be emulated through either:
+  1. scene.eye().rotate(new Quaternion(event.getCount() * 20*PI / width,0,0), scene.anchor()); or,
+  2. scene.eye().rotate(new Quaternion(new Vector(1,0,0), event.getCount() * 20*PI / width), scene.anchor());
+
+  // Overkill 2: simply accomplish these with constraints
   public void screenRotate(Point point1, Point point2) {
     screenRotate(point1, point2, 1);
   }
