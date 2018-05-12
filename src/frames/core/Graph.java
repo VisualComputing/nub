@@ -2449,7 +2449,12 @@ public class Graph {
   protected void _visit(Node node, float x, float y) {
     pushModelView();
     applyTransformation(node);
-    node._visit(x, y);
+
+    if (trackedFrame() == null && node.isTrackingEnabled())
+      if (track(x, y, node))
+        setTrackedFrame(node);
+    node.visit();
+
     if (!node.isCulled())
       for (Node child : node.children())
         _visit(child, x, y);

@@ -258,14 +258,6 @@ public class Node extends Frame {
     _tracking = flag;
   }
 
-  //TODO docs
-  protected void _visit(float x, float y) {
-    if (graph().trackedFrame() == null && isTrackingEnabled())
-      if (graph().track(x, y, this))
-        graph().setTrackedFrame(this);
-    visit();
-  }
-
   /**
    * Procedure called on the frame by the graph traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes.
