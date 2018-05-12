@@ -83,10 +83,6 @@ public class RotateAroundFrame extends PApplet {
     upVector = eye.yAxis();
   }
 
-  float computeAngle(float dx) {
-    return dx * PI / width;
-  }
-
   public void mouseDragged() {
     if (mouseButton == LEFT) {
       if (scene.isTrackedFrame(shape2))

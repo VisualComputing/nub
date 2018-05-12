@@ -2866,8 +2866,10 @@ public class Scene extends Graph implements PConstants {
     mouseTranslate(eye());
   }
 
+  // TODO test mouseLookAround
+
   public void mouseLookAround(Vector upVector) {
-    mouseLookAround(upVector, 1);
+    mouseLookAround(upVector, PI / (2 * PApplet.max(width(), height())));
   }
 
   public void mouseLookAround(Vector upVector, float sensitivity) {
@@ -2875,8 +2877,16 @@ public class Scene extends Graph implements PConstants {
     lookAround(delta.x(), delta.y(), upVector, sensitivity);
   }
 
+  public void mouseCAD() {
+    mouseCAD(PI / PApplet.max(width(), height()));
+  }
+
   public void mouseCAD(float sensitivity) {
     rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, sensitivity);
+  }
+
+  public void mouseCAD(Vector upVector) {
+    mouseCAD(upVector, PI / PApplet.max(width(), height()));
   }
 
   public void mouseCAD(Vector upVector, float sensitivity) {

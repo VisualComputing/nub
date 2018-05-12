@@ -21,7 +21,7 @@ public class Interaction extends PApplet {
   Vector upVector;
 
   public void settings() {
-    size(800, 800, P3D);
+    size(1600, 800, P3D);
   }
 
   public void setup() {
@@ -115,11 +115,12 @@ public class Interaction extends PApplet {
       //*/
     ///*
     if (mouseButton == LEFT)
-      scene.mouseSpin();
-      //scene.mouseCAD(PI / height);
+      //scene.mouseSpin();
+      //scene.mouseLookAround(upVector);
+      scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      //scene.mouseTranslate();
-      scene.mousePan();
+      scene.mouseTranslate();
+      //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
