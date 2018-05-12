@@ -63,6 +63,8 @@ public class Interaction extends PApplet {
     if (mousePressed)
       scene.traverse();
     else
+      //same as traverse, but updates the scene tracked frame
+      // according to the current mouse position
       scene.cast();
   }
 
@@ -76,6 +78,12 @@ public class Interaction extends PApplet {
   }
 
   public void mouseDragged() {
+    // Note 1.
+    // When mouse methods are invoked without the frame parameter
+    // the scene.defaultFrame is used.
+    // Note 2.
+    // Mouse methods that don't take a frame parameter (such as mouseCAD)
+    // are only available to the scene.eye().
     if (mouseButton == LEFT)
       scene.mouseSpin();
       //scene.mouseLookAround(upVector);
