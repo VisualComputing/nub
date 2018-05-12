@@ -4,7 +4,10 @@ import frames.core.Interpolator;
 import frames.core.Node;
 import frames.primitives.Frame;
 import frames.processing.Scene;
+import frames.processing.Shape;
 import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.event.MouseEvent;
 
 /**
  * This example introduces the three different interpolations offered
@@ -13,6 +16,7 @@ import processing.core.PApplet;
 public class FrameInterpolation extends PApplet {
   Scene scene;
   Interpolator nodeInterpolator, eyeInterpolator1, eyeInterpolator2;
+  Shape shape;
   boolean showEyePath = true;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -36,9 +40,25 @@ public class FrameInterpolation extends PApplet {
     eyeInterpolator1 = new Interpolator(eye);
     eyeInterpolator2 = new Interpolator(eye);
 
-    // interpolation 3. Custom (arbitrary)frame interpolations, like the one
-    // you guys David & Juan are currently exploring to deform a shape
-    nodeInterpolator = new Interpolator(scene);
+    // interpolation 3. Custom (arbitrary)frame interpolations
+
+    shape = new Shape(scene) {
+      // Note that within visit() geometry is defined at the
+      // node local coordinate system.
+      @Override
+      public void setShape(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(0, 255, 255, 125);
+        pg.stroke(0, 0, 255);
+        pg.strokeWeight(2);
+        if (pg.is2D())
+          pg.rect(0, 0, 100, 100);
+        else
+          pg.box(30);
+        pg.popStyle();
+      }
+    };
+    nodeInterpolator = new Interpolator(shape);
     nodeInterpolator.setLoop();
     // Create an initial path
     int nbKeyFrames = 4;
@@ -53,19 +73,10 @@ public class FrameInterpolation extends PApplet {
 
   public void draw() {
     background(0);
-    pushMatrix();
-    scene.applyTransformation(nodeInterpolator.frame());
-    scene.drawAxes(30);
-    pushStyle();
-    fill(0, 255, 255, 125);
-    stroke(0, 0, 255);
-    strokeWeight(2);
-    if (getGraphics().is2D())
-      rect(0, 0, 100, 100);
+    if (mousePressed)
+      scene.traverse();
     else
-      box(30);
-    popStyle();
-    popMatrix();
+      scene.cast();
 
     pushStyle();
     stroke(255);
@@ -89,6 +100,24 @@ public class FrameInterpolation extends PApplet {
       scene.drawPath(eyeInterpolator2, 3);
       popStyle();
     }
+  }
+
+  public void mouseDragged() {
+    if (mouseButton == LEFT)
+      scene.mouseSpin();
+      //scene.mouseLookAround(upVector);
+      //scene.mouseCAD();
+    else if (mouseButton == RIGHT)
+      scene.mouseTranslate();
+      //scene.mousePan();
+    else
+      //scene.zoom(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    //scene.zoom(event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
   }
 
   public void keyPressed() {
