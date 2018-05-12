@@ -202,12 +202,14 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
 
+  //TODO graph.get()
+
   /**
    * Returns a random graph node. The node is randomly positioned inside the ball defined
    * by {@link #center()} and {@link #radius()}. The {@link Node#orientation()} is set by
    * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
    *
-   * @see Node#randomize()
+   * @see #randomize(Frame)
    */
   public Node random() {
     Node node = new Node(this);
@@ -221,7 +223,14 @@ public class Graph {
     return node;
   }
 
-  //TODO graph.get()
+  /**
+   * Same as {@code randomize(graph().center(), graph().radius())}.
+   *
+   * @see #random()
+   */
+  public void randomize(Frame frame) {
+    frame.randomize(center(), radius());
+  }
 
   // Dimensions stuff
 
@@ -2413,19 +2422,21 @@ public class Graph {
     return trackedFrame() == null ? eye() : trackedFrame();
   }
 
-  public boolean track(float x, float y, Frame frame) {
-    return track(x, y, 20, frame);
-  }
-
   /**
-   * Picks the frame according to the {@code precision}.
+   * Picks the frame according to the {@link Frame#precision()}.
+   *
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
    */
-  public boolean track(float x, float y, float precision, Frame frame) {
+  public boolean track(float x, float y, Frame frame) {
+    if (frame == null)
+      return false;
     if (isEye(frame))
       return false;
     Vector projection = screenLocation(frame.position());
-    float halfThreshold = precision / 2;
-    return ((Math.abs(x - projection._vector[0]) < halfThreshold) && (Math.abs(y - projection._vector[1]) < halfThreshold));
+    float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
+        : frame.precisionThreshold() / 2;
+    return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }
 
   public Frame cast(float x, float y) {

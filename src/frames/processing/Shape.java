@@ -371,29 +371,4 @@ public class Shape extends Node {
   public void setBack(PShape shape) {
     _backShape = shape;
   }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
-   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
-   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
-   * otherwise.
-   * <p>
-   * This method is only meaningful when this shape is not an eye.
-   *
-   * @see #setPrecision(Precision)
-   */
-  @Override
-  public final boolean track(float x, float y) {
-    if (graph().isEye(this))
-      return false;
-    if (precision() != Precision.EXACT)
-      return super.track(x, y);
-    int index = (int) y * graph().width() + (int) x;
-    if (graph().backBuffer().pixels != null)
-      if ((0 <= index) && (index < graph().backBuffer().pixels.length))
-        return graph().backBuffer().pixels[index] == id();
-    return false;
-  }
 }

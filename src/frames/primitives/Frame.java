@@ -87,6 +87,9 @@ import frames.timing.TimingHandler;
  * share their global parameters (position, orientation and magnitude) taken the one
  * that has been most recently updated. Syncing can be useful to share frames
  * among different off-screen canvases.
+ * <h2>Picking</h2>
+ * Picking a frame is done accordingly to a {@link #precision()}. Refer to
+ * {@link #setPrecision(Precision)} for details.
  */
 public class Frame {
   /**
@@ -107,6 +110,15 @@ public class Frame {
   protected Frame _reference;
   protected Constraint _constraint;
   protected long _lastUpdate;
+
+  // Tracking & Precision
+  protected float _threshold;
+
+  public enum Precision {
+    FIXED, ADAPTIVE, EXACT
+  }
+
+  protected Precision _precision;
 
   // ID
   protected static int _nodeCount;
@@ -206,6 +218,8 @@ public class Frame {
    * Creates a frame with {@code reference} as {@link #reference()}, and {@code translation},
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
+   * <p>
+   * Sets the {@link #precision()} to {@link Precision#FIXED}.
    */
   protected Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
     setTranslation(translation);
@@ -217,6 +231,8 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = 0;
+    _precision = Precision.FIXED;
+    setPrecisionThreshold(20);
   }
 
   protected Frame(Frame frame) {
@@ -230,6 +246,8 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = frame.lastUpdate();
+    this._precision = frame._precision;
+    this._threshold = frame._threshold;
   }
 
   /**
@@ -479,6 +497,77 @@ public class Frame {
     float upper = 2;
     frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     return frame;
+  }
+
+  // PRECISION
+
+  /**
+   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
+   *
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
+   */
+  public Precision precision() {
+    return _precision;
+  }
+
+  /**
+   * Sets the frame picking precision.
+   * <p>
+   * When {@link #precision()} is {@link Precision#FIXED} or
+   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
+   * within a squared area around the frame {@link #position()} screen projection which size
+   * is defined by {@link #setPrecisionThreshold(float)}.
+   * <p>
+   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
+   * in a precise manner according to the projected pixels of the visual representation
+   * related to the frame. It is meant to be implemented by derived classes (providing the
+   * means attach a visual representation to the frame) and requires the graph to implement
+   * a back buffer.
+   * <p>
+   * Default implementation of this policy will behave like {@link Precision#FIXED}.
+   *
+   * @see #precision()
+   * @see #setPrecisionThreshold(float)
+   */
+  public void setPrecision(Precision precision) {
+    if (precision == Precision.EXACT)
+      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
+    _precision = precision;
+  }
+
+  /**
+   * Sets the length of the squared area around the frame {@link #position()} screen
+   * projection that defined the frame picking condition.
+   * <p>
+   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * in pixels and directly defines the fixed length of a 'shooter target', centered
+   * at the projection of the frame origin onto the screen.
+   * <p>
+   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * in object space (world units) and defines the edge length of a squared bounding box that
+   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
+   * origin onto the screen. Use this version only if you have a good idea of the bounding box
+   * size of the object you are attaching to the frame shape.
+   * <p>
+   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
+   * {@link #setPrecision(Precision)} for details.
+   * <p>
+   * Default behavior is to set the PRECISIONTHRESHOLD (in a non-adaptive
+   * manner) to 20.
+   * <p>
+   * Negative {@code threshold} values are silently ignored.
+   *
+   * @see #precision()
+   * TODO PRECISIONTHRESHOLD
+   */
+  public void setPrecisionThreshold(float threshold) {
+    if (threshold >= 0)
+      _threshold = threshold;
+  }
+
+  public float precisionThreshold() {
+    return _threshold;
   }
 
   // CONSTRAINT

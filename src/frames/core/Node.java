@@ -63,22 +63,12 @@ import java.util.List;
  * respect to non-eye nodes. For instance, with a move-to-the-right user gesture the
  * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
  * to the right.
- * <h2>Picking</h2>
- * Picking a node is done accordingly to a {@link #precision()}. Refer to
- * {@link #setPrecision(Precision)} for details.
  */
 public class Node extends Frame {
   protected Graph _graph;
   protected List<Node> _children;
-  protected float _threshold;
   protected boolean _culled;
   protected boolean _tracking;
-
-  public enum Precision {
-    FIXED, ADAPTIVE, EXACT
-  }
-
-  protected Precision _precision;
 
   /**
    * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
@@ -102,8 +92,6 @@ public class Node extends Frame {
    * Creates a graph node with {@code reference} as {@link #reference()}, and
    * {@code translation}, {@code rotation} and {@code scaling} as the frame
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
-   * <p>
-   * Sets the {@link #precision()} to {@link Precision#FIXED}.
    */
   protected Node(Graph graph, Node reference, Vector translation, Quaternion rotation, float scaling) {
     super(reference, translation, rotation, scaling);
@@ -121,8 +109,6 @@ public class Node extends Frame {
     _culled = false;
     _children = new ArrayList<Node>();
     setReference(reference());// _restorePath is completely needed here
-    _precision = Precision.FIXED;
-    setPrecisionThreshold(20);
     enableTracking(true);
   }
 
@@ -134,8 +120,6 @@ public class Node extends Frame {
     if (this.graph() == node.graph()) {
       this.setReference(reference());// _restorePath
     }
-    this._precision = node._precision;
-    this._threshold = node._threshold;
     this._tracking = node._tracking;
   }
 
@@ -257,15 +241,6 @@ public class Node extends Frame {
   }
 
   /**
-   * Same as {@code randomize(graph().center(), graph().radius())}.
-   *
-   * @see Graph#random()
-   */
-  public void randomize() {
-    randomize(graph().center(), graph().radius());
-  }
-
-  /**
    * Returns {@code true} if tracking is enabled.
    *
    * @see #enableTracking(boolean)
@@ -286,7 +261,7 @@ public class Node extends Frame {
   //TODO docs
   protected void _visit(float x, float y) {
     if (graph().trackedFrame() == null && isTrackingEnabled())
-      if (track(x, y))
+      if (graph().track(x, y, this))
         graph().setTrackedFrame(this);
     visit();
   }
@@ -347,102 +322,5 @@ public class Node extends Frame {
    */
   public boolean isCulled() {
     return _culled;
-  }
-
-  // PRECISION
-
-  //TODO move to the frame
-
-  /**
-   * Returns the picking precision threshold in pixels used by the frame to {@link #track(float, float)}.
-   *
-   * @see #setPrecisionThreshold(float)
-   */
-  public float precisionThreshold() {
-    if (precision() == Precision.ADAPTIVE)
-      return _threshold * scaling() * _graph.pixelToGraphRatio(position());
-    return _threshold;
-  }
-
-  /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
-   *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
-   * Sets the frame picking precision.
-   * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or
-   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #position()} screen projection which size
-   * is defined by {@link #setPrecisionThreshold(float)}.
-   * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the frame. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the frame) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
-   *
-   * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   */
-  public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
-    _precision = precision;
-  }
-
-  /**
-   * Sets the length of the squared area around the frame {@link #position()} screen
-   * projection that defined the {@link #track(float, float)} condition used for
-   * frame picking.
-   * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
-   * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame shape.
-   * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
-   * <p>
-   * Default behavior is to set the {@link #precisionThreshold()} (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #precision()
-   * @see #precisionThreshold()
-   */
-  public void setPrecisionThreshold(float threshold) {
-    if (threshold >= 0)
-      _threshold = threshold;
-  }
-
-  //TODO remove
-
-  /**
-   * Picks the frame according to the {@link #precision()}.
-   *
-   * @see #precision()
-   * @see #setPrecision(Precision)
-   */
-  public boolean track(float x, float y) {
-    if (graph().isEye(this))
-      return false;
-    Vector projection = _graph.screenLocation(position());
-    float halfThreshold = precisionThreshold() / 2;
-    return ((Math.abs(x - projection._vector[0]) < halfThreshold) && (Math.abs(y - projection._vector[1]) < halfThreshold));
   }
 }

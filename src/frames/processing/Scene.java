@@ -145,7 +145,7 @@ import java.util.List;
  * }
  * }
  * </pre>
- * which will create a random (see {@link Node#random(Graph)}) interpolator path
+ * which will create a random (see {@link #random()}) interpolator path
  * containing [4..10] key-frames (see {@link Interpolator#addKeyFrame(Frame)}).
  * The interpolation is also started (see {@link Interpolator#start()}). The
  * interpolator path may be drawn with code like this:
@@ -905,6 +905,33 @@ public class Scene extends Graph implements PConstants {
     jsonRot.setFloat(2, quaternion.z());
     jsonRot.setFloat(3, quaternion.w());
     return jsonRot;
+  }
+
+  /**
+   * A shape may be picked using
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
+   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
+   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
+   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
+   * otherwise.
+   * <p>
+   * This method is only meaningful when this shape is not an eye.
+   *
+   * @see Frame#setPrecision(Frame.Precision)
+   */
+  @Override
+  public final boolean track(float x, float y, Frame frame) {
+    if (frame == null)
+      return false;
+    if (isEye(frame))
+      return false;
+    if (frame.precision() != Frame.Precision.EXACT)
+      return super.track(x, y, frame);
+    int index = (int) y * width() + (int) x;
+    if (backBuffer().pixels != null)
+      if ((0 <= index) && (index < backBuffer().pixels.length))
+        return backBuffer().pixels[index] == frame.id();
+    return false;
   }
 
   @Override
@@ -2815,15 +2842,11 @@ public class Scene extends Graph implements PConstants {
 
   //TODO high-level wrappers, including sensitivities(?)
 
+  /**
+   * Picks the frame according to the {@link Frame#precision()}.
+   */
   public boolean mouseTrack(Frame frame) {
     return super.track(pApplet().mouseX, pApplet().mouseY, frame);
-  }
-
-  /**
-   * Picks the frame according to the {@code precision}.
-   */
-  public boolean mouseTrack(float precision, Frame frame) {
-    return super.track(pApplet().mouseX, pApplet().mouseY, precision, frame);
   }
 
   public void mouseSpin() {
