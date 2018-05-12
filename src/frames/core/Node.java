@@ -58,8 +58,8 @@ import java.util.List;
  * algorithm). The {@link #isCulled()} flag is {@code false} by default, see
  * {@link #cull(boolean)}.
  * <p>
- * A node may also be defined as the {@link Graph#eye()} (see {@link #isEye()}
- * and {@link Graph#setEye(Frame)}). Some user gestures are then interpreted in a negated way,
+ * A node may also be defined as the {@link Graph#eye()} (see {@link Graph#setEye(Frame)}).
+ * Some user gestures are then interpreted in a negated way,
  * respect to non-eye nodes. For instance, with a move-to-the-right user gesture the
  * {@link Graph#eye()} has to go to the <i>left</i>, so that the scene seems to move
  * to the right.
@@ -104,8 +104,6 @@ public class Node extends Frame {
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
    * Sets the {@link #precision()} to {@link Precision#FIXED}.
-   * <p>
-   * After object creation a call to {@link #isEye()} will return {@code false}.
    */
   protected Node(Graph graph, Node reference, Vector translation, Quaternion rotation, float scaling) {
     super(reference, translation, rotation, scaling);
@@ -205,12 +203,6 @@ public class Node extends Frame {
     // 2b. after assigning new reference frame
     _restorePath(reference(), this);
     _modified();
-  }
-
-  // TODO remove
-
-  public boolean isEye() {
-    return graph().eye() == this;
   }
 
   public Graph graph() {
@@ -469,7 +461,7 @@ public class Node extends Frame {
    * @see #setPrecision(Precision)
    */
   public boolean track(float x, float y) {
-    if (isEye())
+    if (graph().isEye(this))
       return false;
     Vector projection = _graph.screenLocation(position());
     float halfThreshold = precisionThreshold() / 2;
