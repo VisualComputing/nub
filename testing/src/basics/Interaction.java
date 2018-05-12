@@ -43,7 +43,7 @@ public class Interaction extends PApplet {
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
         if (scene.is3D())
-          Scene.drawCylinder(pGraphics, 30, scene.radius() / 4, 200);
+          Scene.drawTorusSolenoid(pGraphics, 80);
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
@@ -68,13 +68,7 @@ public class Interaction extends PApplet {
 
   public void keyPressed() {
     if (key == 'f')
-      if (scene.isLeftHanded()) {
-        scene.setRightHanded();
-        println("right");
-      } else {
-        scene.setLeftHanded();
-        println("left");
-      }
+      scene.flip();
   }
 
   public void mousePressed() {
@@ -82,71 +76,21 @@ public class Interaction extends PApplet {
   }
 
   public void mouseDragged() {
-    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(mouseX-pmouseX, mouseY-pmouseY)));
-    //defaultFrame.spin(defaultFrame.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY)));
-    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(mouseX-pmouseX, 0)));
-    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(0, mouseY-pmouseY)));
-    //defaultFrame.translate(defaultFrame.gestureTranslate(new Vector(0, 0, mouseX-pmouseX)));
-    //defaultFrame.rotate(defaultFrame.gestureRotate(0,(mouseY-pmouseY),0, PI / width));
-    //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    //defaultFrame.rotate(defaultFrame.gestureRotate(0,0,(mouseX-pmouseX), PI / height));
-    //defaultFrame.spin(defaultFrame.gestureSpin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY), 5));
-    //eye.rotate(eye.gestureLookAround(mouseX-pmouseX, mouseY-pmouseY, upVector, PI/(4*width)));
-    //eye.spin(eye.gestureRotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height));
-    /*
-    if (defaultFrame == eye)
-      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
-    else
-      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, defaultFrame);
-      */
-    //defaultFrame.rotate(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    //defaultFrame.spin(defaultFrame.gestureRotate((mouseY-pmouseY),0, 0, PI / width));
-    /*
-    if (trackedFrame == null)
-      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
-    else
-      scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedFrame);
-    // */
-    /*
-    if (trackedFrame == null)
-      scene.rotate(0, (mouseX - pmouseX), 0, PI / height);
-    else
-      scene.rotate(0, (mouseX - pmouseX), 0,PI / height, trackedFrame);
-      //*/
-    ///*
     if (mouseButton == LEFT)
-      //scene.mouseSpin();
+      scene.mouseSpin();
       //scene.mouseLookAround(upVector);
-      scene.mouseCAD();
+      //scene.mouseCAD();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
-    //*/
-    /*
-    if (mouseButton == LEFT)
-      scene.spinY((pmouseX - mouseX), PI / width);
-    else
-      //scene.spin(0, (pmouseX - mouseX), 0, PI / width);
-      scene.spinX((pmouseY - mouseY), PI / width);
-      //scene.spin((pmouseY - mouseY), (pmouseX - mouseX), 0, PI / width);
-      */
-    //scene.rotateCAD(mouseX - pmouseX, mouseY - pmouseY, upVector, 2.0f / height);
-    //scene.rotateCAD(mouseX - pmouseX, mouseY - pmouseY, 2.0f / height);
   }
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
     scene.scale(event.getCount() * 20);
-    //scene.spinX(event.getCount(), 20*PI / width);
-    //scene.eye().rotate(new Quaternion(event.getCount() * 20*PI / width,0,0), scene.anchor());
-    //scene.eye().rotate(new Quaternion(new Vector(1, 0, 0), event.getCount() * 20 * PI / width), scene.anchor());
-    //scene.exp(0, event.getCount(), 0, 20*PI / width, trackedFrame);
-    //equivalent to:
-    //scene.rotate(0, (mouseX - pmouseX), 0, PI / width, trackedFrame);
-    //scene.rotate(0, event.getCount(), 0, 20 * PI / width, trackedFrame);
   }
 
   PShape shape() {

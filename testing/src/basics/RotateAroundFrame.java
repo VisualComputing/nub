@@ -70,13 +70,7 @@ public class RotateAroundFrame extends PApplet {
     if (key == 'i')
       scene.setTrackedFrame(scene.isTrackedFrame(shape1) ? shape2 : shape1);
     if (key == 'f')
-      if (scene.isLeftHanded()) {
-        scene.setRightHanded();
-        println("right");
-      } else {
-        scene.setLeftHanded();
-        println("left");
-      }
+      scene.flip();
   }
 
   public void mousePressed() {
@@ -93,9 +87,6 @@ public class RotateAroundFrame extends PApplet {
     } else if (mouseButton == RIGHT)
       //scene.mouseTranslate();
       scene.mousePan();
-    //else
-    //scene.zoom(mouseX - pmouseX);
-    //scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
