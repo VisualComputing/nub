@@ -202,6 +202,25 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
 
+  /**
+   * Returns a random graph node. The node is randomly positioned inside the ball defined
+   * by {@link #center()} and {@link #radius()}. The {@link Node#orientation()} is set by
+   * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
+   *
+   * @see Node#randomize()
+   */
+  public Node random() {
+    Node node = new Node(this);
+    Vector displacement = Vector.random();
+    displacement.setMagnitude(radius());
+    node.setPosition(Vector.add(center(), displacement));
+    node.setOrientation(Quaternion.random());
+    float lower = 0.5f;
+    float upper = 2;
+    node.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    return node;
+  }
+
   //TODO graph.get()
 
   // Dimensions stuff
@@ -665,7 +684,7 @@ public class Graph {
    * algorithm.
    *
    * @see #isNodeReachable(Node)
-   * @see Node#isEye()
+   * @see #isEye(Frame)
    */
   public ArrayList<Node> nodes() {
     ArrayList<Node> list = new ArrayList<Node>();

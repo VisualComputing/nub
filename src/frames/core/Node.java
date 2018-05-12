@@ -259,32 +259,10 @@ public class Node extends Frame {
   /**
    * Same as {@code randomize(graph().center(), graph().radius())}.
    *
-   * @see #random(Graph)
+   * @see Graph#random()
    */
   public void randomize() {
     randomize(graph().center(), graph().radius());
-  }
-
-  //TODO move to the graph
-
-  /**
-   * Returns a random graph node. The node is randomly positioned inside the ball defined
-   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
-   *
-   * @see #randomize()
-   */
-  public static Node random(Graph graph) {
-    Node node = new Node(graph);
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(graph.radius());
-    node.setPosition(Vector.add(graph.center(), displacement));
-    node.setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    node.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
-    return node;
   }
 
   /**
