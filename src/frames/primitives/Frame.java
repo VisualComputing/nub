@@ -274,6 +274,7 @@ public class Frame {
   /**
    * Sets an identity frame: 0 {}
    */
+  //TODO decide me!
   public void reset() {
     setPosition(new Vector());
     setOrientation(new Quaternion());
@@ -693,8 +694,28 @@ public class Frame {
     rotate(new Quaternion(x, y, z, w));
   }
 
+  /**
+   * TODO Warning bypasses constraints
+   */
   public void rotate(Quaternion quaternion, Frame frame) {
+    Frame reference = frame == null ?  new Frame() : frame.detach();
+    Frame copy = detach();
+    copy.setReference(reference);
+    copy.set(this);
+    reference.rotate(quaternion);
+    set(copy);
+  }
 
+  /**
+   * TODO Warning bypasses constraints
+   */
+  public void rotate(float roll, float pitch, float yaw, Frame frame) {
+    Frame reference = frame == null ?  new Frame() : frame.detach();
+    Frame copy = detach();
+    copy.setReference(reference);
+    copy.set(this);
+    reference.rotate(new Quaternion(roll, pitch, yaw));
+    set(copy);
   }
 
   /**
@@ -708,8 +729,9 @@ public class Frame {
    *
    * @see #setConstraint(Constraint)
    */
-  //TODO better docs
-  public void _rotate(Quaternion quaternion, Vector point) {
+  //TODO decide if here or to move it as protected method to the graph
+  /*
+  public void rotate(Quaternion quaternion, Vector point) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
@@ -723,6 +745,7 @@ public class Frame {
     else
       translate(vector);
   }
+  */
 
   // ORIENTATION
 

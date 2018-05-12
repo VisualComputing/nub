@@ -13,6 +13,7 @@ package frames.core;
 import frames.ik.Solver;
 import frames.ik.TreeSolver;
 import frames.primitives.*;
+import frames.primitives.constraint.Constraint;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -2885,11 +2886,32 @@ public class Graph {
    * or around the {@link Graph#anchor()} when the {@code frame} is the {@link Graph#eye()}.
    */
   public void spin(Quaternion quaternion, Frame frame) {
-    if (isEye(frame))
-      frame._rotate(quaternion, anchor());
+    if (isEye(frame)) {
+      if (frame.constraint() != null)
+        quaternion = frame.constraint().constrainRotation(quaternion, frame);
+      frame.rotation().compose(quaternion);
+      frame.rotation().normalize(); // Prevents numerical drift
+
+      Vector vector = Vector.add(anchor(), (new Quaternion(frame.orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(frame.position(), anchor())));
+      //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+      vector.subtract(frame.translation());
+      if (frame.constraint() != null)
+        frame.translate(frame.constraint().constrainTranslation(vector, frame));
+      else
+        frame.translate(vector);
+    }
     else
       frame.rotate(quaternion);
   }
+
+  /*
+  public void spin(Quaternion quaternion, Frame frame) {
+    if (isEye(frame))
+      frame.rotate(quaternion, anchor());
+    else
+      frame.rotate(quaternion);
+  }
+  */
 
   // only 3d eye
 
