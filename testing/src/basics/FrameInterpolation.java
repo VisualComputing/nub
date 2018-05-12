@@ -1,8 +1,7 @@
 package basics;
 
+import frames.core.Frame;
 import frames.core.Interpolator;
-import frames.core.Node;
-import frames.primitives.Frame;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -29,7 +28,7 @@ public class FrameInterpolation extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    Node eye = new Node(scene);
+    Frame eye = new Frame(scene);
     scene.setEye(eye);
     scene.setRadius(150);
 
@@ -63,7 +62,7 @@ public class FrameInterpolation extends PApplet {
     // Create an initial path
     int nbKeyFrames = 4;
     for (int i = 0; i < nbKeyFrames; i++) {
-      Node iFrame = new Node(scene);
+      Frame iFrame = new Frame(scene);
       iFrame.setPosition(-100 + 200 * i / (nbKeyFrames - 1), 0, 0);
       iFrame.setScaling(random(0.25f, 4.0f));
       nodeInterpolator.addKeyFrame(iFrame);

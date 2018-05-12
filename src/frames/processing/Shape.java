@@ -10,8 +10,7 @@
 
 package frames.processing;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -19,7 +18,7 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
- * A shape is a {@link Node} specialization that can be set from a retained-mode rendering
+ * A shape is a {@link Frame} specialization that can be set from a retained-mode rendering
  * Processing {@code PShape} or from an immediate-mode rendering Processing procedure. Either
  * case the shape is split in two a front and a back shape. The front shape will be used for
  * rendering and the back shape for picking with exact precision by default, see
@@ -41,7 +40,7 @@ import processing.opengl.PGraphicsOpenGL;
  * <h2>Picking</h2>
  * Picking a shape is done according to a precision which can either be:
  * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
- * to the {@link Node} documentation for both, {@link Precision#FIXED} and
+ * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
  * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
  * of the pointer device over the projected pixels of the back shape. To set a different
  * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
@@ -62,7 +61,7 @@ import processing.opengl.PGraphicsOpenGL;
  * Default is {@link Highlighting#FRONT}. Set the policy with
  * {@link #setHighlighting(Highlighting)}).
  */
-public class Shape extends Node {
+public class Shape extends Frame {
   PShape _frontShape, _backShape;
 
   public enum Highlighting {
@@ -83,9 +82,9 @@ public class Shape extends Node {
 
   /**
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
-   * Sets {@code reference} as its {@link #reference()} node.
+   * Sets {@code reference} as its {@link #reference()} frame.
    */
-  public Shape(Node reference) {
+  public Shape(Frame reference) {
     super(reference);
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
@@ -105,10 +104,10 @@ public class Shape extends Node {
 
   /**
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
-   * Sets {@code reference} as its {@link #reference() node and {@code pShape} as its retained mode
+   * Sets {@code reference} as its {@link #reference() frame and {@code pShape} as its retained mode
    * pshape.
    */
-  public Shape(Node reference, PShape pShape) {
+  public Shape(Frame reference, PShape pShape) {
     this(reference);
     setShape(pShape);
   }
@@ -172,9 +171,9 @@ public class Shape extends Node {
       graph()._bbEnabled = true;
       return;
     }
-    for (Node node : graph().nodes())
-      if (node instanceof Shape)
-        if (node.precision() == Precision.EXACT) {
+    for (Frame frame : graph().frames())
+      if (frame instanceof Shape)
+        if (frame.precision() == Precision.EXACT) {
           graph()._bbEnabled = true;
           return;
         }
@@ -197,8 +196,8 @@ public class Shape extends Node {
    * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
    * <p>
    * This method is internally called by {@link Scene#cast(PGraphics)} to draw
-   * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
-   * the node into the scene main {@link Scene#frontBuffer()}.
+   * the frame into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
+   * the frame into the scene main {@link Scene#frontBuffer()}.
    * <p>
    * Call it only instead of {@link Scene#cast(PGraphics)}.
    */

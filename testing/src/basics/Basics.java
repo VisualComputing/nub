@@ -1,7 +1,6 @@
 package basics;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -26,12 +25,12 @@ public class Basics extends PApplet {
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    eye = new Node(scene);
+    eye = new Frame(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
-    node = new Node(scene) {
+    node = new Frame(scene) {
       @Override
       public void visit() {
         scene.drawAxes(scene.radius() / 3);
@@ -64,12 +63,7 @@ public class Basics extends PApplet {
   }
 
   public void mouseMoved() {
-    /*
-    if (trackedFrame == null)
-      scene.spin(new Point(pmouseX, pmouseY), new Point(mouseX, mouseY));
-    else
-      scene.rotate((mouseY - pmouseY), 0, 0, PI / width, trackedFrame);
-      */
+    scene.mouseSpin();
   }
 
   PShape shape() {

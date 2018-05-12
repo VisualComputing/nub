@@ -10,7 +10,6 @@
 
 package frames.core;
 
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
@@ -64,7 +63,7 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  *
- * <b>Attention:</b> If a {@link frames.primitives.constraint.Constraint} is attached to
+ * <b>Attention:</b> If a {@link frames.core.constraint.Constraint} is attached to
  * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
@@ -194,8 +193,8 @@ public class Interpolator {
     this(graph, new Frame());
   }
 
-  public Interpolator(Node node) {
-    this(node.graph(), node);
+  public Interpolator(Frame frame) {
+    this(frame.graph(), frame);
   }
 
   /**
@@ -206,6 +205,8 @@ public class Interpolator {
    * {@link #time()}, {@link #speed()} and {@link #period()} are set to their default values.
    */
   public Interpolator(Graph graph, Frame frame) {
+    if (graph == null)
+      throw new RuntimeException("Warning: no interpolator instantiated");
     _graph = graph;
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Frame>();
@@ -303,15 +304,15 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Node},
-   * the frame graph ({@link Node#graph()}) and {@link #graph()} should match.
+   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Frame},
+   * the frame graph ({@link Frame#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {
     if (frame == _frame)
       return;
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.graph() != null)
+      if (graph() != frame.graph())
+        throw new RuntimeException("Frame and Interpolator graphs should match");
     _frame = frame;
   }
 
@@ -592,9 +593,9 @@ public class Interpolator {
     if (frame == null)
       return;
 
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.graph() != null)
+      if (graph() != frame.graph())
+        throw new RuntimeException("Frame and Interpolator graphs should match");
 
     if (_list.isEmpty())
       _time = time;
@@ -633,8 +634,7 @@ public class Interpolator {
    */
   public void purgeKeyFrame(int index) {
     Frame frame = removeKeyFrame(index);
-    if (frame instanceof Node)
-      _graph.pruneBranch((Node) frame);
+    _graph.pruneBranch(frame);
   }
 
   /**
@@ -654,15 +654,14 @@ public class Interpolator {
    * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
    *
    * @see #clear()
-   * @see frames.core.Graph#pruneBranch(Node)
+   * @see frames.core.Graph#pruneBranch(Frame)
    */
   public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      if (keyFrame.frame() instanceof Node)
-        _graph.pruneBranch((Node) keyFrame._frame);
+      _graph.pruneBranch(keyFrame._frame);
     }
     _list.clear();
     _pathIsValid = false;

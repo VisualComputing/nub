@@ -10,7 +10,6 @@
 
 package frames.core;
 
-import frames.primitives.Frame;
 import frames.primitives.Matrix;
 import frames.primitives.Vector;
 

@@ -8,10 +8,18 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.primitives;
+package frames.core;
 
-import frames.primitives.constraint.Constraint;
+import frames.core.constraint.Constraint;
+import frames.core.constraint.WorldConstraint;
+import frames.primitives.Matrix;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.timing.TimingHandler;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
@@ -71,16 +79,16 @@ import frames.timing.TimingHandler;
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Constraints</h2>
  * One interesting feature of a frame is that its displacements can be constrained. When a
- * {@link frames.primitives.constraint.Constraint} is attached to a frame, it filters
+ * {@link frames.core.constraint.Constraint} is attached to a frame, it filters
  * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the
  * resulting filtered motion is applied to the frame. The default {@link #constraint()}
  * is {@code null} resulting in no filtering. Use {@link #setConstraint(Constraint)} to
  * attach a constraint to a frame.
  * <p>
  * Classical constraints are provided for convenience (see
- * {@link frames.primitives.constraint.LocalConstraint},
- * {@link frames.primitives.constraint.WorldConstraint} and
- * {@link frames.primitives.constraint.EyeConstraint}) and new constraints can very
+ * {@link frames.core.constraint.LocalConstraint},
+ * {@link frames.core.constraint.WorldConstraint} and
+ * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Syncing</h2>
  * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
@@ -124,13 +132,20 @@ public class Frame {
   protected static int _nodeCount;
   protected int _id;
 
+  // Attached frames
+
+  protected Graph _graph;
+  protected List<Frame> _children;
+  protected boolean _culled;
+  protected boolean _tracking;
+
   /**
    * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
    *
    * @see #Frame(Vector, Quaternion, float)
    */
   public Frame() {
-    this(null, new Vector(), new Quaternion(), 1);
+    this(null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
@@ -172,46 +187,64 @@ public class Frame {
   /**
    * Same as {@code this(null, translation, rotation, scaling)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
   public Frame(Vector translation, Quaternion rotation, float scaling) {
-    this(null, translation, rotation, scaling);
+    this(null, null, translation, rotation, scaling);
   }
 
   /**
    * Same as {@code this(reference, translation, new Quaternion(), 1)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
   public Frame(Frame reference, Vector translation) {
-    this(reference, translation, new Quaternion(), 1);
+    this(null, reference, translation, new Quaternion(), 1);
   }
 
   /**
    * Same as {@code this(reference, new Vector(), rotation, 1)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
   public Frame(Frame reference, Quaternion rotation) {
-    this(reference, new Vector(), rotation, 1);
+    this(null, reference, new Vector(), rotation, 1);
   }
 
   /**
    * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
   public Frame(Frame reference, float scaling) {
-    this(reference, new Vector(), new Quaternion(), scaling);
+    this(null, reference, new Vector(), new Quaternion(), scaling);
   }
 
   /**
    * Same as {@code this(reference, translation, rotation, 1)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
    */
   public Frame(Frame reference, Vector translation, Quaternion rotation) {
-    this(reference, translation, rotation, 1);
+    this(null, reference, translation, rotation, 1);
+  }
+
+  /**
+   * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph) {
+    this(graph, null, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference) {
+    this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
   }
 
   /**
@@ -221,11 +254,12 @@ public class Frame {
    * <p>
    * Sets the {@link #precision()} to {@link Precision#FIXED}.
    */
-  protected Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
+    _graph = graph;
+    setReference(reference);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    setReference(reference);
     _id = ++_nodeCount;
     // unlikely but theoretically possible
     if (_id == 16777216)
@@ -233,13 +267,33 @@ public class Frame {
     _lastUpdate = 0;
     _precision = Precision.FIXED;
     setPrecisionThreshold(20);
+
+    if (graph() == null)
+      return;
+
+    // attached frames:
+    if (graph().is2D()) {
+      if (position().z() != 0)
+        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y)");
+      if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
+        throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
+      WorldConstraint constraint2D = new WorldConstraint();
+      constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
+      constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
+      setConstraint(constraint2D);
+    }
+    _culled = false;
+    _children = new ArrayList<Frame>();
+    //setReference(reference());// _restorePath is completely needed here
+    enableTracking(true);
   }
 
-  protected Frame(Frame frame) {
-    this.setTranslation(frame.translation().get());
-    this.setRotation(frame.rotation().get());
-    this.setScaling(frame.scaling());
+  protected Frame(Graph graph, Frame frame) {
+    this._graph = graph;
     this.setReference(frame.reference());
+    this.setPosition(frame.position());
+    this.setOrientation(frame.orientation());
+    this.setMagnitude(frame.magnitude());
     this.setConstraint(frame.constraint());
     this._id = ++_nodeCount;
     // unlikely but theoretically possible
@@ -248,25 +302,47 @@ public class Frame {
     _lastUpdate = frame.lastUpdate();
     this._precision = frame._precision;
     this._threshold = frame._threshold;
+
+    if (graph() == null)
+      return;
+
+    this._culled = frame._culled;
+    this._children = new ArrayList<Frame>();
+    //if (this.graph() == frame.graph()) this.setReference(reference());// _restorePath
+    this._tracking = frame._tracking;
   }
 
   /**
-   * Returns a deep copy of this frame.
+   * Performs a deep copy of this frame into {@code graph}.
+   */
+  public Frame attach(Graph graph) {
+    return new Frame(graph, this);
+  }
+
+  /**
+   * Same as {@code return attach(graph())}.
+   *
+   * @see #attach(Graph)
    */
   public Frame get() {
-    return new Frame(this);
+    return attach(graph());
   }
 
   /**
-   * Returns a new frame defined in the world coordinate system, with the same {@link #position()},
-   * {@link #orientation()} and {@link #magnitude()} as this frame.
+   * Same as {@code return attach(null)}.
    *
-   * @see #reference()
+   * @see #attach(Graph)
    */
   public Frame detach() {
-    Frame frame = new Frame();
-    frame.set(this);
-    return frame;
+    return attach(null);
+
+    //Frame frame = new Frame();
+    //frame.set(this);
+    //return frame;
+  }
+
+  public boolean isDetached() {
+    return graph() == null;
   }
 
   //TODO Ambiguous: global or local. Check set(), reset and matches().
@@ -352,10 +428,13 @@ public class Frame {
   }
 
   /**
-   * Internal use. Automatically call by all methods which change the frame state.
+   * Internal use. Automatically call by all methods which change the Frame state.
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
+    if (_children != null)
+      for (Frame child : _children)
+        child._modified();
   }
 
   // REFERENCE_FRAME
@@ -448,18 +527,91 @@ public class Frame {
    */
   public void setReference(Frame frame) {
     if (frame == this) {
-      System.out.println("A frame cannot be a reference of itself.");
+      System.out.println("A Frame cannot be a reference of itself.");
       return;
     }
     if (isAncestor(frame)) {
-      System.out.println("A frame descendant cannot be set as its reference.");
+      System.out.println("A Frame descendant cannot be set as its reference.");
       return;
     }
-    if (reference() == frame)
-      return;
-    _reference = frame;
+    if (frame != null)
+      if ((isDetached() && !frame.isDetached()) || !isDetached() && frame.isDetached()) {
+        System.out.println("Both frame and its reference should be attached or detached.");
+        return;
+      }
+    if (isDetached()) {
+      if (reference() == frame)
+        return;
+      _reference = frame;
+    } else {
+      // 1. no need to re-parent, just check this needs to be added as leadingFrame
+      if (reference() == frame) {
+        _restorePath(reference(), this);
+        return;
+      }
+      // 2. else re-parenting
+      // 2a. before assigning new reference frame
+      if (reference() != null) // old
+        reference()._removeChild(this);
+      else if (graph() != null)
+        graph()._removeLeadingFrame(this);
+      // finally assign the reference frame
+      _reference = frame;// reference() returns now the new value
+      // 2b. after assigning new reference frame
+      _restorePath(reference(), this);
+    }
     _modified();
   }
+
+  protected void _restorePath(Frame parent, Frame child) {
+    if (parent == null) {
+      if (graph() != null)
+        graph()._addLeadingFrame(child);
+    } else {
+      if (!parent._hasChild(child)) {
+        parent._addChild(child);
+        _restorePath(parent.reference(), parent);
+      }
+    }
+  }
+
+  protected boolean _addChild(Frame frame) {
+    if (frame == null)
+      return false;
+    if (_hasChild(frame))
+      return false;
+    return _children.add(frame);
+  }
+
+  /**
+   * Removes the leading Frame if present. Typically used when re-parenting the Frame.
+   */
+  protected boolean _removeChild(Frame frame) {
+    boolean result = false;
+    Iterator<Frame> it = _children.iterator();
+    while (it.hasNext()) {
+      if (it.next() == frame) {
+        it.remove();
+        result = true;
+        break;
+      }
+    }
+    return result;
+  }
+
+  protected boolean _hasChild(Frame frame) {
+    for (Frame child : _children)
+      if (child == frame)
+        return true;
+    return false;
+  }
+
+  // TODO Provisional, should go away
+  public List<Frame> children() {
+    return _children;
+  }
+
+  // Random
 
   /**
    * Randomized this frame. The frame is randomly re-positioned inside the ball
@@ -573,7 +725,7 @@ public class Frame {
   // CONSTRAINT
 
   /**
-   * Returns the current {@link frames.primitives.constraint.Constraint} applied to the
+   * Returns the current {@link frames.core.constraint.Constraint} applied to the
    * frame.
    * <p>
    * A {@code null} value (default) means that no constraint is used to filter the frame
@@ -1021,7 +1173,8 @@ public class Frame {
         }
       }
     }
-    Frame old = new Frame(this); // correct line
+    //TODO needs testing
+    Frame old = detach(); // correct line
     // VFrame old = this.get();// this call the get overloaded method and
     // hence add the frame to the mouse _grabber
 
@@ -1669,5 +1822,87 @@ public class Frame {
    */
   protected Vector _referenceLocation(Vector vector) {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
+  }
+
+  // Attached frames
+
+  public Graph graph() {
+    return _graph;
+  }
+
+  /**
+   * Returns {@code true} if tracking is enabled.
+   *
+   * @see #enableTracking(boolean)
+   */
+  public boolean isTrackingEnabled() {
+    return _tracking;
+  }
+
+  /**
+   * Enables frame tracking according to {@code flag}.
+   *
+   * @see #isTrackingEnabled()
+   */
+  public void enableTracking(boolean flag) {
+    _tracking = flag;
+  }
+
+  /**
+   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
+   * empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * frame = new Frame(graph) {
+   *   public void visit() {
+   *     //hierarchical culling is optional and disabled by default
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#traverse()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+  public void visit() {
+  }
+
+  /**
+   * Same as {@code cull(true)}.
+   *
+   * @see #cull(boolean)
+   * @see #isCulled()
+   */
+
+  public void cull() {
+    cull(true);
+  }
+
+  /**
+   * Enables or disables {@link #visit()} of this frame and its children during
+   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   *
+   * @see #isCulled()
+   */
+  public void cull(boolean cull) {
+    _culled = cull;
+  }
+
+  /**
+   * Returns whether or not the frame culled or not. Culled frames (and their children)
+   * will not be visited by the {@link Graph#traverse()} algoruthm.
+   *
+   * @see #cull(boolean)
+   */
+  public boolean isCulled() {
+    return _culled;
   }
 }

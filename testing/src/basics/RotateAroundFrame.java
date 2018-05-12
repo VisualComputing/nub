@@ -1,7 +1,5 @@
 package basics;
 
-import frames.core.Node;
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -16,7 +14,6 @@ import processing.event.MouseEvent;
  */
 public class RotateAroundFrame extends PApplet {
   Scene scene;
-  Frame eye;
   Shape shape1, shape2;
   Vector upVector;
 
@@ -27,12 +24,8 @@ public class RotateAroundFrame extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setRadius(1000);
-    scene.fitBallInterpolation();
-
-    eye = new Node(scene);
-    scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
+    scene.setRadius(1000);
     scene.fitBallInterpolation();
 
     shape1 = new Shape(scene) {
@@ -74,7 +67,7 @@ public class RotateAroundFrame extends PApplet {
   }
 
   public void mousePressed() {
-    upVector = eye.yAxis();
+    upVector = scene.eye().yAxis();
   }
 
   public void mouseDragged() {

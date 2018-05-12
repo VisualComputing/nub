@@ -1,11 +1,11 @@
 package basics;
 
-import frames.primitives.Frame;
+import frames.core.Frame;
+import frames.core.constraint.AxisPlaneConstraint;
+import frames.core.constraint.EyeConstraint;
+import frames.core.constraint.LocalConstraint;
+import frames.core.constraint.WorldConstraint;
 import frames.primitives.Vector;
-import frames.primitives.constraint.AxisPlaneConstraint;
-import frames.primitives.constraint.EyeConstraint;
-import frames.primitives.constraint.LocalConstraint;
-import frames.primitives.constraint.WorldConstraint;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;

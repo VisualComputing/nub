@@ -1,7 +1,6 @@
 package basics;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -30,7 +29,7 @@ public class Interaction extends PApplet {
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    eye = new Node(scene);
+    eye = new Frame(scene);
     scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
