@@ -1,9 +1,7 @@
 package basics;
 
-import frames.primitives.Frame;
 import frames.primitives.Vector;
 import frames.primitives.constraint.AxisPlaneConstraint;
-import frames.primitives.constraint.EyeConstraint;
 import frames.primitives.constraint.LocalConstraint;
 import frames.primitives.constraint.WorldConstraint;
 import frames.processing.Scene;
@@ -58,8 +56,7 @@ public class ConstrainedEye extends PApplet {
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.mouseSpin();
-    else
-    if(mouseButton == RIGHT)
+    else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
       scene.zoom(mouseX - pmouseX);

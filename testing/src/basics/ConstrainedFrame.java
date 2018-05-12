@@ -80,8 +80,7 @@ public class ConstrainedFrame extends PApplet {
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.mouseSpin();
-    else
-    if(mouseButton == RIGHT)
+    else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
       scene.zoom(mouseX - pmouseX);

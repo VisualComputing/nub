@@ -13,7 +13,6 @@ package frames.core;
 import frames.ik.Solver;
 import frames.ik.TreeSolver;
 import frames.primitives.*;
-import frames.primitives.constraint.Constraint;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -2899,8 +2898,7 @@ public class Graph {
         frame.translate(frame.constraint().constrainTranslation(vector, frame));
       else
         frame.translate(vector);
-    }
-    else
+    } else
       frame.rotate(quaternion);
   }
 

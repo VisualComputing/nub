@@ -117,13 +117,12 @@ public class Interaction extends PApplet {
     if (mouseButton == LEFT)
       scene.mouseSpin();
       //scene.mouseCAD(PI / height);
-    else
-      if(mouseButton == RIGHT)
+    else if (mouseButton == RIGHT)
       //scene.mouseTranslate();
       scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
-        scene.scale(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
     //*/
     /*
     if (mouseButton == LEFT)

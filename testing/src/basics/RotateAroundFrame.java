@@ -89,19 +89,17 @@ public class RotateAroundFrame extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT) {
-      if(scene.isTrackedFrame(shape2))
+      if (scene.isTrackedFrame(shape2))
         //shape2.rotate((mouseX-pmouseX)* PI / width, 0, 0, shape1);
-        shape2.rotate(new Quaternion(new Vector(0,1,0),(mouseX-pmouseX)* PI / width), shape1);
+        shape2.rotate(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
       else
         scene.mouseSpin(shape1);
-    }
-    else
-      if(mouseButton == RIGHT)
+    } else if (mouseButton == RIGHT)
       //scene.mouseTranslate();
       scene.mousePan();
     //else
-      //scene.zoom(mouseX - pmouseX);
-        //scene.scale(mouseX - pmouseX);
+    //scene.zoom(mouseX - pmouseX);
+    //scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
