@@ -641,7 +641,7 @@ public class Graph {
   public List<Frame> pruneBranch(Frame frame) {
     if (!isFrameReachable(frame))
       new ArrayList<Frame>();
-      //return null;
+    //return null;
     ArrayList<Frame> list = new ArrayList<Frame>();
     _collectFrames(list, frame);
     for (Frame collectedFrame : list)
@@ -2455,7 +2455,7 @@ public class Graph {
   public List<Frame> children(Frame frame) {
     List<Frame> children = new ArrayList<Frame>();
     if (frame.graph() == this)
-      if(frame._children != null)
+      if (frame._children != null)
         children = frame._children;
     return children;
   }

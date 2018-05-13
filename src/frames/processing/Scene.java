@@ -926,7 +926,7 @@ public class Scene extends Graph implements PConstants {
       return false;
     if (isEye(frame))
       return false;
-    if ((frame.precision() != Frame.Precision.EXACT) || ! (frame instanceof Shape))
+    if ((frame.precision() != Frame.Precision.EXACT) || !(frame instanceof Shape))
       return super.track(x, y, frame);
     int index = (int) y * width() + (int) x;
     if (backBuffer().pixels != null)

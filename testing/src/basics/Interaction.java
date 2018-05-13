@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -96,8 +95,8 @@ public class Interaction extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    if(event.getCount() == 2)
-      if(event.getButton() == LEFT)
+    if (event.getCount() == 2)
+      if (event.getButton() == LEFT)
         scene.focus();
       else
         scene.align();

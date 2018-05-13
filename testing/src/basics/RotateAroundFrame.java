@@ -87,7 +87,7 @@ public class RotateAroundFrame extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    if(event.getCount() == 2)
+    if (event.getCount() == 2)
       scene.focus();
   }
 
