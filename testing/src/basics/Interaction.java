@@ -15,7 +15,6 @@ import processing.event.MouseEvent;
  */
 public class Interaction extends PApplet {
   Scene scene;
-  Frame eye;
   Shape shape1, shape2;
   Vector upVector;
 
@@ -26,12 +25,8 @@ public class Interaction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setRadius(1000);
-    scene.fitBallInterpolation();
-
-    eye = new Frame(scene);
-    scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
+    scene.setRadius(1000);
     scene.fitBallInterpolation();
 
     shape1 = new Shape(scene) {
@@ -62,7 +57,7 @@ public class Interaction extends PApplet {
     if (mousePressed)
       scene.traverse();
     else
-      //same as traverse, but updates the scene tracked frame
+      // same as traverse, but updates the scene tracked frame
       // according to the current mouse position
       scene.cast();
   }
@@ -73,7 +68,7 @@ public class Interaction extends PApplet {
   }
 
   public void mousePressed() {
-    upVector = eye.yAxis();
+    upVector = scene.eye().yAxis();
   }
 
   public void mouseDragged() {
