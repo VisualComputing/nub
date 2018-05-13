@@ -95,6 +95,14 @@ public class Interaction extends PApplet {
     scene.scale(event.getCount() * 20);
   }
 
+  public void mouseClicked(MouseEvent event) {
+    if(event.getCount() == 2)
+      if(event.getButton() == LEFT)
+        scene.focus();
+      else
+        scene.align();
+  }
+
   PShape shape() {
     PShape fig = scene.is3D() ? createShape(BOX, 150) : createShape(RECT, 0, 0, 150, 150);
     fig.setStroke(255);

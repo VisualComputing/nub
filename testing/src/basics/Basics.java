@@ -12,8 +12,7 @@ import processing.core.PShape;
  */
 public class Basics extends PApplet {
   Scene scene;
-  Frame eye, node;
-  Shape shape;
+  Frame frame, shape;
 
   public void settings() {
     size(800, 800, P3D);
@@ -22,15 +21,11 @@ public class Basics extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
+    scene.setFieldOfView(PI / 3);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    eye = new Frame(scene);
-    scene.setEye(eye);
-    scene.setFieldOfView(PI / 3);
-    scene.fitBallInterpolation();
-
-    node = new Frame(scene) {
+    frame = new Frame(scene) {
       @Override
       public void visit() {
         scene.drawAxes(scene.radius() / 3);
@@ -46,8 +41,7 @@ public class Basics extends PApplet {
         popStyle();
       }
     };
-    node.setRotation(Quaternion.random());
-    //node.translate(75, 75, 75);
+    frame.setRotation(Quaternion.random());
     shape = new Shape(scene, shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);

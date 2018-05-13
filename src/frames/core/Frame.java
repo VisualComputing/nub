@@ -129,7 +129,7 @@ public class Frame {
   protected Precision _precision;
 
   // ID
-  protected static int _nodeCount;
+  protected static int _counter;
   protected int _id;
 
   // Attached frames
@@ -260,7 +260,7 @@ public class Frame {
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
-    _id = ++_nodeCount;
+    _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
@@ -295,7 +295,7 @@ public class Frame {
     this.setOrientation(frame.orientation());
     this.setMagnitude(frame.magnitude());
     this.setConstraint(frame.constraint());
-    this._id = ++_nodeCount;
+    this._id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
@@ -465,28 +465,22 @@ public class Frame {
   }
 
   /**
-   * Returns an array containg a straight path of frames from {@code tail} to {@code tip}.
-   * Returns {@code null} if {@code tail} is not ancestor of {@code tip}.
+   * Returns an array containing a straight path of frames from {@code tail} to {@code tip}.
+   * Returns an empty list if {@code tail} is not ancestor of {@code tip}.
    *
    * @see #isAncestor(Frame, Frame)
    */
-  public static Frame[] path(Frame tail, Frame tip) {
-    Frame[] path = null;
+  public static ArrayList<Frame> path(Frame tail, Frame tip) {
+    ArrayList<Frame> list = new ArrayList<Frame>();
     if (tail.isAncestor(tip)) {
-      int steps = 0;
       Frame _tip = tip;
       while (_tip != tail) {
-        steps++;
+        list.add(0, _tip);
         _tip = _tip.reference();
       }
-      path = new Frame[steps + 1];
-      _tip = tip;
-      for (int i = steps; i >= 0; i--) {
-        path[i] = _tip;
-        _tip = _tip.reference();
-      }
+      list.add(0, tail);
     }
-    return path;
+    return list;
   }
 
   /**

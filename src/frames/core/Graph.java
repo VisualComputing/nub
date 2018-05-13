@@ -631,9 +631,6 @@ public class Graph {
    * reachable again by the traversal algorithm. In this case, the frame should be manually
    * added to some agents to interactively handle it.
    * <p>
-   * Note that if frame is not reachable ({@link #isFrameReachable(Frame)}) this method returns
-   * {@code null}.
-   * <p>
    * When collected, pruned frames behave like {@link Frame}, otherwise they are eligible for
    * garbage collection.
    *
@@ -641,9 +638,10 @@ public class Graph {
    * @see #appendBranch(List)
    * @see #isFrameReachable(Frame)
    */
-  public ArrayList<Frame> pruneBranch(Frame frame) {
+  public List<Frame> pruneBranch(Frame frame) {
     if (!isFrameReachable(frame))
-      return null;
+      new ArrayList<Frame>();
+      //return null;
     ArrayList<Frame> list = new ArrayList<Frame>();
     _collectFrames(list, frame);
     for (Frame collectedFrame : list)
@@ -697,7 +695,7 @@ public class Graph {
    * @see #isFrameReachable(Frame)
    * @see #isEye(Frame)
    */
-  public ArrayList<Frame> frames() {
+  public List<Frame> frames() {
     ArrayList<Frame> list = new ArrayList<Frame>();
     for (Frame frame : leadingFrames())
       _collectFrames(list, frame);
@@ -710,7 +708,7 @@ public class Graph {
    *
    * @see #isFrameReachable(Frame)
    */
-  public ArrayList<Frame> branch(Frame frame) {
+  public List<Frame> branch(Frame frame) {
     ArrayList<Frame> list = new ArrayList<Frame>();
     _collectFrames(list, frame);
     return list;
@@ -727,17 +725,8 @@ public class Graph {
    * @see #isFrameReachable(Frame)
    * @see Frame#path(Frame, Frame)
    */
-  public ArrayList<Frame> path(Frame tail, Frame tip) {
-    ArrayList<Frame> list = new ArrayList<Frame>();
-    if (isFrameReachable(tail) && isFrameReachable(tip) && tail.isAncestor(tip)) {
-      Frame _tip = tip;
-      while (_tip != tail) {
-        list.add(0, _tip);
-        _tip = _tip.reference();
-      }
-      list.add(0, tail);
-    }
-    return list;
+  public List<Frame> path(Frame tail, Frame tip) {
+    return (isFrameReachable(tail) && isFrameReachable(tip)) ? Frame.path(tail, tip) : new ArrayList<Frame>();
   }
 
   /**
@@ -2464,9 +2453,15 @@ public class Graph {
   }
 
   public List<Frame> children(Frame frame) {
+    List<Frame> children = new ArrayList<Frame>();
     if (frame.graph() == this)
-      return frame._children;
-    return null;
+      if(frame._children != null)
+        children = frame._children;
+    return children;
+  }
+
+  public void align() {
+    align(defaultFrame());
   }
 
   /**
@@ -2485,6 +2480,10 @@ public class Graph {
       frame.alignWithFrame(null, true);
     else
       frame.alignWithFrame(eye());
+  }
+
+  public void focus() {
+    focus(defaultFrame());
   }
 
   /**

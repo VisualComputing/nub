@@ -14,7 +14,7 @@ import processing.event.MouseEvent;
  */
 public class FrameInterpolation extends PApplet {
   Scene scene;
-  Interpolator nodeInterpolator, eyeInterpolator1, eyeInterpolator2;
+  Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Shape shape;
   boolean showEyePath = true;
 
@@ -28,16 +28,15 @@ public class FrameInterpolation extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    Frame eye = new Frame(scene);
-    scene.setEye(eye);
+    //scene.setFieldOfView(PI / 3);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations
     scene.fitBallInterpolation();
 
     // interpolation 2. Custom eye interpolations
-    eyeInterpolator1 = new Interpolator(eye);
-    eyeInterpolator2 = new Interpolator(eye);
+    eyeInterpolator1 = new Interpolator(scene.eye());
+    eyeInterpolator2 = new Interpolator(scene.eye());
 
     // interpolation 3. Custom (arbitrary)frame interpolations
 
@@ -57,17 +56,17 @@ public class FrameInterpolation extends PApplet {
         pg.popStyle();
       }
     };
-    nodeInterpolator = new Interpolator(shape);
-    nodeInterpolator.setLoop();
+    interpolator = new Interpolator(shape);
+    interpolator.setLoop();
     // Create an initial path
     int nbKeyFrames = 4;
     for (int i = 0; i < nbKeyFrames; i++) {
       Frame iFrame = new Frame(scene);
       iFrame.setPosition(-100 + 200 * i / (nbKeyFrames - 1), 0, 0);
       iFrame.setScaling(random(0.25f, 4.0f));
-      nodeInterpolator.addKeyFrame(iFrame);
+      interpolator.addKeyFrame(iFrame);
     }
-    nodeInterpolator.start();
+    interpolator.start();
   }
 
   public void draw() {
@@ -79,10 +78,10 @@ public class FrameInterpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    scene.drawPath(nodeInterpolator, 5);
+    scene.drawPath(interpolator, 5);
     popStyle();
 
-    for (Frame frame : nodeInterpolator.keyFrames()) {
+    for (Frame frame : interpolator.keyFrames()) {
       pushMatrix();
       scene.applyTransformation(frame);
       if (scene.mouseTrack(frame))
@@ -144,9 +143,9 @@ public class FrameInterpolation extends PApplet {
       eyeInterpolator2.purge();
 
     if (key == '-')
-      nodeInterpolator.setSpeed(nodeInterpolator.speed() - 0.25f);
+      interpolator.setSpeed(interpolator.speed() - 0.25f);
     if (key == '+')
-      nodeInterpolator.setSpeed(nodeInterpolator.speed() + 0.25f);
+      interpolator.setSpeed(interpolator.speed() + 0.25f);
 
     if (key == 's')
       scene.fitBallInterpolation();
