@@ -284,7 +284,6 @@ public class Frame {
     }
     _culled = false;
     _children = new ArrayList<Frame>();
-    //setReference(reference());// _restorePath is completely needed here
     enableTracking(true);
   }
 
@@ -308,7 +307,6 @@ public class Frame {
 
     this._culled = frame._culled;
     this._children = new ArrayList<Frame>();
-    //if (this.graph() == frame.graph()) this.setReference(reference());// _restorePath
     this._tracking = frame._tracking;
   }
 
@@ -519,6 +517,7 @@ public class Frame {
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
+  // TODO test re-parenting
   public void setReference(Frame frame) {
     if (frame == this) {
       System.out.println("A Frame cannot be a reference of itself.");
@@ -538,6 +537,11 @@ public class Frame {
         return;
       _reference = frame;
     } else {
+      if (frame != null)
+        if (graph() != frame.graph()) {
+          System.out.println("Both frame and its reference should be attached to the same graph.");
+          return;
+        }
       // 1. no need to re-parent, just check this needs to be added as leadingFrame
       if (reference() == frame) {
         _restorePath(reference(), this);

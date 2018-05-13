@@ -40,7 +40,7 @@ import java.util.List;
  * {@link Frame#visit()} on each visited frame (refer to the {@link Frame} documentation).
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isFrameReachable(Frame)},
+ * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isReachable(Frame)},
  * {@link #branch(Frame)}, and {@link #clear()}.
  * <h2>Eye handling</h2>
  * Any {@link Frame} or {@link Frame} (belonging to the graph hierarchy) may be set as the
@@ -562,7 +562,7 @@ public class Graph {
    * All leading frames are also reachable by the {@link #traverse()} algorithm for which they are the seeds.
    *
    * @see #frames()
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
   public List<Frame> leadingFrames() {
@@ -619,7 +619,7 @@ public class Graph {
   /**
    * Make all the frames in the {@code frame} branch eligible for garbage collection.
    * <p>
-   * A call to {@link #isFrameReachable(Frame)} on all {@code frame} descendants
+   * A call to {@link #isReachable(Frame)} on all {@code frame} descendants
    * (including {@code frame}) will return false, after issuing this method. It also means
    * that all frames in the {@code frame} branch will become unreachable by the
    * {@link #traverse()} algorithm.
@@ -636,14 +636,13 @@ public class Graph {
    *
    * @see #clear()
    * @see #appendBranch(List)
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    */
   public List<Frame> pruneBranch(Frame frame) {
-    if (!isFrameReachable(frame))
+    if (!isReachable(frame))
       new ArrayList<Frame>();
-    //return null;
     ArrayList<Frame> list = new ArrayList<Frame>();
-    _collectFrames(list, frame);
+    _collect(list, frame);
     for (Frame collectedFrame : list)
       if (collectedFrame.reference() != null)
         collectedFrame.reference()._removeChild(collectedFrame);
@@ -680,7 +679,7 @@ public class Graph {
    * @see #traverse()
    * @see #frames()
    */
-  public boolean isFrameReachable(Frame frame) {
+  public boolean isReachable(Frame frame) {
     if (frame == null)
       return false;
     if (frame.graph() != this)
@@ -691,14 +690,17 @@ public class Graph {
   /**
    * Returns a list of all the frames that are reachable by the {@link #traverse()}
    * algorithm.
+   * <p>
+   * The method traverse the hierarchy to collect. Frame collections should thus be kept at user space
+   * for efficiency.
    *
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    * @see #isEye(Frame)
    */
   public List<Frame> frames() {
     ArrayList<Frame> list = new ArrayList<Frame>();
     for (Frame frame : leadingFrames())
-      _collectFrames(list, frame);
+      _collect(list, frame);
     return list;
   }
 
@@ -706,11 +708,11 @@ public class Graph {
    * Collects {@code frame} and all its descendant frames. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    */
   public List<Frame> branch(Frame frame) {
     ArrayList<Frame> list = new ArrayList<Frame>();
-    _collectFrames(list, frame);
+    _collect(list, frame);
     return list;
   }
 
@@ -722,25 +724,25 @@ public class Graph {
    * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
    * Otherwise it will be empty.
    *
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    * @see Frame#path(Frame, Frame)
    */
   public List<Frame> path(Frame tail, Frame tip) {
-    return (isFrameReachable(tail) && isFrameReachable(tip)) ? Frame.path(tail, tip) : new ArrayList<Frame>();
+    return (isReachable(tail) && isReachable(tip)) ? Frame.path(tail, tip) : new ArrayList<Frame>();
   }
 
   /**
    * Collects {@code frame} and all its descendant frames. Note that for a frame to be collected
    * it must be reachable.
    *
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    */
-  protected void _collectFrames(List<Frame> list, Frame frame) {
+  protected void _collect(List<Frame> list, Frame frame) {
     if (frame == null)
       return;
     list.add(frame);
-    for (Frame child : children(frame))
-      _collectFrames(list, child);
+    for (Frame child : frame._children)
+      _collect(list, child);
   }
 
   // Input stuff
@@ -761,6 +763,7 @@ public class Graph {
    * Use {@code TimingHandler.frameCount} to retrieve the number of frames displayed since
    * the first graph was instantiated.
    */
+  //TODO check name
   public long frameCount() {
     return timingHandler().frameCount();
   }
@@ -2368,7 +2371,7 @@ public class Graph {
    * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
    * eye update) and before any other transformation of the modelview matrix takes place.
    *
-   * @see #isFrameReachable(Frame)
+   * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
   //TODO return frame (always null)?
@@ -2385,7 +2388,7 @@ public class Graph {
     applyTransformation(frame);
     frame.visit();
     if (!frame.isCulled())
-      for (Frame child : children(frame))
+      for (Frame child : frame._children)
         _visit(child);
     popModelView();
   }
@@ -2447,16 +2450,17 @@ public class Graph {
     frame.visit();
 
     if (!frame.isCulled())
-      for (Frame child : children(frame))
+      for (Frame child : frame._children)
         _visit(child, x, y);
     popModelView();
   }
 
+  //TODO needs more testing, maybe use the Frame version only? Decide
   public List<Frame> children(Frame frame) {
     List<Frame> children = new ArrayList<Frame>();
-    if (frame.graph() == this)
-      if (frame._children != null)
-        children = frame._children;
+    //if (frame.graph() == this)
+    if (frame._children != null)
+      children = frame._children;
     return children;
   }
 
@@ -2693,7 +2697,6 @@ public class Graph {
 
   //TODO add 2d conditions
   //TODO add proper names: classification: 2d/3d, only Eye/Frame-eye
-  //TODO test when frame == null -> perhaps perform on the eye()?
 
   public void translate(Vector vector) {
     translate(vector, defaultFrame());
