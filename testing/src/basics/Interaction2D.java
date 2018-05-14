@@ -1,7 +1,6 @@
 package basics;
 
 import frames.core.Frame;
-import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -73,14 +72,13 @@ public class Interaction2D extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
-    if(key =='r')
-      if(shape3.reference() == shape2) {
+    if (key == 'r')
+      if (shape3.reference() == shape2) {
         shape3.setReference(shape1);
-      }
-      else {
+      } else {
         shape3.setReference(shape2);
       }
-    if(key == 'w') {
+    if (key == 'w') {
       shape3.setReference(null);
     }
   }
@@ -107,7 +105,7 @@ public class Interaction2D extends PApplet {
     else
       //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
-      //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
+    //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
   }
 
   public void mouseWheel(MouseEvent event) {
