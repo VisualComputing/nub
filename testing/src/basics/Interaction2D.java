@@ -19,7 +19,7 @@ public class Interaction2D extends PApplet {
   Vector upVector;
 
   public void settings() {
-    size(1600, 800, P2D);
+    size(1600, 800, JAVA2D);
   }
 
   public void setup() {
@@ -35,25 +35,23 @@ public class Interaction2D extends PApplet {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
-        pGraphics.fill(255, 0, 255);
-        if (scene.is3D())
-          Scene.drawTorusSolenoid(pGraphics, 80);
-        else
-          pGraphics.rect(10, 10, 200, 200);
+        pGraphics.fill(0, 255, 255);
+        pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
       }
     };
-    shape1.setRotation(Quaternion.random());
-    shape1.translate(-375, 175, -275);
+    //shape1.setRotation(Quaternion.random());
+    shape1.translate(-375, 175);
     shape1.setPrecision(Frame.Precision.FIXED);
 
     shape2 = new Shape(shape1);
     shape2.setShape(shape());
-    shape2.translate(275, 275, 275);
+    shape2.translate(275, 275);
     shape2.setPrecision(Frame.Precision.FIXED);
 
-    shape3 = new Shape(shape2, createShape(RECT, 0, 0, 150, 150));
-    shape3.translate(-75, -275, -15);
+    shape3 = new Shape(shape2);
+    shape3.setShape(createShape(RECT, 0, 0, 150, 150));
+    shape3.translate(-75, -275);
     shape3.setPrecision(Frame.Precision.FIXED);
   }
 

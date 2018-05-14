@@ -285,9 +285,9 @@ public class Frame {
       constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
       setConstraint(constraint2D);
     }
-    _culled = false;
     _children = new ArrayList<Frame>();
-    enableTracking(true);
+    _culled = false;
+    _tracking = true;
   }
 
   /**
@@ -311,8 +311,9 @@ public class Frame {
     if (graph() == null)
       return;
 
-    this._culled = frame._culled;
+    // attached frames:
     this._children = new ArrayList<Frame>();
+    this._culled = frame._culled;
     this._tracking = frame._tracking;
   }
 
@@ -1867,7 +1868,7 @@ public class Frame {
    * @see #enableTracking(boolean)
    */
   public boolean isTrackingEnabled() {
-    return _tracking;
+    return isDetached() ? false : _tracking;
   }
 
   /**
@@ -1876,6 +1877,8 @@ public class Frame {
    * @see #isTrackingEnabled()
    */
   public void enableTracking(boolean flag) {
+    if (isDetached())
+      System.out.println("Warning: enable tracking on a detached frame does nothing");
     _tracking = flag;
   }
 
@@ -1924,6 +1927,8 @@ public class Frame {
    * @see #isCulled()
    */
   public void cull(boolean cull) {
+    if (isDetached())
+      System.out.println("Warning: culling a detached frame does nothing");
     _culled = cull;
   }
 
@@ -1934,6 +1939,6 @@ public class Frame {
    * @see #cull(boolean)
    */
   public boolean isCulled() {
-    return _culled;
+    return isDetached() ? false : _culled;
   }
 }

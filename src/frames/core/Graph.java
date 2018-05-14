@@ -2432,8 +2432,6 @@ public class Graph {
       return false;
     if (isEye(frame))
       return false;
-    if (!frame.isAttached(this))
-      System.out.println("Warning track invoked on a foreigner frame");
     Vector projection = screenLocation(frame.position());
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
         : frame.precisionThreshold() / 2;
@@ -2625,9 +2623,6 @@ public class Graph {
    */
   public Vector location(Vector pixel, Frame frame) {
     float xyz[] = new float[3];
-    // _location(src.vec[0], src.vec[1], src.vec[2], this.getViewMatrix(true),
-    // this.getProjectionMatrix(true),
-    // getViewport(), xyz);
     _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (frame != null)
       return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
