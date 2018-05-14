@@ -2783,7 +2783,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void drawConstraint(PGraphics pGraphics, Frame frame) {
-    if(frame == null) return;
+    if (frame == null) return;
     if (frame.constraint() == null) return;
     // TODO test
     if (!frame.isAttached(this)) return;

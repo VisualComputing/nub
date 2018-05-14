@@ -2432,7 +2432,7 @@ public class Graph {
       return false;
     if (isEye(frame))
       return false;
-    if(!frame.isAttached(this))
+    if (!frame.isAttached(this))
       System.out.println("Warning track invoked on a foreigner frame");
     Vector projection = screenLocation(frame.position());
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
