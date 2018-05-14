@@ -2726,7 +2726,7 @@ public class Graph {
     Vector eyeVector = Vector.multiply(new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z()), sensitivity);
     // Scale to fit the screen relative vector displacement
     // Quite excited to see how simple it's in 2d:
-    //if (_graph.is2D())
+    //if (is2D())
     //return eyeVector;
     // ... and amazed as to how dirty it's in 3d:
     switch (type()) {
