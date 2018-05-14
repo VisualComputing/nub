@@ -202,8 +202,6 @@ public class Graph {
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
 
-  //TODO graph.get()
-
   /**
    * Returns a random graph frame. The frame is randomly positioned inside the ball defined
    * by {@link #center()} and {@link #radius()}. The {@link Frame#orientation()} is set by
@@ -2374,7 +2372,6 @@ public class Graph {
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
-  //TODO return frame (always null)?
   public void traverse() {
     for (Frame frame : leadingFrames())
       _visit(frame);
@@ -2688,8 +2685,7 @@ public class Graph {
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
 
-  //TODO add 2d conditions
-  //TODO add proper names: classification: 2d/3d, only Eye/Frame-eye
+  //TODO add proper names, classification: 2d/3d, only Eye/Frame-eye
 
   public void translate(Vector vector) {
     translate(vector, defaultFrame());
@@ -2728,8 +2724,6 @@ public class Graph {
       case PERSPECTIVE:
         float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
             eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
-        // * Math.abs(graph.eye().frame().location(isEye() ?
-        // graph.eye().anchor() : position()).vec[2]);
         //TODO check me weird to find height instead of width working (may it has to do with fov?)
         eyeVector._vector[0] *= 2.0 * k / height();
         eyeVector._vector[1] *= 2.0 * k / height();
@@ -2737,18 +2731,14 @@ public class Graph {
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        // float[] wh = graph.eye().getOrthoWidthHeight();
         eyeVector._vector[0] *= 2.0 * wh[0] / width();
         eyeVector._vector[1] *= 2.0 * wh[1] / height();
         break;
     }
     float coef;
     if (isEye(frame)) {
-      // float coef = 8E-4f;
       coef = Math.max(Math.abs((location(anchor()))._vector[2] * frame.magnitude()), 0.2f * radius());
       eyeVector._vector[2] *= coef / height();
-      // eye _wheel seems different
-      // trns.vec[2] *= coef * 8E-4f;
       eyeVector.divide(eye().magnitude());
     } else {
       coef = Vector.subtract(eye().position(), frame.position()).magnitude();
@@ -2998,7 +2988,6 @@ public class Graph {
     spin(_rotateCAD(roll, pitch, sensitivity), eye());
   }
 
-  //TODO test
   protected Quaternion _rotateCAD(float roll, float pitch, float sensitivity) {
     return _rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
   }

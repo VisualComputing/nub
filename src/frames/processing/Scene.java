@@ -2840,7 +2840,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  //TODO high-level wrappers, including sensitivities(?)
+  // TODO api docs missing
 
   /**
    * Picks the frame according to the {@link Frame#precision()}.
@@ -2888,8 +2888,6 @@ public class Scene extends Graph implements PConstants {
   public void mousePan() {
     mouseTranslate(eye());
   }
-
-  // TODO test mouseLookAround
 
   public void mouseLookAround(Vector upVector) {
     mouseLookAround(upVector, PI / (2 * PApplet.max(width(), height())));

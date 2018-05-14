@@ -546,7 +546,6 @@ public class Frame {
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
-  // TODO test re-parenting
   public void setReference(Frame frame) {
     if (frame == this) {
       System.out.println("A Frame cannot be a reference of itself.");
@@ -558,7 +557,7 @@ public class Frame {
     }
     if (frame != null)
       if ((isDetached() && !frame.isDetached()) || !frame.isAttached(graph())) {
-        System.out.println("Both frame and its reference should be detached or attached to the same graph.");
+        System.out.println("Both frame and its reference should be detached, or attached to the same graph.");
         return;
       }
     if (isDetached()) {
@@ -679,6 +678,7 @@ public class Frame {
    *
    * @see #setPrecision(Precision)
    * @see #setPrecisionThreshold(float)
+   * @see #precisionThreshold()
    */
   public Precision precision() {
     return _precision;
@@ -702,6 +702,7 @@ public class Frame {
    *
    * @see #precision()
    * @see #setPrecisionThreshold(float)
+   * @see #precisionThreshold()
    */
   public void setPrecision(Precision precision) {
     if (precision == Precision.EXACT)
@@ -732,13 +733,21 @@ public class Frame {
    * Negative {@code threshold} values are silently ignored.
    *
    * @see #precision()
-   * TODO PRECISIONTHRESHOLD
+   * @see #setPrecision(Precision)
+   * @see #precisionThreshold()
    */
   public void setPrecisionThreshold(float threshold) {
     if (threshold >= 0)
       _threshold = threshold;
   }
 
+  /**
+   * Returns the picking precision threshold in pixels used by {@link Graph#track(float, float, Frame)}.
+   *
+   * @see #setPrecisionThreshold(float)
+   * @see #precision()
+   * @see #setPrecision(Precision)
+   */
   public float precisionThreshold() {
     return _threshold;
   }
