@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -12,13 +13,13 @@ import processing.event.MouseEvent;
 /**
  * Created by pierre on 11/15/16.
  */
-public class Interaction extends PApplet {
+public class Interaction2D extends PApplet {
   Scene scene;
-  Shape shape1, shape2;
+  Shape shape1, shape2, shape3;
   Vector upVector;
 
   public void settings() {
-    size(1600, 800, P3D);
+    size(1600, 800, P2D);
   }
 
   public void setup() {
@@ -44,10 +45,16 @@ public class Interaction extends PApplet {
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
+    shape1.setPrecision(Frame.Precision.FIXED);
 
     shape2 = new Shape(shape1);
     shape2.setShape(shape());
     shape2.translate(275, 275, 275);
+    shape2.setPrecision(Frame.Precision.FIXED);
+
+    shape3 = new Shape(shape2, createShape(RECT, 0, 0, 150, 150));
+    shape3.translate(-75, -275, -15);
+    shape3.setPrecision(Frame.Precision.FIXED);
   }
 
   public void draw() {
@@ -68,6 +75,16 @@ public class Interaction extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
+    if(key =='r')
+      if(shape3.reference() == shape2) {
+        shape3.setReference(shape1);
+      }
+      else {
+        shape3.setReference(shape2);
+      }
+    if(key == 'w') {
+      shape3.setReference(null);
+    }
   }
 
   public void mousePressed() {
@@ -114,6 +131,6 @@ public class Interaction extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.Interaction"});
+    PApplet.main(new String[]{"basics.Interaction2D"});
   }
 }
