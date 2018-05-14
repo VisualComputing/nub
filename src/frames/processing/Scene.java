@@ -2783,8 +2783,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void drawConstraint(PGraphics pGraphics, Frame frame) {
+    if(frame == null) return;
     if (frame.constraint() == null) return;
-    if (frame.graph() != this) return;
+    // TODO test
+    if (!frame.isAttached(this)) return;
     float boneLength = 0;
     if (!frame.children().isEmpty()) {
       for (Frame child : frame.children())

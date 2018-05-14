@@ -682,7 +682,7 @@ public class Graph {
   public boolean isReachable(Frame frame) {
     if (frame == null)
       return false;
-    if (frame.graph() != this)
+    if (!frame.isAttached(this))
       return false;
     return frame.reference() == null ? _isLeadingFrame(frame) : frame.reference()._hasChild(frame);
   }
@@ -2394,9 +2394,14 @@ public class Graph {
   }
 
   public void setTrackedFrame(Frame frame) {
-    if (frame.graph() != null)
-      if (frame.graph() != this)
-        return;
+    if (frame == null) {
+      System.out.println("Warning. Cannot track a null frame!");
+      return;
+    }
+    if (!frame.isAttached(this)) {
+      System.out.println("Warning. Cannot track a frame that is not attached to this graph!");
+      return;
+    }
     _trackedFrame = frame;
   }
 
@@ -2427,6 +2432,8 @@ public class Graph {
       return false;
     if (isEye(frame))
       return false;
+    if(!frame.isAttached(this))
+      System.out.println("Warning track invoked on a foreigner frame");
     Vector projection = screenLocation(frame.position());
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
         : frame.precisionThreshold() / 2;
