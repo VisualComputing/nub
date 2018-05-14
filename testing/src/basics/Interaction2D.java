@@ -97,7 +97,7 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a frame parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpin(0.5f);
       //scene.mouseCAD();
       //scene.mouseLookAround(upVector);
       //scene.mouseCAD();
@@ -111,8 +111,8 @@ public class Interaction2D extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
-    //scene.scale(event.getCount() * 20);
+    //scene.zoom(event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {

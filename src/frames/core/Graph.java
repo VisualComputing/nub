@@ -2718,7 +2718,7 @@ public class Graph {
   }
 
   protected Vector _translate(Vector vector, float sensitivity, Frame frame) {
-    if(is2D() && vector.z() != 0) {
+    if (is2D() && vector.z() != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       vector.setZ(0);
     }
@@ -2800,7 +2800,7 @@ public class Graph {
   }
 
   protected Quaternion _rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
-    if(is2D() && (roll != 0 || pitch != 0)) {
+    if (is2D() && (roll != 0 || pitch != 0)) {
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
     roll *= is3D() ? sensitivity : 0;
@@ -2891,7 +2891,8 @@ public class Graph {
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
-    float angle = 2.0f * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
+    // 2D is ad-hoc which seems to arrived everywhere over the place (see _translate too)!
+    float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
     if (!isEye(frame)) {
       Vector vector = quaternion.axis();
@@ -2909,6 +2910,8 @@ public class Graph {
    * ball, the function is continuous.
    */
   protected float _projectOnBall(float x, float y) {
+    if (is2D())
+      return 0;
     // If you change the size value, change angle computation in deformedBallQuaternion().
     float size = 1.0f;
     float size2 = size * size;
@@ -2964,7 +2967,7 @@ public class Graph {
   }
 
   protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    if(is2D()) {
+    if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
       return new Quaternion();
     }
@@ -3005,7 +3008,7 @@ public class Graph {
   }
 
   protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
-    if(is2D()) {
+    if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
       return new Quaternion();
     }
