@@ -98,6 +98,7 @@ public class Interaction2D extends PApplet {
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
       scene.mouseSpin();
+      //scene.mouseCAD();
       //scene.mouseLookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
@@ -106,11 +107,12 @@ public class Interaction2D extends PApplet {
     else
       //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
+      //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
   }
 
   public void mouseWheel(MouseEvent event) {
-    //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
+    //scene.scale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {

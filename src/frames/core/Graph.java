@@ -2718,12 +2718,12 @@ public class Graph {
   }
 
   protected Vector _translate(Vector vector, float sensitivity, Frame frame) {
+    if(is2D() && vector.z() != 0) {
+      System.out.println("Warning: graph is 2D. Z-translation reset");
+      vector.setZ(0);
+    }
     Vector eyeVector = Vector.multiply(new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z()), sensitivity);
     // Scale to fit the screen relative vector displacement
-    // Quite excited to see how simple it's in 2d:
-    //if (is2D())
-    //return eyeVector;
-    // ... and amazed as to how dirty it's in 3d:
     switch (type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
@@ -2772,10 +2772,7 @@ public class Graph {
   }
 
   public void zoom(float delta, Frame frame) {
-    //if(is3D())
     translate(new Vector(0, 0, delta), 1, frame);
-    //else
-    //System.out.println("Nothing done, zoom() doesn't make sense in 2d. You may use scale() instead");
   }
 
   public void rotate(float roll, float pitch, float yaw) {
@@ -2803,8 +2800,11 @@ public class Graph {
   }
 
   protected Quaternion _rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
-    roll *= sensitivity;
-    pitch *= sensitivity;
+    if(is2D() && (roll != 0 || pitch != 0)) {
+      System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
+    }
+    roll *= is3D() ? sensitivity : 0;
+    pitch *= is3D() ? sensitivity : 0;
     yaw *= sensitivity;
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye(frame)) {
@@ -2964,6 +2964,10 @@ public class Graph {
   }
 
   protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
+    if(is2D()) {
+      System.out.println("Warning: lookAround is only available in 3D");
+      return new Quaternion();
+    }
     deltaX *= -sensitivity;
     deltaY *= sensitivity;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
@@ -3001,6 +3005,10 @@ public class Graph {
   }
 
   protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
+    if(is2D()) {
+      System.out.println("Warning: rotateCAD is only available in 3D");
+      return new Quaternion();
+    }
     roll *= sensitivity;
     pitch *= sensitivity;
     return Quaternion.multiply(new Quaternion(eye().displacement(upVector), eye().displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));

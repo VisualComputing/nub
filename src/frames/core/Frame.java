@@ -11,7 +11,6 @@
 package frames.core;
 
 import frames.core.constraint.Constraint;
-import frames.core.constraint.WorldConstraint;
 import frames.primitives.Matrix;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -275,16 +274,6 @@ public class Frame {
       return;
 
     // attached frames:
-    if (graph().is2D()) {
-      if (position().z() != 0)
-        throw new RuntimeException("2D frame z-position should be 0. Set it as: setPosition(x, y)");
-      if (orientation().axis().x() != 0 || orientation().axis().y() != 0)
-        throw new RuntimeException("2D frame rotation axis should (0,0,1). Set it as: setOrientation(new Quaternion(orientation().angle()))");
-      WorldConstraint constraint2D = new WorldConstraint();
-      constraint2D.setTranslationConstraint(WorldConstraint.Type.PLANE, new Vector(0, 0, 1));
-      constraint2D.setRotationConstraint(WorldConstraint.Type.AXIS, new Vector(0, 0, 1));
-      setConstraint(constraint2D);
-    }
     _children = new ArrayList<Frame>();
     _culled = false;
     _tracking = true;
