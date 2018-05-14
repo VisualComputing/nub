@@ -982,7 +982,7 @@ public class Scene extends Graph implements PConstants {
     applyTransformation(_targetPGraphics, frame);
     frame.visit();
     if (!frame.isCulled())
-      for (Frame child : children(frame))
+      for (Frame child : frame.children())
         _visit(child);
     _targetPGraphics.popMatrix();
   }
@@ -2782,15 +2782,14 @@ public class Scene extends Graph implements PConstants {
     drawConstraint(frontBuffer(), frame);
   }
 
-  //TODO modified. @sechaparroc needs testing
   public void drawConstraint(PGraphics pGraphics, Frame frame) {
     if (frame.constraint() == null) return;
     if (frame.graph() != this) return;
     float boneLength = 0;
-    if (!children(frame).isEmpty()) {
-      for (Frame child : children(frame))
+    if (!frame.children().isEmpty()) {
+      for (Frame child : frame.children())
         boneLength += child.translation().magnitude();
-      boneLength = boneLength / (1.f * children(frame).size());
+      boneLength = boneLength / (1.f * frame.children().size());
     } else
       boneLength = frame.translation().magnitude();
     if (boneLength == 0) return;
@@ -2822,10 +2821,10 @@ public class Scene extends Graph implements PConstants {
       drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
     } else if (frame.constraint() instanceof Hinge) {
       Hinge constraint = (Hinge) frame.constraint();
-      if (children(frame).size() == 1) {
+      if (frame.children().size() == 1) {
         Vector axis = constraint.restRotation().rotate(constraint.axis());
         reference.rotate(constraint.restRotation());
-        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(children(frame).get(0).translation()), axis);
+        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
         //Align Z-Axis with Axis
         reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis

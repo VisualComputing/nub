@@ -339,16 +339,18 @@ public class Frame {
     //return frame;
   }
 
+  public boolean isAttached(Graph graph) {
+    return _graph == graph;
+  }
+
   public boolean isDetached() {
     return graph() == null;
   }
 
-  //TODO Ambiguous: global or local. Check set(), reset and matches().
-
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code frame}. This frame {@link #constraint()} and {@link #reference()}
-   * are not affected by this call.
+   * those of the {@code frame}. The frame {@link #graph()}, {@link #reference()} and
+   * {@link #constraint()} are not affected by this call.
    * <p>
    * After calling {@code set(frame)} a call to {@code this.matches(other)} should
    * return {@code true}.
@@ -357,20 +359,21 @@ public class Frame {
    */
   public void set(Frame frame) {
     if (frame == null)
-      reset();
+      frame = new Frame();
     setPosition(frame.position());
     setOrientation(frame.orientation());
     setMagnitude(frame.magnitude());
   }
 
   /**
-   * Sets an identity frame: 0 {}
+   * Sets an identity frame by resetting its {@link #translation()}, {@link #rotation()}
+   * and {@link #scaling()}. The frame {@link #graph()}, {@link #reference()} and
+   * {@link #constraint()} are not affected by this call.
    */
-  //TODO decide me!
   public void reset() {
-    setPosition(new Vector());
-    setOrientation(new Quaternion());
-    setMagnitude(1);
+    setTranslation(new Vector());
+    setRotation(new Quaternion());
+    setScaling(1);
   }
 
   // id
@@ -604,7 +607,6 @@ public class Frame {
     return false;
   }
 
-  // TODO Provisional, should go away
   public List<Frame> children() {
     return _children;
   }

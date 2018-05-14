@@ -741,7 +741,7 @@ public class Graph {
     if (frame == null)
       return;
     list.add(frame);
-    for (Frame child : frame._children)
+    for (Frame child : frame.children())
       _collect(list, child);
   }
 
@@ -2388,7 +2388,7 @@ public class Graph {
     applyTransformation(frame);
     frame.visit();
     if (!frame.isCulled())
-      for (Frame child : frame._children)
+      for (Frame child : frame.children())
         _visit(child);
     popModelView();
   }
@@ -2450,18 +2450,9 @@ public class Graph {
     frame.visit();
 
     if (!frame.isCulled())
-      for (Frame child : frame._children)
+      for (Frame child : frame.children())
         _visit(child, x, y);
     popModelView();
-  }
-
-  //TODO needs more testing, maybe use the Frame version only? Decide
-  public List<Frame> children(Frame frame) {
-    List<Frame> children = new ArrayList<Frame>();
-    //if (frame.graph() == this)
-    if (frame._children != null)
-      children = frame._children;
-    return children;
   }
 
   public void align() {
