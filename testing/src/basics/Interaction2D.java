@@ -95,7 +95,7 @@ public class Interaction2D extends PApplet {
     // Mouse methods that don't take a frame parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
-      scene.mouseSpin(0.5f);
+      scene.mouseSpin();
       //scene.mouseCAD();
       //scene.mouseLookAround(upVector);
       //scene.mouseCAD();
