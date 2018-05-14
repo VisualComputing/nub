@@ -943,7 +943,7 @@ public class Scene extends Graph implements PConstants {
 
   //TODO name and docs: cast() only makes sense when called from within draw
   public Frame cast() {
-    return cast(pApplet().mouseX, pApplet().mouseY);
+    return cast(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
   @Override
@@ -2846,7 +2846,7 @@ public class Scene extends Graph implements PConstants {
    * Picks the frame according to the {@link Frame#precision()}.
    */
   public boolean mouseTrack(Frame frame) {
-    return super.track(pApplet().mouseX, pApplet().mouseY, frame);
+    return super.track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y(), frame);
   }
 
   public void mouseSpin() {
