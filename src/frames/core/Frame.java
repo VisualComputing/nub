@@ -352,9 +352,10 @@ public class Frame {
    * those of the {@code frame}. The frame {@link #graph()}, {@link #reference()} and
    * {@link #constraint()} are not affected by this call.
    * <p>
-   * After calling {@code set(frame)} a call to {@code this.matches(other)} should
+   * After calling {@code set(frame)} a call to {@code this.matches(frame)} should
    * return {@code true}.
    *
+   * @see #reset()
    * @see #worldMatrix()
    */
   public void set(Frame frame) {
@@ -368,7 +369,11 @@ public class Frame {
   /**
    * Sets an identity frame by resetting its {@link #translation()}, {@link #rotation()}
    * and {@link #scaling()}. The frame {@link #graph()}, {@link #reference()} and
-   * {@link #constraint()} are not affected by this call.
+   * {@link #constraint()} are not affected by this call. Call {@code set(null)} if you
+   * want to reset the global {@link #position()}, {@link #orientation()} and
+   * {@link #magnitude()} frame parameters instead.
+   *
+   * @see #set(Frame)
    */
   public void reset() {
     setTranslation(new Vector());
