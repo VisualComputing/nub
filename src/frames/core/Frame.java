@@ -536,8 +536,8 @@ public class Frame {
       return;
     }
     if (frame != null)
-      if ((isDetached() && !frame.isDetached()) || !isDetached() && frame.isDetached()) {
-        System.out.println("Both frame and its reference should be attached or detached.");
+      if ((isDetached() && !frame.isDetached()) || !frame.isAttached(graph())) {
+        System.out.println("Both frame and its reference should be detached or attached to the same graph.");
         return;
       }
     if (isDetached()) {
@@ -545,11 +545,6 @@ public class Frame {
         return;
       _reference = frame;
     } else {
-      if (frame != null)
-        if (graph() != frame.graph()) {
-          System.out.println("Both frame and its reference should be attached to the same graph.");
-          return;
-        }
       // 1. no need to re-parent, just check this needs to be added as leadingFrame
       if (reference() == frame) {
         _restorePath(reference(), this);
