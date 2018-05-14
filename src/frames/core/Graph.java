@@ -640,7 +640,7 @@ public class Graph {
    */
   public List<Frame> pruneBranch(Frame frame) {
     if (!isReachable(frame))
-      new ArrayList<Frame>();
+      return new ArrayList<Frame>();
     ArrayList<Frame> list = new ArrayList<Frame>();
     _collect(list, frame);
     for (Frame collectedFrame : list)

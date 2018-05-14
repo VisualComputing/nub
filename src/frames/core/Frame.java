@@ -22,6 +22,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * TODO new concept: attach (children != null) and detach (attach.children == null),
+ * same as attach(null)).
+ * <p>
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
  * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
  * important: the frame is first translated, then rotated around the new translated origin
@@ -287,6 +290,9 @@ public class Frame {
     enableTracking(true);
   }
 
+  /**
+   * Copy constructor.
+   */
   protected Frame(Graph graph, Frame frame) {
     this._graph = graph;
     this.setReference(frame.reference());
@@ -312,12 +318,18 @@ public class Frame {
 
   /**
    * Performs a deep copy of this frame into {@code graph}.
+   * <p>
+   * Same as {@code return new Frame(graph, this)}.
+   *
+   * @see #Frame(Graph, Frame)
    */
   public Frame attach(Graph graph) {
     return new Frame(graph, this);
   }
 
   /**
+   * Performs a deep copy of this frame.
+   * <p>
    * Same as {@code return attach(graph())}.
    *
    * @see #attach(Graph)
@@ -327,24 +339,43 @@ public class Frame {
   }
 
   /**
+   * Returns a detached deep copy of this frame.
+   * <p>
    * Same as {@code return attach(null)}.
    *
    * @see #attach(Graph)
    */
   public Frame detach() {
     return attach(null);
-
-    //Frame frame = new Frame();
-    //frame.set(this);
-    //return frame;
   }
 
+  /**
+   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#traverse()}).
+   * To test if the frame is detach from any graph hierarchy call {@code isAttached(null)}.
+   * <p>
+   * Note that a call to {@link #children()} never returns {@code null} if the frame is attached to
+   * a graph, i.e., that graph will visit the frame during traversal.
+   *
+   * @see #isDetached()
+   * @see Graph#traverse()
+   * @see Graph#cast(float, float)
+   */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
   }
 
+  /**
+   * Same as {@code return isAttached(null)}.
+   * <p>
+   * Note that a call to {@link #children()} always returns {@code null} if the frame is detached,
+   * i.e., the frame is not available for graph traversal (see {@link Graph#traverse()}).
+   *
+   * @see #isAttached(Graph)
+   * @see Graph#traverse()
+   * @see Graph#cast(float, float)
+   */
   public boolean isDetached() {
-    return graph() == null;
+    return isAttached(null);
   }
 
   /**

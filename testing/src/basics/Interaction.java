@@ -64,6 +64,10 @@ public class Interaction extends PApplet {
   public void keyPressed() {
     if (key == 'f')
       scene.flip();
+    if (key == 's')
+      scene.fitBallInterpolation();
+    if (key == 'f')
+      scene.fitBall();
   }
 
   public void mousePressed() {
