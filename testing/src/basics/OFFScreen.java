@@ -70,11 +70,14 @@ public class OFFScreen extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
+      /*
       if (scene.defaultFrame() == scene.eye())
         //scene.mouseCAD();
         scene.mouseLookAround(upVector);
       else
         scene.mouseSpin();
+        //*/
+      scene.mouseSpin();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
@@ -91,6 +94,15 @@ public class OFFScreen extends PApplet {
         scene.focus();
       else
         scene.align();
+  }
+
+  public void keyPressed() {
+    if (key == 'f')
+      scene.flip();
+    if (key == 's')
+      scene.fitBallInterpolation();
+    if (key == 'f')
+      scene.fitBall();
   }
 
   PShape shape() {
