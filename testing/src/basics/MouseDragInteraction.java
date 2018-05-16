@@ -12,7 +12,7 @@ import processing.event.MouseEvent;
 /**
  * Created by pierre on 11/15/16.
  */
-public class Interaction extends PApplet {
+public class MouseDragInteraction extends PApplet {
   Scene scene;
   Shape shape1, shape2;
   Vector upVector;
@@ -53,12 +53,8 @@ public class Interaction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    if (mousePressed)
-      scene.traverse();
-    else
-      // same as traverse, but updates the scene tracked frame
-      // according to the current mouse position
-      scene.cast();
+    // draw + mouse move picking
+    scene.mouseMoveCast();
   }
 
   public void keyPressed() {
@@ -75,27 +71,17 @@ public class Interaction extends PApplet {
   }
 
   public void mouseDragged() {
-    // Note 1.
-    // When mouse methods are invoked without the frame parameter
-    // the scene.defaultFrame is used.
-    // Note 2.
-    // Mouse methods that don't take a frame parameter (such as mouseCAD)
-    // are only available to the scene.eye().
     if (mouseButton == LEFT)
       scene.mouseSpin();
-      //scene.mouseLookAround(upVector);
-      //scene.mouseCAD();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
-      //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -114,6 +100,6 @@ public class Interaction extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.Interaction"});
+    PApplet.main(new String[]{"basics.MouseDragInteraction"});
   }
 }

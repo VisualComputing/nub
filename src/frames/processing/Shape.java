@@ -185,7 +185,7 @@ public class Shape extends Frame {
    * <p>
    * Call it only instead of {@link Scene#traverse()}.
    *
-   * @see frames.processing.Scene#cast(PGraphics)
+   * @see frames.processing.Scene#traverse(PGraphics)
    */
   public void draw() {
     draw(graph().frontBuffer());
@@ -195,11 +195,11 @@ public class Shape extends Frame {
    * Draws the shape into {@code pGraphics} using the current point of view (see
    * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
    * <p>
-   * This method is internally called by {@link Scene#cast(PGraphics)} to draw
+   * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
    * the frame into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
    * the frame into the scene main {@link Scene#frontBuffer()}.
    * <p>
-   * Call it only instead of {@link Scene#cast(PGraphics)}.
+   * Call it only instead of {@link Scene#traverse(PGraphics)}.
    */
   public void draw(PGraphics pGraphics) {
     pGraphics.pushMatrix();

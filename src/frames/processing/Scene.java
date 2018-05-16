@@ -203,6 +203,9 @@ public class Scene extends Graph implements PConstants {
   protected boolean _bbEnabled;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
+  //
+  protected long _clickCount, _moveCount, _dragCount;
+
   // CONSTRUCTORS
 
   /**
@@ -267,6 +270,7 @@ public class Scene extends Graph implements PConstants {
     }
 
     // 4. Create _agents and register P5 methods
+    _parent.registerMethod("mouseEvent", this);
 
     // this.setDefaultKeyBindings();
     if (!isOffscreen()) {
@@ -278,6 +282,21 @@ public class Scene extends Graph implements PConstants {
 
     // 5. Handed
     setLeftHanded();
+  }
+
+  public void mouseEvent(processing.event.MouseEvent mouseEvent) {
+    boolean move = mouseEvent.getAction() == processing.event.MouseEvent.MOVE;
+    //boolean press = mouseEvent.getAction() == processing.event.MouseEvent.PRESS;
+    boolean drag = mouseEvent.getAction() == processing.event.MouseEvent.DRAG;
+    //boolean release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
+    //boolean wheel = mouseEvent.getAction() == processing.event.MouseEvent.WHEEL;
+    boolean click = mouseEvent.getAction() == processing.event.MouseEvent.CLICK;
+    if(click)
+      _clickCount = this.frameCount();
+    if(move)
+      _moveCount = this.frameCount();
+    if(drag)
+      _dragCount = this.frameCount();
   }
 
   /**
@@ -328,7 +347,7 @@ public class Scene extends Graph implements PConstants {
     backBuffer().beginDraw();
     backBuffer().pushStyle();
     backBuffer().background(0);
-    cast(backBuffer());
+    traverse(backBuffer());
     backBuffer().popStyle();
     backBuffer().endDraw();
     // if (frames().size() > 0)
@@ -941,6 +960,24 @@ public class Scene extends Graph implements PConstants {
     super.traverse();
   }
 
+  public Frame mouseMoveCast() {
+    if (_dragCount > _moveCount) {
+      traverse();
+      return null;
+    }
+    else
+      return cast();
+  }
+
+  public Frame mouseClickCast() {
+    if (_moveCount > _clickCount) {
+      traverse();
+      return null;
+    }
+    else
+      return cast();
+  }
+
   //TODO name and docs: cast() only makes sense when called from within draw
   public Frame cast() {
     return cast(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
@@ -969,7 +1006,7 @@ public class Scene extends Graph implements PConstants {
    * @see #frames()
    * @see #traverse()
    */
-  public void cast(PGraphics pGraphics) {
+  public void traverse(PGraphics pGraphics) {
     _targetPGraphics = pGraphics;
     if (pGraphics != frontBuffer())
       _bind(pGraphics);
