@@ -2687,6 +2687,10 @@ public class Graph {
 
   //TODO add proper names, classification: 2d/3d, only Eye/Frame-eye
 
+  public void translate(Vector vector, float sensitivity) {
+    translate(vector, sensitivity, defaultFrame());
+  }
+
   public void translate(Vector vector) {
     translate(vector, defaultFrame());
   }
