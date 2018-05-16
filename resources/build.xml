@@ -67,7 +67,6 @@
 		<fileset dir="${classpath.local.location}" includes="${classpath.local.include}" />
 		<fileset dir="${classpath.libraries.location}" includes="**/*.jar" />
 		<fileset dir="${project.lib}" includes="**/*.jar" />
-		<fileset dir="${android_platform.location}" includes="${android_platform.include}" />
 	</path>		
 
 	
