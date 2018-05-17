@@ -960,7 +960,7 @@ public class Scene extends Graph implements PConstants {
     super.traverse();
   }
 
-  public Frame mouseMoveCast() {
+  public Frame mouseCastOnMove() {
     if (_dragCount > _moveCount) {
       traverse();
       return null;
@@ -969,7 +969,7 @@ public class Scene extends Graph implements PConstants {
       return cast();
   }
 
-  public Frame mouseClickCast() {
+  public Frame mouseCastOnClick() {
     if (_moveCount > _clickCount) {
       traverse();
       return null;

@@ -1,7 +1,6 @@
 package basics;
 
 import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -53,7 +52,7 @@ public class MouseMoveInteraction extends PApplet {
     background(0);
     scene.drawAxes();
     // draw + mouse click picking
-    scene.mouseClickCast();
+    scene.mouseCastOnClick();
   }
 
   public void keyPressed() {
