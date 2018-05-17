@@ -54,7 +54,7 @@ public class MouseDragInteraction extends PApplet {
     background(0);
     scene.drawAxes();
     // draw + mouse move picking
-    scene.mouseCastOnMove();
+    scene.castOnMouseMove();
   }
 
   public void keyPressed() {
