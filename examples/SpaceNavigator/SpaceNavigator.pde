@@ -31,11 +31,6 @@ float cosLUT[];
 float SINCOS_PRECISION = 0.5;
 int SINCOS_LENGTH = int(360.0 / SINCOS_PRECISION);
 
-Scene scene;
-// Space navigator gesture id
-int SN_ID = 101;
-Shape eye, rocket;
-
 ControlIO control;
 ControlDevice device; // my SpaceNavigator
 ControlSlider sliderXpos; // Positions
@@ -47,6 +42,12 @@ ControlSlider sliderZrot;
 ControlButton button1; // Buttons
 ControlButton button2;
 
+// frames stuff:
+Scene scene;
+Shape eye, rocket;
+Frame spaceNavigatorTrackedFrame;
+boolean spaceNavigator;
+
 void setup() {
   size(800, 600, P3D);
   openSpaceNavigator();
@@ -56,6 +57,8 @@ void setup() {
   scene.setFieldOfView(PI / 3);
   scene.setRadius(260);
   scene.fitBallInterpolation();
+
+  spaceNavigatorTrackedFrame =  scene.eye();
 
   rocket = new Shape(scene, loadShape("rocket.obj"));
   rocket.translate(new Vector(275, 180, 0));
@@ -67,13 +70,30 @@ void setup() {
 void draw() {
   background(0);
   renderGlobe();
-  scene.traverse();
+  if (spaceNavigator)
+    spaceNavigatorPointer();
+  else
+    scene.castOnMouseMove();
   spaceNavigator();
 }
 
 void spaceNavigator() {
-  scene.translate(new Vector(sliderXpos.getValue(), sliderYpos.getValue(), -sliderZpos.getValue()), 10);
-  scene.rotate(sliderXrot.getValue(), sliderYrot.getValue(), -sliderZrot.getValue(), (10 * PI)/width);
+  if (!spaceNavigator) {
+    scene.translate(new Vector(sliderXpos.getValue(), sliderYpos.getValue(), -sliderZpos.getValue()), 10, spaceNavigatorTrackedFrame);
+    scene.rotate(sliderXrot.getValue(), sliderYrot.getValue(), -sliderZrot.getValue(), (10 * PI)/width, spaceNavigatorTrackedFrame);
+  }
+}
+
+void spaceNavigatorPointer() {
+  pushStyle();
+  float x = map(sliderXpos.getValue(), -1, 1, 0, width);
+  float y = map(sliderYpos.getValue(), -1, 1, 0, height);
+  strokeWeight(3);
+  stroke(0, 255, 0);
+  scene.drawCross(x, y, 30);
+  popStyle();
+  Frame frame = scene.cast(x, y);
+  spaceNavigatorTrackedFrame = frame == null ? scene.eye() : frame;
 }
 
 void mouseDragged() {
@@ -92,8 +112,9 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == 'y')
     scene.flip();
+  // define the tracking device
   if (key == 'i')
-    scene.setTrackedFrame(scene.isTrackedFrame(rocket) ? scene.eye() : rocket);
+    spaceNavigator = !spaceNavigator;
 }
 
 void renderGlobe() {
