@@ -33,20 +33,20 @@ int SINCOS_LENGTH = int(360.0 / SINCOS_PRECISION);
 
 ControlIO control;
 ControlDevice device; // my SpaceNavigator
-ControlSlider sliderXpos; // Positions
-ControlSlider sliderYpos;
-ControlSlider sliderZpos;
-ControlSlider sliderXrot; // Rotations
-ControlSlider sliderYrot;
-ControlSlider sliderZrot;
+ControlSlider snXPos; // Positions
+ControlSlider snYPos;
+ControlSlider snZPos;
+ControlSlider snXRot; // Rotations
+ControlSlider snYRot;
+ControlSlider snZRot;
 ControlButton button1; // Buttons
 ControlButton button2;
 
 // frames stuff:
 Scene scene;
 Shape eye, rocket;
-Frame spaceNavigatorTrackedFrame;
-boolean spaceNavigator;
+Frame snTrackedFrame;
+boolean snPicking;
 
 void setup() {
   size(800, 600, P3D);
@@ -57,43 +57,42 @@ void setup() {
   scene.setFieldOfView(PI / 3);
   scene.setRadius(260);
   scene.fitBallInterpolation();
-
-  spaceNavigatorTrackedFrame =  scene.eye();
-
+  // set the eye as the space navigator default frame
+  snTrackedFrame = scene.eye();
+  // rocket shape
   rocket = new Shape(scene, loadShape("rocket.obj"));
   rocket.translate(new Vector(275, 180, 0));
   rocket.scale(0.3);
-
   smooth();
 }
 
 void draw() {
   background(0);
   renderGlobe();
-  if (spaceNavigator)
-    spaceNavigatorPointer();
-  else
+  if (snPicking)
+    spaceNavigatorPicking();
+  else {
     scene.castOnMouseMove();
-  spaceNavigator();
-}
-
-void spaceNavigator() {
-  if (!spaceNavigator) {
-    scene.translate(new Vector(sliderXpos.getValue(), sliderYpos.getValue(), -sliderZpos.getValue()), 10, spaceNavigatorTrackedFrame);
-    scene.rotate(sliderXrot.getValue(), sliderYrot.getValue(), -sliderZrot.getValue(), (10 * PI)/width, spaceNavigatorTrackedFrame);
+    spaceNavigatorInteraction();
   }
 }
 
-void spaceNavigatorPointer() {
+void spaceNavigatorInteraction() {
+  scene.translate(new Vector(snXPos.getValue(), snYPos.getValue(), -snZPos.getValue()), 10, snTrackedFrame);
+  scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI/width, snTrackedFrame);
+}
+
+void spaceNavigatorPicking() {
+  float x = map(snXPos.getValue(), -.8, .8, 0, width);
+  float y = map(snYPos.getValue(), -.8, .8, 0, height);
+  // frames' drawing + space navigator picking
+  Frame frame = scene.cast(x, y);
+  snTrackedFrame = frame == null ? scene.eye() : frame;
   pushStyle();
-  float x = map(sliderXpos.getValue(), -1, 1, 0, width);
-  float y = map(sliderYpos.getValue(), -1, 1, 0, height);
   strokeWeight(3);
   stroke(0, 255, 0);
   scene.drawCross(x, y, 30);
   popStyle();
-  Frame frame = scene.cast(x, y);
-  spaceNavigatorTrackedFrame = frame == null ? scene.eye() : frame;
 }
 
 void mouseDragged() {
@@ -114,7 +113,7 @@ void keyPressed() {
     scene.flip();
   // define the tracking device
   if (key == 'i')
-    spaceNavigator = !spaceNavigator;
+    snPicking = !snPicking;
 }
 
 void renderGlobe() {
@@ -237,12 +236,12 @@ void openSpaceNavigator() {
     System.exit(-1); // End the program NOW!
   }
   //device.setTolerance(5.00f);
-  sliderXpos = device.getSlider(0);
-  sliderYpos = device.getSlider(1);
-  sliderZpos = device.getSlider(2);
-  sliderXrot = device.getSlider(3);
-  sliderYrot = device.getSlider(4);
-  sliderZrot = device.getSlider(5);
+  snXPos = device.getSlider(0);
+  snYPos = device.getSlider(1);
+  snZPos = device.getSlider(2);
+  snXRot = device.getSlider(3);
+  snYRot = device.getSlider(4);
+  snZRot = device.getSlider(5);
   //button1 = device.getButton(0);
   //button2 = device.getButton(1);
 }
