@@ -65,9 +65,9 @@ public class MouseMoveInteraction extends PApplet {
   }
 
   public void mouseMoved(MouseEvent event) {
-    if(!event.isControlDown())
+    if (!event.isControlDown())
       scene.mouseSpin();
-    if(event.isShiftDown())
+    if (event.isShiftDown())
       scene.mouseTranslate();
   }
 
