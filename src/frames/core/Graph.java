@@ -563,7 +563,7 @@ public class Graph {
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
-  public List<Frame> leadingFrames() {
+  protected List<Frame> _leadingFrames() {
     return _seeds;
   }
 
@@ -571,7 +571,7 @@ public class Graph {
    * Returns {@code true} if the frame is top-level.
    */
   protected boolean _isLeadingFrame(Frame frame) {
-    for (Frame leadingFrame : leadingFrames())
+    for (Frame leadingFrame : _leadingFrames())
       if (leadingFrame == frame)
         return true;
     return false;
@@ -585,7 +585,7 @@ public class Graph {
       return false;
     if (_isLeadingFrame(frame))
       return false;
-    return leadingFrames().add(frame);
+    return _leadingFrames().add(frame);
   }
 
   /**
@@ -593,7 +593,7 @@ public class Graph {
    */
   protected boolean _removeLeadingFrame(Frame frame) {
     boolean result = false;
-    Iterator<Frame> it = leadingFrames().iterator();
+    Iterator<Frame> it = _leadingFrames().iterator();
     while (it.hasNext()) {
       if (it.next() == frame) {
         it.remove();
@@ -605,12 +605,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code for(Frame frame : leadingFrames()) pruneBranch(frame)}.
+   * Same as {@code for(Frame frame : _leadingFrames()) pruneBranch(frame)}.
    *
    * @see #pruneBranch(Frame)
    */
   public void clear() {
-    for (Frame frame : leadingFrames())
+    for (Frame frame : _leadingFrames())
       pruneBranch(frame);
   }
 
@@ -697,7 +697,7 @@ public class Graph {
    */
   public List<Frame> frames() {
     ArrayList<Frame> list = new ArrayList<Frame>();
-    for (Frame frame : leadingFrames())
+    for (Frame frame : _leadingFrames())
       _collect(list, frame);
     return list;
   }
@@ -2373,7 +2373,7 @@ public class Graph {
    * @see #pruneBranch(Frame)
    */
   public void traverse() {
-    for (Frame frame : leadingFrames())
+    for (Frame frame : _leadingFrames())
       _visit(frame);
   }
 
@@ -2437,7 +2437,7 @@ public class Graph {
 
   public Frame cast(float x, float y) {
     resetTrackedFrame();
-    for (Frame frame : leadingFrames())
+    for (Frame frame : _leadingFrames())
       _visit(frame, x, y);
     return trackedFrame();
   }
