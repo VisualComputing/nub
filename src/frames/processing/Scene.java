@@ -2942,13 +2942,13 @@ public class Scene extends Graph implements PConstants {
     mouseTranslate(eye());
   }
 
-  public void mouseLookAround(Vector upVector) {
-    mouseLookAround(upVector, PI / (2 * PApplet.max(width(), height())));
+  public void mouseLookAround() {
+    mouseLookAround(PI / (2 * PApplet.max(width(), height())));
   }
 
-  public void mouseLookAround(Vector upVector, float sensitivity) {
+  public void mouseLookAround(float sensitivity) {
     Vector delta = Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY));
-    lookAround(delta.x(), delta.y(), upVector, sensitivity);
+    lookAround(delta.x(), delta.y(), sensitivity);
   }
 
   public void mouseCAD() {

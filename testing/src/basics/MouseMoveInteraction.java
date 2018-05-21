@@ -14,6 +14,7 @@ import processing.event.MouseEvent;
 public class MouseMoveInteraction extends PApplet {
   Scene scene;
   Shape shape1, shape2;
+  boolean lookAround;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -62,13 +63,17 @@ public class MouseMoveInteraction extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
+    if (key == 'l')
+      lookAround = !lookAround;
   }
 
   public void mouseMoved(MouseEvent event) {
-    if (!event.isControlDown())
-      scene.mouseSpin();
     if (event.isShiftDown())
       scene.mouseTranslate();
+    else if (lookAround)
+      scene.mouseLookAround();
+    else
+      scene.mouseSpin();
   }
 
   public void mouseWheel(MouseEvent event) {

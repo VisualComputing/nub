@@ -125,6 +125,10 @@ public class Graph {
   // 5. IKinematics solvers
   protected List<TreeSolver> _solvers;
 
+  // 6. Interaction methods
+  Vector _upVector;
+  protected long _lookAroundCount;
+
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -2948,16 +2952,48 @@ public class Graph {
 
   // only 3d eye
 
-  public void lookAround(float deltaX, float deltaY, Vector upVector) {
-    eye().rotate(_lookAround(deltaX, deltaY, upVector));
+  public void lookAround(float deltaX, float deltaY) {
+    eye().rotate(_lookAround(deltaX, deltaY));
   }
 
-  protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector) {
-    return _lookAround(deltaX, deltaY, upVector, 1);
+  protected Quaternion _lookAround(float deltaX, float deltaY) {
+    return _lookAround(deltaX, deltaY, 1);
   }
 
-  public void lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
-    eye().rotate(_lookAround(deltaX, deltaY, upVector, sensitivity));
+  public void lookAround(float deltaX, float deltaY, float sensitivity) {
+    eye().rotate(_lookAround(deltaX, deltaY, sensitivity));
+  }
+
+  protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
+    if (is2D()) {
+      System.out.println("Warning: lookAround is only available in 3D");
+      return new Quaternion();
+    }
+    if (frameCount() > _lookAroundCount) {
+      _upVector = eye().yAxis();
+      _lookAroundCount = this.frameCount();
+    }
+    _lookAroundCount++;
+    deltaX *= -sensitivity;
+    deltaY *= sensitivity;
+    Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
+    Quaternion rotY = new Quaternion(eye().displacement(_upVector), deltaX);
+    return Quaternion.multiply(rotY, rotX);
+  }
+
+  //Replace previous call with the following two to preserve the upVector param.
+  /*
+  protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
+    if (is2D()) {
+      System.out.println("Warning: lookAround is only available in 3D");
+      return new Quaternion();
+    }
+    if(frameCount() > _lookAroundCount) {
+      _upVector = eye().yAxis();
+      _lookAroundCount = this.frameCount();
+    }
+    _lookAroundCount++;
+    return _lookAround(deltaX, deltaY, _upVector, sensitivity);
   }
 
   protected Quaternion _lookAround(float deltaX, float deltaY, Vector upVector, float sensitivity) {
@@ -2971,6 +3007,7 @@ public class Graph {
     Quaternion rotY = new Quaternion(eye().displacement(upVector), deltaX);
     return Quaternion.multiply(rotY, rotX);
   }
+  // */
 
   public void rotateCAD(float roll, float pitch) {
     spin(_rotateCAD(roll, pitch), eye());

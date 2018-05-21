@@ -15,8 +15,8 @@ import processing.event.MouseEvent;
 public class MouseDragInteraction extends PApplet {
   Scene scene;
   Shape shape1, shape2;
-  Vector upVector, randomVector;
-  boolean cad;
+  Vector randomVector;
+  boolean cad, lookAround;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -72,22 +72,22 @@ public class MouseDragInteraction extends PApplet {
       scene.fitBall();
     if (key == 'c') {
       cad = !cad;
-      if(cad) {
+      if (cad) {
         scene.eye().setYAxis(randomVector);
         //scene.focus(scene.eye());
         scene.fitBall();
       }
     }
-  }
-
-  public void mousePressed() {
-    upVector = scene.eye().yAxis();
+    if (key == 'l')
+      lookAround = !lookAround;
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
       if (cad)
         scene.mouseCAD(randomVector);
+      else if (lookAround)
+        scene.mouseLookAround();
       else
         scene.mouseSpin();
     else if (mouseButton == RIGHT)
