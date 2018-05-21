@@ -72,7 +72,8 @@ public class MouseDragInteraction extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+     // scene.mouseSpin();
+      scene.mouseCAD();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else

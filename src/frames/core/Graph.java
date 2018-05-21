@@ -3007,7 +3007,8 @@ public class Graph {
     }
     roll *= sensitivity;
     pitch *= sensitivity;
-    return Quaternion.multiply(new Quaternion(eye().displacement(upVector), eye().displacement(upVector).y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+    Vector eyeUp = eye().displacement(upVector);
+    return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }
 
   /*
