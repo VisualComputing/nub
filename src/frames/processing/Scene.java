@@ -291,11 +291,11 @@ public class Scene extends Graph implements PConstants {
     //boolean release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
     //boolean wheel = mouseEvent.getAction() == processing.event.MouseEvent.WHEEL;
     boolean click = mouseEvent.getAction() == processing.event.MouseEvent.CLICK;
-    if(click)
+    if (click)
       _clickCount = this.frameCount();
-    if(move)
+    if (move)
       _moveCount = this.frameCount();
-    if(drag)
+    if (drag)
       _dragCount = this.frameCount();
   }
 
@@ -964,8 +964,7 @@ public class Scene extends Graph implements PConstants {
     if (_dragCount > _moveCount) {
       traverse();
       return null;
-    }
-    else
+    } else
       return cast();
   }
 
@@ -973,8 +972,7 @@ public class Scene extends Graph implements PConstants {
     if (_moveCount > _clickCount) {
       traverse();
       return null;
-    }
-    else
+    } else
       return cast();
   }
 

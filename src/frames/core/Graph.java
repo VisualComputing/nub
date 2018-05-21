@@ -3003,7 +3003,7 @@ public class Graph {
    * is preserved and stays projected along the eye's horizontal axis.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Frame#setYAxis(Vector)}) and , first.
+   * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()}, first.
    */
   public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     spin(_rotateCAD(roll, pitch, upVector, sensitivity), eye());
