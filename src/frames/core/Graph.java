@@ -2934,9 +2934,8 @@ public class Graph {
       //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
       vector.subtract(frame.translation());
       if (frame.constraint() != null)
-        frame.translate(frame.constraint().constrainTranslation(vector, frame));
-      else
-        frame.translate(vector);
+        vector = frame.constraint().constrainTranslation(vector, frame);
+      frame.translation().add(vector);
     } else
       frame.rotate(quaternion);
   }
