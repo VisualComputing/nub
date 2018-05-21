@@ -2996,6 +2996,15 @@ public class Graph {
     return _rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
   }
 
+  /**
+   * Defines an axis around which the eye rotates. The eye can rotate left or right around
+   * this axis. It can also be moved up or down to show the 'top' and 'bottom' views of the scene.
+   * As a result, the {@code upVector} will always appear vertical in the scene, and the horizon
+   * is preserved and stays projected along the eye's horizontal axis.
+   * <p>
+   * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
+   * {@link Frame#setYAxis(Vector)}) and , first.
+   */
   public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     spin(_rotateCAD(roll, pitch, upVector, sensitivity), eye());
   }

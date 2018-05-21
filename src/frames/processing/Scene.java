@@ -1527,6 +1527,24 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code drawArrow(vector, 0.05f * vector.magnitude())}.
+   *
+   * @see #drawArrow(Vector, float)
+   */
+  public void drawArrow(Vector vector) {
+    drawArrow(vector, 0.05f * vector.magnitude());
+  }
+
+  /**
+   * Same as {@code drawArrow(new Vector(), vector, radius)}.
+   *
+   * @see #drawArrow(Vector, Vector, float)
+   */
+  public void drawArrow(Vector vector, float radius) {
+    drawArrow(new Vector(), vector, radius);
+  }
+
+  /**
    * Draws an arrow of {@code radius} between {@code from} and the 3D point {@code to}.
    *
    * @see #drawArrow(float, float)

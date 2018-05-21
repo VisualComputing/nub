@@ -15,7 +15,8 @@ import processing.event.MouseEvent;
 public class MouseDragInteraction extends PApplet {
   Scene scene;
   Shape shape1, shape2;
-  Vector upVector;
+  Vector upVector, randomVector;
+  boolean cad;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -48,10 +49,15 @@ public class MouseDragInteraction extends PApplet {
     shape2 = new Shape(shape1);
     shape2.setShape(shape());
     shape2.translate(275, 275, 275);
+
+    randomVector = Vector.random();
+    randomVector.setMagnitude(scene.radius() * 0.5f);
   }
 
   public void draw() {
     background(0);
+    fill(0, 255, 255);
+    scene.drawArrow(randomVector);
     scene.drawAxes();
     // draw + mouse move picking
     scene.castOnMouseMove();
@@ -64,6 +70,14 @@ public class MouseDragInteraction extends PApplet {
       scene.fitBallInterpolation();
     if (key == 'f')
       scene.fitBall();
+    if (key == 'c') {
+      cad = !cad;
+      if(cad) {
+        scene.eye().setYAxis(randomVector);
+        //scene.focus(scene.eye());
+        scene.fitBall();
+      }
+    }
   }
 
   public void mousePressed() {
@@ -72,8 +86,10 @@ public class MouseDragInteraction extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-     // scene.mouseSpin();
-      scene.mouseCAD();
+      if (cad)
+        scene.mouseCAD(randomVector);
+      else
+        scene.mouseSpin();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
@@ -82,7 +98,7 @@ public class MouseDragInteraction extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.zoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
