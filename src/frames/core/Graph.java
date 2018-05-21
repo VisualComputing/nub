@@ -2925,18 +2925,18 @@ public class Graph {
    */
   public void spin(Quaternion quaternion, Frame frame) {
     if (isEye(frame)) {
-      if (frame.constraint() != null)
-        quaternion = frame.constraint().constrainRotation(quaternion, frame);
-      frame.rotation().compose(quaternion);
-      frame.rotation().normalize(); // Prevents numerical drift
+      //frame.rotation().compose(quaternion);
+      //frame.rotation().normalize(); // Prevents numerical drift
+      frame.rotate(quaternion);
 
-      Vector vector = Vector.add(anchor(), (new Quaternion(frame.orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(frame.position(), anchor())));
-      //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+      //Vector vector = Vector.add(anchor(), (new Quaternion(frame.orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(frame.position(), anchor())));
+      //Vector vector = Vector.add(anchor(), (new Quaternion(frame.worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(frame.position(), anchor())));
+
+      Vector worldAxis = frame.worldDisplacement(quaternion.axis());
+      Quaternion worldQuaternion = new Quaternion(worldAxis, quaternion.angle());
+      Vector vector = Vector.add(anchor(), worldQuaternion.rotate(Vector.subtract(frame.position(), anchor())));
       vector.subtract(frame.translation());
-      if (frame.constraint() != null)
-        frame.translate(frame.constraint().constrainTranslation(vector, frame));
-      else
-        frame.translate(vector);
+      frame.translate(vector);
     } else
       frame.rotate(quaternion);
   }

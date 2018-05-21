@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -74,6 +75,7 @@ public class RotateAroundFrame extends PApplet {
     if (mouseButton == LEFT) {
       if (scene.isTrackedFrame(shape2))
         //shape2.rotate((mouseX-pmouseX)* PI / width, 0, 0, shape1);
+        //shape2.rotateAround(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         shape2.rotate(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
       else
         scene.mouseSpin(shape1);

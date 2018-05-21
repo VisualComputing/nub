@@ -970,8 +970,7 @@ public class Frame {
    */
   public void rotate(Quaternion quaternion, Frame frame) {
     Frame reference = frame == null ? new Frame() : frame.detach();
-    Frame copy = detach();
-    copy.setReference(reference);
+    Frame copy = new Frame(reference);
     copy.set(this);
     reference.rotate(quaternion);
     set(copy);
@@ -981,12 +980,7 @@ public class Frame {
    * TODO Warning bypasses constraints
    */
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
-    Frame reference = frame == null ? new Frame() : frame.detach();
-    Frame copy = detach();
-    copy.setReference(reference);
-    copy.set(this);
-    reference.rotate(new Quaternion(roll, pitch, yaw));
-    set(copy);
+    rotate(new Quaternion(roll, pitch, yaw), frame);
   }
 
   /**
