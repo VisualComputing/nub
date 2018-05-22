@@ -966,61 +966,86 @@ public class Frame {
   }
 
   /**
-   * TODO Warning bypasses constraints
-   */
-  /*
-  public void rotateAround(Quaternion quaternion, Frame frame) {
-    Frame reference = frame == null ? new Frame() : frame.detach();
-    Frame copy = new Frame(reference);
-    copy.set(this);
-    reference.rotate(quaternion);
-    set(copy);
-  }
-  */
-
-  /**
-   * TODO Warning bypasses constraints
-   */
-  /*
-  public void rotateAround(float roll, float pitch, float yaw, Frame frame) {
-    rotateAround(new Quaternion(roll, pitch, yaw), frame);
-  }
-  */
-
-  /**
    * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
    * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
    * defined in the frame coordinate system, while {@code point} is defined in the world
    * coordinate system).
    * <p>
-   * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
+   * Note: ugly but if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
    */
-  // TODO decide if here or to move it as protected method to the graph
-  // TODO test frame hierarchy, we are using worldDisplacement instead of orientation().rotate
   protected void _orbit(Quaternion quaternion, Vector center) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
     this.rotation().normalize(); // Prevents numerical drift
 
-    //Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+    // Original in frames-0.1.x and proscene:
+    //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
+    // TODO test frame hierarchy, we are using worldDisplacement instead of orientation().rotate
+    Vector vector = Vector.add(center, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
+    vector.subtract(translation());
+    translate(vector);
 
+    // Previous three lines are equivalent to:
+    /*
     Quaternion worldQuaternion = new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
     Vector center2Position = Vector.subtract(position(), center);
     Vector center2PositionRotated = worldQuaternion.rotate(center2Position);
     Vector vector = Vector.add(center, center2PositionRotated);
     vector.subtract(translation());
     translate(vector);
+    */
   }
 
-  //TODO define arbitrary point in frame?
-  //TODO frame = null semantics and test
+  /**
+   * Same as { orbit(new Quaternion(axis, angle))}.
+   *
+   * @see #orbit(Quaternion)
+   */
+  public void orbit(Vector axis, float angle) {
+    orbit(new Quaternion(axis, angle));
+  }
+
+  /**
+   * Same as {@code orbit(new Quaternion(axis, angle), frame)}.
+   *
+   * @see #orbit(Quaternion, Frame)
+   */
+  public void orbit(Vector axis, float angle, Frame frame) {
+    orbit(new Quaternion(axis, angle), frame);
+  }
+
+  /**
+   * Same as {@code orbit(quaternion, null)}.
+   *
+   * @see #orbit(Quaternion, Frame)
+   */
+  public void orbit(Quaternion quaternion) {
+    orbit(quaternion, null);
+  }
+
+  /**
+   * Rotates this frame around {@code frame} (which may be null for the world coordinate system)
+   * according to {@code quaternion}.
+   * <p>
+   * The {@link Quaternion#axis()} is defined in the {@code frame} coordinate system.
+   */
   public void orbit(Quaternion quaternion, Frame frame) {
     Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
-    _orbit(localQuaternion, frame.position());
+    _orbit(localQuaternion, frame == null ? new Vector() : frame.position());
+
+    // Note that the 'easy way' to do it (not relying on the _orbit() method)
+    // by-passes the frame constraint (kept for the curious):
+    /*
+    Frame reference = frame == null ? new Frame() : frame.detach();
+    Frame copy = new Frame(reference);
+    copy.set(this);
+    reference.rotate(quaternion);
+    set(copy);
+    // */
   }
 
   // ORIENTATION

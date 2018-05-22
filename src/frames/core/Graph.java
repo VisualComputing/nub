@@ -2923,31 +2923,10 @@ public class Graph {
    * Rotates the frame using {@code quaternion} around its {@link Frame#position()} (non-eye frames)
    * or around the {@link Graph#anchor()} when the {@code frame} is the {@link Graph#eye()}.
    */
-  /*
-  public void spin(Quaternion quaternion, Frame frame) {
-    if (isEye(frame)) {
-      if (frame.constraint() != null)
-        quaternion = frame.constraint().constrainRotation(quaternion, frame);
-      frame.rotation().compose(quaternion);
-      frame.rotation().normalize(); // Prevents numerical drift
-
-      Vector vector = Vector.add(anchor(), (new Quaternion(frame.orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(frame.position(), anchor())));
-      //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
-      vector.subtract(frame.translation());
-
-      // 1.
-      frame.translate(vector);
-      // 2.
-      //if (frame.constraint() != null)
-      //  vector = frame.constraint().constrainTranslation(vector, frame);
-      //frame.translation().add(vector);
-    } else
-      frame.rotate(quaternion);
-  }
-  */
   public void spin(Quaternion quaternion, Frame frame) {
     if (isEye(frame))
-      //TODO: use Frame.rotate(Quaternion quaternion, Frame frame) instead?
+      //same as:
+      //frame.orbit(new Quaternion(frame.worldDisplacement(quaternion.axis()), quaternion.angle()));
       frame._orbit(quaternion, anchor());
     else
       frame.rotate(quaternion);
