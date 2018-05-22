@@ -968,20 +968,24 @@ public class Frame {
   /**
    * TODO Warning bypasses constraints
    */
-  public void rotate(Quaternion quaternion, Frame frame) {
+  /*
+  public void rotateAround(Quaternion quaternion, Frame frame) {
     Frame reference = frame == null ? new Frame() : frame.detach();
     Frame copy = new Frame(reference);
     copy.set(this);
     reference.rotate(quaternion);
     set(copy);
   }
+  */
 
   /**
    * TODO Warning bypasses constraints
    */
-  public void rotate(float roll, float pitch, float yaw, Frame frame) {
-    rotate(new Quaternion(roll, pitch, yaw), frame);
+  /*
+  public void rotateAround(float roll, float pitch, float yaw, Frame frame) {
+    rotateAround(new Quaternion(roll, pitch, yaw), frame);
   }
+  */
 
   /**
    * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
@@ -995,22 +999,26 @@ public class Frame {
    * @see #setConstraint(Constraint)
    */
   //TODO decide if here or to move it as protected method to the graph
-  /*
-  public void rotate(Quaternion quaternion, Vector point) {
+  protected void _rotate(Quaternion quaternion, Vector point) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
     this.rotation().normalize(); // Prevents numerical drift
 
-    Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
-    //Vector vector = Vector.add(point, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+    //Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
+
+    Quaternion worldQuaternion = new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
+    Vector point2Position = Vector.subtract(position(), point);
+    Vector point2PositionRotated = worldQuaternion.rotate(point2Position);
+    Vector vector = Vector.add(point, point2PositionRotated);
     vector.subtract(translation());
-    if (constraint() != null)
-      translate(constraint().constrainTranslation(vector, this));
-    else
-      translate(vector);
+    translate(vector);
   }
-  */
+
+  public void rotate(Quaternion quaternion, Frame frame) {
+    Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
+    _rotate(localQuaternion, frame.position());
+  }
 
   // ORIENTATION
 
