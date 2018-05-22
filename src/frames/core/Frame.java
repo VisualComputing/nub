@@ -998,7 +998,8 @@ public class Frame {
    *
    * @see #setConstraint(Constraint)
    */
-  //TODO decide if here or to move it as protected method to the graph
+  // TODO decide if here or to move it as protected method to the graph
+  // TODO test frame hierarchy, we are using worldDisplacement instead of orientation().rotate
   protected void _rotate(Quaternion quaternion, Vector point) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
@@ -1015,6 +1016,8 @@ public class Frame {
     translate(vector);
   }
 
+  //TODO define arbitrary point in frame?
+  //TODO frame = null semantics and test
   public void rotate(Quaternion quaternion, Frame frame) {
     Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
     _rotate(localQuaternion, frame.position());

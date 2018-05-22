@@ -2947,6 +2947,7 @@ public class Graph {
   */
   public void spin(Quaternion quaternion, Frame frame) {
     if (isEye(frame))
+      //TODO: use Frame.rotate(Quaternion quaternion, Frame frame) instead?
       frame._rotate(quaternion, anchor());
     else
       frame.rotate(quaternion);
