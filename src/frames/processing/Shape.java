@@ -75,7 +75,7 @@ public class Shape extends Frame {
    */
   public Shape() {
     super();
-    setHighlighting(Highlighting.FRONT);
+    setHighlighting(Highlighting.NONE);
   }
 
   /**
@@ -163,7 +163,11 @@ public class Shape extends Frame {
    * @see #highlighting()
    */
   public void setHighlighting(Highlighting highlighting) {
-    _highlight = highlighting;
+    if (isDetached() && highlighting != Highlighting.NONE) {
+      System.out.println("Warning: detached shapes can only have Highlighting.NONE.");
+      _highlight = Highlighting.NONE;
+    } else
+      _highlight = highlighting;
   }
 
   /**
@@ -177,6 +181,10 @@ public class Shape extends Frame {
 
   @Override
   public void setPrecision(Precision precision) {
+    if (isDetached() && precision == Precision.EXACT) {
+      System.out.println("Warning: EXACT picking precision is not enabled by detached shapes.");
+      return;
+    }
     if (precision == Precision.EXACT)
       if (graph()._bb == null) {
         System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
@@ -208,6 +216,10 @@ public class Shape extends Frame {
     draw(graph().frontBuffer());
   }
 
+  public void draw(PApplet pApplet) {
+    draw(pApplet.g);
+  }
+
   /**
    * Draws the shape into {@code pGraphics} using the current point of view (see
    * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
@@ -234,7 +246,16 @@ public class Shape extends Frame {
    * Internal use.
    */
   protected void _visit(PGraphics pGraphics) {
-    if (pGraphics != graph().backBuffer()) {
+    if (isDetached()) {
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
+      if (_frontShape != null)
+        pGraphics.shape(_frontShape);
+      else
+        setGraphics(pGraphics);
+      pGraphics.popStyle();
+      pGraphics.popMatrix();
+    } else if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
             /*

@@ -12,7 +12,7 @@ import processing.event.MouseEvent;
 public class DettachedShapes extends PApplet {
   Scene scene;
   Shape[] shapes;
-  Shape eye;
+  Shape eye, trackedShape;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -27,7 +27,7 @@ public class DettachedShapes extends PApplet {
     scene.fitBallInterpolation();
     shapes = new Shape[25];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene, shape());
+      shapes[i] = new Shape(shape());
       scene.randomize(shapes[i]);
     }
   }
@@ -35,8 +35,10 @@ public class DettachedShapes extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    for (int i = 0; i < shapes.length; i++)
-      shapes[i].draw();
+    for (int i = 0; i < shapes.length; i++) {
+      shapes[i].draw(this);
+      scene.drawShooterTarget(shapes[i]);
+    }
   }
 
   public void keyPressed() {
@@ -46,25 +48,29 @@ public class DettachedShapes extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.mouseSpin(defaultShape());
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.mouseTranslate(defaultShape());
     else
-      scene.scale(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX, defaultShape());
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 50);
+    scene.zoom(event.getCount() * 50, defaultShape());
   }
 
   public void mouseClicked(MouseEvent event) {
     for (int i = 0; i < shapes.length; i++) {
-      scene.resetTrackedFrame();
+      trackedShape = null;
       if (scene.track(mouseX, mouseY, shapes[i])) {
-        scene.setTrackedFrame(shapes[i]);
+        trackedShape = shapes[i];
         break;
       }
     }
+  }
+
+  Shape defaultShape() {
+    return trackedShape == null ? eye : trackedShape;
   }
 
   PShape shape() {
