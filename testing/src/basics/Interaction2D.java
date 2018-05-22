@@ -30,7 +30,7 @@ public class Interaction2D extends PApplet {
 
     shape1 = new Shape(scene) {
       @Override
-      public void setShape(PGraphics pGraphics) {
+      public void setGraphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -44,12 +44,12 @@ public class Interaction2D extends PApplet {
     shape1.setPrecision(Frame.Precision.FIXED);
 
     shape2 = new Shape(shape1);
-    shape2.setShape(shape());
+    shape2.setGraphics(shape());
     shape2.translate(275, 275);
     shape2.setPrecision(Frame.Precision.FIXED);
 
     shape3 = new Shape(shape2);
-    shape3.setShape(createShape(RECT, 0, 0, 150, 150));
+    shape3.setGraphics(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-75, -275);
     shape3.setPrecision(Frame.Precision.FIXED);
   }

@@ -12,7 +12,7 @@ import processing.event.MouseEvent;
 /**
  * Created by pierre on 11/15/16.
  */
-public class RotateAroundFrame extends PApplet {
+public class Orbit extends PApplet {
   Scene scene;
   Shape shape1, shape2;
   Vector upVector;
@@ -30,7 +30,7 @@ public class RotateAroundFrame extends PApplet {
 
     shape1 = new Shape(scene) {
       @Override
-      public void setShape(PGraphics pGraphics) {
+      public void setGraphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -47,7 +47,7 @@ public class RotateAroundFrame extends PApplet {
 
     //shape2 = new Shape(shape1);
     shape2 = new Shape(scene);
-    shape2.setShape(shape());
+    shape2.setGraphics(shape());
     shape2.translate(275, 275, 275);
 
     scene.setTrackedFrame(shape2);
@@ -76,7 +76,7 @@ public class RotateAroundFrame extends PApplet {
         //shape2.rotate((mouseX-pmouseX)* PI / width, 0, 0, shape1);
         //shape2.rotateAround(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         //shape2.rotateAround(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
-        shape2.rotate(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
+        shape2.orbit(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
       else
         scene.mouseSpin(shape1);
     } else if (mouseButton == RIGHT)
@@ -101,6 +101,6 @@ public class RotateAroundFrame extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.RotateAroundFrame"});
+    PApplet.main(new String[]{"basics.Orbit"});
   }
 }

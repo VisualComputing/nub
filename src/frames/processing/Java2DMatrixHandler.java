@@ -60,7 +60,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void beginScreenCoordinates() {
+  public void beginScreenDrawing() {
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
 
@@ -74,7 +74,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void endScreenCoordinates() {
+  public void endScreenDrawing() {
     popModelView();
   }
 

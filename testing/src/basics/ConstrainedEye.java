@@ -50,9 +50,9 @@ public class ConstrainedEye extends PApplet {
     fill(204, 102, 0, 150);
     scene.drawTorusSolenoid();
     fill(0, 0, 255);
-    scene.beginScreenCoordinates();
+    scene.beginScreenDrawing();
     displayText();
-    scene.endScreenCoordinates();
+    scene.endScreenDrawing();
   }
 
   public void mouseDragged() {

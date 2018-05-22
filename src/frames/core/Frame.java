@@ -1000,7 +1000,7 @@ public class Frame {
    */
   // TODO decide if here or to move it as protected method to the graph
   // TODO test frame hierarchy, we are using worldDisplacement instead of orientation().rotate
-  protected void _rotate(Quaternion quaternion, Vector point) {
+  protected void _orbit(Quaternion quaternion, Vector center) {
     if (constraint() != null)
       quaternion = constraint().constrainRotation(quaternion, this);
     this.rotation().compose(quaternion);
@@ -1009,18 +1009,18 @@ public class Frame {
     //Vector vector = Vector.add(point, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), point)));
 
     Quaternion worldQuaternion = new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle());
-    Vector point2Position = Vector.subtract(position(), point);
-    Vector point2PositionRotated = worldQuaternion.rotate(point2Position);
-    Vector vector = Vector.add(point, point2PositionRotated);
+    Vector center2Position = Vector.subtract(position(), center);
+    Vector center2PositionRotated = worldQuaternion.rotate(center2Position);
+    Vector vector = Vector.add(center, center2PositionRotated);
     vector.subtract(translation());
     translate(vector);
   }
 
   //TODO define arbitrary point in frame?
   //TODO frame = null semantics and test
-  public void rotate(Quaternion quaternion, Frame frame) {
+  public void orbit(Quaternion quaternion, Frame frame) {
     Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
-    _rotate(localQuaternion, frame.position());
+    _orbit(localQuaternion, frame.position());
   }
 
   // ORIENTATION

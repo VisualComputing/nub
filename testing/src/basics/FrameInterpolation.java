@@ -44,7 +44,7 @@ public class FrameInterpolation extends PApplet {
       // Note that within visit() geometry is defined at the
       // node local coordinate system.
       @Override
-      public void setShape(PGraphics pg) {
+      public void setGraphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(0, 255, 255, 125);
         pg.stroke(0, 0, 255);

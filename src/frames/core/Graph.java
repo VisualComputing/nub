@@ -75,8 +75,8 @@ import java.util.List;
  * {@link #popModelView()} and {@link #applyModelView(Matrix)} (which wrap
  * {@link MatrixHandler} functions with the same signatures).
  * <p>
- * Issue your drawing code between {@link #beginScreenCoordinates()} and
- * {@link #endScreenCoordinates()} to define your geometry on the screen coordinate
+ * Issue your drawing code between {@link #beginScreenDrawing()} and
+ * {@link #endScreenDrawing()} to define your geometry on the screen coordinate
  * system (such as when drawing 2d controls on top of 3d graph). These methods
  * are {@link MatrixHandler} wrapper functions with the same signatures provided
  * for convenience.
@@ -821,31 +821,31 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginScreenCoordinates()}. Adds exception when no properly
-   * closing the screen drawing with a call to {@link #endScreenCoordinates()}.
+   * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds exception when no properly
+   * closing the screen drawing with a call to {@link #endScreenDrawing()}.
    *
-   * @see MatrixHandler#beginScreenCoordinates()
+   * @see MatrixHandler#beginScreenDrawing()
    */
-  public void beginScreenCoordinates() {
+  public void beginScreenDrawing() {
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     _startCoordCalls++;
-    _matrixHandler.beginScreenCoordinates();
+    _matrixHandler.beginScreenDrawing();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endScreenCoordinates()} . Adds exception
-   * if {@link #beginScreenCoordinates()} wasn't properly called before
+   * Wrapper for {@link MatrixHandler#endScreenDrawing()} . Adds exception
+   * if {@link #beginScreenDrawing()} wasn't properly called before
    *
-   * @see MatrixHandler#endScreenCoordinates()
+   * @see MatrixHandler#endScreenDrawing()
    */
-  public void endScreenCoordinates() {
+  public void endScreenDrawing() {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
-    _matrixHandler.endScreenCoordinates();
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+    _matrixHandler.endScreenDrawing();
   }
 
   /**
@@ -2948,7 +2948,7 @@ public class Graph {
   public void spin(Quaternion quaternion, Frame frame) {
     if (isEye(frame))
       //TODO: use Frame.rotate(Quaternion quaternion, Frame frame) instead?
-      frame._rotate(quaternion, anchor());
+      frame._orbit(quaternion, anchor());
     else
       frame.rotate(quaternion);
   }

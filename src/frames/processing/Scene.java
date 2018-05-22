@@ -111,7 +111,7 @@ import java.util.List;
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
  * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
- * {@link Shape#setShape(PGraphics)}.
+ * {@link Shape#setGraphics(PGraphics)}.
  * <h3>Immediate-mode shapes</h3>
  * To set an immediate-mode shape use code such as the following:
  * <pre>
@@ -174,7 +174,7 @@ import java.util.List;
  * static ones), such as {@link #beginScreenCoordinates(PGraphics)},
  * {@link #endScreenCoordinates(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Shape} (see {@link Shape#setShape(PGraphics)}).
+ * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than this one) can be drawn with
  * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
@@ -1103,7 +1103,7 @@ public class Scene extends Graph implements PConstants {
    * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void beginScreenCoordinates() {
+  public void beginScreenDrawing() {
     beginScreenCoordinates(frontBuffer());
   }
 
@@ -1112,29 +1112,29 @@ public class Scene extends Graph implements PConstants {
    * to call {@link #endScreenCoordinates(PGraphics)} after screen drawing ends.
    *
    * @see #endScreenCoordinates(PGraphics)
-   * @see #beginScreenCoordinates()
+   * @see #beginScreenDrawing()
    */
   public void beginScreenCoordinates(PGraphics pGraphics) {
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     _startCoordCalls++;
     pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
     disableDepthTest(pGraphics);
     // if-else same as:
-    // matrixHandler(p).beginScreenCoordinates();
+    // matrixHandler(p).beginScreenDrawing();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().beginScreenCoordinates();
+      matrixHandler().beginScreenDrawing();
     else
-      matrixHandler(pGraphics).beginScreenCoordinates();
+      matrixHandler(pGraphics).beginScreenDrawing();
   }
 
   /**
    * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void endScreenCoordinates() {
+  public void endScreenDrawing() {
     endScreenCoordinates(frontBuffer());
   }
 
@@ -1144,20 +1144,20 @@ public class Scene extends Graph implements PConstants {
    * {@link #beginScreenCoordinates(PGraphics)} and this method.
    *
    * @see #beginScreenCoordinates(PGraphics)
-   * @see #endScreenCoordinates()
+   * @see #endScreenDrawing()
    */
   public void endScreenCoordinates(PGraphics pGraphics) {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHandler(p).endScreenCoordinates();
+    // matrixHandler(p).endScreenDrawing();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().endScreenCoordinates();
+      matrixHandler().endScreenDrawing();
     else
-      matrixHandler(pGraphics).endScreenCoordinates();
+      matrixHandler(pGraphics).endScreenDrawing();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }

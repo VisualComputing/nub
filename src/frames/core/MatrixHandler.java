@@ -313,15 +313,15 @@ public class MatrixHandler {
    * Computes the world coordinates of an screen object so that drawing can be done
    * directly with 2D screen coordinates.
    * <p>
-   * All screen drawing should be enclosed between {@link #beginScreenCoordinates()} and
-   * {@link #endScreenCoordinates()}. Then you can just begin drawing your screen shapes.
+   * All screen drawing should be enclosed between {@link #beginScreenDrawing()} and
+   * {@link #endScreenDrawing()}. Then you can just begin drawing your screen shapes.
    * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
-   * then draw first all your 3d before doing any call to a {@link #beginScreenCoordinates()}
-   * and {@link #endScreenCoordinates()} pair.
+   * then draw first all your 3d before doing any call to a {@link #beginScreenDrawing()}
+   * and {@link #endScreenDrawing()} pair.
    *
-   * @see #endScreenCoordinates()
+   * @see #endScreenDrawing()
    */
-  public void beginScreenCoordinates() {
+  public void beginScreenDrawing() {
     pushProjection();
     _ortho2D();
     pushModelView();
@@ -329,11 +329,11 @@ public class MatrixHandler {
   }
 
   /**
-   * Ends screen drawing. See {@link #beginScreenCoordinates()} for details.
+   * Ends screen drawing. See {@link #beginScreenDrawing()} for details.
    *
-   * @see #beginScreenCoordinates()
+   * @see #beginScreenDrawing()
    */
-  public void endScreenCoordinates() {
+  public void endScreenDrawing() {
     popProjection();
     popModelView();
   }

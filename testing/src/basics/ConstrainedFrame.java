@@ -72,9 +72,9 @@ public class ConstrainedFrame extends PApplet {
     popMatrix();
 
     fill(0, 0, 255);
-    scene.beginScreenCoordinates();
+    scene.beginScreenDrawing();
     displayText();
-    scene.endScreenCoordinates();
+    scene.endScreenDrawing();
   }
 
   public void mouseDragged() {
