@@ -29,11 +29,11 @@ import processing.opengl.PGraphicsOpenGL;
  * {@link #precision()} different than {@link Precision#EXACT} or a simpler representation
  * for the back shape.
  * <h2>Retained mode</h2>
- * To set a retained mode shape call {@link #setGraphics(PShape)} which will set both the front and
+ * To set a retained-mode shape call {@link #setGraphics(PShape)} which will set both the front and
  * the back shape to be the same pshape. Call {@link #setFrontGraphics(PShape)} and
- * {@link #setFrontGraphics(PShape)} to set different pshapes for rendering and picking, respectively.
+ * {@link #setFrontGraphics(PShape)} to set different graphics for rendering and picking, respectively.
  * <h2>Immediate mode</h2>
- * To set an immediate mode shape override {@link #setGraphics(PGraphics)} which will set both the
+ * To set an immediate-mode shape override {@link #setGraphics(PGraphics)} which will set both the
  * front and the back shape to be the same graphics procedure. Override
  * {@link #setFrontGraphics(PGraphics)} and {@link #setFrontGraphics(PGraphics)} to set different
  * graphics procedures for rendering and picking, respectively.
@@ -71,7 +71,24 @@ public class Shape extends Frame {
   Highlighting _highlight;
 
   /**
-   * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
+   * Constructs a 'detached' shape with {@link Precision#FIXED} and {@link Highlighting#FRONT} policy.
+   */
+  public Shape() {
+    super();
+    setHighlighting(Highlighting.FRONT);
+  }
+
+  /**
+   * Constructs a 'detached' shape with {@link Precision#FIXED}, {@link Highlighting#FRONT} policy and
+   * {@code pShape} graphics.
+   */
+  public Shape(PShape pShape) {
+    this();
+    setGraphics(pShape);
+  }
+
+  /**
+   * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    */
   public Shape(Scene scene) {
     super(scene);
@@ -94,7 +111,7 @@ public class Shape extends Frame {
   }
 
   /**
-   * Constructs a scene shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
+   * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    * Sets {@code pShape} as its retained mode pshape.
    */
   public Shape(Scene scene, PShape pShape) {

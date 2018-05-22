@@ -1031,7 +1031,8 @@ public class Frame {
    * Rotates this frame around {@code frame} (which may be null for the world coordinate system)
    * according to {@code quaternion}.
    * <p>
-   * The {@link Quaternion#axis()} is defined in the {@code frame} coordinate system.
+   * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code frame}
+   * coordinate system.
    */
   public void orbit(Quaternion quaternion, Frame frame) {
     Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
