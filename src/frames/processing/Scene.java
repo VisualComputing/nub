@@ -106,7 +106,7 @@ import java.util.List;
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
  * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #traverse()} to render all scene-graph shapes or {@link Shape#draw()} to
+ * {@link #traverse()} to render all scene-graph shapes or {@link #draw(Shape)} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
@@ -925,6 +925,17 @@ public class Scene extends Graph implements PConstants {
     jsonRot.setFloat(2, quaternion.z());
     jsonRot.setFloat(3, quaternion.w());
     return jsonRot;
+  }
+
+  /**
+   * Same as {@code shape._draw(frontBuffer()}.
+   * <p>
+   * Call it only instead of {@link Scene#traverse()}.
+   *
+   * @see frames.processing.Scene#traverse(PGraphics)
+   */
+  public void draw(Shape shape) {
+    shape._draw(frontBuffer());
   }
 
   /**

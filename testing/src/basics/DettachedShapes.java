@@ -39,7 +39,7 @@ public class DettachedShapes extends PApplet {
     background(0);
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i].draw(this);
+      scene.draw(shapes[i]);
       pushStyle();
       stroke(255);
       scene.drawShooterTarget(shapes[i]);
