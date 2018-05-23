@@ -10,10 +10,10 @@ import processing.event.MouseEvent;
 /**
  * Created by pierre on 11/15/16.
  */
-public class DettachedShapes extends PApplet {
+public class AdaptivePrecision extends PApplet {
   Scene scene;
   Shape[] shapes;
-  Shape eye, trackedShape;
+  Shape trackedShape;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -22,13 +22,11 @@ public class DettachedShapes extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    eye = new Shape();
-    scene.setEye(eye);
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
     shapes = new Shape[25];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(shape());
+      shapes[i] = new Shape(scene, shape());
       scene.randomize(shapes[i]);
       shapes[i].setPrecisionThreshold(25);
       shapes[i].setPrecision(Frame.Precision.ADAPTIVE);
@@ -74,8 +72,8 @@ public class DettachedShapes extends PApplet {
       }
   }
 
-  Shape defaultShape() {
-    return trackedShape == null ? eye : trackedShape;
+  Frame defaultShape() {
+    return trackedShape == null ? scene.eye() : trackedShape;
   }
 
   PShape shape() {
@@ -86,6 +84,6 @@ public class DettachedShapes extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.DettachedShapes"});
+    PApplet.main(new String[]{"basics.AdaptivePrecision"});
   }
 }

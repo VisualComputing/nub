@@ -71,23 +71,6 @@ public class Shape extends Frame {
   Highlighting _highlight;
 
   /**
-   * Constructs a 'detached' shape with {@link Precision#FIXED} and {@link Highlighting#FRONT} policy.
-   */
-  public Shape() {
-    super();
-    setHighlighting(Highlighting.NONE);
-  }
-
-  /**
-   * Constructs a 'detached' shape with {@link Precision#FIXED}, {@link Highlighting#FRONT} policy and
-   * {@code pShape} graphics.
-   */
-  public Shape(PShape pShape) {
-    this();
-    setGraphics(pShape);
-  }
-
-  /**
    * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    */
   public Shape(Scene scene) {
@@ -103,6 +86,8 @@ public class Shape extends Frame {
    */
   public Shape(Frame reference) {
     super(reference);
+    if(reference.isDetached())
+      throw new RuntimeException("Shape reference should be attached to an scene");
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
     if (graph().frontBuffer() instanceof PGraphicsOpenGL)
@@ -163,10 +148,6 @@ public class Shape extends Frame {
    * @see #highlighting()
    */
   public void setHighlighting(Highlighting highlighting) {
-    if (isDetached() && highlighting != Highlighting.NONE) {
-      System.out.println("Warning: detached shapes can only have Highlighting.NONE.");
-      _highlight = Highlighting.NONE;
-    } else
       _highlight = highlighting;
   }
 
@@ -181,10 +162,6 @@ public class Shape extends Frame {
 
   @Override
   public void setPrecision(Precision precision) {
-    if (isDetached()) {
-      super.setPrecision(precision);
-      return;
-    }
     if (precision == Precision.EXACT)
       if (graph()._bb == null) {
         System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
@@ -214,16 +191,7 @@ public class Shape extends Frame {
    * Internal use.
    */
   protected void _visit(PGraphics pGraphics) {
-    if (isDetached()) {
-      pGraphics.pushStyle();
-      pGraphics.pushMatrix();
-      if (_frontShape != null)
-        pGraphics.shape(_frontShape);
-      else
-        setGraphics(pGraphics);
-      pGraphics.popStyle();
-      pGraphics.popMatrix();
-    } else if (pGraphics != graph().backBuffer()) {
+    if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
             /*
