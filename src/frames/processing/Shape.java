@@ -205,23 +205,6 @@ public class Shape extends Frame {
     graph()._bbEnabled = false;
   }
 
-  /**
-   * Draws the shape into {@code pGraphics} using the current point of view (see
-   * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
-   * <p>
-   * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
-   * the frame into the {@link Scene#backBuffer()} and by {@link Scene#draw(Shape)}
-   * to draw the frame into the scene main {@link Scene#frontBuffer()}.
-   * <p>
-   * Call it only instead of {@link Scene#traverse(PGraphics)}.
-   */
-  protected void _draw(PGraphics pGraphics) {
-    pGraphics.pushMatrix();
-    Scene.applyWorldTransformation(pGraphics, this);
-    _visit(pGraphics);
-    pGraphics.popMatrix();
-  }
-
   @Override
   public void visit() {
     _visit(graph()._targetPGraphics);

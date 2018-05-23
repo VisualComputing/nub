@@ -928,14 +928,17 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code shape._draw(frontBuffer()}.
+   * Draws the shape into the {@link #frontBuffer()}.
    * <p>
    * Call it only instead of {@link Scene#traverse()}.
    *
    * @see frames.processing.Scene#traverse(PGraphics)
    */
   public void draw(Shape shape) {
-    shape._draw(frontBuffer());
+    frontBuffer().pushMatrix();
+    Scene.applyWorldTransformation(frontBuffer(), shape);
+    shape._visit(frontBuffer());
+    frontBuffer().popMatrix();
   }
 
   /**
