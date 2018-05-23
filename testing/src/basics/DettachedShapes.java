@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -29,6 +30,8 @@ public class DettachedShapes extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(shape());
       scene.randomize(shapes[i]);
+      shapes[i].setPrecisionThreshold(25);
+      shapes[i].setPrecision(Frame.Precision.ADAPTIVE);
     }
   }
 
@@ -37,7 +40,10 @@ public class DettachedShapes extends PApplet {
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
       shapes[i].draw(this);
+      pushStyle();
+      stroke(255);
       scene.drawShooterTarget(shapes[i]);
+      popStyle();
     }
   }
 
@@ -60,13 +66,12 @@ public class DettachedShapes extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    for (int i = 0; i < shapes.length; i++) {
-      trackedShape = null;
+    trackedShape = null;
+    for (int i = 0; i < shapes.length; i++)
       if (scene.track(mouseX, mouseY, shapes[i])) {
         trackedShape = shapes[i];
         break;
       }
-    }
   }
 
   Shape defaultShape() {

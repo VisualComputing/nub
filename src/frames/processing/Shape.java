@@ -181,8 +181,8 @@ public class Shape extends Frame {
 
   @Override
   public void setPrecision(Precision precision) {
-    if (isDetached() && precision == Precision.EXACT) {
-      System.out.println("Warning: EXACT picking precision is not enabled by detached shapes.");
+    if (isDetached()) {
+      super.setPrecision(precision);
       return;
     }
     if (precision == Precision.EXACT)

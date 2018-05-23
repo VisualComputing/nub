@@ -2487,7 +2487,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (isTrackedFrame(frame))
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame.precisionThreshold());
+    drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2556,7 +2556,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (isTrackedFrame(frame))
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame.precisionThreshold());
+    drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
