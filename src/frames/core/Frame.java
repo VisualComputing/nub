@@ -21,15 +21,36 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * TODO new concept: attach (children != null) and detach (attach.children == null),
- * same as attach(null)).
- * <p>
  * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
  * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
  * important: the frame is first translated, then rotated around the new translated origin
  * and then scaled. This class API partially conforms that of the great
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
  * Frame</a>.
+ * <h2>Hierarchy of frames</h2>
+ * The frame position, orientation and magnitude are actually defined with respect to
+ * a {@link #reference()} frame. The default {@link #reference()} is the world
+ * coordinate system (represented by a {@code null} {@link #reference()}). If you
+ * {@link #setReference(Frame)} to a different frame, you must then differentiate:
+ * <ul>
+ * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
+ * defined with respect to the {@link #reference()} which represents an angle preserving
+ * transformation of space.</li>
+ * <li>The <b>global</b> {@link #position()}, {@link #orientation()} and
+ * {@link #magnitude()}, always defined with respect to the world coordinate system.</li>
+ * </ul>
+ * <p>
+ * A frame is actually defined by its {@link #translation()} with respect to its
+ * {@link #reference()}, then by {@link #rotation()} of the coordinate system around
+ * the new translated origin and then by a uniform positive {@link #scaling()} along its
+ * rotated axes.
+ * <p>
+ * This terminology for <b>local</b> ({@link #translation()}, {@link #rotation()} and
+ * {@link #scaling()}) and <b>global</b> ({@link #position()}, {@link #orientation()} and
+ * {@link #magnitude()}) definitions is used in all the methods' names and should be
+ * enough to prevent ambiguities. These notions are obviously identical when the
+ * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
+ * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Geometry transformations</h2>
  * A frame is useful to define the position, orientation and magnitude of an arbitrary object
  * which may represent a scene point-of-view.
@@ -52,33 +73,17 @@ import java.util.List;
  * To transform a point from one frame to another use {@link #location(Vector, Frame)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
  * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
+ * <h2>Hierarchical traversals</h2>
+ * Hierarchical traversals of the frame hierarchy which automatically apply the local
+ * frame transformations described above may be achieved with {@link Graph#traverse()}.
+ * Automatic traversals require overriding {@link #visit()} and to instantiate a frame
+ * attached to a graph which is referred to as attached frame (see {@link #isAttached(Graph)}
+ * and {@link #isDetached()}).
  * <p>
- * The {@link #translation()}, {@link #rotation()} and uniform positive {@link #scaling()}
- * that are encapsulated in a frame can also be used to represent an angle preserving
- * transformation of space.
- * <h2>Hierarchy of frames</h2>
- * The frame position, orientation and magnitude are actually defined with respect to
- * a {@link #reference()} frame. The default {@link #reference()} is the world
- * coordinate system (represented by a {@code null} {@link #reference()}). If you
- * {@link #setReference(Frame)} to a different frame, you must then differentiate:
- * <ul>
- * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
- * defined with respect to the {@link #reference()}.</li>
- * <li>the <b>global</b> {@link #position()}, {@link #orientation()} and
- * {@link #magnitude()}, always defined with respect to the world coordinate system.</li>
- * </ul>
- * <p>
- * A frame is actually defined by its {@link #translation()} with respect to its
- * {@link #reference()}, then by {@link #rotation()} of the coordinate system around
- * the new translated origin and then by a uniform positive {@link #scaling()} along its
- * rotated axes.
- * <p>
- * This terminology for <b>local</b> ({@link #translation()}, {@link #rotation()} and
- * {@link #scaling()}) and <b>global</b> ({@link #position()}, {@link #orientation()} and
- * {@link #magnitude()}) definitions is used in all the methods' names and should be
- * enough to prevent ambiguities. These notions are obviously identical when the
- * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
- * coordinate system (the one you are left with after calling a graph preDraw() method).
+ * To instantiate an attached frame use the frame constructors that take a {@code graph}
+ * parameter or a (reference) frame which in turn is attached to a graph. Once instantiated,
+ * a frame cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
+ * and {@link #detach()}).
  * <h2>Constraints</h2>
  * One interesting feature of a frame is that its displacements can be constrained. When a
  * {@link frames.core.constraint.Constraint} is attached to a frame, it filters
@@ -584,6 +589,9 @@ public class Frame {
     _modified();
   }
 
+  /**
+   * Used by {@link #setReference(Frame)}.
+   */
   protected void _restorePath(Frame parent, Frame child) {
     if (parent == null) {
       if (graph() != null)
@@ -596,6 +604,9 @@ public class Frame {
     }
   }
 
+  /**
+   * Used by {@link #_restorePath(Frame, Frame)}.
+   */
   protected boolean _addChild(Frame frame) {
     if (frame == null)
       return false;
@@ -627,6 +638,10 @@ public class Frame {
     return false;
   }
 
+  /**
+   * Returns the list a child frames of this frame. Only meaningful if this frame {@link #isAttached(Graph)}
+   * to a graph. Returns {@code null} if this frame {@link #isDetached()}.
+   */
   public List<Frame> children() {
     return _children;
   }
@@ -687,10 +702,10 @@ public class Frame {
   /**
    * Sets the frame picking precision.
    * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or
-   * {@link Precision#ADAPTIVE} Picking is done by checking if the pointer lies
-   * within a squared area around the frame {@link #position()} screen projection which size
-   * is defined by {@link #setPrecisionThreshold(float)}.
+   * When {@link #precision()} is {@link Precision#FIXED} or {@link Precision#ADAPTIVE}
+   * Picking is done by checking if the pointer lies within a squared area around the frame
+   * {@link #position()} screen projection which size is defined by
+   * {@link #setPrecisionThreshold(float)}.
    * <p>
    * When {@link #precision()} is {@link Precision#EXACT}, picking is done
    * in a precise manner according to the projected pixels of the visual representation
@@ -971,7 +986,7 @@ public class Frame {
    * defined in the frame coordinate system, while {@code point} is defined in the world
    * coordinate system).
    * <p>
-   * Note: ugly but if there's a {@link #constraint()} it is satisfied, i.e., to
+   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
    * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
@@ -1033,6 +1048,9 @@ public class Frame {
    * <p>
    * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code frame}
    * coordinate system.
+   * <p>
+   * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
+   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void orbit(Quaternion quaternion, Frame frame) {
     Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
@@ -1887,12 +1905,17 @@ public class Frame {
 
   // Attached frames
 
+  /**
+   * Returns the {@code graph} this frame is attached to. Always returns {@code false} if
+   * the frame {@link #isDetached()}.
+   */
   public Graph graph() {
     return _graph;
   }
 
   /**
-   * Returns {@code true} if tracking is enabled.
+   * Returns {@code true} if tracking is enabled. Always returns {@code false} if
+   * the frame {@link #isDetached()}.
    *
    * @see #enableTracking(boolean)
    */
@@ -1901,7 +1924,8 @@ public class Frame {
   }
 
   /**
-   * Enables frame tracking according to {@code flag}.
+   * Enables frame tracking according to {@code flag}. Only meaningful if the frame is
+   * attached to a {@code graph}.
    *
    * @see #isTrackingEnabled()
    */
@@ -1913,7 +1937,8 @@ public class Frame {
 
   /**
    * Procedure called on the frame by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes.
+   * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
+   * is attached to a {@code graph}.
    * <p>
    * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
@@ -1939,7 +1964,8 @@ public class Frame {
   }
 
   /**
-   * Same as {@code cull(true)}.
+   * Same as {@code cull(true)}. Only meaningful if the frame is attached to
+   * a {@code graph}.
    *
    * @see #cull(boolean)
    * @see #isCulled()
@@ -1952,6 +1978,7 @@ public class Frame {
   /**
    * Enables or disables {@link #visit()} of this frame and its children during
    * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   * Only meaningful if the frame is attached to a {@code graph}.
    *
    * @see #isCulled()
    */
@@ -1963,7 +1990,8 @@ public class Frame {
 
   /**
    * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#traverse()} algoruthm.
+   * will not be visited by the {@link Graph#traverse()} algorithm. Always returns
+   * {@code false} if the frame {@link #isDetached()}.
    *
    * @see #cull(boolean)
    */

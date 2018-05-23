@@ -11,6 +11,7 @@
 package frames.processing;
 
 import frames.core.Frame;
+import frames.core.Graph;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -18,12 +19,13 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
- * A shape is a {@link Frame} specialization that can be set from a retained-mode rendering
- * Processing {@code PShape} or from an immediate-mode rendering Processing procedure. Either
- * case the shape is split in two a front and a back shape. The front shape will be used for
- * rendering and the back shape for picking with exact precision by default, see
- * {@link #setPrecision(Precision)}. When picking a shape it will be highlighted according
- * to a highlighting policy, see {@link #setHighlighting(Highlighting)}.
+ * A shape is a {@link Frame} specialization that should always be attached to a {@code scene}
+ * (see {@link Frame#isAttached(Graph)}) and that can be set from a retained-mode rendering Processing
+ * {@code PShape} or from an immediate-mode rendering Processing procedure. Either case the shape is
+ * split in two a front and a back shape. The front shape will be used for rendering and the back
+ * shape for picking with exact precision by default, see {@link #setPrecision(Precision)}. When
+ * picking a shape it will be highlighted according to a highlighting policy, see
+ * {@link #setHighlighting(Highlighting)}.
  * <p>
  * Picking in an exact manner is costly. If performance is a concern, use a
  * {@link #precision()} different than {@link Precision#EXACT} or a simpler representation
@@ -86,7 +88,7 @@ public class Shape extends Frame {
    */
   public Shape(Frame reference) {
     super(reference);
-    if(reference.isDetached())
+    if (reference.isDetached())
       throw new RuntimeException("Shape reference should be attached to an scene");
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
@@ -148,7 +150,7 @@ public class Shape extends Frame {
    * @see #highlighting()
    */
   public void setHighlighting(Highlighting highlighting) {
-      _highlight = highlighting;
+    _highlight = highlighting;
   }
 
   /**
