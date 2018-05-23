@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 /**
  * Created by pierre on 11/15/16.
  */
-public class AdaptivePrecision extends PApplet {
+public class AdaptivePrecision1 extends PApplet {
   Scene scene;
   Shape[] shapes;
   Shape trackedShape;
@@ -84,6 +84,6 @@ public class AdaptivePrecision extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.AdaptivePrecision"});
+    PApplet.main(new String[]{"basics.AdaptivePrecision1"});
   }
 }
