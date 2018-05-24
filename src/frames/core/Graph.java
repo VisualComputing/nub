@@ -537,7 +537,7 @@ public class Graph {
   }
 
   /**
-   * Simply returns {@code 1} which is valid for 2d graphs.
+   * In 2D returns {@code 1}.
    * <p>
    * In 3D returns a value proportional to the eye (z projected) distance to the
    * {@link #anchor()} so that when zooming on the object, the ortho eye is translated
@@ -2691,14 +2691,46 @@ public class Graph {
 
   //TODO add proper names, classification: 2d/3d, only Eye/Frame-eye
 
+  /**
+   * Same as {@code translate(vector, sensitivity, defaultFrame())}.
+   *
+   * @see #translate(Vector, float, Frame)
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector)
+   * @see #zoom(float, Frame)
+   * @see #zoom(float)
+   * @see #defaultFrame()
+   */
   public void translate(Vector vector, float sensitivity) {
     translate(vector, sensitivity, defaultFrame());
   }
 
+  /**
+   * Same as {@code translate(vector, defaultFrame())}.
+   *
+   * @see #translate(Vector, float, Frame)
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector, float)
+   * @see #zoom(float, Frame)
+   * @see #zoom(float)
+   * @see #defaultFrame()
+   */
   public void translate(Vector vector) {
     translate(vector, defaultFrame());
   }
 
+  /**
+   * Translates the {@code frame} from {@code vector} which is expressed in screen space. The translated frame would be
+   * kept exactly under a pointer if such a device were used to translate. The z-coordinate is mapped from
+   * [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
+   *
+   * @see #translate(Vector, float, Frame)
+   * @see #translate(Vector, float)
+   * @see #translate(Vector)
+   * @see #zoom(float, Frame)
+   * @see #zoom(float)
+   * @see #defaultFrame()
+   */
   public void translate(Vector vector, Frame frame) {
     if (frame == null)
       throw new RuntimeException("translate(vector, frame) requires a non-null frame param");
@@ -2706,21 +2738,44 @@ public class Graph {
   }
 
   /**
-   * Converts physical (device) space
+   * Translates the {@code frame} from {@code vector} which is expressed in physical space.
+   * <p>
+   * The projection onto the screen of the frame translation and {@code vector} exactly match when {@code sensitivity = 1}
+   * and {@code vector} is defined in screen coordinates (e.g., the translated frame would be kept exactly under a
+   * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
+   * [0..2*{@link #radius()} / {@link #radius()}] range.
    *
-   * @param vector
-   * @return
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector, float)
+   * @see #translate(Vector)
+   * @see #zoom(float, Frame)
+   * @see #zoom(float)
+   * @see #defaultFrame()
    */
-  protected Vector _translate(Vector vector, Frame frame) {
-    return _translate(vector, 1, frame);
-  }
-
   public void translate(Vector vector, float sensitivity, Frame frame) {
     if (frame == null)
       throw new RuntimeException("translate(vector, sensitivity, frame) requires a non-null frame param");
     frame.translate(_translate(vector, sensitivity, frame));
   }
 
+  /**
+   * Same as {@code return _translate(vector, 1, frame)}.
+   *
+   * @see #translate(Vector, float, Frame)
+   */
+  protected Vector _translate(Vector vector, Frame frame) {
+    return _translate(vector, 1, frame);
+  }
+
+  /**
+   * Interactive translation low-level implementation. Converts {@code vector} expressed in physical space to
+   * {@link Frame#reference()} (or world coordinates if the frame reference is null).
+   * <p>
+   * The projection onto the screen of the returned vector and {@code vector} exactly match when {@code sensitivity = 1}
+   * and {@code vector} is defined in screen coordinates (e.g., the translated frame would be kept exactly under a
+   * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
+   * [0..2*{@link #radius()} / {@link #radius()}] range.
+   */
   protected Vector _translate(Vector vector, float sensitivity, Frame frame) {
     if (is2D() && vector.z() != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
@@ -2743,16 +2798,8 @@ public class Graph {
         eyeVector._vector[1] *= 2.0 * wh[1] / height();
         break;
     }
-    float coef;
-    if (isEye(frame)) {
-      coef = Math.max(Math.abs((location(anchor()))._vector[2] * frame.magnitude()), 0.2f * radius());
-      eyeVector._vector[2] *= coef / height();
-      eyeVector.divide(eye().magnitude());
-    } else {
-      coef = Vector.subtract(eye().position(), frame.position()).magnitude();
-      eyeVector._vector[2] *= coef / height();
-      eyeVector.divide(eye().magnitude());
-    }
+    eyeVector._vector[2] *= 2*radius() / height();
+    eyeVector.divide(eye().magnitude());
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
@@ -2765,10 +2812,28 @@ public class Graph {
     frame.scale(delta >= 0 ? factor : 1 / factor);
   }
 
+  /**
+   * Same as {@code zoom(delta, defaultFrame())}.
+   *
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector, float)
+   * @see #translate(Vector)
+   * @see #zoom(float, Frame)
+   * @see #defaultFrame()
+   */
   public void zoom(float delta) {
     zoom(delta, defaultFrame());
   }
 
+  /**
+   * Same as {@code translate(new Vector(0, 0, delta), 1, frame)}.
+   *
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector, float)
+   * @see #translate(Vector)
+   * @see #zoom(float)
+   * @see #defaultFrame()
+   */
   public void zoom(float delta, Frame frame) {
     translate(new Vector(0, 0, delta), 1, frame);
   }
@@ -3023,11 +3088,16 @@ public class Graph {
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
    * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()}, first.
+   *
+   * @see #_rotateCAD(float, float, Vector, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     spin(_rotateCAD(roll, pitch, upVector, sensitivity), eye());
   }
 
+  /**
+   * Computes and returns the quaternion used by {@link #rotateCAD(float, float, Vector, float)}.
+   */
   protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");

@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -25,7 +26,8 @@ public class MouseDragInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
+    //scene.setFieldOfView(PI / 3);
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
@@ -93,12 +95,12 @@ public class MouseDragInteraction extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      //scene.zoom(mouseX - pmouseX);
-      scene.scale(mouseX - pmouseX);
+      scene.zoom(mouseX - pmouseX);
+      //scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 50);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
