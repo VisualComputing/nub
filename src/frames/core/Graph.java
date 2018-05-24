@@ -2798,7 +2798,7 @@ public class Graph {
         eyeVector._vector[1] *= 2.0 * wh[1] / height();
         break;
     }
-    eyeVector._vector[2] *= 2*radius() / height();
+    eyeVector._vector[2] *= 2 * radius() / height();
     eyeVector.divide(eye().magnitude());
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
