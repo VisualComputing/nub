@@ -52,7 +52,7 @@ import java.util.List;
  * {@link #location(Vector, Frame)}, are provided for convenience.
  * <h3>Interpolator</h3>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
- * such as {@link #fitBallInterpolation()}, {@link #fitScreenRegionInterpolation(Rectangle)},
+ * such as {@link #fitBallInterpolation()}, {@link #zoomOnRegionInterpolation(Rectangle)},
  * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
  * {@link Interpolator} documentation for details.
  * <h3>Visibility and culling techniques</h3>
@@ -1915,7 +1915,7 @@ public class Graph {
 
   /**
    * Returns the {@link #eye()} {@link Interpolator} used by {@link #fitBallInterpolation()},
-   * {@link #fitScreenRegionInterpolation(Rectangle)}, {@link #interpolateTo(Frame)}, etc.
+   * {@link #zoomOnRegionInterpolation(Rectangle)}, {@link #interpolateTo(Frame)}, etc.
    */
   public Interpolator interpolator() {
     return _interpolator;
@@ -1960,13 +1960,13 @@ public class Graph {
    * {@link #center()}) that is used to define the 3D rectangle that is eventually
    * fitted.
    */
-  public void fitScreenRegionInterpolation(Rectangle rectangle) {
+  public void zoomOnRegionInterpolation(Rectangle rectangle) {
     _interpolator.stop();
     _interpolator.purge();
     Frame eye = eye();
     setEye(eye().detach());
     _interpolator.addKeyFrame(eye().detach());
-    fitScreenRegion(rectangle);
+    zoomOnRegion(rectangle);
     _interpolator.addKeyFrame(eye().detach());
     setEye(eye);
     _interpolator.start();
@@ -2059,7 +2059,7 @@ public class Graph {
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
    */
-  public void fitScreenRegion(Rectangle rectangle) {
+  public void zoomOnRegion(Rectangle rectangle) {
     //ad-hoc
     if (is2D()) {
       float rectRatio = (float) rectangle.width() / (float) rectangle.height();

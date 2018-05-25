@@ -2932,26 +2932,31 @@ public class Scene extends Graph implements PConstants {
     spin(_spin(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame), frame);
   }
 
+  /**
+   * Same as {@code mouseTranslate(defaultFrame())}.
+   *
+   * @see #mouseTranslate(Frame)
+   */
   public void mouseTranslate() {
     mouseTranslate(defaultFrame());
   }
 
+  /**
+   * Same as {@code translate(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, frame)}.
+   *
+   * @see #translate(float, float, Frame)
+   */
   public void mouseTranslate(Frame frame) {
     translate(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, frame);
   }
 
-  /*
-  public void zoom(float sensitivity) {
-    zoom(sensitivity, defaultFrame());
-  }
-
-  public void zoom(float sensitivity, Frame frame) {
-    translate(new Vector(0, 0, pApplet().mouseX - pApplet().pmouseX), sensitivity, frame);
-  }
-  //*/
-
   // only eye
 
+  /**
+   * Same as {@code mouseTranslate(eye())}.
+   *
+   * @see #mouseTranslate(Frame)
+   */
   public void mousePan() {
     mouseTranslate(eye());
   }
