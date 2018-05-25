@@ -35,8 +35,15 @@ import java.util.List;
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
  * override {@link #computeCustomProjection()}.
+ * <h2>Interactivity</h2>
+ * //TODO missed. Also complete the Scene mouse top level description...
+ * Several methods that take a {@link Frame} parameter provide implement interactivity
+ * attached or detached {@link Frame}s
+ * <h3>Picking</h3>
+ * To see if a given frame grabs input call {@link #track(float, float, Frame)}.
+ * <h3>Manipulation</h3>
  * <h2>Scene graph handling</h2>
- * A graph forms a tree of {@link Frame}s which may be {@link #traverse()}, calling
+ * A graph forms a tree of attached {@link Frame}s which may be {@link #traverse()}, calling
  * {@link Frame#visit()} on each visited frame (refer to the {@link Frame} documentation).
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -746,9 +753,6 @@ public class Graph {
     for (Frame child : frame.children())
       _collect(list, child);
   }
-
-  // Input stuff
-
 
   // Timing stuff
 
@@ -2370,9 +2374,11 @@ public class Graph {
    * <p>
    * Note that only reachable frames are visited by this algorithm.
    *
-   * <b>Attention:</b> this method should be called after {@link #preDraw()} (i.e.,
-   * eye update) and before any other transformation of the modelview matrix takes place.
+   * <b>Attention:</b> this method should be called within the main event loop, just after
+   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
+   * modelview matrix takes place.
    *
+   * @see #cast(float, float)
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
@@ -2394,6 +2400,16 @@ public class Graph {
     popModelView();
   }
 
+  /**
+   * Sets the {@link #trackedFrame()}. Call this function if you want to set the tracked frame manually or
+   * {@link #cast(float, float)} to set it automatically during the graph traversal.
+   *
+   * @see #defaultFrame()
+   * @see #track(float, float, Frame)
+   * @see #cast(float, float)
+   * @see #resetTrackedFrame()
+   * @see #isTrackedFrame(Frame)
+   */
   public void setTrackedFrame(Frame frame) {
     if (frame == null) {
       System.out.println("Warning. Cannot track a null frame!");
@@ -2406,25 +2422,73 @@ public class Graph {
     _trackedFrame = frame;
   }
 
+  /**
+   * Returns the current tracked frame which is usually set by ray casting (see {@link #cast(float, float)}).
+   * May return {@code null}. Reset it with {@link #resetTrackedFrame()}.
+   *
+   * @see #defaultFrame()
+   * @see #track(float, float, Frame)
+   * @see #cast(float, float)
+   * @see #resetTrackedFrame()
+   * @see #isTrackedFrame(Frame)
+   * @see #setTrackedFrame(Frame)
+   */
   public Frame trackedFrame() {
     return _trackedFrame;
   }
 
+  /**
+   * Returns {@code true} if {@code frame} is the current {@link #trackedFrame()} and {@code false} otherwise.
+   *
+   * @see #defaultFrame()
+   * @see #track(float, float, Frame)
+   * @see #cast(float, float)
+   * @see #resetTrackedFrame()
+   * @see #setTrackedFrame(Frame)
+   */
   public boolean isTrackedFrame(Frame frame) {
     return trackedFrame() == frame;
   }
 
+  /**
+   * Resets the current {@link #trackedFrame()} so that a call to {@link #trackedFrame()} will return {@code false}.
+   * Note that {@link #cast(float, float)} will reset the tracked frame automatically.
+   *
+   * @see #trackedFrame()
+   * @see #defaultFrame()
+   * @see #track(float, float, Frame)
+   * @see #cast(float, float)
+   * @see #setTrackedFrame(Frame)
+   * @see #isTrackedFrame(Frame)
+   */
   public void resetTrackedFrame() {
     _trackedFrame = null;
   }
 
+  /**
+   * Same as {@code return trackedFrame() == null ? eye() : trackedFrame()}. Never returns {@code null}.
+   *
+   * @see #trackedFrame()
+   * @see #resetTrackedFrame()
+   * @see #track(float, float, Frame)
+   * @see #cast(float, float)
+   * @see #setTrackedFrame(Frame)
+   * @see #isTrackedFrame(Frame)
+   */
   public Frame defaultFrame() {
     return trackedFrame() == null ? eye() : trackedFrame();
   }
 
   /**
-   * Picks the frame according to the {@link Frame#precision()}.
+   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
+   * {@code false} otherwise. The frame is picked according to the {@link Frame#precision()}.
    *
+   * @see #trackedFrame()
+   * @see #resetTrackedFrame()
+   * @see #defaultFrame()
+   * @see #cast(float, float)
+   * @see #setTrackedFrame(Frame)
+   * @see #isTrackedFrame(Frame)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
@@ -2439,6 +2503,23 @@ public class Graph {
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }
 
+  /**
+   * Same as {@link #traverse()} but also sets the {@link #trackedFrame()} while traversing the frame hierarchy  and
+   * returns it. This method should be called only within your main event loop.
+   * <p>
+   * To set the {@link #trackedFrame()} the algorithm casts a ray at pixel position {@code (x, y)}
+   * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   *
+   * @see #traverse()
+   * @see #trackedFrame()
+   * @see #resetTrackedFrame()
+   * @see #defaultFrame()
+   * @see #track(float, float, Frame)
+   * @see #setTrackedFrame(Frame)
+   * @see #isTrackedFrame(Frame)
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
+   */
   public Frame cast(float x, float y) {
     resetTrackedFrame();
     for (Frame frame : _leadingFrames())
@@ -2446,6 +2527,9 @@ public class Graph {
     return trackedFrame();
   }
 
+  /**
+   * Use internally by {@link #cast(float, float)}.
+   */
   protected void _visit(Frame frame, float x, float y) {
     pushModelView();
     applyTransformation(frame);
@@ -2461,6 +2545,12 @@ public class Graph {
     popModelView();
   }
 
+  /**
+   * Same as {@code align(defaultFrame())}.
+   *
+   * @see #align(Frame)
+   * @see #defaultFrame()
+   */
   public void align() {
     align(defaultFrame());
   }
@@ -2473,6 +2563,7 @@ public class Graph {
    * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)}.
    *
    * @see #isEye(Frame)
+   * @see #defaultFrame()
    */
   public void align(Frame frame) {
     if (frame == null)
@@ -2483,6 +2574,12 @@ public class Graph {
       frame.alignWithFrame(eye());
   }
 
+  /**
+   * Same as {@code focus(defaultFrame())}.
+   *
+   * @see #focus(Frame)
+   * @see #defaultFrame()
+   */
   public void focus() {
     focus(defaultFrame());
   }
