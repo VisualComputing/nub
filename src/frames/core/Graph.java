@@ -2835,37 +2835,35 @@ public class Graph {
     frame.scale(delta >= 0 ? factor : 1 / factor);
   }
 
+  /**
+   * Rotates the {@link #defaultFrame()} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   *
+   * @see #rotate(float, float, float, Frame)
+   */
   public void rotate(float roll, float pitch, float yaw) {
     rotate(roll, pitch, yaw, defaultFrame());
   }
 
-  public void rotate(float roll, float pitch, float yaw, Frame frame) {
-    rotate(roll, pitch, yaw, 1, frame);
-  }
-
-  public void rotate(float roll, float pitch, float yaw, float sensitivity) {
-    rotate(roll, pitch, yaw, sensitivity, defaultFrame());
-  }
-
   /**
-   * Rotates the frame roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   * Rotates the {@code frame} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   *
+   * @see #rotate(float, float, float)
    */
-  public void rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
+  public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
       throw new RuntimeException("rotate(roll, pitch, yaw, sensitivity, frame) requires a non-null frame param");
-    frame.rotate(_rotate(roll, pitch, yaw, sensitivity, frame));
+    frame.rotate(_rotate(roll, pitch, yaw, frame));
   }
 
   /**
    * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
    */
-  protected Quaternion _rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
+  protected Quaternion _rotate(float roll, float pitch, float yaw, Frame frame) {
     if (is2D() && (roll != 0 || pitch != 0)) {
+      roll = 0;
+      pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    roll *= is3D() ? sensitivity : 0;
-    pitch *= is3D() ? sensitivity : 0;
-    yaw *= sensitivity;
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye(frame)) {
       return new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
