@@ -27,7 +27,7 @@ public class MouseDragInteraction extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     //scene.setFieldOfView(PI / 3);
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
@@ -95,8 +95,8 @@ public class MouseDragInteraction extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.zoom(mouseX - pmouseX);
-      //scene.scale(mouseX - pmouseX);
+      //scene.zoom(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

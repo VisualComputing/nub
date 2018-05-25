@@ -2937,7 +2937,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void mouseTranslate(Frame frame) {
-    translate(Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY)), frame);
+    translate(pApplet().mouseX- pApplet().pmouseX, pApplet().mouseY- pApplet().pmouseY, frame);
   }
 
   /*

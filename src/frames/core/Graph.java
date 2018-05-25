@@ -2694,8 +2694,10 @@ public class Graph {
   /**
    * Same as {@code zoom(delta, defaultFrame())}.
    *
-   * @see #translate(Vector, Frame)
-   * @see #translate(Vector)
+   * @see #translate(float, float, Frame)
+   * @see #translate(float, float)
+   * @see #translate(float, float, float, Frame)
+   * @see #translate(float, float, float)
    * @see #zoom(float, Frame)
    * @see #defaultFrame()
    */
@@ -2706,25 +2708,47 @@ public class Graph {
   /**
    * Same as {@code translate(new Vector(0, 0, delta), 1, frame)}.
    *
-   * @see #translate(Vector, Frame)
-   * @see #translate(Vector)
+   * @see #translate(float, float, Frame)
+   * @see #translate(float, float)
+   * @see #translate(float, float, float, Frame)
+   * @see #translate(float, float, float)
    * @see #zoom(float)
    * @see #defaultFrame()
    */
   public void zoom(float delta, Frame frame) {
-    translate(new Vector(0, 0, delta), frame);
+    translate(0, 0, delta, frame);
+  }
+
+  public void translate(float x, float y) {
+    translate(x, y, 0, defaultFrame());
   }
 
   /**
    * Same as {@code translate(vector, defaultFrame())}.
    *
-   * @see #translate(Vector, Frame)
+   * @see #translate(float, float, Frame)
+   * @see #translate(float, float)
+   * @see #translate(float, float, float, Frame)
    * @see #zoom(float, Frame)
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(Vector vector) {
-    translate(vector, defaultFrame());
+  public void translate(float x, float y, float z) {
+    translate(x, y, z, defaultFrame());
+  }
+
+  /**
+   * Same as {@code translate(vector, defaultFrame())}.
+   *
+   * @see #translate(float, float, float)
+   * @see #translate(float, float)
+   * @see #translate(float, float, float, Frame)
+   * @see #zoom(float, Frame)
+   * @see #zoom(float)
+   * @see #defaultFrame()
+   */
+  public void translate(float x, float y, Frame frame) {
+    translate(x, y, 0, frame);
   }
 
   /**
@@ -2732,15 +2756,17 @@ public class Graph {
    * kept exactly under a pointer if such a device were used to translate. The z-coordinate is mapped from
    * [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
    *
-   * @see #translate(Vector)
+   * @see #translate(float, float, Frame)
+   * @see #translate(float, float)
+   * @see #translate(float, float, float)
    * @see #zoom(float, Frame)
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(Vector vector, Frame frame) {
+  public void translate(float x, float y, float z, Frame frame) {
     if (frame == null)
       throw new RuntimeException("translate(vector, frame) requires a non-null frame param");
-    frame.translate(_translate(vector, frame));
+    frame.translate(_translate(x, y, z, frame));
   }
 
   /**
@@ -2752,12 +2778,12 @@ public class Graph {
    * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
    * [0..2*{@link #radius()} / {@link #radius()}] range.
    */
-  protected Vector _translate(Vector vector, Frame frame) {
-    if (is2D() && vector.z() != 0) {
+  protected Vector _translate(float x, float y, float z, Frame frame) {
+    if (is2D() && z != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
-      vector.setZ(0);
+      z = 0;
     }
-    Vector eyeVector = new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z());
+    Vector eyeVector = new Vector(isEye(frame) ? -x : x, (isRightHanded() ^ isEye(frame)) ? -y : y, isEye(frame) ? -z : z);
     // Scale to fit the screen relative vector displacement
     switch (type()) {
       case PERSPECTIVE:
