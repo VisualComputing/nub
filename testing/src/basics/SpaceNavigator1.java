@@ -1,6 +1,7 @@
 package basics;
 
 import frames.core.Frame;
+import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;
@@ -37,6 +38,7 @@ public class SpaceNavigator1 extends PApplet {
     openSpaceNavigator();
     scene = new Scene(this);
     scene.setFieldOfView(PI / 3);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fitBallInterpolation();
     // set the eye as the space navigator default frame
@@ -70,8 +72,8 @@ public class SpaceNavigator1 extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue(), snTrackedFrame);
-    scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI / width, snTrackedFrame);
+    scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -40 * snZPos.getValue(), snTrackedFrame);
+    //scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI / width, snTrackedFrame);
   }
 
   void spaceNavigatorPicking() {

@@ -2689,8 +2689,6 @@ public class Graph {
   // Gesture physical interface is quite nice!
   // It always maps physical (screen) space geom data respect to the eye
 
-  //TODO add proper names, classification: 2d/3d, only Eye/Frame-eye
-
   /**
    * Same as {@code zoom(delta, defaultFrame())}.
    *
@@ -2764,7 +2762,7 @@ public class Graph {
   /**
    * Translates the {@code frame} from {@code x}, {@code y} and {@code z} which are expressed in screen space.
    * The translated frame would be kept exactly under a pointer if such a device were used to translate it.
-   * The z-coordinate is mapped from [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
+   * The z-coordinate mapping is whatever you want to be.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2780,37 +2778,38 @@ public class Graph {
   }
 
   /**
-   * Interactive translation low-level implementation. Converts {@code x}, {@code y} and {@code z} which are expressed
-   * in physical space to {@link Frame#reference()} (or world coordinates if the frame reference is null).
+   * Interactive translation low-level implementation. Converts {@code x} and {@code y} screen coordinates to
+   * {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
-   * The projection onto the screen of the returned vector and {@code vector} exactly match when {@code sensitivity = 1}
-   * and {@code vector} is defined in screen coordinates (e.g., the translated frame would be kept exactly under a
-   * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
-   * [0..2*{@link #radius()} / {@link #radius()}] range.
+   * The projection onto the screen of the returned vector exactly match the screen {@code (x,y)} displacement
+   * (e.g., the translated frame would be kept exactly under a pointer if such a device were used to translate it).
+   * The z-coordinate mapping is whatever you want it to be.
    */
   protected Vector _translate(float x, float y, float z, Frame frame) {
     if (is2D() && z != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       z = 0;
     }
-    Vector eyeVector = new Vector(isEye(frame) ? -x : x, (isRightHanded() ^ isEye(frame)) ? -y : y, isEye(frame) ? -z : z);
+    x = isEye(frame) ? -x : x;
+    y = isRightHanded() ^ isEye(frame) ? -y : y;
+    z = isEye(frame) ? -z : z;
     // Scale to fit the screen relative vector displacement
     switch (type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
             eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
         //TODO check me weird to find height instead of width working (may it has to do with fov?)
-        eyeVector._vector[0] *= 2.0 * k / height();
-        eyeVector._vector[1] *= 2.0 * k / height();
+        x *= 2.0 * k / height();
+        y *= 2.0 * k / height();
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        eyeVector._vector[0] *= 2.0 * wh[0] / width();
-        eyeVector._vector[1] *= 2.0 * wh[1] / height();
+        x *= 2.0 * wh[0] / width();
+        y *= 2.0 * wh[1] / height();
         break;
     }
-    eyeVector._vector[2] *= 2 * radius() / height();
+    Vector eyeVector = new Vector(x, y, z);
     eyeVector.divide(eye().magnitude());
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
