@@ -2851,7 +2851,7 @@ public class Graph {
    */
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
-      throw new RuntimeException("rotate(roll, pitch, yaw, sensitivity, frame) requires a non-null frame param");
+      throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
     frame.rotate(_rotate(roll, pitch, yaw, frame));
   }
 
@@ -2880,24 +2880,59 @@ public class Graph {
     }
   }
 
-  public void spin(Point point1, Point point2) {
-    spin(point1, point2, defaultFrame());
+  /**
+   * Same as {@code spin(tail, head, defaultFrame())}.
+   *
+   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point, Frame)
+   * @see #spin(Point, Point, float)
+   */
+  public void spin(Point tail, Point head) {
+    spin(tail, head, defaultFrame());
   }
 
-  public void spin(Point point1, Point point2, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, 1, frame), frame);
+  /**
+   * Same as {@code spin(tail, head, 1, frame)}.
+   *
+   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point)
+   * @see #spin(Point, Point, float)
+   */
+  public void spin(Point tail, Point head, Frame frame) {
+    spin(tail, head, 1, frame);
   }
 
-  public void spin(Point point1, Point point2, float sensitivity) {
-    spin(point1, point2, sensitivity, defaultFrame());
+  /**
+   * Same as {@code spin(tail, head, sensitivity, defaultFrame())}.
+   *
+   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point)
+   * @see #spin(Point, Point, Frame)
+   * @see #defaultFrame()
+   */
+  public void spin(Point tail, Point head, float sensitivity) {
+    spin(tail, head, sensitivity, defaultFrame());
   }
 
-  public void spin(Point point1, Point point2, float sensitivity, Frame frame) {
+  /**
+   * Rotates the {@code frame} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
+   * {@code sensitivity} controls the gesture strength. The center of the rotation is {@link #anchor()} if the frame is
+   * the {@link #eye()} or {@link Frame#position()} otherwise.
+   * <p>
+   * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
+   * orientation using a mouse.
+   * <p>
+   * Override this class an call {@link #_spin(Point, Point, Point, float, Frame)} if you want to define a different
+   * rotation center (rare).
+   *
+   * @see #spin(Point, Point)
+   * @see #spin(Point, Point, Frame)
+   * @see #spin(Point, Point, float)
+   */
+  public void spin(Point tail, Point head, float sensitivity, Frame frame) {
     if (frame == null)
       throw new RuntimeException("spin(point1, point2, sensitivity, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, sensitivity, frame), frame);
+    spin(_spin(tail, head, sensitivity, frame), frame);
   }
 
   /**
@@ -2911,7 +2946,8 @@ public class Graph {
   }
 
   /**
-   * Computes the classical arcball quaternion.
+   * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
+   * three-dimensional orientation using a mouse.
    */
   protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
     float cx = center.x();

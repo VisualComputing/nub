@@ -1,7 +1,6 @@
 package basics;
 
 import frames.core.Frame;
-import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;
@@ -73,7 +72,7 @@ public class SpaceNavigator1 extends PApplet {
 
   void spaceNavigatorInteraction() {
     scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -40 * snZPos.getValue(), snTrackedFrame);
-    scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI / width, snTrackedFrame);
+    scene.rotate(snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, -snZRot.getValue() * 10 * PI / width, snTrackedFrame);
   }
 
   void spaceNavigatorPicking() {
