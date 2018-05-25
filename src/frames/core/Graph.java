@@ -2692,25 +2692,33 @@ public class Graph {
   //TODO add proper names, classification: 2d/3d, only Eye/Frame-eye
 
   /**
-   * Same as {@code translate(vector, sensitivity, defaultFrame())}.
+   * Same as {@code zoom(delta, defaultFrame())}.
    *
-   * @see #translate(Vector, float, Frame)
    * @see #translate(Vector, Frame)
    * @see #translate(Vector)
    * @see #zoom(float, Frame)
+   * @see #defaultFrame()
+   */
+  public void zoom(float delta) {
+    zoom(delta, defaultFrame());
+  }
+
+  /**
+   * Same as {@code translate(new Vector(0, 0, delta), 1, frame)}.
+   *
+   * @see #translate(Vector, Frame)
+   * @see #translate(Vector)
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(Vector vector, float sensitivity) {
-    translate(vector, sensitivity, defaultFrame());
+  public void zoom(float delta, Frame frame) {
+    translate(new Vector(0, 0, delta), frame);
   }
 
   /**
    * Same as {@code translate(vector, defaultFrame())}.
    *
-   * @see #translate(Vector, float, Frame)
    * @see #translate(Vector, Frame)
-   * @see #translate(Vector, float)
    * @see #zoom(float, Frame)
    * @see #zoom(float)
    * @see #defaultFrame()
@@ -2724,8 +2732,6 @@ public class Graph {
    * kept exactly under a pointer if such a device were used to translate. The z-coordinate is mapped from
    * [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
    *
-   * @see #translate(Vector, float, Frame)
-   * @see #translate(Vector, float)
    * @see #translate(Vector)
    * @see #zoom(float, Frame)
    * @see #zoom(float)
@@ -2738,36 +2744,6 @@ public class Graph {
   }
 
   /**
-   * Translates the {@code frame} from {@code vector} which is expressed in physical space.
-   * <p>
-   * The projection onto the screen of the frame translation and {@code vector} exactly match when {@code sensitivity = 1}
-   * and {@code vector} is defined in screen coordinates (e.g., the translated frame would be kept exactly under a
-   * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
-   * [0..2*{@link #radius()} / {@link #radius()}] range.
-   *
-   * @see #translate(Vector, Frame)
-   * @see #translate(Vector, float)
-   * @see #translate(Vector)
-   * @see #zoom(float, Frame)
-   * @see #zoom(float)
-   * @see #defaultFrame()
-   */
-  public void translate(Vector vector, float sensitivity, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("translate(vector, sensitivity, frame) requires a non-null frame param");
-    frame.translate(_translate(vector, sensitivity, frame));
-  }
-
-  /**
-   * Same as {@code return _translate(vector, 1, frame)}.
-   *
-   * @see #translate(Vector, float, Frame)
-   */
-  protected Vector _translate(Vector vector, Frame frame) {
-    return _translate(vector, 1, frame);
-  }
-
-  /**
    * Interactive translation low-level implementation. Converts {@code vector} expressed in physical space to
    * {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
@@ -2776,12 +2752,12 @@ public class Graph {
    * pointer if such a device were used to translate it). The z-coordinate is mapped from [0..{@link #height()}] to the
    * [0..2*{@link #radius()} / {@link #radius()}] range.
    */
-  protected Vector _translate(Vector vector, float sensitivity, Frame frame) {
+  protected Vector _translate(Vector vector, Frame frame) {
     if (is2D() && vector.z() != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       vector.setZ(0);
     }
-    Vector eyeVector = Vector.multiply(new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z()), sensitivity);
+    Vector eyeVector = new Vector(isEye(frame) ? -vector.x() : vector.x(), (isRightHanded() ^ isEye(frame)) ? -vector.y() : vector.y(), isEye(frame) ? -vector.z() : vector.z());
     // Scale to fit the screen relative vector displacement
     switch (type()) {
       case PERSPECTIVE:
@@ -2810,32 +2786,6 @@ public class Graph {
   public void scale(float delta, Frame frame) {
     float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
     frame.scale(delta >= 0 ? factor : 1 / factor);
-  }
-
-  /**
-   * Same as {@code zoom(delta, defaultFrame())}.
-   *
-   * @see #translate(Vector, Frame)
-   * @see #translate(Vector, float)
-   * @see #translate(Vector)
-   * @see #zoom(float, Frame)
-   * @see #defaultFrame()
-   */
-  public void zoom(float delta) {
-    zoom(delta, defaultFrame());
-  }
-
-  /**
-   * Same as {@code translate(new Vector(0, 0, delta), 1, frame)}.
-   *
-   * @see #translate(Vector, Frame)
-   * @see #translate(Vector, float)
-   * @see #translate(Vector)
-   * @see #zoom(float)
-   * @see #defaultFrame()
-   */
-  public void zoom(float delta, Frame frame) {
-    translate(new Vector(0, 0, delta), 1, frame);
   }
 
   public void rotate(float roll, float pitch, float yaw) {
