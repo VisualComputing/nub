@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;

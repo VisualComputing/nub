@@ -1,7 +1,6 @@
 package basics;
 
 import frames.core.Frame;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;

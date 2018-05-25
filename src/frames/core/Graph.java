@@ -2706,7 +2706,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(new Vector(0, 0, delta), 1, frame)}.
+   * Same as {@code translate(0, 0, delta, frame)}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2719,12 +2719,22 @@ public class Graph {
     translate(0, 0, delta, frame);
   }
 
+  /**
+   * Same as {@code translate(x, y, 0, defaultFrame())}.
+   *
+   * @see #translate(float, float, Frame)
+   * @see #translate(float, float, float, Frame)
+   * @see #translate(float, float, float)
+   * @see #zoom(float)
+   * @see #zoom(float, Frame)
+   * @see #defaultFrame()
+   */
   public void translate(float x, float y) {
     translate(x, y, 0, defaultFrame());
   }
 
   /**
-   * Same as {@code translate(vector, defaultFrame())}.
+   * Same as {@code translate(x, y, z, defaultFrame())}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2738,7 +2748,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(vector, defaultFrame())}.
+   * Same as {@code translate(x, y, 0, frame)}.
    *
    * @see #translate(float, float, float)
    * @see #translate(float, float)
@@ -2752,9 +2762,9 @@ public class Graph {
   }
 
   /**
-   * Translates the {@code frame} from {@code vector} which is expressed in screen space. The translated frame would be
-   * kept exactly under a pointer if such a device were used to translate. The z-coordinate is mapped from
-   * [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
+   * Translates the {@code frame} from {@code x}, {@code y} and {@code z} which are expressed in screen space.
+   * The translated frame would be kept exactly under a pointer if such a device were used to translate it.
+   * The z-coordinate is mapped from [0..{@link #height()}] to the [0..2*{@link #radius()} / {@link #radius()}] range.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2770,8 +2780,8 @@ public class Graph {
   }
 
   /**
-   * Interactive translation low-level implementation. Converts {@code vector} expressed in physical space to
-   * {@link Frame#reference()} (or world coordinates if the frame reference is null).
+   * Interactive translation low-level implementation. Converts {@code x}, {@code y} and {@code z} which are expressed
+   * in physical space to {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
    * The projection onto the screen of the returned vector and {@code vector} exactly match when {@code sensitivity = 1}
    * and {@code vector} is defined in screen coordinates (e.g., the translated frame would be kept exactly under a
