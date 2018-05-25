@@ -2718,7 +2718,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(x, y, 0, defaultFrame())}.
+   * Same as {@code translate(dx, dy, 0, defaultFrame())}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float, float, Frame)
@@ -2727,12 +2727,12 @@ public class Graph {
    * @see #zoom(float, Frame)
    * @see #defaultFrame()
    */
-  public void translate(float x, float y) {
-    translate(x, y, 0, defaultFrame());
+  public void translate(float dx, float dy) {
+    translate(dx, dy, 0, defaultFrame());
   }
 
   /**
-   * Same as {@code translate(x, y, z, defaultFrame())}.
+   * Same as {@code translate(dx, dy, dz, defaultFrame())}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2741,12 +2741,12 @@ public class Graph {
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(float x, float y, float z) {
-    translate(x, y, z, defaultFrame());
+  public void translate(float dx, float dy, float dz) {
+    translate(dx, dy, dz, defaultFrame());
   }
 
   /**
-   * Same as {@code translate(x, y, 0, frame)}.
+   * Same as {@code translate(dx, dy, 0, frame)}.
    *
    * @see #translate(float, float, float)
    * @see #translate(float, float)
@@ -2755,12 +2755,12 @@ public class Graph {
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(float x, float y, Frame frame) {
-    translate(x, y, 0, frame);
+  public void translate(float dx, float dy, Frame frame) {
+    translate(dx, dy, 0, frame);
   }
 
   /**
-   * Translates the {@code frame} from {@code x}, {@code y} and {@code z} which are expressed in screen space.
+   * Translates the {@code frame} according to {@code dx}, {@code dy} and {@code dz} which are expressed in screen space.
    * The translated frame would be kept exactly under a pointer if such a device were used to translate it.
    * The z-coordinate mapping is whatever you want to be.
    *
@@ -2771,53 +2771,65 @@ public class Graph {
    * @see #zoom(float)
    * @see #defaultFrame()
    */
-  public void translate(float x, float y, float z, Frame frame) {
+  public void translate(float dx, float dy, float dz, Frame frame) {
     if (frame == null)
       throw new RuntimeException("translate(vector, frame) requires a non-null frame param");
-    frame.translate(_translate(x, y, z, frame));
+    frame.translate(_translate(dx, dy, dz, frame));
   }
 
   /**
-   * Interactive translation low-level implementation. Converts {@code x} and {@code y} screen coordinates to
+   * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space
    * {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
-   * The projection onto the screen of the returned vector exactly match the screen {@code (x,y)} displacement
+   * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
    * (e.g., the translated frame would be kept exactly under a pointer if such a device were used to translate it).
    * The z-coordinate mapping is whatever you want it to be.
    */
-  protected Vector _translate(float x, float y, float z, Frame frame) {
-    if (is2D() && z != 0) {
+  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
+    if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
-      z = 0;
+      dz = 0;
     }
-    x = isEye(frame) ? -x : x;
-    y = isRightHanded() ^ isEye(frame) ? -y : y;
-    z = isEye(frame) ? -z : z;
+    dx = isEye(frame) ? -dx : dx;
+    dy = isRightHanded() ^ isEye(frame) ? -dy : dy;
+    dz = isEye(frame) ? -dz : dz;
     // Scale to fit the screen relative vector displacement
     switch (type()) {
       case PERSPECTIVE:
         float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
             eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
         //TODO check me weird to find height instead of width working (may it has to do with fov?)
-        x *= 2.0 * k / height();
-        y *= 2.0 * k / height();
+        dx *= 2.0 * k / height();
+        dy *= 2.0 * k / height();
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        x *= 2.0 * wh[0] / width();
-        y *= 2.0 * wh[1] / height();
+        dx *= 2.0 * wh[0] / width();
+        dy *= 2.0 * wh[1] / height();
         break;
     }
-    Vector eyeVector = new Vector(x, y, z);
+    Vector eyeVector = new Vector(dx, dy, dz);
     eyeVector.divide(eye().magnitude());
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
+  /**
+   * Same as {@code scale(delta, defaultFrame())}.
+   *
+   * @see #scale(float, Frame)
+   * @see #defaultFrame()
+   */
   public void scale(float delta) {
     scale(delta, defaultFrame());
   }
 
+  /**
+   * Scales the {@code frame} according to {@code delta}. Note that if {@code frame} is the {@link #eye()}
+   * this call simply changes the {@link #fieldOfView()}.
+   *
+   * @see #scale(float)
+   */
   public void scale(float delta, Frame frame) {
     float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
     frame.scale(delta >= 0 ? factor : 1 / factor);
@@ -2828,25 +2840,26 @@ public class Graph {
   }
 
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
-    frame.rotate(_rotate(roll, pitch, yaw, frame));
-  }
-
-  protected Quaternion _rotate(float roll, float pitch, float yaw, Frame frame) {
-    return _rotate(roll, pitch, yaw, 1, frame);
+    rotate(roll, pitch, yaw, 1, frame);
   }
 
   public void rotate(float roll, float pitch, float yaw, float sensitivity) {
     rotate(roll, pitch, yaw, sensitivity, defaultFrame());
   }
 
+  /**
+   * Rotates the frame around x, y and z axes (roll, pitch and yaw respectively) defined in screen space.
+   * Angles are given in radians.
+   */
   public void rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
     if (frame == null)
       throw new RuntimeException("rotate(roll, pitch, yaw, sensitivity, frame) requires a non-null frame param");
     frame.rotate(_rotate(roll, pitch, yaw, sensitivity, frame));
   }
 
+  /**
+   * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
+   */
   protected Quaternion _rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
@@ -2877,11 +2890,7 @@ public class Graph {
   public void spin(Point point1, Point point2, Frame frame) {
     if (frame == null)
       throw new RuntimeException("spin(point1, point2, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, frame), frame);
-  }
-
-  protected Quaternion _spin(Point point1, Point point2, Frame frame) {
-    return _spin(point1, point2, 1, frame);
+    spin(_spin(point1, point2, 1, frame), frame);
   }
 
   public void spin(Point point1, Point point2, float sensitivity) {
@@ -2894,35 +2903,19 @@ public class Graph {
     spin(_spin(point1, point2, sensitivity, frame), frame);
   }
 
+  /**
+   * Same as {@code return _spin(point1, point2, center, sensitivity, frame)} where {@code center} is {@link #anchor()}
+   * if the frame is the {@link #eye()} or {@link Frame#position()} otherwise.
+   */
   protected Quaternion _spin(Point point1, Point point2, float sensitivity, Frame frame) {
-    Vector center = screenLocation(isEye(frame) ? anchor() : frame.position());
-    return _spin(point1, point2, new Point(center.x(), center.y()), sensitivity, frame);
+    Vector vector = screenLocation(isEye(frame) ? anchor() : frame.position());
+    Point center = new Point(vector.x(), vector.y());
+    return _spin(point1, point2, center, sensitivity, frame);
   }
 
-  public void spin(Point point1, Point point2, Point center) {
-    spin(point1, point2, center, defaultFrame());
-  }
-
-  public void spin(Point point1, Point point2, Point center, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, center, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, center, frame), frame);
-  }
-
-  protected Quaternion _spin(Point point1, Point point2, Point center, Frame frame) {
-    return _spin(point1, point2, center, 1, frame);
-  }
-
-  public void spin(Point point1, Point point2, Point center, float sensitivity) {
-    spin(point1, point2, center, sensitivity, defaultFrame());
-  }
-
-  public void spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, center, sensitivity, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, center, sensitivity, frame), frame);
-  }
-
+  /**
+   * Computes the classical arcball quaternion.
+   */
   protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
     float cx = center.x();
     float cy = center.y();
@@ -2984,18 +2977,28 @@ public class Graph {
 
   // only 3d eye
 
+  /**
+   * Same as {@code lookAround(deltaX, deltaY, 1)}.
+   *
+   * @see #lookAround(float, float, float)
+   */
   public void lookAround(float deltaX, float deltaY) {
-    eye().rotate(_lookAround(deltaX, deltaY));
+    lookAround(deltaX, deltaY, 1);
   }
 
-  protected Quaternion _lookAround(float deltaX, float deltaY) {
-    return _lookAround(deltaX, deltaY, 1);
-  }
-
+  /**
+   * Look around with the eye (without translating it) according angular displacements {@code deltaX} and {@code deltaY}
+   * expressed in radians.
+   *
+   * @see #lookAround(float, float)
+   */
   public void lookAround(float deltaX, float deltaY, float sensitivity) {
     eye().rotate(_lookAround(deltaX, deltaY, sensitivity));
   }
 
+  /**
+   * Look around with the eye without moving while preserving the eye {@link Frame#yAxis()} when the action began.
+   */
   protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
@@ -3041,40 +3044,51 @@ public class Graph {
   }
   // */
 
+  /**
+   * Same as {@code rotateCAD(roll, pitch, 1)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   * @see #rotateCAD(float, float, float)
+   * @see #rotateCAD(float, float, Vector)
+   */
   public void rotateCAD(float roll, float pitch) {
-    spin(_rotateCAD(roll, pitch), eye());
-  }
-
-  protected Quaternion _rotateCAD(float roll, float pitch) {
-    return _rotateCAD(roll, pitch, new Vector(0, 1, 0), 1);
-  }
-
-  public void rotateCAD(float roll, float pitch, Vector upVector) {
-    spin(_rotateCAD(roll, pitch, upVector), eye());
-  }
-
-  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector) {
-    return _rotateCAD(roll, pitch, upVector, 1);
-  }
-
-  public void rotateCAD(float roll, float pitch, float sensitivity) {
-    spin(_rotateCAD(roll, pitch, sensitivity), eye());
-  }
-
-  protected Quaternion _rotateCAD(float roll, float pitch, float sensitivity) {
-    return _rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
+    rotateCAD(roll, pitch, 1);
   }
 
   /**
-   * Defines an axis around which the eye rotates. The eye can rotate left or right around
+   * Same as {@code rotateCAD(roll, pitch, upVector, 1)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   * @see #rotateCAD(float, float, float)
+   * @see #rotateCAD(float, float)
+   */
+  public void rotateCAD(float roll, float pitch, Vector upVector) {
+    rotateCAD(roll, pitch, upVector, 1);
+  }
+
+  /**
+   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity)}.
+   *
+   * @see #rotateCAD(float, float, Vector, float)
+   * @see #rotateCAD(float, float, Vector)
+   * @see #rotateCAD(float, float)
+   */
+  public void rotateCAD(float roll, float pitch, float sensitivity) {
+    rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
+  }
+
+  /**
+   * Defines an axis which the eye rotates around. The eye can rotate left or right around
    * this axis. It can also be moved up or down to show the 'top' and 'bottom' views of the scene.
    * As a result, the {@code upVector} will always appear vertical in the scene, and the horizon
    * is preserved and stays projected along the eye's horizontal axis.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()}, first.
+   * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()} first.
    *
-   * @see #_rotateCAD(float, float, Vector, float)
+   * @see #rotateCAD(float, float, float)
+   * @see #rotateCAD(float, float, Vector)
+   * @see #rotateCAD(float, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
     spin(_rotateCAD(roll, pitch, upVector, sensitivity), eye());
@@ -3097,6 +3111,26 @@ public class Graph {
   /*
   // nice interactivity examples: spinning (spin + timer), moveForward, moveBackward, spinX/Y/Z
   // screenRotate/Translate.
+
+  public void spin(Point point1, Point point2, Point center) {
+    spin(point1, point2, center, defaultFrame());
+  }
+
+  public void spin(Point point1, Point point2, Point center, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, center, frame) requires a non-null frame param");
+    spin(_spin(point1, point2, center, 1, frame), frame);
+  }
+
+  public void spin(Point point1, Point point2, Point center, float sensitivity) {
+    spin(point1, point2, center, sensitivity, defaultFrame());
+  }
+
+  public void spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
+    if (frame == null)
+      throw new RuntimeException("spin(point1, point2, center, sensitivity, frame) requires a non-null frame param");
+    spin(_spin(point1, point2, center, sensitivity, frame), frame);
+  }
 
   public void spinX(float roll) {
     spinX(roll, 1);

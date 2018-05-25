@@ -73,7 +73,7 @@ public class SpaceNavigator1 extends PApplet {
 
   void spaceNavigatorInteraction() {
     scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -40 * snZPos.getValue(), snTrackedFrame);
-    //scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI / width, snTrackedFrame);
+    scene.rotate(snXRot.getValue(), snYRot.getValue(), -snZRot.getValue(), 10 * PI / width, snTrackedFrame);
   }
 
   void spaceNavigatorPicking() {
