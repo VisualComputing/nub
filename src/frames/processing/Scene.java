@@ -2991,37 +2991,43 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Computes the angular displacements in {@link #lookAround(float, float, float)} according to the current and
-   * previous mouse position.
+   * Computes the angular displacements in {@link #lookAround(float, float)} according to the current and
+   * previous mouse position and modulates them according to {@code sensitivity}.
    *
-   * @see #lookAround(float, float, float)
+   * @see #lookAround(float, float)
    */
   public void mouseLookAround(float sensitivity) {
     Vector delta = Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY));
-    lookAround(delta.x(), delta.y(), sensitivity);
+    lookAround(delta.x() * sensitivity, delta.y() * sensitivity);
   }
 
   /**
-   * Same as {@code mouseCAD(PI / PApplet.max(width(), height()))}.
+   * Same as {@code mouseCAD(new Vector(0, 1, 0))}.
    *
+   * @see #mouseCAD(Vector)
    * @see #mouseCAD(float)
+   * @see #mouseCAD(Vector, float)
    */
   public void mouseCAD() {
-    mouseCAD(PI / PApplet.max(width(), height()));
+    mouseCAD(new Vector(0, 1, 0));
   }
 
   /**
-   * Same as {@code rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, sensitivity)}.
+   * Same as {@code mouseCAD(new Vector(0, 1, 0), sensitivity)}.
    *
-   * @see #rotateCAD(float, float, float)
+   * @see #mouseCAD()
+   * @see #mouseCAD(Vector)
+   * @see #mouseCAD(Vector, float)
    */
   public void mouseCAD(float sensitivity) {
-    rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, sensitivity);
+    mouseCAD(new Vector(0, 1, 0), sensitivity);
   }
 
   /**
    * Same as {@code mouseCAD(upVector, PI / PApplet.max(width(), height()))}.
    *
+   * @see #mouseCAD()
+   * @see #mouseCAD(float)
    * @see #mouseCAD(Vector, float)
    */
   public void mouseCAD(Vector upVector) {
@@ -3029,12 +3035,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, upVector, sensitivity)}.
+   * Same as {@code rotateCAD((pApplet().mouseX - pApplet().pmouseX) * sensitivity, (pApplet().mouseY - pApplet().pmouseY) * sensitivity, upVector)}.
    *
    * @see #rotateCAD(float, float, Vector)
+   * @see #mouseCAD()
+   * @see #mouseCAD(Vector)
+   * @see #mouseCAD(float)
    */
   public void mouseCAD(Vector upVector, float sensitivity) {
-    rotateCAD(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, upVector, sensitivity);
+    rotateCAD((pApplet().mouseX - pApplet().pmouseX) * sensitivity, (pApplet().mouseY - pApplet().pmouseY) * sensitivity, upVector);
   }
 
   /*

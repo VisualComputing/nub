@@ -2848,8 +2848,7 @@ public class Graph {
   }
 
   /**
-   * Rotates the frame around x, y and z axes (roll, pitch and yaw respectively) defined in screen space.
-   * Angles are given in radians.
+   * Rotates the frame roll, pitch and yaw radians around screen space x, y and z axes, respectively.
    */
   public void rotate(float roll, float pitch, float yaw, float sensitivity, Frame frame) {
     if (frame == null)
@@ -2932,7 +2931,7 @@ public class Graph {
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
-    // 2D is ad-hoc which seems to arrived everywhere over the place (see _translate too)!
+    // 2D is ad-hoc :p
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
     if (!isEye(frame)) {
@@ -2978,28 +2977,17 @@ public class Graph {
   // only 3d eye
 
   /**
-   * Same as {@code lookAround(deltaX, deltaY, 1)}.
-   *
-   * @see #lookAround(float, float, float)
+   * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
+   * expressed in radians.
    */
   public void lookAround(float deltaX, float deltaY) {
-    lookAround(deltaX, deltaY, 1);
+    eye().rotate(_lookAround(deltaX, deltaY));
   }
 
   /**
-   * Look around with the eye (without translating it) according angular displacements {@code deltaX} and {@code deltaY}
-   * expressed in radians.
-   *
-   * @see #lookAround(float, float)
+   * Look around without moving the eye while preserving its {@link Frame#yAxis()} when the action began.
    */
-  public void lookAround(float deltaX, float deltaY, float sensitivity) {
-    eye().rotate(_lookAround(deltaX, deltaY, sensitivity));
-  }
-
-  /**
-   * Look around with the eye without moving while preserving the eye {@link Frame#yAxis()} when the action began.
-   */
-  protected Quaternion _lookAround(float deltaX, float deltaY, float sensitivity) {
+  protected Quaternion _lookAround(float deltaX, float deltaY) {
     if (is2D()) {
       System.out.println("Warning: lookAround is only available in 3D");
       return new Quaternion();
@@ -3009,10 +2997,8 @@ public class Graph {
       _lookAroundCount = this.frameCount();
     }
     _lookAroundCount++;
-    deltaX *= -sensitivity;
-    deltaY *= sensitivity;
     Quaternion rotX = new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -deltaY : deltaY);
-    Quaternion rotY = new Quaternion(eye().displacement(_upVector), deltaX);
+    Quaternion rotY = new Quaternion(eye().displacement(_upVector), -deltaX);
     return Quaternion.multiply(rotY, rotX);
   }
 
@@ -3045,36 +3031,12 @@ public class Graph {
   // */
 
   /**
-   * Same as {@code rotateCAD(roll, pitch, 1)}.
+   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0))}.
    *
-   * @see #rotateCAD(float, float, Vector, float)
-   * @see #rotateCAD(float, float, float)
    * @see #rotateCAD(float, float, Vector)
    */
   public void rotateCAD(float roll, float pitch) {
-    rotateCAD(roll, pitch, 1);
-  }
-
-  /**
-   * Same as {@code rotateCAD(roll, pitch, upVector, 1)}.
-   *
-   * @see #rotateCAD(float, float, Vector, float)
-   * @see #rotateCAD(float, float, float)
-   * @see #rotateCAD(float, float)
-   */
-  public void rotateCAD(float roll, float pitch, Vector upVector) {
-    rotateCAD(roll, pitch, upVector, 1);
-  }
-
-  /**
-   * Same as {@code rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity)}.
-   *
-   * @see #rotateCAD(float, float, Vector, float)
-   * @see #rotateCAD(float, float, Vector)
-   * @see #rotateCAD(float, float)
-   */
-  public void rotateCAD(float roll, float pitch, float sensitivity) {
-    rotateCAD(roll, pitch, new Vector(0, 1, 0), sensitivity);
+    rotateCAD(roll, pitch, new Vector(0, 1, 0));
   }
 
   /**
@@ -3086,24 +3048,20 @@ public class Graph {
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
    * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()} first.
    *
-   * @see #rotateCAD(float, float, float)
-   * @see #rotateCAD(float, float, Vector)
    * @see #rotateCAD(float, float)
    */
-  public void rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
-    spin(_rotateCAD(roll, pitch, upVector, sensitivity), eye());
+  public void rotateCAD(float roll, float pitch, Vector upVector) {
+    spin(_rotateCAD(roll, pitch, upVector), eye());
   }
 
   /**
-   * Computes and returns the quaternion used by {@link #rotateCAD(float, float, Vector, float)}.
+   * Computes and returns the quaternion used by {@link #rotateCAD(float, float, Vector)}.
    */
-  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector, float sensitivity) {
+  protected Quaternion _rotateCAD(float roll, float pitch, Vector upVector) {
     if (is2D()) {
       System.out.println("Warning: rotateCAD is only available in 3D");
       return new Quaternion();
     }
-    roll *= sensitivity;
-    pitch *= sensitivity;
     Vector eyeUp = eye().displacement(upVector);
     return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
   }

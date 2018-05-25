@@ -14,7 +14,7 @@ import processing.event.MouseEvent;
 public class MouseMoveInteraction extends PApplet {
   Scene scene;
   Shape shape1, shape2;
-  boolean lookAround;
+  boolean lookAround = true;
 
   public void settings() {
     size(1600, 800, P3D);
