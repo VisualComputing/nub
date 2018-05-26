@@ -45,11 +45,11 @@ public class MouseDragInteraction extends PApplet {
       }
     };
     shape1.setRotation(Quaternion.random());
-    shape1.translate(-375, 175, -275);
+    shape1.translate(-375, 175);
 
     shape2 = new Shape(shape1);
     shape2.setGraphics(shape());
-    shape2.translate(275, 275, 275);
+    shape2.translate(275, 275);
 
     randomVector = Vector.random();
     randomVector.setMagnitude(scene.radius() * 0.5f);

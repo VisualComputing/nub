@@ -2859,7 +2859,7 @@ public class Graph {
   /**
    * Translates the {@code frame} according to {@code dx}, {@code dy} and {@code dz} which are expressed in screen space.
    * The translated frame would be kept exactly under a pointer if such a device were used to translate it.
-   * The z-coordinate mapping is whatever you want to be.
+   * The z-coordinate is mapped from [0..{@code min(width(), height())}] to the [0..2*{@link #radius()}}] range.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float)
@@ -2875,14 +2875,23 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), frame)}.
+   *
+   * @see #_translate(float, float, float, int, Frame)
+   */
+  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
+    return _translate(dx, dy, dz, Math.min(width(), height()), frame);
+  }
+
+  /**
    * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space
    * {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
    * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
    * (e.g., the translated frame would be kept exactly under a pointer if such a device were used to translate it).
-   * The z-coordinate mapping is whatever you want it to be.
+   * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
    */
-  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
+  protected Vector _translate(float dx, float dy, float dz, int zMax, Frame frame) {
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
@@ -2906,8 +2915,7 @@ public class Graph {
         dy *= 2.0 * wh[1] / height();
         break;
     }
-    Vector eyeVector = new Vector(dx, dy, dz);
-    eyeVector.divide(eye().magnitude());
+    Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz * 2 * radius() / zMax);
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
