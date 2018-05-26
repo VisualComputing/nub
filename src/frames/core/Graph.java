@@ -60,6 +60,7 @@ import java.util.List;
  * public void mouseTranslate(Frame frame) {
  *   translate(deltaMouseX, deltaMouseY, frame);
  * }
+ * }
  * </pre>
  * <h3>Picking</h3>
  * To set a graph tracked frame call {@link #setTrackedFrame(Frame)} and note that
