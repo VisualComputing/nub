@@ -36,15 +36,53 @@ import java.util.List;
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
  * override {@link #computeCustomProjection()}.
  * <h2>Interactivity</h2>
- * //TODO missed. Also complete the Scene mouse top level description...
- * Several methods that take a {@link Frame} parameter provide implement interactivity
- * attached or detached {@link Frame}s
+ * Several methods taking a {@link Frame} parameter provide interactivity to (both, attached
+ * or detached) {@link Frame}s from any input source, such as
+ * {@link #translate(float, float, float, Frame)}, {@link #rotate(float, float, float, Frame)}
+ * and {@link #scale(float, Frame)}. These functions are overloaded to bypass the frame param,
+ * thus acting upon a {@link #defaultFrame()}: {@link #translate(float, float, float)},
+ * {@link #rotate(float, float, float)} and {@link #scale(float)}.
+ * <p>
+ * Some interactivity methods are only available for the {@link #eye()} and hence they don't
+ * take a frame parameter, such as {@link #lookAround(float, float)} or
+ * {@link #rotateCAD(float, float)}.
+ * <h3>Implementing a <a href="https://en.wikipedia.org/wiki/Human_interface_device">
+ * Human Interface Device (HID)</a></h3>
+ * The above interactivity API is HID agnostic, i.e., all that third-parties implementing a
+ * specific HID require is to conform to their method signatures. For example, the following
+ * two functions would implement translation with a mouse:
+ * <pre>
+ * {@code
+ * public void mouseTranslate() {
+ *   mouseTranslate(defaultFrame());
+ * }
+ *
+ * public void mouseTranslate(Frame frame) {
+ *   translate(deltaMouseX, deltaMouseY, frame);
+ * }
+ * </pre>
  * <h3>Picking</h3>
- * To see if a given frame grabs input call {@link #track(float, float, Frame)}.
- * <h3>Manipulation</h3>
+ * To set a graph tracked frame call {@link #setTrackedFrame(Frame)} and note that
+ * the {@link #defaultFrame()} is a shortcut to retrieve the {@link #trackedFrame()}
+ * or the {@link #eye()}, when the former is {@code null}.
+ * <p>
+ * To check if a given frame would be picked with a ray casted at a given screen position
+ * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
+ * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
+ * <p>
+ * Note also that picking with ray casting may be performed automatically during the graph
+ * traversal (see the next Section).
  * <h2>Scene graph handling</h2>
- * A graph forms a tree of attached {@link Frame}s which may be {@link #traverse()}, calling
- * {@link Frame#visit()} on each visited frame (refer to the {@link Frame} documentation).
+ * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
+ * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
+ * documentation).
+ * <p>
+ * Using {@link #cast(float, float)}, instead of {@link #traverse()}, will additionally
+ * cast a ray and test it against each visited frame during traversal to automatically
+ * update the {@link #trackedFrame()}, and hence the  {@link #defaultFrame()} too (i.e.,
+ * without the need to explicitly be calling {@link #track(float, float, Frame)} and
+ * {@link #setTrackedFrame(Frame)}).
+ * <p>
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
  * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isReachable(Frame)},
@@ -3070,7 +3108,7 @@ public class Graph {
     Vector p2 = new Vector(dx, dy, _projectOnBall(dx, dy));
     // Approximation of rotation angle Should be divided by the projectOnBall size, but it is 1.0
     Vector axis = p2.cross(p1);
-    // 2D is ad-hoc :p
+    // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
     if (!isEye(frame)) {

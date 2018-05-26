@@ -37,7 +37,6 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * //TODO add mouse...
  * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
  *
  * <h2>Usage</h2>
