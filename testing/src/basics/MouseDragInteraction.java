@@ -95,7 +95,7 @@ public class MouseDragInteraction extends PApplet {
       scene.mouseTranslate();
     else
       scene.zoom(mouseX - pmouseX);
-      //scene.scale(mouseX - pmouseX);
+    //scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
