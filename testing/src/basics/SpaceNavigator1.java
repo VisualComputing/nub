@@ -11,6 +11,7 @@ import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+// The space navigator uses a right-handed coordinate system
 public class SpaceNavigator1 extends PApplet {
   ControlIO control;
   ControlDevice device; // my SpaceNavigator1
@@ -55,7 +56,7 @@ public class SpaceNavigator1 extends PApplet {
     PShape fig = createShape(BOX, 150);
     fig.setStroke(color(0, 255, 0));
     fig.setStrokeWeight(3);
-    fig.setFill(color(random(0, 255), random(0, 255), random(0, 255), 125));
+    fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
     return fig;
   }
 
@@ -71,8 +72,16 @@ public class SpaceNavigator1 extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue(), snTrackedFrame);
-    scene.rotate(snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, -snZRot.getValue() * 10 * PI / width, snTrackedFrame);
+    //scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue(), snTrackedFrame);
+    //scene.rotate(snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width, snTrackedFrame);
+    println(snXRot.getValue());
+    // eye in '1st person'
+    //scene.translate(10*snXPos.getValue(),0,0,snTrackedFrame);//eye inv
+    //scene.translate(0,10*snYPos.getValue(),0,snTrackedFrame);//eye inv
+    //scene.translate(0,0,10*snZPos.getValue(),snTrackedFrame);//eye inv
+    scene.rotate(snXRot.getValue()*10*PI/width,0,0,snTrackedFrame);
+    //scene.rotate(0,snYRot.getValue()*10*PI/width,0,snTrackedFrame);
+    //scene.rotate(0,0,snZRot.getValue()*10*PI/width,snTrackedFrame);
   }
 
   void spaceNavigatorPicking() {
@@ -103,8 +112,10 @@ public class SpaceNavigator1 extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'y')
-      scene.flip();
+    if (key == 'r')
+      scene.setRightHanded();
+    if (key == 'l')
+      scene.setLeftHanded();
     // define the tracking device
     if (key == 'i')
       snPicking = !snPicking;

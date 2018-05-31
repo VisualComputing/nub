@@ -108,6 +108,7 @@ import java.util.List;
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
  * <h2>Timing handling</h2>
+ * //TODO more docs
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
@@ -2937,7 +2938,7 @@ public class Graph {
     }
     dx = isEye(frame) ? -dx : dx;
     dy = isRightHanded() ^ isEye(frame) ? -dy : dy;
-    dz = isEye(frame) ? -dz : dz;
+    dz = isEye(frame) ? dz : -dz;
     // Scale to fit the screen relative vector displacement
     switch (type()) {
       case PERSPECTIVE:
@@ -3010,10 +3011,10 @@ public class Graph {
     }
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
     if (isEye(frame)) {
-      return new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
+      return new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw);
     } else {
       Vector vector = new Vector();
-      Quaternion quaternion = new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw);
+      Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
       vector.set(-quaternion.x(), -quaternion.y(), -quaternion.z());
       vector = eye().orientation().rotate(vector);
       vector = frame.displacement(vector);
