@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -11,11 +10,9 @@ public class StandardCamera extends PApplet {
   StdCamera scene;
   Scene auxScene;
   PGraphics canvas, auxCanvas;
-  StdCamera stdCam;
-  Frame origCam;
 
-  int w = 1110;
-  int h = 1110;
+  int w = 1200;
+  int h = 1200;
 
   public void settings() {
     size(w, h, P3D);
@@ -24,6 +21,7 @@ public class StandardCamera extends PApplet {
   public void setup() {
     canvas = createGraphics(w, h / 2, P3D);
     scene = new StdCamera(this, canvas);
+    scene.setFieldOfView(PI / 3);
     scene.setRadius(200);
     scene.fitBallInterpolation();
 
@@ -65,43 +63,37 @@ public class StandardCamera extends PApplet {
         scene.align();
   }
 
-  void mainDrawing(Scene s) {
-    PGraphics p = s.frontBuffer();
-    p.background(0);
-    p.noStroke();
+  void draw(PGraphics graphics) {
+    graphics.background(0);
+    graphics.noStroke();
     // the main viewer camera is used to cull the sphere object against its frustum
     switch (scene.ballVisibility(new Vector(0, 0, 0), scene.radius() * 0.6f)) {
       case VISIBLE:
-        p.fill(0, 255, 0);
-        p.sphere(scene.radius() * 0.6f);
+        graphics.fill(0, 255, 0);
+        graphics.sphere(scene.radius() * 0.6f);
         break;
       case SEMIVISIBLE:
-        p.fill(255, 0, 0);
-        p.sphere(scene.radius() * 0.6f);
+        graphics.fill(255, 0, 0);
+        graphics.sphere(scene.radius() * 0.6f);
         break;
       case INVISIBLE:
         break;
     }
   }
 
-  void auxiliarDrawing(Scene s) {
-    mainDrawing(s);
-    PGraphics p = s.frontBuffer();
-    p.pushStyle();
-    p.stroke(255, 255, 0);
-    p.fill(255, 255, 0, 160);
-    s.drawEye(scene);
-    p.popStyle();
-  }
-
   public void draw() {
     scene.beginDraw();
-    mainDrawing(scene);
+    draw(canvas);
     scene.endDraw();
     scene.display();
 
     auxScene.beginDraw();
-    auxiliarDrawing(auxScene);
+    draw(auxCanvas);
+    auxCanvas.pushStyle();
+    auxCanvas.stroke(255, 255, 0);
+    auxCanvas.fill(255, 255, 0, 160);
+    auxScene.drawEye(scene);
+    auxCanvas.popStyle();
     auxScene.endDraw();
     auxScene.display();
   }
