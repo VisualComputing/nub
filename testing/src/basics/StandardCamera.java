@@ -5,9 +5,11 @@ import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.event.MouseEvent;
 
 public class StandardCamera extends PApplet {
-  Scene scene, auxScene;
+  StdCamera scene;
+  Scene auxScene;
   PGraphics canvas, auxCanvas;
   StdCamera stdCam;
   Frame origCam;
@@ -34,6 +36,33 @@ public class StandardCamera extends PApplet {
     auxScene = new Scene(this, auxCanvas, 0, h / 2);
     auxScene.setRadius(400);
     auxScene.fitBallInterpolation();
+  }
+
+  public void keyPressed() {
+    if (key == ' ')
+      scene.toggleMode();
+  }
+
+  public void mouseDragged() {
+    if (mouseButton == LEFT)
+      scene.mouseSpin();
+    else if (mouseButton == RIGHT)
+      scene.mouseTranslate();
+    else
+      scene.zoom(mouseX - pmouseX);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    scene.scale(event.getCount() * 20);
+    //scene.zoom(event.getCount() * 50);
+  }
+
+  public void mouseClicked(MouseEvent event) {
+    if (event.getCount() == 2)
+      if (event.getButton() == LEFT)
+        scene.focus();
+      else
+        scene.align();
   }
 
   void mainDrawing(Scene s) {
