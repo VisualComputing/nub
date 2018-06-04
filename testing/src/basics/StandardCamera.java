@@ -1,6 +1,8 @@
 package basics;
 
+import frames.core.Frame;
 import frames.core.Graph;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -10,7 +12,9 @@ import processing.event.MouseEvent;
 public class StandardCamera extends PApplet {
   StdCamera scene;
   Scene auxScene, focus;
+  Frame boxFrame;
   PGraphics canvas, auxCanvas;
+  boolean box, sphere;
 
   int w = 1200;
   int h = 1200;
@@ -22,9 +26,10 @@ public class StandardCamera extends PApplet {
   public void setup() {
     canvas = createGraphics(w, h / 2, P3D);
     scene = new StdCamera(this, canvas);
+    //scene.setZClippingCoefficient(1);
     scene.setRadius(200);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.setFieldOfView(PI / 3);
+    //scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
     // enable computation of the frustum planes equations (disabled by default)
@@ -37,23 +42,34 @@ public class StandardCamera extends PApplet {
     auxScene.setType(Graph.Type.ORTHOGRAPHIC);
     auxScene.setRadius(400);
     auxScene.fitBallInterpolation();
+    boxFrame = new Frame(auxScene);
+    boxFrame.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
 
   public void keyPressed() {
     if (key == ' ')
       scene.toggleMode();
+    if (key == 'f')
+      scene.fitFieldOfView();
+    if (key == 'b')
+      box = !box;
+    if (key == 's')
+      sphere = !sphere;
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.eye().setMagnitude(1);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
       } else {
-        scene.setFieldOfView(PI / 3);
+        //scene.setFieldOfView(PI / 3);
         scene.setType(Graph.Type.PERSPECTIVE);
       }
       scene.fitBallInterpolation();
     }
-    if (key == 'f')
-      scene.fitFieldOfView();
+    if (key == 'e')
+      if (auxScene.trackedFrame() == boxFrame)
+        auxScene.resetTrackedFrame();
+      else
+        auxScene.setTrackedFrame(boxFrame);
   }
 
   public void mouseDragged() {
@@ -67,7 +83,7 @@ public class StandardCamera extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     focus.scale(event.getCount() * 20);
-    //scene.zoom(event.getCount() * 50);
+    //focus.zoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -114,8 +130,23 @@ public class StandardCamera extends PApplet {
     //draw(auxCanvas);
     auxCanvas.background(0);
     auxScene.drawAxes();
-    auxCanvas.fill(255, 0, 255, 160);
-    auxCanvas.sphere(scene.radius());
+
+    if (sphere) {
+      auxCanvas.pushStyle();
+      auxCanvas.fill(255, 0, 255, 160);
+      auxCanvas.sphere(scene.radius());
+      auxCanvas.popStyle();
+    }
+
+    if (box) {
+      auxCanvas.pushStyle();
+      auxCanvas.pushMatrix();
+      auxScene.applyTransformation(boxFrame);
+      auxCanvas.fill(0, 255, 0, 160);
+      auxCanvas.box(2 * scene.radius());
+      auxCanvas.popMatrix();
+      auxCanvas.popStyle();
+    }
 
     // draw with axes
     //eye

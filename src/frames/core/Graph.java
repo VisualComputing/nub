@@ -531,7 +531,7 @@ public class Graph {
    * {@link #center()}. This guarantees an optimal use of the z-buffer range and
    * minimizes aliasing. See the {@link #zNear()} and {@link #zFar()} documentations.
    * <p>
-   * Default value is square root of 3 (so that a cube of size 2*{@link #radius()}
+   * Default value is square root of 3 (so that a cube of edge size 2*{@link #radius()}
    * is not clipped).
    *
    * @see #zNearCoefficient()
@@ -1758,6 +1758,7 @@ public class Graph {
    * Default value is the world origin. Use {@link #setCenter(Vector)} to change it.
    *
    * @see #setCenter(Vector)
+   * @see #setRadius(float)
    * @see #setBoundingBox(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
@@ -1797,6 +1798,8 @@ public class Graph {
 
   /**
    * Sets the {@link #radius()} value in world units.
+   *
+   * @see #setCenter(Vector)
    */
   public void setRadius(float radius) {
     if (radius <= 0.0f) {
@@ -2017,7 +2020,7 @@ public class Graph {
   }
 
   /**
-   * Interpolates the eye so that the entire graph fits the screen at the end.
+   * Interpolates the eye so that the entire graph fits the screen.
    * <p>
    * The graph is defined by its {@link #center()} and its {@link #radius()}.
    * See {@link #fitBall()}.
