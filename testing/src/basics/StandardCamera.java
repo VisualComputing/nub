@@ -29,7 +29,7 @@ public class StandardCamera extends PApplet {
     //scene.setZClippingCoefficient(1);
     scene.setRadius(200);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
-    //scene.setFieldOfView(PI / 3);
+    scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
 
     // enable computation of the frustum planes equations (disabled by default)
@@ -55,6 +55,15 @@ public class StandardCamera extends PApplet {
       box = !box;
     if (key == 's')
       sphere = !sphere;
+    if (key == 'a') {
+      Vector from = new Vector(0, 0, scene.zNear());
+      Vector to = new Vector(0, 0, scene.zFar());
+      Vector fromto = Vector.subtract(to, from);
+      Vector fromtoeye = scene.eye().displacement(fromto);
+      println("fromto: " + fromto.magnitude());
+      println("fromtoeye: " + fromtoeye.magnitude());
+      println("2*radius*sqrt(3): " + 2 * scene.radius() * sqrt(3));
+    }
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.eye().setMagnitude(1);
@@ -70,6 +79,10 @@ public class StandardCamera extends PApplet {
         auxScene.resetTrackedFrame();
       else
         auxScene.setTrackedFrame(boxFrame);
+    if (key == '+')
+      scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
+    if (key == '-')
+      scene.eye().rotate(0, 1, 0, -QUARTER_PI / 2);
   }
 
   public void mouseDragged() {

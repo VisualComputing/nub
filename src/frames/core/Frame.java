@@ -974,10 +974,21 @@ public class Frame {
   }
 
   /**
-   * Same as {@link #rotate(Quaternion)} but with {@code float} rotation parameters.
+   * Same as {@code rotate(new Quaternion(axis, angle))}.
+   *
+   * @see #rotate(Quaternion)
    */
-  public void rotate(float x, float y, float z, float w) {
-    rotate(new Quaternion(x, y, z, w));
+  public void rotate(Vector axis, float angle) {
+    rotate(new Quaternion(axis, angle));
+  }
+
+  /**
+   * Same as {@code rotate(new Vector(x,y,z), angle)}.
+   *
+   * @see #rotate(Vector, float)
+   */
+  public void rotate(float x, float y, float z, float angle) {
+    rotate(new Vector(x, y, z), angle);
   }
 
   /**
