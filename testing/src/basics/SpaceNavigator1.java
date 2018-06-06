@@ -84,6 +84,7 @@ public class SpaceNavigator1 extends PApplet {
     //scene.rotate(0,0,snZRot.getValue()*10*PI/width,snTrackedFrame);
   }
 
+  // TODO: key! Try to do this in terms of scene.mouseCast() instead! 
   void spaceNavigatorPicking() {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
