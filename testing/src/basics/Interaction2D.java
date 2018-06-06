@@ -62,7 +62,7 @@ public class Interaction2D extends PApplet {
     else
       // same as traverse, but updates the scene tracked frame
       // according to the current mouse position
-      scene.cast();
+      scene.mouseCast();
   }
 
   public void keyPressed() {

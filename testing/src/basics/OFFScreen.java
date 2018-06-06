@@ -59,7 +59,7 @@ public class OFFScreen extends PApplet {
     if (mousePressed)
       scene.traverse();
     else
-      scene.cast();
+      scene.mouseCast();
     scene.endDraw();
     scene.display();
   }

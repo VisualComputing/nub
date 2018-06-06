@@ -930,7 +930,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the shape into the {@link #frontBuffer()}.
    * <p>
-   * Call it only instead of {@link Scene#traverse()} (or {@link #cast()}).
+   * Call it only instead of {@link Scene#traverse()} (or {@link #mouseCast()}).
    *
    * @see frames.processing.Scene#traverse(PGraphics)
    */
@@ -979,9 +979,9 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #cast()} on a mouse move event. Call it only within Processing draw() method.
+   * Calls {@link #mouseCast()} on a mouse move event. Call it only within Processing draw() method.
    *
-   * @see #cast()
+   * @see #mouseCast()
    * @see #castOnMouseClick()
    * @see #cast(float, float)
    * @see #traverse()
@@ -991,13 +991,13 @@ public class Scene extends Graph implements PConstants {
       traverse();
       return null;
     } else
-      return cast();
+      return mouseCast();
   }
 
   /**
-   * Calls {@link #cast()} on a mouse click event. Call it only within Processing draw() method.
+   * Calls {@link #mouseCast()} on a mouse click event. Call it only within Processing draw() method.
    *
-   * @see #cast()
+   * @see #mouseCast()
    * @see #castOnMouseMove()
    * @see #cast(float, float)
    * @see #traverse()
@@ -1007,7 +1007,7 @@ public class Scene extends Graph implements PConstants {
       traverse();
       return null;
     } else
-      return cast();
+      return mouseCast();
   }
 
   /**
@@ -1020,7 +1020,7 @@ public class Scene extends Graph implements PConstants {
    * @see #cast(float, float)
    * @see #traverse()
    */
-  public Frame cast() {
+  public Frame mouseCast() {
     return cast(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 

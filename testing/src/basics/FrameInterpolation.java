@@ -74,7 +74,7 @@ public class FrameInterpolation extends PApplet {
     if (mousePressed)
       scene.traverse();
     else
-      scene.cast();
+      scene.mouseCast();
 
     pushStyle();
     stroke(255);
