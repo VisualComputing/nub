@@ -325,7 +325,7 @@ public class FrameAPI extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast(mouseX, mouseY);
+    scene.track(mouseX, mouseY);
   }
 
   @Override

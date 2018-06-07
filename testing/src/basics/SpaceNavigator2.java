@@ -90,7 +90,7 @@ public class SpaceNavigator2 extends PApplet {
     scene.rotate(snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, -snZRot.getValue() * 10 * PI / width, snTrackedFrame);
   }
 
-  // TODO: key! Try to do this in terms of scene.cast(x, y) instead!
+  // TODO: key! Try to do this in terms of scene.track(x, y) instead!
   void spaceNavigatorPicking() {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);

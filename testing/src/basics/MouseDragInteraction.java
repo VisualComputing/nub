@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -86,7 +85,7 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast(mouseX, mouseY);
+    scene.track(mouseX, mouseY);
   }
 
   public void mouseDragged() {

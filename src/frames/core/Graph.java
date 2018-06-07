@@ -78,8 +78,8 @@ import java.util.List;
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
  * documentation).
  * <p>
- * Using {@link #cast(float, float)}, instead of {@link #traverse()}, will additionally
- * cast a ray and test it against each visited frame during traversal to automatically
+ * Using {@link #track(float, float)}, instead of {@link #traverse()}, will additionally
+ * track a ray and test it against each visited frame during traversal to automatically
  * update the {@link #trackedFrame()}, and hence the  {@link #defaultFrame()} too (i.e.,
  * without the need to explicitly be calling {@link #track(float, float, Frame)} and
  * {@link #setTrackedFrame(Frame)}).
@@ -2421,7 +2421,7 @@ public class Graph {
    * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
    * modelview matrix takes place.
    *
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
@@ -2445,11 +2445,11 @@ public class Graph {
 
   /**
    * Sets the {@link #trackedFrame()}. Call this function if you want to set the tracked frame manually or
-   * {@link #cast(float, float)} to set it automatically during the graph traversal.
+   * {@link #track(float, float)} to set it automatically during the graph traversal.
    *
    * @see #defaultFrame()
    * @see #track(float, float, Frame)
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #resetTrackedFrame()
    * @see #isTrackedFrame(Frame)
    */
@@ -2466,12 +2466,12 @@ public class Graph {
   }
 
   /**
-   * Returns the current tracked frame which is usually set by ray casting (see {@link #cast(float, float)}).
+   * Returns the current tracked frame which is usually set by ray casting (see {@link #track(float, float)}).
    * May return {@code null}. Reset it with {@link #resetTrackedFrame()}.
    *
    * @see #defaultFrame()
    * @see #track(float, float, Frame)
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #resetTrackedFrame()
    * @see #isTrackedFrame(Frame)
    * @see #setTrackedFrame(Frame)
@@ -2485,7 +2485,7 @@ public class Graph {
    *
    * @see #defaultFrame()
    * @see #track(float, float, Frame)
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #resetTrackedFrame()
    * @see #setTrackedFrame(Frame)
    */
@@ -2495,12 +2495,12 @@ public class Graph {
 
   /**
    * Resets the current {@link #trackedFrame()} so that a call to {@link #trackedFrame()} will return {@code false}.
-   * Note that {@link #cast(float, float)} will reset the tracked frame automatically.
+   * Note that {@link #track(float, float)} will reset the tracked frame automatically.
    *
    * @see #trackedFrame()
    * @see #defaultFrame()
    * @see #track(float, float, Frame)
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #setTrackedFrame(Frame)
    * @see #isTrackedFrame(Frame)
    */
@@ -2514,7 +2514,7 @@ public class Graph {
    * @see #trackedFrame()
    * @see #resetTrackedFrame()
    * @see #track(float, float, Frame)
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #setTrackedFrame(Frame)
    * @see #isTrackedFrame(Frame)
    */
@@ -2529,7 +2529,7 @@ public class Graph {
    * @see #trackedFrame()
    * @see #resetTrackedFrame()
    * @see #defaultFrame()
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #setTrackedFrame(Frame)
    * @see #isTrackedFrame(Frame)
    * @see Frame#precision()
@@ -2563,28 +2563,27 @@ public class Graph {
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
-  public Frame cast(float x, float y) {
+  public Frame track(float x, float y) {
     resetTrackedFrame();
     for (Frame frame : _leadingFrames())
-      _visit(frame, x, y);
+      _track(frame, x, y);
     return trackedFrame();
   }
 
   /**
-   * Use internally by {@link #cast(float, float)}.
+   * Use internally by {@link #track(float, float)}.
    */
-  protected void _visit(Frame frame, float x, float y) {
+  protected void _track(Frame frame, float x, float y) {
     pushModelView();
     applyTransformation(frame);
 
     if (trackedFrame() == null && frame.isTrackingEnabled())
       if (track(x, y, frame))
         setTrackedFrame(frame);
-    frame.visit();
 
-    if (!frame.isCulled())
+    if (!frame.isCulled() && trackedFrame() == null)
       for (Frame child : frame.children())
-        _visit(child, x, y);
+        _track(child, x, y);
     popModelView();
   }
 

@@ -79,7 +79,7 @@ public class Flock extends PApplet {
   // the eye reference and perform an eye interpolation to it.
   public void mouseClicked(MouseEvent event) {
     if(event.getCount() == 1)
-      scene.cast(mouseX, mouseY);
+      scene.track(mouseX, mouseY);
     if (scene.trackedFrame() != null)
       if (avatar != scene.trackedFrame() && scene.eye().reference() != scene.trackedFrame()) {
         avatar = scene.trackedFrame();

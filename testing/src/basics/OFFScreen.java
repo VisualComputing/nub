@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -64,7 +63,8 @@ public class OFFScreen extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast(mouseX, mouseY);
+    //scene.track(mouseX, mouseY);
+    scene.mouseTrack();
   }
 
   public void mousePressed() {

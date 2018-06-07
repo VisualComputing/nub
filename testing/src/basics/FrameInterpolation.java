@@ -99,7 +99,7 @@ public class FrameInterpolation extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast(mouseX, mouseY);
+    scene.track(mouseX, mouseY);
   }
 
   public void mouseDragged() {

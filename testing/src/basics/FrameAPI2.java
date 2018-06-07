@@ -353,7 +353,7 @@ public class FrameAPI2 extends PApplet {
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.cast(mouseX, mouseY);
+      scene.track(mouseX, mouseY);
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();

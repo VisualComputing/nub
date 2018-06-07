@@ -930,7 +930,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the shape into the {@link #frontBuffer()}.
    * <p>
-   * Call it only instead of {@link Scene#traverse()} (or {@link #mouseCast()}).
+   * Call it only instead of {@link Scene#traverse()} (or {@link #mouseTrack()}).
    *
    * @see frames.processing.Scene#traverse(PGraphics)
    */
@@ -979,59 +979,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #mouseCast()} on a mouse move event. Call it only within Processing draw() method.
-   *
-   * @see #mouseCast()
-   * @see #castOnMouseClick()
-   * @see #cast(float, float)
-   * @see #traverse()
-   */
-  public Frame castOnMouseMove() {
-    if (_dragCount > _moveCount) {
-      traverse();
-      return null;
-    } else
-      return mouseCast();
-  }
-
-  /**
-   * Calls {@link #mouseCast()} on a mouse click event. Call it only within Processing draw() method.
-   *
-   * @see #mouseCast()
-   * @see #castOnMouseMove()
-   * @see #cast(float, float)
-   * @see #traverse()
-   */
-  public Frame castOnMouseClick() {
-    if (_moveCount > _clickCount) {
-      traverse();
-      return null;
-    } else
-      return mouseCast();
-  }
-
-  /**
-   * Calls {@link #cast(float, float)} on current Processing {@code mouseX} and {@code mouseY} variables. If there are
+   * Calls {@link #track(float, float)} on current Processing {@code mouseX} and {@code mouseY} variables. If there are
    * any {@link Shape}s in the scene frame hierarchy they also get drawn. Call it only within Processing draw()
    * method.
    *
-   * @see #castOnMouseClick()
-   * @see #castOnMouseMove()
-   * @see #cast(float, float)
+   * @see #track(float, float)
    * @see #traverse()
    */
-  public Frame mouseCast() {
-    return cast(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
-  }
-
-  /**
-   * Same as {@link super#cast(float, float)}, but if there are any {@link Shape}s in the scene frame hierarchy
-   * they also get drawn. Call it only within Processing draw() method.
-   */
-  @Override
-  public Frame cast(float x, float y) {
-    _targetPGraphics = frontBuffer();
-    return super.cast(x, y);
+  public Frame mouseTrack() {
+    return track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
   /**

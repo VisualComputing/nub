@@ -80,7 +80,7 @@ public class Interaction2D extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast(mouseX, mouseY);
+    scene.track(mouseX, mouseY);
   }
 
   public void mousePressed() {
