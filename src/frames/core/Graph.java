@@ -2547,8 +2547,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #traverse()} but also sets the {@link #trackedFrame()} while traversing the frame hierarchy  and
-   * returns it. This method should be called only within your main event loop.
+   * Updates the tracked frame.
    * <p>
    * To set the {@link #trackedFrame()} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.

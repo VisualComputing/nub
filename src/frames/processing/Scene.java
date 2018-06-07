@@ -204,7 +204,7 @@ public class Scene extends Graph implements PConstants {
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   //
-  protected long _clickCount, _moveCount, _dragCount;
+  //protected long _clickCount, _moveCount, _dragCount;
 
   // CONSTRUCTORS
 
@@ -269,10 +269,7 @@ public class Scene extends Graph implements PConstants {
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
     }
 
-    // 4. Create _agents and register P5 methods
-    _parent.registerMethod("mouseEvent", this);
-
-    // this.setDefaultKeyBindings();
+    // 4. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
@@ -282,21 +279,6 @@ public class Scene extends Graph implements PConstants {
 
     // 5. Handed
     setLeftHanded();
-  }
-
-  public void mouseEvent(processing.event.MouseEvent mouseEvent) {
-    boolean move = mouseEvent.getAction() == processing.event.MouseEvent.MOVE;
-    //boolean press = mouseEvent.getAction() == processing.event.MouseEvent.PRESS;
-    boolean drag = mouseEvent.getAction() == processing.event.MouseEvent.DRAG;
-    //boolean release = mouseEvent.getAction() == processing.event.MouseEvent.RELEASE;
-    //boolean wheel = mouseEvent.getAction() == processing.event.MouseEvent.WHEEL;
-    boolean click = mouseEvent.getAction() == processing.event.MouseEvent.CLICK;
-    if (click)
-      _clickCount = this.frameCount();
-    if (move)
-      _moveCount = this.frameCount();
-    if (drag)
-      _dragCount = this.frameCount();
   }
 
   /**
@@ -979,9 +961,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Calls {@link #track(float, float)} on current Processing {@code mouseX} and {@code mouseY} variables. If there are
-   * any {@link Shape}s in the scene frame hierarchy they also get drawn. Call it only within Processing draw()
-   * method.
+   * Same as {@code return track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y())}.
    *
    * @see #track(float, float)
    * @see #traverse()
