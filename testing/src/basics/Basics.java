@@ -51,9 +51,7 @@ public class Basics extends PApplet {
     background(0);
     scene.drawAxes();
     if (mousePressed)
-      scene.mouseCast();
-    else
-      scene.traverse();
+      scene.cast(mouseX, mouseY);
   }
 
   public void mouseMoved() {

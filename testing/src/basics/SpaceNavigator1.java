@@ -66,7 +66,7 @@ public class SpaceNavigator1 extends PApplet {
     if (snPicking)
       spaceNavigatorPicking();
     else {
-      scene.castOnMouseMove();
+      scene.cast(mouseX, mouseY);
       spaceNavigatorInteraction();
     }
   }

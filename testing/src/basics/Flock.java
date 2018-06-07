@@ -47,8 +47,7 @@ public class Flock extends PApplet {
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
-    // draw + mouse click picking
-    scene.castOnMouseClick();
+    scene.traverse();
   }
 
   // interaction in 'first-person'
@@ -79,6 +78,8 @@ public class Flock extends PApplet {
   // Behaviour: tapping over a boid will select the frame as
   // the eye reference and perform an eye interpolation to it.
   public void mouseClicked(MouseEvent event) {
+    if(event.getCount() == 1)
+      scene.cast(mouseX, mouseY);
     if (scene.trackedFrame() != null)
       if (avatar != scene.trackedFrame() && scene.eye().reference() != scene.trackedFrame()) {
         avatar = scene.trackedFrame();

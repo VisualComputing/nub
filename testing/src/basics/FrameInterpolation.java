@@ -71,10 +71,7 @@ public class FrameInterpolation extends PApplet {
 
   public void draw() {
     background(0);
-    if (mousePressed)
-      scene.traverse();
-    else
-      scene.mouseCast();
+    scene.traverse();
 
     pushStyle();
     stroke(255);
@@ -98,6 +95,11 @@ public class FrameInterpolation extends PApplet {
       scene.drawPath(eyeInterpolator2, 3);
       popStyle();
     }
+  }
+
+  @Override
+  public void mouseMoved() {
+    scene.cast(mouseX, mouseY);
   }
 
   public void mouseDragged() {

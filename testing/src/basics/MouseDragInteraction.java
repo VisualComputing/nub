@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -61,7 +62,7 @@ public class MouseDragInteraction extends PApplet {
     scene.drawArrow(randomVector);
     scene.drawAxes();
     // draw + mouse move picking
-    scene.castOnMouseMove();
+    scene.traverse();
   }
 
   public void keyPressed() {
@@ -81,6 +82,11 @@ public class MouseDragInteraction extends PApplet {
     }
     if (key == 'l')
       lookAround = !lookAround;
+  }
+
+  @Override
+  public void mouseMoved() {
+    scene.cast(mouseX, mouseY);
   }
 
   public void mouseDragged() {

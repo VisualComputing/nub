@@ -53,7 +53,7 @@ public class MouseMoveInteraction extends PApplet {
     background(0);
     scene.drawAxes();
     // draw + mouse click picking
-    scene.castOnMouseClick();
+    scene.traverse();
   }
 
   public void keyPressed() {
@@ -82,6 +82,9 @@ public class MouseMoveInteraction extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
+    if(event.getCount() == 1)
+      scene.cast(mouseX, mouseY);
+    else
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();

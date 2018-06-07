@@ -57,12 +57,7 @@ public class Interaction2D extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    if (mousePressed)
-      scene.traverse();
-    else
-      // same as traverse, but updates the scene tracked frame
-      // according to the current mouse position
-      scene.mouseCast();
+    scene.traverse();
   }
 
   public void keyPressed() {
@@ -81,6 +76,11 @@ public class Interaction2D extends PApplet {
     if (key == 'w') {
       shape3.setReference(null);
     }
+  }
+
+  @Override
+  public void mouseMoved() {
+    scene.cast(mouseX, mouseY);
   }
 
   public void mousePressed() {

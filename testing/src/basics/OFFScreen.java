@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -56,12 +57,14 @@ public class OFFScreen extends PApplet {
     scene.beginDraw();
     canvas.background(0);
     scene.drawAxes();
-    if (mousePressed)
-      scene.traverse();
-    else
-      scene.mouseCast();
+    scene.traverse();
     scene.endDraw();
     scene.display();
+  }
+
+  @Override
+  public void mouseMoved() {
+    scene.cast(mouseX, mouseY);
   }
 
   public void mousePressed() {
