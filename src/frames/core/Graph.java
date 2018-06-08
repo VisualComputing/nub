@@ -48,14 +48,14 @@ import java.util.List;
  * take a frame parameter, such as {@link #lookAround(float, float)} or
  * {@link #rotateCAD(float, float)}.
  * <h3>Implementing a <a href="https://en.wikipedia.org/wiki/Human_interface_device">
- * Human Interface Device (HID)</a></h3>
- * The above interactivity API is HID agnostic, i.e., all that third-parties implementing a
- * specific HID require is to conform to their method signatures. For example, the following
+ * Human Interface Device (hid)</a></h3>
+ * The above interactivity API is {@code hid} agnostic, i.e., all that third-parties implementing a
+ * specific {@code hid} require is to conform to their method signatures. For example, the following
  * two functions would implement translation with a mouse:
  * <pre>
  * {@code
  * public void mouseTranslate() {
- *   mouseTranslate(defaultFrame());
+ *   mouseTranslate(defaultFrame(MOUSE_ID));
  * }
  *
  * public void mouseTranslate(Frame frame) {
@@ -64,7 +64,7 @@ import java.util.List;
  * }
  * </pre>
  * <h3>Picking</h3>
- * To set a graph tracked frame call {@link #setTrackedFrame(int, Frame)} and note that
+ * To set an {@code hid} tracked frame call {@link #setTrackedFrame(int, Frame)} and note that
  * the {@link #defaultFrame(int)} is a shortcut to retrieve the {@link #trackedFrame(int)}
  * or the {@link #eye()}, when the former is {@code null}.
  * <p>
@@ -72,18 +72,14 @@ import java.util.List;
  * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
  * <p>
- * Note also that picking with ray casting may be performed automatically during the graph
- * traversal (see the next Section).
+ * Note that {@link #track(int, float, float)} will cast a ray and test it against each graph
+ * attached frame to automatically update the {@code hid} {@link #trackedFrame(int)}, and hence
+ * the {@code hid} {@link #defaultFrame(int)} too (i.e., without the need to explicitly call
+ * {@link #track(float, float, Frame)} and {@link #setTrackedFrame(int, Frame)}).
  * <h2>Scene graph handling</h2>
  * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
- * documentation).
- * <p>
- * Using {@link #track(int, float, float)}, instead of {@link #traverse()}, will additionally
- * track a ray and test it against each visited frame during traversal to automatically
- * update the {@link #trackedFrame(int)}, and hence the  {@link #defaultFrame(int)} too (i.e.,
- * without the need to explicitly be calling {@link #track(float, float, Frame)} and
- * {@link #setTrackedFrame(int, Frame)}).
+ * documentation). Note that {@link #traverse()} should be called within your main-event loop.
  * <p>
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -2446,8 +2442,8 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #trackedFrame(int)}. Call this function if you want to set the tracked frame manually or
-   * {@link #track(int, float, float)} to set it automatically during the graph traversal.
+   * Sets the {@code hid} tracked-frame (see {@link #trackedFrame(int)}). Call this function if you want to set the
+   * tracked frame manually or {@link #track(int, float, float)} to set it automatically using ray casting.
    *
    * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
@@ -2468,8 +2464,8 @@ public class Graph {
   }
 
   /**
-   * Returns the current tracked frame which is usually set by ray casting (see {@link #track(int, float, float)}).
-   * May return {@code null}. Reset it with {@link #resetTrackedFrame(int)}.
+   * Returns the current {@code hid} tracked frame which is usually set by ray casting (see
+   * {@link #track(int, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedFrame(int)}.
    *
    * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
@@ -2482,12 +2478,15 @@ public class Graph {
     return _hidFrameMap.get(hid);
   }
 
+  /**
+   * Returns {@code true} if the {@code frame} is the tracked of frame of some {@code hid} and {@code false} otherwise.
+   */
   public boolean isTrackedFrame(Frame frame) {
     return _hidFrameMap.containsValue(frame);
   }
 
   /**
-   * Returns {@code true} if {@code frame} is the current {@link #trackedFrame(int)} and {@code false} otherwise.
+   * Returns {@code true} if {@code frame} is the current {@code hid} {@link #trackedFrame(int)} and {@code false} otherwise.
    *
    * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
@@ -2500,8 +2499,8 @@ public class Graph {
   }
 
   /**
-   * Resets the current {@link #trackedFrame(int)} so that a call to {@link #trackedFrame(int)} will return {@code false}.
-   * Note that {@link #track(int, float, float)} will reset the tracked frame automatically.
+   * Resets the current {@code hid} {@link #trackedFrame(int)} so that a call to {@link #trackedFrame(int)} will return
+   * {@code false}. Note that {@link #track(int, float, float)} will reset the tracked frame automatically.
    *
    * @see #trackedFrame(int)
    * @see #defaultFrame(int)
@@ -2515,7 +2514,8 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return trackedFrame() == null ? eye() : trackedFrame()}. Never returns {@code null}.
+   * Returns the {@code hid} default-frame which is used by methods dealing interactivity that don take a frame
+   * para. Same as {@code return trackedFrame(hid) == null ? eye() : trackedFrame(hid)}. Never returns {@code null}.
    *
    * @see #trackedFrame(int)
    * @see #resetTrackedFrame(int)
@@ -2553,7 +2553,7 @@ public class Graph {
   }
 
   /**
-   * Updates the tracked frame.
+   * Updates the {@code hid} device tracked-frame and returns it.
    * <p>
    * To set the {@link #trackedFrame(int)} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
@@ -2591,7 +2591,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code align(defaultFrame())}.
+   * Same as {@code align(defaultFrame(hid))}.
    *
    * @see #align(Frame)
    * @see #defaultFrame(int)
@@ -2832,7 +2832,7 @@ public class Graph {
   // It always maps physical (screen) space geom data respect to the eye
 
   /**
-   * Same as {@code zoom(delta, defaultFrame())}.
+   * Same as {@code zoom(delta, defaultFrame(hid))}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(int, float, float)
@@ -2860,7 +2860,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, defaultFrame())}.
+   * Same as {@code translate(dx, dy, 0, defaultFrame(hid))}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float, float, Frame)
@@ -2874,7 +2874,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, dz, defaultFrame())}.
+   * Same as {@code translate(dx, dy, dz, defaultFrame(hid))}.
    *
    * @see #translate(float, float, Frame)
    * @see #translate(int, float, float)
@@ -2965,7 +2965,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scale(delta, defaultFrame())}.
+   * Same as {@code scale(delta, defaultFrame(hid))}.
    *
    * @see #scale(float, Frame)
    * @see #defaultFrame(int)
@@ -2986,7 +2986,8 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@link #defaultFrame(int)} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   * Rotates the {@code hid} default-frame (see {@link #defaultFrame(int)}) roll, pitch and yaw radians around screen
+   * space x, y and z axes, respectively.
    *
    * @see #rotate(float, float, float, Frame)
    */
@@ -3031,7 +3032,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, defaultFrame())}.
+   * Same as {@code spin(tail, head, defaultFrame(hid))}.
    *
    * @see #spin(Point, Point, float, Frame)
    * @see #spin(Point, Point, Frame)
@@ -3053,7 +3054,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, sensitivity, defaultFrame())}.
+   * Same as {@code spin(tail, head, sensitivity, defaultFrame(hid))}.
    *
    * @see #spin(Point, Point, float, Frame)
    * @see #spin(int, Point, Point)

@@ -961,7 +961,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y())}.
+   * Same as {@code return track(1, pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y())}.
    *
    * @see #track(int, float, float)
    * @see #traverse()
@@ -971,7 +971,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draw all {@link #frames()} into the given pGraphics. No
+   * Visit all {@link #frames()} into the given {@code pGraphics}. No
    * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
    * chaining. Call it only within Processing draw() method.
    * <p>
