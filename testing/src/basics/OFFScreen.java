@@ -1,7 +1,6 @@
 package basics;
 
 import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -12,7 +11,6 @@ import processing.event.MouseEvent;
 public class OFFScreen extends PApplet {
   Scene scene;
   Shape shape1, shape2;
-  Vector upVector;
   PGraphics canvas;
 
   //Choose FX2D, JAVA2D, P2D or P3D
@@ -64,10 +62,6 @@ public class OFFScreen extends PApplet {
   @Override
   public void mouseMoved() {
     scene.mouseTrack();
-  }
-
-  public void mousePressed() {
-    upVector = scene.eye().yAxis();
   }
 
   public void mouseDragged() {

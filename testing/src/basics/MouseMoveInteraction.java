@@ -13,7 +13,6 @@ import processing.event.MouseEvent;
  */
 public class MouseMoveInteraction extends PApplet {
   Scene scene;
-  Shape shape1, shape2;
   boolean lookAround = true;
 
   public void settings() {
@@ -27,7 +26,7 @@ public class MouseMoveInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    shape1 = new Shape(scene) {
+    Shape shape1 = new Shape(scene) {
       @Override
       public void setGraphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -44,7 +43,7 @@ public class MouseMoveInteraction extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
-    shape2 = new Shape(shape1);
+    Shape shape2 = new Shape(shape1);
     shape2.setGraphics(shape());
     shape2.translate(275, 275, 275);
   }
@@ -52,7 +51,7 @@ public class MouseMoveInteraction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    // draw + mouse click picking
+    // visit scene frames (shapes simply get drawn)
     scene.traverse();
   }
 

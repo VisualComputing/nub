@@ -14,7 +14,6 @@ import processing.event.MouseEvent;
  */
 public class MouseDragInteraction extends PApplet {
   Scene scene;
-  Shape shape1, shape2;
   Vector randomVector;
   boolean cad, lookAround;
 
@@ -30,7 +29,7 @@ public class MouseDragInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 
-    shape1 = new Shape(scene) {
+    Shape shape1 = new Shape(scene) {
       @Override
       public void setGraphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -47,7 +46,7 @@ public class MouseDragInteraction extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
-    shape2 = new Shape(shape1);
+    Shape shape2 = new Shape(shape1);
     shape2.setGraphics(shape());
     shape2.translate(275, 275);
 
@@ -60,7 +59,7 @@ public class MouseDragInteraction extends PApplet {
     fill(0, 255, 255);
     scene.drawArrow(randomVector);
     scene.drawAxes();
-    // draw + mouse move picking
+    // visit scene frames (shapes simply get drawn)
     scene.traverse();
   }
 
@@ -100,7 +99,7 @@ public class MouseDragInteraction extends PApplet {
       scene.mouseTranslate();
     else
       scene.mouseZoom(mouseX - pmouseX);
-    //scene.scale(mouseX - pmouseX);
+    //scene.mouseScale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
