@@ -63,7 +63,6 @@ public class OFFScreen extends PApplet {
 
   @Override
   public void mouseMoved() {
-    //scene.track(mouseX, mouseY);
     scene.mouseTrack();
   }
 
@@ -73,13 +72,6 @@ public class OFFScreen extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      /*
-      if (scene.defaultFrame() == scene.eye())
-        //scene.mouseCAD();
-        scene.mouseLookAround(upVector);
-      else
-        scene.mouseSpin();
-        //*/
       scene.mouseSpin();
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();

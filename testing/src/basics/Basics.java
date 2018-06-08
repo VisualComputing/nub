@@ -50,8 +50,7 @@ public class Basics extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    if (mousePressed)
-      scene.mouseTrack();
+    scene.traverse();
   }
 
   public void mouseMoved() {
@@ -66,6 +65,8 @@ public class Basics extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == ' ')
+      scene.mouseTrack();
     if (key == 'f')
       scene.flip();
   }

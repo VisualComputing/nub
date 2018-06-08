@@ -18,6 +18,7 @@ public class ConstrainedFrame extends PApplet {
   }
 
   Scene scene;
+  boolean mouseTracking = true;
   PFont myFont;
   int transDir;
   int rotDir;
@@ -46,11 +47,9 @@ public class ConstrainedFrame extends PApplet {
     rotDir = 0;
     activeConstraint = 0;
 
-    node = new Frame();
+    node = new Frame(scene);
     node.translate(new Vector(20, 20, 0));
     node.setConstraint(constraints[activeConstraint]);
-
-    scene.setMouseTrackedFrame(scene.eye());
   }
 
   public void draw() {
@@ -77,6 +76,11 @@ public class ConstrainedFrame extends PApplet {
     scene.endScreenDrawing();
   }
 
+  public void mouseMoved() {
+    if (mouseTracking)
+      scene.mouseTrack();
+  }
+
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.mouseSpin();
@@ -92,7 +96,13 @@ public class ConstrainedFrame extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setMouseTrackedFrame(scene.isMouseTrackedFrame(node) ? scene.eye() : node);
+      if (scene.isMouseTrackedFrame(node)) {
+        scene.resetMouseTrackedFrame();
+        mouseTracking = true;
+      } else {
+        scene.setMouseTrackedFrame(node);
+        mouseTracking = false;
+      }
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }

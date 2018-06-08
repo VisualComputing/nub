@@ -1,6 +1,5 @@
 package basics;
 
-import frames.core.Frame;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;
@@ -12,9 +11,9 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 // The space navigator uses a right-handed coordinate system
-public class SpaceNavigator1 extends PApplet {
+public class SpaceNavigator extends PApplet {
   ControlIO control;
-  ControlDevice device; // my SpaceNavigator1
+  ControlDevice device; // my SpaceNavigator
   ControlSlider snXPos; // Positions
   ControlSlider snYPos;
   ControlSlider snZPos;
@@ -26,9 +25,8 @@ public class SpaceNavigator1 extends PApplet {
 
   // frames stuff:
   Scene scene;
-  Shape[] shapes;
-  Frame snTrackedFrame;
   boolean snPicking;
+  public static int SPCNAV = 2;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -41,10 +39,7 @@ public class SpaceNavigator1 extends PApplet {
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fitBallInterpolation();
-    // set the eye as the space navigator default frame
-    snTrackedFrame = scene.eye();
-    // mouseShapes
-    shapes = new Shape[50];
+    Shape[] shapes = new Shape[50];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene, shape());
       scene.randomize(shapes[i]);
@@ -63,40 +58,33 @@ public class SpaceNavigator1 extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    if (snPicking)
-      spaceNavigatorPicking();
-    else {
-      scene.mouseTrack();
+    scene.traverse();
+    if (snPicking) {
+      float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
+      float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
+      spaceNavigatorPicking(x, y);
+      // draw picking visual hint
+      pushStyle();
+      strokeWeight(3);
+      stroke(0, 255, 0);
+      scene.drawCross(x, y, 30);
+      popStyle();
+    } else {
       spaceNavigatorInteraction();
     }
   }
 
-  void spaceNavigatorInteraction() {
-    //scene.translate(10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue(), snTrackedFrame);
-    //scene.rotate(snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width, snTrackedFrame);
-    println(snXRot.getValue());
-    // eye in '1st person'
-    //scene.translate(10*snXPos.getValue(),0,0,snTrackedFrame);//eye inv
-    //scene.translate(0,10*snYPos.getValue(),0,snTrackedFrame);//eye inv
-    //scene.translate(0,0,10*snZPos.getValue(),snTrackedFrame);//eye inv
-    scene.rotate(snXRot.getValue() * 10 * PI / width, 0, 0, snTrackedFrame);
-    //scene.rotate(0,snYRot.getValue()*10*PI/width,0,snTrackedFrame);
-    //scene.rotate(0,0,snZRot.getValue()*10*PI/width,snTrackedFrame);
+  void spaceNavigatorPicking(float x, float y) {
+    scene.track(SPCNAV, x, y);
   }
 
-  // TODO: key! Try to do this in terms of scene.track(x, y) instead!
-  void spaceNavigatorPicking() {
-    float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
-    float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
-    // frames' drawing + space navigator picking
-    Frame frame = scene.track(2, x, y);
-    snTrackedFrame = frame == null ? scene.eye() : frame;
-    // draw picking visual hint
-    pushStyle();
-    strokeWeight(3);
-    stroke(0, 255, 0);
-    scene.drawCross(x, y, 30);
-    popStyle();
+  void spaceNavigatorInteraction() {
+    scene.translate(SPCNAV, 10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue());
+    scene.rotate(SPCNAV, snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width);
+  }
+
+  public void mouseMoved() {
+    scene.mouseTrack();
   }
 
   public void mouseDragged() {
@@ -117,7 +105,7 @@ public class SpaceNavigator1 extends PApplet {
       scene.setRightHanded();
     if (key == 'l')
       scene.setLeftHanded();
-    // define the tracking device
+    // enables/disables picking with the space navigator
     if (key == 'i')
       snPicking = !snPicking;
   }
@@ -146,6 +134,6 @@ public class SpaceNavigator1 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.SpaceNavigator1"});
+    PApplet.main(new String[]{"basics.SpaceNavigator"});
   }
 }
