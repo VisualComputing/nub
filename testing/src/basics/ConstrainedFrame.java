@@ -50,7 +50,7 @@ public class ConstrainedFrame extends PApplet {
     node.translate(new Vector(20, 20, 0));
     node.setConstraint(constraints[activeConstraint]);
 
-    scene.setTrackedFrame(scene.eye());
+    scene.setMouseTrackedFrame(scene.eye());
   }
 
   public void draw() {
@@ -83,16 +83,16 @@ public class ConstrainedFrame extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.mouseZoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.mouseZoom(event.getCount() * 20);
   }
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setTrackedFrame(scene.isTrackedFrame(node) ? scene.eye() : node);
+      scene.setMouseTrackedFrame(scene.isMouseTrackedFrame(node) ? scene.eye() : node);
     if (key == 'b' || key == 'B') {
       rotDir = (rotDir + 1) % 3;
     }

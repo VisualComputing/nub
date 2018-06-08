@@ -70,7 +70,7 @@ public class MouseMoveInteraction extends PApplet {
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
       scene.mouseTranslate();
-    else if (lookAround && scene.trackedFrame() == null)
+    else if (lookAround && scene.mouseTrackedFrame() == null)
       scene.mouseLookAround();
     else
       scene.mouseSpin();
@@ -78,17 +78,17 @@ public class MouseMoveInteraction extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    scene.mouseScale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.track(mouseX, mouseY);
+      scene.mouseTrack();
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus();
+        scene.mouseFocus();
       else
-        scene.align();
+        scene.mouseAlign();
   }
 
   PShape shape() {

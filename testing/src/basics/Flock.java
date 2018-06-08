@@ -71,7 +71,7 @@ public class Flock extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.mouseScale(event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 
@@ -79,16 +79,16 @@ public class Flock extends PApplet {
   // the eye reference and perform an eye interpolation to it.
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.track(mouseX, mouseY);
-    if (scene.trackedFrame() != null)
-      if (avatar != scene.trackedFrame() && scene.eye().reference() != scene.trackedFrame()) {
-        avatar = scene.trackedFrame();
-        scene.interpolateTo(scene.trackedFrame());
-        scene.eye().setReference(scene.trackedFrame());
+      scene.mouseTrack();
+    if (scene.mouseTrackedFrame() != null)
+      if (avatar != scene.mouseTrackedFrame() && scene.eye().reference() != scene.mouseTrackedFrame()) {
+        avatar = scene.mouseTrackedFrame();
+        scene.interpolateTo(scene.mouseTrackedFrame());
+        scene.eye().setReference(scene.mouseTrackedFrame());
         // TODO
         // Interpolation after setting the reference fires the following warning:
         // 'Both frame and its reference should be detached, or attached to the same graph.'
-        //scene.interpolateTo(scene.trackedFrame());
+        //scene.interpolateTo(scene.mouseTrackedFrame());
       }
   }
 

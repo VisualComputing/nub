@@ -963,11 +963,11 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y())}.
    *
-   * @see #track(float, float)
+   * @see #track(int, float, float)
    * @see #traverse()
    */
   public Frame mouseTrack() {
-    return track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
+    return track(1, pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
   /**
@@ -2891,7 +2891,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseSpin(Frame)
    */
   public void mouseSpin() {
-    mouseSpin(defaultFrame());
+    mouseSpin(defaultFrame(1));
   }
 
   /**
@@ -2909,7 +2909,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseSpin(float, Frame)
    */
   public void mouseSpin(float sensitivity) {
-    mouseSpin(sensitivity, defaultFrame());
+    mouseSpin(sensitivity, defaultFrame(1));
   }
 
   /**
@@ -2927,7 +2927,7 @@ public class Scene extends Graph implements PConstants {
    * @see #mouseTranslate(Frame)
    */
   public void mouseTranslate() {
-    mouseTranslate(defaultFrame());
+    mouseTranslate(defaultFrame(1));
   }
 
   /**
@@ -2937,6 +2937,42 @@ public class Scene extends Graph implements PConstants {
    */
   public void mouseTranslate(Frame frame) {
     translate(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, frame);
+  }
+
+  public void mouseScale(float delta) {
+    scale(1, delta);
+  }
+
+  public void mouseFocus() {
+    focus(1);
+  }
+
+  public void mouseAlign() {
+    align(1);
+  }
+
+  public void mouseZoom(float delta) {
+    zoom(1, delta);
+  }
+
+  public Frame mouseTrackedFrame() {
+    return trackedFrame(1);
+  }
+
+  public void setMouseTrackedFrame(Frame frame) {
+    setTrackedFrame(1, frame);
+  }
+
+  public void resetMouseTrackedFrame() {
+    resetTrackedFrame(1);
+  }
+
+  public boolean isMouseTrackedFrame(Frame frame) {
+    return isTrackedFrame(1, frame);
+  }
+
+  public Frame mouseDefaultFrame() {
+    return defaultFrame(1);
   }
 
   // only eye

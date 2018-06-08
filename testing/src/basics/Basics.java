@@ -51,7 +51,7 @@ public class Basics extends PApplet {
     background(0);
     scene.drawAxes();
     if (mousePressed)
-      scene.track(mouseX, mouseY);
+      scene.mouseTrack();
   }
 
   public void mouseMoved() {

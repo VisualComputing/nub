@@ -75,10 +75,10 @@ public class StandardCamera extends PApplet {
       scene.fitBallInterpolation();
     }
     if (key == 'e')
-      if (auxScene.trackedFrame() == boxFrame)
-        auxScene.resetTrackedFrame();
+      if (auxScene.mouseTrackedFrame() == boxFrame)
+        auxScene.resetMouseTrackedFrame();
       else
-        auxScene.setTrackedFrame(boxFrame);
+        auxScene.setMouseTrackedFrame(boxFrame);
     if (key == '+')
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')
@@ -91,20 +91,20 @@ public class StandardCamera extends PApplet {
     else if (mouseButton == RIGHT)
       focus.mouseTranslate();
     else
-      focus.zoom(mouseX - pmouseX);
+      focus.mouseZoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    focus.scale(event.getCount() * 20);
+    focus.mouseScale(event.getCount() * 20);
     //focus.zoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focus();
+        focus.mouseFocus();
       else
-        focus.align();
+        focus.mouseAlign();
   }
 
   void draw(PGraphics graphics) {

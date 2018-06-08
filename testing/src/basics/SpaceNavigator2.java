@@ -130,7 +130,7 @@ public class SpaceNavigator2 extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.mouseZoom(event.getCount() * 20);
   }
 
   public void keyPressed() {

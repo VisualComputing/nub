@@ -55,18 +55,18 @@ public class AdaptivePrecision2 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scale(mouseX - pmouseX);
+      scene.mouseScale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 50);
+    scene.mouseZoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
-    scene.resetTrackedFrame();
+    scene.resetMouseTrackedFrame();
     for (int i = 0; i < shapes.length; i++)
       if (scene.track(mouseX, mouseY, shapes[i])) {
-        scene.setTrackedFrame(shapes[i]);
+        scene.setMouseTrackedFrame(shapes[i]);
         break;
       }
   }

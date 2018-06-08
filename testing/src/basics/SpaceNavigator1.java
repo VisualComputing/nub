@@ -66,7 +66,7 @@ public class SpaceNavigator1 extends PApplet {
     if (snPicking)
       spaceNavigatorPicking();
     else {
-      scene.track(mouseX, mouseY);
+      scene.mouseTrack();
       spaceNavigatorInteraction();
     }
   }
@@ -89,7 +89,7 @@ public class SpaceNavigator1 extends PApplet {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
     // frames' drawing + space navigator picking
-    Frame frame = scene.track(x, y);
+    Frame frame = scene.track(2, x, y);
     snTrackedFrame = frame == null ? scene.eye() : frame;
     // draw picking visual hint
     pushStyle();
@@ -105,11 +105,11 @@ public class SpaceNavigator1 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.mouseTranslate();
     else
-      scene.scale(mouseX - pmouseX);
+      scene.mouseScale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.mouseZoom(event.getCount() * 20);
   }
 
   public void keyPressed() {

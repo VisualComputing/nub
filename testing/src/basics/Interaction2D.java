@@ -80,7 +80,7 @@ public class Interaction2D extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track(mouseX, mouseY);
+    scene.mouseTrack();
   }
 
   public void mousePressed() {
@@ -104,21 +104,21 @@ public class Interaction2D extends PApplet {
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
-      scene.scale(mouseX - pmouseX);
+      scene.mouseScale(mouseX - pmouseX);
     //scene.rotate(0, 0, mouseX - pmouseX, PI/width);
   }
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    scene.mouseScale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus();
+        scene.mouseFocus();
       else
-        scene.align();
+        scene.mouseAlign();
   }
 
   PShape shape() {

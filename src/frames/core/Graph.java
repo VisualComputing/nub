@@ -18,6 +18,7 @@ import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,8 +41,8 @@ import java.util.List;
  * or detached) {@link Frame}s from any input source, such as
  * {@link #translate(float, float, float, Frame)}, {@link #rotate(float, float, float, Frame)}
  * and {@link #scale(float, Frame)}. These functions are overloaded to bypass the frame param,
- * thus acting upon a {@link #defaultFrame()}: {@link #translate(float, float, float)},
- * {@link #rotate(float, float, float)} and {@link #scale(float)}.
+ * thus acting upon a {@link #defaultFrame(int)}: {@link #translate(int, float, float, float)},
+ * {@link #rotate(int, float, float, float)} and {@link #scale(int, float)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a frame parameter, such as {@link #lookAround(float, float)} or
@@ -63,8 +64,8 @@ import java.util.List;
  * }
  * </pre>
  * <h3>Picking</h3>
- * To set a graph tracked frame call {@link #setTrackedFrame(Frame)} and note that
- * the {@link #defaultFrame()} is a shortcut to retrieve the {@link #trackedFrame()}
+ * To set a graph tracked frame call {@link #setTrackedFrame(int, Frame)} and note that
+ * the {@link #defaultFrame(int)} is a shortcut to retrieve the {@link #trackedFrame(int)}
  * or the {@link #eye()}, when the former is {@code null}.
  * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
@@ -78,11 +79,11 @@ import java.util.List;
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
  * documentation).
  * <p>
- * Using {@link #track(float, float)}, instead of {@link #traverse()}, will additionally
+ * Using {@link #track(int, float, float)}, instead of {@link #traverse()}, will additionally
  * track a ray and test it against each visited frame during traversal to automatically
- * update the {@link #trackedFrame()}, and hence the  {@link #defaultFrame()} too (i.e.,
+ * update the {@link #trackedFrame(int)}, and hence the  {@link #defaultFrame(int)} too (i.e.,
  * without the need to explicitly be calling {@link #track(float, float, Frame)} and
- * {@link #setTrackedFrame(Frame)}).
+ * {@link #setTrackedFrame(int, Frame)}).
  * <p>
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -163,7 +164,7 @@ public class Graph {
 
   // 3. Handlers
   protected TimingHandler _timingHandler;
-  protected Frame _trackedFrame;
+  protected HashMap<Integer, Frame> _hidFrameMap;
 
   // 4. Graph
   protected List<Frame> _seeds;
@@ -245,6 +246,7 @@ public class Graph {
     fitBall();
 
     setMatrixHandler(new MatrixHandler(this));
+    _hidFrameMap = new HashMap<Integer, Frame>();
     setRightHanded();
 
     enableBoundaryEquations(false);
@@ -2421,7 +2423,7 @@ public class Graph {
    * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
    * modelview matrix takes place.
    *
-   * @see #track(float, float)
+   * @see #track(int, float, float)
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
@@ -2444,16 +2446,16 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #trackedFrame()}. Call this function if you want to set the tracked frame manually or
-   * {@link #track(float, float)} to set it automatically during the graph traversal.
+   * Sets the {@link #trackedFrame(int)}. Call this function if you want to set the tracked frame manually or
+   * {@link #track(int, float, float)} to set it automatically during the graph traversal.
    *
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
-   * @see #track(float, float)
-   * @see #resetTrackedFrame()
-   * @see #isTrackedFrame(Frame)
+   * @see #track(int, float, float)
+   * @see #resetTrackedFrame(int)
+   * @see #isTrackedFrame(int, Frame)
    */
-  public void setTrackedFrame(Frame frame) {
+  public void setTrackedFrame(int hid, Frame frame) {
     if (frame == null) {
       System.out.println("Warning. Cannot track a null frame!");
       return;
@@ -2462,76 +2464,80 @@ public class Graph {
       System.out.println("Warning. Cannot track a frame that is not attached to this graph!");
       return;
     }
-    _trackedFrame = frame;
+    _hidFrameMap.put(hid, frame);
   }
 
   /**
-   * Returns the current tracked frame which is usually set by ray casting (see {@link #track(float, float)}).
-   * May return {@code null}. Reset it with {@link #resetTrackedFrame()}.
+   * Returns the current tracked frame which is usually set by ray casting (see {@link #track(int, float, float)}).
+   * May return {@code null}. Reset it with {@link #resetTrackedFrame(int)}.
    *
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
-   * @see #track(float, float)
-   * @see #resetTrackedFrame()
-   * @see #isTrackedFrame(Frame)
-   * @see #setTrackedFrame(Frame)
+   * @see #track(int, float, float)
+   * @see #resetTrackedFrame(int)
+   * @see #isTrackedFrame(int, Frame)
+   * @see #setTrackedFrame(int, Frame)
    */
-  public Frame trackedFrame() {
-    return _trackedFrame;
+  public Frame trackedFrame(int hid) {
+    return _hidFrameMap.get(hid);
   }
 
-  /**
-   * Returns {@code true} if {@code frame} is the current {@link #trackedFrame()} and {@code false} otherwise.
-   *
-   * @see #defaultFrame()
-   * @see #track(float, float, Frame)
-   * @see #track(float, float)
-   * @see #resetTrackedFrame()
-   * @see #setTrackedFrame(Frame)
-   */
   public boolean isTrackedFrame(Frame frame) {
-    return trackedFrame() == frame;
+    return _hidFrameMap.containsValue(frame);
   }
 
   /**
-   * Resets the current {@link #trackedFrame()} so that a call to {@link #trackedFrame()} will return {@code false}.
-   * Note that {@link #track(float, float)} will reset the tracked frame automatically.
+   * Returns {@code true} if {@code frame} is the current {@link #trackedFrame(int)} and {@code false} otherwise.
    *
-   * @see #trackedFrame()
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
-   * @see #track(float, float)
-   * @see #setTrackedFrame(Frame)
-   * @see #isTrackedFrame(Frame)
+   * @see #track(int, float, float)
+   * @see #resetTrackedFrame(int)
+   * @see #setTrackedFrame(int, Frame)
    */
-  public void resetTrackedFrame() {
-    _trackedFrame = null;
+  public boolean isTrackedFrame(int hid, Frame frame) {
+    return trackedFrame(hid) == frame;
+  }
+
+  /**
+   * Resets the current {@link #trackedFrame(int)} so that a call to {@link #trackedFrame(int)} will return {@code false}.
+   * Note that {@link #track(int, float, float)} will reset the tracked frame automatically.
+   *
+   * @see #trackedFrame(int)
+   * @see #defaultFrame(int)
+   * @see #track(float, float, Frame)
+   * @see #track(int, float, float)
+   * @see #setTrackedFrame(int, Frame)
+   * @see #isTrackedFrame(int, Frame)
+   */
+  public void resetTrackedFrame(int hid) {
+    _hidFrameMap.remove(hid);
   }
 
   /**
    * Same as {@code return trackedFrame() == null ? eye() : trackedFrame()}. Never returns {@code null}.
    *
-   * @see #trackedFrame()
-   * @see #resetTrackedFrame()
+   * @see #trackedFrame(int)
+   * @see #resetTrackedFrame(int)
    * @see #track(float, float, Frame)
-   * @see #track(float, float)
-   * @see #setTrackedFrame(Frame)
-   * @see #isTrackedFrame(Frame)
+   * @see #track(int, float, float)
+   * @see #setTrackedFrame(int, Frame)
+   * @see #isTrackedFrame(int, Frame)
    */
-  public Frame defaultFrame() {
-    return trackedFrame() == null ? eye() : trackedFrame();
+  public Frame defaultFrame(int hid) {
+    return trackedFrame(hid) == null ? eye() : trackedFrame(hid);
   }
 
   /**
    * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
    * {@code false} otherwise. The frame is picked according to the {@link Frame#precision()}.
    *
-   * @see #trackedFrame()
-   * @see #resetTrackedFrame()
-   * @see #defaultFrame()
-   * @see #track(float, float)
-   * @see #setTrackedFrame(Frame)
-   * @see #isTrackedFrame(Frame)
+   * @see #trackedFrame(int)
+   * @see #resetTrackedFrame(int)
+   * @see #defaultFrame(int)
+   * @see #track(int, float, float)
+   * @see #setTrackedFrame(int, Frame)
+   * @see #isTrackedFrame(int, Frame)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
@@ -2549,40 +2555,40 @@ public class Graph {
   /**
    * Updates the tracked frame.
    * <p>
-   * To set the {@link #trackedFrame()} the algorithm casts a ray at pixel position {@code (x, y)}
+   * To set the {@link #trackedFrame(int)} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
    *
    * @see #traverse()
-   * @see #trackedFrame()
-   * @see #resetTrackedFrame()
-   * @see #defaultFrame()
+   * @see #trackedFrame(int)
+   * @see #resetTrackedFrame(int)
+   * @see #defaultFrame(int)
    * @see #track(float, float, Frame)
-   * @see #setTrackedFrame(Frame)
-   * @see #isTrackedFrame(Frame)
+   * @see #setTrackedFrame(int, Frame)
+   * @see #isTrackedFrame(int, Frame)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
-  public Frame track(float x, float y) {
-    resetTrackedFrame();
+  public Frame track(int hid, float x, float y) {
+    resetTrackedFrame(hid);
     for (Frame frame : _leadingFrames())
-      _track(frame, x, y);
-    return trackedFrame();
+      _track(hid, frame, x, y);
+    return trackedFrame(hid);
   }
 
   /**
-   * Use internally by {@link #track(float, float)}.
+   * Use internally by {@link #track(int, float, float)}.
    */
-  protected void _track(Frame frame, float x, float y) {
+  protected void _track(int hid, Frame frame, float x, float y) {
     pushModelView();
     applyTransformation(frame);
 
-    if (trackedFrame() == null && frame.isTrackingEnabled())
+    if (trackedFrame(hid) == null && frame.isTrackingEnabled())
       if (track(x, y, frame))
-        setTrackedFrame(frame);
+        setTrackedFrame(hid, frame);
 
-    if (!frame.isCulled() && trackedFrame() == null)
+    if (!frame.isCulled() && trackedFrame(hid) == null)
       for (Frame child : frame.children())
-        _track(child, x, y);
+        _track(hid, child, x, y);
     popModelView();
   }
 
@@ -2590,10 +2596,10 @@ public class Graph {
    * Same as {@code align(defaultFrame())}.
    *
    * @see #align(Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void align() {
-    align(defaultFrame());
+  public void align(int hid) {
+    align(defaultFrame(hid));
   }
 
   /**
@@ -2604,7 +2610,7 @@ public class Graph {
    * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)}.
    *
    * @see #isEye(Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
   public void align(Frame frame) {
     if (frame == null)
@@ -2619,10 +2625,10 @@ public class Graph {
    * Same as {@code focus(defaultFrame())}.
    *
    * @see #focus(Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void focus() {
-    focus(defaultFrame());
+  public void focus(int hid) {
+    focus(defaultFrame(hid));
   }
 
   /**
@@ -2831,25 +2837,25 @@ public class Graph {
    * Same as {@code zoom(delta, defaultFrame())}.
    *
    * @see #translate(float, float, Frame)
-   * @see #translate(float, float)
+   * @see #translate(int, float, float)
    * @see #translate(float, float, float, Frame)
-   * @see #translate(float, float, float)
+   * @see #translate(int, float, float, float)
    * @see #zoom(float, Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void zoom(float delta) {
-    zoom(delta, defaultFrame());
+  public void zoom(int hid, float delta) {
+    zoom(delta, defaultFrame(hid));
   }
 
   /**
    * Same as {@code translate(0, 0, delta, frame)}.
    *
    * @see #translate(float, float, Frame)
-   * @see #translate(float, float)
+   * @see #translate(int, float, float)
    * @see #translate(float, float, float, Frame)
-   * @see #translate(float, float, float)
-   * @see #zoom(float)
-   * @see #defaultFrame()
+   * @see #translate(int, float, float, float)
+   * @see #zoom(int, float)
+   * @see #defaultFrame(int)
    */
   public void zoom(float delta, Frame frame) {
     translate(0, 0, delta, frame);
@@ -2860,38 +2866,38 @@ public class Graph {
    *
    * @see #translate(float, float, Frame)
    * @see #translate(float, float, float, Frame)
-   * @see #translate(float, float, float)
-   * @see #zoom(float)
+   * @see #translate(int, float, float, float)
+   * @see #zoom(int, float)
    * @see #zoom(float, Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void translate(float dx, float dy) {
-    translate(dx, dy, 0, defaultFrame());
+  public void translate(int hid, float dx, float dy) {
+    translate(dx, dy, 0, defaultFrame(hid));
   }
 
   /**
    * Same as {@code translate(dx, dy, dz, defaultFrame())}.
    *
    * @see #translate(float, float, Frame)
-   * @see #translate(float, float)
+   * @see #translate(int, float, float)
    * @see #translate(float, float, float, Frame)
    * @see #zoom(float, Frame)
-   * @see #zoom(float)
-   * @see #defaultFrame()
+   * @see #zoom(int, float)
+   * @see #defaultFrame(int)
    */
-  public void translate(float dx, float dy, float dz) {
-    translate(dx, dy, dz, defaultFrame());
+  public void translate(int hid, float dx, float dy, float dz) {
+    translate(dx, dy, dz, defaultFrame(hid));
   }
 
   /**
    * Same as {@code translate(dx, dy, 0, frame)}.
    *
-   * @see #translate(float, float, float)
-   * @see #translate(float, float)
+   * @see #translate(int, float, float, float)
+   * @see #translate(int, float, float)
    * @see #translate(float, float, float, Frame)
    * @see #zoom(float, Frame)
-   * @see #zoom(float)
-   * @see #defaultFrame()
+   * @see #zoom(int, float)
+   * @see #defaultFrame(int)
    */
   public void translate(float dx, float dy, Frame frame) {
     translate(dx, dy, 0, frame);
@@ -2903,11 +2909,11 @@ public class Graph {
    * The z-coordinate is mapped from [0..{@code min(width(), height())}] to the [0..2*{@link #radius()}}] range.
    *
    * @see #translate(float, float, Frame)
-   * @see #translate(float, float)
-   * @see #translate(float, float, float)
+   * @see #translate(int, float, float)
+   * @see #translate(int, float, float, float)
    * @see #zoom(float, Frame)
-   * @see #zoom(float)
-   * @see #defaultFrame()
+   * @see #zoom(int, float)
+   * @see #defaultFrame(int)
    */
   public void translate(float dx, float dy, float dz, Frame frame) {
     if (frame == null)
@@ -2964,17 +2970,17 @@ public class Graph {
    * Same as {@code scale(delta, defaultFrame())}.
    *
    * @see #scale(float, Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void scale(float delta) {
-    scale(delta, defaultFrame());
+  public void scale(int hid, float delta) {
+    scale(delta, defaultFrame(hid));
   }
 
   /**
    * Scales the {@code frame} according to {@code delta}. Note that if {@code frame} is the {@link #eye()}
    * this call simply changes the {@link #fieldOfView()}.
    *
-   * @see #scale(float)
+   * @see #scale(int, float)
    */
   public void scale(float delta, Frame frame) {
     float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
@@ -2982,18 +2988,18 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@link #defaultFrame()} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   * Rotates the {@link #defaultFrame(int)} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
    *
    * @see #rotate(float, float, float, Frame)
    */
-  public void rotate(float roll, float pitch, float yaw) {
-    rotate(roll, pitch, yaw, defaultFrame());
+  public void rotate(int hid, float roll, float pitch, float yaw) {
+    rotate(roll, pitch, yaw, defaultFrame(hid));
   }
 
   /**
    * Rotates the {@code frame} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
    *
-   * @see #rotate(float, float, float)
+   * @see #rotate(int, float, float, float)
    */
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
@@ -3031,18 +3037,18 @@ public class Graph {
    *
    * @see #spin(Point, Point, float, Frame)
    * @see #spin(Point, Point, Frame)
-   * @see #spin(Point, Point, float)
+   * @see #spin(int, Point, Point, float)
    */
-  public void spin(Point tail, Point head) {
-    spin(tail, head, defaultFrame());
+  public void spin(int hid, Point tail, Point head) {
+    spin(tail, head, defaultFrame(hid));
   }
 
   /**
    * Same as {@code spin(tail, head, 1, frame)}.
    *
    * @see #spin(Point, Point, float, Frame)
-   * @see #spin(Point, Point)
-   * @see #spin(Point, Point, float)
+   * @see #spin(int, Point, Point)
+   * @see #spin(int, Point, Point, float)
    */
   public void spin(Point tail, Point head, Frame frame) {
     spin(tail, head, 1, frame);
@@ -3052,12 +3058,12 @@ public class Graph {
    * Same as {@code spin(tail, head, sensitivity, defaultFrame())}.
    *
    * @see #spin(Point, Point, float, Frame)
-   * @see #spin(Point, Point)
+   * @see #spin(int, Point, Point)
    * @see #spin(Point, Point, Frame)
-   * @see #defaultFrame()
+   * @see #defaultFrame(int)
    */
-  public void spin(Point tail, Point head, float sensitivity) {
-    spin(tail, head, sensitivity, defaultFrame());
+  public void spin(int hid, Point tail, Point head, float sensitivity) {
+    spin(tail, head, sensitivity, defaultFrame(hid));
   }
 
   /**
@@ -3071,9 +3077,9 @@ public class Graph {
    * Override this class an call {@link #_spin(Point, Point, Point, float, Frame)} if you want to define a different
    * rotation center (rare).
    *
-   * @see #spin(Point, Point)
+   * @see #spin(int, Point, Point)
    * @see #spin(Point, Point, Frame)
-   * @see #spin(Point, Point, float)
+   * @see #spin(int, Point, Point, float)
    */
   public void spin(Point tail, Point head, float sensitivity, Frame frame) {
     if (frame == null)
