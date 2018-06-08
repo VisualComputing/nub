@@ -2579,17 +2579,15 @@ public class Graph {
    * Use internally by {@link #track(int, float, float)}.
    */
   protected void _track(int hid, Frame frame, float x, float y) {
-    pushModelView();
-    applyTransformation(frame);
-
     if (trackedFrame(hid) == null && frame.isTrackingEnabled())
-      if (track(x, y, frame))
+      if (track(x, y, frame)) {
         setTrackedFrame(hid, frame);
+        return;
+      }
 
     if (!frame.isCulled() && trackedFrame(hid) == null)
       for (Frame child : frame.children())
         _track(hid, child, x, y);
-    popModelView();
   }
 
   /**
