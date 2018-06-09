@@ -51,7 +51,7 @@ import java.util.List;
  * Human Interface Device (hid)</a></h3>
  * The above interactivity API is {@code hid} agnostic, i.e., all that third-parties implementing a
  * specific {@code hid} require is to conform to their method signatures. For example, the following
- * two functions would implement translation with a mouse:
+ * two functions would implement translation with a mouse (see {@link #translate(float, float, Frame)}):
  * <pre>
  * {@code
  * public void mouseTranslate() {
@@ -72,10 +72,10 @@ import java.util.List;
  * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
  * <p>
- * Note that {@link #track(int, float, float)} will cast a ray and test it against each graph
- * attached frame to automatically update the {@code hid} {@link #trackedFrame(int)}, and hence
- * the {@code hid} {@link #defaultFrame(int)} too (i.e., without the need to explicitly call
- * {@link #track(float, float, Frame)} and {@link #setTrackedFrame(int, Frame)}).
+ * Note that {@link #track(int, float, float)} will cast a ray and test it against each frame
+ * (attached to this graph) to automatically update the {@code hid} {@link #trackedFrame(int)},
+ * and hence the {@code hid} {@link #defaultFrame(int)} too (i.e., without the need to
+ * explicitly call {@link #track(float, float, Frame)} and {@link #setTrackedFrame(int, Frame)}).
  * <h2>Scene graph handling</h2>
  * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
@@ -2515,7 +2515,7 @@ public class Graph {
 
   /**
    * Returns the {@code hid} default-frame which is used by methods dealing interactivity that don take a frame
-   * para. Same as {@code return trackedFrame(hid) == null ? eye() : trackedFrame(hid)}. Never returns {@code null}.
+   * param. Same as {@code return trackedFrame(hid) == null ? eye() : trackedFrame(hid)}. Never returns {@code null}.
    *
    * @see #trackedFrame(int)
    * @see #resetTrackedFrame(int)

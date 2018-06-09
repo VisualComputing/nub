@@ -59,23 +59,23 @@ public class SpaceNavigator extends PApplet {
     background(0);
     scene.drawAxes();
     scene.traverse();
-    if (snPicking) {
-      float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
-      float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
-      spaceNavigatorPicking(x, y);
-      // draw picking visual hint
-      pushStyle();
-      strokeWeight(3);
-      stroke(0, 255, 0);
-      scene.drawCross(x, y, 30);
-      popStyle();
-    } else {
+    if (snPicking)
+      spaceNavigatorPicking();
+    else
       spaceNavigatorInteraction();
-    }
   }
 
-  void spaceNavigatorPicking(float x, float y) {
+  void spaceNavigatorPicking() {
+    float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
+    float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
+    // update the space navigator tracked frame:
     scene.track(SPCNAV, x, y);
+    // draw picking visual hint
+    pushStyle();
+    strokeWeight(3);
+    stroke(0, 255, 0);
+    scene.drawCross(x, y, 30);
+    popStyle();
   }
 
   void spaceNavigatorInteraction() {
