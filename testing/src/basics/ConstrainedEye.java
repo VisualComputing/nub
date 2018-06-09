@@ -57,15 +57,15 @@ public class ConstrainedEye extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin("mouse");
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
     else
-      scene.mouseZoom(mouseX - pmouseX);
+      scene.zoom("mouse", mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseZoom(event.getCount() * 20);
+    scene.zoom("mouse", event.getCount() * 20);
   }
 
   public void keyPressed() {

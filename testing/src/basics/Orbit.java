@@ -50,7 +50,7 @@ public class Orbit extends PApplet {
     shape2.setGraphics(shape());
     shape2.translate(275, 275, 275);
 
-    scene.setMouseTrackedFrame(shape2);
+    scene.setTrackedFrame("mouse", shape2);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
   }
@@ -65,7 +65,7 @@ public class Orbit extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setMouseTrackedFrame(scene.isMouseTrackedFrame(shape1) ? shape2 : shape1);
+      scene.setTrackedFrame("mouse", scene.isTrackedFrame("mouse", shape1) ? shape2 : shape1);
     if (key == 'f')
       scene.flip();
   }
@@ -79,20 +79,20 @@ public class Orbit extends PApplet {
         //shape2.orbit(new Quaternion(new Vector(0, 1, 0), (mouseX - pmouseX) * PI / width), shape1);
         shape2.orbit(axis, (mouseX - pmouseX) * PI / width);
       else
-        scene.mouseSpin(shape1);
+        scene.spin("mouse");
     } else if (mouseButton == RIGHT)
-      scene.mouseSpin(scene.eye());
-    //scene.mouseTranslate();
+      scene.spin(scene.eye());
+    //scene.translate("mouse");
     //scene.mousePan();
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseScale(event.getCount() * 20);
+    scene.scale("mouse", event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
-      scene.mouseFocus();
+      scene.focus("mouse");
   }
 
   PShape shape() {

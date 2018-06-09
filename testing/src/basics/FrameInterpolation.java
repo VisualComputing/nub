@@ -81,7 +81,7 @@ public class FrameInterpolation extends PApplet {
     for (Frame frame : interpolator.keyFrames()) {
       pushMatrix();
       scene.applyTransformation(frame);
-      if (scene.mouseTrack(frame))
+      if (scene.track(scene.mouse(), frame))
         scene.drawAxes(40);
       else
         scene.drawAxes(20);
@@ -99,25 +99,25 @@ public class FrameInterpolation extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.mouseTrack();
+    scene.track("mouse");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
-      //scene.mouseLookAround(upVector);
+      scene.spin("mouse");
+      //scene.lookAround(upVector);
       //scene.mouseCAD();
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
       //scene.mousePan();
     else
       //scene.zoom(mouseX - pmouseX);
-      scene.mouseScale(mouseX - pmouseX);
+      scene.scale("mouse", mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
     //scene.zoom(event.getCount() * 20);
-    scene.mouseScale(event.getCount() * 20);
+    scene.scale("mouse", event.getCount() * 20);
   }
 
   public void keyPressed() {

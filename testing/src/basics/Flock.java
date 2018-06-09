@@ -54,9 +54,9 @@ public class Flock extends PApplet {
   public void mouseDragged() {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
-        scene.mouseSpin(scene.eye());
+        scene.spin(scene.eye());
       else if (mouseButton == RIGHT)
-        scene.mousePan();
+        scene.translate("mouse");
       else
         scene.zoom(mouseX - pmouseX, scene.eye());
     //scene.scale(mouseX - pmouseX);
@@ -67,11 +67,11 @@ public class Flock extends PApplet {
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
-        scene.mouseLookAround();
+        scene.lookAround();
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseScale(event.getCount() * 20);
+    scene.scale("mouse", event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 
@@ -79,12 +79,12 @@ public class Flock extends PApplet {
   // the eye reference and perform an eye interpolation to it.
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.mouseTrack();
-    if (scene.mouseTrackedFrame() != null)
-      if (avatar != scene.mouseTrackedFrame() && scene.eye().reference() != scene.mouseTrackedFrame()) {
-        avatar = scene.mouseTrackedFrame();
-        scene.interpolateTo(scene.mouseTrackedFrame());
-        scene.eye().setReference(scene.mouseTrackedFrame());
+      scene.track("mouse");
+    if (scene.trackedFrame("mouse") != null)
+      if (avatar != scene.trackedFrame("mouse") && scene.eye().reference() != scene.trackedFrame("mouse")) {
+        avatar = scene.trackedFrame("mouse");
+        scene.interpolateTo(scene.trackedFrame("mouse"));
+        scene.eye().setReference(scene.trackedFrame("mouse"));
         // TODO
         // Interpolation after setting the reference fires the following warning:
         // 'Both frame and its reference should be detached, or attached to the same graph.'

@@ -26,7 +26,6 @@ public class SpaceNavigator extends PApplet {
   // frames stuff:
   Scene scene;
   boolean snPicking;
-  public static int SPCNAV = 2;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -69,7 +68,7 @@ public class SpaceNavigator extends PApplet {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
     // update the space navigator tracked frame:
-    scene.track(SPCNAV, x, y);
+    scene.track("SPCNAV", x, y);
     // draw picking visual hint
     pushStyle();
     strokeWeight(3);
@@ -79,25 +78,25 @@ public class SpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate(SPCNAV, 10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue());
-    scene.rotate(SPCNAV, snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width);
+    scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue());
+    scene.rotate("SPCNAV", snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width);
   }
 
   public void mouseMoved() {
-    scene.mouseTrack();
+    scene.track("mouse");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin("mouse");
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
     else
-      scene.mouseScale(mouseX - pmouseX);
+      scene.scale("mouse", scene.mouseDX());
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseZoom(event.getCount() * 20);
+    scene.zoom("mouse", event.getCount() * 20);
   }
 
   public void keyPressed() {

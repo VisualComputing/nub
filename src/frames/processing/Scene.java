@@ -912,7 +912,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the shape into the {@link #frontBuffer()}.
    * <p>
-   * Call it only instead of {@link Scene#traverse()} (or {@link #mouseTrack()}).
+   * Call it only instead of {@link Scene#traverse()}.
    *
    * @see frames.processing.Scene#traverse(PGraphics)
    */
@@ -958,16 +958,6 @@ public class Scene extends Graph implements PConstants {
   public void traverse() {
     _targetPGraphics = frontBuffer();
     super.traverse();
-  }
-
-  /**
-   * Same as {@code return track(1, pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y())}.
-   *
-   * @see #track(int, float, float)
-   * @see #traverse()
-   */
-  public Frame mouseTrack() {
-    return track(1, pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
   /**
@@ -2876,179 +2866,74 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  /**
-   * Same as {@code super.track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y(), frame)}.
-   *
-   * @see #track(float, float, Frame)
-   */
-  public boolean mouseTrack(Frame frame) {
-    return super.track(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y(), frame);
+  public Point point(float x, float y) {
+    return new Point(x, y);
   }
 
-  /**
-   * Same as {@code mouseSpin(defaultFrame())}.
-   *
-   * @see #mouseSpin(Frame)
-   */
-  public void mouseSpin() {
-    mouseSpin(defaultFrame(1));
+  public float mouseDX() {
+    return pApplet().mouseX - pApplet().pmouseX;
   }
 
-  /**
-   * Same as {@code mouseSpin(1, frame)}.
-   *
-   * @see #mouseSpin(float, Frame)
-   */
-  public void mouseSpin(Frame frame) {
-    mouseSpin(1, frame);
+  public float mouseDY() {
+    return pApplet().mouseY - pApplet().pmouseY;
   }
 
-  /**
-   * Same as {@code mouseSpin(sensitivity, defaultFrame())}.
-   *
-   * @see #mouseSpin(float, Frame)
-   */
-  public void mouseSpin(float sensitivity) {
-    mouseSpin(sensitivity, defaultFrame(1));
+  public float mouseRADX() {
+    return mouseRADX(PI / height());
   }
 
-  /**
-   * Same as {@code spin(_spin(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame), frame)}.
-   *
-   * @see #spin(Quaternion, Frame)
-   */
-  public void mouseSpin(float sensitivity, Frame frame) {
-    spin(_spin(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame), frame);
+  public float mouseRADX(float sensitivity) {
+    return mouseDX() * sensitivity;
   }
 
-  /**
-   * Same as {@code mouseTranslate(defaultFrame())}.
-   *
-   * @see #mouseTranslate(Frame)
-   */
-  public void mouseTranslate() {
-    mouseTranslate(defaultFrame(1));
+  public float mouseRADY() {
+    return mouseRADY(PI / width());
   }
 
-  /**
-   * Same as {@code translate(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, frame)}.
-   *
-   * @see #translate(float, float, Frame)
-   */
-  public void mouseTranslate(Frame frame) {
-    translate(pApplet().mouseX - pApplet().pmouseX, pApplet().mouseY - pApplet().pmouseY, frame);
+  public float mouseRADY(float sensitivity) {
+    return mouseDY() * sensitivity;
   }
 
-  public void mouseScale(float delta) {
-    scale(1, delta);
+  public Point mouse() {
+    return point(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
-  public void mouseFocus() {
-    focus(1);
+  public Point pmouse() {
+    return point(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
   }
 
-  public void mouseAlign() {
-    align(1);
+  public Frame track(String hid) {
+    return track(hid, mouse());
   }
 
-  public void mouseZoom(float delta) {
-    zoom(1, delta);
+  public void translate(String hid) {
+    translate(hid, mouseDX(), mouseDY());
   }
 
-  public Frame mouseTrackedFrame() {
-    return trackedFrame(1);
+  public void translate(Frame frame) {
+    translate(mouseDX(), mouseDY(), frame);
   }
 
-  public void setMouseTrackedFrame(Frame frame) {
-    setTrackedFrame(1, frame);
+  public void spin(String hid) {
+    spin(hid, pmouse(), mouse());
   }
 
-  public void resetMouseTrackedFrame() {
-    resetTrackedFrame(1);
-  }
-
-  public boolean isMouseTrackedFrame(Frame frame) {
-    return isTrackedFrame(1, frame);
-  }
-
-  public Frame mouseDefaultFrame() {
-    return defaultFrame(1);
+  public void spin(Frame frame) {
+    spin(pmouse(), mouse(), frame);
   }
 
   // only eye
 
-  /**
-   * Same as {@code mouseTranslate(eye())}.
-   *
-   * @see #mouseTranslate(Frame)
-   */
-  public void mousePan() {
-    mouseTranslate(eye());
+  public void lookAround() {
+    lookAround(mouseRADX(), mouseRADY());
   }
 
-  /**
-   * Same as {@code mouseLookAround(PI / (2 * PApplet.max(width(), height())))}.
-   *
-   * @see #mouseLookAround(float)
-   */
-  public void mouseLookAround() {
-    mouseLookAround(PI / (2 * PApplet.max(width(), height())));
+  public void rotateCAD() {
+    rotateCAD(mouseRADX(), mouseRADY());
   }
 
-  /**
-   * Computes the angular displacements in {@link #lookAround(float, float)} according to the current and
-   * previous mouse position and modulates them according to {@code sensitivity}.
-   *
-   * @see #lookAround(float, float)
-   */
-  public void mouseLookAround(float sensitivity) {
-    Vector delta = Vector.subtract(new Vector(pApplet().mouseX, pApplet().mouseY), new Vector(pApplet().pmouseX, pApplet().pmouseY));
-    lookAround(delta.x() * sensitivity, delta.y() * sensitivity);
-  }
-
-  /**
-   * Same as {@code mouseCAD(new Vector(0, 1, 0))}.
-   *
-   * @see #mouseCAD(Vector)
-   * @see #mouseCAD(float)
-   * @see #mouseCAD(Vector, float)
-   */
-  public void mouseCAD() {
-    mouseCAD(new Vector(0, 1, 0));
-  }
-
-  /**
-   * Same as {@code mouseCAD(new Vector(0, 1, 0), sensitivity)}.
-   *
-   * @see #mouseCAD()
-   * @see #mouseCAD(Vector)
-   * @see #mouseCAD(Vector, float)
-   */
-  public void mouseCAD(float sensitivity) {
-    mouseCAD(new Vector(0, 1, 0), sensitivity);
-  }
-
-  /**
-   * Same as {@code mouseCAD(upVector, PI / PApplet.max(width(), height()))}.
-   *
-   * @see #mouseCAD()
-   * @see #mouseCAD(float)
-   * @see #mouseCAD(Vector, float)
-   */
-  public void mouseCAD(Vector upVector) {
-    mouseCAD(upVector, PI / PApplet.max(width(), height()));
-  }
-
-  /**
-   * Same as {@code rotateCAD((pApplet().mouseX - pApplet().pmouseX) * sensitivity, (pApplet().mouseY - pApplet().pmouseY) * sensitivity, upVector)}.
-   *
-   * @see #rotateCAD(float, float, Vector)
-   * @see #mouseCAD()
-   * @see #mouseCAD(Vector)
-   * @see #mouseCAD(float)
-   */
-  public void mouseCAD(Vector upVector, float sensitivity) {
-    rotateCAD((pApplet().mouseX - pApplet().pmouseX) * sensitivity, (pApplet().mouseY - pApplet().pmouseY) * sensitivity, upVector);
+  public void rotateCAD(Vector up) {
+    rotateCAD(mouseRADX(), mouseRADY(), up);
   }
 
   /*

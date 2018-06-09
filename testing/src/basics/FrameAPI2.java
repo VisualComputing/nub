@@ -328,37 +328,37 @@ public class FrameAPI2 extends PApplet {
     if (event.isControlDown())
       return;
     if (event.isShiftDown())
-      scene.mouseTranslate();
-    else if (scene.mouseTrackedFrame() == null)
-      scene.mouseLookAround();
+      scene.translate("mouse");
+    else if (scene.trackedFrame("mouse") == null)
+      scene.lookAround();
     else
-      scene.mouseSpin();
+      scene.spin("mouse");
   }
 
   @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin("mouse");
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
     else
-      scene.mouseZoom(mouseX - pmouseX);
+      scene.zoom("mouse", mouseX - pmouseX);
   }
 
   @Override
   public void mouseWheel(MouseEvent event) {
-    scene.mouseScale(event.getCount() * 20);
+    scene.scale("mouse", event.getCount() * 20);
   }
 
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.mouseTrack();
+      scene.track("mouse");
     else if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.mouseFocus();
+        scene.focus("mouse");
       else
-        scene.mouseAlign();
+        scene.align("mouse");
   }
 
   public class InteractiveFrame extends Frame {

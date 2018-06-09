@@ -51,19 +51,19 @@ public class AdaptivePrecision3 extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin("mouse");
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
     else
-      scene.mouseScale(mouseX - pmouseX);
+      scene.scale("mouse", mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseZoom(event.getCount() * 50);
+    scene.zoom("mouse", event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
-    scene.mouseTrack();
+    scene.track("mouse");
   }
 
   PShape shape() {

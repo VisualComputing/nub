@@ -58,7 +58,7 @@ public class ConstrainedFrame extends PApplet {
     pushMatrix();
     scene.applyTransformation(node);
     scene.drawAxes(40);
-    if (scene.mouseTrack(node)) {
+    if (scene.track(scene.mouse(), node)) {
       fill(0, 255, 255);
       scene.drawTorusSolenoid();
     } else if (scene.isTrackedFrame(node)) {
@@ -78,29 +78,29 @@ public class ConstrainedFrame extends PApplet {
 
   public void mouseMoved() {
     if (mouseTracking)
-      scene.mouseTrack();
+      scene.track("mouse");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.mouseSpin();
+      scene.spin("mouse");
     else if (mouseButton == RIGHT)
-      scene.mouseTranslate();
+      scene.translate("mouse");
     else
-      scene.mouseZoom(mouseX - pmouseX);
+      scene.zoom("mouse", mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.mouseZoom(event.getCount() * 20);
+    scene.zoom("mouse", event.getCount() * 20);
   }
 
   public void keyPressed() {
     if (key == 'i')
-      if (scene.isMouseTrackedFrame(node)) {
-        scene.resetMouseTrackedFrame();
+      if (scene.isTrackedFrame("mouse", node)) {
+        scene.resetTrackedFrame("mouse");
         mouseTracking = true;
       } else {
-        scene.setMouseTrackedFrame(node);
+        scene.setTrackedFrame("mouse", node);
         mouseTracking = false;
       }
     if (key == 'b' || key == 'B') {
