@@ -160,7 +160,7 @@ public class Graph {
 
   // 3. Handlers
   protected TimingHandler _timingHandler;
-  protected HashMap<String, Frame> _hidFrameMap;
+  protected HashMap<String, Frame> _agents;
 
   // 4. Graph
   protected List<Frame> _seeds;
@@ -242,7 +242,7 @@ public class Graph {
     fitBall();
 
     setMatrixHandler(new MatrixHandler(this));
-    _hidFrameMap = new HashMap<String, Frame>();
+    _agents = new HashMap<String, Frame>();
     setRightHanded();
 
     enableBoundaryEquations(false);
@@ -2460,7 +2460,7 @@ public class Graph {
       System.out.println("Warning. Cannot track a frame that is not attached to this graph!");
       return;
     }
-    _hidFrameMap.put(hid, frame);
+    _agents.put(hid, frame);
   }
 
   /**
@@ -2475,14 +2475,14 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    */
   public Frame trackedFrame(String hid) {
-    return _hidFrameMap.get(hid);
+    return _agents.get(hid);
   }
 
   /**
    * Returns {@code true} if the {@code frame} is the tracked of frame of some {@code hid} and {@code false} otherwise.
    */
   public boolean isTrackedFrame(Frame frame) {
-    return _hidFrameMap.containsValue(frame);
+    return _agents.containsValue(frame);
   }
 
   /**
@@ -2499,6 +2499,20 @@ public class Graph {
   }
 
   /**
+   * Resets all HID's {@link #trackedFrame(String)}.
+   *
+   * @see #trackedFrame(String)
+   * @see #defaultFrame(String)
+   * @see #track(float, float, Frame)
+   * @see #track(String, float, float)
+   * @see #setTrackedFrame(String, Frame)
+   * @see #isTrackedFrame(String, Frame)
+   */
+  public void resetTrackedFrame() {
+    _agents.clear();
+  }
+
+  /**
    * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #trackedFrame(String)}
    * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked frame automatically.
    *
@@ -2510,7 +2524,7 @@ public class Graph {
    * @see #isTrackedFrame(String, Frame)
    */
   public void resetTrackedFrame(String hid) {
-    _hidFrameMap.remove(hid);
+    _agents.remove(hid);
   }
 
   /**
