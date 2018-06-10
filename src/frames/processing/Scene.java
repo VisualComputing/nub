@@ -2866,72 +2866,160 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  public Point point(float x, float y) {
+  /**
+   * Converts the {@code x, y} coordinates into new {@link Point} and returns it.
+   */
+  public Point toPoint(float x, float y) {
     return new Point(x, y);
   }
 
+  /**
+   * Returns the last {@code x} mouse displacement.
+   */
   public float mouseDX() {
     return pApplet().mouseX - pApplet().pmouseX;
   }
 
-  public float mouseDY() {
-    return pApplet().mouseY - pApplet().pmouseY;
-  }
-
+  /**
+   * Same as {@code return mouseRADX(PI / width())}.
+   *
+   * @see #mouseRADX(float)
+   */
   public float mouseRADX() {
-    return mouseRADX(PI / height());
+    return mouseRADX(PI / width());
   }
 
+  /**
+   * Converts {@link #mouseDX()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
   public float mouseRADX(float sensitivity) {
     return mouseDX() * sensitivity;
   }
 
-  public float mouseRADY() {
-    return mouseRADY(PI / width());
+  /**
+   * Returns the last {@code y} mouse displacement.
+   */
+  public float mouseDY() {
+    return pApplet().mouseY - pApplet().pmouseY;
   }
 
+  /**
+   * Same as {@code return mouseRADY(PI / height())}.
+   *
+   * @see #mouseRADY(float)
+   */
+  public float mouseRADY() {
+    return mouseRADY(PI / height());
+  }
+
+  /**
+   * Converts {@link #mouseDY()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
   public float mouseRADY(float sensitivity) {
     return mouseDY() * sensitivity;
   }
 
+  /**
+   * Returns the current mouse cursor position.
+   */
   public Point mouse() {
-    return point(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
+    return toPoint(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
   }
 
+  /**
+   * Returns the previous mouse cursor position.
+   */
   public Point pmouse() {
-    return point(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
+    return toPoint(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
   }
 
+  /**
+   * Same as {@code return track(hid, mouse())}.
+   *
+   * @see #track(String, Point)
+   * @see #mouse()
+   */
   public Frame track(String hid) {
     return track(hid, mouse());
   }
 
+  /**
+   * Same as {@code translate(hid, mouseDX(), mouseDY())}.
+   *
+   * @see #translate(String, float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
   public void translate(String hid) {
     translate(hid, mouseDX(), mouseDY());
   }
 
+  /**
+   * Same as {@code translate(mouseDX(), mouseDY(), frame)}.
+   *
+   * @see #translate(float, float, Frame)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
   public void translate(Frame frame) {
     translate(mouseDX(), mouseDY(), frame);
   }
 
+  /**
+   * Same as {@code spin(hid, pmouse(), mouse())}.
+   *
+   * @see #spin(String, Point, Point)
+   * @see #pmouse()
+   * @see #mouse()
+   */
   public void spin(String hid) {
     spin(hid, pmouse(), mouse());
   }
 
+  /**
+   * Same as {@code spin(pmouse(), mouse(), frame)}.
+   *
+   * @see #spin(Point, Point, Frame)
+   * @see #pmouse()
+   * @see #mouse()
+   */
   public void spin(Frame frame) {
     spin(pmouse(), mouse(), frame);
   }
 
   // only eye
 
+  /**
+   * Same as {@code lookAround(mouseRADX(), mouseRADY())}.
+   *
+   * @see #lookAround(float, float)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
   public void lookAround() {
     lookAround(mouseRADX(), mouseRADY());
   }
 
+  /**
+   * Same as {@code rotateCAD(mouseRADX(), mouseRADY())}.
+   *
+   * @see #rotateCAD(float, float)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
   public void rotateCAD() {
     rotateCAD(mouseRADX(), mouseRADY());
   }
 
+  /**
+   * Same as {@code rotateCAD(mouseRADX(), mouseRADY(), up)}.
+   *
+   * @see #rotateCAD(float, float, Vector)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
   public void rotateCAD(Vector up) {
     rotateCAD(mouseRADX(), mouseRADY(), up);
   }
