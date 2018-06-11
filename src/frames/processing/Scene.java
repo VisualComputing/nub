@@ -988,6 +988,8 @@ public class Scene extends Graph implements PConstants {
   protected void _visit(Frame frame) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, frame);
+    if (_targetPGraphics == backBuffer() || (_targetPGraphics == frontBuffer() && !_bbEnabled))
+      _track(frame);
     frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
@@ -2943,6 +2945,16 @@ public class Scene extends Graph implements PConstants {
    */
   public Frame track(String hid) {
     return track(hid, mouse());
+  }
+
+  /**
+   * Same as {@code cast(hid, mouse())}.
+   *
+   * @see #cast(String, Point)
+   * @see #mouse()
+   */
+  public void cast(String hid) {
+    cast(hid, mouse());
   }
 
   /**

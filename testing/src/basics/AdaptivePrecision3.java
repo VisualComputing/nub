@@ -25,7 +25,7 @@ public class AdaptivePrecision3 extends PApplet {
     scene.fitBallInterpolation();
     shapes = new Shape[25];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene, shape());
+      shapes[i] = new Shape(scene, shape(shapes[i]));
       scene.randomize(shapes[i]);
       shapes[i].setPrecisionThreshold(25);
       shapes[i].setPrecision(Frame.Precision.ADAPTIVE);
@@ -35,13 +35,7 @@ public class AdaptivePrecision3 extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    for (int i = 0; i < shapes.length; i++) {
-      scene.draw(shapes[i]);
-      pushStyle();
-      stroke(255);
-      scene.drawShooterTarget(shapes[i]);
-      popStyle();
-    }
+    scene.traverse();
   }
 
   public void keyPressed() {
@@ -63,10 +57,11 @@ public class AdaptivePrecision3 extends PApplet {
   }
 
   public void mouseClicked(MouseEvent event) {
-    scene.track("mouse");
+    //scene.track("mouse");
+    scene.cast("mouse");
   }
 
-  PShape shape() {
+  PShape shape(Shape shape) {
     PShape fig = scene.is3D() ? createShape(BOX, 15) : createShape(RECT, 0, 0, 15, 15);
     fig.setStroke(255);
     fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));

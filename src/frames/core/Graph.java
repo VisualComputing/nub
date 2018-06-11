@@ -159,8 +159,27 @@ public class Graph {
   protected MatrixHandler _matrixHandler;
 
   // 3. Handlers
+  public class Tuple {
+    protected String _hid;
+    protected Point _pixel;
+
+    public Tuple(String hid, Point grabber) {
+      _hid = hid;
+      _pixel = grabber;
+    }
+
+    public Point pixel() {
+      return _pixel;
+    }
+
+    public String hid() {
+      return _hid;
+    }
+  }
+
   protected TimingHandler _timingHandler;
   protected HashMap<String, Frame> _agents;
+  protected ArrayList<Tuple> _tuples;
 
   // 4. Graph
   protected List<Frame> _seeds;
@@ -243,6 +262,7 @@ public class Graph {
 
     setMatrixHandler(new MatrixHandler(this));
     _agents = new HashMap<String, Frame>();
+    _tuples = new ArrayList<Tuple>();
     setRightHanded();
 
     enableBoundaryEquations(false);
@@ -2410,6 +2430,86 @@ public class Graph {
   // traversal
 
   /**
+   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
+   *
+   * @see #track(String, float, float)
+   */
+  public Frame track(String hid, Point pixel) {
+    return track(hid, pixel.x(), pixel.y());
+  }
+
+  /**
+   * Updates the {@code hid} device tracked-frame and returns it.
+   * <p>
+   * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
+   * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   *
+   * @see #traverse()
+   * @see #trackedFrame(String)
+   * @see #resetTrackedFrame(String)
+   * @see #defaultFrame(String)
+   * @see #track(float, float, Frame)
+   * @see #setTrackedFrame(String, Frame)
+   * @see #isTrackedFrame(String, Frame)
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
+   * @see #cast(String, Point)
+   * @see #cast(String, float, float)
+   */
+  public Frame track(String hid, float x, float y) {
+    resetTrackedFrame(hid);
+    for (Frame frame : _leadingFrames())
+      _track(hid, frame, x, y);
+    return trackedFrame(hid);
+  }
+
+  /**
+   * Use internally by {@link #track(String, float, float)}.
+   */
+  protected void _track(String hid, Frame frame, float x, float y) {
+    if (trackedFrame(hid) == null && frame.isTrackingEnabled())
+      if (track(x, y, frame)) {
+        setTrackedFrame(hid, frame);
+        return;
+      }
+    if (!frame.isCulled() && trackedFrame(hid) == null)
+      for (Frame child : frame.children())
+        _track(hid, child, x, y);
+  }
+
+  /**
+   * Same as {@code cast(hid, new Point(x, y))}.
+   *
+   * @see #cast(String, Point)
+   */
+  public void cast(String hid, float x, float y) {
+    cast(hid, new Point(x, y));
+  }
+
+  /**
+   * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-frame.
+   * The algorithm schedules an updated of the {@code hid} tracked-frame for the next traversal and hence should be
+   * always be used in conjunction with {@link #traverse()}.
+   * <p>
+   * This method is optimal since it updated the {@code hid} tracked-frame at traversal time. Prefer this method over
+   * {@link #track(String, Point)} when dealing with several {@code hids}.
+   *
+   * @see #traverse()
+   * @see #trackedFrame(String)
+   * @see #resetTrackedFrame(String)
+   * @see #defaultFrame(String)
+   * @see #track(float, float, Frame)
+   * @see #setTrackedFrame(String, Frame)
+   * @see #isTrackedFrame(String, Frame)
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
+   * @see #cast(String, float, float)
+   */
+  public void cast(String hid, Point pixel) {
+    _tuples.add(new Tuple(hid, pixel));
+  }
+
+  /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
    * by each traversed frame, and calling {@link Frame#visit()} on it.
    * <p>
@@ -2424,8 +2524,28 @@ public class Graph {
    * @see #pruneBranch(Frame)
    */
   public void traverse() {
+    if (!_tuples.isEmpty())
+      resetTrackedFrame();
     for (Frame frame : _leadingFrames())
       _visit(frame);
+    _tuples.clear();
+  }
+
+  /**
+   * Internally used by {@link #_visit(Frame)}.
+   */
+  protected void _track(Frame frame) {
+    if (!_tuples.isEmpty()) {
+      Iterator<Tuple> it = _tuples.iterator();
+      while (it.hasNext()) {
+        Tuple tuple = it.next();
+        if (!isTracking(tuple.hid()))
+          if (track(tuple.pixel(), frame)) {
+            setTrackedFrame(tuple.hid(), frame);
+            it.remove();
+          }
+      }
+    }
   }
 
   /**
@@ -2434,6 +2554,7 @@ public class Graph {
   protected void _visit(Frame frame) {
     pushModelView();
     applyTransformation(frame);
+    _track(frame);
     frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
@@ -2476,6 +2597,10 @@ public class Graph {
    */
   public Frame trackedFrame(String hid) {
     return _agents.get(hid);
+  }
+
+  public boolean isTracking(String hid) {
+    return _agents.containsKey(hid);
   }
 
   /**
@@ -2568,53 +2693,6 @@ public class Graph {
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
         : frame.precisionThreshold() / 2;
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
-  }
-
-  /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
-   *
-   * @see #track(String, float, float)
-   */
-  public Frame track(String hid, Point pixel) {
-    return track(hid, pixel.x(), pixel.y());
-  }
-
-  /**
-   * Updates the {@code hid} device tracked-frame and returns it.
-   * <p>
-   * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
-   *
-   * @see #traverse()
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
-   */
-  public Frame track(String hid, float x, float y) {
-    resetTrackedFrame(hid);
-    for (Frame frame : _leadingFrames())
-      _track(hid, frame, x, y);
-    return trackedFrame(hid);
-  }
-
-  /**
-   * Use internally by {@link #track(String, float, float)}.
-   */
-  protected void _track(String hid, Frame frame, float x, float y) {
-    if (trackedFrame(hid) == null && frame.isTrackingEnabled())
-      if (track(x, y, frame)) {
-        setTrackedFrame(hid, frame);
-        return;
-      }
-
-    if (!frame.isCulled() && trackedFrame(hid) == null)
-      for (Frame child : frame.children())
-        _track(hid, child, x, y);
   }
 
   /**
