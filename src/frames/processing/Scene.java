@@ -988,7 +988,9 @@ public class Scene extends Graph implements PConstants {
   protected void _visit(Frame frame) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, frame);
-    if (_targetPGraphics == backBuffer() || (_targetPGraphics == frontBuffer() && !_bbEnabled))
+    if (isOffscreen() && _targetPGraphics == frontBuffer())
+      _track(frame);
+    else if (_targetPGraphics == backBuffer() || (_targetPGraphics == frontBuffer() && !_bbEnabled))
       _track(frame);
     frame.visit();
     if (!frame.isCulled())
