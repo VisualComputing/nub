@@ -2524,8 +2524,6 @@ public class Graph {
    * @see #pruneBranch(Frame)
    */
   public void traverse() {
-    if (!_tuples.isEmpty())
-      resetTrackedFrame();
     for (Frame frame : _leadingFrames())
       _visit(frame);
     _tuples.clear();
@@ -2539,6 +2537,7 @@ public class Graph {
       Iterator<Tuple> it = _tuples.iterator();
       while (it.hasNext()) {
         Tuple tuple = it.next();
+        resetTrackedFrame(tuple.hid());
         if (!isTracking(tuple.hid()))
           if (track(tuple.pixel(), frame)) {
             setTrackedFrame(tuple.hid(), frame);

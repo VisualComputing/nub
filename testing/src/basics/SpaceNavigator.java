@@ -68,7 +68,7 @@ public class SpaceNavigator extends PApplet {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
     // update the space navigator tracked frame:
-    scene.track("SPCNAV", x, y);
+    scene.cast("SPCNAV", x, y);
     // draw picking visual hint
     pushStyle();
     strokeWeight(3);
@@ -83,7 +83,7 @@ public class SpaceNavigator extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.track("mouse");
+    scene.cast("mouse");
   }
 
   public void mouseDragged() {
