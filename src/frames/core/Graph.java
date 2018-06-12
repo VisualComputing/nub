@@ -2534,11 +2534,14 @@ public class Graph {
    */
   protected void _track(Frame frame) {
     if (!_tuples.isEmpty()) {
+      Vector projection = screenLocation(frame.position());
       Iterator<Tuple> it = _tuples.iterator();
       while (it.hasNext()) {
         Tuple tuple = it.next();
         resetTrackedFrame(tuple.hid());
         if (!isTracking(tuple.hid()))
+          //if (_track(tuple.pixel().x(), tuple.pixel().y(), projection, frame)) {
+          //if(_track(x, y, projection, frame)) {
           if (track(tuple.pixel(), frame)) {
             setTrackedFrame(tuple.hid(), frame);
             it.remove();
@@ -2684,11 +2687,17 @@ public class Graph {
    * @see Frame#setPrecision(Frame.Precision)
    */
   public boolean track(float x, float y, Frame frame) {
+    return _track(x, y, screenLocation(frame.position()), frame);
+  }
+
+  /**
+   * Cached version of {@link #track(float, float, Frame)}.
+   */
+  protected boolean _track(float x, float y, Vector projection, Frame frame) {
     if (frame == null)
       return false;
     if (isEye(frame))
       return false;
-    Vector projection = screenLocation(frame.position());
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
         : frame.precisionThreshold() / 2;
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
