@@ -749,9 +749,7 @@ public class Graph {
   public boolean isReachable(Frame frame) {
     if (frame == null)
       return false;
-    if (!frame.isAttached(this))
-      return false;
-    return frame.reference() == null ? _isLeadingFrame(frame) : frame.reference()._hasChild(frame);
+    return frame.isAttached(this);
   }
 
   /**
@@ -2541,8 +2539,6 @@ public class Graph {
         resetTrackedFrame(tuple.hid());
         if (!isTracking(tuple.hid()))
           if (_track(tuple.pixel().x(), tuple.pixel().y(), projection, frame)) {
-          //if(_track(x, y, projection, frame)) {
-            //if (track(tuple.pixel(), frame)) {
             setTrackedFrame(tuple.hid(), frame);
             it.remove();
           }

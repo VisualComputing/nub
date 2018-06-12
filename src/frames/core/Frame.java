@@ -353,7 +353,7 @@ public class Frame {
    *
    * @see #isDetached()
    * @see Graph#traverse()
-   * @see Graph#track(float, float)
+   * @see Graph#track(float, float, Frame)
    */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
@@ -367,7 +367,7 @@ public class Frame {
    *
    * @see #isAttached(Graph)
    * @see Graph#traverse()
-   * @see Graph#track(float, float)
+   * @see Graph#track(float, float, Frame)
    */
   public boolean isDetached() {
     return isAttached(null);
