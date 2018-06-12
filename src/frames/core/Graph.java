@@ -2540,9 +2540,9 @@ public class Graph {
         Tuple tuple = it.next();
         resetTrackedFrame(tuple.hid());
         if (!isTracking(tuple.hid()))
-          //if (_track(tuple.pixel().x(), tuple.pixel().y(), projection, frame)) {
+          if (_track(tuple.pixel().x(), tuple.pixel().y(), projection, frame)) {
           //if(_track(x, y, projection, frame)) {
-          if (track(tuple.pixel(), frame)) {
+            //if (track(tuple.pixel(), frame)) {
             setTrackedFrame(tuple.hid(), frame);
             it.remove();
           }

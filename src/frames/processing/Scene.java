@@ -936,13 +936,13 @@ public class Scene extends Graph implements PConstants {
    * @see Frame#setPrecision(Frame.Precision)
    */
   @Override
-  public final boolean track(float x, float y, Frame frame) {
+  protected boolean _track(float x, float y, Vector projection, Frame frame) {
+    if ((frame.precision() != Frame.Precision.EXACT) || !(frame instanceof Shape) || backBuffer() == null)
+      return super._track(x, y, projection, frame);
     if (frame == null)
       return false;
     if (isEye(frame))
       return false;
-    if ((frame.precision() != Frame.Precision.EXACT) || !(frame instanceof Shape) || backBuffer() == null)
-      return super.track(x, y, frame);
     int index = (int) y * width() + (int) x;
     if (backBuffer().pixels != null)
       if ((0 <= index) && (index < backBuffer().pixels.length))
