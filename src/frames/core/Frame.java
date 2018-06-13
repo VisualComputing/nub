@@ -289,11 +289,14 @@ public class Frame {
    */
   protected Frame(Graph graph, Frame frame) {
     this._graph = graph;
-    this.setReference(frame.reference());
     this.setPosition(frame.position());
     this.setOrientation(frame.orientation());
     this.setMagnitude(frame.magnitude());
     this.setConstraint(frame.constraint());
+
+    if ((this.isDetached() && frame.isDetached()) || !(this.isDetached() && !frame.isDetached()))
+      setReference(frame.reference());
+
     this._id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)

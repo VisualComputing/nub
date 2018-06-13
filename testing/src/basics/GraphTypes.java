@@ -9,7 +9,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class StandardCamera extends PApplet {
+public class GraphTypes extends PApplet {
   StdCamera scene;
   Scene auxScene, focus;
   Frame boxFrame;
@@ -179,7 +179,7 @@ public class StandardCamera extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.StandardCamera"});
+    PApplet.main(new String[]{"basics.GraphTypes"});
   }
 
   public class StdCamera extends Scene {

@@ -75,21 +75,26 @@ public class Flock extends PApplet {
     //scene.zoom(event.getCount() * 50);
   }
 
-  // Behaviour: tapping over a boid will select the frame as
-  // the eye reference and perform an eye interpolation to it.
   public void mouseClicked(MouseEvent event) {
-    if (event.getCount() == 1)
-      scene.track("mouse");
-    if (scene.trackedFrame("mouse") != null)
-      if (avatar != scene.trackedFrame("mouse") && scene.eye().reference() != scene.trackedFrame("mouse")) {
-        avatar = scene.trackedFrame("mouse");
-        scene.interpolateTo(scene.trackedFrame("mouse"));
-        scene.eye().setReference(scene.trackedFrame("mouse"));
-        // TODO
-        // Interpolation after setting the reference fires the following warning:
-        // 'Both frame and its reference should be detached, or attached to the same graph.'
-        //scene.interpolateTo(scene.mouseTrackedFrame());
-      }
+    // picks up a boid avatar, may be null
+    avatar = scene.track("mouse");
+    if (avatar != null)
+      animate();
+    else if (scene.eye().reference() != null)
+      resetEye();
+  }
+
+  // Sets current avatar as the eye reference and interpolate the eye to it
+  public void animate() {
+    scene.eye().setReference(avatar);
+    scene.interpolateTo(avatar);
+  }
+
+  // Resets the eye
+  public void resetEye() {
+    scene.eye().setReference(null);
+    scene.lookAt(scene.center());
+    scene.fitBallInterpolation();
   }
 
   public void walls() {
@@ -133,22 +138,10 @@ public class Flock extends PApplet {
         avoidWalls = !avoidWalls;
         break;
       case ' ':
-        if (scene.eye().reference() != null) {
-          scene.lookAt(scene.center());
-          // TODO
-          // Interpolation before setting the nul reference fires the following warning:
-          // 'Both frame and its reference should be detached, or attached to the same graph.'
-          //scene.fitBallInterpolation();
-          scene.eye().setReference(null);
-          scene.fitBallInterpolation();
-        } else if (avatar != null) {
-          scene.interpolateTo(avatar);
-          scene.eye().setReference(avatar);
-          // TODO
-          // Interpolation after setting the reference fires the following warning:
-          // 'Both frame and its reference should be detached, or attached to the same graph.'
-          //scene.interpolateTo(avatar);
-        }
+        if (scene.eye().reference() != null)
+          resetEye();
+        else if (avatar != null)
+          animate();
         break;
     }
   }
