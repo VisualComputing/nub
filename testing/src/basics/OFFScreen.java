@@ -61,28 +61,28 @@ public class OFFScreen extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.cast("mouse");
+    scene.cast();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin("mouse");
+      scene.spin();
     else if (mouseButton == RIGHT)
-      scene.translate("mouse");
+      scene.translate();
     else
-      scene.zoom("mouse", mouseX - pmouseX);
+      scene.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale("mouse", event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus("mouse");
+        scene.focus();
       else
-        scene.align("mouse");
+        scene.align();
   }
 
   public void keyPressed() {

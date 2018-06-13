@@ -83,20 +83,20 @@ public class SpaceNavigator extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast("mouse");
+    scene.cast();
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin("mouse");
+      scene.spin();
     else if (mouseButton == RIGHT)
-      scene.translate("mouse");
+      scene.translate();
     else
-      scene.scale("mouse", scene.mouseDX());
+      scene.scale(scene.mouseDX());
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom("mouse", event.getCount() * 20);
+    scene.zoom(event.getCount() * 20);
   }
 
   public void keyPressed() {

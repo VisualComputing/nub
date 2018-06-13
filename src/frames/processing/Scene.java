@@ -2462,7 +2462,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
-    if (isTrackedFrame(frame))
+    if (tracks(frame))
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
@@ -2531,7 +2531,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
-    if (isTrackedFrame(frame))
+    if (tracks(frame))
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
@@ -2940,34 +2940,34 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return track(hid, mouse())}.
+   * Same as {@code return track(mouse())}.
    *
-   * @see #track(String, Point)
+   * @see #track(Point)
    * @see #mouse()
    */
-  public Frame track(String hid) {
-    return track(hid, mouse());
+  public Frame track() {
+    return track(mouse());
   }
 
   /**
-   * Same as {@code cast(hid, mouse())}.
+   * Same as {@code cast(mouse())}.
    *
    * @see #cast(String, Point)
    * @see #mouse()
    */
-  public void cast(String hid) {
-    cast(hid, mouse());
+  public void cast() {
+    cast(mouse());
   }
 
   /**
-   * Same as {@code translate(hid, mouseDX(), mouseDY())}.
+   * Same as {@code translate(mouseDX(), mouseDY())}.
    *
-   * @see #translate(String, float, float)
+   * @see #translate(float, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
-  public void translate(String hid) {
-    translate(hid, mouseDX(), mouseDY());
+  public void translate() {
+    translate(mouseDX(), mouseDY());
   }
 
   /**
@@ -2982,14 +2982,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code spin(hid, pmouse(), mouse())}.
+   * Same as {@code spin(pmouse(), mouse())}.
    *
-   * @see #spin(String, Point, Point)
+   * @see #spin(Point, Point)
    * @see #pmouse()
    * @see #mouse()
    */
-  public void spin(String hid) {
-    spin(hid, pmouse(), mouse());
+  public void spin() {
+    spin(pmouse(), mouse());
   }
 
   /**

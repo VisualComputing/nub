@@ -2420,12 +2420,30 @@ public class Graph {
   // traversal
 
   /**
+   * Same as {@code return track(null, pixel.x(), pixel.y())}.
+   *
+   * @see #track(String, Point)
+   */
+  public Frame track(Point pixel) {
+    return track(null, pixel.x(), pixel.y());
+  }
+
+  /**
    * Same as {@code return track(hid, pixel.x(), pixel.y())}.
    *
    * @see #track(String, float, float)
    */
   public Frame track(String hid, Point pixel) {
     return track(hid, pixel.x(), pixel.y());
+  }
+
+  /**
+   * Same as {@code return track(null, x, y)}.
+   *
+   * @see #track(String, float, float)
+   */
+  public Frame track(float x, float y) {
+    return track(null, x, y);
   }
 
   /**
@@ -2468,12 +2486,30 @@ public class Graph {
   }
 
   /**
+   * Same as {@code cast(null, new Point(x, y))}.
+   *
+   * @see #cast(String, Point)
+   */
+  public void cast(float x, float y) {
+    cast(null, new Point(x, y));
+  }
+
+  /**
    * Same as {@code cast(hid, new Point(x, y))}.
    *
    * @see #cast(String, Point)
    */
   public void cast(String hid, float x, float y) {
     cast(hid, new Point(x, y));
+  }
+
+  /**
+   * Same as {@code cast(null, pixel)}.
+   *
+   * @see #cast(String, float, float)
+   */
+  public void cast(Point pixel) {
+    cast(null, pixel);
   }
 
   /**
@@ -2553,6 +2589,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code setTrackedFrame(null, frame)}.
+   *
+   * @see #setTrackedFrame(String, Frame)
+   */
+  public void setTrackedFrame(Frame frame) {
+    setTrackedFrame(null, frame);
+  }
+
+  /**
    * Sets the {@code hid} tracked-frame (see {@link #trackedFrame(String)}). Call this function if you want to set the
    * tracked frame manually or {@link #track(String, float, float)} to set it automatically using ray casting.
    *
@@ -2575,6 +2620,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return trackedFrame(null)}.
+   *
+   * @see #trackedFrame(String)
+   */
+  public Frame trackedFrame() {
+    return trackedFrame(null);
+  }
+
+  /**
    * Returns the current {@code hid} tracked frame which is usually set by ray casting (see
    * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedFrame(String)}.
    *
@@ -2589,6 +2643,18 @@ public class Graph {
     return _agents.get(hid);
   }
 
+  /**
+   * Same as {@code isTracking(null)}.
+   *
+   * @see #isTracking(String)
+   */
+  public boolean isTracking() {
+    return isTracking(null);
+  }
+
+  /**
+   * Returns {@code true} if the {@code hid} has a non-null tracked frame and {@code false} otherwise.
+   */
   public boolean isTracking(String hid) {
     return _agents.containsKey(hid);
   }
@@ -2596,8 +2662,17 @@ public class Graph {
   /**
    * Returns {@code true} if the {@code frame} is the tracked of frame of some {@code hid} and {@code false} otherwise.
    */
-  public boolean isTrackedFrame(Frame frame) {
+  public boolean tracks(Frame frame) {
     return _agents.containsValue(frame);
+  }
+
+  /**
+   * Same as {@code return isTrackedFrame(null, frame)}.
+   *
+   * @see #isTrackedFrame(String, Frame)
+   */
+  public boolean isTrackedFrame(Frame frame) {
+    return isTrackedFrame(null, frame);
   }
 
   /**
@@ -2623,8 +2698,17 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    */
-  public void resetTrackedFrame() {
+  public void resetTracking() {
     _agents.clear();
+  }
+
+  /**
+   * Same as {@code resetTrackedFrame(null)}.
+   *
+   * @see #resetTrackedFrame(String)
+   */
+  public void resetTrackedFrame() {
+    resetTrackedFrame(null);
   }
 
   /**
@@ -2640,6 +2724,15 @@ public class Graph {
    */
   public void resetTrackedFrame(String hid) {
     _agents.remove(hid);
+  }
+
+  /**
+   * Same as {@code return defaultFrame(null)}.
+   *
+   * @see #defaultFrame(String)
+   */
+  public Frame defaultFrame() {
+    return defaultFrame(null);
   }
 
   /**
@@ -2692,13 +2785,22 @@ public class Graph {
   }
 
   /**
+   * Same as {@code align(null)}.
+   *
+   * @see #align(String)
+   */
+  public void align() {
+    align(null);
+  }
+
+  /**
    * Same as {@code align(defaultFrame(hid))}.
    *
-   * @see #align(Frame)
+   * @see #alignWith(Frame)
    * @see #defaultFrame(String)
    */
   public void align(String hid) {
-    align(defaultFrame(hid));
+    alignWith(defaultFrame(hid));
   }
 
   /**
@@ -2711,7 +2813,7 @@ public class Graph {
    * @see #isEye(Frame)
    * @see #defaultFrame(String)
    */
-  public void align(Frame frame) {
+  public void alignWith(Frame frame) {
     if (frame == null)
       throw new RuntimeException("align(frame) requires a non-null frame param");
     if (isEye(frame))
@@ -2721,19 +2823,28 @@ public class Graph {
   }
 
   /**
+   * Same as {@code focus(null)}.
+   *
+   * @see #focus(String)
+   */
+  public void focus() {
+    focus(null);
+  }
+
+  /**
    * Same as {@code focus(defaultFrame())}.
    *
-   * @see #focus(Frame)
+   * @see #focusWith(Frame)
    * @see #defaultFrame(String)
    */
   public void focus(String hid) {
-    focus(defaultFrame(hid));
+    focusWith(defaultFrame(hid));
   }
 
   /**
    * Centers the frame into the graph.
    */
-  public void focus(Frame frame) {
+  public void focusWith(Frame frame) {
     if (frame == null)
       throw new RuntimeException("focus(frame) requires a non-null frame param");
     if (isEye(frame))
@@ -2933,6 +3044,15 @@ public class Graph {
   // It always maps physical (screen) space geom data respect to the eye
 
   /**
+   * Same as {@code zoom(null, delta)}.
+   *
+   * @see #zoom(String, float)
+   */
+  public void zoom(float delta) {
+    zoom(null, delta);
+  }
+
+  /**
    * Same as {@code zoom(delta, defaultFrame(hid))}.
    *
    * @see #translate(float, float, Frame)
@@ -2961,6 +3081,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code translate(null, dx, dy)}.
+   *
+   * @see #translate(String, float, float)
+   */
+  public void translate(float dx, float dy) {
+    translate(null, dx, dy);
+  }
+
+  /**
    * Same as {@code translate(dx, dy, 0, defaultFrame(hid))}.
    *
    * @see #translate(float, float, Frame)
@@ -2972,6 +3101,15 @@ public class Graph {
    */
   public void translate(String hid, float dx, float dy) {
     translate(dx, dy, 0, defaultFrame(hid));
+  }
+
+  /**
+   * Same as {@code translate(null, dx, dy, dz)}.
+   *
+   * @see #translate(String, float, float, float)
+   */
+  public void translate(float dx, float dy, float dz) {
+    translate(null, dx, dy, dz);
   }
 
   /**
@@ -3066,6 +3204,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code scale(null, delta)}.
+   *
+   * @see #scale(String, float)
+   */
+  public void scale(float delta) {
+    scale(null, delta);
+  }
+
+  /**
    * Same as {@code scale(delta, defaultFrame(hid))}.
    *
    * @see #scale(float, Frame)
@@ -3084,6 +3231,15 @@ public class Graph {
   public void scale(float delta, Frame frame) {
     float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
     frame.scale(delta >= 0 ? factor : 1 / factor);
+  }
+
+  /**
+   * Same as {@code rotate(null, roll, pitch, yaw)}.
+   *
+   * @see #rotate(String, float, float, float)
+   */
+  public void rotate(float roll, float pitch, float yaw) {
+    rotate(null, roll, pitch, yaw);
   }
 
   /**
@@ -3133,6 +3289,15 @@ public class Graph {
   }
 
   /**
+   * Same as {@code spin(null, tail, head)}.
+   *
+   * @see #spin(String, Point, Point)
+   */
+  public void spin(Point tail, Point head) {
+    spin(null, tail, head);
+  }
+
+  /**
    * Same as {@code spin(tail, head, defaultFrame(hid))}.
    *
    * @see #spin(Point, Point, float, Frame)
@@ -3152,6 +3317,15 @@ public class Graph {
    */
   public void spin(Point tail, Point head, Frame frame) {
     spin(tail, head, 1, frame);
+  }
+
+  /**
+   * Same as {@code spin(null, tail, head, sensitivity)}.
+   *
+   * @see #spin(String, Point, Point, float)
+   */
+  public void spin(Point tail, Point head, float sensitivity) {
+    spin(null, tail, head, sensitivity);
   }
 
   /**

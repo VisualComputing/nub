@@ -75,10 +75,10 @@ public class GraphTypes extends PApplet {
       scene.fitBallInterpolation();
     }
     if (key == 'e')
-      if (auxScene.trackedFrame("mouse") == boxFrame)
-        auxScene.resetTrackedFrame("mouse");
+      if (auxScene.trackedFrame() == boxFrame)
+        auxScene.resetTrackedFrame();
       else
-        auxScene.setTrackedFrame("mouse", boxFrame);
+        auxScene.setTrackedFrame(boxFrame);
     if (key == '+')
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')
@@ -87,24 +87,24 @@ public class GraphTypes extends PApplet {
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      focus.spin("mouse");
+      focus.spin();
     else if (mouseButton == RIGHT)
-      focus.translate("mouse");
+      focus.translate();
     else
-      focus.zoom("mouse", mouseX - pmouseX);
+      focus.zoom(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    focus.scale("mouse", event.getCount() * 20);
+    focus.scale(event.getCount() * 20);
     //focus.zoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        focus.focus("mouse");
+        focus.focus();
       else
-        focus.align("mouse");
+        focus.align();
   }
 
   void draw(PGraphics graphics) {

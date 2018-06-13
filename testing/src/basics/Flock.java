@@ -56,7 +56,7 @@ public class Flock extends PApplet {
       if (mouseButton == LEFT)
         scene.spin(scene.eye());
       else if (mouseButton == RIGHT)
-        scene.translate("mouse");
+        scene.translate();
       else
         scene.zoom(mouseX - pmouseX, scene.eye());
     //scene.scale(mouseX - pmouseX);
@@ -71,13 +71,13 @@ public class Flock extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale("mouse", event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {
     // picks up a boid avatar, may be null
-    avatar = scene.track("mouse");
+    avatar = scene.track();
     if (avatar != null)
       animate();
     else if (scene.eye().reference() != null)

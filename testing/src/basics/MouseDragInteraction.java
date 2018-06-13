@@ -83,7 +83,7 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track("mouse");
+    scene.track();
   }
 
   public void mouseDragged() {
@@ -95,32 +95,32 @@ public class MouseDragInteraction extends PApplet {
         //scene.lookAround();
         scene.lookAround();
       } else {
-        //scene.spin("mouse");
+        //scene.spin();
         //this.mouseX;
-        scene.spin("mouse");
+        scene.spin();
       }
     else if (mouseButton == RIGHT) {
-      //scene.translate("mouse");
-      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultFrame("mouse"));
-      scene.translate("mouse");
+      //scene.translate();
+      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultFrame());
+      scene.translate();
     } else {
       //scene.mouseZoom(mouseX - pmouseX);
-      //scene.zoom(scene.mouseDX(), scene.defaultFrame("mouse"));
-      scene.zoom("mouse", scene.mouseDX());
-      //scene.scale("mouse", mouseX - pmouseX);
+      //scene.zoom(scene.mouseDX(), scene.defaultFrame());
+      scene.zoom(scene.mouseDX());
+      //scene.scale(mouseX - pmouseX);
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale("mouse", event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
-        scene.focus("mouse");
+        scene.focus();
       else
-        scene.align("mouse");
+        scene.align();
   }
 
   PShape shape() {

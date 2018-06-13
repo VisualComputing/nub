@@ -206,7 +206,7 @@ public class Shape extends Frame {
       //TODO needs more thinking
       switch (highlighting()) {
         case FRONT:
-          if (graph().isTrackedFrame(this))
+          if (graph().tracks(this))
             pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
@@ -219,7 +219,7 @@ public class Shape extends Frame {
             pGraphics.shape(_frontShape);
           else
             setFrontGraphics(pGraphics);
-          if (graph().isTrackedFrame(this)) {
+          if (graph().tracks(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
@@ -227,7 +227,7 @@ public class Shape extends Frame {
           }
           break;
         case BACK:
-          if (graph().isTrackedFrame(this)) {
+          if (graph().tracks(this)) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
