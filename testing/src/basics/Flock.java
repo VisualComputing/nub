@@ -8,11 +8,6 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
-/**
- * Flock is a work in progress still. Known issues:
- * 1. Need to click twice to pick a boid
- * 2. Fires weird setting reference warnings (see TODOs)
- */
 public class Flock extends PApplet {
   Scene scene;
   //flock bounding box
