@@ -74,13 +74,13 @@ public class Flock extends PApplet {
     // picks up a boid avatar, may be null
     avatar = scene.track();
     if (avatar != null)
-      animate();
+      thirdPerson();
     else if (scene.eye().reference() != null)
       resetEye();
   }
 
   // Sets current avatar as the eye reference and interpolate the eye to it
-  public void animate() {
+  public void thirdPerson() {
     scene.eye().setReference(avatar);
     scene.interpolateTo(avatar);
   }
@@ -136,7 +136,7 @@ public class Flock extends PApplet {
         if (scene.eye().reference() != null)
           resetEye();
         else if (avatar != null)
-          animate();
+          thirdPerson();
         break;
     }
   }
