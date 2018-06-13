@@ -159,21 +159,13 @@ public class Graph {
   protected MatrixHandler _matrixHandler;
 
   // 3. Handlers
-  public class Tuple {
+  protected class Tuple {
     protected String _hid;
     protected Point _pixel;
 
-    public Tuple(String hid, Point grabber) {
+    public Tuple(String hid, Point pixel) {
       _hid = hid;
-      _pixel = grabber;
-    }
-
-    public Point pixel() {
-      return _pixel;
-    }
-
-    public String hid() {
-      return _hid;
+      _pixel = pixel;
     }
   }
 
@@ -2536,10 +2528,10 @@ public class Graph {
       Iterator<Tuple> it = _tuples.iterator();
       while (it.hasNext()) {
         Tuple tuple = it.next();
-        resetTrackedFrame(tuple.hid());
-        if (!isTracking(tuple.hid()))
-          if (_track(tuple.pixel().x(), tuple.pixel().y(), projection, frame)) {
-            setTrackedFrame(tuple.hid(), frame);
+        resetTrackedFrame(tuple._hid);
+        if (!isTracking(tuple._hid))
+          if (_track(tuple._pixel.x(), tuple._pixel.y(), projection, frame)) {
+            setTrackedFrame(tuple._hid, frame);
             it.remove();
           }
       }
