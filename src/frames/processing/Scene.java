@@ -171,8 +171,8 @@ import java.util.List;
  * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
  * Drawing functions that take a {@code PGraphics} parameter (including the above
- * static ones), such as {@link #beginScreenCoordinates(PGraphics)},
- * {@link #endScreenCoordinates(PGraphics)}, {@link #drawAxes(PGraphics, float)},
+ * static ones), such as {@link #beginScreenDrawing(PGraphics)},
+ * {@link #endScreenDrawing(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
  * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
@@ -1081,17 +1081,17 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void beginScreenDrawing() {
-    beginScreenCoordinates(frontBuffer());
+    beginScreenDrawing(frontBuffer());
   }
 
   /**
    * Begins screen drawing on pGraphics using the {@link #eye()} parameters. Don't forget
-   * to call {@link #endScreenCoordinates(PGraphics)} after screen drawing ends.
+   * to call {@link #endScreenDrawing(PGraphics)} after screen drawing ends.
    *
-   * @see #endScreenCoordinates(PGraphics)
+   * @see #endScreenDrawing(PGraphics)
    * @see #beginScreenDrawing()
    */
-  public void beginScreenCoordinates(PGraphics pGraphics) {
+  public void beginScreenDrawing(PGraphics pGraphics) {
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
           + "endScreenDrawing() and they cannot be nested. Check your implementation!");
@@ -1112,18 +1112,18 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public void endScreenDrawing() {
-    endScreenCoordinates(frontBuffer());
+    endScreenDrawing(frontBuffer());
   }
 
   /**
    * Ends screen drawing on the pGraphics instance using {@link #eye()}
    * parameters. The screen drawing should happen between
-   * {@link #beginScreenCoordinates(PGraphics)} and this method.
+   * {@link #beginScreenDrawing(PGraphics)} and this method.
    *
-   * @see #beginScreenCoordinates(PGraphics)
+   * @see #beginScreenDrawing(PGraphics)
    * @see #endScreenDrawing()
    */
-  public void endScreenCoordinates(PGraphics pGraphics) {
+  public void endScreenDrawing(PGraphics pGraphics) {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
       throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
@@ -2508,7 +2508,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(PGraphics pGraphics, float x, float y, float length) {
     float half_size = length / 2f;
     pGraphics.pushStyle();
-    beginScreenCoordinates(pGraphics);
+    beginScreenDrawing(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
     vertex(pGraphics, x - half_size, y);
@@ -2516,7 +2516,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, x, y - half_size);
     vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
+    endScreenDrawing(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2577,7 +2577,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    beginScreenCoordinates(pGraphics);
+    beginScreenDrawing(pGraphics);
     pGraphics.noFill();
 
     pGraphics.beginShape();
@@ -2603,7 +2603,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), (y + half_length));
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
+    endScreenDrawing(pGraphics);
     drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
   }
