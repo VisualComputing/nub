@@ -926,27 +926,29 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   protected void _track(Frame frame) {
-    if (frame.precision() != Frame.Precision.EXACT) {
-      super._track(frame);
-      return;
-    }
-    if (!_tuples.isEmpty()) {
-      Iterator<Tuple> it = _tuples.iterator();
-      while (it.hasNext()) {
-        Tuple tuple = it.next();
-        resetTrackedFrame(tuple._hid);
-        if (!isTracking(tuple._hid))
-          if (_track(tuple._pixel.x(), tuple._pixel.y(), frame)) {
-            setTrackedFrame(tuple._hid, frame);
-            it.remove();
-          }
+    if (frame.precision() == Frame.Precision.EXACT && _bbEnabled) {
+      if (!_tuples.isEmpty()) {
+        Iterator<Tuple> it = _tuples.iterator();
+        while (it.hasNext()) {
+          Tuple tuple = it.next();
+          resetTrackedFrame(tuple._hid);
+          if (!isTracking(tuple._hid))
+            if (_track(tuple._pixel.x(), tuple._pixel.y(), frame)) {
+              setTrackedFrame(tuple._hid, frame);
+              it.remove();
+            }
+        }
       }
-    }
+    } else
+      super._track(frame);
   }
 
   @Override
   public boolean track(float x, float y, Frame frame) {
-    return frame.precision() == Frame.Precision.EXACT ? _track(x, y, frame) : _track(x, y, screenLocation(frame.position()), frame);
+    if (frame.precision() == Frame.Precision.EXACT && _bbEnabled)
+      return _track(x, y, frame);
+    else
+      return _track(x, y, screenLocation(frame.position()), frame);
   }
 
   /**
