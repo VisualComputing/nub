@@ -160,10 +160,10 @@ public class Graph {
 
   // 3. Handlers
   protected class Tuple {
-    protected String _hid;
-    protected Point _pixel;
+    public String _hid;
+    public Point _pixel;
 
-    public Tuple(String hid, Point pixel) {
+    Tuple(String hid, Point pixel) {
       _hid = hid;
       _pixel = pixel;
     }
@@ -2485,6 +2485,40 @@ public class Graph {
         _track(hid, child, x, y);
   }
 
+  public boolean track(Point pixel, Frame frame) {
+    return track(pixel.x(), pixel.y(), frame);
+  }
+
+  /**
+   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
+   * {@code false} otherwise. The frame is picked according to the {@link Frame#precision()}.
+   *
+   * @see #trackedFrame(String)
+   * @see #resetTrackedFrame(String)
+   * @see #defaultFrame(String)
+   * @see #track(String, float, float)
+   * @see #setTrackedFrame(String, Frame)
+   * @see #isTrackedFrame(String, Frame)
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
+   */
+  public boolean track(float x, float y, Frame frame) {
+    return _track(x, y, screenLocation(frame.position()), frame);
+  }
+
+  /**
+   * Cached version of {@link #track(float, float, Frame)}.
+   */
+  protected boolean _track(float x, float y, Vector projection, Frame frame) {
+    if (frame == null)
+      return false;
+    if (isEye(frame))
+      return false;
+    float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
+        : frame.precisionThreshold() / 2;
+    return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
+  }
+
   /**
    * Same as {@code cast(null, new Point(x, y))}.
    *
@@ -2556,6 +2590,20 @@ public class Graph {
   }
 
   /**
+   * Used by the traversal algorithm.
+   */
+  protected void _visit(Frame frame) {
+    pushModelView();
+    applyTransformation(frame);
+    _track(frame);
+    frame.visit();
+    if (!frame.isCulled())
+      for (Frame child : frame.children())
+        _visit(child);
+    popModelView();
+  }
+
+  /**
    * Internally used by {@link #_visit(Frame)}.
    */
   protected void _track(Frame frame) {
@@ -2572,20 +2620,6 @@ public class Graph {
           }
       }
     }
-  }
-
-  /**
-   * Used by the traversal algorithm.
-   */
-  protected void _visit(Frame frame) {
-    pushModelView();
-    applyTransformation(frame);
-    _track(frame);
-    frame.visit();
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child);
-    popModelView();
   }
 
   /**
@@ -2748,40 +2782,6 @@ public class Graph {
    */
   public Frame defaultFrame(String hid) {
     return trackedFrame(hid) == null ? eye() : trackedFrame(hid);
-  }
-
-  public boolean track(Point pixel, Frame frame) {
-    return track(pixel.x(), pixel.y(), frame);
-  }
-
-  /**
-   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
-   * {@code false} otherwise. The frame is picked according to the {@link Frame#precision()}.
-   *
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #track(String, float, float)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
-   */
-  public boolean track(float x, float y, Frame frame) {
-    return _track(x, y, screenLocation(frame.position()), frame);
-  }
-
-  /**
-   * Cached version of {@link #track(float, float, Frame)}.
-   */
-  protected boolean _track(float x, float y, Vector projection, Frame frame) {
-    if (frame == null)
-      return false;
-    if (isEye(frame))
-      return false;
-    float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
-        : frame.precisionThreshold() / 2;
-    return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }
 
   /**

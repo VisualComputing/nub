@@ -83,7 +83,8 @@ public class MouseDragInteraction extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track();
+    scene.cast();
+    //scene.track();
   }
 
   public void mouseDragged() {
@@ -96,7 +97,6 @@ public class MouseDragInteraction extends PApplet {
         scene.lookAround();
       } else {
         //scene.spin();
-        //this.mouseX;
         scene.spin();
       }
     else if (mouseButton == RIGHT) {

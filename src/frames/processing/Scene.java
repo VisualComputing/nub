@@ -34,6 +34,7 @@ import processing.opengl.PShader;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -923,6 +924,31 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().popMatrix();
   }
 
+  @Override
+  protected void _track(Frame frame) {
+    if (frame.precision() != Frame.Precision.EXACT) {
+      super._track(frame);
+      return;
+    }
+    if (!_tuples.isEmpty()) {
+      Iterator<Tuple> it = _tuples.iterator();
+      while (it.hasNext()) {
+        Tuple tuple = it.next();
+        resetTrackedFrame(tuple._hid);
+        if (!isTracking(tuple._hid))
+          if (_track(tuple._pixel.x(), tuple._pixel.y(), frame)) {
+            setTrackedFrame(tuple._hid, frame);
+            it.remove();
+          }
+      }
+    }
+  }
+
+  @Override
+  public boolean track(float x, float y, Frame frame) {
+    return frame.precision() == Frame.Precision.EXACT ? _track(x, y, frame) : _track(x, y, screenLocation(frame.position()), frame);
+  }
+
   /**
    * A shape may be picked using
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
@@ -935,10 +961,7 @@ public class Scene extends Graph implements PConstants {
    *
    * @see Frame#setPrecision(Frame.Precision)
    */
-  @Override
-  protected boolean _track(float x, float y, Vector projection, Frame frame) {
-    if ((frame.precision() != Frame.Precision.EXACT) || !(frame instanceof Shape) || backBuffer() == null)
-      return super._track(x, y, projection, frame);
+  protected boolean _track(float x, float y, Frame frame) {
     if (frame == null)
       return false;
     if (isEye(frame))
@@ -988,10 +1011,7 @@ public class Scene extends Graph implements PConstants {
   protected void _visit(Frame frame) {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, frame);
-    if (isOffscreen() && _targetPGraphics == frontBuffer())
-      _track(frame);
-    else if (_targetPGraphics == backBuffer() || (_targetPGraphics == frontBuffer() && !_bbEnabled))
-      _track(frame);
+    _track(frame);
     frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
