@@ -28,9 +28,10 @@ public class GraphTypes extends PApplet {
     scene = new StdCamera(this, canvas);
     //scene.setZClippingCoefficient(1);
     scene.setRadius(200);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.setFieldOfView(PI / 3);
-    scene.fitBallInterpolation();
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
+    //scene.setFieldOfView(PI / 3);
+    //scene.fitBallInterpolation();
+    scene.fitBall();
 
     // enable computation of the frustum planes equations (disabled by default)
     scene.enableBoundaryEquations();
@@ -39,9 +40,10 @@ public class GraphTypes extends PApplet {
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     auxScene = new Scene(this, auxCanvas, 0, h / 2);
-    auxScene.setType(Graph.Type.ORTHOGRAPHIC);
+    //auxScene.setType(Graph.Type.ORTHOGRAPHIC);
     auxScene.setRadius(400);
-    auxScene.fitBallInterpolation();
+    //auxScene.fitBallInterpolation();
+    auxScene.fitBall();
     boxFrame = new Frame(auxScene);
     boxFrame.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
@@ -50,29 +52,37 @@ public class GraphTypes extends PApplet {
     if (key == ' ')
       scene.toggleMode();
     if (key == 'f')
+      scene.fitBall();
+    if (key == 'g')
       scene.fitFieldOfView();
     if (key == 'b')
       box = !box;
     if (key == 's')
       sphere = !sphere;
     if (key == 'a') {
-      Vector from = new Vector(0, 0, scene.zNear());
-      Vector to = new Vector(0, 0, scene.zFar());
-      Vector fromto = Vector.subtract(to, from);
-      Vector fromtoeye = scene.eye().displacement(fromto);
-      println("fromto: " + fromto.magnitude());
-      println("fromtoeye: " + fromtoeye.magnitude());
+      Vector zNear = new Vector(0, 0, scene.zNear());
+      Vector zFar = new Vector(0, 0, scene.zFar());
+      Vector zNear2ZFar = Vector.subtract(zFar, zNear);
+      Vector zNear2ZFarEye = scene.eye().displacement(zNear2ZFar);
+      println("zNear2ZFar: " + zNear2ZFar.magnitude());
+      println("zNear2ZFarEye: " + zNear2ZFarEye.magnitude());
       println("2*radius*sqrt(3): " + 2 * scene.radius() * sqrt(3));
+      println(version1() + " " + version2() + " eye magnitude: " + scene.eye().magnitude());
+      println((scene.type() == Graph.Type.ORTHOGRAPHIC ? "ORTHO" : "PERSP") + " zNear: " + scene.zNear() + " zFar: " + scene.zFar());
+      scene.eye().position().print();
     }
+    if (key == 'n')
+      scene.eye().setMagnitude(1);
+    if (key == 'm')
+      scene.setFieldOfView(PI / 3);
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
-        scene.eye().setMagnitude(1);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
       } else {
-        //scene.setFieldOfView(PI / 3);
         scene.setType(Graph.Type.PERSPECTIVE);
       }
-      scene.fitBallInterpolation();
+      //scene.fitBallInterpolation();
+      //scene.fitBall();
     }
     if (key == 'e')
       if (auxScene.trackedFrame() == boxFrame)
@@ -83,6 +93,31 @@ public class GraphTypes extends PApplet {
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')
       scene.eye().rotate(0, 1, 0, -QUARTER_PI / 2);
+  }
+
+  public String version1() {
+    float z = Vector.scalarProjection(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()) - scene.zClippingCoefficient() * scene.radius();
+    // Prevents negative or null zNear values.
+    float zMin = scene.zNearCoefficient() * scene.zClippingCoefficient() * scene.radius();
+    return ("frames z: " + z + " frames zMin: " + zMin);
+  }
+
+  public String version2() {
+    /*
+    float zNearScene = zClippingCoefficient() * sceneRadius();
+    float z = distanceToSceneCenter() - zNearScene;
+    // Prevents negative or null zNear values.
+    float zMin = zNearCoefficient() * zNearScene;
+    */
+
+    float zNearScene = scene.zClippingCoefficient() * scene.radius();
+    float z = distanceToSceneCenter() - zNearScene;
+    float zMin = scene.zNearCoefficient() * zNearScene;
+    return ("Viewer z: " + z + " Viewer zMin: " + zMin);
+  }
+
+  float distanceToSceneCenter() {
+    return Math.abs((scene.eye().location(scene.center())).z());
   }
 
   public void mouseDragged() {
