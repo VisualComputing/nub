@@ -1,22 +1,96 @@
 package ik.mocap;
 
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by sebchaparr on 15/04/18.
  */
 public class LearnConstraint {
-    List<Vector> _feasibleRegion;
-    Vector _rest;
 
-    public LearnConstraint(List<Vector> feasibleRegion){
-        _feasibleRegion = feasibleRegion;
-        _rest = feasibleRegion.get(0);
+    protected static ArrayList<Quaternion> performAdaptativeSampling(List<Quaternion> data, float step){
+        if(data.isEmpty()) return null;
+        ArrayList<Quaternion> new_data = new ArrayList<Quaternion>();
+        float delta = 1;
+        for(int i = 0; i < data.size() - 1; i++){
+            Quaternion prev = data.get(i);
+            new_data.add(data.get(i));
+            float t = 0;
+            while(t < 1) {
+                Quaternion next = Quaternion.slerp(data.get(i), data.get(i+1), t);
+                while (Vector.distance(prev.eulerAngles(), next.eulerAngles()) > step / 2.0) {
+                    next = Quaternion.slerp(prev, next, 0.5f);
+                    delta /= 2.0;
+                }
+                new_data.add(next);
+                prev = next;
+                t = Math.min(t + delta, 1);
+            }
+        }
+        return new_data;
     }
-    public LearnConstraint(List<Vector> feasibleRegion, Vector rest){
-        _feasibleRegion = feasibleRegion;
-        _rest = rest;
+
+    public static float[][][] getDistanceField(List<Quaternion> data, int I, int J, int K){
+        if(data.isEmpty()) return null;
+        float[][][] distance_field = new float[I][J][K];
+        float step = (float) (Math.min(Math.min( I , J ) , K) / (2*Math.PI));
+        List<Quaternion> new_data = performAdaptativeSampling(data, step);
+        //Get a list of vectors
+        ArrayList<Vector> vectors = new ArrayList<Vector>();
+        for(Quaternion quaternion : new_data){
+            Vector euler = quaternion.eulerAngles();
+            if(euler.x() < 0)euler.setX((float)(euler.x() + 2*Math.PI));
+            if(euler.y() < 0)euler.setY((float)(euler.y() + 2*Math.PI));
+            if(euler.z() < 0)euler.setZ((float)(euler.z() + 2*Math.PI));
+            vectors.add(euler);
+        }
+        for(int i = 0; i < I; i++){
+            //System.out.println("Entra 1 i : " + i);
+            for(int j = 0; j < J; j++){
+                //System.out.println("Entra 2 : j " + j);
+                for(int k = 0; k < K; k++){
+                    //System.out.println("Entra 3 : k " + k);
+                    float min = Float.MAX_VALUE;
+                    Vector euler = new Vector((i + 0.5f) * 2 * (float)Math.PI / I,
+                            (j + 0.5f) * 2 * (float)Math.PI / J,
+                            (k + 0.5f) * 2 * (float)Math.PI / K);
+                    if(euler.x() > 2*Math.PI) System.out.println("se paso x " + euler.x());
+                    if(euler.y() > 2*Math.PI) System.out.println("se paso y " + euler.y());
+                    if(euler.z() > 2*Math.PI) System.out.println("se paso z " + euler.z());
+                    int w = 0;
+                    for(Vector vector : vectors){
+                        //System.out.println("Entra 4 i : " + i + " j : " + j + " k : " + k + " w : " + w);
+                        /*Vector cp = new Vector();
+                        float dx = euler.x() - vector.x();
+                        dx = dx > Math.PI ? (float)(2*Math.PI + euler.x() - vector.x()) : dx;
+                        dx = dx > Math.PI ? (float)(-2*Math.PI + euler.x() - vector.x()) : dx;
+                        float dy = euler.y() - vector.y();
+                        dy = dy > Math.PI ? (float)(2*Math.PI + euler.y() - vector.y()) : dy;
+                        dy = dy > Math.PI ? (float)(-2*Math.PI + euler.y() - vector.y()) : dy;
+                        float dz = euler.z() - vector.z();
+                        dz = dz > Math.PI ? (float)(2*Math.PI + euler.z() - vector.z()) : dz;
+                        dz = dz > Math.PI ? (float)(-2*Math.PI + euler.z() - vector.z()) : dz;
+                        min = Math.min(min, (float) Math.sqrt(dx*dx + dy*dy + dz*dz));*/
+                        min = Math.min(min, Vector.distance(euler, vector));
+                        w++;
+                    }
+                    distance_field[i][j][k] = min;
+                }
+            }
+        }
+
+        for(int i = 0; i < I; i++){
+            System.out.println("i = " + i);
+            for(int j = 0; j < J; j++){
+                for(int k = 0; k < K; k++){
+                    if(k % 3 == 0) System.out.println();
+                    System.out.print(" i : " + i + "j: " + j + " k: " + k + " ds : " + distance_field[i][j][k] + " --- ");
+                }
+                System.out.println();
+            }
+        }
+
+        return distance_field;
     }
 }

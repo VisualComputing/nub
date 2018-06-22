@@ -5,6 +5,7 @@ import frames.core.Graph;
 import frames.core.Node;
 import frames.ik.Solver;
 import frames.primitives.Frame;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -54,6 +55,7 @@ public class Viewer extends PApplet {
         parser = new BVHParser(Joint.class, sketchPath() + path, scene, null);
         root = parser.root();
         ((Joint) root).setRoot(true);
+        parser.constraintJoints();
         //make a copy of the skeleton
         //rootIK = (Joint) copy(scene.branch(root));
         //rootIK.translate(50, 50, 50);
@@ -82,6 +84,7 @@ public class Viewer extends PApplet {
             updateTargets();
         }
         parser.drawFeasibleRegion(this.getGraphics());
+        parser.drawConstraint(this.getGraphics());
     }
 
     public Node copy(ArrayList<Node> branch) {
@@ -144,8 +147,22 @@ public class Viewer extends PApplet {
     }
 
     boolean read = false;
+    Node n = null;
     public void keyPressed(){
-        read = !read;
+        if(scene.mouse().trackedGrabber() != null) {
+            n =  (Node) scene.mouse().trackedGrabber();
+            float d = 5;
+            if (key == 'X' || key == 'x') {
+                n.rotate(Quaternion.multiply(n.reference().rotation().inverse(), new Quaternion(new Vector(1,0,0), radians(d))));
+            }
+            if (key == 'Y' || key == 'y') {
+                n.rotate(Quaternion.multiply(n.reference().rotation().inverse(), new Quaternion(new Vector(0,1,0), radians(d))));
+            }
+            if (key == 'Z' || key == 'z') {
+                n.rotate(Quaternion.multiply(n.reference().rotation().inverse(), new Quaternion(new Vector(0,0,1), radians(d))));
+            }
+        }
+        //read = !read;
     }
 
     public static void main(String args[]) {

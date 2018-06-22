@@ -3,6 +3,7 @@ import frames.core.Node;
 import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
+import frames.primitives.constraint.DistanceFieldConstraint;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -327,10 +328,69 @@ public class BVHParser {
         _currentPose++;
     }
 
-    public void drawFeasibleRegion(PGraphics pg){
+    int dim = 24;
+
+    public void drawConstraint(PGraphics pg){
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,0,255);
+        for(Node node : _branch){
+            if(node == _root) continue;
+            DistanceFieldConstraint constraint = (DistanceFieldConstraint) node.constraint();
+            pg.pushMatrix();
+            node.reference().applyWorldTransformation();
+            Vector tr = node.children().isEmpty() ? new Vector(0,0,1) : node.children().get(0).translation().get();
+            float step = (float)(2*Math.PI/dim);
+            for(int i = 0; i < dim; i++){
+                for(int j = 0; j < dim; j++){
+                    for(int k = 0; k < dim; k++){
+                        //Transform to euler
+                        float x = (i + 0.5f) * step;
+                        float y = (j + 0.5f) * step;
+                        float z = (k + 0.5f) * step;
+                        Vector v = Vector.multiply(tr, 0.5f);
+                        v = new Quaternion(x,y,z).rotate(v);
+                        if(constraint.distance_field()[i][j][k] < 0.2){
+                            v.add(node.translation());
+                            pg.line(node.translation().x(), node.translation().y(), node.translation().z(), v.x(), v.y(), v.z());
+                        }
+                    }
+                }
+            }
+
+            /*
+            int i = 0;
+            for(float xx = 0; xx < 2*Math.PI; xx+= 2*Math.PI/16){
+                int j = 0;
+                for(float yy = 0; yy < 2*Math.PI; yy += 2*Math.PI/16){
+                    int k = 0;
+                    for(float zz = 0; zz < 2*Math.PI; zz+= 2*Math.PI/16){
+                        float x = xx > Math.PI ? (float)(xx - 2*Math.PI) : xx;
+                        float y = yy > Math.PI ? (float)(yy - 2*Math.PI) : yy;
+                        float z = zz > Math.PI ? (float)(zz - 2*Math.PI) : zz;
+                        Quaternion q = new Quaternion(x,y,z);
+                        tr.normalize();
+                        Vector v = Vector.multiply(tr, 5);//node.rotation().inverseRotate(tr);
+                        v = q.inverseRotate(v);
+                        DistanceFieldConstraint c = (DistanceFieldConstraint)node.constraint();
+                        if(c.distance_field()[(int)(24*xx/(2*Math.PI))][(int)(24*yy/(2*Math.PI))][(int)(24*zz/(2*Math.PI))] < 1) {
+                        //if(c.distance_field()[i][j][k] < 0.2) {
+                            v.add(node.translation());
+                            pg.line(node.translation().x(), node.translation().y(), node.translation().z(), v.x(), v.y(), v.z());
+                        }k++;
+                    }j++;
+                }i++;
+            }*/
+            pg.popMatrix();
+        }
+        pg.popStyle();
+    }
+
+
+    public void drawFeasibleRegion(PGraphics pg){
+        pg.pushStyle();
+        pg.strokeWeight(3);
+        pg.stroke(0,255,0);
         for(Node node : _branch){
             pg.pushMatrix();
             node.applyWorldTransformation();
@@ -342,6 +402,19 @@ public class BVHParser {
             pg.popMatrix();
         }
         pg.popStyle();
+    }
+
+    public void constraintJoints(){
+        for(Node node : _branch){
+            ArrayList<Quaternion> rots = new ArrayList<Quaternion>();
+            int j = 0;
+            for(Frame f : _poses.get(node)){
+                //if(j == 20) break;
+                rots.add(f.rotation());
+                j++;
+            }
+            node.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots,dim,dim,dim)));
+        }
     }
 }
 
