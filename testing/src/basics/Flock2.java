@@ -8,7 +8,7 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
-public class Flock extends PApplet {
+public class Flock2 extends PApplet {
   Scene scene;
   //flock bounding box
   static int flockWidth = 1280;
@@ -17,7 +17,7 @@ public class Flock extends PApplet {
   static boolean avoidWalls = true;
 
   int initBoidNum = 900; // amount of boids to start the program with
-  static ArrayList<Boid> flock;
+  static ArrayList<Boid2> flock;
   static Frame avatar;
   static boolean animate = true;
 
@@ -34,7 +34,7 @@ public class Flock extends PApplet {
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
-      flock.add(new Boid(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+      flock.add(new Boid2(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
   }
 
   public void draw() {
@@ -43,18 +43,6 @@ public class Flock extends PApplet {
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
     scene.traverse();
-    updateAvatar();
-  }
-
-  public void updateAvatar() {
-    Frame boid = scene.trackedFrame("mouseClicked");
-    if (boid != avatar) {
-      avatar = boid;
-      if (avatar != null)
-        thirdPerson();
-      else if (scene.eye().reference() != null)
-        resetEye();
-    }
   }
 
   // interaction in 'first-person'
@@ -71,7 +59,6 @@ public class Flock extends PApplet {
 
   // interaction in 'third-person'
   public void mouseMoved(MouseEvent event) {
-    scene.cast("mouseMoved", mouseX, mouseY);
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
@@ -85,7 +72,11 @@ public class Flock extends PApplet {
 
   public void mouseClicked(MouseEvent event) {
     // picks up a boid avatar, may be null
-    scene.cast("mouseClicked", mouseX, mouseY);
+    avatar = scene.track();
+    if (avatar != null)
+      thirdPerson();
+    else if (scene.eye().reference() != null)
+      resetEye();
   }
 
   // Sets current avatar as the eye reference and interpolate the eye to it
@@ -151,6 +142,6 @@ public class Flock extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.Flock"});
+    PApplet.main(new String[]{"basics.Flock2"});
   }
 }

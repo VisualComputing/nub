@@ -8,7 +8,7 @@ import processing.core.PApplet;
 
 import java.util.ArrayList;
 
-class Boid {
+class Boid2 {
   Scene scene;
   PApplet pApplet;
   public Frame frame;
@@ -22,7 +22,7 @@ class Boid {
   float flap = 0;
   float t = 0;
 
-  Boid(Scene scn, Vector inPos) {
+  Boid2(Scene scn, Vector inPos) {
     scene = scn;
     pApplet = scene.pApplet();
     position = new Vector();
@@ -32,8 +32,8 @@ class Boid {
       // frame local coordinate system.
       @Override
       public void visit() {
-        if (Flock.animate)
-          run(Flock.flock);
+        if (Flock2.animate)
+          run(Flock2.flock);
         render();
       }
     };
@@ -43,7 +43,7 @@ class Boid {
     neighborhoodRadius = 100;
   }
 
-  public void run(ArrayList<Boid> bl) {
+  public void run(ArrayList<Boid2> bl) {
     t += .1;
     flap = 10 * PApplet.sin(t);
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
@@ -70,7 +70,7 @@ class Boid {
 
   //-----------behaviors---------------
 
-  void flock(ArrayList<Boid> boids) {
+  void flock(ArrayList<Boid2> boids) {
     //alignment
     alignment = new Vector(0, 0, 0);
     int alignmentCount = 0;
@@ -81,7 +81,7 @@ class Boid {
     separation = new Vector(0, 0, 0);
     Vector repulse;
     for (int i = 0; i < boids.size(); i++) {
-      Boid boid = boids.get(i);
+      Boid2 boid = boids.get(i);
       //alignment
       float distance = Vector.distance(position, boid.position);
       if (distance > 0 && distance <= neighborhoodRadius) {
@@ -155,7 +155,7 @@ class Boid {
     pApplet.fill(pApplet.color(0, 255, 0, 125));
 
     // highlight boids under the mouse
-    if (scene.trackedFrame("mouseMoved") == frame) {
+    if (scene.track(pApplet.mouseX, pApplet.mouseY, frame)) {
       pApplet.stroke(pApplet.color(0, 0, 255));
       pApplet.fill(pApplet.color(0, 0, 255));
     }
