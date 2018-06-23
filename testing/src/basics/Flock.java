@@ -47,6 +47,7 @@ public class Flock extends PApplet {
   }
 
   public void updateAvatar() {
+    // boid is the one picked with a 'mouseClicked'
     Frame boid = scene.trackedFrame("mouseClicked");
     if (boid != avatar) {
       avatar = boid;
@@ -57,21 +58,22 @@ public class Flock extends PApplet {
     }
   }
 
-  // interaction in 'first-person'
+  // 'first-person' interaction
   public void mouseDragged() {
     if (scene.eye().reference() == null)
       if (mouseButton == LEFT)
         scene.spin(scene.eye());
       else if (mouseButton == RIGHT)
-        scene.translate();
+        scene.translate(scene.eye());
       else
         scene.zoom(mouseX - pmouseX, scene.eye());
-    //scene.scale(mouseX - pmouseX);
   }
 
-  // interaction in 'third-person'
+  // highlighting and 'third-person' interaction
   public void mouseMoved(MouseEvent event) {
+    // 1. highlighting
     scene.cast("mouseMoved", mouseX, mouseY);
+    // 2. 'third-person interaction
     if (scene.eye().reference() != null)
       // press shift to move the mouse without looking around
       if (!event.isShiftDown())
@@ -79,12 +81,11 @@ public class Flock extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
-    //scene.zoom(event.getCount() * 50);
+    scene.scale(event.getCount() * 20, scene.eye());
   }
 
+  // picks up a boid avatar, may be null
   public void mouseClicked(MouseEvent event) {
-    // picks up a boid avatar, may be null
     scene.cast("mouseClicked", mouseX, mouseY);
   }
 

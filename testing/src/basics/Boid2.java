@@ -48,13 +48,13 @@ class Boid2 {
     flap = 10 * PApplet.sin(t);
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
     // acceleration.add(new Vector(0,.05,0));
-    if (Flock.avoidWalls) {
-      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), Flock.flockHeight, position.z())), 5));
+    if (Flock2.avoidWalls) {
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), Flock2.flockHeight, position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), 0, position.z())), 5));
-      acceleration.add(Vector.multiply(avoid(new Vector(Flock.flockWidth, position.y(), position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(Flock2.flockWidth, position.y(), position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(0, position.y(), position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), 0)), 5));
-      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), Flock.flockDepth)), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), Flock2.flockDepth)), 5));
     }
     flock(bl);
     move();
@@ -130,18 +130,18 @@ class Boid2 {
   }
 
   void checkBounds() {
-    if (position.x() > Flock.flockWidth)
+    if (position.x() > Flock2.flockWidth)
       position.setX(0);
     if (position.x() < 0)
-      position.setX(Flock.flockWidth);
-    if (position.y() > Flock.flockHeight)
+      position.setX(Flock2.flockWidth);
+    if (position.y() > Flock2.flockHeight)
       position.setY(0);
     if (position.y() < 0)
-      position.setY(Flock.flockHeight);
-    if (position.z() > Flock.flockDepth)
+      position.setY(Flock2.flockHeight);
+    if (position.z() > Flock2.flockDepth)
       position.setZ(0);
     if (position.z() < 0)
-      position.setZ(Flock.flockDepth);
+      position.setZ(Flock2.flockDepth);
   }
 
   void render() {
@@ -161,7 +161,7 @@ class Boid2 {
     }
 
     // highlight avatar
-    if (frame == Flock.avatar) {
+    if (frame == Flock2.avatar) {
       pApplet.stroke(pApplet.color(255, 0, 0));
       pApplet.fill(pApplet.color(255, 0, 0));
     }
