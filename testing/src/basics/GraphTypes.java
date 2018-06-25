@@ -26,23 +26,23 @@ public class GraphTypes extends PApplet {
   public void setup() {
     canvas = createGraphics(w, h / 2, P3D);
     scene = new StdCamera(this, canvas);
-    //scene.setZClippingCoefficient(1);
+    //scene1.setZClippingCoefficient(1);
     scene.setRadius(200);
     scene.setType(Graph.Type.ORTHOGRAPHIC);
-    //scene.setFieldOfView(PI / 3);
-    //scene.fitBallInterpolation();
+    //scene1.setFieldOfView(PI / 3);
+    //scene1.fitBallInterpolation();
     scene.fitBall();
 
     // enable computation of the frustum planes equations (disabled by default)
     scene.enableBoundaryEquations();
 
     auxCanvas = createGraphics(w, h / 2, P3D);
-    // Note that we pass the upper left corner coordinates where the scene
+    // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
     auxScene = new Scene(this, auxCanvas, 0, h / 2);
-    //auxScene.setType(Graph.Type.ORTHOGRAPHIC);
+    //scene2.setType(Graph.Type.ORTHOGRAPHIC);
     auxScene.setRadius(400);
-    //auxScene.fitBallInterpolation();
+    //scene2.fitBallInterpolation();
     auxScene.fitBall();
     boxFrame = new Frame(auxScene);
     boxFrame.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
@@ -81,8 +81,8 @@ public class GraphTypes extends PApplet {
       } else {
         scene.setType(Graph.Type.PERSPECTIVE);
       }
-      //scene.fitBallInterpolation();
-      //scene.fitBall();
+      //scene1.fitBallInterpolation();
+      //scene1.fitBall();
     }
     if (key == 'e')
       if (auxScene.trackedFrame() == boxFrame)
@@ -168,15 +168,15 @@ public class GraphTypes extends PApplet {
     handleMouse();
     scene.beginDraw();
     canvas.background(0);
-    //draw(canvas);
+    //draw(canvas1);
     scene.drawAxes();
 
     scene.endDraw();
     scene.display();
 
     auxScene.beginDraw();
-    //draw(auxCanvas);
     auxCanvas.background(0);
+    //draw(canvas2);
     auxScene.drawAxes();
 
     if (sphere) {
