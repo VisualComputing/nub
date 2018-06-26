@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
- * <h1>Type and dimensions</h1>
+ * <h1>1. Types and dimensions</h1>
  * A graph uses a ball to set the 2d or 3d viewing space (instead of the more traditional
  * methods to set a 3d viewing frustum). See {@link #setCenter(Vector)} and
  * {@link #setRadius(float)}, and also {@link #setZClippingCoefficient(float)} and
@@ -36,7 +36,7 @@ import java.util.List;
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
  * override {@link #computeCustomProjection()}.
- * <h1>Scene graph handling</h1>
+ * <h1>2. Scene graph handling</h1>
  * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
  * documentation). Note that {@link #traverse()} should be called within your main-event loop.
@@ -45,7 +45,7 @@ import java.util.List;
  * The graph provides other useful routines to handle the hierarchy, such as
  * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isReachable(Frame)},
  * {@link #branch(Frame)}, and {@link #clear()}.
- * <h2>Eye handling</h2>
+ * <h2>2.1. Eye handling</h2>
  * Any {@link Frame} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
@@ -53,9 +53,9 @@ import java.util.List;
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
  * {@link #screenLocation(Vector, Frame)} and
  * {@link #location(Vector, Frame)}, are provided for convenience.
- * <h1>Interactivity</h1>
- * Several methods taking a {@link Frame} parameter provide interactivity to (both, attached
- * or detached) {@link Frame}s, such as {@link #translate(float, float, float, Frame)},
+ * <h1>3. Interactivity</h1>
+ * Several methods taking a {@link Frame} parameter provide interactivity to frames, such as
+ * {@link #translate(float, float, float, Frame)},
  * {@link #rotate(float, float, float, Frame)} and {@link #scale(float, Frame)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
@@ -65,53 +65,43 @@ import java.util.List;
  * To check if a given frame would be picked with a ray casted at a given screen position
  * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
- * <h1>Setting up a Human Interface Device</h1>
- * The above interactivity API is
- * <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * agnostic, i.e., all that third-parties implementing a specific {@code hid} require is to conform to
- * their method signatures. For example, the following two functions would implement translation with a
- * mouse (see {@link #translate(float, float, Frame)}):
- * <pre>
- * {@code
- * public void mouseTranslate() {
- *   mouseTranslate(defaultFrame("MOUSE_ID"));
- * }
- *
- * public void mouseTranslate(Frame frame) {
- *   translate(deltaMouseX, deltaMouseY, frame);
- * }
- * }
- *
- * <p>
- * These functions are overloaded to bypass the frame param,
- * thus acting upon a {@link #defaultFrame(String)}: {@link #translate(String, float, float, float)},
- * {@link #rotate(String, float, float, float)} and {@link #scale(String, float)}.
- * </pre>
- * <h2>Tracking and casting</h2>
- * To set an {@code hid} tracked frame call {@link #setTrackedFrame(String, Frame)} and note that
- * the {@link #defaultFrame(String)} is a shortcut to retrieve the {@link #trackedFrame(String)}
- * or the {@link #eye()}, when the former is {@code null}.
- * <p>
- * Note that {@link #track(String, float, float)} will cast a ray and test it against each frame
- * (attached to this graph) to automatically update the {@code hid} {@link #trackedFrame(String)},
- * and hence the {@code hid} {@link #defaultFrame(String)} too (i.e., without the need to
- * explicitly call {@link #track(float, float, Frame)} and {@link #setTrackedFrame(String, Frame)}).
- * <h1>Timing handling</h1>
+ * <h1>4. Human Interface Devices</h1>
+ * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
+ * is a two step process: 1. Define an {@code hid} tracked frame instance, using an arbitrary name for it
+ * (see {@link #setTrackedFrame(String, Frame)}); 2. Call any interactivity method that take an {@code hid}
+ * param (such as {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)}
+ * or {@link #scale(String, float)}) following the name convention you defined in 1. Observations:
+ * <ol>
+ * <li>An {@code hid} tracked-frame (see {@link #trackedFrame(String)}) defines in turn an {@code hid} default
+ * frame (see {@link #defaultFrame(String)}) which simply returns the tracked frame or the {@link #eye()} when the
+ * {@code hid} tracked frame is {@code null}.</li>
+ * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
+ * by simply passing the {@code hid} {@link #defaultFrame(String)} to them (e.g.,
+ * {@link #scale(float, Frame)} and {@link #scale(String, float)}).</li>
+ * <li>The default {@code hid} is defined with a {@code null} String parameter, e.g.,
+ * {@link #scale(float)}).</li>
+ * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point)} or
+ * {@link #cast(String, Point)}. While the former updates the {@code hid} tracked-frame synchronously
+ * (i.e., it returns the {@code hid} tracked-frame immediately), the latter updates it synchronously (i.e.,
+ * it optimally updates the {@code hid} tracked-frame during the next call to the {@link #traverse()} algorithm).
+ * Both act upon only to frames attached to this graph.</li>
+ * </ol>
+ * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
- * <h2>Interpolator</h2>
+ * <h2>5.1. Interpolator</h2>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fitBallInterpolation()}, {@link #zoomOnRegionInterpolation(Rectangle)},
  * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
  * {@link Interpolator} documentation for details.
- * <h1>Visibility and culling techniques</h1>
+ * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
  * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
- * <h1>Matrix handling</h1>
+ * <h1>7. Matrix handling</h1>
  * The graph performs matrix handling through a {@link #matrixHandler()}.
  * To set shader matrices use {@link #projection()}, {@link #modelView()}
  * (which wrap {@link MatrixHandler} functions with the same signatures) and
