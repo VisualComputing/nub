@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
- * <h2>Type and dimensions</h2>
+ * <h1>Type and dimensions</h1>
  * A graph uses a ball to set the 2d or 3d viewing space (instead of the more traditional
  * methods to set a 3d viewing frustum). See {@link #setCenter(Vector)} and
  * {@link #setRadius(float)}, and also {@link #setZClippingCoefficient(float)} and
@@ -36,47 +36,7 @@ import java.util.List;
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
  * override {@link #computeCustomProjection()}.
- * <h2>Interactivity</h2>
- * Several methods taking a {@link Frame} parameter provide interactivity to (both, attached
- * or detached) {@link Frame}s from any input source, such as
- * {@link #translate(float, float, float, Frame)}, {@link #rotate(float, float, float, Frame)}
- * and {@link #scale(float, Frame)}. These functions are overloaded to bypass the frame param,
- * thus acting upon a {@link #defaultFrame(String)}: {@link #translate(String, float, float, float)},
- * {@link #rotate(String, float, float, float)} and {@link #scale(String, float)}.
- * <p>
- * Some interactivity methods are only available for the {@link #eye()} and hence they don't
- * take a frame parameter, such as {@link #lookAround(float, float)} or
- * {@link #rotateCAD(float, float)}.
- * <h3>Implementing a <a href="https://en.wikipedia.org/wiki/Human_interface_device">
- * Human Interface Device (hid)</a></h3>
- * The above interactivity API is {@code hid} agnostic, i.e., all that third-parties implementing a
- * specific {@code hid} require is to conform to their method signatures. For example, the following
- * two functions would implement translation with a mouse (see {@link #translate(float, float, Frame)}):
- * <pre>
- * {@code
- * public void mouseTranslate() {
- *   mouseTranslate(defaultFrame(MOUSE_ID));
- * }
- *
- * public void mouseTranslate(Frame frame) {
- *   translate(deltaMouseX, deltaMouseY, frame);
- * }
- * }
- * </pre>
- * <h3>Picking</h3>
- * To set an {@code hid} tracked frame call {@link #setTrackedFrame(String, Frame)} and note that
- * the {@link #defaultFrame(String)} is a shortcut to retrieve the {@link #trackedFrame(String)}
- * or the {@link #eye()}, when the former is {@code null}.
- * <p>
- * To check if a given frame would be picked with a ray casted at a given screen position
- * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
- * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
- * <p>
- * Note that {@link #track(String, float, float)} will cast a ray and test it against each frame
- * (attached to this graph) to automatically update the {@code hid} {@link #trackedFrame(String)},
- * and hence the {@code hid} {@link #defaultFrame(String)} too (i.e., without the need to
- * explicitly call {@link #track(float, float, Frame)} and {@link #setTrackedFrame(String, Frame)}).
- * <h2>Scene graph handling</h2>
+ * <h1>Scene graph handling</h1>
  * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
  * documentation). Note that {@link #traverse()} should be called within your main-event loop.
@@ -86,30 +46,72 @@ import java.util.List;
  * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isReachable(Frame)},
  * {@link #branch(Frame)}, and {@link #clear()}.
  * <h2>Eye handling</h2>
- * Any {@link Frame} or {@link Frame} (belonging to the graph hierarchy) may be set as the
- * {@link #eye()} (see {@link #setEye(Frame)}). Several frame wrapper functions to handle
- * the eye, such as {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
+ * Any {@link Frame} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
+ * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
+ * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
  * {@link #screenLocation(Vector, Frame)} and
  * {@link #location(Vector, Frame)}, are provided for convenience.
- * <h3>Interpolator</h3>
+ * <h1>Interactivity</h1>
+ * Several methods taking a {@link Frame} parameter provide interactivity to (both, attached
+ * or detached) {@link Frame}s, such as {@link #translate(float, float, float, Frame)},
+ * {@link #rotate(float, float, float, Frame)} and {@link #scale(float, Frame)}.
+ * <p>
+ * Some interactivity methods are only available for the {@link #eye()} and hence they don't
+ * take a frame parameter, such as {@link #lookAround(float, float)} or
+ * {@link #rotateCAD(float, float)}.
+ * <p>
+ * To check if a given frame would be picked with a ray casted at a given screen position
+ * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
+ * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
+ * <h1>Setting up a Human Interface Device</h1>
+ * The above interactivity API is
+ * <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
+ * agnostic, i.e., all that third-parties implementing a specific {@code hid} require is to conform to
+ * their method signatures. For example, the following two functions would implement translation with a
+ * mouse (see {@link #translate(float, float, Frame)}):
+ * <pre>
+ * {@code
+ * public void mouseTranslate() {
+ *   mouseTranslate(defaultFrame("MOUSE_ID"));
+ * }
+ *
+ * public void mouseTranslate(Frame frame) {
+ *   translate(deltaMouseX, deltaMouseY, frame);
+ * }
+ * }
+ *
+ * <p>
+ * These functions are overloaded to bypass the frame param,
+ * thus acting upon a {@link #defaultFrame(String)}: {@link #translate(String, float, float, float)},
+ * {@link #rotate(String, float, float, float)} and {@link #scale(String, float)}.
+ * </pre>
+ * <h2>Tracking and casting</h2>
+ * To set an {@code hid} tracked frame call {@link #setTrackedFrame(String, Frame)} and note that
+ * the {@link #defaultFrame(String)} is a shortcut to retrieve the {@link #trackedFrame(String)}
+ * or the {@link #eye()}, when the former is {@code null}.
+ * <p>
+ * Note that {@link #track(String, float, float)} will cast a ray and test it against each frame
+ * (attached to this graph) to automatically update the {@code hid} {@link #trackedFrame(String)},
+ * and hence the {@code hid} {@link #defaultFrame(String)} too (i.e., without the need to
+ * explicitly call {@link #track(float, float, Frame)} and {@link #setTrackedFrame(String, Frame)}).
+ * <h1>Timing handling</h1>
+ * The graph performs timing handling through a {@link #timingHandler()}. Several
+ * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
+ * and {@link #registerAnimator(Animator)}, are provided for convenience.
+ * <h2>Interpolator</h2>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fitBallInterpolation()}, {@link #zoomOnRegionInterpolation(Rectangle)},
  * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
  * {@link Interpolator} documentation for details.
- * <h3>Visibility and culling techniques</h3>
+ * <h1>Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
  * to call {@link #enableBoundaryEquations()} first, since update of the viewing volume
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
- * <h2>Timing handling</h2>
- * //TODO more docs
- * The graph performs timing handling through a {@link #timingHandler()}. Several
- * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
- * and {@link #registerAnimator(Animator)}, are provided for convenience.
- * <h2>Matrix handling</h2>
+ * <h1>Matrix handling</h1>
  * The graph performs matrix handling through a {@link #matrixHandler()}.
  * To set shader matrices use {@link #projection()}, {@link #modelView()}
  * (which wrap {@link MatrixHandler} functions with the same signatures) and
@@ -3159,14 +3161,23 @@ public class Graph {
   }
 
   /**
-   * Interactive translation low-level implementation. Converts {@code dx}, {@code dy} and {@code dz} defined in screen
-   * space to {@link Frame#reference()} (or world coordinates if the frame reference is null). Note that the {@code dx}
-   * and {@code dy} coordinates are expressed in screen space, and the {@code dz} coordinate is given in world units.
+   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), frame)}.
+   *
+   * @see #_translate(float, float, float, int, Frame)
+   */
+  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
+    return _translate(dx, dy, dz, Math.min(width(), height()), frame);
+  }
+
+  /**
+   * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space to
+   * {@link Frame#reference()} (or world coordinates if the frame reference is null).
    * <p>
    * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
    * (e.g., the translated frame would be kept exactly under a pointer if such a device were used to translate it).
+   * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
    */
-  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
+  protected Vector _translate(float dx, float dy, float dz, int zMax, Frame frame) {
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
@@ -3190,7 +3201,9 @@ public class Graph {
         dy *= 2.0 * wh[1] / height();
         break;
     }
-    Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz / eye().magnitude());
+    // this express the dz coordinate is given in world units
+    //Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz / eye().magnitude());
+    Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz * 2 * radius() / zMax);
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
