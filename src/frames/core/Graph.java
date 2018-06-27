@@ -59,30 +59,29 @@ import java.util.List;
  * {@link #rotate(float, float, float, Frame)} and {@link #scale(float, Frame)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
- * take a frame parameter, such as {@link #lookAround(float, float)} or
- * {@link #rotateCAD(float, float)}.
+ * take a frame parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
  * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * is a two step process: 1. Define an {@code hid} tracked frame instance, using an arbitrary name for it
- * (see {@link #setTrackedFrame(String, Frame)}); 2. Call any interactivity method that take an {@code hid}
+ * is a two step process: 1. Define an {@code hid} tracked-frame instance, using an arbitrary name for it
+ * (see {@link #setTrackedFrame(String, Frame)}); and, 2. Call any interactivity method that take an {@code hid}
  * param (such as {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)}
  * or {@link #scale(String, float)}) following the name convention you defined in 1. Observations:
  * <ol>
- * <li>An {@code hid} tracked-frame (see {@link #trackedFrame(String)}) defines in turn an {@code hid} default
- * frame (see {@link #defaultFrame(String)}) which simply returns the tracked frame or the {@link #eye()} when the
- * {@code hid} tracked frame is {@code null}.</li>
+ * <li>An {@code hid} tracked-frame (see {@link #trackedFrame(String)}) defines in turn an {@code hid} default-frame
+ * (see {@link #defaultFrame(String)}) which simply returns the tracked-frame or the {@link #eye()} when the
+ * {@code hid} tracked-frame is {@code null}.</li>
  * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
  * by simply passing the {@code hid} {@link #defaultFrame(String)} to them (e.g.,
- * {@link #scale(float, Frame)} and {@link #scale(String, float)}).</li>
- * <li>The default {@code hid} is defined with a {@code null} String parameter, e.g.,
- * {@link #scale(float)}).</li>
+ * {{@link #scale(String, float)} calls @link #scale(float, Frame)} passing the {@code hid} default-frame).</li>
+ * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
+ * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
  * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point)} or
  * {@link #cast(String, Point)}. While the former updates the {@code hid} tracked-frame synchronously
- * (i.e., it returns the {@code hid} tracked-frame immediately), the latter updates it synchronously (i.e.,
+ * (i.e., it returns the {@code hid} tracked-frame immediately), the latter updates it asynchronously (i.e.,
  * it optimally updates the {@code hid} tracked-frame during the next call to the {@link #traverse()} algorithm).
  * Both act upon only to frames attached to this graph.</li>
  * </ol>
