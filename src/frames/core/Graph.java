@@ -76,7 +76,7 @@ import java.util.List;
  * {@code hid} tracked-frame is {@code null}.</li>
  * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
  * by simply passing the {@code hid} {@link #defaultFrame(String)} to them (e.g.,
- * {{@link #scale(String, float)} calls @link #scale(float, Frame)} passing the {@code hid} default-frame).</li>
+ * {@link #scale(String, float)} calls {@link #scale(float, Frame)} passing the {@code hid} default-frame).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
  * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point)} or
