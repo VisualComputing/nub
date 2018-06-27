@@ -38,12 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
- *
- * <h2>Usage</h2>
- * Typical usage comprises three steps: scene instantiation, setting an eye
- * and setting some shapes.
- * <h3>Scene instantiation</h3>
+ * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
+ * <h1>Usage</h1>
+ * Typical usage comprises two steps: scene instantiation and setting some shapes.
+ * <h2>Scene instantiation</h2>
  * Instantiate your on-screen scene at the {@code PApplet.setup()}:
  * <pre>
  * {@code
@@ -67,47 +65,12 @@ import java.util.List;
  * }
  * </pre>
  * In this case, the scene {@link #frontBuffer()} corresponds to the {@code canvas}.
- * <h3>The eye</h3>
- * The scene eye can be an instance of {@link Frame} or a {@link Frame}. To set the
- * eye from a frame instance use code such as the following:
- * <pre>
- * {@code
- * ...
- * Frame eye;
- * void setup() {
- *   ...
- *   eye = new Frame();
- *   scene.setEye(eye);
- * }
- * }
- * </pre>
- * The eye can be controlled programmatically using the powerful {@link Frame} API.
- * <p>
- * To set the eye from a frame instance use code such as the following:
- * <pre>
- * {@code
- * ...
- * Frame eye;
- * void setup() {
- *   ...
- *   eye = new Frame(scene) {
- *     public void interact(Event event) {
- *       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
- *         translate(event);
- *     }
- *   };
- *   scene.setEye(eye);
- * }
- * }
- * </pre>
- * The eye can be controlled both programmatically (since a {@link Frame} is a
- * {@link Frame} specialization) and interactively.
- * <h3>Shapes</h3>
+ * <h2>Shapes</h2>
  * A {@link Shape} is a {@link Frame} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
  * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #traverse()} to render all scene-graph shapes or {@link #draw(Shape)} to
+ * {@link #traverse()} to render all scene shapes or {@link #draw(Shape)} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
@@ -129,41 +92,7 @@ import java.util.List;
  * }
  * }
  * </pre>
- * <h2>Key-frame interpolators</h2>
- * A frame (and hence a frame or a shape) can be animated through a key-frame
- * Catmull-Rom interpolator path. Use code such as the following:
- * <pre>
- * {@code
- * Scene scene;
- * PShape pshape;
- * Shape shape;
- * Interpolator interpolator;
- * void setup() {
- *   ...
- *   shape = new Shape(scene, pshape);
- *   interpolator = new Interpolator(shape);
- *   for (int i = 0; i < random(4, 10); i++)
- *     interpolator.addKeyFrame(Frame.random(scene));
- *   interpolator.start();
- * }
- * }
- * </pre>
- * which will create a random (see {@link #random()}) interpolator path
- * containing [4..10] key-frames (see {@link Interpolator#addKeyFrame(Frame)}).
- * The interpolation is also started (see {@link Interpolator#start()}). The
- * interpolator path may be drawn with code like this:
- * <pre>
- * {@code
- * ...
- * void draw() {
- *   scene.traverse();
- *   scene.drawPath(interpolator, 5);
- * }
- * }
- * </pre>
- * while {@link #traverse()} will draw the animated shape(s),
- * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
- * <h2>Drawing functionality</h2>
+ * <h1>Drawing functionality</h1>
  * There are several static drawing functions that complements those already provided
  * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
  * {@link #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)},
@@ -180,6 +109,27 @@ import java.util.List;
  * Another scene's eye (different than this one) can be drawn with
  * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
+ * <p>
+ * An {@link Interpolator} path may be drawn with code like this:
+ * <pre>
+ * {@code
+ * ...
+ * void draw() {
+ *   scene.traverse();
+ *   scene.drawPath(interpolator, 5);
+ * }
+ * }
+ * </pre>
+ * while {@link #traverse()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
+ * will draw the interpolated path too.
+ * <h1>Human Interface Devices</h1>
+ * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
+ * is the Processing mouse, see {@link #track()}, {@link #cast()}, {@link #spin()}, {@link #translate()}
+ * {@link #scale(float)}, etc. To set up another {@code hid} refer to the {@link Graph} documentation.
+ *
+ * @see Graph
+ * @see Frame
+ * @see Interpolator
  */
 public class Scene extends Graph implements PConstants {
   // Timing
@@ -203,9 +153,6 @@ public class Scene extends Graph implements PConstants {
   protected PGraphics _bb;
   protected boolean _bbEnabled;
   protected PShader _triangleShader, _lineShader, _pointShader;
-
-  //
-  //protected long _clickCount, _moveCount, _dragCount;
 
   // CONSTRUCTORS
 
@@ -2830,10 +2777,21 @@ public class Scene extends Graph implements PConstants {
     pGraphics.endShape(PApplet.CLOSE);
   }
 
+  /**
+   * Same as {@code drawConstraint(frontBuffer(), frame)}.
+   *
+   * @see #drawConstraint(PGraphics, Frame)
+   */
   public void drawConstraint(Frame frame) {
     drawConstraint(frontBuffer(), frame);
   }
 
+  /**
+   * Draws the frame constraint if it's non-null.
+   *
+   * @see Frame#constraint()
+   * @see frames.core.constraint.Constraint
+   */
   public void drawConstraint(PGraphics pGraphics, Frame frame) {
     if (frame == null) return;
     if (frame.constraint() == null) return;
@@ -2893,14 +2851,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Converts the {@code x, y} coordinates into new {@link Point} and returns it.
+   * Converts the {@code x, y} coordinates into a new {@link Point} and returns it.
    */
   public Point toPoint(float x, float y) {
     return new Point(x, y);
   }
 
   /**
-   * Returns the last {@code x} mouse displacement.
+   * Returns the last horizontal mouse displacement.
    */
   public float mouseDX() {
     return pApplet().mouseX - pApplet().pmouseX;
@@ -2924,7 +2882,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Returns the last {@code y} mouse displacement.
+   * Returns the last vertical mouse displacement.
    */
   public float mouseDY() {
     return pApplet().mouseY - pApplet().pmouseY;

@@ -84,7 +84,8 @@ public class Flock extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20, scene.eye());
+    // same as: scene.scale(event.getCount() * 20, scene.eye());
+    scene.scale(event.getCount() * 20);
   }
 
   // picks up a boid avatar, may be null

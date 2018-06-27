@@ -27,21 +27,33 @@ import java.util.ListIterator;
  * when the user {@link #start()}, the interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
- * Here is a typical utilization example:
+ * Here is a typical usage example:
+ * <pre>
+ * {@code
+ * void init() {
+ *   Graph graph = new Graph(1200, 800);
+ *   Interpolator interpolator = new Interpolator(graph);
+ *   for (int i = 0; i < random(4, 10); i++)
+ *     interpolator.addKeyFrame(Frame.random(graph));
+ *   interpolator.start();
+ * }
+ * }
+ * </pre>
+ * which will create a random (see {@link Frame#random(Graph)}) interpolator path
+ * containing [4..10] key-frames (see {@link #addKeyFrame(Frame)}). The interpolation is
+ * also started (see {@link #start()}).
  * <p>
- * {@code Interpolator interpolator = new Interpolator(graph);}<br>
- * {@code interpolator.addKeyFrame(new Frame( new Vector(1,0,0), new Quaternion()));}<br>
- * {@code interpolator.addKeyFrame(new Frame( new Vector(2,1,0), new Quaternion()));}<br>
- * {@code // ...and so on for all the key frames.}<br>
- * {@code interpolator.start();}<br>
- * <p>
- * {@code //mainDrawingLoop() should look like:}<br>
- * {@code graph.pushModelView();}<br>
- * {@code graph.applyTransformation(interpolator.frame());}<br>
- * {@code // Draw your object here. Its position, orientation and magnitude are interpolated.}
- * <br>
- * {@code graph.popModelView();}<br>
- * <p>
+ * The graph main drawing loop should look like:
+ * <pre>
+ * {@code
+ * void mainLoop() {
+ *   graph.pushModelView();
+ *   graph.applyTransformation(interpolator.frame());
+ *   // draw your object here. Its position, orientation and magnitude are interpolated.
+ *   graph.popModelView();
+ * }
+ * }
+ * </pre>
  * The key frames are defined by a frame and a time, expressed in seconds. The time has to
  * be monotonously increasing over key frames. When {@link #speed()} equals
  * 1 (default value), these times correspond to actual user's seconds during
@@ -187,12 +199,20 @@ public class Interpolator {
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * interpolator.
    *
+   * @see #Interpolator(Frame)
    * @see #Interpolator(Graph, Frame)
    */
   public Interpolator(Graph graph) {
     this(graph, new Frame());
   }
 
+  /**
+   * Same as {@code this(frame.graph(), frame)}. Note that {@code frame} should be attached to
+   * a {@link Graph}.
+   *
+   * @see #Interpolator(Graph)
+   * @see #Interpolator(Graph, Frame)
+   */
   public Interpolator(Frame frame) {
     this(frame.graph(), frame);
   }

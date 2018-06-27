@@ -90,7 +90,7 @@ import java.util.List;
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
- * <h2>5.1. Interpolator</h2>
+ * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fitBallInterpolation()}, {@link #zoomOnRegionInterpolation(Rectangle)},
  * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
@@ -256,28 +256,7 @@ public class Graph {
   }
 
   /**
-   * Returns a random graph frame. The frame is randomly positioned inside the ball defined
-   * by {@link #center()} and {@link #radius()}. The {@link Frame#orientation()} is set by
-   * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
-   *
-   * @see #randomize(Frame)
-   */
-  public Frame random() {
-    Frame frame = new Frame(this);
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius());
-    frame.setPosition(Vector.add(center(), displacement));
-    frame.setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
-    return frame;
-  }
-
-  /**
    * Same as {@code randomize(graph().center(), graph().radius())}.
-   *
-   * @see #random()
    */
   public void randomize(Frame frame) {
     frame.randomize(center(), radius());

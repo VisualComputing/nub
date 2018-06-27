@@ -670,22 +670,32 @@ public class Frame {
   }
 
   /**
-   * Returns a random frame. The frame is randomly positioned inside the ball defined
-   * by {@code center} and {@code radius} (see {@link Vector#random()}). The
+   * Returns a random frame attached to {@code graph}. The frame is randomly positioned inside
+   * the {@code graph} viewing volume (see {@link Graph#center()} and {@link Graph#radius()}).
+   * The {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
+   * is a random in [0,5...2].
+   *
+   * @see #random(Vector, float)
+   * @see #randomize(Vector, float)
+   */
+  public static Frame random(Graph graph) {
+    Frame frame = new Frame(graph);
+    frame.randomize(graph.center(), graph.radius());
+    return frame;
+  }
+
+  /**
+   * Returns a random detached frame. The frame is randomly positioned inside the ball
+   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
    * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
    * is a random in [0,5...2].
    *
+   * @see #random(Graph)
    * @see #randomize(Vector, float)
    */
   public static Frame random(Vector center, float radius) {
     Frame frame = new Frame();
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius);
-    frame.setPosition(Vector.add(center, displacement));
-    frame.setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    frame.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    frame.randomize(center, radius);
     return frame;
   }
 
