@@ -113,7 +113,6 @@ import java.util.List;
  * An {@link Interpolator} path may be drawn with code like this:
  * <pre>
  * {@code
- * ...
  * void draw() {
  *   scene.traverse();
  *   scene.drawPath(interpolator, 5);
