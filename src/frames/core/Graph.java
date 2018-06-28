@@ -106,15 +106,16 @@ import java.util.List;
  * (which wrap {@link MatrixHandler} functions with the same signatures) and
  * (possibly) {@code Matrix.multiply(projection(), modelView())}.
  * <p>
- * To {@link #applyTransformation(Frame)}, call {@link #pushModelView()},
- * {@link #popModelView()} and {@link #applyModelView(Matrix)} (which wrap
- * {@link MatrixHandler} functions with the same signatures).
+ * To apply the transformation defined by a frame call {@link #applyTransformation(Frame)}
+ * (see also {@link #applyWorldTransformation(Frame)}) between {@link #pushModelView()} and
+ * {@link #popModelView()} (which wrap {@link MatrixHandler} functions with the same signatures).
+ * Note that the frame transformations are applied automatically by the {@link #traverse()}
+ * algorithm (in this case you don't need to call them).
  * <p>
- * Issue your drawing code between {@link #beginScreenDrawing()} and
- * {@link #endScreenDrawing()} to define your geometry on the screen coordinate
- * system (such as when drawing 2d controls on top of 3d graph). These methods
- * are {@link MatrixHandler} wrapper functions with the same signatures provided
- * for convenience.
+ * To define your geometry on the screen coordinate system (such as when drawing 2d controls
+ * on top of a 3d graph) issue your drawing code between {@link #beginScreenDrawing()} and
+ * {@link #endScreenDrawing()}. These methods are {@link MatrixHandler} wrapper functions
+ * with the same signatures provided for convenience.
  * <p>
  * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
  * with {@link #setMatrixHandler(MatrixHandler)} (refer to the {@link MatrixHandler}
@@ -2176,8 +2177,8 @@ public class Graph {
 
   /**
    * Apply the local transformation defined by {@code frame}, i.e., respect to its
-   * {@link Frame#reference()}. The Frame is first translated and then rotated around
-   * the new translated origin.
+   * {@link Frame#reference()}. The Frame is first translated, then rotated around
+   * the new translated origin and then scaled.
    * <p>
    * This method may be used to modify the modelview matrix from a frame hierarchy. For
    * example, with this frame hierarchy:

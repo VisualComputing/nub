@@ -30,7 +30,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   /**
-   * Returns the the PGraphics object to be bound by this handler.
+   * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
     return _pgraphics;

@@ -53,7 +53,7 @@ import java.util.List;
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Geometry transformations</h2>
  * A frame is useful to define the position, orientation and magnitude of an arbitrary object
- * which may represent a scene point-of-view.
+ * which may represent a point-of-view.
  * <p>
  * Use {@link #matrix()} to access the frame coordinate system, as when drawing an object
  * locally:
@@ -1745,7 +1745,7 @@ public class Frame {
   /**
    * Returns a frame representing the inverse of this frame space transformation.
    * <p>
-   * The the new frame {@link #rotation()} is the
+   * The new frame {@link #rotation()} is the
    * {@link Quaternion#inverse()} of the original rotation. Its
    * {@link #translation()} is the negated inverse rotated image of the original
    * translation. Its {@link #scaling()} is 1 / original scaling.
@@ -1775,7 +1775,7 @@ public class Frame {
    * The {@link #orientation()} of the new frame is the
    * {@link Quaternion#inverse()} of the original orientation. Its
    * {@link #position()} is the negated and inverse rotated image of the original
-   * position. The {@link #magnitude()} is the the original magnitude multiplicative
+   * position. The {@link #magnitude()} is the original magnitude multiplicative
    * inverse.
    * <p>
    * The result frame has a {@code null} {@link #reference()} and a {@code null}
