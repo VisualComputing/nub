@@ -33,14 +33,14 @@ import java.util.ListIterator;
  * void init() {
  *   Graph graph = new Graph(1200, 800);
  *   Interpolator interpolator = new Interpolator(graph);
- *   for (int i = 0; i < random(4, 10); i++)
+ *   for (int i = 0; i < 10; i++)
  *     interpolator.addKeyFrame(Frame.random(graph));
  *   interpolator.start();
  * }
  * }
  * </pre>
  * which will create a random (see {@link Frame#random(Graph)}) interpolator path
- * containing [4..10] key-frames (see {@link #addKeyFrame(Frame)}). The interpolation is
+ * containing 10 key-frames (see {@link #addKeyFrame(Frame)}). The interpolation is
  * also started (see {@link #start()}).
  * <p>
  * The graph main drawing loop should look like:
