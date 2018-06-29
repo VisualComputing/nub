@@ -541,6 +541,15 @@ public class Frame {
   }
 
   /**
+   * Same as {@code setReference(null)}.
+   *
+   * @see #setReference(Frame)
+   */
+  public void resetReference() {
+    setReference(null);
+  }
+
+  /**
    * Sets the {@link #reference()} of the frame.
    * <p>
    * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then

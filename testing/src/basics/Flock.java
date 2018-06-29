@@ -101,7 +101,8 @@ public class Flock extends PApplet {
 
   // Resets the eye
   public void resetEye() {
-    scene.eye().setReference(null);
+    // same as: scene.eye().setReference(null);
+    scene.eye().resetReference();
     scene.lookAt(scene.center());
     scene.fitBallInterpolation();
   }
