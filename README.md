@@ -111,16 +111,27 @@ void draw() {
 }
 ```
 
-To test if a given frame is picked use [track(float x, float y, Frame frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-float-float-frames.core.Frame-), for example:
+To test if a given frame is picked use [tracks(Frame frame)](), for example:
 
 ```processing
 void mouseClicked() {
-  if(scene.track(mouseX, mouseY, f1))
-    println("f1 is tracked");
+  if(scene.tracks(f1))
+    scene.setTrackedFrame(f1);
 }
 ```
 
-To interact with a given frame use 
+To interact with a given frame use any `Scene` method taking a `frame` parameter, such as: [](), [](), []() or [](). For example:
+
+```processing
+public void mouseDragged() {
+  if (mouseButton == LEFT)
+    scene.spin();
+  else if (mouseButton == RIGHT)
+    scene.translate();
+  else
+    scene.zoom(scene.mouseDX());
+}
+```
 
 Some advantages of using _detached_ frames are:
 
