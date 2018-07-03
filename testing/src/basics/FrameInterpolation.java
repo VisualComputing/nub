@@ -81,7 +81,7 @@ public class FrameInterpolation extends PApplet {
     for (Frame frame : interpolator.keyFrames()) {
       pushMatrix();
       scene.applyTransformation(frame);
-      if (scene.track(scene.mouse(), frame))
+      if (scene.tracks(frame))
         scene.drawAxes(40);
       else
         scene.drawAxes(20);

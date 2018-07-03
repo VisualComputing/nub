@@ -879,7 +879,7 @@ public class Scene extends Graph implements PConstants {
           Tuple tuple = it.next();
           resetTrackedFrame(tuple._hid);
           if (!isTracking(tuple._hid))
-            if (_track(tuple._pixel.x(), tuple._pixel.y(), frame)) {
+            if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
               setTrackedFrame(tuple._hid, frame);
               it.remove();
             }
@@ -889,12 +889,23 @@ public class Scene extends Graph implements PConstants {
       super._track(frame);
   }
 
+  /**
+   * Same as {@code return track(mouse(), frame)}.
+   *
+   * @see #mouse()
+   * @see #tracks(Point, Frame)
+   * @see #tracks(float, float, Frame)
+   */
+  public boolean tracks(Frame frame) {
+    return tracks(mouse(), frame);
+  }
+
   @Override
-  public boolean track(float x, float y, Frame frame) {
+  public boolean tracks(float x, float y, Frame frame) {
     if (frame.precision() == Frame.Precision.EXACT && _bbEnabled)
-      return _track(x, y, frame);
+      return _tracks(x, y, frame);
     else
-      return _track(x, y, screenLocation(frame.position()), frame);
+      return _tracks(x, y, screenLocation(frame.position()), frame);
   }
 
   /**
@@ -909,7 +920,7 @@ public class Scene extends Graph implements PConstants {
    *
    * @see Frame#setPrecision(Frame.Precision)
    */
-  protected boolean _track(float x, float y, Frame frame) {
+  protected boolean _tracks(float x, float y, Frame frame) {
     if (frame == null)
       return false;
     if (isEye(frame))
@@ -2430,7 +2441,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
-    if (tracks(frame))
+    if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
@@ -2499,7 +2510,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
-    if (tracks(frame))
+    if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
     drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();

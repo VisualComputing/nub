@@ -65,7 +65,7 @@ public class AdaptivePrecision2 extends PApplet {
   public void mouseClicked(MouseEvent event) {
     scene.resetTrackedFrame();
     for (int i = 0; i < shapes.length; i++)
-      if (scene.track(mouseX, mouseY, shapes[i])) {
+      if (scene.tracks(shapes[i])) {
         scene.setTrackedFrame(shapes[i]);
         break;
       }

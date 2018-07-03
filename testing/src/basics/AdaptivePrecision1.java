@@ -63,10 +63,10 @@ public class AdaptivePrecision1 extends PApplet {
     scene.zoom(event.getCount() * 50, defaultShape());
   }
 
-  public void mouseClicked(MouseEvent event) {
+  public void mouseClicked() {
     trackedShape = null;
     for (int i = 0; i < shapes.length; i++)
-      if (scene.track(mouseX, mouseY, shapes[i])) {
+      if (scene.tracks(mouseX, mouseY, shapes[i])) {
         trackedShape = shapes[i];
         break;
       }

@@ -356,7 +356,7 @@ public class Frame {
    *
    * @see #isDetached()
    * @see Graph#traverse()
-   * @see Graph#track(float, float, Frame)
+   * @see Graph#tracks(float, float, Frame)
    */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
@@ -370,7 +370,7 @@ public class Frame {
    *
    * @see #isAttached(Graph)
    * @see Graph#traverse()
-   * @see Graph#track(float, float, Frame)
+   * @see Graph#tracks(float, float, Frame)
    */
   public boolean isDetached() {
     return isAttached(null);
@@ -779,7 +779,7 @@ public class Frame {
   }
 
   /**
-   * Returns the picking precision threshold in pixels used by {@link Graph#track(float, float, Frame)}.
+   * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.
    *
    * @see #setPrecisionThreshold(float)
    * @see #precision()
@@ -1966,6 +1966,14 @@ public class Frame {
     if (isDetached())
       System.out.println("Warning: enable tracking on a detached frame does nothing");
     _tracking = flag;
+  }
+
+  /**
+   * Returns {@code true} if the {@code frame} is being tracked by at least one graph {@code hid}
+   * and {@code false} otherwise.
+   */
+  public boolean isTracked() {
+    return isDetached() ? null : graph()._agents.containsValue(this);
   }
 
   /**

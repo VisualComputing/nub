@@ -62,7 +62,7 @@ import java.util.List;
  * take a frame parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
- * use {@link #track(float, float, Frame)}. Refer to {@link Frame#precision()} (and
+ * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
@@ -2421,13 +2421,13 @@ public class Graph {
    * Updates the {@code hid} device tracked-frame and returns it.
    * <p>
    * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #track(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   * (see {@link #tracks(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
    *
    * @see #traverse()
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#precision()
@@ -2447,7 +2447,7 @@ public class Graph {
    */
   protected void _track(String hid, Frame frame, float x, float y) {
     if (trackedFrame(hid) == null && frame.isTrackingEnabled())
-      if (track(x, y, frame)) {
+      if (tracks(x, y, frame)) {
         setTrackedFrame(hid, frame);
         return;
       }
@@ -2456,8 +2456,8 @@ public class Graph {
         _track(hid, child, x, y);
   }
 
-  public boolean track(Point pixel, Frame frame) {
-    return track(pixel.x(), pixel.y(), frame);
+  public boolean tracks(Point pixel, Frame frame) {
+    return tracks(pixel.x(), pixel.y(), frame);
   }
 
   /**
@@ -2473,14 +2473,14 @@ public class Graph {
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
-  public boolean track(float x, float y, Frame frame) {
-    return _track(x, y, screenLocation(frame.position()), frame);
+  public boolean tracks(float x, float y, Frame frame) {
+    return _tracks(x, y, screenLocation(frame.position()), frame);
   }
 
   /**
-   * Cached version of {@link #track(float, float, Frame)}.
+   * Cached version of {@link #tracks(float, float, Frame)}.
    */
-  protected boolean _track(float x, float y, Vector projection, Frame frame) {
+  protected boolean _tracks(float x, float y, Vector projection, Frame frame) {
     if (frame == null)
       return false;
     if (isEye(frame))
@@ -2529,7 +2529,7 @@ public class Graph {
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#precision()
@@ -2585,7 +2585,7 @@ public class Graph {
         Tuple tuple = it.next();
         resetTrackedFrame(tuple._hid);
         if (!isTracking(tuple._hid))
-          if (_track(tuple._pixel.x(), tuple._pixel.y(), projection, frame)) {
+          if (_tracks(tuple._pixel.x(), tuple._pixel.y(), projection, frame)) {
             setTrackedFrame(tuple._hid, frame);
             it.remove();
           }
@@ -2607,7 +2607,7 @@ public class Graph {
    * tracked frame manually or {@link #track(String, float, float)} to set it automatically using ray casting.
    *
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #resetTrackedFrame(String)
    * @see #isTrackedFrame(String, Frame)
@@ -2638,7 +2638,7 @@ public class Graph {
    * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedFrame(String)}.
    *
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #resetTrackedFrame(String)
    * @see #isTrackedFrame(String, Frame)
@@ -2665,13 +2665,6 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the {@code frame} is the tracked of frame of some {@code hid} and {@code false} otherwise.
-   */
-  public boolean tracks(Frame frame) {
-    return _agents.containsValue(frame);
-  }
-
-  /**
    * Same as {@code return isTrackedFrame(null, frame)}.
    *
    * @see #isTrackedFrame(String, Frame)
@@ -2684,7 +2677,7 @@ public class Graph {
    * Returns {@code true} if {@code frame} is the current {@code hid} {@link #trackedFrame(String)} and {@code false} otherwise.
    *
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #resetTrackedFrame(String)
    * @see #setTrackedFrame(String, Frame)
@@ -2698,7 +2691,7 @@ public class Graph {
    *
    * @see #trackedFrame(String)
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
@@ -2722,7 +2715,7 @@ public class Graph {
    *
    * @see #trackedFrame(String)
    * @see #defaultFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
@@ -2746,7 +2739,7 @@ public class Graph {
    *
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
-   * @see #track(float, float, Frame)
+   * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)

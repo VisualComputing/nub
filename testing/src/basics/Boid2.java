@@ -155,7 +155,7 @@ class Boid2 {
     pApplet.fill(pApplet.color(0, 255, 0, 125));
 
     // highlight boids under the mouse
-    if (scene.track(pApplet.mouseX, pApplet.mouseY, frame)) {
+    if (scene.tracks(frame)) {
       pApplet.stroke(pApplet.color(0, 0, 255));
       pApplet.fill(pApplet.color(0, 0, 255));
     }

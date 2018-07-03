@@ -6,7 +6,6 @@ frames
 
 - [Description](#user-content-description)
 - [Usage](#user-content-usage)
-- [Eye](#user-content-eye)
 - [Interpolators](#user-content-interpolators)
 - [Interactivity](#user-content-interactivity)
 - [IK](#user-content-ik)
@@ -14,7 +13,7 @@ frames
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
 
-## Description
+# Description
 
 [Frames](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, inverse kinematics, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
@@ -22,11 +21,11 @@ frames
 
 If looking for the API docs, check them [here](https://visualcomputing.github.io/frames-javadocs/).
 
-## Usage
+# Usage
 
-Typical usage comprises scene instantiation and setting some scene objects. Setting an [eye](#user-content-eye) is discussed separately.
+Typical usage comprises scene instantiation and setting some scene objects.
 
-### Scene instantiation
+## Scene instantiation
 
 Instantiate your on-screen scene at the [setup()](https://processing.org/reference/setup_.html):
 
@@ -52,12 +51,10 @@ void setup() {
 
 In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the `canvas`.
 
-### Scene objects
+## Scene objects
 
-Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html),
-a [Node](https://visualcomputing.github.io/frames-javadocs/frames/core/Node.html) (which is a Frame specialization) or a 
-[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) (which in turn is a Node
-specialization) instance.
+Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html)
+or a [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance.
 
 To illustrate their use, suppose the following scene graph hierarchy is being implemented:
 
@@ -71,24 +68,25 @@ To illustrate their use, suppose the following scene graph hierarchy is being im
   2 3
 ```
 
-#### Frames
+### Frames
+
+#### Detached frames 
 
 To setup the _frame_ hierarchy use code such as the following:
 
 ```processing
 Scene scene;
-Frame f1, f2, f3, eye;
+Frame f1, f2, f3;
 void setup() {
+  // the scene.eye() is also instantiated
   scene = new Scene(this);
   f1 = new Frame();
   f2 = new Frame(f1, 1);
   f3 = new Frame(f1, 1);
-  eye = new Frame();
-  scene.setEye(eye);
 }
 ```
 
-and then traverse it with:
+then traverse it with:
 
 ```processing
 void draw() {
@@ -113,9 +111,21 @@ void draw() {
 }
 ```
 
-Some advantages of using frames are:
+To test if a given frame is picked use [track(float x, float y, Frame frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-float-float-frames.core.Frame-), for example:
 
-* The scene gets automatically rendered respect to the `eye` frame.
+```processing
+void mouseClicked() {
+  if(scene.track(mouseX, mouseY, f1))
+    println("f1 is tracked");
+}
+```
+
+To interact with a given frame use 
+
+Some advantages of using _detached_ frames are:
+
+* The scene gets automatically rendered respect to the `eye` frame which is instantiated by the scene object.
+
 * `setTranslation(Vector)`, `translate(Vector)`, `setRotation(Quaterion)`, `rotate(Quaterion)`, `setScaling(float)` and `scale(float)`, locally manipulates a frame instance.
 * `setPosition(Vector)`, `setOrientation(Quaterion)`, and `setMagnitude(float)`, globally manipulates a frame instance.
 * `location(Vector, Frame)` and `displacement(Vector, Frame)` transforms coordinates and vectors (resp.) from other frame instances.
@@ -124,20 +134,19 @@ Some advantages of using frames are:
 
 The main disadvantage of using frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it.
 
-#### Nodes
+#### Attached frames
 
-To setup the _node_ hierarchy use code such as the following:
+To setup the _frame_ hierarchy use code such as the following:
 
 ```processing
 Scene scene;
-Node n1, n2, n3, eye;
+Frame f1, f2, f3;
 void setup() {
   scene = new Scene(this);
-  n1 = new Node(scene);
-  n2 = new Node(n1);
-  n3 = new Node(n1);
-  eye = new Node(scene);
-  scene.setEye(eye);
+  // note the scene parameter passed to the frame constructor
+  f1 = new Frame(scene);
+  f2 = new Frame(n1);
+  f3 = new Frame(n1);
 }
 ```
 
@@ -150,11 +159,11 @@ void draw() {
 }
 ```
 
-Some advantages of using nodes are:
+Some advantages of using _attached_ frames are:
 
-* Same as with frames, but traversing the hierarchy doesn't require any prior knowledge of it.
-* Nodes can exhibit [inverse kinematics](https://github.com/VisualComputing/framesjs/tree/processing/examples/ik) behavior.
-* Nodes can be manipulated interactively by overriding `interact(Event)`, e.g., 
+* Same as with _detached_ frames, but traversing the hierarchy doesn't require any prior knowledge of it.
+* Frames can exhibit [inverse kinematics](https://github.com/VisualComputing/framesjs/tree/processing/examples/ik) behavior.
+* Frames can be manipulated interactively by overriding `interact(Event)`, e.g., 
     ```java
     @Override
     public void interact(Event event) {

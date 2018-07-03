@@ -58,10 +58,10 @@ public class ConstrainedFrame extends PApplet {
     pushMatrix();
     scene.applyTransformation(node);
     scene.drawAxes(40);
-    if (scene.track(scene.mouse(), node)) {
+    if (scene.tracks(node)) {
       fill(0, 255, 255);
       scene.drawTorusSolenoid();
-    } else if (scene.tracks(node)) {
+    } else if (node.isTracked()) {
       fill(255, 0, 0);
       scene.drawTorusSolenoid();
     } else {
