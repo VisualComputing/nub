@@ -12,6 +12,7 @@ package frames.core;
 
 import frames.core.constraint.Constraint;
 import frames.primitives.Matrix;
+import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
@@ -274,6 +275,7 @@ public class Frame {
     _lastUpdate = 0;
     _precision = Precision.FIXED;
     setPrecisionThreshold(20);
+    _tracking = true;
 
     if (graph() == null)
       return;
@@ -281,7 +283,6 @@ public class Frame {
     // attached frames:
     _children = new ArrayList<Frame>();
     _culled = false;
-    _tracking = true;
   }
 
   /**
@@ -304,6 +305,7 @@ public class Frame {
     _lastUpdate = frame.lastUpdate();
     this._precision = frame._precision;
     this._threshold = frame._threshold;
+    this._tracking = frame._tracking;
 
     if (graph() == null)
       return;
@@ -311,7 +313,6 @@ public class Frame {
     // attached frames:
     this._children = new ArrayList<Frame>();
     this._culled = frame._culled;
-    this._tracking = frame._tracking;
   }
 
   /**
@@ -356,7 +357,6 @@ public class Frame {
    *
    * @see #isDetached()
    * @see Graph#traverse()
-   * @see Graph#tracks(float, float, Frame)
    */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
@@ -370,7 +370,6 @@ public class Frame {
    *
    * @see #isAttached(Graph)
    * @see Graph#traverse()
-   * @see Graph#tracks(float, float, Frame)
    */
   public boolean isDetached() {
     return isAttached(null);
@@ -1947,33 +1946,45 @@ public class Frame {
   }
 
   /**
-   * Returns {@code true} if tracking is enabled. Always returns {@code false} if
-   * the frame {@link #isDetached()}.
+   * Returns {@code true} if tracking is enabled.
    *
    * @see #enableTracking(boolean)
    */
   public boolean isTrackingEnabled() {
-    return isDetached() ? false : _tracking;
+    return _tracking;
   }
 
   /**
-   * Enables frame tracking according to {@code flag}. Only meaningful if the frame is
-   * attached to a {@code graph}.
+   * Enables frame tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Point, Frame)}
+   * returns {@code false}, {@link Graph#setTrackedFrame(String, Frame)} does nothing while
+   * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the frame.
    *
    * @see #isTrackingEnabled()
    */
   public void enableTracking(boolean flag) {
-    if (isDetached())
-      System.out.println("Warning: enable tracking on a detached frame does nothing");
     _tracking = flag;
   }
 
   /**
-   * Returns {@code true} if the {@code frame} is being tracked by at least one graph {@code hid}
-   * and {@code false} otherwise.
+   * Same as {@code return isDetached() ? false : isTracked(graph())}. Use it if the frame is
+   * attached to a {@link #graph()}. Use {@link #isTracked(Graph)} if the frame {@link #isDetached()}.
+   *
+   * @see #isDetached()
+   * @see #isTracked(Graph)
    */
   public boolean isTracked() {
-    return isDetached() ? null : graph()._agents.containsValue(this);
+    return isDetached() ? false : isTracked(graph());
+  }
+
+  /**
+   * Returns {@code true} if the {@code frame} is being tracked by at least one {@code graph}
+   * {@code hid} and {@code false} otherwise.
+   *
+   * @see Graph#isTrackedFrame(String, Frame)
+   * @see Graph#isTrackedFrame(Frame)
+   */
+  public boolean isTracked(Graph graph) {
+    return graph._agents.containsValue(this);
   }
 
   /**

@@ -921,9 +921,9 @@ public class Scene extends Graph implements PConstants {
    * @see Frame#setPrecision(Frame.Precision)
    */
   protected boolean _tracks(float x, float y, Frame frame) {
-    if (frame == null)
+    if (frame == null || isEye(frame))
       return false;
-    if (isEye(frame))
+    if (!frame.isTrackingEnabled())
       return false;
     int index = (int) y * width() + (int) x;
     if (backBuffer().pixels != null)

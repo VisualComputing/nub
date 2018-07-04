@@ -2430,6 +2430,7 @@ public class Graph {
    * @see #tracks(float, float, Frame)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
+   * @see Frame#enableTracking(boolean)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    * @see #cast(String, Point)
@@ -2456,6 +2457,11 @@ public class Graph {
         _track(hid, child, x, y);
   }
 
+  /**
+   * Same as {tracks(pixel.x(), pixel.y(), frame)}.
+   *
+   * @see #tracks(float, float, Frame)
+   */
   public boolean tracks(Point pixel, Frame frame) {
     return tracks(pixel.x(), pixel.y(), frame);
   }
@@ -2470,6 +2476,7 @@ public class Graph {
    * @see #track(String, float, float)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
+   * @see Frame#enableTracking(boolean)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    */
@@ -2481,9 +2488,9 @@ public class Graph {
    * Cached version of {@link #tracks(float, float, Frame)}.
    */
   protected boolean _tracks(float x, float y, Vector projection, Frame frame) {
-    if (frame == null)
+    if (frame == null || isEye(frame))
       return false;
-    if (isEye(frame))
+    if (!frame.isTrackingEnabled())
       return false;
     float threshold = frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
         : frame.precisionThreshold() / 2;
@@ -2532,6 +2539,7 @@ public class Graph {
    * @see #tracks(float, float, Frame)
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
+   * @see Frame#enableTracking(boolean)
    * @see Frame#precision()
    * @see Frame#setPrecision(Frame.Precision)
    * @see #cast(String, float, float)
@@ -2604,21 +2612,23 @@ public class Graph {
 
   /**
    * Sets the {@code hid} tracked-frame (see {@link #trackedFrame(String)}). Call this function if you want to set the
-   * tracked frame manually or {@link #track(String, float, float)} to set it automatically using ray casting.
+   * tracked frame manually and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it automatically
+   * using ray casting.
    *
    * @see #defaultFrame(String)
    * @see #tracks(float, float, Frame)
    * @see #track(String, float, float)
    * @see #resetTrackedFrame(String)
    * @see #isTrackedFrame(String, Frame)
+   * @see Frame#enableTracking(boolean)
    */
   public void setTrackedFrame(String hid, Frame frame) {
     if (frame == null) {
       System.out.println("Warning. Cannot track a null frame!");
       return;
     }
-    if (!frame.isAttached(this)) {
-      System.out.println("Warning. Cannot track a frame that is not attached to this graph!");
+    if (!frame.isTrackingEnabled()) {
+      System.out.println("Warning. Frame cannot be tracked! Enable tracking on the frame first by call frame.enableTracking(true)");
       return;
     }
     _agents.put(hid, frame);
@@ -2668,6 +2678,7 @@ public class Graph {
    * Same as {@code return isTrackedFrame(null, frame)}.
    *
    * @see #isTrackedFrame(String, Frame)
+   * @see Frame#isTracked()
    */
   public boolean isTrackedFrame(Frame frame) {
     return isTrackedFrame(null, frame);
@@ -2681,6 +2692,7 @@ public class Graph {
    * @see #track(String, float, float)
    * @see #resetTrackedFrame(String)
    * @see #setTrackedFrame(String, Frame)
+   * @see Frame#isTracked()
    */
   public boolean isTrackedFrame(String hid, Frame frame) {
     return trackedFrame(hid) == frame;
