@@ -350,12 +350,6 @@ public class FrameAPI3 extends PApplet {
   }
 
   @Override
-  public void mouseMoved() {
-    //scene.track();
-    scene.cast();
-  }
-
-  @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.spin();
