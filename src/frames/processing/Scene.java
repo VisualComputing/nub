@@ -890,6 +890,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return super.tracks(mouse(), frameArray)}.
+   *
+   * @see Graph#tracks(Point, Frame[])
+   */
+  public Frame tracks(Frame[] frameArray) {
+    return tracks(mouse(), frameArray);
+  }
+
+  /**
    * Same as {@code return track(mouse(), frame)}.
    *
    * @see #mouse()

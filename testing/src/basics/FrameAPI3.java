@@ -368,7 +368,9 @@ public class FrameAPI3 extends PApplet {
   @Override
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1) {
-      trackedFrame = scene.tracks(mouseX, mouseY, new Frame[]{f1, f2, f3, f4, f5});
+      // same as:
+      //trackedFrame = scene.tracks(mouseX, mouseY, new Frame[]{f1, f2, f3, f4, f5});
+      trackedFrame = scene.tracks(new Frame[]{f1, f2, f3, f4, f5});
       if (trackedFrame != null)
         scene.setTrackedFrame(trackedFrame);
       else

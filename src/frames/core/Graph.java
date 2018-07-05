@@ -2463,7 +2463,7 @@ public class Graph {
    * @see #tracks(float, float, Frame[])
    */
   public Frame tracks(Point pixel, Frame[] frameArray) {
-    return tracks(new Point(pixel.x(), pixel.y()), frameArray);
+    return tracks(pixel.x(), pixel.y(), frameArray);
   }
 
   /**
