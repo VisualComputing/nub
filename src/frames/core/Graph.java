@@ -2458,6 +2458,26 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return tracks(new Point(pixel.x(), pixel.y()), frameArray)}.
+   *
+   * @see #tracks(float, float, Frame[])
+   */
+  public Frame tracks(Point pixel, Frame[] frameArray) {
+    return tracks(new Point(pixel.x(), pixel.y()), frameArray);
+  }
+
+  /**
+   * Returns the frame tracked at screen coordinates {@code (x, y)} from the {@code frameArray}.
+   * May be {@code null}.
+   */
+  public Frame tracks(float x, float y, Frame[] frameArray) {
+    for (Frame frame : frameArray)
+      if (tracks(x, y, frame))
+        return frame;
+    return null;
+  }
+
+  /**
    * Same as {tracks(pixel.x(), pixel.y(), frame)}.
    *
    * @see #tracks(float, float, Frame)

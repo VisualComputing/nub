@@ -36,6 +36,7 @@ import processing.event.MouseEvent;
 public class FrameAPI3 extends PApplet {
   Scene scene;
   InteractiveFrame f1, f2, f3, f4, f5;
+  Frame trackedFrame;
   Vector pnt = new Vector(40, 30, 20);
   Vector vec = new Vector(50, 50, 50);
   PFont font16, font13;
@@ -366,11 +367,13 @@ public class FrameAPI3 extends PApplet {
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    if (event.getCount() == 1)
-      if (scene.tracks(f1))
-        scene.setTrackedFrame(f1);
+    if (event.getCount() == 1) {
+      trackedFrame = scene.tracks(mouseX, mouseY, new Frame[]{f1, f2, f3, f4, f5});
+      if (trackedFrame != null)
+        scene.setTrackedFrame(trackedFrame);
       else
         scene.resetTrackedFrame();
+    }
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
