@@ -51,7 +51,7 @@ In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/fram
 
 ## Frames
 
-Scene objects may be related either to a attached or detached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
+Scene objects may be related either to an attached or a detached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
 or a [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance.
 
 To illustrate their use, suppose the following scene graph hierarchy is being implemented:
