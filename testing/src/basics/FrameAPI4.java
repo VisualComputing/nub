@@ -32,7 +32,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
-public class FrameAPI3 extends PApplet {
+public class FrameAPI4 extends PApplet {
   Scene scene;
   InteractiveFrame f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
@@ -349,6 +349,11 @@ public class FrameAPI3 extends PApplet {
   }
 
   @Override
+  public void mouseMoved() {
+    scene.track(new Frame[]{f1, f2, f3, f4, f5});
+  }
+
+  @Override
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.spin();
@@ -365,9 +370,6 @@ public class FrameAPI3 extends PApplet {
 
   @Override
   public void mouseClicked(MouseEvent event) {
-    if (event.getCount() == 1) {
-      scene.track(new Frame[]{f1, f2, f3, f4, f5});
-    }
     if (event.getCount() == 2)
       if (event.getButton() == LEFT)
         scene.focus();
@@ -403,6 +405,6 @@ public class FrameAPI3 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.FrameAPI3"});
+    PApplet.main(new String[]{"basics.FrameAPI4"});
   }
 }

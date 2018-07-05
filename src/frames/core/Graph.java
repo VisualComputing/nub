@@ -2390,6 +2390,113 @@ public class Graph {
 
   // traversal
 
+  // detached frames
+
+  /**
+   * Same as {@code return track(null, pixel, frameArray)}.
+   *
+   * @see #track(String, float, float, Frame[])
+   */
+  public Frame track(Point pixel, Frame[] frameArray) {
+    return track(null, pixel, frameArray);
+  }
+
+  /**
+   * Same as {@code return track(hid, pixel.x(), pixel.y(), frameArray)}.
+   *
+   * @see #track(String, float, float, Frame[])
+   */
+  public Frame track(String hid, Point pixel, Frame[] frameArray) {
+    return track(hid, pixel.x(), pixel.y(), frameArray);
+  }
+
+  /**
+   * Same as {@code return track(null, x, y, frameArray)}.
+   *
+   * @see #track(String, float, float, Frame[])
+   */
+  public Frame track(float x, float y, Frame[] frameArray) {
+    return track(null, x, y, frameArray);
+  }
+
+  /**
+   * Updates the {@code hid} device tracked-frame from the {@code frameArray} and returns it.
+   * <p>
+   * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
+   * (see {@link #tracks(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   * <p>
+   * Use this version of the method instead of {@link #track(String, float, float)} when dealing with
+   * detached frames.
+   *
+   * @see #track(String, float, float)
+   * @see #track(String, float, float, List)
+   * @see #traverse()
+   * @see #trackedFrame(String)
+   * @see #resetTrackedFrame(String)
+   * @see #defaultFrame(String)
+   * @see #tracks(float, float, Frame)
+   * @see #setTrackedFrame(String, Frame)
+   * @see #isTrackedFrame(String, Frame)
+   * @see Frame#enableTracking(boolean)
+   * @see Frame#precision()
+   * @see Frame#setPrecision(Frame.Precision)
+   * @see #cast(String, Point)
+   * @see #cast(String, float, float)
+   */
+  public Frame track(String hid, float x, float y, Frame[] frameArray) {
+    resetTrackedFrame(hid);
+    for (Frame frame : frameArray)
+      if (tracks(x, y, frame)) {
+        setTrackedFrame(hid, frame);
+        break;
+      }
+    return trackedFrame(hid);
+  }
+
+  /**
+   * Same as {@code return track(null, pixel, frameList)}.
+   *
+   * @see #track(String, float, float, List)
+   */
+  public Frame track(Point pixel, List<Frame> frameList) {
+    return track(null, pixel, frameList);
+  }
+
+  /**
+   * Same as {@code return track(hid, pixel.x(), pixel.y(), frameList)}.
+   *
+   * @see #track(String, float, float, List)
+   */
+  public Frame track(String hid, Point pixel, List<Frame> frameList) {
+    return track(hid, pixel.x(), pixel.y(), frameList);
+  }
+
+  /**
+   * Same as {@code return track(null, x, y, frameList)}.
+   *
+   * @see #track(String, float, float, List)
+   */
+  public Frame track(float x, float y, List<Frame> frameList) {
+    return track(null, x, y, frameList);
+  }
+
+  /**
+   * Same as {@link #track(String, float, float, Frame[])} but using a frame list instead of an array.
+   *
+   * @see #track(String, float, float, Frame[])
+   */
+  public Frame track(String hid, float x, float y, List<Frame> frameList) {
+    resetTrackedFrame(hid);
+    for (Frame frame : frameList)
+      if (tracks(x, y, frame)) {
+        setTrackedFrame(hid, frame);
+        break;
+      }
+    return trackedFrame(hid);
+  }
+
+  // attached frames
+
   /**
    * Same as {@code return track(null, pixel.x(), pixel.y())}.
    *
@@ -2397,15 +2504,6 @@ public class Graph {
    */
   public Frame track(Point pixel) {
     return track(null, pixel.x(), pixel.y());
-  }
-
-  /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
-   *
-   * @see #track(String, float, float)
-   */
-  public Frame track(String hid, Point pixel) {
-    return track(hid, pixel.x(), pixel.y());
   }
 
   /**
@@ -2418,11 +2516,24 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
+   *
+   * @see #track(String, float, float)
+   */
+  public Frame track(String hid, Point pixel) {
+    return track(hid, pixel.x(), pixel.y());
+  }
+
+  /**
    * Updates the {@code hid} device tracked-frame and returns it.
    * <p>
    * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #tracks(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   * <p>
+   * Use this version of the method instead of {@link #track(String, float, float, Frame[])} when dealing with
+   * attached frames to the graph.
    *
+   * @see #track(String, float, float, Frame[])
    * @see #traverse()
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
@@ -2455,26 +2566,6 @@ public class Graph {
     if (!frame.isCulled() && trackedFrame(hid) == null)
       for (Frame child : frame.children())
         _track(hid, child, x, y);
-  }
-
-  /**
-   * Same as {@code return tracks(new Point(pixel.x(), pixel.y()), frameArray)}.
-   *
-   * @see #tracks(float, float, Frame[])
-   */
-  public Frame tracks(Point pixel, Frame[] frameArray) {
-    return tracks(pixel.x(), pixel.y(), frameArray);
-  }
-
-  /**
-   * Returns the frame tracked at screen coordinates {@code (x, y)} from the {@code frameArray}.
-   * May be {@code null}.
-   */
-  public Frame tracks(float x, float y, Frame[] frameArray) {
-    for (Frame frame : frameArray)
-      if (tracks(x, y, frame))
-        return frame;
-    return null;
   }
 
   /**
