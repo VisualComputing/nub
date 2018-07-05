@@ -79,11 +79,12 @@ import java.util.List;
  * {@link #scale(String, float)} calls {@link #scale(float, Frame)} passing the {@code hid} default-frame).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point)} or
- * {@link #cast(String, Point)}. While the former updates the {@code hid} tracked-frame synchronously
- * (i.e., it returns the {@code hid} tracked-frame immediately), the latter updates it asynchronously (i.e.,
- * it optimally updates the {@code hid} tracked-frame during the next call to the {@link #traverse()} algorithm).
- * Both act upon only to frames attached to this graph.</li>
+ * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point, Frame[])}
+ * (detached or attached frames), {@link #track(String, Point)} (only attached frames) or
+ * {@link #cast(String, Point)} (only for attached frames too). While {@link #track(String, Point, Frame[])} and
+ * {@link #track(String, Point)} update the {@code hid} tracked-frame synchronously (i.e., they return the
+ * {@code hid} tracked-frame immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
+ * optimally updates the {@code hid} tracked-frame during the next call to the {@link #traverse()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
