@@ -105,17 +105,17 @@ public class FrameAPI3 extends PApplet {
 
     pushMatrix();
     scene.applyTransformation(f1);
-    f1.draw();
+    f1.draw(scene);
     pushMatrix();
     scene.applyTransformation(f3);
-    f3.draw();
+    f3.draw(scene);
     popMatrix();
     pushMatrix();
     scene.applyTransformation(f2);
-    f2.draw();
+    f2.draw(scene);
     pushMatrix();
     scene.applyTransformation(f4);
-    f4.draw();
+    f4.draw(scene);
     popMatrix();
     popMatrix();
     popMatrix();
@@ -125,7 +125,7 @@ public class FrameAPI3 extends PApplet {
     scene.applyTransformation(scene.eye());
     pushMatrix();
     scene.applyTransformation(f5);
-    f5.draw();
+    f5.draw(scene);
     popMatrix();
     popMatrix();
 
@@ -394,11 +394,11 @@ public class FrameAPI3 extends PApplet {
       pnt = new Vector(40, 30, 20);
     }
 
-    public void draw() {
+    public void draw(Scene scn) {
       pushStyle();
-      scene.drawAxes(40);
+      scn.drawAxes(40);
       stroke(_c);
-      scene.drawShooterTarget(this);
+      scn.drawShooterTarget(this);
       strokeWeight(10);
       point(pnt.x(), pnt.y(), pnt.z());
       popStyle();
