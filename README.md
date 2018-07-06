@@ -115,7 +115,7 @@ To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javado
 
 ```processing
 void mouseMoved() {
-  // the tracked-frame is updated from the list using ray-casting
+  // the tracked-frame is updated from the array using ray-casting
   scene.track(new Frame[]{f1, f2, f3});
 }
 ```
