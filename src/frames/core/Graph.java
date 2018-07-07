@@ -3356,10 +3356,7 @@ public class Graph {
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
       throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
-    if (isEye(frame))
-      frame._orbit(_rotate(roll, pitch, yaw, frame), anchor());
-    else
-      frame.rotate(_rotate(roll, pitch, yaw, frame));
+    spin(_rotate(roll, pitch, yaw, frame), frame);
   }
 
   /**
