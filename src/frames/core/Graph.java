@@ -3343,13 +3343,15 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code frame} around the {@link #anchor()} (eye frames) or its origin (non-eye frames),
-   * {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space x, y and z axes, respectively.
+   * Rotates the {@code frame} {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space
+   * x, y and z axes, respectively. The center of the rotation is the graph {@link #anchor()} if the frame is the
+   * {@link #eye()}, or the frame origin (see {@link Frame#position()}) otherwise.
    * <p>
    * To rotate an eye frame around its origin and local axes simply call:
    * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
    *
    * @see #rotate(String, float, float, float)
+   * @see #spin(Point, Point, float, Frame)
    */
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
@@ -3438,8 +3440,8 @@ public class Graph {
 
   /**
    * Rotates the {@code frame} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
-   * {@code sensitivity} controls the gesture strength. The center of the rotation is {@link #anchor()} if the frame is
-   * the {@link #eye()} or {@link Frame#position()} otherwise.
+   * {@code sensitivity} controls the gesture strength. The center of the rotation is the graph {@link #anchor()}
+   * if the frame is the {@link #eye()}, or the frame origin (see {@link Frame#position()}) otherwise.
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
    * orientation using a mouse.
@@ -3450,6 +3452,7 @@ public class Graph {
    * @see #spin(String, Point, Point)
    * @see #spin(Point, Point, Frame)
    * @see #spin(String, Point, Point, float)
+   * @see #rotate(float, float, float, Frame)
    */
   public void spin(Point tail, Point head, float sensitivity, Frame frame) {
     if (frame == null)
