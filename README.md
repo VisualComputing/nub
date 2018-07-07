@@ -79,7 +79,7 @@ void setup() {
   // Note the use of the default frame constructor to instantiate a
   // detached leading frame (those whose parent is the world, such as f1):
   f1 = new Frame();
-  // whereas for the reaming frames we pass any constructor taking a
+  // whereas for the remaining frames we pass any constructor taking a
   // reference frame paramater, such as Frame(Frame referenceFrame, float scaling):
   f2 = new Frame(f1, 1);
   f3 = new Frame(f1, 1);
