@@ -78,9 +78,28 @@ public class SpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorInteraction() {
-    scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), -10 * snZPos.getValue());
-    scene.rotate("SPCNAV", snXRot.getValue() * 10 * PI / width, snYRot.getValue() * 10 * PI / width, snZRot.getValue() * 10 * PI / width);
+    scene.translate("SPCNAV", 10 * snXPos.getValue(), 10 * snYPos.getValue(), 10 * snZPos.getValue());
+    scene.rotate("SPCNAV", -snXRot.getValue() * 20 * PI / width, snYRot.getValue() * 20 * PI / width, snZRot.getValue() * 20 * PI / width);
   }
+
+  /*
+  void spaceNavigatorInteraction() {
+    //Vector eyeVector =  new Vector(-30 * snXPos.getValue(), -30 * snYPos.getValue(), 30 * snZPos.getValue());
+    //Vector worldVector = scene.eye().worldDisplacement(eyeVector);
+    //scene.eye().translate(worldVector);
+    //eyeVector.setY(0);
+    //eyeVector.setZ(0);
+    //scene.eye().translate(eyeVector);
+    float roll = -snXRot.getValue() * 20 * PI / width;
+    float pitch = snYRot.getValue() * 20 * PI / width;
+    float yaw = snZRot.getValue() * 20 * PI / width;
+    //roll = 0;
+    //pitch = 0;
+    //yaw = 0;
+    scene.eye().rotate(new Quaternion(roll, pitch, yaw));
+    // scene.spin(new Quaternion(scene.isLeftHanded() ? roll : -roll, -pitch, scene.isLeftHanded() ? yaw : -yaw), scene.defaultFrame("SPCNAV"));
+  }
+  */
 
   public void mouseMoved() {
     scene.cast();

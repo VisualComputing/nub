@@ -3343,14 +3343,21 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code frame} roll, pitch and yaw radians around screen space x, y and z axes, respectively.
+   * Rotates the {@code frame} around the {@link #anchor()} (eye frames) or its origin (non-eye frames),
+   * {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space x, y and z axes, respectively.
+   * <p>
+   * To rotate an eye frame around its origin and local axes simply call:
+   * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
    *
    * @see #rotate(String, float, float, float)
    */
   public void rotate(float roll, float pitch, float yaw, Frame frame) {
     if (frame == null)
       throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
-    frame.rotate(_rotate(roll, pitch, yaw, frame));
+    if (isEye(frame))
+      frame._orbit(_rotate(roll, pitch, yaw, frame), anchor());
+    else
+      frame.rotate(_rotate(roll, pitch, yaw, frame));
   }
 
   /**
@@ -3363,12 +3370,11 @@ public class Graph {
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
     // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
-    if (isEye(frame)) {
-      return new Quaternion(isLeftHanded() ? roll : -roll, -pitch, isLeftHanded() ? yaw : -yaw);
-    } else {
-      Vector vector = new Vector();
-      Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
-      vector.set(-quaternion.x(), -quaternion.y(), -quaternion.z());
+    Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
+    if (isEye(frame))
+      return quaternion;
+    else {
+      Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
       vector = eye().orientation().rotate(vector);
       vector = frame.displacement(vector);
       quaternion.setX(vector.x());
