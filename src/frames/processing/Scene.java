@@ -884,8 +884,12 @@ public class Scene extends Graph implements PConstants {
    * @see #applyTransformation(Frame)
    * @see #applyWorldTransformation(Frame)
    */
+  //TODO move to the Shape class
   public void draw(Shape shape) {
+    frontBuffer().pushMatrix();
+    applyTransformation(frontBuffer(), shape);
     shape._visit(frontBuffer());
+    frontBuffer().popMatrix();
   }
 
   @Override
