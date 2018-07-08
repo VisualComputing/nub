@@ -164,13 +164,8 @@ public class Shape extends Frame {
 
   @Override
   public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      if (graph()._bb == null) {
-        System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
-        return;
-      }
     this._precision = precision;
-    // enables or disables the grabbing buffer
+    // optimizes the back-buffer
     if (precision() == Precision.EXACT) {
       graph()._bbEnabled = true;
       return;

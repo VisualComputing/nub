@@ -64,6 +64,10 @@ public class MouseDragInteraction extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'e')
+      scene.enableBackBuffer();
+    if (key == 'd')
+      scene.disableBackBuffer();
     if (key == 'f')
       scene.flip();
     if (key == 's')

@@ -207,10 +207,7 @@ public class Scene extends Graph implements PConstants {
     setMatrixHandler(matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
-    _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
-        pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
-        null;
-    if (_bb != null) {
+    if (enableBackBuffer()) {
       _triangleShader = pApplet().loadShader("PickingBuffer.frag");
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
@@ -226,6 +223,28 @@ public class Scene extends Graph implements PConstants {
 
     // 5. Handed
     setLeftHanded();
+  }
+
+  /**
+   * Enable the {@link #backBuffer()} if the Processing renderer supports it. In success returns
+   * {@code true} and {@code false} otherwise.
+   *
+   * @see #disableBackBuffer()
+   */
+  public boolean enableBackBuffer() {
+    _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
+        pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
+        null;
+    return _bb != null;
+  }
+
+  /**
+   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
+   *
+   * @see #enableBackBuffer()
+   */
+  public void disableBackBuffer() {
+    _bb = null;
   }
 
   /**
@@ -271,7 +290,7 @@ public class Scene extends Graph implements PConstants {
    * scenes).
    */
   protected void _renderBackBuffer() {
-    if (!_bbEnabled)
+    if (_bb == null || !_bbEnabled)
       return;
     backBuffer().beginDraw();
     backBuffer().pushStyle();
@@ -857,22 +876,21 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws the shape into the {@link #frontBuffer()}.
+   * Draws locally (i.e., without applying any shape transformation) the shape into the {@link #frontBuffer()}.
    * <p>
    * Call it only instead of {@link Scene#traverse()}.
    *
    * @see frames.processing.Scene#traverse(PGraphics)
+   * @see #applyTransformation(Frame)
+   * @see #applyWorldTransformation(Frame)
    */
   public void draw(Shape shape) {
-    frontBuffer().pushMatrix();
-    Scene.applyWorldTransformation(frontBuffer(), shape);
     shape._visit(frontBuffer());
-    frontBuffer().popMatrix();
   }
 
   @Override
   protected void _track(Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bbEnabled) {
+    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
       if (!_tuples.isEmpty()) {
         Iterator<Tuple> it = _tuples.iterator();
         while (it.hasNext()) {
@@ -920,7 +938,7 @@ public class Scene extends Graph implements PConstants {
 
   @Override
   public boolean tracks(float x, float y, Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bbEnabled)
+    if (frame.precision() == Frame.Precision.EXACT && _bb != null)
       return _tracks(x, y, frame);
     else
       return _tracks(x, y, screenLocation(frame.position()), frame);
