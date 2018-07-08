@@ -207,7 +207,7 @@ A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Sh
 
 To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.set(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
-Immediate-mode shapes should override `Shape.set(PGraphics)`, e.g., using an anonymous inner
+Immediate-mode shapes should override `Shape.setGraphics(PGraphics)`, e.g., using an anonymous inner
 [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-) class intance, such as with the following:
  
 ```java
@@ -217,7 +217,7 @@ void setup() {
   ...
   shape = new Shape(scene) {
     @Override
-    protected void set(PGraphics canvas) {
+    protected void setGraphics(PGraphics canvas) {
       //immediate-mode rendering procedure
     }
   };
@@ -352,7 +352,7 @@ It is desirable to obtain natural, predictable and intuitive poses when End Effe
 The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: `drawCylinder(PGraphics, int, float, float)}`, `drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)`, `drawCone(PGraphics, int, float, float, float, float)`, `drawCone(PGraphics, int, float, float, float, float, float)` and `drawTorusSolenoid(PGraphics, int, int, float, float)`.
 
 Drawing functions that take a `PGraphics` parameter (including the above static ones), such as `beginScreenCoordinates(PGraphics)`,
-`endScreenCoordinates(PGraphics)`, `drawAxes(PGraphics, float)`, `drawCross(PGraphics, float, float, float)` and `drawGrid(PGraphics)` among others, can be used to set a `Shape` (see [set(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-)).
+`endScreenCoordinates(PGraphics)`, `drawAxes(PGraphics, float)`, `drawCross(PGraphics, float, float, float)` and `drawGrid(PGraphics)` among others, can be used to set a ([Shape](#user-content-shapes)).
 
 Another scene's eye (different than this one) can be drawn with `drawEye(Graph)`. Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
