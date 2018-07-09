@@ -241,7 +241,7 @@ Some advantages of using shapes are:
 
 ## Eye
 
-The scene eye can be set from any [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) or [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance, by simply calling [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-).
+The scene eye can be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) or [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance, by simply calling [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-).
 
 The default scene eye is an attached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance.
 
