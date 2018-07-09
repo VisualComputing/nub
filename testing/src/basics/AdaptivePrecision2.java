@@ -36,7 +36,11 @@ public class AdaptivePrecision2 extends PApplet {
     background(0);
     scene.drawAxes();
     for (int i = 0; i < shapes.length; i++) {
-      scene.draw(shapes[i]);
+      //scene.draw(shapes[i]);
+      pushMatrix();
+      scene.applyTransformation(shapes[i]);
+      shapes[i].draw();
+      popMatrix();
       pushStyle();
       stroke(255);
       scene.drawShooterTarget(shapes[i]);

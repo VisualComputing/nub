@@ -181,13 +181,41 @@ public class Shape extends Frame {
 
   @Override
   public void visit() {
-    _visit(graph()._targetPGraphics);
+    draw(graph()._targetPGraphics);
   }
 
   /**
-   * Internal use.
+   * Same as {@code draw(graph().frontBuffer())}. Use it instead of {@link Scene#traverse()}.
+   *
+   * @see Scene#traverse()
+   * @see #draw(PGraphics)
    */
-  protected void _visit(PGraphics pGraphics) {
+  public void draw() {
+    draw(graph().frontBuffer());
+  }
+
+  /**
+   * Draws the shape into the {@code pGraphics}. Use it instead of {@link Scene#traverse(PGraphics)} (which
+   * in turn calls it) such as:
+   *
+   * <pre>
+   * {@code
+   * void draw() {
+   *   pGraphics.pushMatrix();
+   *   // apply the local shape transformation before drawing
+   *   Scene.applyTransformation(pGraphics, shape);
+   *   // or apply the global shape transformation
+   *   //Scene.applyWorldTransformation(pGraphics, shape);
+   *   shape.draw(pGraphics);
+   *   pGraphics.popMatrix();
+   * }
+   * }
+   * </pre>
+   *
+   * @see Scene#traverse(PGraphics)
+   * @see #draw()
+   */
+  public void draw(PGraphics pGraphics) {
     if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
