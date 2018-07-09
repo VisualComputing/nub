@@ -196,6 +196,17 @@ void draw() {
 }
 ```
 
+To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the _attached_ frame the mouse should interact with) call [setTrackedFrame(frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
+
+```processing
+void mouseMoved() {
+  // the tracked-frame is updated from the set of scene attached frames
+  scene.cast();
+}
+```
+
+Interaction with a given frame or the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) is performed as with _detached_ frames (as discussed above).
+
 Some advantages of using _attached_ frames are:
 
 * Same as with _detached_ frames, but traversing the hierarchy doesn't require any prior knowledge of it, but simply calling [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--).
