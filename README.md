@@ -368,7 +368,7 @@ The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/
 Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginScreenDrawing(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#beginScreenDrawing-processing.core.PGraphics-),
 [endScreenDrawing(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#endScreenDrawing-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a ([Shape](#user-content-shapes)).
 
-Another scene's eye (different than this one) can be drawn with `drawEye(Graph)`. Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
+Another scene's eye (different than this one) can be drawn with [drawEye(Graph)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawEye-frames.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
 ## Installation
 
