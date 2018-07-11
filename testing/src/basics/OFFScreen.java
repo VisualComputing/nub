@@ -11,7 +11,6 @@ import processing.event.MouseEvent;
 public class OFFScreen extends PApplet {
   Scene scene;
   Shape shape1, shape2;
-  PGraphics canvas;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -21,8 +20,7 @@ public class OFFScreen extends PApplet {
   }
 
   public void setup() {
-    canvas = createGraphics(1300, 900, renderer);
-    scene = new Scene(this, canvas, 400, 200);
+    scene = new Scene(this, createGraphics(1300, 900, renderer), 400, 200);
     scene.setFieldOfView((float) Math.PI / 3);
     scene.setRadius(300);
     scene.fitBallInterpolation();
@@ -52,7 +50,7 @@ public class OFFScreen extends PApplet {
   public void draw() {
     background(255);
     scene.beginDraw();
-    canvas.background(0);
+    scene.frontBuffer().background(0);
     scene.drawAxes();
     scene.traverse();
     scene.endDraw();
