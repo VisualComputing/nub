@@ -222,7 +222,7 @@ void setup() {
     @Override
     public void visit() {
       // Hierarchical culling is optional and disabled by default
-      // where cullingCondition should be implemented by you
+      // Note that the cullingCondition should be implemented by you
       cull(cullingCondition);
       if(!isCulled())
         // Draw your object here, in the local coordinate system.
