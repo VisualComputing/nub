@@ -1036,15 +1036,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code applyTransformation(pApplet.g, frame)}.
-   *
-   * @see #applyTransformation(PGraphics, Frame)
-   */
-  public static void applyTransformation(PApplet pApplet, Frame frame) {
-    applyTransformation(pApplet.g, frame);
-  }
-
-  /**
    * Apply the local transformation defined by the given {@code frame} on the given
    * {@code pGraphics}. This method doesn't call {@link #_bind(PGraphics)} which
    * should be called manually (only makes sense when {@link #frontBuffer()} is different than
@@ -1064,15 +1055,6 @@ public class Scene extends Graph implements PConstants {
       pGraphics.rotate(frame.rotation().angle2D());
       pGraphics.scale(frame.scaling(), frame.scaling());
     }
-  }
-
-  /**
-   * Same as {@code applyWorldTransformation(pApplet.g, frame)}.
-   *
-   * @see #applyWorldTransformation(PGraphics, Frame)
-   */
-  public static void applyWorldTransformation(PApplet pApplet, Frame frame) {
-    applyWorldTransformation(pApplet.g, frame);
   }
 
   /**
