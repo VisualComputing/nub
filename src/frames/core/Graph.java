@@ -3287,7 +3287,7 @@ public class Graph {
         dy *= 2.0 * wh[1] / height();
         break;
     }
-    // this express the dz coordinate is given in world units
+    // this expresses the dz coordinate in world units:
     //Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz / eye().magnitude());
     Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz * 2 * radius() / zMax);
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());

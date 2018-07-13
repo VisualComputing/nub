@@ -2886,7 +2886,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Converts the {@code x, y} coordinates into a new {@link Point} and returns it.
    */
-  public Point toPoint(float x, float y) {
+  public static Point toPoint(float x, float y) {
     return new Point(x, y);
   }
 
