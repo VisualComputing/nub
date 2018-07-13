@@ -33,7 +33,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
-public class FrameAPI extends PApplet {
+public class FrameAPI1 extends PApplet {
   Scene scene;
   InteractiveFrame f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
@@ -385,6 +385,6 @@ public class FrameAPI extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.FrameAPI"});
+    PApplet.main(new String[]{"basics.FrameAPI1"});
   }
 }

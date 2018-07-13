@@ -8,7 +8,7 @@ import processing.core.PApplet;
 /**
  * Created by pierre on 11/15/16.
  */
-public class DetachedFrames extends PApplet {
+public class DetachedFrames1 extends PApplet {
   Frame[] frames;
 
   public void settings() {
@@ -34,6 +34,6 @@ public class DetachedFrames extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.DetachedFrames"});
+    PApplet.main(new String[]{"basics.DetachedFrames1"});
   }
 }

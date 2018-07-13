@@ -8,7 +8,7 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
-public class Flock2 extends PApplet {
+public class FlockOld extends PApplet {
   Scene scene;
   //flock bounding box
   static int flockWidth = 1280;
@@ -17,7 +17,7 @@ public class Flock2 extends PApplet {
   static boolean avoidWalls = true;
 
   int initBoidNum = 900; // amount of boids to start the program with
-  static ArrayList<Boid2> flock;
+  static ArrayList<BoidOld> flock;
   static Frame avatar;
   static boolean animate = true;
 
@@ -34,7 +34,7 @@ public class Flock2 extends PApplet {
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
-      flock.add(new Boid2(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+      flock.add(new BoidOld(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
   }
 
   public void draw() {
@@ -142,6 +142,6 @@ public class Flock2 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.Flock2"});
+    PApplet.main(new String[]{"basics.FlockOld"});
   }
 }

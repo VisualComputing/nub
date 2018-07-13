@@ -8,7 +8,7 @@ import processing.core.PApplet;
 
 import java.util.ArrayList;
 
-class Boid2 {
+class BoidOld {
   Scene scene;
   PApplet pApplet;
   public Frame frame;
@@ -22,7 +22,7 @@ class Boid2 {
   float flap = 0;
   float t = 0;
 
-  Boid2(Scene scn, Vector inPos) {
+  BoidOld(Scene scn, Vector inPos) {
     scene = scn;
     pApplet = scene.pApplet();
     position = new Vector();
@@ -32,8 +32,8 @@ class Boid2 {
       // frame local coordinate system.
       @Override
       public void visit() {
-        if (Flock2.animate)
-          run(Flock2.flock);
+        if (FlockOld.animate)
+          run(FlockOld.flock);
         render();
       }
     };
@@ -43,18 +43,18 @@ class Boid2 {
     neighborhoodRadius = 100;
   }
 
-  public void run(ArrayList<Boid2> bl) {
+  public void run(ArrayList<BoidOld> bl) {
     t += .1;
     flap = 10 * PApplet.sin(t);
     // acceleration.add(steer(new Vector(mouseX,mouseY,300),true));
     // acceleration.add(new Vector(0,.05,0));
-    if (Flock2.avoidWalls) {
-      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), Flock2.flockHeight, position.z())), 5));
+    if (FlockOld.avoidWalls) {
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), FlockOld.flockHeight, position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), 0, position.z())), 5));
-      acceleration.add(Vector.multiply(avoid(new Vector(Flock2.flockWidth, position.y(), position.z())), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(FlockOld.flockWidth, position.y(), position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(0, position.y(), position.z())), 5));
       acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), 0)), 5));
-      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), Flock2.flockDepth)), 5));
+      acceleration.add(Vector.multiply(avoid(new Vector(position.x(), position.y(), FlockOld.flockDepth)), 5));
     }
     flock(bl);
     move();
@@ -70,7 +70,7 @@ class Boid2 {
 
   //-----------behaviors---------------
 
-  void flock(ArrayList<Boid2> boids) {
+  void flock(ArrayList<BoidOld> boids) {
     //alignment
     alignment = new Vector(0, 0, 0);
     int alignmentCount = 0;
@@ -81,7 +81,7 @@ class Boid2 {
     separation = new Vector(0, 0, 0);
     Vector repulse;
     for (int i = 0; i < boids.size(); i++) {
-      Boid2 boid = boids.get(i);
+      BoidOld boid = boids.get(i);
       //alignment
       float distance = Vector.distance(position, boid.position);
       if (distance > 0 && distance <= neighborhoodRadius) {
@@ -130,18 +130,18 @@ class Boid2 {
   }
 
   void checkBounds() {
-    if (position.x() > Flock2.flockWidth)
+    if (position.x() > FlockOld.flockWidth)
       position.setX(0);
     if (position.x() < 0)
-      position.setX(Flock2.flockWidth);
-    if (position.y() > Flock2.flockHeight)
+      position.setX(FlockOld.flockWidth);
+    if (position.y() > FlockOld.flockHeight)
       position.setY(0);
     if (position.y() < 0)
-      position.setY(Flock2.flockHeight);
-    if (position.z() > Flock2.flockDepth)
+      position.setY(FlockOld.flockHeight);
+    if (position.z() > FlockOld.flockDepth)
       position.setZ(0);
     if (position.z() < 0)
-      position.setZ(Flock2.flockDepth);
+      position.setZ(FlockOld.flockDepth);
   }
 
   void render() {
@@ -161,7 +161,7 @@ class Boid2 {
     }
 
     // highlight avatar
-    if (frame == Flock2.avatar) {
+    if (frame == FlockOld.avatar) {
       pApplet.stroke(pApplet.color(255, 0, 0));
       pApplet.fill(pApplet.color(255, 0, 0));
     }
