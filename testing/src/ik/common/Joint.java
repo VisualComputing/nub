@@ -45,7 +45,7 @@ public class Joint extends InteractiveShape {
     }
 
     if (constraint() != null) {
-      graph().drawConstraint(this);
+      graph().drawConstraint(pg, this);
     }
   }
 }
