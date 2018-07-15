@@ -29,6 +29,9 @@ public class PlanarPolygon extends Constraint {
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
   protected float _height = 1.f;
   protected Quaternion _restRotation = new Quaternion();
+  protected Quaternion _idleRotation = new Quaternion();
+  protected Quaternion _alignmentRotation = new Quaternion();
+
   protected Vector _min, _max;
 
   public Quaternion restRotation() {
@@ -46,11 +49,12 @@ public class PlanarPolygon extends Constraint {
    */
   public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _restRotation = reference.get();
-    Vector Z = _restRotation.inverse().rotate(twist);
+    _idleRotation = reference.get();
     //Align Y-Axis with Up Axis
     _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
+    Vector tw = new Quaternion(new Vector(0, 1, 0), up).inverseRotate(twist);
     //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
+    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), tw));
   }
 
   public ArrayList<Vector> vertices() {
@@ -110,11 +114,15 @@ public class PlanarPolygon extends Constraint {
     */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     //twist to frame
+    Quaternion q1 = Quaternion.compose(desired, _idleRotation.inverse());
     Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = Quaternion.multiply(desired, twist);
+    Vector new_pos = desired.rotate(new Vector(0, 0, 1));
+    new_pos = q1.rotate(twist);
     Vector constrained = apply(new_pos, _restRotation);
+    constrained = Quaternion.compose(q1, rotation.inverse()).inverseRotate(constrained);
     //Get Quaternion
-    return new Quaternion(twist, Quaternion.multiply(frame.rotation().inverse(), constrained));
+    return new Quaternion(frame.localTransformOf(twist), frame.localTransformOf(constrained));
+    //return new Quaternion(rotation.inverseRotate(new Vector(0, 0, 1)), frame.rotation().inverseRotate( constrained));
   }
 
 

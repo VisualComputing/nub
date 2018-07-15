@@ -161,7 +161,6 @@ public class Hinge extends Constraint {
       return new Quaternion(axis, deltaAngle);
     }
   }
-
   @Override
   public Vector constrainTranslation(Vector translation, Frame frame) {
     return new Vector();
