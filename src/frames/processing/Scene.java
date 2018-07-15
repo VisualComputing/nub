@@ -3049,32 +3049,34 @@ public class Scene extends Graph implements PConstants {
       BallAndSocket constraint = (BallAndSocket) node.constraint();
       reference.rotate(constraint.restRotation());
       applyTransformation(reference);
-      drawAxes(5);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, boneLength / 2.f,
           (boneLength / 2.f) * PApplet.tan(constraint.left()),
           (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
     } else if (node.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) node.constraint()).restRotation());
       applyTransformation(reference);
-      drawAxes(5);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, ((PlanarPolygon) node.constraint()).height(), ((PlanarPolygon) node.constraint()).vertices());
     } else if (node.constraint() instanceof SphericalPolygon) {
       reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
       applyTransformation(reference);
-      drawAxes(5);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
     } else if (node.constraint() instanceof Hinge) {
       Hinge constraint = (Hinge) node.constraint();
       if (node.children().size() == 1) {
-        Vector axis = constraint.restRotation().rotate(constraint.axis());
-        reference.rotate(constraint.restRotation());
-        Vector rest = Vector.projectVectorOnPlane(node.rotation().inverse().rotate(node.children().get(0).translation()), axis);
+        //reference.rotate(constraint.restRotation());
+        Vector axis = constraint.restRotation().rotate(constraint.axis().get());
+        Vector rest = Vector.projectVectorOnPlane(node.children().get(0).translation().get(), axis);
+        Quaternion rotation = new Quaternion(new Vector(0, 0, 1), axis);
         //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
+        reference.rotate(rotation);
+        rest = rotation.inverseRotate(rest);
+        reference.rotate(new Quaternion(new Vector(1, 0, 0), rest));
         //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
         applyTransformation(reference);
-        drawAxes(5);
+        drawAxes(pGraphics,5);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }
