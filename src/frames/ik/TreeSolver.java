@@ -159,7 +159,7 @@ public class TreeSolver extends FABRIKSolver {
     float change = minDistance;
     if (treeNode._modified) {
       ChainSolver solver = treeNode._solver();
-      solver._positions().set(0, solver.head().position());
+      solver._positions().set(0, solver.head().position().get());
       change = solver._backwardReaching();
       /*When executing Backward Step, if the Frame is a SubBase (Has more than 1 Child) and
        * it is not a "dummy Frame" (Convenient Frame that constraints position but no orientation of
