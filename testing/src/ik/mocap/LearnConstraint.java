@@ -34,7 +34,7 @@ public class LearnConstraint {
     public static float[][][] getDistanceField(List<Quaternion> data, int I, int J, int K){
         if(data.isEmpty()) return null;
         float[][][] distance_field = new float[I][J][K];
-        float step = (float) (Math.min(Math.min( I , J ) , K) / (2*Math.PI));
+        float step = (float) ((2*Math.PI) / Math.min(Math.min( I , J ) , K));
         List<Quaternion> new_data = performAdaptativeSampling(data, step);
         //Get a list of vectors
         ArrayList<Vector> vectors = new ArrayList<Vector>();
@@ -61,18 +61,11 @@ public class LearnConstraint {
                     int w = 0;
                     for(Vector vector : vectors){
                         //System.out.println("Entra 4 i : " + i + " j : " + j + " k : " + k + " w : " + w);
-                        /*Vector cp = new Vector();
-                        float dx = euler.x() - vector.x();
-                        dx = dx > Math.PI ? (float)(2*Math.PI + euler.x() - vector.x()) : dx;
-                        dx = dx > Math.PI ? (float)(-2*Math.PI + euler.x() - vector.x()) : dx;
-                        float dy = euler.y() - vector.y();
-                        dy = dy > Math.PI ? (float)(2*Math.PI + euler.y() - vector.y()) : dy;
-                        dy = dy > Math.PI ? (float)(-2*Math.PI + euler.y() - vector.y()) : dy;
-                        float dz = euler.z() - vector.z();
-                        dz = dz > Math.PI ? (float)(2*Math.PI + euler.z() - vector.z()) : dz;
-                        dz = dz > Math.PI ? (float)(-2*Math.PI + euler.z() - vector.z()) : dz;
-                        min = Math.min(min, (float) Math.sqrt(dx*dx + dy*dy + dz*dz));*/
-                        min = Math.min(min, Vector.distance(euler, vector));
+                        float dx = (float) Math.min((2 * Math.PI) - Math.abs(euler.x() - vector.x()), Math.abs(euler.x() - vector.x()));
+                        float dy = (float) Math.min((2 * Math.PI) - Math.abs(euler.y() - vector.y()), Math.abs(euler.y() - vector.y()));
+                        float dz = (float) Math.min((2 * Math.PI) - Math.abs(euler.z() - vector.z()), Math.abs(euler.z() - vector.z()));
+                        min = Math.min(min, (float) Math.sqrt(dx*dx + dy*dy + dz*dz));
+                        //min = Math.min(min, Vector.distance(euler, vector));
                         w++;
                     }
                     distance_field[i][j][k] = min;
@@ -81,13 +74,13 @@ public class LearnConstraint {
         }
 
         for(int i = 0; i < I; i++){
-            System.out.println("i = " + i);
+            //System.out.println("i = " + i);
             for(int j = 0; j < J; j++){
                 for(int k = 0; k < K; k++){
                     if(k % 3 == 0) System.out.println();
-                    System.out.print(" i : " + i + "j: " + j + " k: " + k + " ds : " + distance_field[i][j][k] + " --- ");
+                    //System.out.print(" i : " + i + "j: " + j + " k: " + k + " ds : " + distance_field[i][j][k] + " --- ");
                 }
-                System.out.println();
+                //System.out.println();
             }
         }
 

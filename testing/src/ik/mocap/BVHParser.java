@@ -328,14 +328,14 @@ public class BVHParser {
         _currentPose++;
     }
 
-    int dim = 24;
+    int dim = 20;
 
     public void drawConstraint(PGraphics pg){
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,0,255);
         for(Node node : _branch){
-            if(node == _root) continue;
+            //if(node == _root) continue;
             DistanceFieldConstraint constraint = (DistanceFieldConstraint) node.constraint();
             pg.pushMatrix();
             node.reference().applyWorldTransformation();
@@ -397,7 +397,11 @@ public class BVHParser {
             for(Vector vv : _joint.get(node)._feasibleRegion){
                 Vector v = node.rotation().inverseRotate(vv);
                 v.multiply(0.25f);
+                pg.stroke(0,255,0);
                 pg.line(0,0,0, v.x(), v.y(), v.z());
+                pg.stroke(0,0,255);
+                pg.line(0,0,0, -v.x(), -v.y(), -v.z());
+
             }
             pg.popMatrix();
         }
@@ -406,6 +410,7 @@ public class BVHParser {
 
     public void constraintJoints(){
         for(Node node : _branch){
+            //if(node == _root) continue;
             ArrayList<Quaternion> rots = new ArrayList<Quaternion>();
             int j = 0;
             for(Frame f : _poses.get(node)){
