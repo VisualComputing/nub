@@ -16,7 +16,7 @@ public class DistanceFieldConstraint extends Constraint {
     * */
 
     protected float[][][] _distance_field;
-    protected float epsilon = 0.2f;
+    protected float epsilon = 0.3f;
 
     public DistanceFieldConstraint(float[][][] distance_field) {
         this._distance_field = distance_field;
@@ -58,6 +58,10 @@ public class DistanceFieldConstraint extends Constraint {
         //Apply twice
         //Vector projection = project(di,dj,dk,euler);//project(di,dj,dk,euler));
         Vector projection = project(di,dj,dk,project(di,dj,dk,euler));
+        if(projection.x() < 0)projection.setX((float)(projection.x() + 2*Math.PI));
+        if(projection.y() < 0)projection.setY((float)(projection.y() + 2*Math.PI));
+        if(projection.z() < 0)projection.setZ((float)(projection.z() + 2*Math.PI));
+
         if(projection.x() > Math.PI)projection.setX((float)(projection.x() - 2*Math.PI));
         if(projection.y() > Math.PI)projection.setY((float)(projection.y() - 2*Math.PI));
         if(projection.z() > Math.PI)projection.setZ((float)(projection.z() - 2*Math.PI));
@@ -75,21 +79,22 @@ public class DistanceFieldConstraint extends Constraint {
         int J = _distance_field[0].length;
         int K = _distance_field[0][0].length;
 
-        System.out.println("----> p.x : " + p.x() + " p.y : " + p.y() + " p.z : " + p.z());
+        //System.out.println("----> p.x : " + p.x() + " p.y : " + p.y() + " p.z : " + p.z());
         int i = (int)(p.x()/(2*Math.PI) * (_distance_field.length - 0.5)) % I;
         int j = (int)(p.y()/(2*Math.PI) * (_distance_field[0].length - 0.5)) % J;
         int k = (int)(p.z()/(2*Math.PI) * (_distance_field[0][0].length - 0.5)) % K;
 
         Vector delta = new Vector();
         //Compute gradient
-        System.out.println("----> i : " + i + " j : " + j + " k : " + k);
-        System.out.println("----> I : " + I + " J : " + J + " K : " + K);
+        //System.out.println("----> i : " + i + " j : " + j + " k : " + k);
+        //System.out.println("----> I : " + I + " J : " + J + " K : " + K);
 
-        System.out.println("----> distance : " + _distance_field[i][j][k]);
+        //System.out.println("----> distance : " + _distance_field[i][j][k]);
 
         delta.setX((_distance_field[Math.min(i+1, I-1)][j][k] - _distance_field[Math.max(i-1,0)][j][k])/(2*di));
         delta.setY((_distance_field[i][Math.min(j+1, J-1)][k] - _distance_field[i][Math.max(j-1,0)][k])/(2*dj));
         delta.setZ((_distance_field[i][j][Math.min(k+1, K-1)] - _distance_field[i][j][Math.max(k-1,0)])/(2*dk));
+        /*
 
         System.out.println("----> xi : " + (_distance_field[Math.max(i-1,0)][j][k]));
         System.out.println("----> yi : " + (_distance_field[i][Math.max(j-1,0)][k]));
@@ -102,10 +107,10 @@ public class DistanceFieldConstraint extends Constraint {
         System.out.println("----> dx : " + (_distance_field[Math.min(i+1, I-1)][j][k] - _distance_field[Math.max(i-1,0)][j][k]));
         System.out.println("----> dy : " + (_distance_field[i][Math.min(j+1, J-1)][k] - _distance_field[i][Math.max(j-1,0)][k]));
         System.out.println("----> dz : " + (_distance_field[i][j][Math.min(k+1, K-1)] - _distance_field[i][j][Math.max(k-1,0)]));
-
+        */
         delta.normalize();
-        System.out.println("----> delta : " + delta);
-        System.out.println("Res : " + Vector.subtract(p, Vector.multiply(delta, _distance_field[i][j][k])));
+        //System.out.println("----> delta : " + delta);
+        //System.out.println("Res : " + Vector.subtract(p, Vector.multiply(delta, _distance_field[i][j][k])));
 
         return Vector.subtract(p, Vector.multiply(delta, _distance_field[i][j][k]));
     }
