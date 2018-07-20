@@ -33,7 +33,7 @@ public class ChainSolver extends FABRIKSolver {
   protected Frame _prevTarget;
 
   public ArrayList<? extends Frame> chain() {
-    return _chain;
+    return _original;
   }
 
   protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
@@ -63,11 +63,11 @@ public class ChainSolver extends FABRIKSolver {
   }
 
   public Frame head() {
-    return _chain.get(0);
+    return _original.get(0);
   }
 
   public Frame endEffector() {
-    return _chain.get(_chain.size() - 1);
+    return _original.get(_original.size() - 1);
   }
 
   public ChainSolver(ArrayList<? extends Frame> chain) {
@@ -77,7 +77,8 @@ public class ChainSolver extends FABRIKSolver {
   public ChainSolver(ArrayList<? extends Frame> chain, Frame target) {
     super();
     this._original = chain;
-    this._chain = _copy(chain);
+    //this._chain = _copy(chain);
+    this._chain = chain;
     _bestSolution = _copy(chain);
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
@@ -156,8 +157,9 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(_chain.size() - 1, target.get());
     _forwardReaching();
     //Stage 2: Backward Reaching
+    Vector o = _positions.get(0);
     _positions.set(0, initial);
-    float change = _backwardReaching();
+    float change = _backwardReaching(o);
     //Save best solution
     if (Vector.distance(target, end.position()) < Vector.distance(target, _bestSolution.get(_chain.size() - 1).position())) {
       _bestSolution = _copy(_chain);
@@ -209,8 +211,9 @@ public class ChainSolver extends FABRIKSolver {
 
   public ArrayList<Vector> backward() {
     //Stage 2: Backward Reaching
+    Vector o = _positions.get(0);
     _positions.set(0, initial);
-    float change = _backwardReaching();
+    float change = _backwardReaching(o);
     //Save best solution
     if (Vector.distance(target, end.position()) < Vector.distance(target, _bestSolution.get(_chain.size() - 1).position())) {
       _bestSolution = _copy(_chain);
@@ -228,18 +231,19 @@ public class ChainSolver extends FABRIKSolver {
     _forwardReaching(_chain);
   }
 
-  protected float _backwardReaching() {
-    return _backwardReaching(_chain);
+  protected float _backwardReaching(Vector o) {
+    return _backwardReaching(_chain, o);
   }
 
   @Override
   protected void _update() {
-    if(_improveSolution){
+    //if(_improveSolution){
       for(int i = 0; i < _original.size(); i++){
-          _original.get(i).setRotation(_bestSolution.get(i).rotation().get());
+          //_original.get(i).setRotation(_bestSolution.get(i).rotation().get());
+          _original.get(i).setRotation(_chain.get(i).rotation().get());
       }
       _improveSolution = false;
-    }
+    //}
   }
 
   @Override
@@ -263,7 +267,8 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
-    this._chain = _copy(_original);
+    //this._chain = _copy(_original);
+    this._chain = _original;
     this._bestSolution = _copy(_original);
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();

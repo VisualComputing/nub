@@ -51,6 +51,18 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, pos_i1.get());
         continue;
       }
+      if(opt< 2) {
+        Vector o_hat = chain.get(i + 1).position();
+        Vector tr = Vector.subtract(pos_i, pos_i1);
+        Vector n_tr = Vector.subtract(pos_i, o_hat);
+        Quaternion delta = new Quaternion(tr, n_tr);
+        delta = new Quaternion(delta.axis(), 0.3f * delta.angle());
+        Vector desired = delta.rotate(tr);
+        System.out.println("delta" + delta.axis() + " a : " + (delta.angle() * 180 / Math.PI));
+        //o_hat = _positions.get(i+1);
+        _positions.set(i, Vector.add(pos_i1, desired));
+      }
+
       /*Check constraints (for Ball & Socket) it is not applied in First iteration
        * Look at paper FABRIK: A fast, iterative _solver for the Inverse Kinematics problem For more information*/
       pos_i = _constrainForwardReaching(chain, i);
@@ -65,10 +77,11 @@ public abstract class FABRIKSolver extends Solver {
     if(pg!= null)draw_pos(_positions, pg.color(0,255,0), 3);
   }
 
-  protected float _backwardReaching(ArrayList<? extends Frame> chain) {
+  protected float _backwardReaching(ArrayList<? extends Frame> chain, Vector o) {
     float change = 0;
     Quaternion orientation;
     orientation = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
+    Vector o_hat = o;
     //orientation.compose(chain.get(0).rotation());
     //if(opt == 2)
     //  if(chain.size() > 1) _positions.set(1, _constrainBackwardReaching(chain, 0));
@@ -79,6 +92,25 @@ public abstract class FABRIKSolver extends Solver {
       }
       //Find delta rotation
       //_positions.set(i + 1, _constrainBackwardReaching(chain, i));
+      //if(chain.get(i).constraint() != null){
+      if(opt < 2) {
+        System.out.println("On joint i :" + i);
+        System.out.println("poss i" + o_hat);
+        System.out.println("orig" + _positions.get(i));
+        Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
+        Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
+        Quaternion delta = new Quaternion(tr, n_tr);
+        delta = new Quaternion(delta.axis(), 0.3f * delta.angle());
+        Vector desired = delta.rotate(tr);
+        System.out.println("delta" + delta.axis() + " a : " + (delta.angle() * 180 / Math.PI));
+        o_hat = _positions.get(i + 1);
+        _positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
+        System.out.println("poss" + o_hat);
+
+        System.out.println("poss" + _positions.get(i + 1));
+        //}
+      }
+
       Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.subtract(_positions.get(i + 1), _positions.get(i)));
       Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
       //Apply delta rotation
@@ -137,7 +169,37 @@ public abstract class FABRIKSolver extends Solver {
           target.add(p);
           return target;
       } else if(parent.constraint() instanceof PlanarPolygon){
-        if(opt > 2) return o.get();
+        if(true) return o.get();
+
+        /* Pensando en proy a linea pero falla
+
+        Vector prev = chain.get(i).transformOf(Vector.subtract(chain.get(i-1).position(), chain.get(i).position()));
+        Vector translation = chain.get(i+1).translation().get();
+        Vector new_translation = Vector.subtract(p,o);
+        new_translation = chain.get(i).transformOf(new_translation);
+
+        Quaternion delta = new Quaternion(prev, Vector.multiply(new_translation,-1));
+
+        translation = delta.rotate(translation);
+
+        Quaternion desired = new Quaternion(translation, new_translation);
+
+        PlanarPolygon constraint = (PlanarPolygon) parent.constraint();
+        Quaternion constrained = constraint.constrainRotation(desired, chain.get(i));
+
+        Vector target = constrained.rotate(translation);
+        target = chain.get(i).inverseTransformOf(target);
+
+        target.multiply(-1);
+        target.add(p);
+        return target;
+        */
+
+
+
+
+
+
         Vector translation = chain.get(i+1).translation().get();
 
         Vector new_translation = Vector.subtract(p,o);
@@ -145,14 +207,7 @@ public abstract class FABRIKSolver extends Solver {
 
         Quaternion delta = new Quaternion(translation, new_translation);
         PlanarPolygon constraint = (PlanarPolygon) parent.constraint();
-
-        Quaternion desired = delta;
-        desired = Quaternion.compose(chain.get(i).rotation(), desired);
-        //twist to frame
-        Vector twist = constraint.restRotation().rotate(new Vector(0, 0, 1));
-        Vector new_pos = Quaternion.multiply(desired, twist);
-        //Quaternion constrained = Quaternion.compose(chain.get(i+1).rotation().get(),desired);
-        Quaternion constrained = new Quaternion(twist, Quaternion.multiply(chain.get(i).rotation().inverse(), constraint.apply(new_pos)));
+        Quaternion constrained = constraint.constrainRotation(delta, chain.get(i));
 
 
         Vector target = constrained.rotate(translation);
@@ -164,7 +219,25 @@ public abstract class FABRIKSolver extends Solver {
 
         target.add(p);
         return target;
+      } else if(parent.constraint() instanceof Hinge) {
+        if(true) return o.get();
+        Vector translation = chain.get(i + 1).translation().get();
+        Vector new_translation = Vector.subtract(p, o);
+        new_translation = chain.get(i).transformOf(new_translation);
 
+        Quaternion delta = new Quaternion(translation, new_translation);
+        Hinge constraint = (Hinge) parent.constraint();
+
+        Quaternion constrained = constraint.constrainRotation(delta, chain.get(i));
+        Vector target = constrained.rotate(translation);
+
+        target.normalize();
+        target.multiply(new_translation.magnitude());
+        target.multiply(-1);
+        target = chain.get(i).inverseTransformOf(target);
+
+        target.add(p);
+        return target;
       }
     }
 
@@ -190,24 +263,7 @@ public abstract class FABRIKSolver extends Solver {
       target.add(o);
       Vector diff = Vector.subtract(p, target);
       return Vector.add(o, diff);
-    } else if (parent.constraint() instanceof PlanarPolygon && opt == 0) {
-        if (q == null) return o.get();
-        //Find the orientation of restRotation
-        PlanarPolygon constraint = (PlanarPolygon) parent.constraint();
-        Quaternion reference = Quaternion.compose(_orientations.get(i), parent.rotation().inverse());
-        Quaternion restOrientation = Quaternion.compose(reference, constraint.restRotation());
-
-        //Align axis
-        Vector translation = _orientations.get(i).rotate(j.translation().get());
-        Vector newTranslation = Vector.subtract(q, p);
-        restOrientation = Quaternion.compose(new Quaternion(translation, newTranslation), restOrientation);
-
-        //Find constraint
-        Vector target = constraint.apply(Vector.subtract(p, o), restOrientation);
-        target.add(o);
-        Vector diff = Vector.subtract(p, target);
-        return Vector.add(o, diff);
-    } else if(j.constraint() instanceof PlanarPolygon && opt >= 1){
+    } else if(j.constraint() instanceof PlanarPolygon){
       if(q == null) return o.get();
       Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
       Vector y = chain.get(i+1).transformOf(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
@@ -222,14 +278,17 @@ public abstract class FABRIKSolver extends Solver {
       //System.out.println("ON JOINT " + i);
 
       //System.out.println("DEsired : " + desired.axis() + " angle: " + desired.angle());
-
       PlanarPolygon constraint = (PlanarPolygon) chain.get(i+1).constraint();
-      desired = Quaternion.compose(chain.get(i+1).rotation(), desired);
+      Quaternion constrained = constraint.constrainRotation(desired, chain.get(i+1));
+
+
+      //PlanarPolygon constraint = (PlanarPolygon) chain.get(i+1).constraint();
+      //desired = Quaternion.compose(chain.get(i+1).rotation(), desired);
       //twist to frame
-      Vector twist = constraint.restRotation().rotate(new Vector(0, 0, 1));
-      Vector new_pos = Quaternion.multiply(desired, twist);
+      //Vector twist = constraint.restRotation().rotate(new Vector(0, 0, 1));
+      //Vector new_pos = Quaternion.multiply(desired, twist);
       //Quaternion constrained = Quaternion.compose(chain.get(i+1).rotation().get(),desired);
-      Quaternion constrained = new Quaternion(twist, Quaternion.multiply(chain.get(i+1).rotation().inverse(), constraint.apply(new_pos)));
+      //Quaternion constrained = new Quaternion(twist, Quaternion.multiply(chain.get(i+1).rotation().inverse(), constraint.apply(new_pos)));
       //System.out.println("Cons : " + constrained.axis() + " angle: " + constrained.angle());
 
       Vector target = x.get();
@@ -240,13 +299,13 @@ public abstract class FABRIKSolver extends Solver {
       target = chain.get(i+1).inverseTransformOf(target);
       target.add(p);
       return target;
-    } else if (parent.constraint() instanceof Hinge) {
-      if (q == null) return o.get();
-      Hinge constraint = (Hinge) parent.constraint();
+    } else if (j.constraint() instanceof Hinge) {
+      /*if (q == null || opt == 1) return o.get();
+      Hinge constraint = (Hinge) j.constraint();
       Vector axis = constraint.restRotation().rotate(constraint.axis());
       //Get in terms of j_(i+1)
       axis = j.localTransformOf(axis);
-      Vector x = chain.get(i+1).transformOf(Vector.subtract(p,o));
+      Vector x = chain.get(i+1).transformOf(Vector.subtract(o,p));
       Vector y = chain.get(i+2).translation();
       Vector z = chain.get(i+1).transformOf(Vector.subtract(q,p));
       Quaternion delta = new Quaternion(y,z);
@@ -255,17 +314,37 @@ public abstract class FABRIKSolver extends Solver {
       Vector target = Vector.projectVectorOnPlane(x, axis);
       target = chain.get(i+1).inverseTransformOf(target);
       target.add(p);
+      return target;*/
+
+      Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).transformOf(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector z = Vector.subtract(q, p);
+      z = chain.get(i+1).transformOf(z);
+      Vector w = Vector.subtract(o, p);
+      w = chain.get(i+1).transformOf(w);
+
+      Quaternion delta = new Quaternion(z,y);
+
+      w = delta.rotate(w);
+      Hinge constraint = (Hinge) chain.get(i+1).constraint();
+
+      //project w to plane
+      w = Vector.projectVectorOnPlane(w, constraint.axis());
+
+      Quaternion desired = new Quaternion(w,x);
+
+      Quaternion constrained = constraint.constrainRotation(desired, chain.get(i+1));
+
+      Vector target = x.get();
+      target.normalize();
+      target.multiply(w.magnitude());
+      target = constrained.inverseRotate(target);
+      target = delta.inverseRotate(target);
+      target = chain.get(i+1).inverseTransformOf(target);
+      target.add(p);
+      return target;
 
 
-
-            /*if (parent.is2D()) {
-                    //Get new translation in Local Coordinate System
-                Hinge constraint = (Hinge) parent.constraint();
-                Vector newTranslation = Vector.subtract(p, o);
-                newTranslation = orientations.get(i).inverse().rotate(newTranslation);
-                Rot desired = new Rot(j.translation(), newTranslation);
-                constraint.constrainRotation(desired, parent);
-            }*/
     } else if (j.constraint() instanceof DistanceFieldConstraint) {
       if(q == null) return o.get();
       Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
