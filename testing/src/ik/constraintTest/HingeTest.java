@@ -30,6 +30,10 @@ import java.util.Map;
 public class HingeTest extends PApplet {
     Scene scene;
     Node eye;
+    int num_joints = 8;
+    public static float constraint_factor_x = 170;
+    public static float constraint_factor_y = 180;
+
     //String path = "/testing/data/bvh/walk-03-sneak-yokoyama.bvh";
     CCDSolver ccd_solver;
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
@@ -56,20 +60,38 @@ public class HingeTest extends PApplet {
         targets.add(new Target(scene));
         targets.add(new Target(scene));
         targets.add(new Target(scene));
+        targets.add(new Target(scene));
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
+
+        //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
+        ArrayList<Node> branchHingeConstraint = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+        ArrayList<Node> branchHingeConstraintCCD = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+
+        for (int i = 0; i < branchHingeConstraint.size() - 1; i++) {
+            Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x));
+            constraint.setRestRotation(branchHingeConstraint.get(i).rotation().get());
+            constraint.setAxis(Vector.projectVectorOnPlane(new Vector(0, 1, 0), branchHingeConstraint.get(i + 1).translation()));
+            if(Vector.squaredNorm(constraint.axis()) != 0) {
+                branchHingeConstraint.get(i).setConstraint(constraint);
+                branchHingeConstraintCCD.get(i).setConstraint(constraint);
+            }
+        }
 
         ArrayList<Node> structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
         chain_solvers.add(new ChainSolver(structure1));
 
         ArrayList<Node> structure2 = generateStructure(boneLength,new Vector(0,0,0));
         ccd_solver = new CCDSolver(structure2);
+        //ccd_solver = new CCDSolver(branchHingeConstraintCCD);
 
         ArrayList<Node> structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
         chain_solvers.add(new ChainSolver(structure3));
 
-        //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
+        chain_solvers.add(new ChainSolver(branchHingeConstraint));
+
+
         int i = 0;
         for(ChainSolver s : chain_solvers){
             s.pg = scene.pApplet().getGraphics();
@@ -85,14 +107,16 @@ public class HingeTest extends PApplet {
 
         ccd_solver.timesPerFrame = 0.5f;
         ccd_solver.error = 0.5f;
+        ccd_solver.maxIter = 30;
 
         ccd_solver.setTarget(targets.get(targets.size()-1));
+        //ccd_solver.setTarget(targets.get(targets.size()-2));
         //scene.addIKTarget(structure3.get(structure3.size()-1), targets.get(0));
         targets.get(targets.size()-1).setReference(targets.get(0));
         targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
+        //targets.get(targets.size()-1).setPosition(branchHingeConstraintCCD.get(branchHingeConstraintCCD.size()-1).position());
         chain_solvers.get(1).opt = 1;
         chain_solvers.get(0).opt = 1;
-
     }
 
     public void draw() {
@@ -122,12 +146,6 @@ public class HingeTest extends PApplet {
     }
 
     public ArrayList<Node> generateStructure(float boneLength, Vector o){
-        ArrayList<Vector> vertices = new ArrayList<Vector>();
-        vertices.add(new Vector(-10, -10));
-        vertices.add(new Vector(0, -10));
-        vertices.add(new Vector(0, 0));
-        vertices.add(new Vector(-10, 0));
-
         int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
         Joint prev = new Joint(scene, color);
         Joint current = prev;
@@ -164,6 +182,34 @@ public class HingeTest extends PApplet {
 
         return scene.branch(root);
     }
+
+    public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation) {
+        Joint prevFrame = null;
+        Joint chainRoot = null;
+        int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
+        for (int i = 0; i < num_joints; i++) {
+            Joint iFrame;
+            iFrame = new Joint(scene, color);
+            if (i == 0)
+                chainRoot = iFrame;
+            if (prevFrame != null) iFrame.setReference(prevFrame);
+            float x = i % 2 == 0 ? 1 : 0;
+            float z = (i + 1) % 2 == 0 ? 1 : 0;
+            float y = 0;
+            Vector translate = new Vector(x,y,z);
+            translate.normalize();
+            translate.multiply(boneLength);
+            iFrame.setTranslation(translate);
+            iFrame.setPrecision(Node.Precision.FIXED);
+            prevFrame = iFrame;
+        }
+        //Consider Standard Form: Parent Z Axis is Pointing at its Child
+        chainRoot.setTranslation(translation);
+        //chainRoot.setupHierarchy();
+        chainRoot.setRoot(true);
+        return scene.branch(chainRoot);
+    }
+
 
 
     boolean read = false;

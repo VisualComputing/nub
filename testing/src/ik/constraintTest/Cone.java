@@ -34,6 +34,7 @@ public class Cone extends PApplet{
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
 
     ArrayList<Target> targets = new ArrayList<Target>();
+    int num_joints = 12;
 
     public void settings() {
         size(700, 700, P3D);
@@ -56,16 +57,44 @@ public class Cone extends PApplet{
         targets.add(new Target(scene));
         targets.add(new Target(scene));
 
+        ArrayList<Vector> vertices = new ArrayList<Vector>();
+        float v = 10;
+        vertices.add(new Vector(-v, -v));
+        vertices.add(new Vector(v, -v));
+        vertices.add(new Vector(v, v));
+        vertices.add(new Vector(-v, v));
+
+        ArrayList<Node> structure1;
+        ArrayList<Node> structure2;
+        ArrayList<Node> structure3;
+
+
+        structure1 = generateChain(num_joints, boneLength, new Vector(-scene.radius()/2.f, 0, 0));
+        structure2 = generateChain(num_joints, boneLength, new Vector(0, 0, 0));
+        structure3 = generateChain(num_joints, boneLength, new Vector(scene.radius()/2.f, 0, 0));
+
+        for (int i = 1; i < structure1.size() - 1; i++) {
+            PlanarPolygon constraint = new PlanarPolygon(vertices);
+            constraint.setHeight(boneLength / 2.f);
+            Vector twist = structure1.get(i + 1).translation().get();
+            constraint.setRestRotation(structure1.get(i).rotation().get(), new Vector(0, 1, 0), twist);
+            structure1.get(i).setConstraint(constraint);
+            structure2.get(i).setConstraint(constraint);
+            structure3.get(i).setConstraint(constraint);
+        }
+
+
+
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        ArrayList<Node> structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
+        //structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
         chain_solvers.add(new ChainSolver(structure1));
 
-        ArrayList<Node> structure2 = generateStructure(boneLength,new Vector(0,0,0));
+        //structure2 = generateStructure(boneLength,new Vector(0,0,0));
         ccd_solver = new CCDSolver(structure2);
 
-        ArrayList<Node> structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
+        //structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
         chain_solvers.add(new ChainSolver(structure3));
 
         //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
@@ -89,7 +118,7 @@ public class Cone extends PApplet{
         //scene.addIKTarget(structure3.get(structure3.size()-1), targets.get(0));
         targets.get(targets.size()-1).setReference(targets.get(0));
         targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
-        chain_solvers.get(1).opt = 1;
+        chain_solvers.get(1).opt = 2;
         chain_solvers.get(0).opt = 1;
 
     }
@@ -164,6 +193,32 @@ public class Cone extends PApplet{
         return scene.branch(root);
     }
 
+    public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation) {
+        Joint prevFrame = null;
+        Joint chainRoot = null;
+        int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
+        for (int i = 0; i < num_joints; i++) {
+            Joint iFrame;
+            iFrame = new Joint(scene, color);
+            if (i == 0)
+                chainRoot = iFrame;
+            if (prevFrame != null) iFrame.setReference(prevFrame);
+            float x = 0;
+            float z = 1;
+            float y = 0;
+            Vector translate = new Vector(x,y,z);
+            translate.normalize();
+            translate.multiply(boneLength);
+            iFrame.setTranslation(translate);
+            iFrame.setPrecision(Node.Precision.FIXED);
+            prevFrame = iFrame;
+        }
+        //Consider Standard Form: Parent Z Axis is Pointing at its Child
+        chainRoot.setTranslation(translation);
+        //chainRoot.setupHierarchy();
+        chainRoot.setRoot(true);
+        return scene.branch(chainRoot);
+    }
 
     boolean read = false;
     boolean solve = false;
