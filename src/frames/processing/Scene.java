@@ -3068,6 +3068,11 @@ public class Scene extends Graph implements PConstants {
       if (node.children().size() == 1) {
         //reference.rotate(constraint.restRotation());
         Vector axis = constraint.restRotation().rotate(constraint.axis().get());
+        if(Vector.squaredNorm(axis) == 0){
+          pGraphics.popStyle();
+          pGraphics.popMatrix();
+          return;
+        }
         Vector rest = Vector.projectVectorOnPlane(node.children().get(0).translation().get(), axis);
         Quaternion rotation = new Quaternion(new Vector(0, 0, 1), axis);
         //Align Z-Axis with Axis
