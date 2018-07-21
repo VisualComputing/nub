@@ -10,8 +10,8 @@
 
 package frames.processing;
 
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
+import frames.core.Graph;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -19,29 +19,30 @@ import processing.core.PVector;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
- * A shape is a {@link Node} specialization that can be set from a retained-mode rendering
- * Processing {@code PShape} or from an immediate-mode rendering Processing procedure. Either
- * case the shape is split in two a front and a back shape. The front shape will be used for
- * rendering and the back shape for picking with exact precision by default, see
- * {@link #setPrecision(Precision)}. When picking a shape it will be highlighted according
- * to a highlighting policy, see {@link #setHighlighting(Highlighting)}.
+ * A shape is a {@link Frame} specialization that should always be attached to a {@code scene}
+ * (see {@link Frame#isAttached(Graph)}) and that can be set from a retained-mode rendering Processing
+ * {@code PShape} or from an immediate-mode rendering Processing procedure. Either case the shape is
+ * split in two a front and a back shape. The front shape will be used for rendering and the back
+ * shape for picking with exact precision by default, see {@link #setPrecision(Precision)}. When
+ * picking a shape it will be highlighted according to a highlighting policy, see
+ * {@link #setHighlighting(Highlighting)}.
  * <p>
  * Picking in an exact manner is costly. If performance is a concern, use a
  * {@link #precision()} different than {@link Precision#EXACT} or a simpler representation
  * for the back shape.
  * <h2>Retained mode</h2>
- * To set a retained mode shape call {@link #set(PShape)} which will set both the front and
- * the back shape to be the same pshape. Call {@link #setFront(PShape)} and
- * {@link #setFront(PShape)} to set different pshapes for rendering and picking, respectively.
+ * To set a retained-mode shape call {@link #setGraphics(PShape)} which will set both the front and
+ * the back shape to be the same pshape. Call {@link #setFrontGraphics(PShape)} and
+ * {@link #setFrontGraphics(PShape)} to set different graphics for rendering and picking, respectively.
  * <h2>Immediate mode</h2>
- * To set an immediate mode shape override {@link #set(PGraphics)} which will set both the
+ * To set an immediate-mode shape override {@link #setGraphics(PGraphics)} which will set both the
  * front and the back shape to be the same graphics procedure. Override
- * {@link #setFront(PGraphics)} and {@link #setFront(PGraphics)} to set different
+ * {@link #setFrontGraphics(PGraphics)} and {@link #setFrontGraphics(PGraphics)} to set different
  * graphics procedures for rendering and picking, respectively.
  * <h2>Picking</h2>
  * Picking a shape is done according to a precision which can either be:
  * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
- * to the {@link Node} documentation for both, {@link Precision#FIXED} and
+ * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
  * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
  * of the pointer device over the projected pixels of the back shape. To set a different
  * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
@@ -51,10 +52,10 @@ import processing.opengl.PGraphicsOpenGL;
  *
  * <ol>
  * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
- * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFront(PShape)}
- * and {@link #setFront(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
- * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBack(PShape)} and
- * {@link #setBack(PGraphics)}) is displayed instead of the front-shape.</li>
+ * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFrontGraphics(PShape)}
+ * and {@link #setFrontGraphics(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
+ * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBackGraphics(PShape)} and
+ * {@link #setBackGraphics(PGraphics)}) is displayed instead of the front-shape.</li>
  * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
  * displayed. The back shape is made translucent</li>
  * </ol>
@@ -62,7 +63,7 @@ import processing.opengl.PGraphicsOpenGL;
  * Default is {@link Highlighting#FRONT}. Set the policy with
  * {@link #setHighlighting(Highlighting)}).
  */
-public class Shape extends Node {
+public class Shape extends Frame {
   PShape _frontShape, _backShape;
 
   public enum Highlighting {
@@ -72,7 +73,7 @@ public class Shape extends Node {
   Highlighting _highlight;
 
   /**
-   * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
+   * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    */
   public Shape(Scene scene) {
     super(scene);
@@ -83,10 +84,12 @@ public class Shape extends Node {
 
   /**
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
-   * Sets {@code reference} as its {@link #reference()} node.
+   * Sets {@code reference} as its {@link #reference()} frame.
    */
-  public Shape(Node reference) {
+  public Shape(Frame reference) {
     super(reference);
+    if (reference.isDetached())
+      throw new RuntimeException("Shape reference should be attached to an scene");
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
     if (graph().frontBuffer() instanceof PGraphicsOpenGL)
@@ -95,28 +98,28 @@ public class Shape extends Node {
   }
 
   /**
-   * Constructs a scene shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
+   * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    * Sets {@code pShape} as its retained mode pshape.
    */
   public Shape(Scene scene, PShape pShape) {
     this(scene);
-    set(pShape);
+    setGraphics(pShape);
   }
 
   /**
    * Constructs a shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
-   * Sets {@code reference} as its {@link #reference() node and {@code pShape} as its retained mode
+   * Sets {@code reference} as its {@link #reference() frame and {@code pShape} as its retained mode
    * pshape.
    */
-  public Shape(Node reference, PShape pShape) {
+  public Shape(Frame reference, PShape pShape) {
     this(reference);
-    set(pShape);
+    setGraphics(pShape);
   }
 
-  protected Shape(Scene otherGraph, Shape otherShape) {
-    super(otherGraph, otherShape);
-    this._frontShape = otherShape._frontShape;
-    this._backShape = otherShape._backShape;
+  protected Shape(Scene scene, Shape shape) {
+    super(scene, shape);
+    this._frontShape = shape._frontShape;
+    this._backShape = shape._backShape;
   }
 
   @Override
@@ -134,10 +137,10 @@ public class Shape extends Node {
    *
    * <ol>
    * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
-   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFront(PShape)}
-   * and {@link #setFront(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
-   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBack(PShape)} and
-   * {@link #setBack(PGraphics)}) is displayed instead of the front-shape.</li>
+   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFrontGraphics(PShape)}
+   * and {@link #setFrontGraphics(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
+   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBackGraphics(PShape)} and
+   * {@link #setBackGraphics(PGraphics)}) is displayed instead of the front-shape.</li>
    * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
    * displayed. The back shape is made translucent</li>
    * </ol>
@@ -161,63 +164,58 @@ public class Shape extends Node {
 
   @Override
   public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      if (graph()._bb == null) {
-        System.out.println("Warning: EXACT picking precision is not enabled by your PGraphics.");
-        return;
-      }
-    this._Precision = precision;
-    // enables or disables the grabbing buffer
+    this._precision = precision;
+    // optimizes the back-buffer
     if (precision() == Precision.EXACT) {
       graph()._bbEnabled = true;
       return;
     }
-    for (Node node : graph().nodes())
-      if (node instanceof Shape)
-        if (node.precision() == Precision.EXACT) {
+    for (Frame frame : graph().frames())
+      if (frame instanceof Shape)
+        if (frame.precision() == Precision.EXACT) {
           graph()._bbEnabled = true;
           return;
         }
     graph()._bbEnabled = false;
   }
 
+  @Override
+  public void visit() {
+    draw(graph()._targetPGraphics);
+  }
+
   /**
-   * Same as {@code draw(scene.frontBuffer())}.
-   * <p>
-   * Call it only instead of {@link Scene#traverse()}.
+   * Same as {@code draw(graph().frontBuffer())}. Use it instead of {@link Scene#traverse()}.
    *
-   * @see frames.processing.Scene#traverse(PGraphics)
+   * @see Scene#traverse()
+   * @see #draw(PGraphics)
    */
   public void draw() {
     draw(graph().frontBuffer());
   }
 
   /**
-   * Draws the shape into {@code pGraphics} using the current point of view (see
-   * {@link frames.processing.Scene#applyTransformation(PGraphics, Frame)}).
-   * <p>
-   * This method is internally called by {@link Scene#traverse(PGraphics)} to draw
-   * the node into the {@link Scene#backBuffer()} and by {@link #draw()} to draw
-   * the node into the scene main {@link Scene#frontBuffer()}.
-   * <p>
-   * Call it only instead of {@link Scene#traverse(PGraphics)}.
+   * Draws the shape into the {@code pGraphics}. Use it instead of {@link Scene#traverse(PGraphics)} (which
+   * in turn calls it) such as:
+   *
+   * <pre>
+   * {@code
+   * void draw() {
+   *   pGraphics.pushMatrix();
+   *   // apply the local shape transformation before drawing
+   *   Scene.applyTransformation(pGraphics, shape);
+   *   // or apply the global shape transformation
+   *   //Scene.applyWorldTransformation(pGraphics, shape);
+   *   shape.draw(pGraphics);
+   *   pGraphics.popMatrix();
+   * }
+   * }
+   * </pre>
+   *
+   * @see Scene#traverse(PGraphics)
+   * @see #draw()
    */
   public void draw(PGraphics pGraphics) {
-    pGraphics.pushMatrix();
-    Scene.applyWorldTransformation(pGraphics, this);
-    _visit(pGraphics);
-    pGraphics.popMatrix();
-  }
-
-  @Override
-  public void visit() {
-    _visit(graph()._targetPGraphics);
-  }
-
-  /**
-   * Internal use.
-   */
-  protected void _visit(PGraphics pGraphics) {
     if (pGraphics != graph().backBuffer()) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
@@ -225,43 +223,43 @@ public class Shape extends Node {
             if(_frontShape != null)
                 pg.shape(_frontShape);
             set(pg);
-            setFront(pg);
+            setFrontGraphics(pg);
             //*/
       ///*
       //TODO needs more thinking
       switch (highlighting()) {
         case FRONT:
-          if (grabsInput())
+          if (isTracked())
             pGraphics.scale(1.15f);
         case NONE:
           if (_frontShape != null)
             pGraphics.shape(_frontShape);
           else
-            set(pGraphics);
+            setGraphics(pGraphics);
           break;
         case FRONT_BACK:
           if (_frontShape != null)
             pGraphics.shape(_frontShape);
           else
-            setFront(pGraphics);
-          if (grabsInput()) {
+            setFrontGraphics(pGraphics);
+          if (isTracked()) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
-              setBack(pGraphics);
+              setBackGraphics(pGraphics);
           }
           break;
         case BACK:
-          if (grabsInput()) {
+          if (isTracked()) {
             if (_backShape != null)
               pGraphics.shape(_backShape);
             else
-              setBack(pGraphics);
+              setBackGraphics(pGraphics);
           } else {
             if (_frontShape != null)
               pGraphics.shape(_frontShape);
             else
-              setFront(pGraphics);
+              setFrontGraphics(pGraphics);
           }
           break;
       }
@@ -288,7 +286,7 @@ public class Shape extends Node {
                 if (_backShape != null)
                     pg.shape(_backShape);
                 set(pg);
-                setBack(pg);
+                setBackGraphics(pg);
                 //*/
         ///*
         if (_frontShape != null)
@@ -296,8 +294,8 @@ public class Shape extends Node {
         if (_backShape != null)
           pGraphics.shape(_backShape);
         else {
-          set(pGraphics);
-          setBack(pGraphics);
+          setGraphics(pGraphics);
+          setBackGraphics(pGraphics);
         }
         //*/
         pGraphics.popStyle();
@@ -311,90 +309,64 @@ public class Shape extends Node {
    * <p>
    * Sets both the front and the back shape to the same graphics procedure.
    *
-   * @see #setFront(PGraphics)
-   * @see #setBack(PGraphics)
-   * @see #set(PShape)
+   * @see #setFrontGraphics(PGraphics)
+   * @see #setBackGraphics(PGraphics)
+   * @see #setGraphics(PShape)
    */
-  protected void set(PGraphics pGraphics) {
+  protected void setGraphics(PGraphics pGraphics) {
   }
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
-   * front shape. Use it in conjunction with @see #setBack(PGraphics).
+   * front shape. Use it in conjunction with @see #setBackGraphics(PGraphics).
    *
-   * @see #set(PGraphics)
-   * @see #set(PShape)
+   * @see #setGraphics(PGraphics)
+   * @see #setGraphics(PShape)
    */
-  protected void setFront(PGraphics pGraphics) {
+  protected void setFrontGraphics(PGraphics pGraphics) {
   }
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
-   * back shape. Use it in conjunction with @see #setFront(PGraphics).
+   * back shape. Use it in conjunction with @see #setFrontGraphics(PGraphics).
    *
-   * @see #set(PGraphics)
-   * @see #set(PShape)
+   * @see #setGraphics(PGraphics)
+   * @see #setGraphics(PShape)
    */
-  protected void setBack(PGraphics pGraphics) {
+  protected void setBackGraphics(PGraphics pGraphics) {
   }
 
   /**
    * Sets the retained mode pshape for both, the front and the back shapes.
    *
-   * @see #setFront(PShape)
-   * @see #setBack(PShape)
-   * @see #set(PGraphics)
+   * @see #setFrontGraphics(PShape)
+   * @see #setBackGraphics(PShape)
+   * @see #setGraphics(PGraphics)
    */
-  public void set(PShape shape) {
-    setFront(shape);
-    setBack(shape);
+  public void setGraphics(PShape shape) {
+    setFrontGraphics(shape);
+    setBackGraphics(shape);
   }
 
   /**
    * Sets the retained mode pshape for the front shape. Use it in conjunction
-   * with @see #setBack(PShape)}.
+   * with @see #setBackGraphics(PShape)}.
    *
-   * @see #set(PShape)
-   * @see #set(PGraphics)
+   * @see #setGraphics(PShape)
+   * @see #setGraphics(PGraphics)
    */
-  public void setFront(PShape shape) {
+  public void setFrontGraphics(PShape shape) {
     _frontShape = shape;
   }
 
   /**
    * Sets the retained mode pshape for the back shape. Use it in conjunction
-   * with @see #setFront(PShape)}.
+   * with @see #setFrontGraphics(PShape)}.
    *
-   * @see #set(PShape)
-   * @see #set(PGraphics)
+   * @see #setGraphics(PShape)
+   * @see #setGraphics(PGraphics)
    */
-  public void setBack(PShape shape) {
+  public void setBackGraphics(PShape shape) {
     _backShape = shape;
-  }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
-   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
-   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
-   * otherwise.
-   * <p>
-   * This method is only meaningful when this shape is not an eye.
-   *
-   * @see #setPrecision(Precision)
-   */
-  @Override
-  public final boolean track(float x, float y) {
-    if (this == graph().eye()) {
-      return false;
-    }
-    if (precision() != Precision.EXACT)
-      return super.track(x, y);
-    int index = (int) y * graph().width() + (int) x;
-    if (graph().backBuffer().pixels != null)
-      if ((0 <= index) && (index < graph().backBuffer().pixels.length))
-        return graph().backBuffer().pixels[index] == _id();
-    return false;
   }
 }

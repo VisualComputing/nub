@@ -10,7 +10,6 @@
 
 package frames.core;
 
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
@@ -28,21 +27,33 @@ import java.util.ListIterator;
  * when the user {@link #start()}, the interpolator regularly updates
  * the {@link #frame()} position, orientation and magnitude along the path.
  * <p>
- * Here is a typical utilization example:
+ * Here is a typical usage example:
+ * <pre>
+ * {@code
+ * void init() {
+ *   Graph graph = new Graph(1200, 800);
+ *   Interpolator interpolator = new Interpolator(graph);
+ *   for (int i = 0; i < 10; i++)
+ *     interpolator.addKeyFrame(Frame.random(graph));
+ *   interpolator.start();
+ * }
+ * }
+ * </pre>
+ * which will create a random (see {@link Frame#random(Graph)}) interpolator path
+ * containing 10 key-frames (see {@link #addKeyFrame(Frame)}). The interpolation is
+ * also started (see {@link #start()}).
  * <p>
- * {@code Interpolator interpolator = new Interpolator(graph);}<br>
- * {@code interpolator.addKeyFrame(new Frame( new Vector(1,0,0), new Quaternion()));}<br>
- * {@code interpolator.addKeyFrame(new Frame( new Vector(2,1,0), new Quaternion()));}<br>
- * {@code // ...and so on for all the key frames.}<br>
- * {@code interpolator.start();}<br>
- * <p>
- * {@code //mainDrawingLoop() should look like:}<br>
- * {@code graph.pushModelView();}<br>
- * {@code graph.applyTransformation(interpolator.frame());}<br>
- * {@code // Draw your object here. Its position, orientation and magnitude are interpolated.}
- * <br>
- * {@code graph.popModelView();}<br>
- * <p>
+ * The graph main drawing loop should look like:
+ * <pre>
+ * {@code
+ * void mainLoop() {
+ *   graph.pushModelView();
+ *   graph.applyTransformation(interpolator.frame());
+ *   // draw your object here. Its position, orientation and magnitude are interpolated.
+ *   graph.popModelView();
+ * }
+ * }
+ * </pre>
  * The key frames are defined by a frame and a time, expressed in seconds. The time has to
  * be monotonously increasing over key frames. When {@link #speed()} equals
  * 1 (default value), these times correspond to actual user's seconds during
@@ -64,7 +75,7 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  *
- * <b>Attention:</b> If a {@link frames.primitives.constraint.Constraint} is attached to
+ * <b>Attention:</b> If a {@link frames.core.constraint.Constraint} is attached to
  * the {@link #frame()} (see {@link Frame#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.
@@ -73,12 +84,12 @@ public class Interpolator {
   /**
    * Returns whether or not this interpolator matches other.
    *
-   * @param other Interpolator
+   * @param interpolator other interpolator
    */
-  public boolean matches(Interpolator other) {
+  public boolean matches(Interpolator interpolator) {
     boolean result = true;
     for (int i = 0; i < _list.size(); i++) {
-      if (!_list.get(i).matches(other._list.get(i)))
+      if (!_list.get(i).matches(interpolator._list.get(i)))
         result = false;
       break;
     }
@@ -92,10 +103,10 @@ public class Interpolator {
     /**
      * Returns whether or not this key frame matches the {@code other}.
      *
-     * @param other KeyFrame
+     * @param keyFrame other keyFrame
      */
-    public boolean matches(KeyFrame other) {
-      return frame().matches(other.frame()) && time() == other.time();
+    public boolean matches(KeyFrame keyFrame) {
+      return frame().matches(keyFrame.frame()) && time() == keyFrame.time();
     }
 
     protected Quaternion _tangentQuaternion;
@@ -188,14 +199,22 @@ public class Interpolator {
    * Creates an anonymous {@link #frame()} to be interpolated by this
    * interpolator.
    *
+   * @see #Interpolator(Frame)
    * @see #Interpolator(Graph, Frame)
    */
   public Interpolator(Graph graph) {
     this(graph, new Frame());
   }
 
-  public Interpolator(Node node) {
-    this(node.graph(), node);
+  /**
+   * Same as {@code this(frame.graph(), frame)}. Note that {@code frame} should be attached to
+   * a {@link Graph}.
+   *
+   * @see #Interpolator(Graph)
+   * @see #Interpolator(Graph, Frame)
+   */
+  public Interpolator(Frame frame) {
+    this(frame.graph(), frame);
   }
 
   /**
@@ -206,6 +225,8 @@ public class Interpolator {
    * {@link #time()}, {@link #speed()} and {@link #period()} are set to their default values.
    */
   public Interpolator(Graph graph, Frame frame) {
+    if (graph == null)
+      throw new RuntimeException("Warning: no interpolator instantiated");
     _graph = graph;
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Frame>();
@@ -303,15 +324,15 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Node},
-   * the frame graph ({@link Node#graph()}) and {@link #graph()} should match.
+   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Frame},
+   * the frame graph ({@link Frame#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {
     if (frame == _frame)
       return;
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.graph() != null)
+      if (graph() != frame.graph())
+        throw new RuntimeException("Frame and Interpolator graphs should match");
     _frame = frame;
   }
 
@@ -592,9 +613,9 @@ public class Interpolator {
     if (frame == null)
       return;
 
-    if (frame instanceof Node)
-      if (graph() != ((Node) frame)._graph)
-        throw new RuntimeException("Node and Interpolator graphs should match");
+    if (frame.graph() != null)
+      if (graph() != frame.graph())
+        throw new RuntimeException("Frame and Interpolator graphs should match");
 
     if (_list.isEmpty())
       _time = time;
@@ -615,18 +636,25 @@ public class Interpolator {
    * {@link #stop()} if {@link #started()}. If
    * {@code index < 0 || index >= keyFr.size()} the call is silently ignored.
    */
-  public void removeKeyFrame(int index) {
+  public Frame removeKeyFrame(int index) {
     if (index < 0 || index >= _list.size())
-      return;
+      return null;
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentFrameValid = false;
     if (started())
       stop();
-    KeyFrame kf = _list.remove(index);
-    if (kf.frame() instanceof Node)
-      _graph.pruneBranch((Node) kf._frame);
+    KeyFrame keyFrame = _list.remove(index);
     setTime(firstTime());
+    return keyFrame.frame();
+  }
+
+  /**
+   * Same as {@link #removeKeyFrame(int)}, but also removes the key frame from the scene if it is a node instance.
+   */
+  public void purgeKeyFrame(int index) {
+    Frame frame = removeKeyFrame(index);
+    _graph.pruneBranch(frame);
   }
 
   /**
@@ -646,15 +674,14 @@ public class Interpolator {
    * Same as {@link #clear()}, but also removes the key frames node instances from the scene.
    *
    * @see #clear()
-   * @see frames.core.Graph#pruneBranch(Node)
+   * @see frames.core.Graph#pruneBranch(Frame)
    */
   public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      if (keyFrame.frame() instanceof Node)
-        _graph.pruneBranch((Node) keyFrame._frame);
+      _graph.pruneBranch(keyFrame._frame);
     }
     _list.clear();
     _pathIsValid = false;

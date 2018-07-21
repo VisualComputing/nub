@@ -1,9 +1,8 @@
 package ik.mocap;
-import frames.core.Node;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.DistanceFieldConstraint;
+import frames.core.constraint.DistanceFieldConstraint;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -12,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +24,7 @@ import java.util.List;
  * Created by sebchaparr on 23/03/18.
  */
 public class BVHParser {
-    protected BufferedReader _buffer;
+/*    protected BufferedReader _buffer;
     //A Joint is a Node with some Properties
     //TODO: Consider _id() public?
     protected HashMap<Node, Properties> _joint;
@@ -91,6 +89,7 @@ public class BVHParser {
      * Reads a .bvh file from the given path and builds
      * A Hierarchy of Nodes given by the .bvh header
      * */
+    /*
     protected Node _readHeader(String path, Scene scene, Node reference){
         Node root = null;
         try {
@@ -218,6 +217,7 @@ public class BVHParser {
     }
 
     /*Saves Frame info to be read in a later stage*/
+    /*
     protected void _saveFrames(){
         boolean next = true;
         while(next)
@@ -381,6 +381,7 @@ public class BVHParser {
                     }j++;
                 }i++;
             }*/
+            /*
             pg.popMatrix();
         }
         pg.popStyle();
@@ -420,6 +421,6 @@ public class BVHParser {
             }
             node.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots,dim,dim,dim)));
         }
-    }
+    }*/
 }
 

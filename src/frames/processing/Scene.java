@@ -10,20 +10,19 @@
 
 package frames.processing;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
-import frames.core.Node;
-import frames.input.Agent;
-import frames.input.Event;
-import frames.input.Grabber;
-import frames.primitives.*;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.Hinge;
-import frames.primitives.constraint.PlanarPolygon;
-import frames.primitives.constraint.SphericalPolygon;
+import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.Hinge;
+import frames.core.constraint.PlanarPolygon;
+import frames.core.constraint.SphericalPolygon;
+import frames.primitives.Matrix;
+import frames.primitives.Point;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.timing.SequentialTimer;
-import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
 import processing.core.*;
 import processing.data.JSONArray;
@@ -35,15 +34,14 @@ import processing.opengl.PShader;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D interactive, on-screen or off-screen, Processing {@link Graph}.
- *
- * <h2>Usage</h2>
- * Typical usage comprises three steps: scene instantiation, setting an eye
- * and setting some shapes.
- * <h3>Scene instantiation</h3>
+ * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
+ * <h1>Usage</h1>
+ * Typical usage comprises two steps: scene instantiation and setting some shapes.
+ * <h2>Scene instantiation</h2>
  * Instantiate your on-screen scene at the {@code PApplet.setup()}:
  * <pre>
  * {@code
@@ -67,57 +65,17 @@ import java.util.List;
  * }
  * </pre>
  * In this case, the scene {@link #frontBuffer()} corresponds to the {@code canvas}.
- * <h3>The eye</h3>
- * The scene eye can be an instance of {@link Frame} or a {@link Node}. To set the
- * eye from a frame instance use code such as the following:
- * <pre>
- * {@code
- * ...
- * Frame eye;
- * void setup() {
- *   ...
- *   eye = new Frame();
- *   scene.setEye(eye);
- * }
- * }
- * </pre>
- * The eye can be controlled programmatically using the powerful {@link Frame} API.
- * <p>
- * To set the eye from a node instance use code such as the following:
- * <pre>
- * {@code
- * ...
- * Node eye;
- * void setup() {
- *   ...
- *   eye = new Node(scene) {
- *     public void interact(Event event) {
- *       if (event.shortcut().matches(new Shortcut(PApplet.LEFT)))
- *         translate(event);
- *     }
- *   };
- *   scene.setEye(eye);
- *   scene.setDefaultGrabber(eye);
- * }
- * }
- * </pre>
- * The eye can be controlled both programmatically (since a {@link Node} is a
- * {@link Frame} specialization) and interactively (using the mouse, see
- * {@link #mouse()} and {@link Mouse}). Note the use of the anonymous
- * inner {@link Node} class used to define how the node will behave, refer to the
- * {@link Node} API for details. Note also the {@link #setDefaultGrabber(Grabber)}
- * call which will direct input to the eye when no other node is being picked.
- * <h3>Shapes</h3>
- * A {@link Shape} is a {@link Node} specialization that can be set from a
+ * <h2>Shapes</h2>
+ * A {@link Shape} is a {@link Frame} specialization that can be set from a
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
- * onto the screen, see {@link Shape#setPrecision(Node.Precision)}. Use
- * {@link #traverse()} to render all scene-graph shapes or {@link Shape#draw()} to
+ * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
+ * {@link #traverse()} to render all scene shapes or {@link Shape#draw()} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
  * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
- * {@link Shape#set(PGraphics)}.
+ * {@link Shape#setGraphics(PGraphics)}.
  * <h3>Immediate-mode shapes</h3>
  * To set an immediate-mode shape use code such as the following:
  * <pre>
@@ -134,47 +92,7 @@ import java.util.List;
  * }
  * }
  * </pre>
- * <p>
- * Note that shapes like nodes can be control interactively. Override
- * {@link Node#interact(Event)}, like it has been done above.
- * <h2>Key-frame interpolators</h2>
- * A frame (and hence a node or a shape) can be animated through a key-frame
- * Catmull-Rom interpolator path. Use code such as the following:
- * <pre>
- * {@code
- * Scene scene;
- * PShape pshape;
- * Shape shape;
- * Interpolator interpolator;
- * void setup() {
- *   ...
- *   shape = new Shape(scene, pshape);
- *   interpolator = new Interpolator(shape);
- *   for (int i = 0; i < random(4, 10); i++)
- *     interpolator.addKeyFrame(Node.random(scene));
- *   interpolator.start();
- * }
- * }
- * </pre>
- * which will create a random (see {@link Node#random(Graph)}) interpolator path
- * containing [4..10] key-frames (see {@link Interpolator#addKeyFrame(Frame)}).
- * The interpolation is also started (see {@link Interpolator#start()}). The
- * interpolator path may be drawn with code like this:
- * <pre>
- * {@code
- * ...
- * void draw() {
- *   scene.traverse();
- *   scene.drawPath(interpolator, 5);
- * }
- * }
- * </pre>
- * while {@link #traverse()} will draw the animated shape(s),
- * {@link #drawPath(Interpolator, int)} will draw the interpolated path too.
- * <h2>Non-standard interactivity</h2>
- * To control your scene nodes by means different than the {@link #mouse()} (see
- * {@link Mouse}), implement an {@link Agent} and call {@link #registerAgent(Agent)}.
- * <h2>Drawing functionality</h2>
+ * <h1>Drawing functionality</h1>
  * There are several static drawing functions that complements those already provided
  * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
  * {@link #drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)},
@@ -183,19 +101,39 @@ import java.util.List;
  * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
  * Drawing functions that take a {@code PGraphics} parameter (including the above
- * static ones), such as {@link #beginScreenCoordinates(PGraphics)},
- * {@link #endScreenCoordinates(PGraphics)}, {@link #drawAxes(PGraphics, float)},
+ * static ones), such as {@link #beginScreenDrawing(PGraphics)},
+ * {@link #endScreenDrawing(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Shape} (see {@link Shape#set(PGraphics)}).
+ * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than this one) can be drawn with
  * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
+ * <p>
+ * An {@link Interpolator} path may be drawn with code like this:
+ * <pre>
+ * {@code
+ * void draw() {
+ *   scene.traverse();
+ *   scene.drawPath(interpolator, 5);
+ * }
+ * }
+ * </pre>
+ * while {@link #traverse()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
+ * will draw the interpolated path too.
+ * <h1>Human Interface Devices</h1>
+ * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
+ * is the Processing mouse, see {@link #track()}, {@link #cast()}, {@link #spin()}, {@link #translate()}
+ * {@link #scale(float)}, etc. To set up another {@code hid} refer to the {@link Graph} documentation.
+ *
+ * @see Graph
+ * @see Frame
+ * @see Interpolator
  */
 public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean _javaTiming;
-  public static String prettyVersion = "0.1.3";
+  public static String prettyVersion = "0.2.0";
   public static String version = "4";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
@@ -205,19 +143,9 @@ public class Scene extends Graph implements PConstants {
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
 
-  // off-screen scenes:
-  //TODO make protected
-  public static Scene _lastScene;
-  public long _lastDisplay;
-  protected boolean _autofocus;
-  protected static int _offScreenScenes;
-
   // offscreen
   protected Point _upperLeftCorner;
   protected boolean _offscreen;
-
-  // 4. Agents
-  protected Mouse _mouse;
 
   // _bb : picking buffer
   protected PGraphics _targetPGraphics;
@@ -252,8 +180,7 @@ public class Scene extends Graph implements PConstants {
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@link #frontBuffer()} type (see
-   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}). The constructor
-   * instantiates also the {@link #mouse()}.
+   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}).
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -280,31 +207,44 @@ public class Scene extends Graph implements PConstants {
     setMatrixHandler(matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
-    _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
-        pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
-        null;
-    if (_bb != null) {
+    if (enableBackBuffer()) {
       _triangleShader = pApplet().loadShader("PickingBuffer.frag");
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
     }
 
-    // 4. Create _agents and register P5 methods
-    _mouse = new Mouse(this, originCorner());
-    _parent.registerMethod("mouseEvent", mouse());
-
-    // this.setDefaultKeyBindings();
+    // 4. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
-    } else
-      _offScreenScenes++;
-    enableAutoFocus();
+    }
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
     // 5. Handed
     setLeftHanded();
+  }
+
+  /**
+   * Enable the {@link #backBuffer()} if the Processing renderer supports it. In success returns
+   * {@code true} and {@code false} otherwise.
+   *
+   * @see #disableBackBuffer()
+   */
+  public boolean enableBackBuffer() {
+    _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
+        pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
+        null;
+    return _bb != null;
+  }
+
+  /**
+   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
+   *
+   * @see #enableBackBuffer()
+   */
+  public void disableBackBuffer() {
+    _bb = null;
   }
 
   /**
@@ -343,14 +283,14 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Internal use. Traverse the scene {@link #nodes()}) into the
-   * {@link #backBuffer()} to perform picking on the scene {@link #nodes()}.
+   * Internal use. Traverse the scene {@link #frames()}) into the
+   * {@link #backBuffer()} to perform picking on the scene {@link #frames()}.
    * <p>
    * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
    * scenes).
    */
   protected void _renderBackBuffer() {
-    if (!_bbEnabled)
+    if (_bb == null || !_bbEnabled)
       return;
     backBuffer().beginDraw();
     backBuffer().pushStyle();
@@ -360,60 +300,6 @@ public class Scene extends Graph implements PConstants {
     backBuffer().endDraw();
     // if (frames().size() > 0)
     backBuffer().loadPixels();
-  }
-
-  // Mouse agent
-
-  /**
-   * Returns the default mouse.
-   *
-   * @see #enableMouse()
-   * @see #isMouseEnabled()
-   * @see #disableMouse()
-   */
-  public Mouse mouse() {
-    return _mouse;
-  }
-
-  /**
-   * Enables the {@link #mouse()}.
-   *
-   * @see #mouse()
-   * @see #isMouseEnabled()
-   * @see #disableMouse()
-   */
-  public void enableMouse() {
-    if (!isMouseEnabled()) {
-      registerAgent(mouse());
-      _parent.registerMethod("mouseEvent", mouse());
-    }
-  }
-
-  /**
-   * Disables the {@link #mouse()}.
-   *
-   * @see #mouse()
-   * @see #isMouseEnabled()
-   * @see #enableMouse()
-   */
-  public boolean disableMouse() {
-    if (isMouseEnabled()) {
-      _parent.unregisterMethod("mouseEvent", mouse());
-      return unregisterAgent(mouse());
-    }
-    return false;
-  }
-
-  /**
-   * Returns {@code true} if the {@link #mouse()} is enabled and {@code false}
-   * otherwise.
-   *
-   * @see #mouse()
-   * @see #enableMouse()
-   * @see #disableMouse()
-   */
-  public boolean isMouseEnabled() {
-    return isAgentRegistered(mouse());
   }
 
   // OPENGL
@@ -475,7 +361,7 @@ public class Scene extends Graph implements PConstants {
    */
   public Vector pointUnderPixel(Point pixel) {
     float depth = pixelDepth(pixel);
-    Vector point = unprojectedCoordinatesOf(new Vector(pixel.x(), pixel.y(), depth));
+    Vector point = location(new Vector(pixel.x(), pixel.y(), depth));
     return (depth < 1.0f) ? point : null;
   }
 
@@ -660,7 +546,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -676,16 +561,14 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Paint method which is called just after your {@code PApplet.draw()} method. Simply
-   * render the back buffer (useful for picking) and call {@link #postDraw()}. This method
-   * is registered at the PApplet and hence you don't need to call it. Only meaningful if
-   * the graph is on-screen (it the graph {@link #isOffscreen()} it even doesn't get
-   * registered at the PApplet.
+   * render the back buffer (useful for picking). This method is registered at the PApplet
+   * and hence you don't need to call it. Only meaningful if the graph is on-screen (it
+   * the graph {@link #isOffscreen()} it even doesn't get registered at the PApplet.
    * <p>
    * If {@link #isOffscreen()} does nothing.
    *
    * @see #pre()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -693,9 +576,6 @@ public class Scene extends Graph implements PConstants {
   public void draw() {
     popModelView();
     _renderBackBuffer();
-    postDraw();
-    if (hasAutoFocus())
-      _handleFocus();
   }
 
   // Off-screen
@@ -716,7 +596,6 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #pre()
    * @see #endDraw()
    * @see #isOffscreen()
@@ -743,20 +622,15 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Only if the dcene {@link #isOffscreen()}. Calls:
+   * Only if the scene {@link #isOffscreen()}. Calls:
    *
    * <ol>
    * <li>{@code frontBuffer().endDraw()} and hence there's no need to explicitly call it</li>
    * <li>{@code _renderBackBuffer()}: Render the back buffer (useful for picking)</li>
-   * <li>{@link #postDraw()}</li>
-   * <li>{@link #_handleFocus()} if {@link #hasAutoFocus()} is {@code true}</li>
    * </ol>
-   * <p>
-   * {@link #postDraw()}.
    *
    * @see #draw()
    * @see #preDraw()
-   * @see #postDraw()
    * @see #beginDraw()
    * @see #pre()
    * @see #isOffscreen()
@@ -773,10 +647,6 @@ public class Scene extends Graph implements PConstants {
     popModelView();
     frontBuffer().endDraw();
     _renderBackBuffer();
-    postDraw();
-    _lastDisplay = TimingHandler.frameCount;
-    if (hasAutoFocus())
-      _handleFocus();
   }
 
   /**
@@ -797,169 +667,6 @@ public class Scene extends Graph implements PConstants {
     if (isOffscreen())
       pApplet().image(pgraphics, originCorner().x(), originCorner().y());
   }
-
-  /**
-   * Implementation of the "Focus follows mouse" policy. Used by {@link #_hasFocus()}.
-   */
-  protected boolean _hasMouseFocus() {
-    return originCorner().x() < pApplet().mouseX && pApplet().mouseX < originCorner().x() + this.width()
-        && originCorner().y() < pApplet().mouseY && pApplet().mouseY < originCorner().y() + this.height();
-  }
-
-  /**
-   * Main condition evaluated by the {@link #_handleFocus()} algorithm, which defaults to
-   * {@link #_hasMouseFocus()}.
-   * <p>
-   * Override this method to define a focus policy different than "focus follows mouse".
-   */
-  protected boolean _hasFocus() {
-    return _hasMouseFocus();
-  }
-
-  /**
-   * Called by {@link #endDraw()} if {@link #hasAutoFocus()} is {@code true}.
-   */
-  protected void _handleFocus() {
-    if (_offScreenScenes == 0)
-      return;
-    if (isOffscreen()) {
-      // Handling focus of non-overlapping scenes is trivial.
-      // Suppose scn1 and scn2 overlap and also that scn2 is displayed on top of scn1, i.e.,
-      // scn2.display() is to be called after scn1.display() (which is the _key observation).
-      // Then, for a given frame either only scn1 _hasFocus() (which is handled trivially);
-      // or, both, scn1 and scn2 _hasFocus(), which means only scn2 should retain focus
-      // (while scn1 lose it).
-      boolean available = true;
-      if (_lastScene != null)
-        if (_lastScene != this)
-          // Note that _lastScene._lastDisplay == TimingHandler.frameCount - 1 returns true only
-          // if the lastScene was assigned in the previous frame and false otherwise
-          // (particularly, if it was assigned in the current frame) which means both: 1. If scn1
-          // gained focus on the current frame it will lose it when the routine is run on scn2 in
-          // the current frame; and, 2. If scn2 has gained focus in the previous frame, it will
-          // prevent scn1 from having it back in the current frame.
-          if (_lastScene._hasFocus() && _lastScene._lastDisplay == TimingHandler.frameCount - 1)
-            available = false;
-      if (_hasFocus() && _lastDisplay == TimingHandler.frameCount && available) {
-        enableMouse();
-        _lastScene = this;
-      } else
-        disableMouse();
-    } else {
-      if (_lastScene != null) {
-        boolean available = true;
-        if (_lastScene.isOffscreen() && (_lastScene._lastDisplay == TimingHandler.frameCount - 1
-            || _lastScene._lastDisplay == TimingHandler.frameCount) && _lastScene._hasFocus()) {
-          disableMouse();
-          available = false;
-        }
-        if (_hasFocus() && available) {
-          enableMouse();
-          _lastScene = this;
-        }
-      }
-    }
-  }
-
-  /**
-   * When having multiple off-screen scenes displayed at once, it should be decided which
-   * one will grab input from the {@link #mouse()}, so that code like this:
-   *
-   * <pre>
-   * {@code
-   * scene1.beginDraw();
-   * drawScene1();
-   * graph.endDraw();
-   * graph.display();
-   * scene2.beginDraw();
-   * drawScene2();
-   * scene2.endDraw();
-   * scene2.display();
-   * }
-   * </pre>
-   * <p>
-   * will behave according to a given focus policy. This property is enabled by default
-   * and it implements a "focus follows mouse" policy, so that the scene under the cursor
-   * will grab input. If multiple scenes overlaps the scene on top will grab the input as
-   * expected.
-   * <p>
-   * To implement a different policy either:
-   *
-   * <ol>
-   * <li>Override the {@link #_hasFocus()} scene method; or,</li>
-   * <li>Call {@link #disableAutoFocus()} and implement your own focus policy at the
-   * sketch space.</li>
-   * </ol>
-   *
-   * <b>Note</b> that for this policy to work, you should call {@link #display()} instead
-   * of the papplet image() function on the {@link #frontBuffer()}.
-   *
-   * @see #beginDraw()
-   * @see #endDraw()
-   * @see #display()
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public boolean hasAutoFocus() {
-    return _autofocus;
-  }
-
-  /**
-   * Toggles the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   */
-  public void toggleAutoFocus() {
-    if (hasAutoFocus())
-      disableAutoFocus();
-    else
-      enableAutoFocus();
-  }
-
-  /**
-   * Disables the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #enableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void disableAutoFocus() {
-    enableAutoFocus(false);
-  }
-
-  /**
-   * Enables the scene auto-focus property.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus(boolean)
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void enableAutoFocus() {
-    enableAutoFocus(true);
-  }
-
-  /**
-   * Turns on or off the scene auto-focus property according to {@code flag}.
-   * <p>
-   * The {@link #hasAutoFocus()} property is {@code true} by default.
-   *
-   * @see #hasAutoFocus()
-   * @see #enableAutoFocus()
-   * @see #disableAutoFocus()
-   * @see #toggleAutoFocus()
-   */
-  public void enableAutoFocus(boolean autoFocus) {
-    _autofocus = autoFocus;
-  }
-
-  // TODO: Future work should include the eye and graph profiles.
-  // Probably related with iFrame.fromFrame
 
   /**
    * Same as {@link #saveConfig()}.
@@ -1058,11 +765,11 @@ public class Scene extends Graph implements PConstants {
       String type = json.getString("type");
       setType(type.equals("PERSPECTIVE") ? Type.PERSPECTIVE :
           type.equals("ORTHOGRAPHIC") ? Type.ORTHOGRAPHIC : type.equals("TWO_D") ? Type.TWO_D : Type.CUSTOM);
-      eye().setWorldMatrix(_toFrame(json.getJSONObject("eye")));
+      eye().set(_toFrame(json.getJSONObject("eye")));
 
       /*
       JSONObject jsonEye = json.getJSONObject("eye");
-      eye().setWorldMatrix(_toFrame(jsonEye));
+      eye().set(_toFrame(jsonEye));
       JSONArray paths = jsonEye.getJSONArray("paths");
       for (int i = 0; i < paths.size(); i++) {
         JSONObject path = paths.getJSONObject(i);
@@ -1081,15 +788,15 @@ public class Scene extends Graph implements PConstants {
   protected Interpolator _toInterpolator(JSONArray jsonInterpolator) {
     Interpolator interpolator = new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
-      Node keyFrame = new Node(this);
+      Frame keyFrame = new Frame(this);
       pruneBranch(keyFrame);
-      keyFrame.setWorldMatrix(_toFrame(jsonInterpolator.getJSONObject(j)));
-      keyFrame.setPrecision(Node.Precision.FIXED);
+      keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
+      keyFrame.setPrecision(Frame.Precision.FIXED);
       keyFrame.setPrecisionThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
       if (pathsVisualHint())
-        inputHandler().addGrabber(keyFrame);
+        inputHandler().addNode(keyFrame);
       if (!eye().keyFrameInterpolatorMap().containsKey(_id))
         eye().setKeyFrameInterpolator(_id, new Interpolator(this, eyeFrame()));
       eye().keyFrameInterpolator(_id).addKeyFrame(keyFrame, keyFrames.getJSONObject(j).getFloat("time"));
@@ -1168,32 +875,111 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  /**
-   * Same as {@code traverse(frontBuffer())}.
-   *
-   * @see #frontBuffer()
-   * @see #traverse(PGraphics)
-   */
   @Override
-  public void traverse() {
-    traverse(frontBuffer());
+  protected void _track(Frame frame) {
+    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
+      if (!_tuples.isEmpty()) {
+        Iterator<Tuple> it = _tuples.iterator();
+        while (it.hasNext()) {
+          Tuple tuple = it.next();
+          resetTrackedFrame(tuple._hid);
+          if (!isTracking(tuple._hid))
+            if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
+              setTrackedFrame(tuple._hid, frame);
+              it.remove();
+            }
+        }
+      }
+    } else
+      super._track(frame);
   }
 
   /**
-   * Draw all {@link #nodes()} into the given pGraphics. No
-   * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
-   * chaining.
+   * Same as {@code return super.track(mouse(), frameArray)}.
+   *
+   * @see Graph#track(Point, Frame[])
+   */
+  public Frame track(Frame[] frameArray) {
+    return track(mouse(), frameArray);
+  }
+
+  /**
+   * Same as {@code return super.track(mouse(), frameList)}.
+   *
+   * @see Graph#track(Point, List<Frame>)
+   */
+  public Frame track(List<Frame> frameList) {
+    return track(mouse(), frameList);
+  }
+
+  /**
+   * Same as {@code return track(mouse(), frame)}.
+   *
+   * @see #mouse()
+   * @see #tracks(Point, Frame)
+   * @see #tracks(float, float, Frame)
+   */
+  public boolean tracks(Frame frame) {
+    return tracks(mouse(), frame);
+  }
+
+  @Override
+  public boolean tracks(float x, float y, Frame frame) {
+    if (frame.precision() == Frame.Precision.EXACT && _bb != null)
+      return _tracks(x, y, frame);
+    else
+      return _tracks(x, y, screenLocation(frame.position()), frame);
+  }
+
+  /**
+   * A shape may be picked using
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
+   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
+   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
+   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
+   * otherwise.
    * <p>
-   * Note that {@code drawNodes(backBuffer())} (which enables 'picking' of the nodes
+   * This method is only meaningful when this shape is not an eye.
+   *
+   * @see Frame#setPrecision(Frame.Precision)
+   */
+  protected boolean _tracks(float x, float y, Frame frame) {
+    if (frame == null || isEye(frame))
+      return false;
+    if (!frame.isTrackingEnabled())
+      return false;
+    int index = (int) y * width() + (int) x;
+    if (backBuffer().pixels != null)
+      if ((0 <= index) && (index < backBuffer().pixels.length))
+        return backBuffer().pixels[index] == frame.id();
+    return false;
+  }
+
+  /**
+   * Same as {@link super#traverse()}, but if there are any {@link Shape}s in the scene frame hierarchy
+   * they also get drawn. Call it only within Processing draw() method.
+   */
+  @Override
+  public void traverse() {
+    _targetPGraphics = frontBuffer();
+    super.traverse();
+  }
+
+  /**
+   * Visit all {@link #frames()} into the given {@code pGraphics}. No
+   * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
+   * chaining. Call it only within Processing draw() method.
+   * <p>
+   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
-   * technique is called by {@link #postDraw()}.
+   * technique is called by {@link #draw()}.
    *
    * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
    * (i.e., manual eye update) and before any other transformation of the modelview takes
    * place.
    *
    * @param pGraphics
-   * @see #nodes()
+   * @see #frames()
    * @see #traverse()
    */
   public void traverse(PGraphics pGraphics) {
@@ -1204,15 +990,17 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  protected void _visit(Node node) {
+  protected void _visit(Frame frame) {
     _targetPGraphics.pushMatrix();
-    applyTransformation(_targetPGraphics, node);
-    node.visit();
-    if (!node.isCulled())
-      for (Node child : node.children())
+    applyTransformation(_targetPGraphics, frame);
+    _track(frame);
+    frame.visit();
+    if (!frame.isCulled())
+      for (Frame child : frame.children())
         _visit(child);
     _targetPGraphics.popMatrix();
   }
+
 
   /**
    * Returns a new matrix helper for the given {@code pGraphics}. Rarely needed.
@@ -1294,61 +1082,61 @@ public class Scene extends Graph implements PConstants {
    * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void beginScreenCoordinates() {
-    beginScreenCoordinates(frontBuffer());
+  public void beginScreenDrawing() {
+    beginScreenDrawing(frontBuffer());
   }
 
   /**
    * Begins screen drawing on pGraphics using the {@link #eye()} parameters. Don't forget
-   * to call {@link #endScreenCoordinates(PGraphics)} after screen drawing ends.
+   * to call {@link #endScreenDrawing(PGraphics)} after screen drawing ends.
    *
-   * @see #endScreenCoordinates(PGraphics)
-   * @see #beginScreenCoordinates()
+   * @see #endScreenDrawing(PGraphics)
+   * @see #beginScreenDrawing()
    */
-  public void beginScreenCoordinates(PGraphics pGraphics) {
+  public void beginScreenDrawing(PGraphics pGraphics) {
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     _startCoordCalls++;
     pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
     disableDepthTest(pGraphics);
     // if-else same as:
-    // matrixHandler(p).beginScreenCoordinates();
+    // matrixHandler(p).beginScreenDrawing();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().beginScreenCoordinates();
+      matrixHandler().beginScreenDrawing();
     else
-      matrixHandler(pGraphics).beginScreenCoordinates();
+      matrixHandler(pGraphics).beginScreenDrawing();
   }
 
   /**
    * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
    */
   @Override
-  public void endScreenCoordinates() {
-    endScreenCoordinates(frontBuffer());
+  public void endScreenDrawing() {
+    endScreenDrawing(frontBuffer());
   }
 
   /**
    * Ends screen drawing on the pGraphics instance using {@link #eye()}
    * parameters. The screen drawing should happen between
-   * {@link #beginScreenCoordinates(PGraphics)} and this method.
+   * {@link #beginScreenDrawing(PGraphics)} and this method.
    *
-   * @see #beginScreenCoordinates(PGraphics)
-   * @see #endScreenCoordinates()
+   * @see #beginScreenDrawing(PGraphics)
+   * @see #endScreenDrawing()
    */
-  public void endScreenCoordinates(PGraphics pGraphics) {
+  public void endScreenDrawing(PGraphics pGraphics) {
     _startCoordCalls--;
     if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenCoordinates() call followed by a "
-          + "endScreenCoordinates() and they cannot be nested. Check your implementation!");
+      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
+          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHandler(p).endScreenCoordinates();
+    // matrixHandler(p).endScreenDrawing();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().endScreenCoordinates();
+      matrixHandler().endScreenDrawing();
     else
-      matrixHandler(pGraphics).endScreenCoordinates();
+      matrixHandler(pGraphics).endScreenDrawing();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
@@ -1498,7 +1286,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Converts a PVector to a {@link Vector}.
    */
-  public static Vector toVec(PVector pVector) {
+  public static Vector toVector(PVector pVector) {
     return new Vector(pVector.x, pVector.y, pVector.z);
   }
 
@@ -1506,7 +1294,7 @@ public class Scene extends Graph implements PConstants {
    * Converts a {@link Matrix} to a PMatrix3D.
    */
   public static PMatrix3D toPMatrix(Matrix matrix) {
-    float[] a = matrix.getTransposed(new float[16]);
+    float[] a = matrix.get(new float[16], false);
     return new PMatrix3D(a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8], a[9], a[10], a[11], a[12], a[13], a[14],
         a[15]);
   }
@@ -1514,22 +1302,22 @@ public class Scene extends Graph implements PConstants {
   /**
    * Converts a PMatrix3D to a {@link Matrix}.
    */
-  public static Matrix toMat(PMatrix3D pMatrix3D) {
-    return new Matrix(pMatrix3D.get(new float[16]), true);
+  public static Matrix toMatrix(PMatrix3D pMatrix3D) {
+    return new Matrix(pMatrix3D.get(new float[16]), false);
   }
 
   /**
    * Converts a PMatrix2D to a {@link Matrix}.
    */
-  public static Matrix toMat(PMatrix2D pMatrix2D) {
-    return toMat(new PMatrix3D(pMatrix2D));
+  public static Matrix toMatrix(PMatrix2D pMatrix2D) {
+    return toMatrix(new PMatrix3D(pMatrix2D));
   }
 
   /**
    * Converts a {@link Matrix} to a PMatrix2D.
    */
   public static PMatrix2D toPMatrix2D(Matrix matrix) {
-    float[] a = matrix.getTransposed(new float[16]);
+    float[] a = matrix.get(new float[16], false);
     return new PMatrix2D(a[0], a[1], a[3], a[4], a[5], a[7]);
   }
 
@@ -1620,10 +1408,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Frame frame : interpolator.keyFrames())
-      if (frame instanceof Node)
-        drawShooterTarget(frame);
-      else
-        drawCross(frame);
+      drawShooterTarget(frame);
     frontBuffer().popStyle();
   }
 
@@ -1716,6 +1501,24 @@ public class Scene extends Graph implements PConstants {
     matrixHandler().translate(0.0f, 0.0f, length * (1.0f - head));
     drawCone(coneRadiusCoef * radius, head * length);
     matrixHandler().translate(0.0f, 0.0f, -length * (1.0f - head));
+  }
+
+  /**
+   * Same as {@code drawArrow(vector, 0.05f * vector.magnitude())}.
+   *
+   * @see #drawArrow(Vector, float)
+   */
+  public void drawArrow(Vector vector) {
+    drawArrow(vector, 0.05f * vector.magnitude());
+  }
+
+  /**
+   * Same as {@code drawArrow(new Vector(), vector, radius)}.
+   *
+   * @see #drawArrow(Vector, Vector, float)
+   */
+  public void drawArrow(Vector vector, float radius) {
+    drawArrow(new Vector(), vector, radius);
   }
 
   /**
@@ -2626,11 +2429,11 @@ public class Scene extends Graph implements PConstants {
       }
       // in PERSPECTIVE cache the transformed origin
       else
-        o = graph.eye().inverseCoordinatesOf(new Vector());
+        o = graph.eye().worldLocation(new Vector());
       pGraphics.beginShape(PApplet.LINES);
       for (Vector s : points) {
         if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
-          Vector v = graph.eye().coordinatesOf(s);
+          Vector v = graph.eye().location(s);
           Scene.vertex(pGraphics, v.x(), v.y(), v.z());
           // Key here is to represent the eye zNear param (which is given in world units)
           // in eye units.
@@ -2652,19 +2455,18 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
-   * If frame is a Node instance the length of the cross is the node
-   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * If frame is a Frame instance the length of the cross is the frame
+   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawCross(Frame frame) {
     frontBuffer().pushStyle();
-    if (frame instanceof Node)
-      if (isInputGrabber((Node) frame))
-        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    if (frame.isTracked())
+      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2679,7 +2481,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinatesOf(frame.position());
+    Vector center = screenLocation(frame.position());
     drawCross(center.x(), center.y(), length);
   }
 
@@ -2708,7 +2510,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(PGraphics pGraphics, float x, float y, float length) {
     float half_size = length / 2f;
     pGraphics.pushStyle();
-    beginScreenCoordinates(pGraphics);
+    beginScreenDrawing(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
     vertex(pGraphics, x - half_size, y);
@@ -2716,35 +2518,24 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, x, y - half_size);
     vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
+    endScreenDrawing(pGraphics);
     pGraphics.popStyle();
   }
 
   /**
-   * Use {@link #drawShooterTarget(Frame)} instead.
-   *
-   * @deprecated Please refrain from using this method, it will be removed from future releases.
-   */
-  @Deprecated
-  public void drawPickingTarget(Frame frame) {
-    drawShooterTarget(frame);
-  }
-
-  /**
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
-   * If frame is a Node instance the length of the target is the node
-   * {@link Node#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
-   * If frame a Node instance and it is {@link #isInputGrabber(Grabber)} it also applies
+   * If frame is a Frame instance the length of the target is the frame
+   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
    * @see #drawShooterTarget(Frame, float)
    */
   public void drawShooterTarget(Frame frame) {
     frontBuffer().pushStyle();
-    if (frame instanceof Node)
-      if (isInputGrabber((Node) frame))
-        frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame instanceof Node ? ((Node) frame).precisionThreshold() : radius() / 5);
+    if (frame.isTracked())
+      frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
+    drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2759,7 +2550,7 @@ public class Scene extends Graph implements PConstants {
       System.err.println("eye frames don't have an screen target");
       return;
     }
-    Vector center = projectedCoordinatesOf(frame.position());
+    Vector center = screenLocation(frame.position());
     drawShooterTarget(center.x(), center.y(), length);
   }
 
@@ -2788,7 +2579,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    beginScreenCoordinates(pGraphics);
+    beginScreenDrawing(pGraphics);
     pGraphics.noFill();
 
     pGraphics.beginShape();
@@ -2814,7 +2605,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), (y + half_length));
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
-    endScreenCoordinates(pGraphics);
+    endScreenDrawing(pGraphics);
     drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
   }
@@ -2993,9 +2784,8 @@ public class Scene extends Graph implements PConstants {
   public void drawCone(PGraphics pGraphics, List<Vector> vertices, float scale) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
-    for (Vector v : vertices) {
+    for (Vector v : vertices)
       pGraphics.vertex(scale * v.x(), scale * v.y(), scale * v.z());
-    }
     if (!vertices.isEmpty())
       pGraphics.vertex(scale * vertices.get(0).x(), scale * vertices.get(0).y(), scale * vertices.get(0).z());
     pGraphics.endShape();
@@ -3015,27 +2805,38 @@ public class Scene extends Graph implements PConstants {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     float step = (maxAngle - minAngle) / detail;
-    for (float theta = minAngle; theta <= maxAngle; theta += step) {
+    for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
-    }
     pGraphics.endShape(PApplet.CLOSE);
   }
 
-  public void drawConstraint(Node node) {
-    drawConstraint(frontBuffer(), node);
+  /**
+   * Same as {@code drawConstraint(frontBuffer(), frame)}.
+   *
+   * @see #drawConstraint(PGraphics, Frame)
+   */
+  public void drawConstraint(Frame frame) {
+    drawConstraint(frontBuffer(), frame);
   }
 
-  public void drawConstraint(PGraphics pGraphics, Node node) {
-    if (node.constraint() == null) return;
+  /**
+   * Draws the frame constraint if it's non-null.
+   *
+   * @see Frame#constraint()
+   * @see frames.core.constraint.Constraint
+   */
+  public void drawConstraint(PGraphics pGraphics, Frame frame) {
+    if (frame == null) return;
+    if (frame.constraint() == null) return;
+    // TODO test
+    if (!frame.isAttached(this)) return;
     float boneLength = 0;
-    if (!node.children().isEmpty()) {
-      for (Node child : node.children()) {
+    if (!frame.children().isEmpty()) {
+      for (Frame child : frame.children())
         boneLength += child.translation().magnitude();
-      }
-      boneLength = boneLength / (1.f * node.children().size());
-    } else {
-      boneLength = node.translation().magnitude();
-    }
+      boneLength = boneLength / (1.f * frame.children().size());
+    } else
+      boneLength = frame.translation().magnitude();
     if (boneLength == 0) return;
 
     pGraphics.pushMatrix();
@@ -3043,49 +2844,228 @@ public class Scene extends Graph implements PConstants {
     pGraphics.noStroke();
     //TODO: use different colors
     pGraphics.fill(246, 117, 19, 80);
-    Frame reference = new Frame(new Vector(), node.rotation().inverse());
+    Frame reference = new Frame(new Vector(), frame.rotation().inverse());
     //TODO: Check implementation for non symmetric semi-axes
-    if (node.constraint() instanceof BallAndSocket) {
-      BallAndSocket constraint = (BallAndSocket) node.constraint();
+    if (frame.constraint() instanceof BallAndSocket) {
+      BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(constraint.restRotation());
       applyTransformation(reference);
-      drawAxes(pGraphics,5);
+      drawAxes(5);
       drawCone(pGraphics, boneLength / 2.f,
           (boneLength / 2.f) * PApplet.tan(constraint.left()),
           (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
-    } else if (node.constraint() instanceof PlanarPolygon) {
-      reference.rotate(((PlanarPolygon) node.constraint()).restRotation());
+    } else if (frame.constraint() instanceof PlanarPolygon) {
+      reference.rotate(((PlanarPolygon) frame.constraint()).restRotation());
       applyTransformation(reference);
-      drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((PlanarPolygon) node.constraint()).height(), ((PlanarPolygon) node.constraint()).vertices());
-    } else if (node.constraint() instanceof SphericalPolygon) {
-      reference.rotate(((SphericalPolygon) node.constraint()).restRotation());
+      drawAxes(5);
+      drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
+    } else if (frame.constraint() instanceof SphericalPolygon) {
+      reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
       applyTransformation(reference);
-      drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((SphericalPolygon) node.constraint()).vertices(), boneLength);
-    } else if (node.constraint() instanceof Hinge) {
-      Hinge constraint = (Hinge) node.constraint();
-      if (node.children().size() == 1) {
-        //reference.rotate(constraint.restRotation());
-        Vector axis = constraint.restRotation().rotate(constraint.axis().get());
-        if(Vector.squaredNorm(axis) == 0){
-          pGraphics.popStyle();
-          pGraphics.popMatrix();
-          return;
-        }
-        Vector rest = Vector.projectVectorOnPlane(node.children().get(0).translation().get(), axis);
-        Quaternion rotation = new Quaternion(new Vector(0, 0, 1), axis);
+      drawAxes(5);
+      drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
+    } else if (frame.constraint() instanceof Hinge) {
+      Hinge constraint = (Hinge) frame.constraint();
+      if (frame.children().size() == 1) {
+        Vector axis = constraint.restRotation().rotate(constraint.axis());
+        reference.rotate(constraint.restRotation());
+        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
         //Align Z-Axis with Axis
-        reference.rotate(rotation);
-        rest = rotation.inverseRotate(rest);
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), rest));
+        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis
+        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
         applyTransformation(reference);
-        drawAxes(pGraphics,5);
+        drawAxes(5);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
+
+  /**
+   * Converts the {@code x, y} coordinates into a new {@link Point} and returns it.
+   */
+  public static Point toPoint(float x, float y) {
+    return new Point(x, y);
+  }
+
+  /**
+   * Returns the last horizontal mouse displacement.
+   */
+  public float mouseDX() {
+    return pApplet().mouseX - pApplet().pmouseX;
+  }
+
+  /**
+   * Same as {@code return mouseRADX(PI / width())}.
+   *
+   * @see #mouseRADX(float)
+   */
+  public float mouseRADX() {
+    return mouseRADX(PI / width());
+  }
+
+  /**
+   * Converts {@link #mouseDX()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
+  public float mouseRADX(float sensitivity) {
+    return mouseDX() * sensitivity;
+  }
+
+  /**
+   * Returns the last vertical mouse displacement.
+   */
+  public float mouseDY() {
+    return pApplet().mouseY - pApplet().pmouseY;
+  }
+
+  /**
+   * Same as {@code return mouseRADY(PI / height())}.
+   *
+   * @see #mouseRADY(float)
+   */
+  public float mouseRADY() {
+    return mouseRADY(PI / height());
+  }
+
+  /**
+   * Converts {@link #mouseDY()} into angular displacement (in radians) according to {@code sensitivity}
+   * and returns it.
+   */
+  public float mouseRADY(float sensitivity) {
+    return mouseDY() * sensitivity;
+  }
+
+  /**
+   * Returns the current mouse cursor position.
+   */
+  public Point mouse() {
+    return toPoint(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
+  }
+
+  /**
+   * Returns the previous mouse cursor position.
+   */
+  public Point pmouse() {
+    return toPoint(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
+  }
+
+  /**
+   * Same as {@code return track(mouse())}.
+   *
+   * @see #track(Point)
+   * @see #mouse()
+   */
+  public Frame track() {
+    return track(mouse());
+  }
+
+  /**
+   * Same as {@code cast(mouse())}.
+   *
+   * @see #cast(String, Point)
+   * @see #mouse()
+   */
+  public void cast() {
+    cast(mouse());
+  }
+
+  /**
+   * Same as {@code translate(mouseDX(), mouseDY())}.
+   *
+   * @see #translate(float, float)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public void translate() {
+    translate(mouseDX(), mouseDY());
+  }
+
+  /**
+   * Same as {@code translate(mouseDX(), mouseDY(), frame)}.
+   *
+   * @see #translate(float, float, Frame)
+   * @see #mouseDX()
+   * @see #mouseDY()
+   */
+  public void translate(Frame frame) {
+    translate(mouseDX(), mouseDY(), frame);
+  }
+
+  /**
+   * Same as {@code spin(pmouse(), mouse())}.
+   *
+   * @see #spin(Point, Point)
+   * @see #pmouse()
+   * @see #mouse()
+   */
+  public void spin() {
+    spin(pmouse(), mouse());
+  }
+
+  /**
+   * Same as {@code spin(pmouse(), mouse(), frame)}.
+   *
+   * @see #spin(Point, Point, Frame)
+   * @see #pmouse()
+   * @see #mouse()
+   */
+  public void spin(Frame frame) {
+    spin(pmouse(), mouse(), frame);
+  }
+
+  // only eye
+
+  /**
+   * Same as {@code lookAround(mouseRADX(), mouseRADY())}.
+   *
+   * @see #lookAround(float, float)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
+  public void lookAround() {
+    lookAround(mouseRADX(), mouseRADY());
+  }
+
+  /**
+   * Same as {@code rotateCAD(mouseRADX(), mouseRADY())}.
+   *
+   * @see #rotateCAD(float, float)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
+  public void rotateCAD() {
+    rotateCAD(mouseRADX(), mouseRADY());
+  }
+
+  /**
+   * Same as {@code rotateCAD(mouseRADX(), mouseRADY(), up)}.
+   *
+   * @see #rotateCAD(float, float, Vector)
+   * @see #mouseRADX()
+   * @see #mouseRADY()
+   */
+  public void rotateCAD(Vector up) {
+    rotateCAD(mouseRADX(), mouseRADY(), up);
+  }
+
+  /*
+  public void screenRotate() {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY));
+  }
+
+  public void screenRotate(float sensitivity) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity);
+  }
+
+  public void screenRotate(Frame frame) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), frame);
+  }
+
+  public void screenRotate(float sensitivity, Frame frame) {
+    super.screenRotate(new Point(pApplet().pmouseX, pApplet().pmouseY), new Point(pApplet().mouseX, pApplet().mouseY), sensitivity, frame);
+  }
+  */
 }

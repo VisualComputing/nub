@@ -1,61 +1,51 @@
 package ik.constraintTest;
 
-import common.InteractiveNode;
 import frames.core.Graph;
-import frames.core.Node;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
-import frames.ik.FABRIKSolver;
 import frames.ik.Solver;
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.PlanarPolygon;
+import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
-import ik.common.Target;
-import ik.mocap.BVHParser;
 import processing.core.PApplet;
-
+import processing.core.PShape;
+import processing.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by sebchaparr on 8/07/18.
  */
 public class Cone extends PApplet{
     Scene scene;
-    Node eye;
-    //String path = "/testing/data/bvh/walk-03-sneak-yokoyama.bvh";
     CCDSolver ccd_solver;
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
-
-    ArrayList<Target> targets = new ArrayList<Target>();
-    int num_joints = 12;
+    ArrayList<Shape> targets = new ArrayList<Shape>();
+    int num_joints = 10;
 
     public void settings() {
         size(700, 700, P3D);
     }
 
-    int num = 0;
     float boneLength = 50;
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        eye = new InteractiveNode(scene);
-        scene.setRadius(200);
+        scene.setRadius(num_joints * boneLength / 2.f);
+        scene.fitBall();
+        scene.eye().translate(0, scene.radius(), 0);
 
-        scene.setEye(eye);
-        scene.setFieldOfView(PI / 3);
-        scene.setDefaultGrabber(eye);
-        scene.fitBallInterpolation();
 
-        targets.add(new Target(scene));
-        targets.add(new Target(scene));
-        targets.add(new Target(scene));
+        PShape redBall = createShape(SPHERE, 5);
+        redBall.setStroke(false);
+        redBall.setFill(color(255,0,0));
+
+        targets.add(new Shape(scene, redBall));
+        targets.add(new Shape(scene, redBall));
+        targets.add(new Shape(scene, redBall));
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         float v = 10;
@@ -64,9 +54,9 @@ public class Cone extends PApplet{
         vertices.add(new Vector(v, v));
         vertices.add(new Vector(-v, v));
 
-        ArrayList<Node> structure1;
-        ArrayList<Node> structure2;
-        ArrayList<Node> structure3;
+        ArrayList<Frame> structure1;
+        ArrayList<Frame> structure2;
+        ArrayList<Frame> structure3;
 
 
         structure1 = generateChain(num_joints, boneLength, new Vector(-scene.radius()/2.f, 0, 0));
@@ -128,9 +118,7 @@ public class Cone extends PApplet{
         lights();
         //Draw Constraints
         scene.drawAxes();
-        for (Node frame : scene.nodes()) {
-            if (frame instanceof Shape) ((Shape) frame).draw();
-        }
+        scene.traverse();
         for(ChainSolver chain_solver : chain_solvers){
             if(show1) draw_pos(prev, color(0,255,0), 3);
             if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
@@ -145,84 +133,76 @@ public class Cone extends PApplet{
     public void setConstraint(ArrayList<Vector> vertices, Frame f, Vector twist, float boneLength){
         PlanarPolygon constraint = new PlanarPolygon(vertices);
         constraint.setHeight(boneLength / 2.f);
-        constraint.setRestRotation(f.rotation().get(), f.transformOf(new Vector(0, 1, 0)), f.transformOf(twist));
+        constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
         f.setConstraint(constraint);
     }
 
-    public ArrayList<Node> generateStructure(float boneLength, Vector o){
+    public ArrayList<Frame> generateStructure(float boneLength, Vector o){
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         vertices.add(new Vector(-10, -10));
         vertices.add(new Vector(0, -10));
         vertices.add(new Vector(0, 0));
         vertices.add(new Vector(-10, 0));
 
-        int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
-        Joint prev = new Joint(scene, color);
+        Joint prev = new Joint(scene);
         Joint current = prev;
         Joint root = current;
-        root.setRoot(true);
+        root.isRoot = true;
         //current.setRotation(Quaternion.random());
-
-        color = color(random(0, 255), random(0, 255), random(0, 255), 100);
-        current = new Joint(scene, color);
-        current.setReference(prev);
+        current = new Joint(scene);
+        current.frame.setReference(prev.frame);
         prev = current;
         //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength,0);
-        setConstraint(vertices,current, new Vector(0,boneLength,0),boneLength);
+        current.frame.setPosition(0,boneLength,0);
+        setConstraint(vertices,current.frame, new Vector(0,boneLength,0),boneLength);
 
-
-        color = color(random(0, 255), random(0, 255), random(0, 255), 100);
-        current = new Joint(scene, color);
-        current.setReference(prev);
+        current = new Joint(scene);
+        current.frame.setReference(prev.frame);
         prev = current;
         //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength*2,0);
-        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
+        current.frame.setPosition(0,boneLength*2,0);
+        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
 
-        color = color(random(0, 255), random(0, 255), random(0, 255), 100);
-        current = new Joint(scene, color);
-        current.setReference(prev);
+        current = new Joint(scene);
+        current.frame.setReference(prev.frame);
         //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
+        current.frame.setPosition(0,boneLength*2,boneLength*2);
+        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
 
+        root.frame.setPosition(o);
 
-        root.setPosition(o);
-
-        return scene.branch(root);
+        return (ArrayList) scene.branch(root.frame);
     }
 
-    public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation) {
-        Joint prevFrame = null;
+    public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
+        Joint prevJoint = null;
         Joint chainRoot = null;
-        int color = color(random(0, 255), random(0, 255), random(0, 255), 100);
         for (int i = 0; i < num_joints; i++) {
-            Joint iFrame;
-            iFrame = new Joint(scene, color);
+            Joint joint;
+            joint = new Joint(scene);
             if (i == 0)
-                chainRoot = iFrame;
-            if (prevFrame != null) iFrame.setReference(prevFrame);
+                chainRoot = joint;
+            if (prevJoint != null) joint.frame.setReference(prevJoint.frame);
             float x = 0;
             float z = 1;
             float y = 0;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
             translate.multiply(boneLength);
-            iFrame.setTranslation(translate);
-            iFrame.setPrecision(Node.Precision.FIXED);
-            prevFrame = iFrame;
+            joint.frame.setTranslation(translate);
+            joint.frame.setPrecision(Frame.Precision.FIXED);
+            prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        chainRoot.setTranslation(translation);
+        chainRoot.frame.setTranslation(translation);
         //chainRoot.setupHierarchy();
-        chainRoot.setRoot(true);
-        return scene.branch(chainRoot);
+        chainRoot.isRoot = true;
+        return (ArrayList) scene.branch(chainRoot.frame);
     }
 
     boolean read = false;
     boolean solve = false;
-    Node n = null;
+    Frame n = null;
     float d = 5;
     boolean show1 = true, show2 = true, show3 = true;
 
@@ -230,8 +210,8 @@ public class Cone extends PApplet{
     ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
-        if(scene.mouse().trackedGrabber() != null) {
-            n =  (Node) scene.mouse().trackedGrabber();
+        if(scene.trackedFrame() != null) {
+            n =  scene.trackedFrame();
             if(n != null) {
                 if (key == 'A' || key == 'a') {
                     d += 1;
@@ -345,6 +325,32 @@ public class Cone extends PApplet{
 
     }
 
+    @Override
+    public void mouseMoved() {
+        scene.cast();
+    }
+
+    public void mouseDragged() {
+        if (mouseButton == LEFT){
+            scene.spin();
+        } else if (mouseButton == RIGHT) {
+            scene.translate();
+        } else {
+            scene.zoom(scene.mouseDX());
+        }
+    }
+
+    public void mouseWheel(MouseEvent event) {
+        scene.scale(event.getCount() * 20);
+    }
+
+    public void mouseClicked(MouseEvent event) {
+        if (event.getCount() == 2)
+            if (event.getButton() == LEFT)
+                scene.focus();
+            else
+                scene.align();
+    }
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.constraintTest.Cone"});

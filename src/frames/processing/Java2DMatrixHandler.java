@@ -30,7 +30,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   /**
-   * Returns the the PGraphics object to be bound by this handler.
+   * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
     return _pgraphics;
@@ -60,7 +60,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void beginScreenCoordinates() {
+  public void beginScreenDrawing() {
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
 
@@ -74,7 +74,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void endScreenCoordinates() {
+  public void endScreenDrawing() {
     popModelView();
   }
 
@@ -90,7 +90,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix modelView() {
-    return Scene.toMat(new PMatrix2D(pg().getMatrix()));
+    return Scene.toMatrix(new PMatrix2D(pg().getMatrix()));
   }
 
   @Override

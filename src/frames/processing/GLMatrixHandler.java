@@ -28,7 +28,7 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   /**
-   * Returns the the PGraphics object to be bound by this handler.
+   * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphicsOpenGL pggl() {
     return _pgraphics;
@@ -46,7 +46,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix projection() {
-    return Scene.toMat(pggl().projection.get());
+    return Scene.toMatrix(pggl().projection.get());
   }
 
   @Override
@@ -71,7 +71,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public Matrix modelView() {
-    return Scene.toMat((PMatrix3D) pggl().getMatrix());
+    return Scene.toMatrix((PMatrix3D) pggl().getMatrix());
   }
 
   @Override
@@ -80,7 +80,7 @@ public class GLMatrixHandler extends MatrixHandler {
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(matrix));
-      pggl().projmodelview.set(Matrix.multiply(projection(), cacheView()).getTransposed(new float[16]));
+      pggl().projmodelview.set(Matrix.multiply(projection(), cacheView()).get(new float[16], false));
     }
   }
 

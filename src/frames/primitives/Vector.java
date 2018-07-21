@@ -30,10 +30,10 @@ public class Vector {
   /**
    * Returns whether or not this vector matches other.
    *
-   * @param other vec
+   * @param vector other vector
    */
-  public boolean matches(Vector other) {
-    return this._vector[0] == other._vector[0] && this._vector[1] == other._vector[1] && this._vector[2] == other._vector[2];
+  public boolean matches(Vector vector) {
+    return this._vector[0] == vector._vector[0] && this._vector[1] == vector._vector[1] && this._vector[2] == vector._vector[2];
   }
 
   /**
@@ -241,24 +241,6 @@ public class Vector {
       return new Vector(-vector._vector[2], 0.0f, vector._vector[0]);
     else
       return new Vector(-vector._vector[1], vector._vector[0], 0.0f);
-  }
-
-  /**
-   * Link {@code source} array to this vector.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _vector = source;
-  }
-
-  /**
-   * Unlinks this vector if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[3];
-    get(data);
-    set(data);
   }
 
   /**
@@ -658,7 +640,7 @@ public class Vector {
     }
     float m = magnitude();
     if (m > 0) {
-      target.set(_vector[0] / m, _vector[1] / m, _vector[02] / m);
+      target.set(_vector[0] / m, _vector[1] / m, _vector[2] / m);
     } else {
       target.set(_vector[0], _vector[1], _vector[2]);
     }

@@ -1,24 +1,18 @@
 package ik.mocap;
 
-import common.InteractiveNode;
 import frames.core.Graph;
-import frames.core.Node;
+import frames.core.Frame;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.FABRIKSolver;
 import frames.ik.Solver;
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.FixedConstraint;
+import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.FixedConstraint;
 import frames.processing.Scene;
 import frames.processing.Shape;
-import ik.common.Joint;
-import ik.common.Target;
-import ik.interactiveSkeleton.InteractiveJoint;
 import processing.core.PApplet;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +20,8 @@ import java.util.Map;
 /**
  * Created by sebchaparr on 23/03/18.
  */
-public class Viewer extends PApplet {
+public class Viewer extends PApplet{
+    /*
     Scene scene;
     Node eye;
     String path = "/testing/data/bvh/walk-03-sneak-yokoyama.bvh";
@@ -330,7 +325,7 @@ public class Viewer extends PApplet {
         }
 
     }
-
+    */
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.mocap.Viewer"});
     }

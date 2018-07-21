@@ -20,13 +20,13 @@ public class Quaternion {
   /**
    * Returns whether or not this quaternion matches other.
    *
-   * @param other quaternion
+   * @param quaternion other quaternion
    */
-  public boolean matches(Quaternion other) {
-    return _quaternion[0] == other._quaternion[0]
-        && _quaternion[1] == other._quaternion[1]
-        && _quaternion[2] == other._quaternion[2]
-        && _quaternion[3] == other._quaternion[3];
+  public boolean matches(Quaternion quaternion) {
+    return _quaternion[0] == quaternion._quaternion[0]
+        && _quaternion[1] == quaternion._quaternion[1]
+        && _quaternion[2] == quaternion._quaternion[2]
+        && _quaternion[3] == quaternion._quaternion[3];
   }
 
   /**
@@ -235,24 +235,6 @@ public class Quaternion {
     this._quaternion[1] = 0;
     this._quaternion[2] = 0;
     this._quaternion[3] = 1;
-  }
-
-  /**
-   * Link {@code source} array to this quaternion.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _quaternion = source;
-  }
-
-  /**
-   * Unlinks this quaternion if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[4];
-    get(data);
-    set(data);
   }
 
   public float[] get(float[] target) {
@@ -868,11 +850,11 @@ public class Quaternion {
    * @see #angle()
    */
   public Vector axis() {
-    Vector res = new Vector(x(), y(), z());
-    float sinus = res.magnitude();
+    Vector axis = new Vector(x(), y(), z());
+    float sinus = axis.magnitude();
     if (sinus != 0)
-      res.divide(sinus);
-    return res;
+      axis.divide(sinus);
+    return axis;
   }
 
   /**
@@ -888,7 +870,9 @@ public class Quaternion {
   }
 
   /**
-   * Same as {@code return axis().vec[2] > 0 ? angle() : -angle()}.
+   * Same as {@code return axis().z() > 0 ? angle() : -angle()}.
+   *
+   * @see #angle()
    */
   public float angle2D() {
     return axis()._vector[2] > 0 ? angle() : -angle();

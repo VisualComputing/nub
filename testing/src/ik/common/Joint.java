@@ -1,51 +1,58 @@
 package ik.common;
 
-import common.InteractiveShape;
+/**
+ * Created by sebchaparr on 21/07/18.
+ */
+
+import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import processing.core.PGraphics;
+import processing.core.PApplet;
 
-/**
- * Created by sebchaparr on 28/01/18.
- */
-public class Joint extends InteractiveShape {
-  private int color;
-  private boolean root = false;
+public class Joint {
+    Scene scene;
+    PApplet pApplet;
+    public Frame frame;
+    int color;
+    //set to true only when the joint is the root (for rendering purposes)
+    public boolean isRoot = false;
 
-  public Joint(Scene scene) {
-    this(scene, scene.pApplet().color(scene.pApplet().random(0, 255), scene.pApplet().random(0, 255), scene.pApplet().random(0, 255)));
-  }
-
-  public Joint(Scene scene, int color) {
-    super(scene);
-    this.color = color;
-  }
-
-  public void setRoot(boolean root) {
-    this.root = root;
-  }
-
-  public void set(PGraphics pg) {
-    pg.pushStyle();
-    pg.fill(color);
-    pg.noStroke();
-    if (pg.is2D()) pg.ellipse(0, 0, 3, 3);
-    else pg.sphere(3);
-
-    if (!root) {
-      pg.strokeWeight(5);
-      pg.stroke(color);
-      Vector v = localCoordinatesOf(new Vector());
-      if (pg.is2D()) {
-        pg.line(0, 0, v.x(), v.y());
-      } else {
-        pg.line(0, 0, 0, v.x(), v.y(), v.z());
-      }
-      pg.popStyle();
+    public Joint(Scene scn, int color){
+        scene = scn;
+        pApplet = scene.pApplet();
+        this.color = color;
+        frame = new Frame(scene){
+            @Override
+            public void visit(){
+                render();
+            }
+        };
     }
 
-    if (constraint() != null) {
-      graph().drawConstraint(pg, this);
+    public Joint(Scene scn){
+        this(scn, scn.pApplet().color(scn.pApplet().random(0,255),scn.pApplet().random(0,255), scn.pApplet().random(0,255)));
     }
-  }
+
+    public void render(){
+        pApplet.pushStyle();
+        pApplet.fill(color);
+        pApplet.noStroke();
+        if (pApplet.g.is2D()) pApplet.ellipse(0, 0, 3, 3);
+        else pApplet.sphere(3);
+        if (!isRoot) {
+            pApplet.strokeWeight(5);
+            pApplet.stroke(color);
+            Vector v = frame.location(new Vector(), frame.reference());
+            if (pApplet.g.is2D()) {
+                pApplet.line(0, 0, v.x(), v.y());
+            } else {
+                pApplet.line(0, 0, 0, v.x(), v.y(), v.z());
+            }
+            pApplet.popStyle();
+        }
+
+        if (frame.constraint() != null) {
+            scene.drawConstraint(scene.frontBuffer(), frame);
+        }
+    }
 }

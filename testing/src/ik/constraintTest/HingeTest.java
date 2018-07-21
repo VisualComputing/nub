@@ -1,22 +1,19 @@
 package ik.constraintTest;
 
-import common.InteractiveNode;
+
 import frames.core.Graph;
-import frames.core.Node;
+import frames.core.Frame;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.FABRIKSolver;
 import frames.ik.Solver;
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.Hinge;
-import frames.primitives.constraint.PlanarPolygon;
+import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.Hinge;
+import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
 import frames.processing.Shape;
-import ik.common.Joint;
-import ik.common.Target;
 import ik.mocap.BVHParser;
 import processing.core.PApplet;
 
@@ -28,7 +25,7 @@ import java.util.Map;
  * Created by sebchaparr on 8/07/18.
  */
 public class HingeTest extends PApplet {
-    Scene scene;
+/*    Scene scene;
     Node eye;
     int num_joints = 8;
     public static float constraint_factor_x = 170;
@@ -337,7 +334,7 @@ public class HingeTest extends PApplet {
 
     }
 
-
+*/
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.constraintTest.HingeTest"});
     }

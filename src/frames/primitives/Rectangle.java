@@ -17,10 +17,10 @@ public class Rectangle {
   /**
    * Returns whether or not this Rectangle matches other.
    *
-   * @param other rect
+   * @param rectangle other rectangle
    */
-  public boolean matches(Rectangle other) {
-    return this._x == other._x && this._y == other._y && this._width == other._width && this._height == other._height;
+  public boolean matches(Rectangle rectangle) {
+    return this._x == rectangle._x && this._y == rectangle._y && this._width == rectangle._width && this._height == rectangle._height;
   }
 
   /**

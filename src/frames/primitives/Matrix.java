@@ -18,12 +18,12 @@ public class Matrix {
   /**
    * Returns whether or not this matrix matches other.
    *
-   * @param other rect
+   * @param matrix other matrix
    */
-  public boolean matches(Matrix other) {
+  public boolean matches(Matrix matrix) {
     boolean result = true;
     for (int i = 0; i < _matrix.length; i++) {
-      if (_matrix[i] != other._matrix[i])
+      if (_matrix[i] != matrix._matrix[i])
         result = false;
       break;
     }
@@ -40,11 +40,23 @@ public class Matrix {
   }
 
   /**
-   * 16 consecutive values that are used as the elements of a 4 x 4 column-major matrix.
+   * Same as {@code this(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true)}.
+   *
+   * @see #Matrix(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, boolean)
    */
   public Matrix(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
                 float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
-    set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15);
+    this(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true);
+  }
+
+  /**
+   * Same as {@code set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, columnMajorOrder)}.
+   *
+   * @see #set(float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, float, boolean)
+   */
+  public Matrix(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
+                float m9, float m10, float m11, float m12, float m13, float m14, float m15, boolean columnMajorOrder) {
+    set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, columnMajorOrder);
   }
 
   protected Matrix(Matrix matrix) {
@@ -52,24 +64,20 @@ public class Matrix {
   }
 
   /**
-   * Same as {@code this(data, false)}.
+   * Same as {@code this(data, true)}.
    *
    * @see #Matrix(float[], boolean)
    */
   public Matrix(float[] source) {
-    this(source, false);
+    this(source, true);
   }
 
   /**
-   * Sets the matrix contents from the 16 entry float array. If {@code transpose} is false
-   * the matrix contents are set in column major order, otherwise they're set in row-major
-   * order.
+   * Sets the matrix contents from the 16 entry {@code source} float array given in
+   * {@code columnMajorOrder} or row major order (if {@code columnMajorOrder} is {@code false}).
    */
-  public Matrix(float[] source, boolean transposed) {
-    if (transposed)
-      setTransposed(source);
-    else
-      set(source);
+  public Matrix(float[] source, boolean columnMajorOrder) {
+    set(source, columnMajorOrder);
   }
 
   /**
@@ -304,24 +312,6 @@ public class Matrix {
   }
 
   /**
-   * Link {@code source} array to this matrix.
-   *
-   * @see #unLink()
-   */
-  public void link(float[] source) {
-    _matrix = source;
-  }
-
-  /**
-   * Unlinks this matrix if it was previously {@link #link(float[])}.
-   */
-  public void unLink() {
-    float[] data = new float[16];
-    get(data);
-    set(data);
-  }
-
-  /**
    * Returns a copy of this matrix.
    */
   public Matrix get() {
@@ -329,65 +319,74 @@ public class Matrix {
   }
 
   /**
-   * Copies the matrix contents into a 16 entry float array. If target is null (or not the
-   * correct size), a new array will be created.
+   * Internally used by both {@link #set(float[], boolean)} and {@link #get(float[], boolean)}.
+   * <p>
+   * Sets {@code target} array from {@code source} array according to {@code columnMajorOrder}.
    */
-  public float[] get(float[] target) {
-    if ((target == null) || (target.length != 16)) {
-      target = new float[16];
+  protected void _set(float[] target, float[] source, boolean columnMajorOrder) {
+    if (columnMajorOrder) {
+      target[0] = source[0];
+      target[1] = source[1];
+      target[2] = source[2];
+      target[3] = source[3];
+
+      target[4] = source[4];
+      target[5] = source[5];
+      target[6] = source[6];
+      target[7] = source[7];
+
+      target[8] = source[8];
+      target[9] = source[9];
+      target[10] = source[10];
+      target[11] = source[11];
+
+      target[12] = source[12];
+      target[13] = source[13];
+      target[14] = source[14];
+      target[15] = source[15];
+    } else {
+      target[0] = source[0];
+      target[1] = source[4];
+      target[2] = source[8];
+      target[3] = source[12];
+
+      target[4] = source[1];
+      target[5] = source[5];
+      target[6] = source[9];
+      target[7] = source[13];
+
+      target[8] = source[2];
+      target[9] = source[6];
+      target[10] = source[10];
+      target[11] = source[14];
+
+      target[12] = source[3];
+      target[13] = source[7];
+      target[14] = source[11];
+      target[15] = source[15];
     }
-    target[0] = _matrix[0];
-    target[1] = _matrix[1];
-    target[2] = _matrix[2];
-    target[3] = _matrix[3];
-
-    target[4] = _matrix[4];
-    target[5] = _matrix[5];
-    target[6] = _matrix[6];
-    target[7] = _matrix[7];
-
-    target[8] = _matrix[8];
-    target[9] = _matrix[9];
-    target[10] = _matrix[10];
-    target[11] = _matrix[11];
-
-    target[12] = _matrix[12];
-    target[13] = _matrix[13];
-    target[14] = _matrix[14];
-    target[15] = _matrix[15];
-
-    return target;
   }
 
   /**
-   * Copies the transposed matrix contents into a 16 entry float array. If target is null
-   * (or not the correct size), a new array will be created.
+   * Same as {@code return get(target, true)}.
+   *
+   * @see #get(float[], boolean)
    */
-  public float[] getTransposed(float[] rowMajor) {
-    if ((rowMajor == null) || (rowMajor.length != 16)) {
-      rowMajor = new float[16];
+  public float[] get(float[] target) {
+    return get(target, true);
+  }
+
+  /**
+   * Copies the matrix contents into a 16 entry {@code target} float array. If target is null
+   * (or not the correct size), a new array will be created. Column or row major order is defined
+   * by the {@code columnMajorOrder} boolean parameter.
+   */
+  public float[] get(float[] target, boolean columnMajorOrder) {
+    if ((target == null) || (target.length != 16)) {
+      target = new float[16];
     }
-    rowMajor[0] = _matrix[0];
-    rowMajor[1] = _matrix[4];
-    rowMajor[2] = _matrix[8];
-    rowMajor[3] = _matrix[12];
-
-    rowMajor[4] = _matrix[1];
-    rowMajor[5] = _matrix[5];
-    rowMajor[6] = _matrix[9];
-    rowMajor[7] = _matrix[13];
-
-    rowMajor[8] = _matrix[2];
-    rowMajor[9] = _matrix[6];
-    rowMajor[10] = _matrix[10];
-    rowMajor[11] = _matrix[14];
-
-    rowMajor[12] = _matrix[3];
-    rowMajor[13] = _matrix[7];
-    rowMajor[14] = _matrix[11];
-    rowMajor[15] = _matrix[15];
-
-    return rowMajor;
+    _set(target, _matrix, columnMajorOrder);
+    return target;
   }
 
   /**
@@ -398,105 +397,38 @@ public class Matrix {
         matrix._matrix[9], matrix._matrix[10], matrix._matrix[11], matrix._matrix[12], matrix._matrix[13], matrix._matrix[14], matrix._matrix[15]);
   }
 
+  /**
+   * Same as {@code set(source, true)}.
+   *
+   * @see #set(float[], boolean)
+   */
   public void set(float[] source) {
-    if (source.length == 16) {
-      _matrix[0] = source[0];
-      _matrix[1] = source[1];
-      _matrix[2] = source[2];
-      _matrix[3] = source[3];
-
-      _matrix[4] = source[4];
-      _matrix[5] = source[5];
-      _matrix[6] = source[6];
-      _matrix[7] = source[7];
-
-      _matrix[8] = source[8];
-      _matrix[9] = source[9];
-      _matrix[10] = source[10];
-      _matrix[11] = source[11];
-
-      _matrix[12] = source[12];
-      _matrix[13] = source[13];
-      _matrix[14] = source[14];
-      _matrix[15] = source[15];
-    }
+    set(source, true);
   }
 
   /**
-   * Sets the row-major matrix contents from the given 16 consecutive values.
-   *
-   * @see #set(float[])
+   * Sets the matrix contents from the 16 entry float {@code source} array. Column or row major
+   * order is defined by the {@code columnMajorOrder} boolean parameter.
    */
-  public void setTransposed(float[] rowMajor) {
-    if (rowMajor.length == 16) {
-      _matrix[0] = rowMajor[0];
-      _matrix[1] = rowMajor[4];
-      _matrix[2] = rowMajor[8];
-      _matrix[3] = rowMajor[12];
+  public void set(float[] source, boolean columnMajorOrder) {
+    if (source.length == 16)
+      _set(_matrix, source, columnMajorOrder);
+  }
 
-      _matrix[4] = rowMajor[1];
-      _matrix[5] = rowMajor[5];
-      _matrix[6] = rowMajor[9];
-      _matrix[7] = rowMajor[13];
-
-      _matrix[8] = rowMajor[2];
-      _matrix[9] = rowMajor[6];
-      _matrix[10] = rowMajor[10];
-      _matrix[11] = rowMajor[14];
-
-      _matrix[12] = rowMajor[3];
-      _matrix[13] = rowMajor[7];
-      _matrix[14] = rowMajor[11];
-      _matrix[15] = rowMajor[15];
-    }
+  public void set(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
+                  float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
+    set(m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15, true);
   }
 
   /**
    * Sets the column-major matrix contents from the given 16 consecutive values.
    */
   public void set(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
-                  float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
-    this._matrix[0] = m0;
-    this._matrix[1] = m1;
-    this._matrix[2] = m2;
-    this._matrix[3] = m3;
-    this._matrix[4] = m4;
-    this._matrix[5] = m5;
-    this._matrix[6] = m6;
-    this._matrix[7] = m7;
-    this._matrix[8] = m8;
-    this._matrix[9] = m9;
-    this._matrix[10] = m10;
-    this._matrix[11] = m11;
-    this._matrix[12] = m12;
-    this._matrix[13] = m13;
-    this._matrix[14] = m14;
-    this._matrix[15] = m15;
-  }
-
-  /**
-   * Sets the matrix contents from the given elements where first "index" is row, second
-   * is column, e.g., m20 corresponds to the element located at the third row and first
-   * column of the matrix.
-   */
-  public void setTransposed(float m00, float m01, float m02, float m03, float m10, float m11, float m12,
-                            float m13, float m20, float m21, float m22, float m23, float m30, float m31, float m32, float m33) {
-    this._matrix[0] = m00;
-    this._matrix[4] = m01;
-    this._matrix[8] = m02;
-    this._matrix[12] = m03;
-    this._matrix[1] = m10;
-    this._matrix[5] = m11;
-    this._matrix[9] = m12;
-    this._matrix[13] = m13;
-    this._matrix[2] = m20;
-    this._matrix[6] = m21;
-    this._matrix[10] = m22;
-    this._matrix[14] = m23;
-    this._matrix[3] = m30;
-    this._matrix[7] = m31;
-    this._matrix[11] = m32;
-    this._matrix[15] = m33;
+                  float m9, float m10, float m11, float m12, float m13, float m14, float m15, boolean columnMajorOrder) {
+    set(new float[]{m0, m1, m2, m3,
+        m4, m5, m6, m7,
+        m8, m9, m10, m11,
+        m12, m13, m14, m15}, columnMajorOrder);
   }
 
   /**
@@ -532,8 +464,7 @@ public class Matrix {
   public void rotateX(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1);
-    apply(1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -542,8 +473,7 @@ public class Matrix {
   public void rotateY(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1);
-    apply(c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1);
+    apply(new Matrix(c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -552,8 +482,7 @@ public class Matrix {
   public void rotateZ(float angle) {
     float c = (float) Math.cos(angle);
     float s = (float) Math.sin(angle);
-    // applyTranspose(c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-    apply(c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -580,16 +509,15 @@ public class Matrix {
     float s = (float) Math.sin(angle);
     float t = 1.0f - c;
 
-    apply((t * v0 * v0) + c, (t * v0 * v1) + (s * v2), (t * v0 * v2) - (s * v1), 0, (t * v0 * v1) - (s * v2),
+    apply(new Matrix((t * v0 * v0) + c, (t * v0 * v1) + (s * v2), (t * v0 * v2) - (s * v1), 0, (t * v0 * v1) - (s * v2),
         (t * v1 * v1) + c, (t * v1 * v2) + (s * v0), 0, (t * v0 * v2) + (s * v1), (t * v1 * v2) - (s * v0),
-        (t * v2 * v2) + c, 0, 0, 0, 0, 1);
+        (t * v2 * v2) + c, 0, 0, 0, 0, 1));
   }
 
   /**
    * Multiply this matrix by the scaling matrix defined from {@code s}.
    */
   public void scale(float s) {
-    // apply(s, 0, 0, 0, 0, s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1);
     scale(s, s, s);
   }
 
@@ -597,7 +525,6 @@ public class Matrix {
    * Multiply this matrix by the scaling matrix defined from {@code sx} and {@code sy}.
    */
   public void scale(float sx, float sy) {
-    // apply(sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     scale(sx, sy, 1);
   }
 
@@ -606,7 +533,6 @@ public class Matrix {
    * {@code z}.
    */
   public void scale(float x, float y, float z) {
-    // apply(x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1);
     _matrix[0] *= x;
     _matrix[4] *= y;
     _matrix[8] *= z;
@@ -626,7 +552,7 @@ public class Matrix {
    */
   public void shearX(float angle) {
     float t = (float) Math.tan(angle);
-    apply(1, 0, 0, 0, t, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, 0, 0, 0, t, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
@@ -634,48 +560,49 @@ public class Matrix {
    */
   public void shearY(float angle) {
     float t = (float) Math.tan(angle);
-    apply(1, t, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+    apply(new Matrix(1, t, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
   }
 
   /**
-   * Multiply this matrix by the 16 consecutive float array defined by {@code source}.
-   */
-  public void apply(float[] source) {
-    if (source != null) {
-      if (source.length == 16) {
-        apply(source[0], source[1], source[2], source[3], source[4], source[5], source[6], source[7], source[8], source[9],
-            source[10], source[11], source[12], source[13], source[14], source[15]);
-      }
-    }
-  }
-
-  /**
-   * Multiply this matrix by the transposed matrix defined from the 16 consecutive float
-   * {@code source} array.
-   */
-  public void applyTransposed(float[] rowMajor) {
-    if (rowMajor != null) {
-      if (rowMajor.length == 16) {
-        applyTransposed(rowMajor[0], rowMajor[1], rowMajor[2], rowMajor[3], rowMajor[4], rowMajor[5], rowMajor[6],
-            rowMajor[7], rowMajor[8], rowMajor[9], rowMajor[10], rowMajor[11], rowMajor[12], rowMajor[13], rowMajor[14],
-            rowMajor[15]);
-      }
-    }
-  }
-
-  /**
-   * Multiply this matrix by the one defined from {@code source}.
+   * Multiply this matrix by {@code matrix}.
    */
   public void apply(Matrix matrix) {
-    // applyTranspose(source.mat[0], source.mat[4], source.mat[8],
-    // source.mat[12], source.mat[1], source.mat[5],
-    // source.mat[9], source.mat[13], source.mat[2], source.mat[6],
-    // source.mat[10], source.mat[14], source.mat[3],
-    // source.mat[7], source.mat[11], source.mat[15]);
-    // Same as the previous line:
-    apply(matrix._matrix[0], matrix._matrix[1], matrix._matrix[2], matrix._matrix[3], matrix._matrix[4], matrix._matrix[5], matrix._matrix[6],
-        matrix._matrix[7], matrix._matrix[8], matrix._matrix[9], matrix._matrix[10], matrix._matrix[11], matrix._matrix[12], matrix._matrix[13],
-        matrix._matrix[14], matrix._matrix[15]);
+    float r00 = _matrix[0] * matrix._matrix[0] + _matrix[4] * matrix._matrix[1] + _matrix[8] * matrix._matrix[2] + _matrix[12] * matrix._matrix[3];
+    float r01 = _matrix[0] * matrix._matrix[4] + _matrix[4] * matrix._matrix[5] + _matrix[8] * matrix._matrix[6] + _matrix[12] * matrix._matrix[7];
+    float r02 = _matrix[0] * matrix._matrix[8] + _matrix[4] * matrix._matrix[9] + _matrix[8] * matrix._matrix[10] + _matrix[12] * matrix._matrix[11];
+    float r03 = _matrix[0] * matrix._matrix[12] + _matrix[4] * matrix._matrix[13] + _matrix[8] * matrix._matrix[14] + _matrix[12] * matrix._matrix[15];
+
+    float r10 = _matrix[1] * matrix._matrix[0] + _matrix[5] * matrix._matrix[1] + _matrix[9] * matrix._matrix[2] + _matrix[13] * matrix._matrix[3];
+    float r11 = _matrix[1] * matrix._matrix[4] + _matrix[5] * matrix._matrix[5] + _matrix[9] * matrix._matrix[6] + _matrix[13] * matrix._matrix[7];
+    float r12 = _matrix[1] * matrix._matrix[8] + _matrix[5] * matrix._matrix[9] + _matrix[9] * matrix._matrix[10] + _matrix[13] * matrix._matrix[11];
+    float r13 = _matrix[1] * matrix._matrix[12] + _matrix[5] * matrix._matrix[13] + _matrix[9] * matrix._matrix[14] + _matrix[13] * matrix._matrix[15];
+
+    float r20 = _matrix[2] * matrix._matrix[0] + _matrix[6] * matrix._matrix[1] + _matrix[10] * matrix._matrix[2] + _matrix[14] * matrix._matrix[3];
+    float r21 = _matrix[2] * matrix._matrix[4] + _matrix[6] * matrix._matrix[5] + _matrix[10] * matrix._matrix[6] + _matrix[14] * matrix._matrix[7];
+    float r22 = _matrix[2] * matrix._matrix[8] + _matrix[6] * matrix._matrix[9] + _matrix[10] * matrix._matrix[10] + _matrix[14] * matrix._matrix[11];
+    float r23 = _matrix[2] * matrix._matrix[12] + _matrix[6] * matrix._matrix[13] + _matrix[10] * matrix._matrix[14] + _matrix[14] * matrix._matrix[15];
+
+    float r30 = _matrix[3] * matrix._matrix[0] + _matrix[7] * matrix._matrix[1] + _matrix[11] * matrix._matrix[2] + _matrix[15] * matrix._matrix[3];
+    float r31 = _matrix[3] * matrix._matrix[4] + _matrix[7] * matrix._matrix[5] + _matrix[11] * matrix._matrix[6] + _matrix[15] * matrix._matrix[7];
+    float r32 = _matrix[3] * matrix._matrix[8] + _matrix[7] * matrix._matrix[9] + _matrix[11] * matrix._matrix[10] + _matrix[15] * matrix._matrix[11];
+    float r33 = _matrix[3] * matrix._matrix[12] + _matrix[7] * matrix._matrix[13] + _matrix[11] * matrix._matrix[14] + _matrix[15] * matrix._matrix[15];
+
+    _matrix[0] = r00;
+    _matrix[4] = r01;
+    _matrix[8] = r02;
+    _matrix[12] = r03;
+    _matrix[1] = r10;
+    _matrix[5] = r11;
+    _matrix[9] = r12;
+    _matrix[13] = r13;
+    _matrix[2] = r20;
+    _matrix[6] = r21;
+    _matrix[10] = r22;
+    _matrix[14] = r23;
+    _matrix[3] = r30;
+    _matrix[7] = r31;
+    _matrix[11] = r32;
+    _matrix[15] = r33;
   }
 
   /**
@@ -713,221 +640,6 @@ public class Matrix {
   }
 
   /**
-   * Multiply this matrix by the 16 consecutive values that are used as the elements of a
-   * 4 x 4 column-major matrix.
-   */
-  public void apply(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8, float m9,
-                    float m10, float m11, float m12, float m13, float m14, float m15) {
-
-    float r00 = _matrix[0] * m0 + _matrix[4] * m1 + _matrix[8] * m2 + _matrix[12] * m3;
-    float r01 = _matrix[0] * m4 + _matrix[4] * m5 + _matrix[8] * m6 + _matrix[12] * m7;
-    float r02 = _matrix[0] * m8 + _matrix[4] * m9 + _matrix[8] * m10 + _matrix[12] * m11;
-    float r03 = _matrix[0] * m12 + _matrix[4] * m13 + _matrix[8] * m14 + _matrix[12] * m15;
-
-    float r10 = _matrix[1] * m0 + _matrix[5] * m1 + _matrix[9] * m2 + _matrix[13] * m3;
-    float r11 = _matrix[1] * m4 + _matrix[5] * m5 + _matrix[9] * m6 + _matrix[13] * m7;
-    float r12 = _matrix[1] * m8 + _matrix[5] * m9 + _matrix[9] * m10 + _matrix[13] * m11;
-    float r13 = _matrix[1] * m12 + _matrix[5] * m13 + _matrix[9] * m14 + _matrix[13] * m15;
-
-    float r20 = _matrix[2] * m0 + _matrix[6] * m1 + _matrix[10] * m2 + _matrix[14] * m3;
-    float r21 = _matrix[2] * m4 + _matrix[6] * m5 + _matrix[10] * m6 + _matrix[14] * m7;
-    float r22 = _matrix[2] * m8 + _matrix[6] * m9 + _matrix[10] * m10 + _matrix[14] * m11;
-    float r23 = _matrix[2] * m12 + _matrix[6] * m13 + _matrix[10] * m14 + _matrix[14] * m15;
-
-    float r30 = _matrix[3] * m0 + _matrix[7] * m1 + _matrix[11] * m2 + _matrix[15] * m3;
-    float r31 = _matrix[3] * m4 + _matrix[7] * m5 + _matrix[11] * m6 + _matrix[15] * m7;
-    float r32 = _matrix[3] * m8 + _matrix[7] * m9 + _matrix[11] * m10 + _matrix[15] * m11;
-    float r33 = _matrix[3] * m12 + _matrix[7] * m13 + _matrix[11] * m14 + _matrix[15] * m15;
-
-    _matrix[0] = r00;
-    _matrix[4] = r01;
-    _matrix[8] = r02;
-    _matrix[12] = r03;
-    _matrix[1] = r10;
-    _matrix[5] = r11;
-    _matrix[9] = r12;
-    _matrix[13] = r13;
-    _matrix[2] = r20;
-    _matrix[6] = r21;
-    _matrix[10] = r22;
-    _matrix[14] = r23;
-    _matrix[3] = r30;
-    _matrix[7] = r31;
-    _matrix[11] = r32;
-    _matrix[15] = r33;
-  }
-
-  /**
-   * Multiply this matrix by the 16 consecutive values that are used as the elements of a
-   * 4 x 4 row-major matrix. First "index" is row, second is column, e.g., n20 corresponds
-   * to the element located at the third row and first column of the matrix.
-   */
-  public void applyTransposed(float n00, float n01, float n02, float n03, float n10, float n11, float n12, float n13,
-                              float n20, float n21, float n22, float n23, float n30, float n31, float n32, float n33) {
-
-    float r00 = _matrix[0] * n00 + _matrix[4] * n10 + _matrix[8] * n20 + _matrix[12] * n30;
-    float r01 = _matrix[0] * n01 + _matrix[4] * n11 + _matrix[8] * n21 + _matrix[12] * n31;
-    float r02 = _matrix[0] * n02 + _matrix[4] * n12 + _matrix[8] * n22 + _matrix[12] * n32;
-    float r03 = _matrix[0] * n03 + _matrix[4] * n13 + _matrix[8] * n23 + _matrix[12] * n33;
-
-    float r10 = _matrix[1] * n00 + _matrix[5] * n10 + _matrix[9] * n20 + _matrix[13] * n30;
-    float r11 = _matrix[1] * n01 + _matrix[5] * n11 + _matrix[9] * n21 + _matrix[13] * n31;
-    float r12 = _matrix[1] * n02 + _matrix[5] * n12 + _matrix[9] * n22 + _matrix[13] * n32;
-    float r13 = _matrix[1] * n03 + _matrix[5] * n13 + _matrix[9] * n23 + _matrix[13] * n33;
-
-    float r20 = _matrix[2] * n00 + _matrix[6] * n10 + _matrix[10] * n20 + _matrix[14] * n30;
-    float r21 = _matrix[2] * n01 + _matrix[6] * n11 + _matrix[10] * n21 + _matrix[14] * n31;
-    float r22 = _matrix[2] * n02 + _matrix[6] * n12 + _matrix[10] * n22 + _matrix[14] * n32;
-    float r23 = _matrix[2] * n03 + _matrix[6] * n13 + _matrix[10] * n23 + _matrix[14] * n33;
-
-    float r30 = _matrix[3] * n00 + _matrix[7] * n10 + _matrix[11] * n20 + _matrix[15] * n30;
-    float r31 = _matrix[3] * n01 + _matrix[7] * n11 + _matrix[11] * n21 + _matrix[15] * n31;
-    float r32 = _matrix[3] * n02 + _matrix[7] * n12 + _matrix[11] * n22 + _matrix[15] * n32;
-    float r33 = _matrix[3] * n03 + _matrix[7] * n13 + _matrix[11] * n23 + _matrix[15] * n33;
-
-    _matrix[0] = r00;
-    _matrix[4] = r01;
-    _matrix[8] = r02;
-    _matrix[12] = r03;
-    _matrix[1] = r10;
-    _matrix[5] = r11;
-    _matrix[9] = r12;
-    _matrix[13] = r13;
-    _matrix[2] = r20;
-    _matrix[6] = r21;
-    _matrix[10] = r22;
-    _matrix[14] = r23;
-    _matrix[3] = r30;
-    _matrix[7] = r31;
-    _matrix[11] = r32;
-    _matrix[15] = r33;
-  }
-
-  /**
-   * Pre-multiply this matrix by the 16 consecutive float array defined by {@code source}.
-   */
-  public void preApply(float[] source) {
-    if (source != null) {
-      if (source.length == 16) {
-        preApply(source[0], source[1], source[2], source[3], source[4], source[5], source[6], source[7], source[8],
-            source[9], source[10], source[11], source[12], source[13], source[14], source[15]);
-      }
-    }
-  }
-
-  /**
-   * Pre-multiply this matrix by the transposed matrix defined from the 16 consecutive
-   * float {@code rowMajor} array.
-   */
-  public void preApplyTransposed(float[] rowMajor) {
-    if (rowMajor != null) {
-      if (rowMajor.length == 16) {
-        preApplyTransposed(rowMajor[0], rowMajor[1], rowMajor[2], rowMajor[3], rowMajor[4], rowMajor[5], rowMajor[6],
-            rowMajor[7], rowMajor[8], rowMajor[9], rowMajor[10], rowMajor[11], rowMajor[12], rowMajor[13], rowMajor[14],
-            rowMajor[15]);
-      }
-    }
-  }
-
-  /**
-   * Pre-multiply this matrix by the one defined from {@code left}.
-   */
-  public void preApply(Matrix left) {
-    preApply(left._matrix[0], left._matrix[1], left._matrix[2], left._matrix[3], left._matrix[4], left._matrix[5], left._matrix[6], left._matrix[7],
-        left._matrix[8], left._matrix[9], left._matrix[10], left._matrix[11], left._matrix[12], left._matrix[13], left._matrix[14], left._matrix[15]);
-  }
-
-  /**
-   * Pre-multiply this matrix by the 16 consecutive values that are used as the elements
-   * of a 4 x 4 column-major matrix.
-   */
-  public void preApply(float m0, float m1, float m2, float m3, float m4, float m5, float m6, float m7, float m8,
-                       float m9, float m10, float m11, float m12, float m13, float m14, float m15) {
-    float r00 = m0 * _matrix[0] + m4 * _matrix[1] + m8 * _matrix[2] + m12 * _matrix[3];
-    float r01 = m0 * _matrix[4] + m4 * _matrix[5] + m8 * _matrix[6] + m12 * _matrix[7];
-    float r02 = m0 * _matrix[8] + m4 * _matrix[9] + m8 * _matrix[10] + m12 * _matrix[11];
-    float r03 = m0 * _matrix[12] + m4 * _matrix[13] + m8 * _matrix[14] + m12 * _matrix[15];
-
-    float r10 = m1 * _matrix[0] + m5 * _matrix[1] + m9 * _matrix[2] + m13 * _matrix[3];
-    float r11 = m1 * _matrix[4] + m5 * _matrix[5] + m9 * _matrix[6] + m13 * _matrix[7];
-    float r12 = m1 * _matrix[8] + m5 * _matrix[9] + m9 * _matrix[10] + m13 * _matrix[11];
-    float r13 = m1 * _matrix[12] + m5 * _matrix[13] + m9 * _matrix[14] + m13 * _matrix[15];
-
-    float r20 = m2 * _matrix[0] + m6 * _matrix[1] + m10 * _matrix[2] + m14 * _matrix[3];
-    float r21 = m2 * _matrix[4] + m6 * _matrix[5] + m10 * _matrix[6] + m14 * _matrix[7];
-    float r22 = m2 * _matrix[8] + m6 * _matrix[9] + m10 * _matrix[10] + m14 * _matrix[11];
-    float r23 = m2 * _matrix[12] + m6 * _matrix[13] + m10 * _matrix[14] + m14 * _matrix[15];
-
-    float r30 = m3 * _matrix[0] + m7 * _matrix[1] + m11 * _matrix[2] + m15 * _matrix[3];
-    float r31 = m3 * _matrix[4] + m7 * _matrix[5] + m11 * _matrix[6] + m15 * _matrix[7];
-    float r32 = m3 * _matrix[8] + m7 * _matrix[9] + m11 * _matrix[10] + m15 * _matrix[11];
-    float r33 = m3 * _matrix[12] + m7 * _matrix[13] + m11 * _matrix[14] + m15 * _matrix[15];
-
-    _matrix[0] = r00;
-    _matrix[4] = r01;
-    _matrix[8] = r02;
-    _matrix[12] = r03;
-    _matrix[1] = r10;
-    _matrix[5] = r11;
-    _matrix[9] = r12;
-    _matrix[13] = r13;
-    _matrix[2] = r20;
-    _matrix[6] = r21;
-    _matrix[10] = r22;
-    _matrix[14] = r23;
-    _matrix[3] = r30;
-    _matrix[7] = r31;
-    _matrix[11] = r32;
-    _matrix[15] = r33;
-  }
-
-  /**
-   * Pre-multiply this matrix by the 16 consecutive values that are used as the elements
-   * of a 4 x 4 row-major matrix. First "index" is row, second is column, e.g., n20
-   * corresponds to the element located at the third row and first column of the matrix.
-   */
-  public void preApplyTransposed(float n00, float n01, float n02, float n03, float n10, float n11, float n12, float n13,
-                                 float n20, float n21, float n22, float n23, float n30, float n31, float n32, float n33) {
-
-    float r00 = n00 * _matrix[0] + n01 * _matrix[1] + n02 * _matrix[2] + n03 * _matrix[3];
-    float r01 = n00 * _matrix[4] + n01 * _matrix[5] + n02 * _matrix[6] + n03 * _matrix[7];
-    float r02 = n00 * _matrix[8] + n01 * _matrix[9] + n02 * _matrix[10] + n03 * _matrix[11];
-    float r03 = n00 * _matrix[12] + n01 * _matrix[13] + n02 * _matrix[14] + n03 * _matrix[15];
-
-    float r10 = n10 * _matrix[0] + n11 * _matrix[1] + n12 * _matrix[2] + n13 * _matrix[3];
-    float r11 = n10 * _matrix[4] + n11 * _matrix[5] + n12 * _matrix[6] + n13 * _matrix[7];
-    float r12 = n10 * _matrix[8] + n11 * _matrix[9] + n12 * _matrix[10] + n13 * _matrix[11];
-    float r13 = n10 * _matrix[12] + n11 * _matrix[13] + n12 * _matrix[14] + n13 * _matrix[15];
-
-    float r20 = n20 * _matrix[0] + n21 * _matrix[1] + n22 * _matrix[2] + n23 * _matrix[3];
-    float r21 = n20 * _matrix[4] + n21 * _matrix[5] + n22 * _matrix[6] + n23 * _matrix[7];
-    float r22 = n20 * _matrix[8] + n21 * _matrix[9] + n22 * _matrix[10] + n23 * _matrix[11];
-    float r23 = n20 * _matrix[12] + n21 * _matrix[13] + n22 * _matrix[14] + n23 * _matrix[15];
-
-    float r30 = n30 * _matrix[0] + n31 * _matrix[1] + n32 * _matrix[2] + n33 * _matrix[3];
-    float r31 = n30 * _matrix[4] + n31 * _matrix[5] + n32 * _matrix[6] + n33 * _matrix[7];
-    float r32 = n30 * _matrix[8] + n31 * _matrix[9] + n32 * _matrix[10] + n33 * _matrix[11];
-    float r33 = n30 * _matrix[12] + n31 * _matrix[13] + n32 * _matrix[14] + n33 * _matrix[15];
-
-    _matrix[0] = r00;
-    _matrix[4] = r01;
-    _matrix[8] = r02;
-    _matrix[12] = r03;
-    _matrix[1] = r10;
-    _matrix[5] = r11;
-    _matrix[9] = r12;
-    _matrix[13] = r13;
-    _matrix[2] = r20;
-    _matrix[6] = r21;
-    _matrix[10] = r22;
-    _matrix[14] = r23;
-    _matrix[3] = r30;
-    _matrix[7] = r31;
-    _matrix[11] = r32;
-    _matrix[15] = r33;
-  }
-
-  /**
    * Same as {@code return multiply(source, null)}.
    *
    * @see #multiply(Vector, Vector)
@@ -937,8 +649,8 @@ public class Matrix {
   }
 
   /**
-   * Multiply this matrix by the {@code source} Vector and stores the result in the
-   * {@code target} Vector which is then returned.
+   * Multiply this matrix by the {@code source} vector and stores the result in the
+   * {@code target} vector which is then returned.
    */
   public Vector multiply(Vector source, Vector target) {
     if (target == null) {
@@ -951,21 +663,22 @@ public class Matrix {
   }
 
   /**
-   * Multiply a three or four element vector against this matrix. If out is null or not
-   * length 3 or 4, a new float array (length 3) will be returned.
+   * Multiply a three or four element vector {@code source} against this matrix and store the result
+   * in {@code target}. If {@code target} is null or not length 3 or 4, a new float array (length 3)
+   * will be returned.
    */
   public float[] multiply(float[] source, float[] target) {
     if (target == null || target.length < 3) {
       target = new float[3];
     }
     if (source == target) {
-      throw new RuntimeException("The source and target vectors used in " + "Matrix.mult() cannot be identical.");
+      throw new RuntimeException("The source and target vectors used in Matrix multiply() cannot be the same.");
     }
     if (target.length == 3) {
       target[0] = _matrix[0] * source[0] + _matrix[4] * source[1] + _matrix[8] * source[2] + _matrix[12];
       target[1] = _matrix[1] * source[0] + _matrix[5] * source[1] + _matrix[9] * source[2] + _matrix[13];
       target[2] = _matrix[2] * source[0] + _matrix[6] * source[1] + _matrix[10] * source[2] + _matrix[14];
-    } else if (target.length > 3) {
+    } else {
       target[0] = _matrix[0] * source[0] + _matrix[4] * source[1] + _matrix[8] * source[2] + _matrix[12] * source[3];
       target[1] = _matrix[1] * source[0] + _matrix[5] * source[1] + _matrix[9] * source[2] + _matrix[13] * source[3];
       target[2] = _matrix[2] * source[0] + _matrix[6] * source[1] + _matrix[10] * source[2] + _matrix[14] * source[3];
@@ -1000,9 +713,9 @@ public class Matrix {
   }
 
   /**
-   * Invert this matrix into {@code m}, i.e., doesn't modify this matrix.
+   * Invert this matrix into {@code matrix}, i.e., doesn't modify this matrix.
    * <p>
-   * {@code m} should be non-null.
+   * {@code matrix} should be non-null.
    */
   public boolean invert(Matrix matrix) {
     float determinant = determinant();
@@ -1011,28 +724,28 @@ public class Matrix {
     }
 
     // first row
-    float t00 = determinant3x3(_matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
-    float t01 = -determinant3x3(_matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
-    float t02 = determinant3x3(_matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
-    float t03 = -determinant3x3(_matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
+    float t00 = _determinant3x3(_matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
+    float t01 = -_determinant3x3(_matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
+    float t02 = _determinant3x3(_matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
+    float t03 = -_determinant3x3(_matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
 
     // second row
-    float t10 = -determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
-    float t11 = determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
-    float t12 = -determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
-    float t13 = determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
+    float t10 = -_determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
+    float t11 = _determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
+    float t12 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
+    float t13 = _determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
 
     // third row
-    float t20 = determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[7], _matrix[11], _matrix[15]);
-    float t21 = -determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[3], _matrix[11], _matrix[15]);
-    float t22 = determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[3], _matrix[7], _matrix[15]);
-    float t23 = -determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[3], _matrix[7], _matrix[11]);
+    float t20 = _determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[7], _matrix[11], _matrix[15]);
+    float t21 = -_determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[3], _matrix[11], _matrix[15]);
+    float t22 = _determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[3], _matrix[7], _matrix[15]);
+    float t23 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[3], _matrix[7], _matrix[11]);
 
     // fourth row
-    float t30 = -determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14]);
-    float t31 = determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14]);
-    float t32 = -determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14]);
-    float t33 = determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10]);
+    float t30 = -_determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14]);
+    float t31 = _determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14]);
+    float t32 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14]);
+    float t33 = _determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10]);
 
     // transpose and divide by the determinant
     matrix._matrix[0] = t00 / determinant;
@@ -1070,28 +783,28 @@ public class Matrix {
     }
 
     // first row
-    float t00 = determinant3x3(_matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
-    float t01 = -determinant3x3(_matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
-    float t02 = determinant3x3(_matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
-    float t03 = -determinant3x3(_matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
+    float t00 = _determinant3x3(_matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
+    float t01 = -_determinant3x3(_matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
+    float t02 = _determinant3x3(_matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
+    float t03 = -_determinant3x3(_matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
 
     // second row
-    float t10 = -determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
-    float t11 = determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
-    float t12 = -determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
-    float t13 = determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
+    float t10 = -_determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[6], _matrix[10], _matrix[14], _matrix[7], _matrix[11], _matrix[15]);
+    float t11 = _determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[2], _matrix[10], _matrix[14], _matrix[3], _matrix[11], _matrix[15]);
+    float t12 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[2], _matrix[6], _matrix[14], _matrix[3], _matrix[7], _matrix[15]);
+    float t13 = _determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[2], _matrix[6], _matrix[10], _matrix[3], _matrix[7], _matrix[11]);
 
     // third row
-    float t20 = determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[7], _matrix[11], _matrix[15]);
-    float t21 = -determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[3], _matrix[11], _matrix[15]);
-    float t22 = determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[3], _matrix[7], _matrix[15]);
-    float t23 = -determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[3], _matrix[7], _matrix[11]);
+    float t20 = _determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[7], _matrix[11], _matrix[15]);
+    float t21 = -_determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[3], _matrix[11], _matrix[15]);
+    float t22 = _determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[3], _matrix[7], _matrix[15]);
+    float t23 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[3], _matrix[7], _matrix[11]);
 
     // fourth row
-    float t30 = -determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14]);
-    float t31 = determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14]);
-    float t32 = -determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14]);
-    float t33 = determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10]);
+    float t30 = -_determinant3x3(_matrix[4], _matrix[8], _matrix[12], _matrix[5], _matrix[9], _matrix[13], _matrix[6], _matrix[10], _matrix[14]);
+    float t31 = _determinant3x3(_matrix[0], _matrix[8], _matrix[12], _matrix[1], _matrix[9], _matrix[13], _matrix[2], _matrix[10], _matrix[14]);
+    float t32 = -_determinant3x3(_matrix[0], _matrix[4], _matrix[12], _matrix[1], _matrix[5], _matrix[13], _matrix[2], _matrix[6], _matrix[14]);
+    float t33 = _determinant3x3(_matrix[0], _matrix[4], _matrix[8], _matrix[1], _matrix[5], _matrix[9], _matrix[2], _matrix[6], _matrix[10]);
 
     // transpose and divide by the determinant
     _matrix[0] = t00 / determinant;
@@ -1122,8 +835,8 @@ public class Matrix {
    *
    * @return result
    */
-  private float determinant3x3(float t00, float t01, float t02, float t10, float t11, float t12, float t20, float t21,
-                               float t22) {
+  protected float _determinant3x3(float t00, float t01, float t02, float t10, float t11, float t12, float t20, float t21,
+                                  float t22) {
     return (t00 * (t11 * t22 - t12 * t21) + t01 * (t12 * t20 - t10 * t22) + t02 * (t10 * t21 - t11 * t20));
   }
 

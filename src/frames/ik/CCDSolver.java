@@ -11,7 +11,7 @@
 
 package frames.ik;
 
-import frames.primitives.Frame;
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -69,17 +69,25 @@ public class CCDSolver extends Solver {
       return true;
     }
     float change = 0.0f;
-    Vector endLocalPosition = _chain.get(_chain.size() - 2).coordinatesOf(end.position());
-    Vector targetLocalPosition = _chain.get(_chain.size() - 2).coordinatesOf(target);
+    Vector endLocalPosition = _chain.get(_chain.size() - 2).location(end.position());
+    Vector targetLocalPosition = _chain.get(_chain.size() - 2).location(target);
     for (int i = _chain.size() - 2; i >= 0; i--) {
       Quaternion delta = null;
       Quaternion initial = _chain.get(i).rotation().get();
       delta = new Quaternion(endLocalPosition, targetLocalPosition);
       //update target local position
-      targetLocalPosition = _chain.get(i).localInverseCoordinatesOf(targetLocalPosition);
+      if(_chain.get(i).reference() == null){
+        targetLocalPosition = _chain.get(i).worldLocation(targetLocalPosition);
+      } else {
+        targetLocalPosition = _chain.get(i).reference().location(targetLocalPosition, _chain.get(i));
+      }
       _chain.get(i).rotate(delta);
       //update end effector local position
-      endLocalPosition = _chain.get(i).localInverseCoordinatesOf(endLocalPosition);
+      if(_chain.get(i).reference() == null){
+        endLocalPosition = _chain.get(i).worldLocation(endLocalPosition);
+      } else {
+        endLocalPosition = _chain.get(i).reference().location(endLocalPosition, _chain.get(i));
+      }
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
     }

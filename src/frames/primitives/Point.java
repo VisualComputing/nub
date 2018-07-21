@@ -17,10 +17,10 @@ public class Point {
   /**
    * Returns whether or not this Rectangle matches other.
    *
-   * @param other rect
+   * @param point other point
    */
-  public boolean matches(Rectangle other) {
-    return this._x == other._x && this._y == other._y;
+  public boolean matches(Point point) {
+    return this._x == point._x && this._y == point._y;
   }
 
   /**

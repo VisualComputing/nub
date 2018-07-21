@@ -11,16 +11,15 @@
 
 package frames.ik;
 
-import frames.primitives.Frame;
+import frames.core.Frame;
+import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.DistanceFieldConstraint;
+import frames.core.constraint.Hinge;
+import frames.core.constraint.PlanarPolygon;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.BallAndSocket;
-import frames.primitives.constraint.DistanceFieldConstraint;
-import frames.primitives.constraint.Hinge;
-import frames.primitives.constraint.PlanarPolygon;
 import processing.core.PGraphics;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public abstract class FABRIKSolver extends Solver {
@@ -150,7 +149,7 @@ public abstract class FABRIKSolver extends Solver {
           Vector translation = chain.get(i+1).translation().get();
 
           Vector new_translation = Vector.subtract(p,o);
-          new_translation = chain.get(i).transformOf(new_translation);
+          new_translation = chain.get(i).displacement(new_translation);
 
           Quaternion delta = new Quaternion(translation, new_translation);
           DistanceFieldConstraint constraint = (DistanceFieldConstraint) parent.constraint();
@@ -164,7 +163,7 @@ public abstract class FABRIKSolver extends Solver {
           target.normalize();
           target.multiply(new_translation.magnitude());
           target.multiply(-1);
-          target = chain.get(i).inverseTransformOf(target);
+          target = chain.get(i).worldDisplacement(target);
 
           target.add(p);
           return target;
@@ -203,7 +202,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector translation = chain.get(i+1).translation().get();
 
         Vector new_translation = Vector.subtract(p,o);
-        new_translation = chain.get(i).transformOf(new_translation);
+        new_translation = chain.get(i).displacement(new_translation);
 
         Quaternion delta = new Quaternion(translation, new_translation);
         PlanarPolygon constraint = (PlanarPolygon) parent.constraint();
@@ -215,7 +214,7 @@ public abstract class FABRIKSolver extends Solver {
         target.normalize();
         target.multiply(new_translation.magnitude());
         target.multiply(-1);
-        target = chain.get(i).inverseTransformOf(target);
+        target = chain.get(i).worldDisplacement(target);
 
         target.add(p);
         return target;
@@ -223,7 +222,7 @@ public abstract class FABRIKSolver extends Solver {
         if(true) return o.get();
         Vector translation = chain.get(i + 1).translation().get();
         Vector new_translation = Vector.subtract(p, o);
-        new_translation = chain.get(i).transformOf(new_translation);
+        new_translation = chain.get(i).displacement(new_translation);
 
         Quaternion delta = new Quaternion(translation, new_translation);
         Hinge constraint = (Hinge) parent.constraint();
@@ -234,7 +233,7 @@ public abstract class FABRIKSolver extends Solver {
         target.normalize();
         target.multiply(new_translation.magnitude());
         target.multiply(-1);
-        target = chain.get(i).inverseTransformOf(target);
+        target = chain.get(i).worldDisplacement(target);
 
         target.add(p);
         return target;
@@ -265,12 +264,12 @@ public abstract class FABRIKSolver extends Solver {
       return Vector.add(o, diff);
     } else if(j.constraint() instanceof PlanarPolygon){
       if(q == null) return o.get();
-      Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
-      Vector y = chain.get(i+1).transformOf(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
       Vector z = Vector.subtract(q, p);
-      z = chain.get(i+1).transformOf(z);
+      z = chain.get(i+1).displacement(z);
       Vector w = Vector.subtract(o, p);
-      w = chain.get(i+1).transformOf(w);
+      w = chain.get(i+1).displacement(w);
       Quaternion delta = new Quaternion(z,y);
 
       w = delta.rotate(w);
@@ -296,7 +295,7 @@ public abstract class FABRIKSolver extends Solver {
       target.multiply(w.magnitude());
       target = constrained.inverseRotate(target);
       target = delta.inverseRotate(target);
-      target = chain.get(i+1).inverseTransformOf(target);
+      target = chain.get(i+1).worldDisplacement(target);
       target.add(p);
       return target;
     } else if (j.constraint() instanceof Hinge) {
@@ -316,12 +315,12 @@ public abstract class FABRIKSolver extends Solver {
       target.add(p);
       return target;*/
 
-      Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
-      Vector y = chain.get(i+1).transformOf(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
       Vector z = Vector.subtract(q, p);
-      z = chain.get(i+1).transformOf(z);
+      z = chain.get(i+1).displacement(z);
       Vector w = Vector.subtract(o, p);
-      w = chain.get(i+1).transformOf(w);
+      w = chain.get(i+1).displacement(w);
 
       Quaternion delta = new Quaternion(z,y);
 
@@ -340,19 +339,19 @@ public abstract class FABRIKSolver extends Solver {
       target.multiply(w.magnitude());
       target = constrained.inverseRotate(target);
       target = delta.inverseRotate(target);
-      target = chain.get(i+1).inverseTransformOf(target);
+      target = chain.get(i+1).worldDisplacement(target);
       target.add(p);
       return target;
 
 
     } else if (j.constraint() instanceof DistanceFieldConstraint) {
       if(q == null) return o.get();
-      Vector x = chain.get(i+1).transformOf(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
-      Vector y = chain.get(i+1).transformOf(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
       Vector z = Vector.subtract(q, p);
-      z = chain.get(i+1).transformOf(z);
+      z = chain.get(i+1).displacement(z);
       Vector w = Vector.subtract(o, p);
-      w = chain.get(i+1).transformOf(w);
+      w = chain.get(i+1).displacement(w);
       Quaternion delta = new Quaternion(z,y);
 
       w = delta.rotate(w);
@@ -367,7 +366,7 @@ public abstract class FABRIKSolver extends Solver {
       target.multiply(w.magnitude());
       target = constrained.inverseRotate(target);
       target = delta.inverseRotate(target);
-      target = chain.get(i+1).inverseTransformOf(target);
+      target = chain.get(i+1).worldDisplacement(target);
       target.add(p);
 
 
@@ -446,9 +445,9 @@ public abstract class FABRIKSolver extends Solver {
 
     if (j.constraint() instanceof PlanarPolygon) {
       if (q == null) return p.get();
-      Vector translation = chain.get(i + 1).localTransformOf(chain.get(i + 1).translation().get());
+      Vector translation = chain.get(i + 1).displacement(chain.get(i + 1).translation().get(), chain.get(i+1).reference());
       Vector new_translation = Vector.subtract(p, o);
-      new_translation = chain.get(i + 1).transformOf(new_translation);
+      new_translation = chain.get(i + 1).displacement(new_translation);
       Quaternion q1 = new Quaternion(translation, new_translation);
 
       System.out.println("ON JOINT " + i);
@@ -456,7 +455,7 @@ public abstract class FABRIKSolver extends Solver {
       System.out.println("q1 : " + q1.axis() + " angle: " + q1.angle());
 
       Vector a = q1.rotate(chain.get(i + 2).translation().get());
-      Vector b = chain.get(i + 1).transformOf(Vector.subtract(q, p));
+      Vector b = chain.get(i + 1).displacement(Vector.subtract(q, p));
 
       Quaternion delta = new Quaternion(a, b);
 
@@ -489,18 +488,18 @@ public abstract class FABRIKSolver extends Solver {
       System.out.println("proof : " + proof3.axis() + " ang : " + proof3.angle());
 
 
-      target = chain.get(i + 1).inverseTransformOf(target);
+      target = chain.get(i + 1).worldDisplacement(target);
       target.add(o);
       return target;
     } else if (j.constraint() instanceof DistanceFieldConstraint) {
       if(q == null) return p.get();
-      Vector translation = chain.get(i+1).localTransformOf(chain.get(i+1).translation().get());
+      Vector translation = chain.get(i+1).displacement(chain.get(i+1).translation().get(), chain.get(i+1).reference());
       Vector new_translation = Vector.subtract(p,o);
-      new_translation  = chain.get(i+1).transformOf(new_translation);
+      new_translation  = chain.get(i+1).displacement(new_translation);
       Quaternion q1 = new Quaternion(translation,new_translation);
 
       Vector a = q1.rotate(chain.get(i+2).translation().get());
-      Vector b = chain.get(i+1).transformOf(Vector.subtract(q,p));
+      Vector b = chain.get(i+1).displacement(Vector.subtract(q,p));
 
       Quaternion delta = new Quaternion(a,b);
 
@@ -514,7 +513,7 @@ public abstract class FABRIKSolver extends Solver {
       Vector target = q1.rotate(translation);
       target = desired.rotate(target);
       //System.out.println("Cons : " + constrained.axis() + " ang : " + constrained.angle());
-      target = chain.get(i+1).inverseTransformOf(target);
+      target = chain.get(i+1).worldDisplacement(target);
       target.add(o);
 
 

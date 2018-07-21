@@ -4,24 +4,18 @@ package ik.interactiveSkeleton;
  * Created by sebchaparr on 17/07/18.
  */
 
-import common.InteractiveNode;
-import common.InteractiveShape;
 import frames.core.Graph;
 import frames.core.Interpolator;
-import frames.core.Node;
+import frames.core.Frame;
 import frames.ik.CCDSolver;
 import frames.ik.Solver;
-import frames.primitives.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.primitives.constraint.Hinge;
-import frames.primitives.constraint.PlanarPolygon;
+import frames.core.constraint.Hinge;
+import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import frames.timing.TimingTask;
-import ik.common.Joint;
-import ik.common.LinearBlendSkinningGPU;
-import ik.common.Target;
 import processing.core.PApplet;
 import processing.core.PShape;
 
@@ -31,7 +25,7 @@ import java.util.HashMap;
 /**
  * Created by sebchaparr on 11/03/18.
  */
-public class Puppet extends PApplet {
+public class Puppet extends PApplet {/*
     Scene scene;
     Node eye;
     HashMap<String, ArrayList<Joint>> limbs;
@@ -85,7 +79,7 @@ public class Puppet extends PApplet {
             };
             scene.registerTask(task);
             task.run(40);
-            */
+            *//*
         }
     }
     public void draw() {
@@ -143,7 +137,7 @@ public class Puppet extends PApplet {
 
         return skeleton;
     }
-
+*/
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactiveSkeleton.Puppet"});
     }
