@@ -20,18 +20,19 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class Cone extends PApplet{
+    int num_joints = 12;
+    float targetRadius = 7;
+    float boneLength = 50;
+
     Scene scene;
     CCDSolver ccd_solver;
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
     ArrayList<Shape> targets = new ArrayList<Shape>();
-    int num_joints = 12;
-    float targetRadius = 7;
 
     public void settings() {
         size(700, 700, P3D);
     }
 
-    float boneLength = 50;
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
