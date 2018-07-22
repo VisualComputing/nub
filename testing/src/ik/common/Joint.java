@@ -14,6 +14,7 @@ public class Joint {
     PApplet pApplet;
     public Frame frame;
     int color;
+    float radius = 5;
     //set to true only when the joint is the root (for rendering purposes)
     public boolean isRoot = false;
 
@@ -37,13 +38,13 @@ public class Joint {
         pApplet.pushStyle();
         pApplet.fill(color);
         pApplet.noStroke();
-        if (pApplet.g.is2D()) pApplet.ellipse(0, 0, 3, 3);
-        else pApplet.sphere(3);
+        if (scene.is2D()) pApplet.ellipse(0, 0, 3, 3);
+        else pApplet.sphere(radius);
         if (!isRoot) {
-            pApplet.strokeWeight(5);
+            pApplet.strokeWeight(radius/2);
             pApplet.stroke(color);
             Vector v = frame.location(new Vector(), frame.reference());
-            if (pApplet.g.is2D()) {
+            if (scene.is2D()) {
                 pApplet.line(0, 0, v.x(), v.y());
             } else {
                 pApplet.line(0, 0, 0, v.x(), v.y(), v.z());
@@ -52,7 +53,7 @@ public class Joint {
         }
 
         if (frame.constraint() != null) {
-            scene.drawConstraint(scene.frontBuffer(), frame);
+            scene.drawConstraint(frame);
         }
     }
 }
