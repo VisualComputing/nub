@@ -24,7 +24,8 @@ public class Cone extends PApplet{
     CCDSolver ccd_solver;
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
     ArrayList<Shape> targets = new ArrayList<Shape>();
-    int num_joints = 10;
+    int num_joints = 12;
+    float targetRadius = 7;
 
     public void settings() {
         size(700, 700, P3D);
@@ -34,12 +35,12 @@ public class Cone extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength / 2.f);
-        scene.fitBall();
-        scene.eye().translate(0, scene.radius(), 0);
+        scene.setRadius(num_joints * boneLength / 1.5f);
+        scene.fitBallInterpolation();
+        scene.disableBackBuffer();
 
 
-        PShape redBall = createShape(SPHERE, 5);
+        PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
@@ -118,7 +119,6 @@ public class Cone extends PApplet{
         lights();
         //Draw Constraints
         scene.drawAxes();
-        scene.traverse();
         for(ChainSolver chain_solver : chain_solvers){
             if(show1) draw_pos(prev, color(0,255,0), 3);
             if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
@@ -128,6 +128,8 @@ public class Cone extends PApplet{
             ccd_solver.solve();
             for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
         }
+        scene.traverse();
+
     }
 
     public void setConstraint(ArrayList<Vector> vertices, Frame f, Vector twist, float boneLength){
