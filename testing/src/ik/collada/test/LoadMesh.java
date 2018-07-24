@@ -35,7 +35,7 @@ public class LoadMesh extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.disableBackBuffer();
-        model = ColladaLoader.loadColladaModel(sketchPath() + path, dae, tex, this.g, 3);
+        model = ColladaLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
         //PImage texture = loadImage(sketchPath() + path + tex);
         //model.getModel().setFill(false);
         //model.getModel().setStroke(false);
@@ -57,10 +57,11 @@ public class LoadMesh extends PApplet {
         scene.fitBallInterpolation();
     }
     public void draw() {
-        background(255);
+        background(0);
         lights();
         scene.drawAxes();
         scene.traverse();
+        tint(255, 100);
         shape(model.getModel());
     }
 
