@@ -5,6 +5,8 @@ import frames.primitives.Matrix;
 import frames.primitives.Quaternion;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.xmlParser.XmlNode;
+import ik.common.Joint;
+
 import java.util.List;
 
 public class SkeletonLoader {
@@ -20,32 +22,36 @@ public class SkeletonLoader {
 
     public void extractBoneData(AnimatedModel model){
         XmlNode headNode = armatureData.getChild("node");
-        model.setRootJoint(loadJointData(headNode, model, null));
+        Joint root = loadJointData(headNode, model, null);
+        root.isRoot = true;
+        model.setRootJoint(root.frame);
         model.setJointCount(jointCount);
     }
 
-    private Frame loadJointData(XmlNode jointNode, AnimatedModel model, Frame reference){
-        Frame joint = extractMainJointData(jointNode, model, reference);
+    private Joint loadJointData(XmlNode jointNode, AnimatedModel model, Joint parent){
+        Joint joint = extractMainJointData(jointNode, model, parent);
         for(XmlNode childNode : jointNode.getChildren("node")){
             loadJointData(childNode, model, joint);
         }
         return joint;
     }
 
-    private Frame extractMainJointData(XmlNode jointNode, AnimatedModel model, Frame reference){
+    private Joint extractMainJointData(XmlNode jointNode, AnimatedModel model, Joint parent){
         String nameId = jointNode.getAttribute("id");
         int index = boneOrder.indexOf(nameId);
         String[] matrixRawData = jointNode.getChild("matrix").getData().split(" ");
         float[] matrixData = convertData(matrixRawData);
         Matrix mat = new Matrix(matrixData);
-        Frame frame = new Frame();
-        frame.setReference(reference);
+        Joint joint = new Joint(model.getScene());
+        Frame frame = joint.frame;
+        if(parent != null) frame.setReference(parent.frame);
         frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
         frame.setRotation(new Quaternion(mat));
+        joint.setRadius(0.2f);
         jointCount++;
         model.getJoints().put(nameId, frame);
         model.getIdxs().put(frame.id(), index);
-        return frame;
+        return joint;
     }
 
     private float[] convertData(String[] rawData){

@@ -1,5 +1,6 @@
 package ik.collada.colladaParser.colladaLoader;
 
+import frames.processing.Scene;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.animation.Animation;
 import ik.collada.animation.Mesh;
@@ -13,10 +14,10 @@ import java.io.File;
 
 public class ColladaLoader {
 
-    public static AnimatedModel loadColladaModel(String colladaFile, String dae, String tex, PGraphics pg, int maxWeights) {
+    public static AnimatedModel loadColladaModel(String colladaFile, String dae, String tex, Scene scene, int maxWeights) {
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
 
-        AnimatedModel model = new AnimatedModel();
+        AnimatedModel model = new AnimatedModel(scene);
 
         SkinLoader skinLoader = new SkinLoader(node.getChild("library_controllers"), maxWeights);
         SkinningData skinningData = skinLoader.extractSkinData();
@@ -26,7 +27,7 @@ public class ColladaLoader {
 
         GeometryLoader g = new GeometryLoader(node.getChild("library_geometries"), skinningData.verticesSkinData);
         Mesh meshData = g.extractModelData();
-        model.setModel(meshData.generatePShape(pg, colladaFile + tex));
+        model.setModel(meshData.generatePShape(scene.frontBuffer(), colladaFile + tex));
         return model;
     }
 
