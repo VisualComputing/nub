@@ -1,6 +1,7 @@
 package ik.collada.animation;
 
 import frames.core.Frame;
+import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PShape;
@@ -16,7 +17,7 @@ public class AnimatedModel {
     // skin
     private PShape model;
     private PImage texture;
-    private PApplet pApplet;
+    private Scene scene;
 
     // skeleton
     private Frame rootJoint;
@@ -42,9 +43,10 @@ public class AnimatedModel {
         return idxs;
     }
 
-    public AnimatedModel(){
+    public AnimatedModel(Scene scene){
         joints = new HashMap<String, Frame>();
         idxs = new HashMap<Integer, Integer>();
+        this.scene = scene;
     }
 
     public AnimatedModel(PShape model, PImage texture, HashMap<String, Frame> joints, Frame rootJoint) {
@@ -67,6 +69,8 @@ public class AnimatedModel {
         return model;
     }
 
+    public Scene getScene(){ return scene;}
+
     /**
      * @return The diffuse texture for this entity.
      */
@@ -84,15 +88,6 @@ public class AnimatedModel {
     }
 
     /**
-     * Deletes the OpenGL objects associated with this entity, namely the model
-     * (VAO) and texture.
-     */
-    /*public void delete() {
-        model.delete();
-        texture.delete();
-    }*/
-
-    /**
      * Instructs this entity to carry out a given animation. To do this it
      * basically sets the chosen animation as the current animation in the
      * {@link Animator} object.
@@ -101,7 +96,7 @@ public class AnimatedModel {
      *            - the animation to be carried out.
      */
     public void doAnimation(Animation animation) {
-        animator.doAnimation(animation, pApplet.millis());
+        animator.doAnimation(animation, scene.pApplet().millis());
     }
 
     /**
@@ -109,7 +104,7 @@ public class AnimatedModel {
      * pose of the entity. Must be called every frame.
      */
     public void update(float time) {
-        animator.update(pApplet.millis());
+        animator.update(scene.pApplet().millis());
     }
 
     /**
