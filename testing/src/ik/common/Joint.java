@@ -8,6 +8,7 @@ import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 public class Joint {
     Scene scene;
@@ -35,25 +36,30 @@ public class Joint {
     }
 
     public void render(){
-        pApplet.pushStyle();
-        pApplet.fill(color);
-        pApplet.noStroke();
-        if (scene.is2D()) pApplet.ellipse(0, 0, 3, 3);
-        else pApplet.sphere(radius);
+        PGraphics pg = scene.frontBuffer();
+        pg.pushStyle();
+        pg.fill(color);
+        pg.noStroke();
+        if (scene.is2D()) pg.ellipse(0, 0, 3, 3);
+        else pg.sphere(radius);
         if (!isRoot) {
-            pApplet.strokeWeight(radius/2);
-            pApplet.stroke(color);
+            pg.strokeWeight(radius/2);
+            pg.stroke(color);
             Vector v = frame.location(new Vector(), frame.reference());
             if (scene.is2D()) {
-                pApplet.line(0, 0, v.x(), v.y());
+                pg.line(0, 0, v.x(), v.y());
             } else {
-                pApplet.line(0, 0, 0, v.x(), v.y(), v.z());
+                pg.line(0, 0, 0, v.x(), v.y(), v.z());
             }
-            pApplet.popStyle();
+            pg.popStyle();
         }
 
         if (frame.constraint() != null) {
             scene.drawConstraint(frame);
         }
+    }
+
+    public void setRadius(float radius){
+        this.radius = radius;
     }
 }
