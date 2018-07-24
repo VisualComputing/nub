@@ -14,10 +14,6 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.core.constraint.SphericalPolygon;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
@@ -2808,79 +2804,6 @@ public class Scene extends Graph implements PConstants {
     for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
     pGraphics.endShape(PApplet.CLOSE);
-  }
-
-  /**
-   * Same as {@code drawConstraint(frontBuffer(), frame)}.
-   *
-   * @see #drawConstraint(PGraphics, Frame)
-   */
-  public void drawConstraint(Frame frame) {
-    drawConstraint(frontBuffer(), frame);
-  }
-
-  /**
-   * Draws the frame constraint if it's non-null.
-   *
-   * @see Frame#constraint()
-   * @see frames.core.constraint.Constraint
-   */
-  public void drawConstraint(PGraphics pGraphics, Frame frame) {
-    if (frame == null) return;
-    if (frame.constraint() == null) return;
-    // TODO test
-    if (!frame.isAttached(this)) return;
-    float boneLength = 0;
-    if (!frame.children().isEmpty()) {
-      for (Frame child : frame.children())
-        boneLength += child.translation().magnitude();
-      boneLength = boneLength / (1.f * frame.children().size());
-    } else
-      boneLength = frame.translation().magnitude();
-    if (boneLength == 0) return;
-
-    pGraphics.pushMatrix();
-    pGraphics.pushStyle();
-    pGraphics.noStroke();
-    //TODO: use different colors
-    pGraphics.fill(246, 117, 19, 80);
-    Frame reference = new Frame(new Vector(), frame.rotation().inverse());
-    //TODO: Check implementation for non symmetric semi-axes
-    if (frame.constraint() instanceof BallAndSocket) {
-      BallAndSocket constraint = (BallAndSocket) frame.constraint();
-      reference.rotate(constraint.restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
-      drawCone(pGraphics, boneLength / 2.f,
-          (boneLength / 2.f) * PApplet.tan(constraint.left()),
-          (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
-    } else if (frame.constraint() instanceof PlanarPolygon) {
-      reference.rotate(((PlanarPolygon) frame.constraint()).restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
-      drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
-    } else if (frame.constraint() instanceof SphericalPolygon) {
-      reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
-      drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
-    } else if (frame.constraint() instanceof Hinge) {
-      Hinge constraint = (Hinge) frame.constraint();
-      if (frame.children().size() == 1) {
-        Vector axis = constraint.restRotation().rotate(constraint.axis());
-        reference.rotate(constraint.restRotation());
-        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
-        //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
-        //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
-        applyTransformation(reference);
-        drawAxes(5);
-        drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
-      }
-    }
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
   }
 
   /**
