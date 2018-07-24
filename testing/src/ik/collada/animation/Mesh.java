@@ -80,21 +80,24 @@ public class Mesh {
             for(Vertex v : face.vertices){
                 //add attrib to set weights
                 child.normal(v.normal.x, v.normal.y, v.normal.z);
-                child.attribPosition("joints",
+                /*child.attribPosition("joints",
                         v.skinData.jointIds.get(0),
                         v.skinData.jointIds.get(1),
                         v.skinData.jointIds.get(2));
                 child.attribPosition("weights",
                         v.skinData.weights.get(0),
                         v.skinData.weights.get(1),
-                        v.skinData.weights.get(2));
+                        v.skinData.weights.get(2));*/
                child.vertex(v.vector.x, v.vector.y, v.vector.z, v.uv.x, 1 - v.uv.y);
             }
             child.endShape(PConstants.CLOSE);
             shape.addChild(child);
         }
+        shape.setStroke(false);
         shape.setTextureMode(PConstants.NORMAL);
         shape.setTexture(texture);
+        shape.setTint(true);
+        shape.setTint(g.color(255,100));
         return shape;
     }
 }
