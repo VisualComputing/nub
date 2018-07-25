@@ -87,7 +87,6 @@ public class GeometryLoader {
             float s = Float.parseFloat(texData[i * 2]);
             float t = Float.parseFloat(texData[i * 2 + 1]);
             PVector uv = new PVector(s,t);
-            System.out.println("uv : " + uv);
             textures.add(uv);
         }
     }
