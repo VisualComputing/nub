@@ -73,31 +73,37 @@ public class Mesh {
     public PShape generatePShape(PGraphics g, String tex){
         g.textureMode(PConstants.NORMAL);
         PImage texture = g.parent.loadImage(tex);
-        PShape shape = g.createShape(PConstants.GROUP);
+        //TODO: USE PSHAPE IN GROUP MODE
+        //Don't use GROUP while https://github.com/processing/processing/issues/5560 is fixed
+        //PShape shape = g.createShape(PConstants.GROUP);
+        PShape shape = g.createShape();
+        shape.beginShape(PConstants.TRIANGLES);
         for(Face face : faces){
-            PShape child = g.createShape();
-            child.beginShape(PConstants.TRIANGLE);
+            //PShape child = g.createShape();
+            //child.beginShape(PConstants.TRIANGLE);
             for(Vertex v : face.vertices){
+                //change child by shape
                 //add attrib to set weights
-                child.normal(v.normal.x, v.normal.y, v.normal.z);
-                /*child.attribPosition("joints",
-                        v.skinData.jointIds.get(0),
-                        v.skinData.jointIds.get(1),
-                        v.skinData.jointIds.get(2));
-                child.attribPosition("weights",
-                        v.skinData.weights.get(0),
-                        v.skinData.weights.get(1),
-                        v.skinData.weights.get(2));*/
-               child.vertex(v.vector.x, v.vector.y, v.vector.z, v.uv.x, 1 - v.uv.y);
+                shape.normal(v.normal.x, v.normal.y, v.normal.z);
+                shape.attrib("joints",
+                        v.skinData.jointIds.get(0)*1.f,
+                        v.skinData.jointIds.get(1)*1.f,
+                        v.skinData.jointIds.get(2)*1.f);
+                shape.attrib("weights",
+                        v.skinData.weights.get(0).floatValue(),
+                        v.skinData.weights.get(1).floatValue(),
+                        v.skinData.weights.get(2).floatValue());
+                shape.vertex(v.vector.x, v.vector.y, v.vector.z, v.uv.x, 1 - v.uv.y);
             }
-            child.endShape(PConstants.CLOSE);
-            shape.addChild(child);
+            //child.endShape(PConstants.CLOSE);
+            //shape.addChild(child);
         }
+        shape.endShape();
         shape.setStroke(false);
         shape.setTextureMode(PConstants.NORMAL);
         shape.setTexture(texture);
-        shape.setTint(true);
-        shape.setTint(g.color(255,100));
+        //shape.setTint(true);
+        //shape.setTint(g.color(255,100));
         return shape;
     }
 }
