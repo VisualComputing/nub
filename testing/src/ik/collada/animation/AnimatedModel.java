@@ -123,7 +123,7 @@ public class AnimatedModel {
     }
 
     public void addJointsToArray(Frame frame, Frame[] jointMatrices){
-        jointMatrices[idxs.get(frame)]  = frame;
+        jointMatrices[idxs.get(frame.id())]  = frame;
         for(Frame child : frame.children()){
             addJointsToArray(child, jointMatrices);
         }
