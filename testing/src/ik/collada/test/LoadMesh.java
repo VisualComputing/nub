@@ -10,6 +10,7 @@ import frames.processing.Shape;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.colladaLoader.ColladaLoader;
 import ik.common.Joint;
+import ik.common.Skinning;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -25,7 +26,7 @@ public class LoadMesh extends PApplet {
     String dae = "model.dae";
     String tex = "diffuse.png";
     AnimatedModel model;
-
+    Skinning skinning;
     public void settings() {
         size(700, 700, P3D);
     }
@@ -36,33 +37,23 @@ public class LoadMesh extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.disableBackBuffer();
         model = ColladaLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
-        //PImage texture = loadImage(sketchPath() + path + tex);
-        //model.getModel().setFill(false);
-        //model.getModel().setStroke(false);
-
-        //model.getModel().setTextureMode(NORMAL);
-        //model.getModel().setTexture(texture);
-
-        for(PShape sh : model.getModel().getChildren()){
-            //sh.setTextureMode(NORMAL);
-            //sh.setTexture(texture);
-
-            for(int i = 0; i < sh.getVertexCount(); i++){
-                System.out.println("Vector : " + sh.getVertex(i));
-            }
-        }
-
-        //model.getModel().setFill(color(255,0,0));
         scene.setRadius(model.getModel().getWidth()*2);
         scene.fitBallInterpolation();
+        skinning = new Skinning(model);
+
     }
     public void draw() {
+        skinning.updateParams();
         background(0);
         lights();
-        scene.drawAxes();
-        scene.traverse();
-        tint(255, 100);
+        shader(skinning.shader);
         shape(model.getModel());
+        resetShader();
+
+        scene.drawAxes();
+        hint(DISABLE_DEPTH_TEST);
+        scene.traverse();
+        hint(ENABLE_DEPTH_TEST);
     }
 
     @Override
