@@ -1,5 +1,6 @@
 package basics;
 
+import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -81,8 +82,17 @@ public class MouseDragInteraction extends PApplet {
         scene.fitBall();
       }
     }
-    if (key == 'l')
+    if (key == 'a')
       lookAround = !lookAround;
+    if (key == 'r')
+      scene.setRightHanded();
+    if (key == 'l')
+      scene.setLeftHanded();
+    if(key == 'p')
+      if(scene.type()== Graph.Type.PERSPECTIVE)
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
+      else
+        scene.setType(Graph.Type.PERSPECTIVE);
   }
 
   @Override

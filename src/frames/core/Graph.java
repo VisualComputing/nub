@@ -336,7 +336,7 @@ public class Graph {
 
   /**
    * Returns the vertical field of view of the {@link #eye()} (in radians) computed as
-   * {@code 2.0f * (float) Math.atan(eye().magnitude())}.
+   * {@code 2 * (float) Math.atan(eye().magnitude())}.
    * <p>
    * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
    * This value is meaningless if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
@@ -349,18 +349,18 @@ public class Graph {
    * @see #eye()
    */
   public float fieldOfView() {
-    return 2.0f * (float) Math.atan(eye().magnitude());
+    return 2 * (float) Math.atan(eye().magnitude());
   }
 
   /**
-   * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2.0f))}.
+   * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2))}.
    * <p>
    * Sets the field-of-view of the current {@link #eye()}.
    *
    * @see Frame#setMagnitude(float)
    */
   public void setFieldOfView(float fov) {
-    eye().setMagnitude((float) Math.tan(fov / 2.0f));
+    eye().setMagnitude((float) Math.tan(fov / 2));
   }
 
   /**
@@ -371,7 +371,7 @@ public class Graph {
    * {@code horizontalFieldOfView() = 2 * atan ( tan(fieldOfView()/2) * aspectRatio() )}.
    */
   public float horizontalFieldOfView() {
-    return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
+    return 2 * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
   }
 
   /**
@@ -389,10 +389,10 @@ public class Graph {
    */
   // TODO shadow maps computation docs are missing
   public void fitFieldOfView() {
-    if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2.0f) * radius())
-      setFieldOfView(2.0f * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
+    if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
+      setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
     else
-      setFieldOfView((float) Math.PI / 2.0f);
+      setFieldOfView((float) Math.PI / 2);
   }
 
   /**
@@ -533,10 +533,10 @@ public class Graph {
    * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)},
    * respectively.
    * <p>
-   * These values are valid for 2d and ortho graphs (but not persp) and they are
+   * These values are valid for 2d and orthographic graphs (but not perspective) and they are
    * expressed in virtual world units.
    * <p>
-   * In the case of ortho graphs these values are proportional to the eye (z
+   * In the case of orthographs graphs these values are proportional to the eye (z
    * projected) distance to the {@link #anchor()}. When zooming on the object, the eye
    * is translated forward and its boundary is narrowed, making the object appear bigger
    * on screen, as intuitively expected.
@@ -880,7 +880,7 @@ public class Graph {
    * to place the clipping planes. These values are determined from radius() and center() so that
    * they best fit the graph size.
    * <p>
-   * Override {@link #computeProjection()} to define a CUSTOM projection.
+   * Override {@link #computeCustomProjection()} to define a CUSTOM projection.
    *
    * <b>Note 1:</b> This method is called by {@link #preDraw()}.
    *
@@ -888,35 +888,18 @@ public class Graph {
    * shapes depend on the eye magnitude, see {@link #fieldOfView()} and {@link #boundaryWidthHeight()}.
    */
   public Matrix computeProjection() {
-    Matrix projection = new Matrix();
-
-    float ZNear = zNear();
-    float ZFar = zFar();
-
+    Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
-        projection._matrix[0] = 1 / (eye().magnitude() * this.aspectRatio());
-        projection._matrix[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
-        projection._matrix[10] = (ZNear + ZFar) / (ZNear - ZFar);
-        projection._matrix[11] = -1.0f;
-        projection._matrix[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
-        projection._matrix[15] = 0.0f;
-        // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(), zNear(), zFar() );
+        projection = Matrix.perspective(zNear(), zFar(), aspectRatio(), isLeftHanded() ? -eye().magnitude() : eye().magnitude());
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        projection._matrix[0] = 1.0f / wh[0];
-        projection._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
-        projection._matrix[10] = -2.0f / (ZFar - ZNear);
-        projection._matrix[11] = 0.0f;
-        projection._matrix[14] = -(ZFar + ZNear) / (ZFar - ZNear);
-        projection._matrix[15] = 1.0f;
-        // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
+        projection = Matrix.orthographic(zNear(), zFar(), wh[0], isLeftHanded() ? -wh[1] : wh[1]);
         break;
       case CUSTOM:
-        return computeCustomProjection();
+        projection = computeCustomProjection();
     }
     return projection;
   }

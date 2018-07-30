@@ -864,4 +864,43 @@ public class Matrix {
             + "\n" + _matrix[2] + " " + _matrix[6] + " " + _matrix[10] + " " + _matrix[14] + "\n" + _matrix[3] + " " + _matrix[7] + " " + _matrix[11]
             + " " + _matrix[15] + "\n");
   }
+
+  /**
+   * Returns a perspective projection matrix from the given parameters.
+   * <p>
+   * Compute the {@code magnitude} as {@code tan(field-of-view / 2)} if you want to set the matrix from the field-of-view.
+   * <p>
+   * All parameter values should be positive, but {@code magnitude} which may be negative in case you want to invert
+   * the projected image across the eye y-axis.
+   */
+  public static Matrix perspective(float zNear, float zFar, float aspectRatio, float magnitude) {
+    // same as gluPerspective( 180*fieldOfView()/PI, aspectRatio(), zNear(), zFar() );
+    Matrix projection = new Matrix();
+    // all non null coefficients were set to 0 in constructor
+    projection._matrix[0] = 1 / (Math.abs(magnitude) * aspectRatio);
+    projection._matrix[5] = 1 / magnitude;
+    projection._matrix[10] = (zNear + zFar) / (zNear - zFar);
+    projection._matrix[11] = -1;
+    projection._matrix[14] = 2 * zNear * zFar / (zNear - zFar);
+    projection._matrix[15] = 0;
+    return projection;
+  }
+
+  /**
+   * Returns an orthographic projection matrix from the given parameters.
+   * <p>
+   * All parameter values should be positive, but {@code halfHeight} which may be negative in case you want to invert
+   * the projected image across the eye y-axis.
+   */
+  public static Matrix orthographic(float zNear, float zFar, float halfWidth, float halfHeight) {
+    // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
+    Matrix projection = new Matrix();
+    projection._matrix[0] = 1 / halfWidth;
+    projection._matrix[5] = 1 / halfHeight;
+    projection._matrix[10] = -2 / (zFar - zNear);
+    projection._matrix[11] = 0;
+    projection._matrix[14] = -(zFar + zNear) / (zFar - zNear);
+    projection._matrix[15] = 1;
+    return projection;
+  }
 }
