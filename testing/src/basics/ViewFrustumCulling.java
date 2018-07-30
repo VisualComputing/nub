@@ -9,10 +9,10 @@ import processing.event.MouseEvent;
 
 public class ViewFrustumCulling extends PApplet {
   OctreeNode root;
-  Scene scene, auxScene, focus;
-  PGraphics canvas, auxCanvas;
+  Scene scene1, scene2, focus;
+  PGraphics canvas1, canvas2;
 
-  //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
+  //Choose one of P3D for a 3D scene1, or P2D or JAVA2D for a 2D scene1
   String renderer = P3D;
   int w = 1110;
   int h = 1110;
@@ -28,43 +28,44 @@ public class ViewFrustumCulling extends PApplet {
     root = new OctreeNode(p, Vector.multiply(p, -1.0f));
     root.buildBoxHierarchy(4);
 
-    canvas = createGraphics(w, h / 2, P3D);
-    scene = new Scene(this, canvas);
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.enableBoundaryEquations();
-    scene.setFieldOfView(PI / 3);
-    scene.fitBallInterpolation();
+    canvas1 = createGraphics(w, h / 2, P3D);
+    scene1 = new Scene(this, canvas1);
+    scene1.setType(Graph.Type.ORTHOGRAPHIC);
+    scene1.enableBoundaryEquations();
+    scene1.setRadius(100);
+    scene1.setFieldOfView(PI / 3);
+    scene1.fitBallInterpolation();
 
-    auxCanvas = createGraphics(w, h / 2, P3D);
-    // Note that we pass the upper left corner coordinates where the scene
+    canvas2 = createGraphics(w, h / 2, P3D);
+    // Note that we pass the upper left corner coordinates where the scene1
     // is to be drawn (see drawing code below) to its constructor.
-    auxScene = new Scene(this, auxCanvas, 0, h / 2);
-    auxScene.setType(Graph.Type.ORTHOGRAPHIC);
-    auxScene.setRadius(200);
-    scene.setFieldOfView(PI / 3);
-    auxScene.fitBall();
+    scene2 = new Scene(this, canvas2, 0, h / 2);
+    scene2.setType(Graph.Type.ORTHOGRAPHIC);
+    scene2.setRadius(200);
+    scene1.setFieldOfView(PI / 3);
+    scene2.fitBall();
   }
 
   @Override
   public void draw() {
     handleMouse();
     background(0);
-    scene.beginDraw();
-    canvas.background(0);
-    root.drawIfAllChildrenAreVisible(scene.frontBuffer(), scene);
-    scene.endDraw();
-    scene.display();
+    scene1.beginDraw();
+    canvas1.background(0);
+    root.drawIfAllChildrenAreVisible(scene1.frontBuffer(), scene1);
+    scene1.endDraw();
+    scene1.display();
 
-    auxScene.beginDraw();
-    auxCanvas.background(0);
-    root.drawIfAllChildrenAreVisible(auxScene.frontBuffer(), scene);
-    auxScene.frontBuffer().pushStyle();
-    auxScene.frontBuffer().stroke(255, 255, 0);
-    auxScene.frontBuffer().fill(255, 255, 0, 160);
-    auxScene.drawEye(scene);
-    auxScene.frontBuffer().popStyle();
-    auxScene.endDraw();
-    auxScene.display();
+    scene2.beginDraw();
+    canvas2.background(0);
+    root.drawIfAllChildrenAreVisible(scene2.frontBuffer(), scene1);
+    scene2.frontBuffer().pushStyle();
+    scene2.frontBuffer().stroke(255, 255, 0);
+    scene2.frontBuffer().fill(255, 255, 0, 160);
+    scene2.drawEye(scene1);
+    scene2.frontBuffer().popStyle();
+    scene2.endDraw();
+    scene2.display();
   }
 
   public void mouseDragged() {
@@ -98,7 +99,7 @@ public class ViewFrustumCulling extends PApplet {
   }
 
   void handleMouse() {
-    focus = mouseY < h / 2 ? scene : auxScene;
+    focus = mouseY < h / 2 ? scene1 : scene2;
   }
 
   public static void main(String args[]) {
