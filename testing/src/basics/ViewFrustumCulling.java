@@ -12,7 +12,7 @@ public class ViewFrustumCulling extends PApplet {
   Scene scene1, scene2, focus;
   PGraphics canvas1, canvas2;
 
-  //Choose one of P3D for a 3D scene1, or P2D or JAVA2D for a 2D scene1
+  //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene1
   String renderer = P3D;
   int w = 1110;
   int h = 1110;
