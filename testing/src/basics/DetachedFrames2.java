@@ -21,7 +21,7 @@ public class DetachedFrames2 extends PApplet {
   public void setup() {
     eye = new Frame();
     eye.setPosition(0, 0, 200);
-    frames = new Frame[5];
+    frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {
       frames[i] = new Frame();
       frames[i].randomize();
