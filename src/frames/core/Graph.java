@@ -894,35 +894,18 @@ public class Graph {
    * shapes depend on the eye magnitude, see {@link #fieldOfView()} and {@link #boundaryWidthHeight()}.
    */
   public Matrix computeProjection() {
-    Matrix projection = new Matrix();
-
-    float ZNear = zNear();
-    float ZFar = zFar();
-
+    Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        // #CONNECTION# all non null coefficients were set to 0.0 in constructor.
-        projection._matrix[0] = 1 / (eye().magnitude() * this.aspectRatio());
-        projection._matrix[5] = 1 / (isLeftHanded() ? -eye().magnitude() : eye().magnitude());
-        projection._matrix[10] = (ZNear + ZFar) / (ZNear - ZFar);
-        projection._matrix[11] = -1.0f;
-        projection._matrix[14] = 2.0f * ZNear * ZFar / (ZNear - ZFar);
-        projection._matrix[15] = 0.0f;
-        // same as gluPerspective( 180.0*fieldOfView()/M_PI, aspectRatio(), zNear(), zFar() );
+        projection = Matrix.perspective(zNear(), zFar(), aspectRatio(), isLeftHanded() ? -eye().magnitude() : eye().magnitude());
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        projection._matrix[0] = 1.0f / wh[0];
-        projection._matrix[5] = (isLeftHanded() ? -1.0f : 1.0f) / wh[1];
-        projection._matrix[10] = -2.0f / (ZFar - ZNear);
-        projection._matrix[11] = 0.0f;
-        projection._matrix[14] = -(ZFar + ZNear) / (ZFar - ZNear);
-        projection._matrix[15] = 1.0f;
-        // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
+        projection = Matrix.orthographic(zNear(), zFar(), wh[0], isLeftHanded() ? -wh[1] : wh[1]);
         break;
       case CUSTOM:
-        return computeCustomProjection();
+        projection = computeCustomProjection();
     }
     return projection;
   }

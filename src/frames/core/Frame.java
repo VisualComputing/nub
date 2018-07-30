@@ -660,6 +660,24 @@ public class Frame {
   // Random
 
   /**
+   * Same as {@code randomize(100)}.
+   *
+   * @see #randomize(float)
+   */
+  public void randomize() {
+    randomize(100);
+  }
+
+  /**
+   * Same as {@code randomize(new Vector(), radius)}.
+   *
+   * @see #randomize(Vector, float)
+   */
+  public void randomize(float radius) {
+    randomize(new Vector(), radius);
+  }
+
+  /**
    * Randomized this frame. The frame is randomly re-positioned inside the ball
    * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
    * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
@@ -690,6 +708,24 @@ public class Frame {
     Frame frame = new Frame(graph);
     frame.randomize(graph.center(), graph.radius());
     return frame;
+  }
+
+  /**
+   * Same as {@code return random(100)}.
+   *
+   * @see #random(float)
+   */
+  public static Frame random() {
+    return random(100);
+  }
+
+  /**
+   * Same as {@code return random(new Vector(), radius)}
+   *
+   * @see #random(Vector, float)
+   */
+  public static Frame random(float radius) {
+    return random(new Vector(), radius);
   }
 
   /**
