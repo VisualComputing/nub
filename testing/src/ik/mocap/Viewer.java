@@ -32,7 +32,7 @@ public class Viewer extends PApplet{
     Node root, rootIK;
 
     CCDSolver ccd_solver;
-    ChainSolver chain_solver;
+    ClosedLoopChainSolver chain_solver;
     Solver solver;
     public void settings() {
         size(700, 700, P3D);
@@ -84,7 +84,7 @@ public class Viewer extends PApplet{
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
 
-        //chain_solver = new ChainSolver(list);
+        //chain_solver = new ClosedLoopChainSolver(list);
         ArrayList<Node> list2 = scene.branch(originalLimbs.get("RIGHTCOLLAR"));
         list2.add(0, list2.get(0).reference());
         list2.add(0, list2.get(0).reference());
@@ -92,7 +92,7 @@ public class Viewer extends PApplet{
         solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
         //Solver solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
 
-        chain_solver = new ChainSolver(list2);
+        chain_solver = new ClosedLoopChainSolver(list2);
         for(Frame f : rootIK.children()) {
             //f.setConstraint(new FixedConstraint());
             //limbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());

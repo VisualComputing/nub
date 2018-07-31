@@ -110,8 +110,8 @@ public class HingeTest extends PApplet {
         targets.get(targets.size()-1).setReference(targets.get(0));
         targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
         //targets.get(targets.size()-1).setPosition(branchHingeConstraintCCD.get(branchHingeConstraintCCD.size()-1).position());
-        chain_solvers.get(1).opt = 1;
-        chain_solvers.get(0).opt = 1;
+        //chain_solvers.get(1).opt = 1;
+        //chain_solvers.get(0).opt = 1;
     }
 
     public void draw() {
@@ -256,27 +256,6 @@ public class HingeTest extends PApplet {
         if(key == 'k' || key == 'K'){
             for(ChainSolver chain_solver : chain_solvers) chain_solver.backward();
         }
-        if(key == 'l' || key == 'L'){
-            for(ChainSolver chain_solver : chain_solvers) {
-                for (int i = 0; i < chain_solver.chain().size() - 1; i++) {
-                    constr.set(i + 1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-                }
-            }
-        }
-        if(key == 'n' || key == 'N'){
-            int i = 0;
-            for(ChainSolver chain_solver : chain_solvers) {
-                constr = copy_p(prev);
-                constr.set(0, chain_solver.chain().get(0).position());
-                constr.set(i + 1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-            }
-        }
-        if(key == 'm' || key == 'M'){
-            int i = 1;
-            for(ChainSolver chain_solver : chain_solvers)
-                constr.set(i+1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-        }
-
         if(key == '1'){
             show1 = !show1;
         }
