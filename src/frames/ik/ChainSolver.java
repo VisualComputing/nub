@@ -27,31 +27,12 @@ public class ChainSolver extends FABRIKSolver {
   protected ArrayList<? extends Frame> _original;
   protected ArrayList<Frame> _bestSolution;
   protected boolean _improveSolution = false;
-  protected int _previousChange;
 
   protected Frame _target;
   protected Frame _prevTarget;
 
   public ArrayList<? extends Frame> chain() {
     return _original;
-  }
-
-  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
-    ArrayList<Frame> copy = new ArrayList<Frame>();
-    Frame reference = chain.get(0).reference();
-    if (reference != null) {
-      reference = new Frame(reference.position().get(), reference.orientation().get());
-    }
-    for (Frame joint : chain) {
-      Frame newJoint = new Frame();
-      newJoint.setReference(reference);
-      newJoint.setPosition(joint.position().get());
-      newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
-      copy.add(newJoint);
-      reference = newJoint;
-    }
-    return copy;
   }
 
   public Frame target() {
@@ -83,12 +64,12 @@ public class ChainSolver extends FABRIKSolver {
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
-    _previousChange = -1;
     Vector prevPosition = chain.get(0).reference() != null
         ? chain.get(0).reference().position().get() : new Vector(0, 0, 0);
     Quaternion prevOrientation = chain.get(0).reference() != null
         ? chain.get(0).reference().orientation().get() : new Quaternion();
     for (Frame joint : chain) {
+      _properties.put(joint, new Properties());
       Vector position = joint.position().get();
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
