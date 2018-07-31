@@ -1623,27 +1623,43 @@ public class Frame {
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.
    *
+   * @see #view(Vector, Quaternion)
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Frame)
    * @see #set(Frame)
    */
   public Matrix view() {
+    return view(position(), orientation());
+  }
+
+  /**
+   * Returns the inverse of the matrix associated with the eye {@code position} and
+   * {@code orientation}.
+   * <p>
+   * The view matrix converts from the world coordinates system to the eye coordinates system,
+   * so that coordinates can then be projected on screen using a projection matrix.
+   *
+   * @see #view()
+   * @see #matrix()
+   * @see #worldMatrix()
+   * @see #set(Frame)
+   * @see #set(Frame)
+   */
+  public static Matrix view(Vector position, Quaternion orientation) {
     Matrix view = new Matrix();
 
-    Quaternion q = orientation();
+    float q00 = 2.0f * orientation._quaternion[0] * orientation._quaternion[0];
+    float q11 = 2.0f * orientation._quaternion[1] * orientation._quaternion[1];
+    float q22 = 2.0f * orientation._quaternion[2] * orientation._quaternion[2];
 
-    float q00 = 2.0f * q._quaternion[0] * q._quaternion[0];
-    float q11 = 2.0f * q._quaternion[1] * q._quaternion[1];
-    float q22 = 2.0f * q._quaternion[2] * q._quaternion[2];
+    float q01 = 2.0f * orientation._quaternion[0] * orientation._quaternion[1];
+    float q02 = 2.0f * orientation._quaternion[0] * orientation._quaternion[2];
+    float q03 = 2.0f * orientation._quaternion[0] * orientation._quaternion[3];
 
-    float q01 = 2.0f * q._quaternion[0] * q._quaternion[1];
-    float q02 = 2.0f * q._quaternion[0] * q._quaternion[2];
-    float q03 = 2.0f * q._quaternion[0] * q._quaternion[3];
-
-    float q12 = 2.0f * q._quaternion[1] * q._quaternion[2];
-    float q13 = 2.0f * q._quaternion[1] * q._quaternion[3];
-    float q23 = 2.0f * q._quaternion[2] * q._quaternion[3];
+    float q12 = 2.0f * orientation._quaternion[1] * orientation._quaternion[2];
+    float q13 = 2.0f * orientation._quaternion[1] * orientation._quaternion[3];
+    float q23 = 2.0f * orientation._quaternion[2] * orientation._quaternion[3];
 
     view._matrix[0] = 1.0f - q11 - q22;
     view._matrix[1] = q01 - q23;
@@ -1660,7 +1676,7 @@ public class Frame {
     view._matrix[10] = 1.0f - q11 - q00;
     view._matrix[11] = 0.0f;
 
-    Vector t = q.inverseRotate(position());
+    Vector t = orientation.inverseRotate(position);
 
     view._matrix[12] = -t._vector[0];
     view._matrix[13] = -t._vector[1];
