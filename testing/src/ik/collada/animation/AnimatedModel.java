@@ -128,4 +128,10 @@ public class AnimatedModel {
             addJointsToArray(child, jointMatrices);
         }
     }
+
+    public void printNames(){
+        for(String name : joints.keySet()){
+            System.out.println(name);
+        }
+    }
 }
