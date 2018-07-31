@@ -95,7 +95,7 @@ void draw() {
   drawF1();
   // enter f2
   pushMatrix();
-  scene.applyTransformation(f1);
+  scene.applyTransformation(f2);
   drawF2();
   // "return" to f1
   popMatrix();
