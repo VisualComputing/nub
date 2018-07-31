@@ -8,6 +8,7 @@ import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public class Joint {
@@ -37,6 +38,7 @@ public class Joint {
 
     public void render(){
         PGraphics pg = scene.frontBuffer();
+        pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         pg.fill(color);
         pg.noStroke();
@@ -57,6 +59,7 @@ public class Joint {
         if (frame.constraint() != null) {
             scene.drawConstraint(frame);
         }
+        pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
     public void setRadius(float radius){
