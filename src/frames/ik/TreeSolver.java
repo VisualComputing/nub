@@ -166,12 +166,18 @@ public class TreeSolver extends FABRIKSolver {
        * its children) then an additional step must be done: A Weighted Average of Positions to establish
        * new Frame orientation
        * */
-      //TODO : Perhaps add an option to not execute this step
+      //TODO : CHECK WHY CENTROID GENERATES WORST BEHAVIORS
       // (Last chain modified determines Sub Base orientation)
+      //TODO : AVERAGE ROTATION USING SVD (SAME AS FINDING BEST RIGID TRANSFORMATION)
       if (treeNode._children().size() > 1) {
         Vector centroid = new Vector();
         Vector newCentroid = new Vector();
         float totalWeight = 0;
+        int amount = 1;
+        float[] cumulative = new float[4];
+        Quaternion des = new Quaternion();
+        Quaternion first = null;
+
         for (TreeNode child : treeNode._children()) {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
@@ -179,19 +185,36 @@ public class TreeSolver extends FABRIKSolver {
           if (child._solver().chain().get(1).translation().magnitude() == 0) continue;
           Vector diff = solver.endEffector().location(child._solver().chain().get(1).position());
           centroid.add(Vector.multiply(diff, child._weight()));
+          Vector v1 = solver.endEffector().location(child._solver().chain().get(1).position());
+          Vector v2 = v1;
           if (child._modified) {
             diff = solver.endEffector().location(child._solver()._positions().get(1));
             newCentroid.add(Vector.multiply(diff, child._weight()));
+            v2 = solver.endEffector().location(child._solver()._positions().get(1));
           } else {
             newCentroid.add(Vector.multiply(diff, child._weight()));
           }
+          Quaternion q = new Quaternion(v1, v2);
+          if(amount == 1){
+            for(int i = 0; i < 4; i++)
+              cumulative[i] = q._quaternion[i];
+              first = q;
+          }else {
+            des = averageQuaternion(cumulative, q, first, amount);
+          }
           totalWeight += child._weight();
+          amount++;
         }
         //Set only when Centroid and New Centroid varies
         if (Vector.distance(centroid, newCentroid) > 0.001) {
           centroid.multiply(1.f / totalWeight);
           newCentroid.multiply(1.f / totalWeight);
           Quaternion deltaOrientation = new Quaternion(centroid, newCentroid);
+          float ang = deltaOrientation.angle();
+          //clamp rotation
+          ang = (float)Math.max(Math.min(ang, 10*Math.PI/180), -10*Math.PI/180);
+          deltaOrientation = new Quaternion(deltaOrientation.axis(), ang);
+          //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
           treeNode._solver().endEffector().rotate(deltaOrientation);
           for (TreeNode child : treeNode._children()) {
             if (child._solver().chain().size() < 2) continue;
@@ -238,7 +261,7 @@ public class TreeSolver extends FABRIKSolver {
 
   protected boolean _changed(TreeNode treeNode) {
     if (treeNode == null) return false;
-    if (treeNode._solver()._changed()) return true;
+    if (treeNode._solver()._changed() && treeNode._children().isEmpty()) return true;
     for (TreeNode child : treeNode._children()) {
       if (_changed(child)) return true;
     }
@@ -264,4 +287,60 @@ public class TreeSolver extends FABRIKSolver {
     iterations = 0;
     _reset(root);
   }
+
+  //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors
+  public static Quaternion averageQuaternion(float[] cumulative, Quaternion newRotation, Quaternion firstRotation, int addAmount){
+    float w = 0.0f;
+    float x = 0.0f;
+    float y = 0.0f;
+    float z = 0.0f;
+    //Before we add the new rotation to the average (mean), we have to check whether the quaternion has to be inverted. Because
+    //q and -q are the same rotation, but cannot be averaged, we have to make sure they are all the same.
+    if(!areQuaternionsClose(newRotation, firstRotation)){
+      newRotation = inverseSignQuaternion(newRotation);
+    }
+
+    //Average the values
+    float addDet = 1f/(float)addAmount;
+    cumulative[0] += newRotation.x();
+    x = cumulative[0] * addDet;
+    cumulative[1] += newRotation.y();
+    y = cumulative[1] * addDet;
+    cumulative[2] += newRotation.z();
+    z = cumulative[2] * addDet;
+    cumulative[3] += newRotation.w();
+    w = cumulative[3] * addDet;
+
+    //note: if speed is an issue, you can skip the normalization step
+    return normalizeQuaternion(x, y, z, w);
+  }
+
+  public static Quaternion normalizeQuaternion(float x, float y, float z, float w){
+    float lengthD = 1.0f / (w*w + x*x + y*y + z*z);
+    w *= lengthD;
+    x *= lengthD;
+    y *= lengthD;
+    z *= lengthD;
+    return new Quaternion(x, y, z, w);
+  }
+
+  //Changes the sign of the quaternion components. This is not the same as the inverse.
+  public static Quaternion inverseSignQuaternion(Quaternion q){
+    return new Quaternion(-q.x(), -q.y(), -q.z(), -q.w());
+  }
+
+  //Returns true if the two input quaternions are close to each other. This can
+//be used to check whether or not one of two quaternions which are supposed to
+//be very similar but has its component signs reversed (q has the same rotation as
+//-q)
+  public static boolean areQuaternionsClose(Quaternion q1, Quaternion q2){
+    float dot = Quaternion.dot(q1, q2);
+    if(dot < 0.0f){
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
 }
+
