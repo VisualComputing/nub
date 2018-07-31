@@ -1,17 +1,18 @@
 package basics;
-
+/*
 import frames.processing.Scene;
 import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;
 import org.gamecontrolplus.ControlDevice;
 import org.gamecontrolplus.ControlIO;
 import org.gamecontrolplus.ControlSlider;
+*/
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-
 // The space navigator uses a right-handed coordinate system
 public class SpaceNavigator extends PApplet {
+  /*
   ControlIO control;
   ControlDevice device; // my SpaceNavigator
   ControlSlider snXPos; // Positions
@@ -100,7 +101,7 @@ public class SpaceNavigator extends PApplet {
     // scene.spin(new Quaternion(scene.isLeftHanded() ? roll : -roll, -pitch, scene.isLeftHanded() ? yaw : -yaw), scene.defaultFrame("SPCNAV"));
   }
   */
-
+  /*
   public void mouseMoved() {
     scene.cast();
   }
@@ -150,7 +151,7 @@ public class SpaceNavigator extends PApplet {
     //button1 = device.getButton(0);
     //button2 = device.getButton(1);
   }
-
+  */
   public static void main(String args[]) {
     PApplet.main(new String[]{"basics.SpaceNavigator"});
   }

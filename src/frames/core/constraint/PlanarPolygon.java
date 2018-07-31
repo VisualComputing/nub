@@ -29,6 +29,9 @@ public class PlanarPolygon extends Constraint {
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
   protected float _height = 1.f;
   protected Quaternion _restRotation = new Quaternion();
+  protected Quaternion _idleRotation = new Quaternion();
+  protected Quaternion _alignmentRotation = new Quaternion();
+
   protected Vector _min, _max;
 
   public Quaternion restRotation() {
@@ -46,11 +49,12 @@ public class PlanarPolygon extends Constraint {
    */
   public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     _restRotation = reference.get();
-    Vector Z = _restRotation.inverse().rotate(twist);
+    _idleRotation = reference.get();
     //Align Y-Axis with Up Axis
     _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
+    Vector tw = new Quaternion(new Vector(0, 1, 0), up).inverseRotate(twist);
     //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
+    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), tw));
   }
 
   public ArrayList<Vector> vertices() {
@@ -67,6 +71,28 @@ public class PlanarPolygon extends Constraint {
 
   public void setHeight(float height) {
     this._height = height;
+  }
+
+
+  public void setAngle(float angle){
+    if(vertices().isEmpty()) return;
+    //get the point who is farthest from the origin
+    Vector max = vertices().get(0);
+    for(Vector v : vertices()){
+      if(v.magnitude() > max.magnitude()){
+        max = v;
+      }
+    }
+    float new_max = (float)(_height*Math.tan(angle));
+    float alpha = new_max / max.magnitude();
+    System.out.println("alp " + alpha);
+    System.out.println("new_max " + new_max);
+
+    for(Vector v : vertices()) {
+      System.out.println("v " + v);
+      v.multiply(alpha);
+      System.out.println("v " + v);
+    }
   }
 
   public PlanarPolygon() {
@@ -104,17 +130,19 @@ public class PlanarPolygon extends Constraint {
 
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-    /*
-        if(frame.is2D())
-        throw new RuntimeException("This constrained not supports 2D Frames");
-    */
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
     //twist to frame
+    Quaternion q1 = Quaternion.compose(desired, _idleRotation.inverse());
     Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = Quaternion.multiply(desired, twist);
+    Vector new_pos = desired.rotate(new Vector(0, 0, 1));
+    new_pos = q1.rotate(twist);
     Vector constrained = apply(new_pos, _restRotation);
+    Quaternion q2 = Quaternion.compose(frame.rotation(), _idleRotation.inverse());
+
+    constrained = q2.inverseRotate(constrained);
     //Get Quaternion
-    return new Quaternion(twist, Quaternion.multiply(frame.rotation().inverse(), constrained));
+    return new Quaternion(frame.displacement(twist, frame.reference()), frame.displacement(constrained, frame.reference()));
+    //return new Quaternion(rotation.inverseRotate(new Vector(0, 0, 1)), frame.rotation().inverseRotate( constrained));
   }
 
 
@@ -129,16 +157,19 @@ public class PlanarPolygon extends Constraint {
 
   public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
-    Vector proj = new Vector(_height * point.x() / point.z(), _height * point.y() / point.z());
-    float inverse = (_height < 0) == (point.z() < 0) ? 1 : -1;
-    if (!_isInside(proj)) {
-      proj.multiply(inverse);
+    if(point.z() == 0) point.setZ(0.5f);
+    float alpha = Math.abs(_height/point.z());
+    Vector proj = new Vector(alpha * point.x(), alpha * point.y());
+    boolean inverse = point.z() * _height < 0;
+    if (inverse || !_isInside(proj)) {
+      //proj.multiply(inverse);
       Vector constrained = _closestPoint(proj);
-      constrained.setZ(_height);
-      constrained.multiply(inverse * point.z() / _height);
+      constrained.multiply(1.f/alpha);
+      float z = inverse ? -point.z() : point.z();
+      constrained.setZ(z);
       return restRotation.rotate(constrained);
     }
-    return inverse == -1 ? new Vector(target.x(), target.y(), -target.z()) : target;
+    return target;
   }
 
   protected void _setBoundingBox() {

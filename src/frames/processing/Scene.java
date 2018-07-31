@@ -2816,7 +2816,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawConstraint(PGraphics, Frame)
    */
   public void drawConstraint(Frame frame) {
-    drawConstraint(frontBuffer(), frame);
+    //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
+    if(_targetPGraphics == frontBuffer()) drawConstraint(_targetPGraphics, frame);
   }
 
   /**
@@ -2849,20 +2850,20 @@ public class Scene extends Graph implements PConstants {
     if (frame.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(constraint.restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
+      applyTransformation(pGraphics,reference);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, boneLength / 2.f,
           (boneLength / 2.f) * PApplet.tan(constraint.left()),
           (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
     } else if (frame.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) frame.constraint()).restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
+      applyTransformation(pGraphics,reference);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
     } else if (frame.constraint() instanceof SphericalPolygon) {
       reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
-      applyTransformation(reference);
-      drawAxes(5);
+      applyTransformation(pGraphics,reference);
+      drawAxes(pGraphics,5);
       drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
     } else if (frame.constraint() instanceof Hinge) {
       Hinge constraint = (Hinge) frame.constraint();
@@ -2874,8 +2875,8 @@ public class Scene extends Graph implements PConstants {
         reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis
         reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
-        applyTransformation(reference);
-        drawAxes(5);
+        applyTransformation(pGraphics,reference);
+        drawAxes(pGraphics,5);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }

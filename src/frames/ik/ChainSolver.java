@@ -14,6 +14,7 @@ package frames.ik;
 import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
+import processing.core.PGraphics;
 
 import java.util.ArrayList;
 
@@ -23,31 +24,15 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: Enable Translation of Head (Skip Backward Step)
 
   protected ArrayList<? extends Frame> _chain;
+  protected ArrayList<? extends Frame> _original;
   protected ArrayList<Frame> _bestSolution;
+  protected boolean _improveSolution = false;
 
   protected Frame _target;
   protected Frame _prevTarget;
 
   public ArrayList<? extends Frame> chain() {
-    return _chain;
-  }
-
-  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
-    ArrayList<Frame> copy = new ArrayList<Frame>();
-    Frame reference = chain.get(0).reference();
-    if (reference != null) {
-      reference = new Frame(reference.position().get(), reference.orientation().get());
-    }
-    for (Frame joint : chain) {
-      Frame newJoint = new Frame();
-      newJoint.setReference(reference);
-      newJoint.setPosition(joint.position().get());
-      newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
-      copy.add(newJoint);
-      reference = newJoint;
-    }
-    return copy;
+    return _original;
   }
 
   public Frame target() {
@@ -59,11 +44,11 @@ public class ChainSolver extends FABRIKSolver {
   }
 
   public Frame head() {
-    return _chain.get(0);
+    return _original.get(0);
   }
 
   public Frame endEffector() {
-    return _chain.get(_chain.size() - 1);
+    return _original.get(_original.size() - 1);
   }
 
   public ChainSolver(ArrayList<? extends Frame> chain) {
@@ -72,6 +57,8 @@ public class ChainSolver extends FABRIKSolver {
 
   public ChainSolver(ArrayList<? extends Frame> chain, Frame target) {
     super();
+    this._original = chain;
+    //this._chain = _copy(chain);
     this._chain = chain;
     _bestSolution = _copy(chain);
     _positions = new ArrayList<Vector>();
@@ -82,6 +69,7 @@ public class ChainSolver extends FABRIKSolver {
     Quaternion prevOrientation = chain.get(0).reference() != null
         ? chain.get(0).reference().orientation().get() : new Quaternion();
     for (Frame joint : chain) {
+      _properties.put(joint, new Properties());
       Vector position = joint.position().get();
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
@@ -145,34 +133,97 @@ public class ChainSolver extends FABRIKSolver {
                     return true;
                 }else{*/
     //Initial root position
-    Vector initial = _positions.get(0).get();
+    Vector initial = _chain.get(0).position().get();
     //Stage 1: Forward Reaching
     _positions.set(_chain.size() - 1, target.get());
     _forwardReaching();
     //Stage 2: Backward Reaching
+    Vector o = _positions.get(0);
     _positions.set(0, initial);
-    float change = _backwardReaching();
+    float change = _backwardReaching(o);
+    //Save best solution
+    if (Vector.distance(target, end.position()) < Vector.distance(target, _bestSolution.get(_chain.size() - 1).position())) {
+      _bestSolution = _copy(_chain);
+      _improveSolution = true;
+    }
+    //Check total position change
+    System.out.println("Change : " + change);
+    if (change <= minDistance){
+      //avoid deadLock
+      System.out.println("AVOID");
+      _avoidDeadlock();
+    }
+    return false;
+  }
+
+  Vector initial;
+  Frame end;
+  Vector target;
+
+  public ArrayList<Vector> forward(){
+    _init();
+    //As no target is specified there is no need to perform FABRIK
+    if (_target == null) return _positions;
+    Frame root = _chain.get(0);
+    end = _chain.get(_chain.size() - 1);
+    target = this._target.position().get();
+
+    //Execute Until the distance between the end effector and the target is below a threshold
+    if (Vector.distance(end.position(), target) <= error) {
+      return _positions;
+    }
+
+    //Get the distance between the Root and the End Effector
+    float length = _length();
+    //Get the distance between the Root and the Target
+    float dist = Vector.distance(root.position(), target);
+    //When Target is unreachable        //Debug methods
+                    /*if(dist > length){
+                    stretchChain(chain, target);
+                    return true;
+                }else{*/
+    //Initial root position
+    initial = _chain.get(0).position();
+    //Stage 1: Forward Reaching
+    _positions.set(_chain.size() - 1, target.get());
+    _forwardReaching();
+    return _positions;
+  }
+
+  public ArrayList<Vector> backward() {
+    //Stage 2: Backward Reaching
+    Vector o = _positions.get(0);
+    _positions.set(0, initial);
+    float change = _backwardReaching(o);
     //Save best solution
     if (Vector.distance(target, end.position()) < Vector.distance(target, _bestSolution.get(_chain.size() - 1).position())) {
       _bestSolution = _copy(_chain);
     }
     //Check total position change
-    if (change <= minDistance) return true;
-    return false;
+    if (change <= minDistance) return _positions;
+    return _positions;
+  }
+
+  public ArrayList<Vector> get_p(){
+    return _positions;
   }
 
   protected void _forwardReaching() {
     _forwardReaching(_chain);
   }
 
-  protected float _backwardReaching() {
-    return _backwardReaching(_chain);
+  protected float _backwardReaching(Vector o) {
+    return _backwardReaching(_chain, o);
   }
 
   @Override
   protected void _update() {
-    //for(int i = 0; i < chain.size(); i++){
-    //    chain.get(i).setRotation(bestSolution.get(i).rotation().get());
+    //if(_improveSolution){
+      for(int i = 0; i < _original.size(); i++){
+          //_original.get(i).setRotation(_bestSolution.get(i).rotation().get());
+          _original.get(i).setRotation(_chain.get(i).rotation().get());
+      }
+      _improveSolution = false;
     //}
   }
 
@@ -197,6 +248,9 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
+    //this._chain = _copy(_original);
+    this._chain = _original;
+    this._bestSolution = _copy(_original);
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
@@ -214,5 +268,14 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
+
+  }
+
+  protected void _avoidDeadlock(){
+    if(_chain.size() <= 1) return;
+    Vector v = _chain.get(1).position();
+    Vector w = Vector.subtract(_target.position(), head().position());
+    Vector axis = w.cross(v);
+    head().rotate(new Quaternion(axis, 0.1f));
   }
 }

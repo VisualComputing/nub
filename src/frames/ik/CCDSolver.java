@@ -76,10 +76,18 @@ public class CCDSolver extends Solver {
       Quaternion initial = _chain.get(i).rotation().get();
       delta = new Quaternion(endLocalPosition, targetLocalPosition);
       //update target local position
-      targetLocalPosition = _chain.get(i).reference().displacement(targetLocalPosition, _chain.get(i));
+      if(_chain.get(i).reference() == null){
+        targetLocalPosition = _chain.get(i).worldLocation(targetLocalPosition);
+      } else {
+        targetLocalPosition = _chain.get(i).reference().location(targetLocalPosition, _chain.get(i));
+      }
       _chain.get(i).rotate(delta);
       //update end effector local position
-      endLocalPosition = _chain.get(i).reference().displacement(endLocalPosition, _chain.get(i));
+      if(_chain.get(i).reference() == null){
+        endLocalPosition = _chain.get(i).worldLocation(endLocalPosition);
+      } else {
+        endLocalPosition = _chain.get(i).reference().location(endLocalPosition, _chain.get(i));
+      }
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
     }

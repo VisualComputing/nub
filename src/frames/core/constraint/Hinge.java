@@ -135,12 +135,24 @@ public class Hinge extends Constraint {
 
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-    /*First constraint rotation to be defined with respect to Axis*/
     Vector axis = _restRotation.rotate(this._axis);
-    Vector rotationAxis = Vector.projectVectorOnAxis(rotation.axis(), axis);
+    Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
+    Vector rotationAxis = Vector.projectVectorOnAxis(quat, axis);
     //Get rotation component on Axis direction
-    Quaternion rotationTwist = new Quaternion(rotationAxis, rotation.angle());
+    Quaternion rotationTwist= new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rotation.w());
     float deltaAngle = rotationTwist.angle();
+    //System.out.println("Rotation : " + rotationTwist.axis() + " ang : " + rotationTwist.angle());
+
+    /*First constraint rotation to be defined with respect to Axis*/
+    //Vector axis = _restRotation.rotate(this._axis);
+    //Vector rotationAxis = Vector.projectVectorOnAxis(rotation.axis(), axis);
+    //Get rotation component on Axis direction
+    //Quaternion rotationTwist = new Quaternion(rotationAxis, rotation.angle());
+    //float deltaAngle = rotationTwist.angle();
+    System.out.println("Rotation : " + rotation.axis() + " ang : " + rotation.angle());
+
+    System.out.println("Rotation tw : " + rotationTwist.axis() + " ang : " + rotationTwist.angle());
+
     if (rotationAxis.dot(axis) < 0) deltaAngle *= -1;
     /*First rotation of Frame with respect to Axis*/
     Quaternion current = Quaternion.compose(frame.rotation(), _restRotation.inverse());
@@ -161,7 +173,6 @@ public class Hinge extends Constraint {
       return new Quaternion(axis, deltaAngle);
     }
   }
-
   @Override
   public Vector constrainTranslation(Vector translation, Frame frame) {
     return new Vector();
