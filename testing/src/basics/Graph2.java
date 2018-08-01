@@ -36,7 +36,7 @@ public class Graph2 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize(new Vector(), 100);
+      frames[i].randomize(new Vector(), 100, g.is3D());
     }
   }
 

@@ -32,7 +32,7 @@ public class Graph1 extends PApplet {
     frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {
       frames[i] = new Frame();
-      frames[i].randomize(new Vector(), 100);
+      frames[i].randomize(new Vector(), 100, g.is3D());
     }
   }
 

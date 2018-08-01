@@ -257,10 +257,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code randomize(graph().center(), graph().radius())}.
+   * Same as {@code frame.randomize(center(), radius(), is3D())}.
+   *
+   * @see Frame#randomize(Vector, float, boolean)
    */
   public void randomize(Frame frame) {
-    frame.randomize(center(), radius());
+    frame.randomize(center(), radius(), is3D());
   }
 
   // Dimensions stuff
