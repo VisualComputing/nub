@@ -660,95 +660,93 @@ public class Frame {
   // Random
 
   /**
-   * Same as {@code randomize(100)}.
-   *
-   * @see #randomize(float)
+   * Macro that returns a number number between {@code lower} and {@code upper}.
    */
-  public void randomize() {
-    randomize(100);
+  protected static float _random(float lower, float upper) {
+    return ((float) Math.random() * (upper - lower)) + lower;
   }
 
   /**
-   * Same as {@code randomize(new Vector(), radius)}.
+   * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
+   * <p>
+   * Does nothing if the frame {@link #isDetached()}.
    *
-   * @see #randomize(Vector, float)
+   * @see #randomize(Vector, float, boolean)
+   * @see Vector#randomize()
+   * @see Quaternion#randomize()
+   * @see #random(Graph)
+   * @see #random(Vector, float, boolean)
    */
-  public void randomize(float radius) {
-    randomize(new Vector(), radius);
+  public void randomize() {
+    if (graph() != null)
+      randomize(graph().center(), graph().radius(), graph().is3D());
+    else
+      System.out.println("randomize() is only available for attached frames, nothing done! Use randomize(center, radius, is3D) instead");
   }
 
   /**
    * Randomized this frame. The frame is randomly re-positioned inside the ball
-   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
-   * magnitude is a random in oldMagnitude * [0,5...2].
+   * defined by {@code center} and {@code radius}, which in 2D is a
+   * circumference parallel to the x-y plane. The {@link #orientation()} is
+   * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
+   * in old-magnitude * [0,5...2].
    *
-   * @see #random(Vector, float)
+   * @see #randomize()
+   * @see Vector#randomize()
+   * @see Quaternion#randomize()
+   * @see #random(Graph)
+   * @see #random(Vector, float, boolean)
    */
-  public void randomize(Vector center, float radius) {
-    Vector displacement = Vector.random(0);
-    Quaternion quaternion = Quaternion.random(new Vector(0,0,1));
-    if(graph() != null) {
-      if(graph().is3D()) {
-        displacement.randomize();
-        quaternion.randomize();
-      }
+  public void randomize(Vector center, float radius, boolean is3D) {
+    Vector displacement;
+    Quaternion quaternion;
+    if (is3D) {
+      displacement = Vector.random();
+      quaternion = Quaternion.random();
+    } else {
+      displacement = new Vector(_random(-1, 1), _random(-1, 1));
+      displacement.normalize();
+      quaternion = new Quaternion(new Vector(0, 0, 1), _random(0, 2 * (float) Math.PI));
     }
-    float lower = radius * 0.1f;
-    float upper = radius - radius * 0.1f;
-    displacement.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
+    displacement.setMagnitude(_random(radius * 0.1f, radius * 0.9f));
     setPosition(Vector.add(center, displacement));
     setOrientation(quaternion);
-    lower = 0.5f;
-    upper = 2;
-    setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
+    setMagnitude(magnitude() * _random(0.5f, 2));
   }
 
   /**
    * Returns a random frame attached to {@code graph}. The frame is randomly positioned inside
-   * the {@code graph} viewing volume (see {@link Graph#center()} and {@link Graph#radius()}).
-   * The {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
+   * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
+   * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
+   * magnitude is a random in [0,5...2].
    *
-   * @see #random(Vector, float)
-   * @see #randomize(Vector, float)
+   * @see #random(Vector, float, boolean)
+   * @see Vector#random()
+   * @see Quaternion#random()
+   * @see #randomize()
+   * @see #randomize(Vector, float, boolean)
    */
   public static Frame random(Graph graph) {
     Frame frame = new Frame(graph);
-    frame.randomize(graph.center(), graph.radius());
+    frame.randomize();
     return frame;
   }
 
   /**
-   * Same as {@code return random(100)}.
-   *
-   * @see #random(float)
-   */
-  public static Frame random() {
-    return random(100);
-  }
-
-  /**
-   * Same as {@code return random(new Vector(), radius)}
-   *
-   * @see #random(Vector, float)
-   */
-  public static Frame random(float radius) {
-    return random(new Vector(), radius);
-  }
-
-  /**
-   * Returns a random detached frame. The frame is randomly positioned inside the ball
-   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
+   * Returns a random detached frame. The frame is randomly positioned inside the ball defined
+   * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
+   * circumference parallel to the x-y plane. The {@link #orientation()} is set by
+   * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
    *
    * @see #random(Graph)
-   * @see #randomize(Vector, float)
+   * @see Vector#random()
+   * @see Quaternion#random()
+   * @see #randomize()
+   * @see #randomize(Vector, float, boolean)
    */
-  public static Frame random(Vector center, float radius) {
+  public static Frame random(Vector center, float radius, boolean is3D) {
     Frame frame = new Frame();
-    frame.randomize(center, radius);
+    frame.randomize(center, radius, is3D);
     return frame;
   }
 

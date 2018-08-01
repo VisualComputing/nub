@@ -19,7 +19,7 @@ public class DetachedFrames1 extends PApplet {
     frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {
       frames[i] = new Frame();
-      frames[i].randomize(new Vector(400, 400, 0), 400);
+      frames[i].randomize(new Vector(400, 400, 0), 400, g.is3D());
     }
   }
 

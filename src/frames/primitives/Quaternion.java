@@ -207,41 +207,29 @@ public class Quaternion {
     return new Quaternion(this);
   }
 
-  public void randomize(Vector axis) {
-    set(Quaternion.random(axis));
+  /**
+   * Macro that returns a number number between {@code lower} and {@code upper}.
+   */
+  protected static float _random(float lower, float upper) {
+    return ((float) Math.random() * (upper - lower)) + lower;
   }
 
   /**
    * Randomize this quaternion. The quaternion is normalized too.
    *
    * @see #random()
-   * @see #random(Vector)
    */
   public void randomize() {
     set(Quaternion.random());
   }
 
   /**
-   * Same as {@code return random(Vector.random())}.
+   * Returns a normalized random quaternion.
    *
-   * @see Vector#random()
-   * @see #random(Vector)
    * @see #randomize()
    */
   public static Quaternion random() {
-    return random(Vector.random());
-  }
-
-  /**
-   * Returns a normalized random quaternion along {@code axis}.
-   *
-   * @see #random()
-   * @see #randomize()
-   */
-  public static Quaternion random(Vector axis) {
-    float lower = 0;
-    float upper = 2 * (float)Math.PI;
-    return new Quaternion(axis, ((float)Math.random() * (upper - lower)) + lower);
+    return new Quaternion(Vector.random(), _random(0, 2 * (float) Math.PI));
   }
 
   /**

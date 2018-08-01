@@ -78,6 +78,13 @@ public class Vector {
   }
 
   /**
+   * Macro that returns a number number between {@code lower} and {@code upper}.
+   */
+  protected static float _random(float lower, float upper) {
+    return ((float) Math.random() * (upper - lower)) + lower;
+  }
+
+  /**
    * Randomize this vector. The vector is normalized too.
    *
    * @see #random()
@@ -86,33 +93,13 @@ public class Vector {
     set(Vector.random());
   }
 
-  public static Vector random() {
-    float lower = -10;
-    float upper = 10;
-    return Vector.random(((float) Math.random() * (upper - lower)) + lower);
-  }
-
   /**
-   * Randomize this vector. The vector is normalized too.
-   *
-   * @see #random()
-   */
-  public void randomize(float z) {
-    set(Vector.random(z));
-  }
-
-  /**
-   * Returns a normalized random vector, keeping the {@code z} coordinate.
+   * Returns a normalized random vector.
    *
    * @see #randomize()
    */
-  public static Vector random(float z) {
-    Vector vector = new Vector();
-    float lower = -10;
-    float upper = 10;
-    vector.setX(((float) Math.random() * (upper - lower)) + lower);
-    vector.setY(((float) Math.random() * (upper - lower)) + lower);
-    vector.setZ(z);
+  public static Vector random() {
+    Vector vector = new Vector(_random(-1, 1), _random(-1, 1), _random(-1, 1));
     vector.normalize();
     return vector;
   }

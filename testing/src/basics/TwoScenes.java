@@ -50,15 +50,15 @@ public class TwoScenes extends PApplet {
       scene1.fitBall();
     if (key == 'a') {
       println(scene1.zNear());
-      vector = new Vector(0,0, -scene1.zNear()/scene1.eye().magnitude());
+      vector = new Vector(0, 0, -scene1.zNear() / scene1.eye().magnitude());
       vector = scene1.eye().worldLocation(vector);
       frame.setPosition(vector);
     }
-    if(key == 'b') {
+    if (key == 'b') {
       Vector zNear = new Vector(0, 0, scene1.zNear());
       Vector zFar = new Vector(0, 0, scene1.zFar());
       Vector zNear2ZFar = Vector.subtract(zFar, zNear);
-      scene1.translate(0,0,zNear2ZFar.magnitude(), frame);
+      scene1.translate(0, 0, zNear2ZFar.magnitude(), frame);
     }
     if (key == 'n')
       scene1.eye().setMagnitude(1);

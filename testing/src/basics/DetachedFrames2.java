@@ -1,11 +1,8 @@
 package basics;
 
 import frames.core.Frame;
-import frames.primitives.Matrix;
-import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
-import processing.opengl.PGraphicsOpenGL;
 
 /**
  * Created by pierre on 11/15/16.

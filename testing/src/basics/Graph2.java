@@ -3,7 +3,6 @@ package basics;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.primitives.Point;
-import frames.primitives.Vector;
 import frames.processing.GLMatrixHandler;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
@@ -36,7 +35,7 @@ public class Graph2 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize(new Vector(), 100);
+      frames[i].randomize();
     }
   }
 
