@@ -200,36 +200,53 @@ public class Quaternion {
     set(quaternion);
   }
 
+  /**
+   * Returns a deep copy of this quaternion.
+   */
   public Quaternion get() {
     return new Quaternion(this);
+  }
+
+  public void randomize(Vector axis) {
+    set(Quaternion.random(axis));
   }
 
   /**
    * Randomize this quaternion. The quaternion is normalized too.
    *
    * @see #random()
+   * @see #random(Vector)
    */
   public void randomize() {
     set(Quaternion.random());
   }
 
   /**
-   * Returns a normalized random quaternion.
+   * Same as {@code return random(Vector.random())}.
    *
+   * @see Vector#random()
+   * @see #random(Vector)
    * @see #randomize()
    */
   public static Quaternion random() {
-    Vector from = Vector.random();
-    Vector to = Vector.random();
-    Quaternion quaternion = new Quaternion(from, to);
-    /*
-    float lower = 0;
-    float upper = 2 * (float)Math.PI;
-    Quaternion quaternion = new Quaternion(new Vector(0,0,1), ((float)Math.random() * (upper - lower)) + lower);
-    */
-    return quaternion;
+    return random(Vector.random());
   }
 
+  /**
+   * Returns a normalized random quaternion along {@code axis}.
+   *
+   * @see #random()
+   * @see #randomize()
+   */
+  public static Quaternion random(Vector axis) {
+    float lower = 0;
+    float upper = 2 * (float)Math.PI;
+    return new Quaternion(axis, ((float)Math.random() * (upper - lower)) + lower);
+  }
+
+  /**
+   * Make this an identity quaternion.
+   */
   public void reset() {
     this._quaternion[0] = 0;
     this._quaternion[1] = 0;
@@ -237,6 +254,9 @@ public class Quaternion {
     this._quaternion[3] = 1;
   }
 
+  /**
+   * Returns a copy of this quaternion into the four length {@code target} array.
+   */
   public float[] get(float[] target) {
     if ((target == null) || (target.length != 4)) {
       target = new float[4];
@@ -249,6 +269,9 @@ public class Quaternion {
     return target;
   }
 
+  /**
+   * Sets this quaternion from the four length {@code source} array.
+   */
   public void set(float[] source) {
     if (source.length == 4) {
       _quaternion[0] = source[0];
@@ -965,26 +988,6 @@ public class Quaternion {
       float coef = (float) Math.sin(theta) / theta;
       return new Quaternion(this._quaternion[0] * coef, this._quaternion[1] * coef, this._quaternion[2] * coef, (float) Math.cos(theta));
     }
-  }
-
-  /**
-   * Returns a random unit quaternion.
-   * <p>
-   * You can create a randomly directed unit vector using:
-   * <p>
-   * {@code Vector randomDir = new Vector(1.0f, 0.0f, 0.0f);} <br>
-   * {@code randomDir = Quaternion.multiply(Quaternion.randomQuaternion(),
-   * randomDir);}
-   */
-  public static Quaternion randomQuaternion() {
-    float seed = (float) Math.random();
-    float r1 = (float) Math.sqrt(1.0f - seed);
-    float r2 = (float) Math.sqrt(seed);
-    float t1 = 2.0f * (float) Math.PI * (float) Math.random();
-    float t2 = 2.0f * (float) Math.PI * (float) Math.random();
-
-    return new Quaternion((float) Math.sin(t1) * r1, (float) Math.cos(t1) * r1, (float) Math.sin(t2) * r2,
-        (float) Math.cos(t2) * r2);
   }
 
   /**

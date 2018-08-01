@@ -686,12 +686,21 @@ public class Frame {
    * @see #random(Vector, float)
    */
   public void randomize(Vector center, float radius) {
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius);
+    Vector displacement = Vector.random(0);
+    Quaternion quaternion = Quaternion.random(new Vector(0,0,1));
+    if(graph() != null) {
+      if(graph().is3D()) {
+        displacement.randomize();
+        quaternion.randomize();
+      }
+    }
+    float lower = radius * 0.1f;
+    float upper = radius - radius * 0.1f;
+    displacement.setMagnitude(((float) Math.random() * (upper - lower)) + lower);
     setPosition(Vector.add(center, displacement));
-    setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
+    setOrientation(quaternion);
+    lower = 0.5f;
+    upper = 2;
     setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
   }
 

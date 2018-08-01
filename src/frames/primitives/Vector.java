@@ -86,18 +86,33 @@ public class Vector {
     set(Vector.random());
   }
 
+  public static Vector random() {
+    float lower = -10;
+    float upper = 10;
+    return Vector.random(((float) Math.random() * (upper - lower)) + lower);
+  }
+
   /**
-   * Returns a normalized random vector.
+   * Randomize this vector. The vector is normalized too.
+   *
+   * @see #random()
+   */
+  public void randomize(float z) {
+    set(Vector.random(z));
+  }
+
+  /**
+   * Returns a normalized random vector, keeping the {@code z} coordinate.
    *
    * @see #randomize()
    */
-  public static Vector random() {
+  public static Vector random(float z) {
     Vector vector = new Vector();
     float lower = -10;
     float upper = 10;
     vector.setX(((float) Math.random() * (upper - lower)) + lower);
     vector.setY(((float) Math.random() * (upper - lower)) + lower);
-    vector.setZ(((float) Math.random() * (upper - lower)) + lower);
+    vector.setZ(z);
     vector.normalize();
     return vector;
   }
@@ -304,7 +319,7 @@ public class Vector {
   }
 
   /**
-   * Get a copy of this vector.
+   * Returns a deep copy of this vector.
    */
   public Vector get() {
     return new Vector(this);
