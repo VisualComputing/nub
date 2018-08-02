@@ -1,6 +1,7 @@
 package basics;
 
 import frames.core.Frame;
+import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
 
@@ -19,10 +20,8 @@ public class DetachedFrames2 extends PApplet {
     eye = new Frame();
     eye.setPosition(0, 0, 200);
     frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame();
-      frames[i].randomize();
-    }
+    for (int i = 0; i < frames.length; i++)
+      frames[i] = Frame.random(new Vector(), 100, g.is3D());
   }
 
   public void draw() {

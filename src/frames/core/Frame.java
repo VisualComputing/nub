@@ -728,7 +728,7 @@ public class Frame {
    */
   public static Frame random(Graph graph) {
     Frame frame = new Frame(graph);
-    frame.randomize();
+    frame.randomize(graph.center(), graph.radius(), graph.is3D());
     return frame;
   }
 
