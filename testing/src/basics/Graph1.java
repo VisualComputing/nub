@@ -30,10 +30,8 @@ public class Graph1 extends PApplet {
     graph.fitBallInterpolation();
     framesShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/framesjs/testing/data/matrix_handler/FrameVert_pmv.glsl");
     frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame();
-      frames[i].randomize(new Vector(), 100, g.is3D());
-    }
+    for (int i = 0; i < frames.length; i++)
+      frames[i] = Frame.random(new Vector(), 100, g.is3D());
   }
 
   public void draw() {
@@ -41,7 +39,7 @@ public class Graph1 extends PApplet {
     background(0);
     //discard Processing matrices
     resetMatrix();
-    //set initial model-view and projection prograph matrices
+    //set initial model-view and projection matrices
     setUniforms();
     for (int i = 0; i < frames.length; i++) {
       graph.pushModelView();

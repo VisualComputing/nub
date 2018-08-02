@@ -208,13 +208,6 @@ public class Quaternion {
   }
 
   /**
-   * Macro that returns a number number between {@code lower} and {@code upper}.
-   */
-  protected static float _random(float lower, float upper) {
-    return ((float) Math.random() * (upper - lower)) + lower;
-  }
-
-  /**
    * Randomize this quaternion. The quaternion is normalized too.
    *
    * @see #random()
@@ -229,7 +222,7 @@ public class Quaternion {
    * @see #randomize()
    */
   public static Quaternion random() {
-    return new Quaternion(Vector.random(), _random(0, 2 * (float) Math.PI));
+    return new Quaternion(Vector.random(), Vector.random());
   }
 
   /**
@@ -753,7 +746,6 @@ public class Quaternion {
       this._quaternion[0] = this._quaternion[1] = this._quaternion[2] = 0.0f;
       this._quaternion[3] = 1.0f;
     } else {
-
       Vector axis = from.cross(to);
 
       float axisSqNorm = axis.squaredNorm();
