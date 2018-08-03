@@ -661,8 +661,7 @@ public class Graph {
    * belonging to the branch (i.e., {@code branch=pruneBranch(frame)}) and then call
    * {@link #appendBranch(List)} on the cached branch. Note that calling
    * {@link Frame#setReference(Frame)} on a frame belonging to the pruned branch will become
-   * reachable again by the traversal algorithm. In this case, the frame should be manually
-   * added to some agents to interactively handle it.
+   * reachable again by the traversal algorithm.
    * <p>
    * When collected, pruned frames behave like {@link Frame}, otherwise they are eligible for
    * garbage collection.
@@ -687,8 +686,6 @@ public class Graph {
   /**
    * Appends the branch which typically should come from the one pruned (and cached) with
    * {@link #pruneBranch(Frame)}.
-   * <p>
-   * All frames belonging to the branch are automatically added to all graph agents.
    * <p>
    * {@link #pruneBranch(Frame)}
    */
