@@ -8,13 +8,12 @@
  * The back buffer is used to pick them.
  */
 
-import frames.input.*;
-import frames.core.*;
 import frames.primitives.*;
+import frames.core.*;
 import frames.processing.*;
 
 Scene scene;
-OrbitShape[] models;
+Shape[] shapes;
 PGraphics canvas;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
@@ -31,15 +30,12 @@ void setup() {
   scene = new Scene(this, createGraphics(w, h / 2, renderer));
   scene.setRadius(max(w, h));
 
-  models = new OrbitShape[100];
-  for (int i = 0; i < models.length; i++) {
-    models[i] = new OrbitShape(scene);
-    models[i].set(caja());
-    models[i].randomize();
+  shapes = new Shape[100];
+  for (int i = 0; i < shapes.length; i++) {
+    shapes[i] = new Shape(scene);
+    shapes[i].setGraphics(caja());
+    shapes[i].randomize();
   }
-  OrbitShape eye = new OrbitShape(scene);
-  scene.setEye(eye);
-  scene.setDefaultNode(eye);
   scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 }
@@ -53,6 +49,23 @@ void draw() {
   scene.display();
   // 2. Display back buffer
   image(scene.backBuffer(), 0, h / 2);
+}
+
+void mouseMoved() {
+  scene.cast();
+}
+
+void mouseDragged() {
+  if (mouseButton == LEFT)
+    scene.spin();
+  else if (mouseButton == RIGHT)
+    scene.translate();
+  else
+    scene.zoom(mouseX - pmouseX);
+}
+
+void mouseWheel(MouseEvent event) {
+  scene.zoom(event.getCount() * 20);
 }
 
 PShape caja() {

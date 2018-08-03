@@ -10,11 +10,10 @@
  * Hover over lamp elements to select them, and then drag them with the mouse.
  */
 
-import frames.processing.*;
-import frames.input.*;
-import frames.core.*;
 import frames.primitives.*;
-import frames.primitives.constraint.*;
+import frames.core.*;
+import frames.core.constraint.*;
+import frames.processing.*;
 
 Scene scene;
 Lamp lamp;
@@ -22,11 +21,7 @@ Lamp lamp;
 void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
-  OrbitShape eye = new OrbitShape(scene);
-  scene.setEye(eye);
   scene.setFieldOfView(PI / 3);
-  //interactivity defaults to the eye
-  scene.setDefaultNode(eye);
   scene.setRadius(100);
   scene.fitBallInterpolation();
   lamp = new Lamp(scene);
@@ -52,4 +47,21 @@ void draw() {
     }
     endShape();
   }
+}
+
+void mouseMoved() {
+  scene.cast();
+}
+
+void mouseDragged() {
+  if (mouseButton == LEFT)
+    scene.spin();
+  else if (mouseButton == RIGHT)
+    scene.translate();
+  else
+    scene.zoom(mouseX - pmouseX);
+}
+
+void mouseWheel(MouseEvent event) {
+  scene.zoom(event.getCount() * 20);
 }

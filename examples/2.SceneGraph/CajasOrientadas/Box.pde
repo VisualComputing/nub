@@ -1,11 +1,11 @@
 public class Box {
-  public Node iFrame;
+  public Frame iFrame;
   float w, h, d;
   int c;
 
   public Box() {
-    iFrame = new OrbitNode(scene);
-    iFrame.setPrecision(Node.Precision.ADAPTIVE);
+    iFrame = new Frame(scene);
+    iFrame.setPrecision(Frame.Precision.ADAPTIVE);
     iFrame.setPrecisionThreshold(25);
     setSize();
     setColor();
@@ -18,11 +18,11 @@ public class Box {
 
   public void draw(boolean drawAxes) {
     pushMatrix();
-    iFrame.applyWorldTransformation();
+    scene.applyWorldTransformation(iFrame);
     if (drawAxes)
       scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
     noStroke();
-    if (iFrame.grabsInput(scene.mouse()))
+    if (iFrame.isTracked())
       fill(255, 0, 0);
     else
       fill(getColor());

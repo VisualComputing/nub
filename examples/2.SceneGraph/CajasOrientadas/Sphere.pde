@@ -1,11 +1,11 @@
 public class Sphere {
-  Node iFrame;
+  Frame iFrame;
   float r;
   int c;
 
   public Sphere() {
-    iFrame = new OrbitNode(scene);
-    iFrame.setPrecision(Node.Precision.ADAPTIVE);
+    iFrame = new Frame(scene);
+    iFrame.setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
 
@@ -15,12 +15,12 @@ public class Sphere {
 
   public void draw(boolean drawAxes) {
     pushMatrix();
-    iFrame.applyTransformation(scene);
+    scene.applyTransformation(iFrame);
 
     if (drawAxes)
       //DrawingUtils.drawAxes(parent, radius()*1.3f);
       scene.drawAxes(radius() * 1.3f);
-    if (iFrame.grabsInput(scene.mouse())) {
+    if (iFrame.isTracked()) {
       fill(255, 0, 0);
       sphere(radius() * 1.2f);
     } else {
