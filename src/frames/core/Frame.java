@@ -474,9 +474,25 @@ public class Frame {
   // REFERENCE_FRAME
 
   /**
-   * Returns {@code true} if this frame is ancestor of {@code frame}.
+   * Returns {@code true} if {@code frame} is {@link #reference()} {@code this} frame.
+   */
+  public boolean isReference(Frame frame) {
+    return reference() == frame;
+  }
+
+  /**
+   * Returns {@code true} if {@code frame} is ancestor of {@code this} frame.
    */
   public boolean isAncestor(Frame frame) {
+    if(frame == null)
+      return true;
+    return frame._isSuccessor(this);
+  }
+
+  /**
+   * Returns {@code true} if {@code frame} is successor of {@code this} frame.
+   */
+  protected boolean _isSuccessor(Frame frame) {
     if (frame == this || frame == null)
       return false;
     Frame ancestor = frame.reference();
@@ -489,13 +505,13 @@ public class Frame {
   }
 
   /**
-   * Same as {@code return ancestor.isAncestor(frame)}.
+   * Same as {@code return successor.isAncestor(ancestor)}.
    *
    * @see #isAncestor(Frame)
    * @see #path(Frame, Frame)
    */
-  public static boolean isAncestor(Frame ancestor, Frame frame) {
-    return ancestor.isAncestor(frame);
+  public static boolean isAncestor(Frame successor, Frame ancestor) {
+    return successor.isAncestor(ancestor);
   }
 
   /**
@@ -504,15 +520,16 @@ public class Frame {
    *
    * @see #isAncestor(Frame, Frame)
    */
-  public static ArrayList<Frame> path(Frame tail, Frame tip) {
+  public static List<Frame> path(Frame tail, Frame tip) {
     ArrayList<Frame> list = new ArrayList<Frame>();
-    if (tail.isAncestor(tip)) {
+    if (tip.isAncestor(tail)) {
       Frame _tip = tip;
       while (_tip != tail) {
         list.add(0, _tip);
         _tip = _tip.reference();
       }
-      list.add(0, tail);
+      if(tail != null)
+        list.add(0, tail);
     }
     return list;
   }
@@ -567,7 +584,7 @@ public class Frame {
       System.out.println("A Frame cannot be a reference of itself.");
       return;
     }
-    if (isAncestor(frame)) {
+    if (_isSuccessor(frame)) {
       System.out.println("A Frame descendant cannot be set as its reference.");
       return;
     }
