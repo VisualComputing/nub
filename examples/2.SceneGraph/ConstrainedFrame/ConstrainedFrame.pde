@@ -1,21 +1,6 @@
-package basics;
-
-import frames.core.Frame;
-import frames.core.constraint.AxisPlaneConstraint;
-import frames.core.constraint.EyeConstraint;
-import frames.core.constraint.LocalConstraint;
-import frames.core.constraint.WorldConstraint;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import processing.core.PApplet;
-import processing.core.PFont;
-import processing.event.MouseEvent;
-
-public class ConstrainedFrame extends PApplet {
-
-  public void settings() {
-    size(800, 800, P3D);
-  }
+import frames.primitives.*;
+import frames.core.*;
+import frames.processing.*;
 
   Scene scene;
   boolean mouseTracking = true;
@@ -30,7 +15,7 @@ public class ConstrainedFrame extends PApplet {
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public void setup() {
+  void setup() {
     size(800, 800, renderer);
     myFont = loadFont("FreeSans-16.vlw");
     textFont(myFont);
@@ -52,7 +37,7 @@ public class ConstrainedFrame extends PApplet {
     iFrame.setConstraint(constraints[activeConstraint]);
   }
 
-  public void draw() {
+  void draw() {
     background(0);
     scene.drawAxes();
     pushMatrix();
@@ -67,12 +52,12 @@ public class ConstrainedFrame extends PApplet {
     scene.endScreenDrawing();
   }
 
-  public void mouseMoved() {
+  void mouseMoved() {
     if (mouseTracking)
       scene.track();
   }
 
-  public void mouseDragged() {
+  void mouseDragged() {
     if (mouseButton == LEFT)
       scene.spin();
     else if (mouseButton == RIGHT)
@@ -81,11 +66,11 @@ public class ConstrainedFrame extends PApplet {
       scene.zoom(mouseX - pmouseX);
   }
 
-  public void mouseWheel(MouseEvent event) {
+  void mouseWheel(MouseEvent event) {
     scene.zoom(event.getCount() * 20);
   }
 
-  public void keyPressed() {
+  void keyPressed() {
     if (key == 'i')
       if (scene.isTrackedFrame(iFrame)) {
         scene.resetTrackedFrame();
@@ -286,8 +271,3 @@ public class ConstrainedFrame extends PApplet {
         break;
     }
   }
-
-  public static void main(String args[]) {
-    PApplet.main(new String[]{"basics.ConstrainedFrame"});
-  }
-}
