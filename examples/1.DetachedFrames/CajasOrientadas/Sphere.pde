@@ -19,7 +19,7 @@ public class Sphere extends Frame {
       //DrawingUtils.drawAxes(parent, radius()*1.3f);
       scene.drawAxes(radius() * 1.3f);
     
-    fill(255, isTracked(scene) ? 255 : 0, 0);
+    fill(255, isTracked(scene) ? 0 : 255, 0);
     sphere(radius() * 1.2f);
  
     popMatrix();

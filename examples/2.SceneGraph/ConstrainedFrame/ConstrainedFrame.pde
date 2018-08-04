@@ -33,7 +33,16 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  iFrame = new Frame(scene);
+  iFrame = new Frame(scene) {
+    // Note that within visit() geometry is defined at the
+    // frame local coordinate system.
+    @Override
+    public void visit() {
+      scene.drawAxes(40);
+      fill(isTracked() ? 255 : 0, 0, 255);
+      scene.drawTorusSolenoid();
+    }
+  };
   iFrame.translate(new Vector(20, 20, 0));
   iFrame.setConstraint(constraints[activeConstraint]);
 }
@@ -41,13 +50,8 @@ void setup() {
 void draw() {
   background(0);
   scene.drawAxes();
-  pushMatrix();
-  scene.applyTransformation(iFrame);
-  scene.drawAxes(40);
-  fill(iFrame.isTracked() ? 255 : 0, 0, 255);
-  scene.drawTorusSolenoid();
-  popMatrix();
-  fill(0, 0, 255);
+  scene.traverse();
+  fill(0, 255, 255);
   scene.beginScreenDrawing();
   displayText();
   scene.endScreenDrawing();
@@ -55,7 +59,7 @@ void draw() {
 
 void mouseMoved() {
   if (mouseTracking)
-    scene.track();
+    scene.cast();
 }
 
 void mouseDragged() {

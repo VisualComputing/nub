@@ -58,19 +58,14 @@ void mouseMoved() {
 void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin();
-  //scene.lookAround(upVector);
-  //scene.mouseCAD();
   else if (mouseButton == RIGHT)
     scene.translate();
-  //scene.mousePan();
   else
-    //scene.zoom(mouseX - pmouseX);
     scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  //scene.zoom(event.getCount() * 20);
-  scene.scale(event.getCount() * 20);
+  scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

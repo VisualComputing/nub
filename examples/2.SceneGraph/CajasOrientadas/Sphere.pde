@@ -4,7 +4,14 @@ public class Sphere {
   int c;
 
   public Sphere() {
-    iFrame = new Frame(scene);
+    iFrame = new Frame(scene) {
+      // Note that within visit() geometry is defined at the
+      // frame local coordinate system.
+      @Override
+      public void visit() {
+        draw();
+      }
+    };
     iFrame.setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
@@ -14,9 +21,6 @@ public class Sphere {
   }
 
   public void draw(boolean drawAxes) {
-    pushMatrix();
-    scene.applyTransformation(iFrame);
-
     if (drawAxes)
       //DrawingUtils.drawAxes(parent, radius()*1.3f);
       scene.drawAxes(radius() * 1.3f);
@@ -27,7 +31,6 @@ public class Sphere {
       fill(getColor());
       sphere(radius());
     }
-    popMatrix();
   }
 
   public float radius() {

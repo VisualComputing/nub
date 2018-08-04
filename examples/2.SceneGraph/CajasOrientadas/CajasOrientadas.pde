@@ -36,42 +36,24 @@ void setup() {
 
 void draw() {
   background(0);
-
-  esfera.draw(false);
-  for (int i = 0; i < cajas.length; i++) {
-    cajas[i].setOrientation(esfera.getPosition());
-    cajas[i].draw(true);
-  }
-
-  String text = "Cajas Orientadas";
-  float w = scene.frontBuffer().textWidth(text);
-  float h = scene.frontBuffer().textAscent() + scene.frontBuffer().textDescent();
-  scene.beginScreenDrawing();
-  //textFont(font);
-  text(text, 20, 20, w + 1, h);
-  scene.endScreenDrawing();
+  scene.traverse();
 }
 
 void mouseMoved() {
-  scene.track();
+  scene.cast();
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin();
-  //scene.lookAround(upVector);
-  //scene.mouseCAD();
   else if (mouseButton == RIGHT)
     scene.translate();
-  //scene.mousePan();
   else
-    //scene.zoom(mouseX - pmouseX);
     scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  //scene.zoom(event.getCount() * 20);
-  scene.scale(event.getCount() * 20);
+  scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

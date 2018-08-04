@@ -4,7 +4,14 @@ public class Box {
   int c;
 
   public Box() {
-    iFrame = new Frame(scene);
+    iFrame = new Frame(scene) {
+      // Note that within visit() geometry is defined at the
+      // frame local coordinate system.
+      @Override
+      public void visit() {
+        draw();
+      }
+    };
     iFrame.setPrecision(Frame.Precision.ADAPTIVE);
     iFrame.setPrecisionThreshold(25);
     setSize();
@@ -13,12 +20,11 @@ public class Box {
   }
 
   public void draw() {
-    draw(false);
+    draw(true);
   }
 
   public void draw(boolean drawAxes) {
-    pushMatrix();
-    scene.applyWorldTransformation(iFrame);
+    setOrientation(esfera.getPosition());
     if (drawAxes)
       scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
     noStroke();
@@ -26,9 +32,7 @@ public class Box {
       fill(255, 0, 0);
     else
       fill(getColor());
-    //Draw a box
     box(w, h, d);
-    popMatrix();
   }
 
   public void setSize() {
