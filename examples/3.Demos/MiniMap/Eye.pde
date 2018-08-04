@@ -4,7 +4,7 @@ class Eye extends Shape {
   }
 
   @Override
-  protected void setGraphics(PGraphics pGraphics) {
+  void setGraphics(PGraphics pGraphics) {
     pGraphics.fill(0, 255, 0);
     pGraphics.stroke(0, 0, 255);
     pGraphics.strokeWeight(2);

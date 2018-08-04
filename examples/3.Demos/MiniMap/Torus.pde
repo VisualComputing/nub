@@ -1,15 +1,18 @@
 class Torus extends Shape {
-  public Torus(Scene scene) {
+  color _color;
+  public Torus(Scene scene, color rgb) {
     super(scene);
+    _color = rgb;
   }
   
-  public Torus(Frame frame) {
+  public Torus(Frame frame, color rgb) {
     super(frame);
+    _color = rgb;
   }
 
   @Override
-  protected void setGraphics(PGraphics pGraphics) {
-    pGraphics.fill(graph().pApplet().random(255), graph().pApplet().random(255), graph().pApplet().random(255), graph().pApplet().random(255));
+  void setGraphics(PGraphics pGraphics) {
+    pGraphics.fill(_color);
     Scene.drawTorusSolenoid(pGraphics, 6, 8);
   }
 }

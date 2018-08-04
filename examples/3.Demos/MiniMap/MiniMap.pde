@@ -13,9 +13,7 @@ import frames.processing.*;
 
 Scene scene, minimap, focus;
 PGraphics sceneCanvas, minimapCanvas;
-Torus node1, node2, node3;
-Eye eye;
-Torus node4;
+Shape torus1, torus2, minimapTorus1, minimapTorus2, eye;
 
 int w = 1800;
 int h = 1200;
@@ -32,34 +30,34 @@ void setup() {
   size(1800, 1200, renderer);
   sceneCanvas = createGraphics(w, h, renderer);
   scene = new Scene(this, sceneCanvas);
-  node1 = new Torus(scene);
-  node1.translate(30, 30);
-  node2 = new Torus(node1);
-  node2.translate(40, 0);
-  node3 = new Torus(node2);
-  node3.translate(40, 0);
+  torus1 = new Torus(scene, color(255, 0, 0));
+  torus1.translate(-30, -30);
+  torus2 = new Torus(torus1, color(0, 0, 255));
+  torus2.translate(80, 0);
   scene.setFieldOfView((float) Math.PI / 3);
   scene.setRadius(150);
   scene.fitBall();
 
   minimapCanvas = createGraphics(oW, oH, renderer);
   minimap = new Scene(this, minimapCanvas, oX, oY);
-  node4 = new Torus(minimap);
-  ////node1.setPrecision(Node.Precision.EXACT);
-  node4.translate(30, 30);
-  if (minimap.is3D()) minimap.setType(Graph.Type.ORTHOGRAPHIC);
+  minimapTorus1 = new Torus(minimap, color(255, 0, 0));
+  minimapTorus1.translate(-30, -30);
+  minimapTorus2 = new Torus(minimapTorus1, color(0, 0, 255));
+  minimapTorus2.translate(80, 0);
+  if (minimap.is3D())
+    minimap.setType(Graph.Type.ORTHOGRAPHIC);
   minimap.setRadius(500);
   minimap.fitBall();
 
   eye = new Eye(minimap);
-  //to not scale the eye on mouse hover uncomment:
+  //to scale the eye on mouse hover comment:
   eye.setHighlighting(Shape.Highlighting.NONE);
   eye.set(scene.eye());
 }
 
 void draw() {
+  sync();
   handleMouse();
-  Frame.sync(scene.eye(), eye);
   scene.beginDraw();
   sceneCanvas.background(0);
   scene.traverse();
@@ -71,13 +69,23 @@ void draw() {
     minimapCanvas.background(29, 153, 243);
     minimap.frontBuffer().fill(255, 0, 255, 125);
     minimap.traverse();
-    for (Frame node : scene.frames())
-      if (node instanceof Shape)
-        ((Shape) node).draw(minimap.frontBuffer());
     minimap.drawAxes();
     minimap.endDraw();
     minimap.display();
   }
+}
+
+void sync() {
+  Frame.sync(scene.eye(), eye);
+  Frame.sync(torus1, minimapTorus1);
+  Frame.sync(torus2, minimapTorus2);
+}
+
+void handleMouse() {
+  if (!showMiniMap)
+    focus = scene;
+  else
+    focus = mouseX > width-oW && mouseY > height-oH ? minimap : scene;
 }
 
 void mouseMoved() {
@@ -103,13 +111,6 @@ void mouseClicked(MouseEvent event) {
       focus.focus();
     else
       focus.align();
-}
-
-void handleMouse() {
-  if(!showMiniMap)
-    focus = scene;
-  else
-    focus = mouseX > width-oW && mouseY > height-oH ? minimap : scene;
 }
 
 void keyPressed() {
