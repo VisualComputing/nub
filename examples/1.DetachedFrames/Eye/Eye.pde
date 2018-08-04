@@ -16,9 +16,14 @@ void setup() {
 
 void draw() {
   background(0);
-  float fov = PI / 3.0f;
-  float cameraZ = (height / 2.0f) / tan(fov / 2.0f);
-  perspective(fov, width / height, cameraZ / 10.0f, cameraZ * 10.0f);
+  if (g.is3D()) {
+    float fov = PI / 3.0f;
+    float cameraZ = (height / 2.0f) / tan(fov / 2.0f);
+    perspective(fov, width / height, cameraZ / 10.0f, cameraZ * 10.0f);
+    eye.orbit(new Vector(0, 1, 0), 0.01f);
+  }
+  else
+    eye.orbit(new Vector(0, 0, 1), 0.01f);
   setMatrix(Scene.toPMatrix(eye.view()));
   Scene.drawAxes(g, 100);
   for (int i = 0; i < frames.length; i++) {
