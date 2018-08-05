@@ -18,7 +18,7 @@
  * |
  * |
  * f4
- * <p>
+ *
  * Press the space bar to browse the different conversion methods shown here.
  */
 
@@ -46,7 +46,7 @@ enum Mode {
 //Choose FX2D, JAVA2D, P2D or P3D
 String renderer = P3D;
 
-public void setup() {
+void setup() {
   size(900, 900, renderer);
   scene = new Scene(this);
   mode = Mode.m1;
@@ -80,7 +80,7 @@ public void setup() {
   font13 = loadFont("FreeSans-13.vlw");
 }
 
-public void draw() {
+void draw() {
   background(0);
 
   //world:
