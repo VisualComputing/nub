@@ -883,7 +883,8 @@ public class Scene extends Graph implements PConstants {
         while (it.hasNext()) {
           Tuple tuple = it.next();
           resetTrackedFrame(tuple._hid);
-          if (!isTracking(tuple._hid))
+          // Condition is overkill. Use it only in place of resetTrackedFrame
+          //if (!isTracking(tuple._hid))
             if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
               setTrackedFrame(tuple._hid, frame);
               it.remove();

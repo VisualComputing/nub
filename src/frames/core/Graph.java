@@ -2686,7 +2686,8 @@ public class Graph {
       while (it.hasNext()) {
         Tuple tuple = it.next();
         resetTrackedFrame(tuple._hid);
-        if (!isTracking(tuple._hid))
+        // Condition is overkill. Use it only in place of resetTrackedFrame
+        //if (!isTracking(tuple._hid))
           if (_tracks(tuple._pixel.x(), tuple._pixel.y(), projection, frame)) {
             setTrackedFrame(tuple._hid, frame);
             it.remove();
@@ -2816,7 +2817,7 @@ public class Graph {
   }
 
   /**
-   * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #trackedFrame(String)}
+   * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #isTracking(String)}
    * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked frame automatically.
    *
    * @see #trackedFrame(String)
