@@ -2731,7 +2731,7 @@ public class Graph {
   }
 
   /**
-   * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #trackedFrame(String)}
+   * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #isTracking(String)}
    * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked frame automatically.
    *
    * @see #trackedFrame(String)
