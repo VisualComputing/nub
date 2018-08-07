@@ -1,3 +1,13 @@
+/**
+ * ConstrainedFrame.
+ * by Jean Pierre Charalambos.
+ *
+ * This example illustrates how to add constraints to your frames
+ * to limit their motion. Constraints can be defined respect to
+ * the local, world or camera frames. Try all the possibilities
+ * following the on screen helping text.
+ */
+
 import frames.primitives.*;
 import frames.core.*;
 import frames.core.constraint.*;

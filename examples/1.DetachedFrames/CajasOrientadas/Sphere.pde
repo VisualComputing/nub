@@ -1,17 +1,20 @@
-public class Sphere extends Frame {
+class Sphere extends Frame {
   float r;
   int c;
 
-  public Sphere() {
+  // default detached frame constructor
+  Sphere() {
     setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
 
-  public void draw() {
+  void draw() {
     draw(true);
   }
 
-  public void draw(boolean drawAxes) {
+  // detached-frames drawing require to
+  // manually apply the frame transformation
+  void draw(boolean drawAxes) {
     pushMatrix();
     scene.applyTransformation(this);
 
@@ -25,11 +28,11 @@ public class Sphere extends Frame {
     popMatrix();
   }
 
-  public float radius() {
+  float radius() {
     return r;
   }
 
-  public void setRadius(float myR) {
+  void setRadius(float myR) {
     r = myR;
     setPrecisionThreshold(2 * r);
   }

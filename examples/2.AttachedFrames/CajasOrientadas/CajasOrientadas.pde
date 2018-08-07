@@ -2,10 +2,18 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates some basic Frame properties, particularly how to orient them.
- * Select and move the sphere (holding the right mouse button pressed) to see how the
- * boxes will immediately be oriented towards it. You can also pick and move the boxes
- * and still they will be oriented towards the sphere.
+ * This example implements the attached-frames version of the detached-frames
+ * version example having the same name.
+ *
+ * The sphere and the boxes are interactive. Pick and drag them with the
+ * right mouse button. Use also the arrow keys to select and move the sphere.
+ * See how the boxes will always remain oriented towards the sphere.
+ *
+ * Both the sphere and the boxes are implemented as attached-frames
+ * instances having their visit() method overridden which get automatically
+ * call by the scene traversal algorithm.
+ *
+ * Contrast this example with the detached-frame version with the same name.
  */
 
 import frames.primitives.*;
@@ -36,6 +44,8 @@ void setup() {
 
 void draw() {
   background(0);
+  // calls visit() on all scene attached frames
+  // automatically applying all the frame transformations
   scene.traverse();
 }
 

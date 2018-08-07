@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates how to use off-screen rendering to build
- * a mini-map of the main Scene where all objetcs are interactive. It
+ * a mini-map of the main Scene where all objects are interactive. It
  * also shows Frame syncing among views.
  */
 

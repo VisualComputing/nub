@@ -2,10 +2,19 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates some basic Frame properties, particularly how to orient them.
- * Select and move the sphere (holding the right mouse button pressed) to see how the
- * boxes will immediately be oriented towards it. You can also pick and move the boxes
- * and still they will be oriented towards the sphere.
+ * This example illustrates some basic properties of frames, particularly
+ * how to orient them.
+ *
+ * Use the arrow keys to select and move the sphere and see how the boxes
+ * will immediately be oriented towards it. You can also pick and move the
+ * boxes (by dragging them with the mouse right button) and still they
+ * will be oriented towards the sphere.
+ *
+ * Both the sphere and the boxes are implemented as detached-frames
+ * specializations and hence they require to apply the local frame
+ * transformations, check their drawing routines.
+ *
+ * Contrast this example with the attached-frame version with the same name.
  */
 
 import frames.primitives.*;
@@ -36,6 +45,7 @@ void setup() {
 void draw() {
   background(0);
 
+  // Frame drawing
   esfera.draw(false);
   for (int i = 0; i < cajas.length; i++) {
     cajas[i].setOrientation(esfera.position());
@@ -43,8 +53,8 @@ void draw() {
   }
 
   String text = "Cajas Orientadas";
-  float w = scene.frontBuffer().textWidth(text);
-  float h = scene.frontBuffer().textAscent() + scene.frontBuffer().textDescent();
+  float w = textWidth(text);
+  float h = textAscent() + textDescent();
   scene.beginScreenDrawing();
   //textFont(font);
   text(text, 20, 20, w + 1, h);

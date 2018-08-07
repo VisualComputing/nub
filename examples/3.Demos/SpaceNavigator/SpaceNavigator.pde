@@ -29,7 +29,7 @@ ControlButton button2;
 Scene scene;
 boolean snPicking;
 
-public void setup() {
+void setup() {
   size(1600, 800, P3D);
   openSpaceNavigator();
   scene = new Scene(this);

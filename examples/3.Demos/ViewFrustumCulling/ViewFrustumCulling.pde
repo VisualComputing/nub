@@ -1,3 +1,17 @@
+/**
+ * View Frustum Culling.
+ * by Jean Pierre Charalambos.
+ *
+ * This example illustrates a basic view frustum culling implementation which is performed
+ * by analytically solving the frustum plane equations.
+ *
+ * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
+ * A second viewer displays an external view of the scene that exhibits the clipping
+ * (using scene.drawEye(Scene otherScene) to display the frustum).
+ *
+ * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
+ */
+
 import frames.primitives.*;
 import frames.core.*;
 import frames.processing.*;

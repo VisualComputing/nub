@@ -1,6 +1,16 @@
 /**
- * This example introduces the three different interpolations offered
- * by the Graph.
+ * Interpolatros.
+ * by Jean Pierre Charalambos.
+ *
+ * This example introduces the three different frame interpolations.
+ *
+ * Press ' ' to toggle the eye path display.
+ * Press 's' to fit ball interpolation.
+ * Press 'f' to fit ball.
+ * Press the arrow keys to move the camera.
+ * Press '1' and '2' to add eye key-frames to the eye paths.
+ * Press 'a' and 'c' to play the eye paths.
+ * Press 'b' and 'd' to remove the eye paths.
  */
 
 import frames.primitives.*;
@@ -29,7 +39,7 @@ void setup() {
   eyeInterpolator1 = new Interpolator(scene.eye());
   eyeInterpolator2 = new Interpolator(scene.eye());
 
-  // interpolation 3. Custom (arbitrary)frame interpolations
+  // interpolation 3. Custom (arbitrary) frame interpolations
 
   shape = new Shape(scene) {
     // Note that within visit() geometry is defined at the
@@ -95,19 +105,14 @@ void mouseMoved() {
 void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin();
-  //scene.lookAround(upVector);
-  //scene.mouseCAD();
   else if (mouseButton == RIGHT)
     scene.translate();
-  //scene.mousePan();
   else
-    //scene.zoom(mouseX - pmouseX);
     scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  //scene.zoom(event.getCount() * 20);
-  scene.scale(event.getCount() * 20);
+  scene.zoom(event.getCount() * 20);
 }
 
 void keyPressed() {

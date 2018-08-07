@@ -7,7 +7,7 @@
  * an object. The object is described in the graphics handler procedure.
  */
 
-public class Lamp implements PConstants {
+class Lamp implements PConstants {
   Scene scene;
   Piece[] pieces;
 
@@ -30,7 +30,7 @@ public class Lamp implements PConstants {
     frame(2).setRotation(new Quaternion(new Vector(1.0f, 0.0f, 0.0f), -2.0f));
     frame(3).setRotation(new Quaternion(new Vector(1.0f, -0.3f, 0.0f), -1.7f));
 
-    //graphics handlers
+    // Set frame graphics modes
     frame(0).mode = 1;
     frame(1).mode = 2;
     frame(2).mode = 2;
@@ -53,7 +53,7 @@ public class Lamp implements PConstants {
     frame(3).setConstraint(headConstraint);
   }
 
-  public Piece frame(int i) {
+  Piece frame(int i) {
     return pieces[i];
   }
 }

@@ -1,12 +1,12 @@
-public class Sphere {
+class Sphere {
   Frame iFrame;
   float r;
   int c;
 
   public Sphere() {
     iFrame = new Frame(scene) {
-      // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
+      // note that within visit() geometry is defined
+      // at the frame local coordinate system
       @Override
       public void visit() {
         draw();

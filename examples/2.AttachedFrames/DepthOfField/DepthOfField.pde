@@ -1,3 +1,18 @@
+/**
+ * DOF.
+ * by Jean Pierre Charalambos.
+ *
+ * This example implements a Depth-Of-Field (DOF) shader effect
+ * using the traverse(), traverse(PGraphics), display() and
+ * display(PGraphics) Scene methods.
+ *
+ * Press 0 to display the original scene.
+ * Press 1 to display a depth shader (which is used by DOF).
+ * Press 2 to display the DOF effect.
+ * Press 's' to save the eye.
+ * Press 'l' to load the eye previously saved.
+ */
+
 import frames.primitives.*;
 import frames.core.*;
 import frames.processing.*;

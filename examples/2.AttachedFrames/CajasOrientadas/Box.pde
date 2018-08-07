@@ -5,8 +5,8 @@ public class Box {
 
   public Box() {
     iFrame = new Frame(scene) {
-      // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
+      // note that within visit() geometry is defined
+      // at the frame local coordinate system
       @Override
       public void visit() {
         draw();
@@ -69,7 +69,7 @@ public class Box {
   }
 
   public Quaternion getOrientation() {
-    return (Quaternion) iFrame.orientation();
+    return iFrame.orientation();
   }
 
   public void setOrientation(Vector v) {
