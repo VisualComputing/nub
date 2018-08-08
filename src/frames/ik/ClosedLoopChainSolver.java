@@ -16,6 +16,7 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
     protected ArrayList<Frame> _reversedChain;
     protected ArrayList<? extends Frame> _original;
     protected float _distanceHeadToTail;
+    protected ArrayList<Vector> _entryPositions = new ArrayList<Vector>();
     protected ArrayList<Vector> _positionsChildren = new ArrayList<Vector>();
     protected ArrayList<Float> _distancesChildren = new ArrayList<Float>();
 
@@ -36,18 +37,20 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
                 ? chain.get(0).reference().orientation().get() : new Quaternion();
         _reversedChain = new ArrayList<>();
         for (Frame joint : chain) {
+            _properties.put(joint, new Properties());
             _reversedChain.add(_reversedChain.size(), joint);
             Vector position = joint.position().get();
             Quaternion orientation = prevOrientation.get();
             orientation.compose(joint.rotation().get());
+            _entryPositions.add(position);
             _positions.add(position);
             _distances.add(Vector.subtract(position, prevPosition).magnitude());
             _orientations.add(orientation);
 
-            Vector positionChild = joint.children() != null ?
-                    joint.children().get(0).position() : position.get();
-            _positionsChildren.add(positionChild);
-            _distancesChildren.add(Vector.subtract(position, positionChild).magnitude());
+            //Vector positionChild = joint.children() != null ?
+            //        joint.children().get(0).position() : position.get();
+            //_positionsChildren.add(positionChild);
+            //_distancesChildren.add(Vector.subtract(position, positionChild).magnitude());
             prevPosition = position;
             prevOrientation = orientation.get();
         }
@@ -65,78 +68,36 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         }
     }
 
-    public void fixNoisyJoints(){
+    public void setUnknown(int i, Vector vector){
+        _positions.set(i, vector);
+    }
+
+    public float fixNoisyJoints(){
         //consider the case when there're 2 unknowns
-        Frame root = _chain.get(0);
-        Frame end = _chain.get(_chain.size() - 1);
         //Initial root position
         Vector initial = _chain.get(0).position().get();
         //Stage 1: Forward Reaching
         _forwardReaching(_chain);
         //Move root
-        move(0, true);
+        _move(0, true);
         //Move in the other order
         _forwardReaching(_reversedChain);
         //set root to initial position
         _positions.set(0 , initial);
         //keep distances with children
         for(int i = 1; i < _chain.size(); i++){
-            Vector v = move(_positions.get(i), _positionsChildren.get(i), _distancesChildren.get(i));
-            _positions.set(i, move(v, _positions.get(0), Vector.distance(_chain.get(i).position(), _chain.get(0).position())));
+            Vector v = _move(_positions.get(i), _positionsChildren.get(i), _distancesChildren.get(i));
+            _positions.set(i, _move(v, _positions.get(0), Vector.distance(_chain.get(i).position(), _chain.get(0).position())));
         }
         //Stage 1: Forward Reaching
         _forwardReaching(_chain);
         //Move root
-        move(0, true);
+        _move(0, true);
         //Move in the other order
-        _forwardReaching(_reversedChain);
+        return _forwardReaching(_reversedChain);
     }
 
-    protected void _forwardReaching(ArrayList<? extends Frame> chain) {
-        for (int i = chain.size() - 2; i >= 0; i--) {
-            Vector pos_i = _positions.get(i);
-            Vector pos_i1 = _positions.get(i + 1);
-            float dist_i = _distances.get(i + 1);
-            if (dist_i == 0) {
-                _positions.set(i, pos_i1.get());
-                continue;
-            }
-            float r_i = Vector.distance(pos_i, pos_i1);
-            float lambda_i = dist_i / r_i;
-            Vector new_pos = Vector.multiply(pos_i1, 1.f - lambda_i);
-            new_pos.add(Vector.multiply(pos_i, lambda_i));
-            _positions.set(i, new_pos);
-        }
-    }
-
-    protected void _backwardReaching(ArrayList<? extends Frame> chain) {
-        for (int i = 0; i < chain.size() - 1; i++) {
-            Vector pos_i = _positions.get(i);
-            Vector pos_i1 = _positions.get(i + 1);
-            float dist_i = _distances.get(i + 1);
-            if (dist_i == 0) {
-                _positions.set(i+1, pos_i.get());
-                continue;
-            }
-            float r_i = Vector.distance(pos_i, pos_i1);
-            float lambda_i = dist_i / r_i;
-            Vector new_pos = Vector.multiply(pos_i, 1.f - lambda_i);
-            new_pos.add(Vector.multiply(pos_i1, lambda_i));
-            _positions.set(i+1, new_pos);
-        }
-    }
-
-    public Vector move(Vector i, Vector j, float distance){
-        float r_i = Vector.distance(i, j);
-        float lambda_i = distance / r_i;
-        Vector new_pos = Vector.multiply(i, 1.f - lambda_i);
-        new_pos.add(Vector.multiply(j, lambda_i));
-        return new_pos;
-    }
-
-
-
-    public void move(int i, boolean forward){
+    protected void _move(int i, boolean forward){
         int j = forward ? i + 1 : i - 1;
         j = j < 0 ? _chain.size()-1 : j == _chain.size() ? 0 : j;
         Vector pos_i = _positions.get(i);
@@ -156,17 +117,35 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
 
     @Override
     protected boolean _iterate() {
+        //Execute Until the distance between the end effector and the target is below a threshold
+        float error = 0;
+        for(int i = 0; i < _chain.size(); i++){
+            error += Vector.distance(_chain.get(i).position(), _entryPositions.get(i));
+        }
+
+        if (error <= this.error){
+            return true;
+        }
+
+        float change = fixNoisyJoints();
+        //Check total position change
+        if (change <= minDistance){
+            return true;
+        }
         return false;
     }
 
     @Override
     protected void _update() {
-
+        _backwardReaching(_chain, _original.get(0).position());
+        for(int i = 0; i < _original.size(); i++){
+            _original.get(i).setRotation(_chain.get(i).rotation().get());
+        }
     }
 
     @Override
     protected boolean _changed() {
-        return false;
+        return true;
     }
 
     @Override

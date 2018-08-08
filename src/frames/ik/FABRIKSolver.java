@@ -39,6 +39,13 @@ public abstract class FABRIKSolver extends Solver {
 
     public Properties(){
     }
+
+    public Properties(boolean basic){
+      if(basic){
+        _useConstraint = false;
+        _enableFixWeight = false;
+      }
+    }
   }
 
   protected HashMap<Frame, Properties> _properties = new HashMap<>();
@@ -62,11 +69,16 @@ public abstract class FABRIKSolver extends Solver {
     return new_u;
   }
 
+  public Vector _move(Vector u, Vector v, float distance) {
+    return _move(u,v,distance, 0);
+  }
+
   /*
    * Performs First Stage of FABRIK Algorithm, receives a chain of Frames, being the Frame at i
    * the reference frame of the Frame at i + 1
    * */
-  protected void _forwardReaching(ArrayList<? extends Frame> chain) {
+  protected float _forwardReaching(ArrayList<? extends Frame> chain) {
+    float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
       Vector pos_i1 = _positions.get(i + 1);
@@ -78,7 +90,6 @@ public abstract class FABRIKSolver extends Solver {
       Properties props_i = _properties.get(chain.get(i));
       Properties props_i1 = _properties.get(chain.get(i+1));
       if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null){
-        System.out.println("Entra...");
         Vector o_hat = chain.get(i + 1).position();
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
@@ -91,12 +102,13 @@ public abstract class FABRIKSolver extends Solver {
         pos_i = _constrainForwardReaching(chain, i);
       }
       if(props_i._enableFixWeight) {
-        _positions.set(i, _move(pos_i, pos_i1, dist_i, props_i._fixWeight));
+        _positions.set(i, _move(pos_i1, pos_i, dist_i, props_i._fixWeight));
       } else{
-        _positions.set(i, _move(pos_i, pos_i1, dist_i, 0));
+        _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
       }
-      _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
+      change +=  Vector.distance(pos_i, _positions().get(i));
     }
+    return change;
   }
 
   protected float _backwardReaching(ArrayList<? extends Frame> chain, Vector o) {
@@ -279,6 +291,10 @@ public abstract class FABRIKSolver extends Solver {
       reference = newJoint;
     }
     return copy;
+  }
+
+  public ArrayList<Vector> positions(){
+    return _positions;
   }
 
   /// TO DEBUG

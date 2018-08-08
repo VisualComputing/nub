@@ -148,11 +148,11 @@ public class ChainSolver extends FABRIKSolver {
     }
     //Check total position change
     System.out.println("Change : " + change);
-    if (change <= minDistance){
+    /*if (change <= minDistance){
       //avoid deadLock
       System.out.println("AVOID");
       _avoidDeadlock();
-    }
+    }*/
     return false;
   }
 
