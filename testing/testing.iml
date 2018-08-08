@@ -7,7 +7,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="p5-3x" level="project" />
+    <orderEntry type="library" exported="" name="p5-3x" level="project" />
     <orderEntry type="module" module-name="proscene.js" />
   </component>
 </module>

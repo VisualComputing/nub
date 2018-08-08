@@ -62,7 +62,7 @@ public class LoadMesh extends PApplet {
 
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
         //model.getJoints().get("Chest").setConstraint(new FixedConstraint());
-        //model.getRootJoint().setConstraint(new FixedConstraint());
+        model.getRootJoint().setConstraint(new FixedConstraint());
 
         model.printNames();
         targets.get(0).setPosition(model.getJoints().get("Foot_R").position());
@@ -75,7 +75,7 @@ public class LoadMesh extends PApplet {
         scene.addIKTarget(model.getJoints().get("Foot_L"), targets.get(1));
         scene.addIKTarget(model.getJoints().get("Hand_L"), targets.get(2));
         scene.addIKTarget(model.getJoints().get("Hand_R"), targets.get(3));
-        //scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
+        scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
 
         solver.maxIter = 20;
         solver.timesPerFrame = 20;
