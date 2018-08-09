@@ -22,6 +22,7 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene;
+boolean drawAxes = true, drawShooterTarget = true, adaptive;
 Box[] cajas;
 Sphere esfera;
 
@@ -36,7 +37,7 @@ void setup() {
 
   cajas = new Box[30];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(color(random(255),random(255),random(255)));
+    cajas[i] = new Box(color(random(255), random(255), random(255)));
 
   scene.fitBallInterpolation();
   scene.setTrackedFrame("keyboard", esfera);
@@ -46,10 +47,10 @@ void draw() {
   background(0);
 
   // Frame drawing
-  esfera.draw(false);
+  esfera.draw();
   for (int i = 0; i < cajas.length; i++) {
     cajas[i].setOrientation(esfera.position());
-    cajas[i].draw(true);
+    cajas[i].draw();
   }
 
   String text = "Cajas Orientadas";
@@ -79,6 +80,18 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed() {
+  if (key == ' ') {
+    adaptive = !adaptive;
+    for (Frame frame : cajas)
+      if (adaptive)
+        frame.setPrecision(Frame.Precision.ADAPTIVE);
+      else
+        frame.setPrecision(Frame.Precision.FIXED);
+  }
+  if (key == 'a')
+    drawAxes = !drawAxes;
+  if (key == 'p')
+    drawShooterTarget = !drawShooterTarget;
   if (key == 'e')
     scene.setType(Graph.Type.ORTHOGRAPHIC);
   if (key == 'E')

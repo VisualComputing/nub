@@ -22,6 +22,7 @@ import frames.processing.*;
 
 Scene scene;
 Box[] cajas;
+boolean drawAxes = true, drawShooterTarget = true, adaptive = true;
 Sphere esfera;
 
 void setup() {
@@ -67,6 +68,18 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed() {
+  if (key == ' ') {
+    adaptive = !adaptive;
+    for (Box caja : cajas)
+      if (adaptive)
+        caja.iFrame.setPrecision(Frame.Precision.ADAPTIVE);
+      else
+        caja.iFrame.setPrecision(Frame.Precision.FIXED);
+  }
+  if (key == 'a')
+    drawAxes = !drawAxes;
+  if (key == 'p')
+    drawShooterTarget = !drawShooterTarget;
   if (key == 'e')
     scene.setType(Graph.Type.ORTHOGRAPHIC);
   if (key == 'E')

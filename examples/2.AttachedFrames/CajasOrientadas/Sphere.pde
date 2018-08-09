@@ -17,13 +17,11 @@ class Sphere {
   }
 
   public void draw() {
-    draw(true);
-  }
-
-  public void draw(boolean drawAxes) {
+    pushStyle();
     if (drawAxes)
       //DrawingUtils.drawAxes(parent, radius()*1.3f);
       scene.drawAxes(radius() * 1.3f);
+    noStroke();
     if (iFrame.isTracked()) {
       fill(255, 0, 0);
       sphere(radius() * 1.2f);
@@ -31,6 +29,10 @@ class Sphere {
       fill(getColor());
       sphere(radius());
     }
+    stroke(255);
+    if (drawShooterTarget)
+      scene.drawShooterTarget(iFrame);
+    popStyle();
   }
 
   public float radius() {

@@ -3,20 +3,17 @@ class Box extends Frame {
   int c;
 
   Box(color c) {
-    setPrecision(Frame.Precision.ADAPTIVE);
+    setPrecision(Frame.Precision.FIXED);
     setPrecisionThreshold(25);
     setSize();
     setColor(c);
     randomize(new Vector(), 200, g.is3D());
   }
 
-  void draw() {
-    draw(false);
-  }
-
   // detached-frames drawing require to
   // manually apply the frame transformation
-  void draw(boolean drawAxes) {
+  void draw() {
+    pushStyle();
     pushMatrix();
     scene.applyTransformation(this);
     if (drawAxes)
@@ -29,6 +26,10 @@ class Box extends Frame {
     //Draw a box
     box(w, h, d);
     popMatrix();
+    stroke(255);
+    if (drawShooterTarget)
+      scene.drawShooterTarget(this);
+    popStyle();
   }
 
   void setSize() {
@@ -44,7 +45,7 @@ class Box extends Frame {
     d = myD;
   }
 
-   void setColor(int myC) {
+  void setColor(int myC) {
     c = myC;
   }
 

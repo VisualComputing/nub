@@ -20,10 +20,7 @@ public class Box {
   }
 
   public void draw() {
-    draw(true);
-  }
-
-  public void draw(boolean drawAxes) {
+    pushStyle();
     setOrientation(esfera.getPosition());
     if (drawAxes)
       scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
@@ -33,6 +30,10 @@ public class Box {
     else
       fill(getColor());
     box(w, h, d);
+    stroke(255);
+    if (drawShooterTarget)
+      scene.drawShooterTarget(iFrame);
+    popStyle();
   }
 
   public void setSize() {
