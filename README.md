@@ -50,7 +50,7 @@ In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/fram
 
 ## Frames
 
-Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
+Application objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
 or a [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance.
 
 To illustrate their use, suppose the following scene graph hierarchy is being implemented:
@@ -65,18 +65,16 @@ To illustrate their use, suppose the following scene graph hierarchy is being im
   2 3
 ```
 
-### Detached frames 
+### Detached frames
 
-To setup the `scene` hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
+To setup the hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
 
 ```processing
-Scene scene;
-Frame f1, f2, f3;
+Frame eye, f1, f2, f3;
 void setup() {
-  // Note that the scene.eye() is also instantiated
-  scene = new Scene(this);
   // Note the use of the default frame constructor to instantiate a
-  // detached leading frame (those whose parent is the world, such as f1):
+  // detached leading frame (those whose parent is the world, such as the eye and f1):
+  eye =  new Frame();
   f1 = new Frame();
   // whereas for the remaining frames we pass any constructor taking a
   // reference frame paramater, such as Frame(Frame referenceFrame, float scaling):
@@ -86,6 +84,60 @@ void setup() {
 ```
 
 then traverse it with:
+
+```processing
+void draw() {
+  // 1. Define a projection matrix
+  perspective(fov, width / height, cameraZ / 10.0f, cameraZ * 10.0f);
+  // 2. Render from the eye poin-of-view
+  setMatrix(Scene.toPMatrix(eye.view()));
+  // enter f1
+  pushMatrix();
+  // g happens to be the name of the
+  // PApplet man PGraphics instance
+  Scene.applyTransformation(g, f1);
+  drawF1();
+  // enter f2
+  pushMatrix();
+  Scene.applyTransformation(g, f2);
+  drawF2();
+  // "return" to f1
+  popMatrix();
+  // enter f3
+  pushMatrix();
+  Scene.applyTransformation(g, f3);
+  drawF3();
+  // return to f1
+  popMatrix();
+  // return to World
+  popMatrix();
+}
+```
+
+Some advantages of using _detached_ frames without an instantiated `scene` object are:
+
+* The scene gets rendered respect to an `eye` frame.
+* The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
+* [setTranslation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#scale-float-), locally manipulates a frame instance.
+* [setPosition(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setMagnitude-float-), globally manipulates a frame instance.
+* [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
+* [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
+* [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
+
+You can also instantiate an eye through a `scene` object which automatically handles the projection and eye transform matrices:
+
+```processing
+Scene scene;
+Frame f1, f2, f3;
+void setup() {
+  // Define a 3D perspective scene
+  // Note that the scene.eye() is also instantiated
+  scene = new Scene(this);
+  // ... same as before
+}
+```
+
+then traverse the hierarchy with:
 
 ```processing
 void draw() {
@@ -151,17 +203,12 @@ public void mouseDragged() {
 }
 ```
 
-Some advantages of using _detached_ frames are:
+Some advantages of using _detached_ frames with an instantiated `scene` object:
 
-* The scene gets automatically rendered respect to the `eye` frame which is instantiated by the scene object.
-* The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
-* Frames may be picked using ray-casting and the scene provides all sorts of interactivity commands to manipulate them.
-* [setTranslation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#scale-float-), locally manipulates a frame instance.
-* [setPosition(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setMagnitude-float-), globally manipulates a frame instance.
-* The frame methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
-* The frame methods [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
-* The graph methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
-* [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
+* Same as with _detached_ frames without an instantiated `scene` object.
+* The `eye` frame which is automatically handled by the `scene`.
+* Frames may be picked using ray-casting and the `scene` provides all sorts of interactivity commands to manipulate them.
+* The `scene` methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
 
 The main disadvantage of using detached frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it.
 
