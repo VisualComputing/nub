@@ -7,7 +7,6 @@ Frames
 - [Description](#user-content-description)
 - [Scene](#user-content-scene)
 - [Frames](#user-content-frames)
-- [Eye](#user-content-eye)
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Drawing](#user-content-drawing)
@@ -114,7 +113,7 @@ void draw() {
 }
 ```
 
-Some advantages of using _detached_ frames without an instantiated `scene` object are:
+See the [Sceneless example](https://github.com/VisualComputing/frames/tree/master/examples/1.DetachedFrames/Sceneless). Some advantages of using _detached_ frames without instantiating a `scene` object are:
 
 * The scene gets rendered respect to an `eye` frame.
 * The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -203,10 +202,11 @@ public void mouseDragged() {
 }
 ```
 
-Some advantages of using _detached_ frames with an instantiated `scene` object:
+See the [detached-frames CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/1.DetachedFrames/CajasOrientadas). Some advantages of using _detached_ frames through an instantiated `scene` object:
 
 * Same as with _detached_ frames without an instantiated `scene` object.
-* The `eye` frame which is automatically handled by the `scene`.
+* The `eye` frame is automatically handled by the `scene` and may be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)).
+* By default the `scene` object instantiates and attched `eye` frame.
 * Frames may be picked using ray-casting and the `scene` provides all sorts of interactivity commands to manipulate them.
 * The `scene` methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
 
@@ -251,7 +251,7 @@ void mouseMoved() {
 
 Interaction with a given frame or the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) is performed as with _detached_ frames (as discussed above).
 
-Some advantages of using _attached_ frames are:
+See the [attached-frames CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/CajasOrientadas). Some advantages of using _attached_ frames are:
 
 * Same as with _detached_ frames, but traversing the hierarchy doesn't require any prior knowledge of it, but simply calling [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--).
 * Attached frames can be drawn by overriding [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) with your drawing code.
@@ -308,18 +308,11 @@ void draw() {
 }
 ```
 
-Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/DepthOfField). Some advantages of using shapes are:
 
 * Same as with attached frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
-
-## Eye
-
-The scene eye can be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) or [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance, by simply calling [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-).
-
-The default scene eye is an attached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance.
-
-Note that shapes can be set as the scene eye which may be useful to depict the viewer in first person camera style.
+* Shapes can be set as the scene eye (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)) which may be useful to depict the viewer in first person camera style.
 
 ## Interpolators
 
@@ -350,7 +343,7 @@ void draw() {
 }
 ```
 
-while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too.
+while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/Interpolators).
  
 ## HIDs
 
@@ -358,6 +351,8 @@ Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_
 
 1. Define an `hid` tracked-frame instance, using an arbitrary name for it (see [setTrackedFrame(String, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-java.lang.String-frames.core.Frame-)); and,
 2. Call any interactivity method that take an `hid` param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
+
+See the [SpaceNavigator example](https://github.com/VisualComputing/frames/tree/master/examples/3.Demos/SpaceNavigator).
 
 Observations:
 
