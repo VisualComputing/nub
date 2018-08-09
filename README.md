@@ -87,9 +87,9 @@ then traverse it with:
 
 ```processing
 void draw() {
-  // 1. Define a projection matrix
+  // define a projection matrix
   perspective(fov, width / height, cameraZ / 10.0f, cameraZ * 10.0f);
-  // 2. Render from the eye poin-of-view
+  // render from the eye poin-of-view
   setMatrix(Scene.toPMatrix(eye.view()));
   // enter f1
   pushMatrix();
