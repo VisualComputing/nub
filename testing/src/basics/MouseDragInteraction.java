@@ -33,7 +33,7 @@ public class MouseDragInteraction extends PApplet {
     Shape shape1 = new Shape(scene) {
       @Override
       public void setGraphics(PGraphics pGraphics) {
-        scene.drawAxes(pGraphics, scene.radius() / 3);
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
