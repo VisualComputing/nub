@@ -991,7 +991,8 @@ public class Scene extends Graph implements PConstants {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, frame);
     _track(frame);
-    frame.visit();
+    if (_targetPGraphics != backBuffer() || frame instanceof Shape)
+      frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _visit(child);

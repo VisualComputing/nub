@@ -112,7 +112,7 @@ void mouseDragged() {
 void mouseMoved(MouseEvent event) {
   // 1. highlighting
   scene.cast("mouseMoved", mouseX, mouseY);
-  // 2. 'third-person interaction
+  // 2. third-person interaction
   if (scene.eye().reference() != null)
     // press shift to move the mouse without looking around
     if (!event.isShiftDown())
