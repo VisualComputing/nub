@@ -1,4 +1,4 @@
-Detached frames
+# Detached frames
 
 To setup the hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
 
