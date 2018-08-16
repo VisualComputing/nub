@@ -1088,21 +1088,20 @@ public class Graph {
    * and {@code false} otherwise.
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling {@link #computeBoundaryEquations()})
+   * this method. You may compute them explicitly (by calling {@link #updateBoundaryEquations()})
    * or enable them to be automatic updated in your graph setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
@@ -1117,20 +1116,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
    * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility ballVisibility(Vector center, float radius) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1153,20 +1151,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
    * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1214,12 +1211,10 @@ public class Graph {
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
    * every frame instead.
-   *
-   * @see #computeBoundaryEquations()
    */
-  public float[][] computeBoundaryEquations() {
+  public float[][] updateBoundaryEquations() {
     _initCoefficients();
-    return is3D() ? _computeBoundaryEquations3() : _computeBoundaryEquations2();
+    return is3D() ? _updateBoundaryEquations3() : _updateBoundaryEquations2();
   }
 
   protected void _initCoefficients() {
@@ -1243,7 +1238,7 @@ public class Graph {
       _distance = new float[rows];
   }
 
-  protected float[][] _computeBoundaryEquations3() {
+  protected float[][] _updateBoundaryEquations3() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector viewDir = viewDirection();
@@ -1322,7 +1317,7 @@ public class Graph {
     return _coefficients;
   }
 
-  protected float[][] _computeBoundaryEquations2() {
+  protected float[][] _updateBoundaryEquations2() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector up = upVector();
@@ -1399,27 +1394,6 @@ public class Graph {
   }
 
   /**
-   * Updates the boundary plane equations according to the current eye setup, by simply
-   * calling {@link #computeBoundaryEquations()}.
-   *
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * boundary equations to be updated only occasionally (rare). Use
-   * {@link #enableBoundaryEquations()} which automatically update the boundary equations
-   * every frame instead.
-   *
-   * @see #distanceToBoundary(int, Vector)
-   * @see #isPointVisible(Vector)
-   * @see #ballVisibility(Vector, float)
-   * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
-   * @see #boundaryEquations()
-   * @see #enableBoundaryEquations()
-   */
-  public void updateBoundaryEquations() {
-    computeBoundaryEquations();
-  }
-
-  /**
    * Returns the boundary plane equations.
    * <p>
    * In 2D the four 4-component vectors, respectively correspond to the
@@ -1440,20 +1414,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
    * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public float[][] boundaryEquations() {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The graph boundary equations may be outdated. Please "
+      throw new RuntimeException("The graph boundary equations may be outdated. Please "
           + "enable automatic updates of the equations in your setup with enableBoundaryEquations()");
     return _coefficients;
   }
@@ -1471,20 +1444,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
    * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public float distanceToBoundary(int index, Vector position) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
+      throw new RuntimeException("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
     if (is3D())
