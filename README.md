@@ -50,10 +50,7 @@ In this case, the [Scene](https://visualcomputing.github.io/frames-javadocs/fram
 
 ## Frames
 
-Application objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
-or a [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance.
-
-To illustrate their use, suppose the following scene frame hierarchy is being implemented:
+A frame is a coordinate system that may be translated, rotated and scaled. [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instances define each of the nodes comprising a scene graph. To customize their role (e.g., a drawing procedure or a culling condition) symply override the [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
  World
@@ -65,7 +62,7 @@ To illustrate their use, suppose the following scene frame hierarchy is being im
   2 3
 ```
 
-To setup the scene hierarchy of _attached_ frames, i.e., frames belonging to a particular scene, use code such as the following:
+To setup the scene hierarchy of _attached_ frames, i.e., frames belonging to the scene, use code such as the following:
 
 ```processing
 Scene scene;
@@ -78,7 +75,14 @@ void setup() {
   // whereas for the remaining frames we pass any constructor taking a
   // reference frame paramater, such as Frame(Frame referenceFrame)
   f2 = new Frame(f1);
-  f3 = new Frame(f1);
+  f3 = new Frame(f1) {
+    // note that within visit() the geometry is defined
+    // at the frame local coordinate system
+    @Override
+    public void visit() {
+      sphere(50);
+    }
+  };
 }
 ```
 
@@ -86,7 +90,7 @@ and then traverse it with:
 
 ```processing
 void draw() {
-  // calls visit() on each attached frame instance
+  // calls the frame visit() method on each attached frame instance
   scene.traverse();
 }
 ```
@@ -143,7 +147,7 @@ See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree
 * [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
 * The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) methods [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
 * The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) method [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
-* Frames can be drawn by overriding [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) with your drawing code.
+* The role played by a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method.
 
 To bypass the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm use [detached frames](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the frame as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
 
