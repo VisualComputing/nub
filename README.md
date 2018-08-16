@@ -177,7 +177,7 @@ A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Sh
 To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.setGraphics(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
 Immediate-mode shapes should override `Shape.setGraphics(PGraphics)`, e.g., using an anonymous inner
-[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) class intance, such as with the following:
+[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) class instance, such as with the following:
  
 ```java
 ...
