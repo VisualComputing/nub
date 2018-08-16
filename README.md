@@ -95,11 +95,12 @@ void draw() {
 }
 ```
 
-To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
+To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it 
+using ray-casting with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
 
 ```processing
 void mouseMoved() {
-  // the tracked-frame is updated from the set of scene attached frames
+  // the tracked-frame is updated using ray-casting from the set of scene attached frames
   scene.cast();
 }
 ```
