@@ -90,7 +90,8 @@ and then traverse it with:
 
 ```processing
 void draw() {
-  // calls the frame visit() method on each attached frame instance
+  // traverse() peforms a top-down traversal of the frame hierarchy, applying the
+  // local frame transformation and calling the visit() method on each visited frame
   scene.traverse();
 }
 ```
