@@ -39,18 +39,11 @@ void setup() {
   scene.fitBallInterpolation();
   Shape[] shapes = new Shape[50];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Shape(scene, shape());
+    tint(random(0,255), random(0,255), random(0,255), random(150,255));
+    shapes[i] = new Shape(scene, loadShape("rocket.obj"));
     scene.randomize(shapes[i]);
   }
   smooth();
-}
-
-PShape shape() {
-  PShape fig = createShape(BOX, 150);
-  fig.setStroke(color(0, 255, 0));
-  fig.setStrokeWeight(3);
-  fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
-  return fig;
 }
 
 void draw() {
