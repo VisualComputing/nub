@@ -2,11 +2,13 @@
 
 **Table of Contents**
 
-[TOC]
-
-
+- [Description](#user-content-description)
+- [Sceneless](#user-content-scene)
+- [Scene](#user-content-scene)
 
 ## Description
+
+Frames can also be instantiated without attaching them to a `scene` by simply omitting the `scene` parameter in its constructor: `frame = new Frame()`. This article discusses how to use them. This is a low-level technique that may be useful to port the library to other frameworks different than [Processing](https://processing.org/).
 
 ## Sceneless
 
@@ -57,7 +59,7 @@ void draw() {
 }
 ```
 
-See the [Sceneless example](). Some advantages of using _detached_ frames without instantiating a `scene` object are:
+See the [Sceneless example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/Sceneless). Some advantages of using _detached_ frames without instantiating a `scene` object are:
 
 * The scene gets rendered respect to an `eye` frame.
 * The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -148,7 +150,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [detached-frames CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/1.DetachedFrames/CajasOrientadas). Some advantages of using _detached_ frames through an instantiated `scene` object:
+See the [detached-frames CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/CajasOrientadas). Some advantages of using _detached_ frames through an instantiated `scene` object:
 
 * Same as with _detached_ frames without an instantiated `scene` object.
 * The `eye` frame is automatically handled by the `scene` and may be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)).
