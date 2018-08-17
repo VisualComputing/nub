@@ -1,5 +1,15 @@
 # Detached frames
 
+**Table of Contents**
+
+- [Description](#user-content-description)
+- [Sceneless](#user-content-scene)
+- [Scene](#user-content-scene)
+
+## Description
+
+## Sceneless
+
 To setup the hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
 
 ```processing
@@ -47,7 +57,7 @@ void draw() {
 }
 ```
 
-See the [Sceneless example](https://github.com/VisualComputing/frames/tree/master/examples/1.DetachedFrames/Sceneless). Some advantages of using _detached_ frames without instantiating a `scene` object are:
+See the [Sceneless example](). Some advantages of using _detached_ frames without instantiating a `scene` object are:
 
 * The scene gets rendered respect to an `eye` frame.
 * The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -56,6 +66,8 @@ See the [Sceneless example](https://github.com/VisualComputing/frames/tree/maste
 * [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
 * [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
 * [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
+
+## Scene
 
 You can also instantiate an eye through a `scene` object which automatically handles the projection and eye transform matrices:
 
@@ -144,4 +156,4 @@ See the [detached-frames CajasOrientadas example](https://github.com/VisualCompu
 * Frames may be picked using ray-casting and the `scene` provides all sorts of interactivity commands to manipulate them.
 * The `scene` methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
 
-The main disadvantage of using detached frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it.
+The main disadvantage of using detached frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it. To enable the scene to handle the traversal algorithm use [attached frames](README.md) instead.
