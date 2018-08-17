@@ -2022,7 +2022,9 @@ public class Frame {
    * {@code
    * frame = new Frame(graph) {
    *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())
    *       // Draw your object here, in the local coordinate system.
