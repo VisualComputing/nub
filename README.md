@@ -138,7 +138,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/CajasOrientadas). Some advantages of using _attached_ frames are:
+See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basic/CajasOrientadas). Some advantages of using _attached_ frames are:
 
 * The scene gets rendered respect to an _eye_ frame which may be set from any [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)). Note that the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) sets up a default _eye_ frame. To retrieve the scene _eye_ call [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--).
 * The scene topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -203,7 +203,7 @@ void draw() {
 }
 ```
 
-See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/DepthOfField). Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basic/DepthOfField). Some advantages of using shapes are:
 
 * Same as with _attached_ frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
@@ -238,7 +238,7 @@ void draw() {
 }
 ```
 
-while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/2.AttachedFrames/Interpolators).
+while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basic/Interpolators).
  
 ## HIDs
 
@@ -247,7 +247,7 @@ Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_
 1. Define an _hid_ tracked-frame instance, using an arbitrary name for it (see [setTrackedFrame(String, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-java.lang.String-frames.core.Frame-)); and,
 2. Call any interactivity method that take an _hid_ param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
 
-See the [SpaceNavigator example](https://github.com/VisualComputing/frames/tree/master/examples/3.Demos/SpaceNavigator).
+See the [SpaceNavigator example](https://github.com/VisualComputing/frames/tree/master/examples/demos/SpaceNavigator).
 
 Observations:
 
