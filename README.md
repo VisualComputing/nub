@@ -160,8 +160,8 @@ void setup() {
   frame = new Frame(scene) {
     @Override
     public void visit() {
-      // Hierarchical culling is optional and disabled by default
-      // Note that the cullingCondition should be implemented by you
+      // Hierarchical culling is optional and disabled by default. When the cullingCondition
+      // (which should be implemented by you) is true, scene.traverse() will prune the branch at the frame
       cull(cullingCondition);
       if(!isCulled())
         // Draw your object here, in the local coordinate system.
