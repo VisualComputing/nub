@@ -27,8 +27,8 @@ import java.util.ArrayList;
  */
 public class HingeTest extends PApplet {
     int num_joints = 8;
-    float constraint_factor_x = 170;
-    float constraint_factor_y = 170;
+    float constraint_factor_x = 180;
+    float constraint_factor_y = 180;
     float targetRadius = 7;
     float boneLength = 50;
 

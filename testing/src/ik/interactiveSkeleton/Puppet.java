@@ -57,10 +57,10 @@ public class Puppet extends PApplet {
         }
 
         //right arm
-        limbs.put("LeftArm", limb(new Vector(10,0,0), new Vector(1,0,0), boneLenght, new Vector(0,0,10)));
-        limbs.put("RightArm", limb(new Vector(-10,0,0), new Vector(-1,0,0), boneLenght, new Vector(0,0,10)));
-        limbs.put("LeftFoot", limb(new Vector(10,10,0), new Vector(0,1,0), boneLenght, new Vector(-10,0,0)));
-        limbs.put("RightFoot", limb(new Vector(-10,10,0), new Vector(0,1,0), boneLenght, new Vector(-10,0,0)));
+        limbs.put("LeftArm", limb(new Vector(10,0,0), new Vector(1,0,0), new Vector(0,1,0), boneLenght, new Vector(10,0,0)));
+        limbs.put("RightArm", limb(new Vector(-10,0,0), new Vector(-1,0,0), new Vector(0,1,0), boneLenght, new Vector(10,0,0)));
+        limbs.put("LeftFoot", limb(new Vector(10,10,0), new Vector(0,1,0), new Vector(0,1,0), boneLenght, new Vector(-10,0,0)));
+        limbs.put("RightFoot", limb(new Vector(-10,10,0), new Vector(0,1,0), new Vector(0,1,0), boneLenght, new Vector(-10,0,0)));
 
         for(String key : keys){
             ArrayList<Joint> skeleton = limbs.get(key);
@@ -92,15 +92,17 @@ public class Puppet extends PApplet {
     }
 
 
-    public ArrayList<Joint> limb(Vector origin, Vector direction, float boneLength, Vector hinge) {
+    public ArrayList<Joint> limb(Vector origin, Vector d1, Vector d2, float boneLength, Vector hinge) {
         ArrayList<Joint> skeleton = new ArrayList<Joint>();
-        Vector bone = direction.normalize(null);
+        Vector bone = d1.normalize(null);
         bone.multiply(boneLength);
         Joint j1 = new Joint(scene);
         j1.frame.setPosition(origin);
         Joint j2 = new Joint(scene);
         j2.frame.setReference(j1.frame);
         j2.frame.translate(bone);
+        bone = d2.normalize(null);
+        bone.multiply(boneLength);
         Joint j3 = new Joint(scene);
         j3.frame.setReference(j2.frame);
         j3.frame.translate(bone);
@@ -125,10 +127,12 @@ public class Puppet extends PApplet {
         float constraint_factor_x = 170;
         Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x));
         c2.setRestRotation(j2.frame.rotation().get());
-        c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.frame.translation()));
-        if(Vector.squaredNorm(c2.axis()) != 0) {
+        //c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.frame.translation()));
+        c2.setAxis(hinge);
+        //if(Vector.squaredNorm(c2.axis()) != 0) {
+            System.out.println("axis : " + c2.axis());
             j2.frame.setConstraint(c2);
-        }
+        //}
 
         j1.isRoot = true;
         skeleton.add(j1);
@@ -163,6 +167,15 @@ public class Puppet extends PApplet {
                 scene.focus();
             else
                 scene.align();
+    }
+
+    public void keyPressed(){
+        Frame f = scene.trackedFrame();
+        if(f == null) return;
+        Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
+        if(c == null) return;
+        scene.trackedFrame().rotate(new Quaternion(c.axis(), radians(5)));
+
     }
 
 

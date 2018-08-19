@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class Cone extends PApplet{
-    int num_joints = 12;
+    int num_joints = 10;
     float targetRadius = 7;
     float boneLength = 50;
 
@@ -50,7 +50,7 @@ public class Cone extends PApplet{
         targets.add(new Shape(scene, redBall));
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
-        float v = 10;
+        float v = 20;
         vertices.add(new Vector(-v, -v));
         vertices.add(new Vector(v, -v));
         vertices.add(new Vector(v, v));
@@ -88,6 +88,7 @@ public class Cone extends PApplet{
 
         //structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
         chain_solvers.add(new ChainSolver(structure3));
+        chain_solvers.get(1).opt = 1;
 
         //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
         int i = 0;
