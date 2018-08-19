@@ -2870,7 +2870,12 @@ public class Scene extends Graph implements PConstants {
       if (frame.children().size() == 1) {
         Vector axis = constraint.restRotation().rotate(constraint.axis());
         reference.rotate(constraint.restRotation());
-        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
+        Vector rest;
+        try{
+          rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
+        }catch (RuntimeException exception){
+          rest = axis.orthogonalVector();
+        }
         //Align Z-Axis with Axis
         reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
         //Align X-Axis with rest Axis
@@ -2880,8 +2885,8 @@ public class Scene extends Graph implements PConstants {
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
       }
     }
-    pGraphics.popStyle();
     pGraphics.popMatrix();
+    pGraphics.popStyle();
   }
 
   /**
