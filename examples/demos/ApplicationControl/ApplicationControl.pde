@@ -10,7 +10,7 @@ boolean cad, lookAround;
 String renderer = P3D;
 
 void setup() {
-  size(1600, 800, renderer);
+  size(1240, 840, renderer);
   rectMode(CENTER);
   scene = new Scene(this);
   scene.setFieldOfView(PI / 3);
