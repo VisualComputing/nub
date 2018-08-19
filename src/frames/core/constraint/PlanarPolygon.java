@@ -19,7 +19,7 @@ import java.util.ArrayList;
 
 public class PlanarPolygon extends Constraint {
     /*
-    TODO: Enable Setting different Axis Direction
+    TODO: Find a Ball and Socket constraint that is enclosed by this one
     * With this Kind of Constraint no Translation is allowed
     * and the rotation depends on a Cone which base is a Polygon. This kind of constraint always
     * look for the reference frame (local constraint), if no initial position is
@@ -30,7 +30,6 @@ public class PlanarPolygon extends Constraint {
   protected float _height = 1.f;
   protected Quaternion _restRotation = new Quaternion();
   protected Quaternion _idleRotation = new Quaternion();
-  protected Quaternion _alignmentRotation = new Quaternion();
 
   protected Vector _min, _max;
 
@@ -131,18 +130,12 @@ public class PlanarPolygon extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-    //twist to frame
-    Quaternion q1 = Quaternion.compose(desired, _idleRotation.inverse());
+    Quaternion q1 = Quaternion.compose(_idleRotation.inverse(), desired);
     Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = desired.rotate(new Vector(0, 0, 1));
-    new_pos = q1.rotate(twist);
+    Vector new_pos = q1.rotate(twist);
     Vector constrained = apply(new_pos, _restRotation);
-    Quaternion q2 = Quaternion.compose(frame.rotation(), _idleRotation.inverse());
-
-    constrained = q2.inverseRotate(constrained);
-    //Get Quaternion
-    return new Quaternion(frame.displacement(twist, frame.reference()), frame.displacement(constrained, frame.reference()));
-    //return new Quaternion(rotation.inverseRotate(new Vector(0, 0, 1)), frame.rotation().inverseRotate( constrained));
+    Quaternion q2 = new Quaternion(twist, constrained);
+    return Quaternion.compose(frame.rotation().inverse(), q2);
   }
 
 

@@ -18,6 +18,8 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.abs;
+import static java.lang.Math.min;
 
 /**
  * A Frame is constrained to disable translation and
@@ -34,7 +36,7 @@ public class Hinge extends Constraint {
   * */
   protected float _max;
   protected float _min;
-  protected Quaternion _restRotation;
+  protected Quaternion _restRotation = new Quaternion();
   protected Vector _axis;
 
 
@@ -76,6 +78,7 @@ public class Hinge extends Constraint {
   public void setRestRotation(Quaternion restRotation) {
     this._restRotation = restRotation.get();
   }
+
 
   public Hinge() {
     _max = (float) (PI);
@@ -136,41 +139,45 @@ public class Hinge extends Constraint {
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
     Vector axis = _restRotation.rotate(this._axis);
-    Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-    Vector rotationAxis = Vector.projectVectorOnAxis(quat, axis);
+    Vector rotationAxis = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, axis);
     //Get rotation component on Axis direction
     Quaternion rotationTwist= new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rotation.w());
     float deltaAngle = rotationTwist.angle();
-    //System.out.println("Rotation : " + rotationTwist.axis() + " ang : " + rotationTwist.angle());
-
-    /*First constraint rotation to be defined with respect to Axis*/
-    //Vector axis = _restRotation.rotate(this._axis);
-    //Vector rotationAxis = Vector.projectVectorOnAxis(rotation.axis(), axis);
-    //Get rotation component on Axis direction
-    //Quaternion rotationTwist = new Quaternion(rotationAxis, rotation.angle());
-    //float deltaAngle = rotationTwist.angle();
-    System.out.println("Rotation : " + rotation.axis() + " ang : " + rotation.angle());
-
-    System.out.println("Rotation tw : " + rotationTwist.axis() + " ang : " + rotationTwist.angle());
-
     if (rotationAxis.dot(axis) < 0) deltaAngle *= -1;
     /*First rotation of Frame with respect to Axis*/
-    Quaternion current = Quaternion.compose(frame.rotation(), _restRotation.inverse());
+    Quaternion current = Quaternion.compose(_restRotation.inverse(), frame.rotation());
     /*It is possible that the current rotation axis is not parallel to Axis*/
-    Vector currentAxis = Vector.projectVectorOnAxis(current.axis(), axis);
+    Vector currentAxis = new Vector(current._quaternion[0], current._quaternion[1], current._quaternion[2]);
+    currentAxis = Vector.projectVectorOnAxis(currentAxis, axis);
     //Get rotation component on Axis direction
-    Quaternion currentTwist = new Quaternion(currentAxis, current.angle());
+    Quaternion currentTwist = new Quaternion(currentAxis.x(), currentAxis.y(), currentAxis.z(), current.w());
     float frameAngle = currentTwist.angle();
-
     if (current.axis().dot(axis) < 0) frameAngle *= -1;
-    if (frameAngle + deltaAngle > _max) {
-      float r = _max - frameAngle;
-      return new Quaternion(axis, r);
-    } else if (frameAngle + deltaAngle < -_min) {
+    float desired = frameAngle + deltaAngle;
+    desired = (float) (desired - PI * 2 * Math.floor((desired + PI) / (2*PI)));
+    float inverted;
+    if(desired > 0){
+      inverted = (float)(-2*PI + desired);
+    } else{
+      inverted = (float)(2*PI + desired);
+    }
+    if((desired >= 0 && desired <= _max)){
+      return new Quaternion(axis, deltaAngle);
+    }
+    if((desired <= 0 && desired >= -_min)){
+      return new Quaternion(axis, deltaAngle);
+    }
+
+    //get nearest bound
+    float dist_to_min = min(abs(desired + _min), abs(inverted + _min));
+    float dist_to_max = min(abs(desired - _max), abs(inverted - _max));
+    if(dist_to_min < dist_to_max){
       float r = -_min - frameAngle;
       return new Quaternion(axis, r);
-    } else {
-      return new Quaternion(axis, deltaAngle);
+    }else{
+      float r = _max - frameAngle;
+      return new Quaternion(axis, r);
     }
   }
   @Override
