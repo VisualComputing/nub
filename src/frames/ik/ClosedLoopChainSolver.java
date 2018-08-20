@@ -92,6 +92,14 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         //consider the case when there're 2 unknowns
         //Initial root position
         float change = 0;
+
+        //Fix joint inter-distances
+        Vector center = Vector.add(_positions.get(1), _positions().get(2));
+        center.multiply(0.5f);
+
+        _positions.set(1, Vector.add(Vector.multiply(Vector.subtract(_positions.get(1), center).normalize(null), 0.5f*_distances.get(2)), center));
+        _positions.set(2, Vector.add(Vector.multiply(Vector.subtract(_positions.get(2), center).normalize(null), 0.5f*_distances.get(2)), center));
+
         ArrayList<Vector> prev = new ArrayList<Vector>();
         for(Vector v : _positions){
             prev.add(v.get());
@@ -126,6 +134,9 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
             _positions.set(i, _move(_positions.get(0), _positions.get(i), dist));
             _positions.set(i,_move(_childrenPositions.get(i), _positions.get(i), _childrenDistances.get(i)));
         }
+
+        _positions.set(1, Vector.add(Vector.multiply(Vector.subtract(_positions.get(1), center).normalize(null), 0.5f*_distances.get(2)), center));
+        _positions.set(2, Vector.add(Vector.multiply(Vector.subtract(_positions.get(2), center).normalize(null), 0.5f*_distances.get(2)), center));
 
         //step 11
         _positions.set(1, _move(_positions.get(0), _positions.get(1), _distances.get(1)));
@@ -175,11 +186,11 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
     @Override
     protected void _update() {
         //_backwardReaching(_chain, _original.get(0).position());
-        for(int i = 0; i < _original.size() - 1; i++){
-            Vector v = _original.get(i).location(positions().get(i));
-            _original.get(i).rotate(new Quaternion(_original.get(i+1).translation(), v));
+        for(int i = 1; i < _original.size(); i++){
+            //Vector v = _original.get(i).reference().location(positions().get(i));
+            //_original.get(i).reference().rotate(new Quaternion(_original.get(i).translation(), v));
             //_original.get(i).setRotation(_chain.get(i).rotation().get());
-            //_original.get(i).setPosition(_positions.get(i));
+            _original.get(i).setPosition(_positions.get(i));
         }
     }
 
