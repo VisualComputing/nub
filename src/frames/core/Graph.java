@@ -2766,7 +2766,7 @@ public class Graph {
    * Otherwise aligns the {@code frame} with the {@link #eye()}. {@code frame} should be
    * non-null.
    * <p>
-   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)}.
+   * Wrapper method for {@link Frame#align(boolean, float, Frame)}.
    *
    * @see #isEye(Frame)
    * @see #defaultFrame(String)
@@ -2775,9 +2775,9 @@ public class Graph {
     if (frame == null)
       throw new RuntimeException("align(frame) requires a non-null frame param");
     if (isEye(frame))
-      frame.alignWithFrame(null, true);
+      frame.align(true);
     else
-      frame.alignWithFrame(eye());
+      frame.align(eye());
   }
 
   /**

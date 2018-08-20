@@ -1272,25 +1272,66 @@ public class Frame {
   // ALIGNMENT
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, false, 0.85f)}
+   * Same as {@code align(null)}.
+   *
+   * @see #align(Frame)
    */
-  public void alignWithFrame(Frame frame) {
-    alignWithFrame(frame, false, 0.85f);
+  public void align() {
+    align(null);
   }
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, move, 0.85f)}
+   * Convenience function that simply calls {@code align(false, 0.85f, frame)}
+   *
+   * @see #align(boolean, float, Frame)
    */
-  public void alignWithFrame(Frame frame, boolean move) {
-    alignWithFrame(frame, move, 0.85f);
+  public void align(Frame frame) {
+    align(false, 0.85f, frame);
   }
 
   /**
-   * Convenience function that simply calls
-   * {@code alignWithFrame(frame, false, threshold)}
+   * Same as {@code align(move, null)}.
+   *
+   * @see #align(boolean, Frame)
    */
-  public void alignWithFrame(Frame frame, float threshold) {
-    alignWithFrame(frame, false, threshold);
+  public void align(boolean move) {
+    align(move, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(move, 0.85f, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, Frame frame) {
+    align(move, 0.85f, frame);
+  }
+
+  /**
+   * Same as {@code align(threshold, null)}.
+   *
+   * @see #align(boolean, Frame)
+   */
+  public void align(float threshold) {
+    align(threshold, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(false, threshold, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(float threshold, Frame frame) {
+    align(false, threshold, frame);
+  }
+
+  /**
+   * Same as {@code align(move, threshold, null)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, float threshold) {
+    align(move, threshold, null);
   }
 
   /**
@@ -1315,7 +1356,7 @@ public class Frame {
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #reference()}).
    */
-  public void alignWithFrame(Frame frame, boolean move, float threshold) {
+  public void align(boolean move, float threshold, Frame frame) {
     Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
