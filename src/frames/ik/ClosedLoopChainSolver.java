@@ -16,10 +16,9 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
     protected ArrayList<Frame> _reversedChain;
     protected ArrayList<? extends Frame> _original;
     protected float _distanceHeadToTail;
-    protected ArrayList<Vector> _entryPositions = new ArrayList<Vector>();
-    protected ArrayList<Vector> _positionsChildren = new ArrayList<Vector>();
-    protected ArrayList<Float> _distancesChildren = new ArrayList<Float>();
-
+    protected ArrayList<Vector> _childrenPositions = new ArrayList<Vector>();
+    protected ArrayList<Float> _childrenDistances= new ArrayList<Float>();
+    protected boolean _hasChanged = false;
 
     //here we don't consider any kind of constraint
     //chain must not include the head twice
@@ -29,6 +28,8 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         //this._chain = _copy(chain);
         this._chain = chain;
         _positions = new ArrayList<Vector>();
+        _childrenPositions = new ArrayList<Vector>();
+        _childrenDistances = new ArrayList<Float>();
         _distances = new ArrayList<Float>();
         _orientations = new ArrayList<Quaternion>();
         Vector prevPosition = chain.get(0).reference() != null
@@ -42,14 +43,15 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
             Vector position = joint.position().get();
             Quaternion orientation = prevOrientation.get();
             orientation.compose(joint.rotation().get());
-            _entryPositions.add(position);
             _positions.add(position);
+            _childrenPositions.add(position.get());
+            _childrenDistances.add(0.f);
             _distances.add(Vector.subtract(position, prevPosition).magnitude());
             _orientations.add(orientation);
 
             //Vector positionChild = joint.children() != null ?
             //        joint.children().get(0).position() : position.get();
-            //_positionsChildren.add(positionChild);
+            //_childrenPositions.add(positionChild);
             //_distancesChildren.add(Vector.subtract(position, positionChild).magnitude());
             prevPosition = position;
             prevOrientation = orientation.get();
@@ -58,6 +60,10 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         Vector head = _chain.get(0).position().get();
         Vector tail = _chain.get(_chain.size()-1).position().get();
         _distanceHeadToTail = Vector.subtract(head, tail).magnitude();
+    }
+
+    public ArrayList<? extends Frame> chain() {
+        return _original;
     }
 
     public void setUnknown(Frame frame, Vector vector){
@@ -70,59 +76,90 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
 
     public void setUnknown(int i, Vector vector){
         _positions.set(i, vector);
+        _hasChanged = true;
     }
+
+    public void setChildPosition(int i, Vector vector){
+        _childrenPositions.set(i, vector);
+    }
+
+    public void setChildDistance(int i, Float distance){
+        _childrenDistances.set(i, distance);
+    }
+
 
     public float fixNoisyJoints(){
         //consider the case when there're 2 unknowns
         //Initial root position
+        float change = 0;
+        ArrayList<Vector> prev = new ArrayList<Vector>();
+        for(Vector v : _positions){
+            prev.add(v.get());
+        }
+
         Vector initial = _chain.get(0).position().get();
-        //Stage 1: Forward Reaching
-        _forwardReaching(_chain);
+        //Stage 1
+        //step 1
+        _positions.set(1, _move(_positions.get(0), _positions.get(1), _distances.get(1)));
+        //step 2
+        _positions.set(2, _move(_positions.get(1), _positions.get(2), _distances.get(2)));
         //Move root
-        _move(0, true);
-        //Move in the other order
-        _forwardReaching(_reversedChain);
+        //step 3
+        _positions.set(0, _move(_positions.get(_positions.size()-1), _positions.get(0), _distanceHeadToTail));
+        //step 4
+        _positions.set(1, _move(_positions.get(0), _positions.get(1), _distances.get(1)));
+        //Stage 2
         //set root to initial position
         _positions.set(0 , initial);
+        //Move in the other order
+        //step 5
+        _positions.set(2, _move(_positions.get(0), _positions.get(2), _distanceHeadToTail));
+        //step 6
+        _positions.set(1, _move(_positions.get(2), _positions.get(1), _distances.get(2)));
+
+
+        //Steps 7 - 8 - 9 - 10
         //keep distances with children
         for(int i = 1; i < _chain.size(); i++){
-            Vector v = _move(_positions.get(i), _positionsChildren.get(i), _distancesChildren.get(i));
-            _positions.set(i, _move(v, _positions.get(0), Vector.distance(_chain.get(i).position(), _chain.get(0).position())));
+            float dist = _distances.get(i);
+            if(i == 2) dist = _distanceHeadToTail;
+            _positions.set(i, _move(_positions.get(0), _positions.get(i), dist));
+            _positions.set(i,_move(_childrenPositions.get(i), _positions.get(i), _childrenDistances.get(i)));
         }
-        //Stage 1: Forward Reaching
-        _forwardReaching(_chain);
+
+        //step 11
+        _positions.set(1, _move(_positions.get(0), _positions.get(1), _distances.get(1)));
+        //step 12
+        _positions.set(2, _move(_positions.get(1), _positions.get(2), _distances.get(2)));
         //Move root
-        _move(0, true);
+        //step 13
+        _positions.set(0, _move(_positions.get(_positions.size()-1), _positions.get(0), _distanceHeadToTail));
+        //step 14
+        _positions.set(1, _move(_positions.get(0), _positions.get(1), _distances.get(1)));
+        //set root to initial position
+        _positions.set(0 , initial);
         //Move in the other order
-        return _forwardReaching(_reversedChain);
+        //step 15
+        _positions.set(2, _move(_positions.get(0), _positions.get(2), _distanceHeadToTail));
+        //step 16
+        _positions.set(1, _move(_positions.get(2), _positions.get(1), _distances.get(2)));
+
+
+        //Move in the other order
+        for(int i = 0; i < _positions.size(); i++){
+            change += Vector.distance(prev.get(i), _positions.get(i));
+        }
+        return change;
     }
 
-    protected void _move(int i, boolean forward){
-        int j = forward ? i + 1 : i - 1;
-        j = j < 0 ? _chain.size()-1 : j == _chain.size() ? 0 : j;
-        Vector pos_i = _positions.get(i);
-        Vector pos_i1 = _positions.get(j);
-        float dist_i;
-        if(i == 0 && j == _chain.size() || i == _chain.size() && j == 0){
-            dist_i = _distanceHeadToTail;
-        }else{
-            dist_i = forward ? _distances.get(j) : _distances.get(i);
-        }
-        float r_i = Vector.distance(pos_i, pos_i1);
-        float lambda_i = dist_i / r_i;
-        Vector new_pos = Vector.multiply(pos_i1, 1.f - lambda_i);
-        new_pos.add(Vector.multiply(pos_i, lambda_i));
-        _positions.set(i, new_pos);
-    }
 
     @Override
     protected boolean _iterate() {
         //Execute Until the distance between the end effector and the target is below a threshold
         float error = 0;
         for(int i = 0; i < _chain.size(); i++){
-            error += Vector.distance(_chain.get(i).position(), _entryPositions.get(i));
+            error += Vector.distance(_chain.get(i).position(), _positions.get(i));
         }
-
         if (error <= this.error){
             return true;
         }
@@ -137,19 +174,23 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
 
     @Override
     protected void _update() {
-        _backwardReaching(_chain, _original.get(0).position());
-        for(int i = 0; i < _original.size(); i++){
-            _original.get(i).setRotation(_chain.get(i).rotation().get());
+        //_backwardReaching(_chain, _original.get(0).position());
+        for(int i = 0; i < _original.size() - 1; i++){
+            Vector v = _original.get(i).location(positions().get(i));
+            _original.get(i).rotate(new Quaternion(_original.get(i+1).translation(), v));
+            //_original.get(i).setRotation(_chain.get(i).rotation().get());
+            //_original.get(i).setPosition(_positions.get(i));
         }
     }
 
     @Override
     protected boolean _changed() {
-        return true;
+        return _hasChanged;
     }
 
     @Override
     protected void _reset() {
-
+        iterations = 0;
+        _hasChanged = false;
     }
 }
