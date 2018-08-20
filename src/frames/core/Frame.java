@@ -2011,6 +2011,13 @@ public class Frame {
   }
 
   /**
+   * Parse {@code gesture} params. Useful to implement the frame as an for application control.
+   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
+   */
+  public void interact(Object... gesture) {
+  }
+
+  /**
    * Procedure called on the frame by the graph traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
    * is attached to a {@code graph}.

@@ -19,10 +19,6 @@
  * |
  * f4
  *
- * Note that the hierarchy is implemented using attached-frame specializations
- * and hence it gets automatically traversed. Check the draw() method and contrast
- * it with the one implemented by the Click2Pick detached-frame example version.
- *
  * Press the space bar to browse the different conversion methods shown here.
  */
 
