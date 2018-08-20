@@ -9,7 +9,7 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
-public class ApplicationControl extends PApplet {
+public class ApplicationControl2 extends PApplet {
   Scene scene;
   Shape[] shapes;
   PFont font36;
@@ -19,7 +19,7 @@ public class ApplicationControl extends PApplet {
   String renderer = P3D;
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ApplicationControl"});
+    PApplet.main(new String[]{"intellij.ApplicationControl2"});
   }
 
   public void settings() {
@@ -87,8 +87,8 @@ public class ApplicationControl extends PApplet {
     scene.traverse();
   }
 
-  void control(Object... gesture) {
-    control(scene.defaultFrame(), gesture);
+  void control(String hid, Object... gesture) {
+    control(scene.defaultFrame(hid), gesture);
   }
 
   void control(Frame frame, Object... gesture) {
@@ -98,37 +98,37 @@ public class ApplicationControl extends PApplet {
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedFrame(shapes[value]);
+      scene.setTrackedFrame("hid", shapes[value]);
     if (key == ' ')
-      scene.resetTrackedFrame();
+      scene.resetTrackedFrame("hid");
     if (key == CODED)
       if (keyCode == UP)
-        scene.translate(0, -10);
+        scene.translate("hid", 0, -10);
       else if (keyCode == DOWN)
-        scene.translate(0, 10);
+        scene.translate("hid", 0, 10);
       else if (keyCode == LEFT)
-        control("menos");
+        control("hid", "menos");
       else if (keyCode == RIGHT)
-        control("mas");
+        control("hid", "mas");
   }
 
   public void mouseDragged() {
     if (mouseButton == LEFT)
-      scene.spin();
+      scene.spin("hid", scene.pmouse(), scene.mouse());
     else if (mouseButton == CENTER)
-      scene.translate();
+      scene.translate("hid", scene.mouseDX(), scene.mouseDY());
     else
-      control();
+      control("hid");
   }
 
   public void mouseWheel(MouseEvent event) {
-    control(event.getCount());
+    control("hid", event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      control();
+      control("hid");
     if (event.getCount() == 2)
-      scene.cast();
+      scene.cast("hid", scene.mouse());
   }
 }

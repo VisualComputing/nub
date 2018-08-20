@@ -10,6 +10,7 @@ Frames
 - [Shapes](#user-content-shapes)
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
+- [Control](#user-content-control)
 - [Drawing](#user-content-drawing)
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
@@ -255,6 +256,10 @@ Observations:
 2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
 3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
 4. To update an _hid_ tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-frame synchronously (i.e., they return the _hid_ tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-frame during the next call to the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm).
+
+## Control
+
+[Application control](https://hal.inria.fr/hal-00789413/) (aka as Post-[WIMP](https://en.wikipedia.org/wiki/WIMP_(computing)) interaction styles) refers to interfaces “containing at least one interaction technique not dependent on classical 2D widgets” [[van Dam]](http://dl.acm.org/citation.cfm?id=253708), such as:  [tangible interaction](https://en.wikipedia.org/wiki/Tangible_user_interface), or perceptual and [affective computing](https://en.wikipedia.org/wiki/Affective_computing).
 
 ## Drawing
 
