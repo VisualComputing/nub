@@ -23,7 +23,7 @@ PFont font36;
 int totalShapes;
 
 //Choose FX2D, JAVA2D, P2D or P3D
-String renderer = P2D;
+String renderer = P3D;
 
 public void settings() {
   size(1240, 840, renderer);
