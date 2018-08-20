@@ -28,6 +28,7 @@ public abstract class Solver {
   public float timesPerFrame = 1.f;
   public float frameCounter = 0;
   public int iterations = 0;
+  public boolean change_temp = false;
 
   protected TimingTask _task;
 
@@ -55,7 +56,7 @@ public abstract class Solver {
 
   public boolean solve() {
     //Reset counter
-    if (_changed()) {
+    if (_changed() || change_temp) {
       _reset();
     }
 

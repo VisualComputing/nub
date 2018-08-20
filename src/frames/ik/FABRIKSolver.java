@@ -59,7 +59,7 @@ public abstract class FABRIKSolver extends Solver {
   protected int _head = 0;
 
 
-  /*Move vector u to v while keeping certain distance*/
+  /*Move vector v to u while keeping certain distance*/
   public Vector _move(Vector u, Vector v, float distance, float fixWeight){
     float r = Vector.distance(u, v);
     float lambda_i = distance / r;
@@ -77,6 +77,8 @@ public abstract class FABRIKSolver extends Solver {
    * Performs First Stage of FABRIK Algorithm, receives a chain of Frames, being the Frame at i
    * the reference frame of the Frame at i + 1
    * */
+  public int opt = 0;
+
   protected float _forwardReaching(ArrayList<? extends Frame> chain) {
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
@@ -89,7 +91,7 @@ public abstract class FABRIKSolver extends Solver {
       }
       Properties props_i = _properties.get(chain.get(i));
       Properties props_i1 = _properties.get(chain.get(i+1));
-      if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null){
+      if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
         Vector o_hat = chain.get(i + 1).position();
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
@@ -124,7 +126,7 @@ public abstract class FABRIKSolver extends Solver {
       //Find delta rotation
       Properties props_i = _properties.get(chain.get(i));
       Properties props_i1 = _properties.get(chain.get(i+1));
-      if(chain.get(i+1).children().size() < 2 && chain.get(i+1).constraint() != null){
+      if  (chain.get(i+1).children().size() < 2 && chain.get(i+1).constraint() != null  && opt < 1){
         Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
