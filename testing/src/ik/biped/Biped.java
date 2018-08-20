@@ -16,8 +16,8 @@ import java.util.ArrayList;
  * Created by sebchaparr on 7/08/18.
  */
 public class Biped {
-    ClosedLoopChainSolver upperBody;
-    ClosedLoopChainSolver lowerBody;
+    ClosedLoopChainSolver upper_body;
+    ClosedLoopChainSolver lower_body;
     ChainSolver left_arm, right_arm;
     ChainSolver left_leg, right_leg;
     Scene scene;
@@ -118,10 +118,10 @@ public class Biped {
         ul_0.translate(translation);
         Frame ul_1 = new Frame(scene);
         ul_1.setReference(ul_0);
-        ul_1.translate(-50,100);
+        ul_1.translate(-50,-100);
         Frame ul_2 = new Frame(scene);
         ul_2.setReference(ul_0);
-        ul_2.translate(50,100);
+        ul_2.translate(50,-100);
         upper.add(ul_0);
         upper.add(ul_1);
         upper.add(ul_2);
@@ -140,60 +140,68 @@ public class Biped {
         lower.add(lol_2);
 
         //prepare solvers
-        upperBody = new ClosedLoopChainSolver(upper);
-        lowerBody = new ClosedLoopChainSolver(lower);
+        upper_body = new ClosedLoopChainSolver(upper);
+        lower_body = new ClosedLoopChainSolver(lower);
         left_arm = new ChainSolver(l_arm);
         right_arm = new ChainSolver(r_arm);
         left_leg = new ChainSolver(l_leg);
         right_leg = new ChainSolver(r_leg);
         //set number of iterations
-        upperBody.maxIter = 5;
-        lowerBody.maxIter = 5;
+        upper_body.maxIter = 5;
+        lower_body.maxIter = 5;
         left_arm.maxIter = 5;
         right_arm.maxIter = 5;
         left_leg.maxIter = 5;
         right_leg.maxIter = 5;
     }
 
-    void updateUpperBodyTargets(){
-        upperBody.setUnknown(1, left_arm.chain().get(1).position());
-        upperBody.setUnknown(2, right_arm.chain().get(1).position());
-    }
-
-    void updateLowerBodyTargets(){
-        lowerBody.setUnknown(1, left_leg.chain().get(1).position());
-        lowerBody.setUnknown(2, right_leg.chain().get(1).position());
+    void updateClosedLoopTargets(ClosedLoopChainSolver solver, ChainSolver left, ChainSolver right){
+        solver.setUnknown(1, left.chain().get(1).position());
+        solver.setUnknown(2, right.chain().get(1).position());
+        solver.setChildPosition(1, left.chain().get(2).position());
+        solver.setChildPosition(2, right.chain().get(2).position());
+        solver.setChildDistance(1, Vector.distance(left.chain().get(1).position(), left.chain().get(2).position()));
+        solver.setChildDistance(2, Vector.distance(right.chain().get(1).position(), right.chain().get(2).position()));
     }
 
     void fixRotation(Frame frame, Vector new_position){
-        Frame reference = frame.reference() == null ? new Frame() : frame.reference();
+        Frame reference = frame.reference();
+        if(reference == null){
+            //Perhaps translate to the given position
+            return;
+        }
         Vector translation = frame.translation();
         Vector new_translation = reference.location(new_position);
         Quaternion quaternion = new Quaternion(translation, new_translation);
-        frame.rotate(quaternion);
+        reference.rotate(quaternion);
     }
 
     void updateAfterFixing(){
-        fixRotation(left_arm.chain().get(1), upperBody.positions().get(1));
-        fixRotation(right_arm.chain().get(1), upperBody.positions().get(2));
-        fixRotation(left_leg.chain().get(1), lowerBody.positions().get(1));
-        fixRotation(right_leg.chain().get(1), lowerBody.positions().get(2));
+        fixRotation(left_arm.chain().get(1), upper_body.positions().get(1));
+        fixRotation(right_arm.chain().get(1), upper_body.positions().get(2));
+        fixRotation(left_leg.chain().get(1), lower_body.positions().get(1));
+        fixRotation(right_leg.chain().get(1), lower_body.positions().get(2));
     }
 
     public void solve() {
         //solve arms
+        left_arm.change_temp = true;
+        right_arm.change_temp = true;
+        left_leg.change_temp = true;
+        right_leg.change_temp = true;
+
         left_arm.solve();
         right_arm.solve();
         //solve legs
         left_leg.solve();
         right_leg.solve();
         //fix distance constraints
-        //updateUpperBodyTargets();
-        //updateLowerBodyTargets();
-        //upperBody.solve();
-        //lowerBody.solve();
+        updateClosedLoopTargets(upper_body, left_arm, right_arm);
+        updateClosedLoopTargets(lower_body, left_leg, right_leg);
+        upper_body.solve();
+        lower_body.solve();
         //set chain positions to obtained ones
-        //updateAfterFixing();
+        updateAfterFixing();
     }
 
     public void draw() {
@@ -213,6 +221,24 @@ public class Biped {
             drawJoint(pg, frame);
         }
         for (Frame frame : right_leg.chain()) {
+            drawJoint(pg, frame);
+        }
+        for (Frame frame : upper_body.chain()) {
+            drawJoint(pg, frame);
+        }
+
+        Vector v = upper_body.positions().get(1);
+        pg.pushMatrix();
+        pg.translate(v.x(), v.y(), v.z());
+        pg.sphere(8);
+        pg.popMatrix();
+        v = upper_body.positions().get(2);
+        pg.pushMatrix();
+        pg.translate(v.x(), v.y(), v.z());
+        pg.sphere(8);
+        pg.popMatrix();
+
+        for (Frame frame : lower_body.chain()) {
             drawJoint(pg, frame);
         }
 
