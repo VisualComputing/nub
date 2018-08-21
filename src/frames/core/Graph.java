@@ -59,6 +59,9 @@ import java.util.List;
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a frame parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
+ * Call {@link #control(Frame, Object...)} to send arbitrary gesture data to the frame. Note that
+ * {@link Frame#interact(Object...)} should be overridden to implement the frame custom behavior.
+ * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
  * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#precision()} (and
  * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
@@ -3490,6 +3493,39 @@ public class Graph {
     }
     Vector eyeUp = eye().displacement(upVector);
     return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+  }
+
+  /**
+   * Same as {@code control(defaultFrame(), gesture)}. This method implements application control with
+   * the {@link #defaultFrame()} which requires overriding {@link Frame#interact(Object...)}.
+   *
+   * @see #defaultFrame()
+   * @see #control(Frame, Object...)
+   */
+  public void defaultHIDControl(Object... gesture) {
+    control(defaultFrame(), gesture);
+  }
+
+  /**
+   * Same as {@code control(defaultFrame(hid), gesture)}. This method implements application control with
+   * the {@link #defaultFrame(String)} which requires overriding {@link Frame#interact(Object...)}.
+   *
+   * @see #defaultFrame(String)
+   * @see #control(Frame, Object...)
+   */
+  public void control(String hid, Object... gesture) {
+    control(defaultFrame(hid), gesture);
+  }
+
+  /**
+   * Same as {@code frame.interact(gesture)}.
+   *
+   * @see #defaultHIDControl(Object...)
+   * @see #control(String, Object...)
+   * @see Frame#interact(Object...)
+   */
+  public void control(Frame frame, Object... gesture) {
+    frame.interact(gesture);
   }
 
   /*

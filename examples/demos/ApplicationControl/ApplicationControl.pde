@@ -90,14 +90,6 @@ void draw() {
   scene.traverse();
 }
 
-void control(Object... gesture) {
-  control(scene.defaultFrame(), gesture);
-}
-
-void control(Frame frame, Object... gesture) {
-  frame.interact(gesture);
-}
-
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
@@ -110,9 +102,9 @@ void keyPressed() {
     else if (keyCode == DOWN)
       scene.translate(0, 10);
     else if (keyCode == LEFT)
-      control("menos");
+      scene.defaultHIDControl("menos");
     else if (keyCode == RIGHT)
-      control("mas");
+      scene.defaultHIDControl("mas");
 }
 
 void mouseDragged() {
@@ -125,12 +117,12 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  control(event.getCount());
+  scene.defaultHIDControl(event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    control();
+    scene.defaultHIDControl();
   if (event.getCount() == 2)
     scene.cast();
 }

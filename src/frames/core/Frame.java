@@ -106,6 +106,13 @@ import java.util.List;
  * <h2>Picking</h2>
  * Picking a frame is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
+ * <h2>Application Control</h2>
+ * Implementing an application control for the frame is a two step process:
+ * <ul>
+ * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
+ * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
+ * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
+ * </ul>
  */
 public class Frame {
   /**
