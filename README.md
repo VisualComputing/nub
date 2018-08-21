@@ -263,8 +263,8 @@ Observations:
 
 Implementing an application control for a frame is a two step process:
 
-1. Override [Frame.interact(java.lang.Object... gesture)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
-2. Send gesture data to the frame by calling [defaultHIDControl(Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Frame, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-frames.core.Frame-java.lang.Object...-).
+1. Override the frame method [interact(Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
+2. Send gesture data to the frame by calling on of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Frame, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-frames.core.Frame-java.lang.Object...-).
 
 See the [ApplicationControl example](https://github.com/VisualComputing/frames/tree/master/examples/demos/ApplicationControl).
 
