@@ -20,6 +20,7 @@
  * f4
  *
  * Press the space bar to browse the different conversion methods shown here.
+ * To pick a frame single click on it.
  */
 
 import frames.primitives.*;
@@ -280,7 +281,7 @@ void mouseWheel(MouseEvent event) {
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1) {
-    scene.track(new Frame[]{f1, f2, f3, f4, f5});
+    scene.track();
   }
   if (event.getCount() == 2)
     if (event.getButton() == LEFT)
