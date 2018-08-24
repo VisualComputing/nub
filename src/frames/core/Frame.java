@@ -106,6 +106,13 @@ import java.util.List;
  * <h2>Picking</h2>
  * Picking a frame is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
+ * <h2>Application Control</h2>
+ * Implementing an application control for the frame is a two step process:
+ * <ul>
+ * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
+ * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
+ * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
+ * </ul>
  */
 public class Frame {
   /**
@@ -1272,25 +1279,66 @@ public class Frame {
   // ALIGNMENT
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, false, 0.85f)}
+   * Same as {@code align(null)}.
+   *
+   * @see #align(Frame)
    */
-  public void alignWithFrame(Frame frame) {
-    alignWithFrame(frame, false, 0.85f);
+  public void align() {
+    align(null);
   }
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, move, 0.85f)}
+   * Convenience function that simply calls {@code align(false, 0.85f, frame)}
+   *
+   * @see #align(boolean, float, Frame)
    */
-  public void alignWithFrame(Frame frame, boolean move) {
-    alignWithFrame(frame, move, 0.85f);
+  public void align(Frame frame) {
+    align(false, 0.85f, frame);
   }
 
   /**
-   * Convenience function that simply calls
-   * {@code alignWithFrame(frame, false, threshold)}
+   * Same as {@code align(move, null)}.
+   *
+   * @see #align(boolean, Frame)
    */
-  public void alignWithFrame(Frame frame, float threshold) {
-    alignWithFrame(frame, false, threshold);
+  public void align(boolean move) {
+    align(move, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(move, 0.85f, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, Frame frame) {
+    align(move, 0.85f, frame);
+  }
+
+  /**
+   * Same as {@code align(threshold, null)}.
+   *
+   * @see #align(boolean, Frame)
+   */
+  public void align(float threshold) {
+    align(threshold, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(false, threshold, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(float threshold, Frame frame) {
+    align(false, threshold, frame);
+  }
+
+  /**
+   * Same as {@code align(move, threshold, null)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, float threshold) {
+    align(move, threshold, null);
   }
 
   /**
@@ -1315,7 +1363,7 @@ public class Frame {
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #reference()}).
    */
-  public void alignWithFrame(Frame frame, boolean move, float threshold) {
+  public void align(boolean move, float threshold, Frame frame) {
     Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
@@ -2011,6 +2059,13 @@ public class Frame {
   }
 
   /**
+   * Parse {@code gesture} params. Useful to implement the frame as an for application control.
+   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
+   */
+  public void interact(Object... gesture) {
+  }
+
+  /**
    * Procedure called on the frame by the graph traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
    * is attached to a {@code graph}.
@@ -2022,7 +2077,9 @@ public class Frame {
    * {@code
    * frame = new Frame(graph) {
    *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())
    *       // Draw your object here, in the local coordinate system.

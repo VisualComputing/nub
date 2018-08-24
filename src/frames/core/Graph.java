@@ -10,8 +10,6 @@
 
 package frames.core;
 
-import frames.ik.Solver;
-import frames.ik.TreeSolver;
 import frames.primitives.*;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
@@ -60,6 +58,9 @@ import java.util.List;
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a frame parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
+ * <p>
+ * Call {@link #control(Frame, Object...)} to send arbitrary gesture data to the frame. Note that
+ * {@link Frame#interact(Object...)} should be overridden to implement the frame custom behavior.
  * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
  * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#precision()} (and
@@ -114,8 +115,8 @@ import java.util.List;
  * algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
- * on top of a 3d graph) issue your drawing code between {@link #beginScreenDrawing()} and
- * {@link #endScreenDrawing()}. These methods are {@link MatrixHandler} wrapper functions
+ * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
+ * {@link #endHUD()}. These methods are {@link MatrixHandler} wrapper functions
  * with the same signatures provided for convenience.
  * <p>
  * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
@@ -142,9 +143,9 @@ public class Graph {
   protected float _distance[];
   // rescale ortho when anchor changes
   protected float _rapK = 1;
-  // handed and screen drawing
+  // handed and HUD
   protected boolean _rightHanded;
-  protected int _startCoordCalls;
+  protected int _hudCalls;
   // size and dim
   protected int _width, _height;
 
@@ -170,10 +171,7 @@ public class Graph {
   protected List<Frame> _seeds;
   protected long _lastNonEyeUpdate = 0;
 
-  // 5. IKinematics solvers
-  protected List<TreeSolver> _solvers;
-
-  // 6. Interaction methods
+  // 5. Interaction methods
   Vector _upVector;
   protected long _lookAroundCount;
 
@@ -236,7 +234,6 @@ public class Graph {
     setHeight(height);
 
     _seeds = new ArrayList<Frame>();
-    _solvers = new ArrayList<TreeSolver>();
     _timingHandler = new TimingHandler();
 
     setRadius(100);
@@ -344,7 +341,7 @@ public class Graph {
 
   /**
    * Returns the vertical field of view of the {@link #eye()} (in radians) computed as
-   * {@code 2.0f * (float) Math.atan(eye().magnitude())}.
+   * {@code 2 * (float) Math.atan(eye().magnitude())}.
    * <p>
    * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
    * This value is meaningless if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
@@ -357,18 +354,18 @@ public class Graph {
    * @see #eye()
    */
   public float fieldOfView() {
-    return 2.0f * (float) Math.atan(eye().magnitude());
+    return 2 * (float) Math.atan(eye().magnitude());
   }
 
   /**
-   * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2.0f))}.
+   * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2))}.
    * <p>
    * Sets the field-of-view of the current {@link #eye()}.
    *
    * @see Frame#setMagnitude(float)
    */
   public void setFieldOfView(float fov) {
-    eye().setMagnitude((float) Math.tan(fov / 2.0f));
+    eye().setMagnitude((float) Math.tan(fov / 2));
   }
 
   /**
@@ -379,7 +376,7 @@ public class Graph {
    * {@code horizontalFieldOfView() = 2 * atan ( tan(fieldOfView()/2) * aspectRatio() )}.
    */
   public float horizontalFieldOfView() {
-    return 2.0f * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
+    return 2 * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
   }
 
   /**
@@ -397,10 +394,10 @@ public class Graph {
    */
   // TODO shadow maps computation docs are missing
   public void fitFieldOfView() {
-    if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2.0f) * radius())
-      setFieldOfView(2.0f * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
+    if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
+      setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
     else
-      setFieldOfView((float) Math.PI / 2.0f);
+      setFieldOfView((float) Math.PI / 2);
   }
 
   /**
@@ -541,10 +538,10 @@ public class Graph {
    * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)},
    * respectively.
    * <p>
-   * These values are valid for 2d and ortho graphs (but not persp) and they are
+   * These values are valid for 2d and orthographic graphs (but not perspective) and they are
    * expressed in virtual world units.
    * <p>
-   * In the case of ortho graphs these values are proportional to the eye (z
+   * In the case of orthographs graphs these values are proportional to the eye (z
    * projected) distance to the {@link #anchor()}. When zooming on the object, the eye
    * is translated forward and its boundary is narrowed, making the object appear bigger
    * on screen, as intuitively expected.
@@ -844,31 +841,31 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds exception when no properly
-   * closing the screen drawing with a call to {@link #endScreenDrawing()}.
+   * Wrapper for {@link MatrixHandler#beginHUD()}. Adds exception when no properly
+   * closing the screen drawing with a call to {@link #endHUD()}.
    *
-   * @see MatrixHandler#beginScreenDrawing()
+   * @see MatrixHandler#beginHUD()
    */
-  public void beginScreenDrawing() {
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _startCoordCalls++;
-    _matrixHandler.beginScreenDrawing();
+  public void beginHUD() {
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _hudCalls++;
+    _matrixHandler.beginHUD();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endScreenDrawing()} . Adds exception
-   * if {@link #beginScreenDrawing()} wasn't properly called before
+   * Wrapper for {@link MatrixHandler#endHUD()} . Adds exception
+   * if {@link #beginHUD()} wasn't properly called before
    *
-   * @see MatrixHandler#endScreenDrawing()
+   * @see MatrixHandler#endHUD()
    */
-  public void endScreenDrawing() {
-    _startCoordCalls--;
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _matrixHandler.endScreenDrawing();
+  public void endHUD() {
+    _hudCalls--;
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _matrixHandler.endHUD();
   }
 
   /**
@@ -885,7 +882,7 @@ public class Graph {
    * to place the clipping planes. These values are determined from radius() and center() so that
    * they best fit the graph size.
    * <p>
-   * Override {@link #computeProjection()} to define a CUSTOM projection.
+   * Override {@link #computeCustomProjection()} to define a CUSTOM projection.
    *
    * <b>Note 1:</b> This method is called by {@link #preDraw()}.
    *
@@ -1094,21 +1091,20 @@ public class Graph {
    * and {@code false} otherwise.
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
-   * this method. You may compute them explicitly (by calling {@link #computeBoundaryEquations()})
+   * this method. You may compute them explicitly (by calling {@link #updateBoundaryEquations()})
    * or enable them to be automatic updated in your graph setup (with
    * {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public boolean isPointVisible(Vector point) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by isPointVisible) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     for (int i = 0; i < (is3D() ? 6 : 4); ++i)
       if (distanceToBoundary(i, point) > 0)
@@ -1123,20 +1119,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
    * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility ballVisibility(Vector center, float radius) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by ballVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1159,20 +1154,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()} ) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()} ) or enable them to be automatic updated in your
    * graph setup (with {@link Graph#enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see Graph#enableBoundaryEquations()
    */
   public Visibility boxVisibility(Vector corner1, Vector corner2) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
+      throw new RuntimeException("The frustum plane equations (needed by boxVisibility) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     boolean allInForAllPlanes = true;
     for (int i = 0; i < (is3D() ? 6 : 4); ++i) {
@@ -1220,12 +1214,10 @@ public class Graph {
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
    * every frame instead.
-   *
-   * @see #computeBoundaryEquations()
    */
-  public float[][] computeBoundaryEquations() {
+  public float[][] updateBoundaryEquations() {
     _initCoefficients();
-    return is3D() ? _computeBoundaryEquations3() : _computeBoundaryEquations2();
+    return is3D() ? _updateBoundaryEquations3() : _updateBoundaryEquations2();
   }
 
   protected void _initCoefficients() {
@@ -1249,7 +1241,7 @@ public class Graph {
       _distance = new float[rows];
   }
 
-  protected float[][] _computeBoundaryEquations3() {
+  protected float[][] _updateBoundaryEquations3() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector viewDir = viewDirection();
@@ -1328,7 +1320,7 @@ public class Graph {
     return _coefficients;
   }
 
-  protected float[][] _computeBoundaryEquations2() {
+  protected float[][] _updateBoundaryEquations2() {
     // Computed once and for all
     Vector pos = eye().position();
     Vector up = upVector();
@@ -1405,27 +1397,6 @@ public class Graph {
   }
 
   /**
-   * Updates the boundary plane equations according to the current eye setup, by simply
-   * calling {@link #computeBoundaryEquations()}.
-   *
-   * <b>Attention:</b> You should not call this method explicitly, unless you need the
-   * boundary equations to be updated only occasionally (rare). Use
-   * {@link #enableBoundaryEquations()} which automatically update the boundary equations
-   * every frame instead.
-   *
-   * @see #distanceToBoundary(int, Vector)
-   * @see #isPointVisible(Vector)
-   * @see #ballVisibility(Vector, float)
-   * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
-   * @see #boundaryEquations()
-   * @see #enableBoundaryEquations()
-   */
-  public void updateBoundaryEquations() {
-    computeBoundaryEquations();
-  }
-
-  /**
    * Returns the boundary plane equations.
    * <p>
    * In 2D the four 4-component vectors, respectively correspond to the
@@ -1446,20 +1417,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
    * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #distanceToBoundary(int, Vector)
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public float[][] boundaryEquations() {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The graph boundary equations may be outdated. Please "
+      throw new RuntimeException("The graph boundary equations may be outdated. Please "
           + "enable automatic updates of the equations in your setup with enableBoundaryEquations()");
     return _coefficients;
   }
@@ -1477,20 +1447,19 @@ public class Graph {
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
    * this method. You may compute them explicitly (by calling
-   * {@link #computeBoundaryEquations()}) or enable them to be automatic updated in your
+   * {@link #updateBoundaryEquations()}) or enable them to be automatic updated in your
    * graph setup (with {@link #enableBoundaryEquations()}).
    *
    * @see #isPointVisible(Vector)
    * @see #ballVisibility(Vector, float)
    * @see #boxVisibility(Vector, Vector)
-   * @see #computeBoundaryEquations()
    * @see #updateBoundaryEquations()
    * @see #boundaryEquations()
    * @see #enableBoundaryEquations()
    */
   public float distanceToBoundary(int index, Vector position) {
     if (!areBoundaryEquationsEnabled())
-      System.out.println("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
+      throw new RuntimeException("The viewpoint boundary equations (needed by distanceToBoundary) may be outdated. Please "
           + "enable automatic updates of the equations in your PApplet.setup " + "with Scene.enableBoundaryEquations()");
     Vector myVector = new Vector(_coefficients[index][0], _coefficients[index][1], _coefficients[index][2]);
     if (is3D())
@@ -2292,85 +2261,6 @@ public class Graph {
     return _lastNonEyeUpdate;
   }
 
-  /**
-   * Return registered solvers
-   */
-  public List<TreeSolver> treeSolvers() {
-    return _solvers;
-  }
-
-  /**
-   * Registers the given chain to solve IK.
-   */
-  public TreeSolver registerTreeSolver(Frame frame) {
-    for (TreeSolver solver : _solvers)
-      //If Head is Contained in any structure do nothing
-      if (!path(solver.head(), frame).isEmpty())
-        return null;
-    TreeSolver solver = new TreeSolver(frame);
-    _solvers.add(solver);
-    //Add task
-    registerTask(solver.task());
-    solver.task().run(40);
-    return solver;
-  }
-
-  /**
-   * Unregisters the IK Solver with the given Frame as branchRoot
-   */
-  public boolean unregisterTreeSolver(Frame frame) {
-    TreeSolver toRemove = null;
-    for (TreeSolver solver : _solvers) {
-      if (solver.head() == frame) {
-        toRemove = solver;
-        break;
-      }
-    }
-    //Remove task
-    unregisterTask(toRemove.task());
-    return _solvers.remove(toRemove);
-  }
-
-  /**
-   * Gets the IK Solver with associated with branchRoot frame
-   */
-  public TreeSolver treeSolver(Frame frame) {
-    for (TreeSolver solver : _solvers) {
-      if (solver.head() == frame) {
-        return solver;
-      }
-    }
-    return null;
-  }
-
-  public boolean addIKTarget(Frame endEffector, Frame target) {
-    for (TreeSolver solver : _solvers) {
-      if (solver.addTarget(endEffector, target)) return true;
-    }
-    return false;
-  }
-
-  /**
-   * Same as {@code executeIKSolver(_solver, 40)}.
-   *
-   * @see #executeSolver(Solver, long)
-   */
-  public void executeSolver(Solver solver) {
-    executeSolver(solver, 40);
-  }
-
-  /**
-   * Only meaningful for non-registered solvers. Solver should be different than
-   * {@link TreeSolver}.
-   *
-   * @see #registerTreeSolver(Frame)
-   * @see #unregisterTreeSolver(Frame)
-   */
-  public void executeSolver(Solver solver, long period) {
-    registerTask(solver.task());
-    solver.task().run(period);
-  }
-
   // traversal
 
   // detached frames
@@ -2879,7 +2769,7 @@ public class Graph {
    * Otherwise aligns the {@code frame} with the {@link #eye()}. {@code frame} should be
    * non-null.
    * <p>
-   * Wrapper method for {@link Frame#alignWithFrame(Frame, boolean, float)}.
+   * Wrapper method for {@link Frame#align(boolean, float, Frame)}.
    *
    * @see #isEye(Frame)
    * @see #defaultFrame(String)
@@ -2888,9 +2778,9 @@ public class Graph {
     if (frame == null)
       throw new RuntimeException("align(frame) requires a non-null frame param");
     if (isEye(frame))
-      frame.alignWithFrame(null, true);
+      frame.align(true);
     else
-      frame.alignWithFrame(eye());
+      frame.align(eye());
   }
 
   /**
@@ -3603,6 +3493,39 @@ public class Graph {
     }
     Vector eyeUp = eye().displacement(upVector);
     return Quaternion.multiply(new Quaternion(eyeUp, eyeUp.y() < 0.0f ? roll : -roll), new Quaternion(new Vector(1.0f, 0.0f, 0.0f), isRightHanded() ? -pitch : pitch));
+  }
+
+  /**
+   * Same as {@code control(defaultFrame(), gesture)}. This method implements application control with
+   * the {@link #defaultFrame()} which requires overriding {@link Frame#interact(Object...)}.
+   *
+   * @see #defaultFrame()
+   * @see #control(Frame, Object...)
+   */
+  public void defaultHIDControl(Object... gesture) {
+    control(defaultFrame(), gesture);
+  }
+
+  /**
+   * Same as {@code control(defaultFrame(hid), gesture)}. This method implements application control with
+   * the {@link #defaultFrame(String)} which requires overriding {@link Frame#interact(Object...)}.
+   *
+   * @see #defaultFrame(String)
+   * @see #control(Frame, Object...)
+   */
+  public void control(String hid, Object... gesture) {
+    control(defaultFrame(hid), gesture);
+  }
+
+  /**
+   * Same as {@code frame.interact(gesture)}.
+   *
+   * @see #defaultHIDControl(Object...)
+   * @see #control(String, Object...)
+   * @see Frame#interact(Object...)
+   */
+  public void control(Frame frame, Object... gesture) {
+    frame.interact(gesture);
   }
 
   /*

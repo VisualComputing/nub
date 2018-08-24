@@ -14,10 +14,6 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.MatrixHandler;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.core.constraint.SphericalPolygon;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
@@ -101,8 +97,8 @@ import java.util.List;
  * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
  * Drawing functions that take a {@code PGraphics} parameter (including the above
- * static ones), such as {@link #beginScreenDrawing(PGraphics)},
- * {@link #endScreenDrawing(PGraphics)}, {@link #drawAxes(PGraphics, float)},
+ * static ones), such as {@link #beginHUD(PGraphics)},
+ * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
  * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
@@ -133,8 +129,8 @@ import java.util.List;
 public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean _javaTiming;
-  public static String prettyVersion = "0.2.0";
-  public static String version = "4";
+  public static String prettyVersion = "PoC";
+  public static String version = "0";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -995,7 +991,8 @@ public class Scene extends Graph implements PConstants {
     _targetPGraphics.pushMatrix();
     applyTransformation(_targetPGraphics, frame);
     _track(frame);
-    frame.visit();
+    if (_targetPGraphics != backBuffer() || frame instanceof Shape)
+      frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _visit(child);
@@ -1077,67 +1074,78 @@ public class Scene extends Graph implements PConstants {
     }
   }
 
-  // SCREENDRAWING
+  // HUD
 
   /**
-   * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
+   * Same as {@code beginHUD(frontBuffer())}.
+   *
+   * @see #frontBuffer()
+   * @see #beginHUD(PGraphics)
    */
   @Override
-  public void beginScreenDrawing() {
-    beginScreenDrawing(frontBuffer());
+  public void beginHUD() {
+    beginHUD(frontBuffer());
   }
 
   /**
-   * Begins screen drawing on pGraphics using the {@link #eye()} parameters. Don't forget
-   * to call {@link #endScreenDrawing(PGraphics)} after screen drawing ends.
+   * Begins Heads Up Display (HUD) on the {@code pGraphics} so that drawing can be done
+   * using 2D screen coordinates. Don't forget to call {@link #endHUD(PGraphics)} after screen
+   * drawing ends.
+   * <p>
+   * All screen drawing should be enclosed between {@link #beginHUD(PGraphics)} and
+   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen shapes.
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
+   * then draw first all your 3d before doing any call to a {@link #beginHUD(PGraphics)}
+   * and {@link #endHUD(PGraphics)} pair.
    *
-   * @see #endScreenDrawing(PGraphics)
-   * @see #beginScreenDrawing()
+   * @see #endHUD(PGraphics)
+   * @see #beginHUD()
    */
-  public void beginScreenDrawing(PGraphics pGraphics) {
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _startCoordCalls++;
-    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
+  public void beginHUD(PGraphics pGraphics) {
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _hudCalls++;
+    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
     disableDepthTest(pGraphics);
     // if-else same as:
-    // matrixHandler(p).beginScreenDrawing();
+    // matrixHandler(p).beginHUD();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().beginScreenDrawing();
+      matrixHandler().beginHUD();
     else
-      matrixHandler(pGraphics).beginScreenDrawing();
+      matrixHandler(pGraphics).beginHUD();
   }
 
   /**
-   * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
+   * Same as {@code endHUD(frontBuffer())}.
+   *
+   * @see #frontBuffer()
+   * @see #endHUD(PGraphics)
    */
   @Override
-  public void endScreenDrawing() {
-    endScreenDrawing(frontBuffer());
+  public void endHUD() {
+    endHUD(frontBuffer());
   }
 
   /**
-   * Ends screen drawing on the pGraphics instance using {@link #eye()}
-   * parameters. The screen drawing should happen between
-   * {@link #beginScreenDrawing(PGraphics)} and this method.
+   * Ends Heads Up Display (HUD) on the {@code pGraphics}. See {@link #beginHUD(PGraphics)} for details.
    *
-   * @see #beginScreenDrawing(PGraphics)
-   * @see #endScreenDrawing()
+   * @see #beginHUD(PGraphics)
+   * @see #endHUD()
    */
-  public void endScreenDrawing(PGraphics pGraphics) {
-    _startCoordCalls--;
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+  public void endHUD(PGraphics pGraphics) {
+    _hudCalls--;
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHandler(p).endScreenDrawing();
+    // matrixHandler(p).endHUD();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().endScreenDrawing();
+      matrixHandler().endHUD();
     else
-      matrixHandler(pGraphics).endScreenDrawing();
+      matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
@@ -2511,7 +2519,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(PGraphics pGraphics, float x, float y, float length) {
     float half_size = length / 2f;
     pGraphics.pushStyle();
-    beginScreenDrawing(pGraphics);
+    beginHUD(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
     vertex(pGraphics, x - half_size, y);
@@ -2519,7 +2527,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, x, y - half_size);
     vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endHUD(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2580,7 +2588,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    beginScreenDrawing(pGraphics);
+    beginHUD(pGraphics);
     pGraphics.noFill();
 
     pGraphics.beginShape();
@@ -2606,7 +2614,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), (y + half_length));
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endHUD(pGraphics);
     drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
   }
@@ -2809,80 +2817,6 @@ public class Scene extends Graph implements PConstants {
     for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
     pGraphics.endShape(PApplet.CLOSE);
-  }
-
-  /**
-   * Same as {@code drawConstraint(frontBuffer(), frame)}.
-   *
-   * @see #drawConstraint(PGraphics, Frame)
-   */
-  public void drawConstraint(Frame frame) {
-    //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
-    if(_targetPGraphics == frontBuffer()) drawConstraint(_targetPGraphics, frame);
-  }
-
-  /**
-   * Draws the frame constraint if it's non-null.
-   *
-   * @see Frame#constraint()
-   * @see frames.core.constraint.Constraint
-   */
-  public void drawConstraint(PGraphics pGraphics, Frame frame) {
-    if (frame == null) return;
-    if (frame.constraint() == null) return;
-    // TODO test
-    if (!frame.isAttached(this)) return;
-    float boneLength = 0;
-    if (!frame.children().isEmpty()) {
-      for (Frame child : frame.children())
-        boneLength += child.translation().magnitude();
-      boneLength = boneLength / (1.f * frame.children().size());
-    } else
-      boneLength = frame.translation().magnitude();
-    if (boneLength == 0) return;
-
-    pGraphics.pushMatrix();
-    pGraphics.pushStyle();
-    pGraphics.noStroke();
-    //TODO: use different colors
-    pGraphics.fill(246, 117, 19, 80);
-    Frame reference = new Frame(new Vector(), frame.rotation().inverse());
-    //TODO: Check implementation for non symmetric semi-axes
-    if (frame.constraint() instanceof BallAndSocket) {
-      BallAndSocket constraint = (BallAndSocket) frame.constraint();
-      reference.rotate(constraint.restRotation());
-      applyTransformation(pGraphics,reference);
-      drawAxes(pGraphics,5);
-      drawCone(pGraphics, boneLength / 2.f,
-          (boneLength / 2.f) * PApplet.tan(constraint.left()),
-          (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
-    } else if (frame.constraint() instanceof PlanarPolygon) {
-      reference.rotate(((PlanarPolygon) frame.constraint()).restRotation());
-      applyTransformation(pGraphics,reference);
-      drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
-    } else if (frame.constraint() instanceof SphericalPolygon) {
-      reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
-      applyTransformation(pGraphics,reference);
-      drawAxes(pGraphics,5);
-      drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
-    } else if (frame.constraint() instanceof Hinge) {
-      Hinge constraint = (Hinge) frame.constraint();
-      if (frame.children().size() == 1) {
-        Vector axis = constraint.restRotation().rotate(constraint.axis());
-        reference.rotate(constraint.restRotation());
-        Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
-        //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
-        //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
-        applyTransformation(pGraphics,reference);
-        drawAxes(pGraphics,5);
-        drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
-      }
-    }
-    pGraphics.popStyle();
-    pGraphics.popMatrix();
   }
 
   /**
