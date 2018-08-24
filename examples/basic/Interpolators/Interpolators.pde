@@ -60,13 +60,8 @@ void setup() {
   interpolator = new Interpolator(shape);
   interpolator.setLoop();
   // Create an initial path
-  int nbKeyFrames = 4;
-  for (int i = 0; i < nbKeyFrames; i++) {
-    Frame iFrame = new Frame(scene);
-    iFrame.setPosition(-100 + 200 * i / (nbKeyFrames - 1), 0, 0);
-    iFrame.setScaling(random(0.25f, 4.0f));
-    interpolator.addKeyFrame(iFrame);
-  }
+  for (int i = 0; i < random(4, 10); i++)
+    interpolator.addKeyFrame(Frame.random(scene));
   interpolator.start();
 }
 
