@@ -62,9 +62,9 @@ void draw() {
   scene.drawAxes();
   scene.traverse();
   fill(0, 255, 255);
-  scene.beginScreenDrawing();
+  scene.beginHUD();
   displayText();
-  scene.endScreenDrawing();
+  scene.endHUD();
 }
 
 void mouseMoved() {

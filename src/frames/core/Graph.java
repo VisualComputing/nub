@@ -115,8 +115,8 @@ import java.util.List;
  * algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
- * on top of a 3d graph) issue your drawing code between {@link #beginScreenDrawing()} and
- * {@link #endScreenDrawing()}. These methods are {@link MatrixHandler} wrapper functions
+ * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
+ * {@link #endHUD()}. These methods are {@link MatrixHandler} wrapper functions
  * with the same signatures provided for convenience.
  * <p>
  * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
@@ -143,9 +143,9 @@ public class Graph {
   protected float _distance[];
   // rescale ortho when anchor changes
   protected float _rapK = 1;
-  // handed and screen drawing
+  // handed and HUD
   protected boolean _rightHanded;
-  protected int _startCoordCalls;
+  protected int _hudCalls;
   // size and dim
   protected int _width, _height;
 
@@ -841,31 +841,31 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginScreenDrawing()}. Adds exception when no properly
-   * closing the screen drawing with a call to {@link #endScreenDrawing()}.
+   * Wrapper for {@link MatrixHandler#beginHUD()}. Adds exception when no properly
+   * closing the screen drawing with a call to {@link #endHUD()}.
    *
-   * @see MatrixHandler#beginScreenDrawing()
+   * @see MatrixHandler#beginHUD()
    */
-  public void beginScreenDrawing() {
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _startCoordCalls++;
-    _matrixHandler.beginScreenDrawing();
+  public void beginHUD() {
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _hudCalls++;
+    _matrixHandler.beginHUD();
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endScreenDrawing()} . Adds exception
-   * if {@link #beginScreenDrawing()} wasn't properly called before
+   * Wrapper for {@link MatrixHandler#endHUD()} . Adds exception
+   * if {@link #beginHUD()} wasn't properly called before
    *
-   * @see MatrixHandler#endScreenDrawing()
+   * @see MatrixHandler#endHUD()
    */
-  public void endScreenDrawing() {
-    _startCoordCalls--;
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _matrixHandler.endScreenDrawing();
+  public void endHUD() {
+    _hudCalls--;
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _matrixHandler.endHUD();
   }
 
   /**

@@ -245,7 +245,7 @@ public class FrameAPI3 extends PApplet {
   void displayText() {
     pushStyle();
     Vector pos;
-    scene.beginScreenDrawing();
+    scene.beginHUD();
     textFont(font13);
     fill(f1Color);
     pos = scene.screenLocation(f1.position());
@@ -285,7 +285,7 @@ public class FrameAPI3 extends PApplet {
         text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 5 to frame 4", 5, 35);
         break;
     }
-    scene.endScreenDrawing();
+    scene.endHUD();
     popStyle();
   }
 

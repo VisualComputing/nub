@@ -51,9 +51,9 @@ void draw() {
   fill(204, 102, 0, 150);
   scene.drawTorusSolenoid();
   fill(0, 0, 255);
-  scene.beginScreenDrawing();
+  scene.beginHUD();
   displayText();
-  scene.endScreenDrawing();
+  scene.endHUD();
 }
 
 void mouseDragged() {

@@ -97,8 +97,8 @@ import java.util.List;
  * {@link #drawTorusSolenoid(PGraphics, int, int, float, float)}.
  * <p>
  * Drawing functions that take a {@code PGraphics} parameter (including the above
- * static ones), such as {@link #beginScreenDrawing(PGraphics)},
- * {@link #endScreenDrawing(PGraphics)}, {@link #drawAxes(PGraphics, float)},
+ * static ones), such as {@link #beginHUD(PGraphics)},
+ * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
  * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
@@ -1074,67 +1074,78 @@ public class Scene extends Graph implements PConstants {
     }
   }
 
-  // SCREENDRAWING
+  // HUD
 
   /**
-   * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
+   * Same as {@code beginHUD(frontBuffer())}.
+   *
+   * @see #frontBuffer()
+   * @see #beginHUD(PGraphics)
    */
   @Override
-  public void beginScreenDrawing() {
-    beginScreenDrawing(frontBuffer());
+  public void beginHUD() {
+    beginHUD(frontBuffer());
   }
 
   /**
-   * Begins screen drawing on pGraphics using the {@link #eye()} parameters. Don't forget
-   * to call {@link #endScreenDrawing(PGraphics)} after screen drawing ends.
+   * Begins Heads Up Display (HUD) on the {@code pGraphics} so that drawing can be done
+   * using 2D screen coordinates. Don't forget to call {@link #endHUD(PGraphics)} after screen
+   * drawing ends.
+   * <p>
+   * All screen drawing should be enclosed between {@link #beginHUD(PGraphics)} and
+   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen shapes.
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
+   * then draw first all your 3d before doing any call to a {@link #beginHUD(PGraphics)}
+   * and {@link #endHUD(PGraphics)} pair.
    *
-   * @see #endScreenDrawing(PGraphics)
-   * @see #beginScreenDrawing()
+   * @see #endHUD(PGraphics)
+   * @see #beginHUD()
    */
-  public void beginScreenDrawing(PGraphics pGraphics) {
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
-    _startCoordCalls++;
-    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.bS
+  public void beginHUD(PGraphics pGraphics) {
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
+    _hudCalls++;
+    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
     disableDepthTest(pGraphics);
     // if-else same as:
-    // matrixHandler(p).beginScreenDrawing();
+    // matrixHandler(p).beginHUD();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().beginScreenDrawing();
+      matrixHandler().beginHUD();
     else
-      matrixHandler(pGraphics).beginScreenDrawing();
+      matrixHandler(pGraphics).beginHUD();
   }
 
   /**
-   * Need to override it because of this issue: https://github.com/remixlab/proscene/issues/1
+   * Same as {@code endHUD(frontBuffer())}.
+   *
+   * @see #frontBuffer()
+   * @see #endHUD(PGraphics)
    */
   @Override
-  public void endScreenDrawing() {
-    endScreenDrawing(frontBuffer());
+  public void endHUD() {
+    endHUD(frontBuffer());
   }
 
   /**
-   * Ends screen drawing on the pGraphics instance using {@link #eye()}
-   * parameters. The screen drawing should happen between
-   * {@link #beginScreenDrawing(PGraphics)} and this method.
+   * Ends Heads Up Display (HUD) on the {@code pGraphics}. See {@link #beginHUD(PGraphics)} for details.
    *
-   * @see #beginScreenDrawing(PGraphics)
-   * @see #endScreenDrawing()
+   * @see #beginHUD(PGraphics)
+   * @see #endHUD()
    */
-  public void endScreenDrawing(PGraphics pGraphics) {
-    _startCoordCalls--;
-    if (_startCoordCalls != 0)
-      throw new RuntimeException("There should be exactly one beginScreenDrawing() call followed by a "
-          + "endScreenDrawing() and they cannot be nested. Check your implementation!");
+  public void endHUD(PGraphics pGraphics) {
+    _hudCalls--;
+    if (_hudCalls != 0)
+      throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
+          + "endHUD() and they cannot be nested. Check your implementation!");
     // if-else same as:
-    // matrixHandler(p).endScreenDrawing();
+    // matrixHandler(p).endHUD();
     // but perhaps a bit more efficient
     if (pGraphics == frontBuffer())
-      matrixHandler().endScreenDrawing();
+      matrixHandler().endHUD();
     else
-      matrixHandler(pGraphics).endScreenDrawing();
+      matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
@@ -2508,7 +2519,7 @@ public class Scene extends Graph implements PConstants {
   public void drawCross(PGraphics pGraphics, float x, float y, float length) {
     float half_size = length / 2f;
     pGraphics.pushStyle();
-    beginScreenDrawing(pGraphics);
+    beginHUD(pGraphics);
     pGraphics.noFill();
     pGraphics.beginShape(LINES);
     vertex(pGraphics, x - half_size, y);
@@ -2516,7 +2527,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, x, y - half_size);
     vertex(pGraphics, x, y + half_size);
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endHUD(pGraphics);
     pGraphics.popStyle();
   }
 
@@ -2577,7 +2588,7 @@ public class Scene extends Graph implements PConstants {
   public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
-    beginScreenDrawing(pGraphics);
+    beginHUD(pGraphics);
     pGraphics.noFill();
 
     pGraphics.beginShape();
@@ -2603,7 +2614,7 @@ public class Scene extends Graph implements PConstants {
     vertex(pGraphics, (x - half_length), (y + half_length));
     vertex(pGraphics, (x - half_length), ((y + half_length) - (0.6f * half_length)));
     pGraphics.endShape();
-    endScreenDrawing(pGraphics);
+    endHUD(pGraphics);
     drawCross(x, y, 0.6f * length);
     pGraphics.popStyle();
   }

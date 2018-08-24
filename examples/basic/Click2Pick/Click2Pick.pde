@@ -163,7 +163,7 @@ void drawMode() {
 void displayText() {
   pushStyle();
   Vector pos;
-  scene.beginScreenDrawing();
+  scene.beginHUD();
   textFont(font13);
   fill(f1Color);
   pos = scene.screenLocation(f1.position());
@@ -203,7 +203,7 @@ void displayText() {
     text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 5 to frame 4", 5, 35);
     break;
   }
-  scene.endScreenDrawing();
+  scene.endHUD();
   popStyle();
 }
 

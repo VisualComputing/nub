@@ -62,9 +62,9 @@ public class ConstrainedFrame extends PApplet {
     scene.drawTorusSolenoid();
     popMatrix();
     fill(0, 0, 255);
-    scene.beginScreenDrawing();
+    scene.beginHUD();
     displayText();
-    scene.endScreenDrawing();
+    scene.endHUD();
   }
 
   public void mouseMoved() {
