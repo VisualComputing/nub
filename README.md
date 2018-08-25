@@ -254,7 +254,7 @@ Observations:
 
 1. An _hid_ tracked-frame (see [trackedFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame-java.lang.String-)) defines in turn an _hid_ default-frame (see [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-)) which simply returns the tracked-frame or the scene _eye_ when the _hid_ tracked-frame is `null`
 2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
-3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
+3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
 4. To update an _hid_ tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-frame synchronously (i.e., they return the _hid_ tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-frame during the next call to the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm).
 
 ## Control
@@ -279,8 +279,7 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/frames/releases) and extract it to your sketchbook `libraries` folder.
-
+Download the [proof-of-concept implementation](https://github.com/VisualComputing/frames/releases) and extract it to your [Processing](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library#manual-install) sketchbook `libraries` folder.
 
 ## Contributors
 
