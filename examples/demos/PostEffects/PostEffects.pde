@@ -2,11 +2,10 @@
  * PostEffects.
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
- * This example illustrates shader chaining which requires drawing the scene
- * frames into an arbitrary PGraphics (see line 116).
+ * This example illustrates how to concatenate shaders to accumulate their
+ * effects which requires drawing shapes into arbitrary PGraphics canvases.
  *
  * Press '1' to '9' to (de)activate effect.
- * Press 'h' to display the key shortcuts and mouse bindings in the console.
  */
 
 import frames.primitives.*;
@@ -27,13 +26,13 @@ public void setup() {
   font = loadFont("FreeSans-13.vlw");
   textFont(font);
   colorMode(HSB, 255);
-  posns = new float[300];  
+  posns = new float[300];
   for (int i = 0; i<100; i++){
     posns[3*i]=random(-1000, 1000);
     posns[3*i+1]=random(-1000, 1000);
     posns[3*i+2]=random(-1000, 1000);
-  }  
-  graphics = createGraphics(width, height, P3D);  
+  }
+  graphics = createGraphics(width, height, P3D);
   scene = new Scene(this, graphics);
   models = new Shape[100];
   for (int i = 0; i < models.length; i++) {
@@ -43,36 +42,36 @@ public void setup() {
   scene.setRadius(1000);
   scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
-     
+
   colorShader = loadShader("colorfrag.glsl");
   colorShader.set("maxDepth", scene.radius()*2);
   colorGraphics = createGraphics(width, height, P3D);
   colorGraphics.shader(colorShader);
-  
+
   edgeShader = loadShader("edge.glsl");
   edgeGraphics = createGraphics(width, height, P3D);
   edgeGraphics.shader(edgeShader);
   edgeShader.set("aspect", 1.0/width, 1.0/height);
-  
+
   pixelShader = loadShader("pixelate.glsl");
   pixelGraphics = createGraphics(width, height, P3D);
   pixelGraphics.shader(pixelShader);
   pixelShader.set("xPixels", 100.0);
   pixelShader.set("yPixels", 100.0);
-  
+
   raysShader = loadShader("raysfrag.glsl");
   raysGraphics = createGraphics(width, height, P3D);
   raysGraphics.shader(raysShader);
   raysShader.set("lightPositionOnScreen", 0.5, 0.5);
   raysShader.set("lightDirDOTviewDir", 0.7);
-  
-  dofShader = loadShader("dof.glsl");  
+
+  dofShader = loadShader("dof.glsl");
   dofGraphics = createGraphics(width, height, P3D);
   dofGraphics.shader(dofShader);
   dofShader.set("aspect", width / (float) height);
-  dofShader.set("maxBlur", 0.015);  
+  dofShader.set("maxBlur", 0.015);
   dofShader.set("aperture", 0.02);
-  
+
   kaleidoShader = loadShader("kaleido.glsl");
   kaleidoGraphics = createGraphics(width, height, P3D);
   kaleidoGraphics.shader(kaleidoShader);
@@ -84,7 +83,7 @@ public void setup() {
   noiseShader.set("frequency", 4.0);
   noiseShader.set("amplitude", 0.1);
   noiseShader.set("speed", 0.1);
-  
+
   horizontalShader = loadShader("horizontal.glsl");
   horizontalGraphics = createGraphics(width, height, P3D);
   horizontalGraphics.shader(horizontalShader);
@@ -101,9 +100,9 @@ public void draw() {
   pg.background(0);
   scene.traverse();
   scene.endDraw();
- 
+
   drawGraphics = graphics;
-  
+
   if (bdepth){
     colorGraphics.beginDraw();
     colorGraphics.background(0);
@@ -117,7 +116,7 @@ public void draw() {
     kaleidoGraphics.beginDraw();
     kaleidoShader.set("tex", drawGraphics);
     kaleidoGraphics.image(graphics, 0, 0);
-    kaleidoGraphics.endDraw();    
+    kaleidoGraphics.endDraw();
     drawGraphics = kaleidoGraphics;
   }
   if (bnoise) {
@@ -125,7 +124,7 @@ public void draw() {
     noiseShader.set("time", millis() / 1000.0);
     noiseShader.set("tex", drawGraphics);
     noiseGraphics.image(graphics, 0, 0);
-    noiseGraphics.endDraw();    
+    noiseGraphics.endDraw();
     drawGraphics = noiseGraphics;
   }
   if (bpixel) {
@@ -133,37 +132,37 @@ public void draw() {
     pixelShader.set("tex", drawGraphics);
     pixelGraphics.image(graphics, 0, 0);
     pixelGraphics.endDraw();
-    drawGraphics = pixelGraphics;    
+    drawGraphics = pixelGraphics;
   }
-  if (bdof) {  
+  if (bdof) {
     dofGraphics.beginDraw();
-    dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));    
+    dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
     dofShader.set("tDepth", colorGraphics);
     dofShader.set("tex", drawGraphics);
     dofGraphics.image(graphics, 0, 0);
-    dofGraphics.endDraw();    
+    dofGraphics.endDraw();
     drawGraphics = dofGraphics;
   }
-  if (bedge) {  
+  if (bedge) {
     edgeGraphics.beginDraw();
     edgeShader.set("tex", drawGraphics);
     edgeGraphics.image(graphics, 0, 0);
-    edgeGraphics.endDraw();    
+    edgeGraphics.endDraw();
     drawGraphics = edgeGraphics;
   }
   if (bhorizontal) {
     horizontalGraphics.beginDraw();
     horizontalShader.set("tDiffuse", drawGraphics);
     horizontalGraphics.image(graphics, 0, 0);
-    horizontalGraphics.endDraw();    
+    horizontalGraphics.endDraw();
     drawGraphics = horizontalGraphics;
   }
-  if (brays) {   
+  if (brays) {
     raysGraphics.beginDraw();
     raysShader.set("otex", drawGraphics);
     raysShader.set("rtex", drawGraphics);
     raysGraphics.image(graphics, 0, 0);
-    raysGraphics.endDraw();    
+    raysGraphics.endDraw();
     drawGraphics = raysGraphics;
   }
   scene.display(drawGraphics);
@@ -204,7 +203,7 @@ void keyPressed() {
   if(key=='4')
     bpixel = !bpixel;
   if(key=='5')
-    bdof = !bdof;  
+    bdof = !bdof;
   if(key=='6')
     bedge = !bedge;
   if(key=='7')
