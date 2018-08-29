@@ -491,7 +491,7 @@ public class Frame {
    * Returns {@code true} if {@code frame} is ancestor of {@code this} frame.
    */
   public boolean isAncestor(Frame frame) {
-    if(frame == null)
+    if (frame == null)
       return true;
     return frame._isSuccessor(this);
   }
@@ -535,7 +535,7 @@ public class Frame {
         list.add(0, _tip);
         _tip = _tip.reference();
       }
-      if(tail != null)
+      if (tail != null)
         list.add(0, tail);
     }
     return list;

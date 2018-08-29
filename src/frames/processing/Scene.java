@@ -881,10 +881,10 @@ public class Scene extends Graph implements PConstants {
           resetTrackedFrame(tuple._hid);
           // Condition is overkill. Use it only in place of resetTrackedFrame
           //if (!isTracking(tuple._hid))
-            if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
-              setTrackedFrame(tuple._hid, frame);
-              it.remove();
-            }
+          if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
+            setTrackedFrame(tuple._hid, frame);
+            it.remove();
+          }
         }
       }
     } else
