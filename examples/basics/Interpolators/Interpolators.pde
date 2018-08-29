@@ -1,5 +1,5 @@
 /**
- * Interpolatros.
+ * Interpolators.
  * by Jean Pierre Charalambos.
  *
  * This example introduces the three different frame interpolations.
