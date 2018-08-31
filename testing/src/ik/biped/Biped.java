@@ -1,6 +1,7 @@
 package ik.biped;
 
 import frames.core.Frame;
+import frames.core.constraint.PlanarPolygon;
 import frames.ik.ChainSolver;
 import frames.ik.ClosedLoopChainSolver;
 import frames.ik.Solver;
@@ -11,6 +12,11 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
+
+import static processing.core.PConstants.PI;
+import static processing.core.PApplet.cos;
+import static processing.core.PApplet.sin;
+import static processing.core.PApplet.radians;
 
 /**
  * Created by sebchaparr on 7/08/18.
@@ -46,12 +52,15 @@ public class Biped {
         Frame la_0 = new Frame(scene);
         la_0.setReference(reference);
         la_0.translate(translation);
+        setConstraint(la_0, 25, new Vector(0,-1), 30);
         Frame la_1 = new Frame(scene);
         la_1.setReference(la_0);
         la_1.translate(-50,-100);
+        setConstraint(la_1, 25, new Vector(-25,50), 60);
         Frame la_2 = new Frame(scene);
         la_2.setReference(la_1);
         la_2.translate(-25,50);
+        setConstraint(la_2, 25, new Vector(-25,50), 60);
         Frame la_3 = new Frame(scene);
         la_3.setReference(la_2);
         la_3.translate(-25,50);
@@ -63,12 +72,15 @@ public class Biped {
         Frame ra_0 = new Frame(scene);
         ra_0.setReference(reference);
         ra_0.translate(translation);
+        setConstraint(ra_0, 25, new Vector(0,-1), 30);
         Frame ra_1 = new Frame(scene);
         ra_1.setReference(ra_0);
         ra_1.translate(50,-100);
+        setConstraint(ra_1, 25, new Vector(25,50), 60);
         Frame ra_2 = new Frame(scene);
         ra_2.setReference(ra_1);
         ra_2.translate(25,50);
+        setConstraint(ra_2, 25, new Vector(25,50), 60);
         Frame ra_3 = new Frame(scene);
         ra_3.setReference(ra_2);
         ra_3.translate(25,50);
@@ -154,6 +166,23 @@ public class Biped {
         left_leg.maxIter = 5;
         right_leg.maxIter = 5;
     }
+
+    void setConstraint(Frame frame, float boneLength, Vector twist, float degrees){
+        ArrayList<Vector> vertices = new ArrayList<Vector>();
+        int sides = 10;
+        float radius = 40;
+        float step = 2*PI/sides;
+        for(int i = 0; i < sides; i++){
+            float angle = i*step;
+            vertices.add(new Vector(radius*cos(angle), radius*sin(angle)));
+        }
+        PlanarPolygon constraint = new PlanarPolygon(vertices);
+        constraint.setHeight(boneLength / 2.f);
+        constraint.setAngle(radians(degrees));
+        constraint.setRestRotation(frame.rotation().get(), twist.orthogonalVector(), twist);
+        frame.setConstraint(constraint);
+    }
+
 
     void updateClosedLoopTargets(ClosedLoopChainSolver solver, ChainSolver left, ChainSolver right){
         solver.setUnknown(1, left.chain().get(1).position());
@@ -254,6 +283,9 @@ public class Biped {
         pg.stroke(color);
         Vector v = frame.location(new Vector(), frame.reference());
         pg.line(0, 0, 0, v.x(), v.y(), v.z());
+        if (frame.constraint() != null) {
+            scene.drawConstraint(frame);
+        }
         pg.popMatrix();
     }
 }

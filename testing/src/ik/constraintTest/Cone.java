@@ -20,7 +20,7 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class Cone extends PApplet{
-    int num_joints = 10;
+    int num_joints = 15;
     float targetRadius = 7;
     float boneLength = 50;
 
@@ -149,10 +149,11 @@ public class Cone extends PApplet{
         Joint current = prev;
         Joint root = current;
         root.isRoot = true;
-        //current.setRotation(Quaternion.random());
+        current.frame.setRotation(Quaternion.random());
         current = new Joint(scene);
         current.frame.setReference(prev.frame);
         prev = current;
+        current.frame.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength,0);
         setConstraint(vertices,current.frame, new Vector(0,boneLength,0),boneLength);
@@ -160,12 +161,15 @@ public class Cone extends PApplet{
         current = new Joint(scene);
         current.frame.setReference(prev.frame);
         prev = current;
+        current.frame.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength*2,0);
         setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
 
         current = new Joint(scene);
         current.frame.setReference(prev.frame);
+        current.frame.setRotation(Quaternion.random());
+
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength*2,boneLength*2);
         setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
