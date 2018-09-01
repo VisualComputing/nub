@@ -106,6 +106,13 @@ import java.util.List;
  * <h2>Picking</h2>
  * Picking a frame is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
+ * <h2>Application Control</h2>
+ * Implementing an application control for the frame is a two step process:
+ * <ul>
+ * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
+ * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
+ * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
+ * </ul>
  */
 public class Frame {
   /**
@@ -474,9 +481,25 @@ public class Frame {
   // REFERENCE_FRAME
 
   /**
-   * Returns {@code true} if this frame is ancestor of {@code frame}.
+   * Returns {@code true} if {@code frame} is {@link #reference()} {@code this} frame.
+   */
+  public boolean isReference(Frame frame) {
+    return reference() == frame;
+  }
+
+  /**
+   * Returns {@code true} if {@code frame} is ancestor of {@code this} frame.
    */
   public boolean isAncestor(Frame frame) {
+    if (frame == null)
+      return true;
+    return frame._isSuccessor(this);
+  }
+
+  /**
+   * Returns {@code true} if {@code frame} is successor of {@code this} frame.
+   */
+  protected boolean _isSuccessor(Frame frame) {
     if (frame == this || frame == null)
       return false;
     Frame ancestor = frame.reference();
@@ -489,13 +512,13 @@ public class Frame {
   }
 
   /**
-   * Same as {@code return ancestor.isAncestor(frame)}.
+   * Same as {@code return successor.isAncestor(ancestor)}.
    *
    * @see #isAncestor(Frame)
    * @see #path(Frame, Frame)
    */
-  public static boolean isAncestor(Frame ancestor, Frame frame) {
-    return ancestor.isAncestor(frame);
+  public static boolean isAncestor(Frame successor, Frame ancestor) {
+    return successor.isAncestor(ancestor);
   }
 
   /**
@@ -504,15 +527,16 @@ public class Frame {
    *
    * @see #isAncestor(Frame, Frame)
    */
-  public static ArrayList<Frame> path(Frame tail, Frame tip) {
+  public static List<Frame> path(Frame tail, Frame tip) {
     ArrayList<Frame> list = new ArrayList<Frame>();
-    if (tail.isAncestor(tip)) {
+    if (tip.isAncestor(tail)) {
       Frame _tip = tip;
       while (_tip != tail) {
         list.add(0, _tip);
         _tip = _tip.reference();
       }
-      list.add(0, tail);
+      if (tail != null)
+        list.add(0, tail);
     }
     return list;
   }
@@ -567,7 +591,7 @@ public class Frame {
       System.out.println("A Frame cannot be a reference of itself.");
       return;
     }
-    if (isAncestor(frame)) {
+    if (_isSuccessor(frame)) {
       System.out.println("A Frame descendant cannot be set as its reference.");
       return;
     }
@@ -660,50 +684,93 @@ public class Frame {
   // Random
 
   /**
-   * Randomized this frame. The frame is randomly re-positioned inside the ball
-   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is randomized by {@link Quaternion#randomize()}. The new
-   * magnitude is a random in oldMagnitude * [0,5...2].
-   *
-   * @see #random(Vector, float)
+   * Macro that returns a number number between {@code lower} and {@code upper}.
    */
-  public void randomize(Vector center, float radius) {
-    Vector displacement = Vector.random();
-    displacement.setMagnitude(radius);
+  protected static float _random(float lower, float upper) {
+    return ((float) Math.random() * (upper - lower)) + lower;
+  }
+
+  /**
+   * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
+   * <p>
+   * Does nothing if the frame {@link #isDetached()}.
+   *
+   * @see #randomize(Vector, float, boolean)
+   * @see Vector#randomize()
+   * @see Quaternion#randomize()
+   * @see #random(Graph)
+   * @see #random(Vector, float, boolean)
+   */
+  public void randomize() {
+    if (graph() != null)
+      randomize(graph().center(), graph().radius(), graph().is3D());
+    else
+      System.out.println("randomize() is only available for attached frames, nothing done! Use randomize(center, radius, is3D) instead");
+  }
+
+  /**
+   * Randomized this frame. The frame is randomly re-positioned inside the ball
+   * defined by {@code center} and {@code radius}, which in 2D is a
+   * circumference parallel to the x-y plane. The {@link #orientation()} is
+   * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
+   * in old-magnitude * [0,5...2].
+   *
+   * @see #randomize()
+   * @see Vector#randomize()
+   * @see Quaternion#randomize()
+   * @see #random(Graph)
+   * @see #random(Vector, float, boolean)
+   */
+  public void randomize(Vector center, float radius, boolean is3D) {
+    Vector displacement;
+    Quaternion quaternion;
+    if (is3D) {
+      displacement = Vector.random();
+      quaternion = Quaternion.random();
+    } else {
+      displacement = new Vector(_random(-1, 1), _random(-1, 1));
+      displacement.normalize();
+      quaternion = new Quaternion(new Vector(0, 0, 1), _random(0, 2 * (float) Math.PI));
+    }
+    displacement.setMagnitude(_random(radius * 0.1f, radius * 0.9f));
     setPosition(Vector.add(center, displacement));
-    setOrientation(Quaternion.random());
-    float lower = 0.5f;
-    float upper = 2;
-    setMagnitude(magnitude() * ((float) Math.random() * (upper - lower)) + lower);
+    setOrientation(quaternion);
+    setMagnitude(magnitude() * _random(0.5f, 2));
   }
 
   /**
    * Returns a random frame attached to {@code graph}. The frame is randomly positioned inside
-   * the {@code graph} viewing volume (see {@link Graph#center()} and {@link Graph#radius()}).
-   * The {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
+   * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
+   * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
+   * magnitude is a random in [0,5...2].
    *
-   * @see #random(Vector, float)
-   * @see #randomize(Vector, float)
+   * @see #random(Vector, float, boolean)
+   * @see Vector#random()
+   * @see Quaternion#random()
+   * @see #randomize()
+   * @see #randomize(Vector, float, boolean)
    */
   public static Frame random(Graph graph) {
     Frame frame = new Frame(graph);
-    frame.randomize(graph.center(), graph.radius());
+    frame.randomize(graph.center(), graph.radius(), graph.is3D());
     return frame;
   }
 
   /**
-   * Returns a random detached frame. The frame is randomly positioned inside the ball
-   * defined by {@code center} and {@code radius} (see {@link Vector#random()}). The
-   * {@link #orientation()} is set by {@link Quaternion#random()}. The magnitude
-   * is a random in [0,5...2].
+   * Returns a random detached frame. The frame is randomly positioned inside the ball defined
+   * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
+   * circumference parallel to the x-y plane. The {@link #orientation()} is set by
+   * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
    *
    * @see #random(Graph)
-   * @see #randomize(Vector, float)
+   * @see Vector#random()
+   * @see Quaternion#random()
+   * @see #randomize()
+   * @see #randomize(Vector, float, boolean)
    */
-  public static Frame random(Vector center, float radius) {
+  public static Frame random(Vector center, float radius, boolean is3D) {
     Frame frame = new Frame();
-    frame.randomize(center, radius);
+    frame.randomize(center, radius, is3D);
     return frame;
   }
 
@@ -1212,25 +1279,66 @@ public class Frame {
   // ALIGNMENT
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, false, 0.85f)}
+   * Same as {@code align(null)}.
+   *
+   * @see #align(Frame)
    */
-  public void alignWithFrame(Frame frame) {
-    alignWithFrame(frame, false, 0.85f);
+  public void align() {
+    align(null);
   }
 
   /**
-   * Convenience function that simply calls {@code alignWithFrame(frame, move, 0.85f)}
+   * Convenience function that simply calls {@code align(false, 0.85f, frame)}
+   *
+   * @see #align(boolean, float, Frame)
    */
-  public void alignWithFrame(Frame frame, boolean move) {
-    alignWithFrame(frame, move, 0.85f);
+  public void align(Frame frame) {
+    align(false, 0.85f, frame);
   }
 
   /**
-   * Convenience function that simply calls
-   * {@code alignWithFrame(frame, false, threshold)}
+   * Same as {@code align(move, null)}.
+   *
+   * @see #align(boolean, Frame)
    */
-  public void alignWithFrame(Frame frame, float threshold) {
-    alignWithFrame(frame, false, threshold);
+  public void align(boolean move) {
+    align(move, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(move, 0.85f, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, Frame frame) {
+    align(move, 0.85f, frame);
+  }
+
+  /**
+   * Same as {@code align(threshold, null)}.
+   *
+   * @see #align(boolean, Frame)
+   */
+  public void align(float threshold) {
+    align(threshold, null);
+  }
+
+  /**
+   * Convenience function that simply calls {@code align(false, threshold, frame)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(float threshold, Frame frame) {
+    align(false, threshold, frame);
+  }
+
+  /**
+   * Same as {@code align(move, threshold, null)}.
+   *
+   * @see #align(boolean, float, Frame)
+   */
+  public void align(boolean move, float threshold) {
+    align(move, threshold, null);
   }
 
   /**
@@ -1255,7 +1363,7 @@ public class Frame {
    * {@code frame} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #reference()}).
    */
-  public void alignWithFrame(Frame frame, boolean move, float threshold) {
+  public void align(boolean move, float threshold, Frame frame) {
     Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
@@ -1587,51 +1695,14 @@ public class Frame {
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.
    *
+   * @see Matrix#view(Vector, Quaternion)
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Frame)
    * @see #set(Frame)
    */
   public Matrix view() {
-    Matrix view = new Matrix();
-
-    Quaternion q = orientation();
-
-    float q00 = 2.0f * q._quaternion[0] * q._quaternion[0];
-    float q11 = 2.0f * q._quaternion[1] * q._quaternion[1];
-    float q22 = 2.0f * q._quaternion[2] * q._quaternion[2];
-
-    float q01 = 2.0f * q._quaternion[0] * q._quaternion[1];
-    float q02 = 2.0f * q._quaternion[0] * q._quaternion[2];
-    float q03 = 2.0f * q._quaternion[0] * q._quaternion[3];
-
-    float q12 = 2.0f * q._quaternion[1] * q._quaternion[2];
-    float q13 = 2.0f * q._quaternion[1] * q._quaternion[3];
-    float q23 = 2.0f * q._quaternion[2] * q._quaternion[3];
-
-    view._matrix[0] = 1.0f - q11 - q22;
-    view._matrix[1] = q01 - q23;
-    view._matrix[2] = q02 + q13;
-    view._matrix[3] = 0.0f;
-
-    view._matrix[4] = q01 + q23;
-    view._matrix[5] = 1.0f - q22 - q00;
-    view._matrix[6] = q12 - q03;
-    view._matrix[7] = 0.0f;
-
-    view._matrix[8] = q02 - q13;
-    view._matrix[9] = q12 + q03;
-    view._matrix[10] = 1.0f - q11 - q00;
-    view._matrix[11] = 0.0f;
-
-    Vector t = q.inverseRotate(position());
-
-    view._matrix[12] = -t._vector[0];
-    view._matrix[13] = -t._vector[1];
-    view._matrix[14] = -t._vector[2];
-    view._matrix[15] = 1.0f;
-
-    return view;
+    return Matrix.view(position(), orientation());
   }
 
   /**
@@ -1988,6 +2059,13 @@ public class Frame {
   }
 
   /**
+   * Parse {@code gesture} params. Useful to implement the frame as an for application control.
+   * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
+   */
+  public void interact(Object... gesture) {
+  }
+
+  /**
    * Procedure called on the frame by the graph traversal algorithm. Default implementation is
    * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
    * is attached to a {@code graph}.
@@ -1999,7 +2077,9 @@ public class Frame {
    * {@code
    * frame = new Frame(graph) {
    *   public void visit() {
-   *     //hierarchical culling is optional and disabled by default
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())
    *       // Draw your object here, in the local coordinate system.

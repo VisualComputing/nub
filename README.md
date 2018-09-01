@@ -7,9 +7,10 @@ FramesJS
 - [Description](#user-content-description)
 - [Scene](#user-content-scene)
 - [Frames](#user-content-frames)
-- [Eye](#user-content-eye)
+- [Shapes](#user-content-shapes)
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
+- [Control](#user-content-control)
 - [IK](#user-content-ik)
 - [Drawing](#user-content-drawing)
 - [Installation](#user-content-installation)
@@ -17,9 +18,9 @@ FramesJS
 
 ## Description
 
-[Frames](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, inverse kinematics, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
+[Frames](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
-*Frames* is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). The _processing git branch_ (the one you're looking at) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
+*Frames* is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/frames/releases) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
 
 If looking for the API docs, check them [here](https://visualcomputing.github.io/frames-javadocs/).
 
@@ -36,7 +37,7 @@ void setup() {
 }
 ```
 
-The `scene` [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the *PApplet* main `PGraphics` instance.
+The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the *PApplet* main `PGraphics` instance.
  
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
@@ -47,14 +48,11 @@ void setup() {
 }
 ```
 
-In this case, the `scene` [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
+In this case, the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) [frontBuffer()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#frontBuffer--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
 
 ## Frames
 
-Scene objects may be related either to a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html)
-or a [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance.
-
-To illustrate their use, suppose the following scene graph hierarchy is being implemented:
+A frame is a coordinate system that may be translated, rotated and scaled. [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instances define each of the nodes comprising a scene graph. To customize their role (e.g., a drawing procedure or a culling condition) symply override the [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method. To illustrate their use, suppose the following scene graph is being implemented:
 
 ```processing
  World
@@ -66,61 +64,51 @@ To illustrate their use, suppose the following scene graph hierarchy is being im
   2 3
 ```
 
-### Detached frames 
-
-To setup the `scene` hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
+To setup the scene hierarchy of _attached_ frames, i.e., frames belonging to the scene, use code such as the following:
 
 ```processing
 Scene scene;
 Frame f1, f2, f3;
 void setup() {
-  // Note that the scene.eye() is also instantiated
   scene = new Scene(this);
-  // Note the use of the default frame constructor to instantiate a
-  // detached leading frame (those whose parent is the world, such as f1):
-  f1 = new Frame();
+  // To attach a leading-frame (those whose parent is the world, such as f1)
+  // the scene parameter is passed to the Frame constructor:
+  f1 = new Frame(scene);
   // whereas for the remaining frames we pass any constructor taking a
-  // reference frame paramater, such as Frame(Frame referenceFrame, float scaling):
-  f2 = new Frame(f1, 1);
-  f3 = new Frame(f1, 1);
+  // reference frame paramater, such as Frame(Frame referenceFrame)
+  f2 = new Frame(f1);
+  f3 = new Frame(f1) {
+    // note that within visit() the geometry is defined
+    // at the frame local coordinate system
+    @Override
+    public void visit() {
+      sphere(50);
+    }
+  };
 }
 ```
 
-then traverse it with:
+and then traverse it with:
 
 ```processing
 void draw() {
-  // enter f1
-  pushMatrix();
-  scene.applyTransformation(f1);
-  drawF1();
-  // enter f2
-  pushMatrix();
-  scene.applyTransformation(f1);
-  drawF2();
-  // "return" to f1
-  popMatrix();
-  // enter f3
-  pushMatrix();
-  scene.applyTransformation(f3);
-  drawF3();
-  // return to f1
-  popMatrix();
-  // return to World
-  popMatrix();
+  // traverse() peforms a top-down traversal of the frame hierarchy, applying the
+  // local frame transformation and calling the visit() method on each visited frame
+  scene.traverse();
 }
 ```
 
-To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it with [track(Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#track-frames.core.Frame:A-), for example:
+To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it 
+using ray-casting with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
 
 ```processing
 void mouseMoved() {
-  // the tracked-frame is updated from the array using ray-casting
-  scene.track(new Frame[]{f1, f2, f3});
+  // the tracked-frame is updated using ray-casting from the set of scene attached frames
+  scene.cast();
 }
 ```
 
-To interact with a given frame use any `Scene` method that takes a `frame` parameter, such as: [spin(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin-frames.core.Frame-), [translate(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate-frames.core.Frame-), [scale(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-frames.core.Frame-) or [zoom(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-frames.core.Frame-). For example:
+To interact with a given frame use any [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) method that takes a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) parameter, such as: [spin(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin-frames.core.Frame-), [translate(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate-frames.core.Frame-), [scale(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-frames.core.Frame-) or [zoom(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-frames.core.Frame-). For example:
 
 ```processing
 public void mouseDragged() {
@@ -136,7 +124,7 @@ public void mouseDragged() {
 }
 ```
 
-To interact with the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) (which is either the tracked-frame updated with the `mouseMoved` above or the scene eye when the tracked-frame is null) use the _frameless_ versions of the above methods, e.g., [spin()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin--), [translate()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate--), [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) or [zoom(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-). For example:
+To interact with the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) (which is either the tracked-frame updated with the `mouseMoved` above or the scene _eye_ when the tracked-frame is null) use the _frameless_ versions of the above methods, e.g., [spin()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin--), [translate()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate--), [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) or [zoom(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-). For example:
 
 ```processing
 public void mouseDragged() {
@@ -152,66 +140,20 @@ public void mouseDragged() {
 }
 ```
 
-Some advantages of using _detached_ frames are:
+See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basic/CajasOrientadas). Some advantages of using _attached_ frames are:
 
-* The scene gets automatically rendered respect to the `eye` frame which is instantiated by the scene object.
-* The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
-* Frames may be picked using ray-casting and the scene provides all sorts of interactivity commands to manipulate them.
-* [setTranslation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#scale-float-), locally manipulates a frame instance.
-* [setPosition(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setMagnitude-float-), globally manipulates a frame instance.
-* The frame methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
-* The frame methods [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
-* The graph methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
-* [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
+* The scene gets rendered respect to an _eye_ frame which may be set from any [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)). Note that the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) sets up a default _eye_ frame. To retrieve the scene _eye_ call [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--).
+* The scene topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
+* Frames may be picked using ray-casting and the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) provides all sorts of interactivity commands to manipulate them.
+* The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
+* The frame methods [setTranslation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setTranslation-frames.primitives.Vector-), [translate(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#translate-frames.primitives.Vector-), [setRotation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setRotation-frames.primitives.Quaternion-), [rotate(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#rotate-frames.primitives.Quaternion-), [setScaling(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setScaling-float-) and [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#scale-float-), locally manipulates a frame instance.
+* The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) methods [setPosition(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setPosition-frames.primitives.Vector-), [setOrientation(Quaternion)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setOrientation-frames.primitives.Quaternion-), and [setMagnitude(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setMagnitude-float-), globally manipulates a frame instance.
+* The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#location-frames.primitives.Vector-frames.core.Frame-) and [displacement(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#displacement-frames.primitives.Vector-frames.core.Frame-) transforms coordinates and vectors (resp.) from other frame instances.
+* The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) methods [worldLocation(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldLocation-frames.primitives.Vector-) and [worldDisplacement(Vector)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#worldDisplacement-frames.primitives.Vector-) transforms frame coordinates and vectors (resp.) to the world.
+* The [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) method [setConstraint(Constrain)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setConstraint-frames.core.constraint.Constraint-) applies a [Constraint](https://visualcomputing.github.io/frames-javadocs/frames/primitives/constraint/Constraint.html) to a frame instance limiting its motion.
+* The role played by a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method.
 
-The main disadvantage of using detached frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it.
-
-### Attached frames
-
-To setup the `scene` hierarchy of _attached_ frames, i.e., frames belonging to a particular `scene`, use code such as the following:
-
-```processing
-Scene scene;
-Frame f1, f2, f3;
-void setup() {
-  scene = new Scene(this);
-  // To attach a leading-frame (those whose parent is the world, such as f1)
-  // the scene parameter is passed to the Frame constructor:
-  f1 = new Frame(scene);
-  // whereas for the remaining frames we pass any constructor taking a
-  // reference frame paramater, such as Frame(Frame referenceFrame)
-  f2 = new Frame(f1);
-  f3 = new Frame(f1);
-}
-```
-
-and then traverse it with:
-
-```processing
-void draw() {
-  // calls visit() on each attached frame instance
-  scene.traverse();
-}
-```
-
-To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the _attached_ frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
-
-```processing
-void mouseMoved() {
-  // the tracked-frame is updated from the set of scene attached frames
-  scene.cast();
-}
-```
-
-Interaction with a given frame or the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) is performed as with _detached_ frames (as discussed above).
-
-Some advantages of using _attached_ frames are:
-
-* Same as with _detached_ frames, but traversing the hierarchy doesn't require any prior knowledge of it, but simply calling [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--).
-* Attached frames can exhibit [inverse kinematics](https://github.com/VisualComputing/framesjs/tree/processing/examples/ik) behavior.
-* Attached frames can be drawn by overriding [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) with your drawing code.
-
-The main disadvantage of using _attached_ frames is that they all always get traversed by the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm. To bypass the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm use detached frames instead, or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the frame as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
+To bypass the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm use [detached frames](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the frame as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
 
 ```processing
 Scene scene;
@@ -221,8 +163,8 @@ void setup() {
   frame = new Frame(scene) {
     @Override
     public void visit() {
-      // Hierarchical culling is optional and disabled by default
-      // Note that the cullingCondition should be implemented by you
+      // Hierarchical culling is optional and disabled by default. When the cullingCondition
+      // (which should be implemented by you) is true, scene.traverse() will prune the branch at the frame
       cull(cullingCondition);
       if(!isCulled())
         // Draw your object here, in the local coordinate system.
@@ -231,14 +173,14 @@ void setup() {
 }
 ```
 
-### Shapes
+## Shapes
 
 A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) is an attached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) specialization that can be set from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) or from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure. Shapes can be picked precisely using their projection onto the screen, see [setPrecision(Frame.Precision)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-). Use [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) to render all scene-graph shapes or [draw()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#draw--) to render a specific one instead.
 
 To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.setGraphics(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
 Immediate-mode shapes should override `Shape.setGraphics(PGraphics)`, e.g., using an anonymous inner
-[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) class intance, such as with the following:
+[Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) class instance, such as with the following:
  
 ```java
 ...
@@ -263,18 +205,11 @@ void draw() {
 }
 ```
 
-Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basic/DepthOfField). Some advantages of using shapes are:
 
-* Same as with attached frames.
+* Same as with _attached_ frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
-
-## Eye
-
-The scene eye can be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) or [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) instance, by simply calling [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-).
-
-The default scene eye is an attached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance.
-
-Note that shapes can be set as the scene eye which may be useful to depict the viewer in first person camera style.
+* Shapes can be set as the scene _eye_ (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)) which may be useful to depict the viewer in first person camera style.
 
 ## Interpolators
 
@@ -305,91 +240,49 @@ void draw() {
 }
 ```
 
-while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too.
+while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basic/Interpolators).
  
 ## HIDs
 
 Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_interface_device) (different than the mouse which is provided by default) such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion), is a two step process:
 
-1. Define an `hid` tracked-frame instance, using an arbitrary name for it (see [setTrackedFrame(String, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-java.lang.String-frames.core.Frame-)); and,
-2. Call any interactivity method that take an `hid` param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
+1. Define an _hid_ tracked-frame instance, using an arbitrary name for it (see [setTrackedFrame(String, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-java.lang.String-frames.core.Frame-)); and,
+2. Call any interactivity method that take an _hid_ param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
+
+See the [SpaceNavigator example](https://github.com/VisualComputing/frames/tree/master/examples/demos/SpaceNavigator).
 
 Observations:
 
-1. An `hid` tracked-frame (see [trackedFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame-java.lang.String-)) defines in turn an `hid` default-frame (see [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-)) which simply returns the tracked-frame or the scene `eye` when the `hid` tracked-frame is `null`
-2. The `hid` interactivity methods are implemented in terms of the ones defined previously by simply passing the `hid` [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
-3. The default `hid` is defined with a `null` String parameter (e.g., [scale(String, float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-java.lang.String-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse `hid` presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
-4. To update an `hid` tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the `hid` tracked-frame synchronously (i.e., they return the `hid` tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the `hid` tracked-frame during the next call to the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm).
+1. An _hid_ tracked-frame (see [trackedFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame-java.lang.String-)) defines in turn an _hid_ default-frame (see [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-)) which simply returns the tracked-frame or the scene _eye_ when the _hid_ tracked-frame is `null`
+2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
+3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
+4. To update an _hid_ tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-frame synchronously (i.e., they return the _hid_ tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-frame during the next call to the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm).
+
+## Control
+
+[Application control](https://hal.inria.fr/hal-00789413/) (aka as Post-[WIMP](https://en.wikipedia.org/wiki/WIMP_(computing)) interaction styles) refers to interfaces “containing at least one interaction technique not dependent on classical 2D widgets” [[van Dam]](http://dl.acm.org/citation.cfm?id=253708), such as:  [tangible interaction](https://en.wikipedia.org/wiki/Tangible_user_interface), or perceptual and [affective computing](https://en.wikipedia.org/wiki/Affective_computing).
+
+Implementing an application control for a frame is a two step process:
+
+1. Override the frame method [interact(Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
+2. Send gesture data to the frame by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Frame, Object...)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#control-frames.core.Frame-java.lang.Object...-).
+
+See the [ApplicationControl example](https://github.com/VisualComputing/frames/tree/master/examples/demos/ApplicationControl).
 
 ## IK
-
-The goal of Inverse Kinematics (IK for short) is to animate a [Skeleton](https://en.wikipedia.org/wiki/Skeletal_animation), which is a rigid body system composed of Joints and Bones.
-
-As a Skeleton could be built using a hierarchical tree structure where each Node keeps information about Joints and Bones configuration by means of relative geometric transformations (at least rotation and translation) we could consider a Skeleton as a subset of the scene graph.
-
-There are some positions of interest at the Skeleton called End Effectors which depends on the Joint configuration and that an animator would like to manipulate in order to reach some given Target positions and obtain the desired pose.
-
-[Forward Kinematics](https://en.wikipedia.org/wiki/Forward_kinematics#Computer_animation) attempts to obtain the position of an end-effector from some given values for the joint parameters (usually rotation information). This task could be done easily thanks to the scene graph structure provided by Frames.
-
-[Inverse Kinematics](https://en.wikipedia.org/wiki/Inverse_kinematics#Inverse_kinematics_and_3D_animation) on the other hand is a harder problem that attempts to obtain the joint parameters given the desired pose.
-
-This short [video](https://www.youtube.com/watch?v=euFe1S0OltQ) summarizes the difference between this two problems.
-
-Whenever IK is required to be solved follow the next steps:
-
-#### Define the Skeleton (List or Hierarchy of Joints) 
-
-The Skeleton must be a branch from a `Graph` (for instance see [`branch(Node)`](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#branch-frames.core.Node-)). Where each of the leaf nodes (i.e Nodes without children) could be treated as an End Effector.
-
-#### Define the Target(s)
-Create the Target(s) that the End Effector(s) must Follow. A Target is a `Node` that indicates which is de desired position of an End Effector. It's important to instantiate the Target before the Skeleton.
-
-#### Register a Solver
-Once you have specified a Skeleton and the Target(s). It is required to register a Solver task managed by the `scene`. To do this call `registerTreeSolver(Node)` method, where `Node` is the root of the Skeleton.
-
-#### Relate Target(s) and End Effector(s)
-You must specify explicitly which leaf `node` (End Effector) is related to which target `node`. To do this call scene method `addIKTarget(Node, Node)`. Where the first node is the End Effector, whereas the second one is the Target.
-
-Optionally, it is usual to set initial target(s) position to be the same as end effector(s) position.
-
-Assuming that the Skeleton is determined by `branch(Node)` and it is a single chain (i.e each `Node` has as much one child) the code must look like:
-
-```java
-...
-void setup() {
-  Node target = new Node(scene);
-  Node root = new Node(scene);
-  ...
-  ArrayList<Node> chain = scene.branch(root);
-  Node endEffector = chain.get(chain.size()-1);
-  ...
-  scene.registerTreeSolver(root);
-  target.setPosition(endEffector.position());  
-  scene.addIKTarget(endEffector, target);
-}
-```
-#### Using constraints
-
-It is desirable to obtain natural, predictable and intuitive poses when End Effectors are manipulated, however it could exist many solutions (i.e many different poses) that satisfy the IK problem. In such cases you could add constraints to some `nodes` (see [`setConstraint(Constraint)`](https://visualcomputing.github.io/frames-javadocs/frames/primitives/Frame.html#setConstraint-frames.primitives.constraint.Constraint-)) in the Skeleton to improve the `Solver` performance (e.g see [Human Skeleton](https://en.wikipedia.org/wiki/Synovial_joint#/media/File:909_Types_of_Synovial_Joints.jpg)). Currently the supported rotation constraints for Kinematics are:
-
-* **`Hinge`**:   1-DOF constraint. i.e the joint will rotate just in one direction defined by a given Axis (Called Twist Axis).
-* **`BallAndSocket`**: 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with an elliptical base. User must specify ellipse semi-axis to constraint the movement. (for further info look [here](http://wiki.roblox.com/index.php?title=Inverse_kinematics))
-* **`PlanarPolygon`**: As Ball and Socket, is a 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with a polygonal base. A set of vertices on XY plane in Clockwise or Counter Clockwise order must be given to constraint the movement.
- * **`SphericalPolygon`**: As Ball and Socket, is a 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone defined by an spherical polygon. A set of vertices that lies in a unit sphere must be given in Counter Clockwise order  to constraint the movement. (for further info look [here]( https://pdfs.semanticscholar.org/d535/e562effd08694821ea6a8a5769fe10ffb5b6.pdf))
 
 ## Drawing
 
 The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-frames.primitives.Vector-frames.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
 
-Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginScreenDrawing(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#beginScreenDrawing-processing.core.PGraphics-),
-[endScreenDrawing(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#endScreenDrawing-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a ([Shape](#user-content-shapes)).
+Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginHUD(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#beginHUD-processing.core.PGraphics-),
+[endHUD(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#endHUD-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a ([Shape](#user-content-shapes)).
 
 Another scene's eye (different than this one) can be drawn with [drawEye(Graph)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawEye-frames.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your release from [here](https://github.com/VisualComputing/framesjs/releases) and extract it to your sketchbook `libraries` folder.
-
+Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/frames/releases) and extract it to your sketchbook `libraries` folder.
 
 ## Contributors
 
