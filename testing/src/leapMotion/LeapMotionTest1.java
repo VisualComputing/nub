@@ -16,6 +16,7 @@ import processing.event.MouseEvent;
  * Created by sebchaparr on 31/07/18.
  */
 public class LeapMotionTest1 extends PApplet {
+    //TODO : Update
     LeapMotion leap;
     PVector previousNormal;
     PVector previousPosition;

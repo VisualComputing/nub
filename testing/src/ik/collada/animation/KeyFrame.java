@@ -21,7 +21,7 @@ import java.util.Map;
  *
  */
 public class KeyFrame {
-
+    //TODO : Update
     private final float timeStamp;
     private final HashMap<String, Frame> pose;
 

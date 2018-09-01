@@ -9,7 +9,7 @@ import java.util.List;
 
 
 public class SkinLoader {
-
+    //TODO : Update
     private final XmlNode skinningData;
     private final int maxWeights;
 

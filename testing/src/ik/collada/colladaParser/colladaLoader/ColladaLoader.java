@@ -13,7 +13,7 @@ import processing.core.PShape;
 import java.io.File;
 
 public class ColladaLoader {
-
+    //TODO : Update
     public static AnimatedModel loadColladaModel(String colladaFile, String dae, String tex, Scene scene, int maxWeights) {
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
 

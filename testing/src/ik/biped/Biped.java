@@ -21,6 +21,9 @@ import static processing.core.PApplet.radians;
 /**
  * Created by sebchaparr on 7/08/18.
  */
+
+//TODO : Update
+
 public class Biped {
     ClosedLoopChainSolver upper_body;
     ClosedLoopChainSolver lower_body;

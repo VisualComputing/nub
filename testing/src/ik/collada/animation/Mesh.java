@@ -11,6 +11,7 @@ import java.util.List;
  * Created by sebchaparr on 23/07/18.
  */
 public class Mesh {
+    //TODO : Update
     public static class Vertex{
         int id;
         SkinningData.VertexSkinData skinData;

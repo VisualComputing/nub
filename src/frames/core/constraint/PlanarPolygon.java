@@ -17,6 +17,8 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
+//TODO : Update
+
 public class PlanarPolygon extends Constraint {
     /*
     TODO: Find a Ball and Socket constraint that is enclosed by this one

@@ -17,6 +17,8 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
+//TODO : Update
+
 public class SphericalPolygon extends Constraint {
     /*
     TODO: Enable Setting different Axis Direction

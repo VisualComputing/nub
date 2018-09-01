@@ -16,7 +16,7 @@ import java.util.List;
  *
  */
 public class GeometryLoader {
-
+    //TODO : Update
     private final XmlNode meshData;
 
     private final List<SkinningData.VertexSkinData> vertexWeights;

@@ -10,7 +10,7 @@ import ik.collada.colladaParser.xmlParser.XmlNode;
 import java.util.List;
 
 public class AnimationLoader {
-
+    //TODO : Update
     private XmlNode animationData;
     private XmlNode jointHierarchy;
 

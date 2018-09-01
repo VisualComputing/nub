@@ -31,7 +31,7 @@ import java.util.Map;
  *
  */
 public class Animator {
-
+    //TODO : Update
     private final AnimatedModel entity;
 
     private Animation currentAnimation;

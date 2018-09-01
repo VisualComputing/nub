@@ -26,6 +26,7 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class HingeTest extends PApplet {
+    //TODO : Update
     int num_joints = 8;
     float constraint_factor_x = 180;
     float constraint_factor_y = 180;

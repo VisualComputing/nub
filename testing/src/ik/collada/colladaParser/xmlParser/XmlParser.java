@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
  *
  */
 public class XmlParser {
-
+    //TODO : Update
     private static final Pattern DATA = Pattern.compile(">(.+?)<");
     private static final Pattern START_TAG = Pattern.compile("<(.+?)>");
     private static final Pattern ATTR_NAME = Pattern.compile("(.+?)=");

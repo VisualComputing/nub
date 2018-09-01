@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class FABRIKSolver extends Solver {
+  //TODO : Update
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
 

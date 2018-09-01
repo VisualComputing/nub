@@ -11,7 +11,7 @@ package ik.collada.animation;
  *
  */
 public class Animation {
-
+    //TODO : Update
     private final float length;//in seconds
     private final KeyFrame[] keyFrames;
 

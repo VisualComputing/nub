@@ -12,6 +12,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public class Joint {
+    //TODO : Update
     Scene scene;
     PApplet pApplet;
     public Frame frame;

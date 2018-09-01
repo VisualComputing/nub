@@ -16,6 +16,7 @@ attribute vec2 texCoord;
 varying vec4 vertTexCoord;
 
 vec3 rot(vec4 quaternion, vec3 vector) {
+//TODO : Update
     float q00 = 2.0f * quaternion[0] * quaternion[0];
     float q11 = 2.0f * quaternion[1] * quaternion[1];
     float q22 = 2.0f * quaternion[2] * quaternion[2];

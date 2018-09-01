@@ -21,6 +21,7 @@ import java.util.HashMap;
  * Created by sebchaparr on 30/07/18.
  */
 public class Biped extends PApplet {
+    //TODO : Update
     Scene scene;
     HashMap<String, ArrayList<Joint>> limbs;
     HashMap<String, Shape> targets;

@@ -20,6 +20,7 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class Cone extends PApplet{
+    //TODO : Update
     int num_joints = 15;
     float targetRadius = 7;
     float boneLength = 50;

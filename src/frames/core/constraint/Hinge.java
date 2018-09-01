@@ -12,6 +12,7 @@
 package frames.core.constraint;
 
 //TODO: CHECK FORWARD STEP WITH HINGE 3D
+//TODO : Update
 
 import frames.core.Frame;
 import frames.primitives.Quaternion;

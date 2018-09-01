@@ -7,6 +7,7 @@ import java.util.List;
  * Created by sebchaparr on 23/07/18.
  */
 public class SkinningData {
+    //TODO : Update
     public static class VertexSkinData{
         List<Integer> jointIds;
         List<Float> weights;

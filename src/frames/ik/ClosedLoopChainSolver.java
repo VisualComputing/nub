@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class ClosedLoopChainSolver extends FABRIKSolver {
 
+    //TODO : Update
+
     protected ArrayList<? extends Frame> _chain;
     protected ArrayList<Frame> _reversedChain;
     protected ArrayList<? extends Frame> _original;

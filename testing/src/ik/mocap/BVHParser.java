@@ -24,6 +24,7 @@ import java.util.List;
  * Created by sebchaparr on 23/03/18.
  */
 public class BVHParser {
+    //TODO : Update
 /*    protected BufferedReader _buffer;
     //A Joint is a Node with some Properties
     //TODO: Consider _id() public?

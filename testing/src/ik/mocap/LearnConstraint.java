@@ -8,7 +8,7 @@ import java.util.*;
  * Created by sebchaparr on 15/04/18.
  */
 public class LearnConstraint {
-
+    //TODO : Update
     protected static ArrayList<Quaternion> performAdaptativeSampling(List<Quaternion> data, float step){
         if(data.isEmpty()) return null;
         ArrayList<Quaternion> new_data = new ArrayList<Quaternion>();

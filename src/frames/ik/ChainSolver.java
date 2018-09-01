@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 public class ChainSolver extends FABRIKSolver {
 
+  //TODO : Update
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
 

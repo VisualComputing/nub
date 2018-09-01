@@ -10,7 +10,7 @@ import ik.common.Joint;
 import java.util.List;
 
 public class SkeletonLoader {
-
+    //TODO : Update
     private XmlNode armatureData;
     private List<String> boneOrder;
     private int jointCount = 0;

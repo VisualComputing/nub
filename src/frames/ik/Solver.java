@@ -21,6 +21,7 @@ import frames.timing.TimingTask;
  */
 
 public abstract class Solver {
+  //TODO : Update
   //TODO paper idea: optimize values per _solver / timer / local config
   public float error = 0.01f;
   public int maxIter = 200;

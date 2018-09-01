@@ -12,7 +12,7 @@ import processing.opengl.PShader;
  * Created by sebchaparr on 24/07/18.
  */
 public class Skinning {
-
+    //TODO : Update
     public PShader shader;
     private AnimatedModel model;
 
