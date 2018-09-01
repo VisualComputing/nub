@@ -279,7 +279,7 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 ## Installation
 
-Download the [proof-of-concept implementation](https://github.com/VisualComputing/frames/releases/download/v-0.1.0-pre.1/frames-0.1.0-pre.1.zip) (read the release notes [here](https://github.com/VisualComputing/framesjs/releases/tag/v-0.1.0-pre.1)) and extract it to your [Processing](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library#manual-install) sketchbook `libraries` folder.
+Download the [proof-of-concept implementation](https://github.com/VisualComputing/frames/releases/download/v-0.1.0-pre.1/frames-0.1.0-pre.1.zip) (read the release notes [here](https://github.com/VisualComputing/frames/releases/tag/v-0.1.0-pre.1)) and extract it to your [Processing](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library#manual-install) sketchbook `libraries` folder.
 
 ## Contributors
 
