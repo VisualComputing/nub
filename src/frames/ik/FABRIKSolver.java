@@ -12,10 +12,7 @@
 package frames.ik;
 
 import frames.core.Frame;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.DistanceFieldConstraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
+import frames.core.constraint.*;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import processing.core.PGraphics;
@@ -167,28 +164,7 @@ public abstract class FABRIKSolver extends Solver {
     Vector p = _positions.get(i + 1);
     Vector q = i + 2 >= chain.size() ? null : _positions.get(i + 2);
 
-    if (parent.constraint() instanceof BallAndSocket) {
-      if (q == null) return o.get();
-      //Find the orientation of restRotation
-      BallAndSocket constraint = (BallAndSocket) parent.constraint();
-      Quaternion reference = Quaternion.compose(_orientations.get(i), parent.rotation().inverse());
-      Quaternion restOrientation = Quaternion.compose(reference, constraint.restRotation());
-
-      //Align axis
-      Vector translation = _orientations.get(i).rotate(j.translation().get());
-      Vector newTranslation = Vector.subtract(q, p);
-      restOrientation = Quaternion.compose(new Quaternion(translation, newTranslation), restOrientation);
-
-      //Vector pos_i1_constrained = _constrainForwardReaching(chain, i);
-      //Vector diff = Vector.subtract(pos_i1, pos_i1_constrained);
-      //pos_i.add(diff);
-
-      //Find constraint
-      Vector target = constraint.apply(Vector.subtract(p, o), restOrientation);
-      target.add(o);
-      Vector diff = Vector.subtract(p, target);
-      return Vector.add(o, diff);
-    } else if(j.constraint() instanceof PlanarPolygon){
+    if(j.constraint() instanceof ConeConstraint){
       if(q == null) return o.get();
       Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
       Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
@@ -200,7 +176,7 @@ public abstract class FABRIKSolver extends Solver {
 
       w = delta.rotate(w);
       Quaternion desired = new Quaternion(w,x);
-      PlanarPolygon constraint = (PlanarPolygon) chain.get(i+1).constraint();
+      ConeConstraint constraint = (ConeConstraint) chain.get(i+1).constraint();
       Quaternion constrained = constraint.constrainRotation(desired, chain.get(i+1));
 
       Vector target = x.get();
