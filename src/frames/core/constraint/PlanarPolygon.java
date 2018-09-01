@@ -17,46 +17,18 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
-//TODO : Update
+/**
+* A Frame is constrained to disable translation and
+* allow 2-DOF rotation limiting Z-Axis Rotation on a Cone which base is a Polygon.
+* If no restRotation is set Quat() is assumed as restRotation
+*/
 
-public class PlanarPolygon extends Constraint {
-    /*
-    TODO: Find a Ball and Socket constraint that is enclosed by this one
-    * With this Kind of Constraint no Translation is allowed
-    * and the rotation depends on a Cone which base is a Polygon. This kind of constraint always
-    * look for the reference frame (local constraint), if no initial position is
-    * set a Quat() is assumed as rest position
-    * */
+public class PlanarPolygon extends ConeConstraint {
+  //TODO: Find a Ball and Socket constraint that is enclosed by this one
 
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
   protected float _height = 1.f;
-  protected Quaternion _restRotation = new Quaternion();
-  protected Quaternion _idleRotation = new Quaternion();
-
   protected Vector _min, _max;
-
-  public Quaternion restRotation() {
-    return _restRotation;
-  }
-
-  public void setRestRotation(Quaternion restRotation) {
-    this._restRotation = restRotation.get();
-  }
-
-  /**
-   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
-   * result will be stored on restRotation.
-   * twist and up axis are defined locally on reference rotation
-   */
-  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
-    _restRotation = reference.get();
-    _idleRotation = reference.get();
-    //Align Y-Axis with Up Axis
-    _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
-    Vector tw = new Quaternion(new Vector(0, 1, 0), up).inverseRotate(twist);
-    //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), tw));
-  }
 
   public ArrayList<Vector> vertices() {
     return _vertices;
@@ -73,7 +45,6 @@ public class PlanarPolygon extends Constraint {
   public void setHeight(float height) {
     this._height = height;
   }
-
 
   public void setAngle(float angle){
     if(vertices().isEmpty()) return;
@@ -127,23 +98,6 @@ public class PlanarPolygon extends Constraint {
       //Just not consider Z
       v.setZ(0);
     _setBoundingBox();
-  }
-
-  @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-    Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-    Quaternion q1 = Quaternion.compose(_idleRotation.inverse(), desired);
-    Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = q1.rotate(twist);
-    Vector constrained = apply(new_pos, _restRotation);
-    Quaternion q2 = new Quaternion(twist, constrained);
-    return Quaternion.compose(frame.rotation().inverse(), q2);
-  }
-
-
-  @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
-    return new Vector(0, 0, 0);
   }
 
   public Vector apply(Vector target) {

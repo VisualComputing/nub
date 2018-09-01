@@ -17,47 +17,22 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
-//TODO : Update
+/**
+ * A Frame is constrained to disable translation and
+ * allow 2-DOF rotation limiting Z-Axis Rotation on a Cone which base is a Spherical Polygon.
+ * If no restRotation is set Quat() is assumed as restRotation
+ */
 
-public class SphericalPolygon extends Constraint {
-    /*
-    TODO: Enable Setting different Axis Direction
-    * With this Kind of Constraint no Translation is allowed
-    * and the rotation depends on a Cone which base is a Spherical Polygon. This kind of constraint always
-    * look for the reference frame (local constraint), if no initial position is
-    * set a Quat() is assumed as rest position
-    * */
+public class SphericalPolygon extends ConeConstraint {
+  //TODO: Find a Ball and Socket constraint that is enclosed by this one
 
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
   protected Vector _visiblePoint = new Vector();
-  protected Quaternion _restRotation = new Quaternion();
   protected Vector _min, _max;
 
   //Some pre-computations
   protected ArrayList<Vector> _b = new ArrayList<Vector>();
   protected ArrayList<Vector> _s = new ArrayList<Vector>();
-
-  /**
-   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
-   * result will be stored on restRotation.
-   * twist and up axis are defined locally on reference rotation
-   */
-  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
-    _restRotation = reference.get();
-    Vector Z = _restRotation.inverse().rotate(twist);
-    //Align Y-Axis with Up Axis
-    _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
-    //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
-  }
-
-  public Quaternion restRotation() {
-    return _restRotation;
-  }
-
-  public void setRestRotation(Quaternion restRotation) {
-    this._restRotation = restRotation.get();
-  }
 
   public ArrayList<Vector> vertices() {
     return _vertices;
@@ -98,27 +73,6 @@ public class SphericalPolygon extends Constraint {
     this._visiblePoint = _setVisiblePoint();
     _setBoundingBox();
     _init();
-  }
-
-  @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-        /*
-        if(frame.is2D())
-            throw new RuntimeException("This constrained not supports 2D Frames");
-        */
-    Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-    //twist to frame
-    Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = Quaternion.multiply(desired, twist);
-    Vector constrained = apply(new_pos, _restRotation);
-    //Get Quaternion
-    return new Quaternion(twist, Quaternion.multiply(frame.rotation().inverse(), constrained));
-  }
-
-
-  @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
-    return new Vector(0, 0, 0);
   }
 
   public Vector apply(Vector target) {
@@ -168,7 +122,6 @@ public class SphericalPolygon extends Constraint {
     return newVertices;
   }
 
-  //TODO: seems this one should be protected
   protected void _init() {
     _b = new ArrayList<Vector>();
     _s = new ArrayList<Vector>();

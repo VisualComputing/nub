@@ -17,14 +17,13 @@ import frames.primitives.Vector;
 
 import static java.lang.Math.PI;
 
-//TODO : Update
 
 /**
  * A Frame is constrained to disable translation and
  * allow 2-DOF rotation limiting Rotation in a Sphere to
  * laid inside an Ellipse.
  */
-public class BallAndSocket extends Constraint {
+public class BallAndSocket extends ConeConstraint {
   /*
    * With this Kind of Constraint no Translation is allowed
    * and the rotation depends on 4 angles. This kind of constraint always
@@ -39,7 +38,7 @@ public class BallAndSocket extends Constraint {
   protected float _up;
   protected float _left;
   protected float _right;
-  protected Quaternion _restRotation = new Quaternion();
+
 
   public float down() {
     return _down;
@@ -73,28 +72,6 @@ public class BallAndSocket extends Constraint {
     this._right = right;
   }
 
-  public Quaternion restRotation() {
-    return _restRotation;
-  }
-
-  public void setRestRotation(Quaternion restRotation) {
-    this._restRotation = restRotation.get();
-  }
-
-  /**
-   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
-   * result will be stored on restRotation.
-   * twist and up axis are defined locally on reference rotation
-   */
-  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
-    _restRotation = reference.get();
-    Vector Z = _restRotation.inverse().rotate(twist);
-    //Align Y-Axis with Up Axis
-    _restRotation.compose(new Quaternion(new Vector(0, 1, 0), up));
-    //Align y-Axis with twist vector
-    _restRotation.compose(new Quaternion(new Vector(0, 0, 1), twist));
-  }
-
   public BallAndSocket() {
     _down = (float) (PI / 2.f);
     _left = (float) (PI / 2.f);
@@ -124,34 +101,10 @@ public class BallAndSocket extends Constraint {
     this(vertical, vertical, horizontal, horizontal, restRotation);
   }
 
-  @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-    Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-    //twist to frame
-    Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-    Vector new_pos = Quaternion.multiply(desired, twist);
-    Vector constrained = apply(new_pos, _restRotation);
-    //Get Quaternion
-    return new Quaternion(twist, Quaternion.multiply(frame.rotation().inverse(), constrained));
-  }
-
-
-  @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
-    return new Vector(0, 0, 0);
-  }
-
-
   /*
    * Adapted from http://wiki.roblox.com/index.php?title=Inverse_kinematics
    * new_pos: new position defined in terms of local coordinates
    */
-
-  /*
-  public Vector constraint(Vector target) {
-    return constraint(target, _restRotation);
-  }
-  */
 
   //TODO : rename, discard?
   //TODO : remove unnecessary calculations (consider this restriction only from 0 to PI)
