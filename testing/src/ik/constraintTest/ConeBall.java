@@ -1,13 +1,13 @@
 package ik.constraintTest;
 
 import frames.core.Graph;
+import frames.core.constraint.BallAndSocket;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
 import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
-import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 /**
  * Created by sebchaparr on 8/07/18.
  */
-public class Cone extends PApplet{
+public class ConeBall extends PApplet{
     //TODO : Update
     int num_joints = 15;
     float targetRadius = 7;
@@ -50,12 +50,10 @@ public class Cone extends PApplet{
         targets.add(new Shape(scene, redBall));
         targets.add(new Shape(scene, redBall));
 
-        ArrayList<Vector> vertices = new ArrayList<Vector>();
-        float v = 20;
-        vertices.add(new Vector(-v, -v));
-        vertices.add(new Vector(v, -v));
-        vertices.add(new Vector(v, v));
-        vertices.add(new Vector(-v, v));
+        float down = PI/3;
+        float up = PI/3;
+        float left = PI/3;
+        float right = PI/3;
 
         ArrayList<Frame> structure1;
         ArrayList<Frame> structure2;
@@ -67,9 +65,8 @@ public class Cone extends PApplet{
         structure3 = generateChain(num_joints, boneLength, new Vector(scene.radius()/2.f, 0, 0));
 
         for (int i = 1; i < structure1.size() - 1; i++) {
-            PlanarPolygon constraint = new PlanarPolygon(vertices);
-            constraint.setHeight(boneLength / 2.f);
             Vector twist = structure1.get(i + 1).translation().get();
+            BallAndSocket constraint = new BallAndSocket(down, up, left, right);
             constraint.setRestRotation(structure1.get(i).rotation().get(), new Vector(0, 1, 0), twist);
             structure1.get(i).setConstraint(constraint);
             structure2.get(i).setConstraint(constraint);
@@ -132,19 +129,17 @@ public class Cone extends PApplet{
 
     }
 
-    public void setConstraint(ArrayList<Vector> vertices, Frame f, Vector twist, float boneLength){
-        PlanarPolygon constraint = new PlanarPolygon(vertices);
-        constraint.setHeight(boneLength / 2.f);
+    public void setConstraint(float down, float up, float left, float right, Frame f, Vector twist, float boneLength){
+        BallAndSocket constraint = new BallAndSocket(down, up, left, right);
         constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
         f.setConstraint(constraint);
     }
 
     public ArrayList<Frame> generateStructure(float boneLength, Vector o){
-        ArrayList<Vector> vertices = new ArrayList<Vector>();
-        vertices.add(new Vector(-10, -10));
-        vertices.add(new Vector(0, -10));
-        vertices.add(new Vector(0, 0));
-        vertices.add(new Vector(-10, 0));
+        float down = PI/2;
+        float up = PI/2;
+        float left = PI/2;
+        float right = PI/2;
 
         Joint prev = new Joint(scene);
         Joint current = prev;
@@ -157,7 +152,7 @@ public class Cone extends PApplet{
         current.frame.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength,0);
-        setConstraint(vertices,current.frame, new Vector(0,boneLength,0),boneLength);
+        setConstraint(down,up, left, right,current.frame, new Vector(0,boneLength,0),boneLength);
 
         current = new Joint(scene);
         current.frame.setReference(prev.frame);
@@ -165,7 +160,7 @@ public class Cone extends PApplet{
         current.frame.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength*2,0);
-        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
+        setConstraint(down,up, left, right,current.frame, new Vector(0,0,1),boneLength);
 
         current = new Joint(scene);
         current.frame.setReference(prev.frame);
@@ -173,7 +168,7 @@ public class Cone extends PApplet{
 
         //current.setRotation(Quaternion.random());
         current.frame.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
+        setConstraint(down,up, left, right,current.frame, new Vector(0,0,1),boneLength);
 
         root.frame.setPosition(o);
 
@@ -339,7 +334,6 @@ public class Cone extends PApplet{
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.constraintTest.Cone"});
+        PApplet.main(new String[]{"ik.constraintTest.ConeBall"});
     }
-
 }
