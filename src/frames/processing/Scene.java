@@ -2860,18 +2860,22 @@ public class Scene extends Graph implements PConstants {
     pGraphics.fill(246, 117, 19, 80);
     Frame reference = new Frame(new Vector(), frame.rotation().inverse());
     //TODO: Check implementation for non symmetric semi-axes
+    //TODO: Draw Properly when left and up are big values
     if (frame.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(constraint.restRotation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
-      drawCone(pGraphics, boneLength / 2.f,
-          (boneLength / 2.f) * PApplet.tan(constraint.left()),
-          (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
+      if(constraint.left() <= PI/3 && constraint.right() <= PI/3){
+        drawCone(pGraphics, boneLength / 2.f,
+                (boneLength / 2.f) * PApplet.tan(constraint.left()),
+                (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
+      }
     } else if (frame.constraint() instanceof PlanarPolygon) {
-      reference.rotate(((PlanarPolygon) frame.constraint()).restRotation());
+      reference.rotate(((PlanarPolygon) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
+      //TODO: Consider when the cone must not be drawn
       drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
     } else if (frame.constraint() instanceof SphericalPolygon) {
       reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
