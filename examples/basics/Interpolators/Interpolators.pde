@@ -61,7 +61,7 @@ void setup() {
   interpolator.setLoop();
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(Frame.random(scene));
+    interpolator.addKeyFrame(scene.randomFrame());
   interpolator.start();
 }
 
