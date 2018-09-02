@@ -30,7 +30,7 @@ public abstract class FABRIKSolver extends Solver {
     protected boolean _useConstraint = true;
     protected boolean _enableFixWeight = true;
     //It is useful when the chain is highly constrained
-    protected float _directionWeight = 0.3f;
+    protected float _directionWeight = 0.5f;
     //When it is 1 the Joint will not move at all
     protected float _fixWeight = 0;
 
@@ -159,7 +159,6 @@ public abstract class FABRIKSolver extends Solver {
 
   public Vector _constrainForwardReaching(ArrayList<? extends Frame> chain, int i) {
     Frame j = chain.get(i + 1);
-    Frame parent = chain.get(i + 1).reference();
     Vector o = _positions.get(i);
     Vector p = _positions.get(i + 1);
     Vector q = i + 2 >= chain.size() ? null : _positions.get(i + 2);
