@@ -50,10 +50,10 @@ public class ConeBall extends PApplet{
         targets.add(new Shape(scene, redBall));
         targets.add(new Shape(scene, redBall));
 
-        float down = PI/3;
-        float up = PI/3;
-        float left = PI/3;
-        float right = PI/3;
+        float down = PI/2;
+        float up = PI/2;
+        float left = PI/2;
+        float right = PI/2;
 
         ArrayList<Frame> structure1;
         ArrayList<Frame> structure2;

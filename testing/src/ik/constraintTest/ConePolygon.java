@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class ConePolygon extends PApplet{
     //TODO : Update
-    int num_joints = 15;
+    int num_joints = 10;
     float targetRadius = 7;
     float boneLength = 50;
 
@@ -52,10 +52,12 @@ public class ConePolygon extends PApplet{
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         float v = 20;
-        vertices.add(new Vector(-v, -v));
-        vertices.add(new Vector(v, -v));
-        vertices.add(new Vector(v, v));
-        vertices.add(new Vector(-v, v));
+        float w = 20;
+
+        vertices.add(new Vector(-w, -v));
+        vertices.add(new Vector(w, -v));
+        vertices.add(new Vector(w, v));
+        vertices.add(new Vector(-w, v));
 
         ArrayList<Frame> structure1;
         ArrayList<Frame> structure2;
@@ -66,17 +68,19 @@ public class ConePolygon extends PApplet{
         structure2 = generateChain(num_joints, boneLength, new Vector(0, 0, 0));
         structure3 = generateChain(num_joints, boneLength, new Vector(scene.radius()/2.f, 0, 0));
 
-        for (int i = 1; i < structure1.size() - 1; i++) {
+        for (int i = 0; i < structure1.size() - 1; i++) {
             PlanarPolygon constraint = new PlanarPolygon(vertices);
             constraint.setHeight(boneLength / 2.f);
             Vector twist = structure1.get(i + 1).translation().get();
-            constraint.setRestRotation(structure1.get(i).rotation().get(), new Vector(0, 1, 0), twist);
+            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(20));
+            //offset = new Quaternion();
+            Quaternion rest = Quaternion.compose(structure1.get(i).rotation().get(), offset);
+            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
+            constraint.setAngle(PI/3f);
             structure1.get(i).setConstraint(constraint);
             structure2.get(i).setConstraint(constraint);
             structure3.get(i).setConstraint(constraint);
         }
-
-
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
@@ -136,6 +140,7 @@ public class ConePolygon extends PApplet{
         PlanarPolygon constraint = new PlanarPolygon(vertices);
         constraint.setHeight(boneLength / 2.f);
         constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
+        constraint.setAngle(PI/3);
         f.setConstraint(constraint);
     }
 

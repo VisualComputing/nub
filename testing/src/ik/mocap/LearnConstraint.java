@@ -8,7 +8,6 @@ import java.util.*;
  * Created by sebchaparr on 15/04/18.
  */
 public class LearnConstraint {
-    //TODO : Update
     protected static ArrayList<Quaternion> performAdaptativeSampling(List<Quaternion> data, float step){
         if(data.isEmpty()) return null;
         ArrayList<Quaternion> new_data = new ArrayList<Quaternion>();
@@ -46,21 +45,14 @@ public class LearnConstraint {
             vectors.add(euler);
         }
         for(int i = 0; i < I; i++){
-            //System.out.println("Entra 1 i : " + i);
             for(int j = 0; j < J; j++){
-                //System.out.println("Entra 2 : j " + j);
                 for(int k = 0; k < K; k++){
-                    //System.out.println("Entra 3 : k " + k);
                     float min = Float.MAX_VALUE;
                     Vector euler = new Vector((i + 0.5f) * 2 * (float)Math.PI / I,
                             (j + 0.5f) * 2 * (float)Math.PI / J,
                             (k + 0.5f) * 2 * (float)Math.PI / K);
-                    if(euler.x() > 2*Math.PI) System.out.println("se paso x " + euler.x());
-                    if(euler.y() > 2*Math.PI) System.out.println("se paso y " + euler.y());
-                    if(euler.z() > 2*Math.PI) System.out.println("se paso z " + euler.z());
                     int w = 0;
                     for(Vector vector : vectors){
-                        //System.out.println("Entra 4 i : " + i + " j : " + j + " k : " + k + " w : " + w);
                         float dx = (float) Math.min((2 * Math.PI) - Math.abs(euler.x() - vector.x()), Math.abs(euler.x() - vector.x()));
                         float dy = (float) Math.min((2 * Math.PI) - Math.abs(euler.y() - vector.y()), Math.abs(euler.y() - vector.y()));
                         float dz = (float) Math.min((2 * Math.PI) - Math.abs(euler.z() - vector.z()), Math.abs(euler.z() - vector.z()));
@@ -70,17 +62,6 @@ public class LearnConstraint {
                     }
                     distance_field[i][j][k] = min;
                 }
-            }
-        }
-
-        for(int i = 0; i < I; i++){
-            //System.out.println("i = " + i);
-            for(int j = 0; j < J; j++){
-                for(int k = 0; k < K; k++){
-                    if(k % 3 == 0) System.out.println();
-                    //System.out.print(" i : " + i + "j: " + j + " k: " + k + " ds : " + distance_field[i][j][k] + " --- ");
-                }
-                //System.out.println();
             }
         }
 

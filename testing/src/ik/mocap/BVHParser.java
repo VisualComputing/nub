@@ -25,21 +25,21 @@ import java.util.List;
  */
 public class BVHParser {
     //TODO : Update
-/*    protected BufferedReader _buffer;
+    protected BufferedReader _buffer;
     //A Joint is a Node with some Properties
     //TODO: Consider _id() public?
-    protected HashMap<Node, Properties> _joint;
+    protected HashMap<Frame, Properties> _joint;
     protected int _frames;
     protected int _period;
-    protected Class< ? extends  Node> _nodeClass;
-    protected Node _root;
-    protected List<Node> _branch;
-    protected HashMap<Node, ArrayList<Frame>> _poses;
+    protected Class< ? extends  Frame> _nodeClass;
+    protected Frame _root;
+    protected List<Frame> _branch;
+    protected HashMap<Frame, ArrayList<Frame>> _poses;
     protected int _currentPose;
     protected boolean _loop;
 
 
-    public BVHParser(Class<? extends Node> nodeClass, String path, Scene scene, Node reference){
+    public BVHParser(Class<? extends Frame> nodeClass, String path, Scene scene, Frame reference){
         _nodeClass = nodeClass;
         _setup(path, scene, reference);
     }
@@ -69,11 +69,11 @@ public class BVHParser {
 
     }
 
-    public Node root(){
+    public Frame root(){
         return _root;
     }
 
-    protected void _setup(String path, Scene scene, Node reference){
+    protected void _setup(String path, Scene scene, Frame reference){
         _frames = 0;
         _period = 0;
         _currentPose = 0;
@@ -90,17 +90,16 @@ public class BVHParser {
      * Reads a .bvh file from the given path and builds
      * A Hierarchy of Nodes given by the .bvh header
      * */
-    /*
-    protected Node _readHeader(String path, Scene scene, Node reference){
-        Node root = null;
+    protected Frame _readHeader(String path, Scene scene, Frame reference){
+        Frame root = null;
         try {
             _buffer = new BufferedReader(new FileReader(path));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
         }
-        Node currentNode = root;
-        Node currentRoot = reference;
+        Frame currentNode = root;
+        Frame currentRoot = reference;
         Properties currentProperties = null;
         boolean boneBraceOpened = false;
         //READ ALL THE HEADER
@@ -218,7 +217,7 @@ public class BVHParser {
     }
 
     /*Saves Frame info to be read in a later stage*/
-    /*
+
     protected void _saveFrames(){
         boolean next = true;
         while(next)
@@ -246,7 +245,7 @@ public class BVHParser {
         String[] expression = line.split(" ");
         //traverse each line
         int i = 0;
-        for(Node node : _branch){
+        for(Frame node : _branch){
             Properties properties = _joint.get(node);
             boolean translationInfo = false;
             boolean rotationInfo = false;
@@ -322,7 +321,7 @@ public class BVHParser {
             if(_loop) _currentPose = 0;
             else return;
         }
-        for(Node node : _branch){
+        for(Frame node : _branch){
             node.setRotation(_poses.get(node).get(_currentPose).rotation().get());
             node.setTranslation(_poses.get(node).get(_currentPose).translation().get());
         }
@@ -335,11 +334,11 @@ public class BVHParser {
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,0,255);
-        for(Node node : _branch){
+        for(Frame node : _branch){
             //if(node == _root) continue;
             DistanceFieldConstraint constraint = (DistanceFieldConstraint) node.constraint();
             pg.pushMatrix();
-            node.reference().applyWorldTransformation();
+            node.graph().applyWorldTransformation(node);
             Vector tr = node.children().isEmpty() ? new Vector(0,0,1) : node.children().get(0).translation().get();
             float step = (float)(2*Math.PI/dim);
             for(int i = 0; i < dim; i++){
@@ -382,7 +381,6 @@ public class BVHParser {
                     }j++;
                 }i++;
             }*/
-            /*
             pg.popMatrix();
         }
         pg.popStyle();
@@ -393,9 +391,9 @@ public class BVHParser {
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,255,0);
-        for(Node node : _branch){
+        for(Frame node : _branch){
             pg.pushMatrix();
-            node.applyWorldTransformation();
+            node.graph().applyWorldTransformation(node);
             for(Vector vv : _joint.get(node)._feasibleRegion){
                 Vector v = node.rotation().inverseRotate(vv);
                 v.multiply(0.25f);
@@ -411,7 +409,7 @@ public class BVHParser {
     }
 
     public void constraintJoints(){
-        for(Node node : _branch){
+        for(Frame node : _branch){
             //if(node == _root) continue;
             ArrayList<Quaternion> rots = new ArrayList<Quaternion>();
             int j = 0;
@@ -422,6 +420,6 @@ public class BVHParser {
             }
             node.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots,dim,dim,dim)));
         }
-    }*/
+    }
 }
 

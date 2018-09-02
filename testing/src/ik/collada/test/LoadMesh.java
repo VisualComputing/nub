@@ -26,8 +26,8 @@ public class LoadMesh extends PApplet {
     //TODO : Update
     Scene scene;
     String path = "/testing/data/dae/";
-    String dae = "model.dae";
-    String tex = "diffuse.png";
+    String dae = "humanoid.dae";
+    String tex = "texture.png";
     AnimatedModel model;
     Skinning skinning;
 
