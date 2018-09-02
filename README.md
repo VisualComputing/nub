@@ -224,7 +224,7 @@ void setup() {
   shape = new Shape(scene, pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(Frame.random(scene));
+    interpolator.addKeyFrame(scene.randomFrame());
   interpolator.start();
 }
 ```
@@ -239,7 +239,7 @@ void draw() {
 }
 ```
 
-while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basic/Interpolators).
+while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator, int)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-int-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basic/Interpolators).
  
 ## HIDs
 
