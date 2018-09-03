@@ -57,30 +57,30 @@ public class Biped extends PApplet {
         Joint lowerRoot = new Joint(scene);
 
         //right arm
-        limbs.put("LeftArm", limb(chest.frame, new Vector(10,-30,0), new Vector(1,0,0), boneLength, new Vector(0,0,10)));
-        limbs.put("RightArm", limb(chest.frame, new Vector(-10,-30,0), new Vector(-1,0,0), boneLength, new Vector(0,0,10)));
-        limbs.put("LeftFoot", limb(lowerRoot .frame, new Vector(10,10,0), new Vector(0,1,0), boneLength, new Vector(-10,0,0)));
-        limbs.put("RightFoot", limb(lowerRoot .frame, new Vector(-10,10,0), new Vector(0,1,0), boneLength, new Vector(-10,0,0)));
+        limbs.put("LeftArm", limb(chest, new Vector(10,-30,0), new Vector(1,0,0), boneLength, new Vector(0,0,10)));
+        limbs.put("RightArm", limb(chest, new Vector(-10,-30,0), new Vector(-1,0,0), boneLength, new Vector(0,0,10)));
+        limbs.put("LeftFoot", limb(lowerRoot, new Vector(10,10,0), new Vector(0,1,0), boneLength, new Vector(-10,0,0)));
+        limbs.put("RightFoot", limb(lowerRoot, new Vector(-10,10,0), new Vector(0,1,0), boneLength, new Vector(-10,0,0)));
 
-        chest.frame.translate(0,-50,0);
+        chest.translate(0,-50,0);
         Joint upperRoot = new Joint(scene);
-        chest.frame.setReference(upperRoot.frame);
+        chest.setReference(upperRoot);
 
         //applyConstraint(chest.frame, boneLength);
-        applyConstraint(chest.frame.children().get(0), boneLength, chest.frame.translation(), 20);
+        applyConstraint(chest.children().get(0), boneLength, chest.translation(), 20);
 
-        lowerRoot.frame.setConstraint(new FixedConstraint());
+        lowerRoot.setConstraint(new FixedConstraint());
 
-        Solver solver  = scene.registerTreeSolver(upperRoot.frame);
+        Solver solver  = scene.registerTreeSolver(upperRoot);
         solver.maxIter = 100;
-        solver  = scene.registerTreeSolver(lowerRoot.frame);
+        solver  = scene.registerTreeSolver(lowerRoot);
         solver.maxIter = 100;
 
         for(String key : keys){
             ArrayList<Joint> skeleton = limbs.get(key);
-            targets.get(key).setPosition(skeleton.get(skeleton.size()-1).frame.position());
+            targets.get(key).setPosition(skeleton.get(skeleton.size()-1).position());
             //TESTING WITH FABRIK
-            scene.addIKTarget(skeleton.get(skeleton.size() - 1).frame, targets.get(key));
+            scene.addIKTarget(skeleton.get(skeleton.size() - 1), targets.get(key));
         }
     }
     public void draw() {
@@ -118,22 +118,22 @@ public class Biped extends PApplet {
         Vector bone = direction.normalize(null);
         bone.multiply(boneLength);
         Joint j1 = new Joint(scene);
-        j1.frame.setReference(root);
-        j1.frame.setPosition(origin);
+        j1.setReference(root);
+        j1.setPosition(origin);
         Joint j2 = new Joint(scene);
-        j2.frame.setReference(j1.frame);
-        j2.frame.translate(bone);
+        j2.setReference(j1);
+        j2.translate(bone);
         Joint j3 = new Joint(scene);
-        j3.frame.setReference(j2.frame);
-        j3.frame.translate(bone);
+        j3.setReference(j2);
+        j3.translate(bone);
 
 
         //applyConstraint(j2.frame, boneLength);
 
         float constraint_factor_x = 170;
         Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x));
-        c2.setRestRotation(j2.frame.rotation().get());
-        c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.frame.translation()));
+        c2.setRestRotation(j2.rotation().get());
+        c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.translation()));
         if(Vector.squaredNorm(c2.axis()) != 0) {
             //j2.frame.setConstraint(c2);
         }

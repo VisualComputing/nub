@@ -4,6 +4,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.core.constraint.DistanceFieldConstraint;
 import frames.processing.Scene;
+import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
@@ -28,19 +29,24 @@ public class BVHParser {
     protected BufferedReader _buffer;
     //A Joint is a Node with some Properties
     //TODO: Consider _id() public?
-    protected HashMap<Frame, Properties> _joint;
+    protected HashMap<Integer, Properties> _joint;
     protected int _frames;
     protected int _period;
-    protected Class< ? extends  Frame> _nodeClass;
+    protected Class< ? extends  Frame> _class;
     protected Frame _root;
     protected List<Frame> _branch;
-    protected HashMap<Frame, ArrayList<Frame>> _poses;
+    protected HashMap<Integer, ArrayList<Frame>> _poses;
     protected int _currentPose;
     protected boolean _loop;
 
 
-    public BVHParser(Class<? extends Frame> nodeClass, String path, Scene scene, Frame reference){
-        _nodeClass = nodeClass;
+    public BVHParser(String path, Scene scene, Frame reference){
+        _class = Joint.class;
+        _setup(path, scene, reference);
+    }
+
+    public BVHParser(Class<? extends Frame> frameClass, String path, Scene scene, Frame reference){
+        _class = frameClass;
         _setup(path, scene, reference);
     }
 
@@ -98,7 +104,7 @@ public class BVHParser {
             e.printStackTrace();
             return null;
         }
-        Frame currentNode = root;
+        Frame current = root;
         Frame currentRoot = reference;
         Properties currentProperties = null;
         boolean boneBraceOpened = false;
@@ -141,9 +147,9 @@ public class BVHParser {
                     }
                     return root;
                 }
-                //Create a node
+                //Create a Frame
                 try {
-                    root = _nodeClass.getConstructor(Scene.class).newInstance(scene);
+                    root = _class.getConstructor(Scene.class).newInstance(scene);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
@@ -154,18 +160,21 @@ public class BVHParser {
                     e.printStackTrace();
                 }
                 root.setReference(reference);
-                currentNode = root;
+                current = root;
                 currentRoot = root;
                 currentProperties = new Properties(expression[1]);
-                _joint.put(currentNode, currentProperties);
-                _poses.put(currentNode, new ArrayList<>());
+                if(root instanceof Joint){
+                    ((Joint)current).setName(expression[1]);
+                }
+                _joint.put(current.id(), currentProperties);
+                _poses.put(current.id(), new ArrayList<>());
                 boneBraceOpened = true;
             } else if(expression[0].equals("OFFSET")) {
                 if(!boneBraceOpened) continue;
                 float x = Float.valueOf(expression[1]);
                 float y = Float.valueOf(expression[2]);
                 float z = Float.valueOf(expression[3]);
-                currentNode.setTranslation(x,y,z);
+                current.setTranslation(x,y,z);
             } else if(expression[0].equals("CHANNELS")) {
                 currentProperties.channels = Integer.valueOf(expression[1]);
                 for (int i = 0; i < currentProperties.channels; i++)
@@ -173,7 +182,7 @@ public class BVHParser {
             } else if(expression[0].equals("JOINT")) {
                 //Create a node
                 try {
-                    currentNode = _nodeClass.getConstructor(Scene.class).newInstance(scene);
+                    current = _class.getConstructor(Scene.class).newInstance(scene);
                 } catch (InstantiationException e) {
                     e.printStackTrace();
                 } catch (IllegalAccessException e) {
@@ -183,11 +192,11 @@ public class BVHParser {
                 } catch (InvocationTargetException e) {
                     e.printStackTrace();
                 }
-                currentNode.setReference(currentRoot);
-                currentRoot = currentNode;
+                current.setReference(currentRoot);
+                currentRoot = current;
                 currentProperties = new Properties(expression[1]);
-                _joint.put(currentNode, currentProperties);
-                _poses.put(currentNode, new ArrayList<>());
+                _joint.put(current.id(), currentProperties);
+                _poses.put(current.id(), new ArrayList<>());
                 boneBraceOpened = true;
             } else if(expression[0].equals("END_SITE")) {
                 boneBraceOpened = false;
@@ -245,8 +254,8 @@ public class BVHParser {
         String[] expression = line.split(" ");
         //traverse each line
         int i = 0;
-        for(Frame node : _branch){
-            Properties properties = _joint.get(node);
+        for(Frame current : _branch){
+            Properties properties = _joint.get(current.id());
             boolean translationInfo = false;
             boolean rotationInfo = false;
             Vector translation = new Vector();
@@ -288,15 +297,15 @@ public class BVHParser {
                 }
                 i++;
             }
-            Frame frame = new Frame(node.translation().get(), node.rotation().get());
+            Frame next = new Frame(current.translation().get(), current.rotation().get());
 
             switch(properties._parametrization){
                 case "XYZ":{
-                    if(node.reference() != null) {
-                        Quaternion newRotation = _poses.get(node.reference()).get(_poses.get(node.reference()).size()-1).rotation();
-                        Quaternion delta = Quaternion.compose(newRotation, node.reference().rotation().inverse());
+                    if(current.reference() != null) {
+                        Quaternion newRotation = _poses.get(current.reference().id()).get(_poses.get(current.reference().id()).size()-1).rotation();
+                        Quaternion delta = Quaternion.compose(newRotation, current.reference().rotation().inverse());
                         Vector v = delta.multiply(translation.get());
-                        _joint.get(node.reference())._feasibleRegion.add(v);
+                        _joint.get(current.reference().id())._feasibleRegion.add(v);
                     }
                     break;
                 }
@@ -307,28 +316,32 @@ public class BVHParser {
             }
 
             if(rotationInfo){
-                frame.setRotation(rotation);
+                next.setRotation(rotation);
             }if(translationInfo){
-                frame.setTranslation(translation);
+                next.setTranslation(translation);
             }
-            _poses.get(node).add(frame);
+            _poses.get(current.id()).add(next);
         }
         return true;
     }
 
     public void nextPose(){
-        if(_currentPose >= _poses.get(_root).size()){
+        if(_currentPose >= _poses.get(_root.id()).size()){
             if(_loop) _currentPose = 0;
             else return;
         }
-        for(Frame node : _branch){
-            node.setRotation(_poses.get(node).get(_currentPose).rotation().get());
-            node.setTranslation(_poses.get(node).get(_currentPose).translation().get());
+        for(Frame frame : _branch){
+            frame.setRotation(_poses.get(frame.id()).get(_currentPose).rotation().get());
+            frame.setTranslation(_poses.get(frame.id()).get(_currentPose).translation().get());
         }
         _currentPose++;
     }
 
-    int dim = 20;
+
+    //----- TESTING SOME BEHAVIOR -----
+    //TODO : LEARNING CONSTRAINTS
+
+    protected int _dim = 20;
 
     public void drawConstraint(PGraphics pg){
         pg.pushStyle();
@@ -340,10 +353,10 @@ public class BVHParser {
             pg.pushMatrix();
             node.graph().applyWorldTransformation(node);
             Vector tr = node.children().isEmpty() ? new Vector(0,0,1) : node.children().get(0).translation().get();
-            float step = (float)(2*Math.PI/dim);
-            for(int i = 0; i < dim; i++){
-                for(int j = 0; j < dim; j++){
-                    for(int k = 0; k < dim; k++){
+            float step = (float)(2*Math.PI/ _dim);
+            for(int i = 0; i < _dim; i++){
+                for(int j = 0; j < _dim; j++){
+                    for(int k = 0; k < _dim; k++){
                         //Transform to euler
                         float x = (i + 0.5f) * step;
                         float y = (j + 0.5f) * step;
@@ -394,7 +407,7 @@ public class BVHParser {
         for(Frame node : _branch){
             pg.pushMatrix();
             node.graph().applyWorldTransformation(node);
-            for(Vector vv : _joint.get(node)._feasibleRegion){
+            for(Vector vv : _joint.get(node.id())._feasibleRegion){
                 Vector v = node.rotation().inverseRotate(vv);
                 v.multiply(0.25f);
                 pg.stroke(0,255,0);
@@ -409,16 +422,16 @@ public class BVHParser {
     }
 
     public void constraintJoints(){
-        for(Frame node : _branch){
+        for(Frame frame : _branch){
             //if(node == _root) continue;
             ArrayList<Quaternion> rots = new ArrayList<Quaternion>();
-            int j = 0;
-            for(Frame f : _poses.get(node)){
+            //int j = 0;
+            for(Frame next : _poses.get(frame.id())){
                 //if(j == 20) break;
-                rots.add(f.rotation());
-                j++;
+                rots.add(next.rotation());
+                //j++;
             }
-            node.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots,dim,dim,dim)));
+            frame.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots, _dim, _dim, _dim)));
         }
     }
 }

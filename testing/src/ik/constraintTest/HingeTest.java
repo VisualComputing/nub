@@ -143,30 +143,30 @@ public class HingeTest extends PApplet {
         Joint prev = new Joint(scene);
         Joint current = prev;
         Joint root = current;
-        root.isRoot = true;
+        root.setRoot(true);
         //current.setRotation(Quaternion.random());
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
+        current.setReference(prev);
         prev = current;
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength,0);
-        setConstraint(current.frame, new Vector(0,0,1));
+        current.setPosition(0,boneLength,0);
+        setConstraint(current, new Vector(0,0,1));
 
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
+        current.setReference(prev);
         prev = current;
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength*2,0);
-        setConstraint(current.frame, new Vector(1,0,0));
+        current.setPosition(0,boneLength*2,0);
+        setConstraint(current, new Vector(1,0,0));
 
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
+        current.setReference(prev);
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(current.frame, new Vector(1,0,0));
+        current.setPosition(0,boneLength*2,boneLength*2);
+        setConstraint(current, new Vector(1,0,0));
 
-        root.frame.setPosition(o);
-        return (ArrayList) scene.branch(root.frame);
+        root.setPosition(o);
+        return (ArrayList) scene.branch(root);
     }
 
     public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
@@ -177,22 +177,22 @@ public class HingeTest extends PApplet {
             joint = new Joint(scene);
             if (i == 0)
                 chainRoot = joint;
-            if (prevJoint != null) joint.frame.setReference(prevJoint.frame);
+            if (prevJoint != null) joint.setReference(prevJoint);
             float x = i % 2 == 0 ? 1 : 0;
             float z = (i + 1) % 2 == 0 ? 1 : 0;
             float y = 0;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
             translate.multiply(boneLength);
-            joint.frame.setTranslation(translate);
-            joint.frame.setPrecision(Frame.Precision.FIXED);
+            joint.setTranslation(translate);
+            joint.setPrecision(Frame.Precision.FIXED);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        chainRoot.frame.setTranslation(translation);
+        chainRoot.setTranslation(translation);
         //chainRoot.setupHierarchy();
-        chainRoot.isRoot = true;
-        return (ArrayList) scene.branch(chainRoot.frame);
+        chainRoot.setRoot(true);
+        return (ArrayList) scene.branch(chainRoot);
     }
 
 

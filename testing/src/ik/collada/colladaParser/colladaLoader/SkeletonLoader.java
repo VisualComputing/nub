@@ -23,8 +23,8 @@ public class SkeletonLoader {
     public void extractBoneData(AnimatedModel model){
         XmlNode headNode = armatureData.getChild("node");
         Joint root = loadJointData(headNode, model, null);
-        root.isRoot = true;
-        model.setRootJoint(root.frame);
+        root.setRoot(true);
+        model.setRootJoint(root);
         model.setJointCount(jointCount);
     }
 
@@ -43,8 +43,8 @@ public class SkeletonLoader {
         float[] matrixData = convertData(matrixRawData);
         Matrix mat = new Matrix(matrixData);
         Joint joint = new Joint(model.getScene());
-        Frame frame = joint.frame;
-        if(parent != null) frame.setReference(parent.frame);
+        Frame frame = joint;
+        if(parent != null) frame.setReference(parent);
         frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
         frame.setRotation(new Quaternion(mat));
         joint.setRadius(0.2f);

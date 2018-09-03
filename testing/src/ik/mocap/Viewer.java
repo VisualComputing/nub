@@ -12,29 +12,37 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
 import frames.processing.Scene;
 import frames.processing.Shape;
+import ik.common.Joint;
 import processing.core.PApplet;
+import processing.core.PShape;
+import processing.event.MouseEvent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Created by sebchaparr on 23/03/18.
  */
 public class Viewer extends PApplet{
-    //TODO : Update
-    /*
     Scene scene;
-    Node eye;
-    String path = "/testing/data/bvh/walk-03-sneak-yokoyama.bvh";
+    String path = "/testing/data/bvh/mocap.bvh";
+
     BVHParser parser;
-    HashMap<String,Node> originalLimbs = new HashMap<String, Node>();
-    HashMap<String,Joint> limbs = new HashMap<String, Joint>();
-    HashMap<String,Target> targets = new HashMap<String, Target>();
-    Node root, rootIK;
+    HashMap<String, Frame> originalLimbs = new HashMap<String, Frame>();
+    HashMap<String,Frame> limbs = new HashMap<String, Frame>();
+    HashMap<String,Shape> targets = new HashMap<String, Shape>();
+
+    Frame root, rootIK;
 
     CCDSolver ccd_solver;
-    ClosedLoopChainSolver chain_solver;
+    ChainSolver chain_solver;
     Solver solver;
+
+    float targetRadius = 7;
+
+
     public void settings() {
         size(700, 700, P3D);
     }
@@ -42,33 +50,32 @@ public class Viewer extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        eye = new InteractiveNode(scene);
-
-        scene.setEye(eye);
         scene.setFieldOfView(PI / 3);
-        scene.setDefaultGrabber(eye);
         scene.fitBallInterpolation();
 
-        targets.put("LEFTHAND", new Target(scene));
-        targets.put("RIGHTHAND", new Target(scene));
-        targets.put("LEFTFOOT", new Target(scene));
-        targets.put("RIGHTFOOT", new Target(scene));
-        targets.put("HEAD", new Target(scene));
+        //Add a target per limb
+        targets.put("LEFTHAND",  createTarget(targetRadius));
+        targets.put("RIGHTHAND", createTarget(targetRadius));
+        targets.put("LEFTFOOT",  createTarget(targetRadius));
+        targets.put("RIGHTFOOT", createTarget(targetRadius));
+        targets.put("HEAD",      createTarget(targetRadius));
 
-
-        parser = new BVHParser(Joint.class, sketchPath() + path, scene, null);
+        parser = new BVHParser(sketchPath() + path, scene, null);
         root = parser.root();
         ((Joint) root).setRoot(true);
 
+
+        /*TESTING BALL AND SOCKET*/
+        /*
         BallAndSocket constraint = new BallAndSocket(radians(10), radians(10), radians(10), radians(10));
         Vector twist = root.children().get(0).translation().get();
         constraint.setRestRotation(root.rotation().get(), new Vector(0, 1, 0), twist);
         //root.setConstraint(constraint);
+        */
 
-        parser.constraintJoints();
+        //parser.constraintJoints();
         //root.setConstraint(null);
         //root.setConstraint(constraint);
-
 
         //make a copy of the skeleton
         rootIK = (Joint) copy(scene.branch(root));
@@ -79,21 +86,21 @@ public class Viewer extends PApplet{
         //limbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
         //originalLimbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
 
-        ArrayList<Node> list = scene.branch(limbs.get("RIGHTCOLLAR"));
+        ArrayList<Frame> list = (ArrayList<Frame>) scene.branch(limbs.get("RIGHTCOLLAR"));
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
 
         //chain_solver = new ClosedLoopChainSolver(list);
-        ArrayList<Node> list2 = scene.branch(originalLimbs.get("RIGHTCOLLAR"));
+        ArrayList<Frame> list2 = (ArrayList<Frame>) scene.branch(originalLimbs.get("RIGHTCOLLAR"));
         list2.add(0, list2.get(0).reference());
         list2.add(0, list2.get(0).reference());
         //list2.add(0, list2.get(0).reference());
         solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
         //Solver solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
 
-        chain_solver = new ClosedLoopChainSolver(list2);
+        chain_solver = new ChainSolver(list2);
         for(Frame f : rootIK.children()) {
             //f.setConstraint(new FixedConstraint());
             //limbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
@@ -123,14 +130,19 @@ public class Viewer extends PApplet{
 
     }
 
+    public Shape createTarget(float radius){
+        PShape redBall = createShape(SPHERE, radius);
+        redBall.setStroke(false);
+        redBall.setFill(color(255,0,0));
+        return new Shape(scene, redBall);
+    }
+
     public void draw() {
         background(0);
         lights();
         //Draw Constraints
         scene.drawAxes();
-        for (Node frame : scene.nodes()) {
-            if (frame instanceof Shape) ((Shape) frame).draw();
-        }
+        scene.traverse();
         if(read){
             parser.nextPose();
             //updateTargets();
@@ -149,57 +161,57 @@ public class Viewer extends PApplet{
         }
     }
 
-    public Node copy(ArrayList<Node> branch) {
-        ArrayList<Node> copy = new ArrayList<Node>();
-        Node reference = branch.get(0).reference();
-        HashMap<Node, Node> map = new HashMap<Node, Node>();
-        map.put(branch.get(0), reference);
-        for (Node joint : branch) {
+    public Frame copy(List<Frame> branch) {
+        ArrayList<Frame> copy = new ArrayList<Frame>();
+        Frame reference = branch.get(0).reference();
+        HashMap<Integer, Frame> map = new HashMap<Integer, Frame>();
+        map.put(branch.get(0).id(), reference);
+        for (Frame joint : branch) {
             Joint newJoint = new Joint(scene);
-            newJoint.setReference(map.get(joint));
+            newJoint.setReference(map.get(joint.id()));
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
             newJoint.setConstraint(joint.constraint());
             copy.add(newJoint);
             //it's no too efficient but it is just executed once
-            for (Node child : joint.children()) {
+            for (Frame child : joint.children()) {
                 if(joint.children().size() > 1) {
                     //add a new joint per child
-                    Node dummy = new Node(scene);
+                    Frame dummy = new Frame(scene);
                     dummy.setReference(newJoint);
                     dummy.setConstraint(newJoint.constraint());
                     dummy.setPosition(newJoint.position().get());
                     dummy.setOrientation(newJoint.orientation().get());
                     //scene.inputHandler().removeGrabber(dummy);
                     copy.add(dummy);
-                    map.put(child, dummy);
+                    map.put(child.id(), dummy);
                 }else{
-                    map.put(child, newJoint);
+                    map.put(child.id(), newJoint);
                 }
             }
-            if(parser._joint.get(joint)._name.equals("LEFTHAND")){
+            if(parser._joint.get(joint.id())._name.equals("LEFTHAND")){
                 originalLimbs.put("LEFTHAND", joint);
                 limbs.put("LEFTHAND", newJoint);
                 targets.get("LEFTHAND").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint)._name.equals("RIGHTHAND")){
+            } else if(parser._joint.get(joint.id())._name.equals("RIGHTHAND")){
                 originalLimbs.put("RIGHTHAND", joint);
                 limbs.put("RIGHTHAND", newJoint);
                 targets.get("RIGHTHAND").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint)._name.equals("LEFTFOOT")){
+            } else if(parser._joint.get(joint.id())._name.equals("LEFTFOOT")){
                 originalLimbs.put("LEFTFOOT", joint);
                 limbs.put("LEFTFOOT", newJoint);
                 targets.get("LEFTFOOT").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint)._name.equals("RIGHTFOOT")){
+            } else if(parser._joint.get(joint.id())._name.equals("RIGHTFOOT")){
                 originalLimbs.put("RIGHTFOOT", joint);
                 limbs.put("RIGHTFOOT", newJoint);
                 targets.get("RIGHTFOOT").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint)._name.equals("HEAD")){
+            } else if(parser._joint.get(joint.id())._name.equals("HEAD")){
                 originalLimbs.put("HEAD", joint);
                 limbs.put("HEAD", newJoint);
                 targets.get("HEAD").setPosition(newJoint.position());
             }
-            originalLimbs.put(parser._joint.get(joint)._name, joint);
-            limbs.put(parser._joint.get(joint)._name, newJoint);
+            originalLimbs.put(parser._joint.get(joint.id())._name, joint);
+            limbs.put(parser._joint.get(joint.id())._name, newJoint);
         }
         ((Joint) copy.get(0)).setRoot(true);
         return copy.get(0);
@@ -207,14 +219,14 @@ public class Viewer extends PApplet{
 
     public void updateTargets() {
         rootIK.setPosition(root.position());
-        for (Map.Entry<String, Node> entry : originalLimbs.entrySet()) {
+        for (Map.Entry<String, Frame> entry : originalLimbs.entrySet()) {
             targets.get(entry.getKey()).setPosition(entry.getValue().position());
        }
     }
 
     boolean read = false;
     boolean solve = false;
-    Node n = null;
+    Frame n = null;
     float d = 5;
     boolean show1 = true, show2 = true, show3 = true;
 
@@ -222,8 +234,8 @@ public class Viewer extends PApplet{
     ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
-        if(scene.mouse().trackedGrabber() != null) {
-            n =  (Node) scene.mouse().trackedGrabber();
+        if(scene.trackedFrame() != null) {
+            n =  scene.trackedFrame();
             if(n != null) {
                 if (key == 'A' || key == 'a') {
                     d += 1;
@@ -267,21 +279,6 @@ public class Viewer extends PApplet{
         if(key == 'k' || key == 'K'){
             chain_solver.backward();
         }
-        if(key == 'l' || key == 'L'){
-            for (int i = 0; i < chain_solver.chain().size() - 1; i++) {
-                constr.set(i+1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-            }
-        }
-        if(key == 'n' || key == 'N'){
-            int i = 0;
-            constr = copy_p(prev);
-            constr.set(0,chain_solver.chain().get(0).position());
-            constr.set(i+1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-        }
-        if(key == 'm' || key == 'M'){
-            int i = 1;
-            constr.set(i+1, chain_solver._constrainBackwardReaching(chain_solver.chain(), i));
-        }
 
         if(key == '1'){
             show1 = !show1;
@@ -324,9 +321,35 @@ public class Viewer extends PApplet{
             popMatrix();
             prev = p;
         }
-
     }
-    */
+
+    @Override
+    public void mouseMoved() {
+        scene.cast();
+    }
+
+    public void mouseDragged() {
+        if (mouseButton == LEFT){
+            scene.spin();
+        } else if (mouseButton == RIGHT) {
+            scene.translate();
+        } else {
+            scene.zoom(scene.mouseDX());
+        }
+    }
+
+    public void mouseWheel(MouseEvent event) {
+        scene.scale(event.getCount() * 20);
+    }
+
+    public void mouseClicked(MouseEvent event) {
+        if (event.getCount() == 2)
+            if (event.getButton() == LEFT)
+                scene.focus();
+            else
+                scene.align();
+    }
+
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.mocap.Viewer"});
     }

@@ -154,35 +154,35 @@ public class ConePolygon extends PApplet{
         Joint prev = new Joint(scene);
         Joint current = prev;
         Joint root = current;
-        root.isRoot = true;
-        current.frame.setRotation(Quaternion.random());
+        root.setRoot(true);
+        current.setRotation(Quaternion.random());
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
+        current.setReference(prev);
         prev = current;
-        current.frame.setRotation(Quaternion.random());
+        current.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength,0);
-        setConstraint(vertices,current.frame, new Vector(0,boneLength,0),boneLength);
+        current.setPosition(0,boneLength,0);
+        setConstraint(vertices,current, new Vector(0,boneLength,0),boneLength);
 
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
+        current.setReference(prev);
         prev = current;
-        current.frame.setRotation(Quaternion.random());
+        current.setRotation(Quaternion.random());
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength*2,0);
-        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
+        current.setPosition(0,boneLength*2,0);
+        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
 
         current = new Joint(scene);
-        current.frame.setReference(prev.frame);
-        current.frame.setRotation(Quaternion.random());
+        current.setReference(prev);
+        current.setRotation(Quaternion.random());
 
         //current.setRotation(Quaternion.random());
-        current.frame.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(vertices,current.frame, new Vector(0,0,1),boneLength);
+        current.setPosition(0,boneLength*2,boneLength*2);
+        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
 
-        root.frame.setPosition(o);
+        root.setPosition(o);
 
-        return (ArrayList) scene.branch(root.frame);
+        return (ArrayList) scene.branch(root);
     }
 
     public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
@@ -193,22 +193,22 @@ public class ConePolygon extends PApplet{
             joint = new Joint(scene);
             if (i == 0)
                 chainRoot = joint;
-            if (prevJoint != null) joint.frame.setReference(prevJoint.frame);
+            if (prevJoint != null) joint.setReference(prevJoint);
             float x = 0;
             float z = 1;
             float y = 0;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
             translate.multiply(boneLength);
-            joint.frame.setTranslation(translate);
-            joint.frame.setPrecision(Frame.Precision.FIXED);
+            joint.setTranslation(translate);
+            joint.setPrecision(Frame.Precision.FIXED);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        chainRoot.frame.setTranslation(translation);
+        chainRoot.setTranslation(translation);
         //chainRoot.setupHierarchy();
-        chainRoot.isRoot = true;
-        return (ArrayList) scene.branch(chainRoot.frame);
+        chainRoot.setRoot(true);
+        return (ArrayList) scene.branch(chainRoot);
     }
 
     boolean read = false;

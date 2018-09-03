@@ -65,11 +65,11 @@ public class Puppet extends PApplet {
 
         for(String key : keys){
             ArrayList<Joint> skeleton = limbs.get(key);
-            targets.get(key).setPosition(skeleton.get(skeleton.size()-1).frame.position());
+            targets.get(key).setPosition(skeleton.get(skeleton.size()-1).position());
             //TESTING WITH FABRIK
-            Solver solver = scene.registerTreeSolver(skeleton.get(0).frame);
+            Solver solver = scene.registerTreeSolver(skeleton.get(0));
             solver.maxIter = 100;
-            scene.addIKTarget(skeleton.get(skeleton.size() - 1).frame, targets.get(key));
+            scene.addIKTarget(skeleton.get(skeleton.size() - 1), targets.get(key));
             //TESTING WITH CCD
             /*
             CCDSolver solver = new CCDSolver(skeleton);
@@ -98,15 +98,15 @@ public class Puppet extends PApplet {
         Vector bone = d1.normalize(null);
         bone.multiply(boneLength);
         Joint j1 = new Joint(scene);
-        j1.frame.setPosition(origin);
+        j1.setPosition(origin);
         Joint j2 = new Joint(scene);
-        j2.frame.setReference(j1.frame);
-        j2.frame.translate(bone);
+        j2.setReference(j1);
+        j2.translate(bone);
         bone = d2.normalize(null);
         bone.multiply(boneLength);
         Joint j3 = new Joint(scene);
-        j3.frame.setReference(j2.frame);
-        j3.frame.translate(bone);
+        j3.setReference(j2);
+        j3.translate(bone);
 
         //APPLY CONSTRAINTS
         ArrayList<Vector> vertices = new ArrayList<Vector>();
@@ -121,21 +121,21 @@ public class Puppet extends PApplet {
         PlanarPolygon c1 = new PlanarPolygon(vertices);
         c1.setHeight(boneLength / 2.f);
         c1.setAngle(radians(40));
-        Vector twist = j2.frame.translation().get();
-        c1.setRestRotation(j2.frame.rotation().get(), twist.orthogonalVector(), twist);
-        j1.frame.setConstraint(c1);
+        Vector twist = j2.translation().get();
+        c1.setRestRotation(j2.rotation().get(), twist.orthogonalVector(), twist);
+        j1.setConstraint(c1);
 
         float constraint_factor_x = 170;
         Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x));
-        c2.setRestRotation(j2.frame.rotation().get());
+        c2.setRestRotation(j2.rotation().get());
         //c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.frame.translation()));
         c2.setAxis(hinge);
         //if(Vector.squaredNorm(c2.axis()) != 0) {
             System.out.println("axis : " + c2.axis());
-            j2.frame.setConstraint(c2);
+            j2.setConstraint(c2);
         //}
 
-        j1.isRoot = true;
+        j1.setRoot(true);
         skeleton.add(j1);
         skeleton.add(j2);
         skeleton.add(j3);
