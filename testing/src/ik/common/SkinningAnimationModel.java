@@ -11,8 +11,7 @@ import processing.opengl.PShader;
 /**
  * Created by sebchaparr on 24/07/18.
  */
-public class Skinning {
-    //TODO : Update
+public class SkinningAnimationModel {
     public PShader shader;
     private AnimatedModel model;
 
@@ -26,7 +25,7 @@ public class Skinning {
     String fragmentPath = "/testing/src/ik/common/frag.glsl";
     String vertexPath = "/testing/src/ik/common/skinning.glsl";
 
-    public Skinning(AnimatedModel model){
+    public SkinningAnimationModel(AnimatedModel model){
         this.model = model;
         PApplet pApplet = model.getScene().pApplet();
         shader = pApplet.loadShader(pApplet.sketchPath() + fragmentPath,
