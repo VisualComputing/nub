@@ -111,16 +111,22 @@ public abstract class FABRIKSolver extends Solver {
     return change;
   }
 
+
+  //TODO : Check for scaling when chain has constraints
   protected float _backwardReaching(ArrayList<? extends Frame> chain, Vector o) {
     float change = 0;
     Quaternion orientation;
+    float magnitude;
     orientation = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
+    magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
+
     Vector o_hat = o;
     for (int i = 0; i < chain.size() - 1; i++) {
       if (_distances.get(i + 1) == 0) {
         _positions.set(i + 1, _positions.get(i));
         continue;
       }
+      magnitude *= chain.get(i).scaling();
       //Find delta rotation
       Properties props_i = _properties.get(chain.get(i));
       Properties props_i1 = _properties.get(chain.get(i+1));
@@ -133,7 +139,7 @@ public abstract class FABRIKSolver extends Solver {
         o_hat = _positions.get(i + 1);
         _positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
       }
-      Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.subtract(_positions.get(i + 1), _positions.get(i)));
+      Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.divide(Vector.subtract(_positions.get(i + 1), _positions.get(i)), magnitude));
       Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
       //Apply delta rotation
       if(props_i._useConstraint)chain.get(i).rotate(deltaRotation);
@@ -143,6 +149,7 @@ public abstract class FABRIKSolver extends Solver {
       orientation.compose(chain.get(i).rotation());
       _orientations.set(i, orientation.get());
       Vector constrained_pos = orientation.rotate(chain.get(i + 1).translation().get());
+      constrained_pos.multiply(magnitude);
       constrained_pos.add(_positions.get(i));
       change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
