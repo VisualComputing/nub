@@ -3,6 +3,7 @@ package ik.interactiveSkeleton;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
+import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -11,16 +12,23 @@ import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;
+import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
 /**
  * Created by sebchaparr on 11/03/18.
  */
+
+// TODO: Check for flow field with noise and brownian motion
 public class InteractiveFish extends PApplet {
+
+    boolean showSkeleton = false;
     Scene scene;
     Shape shape;
     Frame root;
+    PShape model;
+
     //Uncomment to use Linear Blending Skinning with CPU
     LinearBlendSkinning skinning;
     //LinearBlendSkinningGPU skinning;
@@ -42,7 +50,7 @@ public class InteractiveFish extends PApplet {
         scene.fitBallInterpolation();
         target = createTarget(targetRadius);
 
-        PShape model = loadShape(sketchPath() + shapePath);
+        model = loadShape(sketchPath() + shapePath);
         model.setTexture(loadImage(sketchPath() + texturePath));
 
         Vector[] box = getBoundingBox(model);
@@ -51,26 +59,27 @@ public class InteractiveFish extends PApplet {
         //model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
         shape = new Shape(scene, model);
-        shape.setPrecision(Frame.Precision.FIXED);
-        shape.setPrecisionThreshold(1);
 
         shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
         shape.scale(200.f * 1.f / max);
         root = fishSkeleton(shape);
 
         ArrayList<Frame> skeleton = (ArrayList<Frame>) scene.branch(root);
-
+        shape.scale(0.25f);
         //Uncomment to use Linear Blending Skinning with CPU
         skinning = new LinearBlendSkinning(shape, model);
         skinning.setup(skeleton);
         //skinning = new LinearBlendSkinningGPU(model, skeleton);
         //skinning.initParams(this, scene);
         //Adding IK behavior
+        target.setReference(shape);
         target.setPosition(skeleton.get(skeleton.size() - 1).position());
         //Making a default Path that target must follow
         targetInterpolator = setupTargetInterpolator(target);
-        scene.registerTreeSolver(root);
+        Solver solver = scene.registerTreeSolver(root);
+        solver.error = 0.01f;
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
+
     }
 
     public Shape createTarget(float radius){
@@ -89,7 +98,13 @@ public class InteractiveFish extends PApplet {
         scene.drawAxes();
         //comment this line if you're using Linear Blending Skinning with CPU
         //shader(skinning.shader);
-        scene.traverse();
+        if(showSkeleton) scene.traverse();
+        else{
+            pushMatrix();
+            scene.applyWorldTransformation(shape);
+            shape(model);
+            popMatrix();
+        }
         //resetShader();
         //Uncomment to use Linear Blending Skinning with CPU
         skinning.applyTransformations();
@@ -127,7 +142,6 @@ public class InteractiveFish extends PApplet {
         Joint j1 = new Joint(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        j1.setScaling(1.f / reference.scaling());
         Joint j2 = new Joint(scene);
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
@@ -150,13 +164,14 @@ public class InteractiveFish extends PApplet {
     public Interpolator setupTargetInterpolator(Frame target) {
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.setLoop();
-        targetInterpolator.setSpeed(3.2f);
+        targetInterpolator.setSpeed(5.2f);
         // Create an initial path
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
             Frame iFrame = new Frame(scene);
-            iFrame.setPosition(new Vector(50 * sin(step * i), target.position().y(), target.position().z()));
+            iFrame.setReference(shape);
+            iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
         targetInterpolator.start();
@@ -175,7 +190,38 @@ public class InteractiveFish extends PApplet {
         if (key == ' ') {
             printSkeleton(root);
         }
+        if(key == 'S' || key == 's'){
+            showSkeleton = !showSkeleton;
+        }
     }
+
+    @Override
+    public void mouseMoved() {
+        scene.cast();
+    }
+
+    public void mouseDragged() {
+        if (mouseButton == LEFT){
+            scene.spin();
+        } else if (mouseButton == RIGHT) {
+            scene.translate();
+        } else {
+            scene.zoom(scene.mouseDX());
+        }
+    }
+
+    public void mouseWheel(MouseEvent event) {
+        scene.scale(event.getCount() * 20);
+    }
+
+    public void mouseClicked(MouseEvent event) {
+        if (event.getCount() == 2)
+            if (event.getButton() == LEFT)
+                scene.focus();
+            else
+                scene.align();
+    }
+
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactiveSkeleton.InteractiveFish"});
