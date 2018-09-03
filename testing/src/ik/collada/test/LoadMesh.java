@@ -2,8 +2,6 @@ package ik.collada.test;
 
 import frames.core.Graph;
 import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -11,13 +9,11 @@ import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.colladaLoader.ColladaLoader;
-import ik.common.Joint;
-import ik.common.Skinning;
+import ik.common.SkinningAnimationModel;
 import processing.core.*;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by sebchaparr on 23/07/18.
@@ -29,7 +25,7 @@ public class LoadMesh extends PApplet {
     String dae = "humanoid.dae";
     String tex = "texture.png";
     AnimatedModel model;
-    Skinning skinning;
+    SkinningAnimationModel skinning;
 
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
@@ -59,7 +55,7 @@ public class LoadMesh extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fitBallInterpolation();
-        skinning = new Skinning(model);
+        skinning = new SkinningAnimationModel(model);
 
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
         //model.getJoints().get("Chest").setConstraint(new FixedConstraint());
