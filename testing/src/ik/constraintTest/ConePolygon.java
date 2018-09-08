@@ -21,7 +21,7 @@ import java.util.ArrayList;
  */
 public class ConePolygon extends PApplet{
     //TODO : Update
-    int num_joints = 10;
+    int num_joints = 30;
     float targetRadius = 7;
     float boneLength = 50;
 
@@ -72,7 +72,7 @@ public class ConePolygon extends PApplet{
             PlanarPolygon constraint = new PlanarPolygon(vertices);
             constraint.setHeight(boneLength / 2.f);
             Vector twist = structure1.get(i + 1).translation().get();
-            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(20));
+            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
             //offset = new Quaternion();
             Quaternion rest = Quaternion.compose(structure1.get(i).rotation().get(), offset);
             constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
