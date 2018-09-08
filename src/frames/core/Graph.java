@@ -260,6 +260,16 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return Frame.random(this)}. Creates a random frame attached to this graph.
+   *
+   * @see Frame#random(Graph)
+   * @see #randomize(Frame)
+   */
+  public Frame randomFrame() {
+    return Frame.random(this);
+  }
+
+  /**
    * Same as {@code frame.randomize(center(), radius(), is3D())}.
    *
    * @see Frame#randomize(Vector, float, boolean)

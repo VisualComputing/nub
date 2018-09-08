@@ -140,7 +140,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basic/CajasOrientadas). Some advantages of using _attached_ frames are:
+See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basics/CajasOrientadas). Some advantages of using _attached_ frames are:
 
 * The scene gets rendered respect to an _eye_ frame which may be set from any [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)). Note that the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) sets up a default _eye_ frame. To retrieve the scene _eye_ call [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--).
 * The scene topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -205,7 +205,7 @@ void draw() {
 }
 ```
 
-See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basic/DepthOfField). Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basics/DepthOfField). Some advantages of using shapes are:
 
 * Same as with _attached_ frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
@@ -225,7 +225,7 @@ void setup() {
   shape = new Shape(scene, pshape);
   interpolator = new Interpolator(shape);
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(Frame.random(scene));
+    interpolator.addKeyFrame(scene.randomFrame());
   interpolator.start();
 }
 ```
@@ -240,7 +240,7 @@ void draw() {
 }
 ```
 
-while `traverse()` will draw the animated shape(s) `drawPath(Interpolator, int)` will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basic/Interpolators).
+while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator, int)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-int-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
  
 ## HIDs
 
