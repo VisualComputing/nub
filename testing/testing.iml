@@ -9,5 +9,18 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-3x" level="project" />
     <orderEntry type="module" module-name="frames" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/.lib/gcp" />
+        </CLASSES>
+        <JAVADOC />
+        <NATIVE>
+          <root url="file://$USER_HOME$/.lib/gcp" />
+        </NATIVE>
+        <SOURCES />
+        <jarDirectory url="file://$USER_HOME$/.lib/gcp" recursive="false" />
+      </library>
+    </orderEntry>
   </component>
 </module>

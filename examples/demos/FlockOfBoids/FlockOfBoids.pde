@@ -57,7 +57,8 @@ void draw() {
   directionalLight(255, 255, 255, 0, 1, -100);
   walls();
   scene.traverse();
-  updateAvatar();
+  // uncomment to asynchronously update boid avatar. See mouseClicked()
+  // updateAvatar(scene.trackedFrame("mouseClicked"));
 }
 
 void walls() {
@@ -82,9 +83,7 @@ void walls() {
   popStyle();
 }
 
-void updateAvatar() {
-  // boid is the one picked with a 'mouseClicked'
-  Frame boid = scene.trackedFrame("mouseClicked");
+void updateAvatar(Frame boid) {
   if (boid != avatar) {
     avatar = boid;
     if (avatar != null)
@@ -92,6 +91,33 @@ void updateAvatar() {
     else if (scene.eye().reference() != null)
       resetEye();
   }
+}
+
+// Sets current avatar as the eye reference and interpolate the eye to it
+void thirdPerson() {
+  scene.eye().setReference(avatar);
+  scene.interpolateTo(avatar);
+}
+
+// Resets the eye
+void resetEye() {
+  // same as: scene.eye().setReference(null);
+  scene.eye().resetReference();
+  scene.lookAt(scene.center());
+  scene.fitBallInterpolation();
+}
+
+// picks up a boid avatar, may be null
+void mouseClicked() {
+  // two options to update the boid avatar:
+  // 1. Synchronously
+  updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
+  // which is the same as these two lines:
+  // scene.track("mouseClicked", mouseX, mouseY);
+  // updateAvatar(scene.trackedFrame("mouseClicked"));
+  // 2. Asynchronously
+  // which requires updateAvatar(scene.trackedFrame("mouseClicked")) to be called within draw()
+  // scene.cast("mouseClicked", mouseX, mouseY);
 }
 
 // 'first-person' interaction
@@ -122,25 +148,6 @@ void mouseMoved(MouseEvent event) {
 void mouseWheel(MouseEvent event) {
   // same as: scene.scale(event.getCount() * 20, scene.eye());
   scene.scale(event.getCount() * 20);
-}
-
-// picks up a boid avatar, may be null
-void mouseClicked() {
-  scene.cast("mouseClicked", mouseX, mouseY);
-}
-
-// Sets current avatar as the eye reference and interpolate the eye to it
-void thirdPerson() {
-  scene.eye().setReference(avatar);
-  scene.interpolateTo(avatar);
-}
-
-// Resets the eye
-void resetEye() {
-  // same as: scene.eye().setReference(null);
-  scene.eye().resetReference();
-  scene.lookAt(scene.center());
-  scene.fitBallInterpolation();
 }
 
 void keyPressed() {
