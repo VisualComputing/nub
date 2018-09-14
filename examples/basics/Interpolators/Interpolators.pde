@@ -71,24 +71,25 @@ void draw() {
 
   pushStyle();
   stroke(255);
-  scene.drawPath(interpolator, 5);
+  // same as:scene.drawPath(interpolator, 5);
+  scene.drawPath(interpolator);
   popStyle();
 
   for (Frame frame : interpolator.keyFrames()) {
     pushMatrix();
     scene.applyTransformation(frame);
-    if (scene.tracks(frame))
-      scene.drawAxes(40);
-    else
-      scene.drawAxes(20);
+    scene.drawAxes(scene.tracks(frame) ? 40 : 20);
     popMatrix();
   }
   if (showEyePath) {
     pushStyle();
     fill(255, 0, 0);
     stroke(0, 255, 0);
-    scene.drawPath(eyeInterpolator1, 3);
-    scene.drawPath(eyeInterpolator2, 3);
+    // same as:
+    // scene.drawPath(eyeInterpolator1, 3);
+    // scene.drawPath(eyeInterpolator2, 3);
+    scene.drawPath(eyeInterpolator1);
+    scene.drawPath(eyeInterpolator2);
     popStyle();
   }
 }

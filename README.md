@@ -235,11 +235,11 @@ which will create a random interpolator path containing [4..10] key-frames. The 
 ...
 void draw() {
   scene.traverse();
-  scene.drawPath(interpolator, 5);
+  scene.drawPath(interpolator);
 }
 ```
 
-while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator, int)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-int-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
+while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
  
 ## HIDs
 

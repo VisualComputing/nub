@@ -1333,16 +1333,16 @@ public class Scene extends Graph implements PConstants {
   // DRAWING
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, 1, 6, radius())}.
+   * Convenience function that simply calls {@code drawPath(interpolator, isEye(interpolator.frame()) ? 3 : 5, 6, radius())}.
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
   public void drawPath(Interpolator interpolator) {
-    drawPath(interpolator, 1, 6, radius());
+    drawPath(interpolator, isEye(interpolator.frame()) ? 3 : 5, 6, radius());
   }
 
   /**
-   * Convenience function that simply calls {@code drawPath(kfi, mask, 6, radius())}
+   * Convenience function that simply calls {@code drawPath(interpolator, mask, 6, radius())}
    *
    * @see #drawPath(Interpolator, int, int, float)
    */
@@ -1360,7 +1360,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws the path used to interpolate the {@link Interpolator#frame()}
+   * Draws the {@link Interpolator} path.
    * <p>
    * {@code mask} controls what is drawn: If ( (mask &amp; 1) != 0 ), the position path is
    * drawn. If ( (mask &amp; 2) != 0 ), an eye representation is regularly drawn and if

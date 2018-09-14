@@ -83,9 +83,9 @@ void walls() {
   popStyle();
 }
 
-void updateAvatar(Frame boid) {
-  if (boid != avatar) {
-    avatar = boid;
+void updateAvatar(Frame frame) {
+  if (frame != avatar) {
+    avatar = frame;
     if (avatar != null)
       thirdPerson();
     else if (scene.eye().reference() != null)
