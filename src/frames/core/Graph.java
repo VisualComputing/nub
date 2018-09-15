@@ -383,10 +383,10 @@ public class Graph {
    * <p>
    * Value is set using {@link #setHorizontalFieldOfView(float)} or
    * {@link #setFieldOfView(float)}. These values are always linked by:
-   * {@code horizontalFieldOfView() = 2 * atan ( tan(fieldOfView()/2) * aspectRatio() )}.
+   * {@code horizontalFieldOfView() = 2 * atan (tan(fieldOfView()/2) * aspectRatio())}.
    */
   public float horizontalFieldOfView() {
-    return 2 * (float) Math.atan((eye() == null ? 1 : eye().magnitude()) * aspectRatio());
+    return 2 * (float) Math.atan(eye().magnitude()) * aspectRatio();
   }
 
   /**
