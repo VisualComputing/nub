@@ -204,7 +204,7 @@ void draw() {
 }
 ```
 
-See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basics/DepthOfField). Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/demos/DepthOfField). Some advantages of using shapes are:
 
 * Same as with _attached_ frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
