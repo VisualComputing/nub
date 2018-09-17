@@ -12,6 +12,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public class Joint extends Frame{
+    public static boolean deph = false;
     protected String _name;
     protected int _color;
     protected float _radius = 5;
@@ -27,11 +28,16 @@ public class Joint extends Frame{
         this(scn, scn.pApplet().color(scn.pApplet().random(0,255),scn.pApplet().random(0,255), scn.pApplet().random(0,255)));
     }
 
+    public Joint(Scene scn, float radius){
+        this(scn, scn.pApplet().color(scn.pApplet().random(0,255),scn.pApplet().random(0,255), scn.pApplet().random(0,255)));
+        _radius = radius;
+    }
+
     @Override
     public void visit(){
         Scene scene = (Scene) this._graph;
         PGraphics pg = scene.frontBuffer();
-        pg.hint(PConstants.DISABLE_DEPTH_TEST);
+        if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         pg.fill(_color);
         pg.noStroke();
@@ -52,7 +58,7 @@ public class Joint extends Frame{
         if (constraint() != null) {
             scene.drawConstraint(this);
         }
-        pg.hint(PConstants.ENABLE_DEPTH_TEST);
+        if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
     public void setRadius(float radius){

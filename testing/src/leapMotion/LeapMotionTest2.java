@@ -12,6 +12,8 @@ import processing.core.PShape;
 import processing.core.PVector;
 import processing.event.MouseEvent;
 
+import java.util.ArrayList;
+
 /**
  * Created by sebchaparr on 31/07/18.
  */
@@ -35,8 +37,9 @@ public class LeapMotionTest2 extends PApplet {
         Shape[] shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
             shapes[i] = new Shape(scene, shape());
-            scene.randomize(shapes[i]);
-            shapes[i].setRotation(new Quaternion());
+            shapes[i].setPosition( (i*1.f/shapes.length)*scene.radius()*2 - scene.radius(),0,0);
+            //scene.randomize(shapes[i]);
+            //shapes[i].setRotation(new Quaternion());
             scene.setTrackedFrame("LEAP"+i, shapes[i]);
         }
         smooth();
@@ -58,9 +61,53 @@ public class LeapMotionTest2 extends PApplet {
         updatePos();
     }
 
+    ArrayList<Finger> sortedFingers(){
+        ArrayList<Finger> fingers = new ArrayList<Finger>();
+        boolean trackingHand = false;
+        if(leap.getLeftHand() != null){
+            if(leap.getLeftHand().isLeft()) {
+                trackingHand = true;
+                Hand hand = leap.getLeftHand();
+                fingers.add(hand.getPinkyFinger());
+                fingers.add(hand.getRingFinger());
+                fingers.add(hand.getMiddleFinger());
+                fingers.add(hand.getIndexFinger());
+                fingers.add(hand.getThumb());
+            }
+        }
+
+        if(!trackingHand){
+            for(int i = 0; i < 5; i++){
+                fingers.add(null);
+            }
+        }
+
+        trackingHand = false;
+
+        if(leap.getRightHand() != null){
+            if(leap.getRightHand().isRight()) {
+                trackingHand = true;
+                Hand hand = leap.getRightHand();
+                fingers.add(hand.getThumb());
+                fingers.add(hand.getIndexFinger());
+                fingers.add(hand.getMiddleFinger());
+                fingers.add(hand.getRingFinger());
+                fingers.add(hand.getPinkyFinger());
+            }
+        }
+
+        if(!trackingHand){
+            for(int i = 0; i < 5; i++){
+                fingers.add(null);
+            }
+        }
+
+        return fingers;
+    }
+
     void updatePos(){
         int i = 0;
-        for(Finger f : leap.getFingers()){
+        for(Finger f : sortedFingers()){
             if(f == null){
                 previousPosition[i] = null;
                 i++;

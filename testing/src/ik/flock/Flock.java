@@ -24,7 +24,7 @@ public class Flock extends PApplet {
     static int flockDepth = 600;
     static boolean avoidWalls = true;
 
-    int initBoidNum = 100; // amount of boids to start the program with
+    int initBoidNum = 500; // amount of boids to start the program with
     static ArrayList<Boid> flock;
     static Frame avatar;
     static boolean animate = true;
