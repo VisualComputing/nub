@@ -24,6 +24,13 @@ public abstract class FABRIKSolver extends Solver {
   //TODO : Update
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
+  /*
+  * Some ideas:
+  * Increase of weight direction: Last segments must move a lot, but First ones must try
+  * to keep it's direction, due last segments could be fixed by first ones ?
+  * Weights depends on iterations: First iterations must be exploratory whereas last ones must
+  * preserve directions ?
+  * */
 
   public static class Properties{
     //Enable constraint or not
