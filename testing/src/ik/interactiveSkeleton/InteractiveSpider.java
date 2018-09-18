@@ -47,6 +47,9 @@ public class InteractiveSpider extends PApplet {
             float g = scene.pApplet().random(0, 255);
             float b = scene.pApplet().random(0, 255);
             pshape.setFill(scene.pApplet().color(r,g,b));
+            pshape.setStroke(false);
+            pshape.setTexture(scene.pApplet().loadImage(scene.pApplet().sketchPath() + "/testing/data/textures/spider.jpg"));
+
             float targetRadius = bodyWidth/10.f;
 
             shape = new Shape(scene, pshape);
@@ -61,7 +64,6 @@ public class InteractiveSpider extends PApplet {
 
             ArrayList<Frame> branch = (ArrayList) scene.branch(shape);
             Vector p = branch.get(branch.size()-1).position();
-            System.out.println("p : " + p);
             Vector newPos = new Vector(shape.position().x(), -p.y(), shape.position().z());
             shape.setPosition(newPos);
 
@@ -195,7 +197,7 @@ public class InteractiveSpider extends PApplet {
     }
 
     Scene scene;
-    Spider[] spiders = new Spider[10];
+    Spider[] spiders = new Spider[20];
     Spider userSpider;
     float time = 0;
     float[][] magnitudeField = new float[30][30];
@@ -203,6 +205,7 @@ public class InteractiveSpider extends PApplet {
     float[] userVelocity = new float[]{0,0};
     boolean left, right;
     float velocityMagnitude;
+    float userTime = 0;
 
     public void settings() {
         size(700, 700, P3D);
@@ -266,6 +269,7 @@ public class InteractiveSpider extends PApplet {
 
     public void drawField(){
         pushStyle();
+        float time = this.time*10;
         stroke(255*noise(time),255*noise(time + 1000),255*noise(time + 5000), 100);
         strokeWeight(2);
         for(int i = 0; i < magnitudeField.length; i++){
@@ -273,10 +277,7 @@ public class InteractiveSpider extends PApplet {
                 float x1 = (i * 1.f / (magnitudeField.length - 1)) * 2 * scene.radius() - scene.radius();
                 float y1 = (j * 1.f / (magnitudeField[0].length - 1)) * 2 * scene.radius() - scene.radius();
                 Vector v = new Quaternion(new Vector(0,1,0), angleField[i][j]).rotate(new Vector(magnitudeField[i][j],0,0));
-
-                //float x2 = x1 + (scene.radius()/10)* magnitudeField[i][j]*cos(angleField[i][j]);
-                //float y2 = y1 + (scene.radius()/10)* magnitudeField[i][j]*sin(angleField[i][j]);
-                line(x1,0,y1, x1 + 5*v.x(),0,y1 +5* v.z());
+                line(x1,0,y1, x1 + scene.radius()*0.1f*v.x(),0,y1 + scene.radius()*0.1f*v.z());
             }
         }
         popStyle();
@@ -284,11 +285,13 @@ public class InteractiveSpider extends PApplet {
 
     public void moveUser(){
         if(velocityMagnitude != 0){
+            userTime+=0.1f*velocityMagnitude;
             userSpider.start();
-            userVelocity[0] = velocityMagnitude;
+            userVelocity[0] = velocityMagnitude + userTime;
             if(left) userVelocity[1] += velocityMagnitude > 0 ? 0.1f : -0.1f;
             if(right) userVelocity[1] += velocityMagnitude > 0 ? -0.1f : 0.1f;
         }else{
+            userTime = 0;
             userVelocity[0] = 0;
             userSpider.stop();
         }
@@ -298,6 +301,7 @@ public class InteractiveSpider extends PApplet {
         if (key == CODED){
             if(keyCode == UP){
                 velocityMagnitude = 0;
+                userTime = 0;
             }
             if(keyCode == DOWN){
                 velocityMagnitude = 0;
