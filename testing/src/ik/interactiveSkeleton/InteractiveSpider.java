@@ -49,6 +49,7 @@ public class InteractiveSpider extends PApplet {
             pshape.setFill(scene.pApplet().color(r,g,b));
             pshape.setStroke(false);
             pshape.setTexture(scene.pApplet().loadImage(scene.pApplet().sketchPath() + "/testing/data/textures/spider.jpg"));
+            pshape.setShininess(10.0f);
 
             float targetRadius = bodyWidth/10.f;
 
@@ -238,7 +239,11 @@ public class InteractiveSpider extends PApplet {
 
     public void draw() {
         background(0);
-        lights();
+        ambientLight(102, 102, 102);
+        lightSpecular(204, 204, 204);
+        directionalLight(102, 102, 102, 0, 0, -1);
+        specular(255, 255, 255);
+
         scene.traverse();
         for(int i = 0; i < spiders.length; i++) {
             spiders[i].keepInside();
