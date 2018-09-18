@@ -233,6 +233,12 @@ public class InteractiveSpider extends PApplet {
         userSpider.shape.setPosition(0,userSpider.shape.position().y(),0);
         userSpider.pshape.setFill(color(255,0,0));
 
+        Shape cursor = new Shape(scene);
+        cursor.setFrontGraphics(diamond(scene.radius()*0.2f, scene.radius()*0.1f, scene.radius()*0.1f));
+
+        cursor.setReference(userSpider.shape);
+        cursor.setTranslation(0, -scene.radius()*0.3f, 0);
+
         scene.eye().translate(75, -171, 163);
         scene.eye().rotate(new Quaternion(new Vector(0.88f, 0.44f, 0.13f), 0.75f));
     }
@@ -286,6 +292,43 @@ public class InteractiveSpider extends PApplet {
             }
         }
         popStyle();
+    }
+
+    public PShape diamond(float height, float width, float depth){
+
+        PShape s = createShape();
+        s.beginShape(TRIANGLES);
+        s.vertex(0, height, 0);
+        s.vertex(-width/2.f, 0, depth/2.f);
+        s.vertex(width/2.f, 0, depth/2.f);
+
+        s.vertex(0, height, 0);
+        s.vertex(-width/2.f, 0, -depth/2.f);
+        s.vertex(width/2.f, 0, -depth/2.f);
+
+        s.vertex(0, height, 0);
+        s.vertex(width/2.f, 0, -depth/2.f);
+        s.vertex(width/2.f, 0, depth/2.f);
+
+        s.vertex(0, height, 0);
+        s.vertex(-width/2.f, 0, -depth/2.f);
+        s.vertex(-width/2.f, 0, depth/2.f);
+
+        s.vertex(-width/2.f, 0, -depth/2.f);
+        s.vertex(-width/2.f, 0, depth/2.f);
+        s.vertex(width/2.f, 0, depth/2.f);
+
+        s.vertex(-width/2.f, 0, -depth/2.f);
+        s.vertex(width/2.f, 0, depth/2.f);
+        s.vertex(width/2.f, 0, -depth/2.f);
+
+        s.endShape();
+
+        s.setStroke(false);
+        s.setFill(true);
+        s.setFill(color(0,255,0));
+
+        return s;
     }
 
     public void moveUser(){
