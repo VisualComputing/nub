@@ -34,27 +34,30 @@ public class InteractiveSpider extends PApplet {
         float[] velocity = new float[]{0.2f, 0.2f}; //save direction and angle
 
         Shape shape;
+        PShape pshape;
+        Interpolator[] interpolator;
 
         public Spider(Scene scene){
             this(scene, 7, 5, 14, 6);
         }
 
         public Spider(Scene scene, float bodyWidth, float bodyHeight, float bodyLength, int legs){
-            PShape box = scene.frontBuffer().createShape(BOX, bodyWidth, bodyHeight, bodyLength);
+            pshape = scene.frontBuffer().createShape(BOX, bodyWidth, bodyHeight, bodyLength);
             float r = scene.pApplet().random(0, 255);
             float g = scene.pApplet().random(0, 255);
             float b = scene.pApplet().random(0, 255);
-            box.setFill(scene.pApplet().color(r,g,b));
+            pshape.setFill(scene.pApplet().color(r,g,b));
             float targetRadius = bodyWidth/10.f;
 
-            shape = new Shape(scene, box);
+            shape = new Shape(scene, pshape);
             //create targets
             Frame[] targets = new Frame[legs];
+            interpolator = new Interpolator[legs];
 
             for(int i = 0; i < legs; i++){
                 targets[i] = new Frame(scene);
             }
-            spiderSkeleton(shape,legs,bodyWidth,bodyHeight,bodyLength, targets, targetRadius);
+            spiderSkeleton(shape, legs,bodyWidth,bodyHeight,bodyLength, targets, targetRadius);
 
             ArrayList<Frame> branch = (ArrayList) scene.branch(shape);
             Vector p = branch.get(branch.size()-1).position();
@@ -104,7 +107,7 @@ public class InteractiveSpider extends PApplet {
         }
 
         //Skeleton and IK Stuff
-        public Joint leg(Frame reference, Vector upper, Vector middle, Vector lower, Frame target, boolean invert, float radius){
+        public Joint leg(int i, Frame reference, Vector upper, Vector middle, Vector lower, Frame target, boolean invert, float radius){
             Scene scene = shape.graph();
             Joint j1 = new Joint(scene, radius);
             j1.setReference(reference);
@@ -116,7 +119,7 @@ public class InteractiveSpider extends PApplet {
             j3.setReference(j2);
             j3.setPosition(reference.worldLocation(lower));
             j1.setRoot(true);
-            addIk(j1, j3, target, invert);
+            addIk(i, j1, j3, target, invert);
             return j1;
         }
 
@@ -137,17 +140,17 @@ public class InteractiveSpider extends PApplet {
                 float middle_y = -bodyWidth * factor;
                 float lower_y = -2*middle_y;
 
-                leg(reference, new Vector(-upper_x, upper_y, z), new Vector(-middle_x, middle_y, z), new Vector(-lower_x, lower_y, z), targets[2*i], invert, radius);
-                leg(reference, new Vector(upper_x, upper_y, z), new Vector(middle_x, middle_y, z), new Vector(lower_x, lower_y, z), targets[2*i +1], !invert, radius);
+                leg(2*i, reference, new Vector(-upper_x, upper_y, z), new Vector(-middle_x, middle_y, z), new Vector(-lower_x, lower_y, z), targets[2*i], invert, radius);
+                leg(2*i + 1, reference, new Vector(upper_x, upper_y, z), new Vector(middle_x, middle_y, z), new Vector(lower_x, lower_y, z), targets[2*i +1], !invert, radius);
                 invert = !invert;
             }
         }
 
-        public void addIk(Frame root, Frame endEffector, Frame target, boolean invert){
+        public void addIk(int i, Frame root, Frame endEffector, Frame target, boolean invert){
             Scene scene = shape.graph();
             target.setReference(root.reference());
             target.setPosition(endEffector.position());
-            legPath(target, Vector.distance(root.position(), endEffector.position())*0.1f, invert);
+            interpolator[i] = legPath(target, Vector.distance(root.position(), endEffector.position())*0.1f, invert);
             Solver solver = scene.registerTreeSolver(root);
             solver.error = 0.01f;
             solver.timesPerFrame = 1f;
@@ -176,14 +179,30 @@ public class InteractiveSpider extends PApplet {
             targetInterpolator.start();
             return targetInterpolator;
         }
+
+        public void stop(){
+            for(int i = 0; i < interpolator.length; i++){
+                interpolator[i].stop();
+            }
+        }
+
+        public void start(){
+            for(int i = 0; i < interpolator.length; i++){
+                interpolator[i].start();
+            }
+        }
+
     }
 
     Scene scene;
     Spider[] spiders = new Spider[10];
+    Spider userSpider;
     float time = 0;
     float[][] magnitudeField = new float[30][30];
     float[][] angleField = new float[30][30];
-
+    float[] userVelocity = new float[]{0,0};
+    boolean left, right;
+    float velocityMagnitude;
 
     public void settings() {
         size(700, 700, P3D);
@@ -201,6 +220,14 @@ public class InteractiveSpider extends PApplet {
                     random(16,28),
                     2*(int) random(3, 6));
         }
+        userSpider = new Spider(scene,
+                random(6, 14),
+                random(5, 8),
+                random(16,28),
+                2*(int) random(3, 6));
+
+        userSpider.shape.setPosition(0,userSpider.shape.position().y(),0);
+        userSpider.pshape.setFill(color(255,0,0));
 
         scene.eye().translate(75, -171, 163);
         scene.eye().rotate(new Quaternion(new Vector(0.88f, 0.44f, 0.13f), 0.75f));
@@ -220,10 +247,11 @@ public class InteractiveSpider extends PApplet {
             z = (int) min(max(0, z), scene.radius());
             spiders[i].move(new float[]{magnitudeField[z][x], angleField[z][x]});
         }
-        System.out.println("Eye" + scene.eye().translation() + " rot " + scene.eye().rotation().axis() + "ang : " + scene.eye().rotation().angle());
-
+        userSpider.keepInside();
+        userSpider.move(userVelocity);
         generateField();
         drawField();
+        moveUser();
         time += 0.005f;
     }
 
@@ -252,6 +280,52 @@ public class InteractiveSpider extends PApplet {
             }
         }
         popStyle();
+    }
+
+    public void moveUser(){
+        if(velocityMagnitude != 0){
+            userSpider.start();
+            userVelocity[0] = velocityMagnitude;
+            if(left) userVelocity[1] += velocityMagnitude > 0 ? 0.1f : -0.1f;
+            if(right) userVelocity[1] += velocityMagnitude > 0 ? -0.1f : 0.1f;
+        }else{
+            userVelocity[0] = 0;
+            userSpider.stop();
+        }
+    }
+
+    public void keyReleased(){
+        if (key == CODED){
+            if(keyCode == UP){
+                velocityMagnitude = 0;
+            }
+            if(keyCode == DOWN){
+                velocityMagnitude = 0;
+            }
+            if(keyCode == LEFT){
+                left = false;
+            }
+            if(keyCode == RIGHT){
+                right = false;
+            }
+        }
+    }
+
+    public  void keyPressed(){
+        if (key == CODED){
+            if(keyCode == UP){
+                velocityMagnitude = 1;
+            }
+            if(keyCode == DOWN){
+                velocityMagnitude = -1;
+            }
+            if(keyCode == LEFT){
+                left = true;
+            }
+            if(keyCode == RIGHT){
+                right = true;
+            }
+        }
     }
 
 
