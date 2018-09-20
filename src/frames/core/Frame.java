@@ -567,6 +567,7 @@ public class Frame {
    * Same as {@code setReference(null)}.
    *
    * @see #setReference(Frame)
+   * @see #resetConstraint()
    */
   public void resetReference() {
     setReference(null);
@@ -877,6 +878,16 @@ public class Frame {
    */
   public void setConstraint(Constraint constraint) {
     _constraint = constraint;
+  }
+
+  /**
+   * Same as {@code setConstraint(null)}.
+   *
+   * @see #setConstraint(Constraint)
+   * @see #resetReference()
+   */
+  public void resetConstraint() {
+    setConstraint(null);
   }
 
   // TRANSLATION
