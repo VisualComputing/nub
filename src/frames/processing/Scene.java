@@ -8,6 +8,9 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
+// Thanks goes to Andres Colubri, https://www.sabetilab.org/andres-colubri/
+// for implementing the first off-screen scene working example
+
 package frames.processing;
 
 import frames.core.Frame;
