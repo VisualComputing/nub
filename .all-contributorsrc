@@ -7,32 +7,7 @@
   "imageSize": 100,
   "commit": true,
   "contributors": [
-    {
-      "login": "nakednous",
-      "name": "Jean Pierre Charalambos",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/645599?v=4",
-      "profile": "https://github.com/nakednous",
-      "contributions": [
-        "blog",
-        "bug",
-        "code",
-        "design",
-        "doc",
-        "eventOrganizing",
-        "example",
-        "financial",
-        "fundingFinding",
-        "ideas",
-        "platform",
-        "plugin",
-        "question",
-        "review",
-        "talk",
-        "test",
-        "tutorial",
-        "video"
-      ]
-    }
+   
   ],
   "repoType": "github"
 }
