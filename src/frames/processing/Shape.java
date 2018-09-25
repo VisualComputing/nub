@@ -8,6 +8,9 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
+// Thanks goes to Sebastian Chaparro, https://github.com/sechaparroc
+// for searching and providing an initial working picking example using a back buffer
+
 package frames.processing;
 
 import frames.core.Frame;
