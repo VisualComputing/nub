@@ -4,6 +4,7 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.constraint.AxisPlaneConstraint;
+import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.LocalConstraint;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
@@ -118,11 +119,16 @@ public class InteractiveSpider extends PApplet {
             Joint j2 = new Joint(scene, radius);
             j2.setReference(j1);
             j2.setPosition(reference.worldLocation(middle));
+            Joint j21 = new Joint(scene, radius);
+            j21.setReference(j2);
+            Vector v = Vector.add(middle, Vector.multiply(Vector.subtract(lower, middle),0.5f));
+            j21.setPosition(reference.worldLocation(v));
             Joint j3 = new Joint(scene, radius);
-            j3.setReference(j2);
+            j3.setReference(j21);
             j3.setPosition(reference.worldLocation(lower));
             j1.setRoot(true);
             addIk(i, j1, j3, target, invert);
+            j21.setConstraint(new FixedConstraint());
             return j1;
         }
 
@@ -198,7 +204,7 @@ public class InteractiveSpider extends PApplet {
     }
 
     Scene scene;
-    Spider[] spiders = new Spider[20];
+    Spider[] spiders = new Spider[30];
     Spider userSpider;
     float time = 0;
     float[][] magnitudeField = new float[30][30];
