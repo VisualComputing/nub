@@ -28,10 +28,10 @@ import frames.processing.*;
 
 Scene scene;
 //flock bounding box
-static int flockWidth = 1280;
-static int flockHeight = 720;
-static int flockDepth = 600;
-static boolean avoidWalls = true;
+int flockWidth = 1280;
+int flockHeight = 720;
+int flockDepth = 600;
+boolean avoidWalls = true;
 
 int initBoidNum = 900; // amount of boids to start the program with
 ArrayList<Boid> flock;
