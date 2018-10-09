@@ -71,24 +71,25 @@ void draw() {
 
   pushStyle();
   stroke(255);
-  scene.drawPath(interpolator, 5);
+  // same as:scene.drawPath(interpolator, 5);
+  scene.drawPath(interpolator);
   popStyle();
 
   for (Frame frame : interpolator.keyFrames()) {
     pushMatrix();
     scene.applyTransformation(frame);
-    if (scene.tracks(frame))
-      scene.drawAxes(40);
-    else
-      scene.drawAxes(20);
+    scene.drawAxes(scene.tracks(frame) ? 40 : 20);
     popMatrix();
   }
   if (showEyePath) {
     pushStyle();
     fill(255, 0, 0);
     stroke(0, 255, 0);
-    scene.drawPath(eyeInterpolator1, 3);
-    scene.drawPath(eyeInterpolator2, 3);
+    // same as:
+    // scene.drawPath(eyeInterpolator1, 3);
+    // scene.drawPath(eyeInterpolator2, 3);
+    scene.drawPath(eyeInterpolator1);
+    scene.drawPath(eyeInterpolator2);
     popStyle();
   }
 }
@@ -115,14 +116,16 @@ void keyPressed() {
     showEyePath = !showEyePath;
 
   if (key == '1')
-    eyeInterpolator1.addKeyFrame(scene.eye().get());
+    // same as: eyeInterpolator1.addKeyFrame(scene.eye().get())
+    eyeInterpolator1.addKeyFrame();
   if (key == 'a')
     eyeInterpolator1.toggle();
   if (key == 'b')
     eyeInterpolator1.purge();
 
   if (key == '2')
-    eyeInterpolator2.addKeyFrame(scene.eye().get());
+    // same as: eyeInterpolator2.addKeyFrame(scene.eye().get());
+    eyeInterpolator2.addKeyFrame();
   if (key == 'c')
     eyeInterpolator2.toggle();
   if (key == 'd')
