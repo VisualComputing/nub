@@ -4,6 +4,9 @@ import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -19,21 +22,50 @@ public class HillClimbing extends Solver{
     protected List<? extends Frame> _chain, _x_i;
     protected boolean _powerLaw;
     protected double _sigma;
+    protected double _alpha = 2;
+    protected PrintWriter _printWriter;
 
-    public HillClimbing(boolean powerLaw, double sigma, List<? extends Frame> chain){
-        this._powerLaw = powerLaw;
+    public HillClimbing(double sigma, List<? extends Frame> chain){
+        this._powerLaw = false;
         this._sigma = sigma;
         this._chain = chain;
+        _x_i = _copy(chain);
     }
 
-    public List<? extends Frame> execute(List<? extends Frame> initial, double sigma, boolean powerLaw){
+    public HillClimbing(double alpha, double sigma, List<? extends Frame> chain){
+        this._powerLaw = true;
+        this._alpha = alpha;
+        this._sigma = sigma;
+        this._chain = chain;
+        _x_i = _copy(chain);
+    }
+
+    public boolean powerLaw(){
+        return _powerLaw;
+    }
+
+    public double[] execute(){
+        double[] results = new double[maxIter];
         int k = 0;
-        ArrayList<Frame> x_i = _copy(initial);
-        while(k < iterations){
+        _x_i = _copy(_chain);
+        while(k < maxIter){
             _iterate();
+            results[k] = _distanceToTarget(_x_i);
             k++;
         }
-        return x_i;
+        return results;
+    }
+
+    public List<? extends Frame> chain(){
+        return _chain;
+    }
+
+    public Frame target() {
+        return _target;
+    }
+
+    public void setTarget(Frame target) {
+        this._target = target;
     }
 
     protected double _distanceToTarget(List<? extends Frame> chain){
@@ -74,9 +106,9 @@ public class HillClimbing extends Solver{
             float pitch;
             float yaw;
             if(_powerLaw){
-                roll = (float) (invert * _powerLawGenerator(random.nextDouble(), 2)*_sigma);
-                pitch = (float) (invert * _powerLawGenerator(random.nextDouble(), 2)*_sigma);
-                yaw = (float) (invert * _powerLawGenerator(random.nextDouble(), 2)*_sigma);
+                roll = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
+                pitch = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
+                yaw = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
             }else{
                 roll = (float) (random.nextGaussian() * _sigma);
                 pitch = (float) (random.nextGaussian() * _sigma);
@@ -86,12 +118,21 @@ public class HillClimbing extends Solver{
             x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
         }
 
-        double d1 = _distanceToTarget(x_i1), d2 = _distanceToTarget(x_i1);
+        double d1 = _distanceToTarget(x_i1), d2 = _distanceToTarget(_x_i);
         if(d1 < d2) {
             _x_i = x_i1;
             d1 = d2;
         }
         return d1 < minDistance;
+    }
+
+
+    public Frame head() {
+        return _chain.get(0);
+    }
+
+    public Frame endEffector() {
+        return _chain.get(_chain.size() - 1);
     }
 
     @Override

@@ -3,6 +3,7 @@ package ik.basic;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.HillClimbing;
@@ -23,13 +24,13 @@ import java.util.ArrayList;
  */
 public class HCTest extends PApplet {
     //TODO : Update
-    int num_joints = 15;
+    int num_joints = 5;
     float targetRadius = 7;
     float boneLength = 50;
 
     Scene scene;
     //Methods
-    int num_solvers = 1;
+    int num_solvers = 4;
     ArrayList<Solver> solvers;
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
@@ -56,59 +57,77 @@ public class HCTest extends PApplet {
         float left = PI/2;
         float right = PI/2;
 
-        ArrayList<ArrayList<Frame>> structures;
+        ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
 
         for(int i = 0; i < num_solvers; i++){
-            structures.add(generateChain(num_joints, boneLength, new Vector(i*scene.radius()/10 - scene.radius()/2.f, 0, 0)));
+            structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()/num_solvers - 0.8f*scene.radius(), 0, 0)));
         }
 
+        ArrayList<Vector> vertices = new ArrayList<Vector>();
+        float v = 20;
+        float w = 20;
+
+        vertices.add(new Vector(-w, -v));
+        vertices.add(new Vector(w, -v));
+        vertices.add(new Vector(w, v));
+        vertices.add(new Vector(-w, v));
+
+        for (int i = 0; i < num_joints - 1; i++) {
+            PlanarPolygon constraint = new PlanarPolygon(vertices);
+            constraint.setHeight(boneLength / 2.f);
+            Vector twist = structures.get(0).get(i + 1).translation().get();
+            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
+            offset = new Quaternion();
+            Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
+            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
+            constraint.setAngle(PI/3f);
+            for(ArrayList<Frame> structure : structures){
+                //structure.get(i).setConstraint(constraint);
+            }
+        }
+
+        /*
         for (int i = 1; i < num_joints - 1; i++) {
             Vector twist = structures.get(0).get(i + 1).translation().get();
             BallAndSocket constraint = new BallAndSocket(down, up, left, right);
             constraint.setRestRotation(structures.get(0).get(i).rotation().get(), new Vector(0, 1, 0), twist);
             for(ArrayList<Frame> structure : structures){
-                structure.get(i).setConstraint(constraint);
+                //structure.get(i).setConstraint(constraint);
             }
         }
+        */
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
+        solvers = new ArrayList<>();
+
+        solvers.add(new HillClimbing(radians(3), structures.get(0)));
+        solvers.add(new HillClimbing(5, radians(3), structures.get(1)));
+        solvers.add(new HillClimbing(radians(5), structures.get(2)));
+        solvers.add(new HillClimbing(5, radians(5), structures.get(3)));
+
+        //solvers.add(new CCDSolver(structures.get(2)));
+        //solvers.add(new ChainSolver(structures.get(3)));
 
         for(int i = 0; i < num_solvers; i++){
-
-        }
-
-        chain_solvers.add(new ChainSolver(structure1));
-
-        ccd_solver = new CCDSolver(structure2);
-
-        chain_solvers.add(new ChainSolver(structure3));
-
-
-        hc_solver = new HillClimbing(structures.get(0));
-        hc.
-
-        int i = 0;
-        for(ChainSolver s : chain_solvers){
-            s.pg = scene.pApplet().getGraphics();
-            //s.timesPerFrame = 20;
-            s.error = 0.5f;
-            s.timesPerFrame = 0.5f;
-            s.maxIter = 30;
-            //s.error = 1f;
-            s.setTarget(targets.get(i));
+            solvers.get(i).error = 0.5f;
+            solvers.get(i).timesPerFrame = 1f;
+            solvers.get(i).maxIter = 500;
             if(i != 0)targets.get(i).setReference(targets.get(0));
-            targets.get(i++).setPosition(s.endEffector().position());
+            if(solvers.get(i) instanceof HillClimbing) {
+                ((HillClimbing) solvers.get(i)).setTarget(targets.get(i));
+                targets.get(i).setPosition( ((HillClimbing) solvers.get(i)).endEffector().position());
+            }
+            if(solvers.get(i) instanceof ChainSolver) {
+                ((ChainSolver) solvers.get(i)).setTarget(targets.get(i));
+                targets.get(i).setPosition( ((ChainSolver) solvers.get(i)).endEffector().position());
+            }
+            if(solvers.get(i) instanceof CCDSolver) {
+                ((CCDSolver) solvers.get(i)).setTarget(targets.get(i));
+                targets.get(i).setPosition( ((CCDSolver) solvers.get(i)).endEffector().position());
+            }
         }
-
-        ccd_solver.timesPerFrame = 0.5f;
-        ccd_solver.error = 0.5f;
-
-        ccd_solver.setTarget(targets.get(targets.size()-1));
-        //scene.addIKTarget(structure3.get(structure3.size()-1), targets.get(0));
-        targets.get(targets.size()-1).setReference(targets.get(0));
-        targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
     }
 
     public void draw() {
@@ -116,14 +135,10 @@ public class HCTest extends PApplet {
         lights();
         //Draw Constraints
         scene.drawAxes();
-        for(ChainSolver chain_solver : chain_solvers){
-            if(show1) draw_pos(prev, color(0,255,0), 3);
-            if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
-            if(show3) draw_pos(constr, color(100,100,0), 3);
-        }
         if(solve) {
-            ccd_solver.solve();
-            for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
+            for(Solver solver : solvers){
+                solver.solve();
+            }
         }
         scene.traverse();
 
@@ -162,13 +177,11 @@ public class HCTest extends PApplet {
     }
 
     boolean solve = false;
-    Frame n = null;
-    float d = 5;
-    boolean show1 = true, show2 = true, show3 = true;
-
-    ArrayList<Vector> prev = new ArrayList<Vector>();
-    ArrayList<Vector> constr = new ArrayList<Vector>();
-
+    public void keyPressed(){
+        if(key == 'w' || key == 'W'){
+            solve = !solve;
+        }
+    }
 
     @Override
     public void mouseMoved() {
@@ -197,7 +210,8 @@ public class HCTest extends PApplet {
                 scene.align();
     }
 
+
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.constraintTest.HCTest"});
+        PApplet.main(new String[]{"ik.basic.HCTest"});
     }
 }
