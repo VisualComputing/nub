@@ -3,8 +3,13 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates how to use off-screen rendering to build
- * a mini-map of the main Scene where all objects are interactive. It
- * also shows Frame syncing among views.
+ * a mini-map of the main Scene where all objects are interactive.
+ * In 3D the minimap also displays the projection of the scene onto
+ * the near plane.
+ * 
+ * Press ' ' to toggle the minimap display.
+ * Press 's' and 'S' to show the entire scene and minimap, resp.
+ * Press 't' to toggle the scene camera type (only in 3D).
  */
 
 import frames.primitives.*;
@@ -24,7 +29,7 @@ int oY = h - oH;
 boolean showMiniMap = true;
 
 //Choose FX2D, JAVA2D, P2D or P3D
-String renderer = P2D;
+String renderer = P3D;
 
 void settings() {
   size(w, h, renderer);
@@ -32,6 +37,8 @@ void settings() {
 
 void setup() {
   sceneCanvas = createGraphics(w, h, renderer);
+  // Standard camera zNear and zFar implementation allows to better display
+  // the projection of the scene onto the near plane on the minimap
   scene = new Scene(this, sceneCanvas) {
     @Override
     public float zNear() {
@@ -149,8 +156,9 @@ void keyPressed() {
   if (key == 'S')
     minimap.fitBallInterpolation();
   if (key == 't')
-    if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else
-      focus.setType(Graph.Type.PERSPECTIVE);
+    if(g.is3D())
+      if (focus.type() == Graph.Type.PERSPECTIVE)
+        focus.setType(Graph.Type.ORTHOGRAPHIC);
+      else
+        focus.setType(Graph.Type.PERSPECTIVE);
 }
