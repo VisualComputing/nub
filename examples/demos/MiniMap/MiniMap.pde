@@ -4,8 +4,8 @@
  * 
  * This example illustrates how to use off-screen rendering to build
  * a mini-map of the main Scene where all objects are interactive.
- * In 3D the minimap also displays the projection of the scene onto
- * the near plane.
+ * Note that the minimap displays the projection of the scene onto
+ * the near plane in 3D.
  * 
  * Press ' ' to toggle the minimap display.
  * Press 's' and 'S' to show the entire scene and minimap, resp.
