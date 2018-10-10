@@ -37,8 +37,8 @@ void settings() {
 
 void setup() {
   sceneCanvas = createGraphics(w, h, renderer);
-  // Standard camera zNear and zFar implementation allows to better display
-  // the projection of the scene onto the near plane on the minimap
+  // Standard camera zNear and zFar implementation allows to better
+  // display the projection of the scene onto the minimap near plane
   scene = new Scene(this, sceneCanvas) {
     @Override
     public float zNear() {
@@ -53,13 +53,6 @@ void setup() {
         return 400;
       else
         return super.zFar();
-    }
-    @Override
-    protected float _rescalingFactor() {
-      if(is3D())
-        return 1;
-      else
-        return super._rescalingFactor();
     }
   };
   torus1 = new Torus(scene, color(255, 0, 0));
