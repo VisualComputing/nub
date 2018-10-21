@@ -17,8 +17,9 @@ import frames.primitives.Vector;
  * The matrix handler specifies (and implements) various matrix operations needed by the
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
- * To set shader matrix uniform variables call {@link #projection()}, {@link #modelView()}
- * and (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * To emit the {@link #projectionModelView()} matrix to a shader override the
+ * {@link #_setUniforms()} signal, which is fired automatically by the handler every time
+ * one of its matrices change state. See also {@link #projection()}, {@link #modelView()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
@@ -94,6 +95,9 @@ public class MatrixHandler {
     _projection.set(graph().computeProjection());
     _view.set(graph().eye().view());
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
+    // TODO _bindProjection is redundant when there's no binding of the matrices
+    // We could go like this (but I don't know if it works in JS):
+    //if(graph().getClass() != Graph.class)
     _bindProjection(cacheProjection());
     _bindModelView(cacheView());
     _setUniforms();
@@ -103,6 +107,10 @@ public class MatrixHandler {
 
   /**
    * Returns {@link #projection()} times {@link #modelView()}.
+   *
+   * @see #_setUniforms()
+   * @see #projection()
+   * @see #modelView()
    */
   public Matrix projectionModelView() {
     return Matrix.multiply(projection(), modelView());
@@ -113,14 +121,13 @@ public class MatrixHandler {
    * or {@link #modelView()} matrices change. Default implementation is empty.
    */
   protected void _setUniforms() {
-
   }
 
   /**
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
-   * Default implementation is empty (see {@link #_bind()}).
    */
   public void _bindProjection(Matrix matrix) {
+    _projection.set(matrix);
   }
 
   /**
