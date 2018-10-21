@@ -94,7 +94,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void bindModelView(Matrix matrix) {
+  public void _bindModelView(Matrix matrix) {
     pg().setMatrix(Scene.toPMatrix2D(matrix));
   }
 

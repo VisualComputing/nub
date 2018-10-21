@@ -104,8 +104,8 @@ public class MatrixHandler {
   /**
    * Returns {@link #projection()} times {@link #modelView()}.
    */
-  public float[] projectionModelView() {
-    return Matrix.multiply(projection(), modelView()).get(new float[16]);
+  public Matrix projectionModelView() {
+    return Matrix.multiply(projection(), modelView());
   }
 
   /**

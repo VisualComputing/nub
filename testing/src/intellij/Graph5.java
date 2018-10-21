@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.MatrixHandler;
-import frames.primitives.Matrix;
 import frames.primitives.Point;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -78,90 +77,19 @@ public class Graph5 extends PApplet {
 
   public class GLSLMatrixHandler extends MatrixHandler {
     PShader framesShader;
-    Matrix pmv;
     PMatrix3D pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph) {
       super(graph);
-      framesShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/framesjs/testing/data/matrix_handler/FrameVert_pmv.glsl");
+      framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
     }
 
-    void updateMatrices() {
+    @Override
+    protected void _setUniforms() {
       shader(framesShader);
-      pmv = Matrix.multiply(projection(), modelView());
-      pmatrix.set(pmv.get(new float[16]));
+      pmatrix.set(Scene.toPMatrix(projectionModelView()));
+      pmatrix.transpose();
       framesShader.set("frames_transform", pmatrix);
-    }
-
-    @Override
-    protected void _bind() {
-      super._bind();
-      //shader(framesShader);
-      //pmatrix.set(cacheView().get(new float[16]));
-      //framesShader.set("frames_transform", pmatrix);
-      updateMatrices();
-    }
-
-    /*
-    @Override
-    public void bindProjection(Matrix matrix) {
-      super.bindProjection(matrix);
-      updateMatrices();
-    }
-
-    @Override
-    public void bindModelView(Matrix matrix) {
-      super.bindModelView(matrix);
-      updateMatrices();
-    }
-    // */
-
-    @Override
-    public void applyProjection(Matrix matrix) {
-      super.applyProjection(matrix);
-      updateMatrices();
-    }
-
-    @Override
-    public void applyModelView(Matrix matrix) {
-      super.applyModelView(matrix);
-      updateMatrices();
-    }
-
-    @Override
-    public void translate(float x, float y) {
-      super.translate(x, y);
-      updateMatrices();
-    }
-
-    @Override
-    public void translate(float x, float y, float z) {
-      super.translate(x, y, z);
-      updateMatrices();
-    }
-
-    @Override
-    public void rotate(float angle) {
-      super.rotate(angle);
-      updateMatrices();
-    }
-
-    @Override
-    public void rotate(float angle, float vx, float vy, float vz) {
-      super.rotate(angle, vx, vy, vz);
-      updateMatrices();
-    }
-
-    @Override
-    public void scale(float sx, float sy) {
-      super.scale(sx, sy);
-      updateMatrices();
-    }
-
-    @Override
-    public void scale(float x, float y, float z) {
-      super.scale(x, y, z);
-      updateMatrices();
     }
   }
 }
