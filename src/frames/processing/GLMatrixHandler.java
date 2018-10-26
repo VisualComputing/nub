@@ -50,7 +50,7 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void bindProjection(Matrix matrix) {
+  public void _bindProjection(Matrix matrix) {
     pggl().setProjection(Scene.toPMatrix(matrix));
   }
 
@@ -75,7 +75,7 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void bindModelView(Matrix matrix) {
+  public void _bindModelView(Matrix matrix) {
     if (_graph.is3D())
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {

@@ -1020,8 +1020,8 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Sets the {@code pGraphics} matrices by calling
-   * {@link MatrixHandler#bindProjection(Matrix)} and
-   * {@link MatrixHandler#bindModelView(Matrix)} (only makes sense
+   * {@link MatrixHandler#_bindProjection(Matrix)} and
+   * {@link MatrixHandler#_bindModelView(Matrix)} (only makes sense
    * when {@link #frontBuffer()} is different than {@code pGraphics}).
    * <p>
    * This method doesn't perform any computation, but simple retrieve the current matrices
@@ -1031,9 +1031,9 @@ public class Scene extends Graph implements PConstants {
     if (this.frontBuffer() == pGraphics)
       return;
     MatrixHandler matrixHandler = matrixHandler(pGraphics);
-    matrixHandler.bindProjection(projection());
+    matrixHandler._bindProjection(projection());
     //matrixHandler.bindView(matrixHandler().cacheView());
-    matrixHandler.bindModelView(matrixHandler().cacheView());
+    matrixHandler._bindModelView(matrixHandler().cacheView());
   }
 
   /**
