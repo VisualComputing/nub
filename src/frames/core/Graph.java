@@ -1032,7 +1032,6 @@ public class Graph {
    * </ol>
    */
   public void preDraw() {
-    //TODO test syncing, since timingHandler().handle() was called in postDraw()
     timingHandler().handle();
     matrixHandler()._bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
