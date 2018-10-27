@@ -25,7 +25,7 @@ class Boid {
     float flap = 0;
     float t = 0;
 
-    Boid(Scene scn, Shape shape, PShape pshape, Vector inPos) {
+    Boid(Scene scn, Frame objFrame, PShape pshape, Vector inPos) {
         scene = scn;
         pApplet = scene.pApplet();
         position = new Vector();
@@ -40,7 +40,7 @@ class Boid {
                 //render();
                 //scene.drawAxes(20);
                 scene.pApplet().pushMatrix();
-                scene.applyTransformation(shape);
+                scene.applyTransformation(objFrame);
                 //scene.drawAxes(20);
                 scene.pApplet().shape(pshape);
                 scene.pApplet().popMatrix();

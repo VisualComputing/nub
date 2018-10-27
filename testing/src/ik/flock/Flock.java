@@ -24,6 +24,10 @@ public class Flock extends PApplet {
     static int flockDepth = 600;
     static boolean avoidWalls = true;
 
+    String shapePath = "/testing/data/objs/fish.obj";
+    PShape pshape;
+    Frame objShape;
+
     int initBoidNum = 500; // amount of boids to start the program with
     static ArrayList<Boid> flock;
     static Frame avatar;
@@ -44,7 +48,7 @@ public class Flock extends PApplet {
         flock = new ArrayList();
         generateFish();
         for (int i = 0; i < initBoidNum; i++)
-            flock.add(new Boid(scene, shape, pshape, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+            flock.add(new Boid(scene, objShape, pshape, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
     }
 
     public void draw() {
@@ -167,11 +171,6 @@ public class Flock extends PApplet {
         }
     }
 
-    String shapePath = "/testing/data/objs/fish.obj";
-    String texturePath = "/testing/data/objs/fish.jpg";
-    PShape pshape;
-    Shape shape;
-
     public void generateFish(){
         pshape = loadShape(sketchPath() + shapePath);
 
@@ -180,46 +179,46 @@ public class Flock extends PApplet {
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
         //model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
-        shape = new Shape(scene, pshape);
+        objShape = new Frame(scene);
 
-        shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
-        shape.scale(200.f * 1.f / max);
-        Frame root = fishSkeleton(shape);
+        objShape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
+        objShape.scale(200.f * 1.f / max);
+        Frame root = fishSkeleton(objShape);
 
         ArrayList<Frame> skeleton = (ArrayList<Frame>) scene.branch(root);
-        shape.scale(0.4f);
+        objShape.scale(0.4f);
         //Uncomment to use Linear Blending Skinning with CPU
-        skinning = new LinearBlendSkinning(shape, pshape);
+        skinning = new LinearBlendSkinning(objShape, pshape);
         skinning.setup(skeleton);
         //Adding IK behavior
         Frame target = new Frame(scene);
-        target.setReference(shape);
+        target.setReference(objShape);
         target.setPosition(skeleton.get(skeleton.size() - 1).position());
         //Making a default Path that target must follow
-        setupTargetInterpolator(shape, target);
+        setupTargetInterpolator(objShape, target);
         Solver solver = scene.registerTreeSolver(root);
         solver.error = 0.01f;
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
-        shape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
+        objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
     }
 
     public Frame fishSkeleton(Frame reference) {
-        Frame j1 = new Joint(scene);
+        Frame j1 = new Frame(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        Frame  j2 = new Joint(scene);
+        Frame  j2 = new Frame(scene);
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
-        Frame  j3 = new Joint(scene);
+        Frame  j3 = new Frame(scene);
         j3.setReference(j2);
         j3.setPosition(0, 0.4f, 22);
-        Frame  j4 = new Joint(scene);
+        Frame  j4 = new Frame(scene);
         j4.setReference(j3);
         j4.setPosition(0, 0, -18);
-        Frame  j5 = new Joint(scene);
+        Frame  j5 = new Frame(scene);
         j5.setReference(j4);
         j5.setPosition(0, 1.8f, -54);
-        Frame  j6 = new Joint(scene);
+        Frame  j6 = new Frame(scene);
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         return j1;

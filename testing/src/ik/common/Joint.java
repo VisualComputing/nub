@@ -70,4 +70,7 @@ public class Joint extends Frame{
     public void setRoot(boolean isRoot){
         _isRoot = isRoot;
     }
+    public float radius(){
+        return _radius;
+    }
 }

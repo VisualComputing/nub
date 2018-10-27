@@ -24,13 +24,13 @@ import java.util.ArrayList;
  */
 public class HCTest extends PApplet {
     //TODO : Update
-    int num_joints = 5;
-    float targetRadius = 7;
+    int num_joints = 15;
+    float targetRadius = 12;
     float boneLength = 50;
 
     Scene scene;
     //Methods
-    int num_solvers = 4;
+    int num_solvers = 5;
     ArrayList<Solver> solvers;
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
@@ -106,13 +106,13 @@ public class HCTest extends PApplet {
         solvers.add(new HillClimbing(5, radians(3), structures.get(1)));
         solvers.add(new HillClimbing(radians(5), structures.get(2)));
         solvers.add(new HillClimbing(5, radians(5), structures.get(3)));
+        solvers.add(new ChainSolver(structures.get(4)));
 
         //solvers.add(new CCDSolver(structures.get(2)));
-        //solvers.add(new ChainSolver(structures.get(3)));
 
         for(int i = 0; i < num_solvers; i++){
             solvers.get(i).error = 0.5f;
-            solvers.get(i).timesPerFrame = 1f;
+            solvers.get(i).timesPerFrame = 10;
             solvers.get(i).maxIter = 500;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbing) {
@@ -141,7 +141,26 @@ public class HCTest extends PApplet {
             }
         }
         scene.traverse();
-
+        scene.beginHUD();
+        for(Solver solver : solvers) {
+            fill(255);
+            textSize(12);
+            if (solver instanceof HillClimbing) {
+                HillClimbing s = (HillClimbing) solver;
+                Frame f = s.chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                if(s.powerLaw()){
+                    text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                } else{
+                    text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                }
+            } else if (solver instanceof ChainSolver) {
+                Frame f = ((ChainSolver)solver).chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("FABRIK", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            }
+        }
+        scene.endHUD();
     }
 
     public void setConstraint(float down, float up, float left, float right, Frame f, Vector twist, float boneLength){

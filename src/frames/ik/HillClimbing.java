@@ -40,6 +40,10 @@ public class HillClimbing extends Solver{
         _x_i = _copy(chain);
     }
 
+    public double sigma(){ return _sigma; }
+
+    public double alpha(){ return _alpha; }
+
     public boolean powerLaw(){
         return _powerLaw;
     }
