@@ -361,6 +361,8 @@ public class Graph {
    * window aspect ratio (see {@link #aspectRatio()} and {@link #horizontalFieldOfView()}).
    *
    * @see #setFieldOfView(float)
+   * @see #horizontalFieldOfView()
+   * @see #aspectRatio()
    * @see #eye()
    */
   public float fieldOfView() {
@@ -382,11 +384,15 @@ public class Graph {
    * Returns the horizontal field of view of the {@link #eye()} (in radians).
    * <p>
    * Value is set using {@link #setHorizontalFieldOfView(float)} or
-   * {@link #setFieldOfView(float)}. These values are always linked by:
-   * {@code horizontalFieldOfView() = 2 * atan (tan(fieldOfView()/2) * aspectRatio())}.
+   * {@link #setFieldOfView(float)}.
+   *
+   * @see #setHorizontalFieldOfView(float)
+   * @see #fieldOfView()
+   * @see #aspectRatio()
+   * @see #eye()
    */
   public float horizontalFieldOfView() {
-    return 2 * (float) Math.atan(eye().magnitude()) * aspectRatio();
+    return 2 * (float) Math.atan(eye().magnitude() * aspectRatio());
   }
 
   /**
