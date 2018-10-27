@@ -958,6 +958,11 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@link super#traverse()}, but if there are any {@link Shape}s in the scene frame hierarchy
    * they also get drawn. Call it only within Processing draw() method.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
    */
   @Override
   public void traverse() {
@@ -966,26 +971,62 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Visit all {@link #frames()} into the given {@code pGraphics}. No
-   * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
-   * chaining. Call it only within Processing draw() method.
+   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
+   *
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics) {
+    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
+  }
+
+  /**
+   * Same as {@code traverse(pGraphics, eye.view(), matrixHandler().projection())}.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics, Frame eye) {
+    traverse(pGraphics, eye.view(), matrixHandler().projection());
+  }
+
+  /**
+   * Same as {@code traverse(pGraphics, eye.view(), projection)}.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics, Frame eye, Matrix projection) {
+    traverse(pGraphics, eye.view(), projection);
+  }
+
+  /**
+   * Renders the scene into {@code pGraphics} from the {@code eye} point of view, using
+   * the {@code projection} matrix. Calls {@link Graph#traverse()}.
+   * No {@code pGraphics.beginDraw()/endDraw()} calls take place. Call this method only
+   * within Processing draw() method.
    * <p>
    * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #draw()}.
    *
-   * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
-   * (i.e., manual eye update) and before any other transformation of the modelview takes
-   * place.
-   *
    * @param pGraphics
    * @see #frames()
    * @see #traverse()
    */
-  public void traverse(PGraphics pGraphics) {
+  public void traverse(PGraphics pGraphics, Matrix view, Matrix projection) {
     _targetPGraphics = pGraphics;
-    if (pGraphics != frontBuffer())
-      _bind(pGraphics);
+    if (pGraphics != frontBuffer()) {
+      MatrixHandler matrixHandler = matrixHandler(pGraphics);
+      matrixHandler._bindProjection(projection);
+      matrixHandler._bindModelView(view);
+    }
     super.traverse();
   }
 
@@ -1019,31 +1060,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Sets the {@code pGraphics} matrices by calling
-   * {@link MatrixHandler#_bindProjection(Matrix)} and
-   * {@link MatrixHandler#_bindModelView(Matrix)} (only makes sense
-   * when {@link #frontBuffer()} is different than {@code pGraphics}).
-   * <p>
-   * This method doesn't perform any computation, but simple retrieve the current matrices
-   * whose actual computation has been updated in {@link #preDraw()}.
-   */
-  protected void _bind(PGraphics pGraphics) {
-    if (this.frontBuffer() == pGraphics)
-      return;
-    MatrixHandler matrixHandler = matrixHandler(pGraphics);
-    matrixHandler._bindProjection(projection());
-    //matrixHandler.bindView(matrixHandler().cacheView());
-    matrixHandler._bindModelView(matrixHandler().cacheView());
-  }
-
-  /**
    * Apply the local transformation defined by the given {@code frame} on the given
-   * {@code pGraphics}. This method doesn't call {@link #_bind(PGraphics)} which
-   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
-   * {@code pGraphics}). Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
+   * {@code pGraphics}. Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
    *
    * @see #applyWorldTransformation(PGraphics, Frame)
-   * @see #_bind(PGraphics)
    */
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
     if (pGraphics instanceof PGraphics3D) {
@@ -1060,12 +1080,9 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Apply the global transformation defined by the given {@code frame} on the given
-   * {@code pGraphics}. This method doesn't call {@link #_bind(PGraphics)} which
-   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
-   * {@code pGraphics}).
+   * {@code pGraphics}.
    *
    * @see #applyTransformation(PGraphics, Frame)
-   * @see #_bind(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
     Frame reference = frame.reference();
@@ -2126,6 +2143,14 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
+  //TODO drawEye stuff should be done in terms of (eye) frame and ideally the projection matrix
+  // see the new scene.traverse(..., eye, ...,) methiods
+
+  /**
+   * Same as {@code drawEye(graph, false)}.
+   *
+   * @see #drawEye(Graph, boolean)
+   */
   public void drawEye(Graph graph) {
     drawEye(graph, false);
   }
