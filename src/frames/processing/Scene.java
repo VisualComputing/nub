@@ -2292,23 +2292,22 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    _drawFarPlane(pGraphics, points[1], new Vector(0, 0, -1));
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1));
     // near plane
-    _drawNearPlane(pGraphics, graph, points[0], new Vector(0, 0, 1));
+    _drawPlane(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, points[0], new Vector(0, 0, 1));
 
     pGraphics.popStyle();
   }
 
-  protected void _drawNearPlane(PGraphics pGraphics, Graph graph, Vector corner, Vector normal) {
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
+  protected void _drawPlane(PGraphics pGraphics, PGraphics texture, Vector corner, Vector normal) {
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
-    if (texture) {
+    if (texture != null) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
-      pGraphics.texture(((Scene) graph).frontBuffer());
+      pGraphics.texture(texture);
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
@@ -2319,21 +2318,6 @@ public class Scene extends Graph implements PConstants {
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
       Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
     }
-    pGraphics.endShape();
-    pGraphics.popStyle();
-  }
-
-  protected void _drawFarPlane(PGraphics pGraphics, Vector corner, Vector normal) {
-    pGraphics.pushStyle();
-    // near plane
-    pGraphics.beginShape(PApplet.QUAD);
-    pGraphics.normal(normal.x(), normal.y(), normal.z());
-
-    Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
-    Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
-    Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
-    Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
-
     pGraphics.endShape();
     pGraphics.popStyle();
   }
