@@ -7,7 +7,7 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class ShadowMapping extends PApplet {
+public class ShadowMapping2 extends PApplet {
   Scene scene;
   Shape[] shapes;
   Shape light;
@@ -24,7 +24,7 @@ public class ShadowMapping extends PApplet {
   }
 
   public void setup() {
-    scene = new Scene(this, createGraphics(w, h, renderer));
+    scene = new Scene(this);
     scene.setRadius(max(w, h));
 
     shapes = new Shape[20];
@@ -53,20 +53,20 @@ public class ShadowMapping extends PApplet {
   }
 
   public void draw() {
+    background(90, 80, 125);
     // 1. Fill in and display front-buffer
-    scene.beginDraw();
-    scene.frontBuffer().background(10, 50, 25);
     scene.traverse();
-    scene.endDraw();
-    scene.display();
     // 2. Display shadow map
     shadowMap.beginDraw();
     shadowMap.background(120);
     scene.traverse(shadowMap, light);
     shadowMap.endDraw();
     // 3. display shadow map
-    if (show)
+    if (show) {
+      scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
+      scene.endHUD();
+    }
   }
 
   public void mouseMoved() {
@@ -104,6 +104,6 @@ public class ShadowMapping extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMapping"});
+    PApplet.main(new String[]{"intellij.ShadowMapping2"});
   }
 }
