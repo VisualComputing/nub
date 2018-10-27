@@ -2188,7 +2188,7 @@ public class Scene extends Graph implements PConstants {
         //drawEye(pGraphics, graph.eye(), wh[0], graph.isLeftHanded() ? -wh[1] : wh[1], graph.zNear(), graph.zFar(), texture ? ((Scene)graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
-        //drawEye(pGraphics, graph.eye(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene)graph).frontBuffer() : null);
+        drawEye(pGraphics, graph.eye(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
     }
   }
@@ -2406,6 +2406,93 @@ public class Scene extends Graph implements PConstants {
     _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
     // near plane
     _drawPlane(pGraphics, frontBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
+  }
+
+  public static void drawEye(PGraphics pGraphics, Frame eye, float aspectRatio, float zNear, float zFar, PGraphics texture) {
+    boolean lh = aspectRatio < 0;
+    aspectRatio = Math.abs(aspectRatio);
+
+    pGraphics.pushStyle();
+
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setZ(zNear * 1 / eye.magnitude());
+    points[1].setZ(zFar * 1 / eye.magnitude());
+    //(2 * (float) Math.atan(eye().magnitude()))
+    //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
+    points[0].setY(points[0].z() * eye.magnitude());
+    points[0].setX(points[0].y() * aspectRatio);
+    float ratio = points[1].z() / points[0].z();
+    points[1].setY(ratio * points[0].y());
+    points[1].setX(ratio * points[0].x());
+
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (texture != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+    }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+    }
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (texture != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, texture, points[0], new Vector(0, 0, 1), lh);
 
     pGraphics.popStyle();
   }
