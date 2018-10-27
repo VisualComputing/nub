@@ -2172,9 +2172,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawEye(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
-    // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
-    // (which are given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
     if (graph == this) {
       System.out.println("Warning: No drawEye done!");
       return;
@@ -2184,8 +2181,8 @@ public class Scene extends Graph implements PConstants {
         drawEye(pGraphics, graph.eye(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case ORTHOGRAPHIC:
-        //float[] wh = boundaryWidthHeight();
-        //drawEye(pGraphics, graph.eye(), wh[0], graph.isLeftHanded() ? -wh[1] : wh[1], graph.zNear(), graph.zFar(), texture ? ((Scene)graph).frontBuffer() : null);
+        float[] wh = graph.boundaryWidthHeight();
+        drawEye(pGraphics, graph.eye(), wh[0], graph.isLeftHanded() ? -wh[1] : wh[1], graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
         drawEye(pGraphics, graph.eye(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
@@ -2201,138 +2198,6 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    */
-
-  /*
-  public void drawEye(PGraphics pGraphics, Graph graph) {
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
-    // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
-    // (which are given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
-    if (graph == this) {
-      System.out.println("Warning: No drawEye done!");
-      return;
-    }
-    pGraphics.pushStyle();
-
-    // boolean drawFarPlane = true;
-    // int farIndex = drawFarPlane ? 1 : 0;
-    int farIndex = is3D() ? 1 : 0;
-    boolean ortho = false;
-    if (is3D())
-      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
-        ortho = true;
-
-    // 0 is the upper left coordinates of the near corner, 1 for the far one
-    Vector[] points = new Vector[2];
-    points[0] = new Vector();
-    points[1] = new Vector();
-
-    if (is2D() || ortho) {
-      float[] wh = graph.boundaryWidthHeight();
-      points[0].setX(wh[0] * 1 / graph.eye().magnitude());
-      points[1].setX(wh[0] * 1 / graph.eye().magnitude());
-      points[0].setY(wh[1] * 1 / graph.eye().magnitude());
-      points[1].setY(wh[1] * 1 / graph.eye().magnitude());
-    }
-
-    if (is3D()) {
-      points[0].setZ(graph.zNear() * 1 / graph.eye().magnitude());
-      points[1].setZ(graph.zFar() * 1 / graph.eye().magnitude());
-      if (graph.type() == Graph.Type.PERSPECTIVE) {
-        points[0].setY(points[0].z() * PApplet.tan((graph.fieldOfView() / 2.0f)));
-        points[0].setX(points[0].y() * graph.aspectRatio());
-        float ratio = points[1].z() / points[0].z();
-        points[1].setY(ratio * points[0].y());
-        points[1].setX(ratio * points[0].x());
-      }
-
-      // Frustum lines
-      switch (graph.type()) {
-        case PERSPECTIVE: {
-          pGraphics.beginShape(PApplet.LINES);
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, points[farIndex].x(), points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, -points[farIndex].x(), points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, -points[farIndex].x(), -points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, points[farIndex].x(), -points[farIndex].y(), -points[farIndex].z());
-          pGraphics.endShape();
-          break;
-        }
-        case ORTHOGRAPHIC: {
-          // if (drawFarPlane) {
-          pGraphics.beginShape(PApplet.LINES);
-          Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
-          pGraphics.endShape();
-          // }
-          break;
-        }
-      }
-    }
-
-    // Up arrow
-    float arrowHeight = 1.5f * points[0].y();
-    float baseHeight = 1.2f * points[0].y();
-    float arrowHalfWidth = 0.5f * points[0].x();
-    float baseHalfWidth = 0.3f * points[0].x();
-
-    pGraphics.noStroke();
-    // Arrow base
-    if (texture) {
-      pGraphics.pushStyle();// end at arrow
-      pGraphics.colorMode(PApplet.RGB, 255);
-      float r = pGraphics.red(pGraphics.fillColor);
-      float g = pGraphics.green(pGraphics.fillColor);
-      float b = pGraphics.blue(pGraphics.fillColor);
-      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
-    }
-    pGraphics.beginShape(PApplet.QUADS);
-    if (isLeftHanded()) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
-    }
-    pGraphics.endShape();
-
-    // Arrow
-    pGraphics.beginShape(PApplet.TRIANGLES);
-    if (isLeftHanded()) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
-    }
-    if (texture)
-      pGraphics.popStyle();// begin at arrow base
-    pGraphics.endShape();
-
-    // Planes
-    // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), graph.isLeftHanded());
-    // near plane
-    _drawPlane(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, points[0], new Vector(0, 0, 1), graph.isLeftHanded());
-
-    pGraphics.popStyle();
-  }
-  */
 
   /**
    * Draws a 2D representation of the {@code eye} into {@code pGraphics} according. The {@code width}, [@code height}
@@ -2408,7 +2273,92 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
-  public static void drawEye(PGraphics pGraphics, Frame eye, float aspectRatio, float zNear, float zFar, PGraphics texture) {
+  public static void drawEye(PGraphics pGraphics, Frame eye, float width, float height, float zNear, float zFar, PGraphics frontBuffer) {
+    boolean lh = height < 0;
+    height = Math.abs(height);
+
+    pGraphics.pushStyle();
+
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setX(width * 1 / eye.magnitude());
+    points[1].setX(width * 1 / eye.magnitude());
+    points[0].setY(height * 1 / eye.magnitude());
+    points[1].setY(height * 1 / eye.magnitude());
+
+    points[0].setZ(zNear * 1 / eye.magnitude());
+    points[1].setZ(zFar * 1 / eye.magnitude());
+
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (frontBuffer != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+    }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+    }
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (frontBuffer != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, frontBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
+  }
+
+  public static void drawEye(PGraphics pGraphics, Frame eye, float aspectRatio, float zNear, float zFar, PGraphics frontBuffer) {
     boolean lh = aspectRatio < 0;
     aspectRatio = Math.abs(aspectRatio);
 
@@ -2449,7 +2399,7 @@ public class Scene extends Graph implements PConstants {
 
     pGraphics.noStroke();
     // Arrow base
-    if (texture != null) {
+    if (frontBuffer != null) {
       pGraphics.pushStyle();// end at arrow
       pGraphics.colorMode(PApplet.RGB, 255);
       float r = pGraphics.red(pGraphics.fillColor);
@@ -2482,7 +2432,7 @@ public class Scene extends Graph implements PConstants {
       Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
       Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
-    if (texture != null)
+    if (frontBuffer != null)
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
 
@@ -2490,20 +2440,20 @@ public class Scene extends Graph implements PConstants {
     // far plane
     _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
     // near plane
-    _drawPlane(pGraphics, texture, points[0], new Vector(0, 0, 1), lh);
+    _drawPlane(pGraphics, frontBuffer, points[0], new Vector(0, 0, 1), lh);
 
     pGraphics.popStyle();
   }
 
-  protected static void _drawPlane(PGraphics pGraphics, PGraphics texture, Vector corner, Vector normal, boolean lh) {
+  protected static void _drawPlane(PGraphics pGraphics, PGraphics frontBuffer, Vector corner, Vector normal, boolean lh) {
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
-    if (texture != null) {
+    if (frontBuffer != null) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
-      pGraphics.texture(texture);
+      pGraphics.texture(frontBuffer);
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);

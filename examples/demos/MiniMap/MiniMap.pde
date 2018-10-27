@@ -154,8 +154,8 @@ void keyPressed() {
         focus.setType(Graph.Type.ORTHOGRAPHIC);
       else
         focus.setType(Graph.Type.PERSPECTIVE);
-    else {
-      scene.flip();
-      minimap.flip();
-    }
+  if (key == 'f') {
+    scene.flip();
+    minimap.flip();
+  }
 }
