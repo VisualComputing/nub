@@ -2144,39 +2144,21 @@ public class Scene extends Graph implements PConstants {
   }
 
   //TODO drawEye stuff should be done in terms of (eye) frame and ideally the projection matrix
-  // see the new scene.traverse(..., eye, ...,) methiods
-
-  /**
-   * Same as {@code drawEye(graph, false)}.
-   *
-   * @see #drawEye(Graph, boolean)
-   */
-  public void drawEye(Graph graph) {
-    drawEye(graph, false);
-  }
+  // see the new scene.traverse(..., eye, ...,) methods
 
   /**
    * Applies the {@code graph.eye()} transformation and then calls
-   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #frontBuffer()}. If
+   * {@link #drawEye(PGraphics, Graph)} on the scene {@link #frontBuffer()}. If
    * {@code texture} draws the projected scene on the near plane.
    *
    * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, Graph, boolean)
+   * @see #drawEye(PGraphics, Graph)
    */
-  public void drawEye(Graph graph, boolean texture) {
+  public void drawEye(Graph graph) {
     frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEye(frontBuffer(), graph, texture);
+    drawEye(frontBuffer(), graph);
     frontBuffer().popMatrix();
-  }
-
-  /**
-   * Same as {@code drawEye(pGraphics, graph, false)}.
-   *
-   * @see #drawEye(PGraphics, Graph, boolean)
-   */
-  public void drawEye(PGraphics pGraphics, Graph graph) {
-    drawEye(pGraphics, graph, false);
   }
 
   /**
@@ -2187,7 +2169,8 @@ public class Scene extends Graph implements PConstants {
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    */
-  public void drawEye(PGraphics pGraphics, Graph graph, boolean texture) {
+  public void drawEye(PGraphics pGraphics, Graph graph) {
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
     // (which are given in world units) in eye units.
     // Hence they should be multiplied by: 1 / eye.eye().magnitude()
@@ -2309,19 +2292,20 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    _drawPlane(pGraphics, graph, points[1], new Vector(0, 0, -1), false);
+    _drawFarPlane(pGraphics, points[1], new Vector(0, 0, -1));
     // near plane
-    _drawPlane(pGraphics, graph, points[0], new Vector(0, 0, 1), texture);
+    _drawNearPlane(pGraphics, graph, points[0], new Vector(0, 0, 1));
 
     pGraphics.popStyle();
   }
 
-  protected void _drawPlane(PGraphics pGraphics, Graph graph, Vector corner, Vector normal, boolean texture) {
+  protected void _drawNearPlane(PGraphics pGraphics, Graph graph, Vector corner, Vector normal) {
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
-    if (pGraphics instanceof PGraphicsOpenGL && texture && graph instanceof Scene) {
+    if (texture) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(((Scene) graph).frontBuffer());
@@ -2335,6 +2319,21 @@ public class Scene extends Graph implements PConstants {
       Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
       Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
     }
+    pGraphics.endShape();
+    pGraphics.popStyle();
+  }
+
+  protected void _drawFarPlane(PGraphics pGraphics, Vector corner, Vector normal) {
+    pGraphics.pushStyle();
+    // near plane
+    pGraphics.beginShape(PApplet.QUAD);
+    pGraphics.normal(normal.x(), normal.y(), normal.z());
+
+    Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
+    Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
+    Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z());
+    Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z());
+
     pGraphics.endShape();
     pGraphics.popStyle();
   }
@@ -2372,7 +2371,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
    * <p>
-   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph, boolean)}.
+   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *
