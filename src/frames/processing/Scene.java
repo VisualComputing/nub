@@ -2349,12 +2349,10 @@ public class Scene extends Graph implements PConstants {
     points[0] = new Vector();
     points[1] = new Vector();
 
-    float wh0 = eye.magnitude() * width / 2;
-    float wh1 = eye.magnitude() * height / 2;
-    points[0].setX(wh0 * 1 / eye.magnitude());
-    points[1].setX(wh0 * 1 / eye.magnitude());
-    points[0].setY(wh1 * 1 / eye.magnitude());
-    points[1].setY(wh1 * 1 / eye.magnitude());
+    points[0].setX(width / 2);
+    points[1].setX(width / 2);
+    points[0].setY(height / 2);
+    points[1].setY(height / 2);
 
     // Up arrow
     float arrowHeight = 1.5f * points[0].y();
