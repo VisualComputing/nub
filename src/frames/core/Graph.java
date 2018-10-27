@@ -903,12 +903,12 @@ public class Graph {
     Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        projection = Matrix.perspective(zNear(), zFar(), aspectRatio(), isLeftHanded() ? -eye().magnitude() : eye().magnitude());
+        projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        projection = Matrix.orthographic(zNear(), zFar(), wh[0], isLeftHanded() ? -wh[1] : wh[1]);
+        projection = Matrix.orthographic(wh[0], isLeftHanded() ? -wh[1] : wh[1], zNear(), zFar());
         break;
       case CUSTOM:
         projection = computeCustomProjection();
