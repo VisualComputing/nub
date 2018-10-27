@@ -149,9 +149,13 @@ void keyPressed() {
   if (key == 'S')
     minimap.fitBallInterpolation();
   if (key == 't')
-    if(g.is3D())
+    if (g.is3D())
       if (focus.type() == Graph.Type.PERSPECTIVE)
         focus.setType(Graph.Type.ORTHOGRAPHIC);
       else
         focus.setType(Graph.Type.PERSPECTIVE);
+    else {
+      scene.flip();
+      minimap.flip();
+    }
 }
