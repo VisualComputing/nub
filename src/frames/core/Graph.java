@@ -408,7 +408,6 @@ public class Graph {
    *
    * @see #setFieldOfView(float)
    */
-  // TODO shadow maps computation docs are missing
   public void fitFieldOfView() {
     if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
       setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));

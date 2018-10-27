@@ -98,8 +98,14 @@ void keyPressed() {
   if (key == ' ')
     if (focus.type() == Graph.Type.PERSPECTIVE)
       focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else
+    else {
       focus.setType(Graph.Type.PERSPECTIVE);
+      focus.setFieldOfView(PI / 3);
+    }
+  if (key == 'f') {
+    scene1.flip();
+    scene2.flip();
+  }
 }
 
 void handleMouse() {

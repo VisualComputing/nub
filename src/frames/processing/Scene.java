@@ -2292,14 +2292,14 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1));
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), graph.isLeftHanded());
     // near plane
-    _drawPlane(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, points[0], new Vector(0, 0, 1));
+    _drawPlane(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, points[0], new Vector(0, 0, 1), graph.isLeftHanded());
 
     pGraphics.popStyle();
   }
 
-  protected void _drawPlane(PGraphics pGraphics, PGraphics texture, Vector corner, Vector normal) {
+  protected void _drawPlane(PGraphics pGraphics, PGraphics texture, Vector corner, Vector normal, boolean lh) {
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
@@ -2308,10 +2308,10 @@ public class Scene extends Graph implements PConstants {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
       pGraphics.texture(texture);
-      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
-      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
-      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
-      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, 0);
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
     } else {
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
