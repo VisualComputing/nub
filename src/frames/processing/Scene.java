@@ -2816,7 +2816,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    pGraphics.vertex(0, 0, 0);
+    pGraphics.vertex(0, 0);
     float step = (maxAngle - minAngle) / detail;
     for (float theta = minAngle; theta <= maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
@@ -2863,14 +2863,18 @@ public class Scene extends Graph implements PConstants {
     //TODO: Draw Properly when left and up are big values
     if (frame.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
-      reference.rotate(constraint.restRotation());
+      reference.rotate(((BallAndSocket) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
-      if(constraint.left() <= PI/3 && constraint.right() <= PI/3){
-        drawCone(pGraphics, boneLength / 2.f,
-                (boneLength / 2.f) * PApplet.tan(constraint.left()),
-                (boneLength / 2.f) * PApplet.tan(constraint.up()), 20);
-      }
+      float max_width = boneLength / 8.f;
+      float max_angle = PApplet.max(constraint.left(),constraint.up());
+      float height = max_width / PApplet.tan(max_angle);
+
+      //if(constraint.left() <= PI/3 && constraint.right() <= PI/3){
+        drawCone(pGraphics, height,
+                max_width * PApplet.tan(constraint.left()),
+                max_width * PApplet.tan(constraint.up()), 20);
+      //}
     } else if (frame.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
@@ -2883,20 +2887,31 @@ public class Scene extends Graph implements PConstants {
       drawAxes(pGraphics,5);
       drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
     } else if (frame.constraint() instanceof Hinge) {
+      //TODO: Works only when child and parent have the same orientation
       Hinge constraint = (Hinge) frame.constraint();
       if (frame.children().size() == 1) {
         Vector axis = constraint.restRotation().rotate(constraint.axis());
         reference.rotate(constraint.restRotation());
-        Vector rest;
-        try{
-          rest = Vector.projectVectorOnPlane(frame.rotation().inverse().rotate(frame.children().get(0).translation()), axis);
-        }catch (RuntimeException exception){
-          rest = axis.orthogonalVector();
+        if(frame.graph().is3D()) {
+          Vector rest = Vector.projectVectorOnPlane(frame.rotation().inverseRotate(frame.children().get(0).translation()), axis);
+          try{
+            if(Vector.projectVectorOnAxis(rest, axis).dot(axis) < 0) rest.multiply(-1);
+          }catch (RuntimeException exception){
+            return;
+          }
+          //Align Z-Axis with Axis
+          reference.rotate(new Quaternion(new Vector(0, 0, 1), reference.rotation().inverseRotate(axis)));
+          //Align X-Axis with rest Axis
+          float angle = Vector.angleBetween(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest));
+          Quaternion deltaX = new Quaternion(Vector.cross(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest), null), angle);
+          reference.rotate(deltaX);
+        } else{
+          Vector rest = frame.rotation().inverseRotate(frame.children().get(0).translation());
+          //Align X-Axis with rest Axis
+          float angle = Vector.angleBetween(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest));
+          Quaternion deltaX = new Quaternion(Vector.cross(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest), null), angle);
+          reference.rotate(deltaX);
         }
-        //Align Z-Axis with Axis
-        reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
-        //Align X-Axis with rest Axis
-        reference.rotate(new Quaternion(new Vector(1, 0, 0), reference.rotation().inverse().rotate(rest)));
         applyTransformation(pGraphics,reference);
         drawAxes(pGraphics,5);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle(), constraint.maxAngle(), 10);
