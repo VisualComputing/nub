@@ -958,6 +958,11 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@link super#traverse()}, but if there are any {@link Shape}s in the scene frame hierarchy
    * they also get drawn. Call it only within Processing draw() method.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
    */
   @Override
   public void traverse() {
@@ -966,26 +971,62 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Visit all {@link #frames()} into the given {@code pGraphics}. No
-   * {@code pGraphics.beginDraw()/endDraw()} calls take place. This method allows shader
-   * chaining. Call it only within Processing draw() method.
+   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
+   *
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics) {
+    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
+  }
+
+  /**
+   * Same as {@code traverse(pGraphics, eye.view(), matrixHandler().projection())}.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame, Matrix)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics, Frame eye) {
+    traverse(pGraphics, eye.view(), matrixHandler().projection());
+  }
+
+  /**
+   * Same as {@code traverse(pGraphics, eye.view(), projection)}.
+   *
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Frame)
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(PGraphics pGraphics, Frame eye, Matrix projection) {
+    traverse(pGraphics, eye.view(), projection);
+  }
+
+  /**
+   * Renders the scene into {@code pGraphics} from the {@code eye} point of view, using
+   * the {@code projection} matrix. Calls {@link Graph#traverse()}.
+   * No {@code pGraphics.beginDraw()/endDraw()} calls take place. Call this method only
+   * within Processing draw() method.
    * <p>
    * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #draw()}.
    *
-   * <b>Attention:</b> this method should be called after {@link #_bind(PGraphics)}
-   * (i.e., manual eye update) and before any other transformation of the modelview takes
-   * place.
-   *
    * @param pGraphics
    * @see #frames()
    * @see #traverse()
    */
-  public void traverse(PGraphics pGraphics) {
+  public void traverse(PGraphics pGraphics, Matrix view, Matrix projection) {
     _targetPGraphics = pGraphics;
-    if (pGraphics != frontBuffer())
-      _bind(pGraphics);
+    if (pGraphics != frontBuffer()) {
+      MatrixHandler matrixHandler = matrixHandler(pGraphics);
+      matrixHandler._bindProjection(projection);
+      matrixHandler._bindModelView(view);
+    }
     super.traverse();
   }
 
@@ -1019,31 +1060,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Sets the {@code pGraphics} matrices by calling
-   * {@link MatrixHandler#_bindProjection(Matrix)} and
-   * {@link MatrixHandler#_bindModelView(Matrix)} (only makes sense
-   * when {@link #frontBuffer()} is different than {@code pGraphics}).
-   * <p>
-   * This method doesn't perform any computation, but simple retrieve the current matrices
-   * whose actual computation has been updated in {@link #preDraw()}.
-   */
-  protected void _bind(PGraphics pGraphics) {
-    if (this.frontBuffer() == pGraphics)
-      return;
-    MatrixHandler matrixHandler = matrixHandler(pGraphics);
-    matrixHandler._bindProjection(projection());
-    //matrixHandler.bindView(matrixHandler().cacheView());
-    matrixHandler._bindModelView(matrixHandler().cacheView());
-  }
-
-  /**
    * Apply the local transformation defined by the given {@code frame} on the given
-   * {@code pGraphics}. This method doesn't call {@link #_bind(PGraphics)} which
-   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
-   * {@code pGraphics}). Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
+   * {@code pGraphics}. Needed by {@link #applyWorldTransformation(PGraphics, Frame)}.
    *
    * @see #applyWorldTransformation(PGraphics, Frame)
-   * @see #_bind(PGraphics)
    */
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
     if (pGraphics instanceof PGraphics3D) {
@@ -1060,12 +1080,9 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Apply the global transformation defined by the given {@code frame} on the given
-   * {@code pGraphics}. This method doesn't call {@link #_bind(PGraphics)} which
-   * should be called manually (only makes sense when {@link #frontBuffer()} is different than
-   * {@code pGraphics}).
+   * {@code pGraphics}.
    *
    * @see #applyTransformation(PGraphics, Frame)
-   * @see #_bind(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
     Frame reference = frame.reference();
@@ -2126,116 +2143,111 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
-  public void drawEye(Graph graph) {
-    drawEye(graph, false);
-  }
-
   /**
-   * Applies the {@code graph.eye()} transformation and then calls
-   * {@link #drawEye(PGraphics, Graph, boolean)} on the scene {@link #frontBuffer()}. If
-   * {@code texture} draws the projected scene on the near plane.
+   * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Frame)})
+   * and then calls {@link #drawEye(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
    *
-   * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, Graph, boolean)
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
    */
-  public void drawEye(Graph graph, boolean texture) {
+  public void drawEye(Graph graph) {
     frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEye(frontBuffer(), graph, texture);
+    drawEye(frontBuffer(), graph);
     frontBuffer().popMatrix();
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, graph, false)}.
-   *
-   * @see #drawEye(PGraphics, Graph, boolean)
-   */
-  public void drawEye(PGraphics pGraphics, Graph graph) {
-    drawEye(pGraphics, graph, false);
-  }
-
-  /**
    * Draws a representations of the {@code graph.eye()} onto {@code pGraphics}.
-   * If {@code texture} draws the projected scene on the near plane.
-   * <p>
-   * Warning: texture only works with opengl renderers.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
+   *
+   * @see #drawEye(Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
    */
-  public void drawEye(PGraphics pGraphics, Graph graph, boolean texture) {
-    // Key here is to represent the eye boundaryWidthHeight, zNear and zFar params
-    // (which are given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
+  public void drawEye(PGraphics pGraphics, Graph graph) {
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     if (graph == this) {
       System.out.println("Warning: No drawEye done!");
       return;
     }
-    pGraphics.pushStyle();
+    switch (graph.type()) {
+      case TWO_D:
+        drawEye(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
+        break;
+      case ORTHOGRAPHIC:
+        float[] wh = graph.boundaryWidthHeight();
+        drawEye(pGraphics, graph.eye().magnitude(), wh[0], graph.isLeftHanded() ? -wh[1] : wh[1], graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        break;
+      case PERSPECTIVE:
+        drawEye(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
+        break;
+    }
+  }
 
-    // boolean drawFarPlane = true;
-    // int farIndex = drawFarPlane ? 1 : 0;
-    int farIndex = is3D() ? 1 : 0;
-    boolean ortho = false;
-    if (is3D())
-      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
-        ortho = true;
+  /**
+   * Same as {@code drawEye(pGraphics, frontBuffer, true)}.
+   *
+   * @see #drawEye(Graph)
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
+   */
+  public static void drawEye(PGraphics pGraphics, PGraphics frontBuffer) {
+    drawEye(pGraphics, frontBuffer, true);
+  }
+
+  /**
+   * Draws a 2D representation of the {@code eyeBuffer}, which maybe {@code leftHanded}, into {@code pGraphics}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
+   */
+  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, boolean leftHanded) {
+    float width = eyeBuffer.width;
+    float height = eyeBuffer.height;
+
+    pGraphics.pushStyle();
 
     // 0 is the upper left coordinates of the near corner, 1 for the far one
     Vector[] points = new Vector[2];
     points[0] = new Vector();
     points[1] = new Vector();
 
-    if (is2D() || ortho) {
-      float[] wh = graph.boundaryWidthHeight();
-      points[0].setX(wh[0] * 1 / graph.eye().magnitude());
-      points[1].setX(wh[0] * 1 / graph.eye().magnitude());
-      points[0].setY(wh[1] * 1 / graph.eye().magnitude());
-      points[1].setY(wh[1] * 1 / graph.eye().magnitude());
-    }
-
-    if (is3D()) {
-      points[0].setZ(graph.zNear() * 1 / graph.eye().magnitude());
-      points[1].setZ(graph.zFar() * 1 / graph.eye().magnitude());
-      if (graph.type() == Graph.Type.PERSPECTIVE) {
-        points[0].setY(points[0].z() * PApplet.tan((graph.fieldOfView() / 2.0f)));
-        points[0].setX(points[0].y() * graph.aspectRatio());
-        float ratio = points[1].z() / points[0].z();
-        points[1].setY(ratio * points[0].y());
-        points[1].setX(ratio * points[0].x());
-      }
-
-      // Frustum lines
-      switch (graph.type()) {
-        case PERSPECTIVE: {
-          pGraphics.beginShape(PApplet.LINES);
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, points[farIndex].x(), points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, -points[farIndex].x(), points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, -points[farIndex].x(), -points[farIndex].y(), -points[farIndex].z());
-          Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
-          Scene.vertex(pGraphics, points[farIndex].x(), -points[farIndex].y(), -points[farIndex].z());
-          pGraphics.endShape();
-          break;
-        }
-        case ORTHOGRAPHIC: {
-          // if (drawFarPlane) {
-          pGraphics.beginShape(PApplet.LINES);
-          Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-          Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-          Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
-          pGraphics.endShape();
-          // }
-          break;
-        }
-      }
-    }
+    points[0].setX(width / 2);
+    points[1].setX(width / 2);
+    points[0].setY(height / 2);
+    points[1].setY(height / 2);
 
     // Up arrow
     float arrowHeight = 1.5f * points[0].y();
@@ -2245,7 +2257,7 @@ public class Scene extends Graph implements PConstants {
 
     pGraphics.noStroke();
     // Arrow base
-    if (texture) {
+    if (eyeBuffer != null) {
       pGraphics.pushStyle();// end at arrow
       pGraphics.colorMode(PApplet.RGB, 255);
       float r = pGraphics.red(pGraphics.fillColor);
@@ -2254,7 +2266,7 @@ public class Scene extends Graph implements PConstants {
       pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
     }
     pGraphics.beginShape(PApplet.QUADS);
-    if (isLeftHanded()) {
+    if (leftHanded) {
       Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
       Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
       Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
@@ -2269,7 +2281,7 @@ public class Scene extends Graph implements PConstants {
 
     // Arrow
     pGraphics.beginShape(PApplet.TRIANGLES);
-    if (isLeftHanded()) {
+    if (leftHanded) {
       Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
       Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
       Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
@@ -2278,99 +2290,325 @@ public class Scene extends Graph implements PConstants {
       Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
       Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
     }
-    if (texture)
+    if (eyeBuffer != null)
       pGraphics.popStyle();// begin at arrow base
     pGraphics.endShape();
 
     // Planes
     // far plane
-    _drawPlane(pGraphics, graph, points[1], new Vector(0, 0, -1), false);
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), leftHanded);
     // near plane
-    _drawPlane(pGraphics, graph, points[0], new Vector(0, 0, 1), texture);
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), leftHanded);
 
     pGraphics.popStyle();
   }
 
-  public void drawEyeNearPlane(Graph graph) {
-    drawEyeNearPlane(graph, false);
-  }
-
   /**
-   * Applies the {@code graph.eye()} transformation and then calls
-   * {@link #drawEyeNearPlane(PGraphics, Graph, boolean)} on the scene {@link #frontBuffer()}.
-   * If {@code texture} draws the projected scene on the near plane.
+   * Draws a 3D orthographic volume representation onto {@code PGraphics}.
    *
-   * @see #drawEyeNearPlane(PGraphics, Graph, boolean)
-   * @see #applyTransformation(Frame)
-   * @see #drawEye(PGraphics, Graph, boolean)
+   * @param magnitude  your eye magnitude, see {@link Frame#magnitude()}.
+   * @param halfWidth  half-width of the eye boundary, see {@link #boundaryWidthHeight()}.
+   * @param halfHeight half-height of the eye boundary, see {@link #boundaryWidthHeight()}. Should be negative is
+   *                   your scene is {@link #isLeftHanded()} and positive otherwise.
+   * @param zNear      zNear plane, see {@link #zNear()}.
+   * @param zFar       zFar plane, see {@link #zFar()}.
+   * @param eyeBuffer  Texture of the volume near plane representation.
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
    */
-  public void drawEyeNearPlane(Graph graph, boolean texture) {
-    frontBuffer().pushMatrix();
-    applyTransformation(graph.eye());
-    drawEyeNearPlane(frontBuffer(), graph, texture);
-    frontBuffer().popMatrix();
-  }
+  public static void drawEye(PGraphics pGraphics, float magnitude, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
+    boolean lh = halfHeight < 0;
+    halfHeight = Math.abs(halfHeight);
 
-  /**
-   * Same as {@code drawEyeNearPlane(pGraphics, graph, false)}.
-   *
-   * @see #drawEyeNearPlane(PGraphics, Graph, boolean)
-   */
-  public void drawEyeNearPlane(PGraphics pGraphics, Graph graph) {
-    drawEyeNearPlane(pGraphics, graph, false);
-  }
-
-  /**
-   * Draws the eye near plane onto {@code pGraphics}. If {@code texture} draws the projected
-   * scene on the plane.
-   * <p>
-   * Warning: texture only works with opengl renderers.
-   * <p>
-   * Note that if {@code graph == this} this method has not effect at all.
-   */
-  public void drawEyeNearPlane(PGraphics pGraphics, Graph graph, boolean texture) {
-    // Key here is to represent the eye boundaryWidthHeight and zNear params
-    // (which are is given in world units) in eye units.
-    // Hence they should be multiplied by: 1 / eye.eye().magnitude()
-    if (graph == this) {
-      System.out.println("Warning: No drawEyeNearPlane done!");
-      return;
-    }
     pGraphics.pushStyle();
-    boolean ortho = false;
-    if (is3D())
-      if (graph.type() == Graph.Type.ORTHOGRAPHIC)
-        ortho = true;
+
     // 0 is the upper left coordinates of the near corner, 1 for the far one
-    Vector corner = new Vector();
-    if (is2D() || ortho) {
-      float[] wh = graph.boundaryWidthHeight();
-      corner.setX(wh[0] * 1 / graph.eye().magnitude());
-      corner.setY(wh[1] * 1 / graph.eye().magnitude());
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setX(halfWidth * 1 / magnitude);
+    points[1].setX(halfWidth * 1 / magnitude);
+    points[0].setY(halfHeight * 1 / magnitude);
+    points[1].setY(halfHeight * 1 / magnitude);
+
+    points[0].setZ(zNear * 1 / magnitude);
+    points[1].setZ(zFar * 1 / magnitude);
+
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (eyeBuffer != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
     }
-    if (is3D()) {
-      corner.setZ(graph.zNear() * 1 / graph.eye().magnitude());
-      if (graph.type() == Graph.Type.PERSPECTIVE) {
-        corner.setY(corner.z() * PApplet.tan((graph.fieldOfView() / 2.0f)));
-        corner.setX(corner.y() * graph.aspectRatio());
-      }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
     }
-    _drawPlane(pGraphics, graph, corner, new Vector(0, 0, 1), texture);
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (eyeBuffer != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
   }
 
-  protected void _drawPlane(PGraphics pGraphics, Graph graph, Vector corner, Vector normal, boolean texture) {
+  /**
+   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   */
+  public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer);
+  }
+
+  /**
+   * Same as {@code drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   */
+  public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true);
+  }
+
+  /**
+   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   */
+  public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+    drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded);
+  }
+
+  /**
+   * Draws a 3D perspective volume representation onto {@code PGraphics}.
+   *
+   * @param magnitude {@code magnitude = tan(fieldOfView / 2)}, see {@link #fieldOfView()}.
+   * @param zNear     zNear plane, see {@link #zNear()}.
+   * @param zFar      zFar plane, see {@link #zFar()}.
+   * @param eyeBuffer Texture of the volume near plane representation.
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, float, PGraphics)
+   */
+  public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+    _drawEye(pGraphics, magnitude, eyeBuffer.width / (leftHanded ? -eyeBuffer.height : eyeBuffer.height), zNear, zFar, eyeBuffer);
+  }
+
+  /**
+   * Same as {@code drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar)}.
+   *
+   * @see #drawEye(PGraphics, float, float, float, float)
+   */
+  public void drawEye(float magnitude, float aspectRatio, float zNear, float zFar) {
+    drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar);
+  }
+
+  /**
+   * Draws a 3D perspective volume representation onto {@code PGraphics}.
+   * <p>
+   * Note that the zNear plane is textured with {@code eyeBuffer}, i.e., the scene rendered from the {@code eye}.
+   *
+   * @param magnitude   {@code magnitude = tan(fieldOfView / 2)}, see {@link #fieldOfView()}.
+   * @param aspectRatio aspect ratio of the {@code eyeBuffer}, see {@link #aspectRatio()}.
+   * @param zNear       zNear plane, see {@link #zNear()}.
+   * @param zFar        zFar plane, see {@link #zFar()}.
+   * @see #drawEye(float, float, float, float)
+   */
+  public static void drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar) {
+    _drawEye(pGraphics, magnitude, aspectRatio, zNear, zFar, null);
+  }
+
+  protected static void _drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
+    boolean lh = aspectRatio < 0;
+    aspectRatio = Math.abs(aspectRatio);
+
+    pGraphics.pushStyle();
+
+    // 0 is the upper left coordinates of the near corner, 1 for the far one
+    Vector[] points = new Vector[2];
+    points[0] = new Vector();
+    points[1] = new Vector();
+
+    points[0].setZ(zNear * 1 / magnitude);
+    points[1].setZ(zFar * 1 / magnitude);
+    //(2 * (float) Math.atan(eye().magnitude()))
+    //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
+    points[0].setY(points[0].z() * magnitude);
+    points[0].setX(points[0].y() * aspectRatio);
+    float ratio = points[1].z() / points[0].z();
+    points[1].setY(ratio * points[0].y());
+    points[1].setX(ratio * points[0].x());
+
+    // Frustum lines
+    pGraphics.beginShape(PApplet.LINES);
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+    Scene.vertex(pGraphics, 0.0f, 0.0f, 0.0f);
+    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+    pGraphics.endShape();
+
+    // Up arrow
+    float arrowHeight = 1.5f * points[0].y();
+    float baseHeight = 1.2f * points[0].y();
+    float arrowHalfWidth = 0.5f * points[0].x();
+    float baseHalfWidth = 0.3f * points[0].x();
+
+    pGraphics.noStroke();
+    // Arrow base
+    if (eyeBuffer != null) {
+      pGraphics.pushStyle();// end at arrow
+      pGraphics.colorMode(PApplet.RGB, 255);
+      float r = pGraphics.red(pGraphics.fillColor);
+      float g = pGraphics.green(pGraphics.fillColor);
+      float b = pGraphics.blue(pGraphics.fillColor);
+      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+    }
+    pGraphics.beginShape(PApplet.QUADS);
+    if (lh) {
+      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
+    }
+    pGraphics.endShape();
+
+    // Arrow
+    pGraphics.beginShape(PApplet.TRIANGLES);
+    if (lh) {
+      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
+    } else {
+      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
+      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
+      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
+    }
+    if (eyeBuffer != null)
+      pGraphics.popStyle();// begin at arrow base
+    pGraphics.endShape();
+
+    // Planes
+    // far plane
+    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    // near plane
+    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
+
+    pGraphics.popStyle();
+  }
+
+  protected static void _drawPlane(PGraphics pGraphics, PGraphics frontBuffer, Vector corner, Vector normal, boolean lh) {
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
     pGraphics.normal(normal.x(), normal.y(), normal.z());
-    if (pGraphics instanceof PGraphicsOpenGL && texture && graph instanceof Scene) {
+    if (frontBuffer != null) {
       pGraphics.textureMode(NORMAL);
       pGraphics.tint(255, 126); // Apply transparency without changing color
-      pGraphics.texture(((Scene) graph).frontBuffer());
-      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, 1);
-      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, 1);
-      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, 0);
-      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, 0);
+      pGraphics.texture(frontBuffer);
+      Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z(), 1, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z(), 0, lh ? 1 : 0);
+      Scene.vertex(pGraphics, -corner.x(), -corner.y(), -corner.z(), 0, lh ? 0 : 1);
+      Scene.vertex(pGraphics, corner.x(), -corner.y(), -corner.z(), 1, lh ? 0 : 1);
     } else {
       Scene.vertex(pGraphics, corner.x(), corner.y(), -corner.z());
       Scene.vertex(pGraphics, -corner.x(), corner.y(), -corner.z());
@@ -2414,7 +2652,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
    * <p>
-   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph, boolean)}.
+   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *

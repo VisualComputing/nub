@@ -361,6 +361,8 @@ public class Graph {
    * window aspect ratio (see {@link #aspectRatio()} and {@link #horizontalFieldOfView()}).
    *
    * @see #setFieldOfView(float)
+   * @see #horizontalFieldOfView()
+   * @see #aspectRatio()
    * @see #eye()
    */
   public float fieldOfView() {
@@ -382,11 +384,15 @@ public class Graph {
    * Returns the horizontal field of view of the {@link #eye()} (in radians).
    * <p>
    * Value is set using {@link #setHorizontalFieldOfView(float)} or
-   * {@link #setFieldOfView(float)}. These values are always linked by:
-   * {@code horizontalFieldOfView() = 2 * atan (tan(fieldOfView()/2) * aspectRatio())}.
+   * {@link #setFieldOfView(float)}.
+   *
+   * @see #setHorizontalFieldOfView(float)
+   * @see #fieldOfView()
+   * @see #aspectRatio()
+   * @see #eye()
    */
   public float horizontalFieldOfView() {
-    return 2 * (float) Math.atan(eye().magnitude()) * aspectRatio();
+    return 2 * (float) Math.atan(eye().magnitude() * aspectRatio());
   }
 
   /**
@@ -402,7 +408,6 @@ public class Graph {
    *
    * @see #setFieldOfView(float)
    */
-  // TODO shadow maps computation docs are missing
   public void fitFieldOfView() {
     if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
       setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
@@ -903,12 +908,12 @@ public class Graph {
     Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        projection = Matrix.perspective(zNear(), zFar(), aspectRatio(), isLeftHanded() ? -eye().magnitude() : eye().magnitude());
+        projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        projection = Matrix.orthographic(zNear(), zFar(), wh[0], isLeftHanded() ? -wh[1] : wh[1]);
+        projection = Matrix.orthographic(wh[0], isLeftHanded() ? -wh[1] : wh[1], zNear(), zFar());
         break;
       case CUSTOM:
         projection = computeCustomProjection();
@@ -1032,7 +1037,6 @@ public class Graph {
    * </ol>
    */
   public void preDraw() {
-    //TODO test syncing, since timingHandler().handle() was called in postDraw()
     timingHandler().handle();
     matrixHandler()._bind();
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {

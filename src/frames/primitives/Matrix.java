@@ -876,7 +876,7 @@ public class Matrix {
    * @see #orthographic(float, float, float, float)
    * @see #view(Vector, Quaternion)
    */
-  public static Matrix perspective(float zNear, float zFar, float aspectRatio, float magnitude) {
+  public static Matrix perspective(float magnitude, float aspectRatio, float zNear, float zFar) {
     // same as gluPerspective( 180*fieldOfView()/PI, aspectRatio(), zNear(), zFar() );
     Matrix projection = new Matrix();
     // all non null coefficients were set to 0 in constructor
@@ -898,7 +898,7 @@ public class Matrix {
    * @see #perspective(float, float, float, float)
    * @see #view(Vector, Quaternion)
    */
-  public static Matrix orthographic(float zNear, float zFar, float halfWidth, float halfHeight) {
+  public static Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar) {
     // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
     Matrix projection = new Matrix();
     projection._matrix[0] = 1 / halfWidth;

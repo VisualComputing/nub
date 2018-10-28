@@ -14,7 +14,6 @@ import frames.processing.*;
 
 Scene scene;
 Shape[] shapes;
-PGraphics canvas;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
