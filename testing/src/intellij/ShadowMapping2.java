@@ -1,5 +1,6 @@
 package intellij;
 
+import frames.primitives.Matrix;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -8,6 +9,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class ShadowMapping2 extends PApplet {
+  Matrix matrix;
   Scene scene;
   Shape[] shapes;
   Shape light;
@@ -24,6 +26,7 @@ public class ShadowMapping2 extends PApplet {
   }
 
   public void setup() {
+    matrix = Matrix.orthographic(100, 100, 1, 500);
     scene = new Scene(this);
     scene.setRadius(max(w, h));
 
@@ -39,10 +42,11 @@ public class ShadowMapping2 extends PApplet {
       @Override
       public void setGraphics(PGraphics pg) {
         pg.pushStyle();
-        scene.drawAxes(pg, 150);
+        Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.noStroke();
-        pg.sphere(50);
+        //pg.sphere(50);
+        Scene.drawEye(pg, 100, 100, 1, 500, shadowMap);
         pg.popStyle();
       }
     };
@@ -59,7 +63,7 @@ public class ShadowMapping2 extends PApplet {
     // 2. Display shadow map
     shadowMap.beginDraw();
     shadowMap.background(120);
-    scene.traverse(shadowMap, light);
+    scene.traverse(shadowMap, light, matrix);
     shadowMap.endDraw();
     // 3. display shadow map
     if (show) {

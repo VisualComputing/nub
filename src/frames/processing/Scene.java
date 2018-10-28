@@ -2193,7 +2193,8 @@ public class Scene extends Graph implements PConstants {
         break;
       case ORTHOGRAPHIC:
         float[] wh = graph.boundaryWidthHeight();
-        drawEye(pGraphics, graph.eye().magnitude(), wh[0], graph.isLeftHanded() ? -wh[1] : wh[1], graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        float magnitude = graph.eye().magnitude();
+        drawEye(pGraphics, wh[0] / magnitude, graph.isLeftHanded() ? -wh[1] / magnitude : wh[1] / magnitude, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
         drawEye(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
@@ -2215,8 +2216,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
    */
-  public static void drawEye(PGraphics pGraphics, PGraphics frontBuffer) {
-    drawEye(pGraphics, frontBuffer, true);
+  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer) {
+    drawEye(pGraphics, eyeBuffer, true);
   }
 
   /**
@@ -2306,7 +2307,6 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a 3D orthographic volume representation onto {@code PGraphics}.
    *
-   * @param magnitude  your eye magnitude, see {@link Frame#magnitude()}.
    * @param halfWidth  half-width of the eye boundary, see {@link #boundaryWidthHeight()}.
    * @param halfHeight half-height of the eye boundary, see {@link #boundaryWidthHeight()}. Should be negative is
    *                   your scene is {@link #isLeftHanded()} and positive otherwise.
@@ -2324,7 +2324,7 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
    */
-  public static void drawEye(PGraphics pGraphics, float magnitude, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
+  public static void drawEye(PGraphics pGraphics, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
     boolean lh = halfHeight < 0;
     halfHeight = Math.abs(halfHeight);
 
@@ -2335,13 +2335,13 @@ public class Scene extends Graph implements PConstants {
     points[0] = new Vector();
     points[1] = new Vector();
 
-    points[0].setX(halfWidth * 1 / magnitude);
-    points[1].setX(halfWidth * 1 / magnitude);
-    points[0].setY(halfHeight * 1 / magnitude);
-    points[1].setY(halfHeight * 1 / magnitude);
+    points[0].setX(halfWidth);
+    points[1].setX(halfWidth);
+    points[0].setY(halfHeight);
+    points[1].setY(halfHeight);
 
-    points[0].setZ(zNear * 1 / magnitude);
-    points[1].setZ(zFar * 1 / magnitude);
+    points[0].setZ(zNear);
+    points[1].setZ(zFar);
 
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
