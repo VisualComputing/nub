@@ -2157,6 +2157,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public void drawEye(Graph graph) {
     frontBuffer().pushMatrix();
@@ -2180,13 +2184,13 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public void drawEye(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
-    if (graph == this) {
-      System.out.println("Warning: No drawEye done!");
-      return;
-    }
     switch (graph.type()) {
       case TWO_D:
         drawEye(pGraphics, texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
@@ -2215,6 +2219,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer) {
     drawEye(pGraphics, eyeBuffer, true);
@@ -2233,8 +2241,14 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, boolean leftHanded) {
+    if (pGraphics == eyeBuffer)
+      return;
     float width = eyeBuffer.width;
     float height = eyeBuffer.height;
 
@@ -2305,6 +2319,51 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   */
+  public static void drawEye(PGraphics pGraphics, Frame frame, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true);
+  }
+
+  /**
+   * Same as {@code drawEye(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   */
+  public static void drawEye(PGraphics pGraphics, Frame frame, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+    float sqMagnitude = frame.magnitude() * frame.magnitude();
+    drawEye(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer);
+  }
+
+  /**
    * Draws a 3D orthographic volume representation onto {@code PGraphics}.
    *
    * @param halfWidth  half-width of the eye boundary, see {@link #boundaryWidthHeight()}.
@@ -2323,8 +2382,14 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
+    if (pGraphics == eyeBuffer)
+      return;
     boolean lh = halfHeight < 0;
     halfHeight = Math.abs(halfHeight);
 
@@ -2422,6 +2487,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
     drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer);
@@ -2440,6 +2509,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
     drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true);
@@ -2458,9 +2531,56 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded);
+  }
+
+  /**
+   * Same as {@code drawEye(pGraphics, frame, zNear, zFar, eyeBuffer, true)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   */
+  public static void drawEye(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawEye(pGraphics, frame, zNear, zFar, eyeBuffer, true);
+  }
+
+  /**
+   * Same as {@code drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded)}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, PGraphics, boolean)
+   * @see #drawEye(float, float, float, float)
+   * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(float, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   */
+  public static void drawEye(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+    drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
   }
 
   /**
@@ -2481,6 +2601,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     _drawEye(pGraphics, magnitude, eyeBuffer.width / (leftHanded ? -eyeBuffer.height : eyeBuffer.height), zNear, zFar, eyeBuffer);
@@ -2499,6 +2623,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float aspectRatio, float zNear, float zFar) {
     drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar);
@@ -2524,12 +2652,18 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar) {
     _drawEye(pGraphics, magnitude, aspectRatio, zNear, zFar, null);
   }
 
   protected static void _drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
+    if (pGraphics == eyeBuffer)
+      return;
     boolean lh = aspectRatio < 0;
     aspectRatio = Math.abs(aspectRatio);
 
@@ -2617,6 +2751,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   protected static void _drawPlane(PGraphics pGraphics, PGraphics eyeBuffer, Vector corner, Vector normal, boolean lh) {
+    if (pGraphics == eyeBuffer)
+      return;
     pGraphics.pushStyle();
     // near plane
     pGraphics.beginShape(PApplet.QUAD);
