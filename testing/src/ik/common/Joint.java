@@ -41,7 +41,7 @@ public class Joint extends Frame{
         pg.pushStyle();
         pg.fill(_color);
         pg.noStroke();
-        if (scene.is2D()) pg.ellipse(0, 0, 3, 3);
+        if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
         else pg.sphere(_radius);
         if (!_isRoot) {
             pg.strokeWeight(_radius/2);
@@ -52,8 +52,8 @@ public class Joint extends Frame{
             } else {
                 pg.line(0, 0, 0, v.x(), v.y(), v.z());
             }
-            pg.popStyle();
         }
+        pg.popStyle();
 
         if (constraint() != null) {
             scene.drawConstraint(this);

@@ -2,6 +2,8 @@ package ik.interactive;
 
 import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.Hinge;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -23,7 +25,12 @@ public class SkeletonBuilder extends PApplet{
 
     /*Create different skeletons to interact with*/
     //Choose FX2D, JAVA2D, P2D or P3D
-    String renderer = P3D;
+    String renderer = P2D;
+
+    /*Constraint Parameters*/
+    float minAngle = radians(60);
+    float maxAngle = radians(60);
+
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactive.SkeletonBuilder"});
@@ -34,10 +41,9 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void setup(){
-        if(renderer.equals(P2D)) radius = 10;
         scene = new Scene(this);
         scene.fitBallInterpolation();
-        scene.setType(Graph.Type.ORTHOGRAPHIC);
+        if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
         createInteractiveJoint().setRoot(true);
     }
 
@@ -99,10 +105,33 @@ public class SkeletonBuilder extends PApplet{
         if(key == '+'){
             createInteractiveJoint().setRoot(true);
         }
-
         if(key == 'A' || key == 'a'){
             addTreeSolver();
         }
+        if(key == 'C' || key == 'c'){
+            addConstraint(scene.trackedFrame());
+        }
+        if(key == 'S' || key == 's'){
+            minAngle += radians(5);
+            if(minAngle >= radians(170) ) minAngle = radians(170);
+            System.out.println("minAngle : " + degrees(minAngle));
+        }
+        if(key == 'D' || key == 'd'){
+            minAngle -= radians(5);
+            if(minAngle <= radians(0) ) minAngle = radians(0);
+            System.out.println("minAngle : " + degrees(minAngle));
+        }
+        if(key == 'F' || key == 'f'){
+            maxAngle += radians(5);
+            if(maxAngle >= radians(170) ) maxAngle = radians(170);
+            System.out.println("maxAngle : " + degrees(maxAngle));
+        }
+        if(key == 'G' || key == 'g'){
+            maxAngle -= radians(5);
+            if(maxAngle <= radians(0) ) maxAngle = radians(0);
+            System.out.println("maxAngle : " + degrees(maxAngle));
+        }
+
     }
 
     //------------------------------------
@@ -164,6 +193,18 @@ public class SkeletonBuilder extends PApplet{
         };
     }
 
+    public Shape createTarget(Vector position){
+        PShape redBall =
+                scene.is3D() ? createShape(SPHERE, ((Joint) scene.trackedFrame()).radius() * 2f) :
+                        createShape(ELLIPSE, 0,0, ((Joint) scene.trackedFrame()).radius() * 4f, ((Joint) scene.trackedFrame()).radius() * 4f);
+        redBall.setStroke(false);
+        redBall.setFill(color(255, 0, 0));
+        Shape target = new Shape(scene, redBall);
+        target.setReference(scene.trackedFrame().reference());
+        target.setPosition(position);
+        return target;
+    }
+
     public void findEndEffectors(Frame frame, List<Frame> endEffectors){
         if(frame.children().isEmpty()){
             endEffectors.add(frame);
@@ -174,6 +215,23 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
+    public void addConstraint(Frame frame){
+        //If has a child
+        if(frame == null) return;
+        if(frame.children().size() != 1) return;
+        if(scene.is3D()) {
+            BallAndSocket constraint = new BallAndSocket(minAngle, minAngle, maxAngle, maxAngle);
+            Vector twist = frame.children().get(0).translation().get();
+            constraint.setRestRotation(frame.rotation().get(), Vector.orthogonalVector(twist), twist);
+            frame.setConstraint(constraint);
+        } else{
+            Hinge constraint = new Hinge(true, minAngle, maxAngle);
+            constraint.setRestRotation(frame.rotation().get());
+            frame.setConstraint(constraint);
+        }
+
+    }
+
     public void addTreeSolver(){
         if(scene.trackedFrame() == null) return;
         scene.registerTreeSolver(scene.trackedFrame());
@@ -181,16 +239,8 @@ public class SkeletonBuilder extends PApplet{
         //get leaf nodes
         ArrayList<Frame> endEffectors = new ArrayList<Frame>();
         findEndEffectors(scene.trackedFrame(), endEffectors);
-        PShape redBall =
-                scene.is3D() ? createShape(SPHERE, ((Joint) scene.trackedFrame()).radius() * 2f) :
-                        createShape(ELLIPSE, 0,0, ((Joint) scene.trackedFrame()).radius() * 2f, ((Joint) scene.trackedFrame()).radius() * 2f);
-        redBall.setStroke(false);
-        redBall.setFill(color(255, 0, 0));
         for(Frame endEffector : endEffectors) {
-            Shape target = new Shape(scene, redBall);
-            target.setReference(scene.trackedFrame().reference());
-            target.setPosition(endEffector.position());
-            scene.addIKTarget(endEffector, target);
+            scene.addIKTarget(endEffector, createTarget(endEffector.position()));
         }
     }
 
