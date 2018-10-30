@@ -72,6 +72,9 @@ public class Individual{
             structure.add(_structure.get(i).get());
         }
         Individual individual = new Individual(structure);
+        for(String name : _parameters.keySet()){
+            individual.putParameter(name,_parameters.get(name)._values.clone());
+        }
         individual._fitness = _fitness;
         return individual;
     }

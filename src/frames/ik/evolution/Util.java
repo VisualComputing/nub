@@ -1,6 +1,8 @@
 package frames.ik.evolution;
 
 import frames.core.Frame;
+import frames.ik.evolution.operator.Operator;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.util.*;
@@ -9,6 +11,7 @@ import java.util.*;
  * Created by sebchaparr on 28/10/18.
  */
 public class Util {
+    protected static Random _random;
 
     public static List<Individual> sort(boolean inPlace, boolean reverse, List<Individual> population){
         final int sign = reverse ? 1 : -1;
@@ -30,6 +33,27 @@ public class Util {
         return sorted;
     }
 
+    public static List<Individual> generatePopulation(List<Frame> structure, int n, float max_angle){
+        List<Individual> population = new ArrayList<>();
+        List<Frame> copy_structure = new ArrayList<>();
+        Individual original = new Individual(structure);
+        for(int i = 0; i < n; i++){
+            Individual individual = original.clone();
+            for(Frame frame : individual.structure()){
+                float roll = (float) Math.toRadians(max_angle * _random.nextFloat());
+                float pitch = (float) Math.toRadians(max_angle * _random.nextFloat());
+                float yaw = (float) Math.toRadians(max_angle * _random.nextFloat());
+                frame.setRotation(new Quaternion(roll, pitch, yaw ));
+            }
+            population.add(individual);
+        }
+        return population;
+    }
+
+    public static List<Individual> generatePopulation(List<Frame> structure, int n){
+        return generatePopulation(structure, n, 5);
+    }
+
     public static List<Individual> concatenate(List<Individual>... lists){
         List<Individual> concatenation = new ArrayList<>();
         for(List<Individual> list : lists){
@@ -47,11 +71,11 @@ public class Util {
     }
 
     public static void main(String[] args){
-        //create random Individuals
+        //create _random Individuals
         Random r = new Random();
         List<Individual> l = new ArrayList<Individual>();
         for(int i = 0; i < 15; i++){
-            Individual ind = new Individual(null, null);
+            Individual ind = new Individual(null);
             ind.setFitness(r.nextFloat()*100);
             l.add(ind);
         }

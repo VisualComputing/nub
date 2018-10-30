@@ -24,7 +24,6 @@ public class HillClimbingSolver extends Solver {
     protected boolean _powerLaw;
     protected double _sigma;
     protected double _alpha = 2;
-    protected PrintWriter _printWriter;
 
     public HillClimbingSolver(double sigma, List<? extends Frame> chain){
         this._powerLaw = false;

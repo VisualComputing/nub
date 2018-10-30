@@ -2,11 +2,14 @@ package frames.ik.evolution;
 
 import frames.core.Frame;
 import frames.ik.Solver;
+import frames.ik.evolution.operator.Operator;
+import frames.ik.evolution.selection.Selection;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -14,131 +17,88 @@ import java.util.Random;
  * Created by sebchaparr on 29/10/18.
  */
 public class GASolver extends Solver {
-    protected Random random = new Random();
-    protected Frame _target;
-    protected Frame _previousTarget;
-    protected List<? extends Frame> _chain, _x_i;
-    protected boolean _powerLaw;
-    protected double _sigma;
-    protected double _alpha = 2;
-    protected PrintWriter _printWriter;
+    protected Selection _selection;
+    protected Operator _mutation;
+    protected Operator _crossover;
+    protected float _cross_probability = 0.5f;
+    protected int _population_size = 10;
 
-    public GASolver(double sigma, List<? extends Frame> chain){
-        this._powerLaw = false;
-        this._sigma = sigma;
-        this._chain = chain;
-        _x_i = _copy(chain);
+    protected Random _random = new Random();
+    protected HashMap<Frame, Frame> _previousTarget;
+    protected HashMap<Frame, Frame> _target;
+    protected List<Frame> _structure;
+    protected List<Individual> _population;
+    protected Individual _best;
+
+
+    public GASolver(List<Frame> structure, int population_size){
+        this._structure = structure;
+        this._population_size = population_size;
     }
 
-    public GASolver(double alpha, double sigma, List<? extends Frame> chain){
-        this._powerLaw = true;
-        this._alpha = alpha;
-        this._sigma = sigma;
-        this._chain = chain;
-        _x_i = _copy(chain);
+    public List<Frame> structure(){
+        return _structure;
     }
 
-    public double sigma(){ return _sigma; }
-    public double alpha(){ return _alpha; }
-    public boolean powerLaw(){
-        return _powerLaw;
+    public void setTarget(Frame endEffector, Frame target) {
+        this._target.put(endEffector, target);
     }
 
     public double[] execute(){
-        double[] results = new double[maxIter];
+        //double[] results = new double[maxIter];
+        //1. Generate population
+        _population = Util.generatePopulation(_structure, _population_size);
+        //2. Update Fitness
+        for(Individual individual : _population){
+            individual.updateFitness(_target);
+        }
+        //3. TODO use a better Termination Condition
         int k = 0;
-        _x_i = _copy(_chain);
         while(k < maxIter){
             _iterate();
-            results[k] = _distanceToTarget(_x_i);
             k++;
         }
-        return results;
+        //TODO update statistics
+        //results[k] = _distanceToTarget(_x_i);
+        return null;
     }
-
-    public List<? extends Frame> chain(){
-        return _chain;
-    }
-
-    public Frame target() {
-        return _target;
-    }
-
-    public void setTarget(Frame target) {
-        this._target = target;
-    }
-
-    protected double _distanceToTarget(List<? extends Frame> chain){
-        return Vector.distance(chain.get(chain.size()-1).position(), _target.position());
-    }
-
-    protected double _powerLawGenerator(double x, double alpha){
-        double coarse_alpha = 1.0/(1.0-alpha);
-        return Math.pow(1.0 - x, coarse_alpha);
-    }
-
-    protected ArrayList<Frame> _copy(List<? extends Frame> chain) {
-        ArrayList<Frame> copy = new ArrayList<Frame>();
-        Frame reference = chain.get(0).reference();
-        if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get());
-        }
-        for (Frame joint : chain) {
-            Frame newJoint = new Frame();
-            newJoint.setReference(reference);
-            newJoint.setPosition(joint.position().get());
-            newJoint.setOrientation(joint.orientation().get());
-            newJoint.setConstraint(joint.constraint());
-            copy.add(newJoint);
-            reference = newJoint;
-        }
-        return copy;
-    }
-
 
     @Override
     protected boolean _iterate() {
-        ArrayList<Frame> x_i1 = _copy(_x_i);
-        for(int i = 0; i < _x_i.size(); i++) {
-            int invert = random.nextDouble() >= 0.5 ? 1 : -1;
-            //rotate
-            float roll;
-            float pitch;
-            float yaw;
-            if(_powerLaw){
-                roll = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
-                pitch = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
-                yaw = (float) (invert * _powerLawGenerator(random.nextDouble(), _alpha)*_sigma);
-            }else{
-                roll = (float) (random.nextGaussian() * _sigma);
-                pitch = (float) (random.nextGaussian() * _sigma);
-                yaw = (float) (random.nextGaussian() * _sigma);
+        //1. Select parents
+        List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
+        //2. Generate children
+        List<Individual> children = new ArrayList<>();
+        for(int i = 0; i < parents.size(); i+=2){
+            if(_random.nextFloat() < _cross_probability) {
+                Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
+                children.add(_mutation.apply(child));
+            } else{
+                children.add(parents.get(0));
             }
-            //rotate method consider constraints
-            x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
         }
+        //3. Replacement
 
-        double d1 = _distanceToTarget(x_i1), d2 = _distanceToTarget(_x_i);
-        if(d1 < d2) {
-            _x_i = x_i1;
-            d1 = d2;
-        }
-        return d1 < minDistance;
+
+        //4. Find Best
+
+        double distance = 0 ;
+        return distance < minDistance;
     }
 
 
     public Frame head() {
-        return _chain.get(0);
+        return _structure.get(0);
     }
 
     public Frame endEffector() {
-        return _chain.get(_chain.size() - 1);
+        return _structure.get(_structure.size() - 1);
     }
 
     @Override
     protected void _update() {
-        for(int i = 0; i < _chain.size(); i++){
-            _chain.get(i).setRotation(_x_i.get(i).rotation().get());
+        for(int i = 0; i < _structure.size(); i++){
+            _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
         }
     }
 
@@ -150,17 +110,25 @@ public class GASolver extends Solver {
         } else if (_previousTarget == null) {
             return true;
         }
-        return !(_previousTarget.position().matches(_target.position()) && _previousTarget.orientation().matches(_target.orientation()));
+        for(Frame endEffector : _target.keySet()){
+            if(!(_previousTarget.get(endEffector).position().matches(_target.get(endEffector).position()) &&
+                    _previousTarget.get(endEffector).orientation().matches(_target.get(endEffector).orientation()))){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     protected void _reset() {
-        _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
         iterations = 0;
+        if(_target == null){
+            _previousTarget = null;
+            return;
+        }
+        for(Frame endEffector : _target.keySet()) {
+            _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation()));
+        }
     }
-
-    //Selection methods
-
-
 }
 

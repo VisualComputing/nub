@@ -144,24 +144,24 @@ public class HingeTest extends PApplet {
         Joint current = prev;
         Joint root = current;
         root.setRoot(true);
-        //current.setRotation(Quaternion.random());
+        //current.setRotation(Quaternion._random());
         current = new Joint(scene);
         current.setReference(prev);
         prev = current;
-        //current.setRotation(Quaternion.random());
+        //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength,0);
         setConstraint(current, new Vector(0,0,1));
 
         current = new Joint(scene);
         current.setReference(prev);
         prev = current;
-        //current.setRotation(Quaternion.random());
+        //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,0);
         setConstraint(current, new Vector(1,0,0));
 
         current = new Joint(scene);
         current.setReference(prev);
-        //current.setRotation(Quaternion.random());
+        //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,boneLength*2);
         setConstraint(current, new Vector(1,0,0));
 
