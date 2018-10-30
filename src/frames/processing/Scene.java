@@ -2159,8 +2159,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public void drawEye(Graph graph) {
     frontBuffer().pushMatrix();
@@ -2186,8 +2186,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public void drawEye(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
@@ -2221,8 +2221,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer) {
     drawEye(pGraphics, eyeBuffer, true);
@@ -2243,8 +2243,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, boolean leftHanded) {
     if (pGraphics == eyeBuffer)
@@ -2333,15 +2333,15 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, PGraphics, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, Frame frame, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true);
+  public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawOrthographicVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true);
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
+   * Same as {@code drawOrthographicVolume(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2355,12 +2355,14 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, PGraphics, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, Frame frame, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+  public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     float sqMagnitude = frame.magnitude() * frame.magnitude();
-    drawEye(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer);
+    float halfWidth = eyeBuffer.width / (2 * sqMagnitude);
+    float halfHeight = eyeBuffer.height / (2 * sqMagnitude);
+    drawEye(pGraphics, halfWidth, leftHanded ? -halfHeight : halfHeight, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer);
   }
 
   /**
@@ -2384,8 +2386,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float halfWidth, float halfHeight, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
@@ -2489,8 +2491,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
     drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer);
@@ -2511,8 +2513,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
     drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true);
@@ -2533,8 +2535,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded);
@@ -2554,8 +2556,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
     drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true);
@@ -2576,8 +2578,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
@@ -2603,8 +2605,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     _drawEye(pGraphics, magnitude, eyeBuffer.width / (leftHanded ? -eyeBuffer.height : eyeBuffer.height), zNear, zFar, eyeBuffer);
@@ -2625,8 +2627,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public void drawEye(float magnitude, float aspectRatio, float zNear, float zFar) {
     drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar);
@@ -2654,8 +2656,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawOrthographicVolume(PGraphics, Frame, float, float, PGraphics, boolean)
    */
   public static void drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar) {
     _drawEye(pGraphics, magnitude, aspectRatio, zNear, zFar, null);
