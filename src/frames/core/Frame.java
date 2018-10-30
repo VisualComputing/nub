@@ -1776,15 +1776,15 @@ public class Frame {
   }
 
   public Matrix orthographic(float zNear, float zFar) {
-    return orthographic(isDetached() ? 500 : graph().width() / 2, isDetached() ? 500 : graph().height() / 2, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
+    return orthographic(isDetached() ? 500 : graph().width(), isDetached() ? 500 : graph().height(), zNear, zFar, isDetached() ? true : graph().isLeftHanded());
   }
 
-  public Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar) {
-    return orthographic(halfWidth, halfHeight, zNear, zFar, true);
+  public Matrix orthographic(float width, float height, float zNear, float zFar) {
+    return orthographic(width, height, zNear, zFar, true);
   }
 
-  public Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.orthographic(halfWidth / magnitude(), (leftHanded ? -halfHeight : halfHeight) / magnitude(), zNear, zFar);
+  public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.orthographic(width / magnitude(), (leftHanded ? -height : height) / magnitude(), zNear, zFar);
   }
 
   /**

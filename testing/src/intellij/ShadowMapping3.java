@@ -123,7 +123,7 @@ public class ShadowMapping3 extends PApplet {
       //matrix = Matrix.orthographic(halfWidth / light.magnitude(), -halfHeight / light.magnitude(), zNear, zFar);
       //matrix = light.orthographic(halfWidth, halfHeight, zNear, zFar);
       //matrix = light.orthographic(zNear, zFar);
-      matrix = light.orthographic(shadowMap.width / 2, shadowMap.height / 2, zNear, zFar);
+      matrix = light.orthographic(shadowMap.width, shadowMap.height, zNear, zFar);
     } else {
       //light.setMagnitude(tan((PI / 3) / 2));
       //matrix = Matrix.perspective(-light.magnitude(), w / h, zNear, zFar);

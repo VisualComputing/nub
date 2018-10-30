@@ -913,7 +913,7 @@ public class Graph {
       case TWO_D:
       case ORTHOGRAPHIC:
         float[] wh = boundaryWidthHeight();
-        projection = Matrix.orthographic(wh[0], isLeftHanded() ? -wh[1] : wh[1], zNear(), zFar());
+        projection = Matrix.orthographic(2 * wh[0], isLeftHanded() ? -2 * wh[1] : 2 * wh[1], zNear(), zFar());
         break;
       case CUSTOM:
         projection = computeCustomProjection();
