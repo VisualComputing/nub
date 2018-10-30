@@ -1,6 +1,7 @@
-package frames.ik;
+package frames.ik.evolution;
 
 import frames.core.Frame;
+import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -14,7 +15,7 @@ import java.util.Random;
 /**
  * Created by sebchaparr on 8/10/18.
  */
-public class HillClimbing extends Solver{
+public class HillClimbingSolver extends Solver {
 
     protected Random random = new Random();
     protected Frame _target;
@@ -25,14 +26,14 @@ public class HillClimbing extends Solver{
     protected double _alpha = 2;
     protected PrintWriter _printWriter;
 
-    public HillClimbing(double sigma, List<? extends Frame> chain){
+    public HillClimbingSolver(double sigma, List<? extends Frame> chain){
         this._powerLaw = false;
         this._sigma = sigma;
         this._chain = chain;
         _x_i = _copy(chain);
     }
 
-    public HillClimbing(double alpha, double sigma, List<? extends Frame> chain){
+    public HillClimbingSolver(double alpha, double sigma, List<? extends Frame> chain){
         this._powerLaw = true;
         this._alpha = alpha;
         this._sigma = sigma;

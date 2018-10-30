@@ -2,7 +2,7 @@ package ik.basic;
 
 import frames.core.Frame;
 import frames.core.constraint.BallAndSocket;
-import frames.ik.HillClimbing;
+import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -82,7 +82,7 @@ public class HCTest2{
         return chain.get(chain.size()-1);
     }
 
-    public static void generateExperiment(HillClimbing method, int iterations, int times){
+    public static void generateExperiment(HillClimbingSolver method, int iterations, int times){
         String path = "/home/sebchaparr/Schap/Evolutivos/IK/";
         String name = "joints" + num_joints;
         name += method.powerLaw() ? "hill_power_law" : "hill_gaussian";
@@ -119,14 +119,14 @@ public class HCTest2{
 
         solvers = new ArrayList<>();
 
-        solvers.add(new HillClimbing(PApplet.radians(3), structures.get(0)));
-        solvers.add(new HillClimbing(2.5, PApplet.radians(3), structures.get(1)));
-        solvers.add(new HillClimbing(PApplet.radians(5), structures.get(2)));
-        solvers.add(new HillClimbing(2.5, PApplet.radians(5), structures.get(3)));
+        solvers.add(new HillClimbingSolver(PApplet.radians(3), structures.get(0)));
+        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(3), structures.get(1)));
+        solvers.add(new HillClimbingSolver(PApplet.radians(5), structures.get(2)));
+        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(5), structures.get(3)));
 
         //generate experiments
         for(Solver solver : solvers) {
-            generateExperiment((HillClimbing) solver, 300, 30);
+            generateExperiment((HillClimbingSolver) solver, 300, 30);
         }
         System.out.println("Finished...");
     }

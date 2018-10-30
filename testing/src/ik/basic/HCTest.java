@@ -6,7 +6,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
-import frames.ik.HillClimbing;
+import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -102,10 +102,10 @@ public class HCTest extends PApplet {
 
         solvers = new ArrayList<>();
 
-        solvers.add(new HillClimbing(radians(3), structures.get(0)));
-        solvers.add(new HillClimbing(5, radians(3), structures.get(1)));
-        solvers.add(new HillClimbing(radians(5), structures.get(2)));
-        solvers.add(new HillClimbing(5, radians(5), structures.get(3)));
+        solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
+        solvers.add(new HillClimbingSolver(5, radians(3), structures.get(1)));
+        solvers.add(new HillClimbingSolver(radians(5), structures.get(2)));
+        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
         solvers.add(new ChainSolver(structures.get(4)));
 
         //solvers.add(new CCDSolver(structures.get(2)));
@@ -115,9 +115,9 @@ public class HCTest extends PApplet {
             solvers.get(i).timesPerFrame = 10;
             solvers.get(i).maxIter = 500;
             if(i != 0)targets.get(i).setReference(targets.get(0));
-            if(solvers.get(i) instanceof HillClimbing) {
-                ((HillClimbing) solvers.get(i)).setTarget(targets.get(i));
-                targets.get(i).setPosition( ((HillClimbing) solvers.get(i)).endEffector().position());
+            if(solvers.get(i) instanceof HillClimbingSolver) {
+                ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
+                targets.get(i).setPosition( ((HillClimbingSolver) solvers.get(i)).endEffector().position());
             }
             if(solvers.get(i) instanceof ChainSolver) {
                 ((ChainSolver) solvers.get(i)).setTarget(targets.get(i));
@@ -145,8 +145,8 @@ public class HCTest extends PApplet {
         for(Solver solver : solvers) {
             fill(255);
             textSize(12);
-            if (solver instanceof HillClimbing) {
-                HillClimbing s = (HillClimbing) solver;
+            if (solver instanceof HillClimbingSolver) {
+                HillClimbingSolver s = (HillClimbingSolver) solver;
                 Frame f = s.chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 if(s.powerLaw()){
