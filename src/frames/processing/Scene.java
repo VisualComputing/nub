@@ -2277,7 +2277,7 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true)}.
    */
   public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawOrthographicVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true);
+    drawOrthographicVolume(pGraphics, frame, zNear, zFar, eyeBuffer, frame.isDetached() ? true : frame.graph().isLeftHanded());
   }
 
   /**
@@ -2412,7 +2412,7 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true)}.
    */
   public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true);
+    drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, frame.isDetached() ? true : frame.graph().isLeftHanded());
   }
 
   /**

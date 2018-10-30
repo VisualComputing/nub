@@ -14,26 +14,20 @@ public class ShadowMapping3 extends PApplet {
   Shape[] shapes;
   Shape light;
   boolean show = true;
-
   PGraphics shadowMap;
   float zNear = 50;
   float zFar = 500;
-  float halfWidth = 200, halfHeight = 200;
   boolean ortho = true;
-
-  //Choose one of P3D for a 3D scene or P2D for a 2D one.
-  String renderer = P3D;
   int w = 1000;
   int h = 1000;
 
   public void settings() {
-    size(w, h, renderer);
+    size(w, h, P3D);
   }
 
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(max(w, h));
-
     shapes = new Shape[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene);
@@ -41,30 +35,21 @@ public class ShadowMapping3 extends PApplet {
       shapes[i].randomize();
     }
     light = new Shape(scene) {
-      // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
       @Override
       public void setGraphics(PGraphics pg) {
         pg.pushStyle();
         Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-        ///*
         if (ortho)
-          //Scene.drawEye(pg, this, halfWidth, halfHeight, zNear, zFar, shadowMap);
-          //Scene.drawEye(pg, 200 / (magnitude() * magnitude()), -200 / (magnitude() * magnitude()), zNear / magnitude(), zFar / magnitude(), shadowMap);
           Scene.drawOrthographicVolume(pg, this, zNear, zFar, shadowMap);
         else
           Scene.drawPerspectiveVolume(pg, this, zNear, zFar, shadowMap);
-        //*/
-        //pg.sphere(30);
         pg.popStyle();
       }
     };
-
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
-
-    shadowMap = createGraphics(w / 2, h / 2, renderer);
+    shadowMap = createGraphics(w / 2, h / 2, P3D);
     setVolume();
   }
 
@@ -104,13 +89,8 @@ public class ShadowMapping3 extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == ' ') {
+    if (key == ' ')
       show = !show;
-      if (show)
-        println("show!");
-      else
-        println("DON't show");
-    }
     if (key == 'r') {
       ortho = !ortho;
       setVolume();
@@ -118,17 +98,8 @@ public class ShadowMapping3 extends PApplet {
   }
 
   public void setVolume() {
-    if (ortho) {
-      //light.setMagnitude(1);
-      //matrix = Matrix.orthographic(halfWidth / light.magnitude(), -halfHeight / light.magnitude(), zNear, zFar);
-      //matrix = light.orthographic(halfWidth, halfHeight, zNear, zFar);
-      //matrix = light.orthographic(zNear, zFar);
-      matrix = light.orthographic(shadowMap.width, shadowMap.height, zNear, zFar);
-    } else {
-      //light.setMagnitude(tan((PI / 3) / 2));
-      //matrix = Matrix.perspective(-light.magnitude(), w / h, zNear, zFar);
-      matrix = light.perspective(shadowMap.width / shadowMap.height, zNear, zFar);
-    }
+    matrix = ortho ? light.orthographic(shadowMap.width, shadowMap.height, zNear, zFar) :
+        light.perspective(shadowMap.width / shadowMap.height, zNear, zFar);
   }
 
   PShape caja() {
