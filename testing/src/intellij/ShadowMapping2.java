@@ -52,7 +52,7 @@ public class ShadowMapping2 extends PApplet {
         ///*
         if (ortho)
           Scene.drawEye(pg, 200 / (magnitude() * magnitude()), -200 / (magnitude() * magnitude()), zNear / magnitude(), zFar / magnitude(), shadowMap);
-          //Scene.drawEye(pg, 200, -200, zNear, zFar, shadowMap);
+          //Scene.drawPerspectiveVolume(pg, 200, -200, zNear, zFar, shadowMap);
         else
           Scene.drawEye(pg, magnitude(), zNear, zFar, shadowMap);
         //*/

@@ -1775,6 +1775,54 @@ public class Frame {
     );
   }
 
+  public Matrix orthographic(float zNear, float zFar) {
+    return orthographic(isDetached() ? 500 : graph().width() / 2, isDetached() ? 500 : graph().height() / 2, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
+  }
+
+  public Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar) {
+    return orthographic(halfWidth, halfHeight, zNear, zFar, true);
+  }
+
+  public Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.orthographic(halfWidth / magnitude(), (leftHanded ? -halfHeight : halfHeight) / magnitude(), zNear, zFar);
+  }
+
+  /**
+   * Same as {@code return perspective(isDetached() ? 1 : graph().aspectRatio(), zNear, zFar, isDetached() ? true : graph().isLeftHanded())}.
+   *
+   * @see Matrix#perspective(float, float, float, float)
+   * @see #perspective(float, float, float)
+   * @see #perspective(float, float, float, boolean)
+   * @see #orthographic(float, float, float, float, boolean)
+   */
+  public Matrix perspective(float zNear, float zFar) {
+    return perspective(isDetached() ? 1 : graph().aspectRatio(), zNear, zFar, isDetached() ? true : graph().isLeftHanded());
+  }
+
+  /**
+   * Same as {@code return perspective(aspectRatio, zNear, zFar, true)}.
+   *
+   * @see Matrix#perspective(float, float, float, float)
+   * @see #perspective(float, float)
+   * @see #perspective(float, float, float, boolean)
+   * @see #orthographic(float, float, float, float, boolean)
+   */
+  public Matrix perspective(float aspectRatio, float zNear, float zFar) {
+    return perspective(aspectRatio, zNear, zFar, true);
+  }
+
+  /**
+   * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
+   *
+   * @see Matrix#perspective(float, float, float, float)
+   * @see #perspective(float, float)
+   * @see #perspective(float, float, float)
+   * @see #orthographic(float, float, float, float, boolean)
+   */
+  public Matrix perspective(float aspectRatio, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar);
+  }
+
   /**
    * Sets the frame from {@link #worldMatrix()} representation: orientation and magnitude
    * in the upper left 3x3 matrix and position on the last column.

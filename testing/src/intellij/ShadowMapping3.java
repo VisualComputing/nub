@@ -50,10 +50,10 @@ public class ShadowMapping3 extends PApplet {
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         ///*
         if (ortho)
-          Scene.drawEye(pg, this, halfWidth, halfHeight, zNear, zFar, shadowMap);
-          //Scene.drawEye(pg, 200 / (magnitude() * magnitude()), -200 / (magnitude() * magnitude()), zNear / magnitude(), zFar / magnitude(), shadowMap);
+          //Scene.drawPerspectiveVolume(pg, this, halfWidth, halfHeight, zNear, zFar, shadowMap);
+          Scene.drawEye(pg, 200 / (magnitude() * magnitude()), -200 / (magnitude() * magnitude()), zNear / magnitude(), zFar / magnitude(), shadowMap);
         else
-          Scene.drawEye(pg, this, zNear, zFar, shadowMap);
+          Scene.drawPerspectiveVolume(pg, this, zNear, zFar, shadowMap);
         //*/
         //pg.sphere(30);
         pg.popStyle();
@@ -119,10 +119,13 @@ public class ShadowMapping3 extends PApplet {
   public void setVolume() {
     if (ortho) {
       //light.setMagnitude(1);
-      matrix = Matrix.orthographic(halfWidth / light.magnitude(), -halfHeight / light.magnitude(), zNear, zFar);
+      //matrix = Matrix.orthographic(halfWidth / light.magnitude(), -halfHeight / light.magnitude(), zNear, zFar);
+      matrix = light.orthographic(halfWidth, halfHeight, zNear, zFar);
+      //matrix = light.orthographic(zNear, zFar);
     } else {
       //light.setMagnitude(tan((PI / 3) / 2));
-      matrix = Matrix.perspective(-light.magnitude(), w / h, zNear, zFar);
+      //matrix = Matrix.perspective(-light.magnitude(), w / h, zNear, zFar);
+      matrix = light.perspective(shadowMap.width / shadowMap.height, zNear, zFar);
     }
   }
 

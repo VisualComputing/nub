@@ -2157,8 +2157,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2184,8 +2184,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2207,7 +2207,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, frontBuffer, true)}.
+   * Same as {@code drawPerspectiveVolume(pGraphics, frontBuffer, true)}.
    *
    * @see #drawEye(Graph)
    * @see #drawEye(PGraphics, Graph)
@@ -2219,8 +2219,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2241,8 +2241,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2319,7 +2319,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true)}.
+   public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
+   float sqMagnitude = frame.magnitude() * frame.magnitude();
+   drawEye(pGraphics, frame, 200 / sqMagnitude, -200 / (magnitude() * magnitude()), zNear, zFar, eyeBuffer);
+   }*/
+
+  /**
+   * Same as {@code drawPerspectiveVolume(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2331,8 +2337,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, PGraphics, boolean)
    */
@@ -2341,7 +2347,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
+   * Same as {@code drawPerspectiveVolume(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2353,8 +2359,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, PGraphics, boolean)
    */
@@ -2382,8 +2388,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2475,7 +2481,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer)}.
+   * Same as {@code drawPerspectiveVolume(frontBuffer(), magnitude, zNear, zFar, eyeBuffer)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2487,8 +2493,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2497,7 +2503,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true)}.
+   * Same as {@code drawPerspectiveVolume(pGraphics, magnitude, zNear, zFar, eyeBuffer, true)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2509,8 +2515,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2519,7 +2525,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded)}.
+   * Same as {@code drawPerspectiveVolume(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2531,8 +2537,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2541,7 +2547,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, frame, zNear, zFar, eyeBuffer, true)}.
+   * Same as {@code drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2557,12 +2563,12 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawEye(pGraphics, frame, zNear, zFar, eyeBuffer, true);
+  public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
+    drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true);
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded)}.
+   * Same as {@code drawPerspectiveVolume(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2575,11 +2581,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
    * @see #drawEye(float, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+  public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
     drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
   }
 
@@ -2601,8 +2607,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2611,7 +2617,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar)}.
+   * Same as {@code drawPerspectiveVolume(frontBuffer(), magnitude, aspectRatio, zNear, zFar)}.
    *
    * @see #drawEye(PGraphics, Graph)
    * @see #drawEye(PGraphics, PGraphics)
@@ -2623,8 +2629,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(PGraphics, float, float, float, PGraphics, boolean)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
@@ -2652,8 +2658,8 @@ public class Scene extends Graph implements PConstants {
    * @see #drawEye(PGraphics, PGraphics, boolean)
    * @see #drawEye(float, float, float, float)
    * @see #drawEye(PGraphics, float, float, float, float, PGraphics)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics, boolean)
-   * @see #drawEye(PGraphics, Frame, float, float, PGraphics)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics, boolean)
+   * @see #drawPerspectiveVolume(PGraphics, Frame, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics)
    * @see #drawEye(PGraphics, Frame, float, float, float, float, PGraphics, boolean)
    */
