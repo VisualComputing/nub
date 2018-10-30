@@ -255,10 +255,10 @@ public class GraphTypes extends PApplet {
     }
 
     @Override
-    protected float _rescalingFactor() {
+    public float rescalingFactor() {
       if (isStandard())
         return 1.0f;
-      return super._rescalingFactor();
+      return super.rescalingFactor();
     }
   }
 }

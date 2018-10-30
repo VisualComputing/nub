@@ -332,7 +332,7 @@ public class Graph {
    * A {@link Type#PERSPECTIVE} uses a classical projection mainly defined by its
    * {@link #fieldOfView()}. With a {@link Type#ORTHOGRAPHIC}, the {@link #fieldOfView()}
    * is meaningless and the width and height of the graph frustum are inferred from the
-   * distance to the {@link #anchor()} using {@link #boundaryWidthHeight()}. Both types
+   * distance to the {@link #anchor()} using {@link #rescalingFactor()}. Both types
    * use {@link #zNear()} and {@link #zFar()} (to define their clipping planes) and
    * {@link #aspectRatio()} (for frustum shape).
    * <p>
@@ -546,52 +546,16 @@ public class Graph {
   }
 
   /**
-   * Returns the {@code halfWidth} and {@code halfHeight} of the eye boundary.
-   * While first element holds {@code halfWidth}, the second one
-   * holds {@code halfHeight}. Values are computed as:
-   * {@code _rescalingFactor() * (eye().magnitude() * width() / 2)}
-   * and {@code _rescalingFactor() * (eye().magnitude() * height() / 2)},
-   * respectively.
-   * <p>
-   * These values are valid for 2d and orthographic graphs (but not perspective) and they are
-   * expressed in virtual world units.
-   * <p>
-   * In the case of orthographs graphs these values are proportional to the eye (z
-   * projected) distance to the {@link #anchor()}. When zooming on the object, the eye
-   * is translated forward and its boundary is narrowed, making the object appear bigger
-   * on screen, as intuitively expected.
-   * <p>
-   * Overload this method to change this behavior if desired.
-   *
-   * @see #_rescalingFactor()
-   */
-  public float[] boundaryWidthHeight() {
-    float[] target = new float[2];
-    if ((target == null) || (target.length != 2)) {
-      target = new float[2];
-    }
-
-    float orthoCoef = _rescalingFactor();
-
-    target[0] = orthoCoef * (eye().magnitude() * width() / 2);
-    target[1] = orthoCoef * (eye().magnitude() * height() / 2);
-
-    return target;
-  }
-
-  /**
    * In 2D returns {@code 1}.
    * <p>
    * In 3D returns a value proportional to the eye (z projected) distance to the
-   * {@link #anchor()} so that when zooming on the object, the ortho eye is translated
+   * {@link #anchor()} so that when zooming on the object, the orthographic eye is translated
    * forward and its boundary is narrowed, making the object appear bigger on screen, as
    * intuitively expected.
    * <p>
    * Value is computed as: {@code 2 * Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis()) / screenHeight()}.
-   *
-   * @see #boundaryWidthHeight()
    */
-  protected float _rescalingFactor() {
+  public float rescalingFactor() {
     if (is2D())
       return 1.0f;
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
@@ -891,7 +855,7 @@ public class Graph {
    * parameters.
    * <p>
    * If the graph type is ORTHOGRAPHIC or TWO_D, the frustum's width and height are set using
-   * {@link #boundaryWidthHeight()}.
+   * {@link #rescalingFactor()}.
    * <p>
    * Both PERSPECTIVE and ORTHOGRAPHIC types use {@link #zNear()} and {@link #zFar()}
    * to place the clipping planes. These values are determined from radius() and center() so that
@@ -902,7 +866,7 @@ public class Graph {
    * <b>Note 1:</b> This method is called by {@link #preDraw()}.
    *
    * <b>Note 2:</b> Note that the computation of both, the PERSPECTIVE and ORTHOGRAPHIC frustum
-   * shapes depend on the eye magnitude, see {@link #fieldOfView()} and {@link #boundaryWidthHeight()}.
+   * shapes depend on the eye magnitude, see {@link #fieldOfView()}.
    */
   public Matrix computeProjection() {
     Matrix projection = null;
@@ -912,8 +876,8 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = boundaryWidthHeight();
-        projection = Matrix.orthographic(2 * wh[0], isLeftHanded() ? -2 * wh[1] : 2 * wh[1], zNear(), zFar());
+        float factor = rescalingFactor();
+        projection = Matrix.orthographic(factor * eye().magnitude() * width(), (isLeftHanded() ? -factor : factor) * eye().magnitude() * height(), zNear(), zFar());
         break;
       case CUSTOM:
         projection = computeCustomProjection();
@@ -1310,11 +1274,12 @@ public class Graph {
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float[] wh = boundaryWidthHeight();
-        _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
-        _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
-        _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[4]);
-        _distance[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[5]);
+        float wh0 = rescalingFactor() * eye().magnitude() * width() / 2;
+        float wh1 = rescalingFactor() * eye().magnitude() * height() / 2;
+        _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
+        _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
+        _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
+        _distance[5] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh1)), _normal[5]);
         break;
     }
 
@@ -1345,12 +1310,12 @@ public class Graph {
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
 
-    float[] wh = boundaryWidthHeight();
-
-    _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh[0])), _normal[0]);
-    _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh[0])), _normal[1]);
-    _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh[1])), _normal[2]);
-    _distance[3] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh[1])), _normal[3]);
+    float wh0 = eye().magnitude() * width() / 2;
+    float wh1 = eye().magnitude() * height() / 2;
+    _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
+    _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
+    _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
+    _distance[3] = Vector.dot(Vector.subtract(pos, Vector.multiply(up, wh1)), _normal[3]);
 
     for (int i = 0; i < 4; ++i) {
       _coefficients[i][0] = _normal[i]._vector[0];
@@ -1520,8 +1485,7 @@ public class Graph {
             .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = boundaryWidthHeight();
-        return 2.0f * wh[1] / height();
+        return rescalingFactor() * eye().magnitude();
     }
     return 1.0f;
   }
@@ -2128,10 +2092,11 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float[] wh = boundaryWidthHeight();
-        origin.set(
-            new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh[0], -(2.0f * pixelCopy.y() / height() - 1.0f) * wh[1],
-                0.0f));
+        float wh0 = rescalingFactor() * eye().magnitude() * width() / 2;
+        float wh1 = rescalingFactor() * eye().magnitude() * height() / 2;
+        origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
+            -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
+            0.0f));
         origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
         break;
@@ -3169,9 +3134,8 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        float[] wh = boundaryWidthHeight();
-        dx *= 2.0 * wh[0] / width();
-        dy *= 2.0 * wh[1] / height();
+        dx *= rescalingFactor() * eye().magnitude() * width();
+        dy *= rescalingFactor() * eye().magnitude() * height();
         break;
     }
     // this expresses the dz coordinate in world units:

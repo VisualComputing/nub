@@ -2169,9 +2169,10 @@ public class Scene extends Graph implements PConstants {
           drawEye(pGraphics, graph.width(), graph.height(), graph.isLeftHanded());
         break;
       case ORTHOGRAPHIC:
-        float[] wh = graph.boundaryWidthHeight();
+        float wh0 = graph.rescalingFactor() * graph.width();
+        float wh1 = graph.rescalingFactor() * graph.height();
         float magnitude = graph.eye().magnitude();
-        _drawOrthographicEye(pGraphics, 2 * wh[0] / magnitude, graph.isLeftHanded() ? -2 * wh[1] / magnitude : 2 * wh[1] / magnitude, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
+        _drawOrthographicEye(pGraphics, wh0, graph.isLeftHanded() ? -wh1 : wh1, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
         drawEye(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
@@ -2292,13 +2293,6 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Draws a 3D orthographic volume representation onto {@code PGraphics}.
-   *
-   * @param width  half-width of the eye boundary, see {@link #boundaryWidthHeight()}.
-   * @param height half-height of the eye boundary, see {@link #boundaryWidthHeight()}. Should be negative is
-   *                   your scene is {@link #isLeftHanded()} and positive otherwise.
-   * @param zNear      zNear plane, see {@link #zNear()}.
-   * @param zFar       zFar plane, see {@link #zFar()}.
-   * @param eyeBuffer  Texture of the volume near plane representation.
    */
   protected static void _drawOrthographicEye(PGraphics pGraphics, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)

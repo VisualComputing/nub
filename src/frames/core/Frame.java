@@ -1780,7 +1780,7 @@ public class Frame {
   }
 
   public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    return orthographic(width, height, zNear, zFar, true);
+    return orthographic(width, height, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
   }
 
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
@@ -1808,7 +1808,7 @@ public class Frame {
    * @see #orthographic(float, float, float, float, boolean)
    */
   public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    return perspective(aspectRatio, zNear, zFar, true);
+    return perspective(aspectRatio, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
   }
 
   /**
