@@ -61,7 +61,7 @@ public abstract class Solver {
       _reset();
     }
 
-    if (iterations == maxIter) {
+    if (iterations >= maxIter) {
       return true;
     }
     frameCounter += timesPerFrame;
