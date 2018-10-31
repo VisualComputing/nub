@@ -6,6 +6,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
+import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
@@ -24,13 +25,13 @@ import java.util.ArrayList;
  */
 public class HCTest extends PApplet {
     //TODO : Update
-    int num_joints = 15;
+    int num_joints = 5;
     float targetRadius = 12;
     float boneLength = 50;
 
     Scene scene;
     //Methods
-    int num_solvers = 5;
+    int num_solvers = 6;
     ArrayList<Solver> solvers;
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
@@ -107,7 +108,7 @@ public class HCTest extends PApplet {
         solvers.add(new HillClimbingSolver(radians(5), structures.get(2)));
         solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
         solvers.add(new ChainSolver(structures.get(4)));
-
+        solvers.add(new GASolver(structures.get(5), 10));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < num_solvers; i++){
@@ -126,6 +127,11 @@ public class HCTest extends PApplet {
             if(solvers.get(i) instanceof CCDSolver) {
                 ((CCDSolver) solvers.get(i)).setTarget(targets.get(i));
                 targets.get(i).setPosition( ((CCDSolver) solvers.get(i)).endEffector().position());
+            }
+            if(solvers.get(i) instanceof GASolver) {
+                GASolver solver = (GASolver) solvers.get(i);
+                solver.setTarget(solver.endEffector(), targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
             }
         }
     }
@@ -158,6 +164,10 @@ public class HCTest extends PApplet {
                 Frame f = ((ChainSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 text("FABRIK", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  GASolver){
+                Frame f = ((GASolver)solver).structure().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("Genetic Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
