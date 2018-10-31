@@ -39,12 +39,11 @@ public class Util {
         for(int i = 0; i < n; i++){
             Individual individual = original.clone();
             for(Frame frame : individual.structure()){
-                float roll = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
-                float pitch = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
-                float yaw = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
+                float roll = 2 * max_angle * _random.nextFloat() - max_angle;
+                float pitch = 2 * max_angle * _random.nextFloat() - max_angle;
+                float yaw =  2 * max_angle * _random.nextFloat() - max_angle;
                 frame.rotate(new Quaternion(roll, pitch, yaw ));
             }
-            System.out.println(individual);
             population.add(individual);
         }
         population.add(original.clone());
@@ -52,7 +51,7 @@ public class Util {
     }
 
     public static List<Individual> generatePopulation(List<Frame> structure, int n){
-        return generatePopulation(structure, n, 5);
+        return generatePopulation(structure, n, (float) Math.toRadians(5));
     }
 
     public static List<Individual> concatenate(List<Individual>... lists){

@@ -24,9 +24,9 @@ public class OperatorMethods {
             Frame joint = individual.structure().get(index);
             //modify each Euler Angle
             //rotate
-            float roll = (_random.nextFloat() * _delta);
-            float pitch = (_random.nextFloat() * _delta);
-            float yaw = (_random.nextFloat() * _delta);
+            float roll = 2*_delta * _random.nextFloat() - _delta;
+            float pitch = 2*_delta * _random.nextFloat() - _delta;
+            float yaw = 2*_delta * _random.nextFloat() - _delta;
             //rotate method consider constraints
             joint.rotate(new Quaternion(roll, pitch, yaw));
             return individual;
@@ -56,7 +56,7 @@ public class OperatorMethods {
     public static class ConvexCombination implements Operator{
         @Override
         public Individual apply(Individual... individuals) {
-            List<Frame> structure = new ArrayList<>();
+            Individual combination = individuals[0].clone();
             int n = individuals.length;
             for (int i = 0; i < individuals[0].structure().size(); i++){
                 float roll = 0;
@@ -68,11 +68,9 @@ public class OperatorMethods {
                     pitch += euler.y();
                     yaw += euler.z();
                 }
-                Frame frame = individuals[0].structure().get(i).get();
-                frame.setRotation(new Quaternion(roll/n, pitch/n, yaw/n ));
-                structure.add(frame);
+                combination.structure().get(i).setRotation(new Quaternion(roll/n, pitch/n, yaw/n ));
             }
-            return new Individual(structure);
+            return combination;
         }
     }
 

@@ -23,27 +23,28 @@ public class GASolver extends Solver {
     protected Selection _selection;
     protected Operator _mutation;
     protected Operator _crossover;
-    protected float _cross_probability = 0.5f;
+    protected float _cross_probability = 1f;
     protected int _population_size = 10;
     protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
-    protected HashMap<Frame, Frame> _previousTarget;
-    protected HashMap<Frame, Frame> _target;
+    protected HashMap<Integer, Frame> _previousTarget;
+    protected HashMap<Integer, Frame> _target;
     protected List<Frame> _structure;
     protected List<Individual> _population;
     protected Individual _best;
 
 
-    protected boolean _use_Statistics = true;
     protected List<Statistics> _statistics;
+
+    protected boolean _debug = false;
 
     public GASolver(List<Frame> structure, int population_size){
         this._structure = structure;
         this._population_size = population_size;
-        this._target = new HashMap<Frame, Frame>();
-        this._previousTarget = new HashMap<Frame, Frame>();
-        _selection = new SelectionMethods.Tournament();
+        this._target = new HashMap<Integer, Frame>();
+        this._previousTarget = new HashMap<Integer, Frame>();
+        _selection = new SelectionMethods.Ranking();
         _mutation = new OperatorMethods.UniformMutation();
         _crossover = new OperatorMethods.ConvexCombination();
     }
@@ -65,7 +66,7 @@ public class GASolver extends Solver {
     }
 
     public void setTarget(Frame endEffector, Frame target) {
-        this._target.put(endEffector, target);
+        this._target.put(structure().indexOf(endEffector), target);
     }
 
     public double[] execute(){
@@ -91,21 +92,39 @@ public class GASolver extends Solver {
     @Override
     protected boolean _iterate() {
         //If there is no population then genereate one
-        _population = _population == null ? Util.generatePopulation(_structure, _population_size) : _population;
+        if(_population == null) {
+            _population = Util.generatePopulation(_structure, _population_size);
+            for (Individual individual : _population) {
+                individual.updateFitness(_target);
+                _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
+            }
+        }
+
         //1. Select parents
         List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
+        if(_debug) {
+            System.out.println("ITERATION : " + iterations);
+            System.out.println("Parents");
+            for(Individual ind : parents){
+                System.out.println(ind);
+            }
+        }
+
         //2. Generate children
         List<Individual> children = new ArrayList<>();
         Individual worst = null;
         Individual best = null;
         for(int i = 0; i < parents.size(); i+=2){
-            System.out.println("Parent " + i);
-            System.out.println(parents.get(i));
-            System.out.println("Parent " + (i + 1));
-            System.out.println(parents.get(i + 1));
-
             if(_random.nextFloat() < _cross_probability) {
-                Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
+                Individual child = _crossover.apply(_best, parents.get(i), parents.get(i + 1));
+                if(_debug) {
+                    System.out.println("\t Best " + _best);
+                    System.out.println("\t P1 " + parents.get(i));
+                    System.out.println("\t P2 " + parents.get(i + 1));
+                    child.updateFitness(_target);
+                    System.out.println("\t Child " + child);
+                }
+
                 child = _mutation.apply(child);
                 child.updateFitness(_target);
                 children.add(child);
@@ -113,20 +132,34 @@ public class GASolver extends Solver {
                 worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
 
             } else{
-                Individual child = parents.get(0);
+                Individual child = parents.get(i);
                 children.add(child);
                 best = best == null ? child : best.fitness() > child.fitness() ? child : best;
-                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;            }
+                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+            }
         }
+        if(_debug) {
+            System.out.println("Children ");
+            for (Individual ind : children) {
+                System.out.println(ind);
+            }
+        }
+
         //3. Replacement
         switch (replacement){
             case ELITISM:{
                 //Keep best individuals
                 _population = Util.concatenate(parents, children);
-                _population = Util.sort(true, true, _population);
+                _population = Util.sort(true, false, _population);
                 _best = _population.get(0);
                 _population = _population.subList(0, _population_size);
                 Collections.shuffle(_population);
+                if(_debug) {
+                    System.out.println("Population ");
+                    for (Individual ind : _population) {
+                        System.out.println(ind);
+                    }
+                }
                 break;
             }
             case GENERATIONAL:{
@@ -172,7 +205,7 @@ public class GASolver extends Solver {
         } else if (_previousTarget == null) {
             return true;
         }
-        for(Frame endEffector : _target.keySet()){
+        for(Integer endEffector : _target.keySet()){
             if(_previousTarget.get(endEffector) == null) continue;
             if(!(_previousTarget.get(endEffector).position().matches(_target.get(endEffector).position()) &&
                     _previousTarget.get(endEffector).orientation().matches(_target.get(endEffector).orientation()))){
@@ -189,7 +222,7 @@ public class GASolver extends Solver {
             _previousTarget = null;
             return;
         }
-        for(Frame endEffector : _target.keySet()) {
+        for(Integer endEffector : _target.keySet()) {
             _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation()));
         }
     }

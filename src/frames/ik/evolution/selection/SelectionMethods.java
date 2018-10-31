@@ -85,7 +85,7 @@ public class SelectionMethods {
 
     public static class Ranking implements Selection {
         protected Roulette roulette = new Roulette();
-        protected boolean _exponential;
+        protected boolean _exponential = false;
         protected float _alpha = 2;
         protected boolean _minimization = true;
 
