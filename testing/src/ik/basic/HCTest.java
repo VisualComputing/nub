@@ -25,7 +25,7 @@ import java.util.ArrayList;
  */
 public class HCTest extends PApplet {
     //TODO : Update
-    int num_joints = 5;
+    int num_joints = 4;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -113,8 +113,8 @@ public class HCTest extends PApplet {
 
         for(int i = 0; i < num_solvers; i++){
             solvers.get(i).error = 0.5f;
-            solvers.get(i).timesPerFrame = 10;
-            solvers.get(i).maxIter = 500;
+            solvers.get(i).timesPerFrame = 1;
+            solvers.get(i).maxIter = 5;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
