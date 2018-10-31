@@ -8,20 +8,22 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created by sebchaparr on 29/10/18.
  */
 public class GASolver extends Solver {
+    public enum Replacement {
+        GENERATIONAL, ELITISM, KEEP_BEST
+    }
+
     protected Selection _selection;
     protected Operator _mutation;
     protected Operator _crossover;
     protected float _cross_probability = 0.5f;
     protected int _population_size = 10;
+    protected Replacement replacement = Replacement.KEEP_BEST;
 
     protected Random _random = new Random();
     protected HashMap<Frame, Frame> _previousTarget;
@@ -51,6 +53,7 @@ public class GASolver extends Solver {
         //2. Update Fitness
         for(Individual individual : _population){
             individual.updateFitness(_target);
+            _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
         //3. TODO use a better Termination Condition
         int k = 0;
@@ -69,21 +72,51 @@ public class GASolver extends Solver {
         List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
         //2. Generate children
         List<Individual> children = new ArrayList<>();
+        Individual worst = null;
+        Individual best = null;
         for(int i = 0; i < parents.size(); i+=2){
             if(_random.nextFloat() < _cross_probability) {
                 Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
-                children.add(_mutation.apply(child));
+                child = _mutation.apply(child);
+                child.updateFitness(_target);
+                children.add(child);
+                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
+                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+
             } else{
-                children.add(parents.get(0));
-            }
+                Individual child = parents.get(0);
+                children.add(child);
+                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
+                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;            }
         }
         //3. Replacement
-
-
-        //4. Find Best
-
-        double distance = 0 ;
-        return distance < minDistance;
+        switch (replacement){
+            case ELITISM:{
+                //Keep best individuals
+                _population = Util.concatenate(parents, children);
+                _population = Util.sort(true, true, _population);
+                _best = _population.get(0);
+                _population = _population.subList(0, _population_size);
+                Collections.shuffle(_population);
+                break;
+            }
+            case GENERATIONAL:{
+                _population = children;
+                _best = best;
+                break;
+            }
+            //Steady State
+            case KEEP_BEST:{
+                _population = children;
+                if(!_population.contains(best)) {
+                    _population.remove(worst);
+                    _population.add(best);
+                }
+                _best = best;
+                break;
+            }
+        }
+        return _best.fitness() < minDistance;
     }
 
 
