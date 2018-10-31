@@ -11,10 +11,10 @@ import java.util.*;
  * Created by sebchaparr on 28/10/18.
  */
 public class Util {
-    protected static Random _random;
+    protected static Random _random = new Random();
 
     public static List<Individual> sort(boolean inPlace, boolean reverse, List<Individual> population){
-        final int sign = reverse ? 1 : -1;
+        final int sign = reverse ? -1 : 1;
         List<Individual> sorted = population;
         if(!inPlace) sorted = new ArrayList<Individual>(population);
         sorted.sort(new Comparator<Individual>() {
@@ -35,18 +35,19 @@ public class Util {
 
     public static List<Individual> generatePopulation(List<Frame> structure, int n, float max_angle){
         List<Individual> population = new ArrayList<>();
-        List<Frame> copy_structure = new ArrayList<>();
         Individual original = new Individual(structure);
         for(int i = 0; i < n; i++){
             Individual individual = original.clone();
             for(Frame frame : individual.structure()){
-                float roll = (float) Math.toRadians(max_angle * _random.nextFloat());
-                float pitch = (float) Math.toRadians(max_angle * _random.nextFloat());
-                float yaw = (float) Math.toRadians(max_angle * _random.nextFloat());
-                frame.setRotation(new Quaternion(roll, pitch, yaw ));
+                float roll = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
+                float pitch = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
+                float yaw = (float) Math.toRadians(2*max_angle * _random.nextFloat() - max_angle);
+                frame.rotate(new Quaternion(roll, pitch, yaw ));
             }
+            System.out.println(individual);
             population.add(individual);
         }
+        population.add(original.clone());
         return population;
     }
 

@@ -119,7 +119,7 @@ public class SelectionMethods {
             List<Individual> list = replacement ? population : new ArrayList<Individual>(population);
             for(int i = 0; i < m; i++){
                 List<Individual> t_population = uniform.choose(replacement, list, _size);
-                t_population = Util.sort(true, _minimization, t_population);
+                t_population = Util.sort(true, !_minimization, t_population);
                 Individual individual = t_population.get(0);
                 choosed.add(individual);
                 if(!replacement) list.remove(individual);
@@ -134,7 +134,7 @@ public class SelectionMethods {
         @Override
         public List<Individual> choose(boolean replacement, List<Individual> population, int m) {
             List<Individual> choosed = new ArrayList<Individual>();
-            List<Individual> list = Util.sort(false, _minimization, population);
+            List<Individual> list = Util.sort(false, !_minimization, population);
             int n = list.size();
             int index_best = (int)(0.1*n);
             int index_normal = (int)(0.8*n);

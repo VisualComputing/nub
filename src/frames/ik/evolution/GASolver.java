@@ -3,7 +3,9 @@ package frames.ik.evolution;
 import frames.core.Frame;
 import frames.ik.Solver;
 import frames.ik.evolution.operator.Operator;
+import frames.ik.evolution.operator.OperatorMethods;
 import frames.ik.evolution.selection.Selection;
+import frames.ik.evolution.selection.SelectionMethods;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -23,7 +25,7 @@ public class GASolver extends Solver {
     protected Operator _crossover;
     protected float _cross_probability = 0.5f;
     protected int _population_size = 10;
-    protected Replacement replacement = Replacement.KEEP_BEST;
+    protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
     protected HashMap<Frame, Frame> _previousTarget;
@@ -33,9 +35,29 @@ public class GASolver extends Solver {
     protected Individual _best;
 
 
+    protected boolean _use_Statistics = true;
+    protected List<Statistics> _statistics;
+
     public GASolver(List<Frame> structure, int population_size){
         this._structure = structure;
         this._population_size = population_size;
+        this._target = new HashMap<Frame, Frame>();
+        this._previousTarget = new HashMap<Frame, Frame>();
+        _selection = new SelectionMethods.Tournament();
+        _mutation = new OperatorMethods.UniformMutation();
+        _crossover = new OperatorMethods.ConvexCombination();
+    }
+
+    public void setSelection(Selection selection){
+        _selection = selection;
+    }
+
+    public void setMutation(Operator mutation){
+        _mutation = mutation;
+    }
+
+    public void setCrossover(Operator crossover){
+        _crossover = crossover;
     }
 
     public List<Frame> structure(){
@@ -47,7 +69,7 @@ public class GASolver extends Solver {
     }
 
     public double[] execute(){
-        //double[] results = new double[maxIter];
+        this._statistics = new ArrayList<Statistics>();
         //1. Generate population
         _population = Util.generatePopulation(_structure, _population_size);
         //2. Update Fitness
@@ -61,13 +83,15 @@ public class GASolver extends Solver {
             _iterate();
             k++;
         }
-        //TODO update statistics
-        //results[k] = _distanceToTarget(_x_i);
+        //4. Keep statistics
+        _statistics.add(new Statistics(_population));
         return null;
     }
 
     @Override
     protected boolean _iterate() {
+        //If there is no population then genereate one
+        _population = _population == null ? Util.generatePopulation(_structure, _population_size) : _population;
         //1. Select parents
         List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
         //2. Generate children
@@ -75,6 +99,11 @@ public class GASolver extends Solver {
         Individual worst = null;
         Individual best = null;
         for(int i = 0; i < parents.size(); i+=2){
+            System.out.println("Parent " + i);
+            System.out.println(parents.get(i));
+            System.out.println("Parent " + (i + 1));
+            System.out.println(parents.get(i + 1));
+
             if(_random.nextFloat() < _cross_probability) {
                 Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
                 child = _mutation.apply(child);
@@ -144,6 +173,7 @@ public class GASolver extends Solver {
             return true;
         }
         for(Frame endEffector : _target.keySet()){
+            if(_previousTarget.get(endEffector) == null) continue;
             if(!(_previousTarget.get(endEffector).position().matches(_target.get(endEffector).position()) &&
                     _previousTarget.get(endEffector).orientation().matches(_target.get(endEffector).orientation()))){
                 return true;

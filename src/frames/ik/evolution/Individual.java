@@ -72,10 +72,22 @@ public class Individual{
             structure.add(_structure.get(i).get());
         }
         Individual individual = new Individual(structure);
-        for(String name : _parameters.keySet()){
-            individual.putParameter(name,_parameters.get(name)._values.clone());
-        }
         individual._fitness = _fitness;
+        if(_parameters != null) {
+            for (String name : _parameters.keySet()) {
+                individual.putParameter(name, _parameters.get(name)._values.clone());
+            }
+        }
         return individual;
+    }
+
+    public String toString(){
+        String s = "\n";
+        s += "Individual : [";
+        for(Frame frame : _structure){
+            s += frame.rotation().eulerAngles() + ", ";
+        }
+        s+="] Fitness " + this._fitness + "\n";
+        return s;
     }
 }
