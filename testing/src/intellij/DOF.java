@@ -1,5 +1,6 @@
 package intellij;
 
+import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -25,7 +26,8 @@ public class DOF extends PApplet {
     colorMode(HSB, 255);
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
-    scene.setFieldOfView(PI / 3);
+    //scene.setFieldOfView(PI / 3);
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 

@@ -3135,8 +3135,12 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        dx *= rescalingFactor() * eye().magnitude() * width();
-        dy *= rescalingFactor() * eye().magnitude() * height();
+        //dx *= rescalingFactor() * eye().magnitude() * width();
+        //dy *= rescalingFactor() * eye().magnitude() * height();
+        float wh0 = rescalingFactor() * eye().magnitude() * width() / 2;
+        float wh1 = rescalingFactor() * eye().magnitude() * height() / 2;
+        dx *= 2.0 * wh0 / width();
+        dy *= 2.0 * wh1 / height();
         break;
     }
     // this expresses the dz coordinate in world units:
