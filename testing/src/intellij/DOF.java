@@ -96,6 +96,15 @@ public class DOF extends PApplet {
     if (key == '2') mode = 2;
     if (key == 's') scene.saveConfig("/home/pierre/config.json");
     if (key == 'l') scene.loadConfig("/home/pierre/config.json");
+    if (key == 't')
+      if (scene.type() == Graph.Type.ORTHOGRAPHIC)
+        scene.setAperture(Graph.Type.PERSPECTIVE);
+      else
+        scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    if (key == 'f')
+      scene.fitBallInterpolation();
+    if (key == 'F')
+      scene.fitBall();
   }
 
   @Override
