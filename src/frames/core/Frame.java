@@ -1775,6 +1775,31 @@ public class Frame {
     );
   }
 
+  /**
+   * In 2D returns {@code 1}.
+   * <p>
+   * In 3D returns a value proportional to the eye (z projected) distance to the
+   * {@link #anchor()} so that when zooming on the object, the orthographic eye is translated
+   * forward and its boundary is narrowed, making the object appear bigger on screen, as
+   * intuitively expected.
+   * <p>
+   * Value is computed as: {@code 2 * Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis()) / screenHeight()}.
+   */
+  public float rescalingFactor() {
+    if (isDetached())
+      return 1;
+    else {
+      if (graph().isEye(this)) {
+        if (graph().is2D())
+          return 1.0f;
+        float toAnchor = Vector.scalarProjection(Vector.subtract(position(), graph().anchor()), zAxis());
+        float epsilon = 0.0001f;
+        return (2 * (toAnchor == 0 ? epsilon : toAnchor) * graph()._rapK / graph().height());
+      } else
+        return 1;
+    }
+  }
+
   public Matrix orthographic(float zNear, float zFar) {
     return orthographic(isDetached() ? 500 : graph().width(), isDetached() ? 500 : graph().height(), zNear, zFar, isDetached() ? true : graph().isLeftHanded());
   }
@@ -1784,7 +1809,7 @@ public class Frame {
   }
 
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    float factor = magnitude() * (isDetached() ? 1 : graph().isEye(this) ? graph().rescalingFactor() : 1);
+    float factor = magnitude() * rescalingFactor();
     return Matrix.orthographic(width * factor, (leftHanded ? -height : height) * factor, zNear, zFar);
     //return Matrix.orthographic(width / magnitude(), (leftHanded ? -height : height) / magnitude(), zNear, zFar);
   }

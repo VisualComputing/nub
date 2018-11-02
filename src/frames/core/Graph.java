@@ -545,24 +545,6 @@ public class Graph {
     _zClippingCoefficient = coef;
   }
 
-  /**
-   * In 2D returns {@code 1}.
-   * <p>
-   * In 3D returns a value proportional to the eye (z projected) distance to the
-   * {@link #anchor()} so that when zooming on the object, the orthographic eye is translated
-   * forward and its boundary is narrowed, making the object appear bigger on screen, as
-   * intuitively expected.
-   * <p>
-   * Value is computed as: {@code 2 * Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis()) / screenHeight()}.
-   */
-  public float rescalingFactor() {
-    if (is2D())
-      return 1.0f;
-    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-    float epsilon = 0.0001f;
-    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
-  }
-
   // Graph and frames stuff
 
   /**
@@ -1276,8 +1258,8 @@ public class Graph {
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float wh0 = rescalingFactor() * eye().magnitude() * width() / 2;
-        float wh1 = rescalingFactor() * eye().magnitude() * height() / 2;
+        float wh0 = eye().rescalingFactor() * eye().magnitude() * width() / 2;
+        float wh1 = eye().rescalingFactor() * eye().magnitude() * height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1487,7 +1469,7 @@ public class Graph {
             .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        return rescalingFactor() * eye().magnitude();
+        return eye().rescalingFactor() * eye().magnitude();
     }
     return 1.0f;
   }
@@ -2094,8 +2076,8 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float wh0 = rescalingFactor() * eye().magnitude() * width() / 2;
-        float wh1 = rescalingFactor() * eye().magnitude() * height() / 2;
+        float wh0 = eye().rescalingFactor() * eye().magnitude() * width() / 2;
+        float wh1 = eye().rescalingFactor() * eye().magnitude() * height() / 2;
         origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
             -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
             0.0f));
@@ -3136,8 +3118,8 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        dx *= rescalingFactor() * eye().magnitude();
-        dy *= rescalingFactor() * eye().magnitude();
+        dx *= eye().rescalingFactor() * eye().magnitude();
+        dy *= eye().rescalingFactor() * eye().magnitude();
         break;
     }
     // this expresses the dz coordinate in world units:

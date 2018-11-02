@@ -253,12 +253,5 @@ public class GraphTypes extends PApplet {
       else
         return super.zFar();
     }
-
-    @Override
-    public float rescalingFactor() {
-      if (isStandard())
-        return 1.0f;
-      return super.rescalingFactor();
-    }
   }
 }
