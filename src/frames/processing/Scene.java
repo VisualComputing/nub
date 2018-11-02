@@ -2169,8 +2169,8 @@ public class Scene extends Graph implements PConstants {
           drawEye(pGraphics, graph.width(), graph.height(), graph.isLeftHanded());
         break;
       case ORTHOGRAPHIC:
-        float wh0 = graph.eye().rescalingFactor() * graph.width();
-        float wh1 = graph.eye().rescalingFactor() * graph.height();
+        float wh0 = graph.eye().magnitude() * graph.width();
+        float wh1 = graph.eye().magnitude() * graph.height();
         float magnitude = graph.eye().magnitude();
         _drawOrthographicEye(pGraphics, wh0, graph.isLeftHanded() ? -wh1 : wh1, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
         break;

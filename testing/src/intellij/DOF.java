@@ -27,7 +27,7 @@ public class DOF extends PApplet {
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
     //scene.setAperture(Graph.Type.PERSPECTIVE);
-    //scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fitBallInterpolation();
 

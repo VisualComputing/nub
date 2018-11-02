@@ -142,7 +142,7 @@ public class Graph {
   protected Vector _normal[];
   protected float _distance[];
   // rescale ortho when anchor changes
-  protected float _rapK = 1;
+  public float _rapK = 1;
   // handed and HUD
   protected boolean _rightHanded;
   protected int _hudCalls;
@@ -884,16 +884,23 @@ public class Graph {
         //projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
         projection = eye().perspective(aspectRatio(), zNear(), zFar(), isLeftHanded());
         break;
-      case TWO_D:
       case ORTHOGRAPHIC:
         //float factor = rescalingFactor();
         //projection = Matrix.orthographic(factor * eye().magnitude() * width(), (isLeftHanded() ? -factor : factor) * eye().magnitude() * height(), zNear(), zFar());
+        eye().setMagnitude(_rescalingFactor());
+      case TWO_D:
         projection = eye().orthographic(width(), height(), zNear(), zFar(), isLeftHanded());
         break;
       case CUSTOM:
         projection = computeCustomProjection();
     }
     return projection;
+  }
+
+  protected float _rescalingFactor() {
+    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
+    float epsilon = 0.0001f;
+    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
   }
 
   /**
@@ -1285,8 +1292,8 @@ public class Graph {
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float wh0 = eye().rescalingFactor() * eye().magnitude() * width() / 2;
-        float wh1 = eye().rescalingFactor() * eye().magnitude() * height() / 2;
+        float wh0 = eye().magnitude() * width() / 2;
+        float wh1 = eye().magnitude() * height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1496,7 +1503,7 @@ public class Graph {
             .tan(fieldOfView() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        return eye().rescalingFactor() * eye().magnitude();
+        return eye().magnitude();
     }
     return 1.0f;
   }
@@ -2103,8 +2110,8 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float wh0 = eye().rescalingFactor() * eye().magnitude() * width() / 2;
-        float wh1 = eye().rescalingFactor() * eye().magnitude() * height() / 2;
+        float wh0 = eye().magnitude() * width() / 2;
+        float wh1 = eye().magnitude() * height() / 2;
         origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
             -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
             0.0f));
@@ -3135,23 +3142,16 @@ public class Graph {
     dy = isRightHanded() ^ isEye(frame) ? -dy : dy;
     dz = isEye(frame) ? dz : -dz;
     // Scale to fit the screen relative vector displacement
-    switch (type()) {
-      case PERSPECTIVE:
-        float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
-            eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
-        //TODO check me weird to find height instead of width working (may it has to do with fov?)
-        dx *= 2.0 * k / height();
-        dy *= 2.0 * k / height();
-        break;
-      case TWO_D:
-      case ORTHOGRAPHIC:
-        dx *= eye().rescalingFactor() * eye().magnitude();
-        dy *= eye().rescalingFactor() * eye().magnitude();
-        break;
+    if (type() == Type.PERSPECTIVE) {
+      float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
+          eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
+      //TODO check me weird to find height instead of width working (may it has to do with fov?)
+      dx *= 2.0 * k / (height() * eye().magnitude());
+      dy *= 2.0 * k / (height() * eye().magnitude());
     }
     // this expresses the dz coordinate in world units:
-    //Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz / eye().magnitude());
-    Vector eyeVector = new Vector(dx / eye().magnitude(), dy / eye().magnitude(), dz * 2 * radius() / zMax);
+    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
+    Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / zMax);
     return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
   }
 
