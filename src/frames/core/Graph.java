@@ -349,6 +349,22 @@ public class Graph {
     }
   }
 
+  public void setAperture(float aperture) {
+    eye().setMagnitude(aperture);
+  }
+
+  public float aperture() {
+    return eye().magnitude();
+  }
+
+  public static float radians(float magnitude) {
+    return 2 * (float) Math.atan(magnitude);
+  }
+
+  public static float magnitude(float fov) {
+    return (float) Math.tan(fov / 2);
+  }
+
   /**
    * Returns the vertical field of view of the {@link #eye()} (in radians) computed as
    * {@code 2 * (float) Math.atan(eye().magnitude())}.
@@ -366,7 +382,7 @@ public class Graph {
    * @see #eye()
    */
   public float fieldOfView() {
-    return 2 * (float) Math.atan(eye().magnitude());
+    return radians(eye().magnitude());
   }
 
   /**
@@ -377,7 +393,7 @@ public class Graph {
    * @see Frame#setMagnitude(float)
    */
   public void setFieldOfView(float fov) {
-    eye().setMagnitude((float) Math.tan(fov / 2));
+    setAperture(magnitude(fov));
   }
 
   /**
@@ -392,7 +408,7 @@ public class Graph {
    * @see #eye()
    */
   public float horizontalFieldOfView() {
-    return 2 * (float) Math.atan(eye().magnitude() * aspectRatio());
+    return radians(eye().magnitude() * aspectRatio());
   }
 
   /**
@@ -836,8 +852,9 @@ public class Graph {
    * {@link #fieldOfView()}, {@link #aspectRatio()}, {@link #zNear()} and {@link #zFar()}
    * parameters.
    * <p>
-   * If the graph type is ORTHOGRAPHIC or TWO_D, the frustum's width and height are set using
-   * {@link #rescalingFactor()}.
+   * If the graph type is ORTHOGRAPHIC or TWO_D, defines a projection matrix using the
+   * {@link #aperture()}, {@link #width()}, {@link #height()}, {@link #zNear()} and {@link #zFar()}
+   *  parameters.
    * <p>
    * Both PERSPECTIVE and ORTHOGRAPHIC types use {@link #zNear()} and {@link #zFar()}
    * to place the clipping planes. These values are determined from radius() and center() so that
