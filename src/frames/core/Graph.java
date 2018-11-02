@@ -872,7 +872,8 @@ public class Graph {
     Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
+        //projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
+        projection = eye().perspective(aspectRatio(), zNear(), zFar(), isLeftHanded());
         break;
       case TWO_D:
       case ORTHOGRAPHIC:

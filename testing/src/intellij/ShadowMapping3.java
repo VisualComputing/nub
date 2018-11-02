@@ -100,6 +100,8 @@ public class ShadowMapping3 extends PApplet {
   public void setVolume() {
     matrix = ortho ? light.orthographic(shadowMap.width, shadowMap.height, zNear, zFar) :
         light.perspective(shadowMap.width / shadowMap.height, zNear, zFar);
+    println(light.magnitude());
+    matrix.print();
   }
 
   PShape caja() {
