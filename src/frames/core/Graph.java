@@ -229,7 +229,6 @@ public class Graph {
    * @see #setEye(Frame)
    */
   public Graph(Type type, int width, int height) {
-    setType(type);
     setWidth(width);
     setHeight(height);
 
@@ -240,6 +239,7 @@ public class Graph {
     setCenter(new Vector());
     _anchor = center().get();
     setEye(new Frame(this));
+    setAperture(type);
     fitBall();
 
     setMatrixHandler(new MatrixHandler(this));
@@ -347,6 +347,16 @@ public class Graph {
       _modified();
       this._type = type;
     }
+  }
+
+  public void setAperture(Type type) {
+    setType(type);
+    setAperture(type() == Type.PERSPECTIVE ? magnitude((float) Math.PI / 3) : 1);
+  }
+
+  public void setAperture(Type type, float aperture) {
+    setType(type);
+    setAperture(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture);
   }
 
   public void setAperture(float aperture) {
