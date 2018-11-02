@@ -877,8 +877,9 @@ public class Graph {
         break;
       case TWO_D:
       case ORTHOGRAPHIC:
-        float factor = rescalingFactor();
-        projection = Matrix.orthographic(factor * eye().magnitude() * width(), (isLeftHanded() ? -factor : factor) * eye().magnitude() * height(), zNear(), zFar());
+        //float factor = rescalingFactor();
+        //projection = Matrix.orthographic(factor * eye().magnitude() * width(), (isLeftHanded() ? -factor : factor) * eye().magnitude() * height(), zNear(), zFar());
+        projection = eye().orthographic(width(), height(), zNear(), zFar(), isLeftHanded());
         break;
       case CUSTOM:
         projection = computeCustomProjection();

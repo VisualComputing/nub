@@ -1784,7 +1784,9 @@ public class Frame {
   }
 
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.orthographic(width / magnitude(), (leftHanded ? -height : height) / magnitude(), zNear, zFar);
+    float factor = magnitude() * (isDetached() ? 1 : graph().isEye(this) ? graph().rescalingFactor() : 1);
+    return Matrix.orthographic(width * factor, (leftHanded ? -height : height) * factor, zNear, zFar);
+    //return Matrix.orthographic(width / magnitude(), (leftHanded ? -height : height) / magnitude(), zNear, zFar);
   }
 
   /**
