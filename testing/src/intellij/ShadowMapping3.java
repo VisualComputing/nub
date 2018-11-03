@@ -1,5 +1,6 @@
 package intellij;
 
+import frames.core.Graph;
 import frames.primitives.Matrix;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -91,10 +92,17 @@ public class ShadowMapping3 extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       show = !show;
-    if (key == 'r') {
+    if (key == 'o') {
       ortho = !ortho;
       setVolume();
     }
+    if (key == 't')
+      if (scene.type() == Graph.Type.PERSPECTIVE)
+        scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+      else
+        scene.setAperture(Graph.Type.PERSPECTIVE);
+    if (key == 'f')
+      scene.flip();
   }
 
   public void setVolume() {
