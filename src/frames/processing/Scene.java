@@ -960,8 +960,6 @@ public class Scene extends Graph implements PConstants {
    * they also get drawn. Call it only within Processing draw() method.
    *
    * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Frame)
-   * @see #traverse(PGraphics, Frame, Matrix)
    * @see #traverse(PGraphics, Matrix, Matrix)
    */
   @Override
@@ -973,8 +971,6 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
-   * @see #traverse(PGraphics, Frame)
-   * @see #traverse(PGraphics, Frame, Matrix)
    * @see #traverse(PGraphics, Matrix, Matrix)
    * @see #traverse()
    */
@@ -982,28 +978,12 @@ public class Scene extends Graph implements PConstants {
     traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
   }
 
-  /**
-   * Same as {@code traverse(pGraphics, eye.view(), matrixHandler().projection())}.
-   *
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Frame, Matrix)
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Frame eye) {
-    traverse(pGraphics, eye.view(), matrixHandler().projection());
+  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
+    traverse(pGraphics, type, eye, zNear, zFar, true);
   }
 
-  /**
-   * Same as {@code traverse(pGraphics, eye.view(), projection)}.
-   *
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Frame)
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Frame eye, Matrix projection) {
-    traverse(pGraphics, eye.view(), projection);
+  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+    traverse(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
   }
 
   /**
@@ -2163,130 +2143,29 @@ public class Scene extends Graph implements PConstants {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     switch (graph.type()) {
       case TWO_D:
-        if (texture)
-          drawEye(pGraphics, ((Scene) graph).frontBuffer(), graph.isLeftHanded());
-        else
-          drawEye(pGraphics, graph.width(), graph.height(), graph.isLeftHanded());
-        break;
       case ORTHOGRAPHIC:
-        drawOrthographicVolume(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
-        /*
-        float magnitude = graph.eye().magnitude();
-        float wh0 = magnitude * graph.width();
-        float wh1 = magnitude * graph.height();
-        _drawOrthographicEye(pGraphics, wh0, graph.isLeftHanded() ? -wh1 : wh1, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
-        */
+        _drawOrthographicEye(pGraphics, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
-        drawEye(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
+        _drawPerspectiveEye(pGraphics, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
     }
   }
 
-  public static void drawEye(PGraphics pGraphics, int width, int height) {
-    drawEye(pGraphics, width, height, true);
+  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
+    drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
   }
 
-  public static void drawEye(PGraphics pGraphics, int width, int height, boolean leftHanded) {
-    _draw2DEye(pGraphics, width, leftHanded ? -height : height, null);
-  }
-
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer) {
-    drawEye(pGraphics, eyeBuffer, true);
-  }
-
-  /**
-   * Same as {@code drawEye(pGraphics, frontBuffer, true)}.
-   */
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, boolean leftHanded) {
-    _draw2DEye(pGraphics, eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, eyeBuffer);
-  }
-
-  /**
-   * Draws a 2D representation of the {@code eyeBuffer}, which maybe {@code leftHanded}, into {@code pGraphics}.
-   */
-  protected static void _draw2DEye(PGraphics pGraphics, float width, float height, PGraphics eyeBuffer) {
-    if (pGraphics == eyeBuffer)
-      return;
-    boolean lh = height < 0;
-    height = Math.abs(height);
-
-    pGraphics.pushStyle();
-
-    // 0 is the upper left coordinates of the near corner, 1 for the far one
-    Vector[] points = new Vector[2];
-    points[0] = new Vector();
-    points[1] = new Vector();
-
-    points[0].setX(width / 2);
-    points[1].setX(width / 2);
-    points[0].setY(height / 2);
-    points[1].setY(height / 2);
-
-    // Up arrow
-    float arrowHeight = 1.5f * points[0].y();
-    float baseHeight = 1.2f * points[0].y();
-    float arrowHalfWidth = 0.5f * points[0].x();
-    float baseHalfWidth = 0.3f * points[0].x();
-
-    pGraphics.noStroke();
-    // Arrow base
-    if (eyeBuffer != null) {
-      pGraphics.pushStyle();// end at arrow
-      pGraphics.colorMode(PApplet.RGB, 255);
-      float r = pGraphics.red(pGraphics.fillColor);
-      float g = pGraphics.green(pGraphics.fillColor);
-      float b = pGraphics.blue(pGraphics.fillColor);
-      pGraphics.fill(r, g, b, 126);// same transparency as near plane texture
+  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+    switch (type) {
+      case TWO_D:
+      case ORTHOGRAPHIC:
+        _drawOrthographicEye(pGraphics, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
+        break;
+      case PERSPECTIVE:
+        _drawPerspectiveEye(pGraphics, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar, eyeBuffer);
+        break;
     }
-    pGraphics.beginShape(PApplet.QUADS);
-    if (lh) {
-      Scene.vertex(pGraphics, -baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, -baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, points[0].y(), -points[0].z());
-      Scene.vertex(pGraphics, baseHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, -baseHalfWidth, baseHeight, -points[0].z());
-    }
-    pGraphics.endShape();
-
-    // Arrow
-    pGraphics.beginShape(PApplet.TRIANGLES);
-    if (lh) {
-      Scene.vertex(pGraphics, 0.0f, -arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, -baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, -baseHeight, -points[0].z());
-    } else {
-      Scene.vertex(pGraphics, 0.0f, arrowHeight, -points[0].z());
-      Scene.vertex(pGraphics, -arrowHalfWidth, baseHeight, -points[0].z());
-      Scene.vertex(pGraphics, arrowHalfWidth, baseHeight, -points[0].z());
-    }
-    if (eyeBuffer != null)
-      pGraphics.popStyle();// begin at arrow base
-    pGraphics.endShape();
-
-    // Planes
-    // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
-    // near plane
-    _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
-
-    pGraphics.popStyle();
-  }
-
-  public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawOrthographicVolume(pGraphics, frame, zNear, zFar, eyeBuffer, frame.isDetached() ? true : frame.graph().isLeftHanded());
-  }
-
-  public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    drawOrthographicVolume(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
-  }
-
-  public static void drawOrthographicVolume(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    _drawOrthographicEye(pGraphics, magnitude, eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
   }
 
   /**
@@ -2295,6 +2174,7 @@ public class Scene extends Graph implements PConstants {
   protected static void _drawOrthographicEye(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
+    boolean threeD = pGraphics.is3D();
     boolean lh = height < 0;
     height = Math.abs(height);
 
@@ -2309,20 +2189,21 @@ public class Scene extends Graph implements PConstants {
     points[1].setX(width / 2);
     points[0].setY(height / 2);
     points[1].setY(height / 2);
-    points[0].setZ(zNear / magnitude);
-    points[1].setZ(zFar / magnitude);
-
-    // Frustum lines
-    pGraphics.beginShape(PApplet.LINES);
-    Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
-    Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
-    Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
-    pGraphics.endShape();
+    if (threeD) {
+      points[0].setZ(zNear / magnitude);
+      points[1].setZ(zFar / magnitude);
+      // Frustum lines
+      pGraphics.beginShape(PApplet.LINES);
+      Scene.vertex(pGraphics, points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, -points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, -points[1].x(), -points[1].y(), -points[1].z());
+      Scene.vertex(pGraphics, points[0].x(), -points[0].y(), -points[0].z());
+      Scene.vertex(pGraphics, points[1].x(), -points[1].y(), -points[1].z());
+      pGraphics.endShape();
+    }
 
     // Up arrow
     float arrowHeight = 1.5f * points[0].y();
@@ -2371,79 +2252,12 @@ public class Scene extends Graph implements PConstants {
 
     // Planes
     // far plane
-    _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
+    if (threeD)
+      _drawPlane(pGraphics, null, points[1], new Vector(0, 0, -1), lh);
     // near plane
     _drawPlane(pGraphics, eyeBuffer, points[0], new Vector(0, 0, 1), lh);
 
     pGraphics.popStyle();
-  }
-
-  /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer)}.
-   */
-  public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer);
-  }
-
-  /**
-   * Same as {@code drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true)}.
-   */
-  public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawEye(pGraphics, magnitude, zNear, zFar, eyeBuffer, true);
-  }
-
-  /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded)}.
-   */
-  public void drawEye(float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    drawEye(frontBuffer(), magnitude, zNear, zFar, eyeBuffer, leftHanded);
-  }
-
-  /**
-   * Same as {@code drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, true)}.
-   */
-  public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
-    drawPerspectiveVolume(pGraphics, frame, zNear, zFar, eyeBuffer, frame.isDetached() ? true : frame.graph().isLeftHanded());
-  }
-
-  /**
-   * Same as {@code drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded)}.
-   */
-  public static void drawPerspectiveVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    drawEye(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
-  }
-
-  /**
-   * Draws a 3D perspective volume representation onto {@code PGraphics}.
-   *
-   * @param magnitude {@code magnitude = tan(fieldOfView / 2)}, see {@link #fieldOfView()}.
-   * @param zNear     zNear plane, see {@link #zNear()}.
-   * @param zFar      zFar plane, see {@link #zFar()}.
-   * @param eyeBuffer Texture of the volume near plane representation.
-   */
-  public static void drawEye(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    _drawPerspectiveEye(pGraphics, magnitude, eyeBuffer.width / (leftHanded ? -eyeBuffer.height : eyeBuffer.height), zNear, zFar, eyeBuffer);
-  }
-
-  /**
-   * Same as {@code drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar)}.
-   */
-  public void drawEye(float magnitude, float aspectRatio, float zNear, float zFar) {
-    drawEye(frontBuffer(), magnitude, aspectRatio, zNear, zFar);
-  }
-
-  /**
-   * Draws a 3D perspective volume representation onto {@code PGraphics}.
-   * <p>
-   * Note that the zNear plane is textured with {@code eyeBuffer}, i.e., the scene rendered from the {@code eye}.
-   *
-   * @param magnitude   {@code magnitude = tan(fieldOfView / 2)}, see {@link #fieldOfView()}.
-   * @param aspectRatio aspect ratio of the {@code eyeBuffer}, see {@link #aspectRatio()}.
-   * @param zNear       zNear plane, see {@link #zNear()}.
-   * @param zFar        zFar plane, see {@link #zFar()}.
-   */
-  public static void drawEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar) {
-    _drawPerspectiveEye(pGraphics, magnitude, aspectRatio, zNear, zFar, null);
   }
 
   protected static void _drawPerspectiveEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {

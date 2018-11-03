@@ -98,6 +98,9 @@ public class ViewFrustumCulling extends PApplet {
       scene1.flip();
       scene2.flip();
     }
+    if (key == 'p') {
+      println(Vector.distance(scene1.eye().position(), scene1.anchor()));
+    }
   }
 
   void handleMouse() {

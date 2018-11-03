@@ -1,5 +1,6 @@
 package intellij;
 
+import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -8,25 +9,24 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class ShadowMapping extends PApplet {
+  Graph.Type shodowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Shape[] shapes;
   Shape light;
+  boolean show = true;
   PGraphics shadowMap;
-  boolean show;
-
-  //Choose one of P3D for a 3D scene or P2D for a 2D one.
-  String renderer = P3D;
+  float zNear = 50;
+  float zFar = 500;
   int w = 1000;
   int h = 1000;
 
   public void settings() {
-    size(w, h, renderer);
+    size(w, h, P3D);
   }
 
   public void setup() {
-    scene = new Scene(this, createGraphics(w, h, renderer));
+    scene = new Scene(this);
     scene.setRadius(max(w, h));
-
     shapes = new Shape[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene);
@@ -34,39 +34,35 @@ public class ShadowMapping extends PApplet {
       shapes[i].randomize();
     }
     light = new Shape(scene) {
-      // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
       @Override
       public void setGraphics(PGraphics pg) {
         pg.pushStyle();
-        scene.drawAxes(pg, 150);
+        Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-        pg.noStroke();
-        pg.sphere(50);
+        Scene.drawEye(pg, shadowMap, shodowMapType, this, zNear, zFar);
         pg.popStyle();
       }
     };
     scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
-
-    shadowMap = createGraphics(w / 2, h / 2, renderer);
+    shadowMap = createGraphics(w / 2, h / 2, P3D);
   }
 
   public void draw() {
+    background(90, 80, 125);
     // 1. Fill in and display front-buffer
-    scene.beginDraw();
-    scene.frontBuffer().background(10, 50, 25);
     scene.traverse();
-    scene.endDraw();
-    scene.display();
     // 2. Display shadow map
     shadowMap.beginDraw();
     shadowMap.background(120);
-    scene.traverse(shadowMap, light);
+    scene.traverse(shadowMap, shodowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 3. display shadow map
-    if (show)
+    if (show) {
+      scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
+      scene.endHUD();
+    }
   }
 
   public void mouseMoved() {
@@ -83,16 +79,22 @@ public class ShadowMapping extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.scale(event.getCount() * 20);
   }
 
   public void keyPressed() {
     if (key == ' ')
       show = !show;
-    if (show)
-      println("show!");
-    else
-      println("DON't show");
+    if (key == 'o')
+      if (shodowMapType == Graph.Type.ORTHOGRAPHIC)
+        shodowMapType = Graph.Type.PERSPECTIVE;
+      else
+        shodowMapType = Graph.Type.ORTHOGRAPHIC;
+    if (key == 't')
+      if (scene.type() == Graph.Type.PERSPECTIVE)
+        scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+      else
+        scene.setAperture(Graph.Type.PERSPECTIVE);
   }
 
   PShape caja() {

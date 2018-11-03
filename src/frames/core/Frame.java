@@ -1775,12 +1775,11 @@ public class Frame {
     );
   }
 
-  public Matrix orthographic(float zNear, float zFar) {
-    return orthographic(isDetached() ? 500 : graph().width(), isDetached() ? 500 : graph().height(), zNear, zFar, isDetached() ? true : graph().isLeftHanded());
-  }
-
-  public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    return orthographic(width, height, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
+  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar, boolean lefTHanded) {
+    if (type == Graph.Type.PERSPECTIVE)
+      return perspective(width / height, zNear, zFar, lefTHanded);
+    else
+      return orthographic(width, height, zNear, zFar, lefTHanded);
   }
 
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
@@ -1788,35 +1787,9 @@ public class Frame {
   }
 
   /**
-   * Same as {@code return perspective(isDetached() ? 1 : graph().aspectRatio(), zNear, zFar, isDetached() ? true : graph().isLeftHanded())}.
-   *
-   * @see Matrix#perspective(float, float, float, float)
-   * @see #perspective(float, float, float)
-   * @see #perspective(float, float, float, boolean)
-   * @see #orthographic(float, float, float, float, boolean)
-   */
-  public Matrix perspective(float zNear, float zFar) {
-    return perspective(isDetached() ? 1 : graph().aspectRatio(), zNear, zFar, isDetached() ? true : graph().isLeftHanded());
-  }
-
-  /**
-   * Same as {@code return perspective(aspectRatio, zNear, zFar, true)}.
-   *
-   * @see Matrix#perspective(float, float, float, float)
-   * @see #perspective(float, float)
-   * @see #perspective(float, float, float, boolean)
-   * @see #orthographic(float, float, float, float, boolean)
-   */
-  public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    return perspective(aspectRatio, zNear, zFar, isDetached() ? true : graph().isLeftHanded());
-  }
-
-  /**
    * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
    *
    * @see Matrix#perspective(float, float, float, float)
-   * @see #perspective(float, float)
-   * @see #perspective(float, float, float)
    * @see #orthographic(float, float, float, float, boolean)
    */
   public Matrix perspective(float aspectRatio, float zNear, float zFar, boolean leftHanded) {

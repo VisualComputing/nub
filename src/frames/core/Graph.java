@@ -876,21 +876,7 @@ public class Graph {
    * shapes depend on the eye magnitude, see {@link #fieldOfView()}.
    */
   public Matrix computeProjection() {
-    Matrix projection = null;
-    switch (type()) {
-      case PERSPECTIVE:
-        projection = eye().perspective(aspectRatio(), zNear(), zFar(), isLeftHanded());
-        break;
-      case ORTHOGRAPHIC:
-        //float factor = rescalingFactor();
-        //eye().setMagnitude(factor);
-      case TWO_D:
-        projection = eye().orthographic(width(), height(), zNear(), zFar(), isLeftHanded());
-        break;
-      case CUSTOM:
-        projection = computeCustomProjection();
-    }
-    return projection;
+    return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
   }
 
   /*
