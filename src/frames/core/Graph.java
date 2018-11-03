@@ -141,8 +141,6 @@ public class Graph {
   protected boolean _coefficientsUpdate;
   protected Vector _normal[];
   protected float _distance[];
-  // rescale ortho when anchor changes
-  public float _rapK = 1;
   // handed and HUD
   protected boolean _rightHanded;
   protected int _hudCalls;
@@ -881,13 +879,11 @@ public class Graph {
     Matrix projection = null;
     switch (type()) {
       case PERSPECTIVE:
-        //projection = Matrix.perspective(isLeftHanded() ? -eye().magnitude() : eye().magnitude(), aspectRatio(), zNear(), zFar());
         projection = eye().perspective(aspectRatio(), zNear(), zFar(), isLeftHanded());
         break;
       case ORTHOGRAPHIC:
         //float factor = rescalingFactor();
-        //projection = Matrix.orthographic(factor * eye().magnitude() * width(), (isLeftHanded() ? -factor : factor) * eye().magnitude() * height(), zNear(), zFar());
-        eye().setMagnitude(_rescalingFactor());
+        //eye().setMagnitude(factor);
       case TWO_D:
         projection = eye().orthographic(width(), height(), zNear(), zFar(), isLeftHanded());
         break;
@@ -897,11 +893,13 @@ public class Graph {
     return projection;
   }
 
+  /*
   protected float _rescalingFactor() {
     float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
     float epsilon = 0.0001f;
     return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
   }
+  */
 
   /**
    * Override this method to define a graph CUSTOM projection matrix.
@@ -1711,6 +1709,12 @@ public class Graph {
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
   public void setAnchor(Vector anchor) {
+    _anchor = anchor;
+  }
+  /*
+  // rescale ortho when anchor changes
+  // public float _rapK = 1;
+  public void setAnchor(Vector anchor) {
     if (is2D()) {
       _anchor = anchor;
       _anchor.setZ(0);
@@ -1722,6 +1726,7 @@ public class Graph {
         _rapK *= prevDist / newDist;
     }
   }
+  */
 
   /**
    * Sets the {@link #radius()} value in world units.
@@ -1729,10 +1734,6 @@ public class Graph {
    * @see #setCenter(Vector)
    */
   public void setRadius(float radius) {
-    if (radius <= 0.0f) {
-      System.out.println("Warning: Scene radius must be positive - Ignoring value");
-      return;
-    }
     _radius = radius;
   }
 

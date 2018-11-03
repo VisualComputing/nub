@@ -2169,10 +2169,13 @@ public class Scene extends Graph implements PConstants {
           drawEye(pGraphics, graph.width(), graph.height(), graph.isLeftHanded());
         break;
       case ORTHOGRAPHIC:
-        float wh0 = graph.eye().magnitude() * graph.width();
-        float wh1 = graph.eye().magnitude() * graph.height();
+        drawOrthographicVolume(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
+        /*
         float magnitude = graph.eye().magnitude();
+        float wh0 = magnitude * graph.width();
+        float wh1 = magnitude * graph.height();
         _drawOrthographicEye(pGraphics, wh0, graph.isLeftHanded() ? -wh1 : wh1, graph.zNear() / magnitude, graph.zFar() / magnitude, texture ? ((Scene) graph).frontBuffer() : null);
+        */
         break;
       case PERSPECTIVE:
         drawEye(pGraphics, graph.eye().magnitude(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null, graph.isLeftHanded());
@@ -2274,27 +2277,22 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
-  /**
-   * Same as {@code drawEye(pGraphics, frame, halfWidth, halfHeight, zNear, zFar, eyeBuffer, true)}.
-   */
   public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer) {
     drawOrthographicVolume(pGraphics, frame, zNear, zFar, eyeBuffer, frame.isDetached() ? true : frame.graph().isLeftHanded());
   }
 
-  /**
-   * Same as {@code drawOrthographicVolume(pGraphics, halfWidth / sqMagnitude, (leftHanded ? -halfHeight : halfHeight) / sqMagnitude, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer)}.
-   */
   public static void drawOrthographicVolume(PGraphics pGraphics, Frame frame, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
-    float sqMagnitude = frame.magnitude() * frame.magnitude();
-    float width = eyeBuffer.width / sqMagnitude;
-    float height = eyeBuffer.height / sqMagnitude;
-    _drawOrthographicEye(pGraphics, width, leftHanded ? -height : height, zNear / frame.magnitude(), zFar / frame.magnitude(), eyeBuffer);
+    drawOrthographicVolume(pGraphics, frame.magnitude(), zNear, zFar, eyeBuffer, leftHanded);
+  }
+
+  public static void drawOrthographicVolume(PGraphics pGraphics, float magnitude, float zNear, float zFar, PGraphics eyeBuffer, boolean leftHanded) {
+    _drawOrthographicEye(pGraphics, magnitude, eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
   }
 
   /**
    * Draws a 3D orthographic volume representation onto {@code PGraphics}.
    */
-  protected static void _drawOrthographicEye(PGraphics pGraphics, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
+  protected static void _drawOrthographicEye(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
     boolean lh = height < 0;
@@ -2311,9 +2309,8 @@ public class Scene extends Graph implements PConstants {
     points[1].setX(width / 2);
     points[0].setY(height / 2);
     points[1].setY(height / 2);
-
-    points[0].setZ(zNear);
-    points[1].setZ(zFar);
+    points[0].setZ(zNear / magnitude);
+    points[1].setZ(zFar / magnitude);
 
     // Frustum lines
     pGraphics.beginShape(PApplet.LINES);
@@ -2462,8 +2459,8 @@ public class Scene extends Graph implements PConstants {
     points[0] = new Vector();
     points[1] = new Vector();
 
-    points[0].setZ(zNear * 1 / magnitude);
-    points[1].setZ(zFar * 1 / magnitude);
+    points[0].setZ(zNear / magnitude);
+    points[1].setZ(zFar / magnitude);
     //(2 * (float) Math.atan(eye().magnitude()))
     //points[0].setY(points[0].z() * PApplet.tan(((2 * (float) Math.atan(eye().magnitude())) / 2.0f)));
     points[0].setY(points[0].z() * magnitude);
