@@ -20,6 +20,30 @@ public class Statistics {
         }
     }
 
+    public float best(){
+        return _best;
+    }
+
+    public float worst(){
+        return _worst;
+    }
+
+    public float median(){
+        return _median;
+    }
+
+    public float avg(){
+        return _avg;
+    }
+
+    public float stdAvg(){
+        return _std_avg;
+    }
+
+    public float stdMedian(){
+        return _std_median;
+    }
+
     public float std(List<Float> population, float mean){
         int sum = 0;
         for(Float individual : population){
