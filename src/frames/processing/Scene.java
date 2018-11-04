@@ -961,6 +961,8 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #traverse(PGraphics)
    * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse(PGraphics, Type, Frame, float, float)
+   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
    */
   @Override
   public void traverse() {
@@ -972,31 +974,51 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
    * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse(PGraphics, Type, Frame, float, float)
+   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
    * @see #traverse()
    */
   public void traverse(PGraphics pGraphics) {
     traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
   }
 
+  /**
+   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
+   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
+   * taking the {@code eye} as the light point-of-view.
+   *
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
+   * @see #traverse()
+   */
   public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
     traverse(pGraphics, type, eye, zNear, zFar, true);
   }
 
+  /**
+   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
+   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
+   * taking the {@code eye} as the light point-of-view.
+   *
+   * @see #traverse(PGraphics, Matrix, Matrix)
+   * @see #traverse(PGraphics)
+   * @see #traverse(PGraphics, Type, Frame, float, float)
+   * @see #traverse()
+   */
   public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
     traverse(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
   }
 
   /**
-   * Renders the scene into {@code pGraphics} from the {@code eye} point of view, using
-   * the {@code projection} matrix. Calls {@link Graph#traverse()}.
-   * No {@code pGraphics.beginDraw()/endDraw()} calls take place. Call this method only
-   * within Processing draw() method.
+   * Renders the scene into {@code pGraphics} using the {@code view} and {@code projection}
+   * matrices. Calls {@link Graph#traverse()}. No {@code pGraphics.beginDraw()/endDraw()}
+   * calls take place. Call this method only within Processing draw() method.
    * <p>
    * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
    * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
    * technique is called by {@link #draw()}.
    *
-   * @param pGraphics
    * @see #frames()
    * @see #traverse()
    */
@@ -2126,6 +2148,10 @@ public class Scene extends Graph implements PConstants {
   /**
    * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Frame)})
    * and then calls {@link #drawEye(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
+   *
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
   public void drawEye(Graph graph) {
     frontBuffer().pushMatrix();
@@ -2138,6 +2164,10 @@ public class Scene extends Graph implements PConstants {
    * Draws a representations of the {@code graph.eye()} onto {@code pGraphics}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
+   *
+   * @see #drawEye(Graph)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
   public void drawEye(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
@@ -2152,10 +2182,27 @@ public class Scene extends Graph implements PConstants {
     }
   }
 
+  /**
+   * Same as {@code drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
+   *
+   * @see #drawEye(Graph)
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
     drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
   }
 
+  /**
+   * Draws a representation of the eye according to the frustum parameters and the frame {@link Frame#magnitude()}.
+   * Use it in conjunction with {@link #traverse(PGraphics, Type, Frame, float, float, boolean)} as when
+   * defining a shadow map.
+   *
+   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawEye(Graph)
+   * @see #drawEye(PGraphics, Graph)
+   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
+   */
   public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
     switch (type) {
       case TWO_D:
@@ -2168,9 +2215,6 @@ public class Scene extends Graph implements PConstants {
     }
   }
 
-  /**
-   * Draws a 3D orthographic volume representation onto {@code PGraphics}.
-   */
   protected static void _drawOrthographicEye(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;

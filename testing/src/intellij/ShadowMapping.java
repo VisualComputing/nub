@@ -51,12 +51,12 @@ public class ShadowMapping extends PApplet {
     background(90, 80, 125);
     // 1. Fill in and display front-buffer
     scene.traverse();
-    // 2. Display shadow map
+    // 2. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
     shadowMap.background(120);
     scene.traverse(shadowMap, shodowMapType, light, zNear, zFar);
     shadowMap.endDraw();
-    // 3. display shadow map
+    // 3. Display shadow map
     if (show) {
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
@@ -84,6 +84,7 @@ public class ShadowMapping extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       show = !show;
+    /*
     if (key == 'o')
       if (shodowMapType == Graph.Type.ORTHOGRAPHIC)
         shodowMapType = Graph.Type.PERSPECTIVE;
@@ -94,6 +95,7 @@ public class ShadowMapping extends PApplet {
         scene.setAperture(Graph.Type.ORTHOGRAPHIC);
       else
         scene.setAperture(Graph.Type.PERSPECTIVE);
+        */
   }
 
   PShape caja() {

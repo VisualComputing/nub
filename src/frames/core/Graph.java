@@ -327,20 +327,24 @@ public class Graph {
   }
 
   /**
-   * Defines the graph {@link #type()}.
+   * Defines the graph {@link #type()} according to the projection of the scene.
+   * Either {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}, {@link Type#TWO_D}
+   * or {@link Type#CUSTOM}.
    * <p>
-   * A {@link Type#PERSPECTIVE} uses a classical projection mainly defined by its
-   * {@link #fieldOfView()}. With a {@link Type#ORTHOGRAPHIC}, the {@link #fieldOfView()}
-   * is meaningless and the width and height of the graph frustum are inferred from the
-   * distance to the {@link #anchor()} using {@link #rescalingFactor()}. Both types
-   * use {@link #zNear()} and {@link #zFar()} (to define their clipping planes) and
-   * {@link #aspectRatio()} (for frustum shape).
+   * {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} use the classical projection
+   * matrices and the frame {@link Frame#magnitude()}. Both use {@link #zNear()} and
+   * {@link #zFar()} (to define their clipping planes) and {@link #width()} and {@link #height()}
+   * for frustum shape.
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
    * frames will be constrained so that they will remain at the x-y plane. See
    * {@link frames.core.constraint.Constraint}.
    * <p>
    * To set a {@link Type#CUSTOM} override {@link #computeCustomProjection()}.
+   *
+   * @see #computeProjection()
+   * @see #computeCustomProjection()
+   * @see Frame#magnitude()
    */
   public void setType(Type type) {
     if (type != type()) {
@@ -349,28 +353,82 @@ public class Graph {
     }
   }
 
+  /**
+   * Same as {@code setType(type); setAperture(type() == Type.PERSPECTIVE ? (float)Math.PI / 3 : 1)}.
+   *
+   * @see #setType(Type)
+   * @see #setAperture(Type, float)
+   * @see #setAperture(float)
+   * @see #aperture()
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
   public void setAperture(Type type) {
     setType(type);
-    setAperture(type() == Type.PERSPECTIVE ? magnitude((float) Math.PI / 3) : 1);
+    setAperture(type() == Type.PERSPECTIVE ? (float) Math.PI / 3 : 1);
   }
 
+  /**
+   * Same as {@code setType(type); setAperture(aperture)}.
+   *
+   * @see #setType(Type)
+   * @see #setAperture(Type)
+   * @see #setAperture(float)
+   * @see #aperture()
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
   public void setAperture(Type type, float aperture) {
     setType(type);
-    setAperture(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture);
+    setAperture(aperture);
   }
 
+  /**
+   * Same as {@code eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture)}.
+   * Sets the graph {@link #aperture()}.
+   *
+   * @param aperture is given radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
+   *                 or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   * @see #setAperture(Type)
+   * @see #setAperture(Type, float)
+   * @see #aperture()
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
   public void setAperture(float aperture) {
-    eye().setMagnitude(aperture);
+    eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture);
   }
 
+  /**
+   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude()}.
+   * Returns the {@link #eye()} field-of-view in radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
+   * or the {@link #eye()} {@link Frame#magnitude()} otherwise.
+   *
+   * @see #setAperture(Type)
+   * @see #setAperture(float)
+   * @see #setAperture(Type, float)
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
   public float aperture() {
-    return eye().magnitude();
+    return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude();
   }
 
+  /**
+   * Macro used to convert frame {@code magnitude} units to perspective fov (field-of-view) in radians.
+   *
+   * @see #magnitude(float)
+   */
   public static float radians(float magnitude) {
     return 2 * (float) Math.atan(magnitude);
   }
 
+  /**
+   * Macro used to convert the perspective {@code fov} (field-of-view) expressed in radians,
+   * to frame magnitude units.
+   *
+   * @see #radians(float)
+   */
   public static float magnitude(float fov) {
     return (float) Math.tan(fov / 2);
   }
@@ -403,7 +461,7 @@ public class Graph {
    * @see Frame#setMagnitude(float)
    */
   public void setFieldOfView(float fov) {
-    setAperture(magnitude(fov));
+    eye().setMagnitude(magnitude(fov));
   }
 
   /**
@@ -865,26 +923,17 @@ public class Graph {
   }
 
   /**
+   * Same as {@code return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.
+   * <p>
    * Computes and returns the projection matrix associated with the graph.
-   * <p>
-   * If the graph type is PERSPECTIVE, defines a projection matrix using the
-   * {@link #fieldOfView()}, {@link #aspectRatio()}, {@link #zNear()} and {@link #zFar()}
-   * parameters.
-   * <p>
-   * If the graph type is ORTHOGRAPHIC or TWO_D, defines a projection matrix using the
-   * {@link #aperture()}, {@link #width()}, {@link #height()}, {@link #zNear()} and {@link #zFar()}
-   *  parameters.
-   * <p>
-   * Both PERSPECTIVE and ORTHOGRAPHIC types use {@link #zNear()} and {@link #zFar()}
-   * to place the clipping planes. These values are determined from radius() and center() so that
-   * they best fit the graph size.
    * <p>
    * Override {@link #computeCustomProjection()} to define a CUSTOM projection.
    *
-   * <b>Note 1:</b> This method is called by {@link #preDraw()}.
+   * <b>Note:</b> This method is called by {@link #preDraw()}.
    *
-   * <b>Note 2:</b> Note that the computation of both, the PERSPECTIVE and ORTHOGRAPHIC frustum
-   * shapes depend on the eye magnitude, see {@link #fieldOfView()}.
+   * @see #preDraw()
+   * @see #computeCustomProjection()
+   * @see Frame#projection(Type, float, float, float, float, boolean)
    */
   public Matrix computeProjection() {
     return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
