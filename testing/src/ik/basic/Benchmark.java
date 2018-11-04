@@ -2,6 +2,7 @@ package ik.basic;
 
 import frames.core.Frame;
 import frames.core.constraint.BallAndSocket;
+import frames.ik.HAEASolver;
 import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
@@ -15,16 +16,17 @@ import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by sebchaparr on 8/10/18.
  */
 public class Benchmark {
+    static Random random = new Random();
     static int num_joints = 15;
     static float boneLength = 50;
     static int experiment = 0;
     //Methods
-    static int num_solvers = 6;
     static ArrayList<Solver> solvers;
 
     public void setConstraint(float down, float up, float left, float right, Frame f, Vector twist, float boneLength){
@@ -76,10 +78,7 @@ public class Benchmark {
     public static Frame generateRandomReachablePosition(List<? extends Frame> original){
         ArrayList<? extends Frame> chain = copy(original);
         for(int i = 0; i < chain.size(); i++){
-            float yaw = (float)(Math.random()*2*Math.PI - Math.PI);
-            float pitch = (float)(Math.random()*2*Math.PI - Math.PI);
-            float roll = (float)(Math.random()*2*Math.PI - Math.PI);
-            chain.get(i).rotate(new Quaternion(roll, pitch, yaw));
+            chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*Math.PI/2)));
         }
         return chain.get(chain.size()-1);
     }
@@ -89,17 +88,18 @@ public class Benchmark {
             generateExperiment((HillClimbingSolver) solver, iterations, times);
         } else if(solver instanceof  GASolver){
             generateExperiment((GASolver) solver, iterations, times);
+        } else if(solver instanceof  HAEASolver){
+            generateExperiment((HAEASolver) solver, iterations, times);
         }
-
     }
 
     public static void generateExperiment(HillClimbingSolver method, int iterations, int times){
-        String path = "/home/sebchaparr/Schap/Evolutivos/IK/";
+        String path = "/home/sebchaparr/Schap/Evolutivos/IK/Hill/";
         String name = "joints" + num_joints;
         name += method.powerLaw() ? "hill_power_law" : "hill_gaussian";
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new File(path + name + experiment));
+            pw = new PrintWriter(new File(path + name));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -122,12 +122,12 @@ public class Benchmark {
     }
 
     public static void generateExperiment(GASolver method, int iterations, int times){
-        String path = "/home/sebchaparr/Schap/Evolutivos/IK/";
+        String path = "/home/sebchaparr/Schap/Evolutivos/IK/GA/";
         String name = "joints" + num_joints;
         name += "GA_pop_" + method.populationSize() + "_prob_" + method.crossProbability();
         PrintWriter pw = null;
         try {
-            pw = new PrintWriter(new File(path + name + experiment));
+            pw = new PrintWriter(new File(path + name));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -162,23 +162,75 @@ public class Benchmark {
         pw.close();
     }
 
-    public static void main(String args[]) {
-        ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
 
-        for(int i = 0; i < num_solvers; i++){
-            structures.add(generateChain(num_joints, boneLength));
+    public static void generateExperiment(HAEASolver method, int iterations, int times){
+        String path = "/home/sebchaparr/Schap/Evolutivos/IK/HAEA/";
+        String name = "joints" + num_joints;
+        name += "HAEA_pop_" + method.populationSize();
+        PrintWriter pw = null;
+        try {
+            pw = new PrintWriter(new File(path + name));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        float[][] results = new float[6 + method.operators().size()][iterations];
+
+        StringBuilder sb = new StringBuilder();
+        Frame target = generateRandomReachablePosition(method.structure());
+        method.setTarget(method.endEffector(), target);
+        method.maxIter = iterations;
+        for(int i = 0; i < times; i++) {
+            for(Frame f : method.structure()){
+                f.setRotation(new Quaternion());
+            }
+            method.execute();
+            for(int j  = 0; j < method.statistics().size(); j++){
+                results[0][j] += method.statistics().get(j).best()/times;
+                results[1][j] += method.statistics().get(j).worst()/times;
+                results[2][j] += method.statistics().get(j).avg()/times;
+                results[3][j] += method.statistics().get(j).median()/times;
+                results[4][j] += method.statistics().get(j).stdAvg()/times;
+                results[5][j] += method.statistics().get(j).stdMedian()/times;
+                for(int k = 0; k < method.operatorsValues().length; k++){
+                    results[6 + k][j] += method.operatorsValues()[k][j]/times;
+                }
+            }
         }
 
-        solvers = new ArrayList<>();
+        for(int i = 0; i < results.length; i++){
+            for(int j = 0; j < iterations; j++){
+                sb.append(results[i][j]);
+                if(j != iterations - 1)
+                    sb.append(",");
+            }
+            sb.append("\n");
+        }
+        experiment++;
+        pw.write(sb.toString());
+        pw.close();
+    }
 
-        solvers.add(new HillClimbingSolver(PApplet.radians(3), structures.get(0)));
-        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(3), structures.get(1)));
-        solvers.add(new HillClimbingSolver(PApplet.radians(5), structures.get(2)));
-        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(5), structures.get(3)));
-        solvers.add(new GASolver(structures.get(4), 10));
-        solvers.add(new GASolver(structures.get(5), 10));
+
+    public static void main(String args[]) {
+        solvers = new ArrayList<>();
+        /*
+        //Hill Climbing
+        solvers.add(new HillClimbingSolver(PApplet.radians(3), generateChain(num_joints, boneLength)));
+        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(3), generateChain(num_joints, boneLength)));
+        solvers.add(new HillClimbingSolver(PApplet.radians(5), generateChain(num_joints, boneLength)));
+        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(5), generateChain(num_joints, boneLength)));
+        */
+        //GA
+        solvers.add(new GASolver(generateChain(num_joints, boneLength), 10));
+        solvers.add(new GASolver(generateChain(num_joints, boneLength), 10));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 10));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 15));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 20));
+
         //generate experiments
+        int counter = 0;
         for(Solver solver : solvers) {
+            System.out.println("On method : " + ++counter + " of " + solvers.size());
             generateExperiment(solver, 300, 30);
         }
         System.out.println("Finished...");

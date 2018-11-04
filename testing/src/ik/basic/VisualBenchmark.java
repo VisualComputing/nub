@@ -20,6 +20,8 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 /**
  * Created by sebchaparr on 8/10/18.
@@ -30,10 +32,13 @@ public class VisualBenchmark extends PApplet {
     float targetRadius = 12;
     float boneLength = 50;
 
+    Random random = new Random();
+
     Scene scene;
     //Methods
     int num_solvers = 7;
     ArrayList<Solver> solvers;
+    ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
     public void settings() {
@@ -58,8 +63,6 @@ public class VisualBenchmark extends PApplet {
         float up = PI/2;
         float left = PI/2;
         float right = PI/2;
-
-        ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
 
         for(int i = 0; i < num_solvers; i++){
             structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()/num_solvers - 0.8f*scene.radius(), 0, 0)));
@@ -216,10 +219,48 @@ public class VisualBenchmark extends PApplet {
         return (ArrayList) scene.branch(chainRoot);
     }
 
+    public Frame generateRandomReachablePosition(List<? extends Frame> original){
+        ArrayList<? extends Frame> chain = copy(original);
+        for(int i = 0; i < chain.size(); i++){
+            chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+        }
+        return chain.get(chain.size()-1);
+    }
+
+    public ArrayList<Frame> copy(List<? extends Frame> chain) {
+        ArrayList<Frame> copy = new ArrayList<Frame>();
+        Frame reference = chain.get(0).reference();
+        if (reference != null) {
+            reference = new Frame(reference.position().get(), reference.orientation().get());
+        }
+        for (Frame joint : chain) {
+            Frame newJoint = new Frame();
+            newJoint.setReference(reference);
+            newJoint.setPosition(joint.position().get());
+            newJoint.setOrientation(joint.orientation().get());
+            newJoint.setConstraint(joint.constraint());
+            copy.add(newJoint);
+            reference = newJoint;
+        }
+        return copy;
+    }
+
+
     boolean solve = false;
     public void keyPressed(){
         if(key == 'w' || key == 'W'){
             solve = !solve;
+        }
+        if(key == 's' || key == 'S'){
+            Frame f = generateRandomReachablePosition(structures.get(0));
+            targets.get(0).setPosition(f.position());
+        }
+        if(key == 'd' || key == 'D'){
+            for(List<Frame> structure : structures) {
+                for (Frame f : structure) {
+                    f.setRotation(new Quaternion());
+                }
+            }
         }
     }
 
