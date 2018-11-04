@@ -52,7 +52,6 @@ void setup() {
   scene = new Scene(this);
   mode = Mode.m1;
 
-  scene.setFieldOfView(PI / 3);
   scene.setRadius(200);
   scene.fitBallInterpolation();
 

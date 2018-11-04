@@ -43,7 +43,6 @@ void setup() {
   scene = new Scene(this);
   scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
   scene.setAnchor(scene.center());
-  scene.setFieldOfView(PI / 3);
   scene.fitBall();
   // create and fill the list of boids
   flock = new ArrayList();
@@ -130,8 +129,7 @@ void mouseDragged() {
       // same as: scene.translate(scene.eye());
       scene.translate();
     else
-      // same as: scene.zoom(mouseX - pmouseX, scene.eye());
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
 }
 
 // highlighting and 'third-person' interaction

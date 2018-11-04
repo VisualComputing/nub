@@ -33,8 +33,6 @@ void setup() {
   size(1600, 800, P3D);
   openSpaceNavigator();
   scene = new Scene(this);
-  scene.setFieldOfView(PI / 3);
-  //scene.setType(Graph.Type.ORTHOGRAPHIC);
   scene.setRadius(1500);
   scene.fitBallInterpolation();
   Shape[] shapes = new Shape[50];
@@ -88,7 +86,7 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 void keyPressed() {

@@ -35,7 +35,6 @@ void setup() {
     shapes[i].setGraphics(caja());
     shapes[i].randomize();
   }
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 }
 
@@ -60,11 +59,11 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(mouseX - pmouseX);
+    scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 PShape caja() {

@@ -28,7 +28,6 @@ void setup() {
   colorMode(HSB, 255);
   srcPGraphics = createGraphics(width, height, P3D);
   scene = new Scene(this, srcPGraphics);
-  scene.setFieldOfView(PI / 3);
   scene.setRadius(1000);
   scene.fitBallInterpolation();
 
@@ -107,11 +106,11 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(scene.mouseDX());
+    scene.scale(scene.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.scale(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 void mouseClicked(MouseEvent event) {
