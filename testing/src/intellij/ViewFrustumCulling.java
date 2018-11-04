@@ -72,12 +72,13 @@ public class ViewFrustumCulling extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      //focus.zoom(mouseX - pmouseX);
+      focus.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    focus.scale(event.getCount() * 20);
-    //focus.zoom(event.getCount() * 50);
+    //focus.scale(event.getCount() * 20);
+    focus.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -98,6 +99,10 @@ public class ViewFrustumCulling extends PApplet {
       scene1.flip();
       scene2.flip();
     }
+    if (key == '1')
+      scene1.autoAperture();
+    if (key == '2')
+      scene2.autoAperture();
     if (key == 'p') {
       println(Vector.distance(scene1.eye().position(), scene1.anchor()));
     }

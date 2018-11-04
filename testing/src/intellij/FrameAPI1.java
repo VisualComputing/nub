@@ -336,7 +336,7 @@ public class FrameAPI1 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
   }
 
   @Override

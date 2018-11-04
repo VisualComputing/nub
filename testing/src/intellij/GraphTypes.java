@@ -54,7 +54,7 @@ public class GraphTypes extends PApplet {
     if (key == 'f')
       scene.fitBall();
     if (key == 'g')
-      scene.fitFieldOfView();
+      scene.autoAperture();
     if (key == 'b')
       box = !box;
     if (key == 's')
@@ -126,7 +126,7 @@ public class GraphTypes extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      focus.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

@@ -64,7 +64,7 @@ public class AdaptivePrecision1 extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 50, defaultShape());
+    scene.moveForward(event.getCount() * 50);
   }
 
   public void mouseClicked() {

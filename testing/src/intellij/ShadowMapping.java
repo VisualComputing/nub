@@ -43,7 +43,6 @@ public class ShadowMapping extends PApplet {
         pg.popStyle();
       }
     };
-    scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
     shadowMap = createGraphics(w / 2, h / 2, P3D);
   }
@@ -75,7 +74,7 @@ public class ShadowMapping extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

@@ -119,7 +119,7 @@ public class DOF extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(scene.mouseDX());
+      scene.moveForward(scene.mouseDX());
   }
 
   @Override

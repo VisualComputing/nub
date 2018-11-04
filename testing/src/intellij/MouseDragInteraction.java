@@ -120,13 +120,13 @@ public class MouseDragInteraction extends PApplet {
     } else {
       //scene.mouseZoom(mouseX - pmouseX);
       //scene.zoom(scene.mouseDX(), scene.defaultFrame());
-      scene.zoom(scene.mouseDX());
+      scene.scale(scene.mouseDX());
       //scene.scale(mouseX - pmouseX);
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {

@@ -53,7 +53,7 @@ public class FlockOld extends PApplet {
       else if (mouseButton == RIGHT)
         scene.translate();
       else
-        scene.zoom(mouseX - pmouseX, scene.eye());
+        scene.scale(mouseX - pmouseX, scene.eye());
     //scene.scale(mouseX - pmouseX);
   }
 
@@ -66,7 +66,7 @@ public class FlockOld extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 

@@ -1,6 +1,7 @@
 package intellij;
 
 import frames.core.Frame;
+import frames.core.Graph;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -27,9 +28,9 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
+    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
-    scene.setFieldOfView(PI / 3);
     scene.fitBall();
     // create and fill the list of boids
     flock = new ArrayList();
@@ -69,7 +70,7 @@ public class Flock extends PApplet {
         scene.translate();
       else
         // same as: scene.zoom(mouseX - pmouseX, scene.eye());
-        scene.zoom(mouseX - pmouseX);
+        scene.moveForward(mouseX - pmouseX);
   }
 
   // highlighting and 'third-person' interaction

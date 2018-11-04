@@ -68,7 +68,7 @@ public class OFFScreen extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

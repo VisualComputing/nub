@@ -47,7 +47,7 @@ import java.util.List;
  * Any {@link Frame} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
- * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFieldOfView()},
+ * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #autoAperture()},
  * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
  * {@link #screenLocation(Vector, Frame)} and
  * {@link #location(Vector, Frame)}, are provided for convenience.
@@ -134,6 +134,8 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
+  // rescale ortho when anchor changes
+  protected float _rapK = 1;
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -432,11 +434,20 @@ public class Graph {
    *
    * @see #setFieldOfView(float)
    */
-  public void fitFieldOfView() {
-    if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
-      setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
-    else
-      setFieldOfView((float) Math.PI / 2);
+  public void autoAperture() {
+    switch (type()) {
+      case ORTHOGRAPHIC:
+      case TWO_D:
+        float size = Math.min(width(), height());
+        eye().setMagnitude(2 * radius() / size);
+        break;
+      case PERSPECTIVE:
+        if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
+          setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
+        else
+          setFieldOfView((float) Math.PI / 2);
+        break;
+    }
   }
 
   /**
@@ -878,14 +889,6 @@ public class Graph {
   public Matrix computeProjection() {
     return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
   }
-
-  /*
-  protected float _rescalingFactor() {
-    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-    float epsilon = 0.0001f;
-    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
-  }
-  */
 
   /**
    * Override this method to define a graph CUSTOM projection matrix.
@@ -1695,12 +1698,6 @@ public class Graph {
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
   public void setAnchor(Vector anchor) {
-    _anchor = anchor;
-  }
-  /*
-  // rescale ortho when anchor changes
-  // public float _rapK = 1;
-  public void setAnchor(Vector anchor) {
     if (is2D()) {
       _anchor = anchor;
       _anchor.setZ(0);
@@ -1712,7 +1709,6 @@ public class Graph {
         _rapK *= prevDist / newDist;
     }
   }
-  */
 
   /**
    * Sets the {@link #radius()} value in world units.
@@ -1977,27 +1973,25 @@ public class Graph {
    * @see #setUpVector(Vector, boolean)
    */
   public void fitBall(Vector center, float radius) {
-    if (is2D()) {
-      float size = Math.min(width(), height());
-      eye().setMagnitude(2 * radius / size);
-      lookAt(center);
-      return;
-    }
-    float distance = 0.0f;
+    float distance = 0;
     switch (type()) {
-      case PERSPECTIVE: {
+      case TWO_D:
+        //TODO test 2d case since I swapped the calling order with the above lookAt
+        lookAt(center);
+        autoAperture();
+        break;
+      case ORTHOGRAPHIC:
+        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
+        eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
+        autoAperture();
+        break;
+      case PERSPECTIVE:
         float yview = radius / (float) Math.sin(fieldOfView() / 2.0f);
         float xview = radius / (float) Math.sin(horizontalFieldOfView() / 2.0f);
         distance = Math.max(xview, yview);
+        eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         break;
-      }
-      case ORTHOGRAPHIC: {
-        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
-        break;
-      }
     }
-    Vector newPos = Vector.subtract(center, Vector.multiply(viewDirection(), distance));
-    eye().setPosition(newPos);
   }
 
   /**
@@ -2989,43 +2983,6 @@ public class Graph {
   // It always maps physical (screen) space geom data respect to the eye
 
   /**
-   * Same as {@code zoom(null, delta)}.
-   *
-   * @see #zoom(String, float)
-   */
-  public void zoom(float delta) {
-    zoom(null, delta);
-  }
-
-  /**
-   * Same as {@code zoom(delta, defaultFrame(hid))}.
-   *
-   * @see #translate(float, float, Frame)
-   * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Frame)
-   * @see #translate(String, float, float, float)
-   * @see #zoom(float, Frame)
-   * @see #defaultFrame(String)
-   */
-  public void zoom(String hid, float delta) {
-    zoom(delta, defaultFrame(hid));
-  }
-
-  /**
-   * Same as {@code translate(0, 0, delta, frame)}.
-   *
-   * @see #translate(float, float, Frame)
-   * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Frame)
-   * @see #translate(String, float, float, float)
-   * @see #zoom(String, float)
-   * @see #defaultFrame(String)
-   */
-  public void zoom(float delta, Frame frame) {
-    translate(0, 0, delta, frame);
-  }
-
-  /**
    * Same as {@code translate(null, dx, dy)}.
    *
    * @see #translate(String, float, float)
@@ -3040,8 +2997,6 @@ public class Graph {
    * @see #translate(float, float, Frame)
    * @see #translate(float, float, float, Frame)
    * @see #translate(String, float, float, float)
-   * @see #zoom(String, float)
-   * @see #zoom(float, Frame)
    * @see #defaultFrame(String)
    */
   public void translate(String hid, float dx, float dy) {
@@ -3063,8 +3018,6 @@ public class Graph {
    * @see #translate(float, float, Frame)
    * @see #translate(String, float, float)
    * @see #translate(float, float, float, Frame)
-   * @see #zoom(float, Frame)
-   * @see #zoom(String, float)
    * @see #defaultFrame(String)
    */
   public void translate(String hid, float dx, float dy, float dz) {
@@ -3077,8 +3030,6 @@ public class Graph {
    * @see #translate(String, float, float, float)
    * @see #translate(String, float, float)
    * @see #translate(float, float, float, Frame)
-   * @see #zoom(float, Frame)
-   * @see #zoom(String, float)
    * @see #defaultFrame(String)
    */
   public void translate(float dx, float dy, Frame frame) {
@@ -3093,8 +3044,6 @@ public class Graph {
    * @see #translate(float, float, Frame)
    * @see #translate(String, float, float)
    * @see #translate(String, float, float, float)
-   * @see #zoom(float, Frame)
-   * @see #zoom(String, float)
    * @see #defaultFrame(String)
    */
   public void translate(float dx, float dy, float dz, Frame frame) {
@@ -3382,6 +3331,35 @@ public class Graph {
   // only 3d eye
 
   /**
+   * Same as {@code translate(0, 0, delta, eye()); adaptAperture();}.
+   *
+   * @see #translate(float, float, float, Frame)
+   * @see #adaptAperture()
+   */
+  public void moveForward(float delta) {
+    translate(0, 0, delta, eye());
+    adaptAperture();
+  }
+
+  /**
+   * Balance the aperture according to according to the eye to anchor distance. Call it after an eye
+   * z-translation. Only meaningful for {@link Type#ORTHOGRAPHIC} graphs.
+   *
+   * @see #translate(float, float, float, Frame)
+   * @see #moveForward(float)
+   */
+  public void adaptAperture() {
+    if (type() == Type.ORTHOGRAPHIC)
+      eye().setScaling(_orthoScale());
+  }
+
+  protected float _orthoScale() {
+    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
+    float epsilon = 0.0001f;
+    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
+  }
+
+  /**
    * Look around (without translating the eye) according to angular displacements {@code deltaX} and {@code deltaY}
    * expressed in radians.
    */
@@ -3507,6 +3485,18 @@ public class Graph {
   /*
   // nice interactivity examples: spinning (spin + timer), moveForward, moveBackward, spinX/Y/Z
   // screenRotate/Translate.
+
+  public void zoom(float delta) {
+    zoom(null, delta);
+  }
+
+  public void zoom(String hid, float delta) {
+    zoom(delta, defaultFrame(hid));
+  }
+
+  public void zoom(float delta, Frame frame) {
+    translate(0, 0, delta, frame);
+  }
 
   public void spin(Point point1, Point point2, Point center) {
     spin(point1, point2, center, defaultFrame());

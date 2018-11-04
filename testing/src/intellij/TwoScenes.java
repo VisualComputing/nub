@@ -83,7 +83,7 @@ public class TwoScenes extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      focus.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
