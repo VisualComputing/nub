@@ -49,6 +49,26 @@ public class GASolver extends Solver {
         _crossover = new OperatorMethods.ConvexCombination();
     }
 
+    public int populationSize(){
+        return _population_size;
+    }
+
+    public float crossProbability(){
+        return _cross_probability;
+    }
+
+    public List<Statistics> statistics(){
+        return _statistics;
+    }
+
+    public void setPopulationSize(int size){
+        _population_size = size;
+    }
+
+    public void setCrossProbability(float probability){
+        _cross_probability = probability;
+    }
+
     public void setSelection(Selection selection){
         _selection = selection;
     }
@@ -69,7 +89,7 @@ public class GASolver extends Solver {
         this._target.put(structure().indexOf(endEffector), target);
     }
 
-    public double[] execute(){
+    public float execute(){
         this._statistics = new ArrayList<Statistics>();
         //1. Generate population
         _population = Util.generatePopulation(_structure, _population_size);
@@ -78,28 +98,19 @@ public class GASolver extends Solver {
             individual.updateFitness(_target);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
-        //3. TODO use a better Termination Condition
+        //3. Iterate a given number of times.
         int k = 0;
         while(k < maxIter){
             _iterate();
+            _statistics.add(new Statistics(_population));
             k++;
         }
         //4. Keep statistics
-        _statistics.add(new Statistics(_population));
-        return null;
+        return _best.fitness();
     }
 
     @Override
     protected boolean _iterate() {
-        //If there is no population then genereate one
-        if(_population == null) {
-            _population = Util.generatePopulation(_structure, _population_size);
-            for (Individual individual : _population) {
-                individual.updateFitness(_target);
-                _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
-            }
-        }
-
         //1. Select parents
         List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
         if(_debug) {
@@ -206,7 +217,7 @@ public class GASolver extends Solver {
             return true;
         }
         for(Integer endEffector : _target.keySet()){
-            if(_previousTarget.get(endEffector) == null) continue;
+            if(_previousTarget.get(endEffector) == null) return true;
             if(!(_previousTarget.get(endEffector).position().matches(_target.get(endEffector).position()) &&
                     _previousTarget.get(endEffector).orientation().matches(_target.get(endEffector).orientation()))){
                 return true;
@@ -225,6 +236,11 @@ public class GASolver extends Solver {
         for(Integer endEffector : _target.keySet()) {
             _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation()));
         }
+        //If there is no population then genereate one
+        _population = Util.generatePopulation(_structure, _population_size);
+        for (Individual individual : _population) {
+            individual.updateFitness(_target);
+            _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
+        }
     }
 }
-
