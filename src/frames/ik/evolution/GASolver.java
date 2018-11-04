@@ -90,6 +90,7 @@ public class GASolver extends Solver {
     }
 
     public float execute(){
+        this._best = null;
         this._statistics = new ArrayList<Statistics>();
         //1. Generate population
         _population = Util.generatePopulation(_structure, _population_size);
@@ -228,6 +229,7 @@ public class GASolver extends Solver {
 
     @Override
     protected void _reset() {
+        _best = null;
         iterations = 0;
         if(_target == null){
             _previousTarget = null;
