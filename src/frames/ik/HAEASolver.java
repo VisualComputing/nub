@@ -70,7 +70,7 @@ public class HAEASolver  extends Solver {
 
 
     protected List<Statistics> _statistics;
-    protected List<Float> _operatorsValues = new ArrayList<>();
+    protected float[][] _operatorsValues;
 
     protected boolean _debug = false;
 
@@ -83,7 +83,7 @@ public class HAEASolver  extends Solver {
         //Default operators
         this._operators.add(new OperatorMethods.UniformMutation());
         this._operators.add(new OperatorMethods.ConvexCombination());
-        this._operators.add(new OperatorMethods.GaussianMutation());
+        //this._operators.add(new OperatorMethods.GaussianMutation());
     }
 
     public int populationSize(){
@@ -102,6 +102,13 @@ public class HAEASolver  extends Solver {
         _operators.add(operator);
     }
 
+    public List<Operator> operators(){
+        return _operators;
+    }
+
+    public float[][] operatorsValues(){
+        return _operatorsValues;
+    }
 
     public void setSelection(Selection selection){
         _selection = selection;
@@ -117,24 +124,29 @@ public class HAEASolver  extends Solver {
     }
 
     public float execute(){
+        this._best = null;
         this._statistics = new ArrayList<Statistics>();
+        _operatorsValues = new float[_operators.size()][maxIter];
         //1. Generate population
         _population = Util.generatePopulation(_structure, _population_size);
         //2. Update Fitness
-        for(Individual individual : _population){
-            individual.updateFitness(_target);
-            _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
+        for (int i = 0; i < _population.size(); i++) {
+            _population.get(i).updateFitness(_target);
+            _population.set(i, new HAEAIndividual(_population.get(i)));
+            ((HAEAIndividual)_population.get(i)).generateRates(_random, _operators);
+            _best = _best == null ? _population.get(i) : _best.fitness() > _population.get(i).fitness() ? _population.get(i) : _best;
         }
         //3. Iterate a given number of times.
         int k = 0;
         while(k < maxIter){
             _iterate();
             _statistics.add(new Statistics(_population));
-            for(Individual individual : _population) {
-                HAEAIndividual ind = (HAEAIndividual) individual;
-                for(int i = 0; i < ind._operatorRates.length; i++) {
-                    _operatorsValues.add(ind._operatorRates[i]/ind._operatorRates.length);
+            for(int i = 0; i < _operators.size(); i++){
+                for(int j = 0; j < _population_size; j++){
+                    HAEAIndividual individual = (HAEAIndividual) _population.get(j);
+                    _operatorsValues[i][k] += individual._operatorRates[i];
                 }
+                _operatorsValues[i][k] /= _population_size;
             }
             k++;
         }
@@ -144,7 +156,6 @@ public class HAEASolver  extends Solver {
 
     @Override
     protected boolean _iterate() {
-        _best = null;
         List<Individual> next = new ArrayList<>();
 
         for(Individual individual : _population){
@@ -157,6 +168,7 @@ public class HAEASolver  extends Solver {
             if(operator instanceof OperatorMethods.ConvexCombination){
                 List<Individual> parents = _selection.choose(true, _population,1);
                 parents.add(individual);
+                //parents.add(_best);
                 children.add(operator.apply(parents.toArray(new Individual[parents.size()])));
             } else{
                 children.add(operator.apply(individual));
@@ -171,19 +183,21 @@ public class HAEASolver  extends Solver {
                     better = true;
                 }
             }
-            _best = _best == null ? replacement : _best.fitness() > replacement.fitness() ? replacement: _best;
-
             if(better) {
                 replacement = new HAEAIndividual(replacement);
                 ((HAEAIndividual) replacement)._operatorRates = ((HAEAIndividual) individual)._operatorRates;
                 //reward
                 ((HAEAIndividual) replacement)._operatorRates[index] *= (1 + delta);
+                ((HAEAIndividual) replacement)._operatorRates = ((HAEAIndividual) replacement)._operatorRates.clone();
             } else{
                 //punish
                 ((HAEAIndividual) replacement)._operatorRates[index] *= (1 - delta);
+                ((HAEAIndividual) replacement)._operatorRates = ((HAEAIndividual) replacement)._operatorRates.clone();
+
             }
             ((HAEAIndividual) replacement).normalizeRates();
             next.add(replacement);
+            _best = _best == null ? replacement : _best.fitness() > replacement.fitness() ? replacement: _best;
         }
 
         _population = next;
@@ -237,6 +251,7 @@ public class HAEASolver  extends Solver {
 
     @Override
     protected void _reset() {
+        _best = null;
         iterations = 0;
         if(_target == null){
             _previousTarget = null;
