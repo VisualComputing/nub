@@ -6,6 +6,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
+import frames.ik.HAEASolver;
 import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
@@ -23,15 +24,15 @@ import java.util.ArrayList;
 /**
  * Created by sebchaparr on 8/10/18.
  */
-public class HCTest extends PApplet {
+public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 4;
+    int num_joints = 15;
     float targetRadius = 12;
     float boneLength = 50;
 
     Scene scene;
     //Methods
-    int num_solvers = 6;
+    int num_solvers = 7;
     ArrayList<Solver> solvers;
     ArrayList<Shape> targets = new ArrayList<Shape>();
 
@@ -109,12 +110,13 @@ public class HCTest extends PApplet {
         solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
         solvers.add(new ChainSolver(structures.get(4)));
         solvers.add(new GASolver(structures.get(5), 10));
+        solvers.add(new HAEASolver(structures.get(6), 10));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < num_solvers; i++){
             solvers.get(i).error = 0.5f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 5;
+            solvers.get(i).maxIter = 50;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
@@ -130,6 +132,11 @@ public class HCTest extends PApplet {
             }
             if(solvers.get(i) instanceof GASolver) {
                 GASolver solver = (GASolver) solvers.get(i);
+                solver.setTarget(solver.endEffector(), targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
+            }
+            if(solvers.get(i) instanceof HAEASolver) {
+                HAEASolver solver = (HAEASolver) solvers.get(i);
                 solver.setTarget(solver.endEffector(), targets.get(i));
                 targets.get(i).setPosition(solver.endEffector().position());
             }
@@ -167,7 +174,11 @@ public class HCTest extends PApplet {
             } else if(solver instanceof  GASolver){
                 Frame f = ((GASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("Genetic Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("Genetic \n Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  HAEASolver){
+                Frame f = ((HAEASolver)solver).structure().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("HAEA \n Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
@@ -241,6 +252,6 @@ public class HCTest extends PApplet {
 
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.HCTest"});
+        PApplet.main(new String[]{"ik.basic.VisualBenchmark"});
     }
 }
