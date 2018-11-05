@@ -350,7 +350,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setType(type); setAperture(type() == Type.PERSPECTIVE ? (float)Math.PI / 3 : 1)}.
+   * Same as {@code setType(type); setAperture(type() == Type.PERSPECTIVE ? (float)Math.PI / 3 : foreshortening())}.
    *
    * @see #setType(Type)
    * @see #setAperture(Type, float)
@@ -363,7 +363,7 @@ public class Graph {
    */
   public void setAperture(Type type) {
     setType(type);
-    setAperture(type() == Type.PERSPECTIVE ? (float) Math.PI / 3 : 1);
+    setAperture(type() == Type.PERSPECTIVE ? (float) Math.PI / 3 : foreshortening());
   }
 
   /**
@@ -3345,32 +3345,33 @@ public class Graph {
   // only 3d eye
 
   /**
-   * Same as {@code translate(0, 0, delta, eye()); adaptAperture();}.
+   * Same as {@code translate(0, 0, delta, eye()); }. If {@link #type()} is
+   * {@link Type#ORTHOGRAPHIC} calls {@code eye().setMagnitude(foreshortening())} afterwards.
    *
    * @see #translate(float, float, float, Frame)
-   * @see #adaptAperture()
+   * @see #foreshortening()
    */
   public void moveForward(float delta) {
     translate(0, 0, delta, eye());
-    adaptAperture();
+    if (type() == Type.ORTHOGRAPHIC)
+      eye().setMagnitude(foreshortening());
   }
 
   /**
-   * Balance the aperture according to according to the eye to anchor distance. Call it after an eye
-   * z-translation. Only meaningful for {@link Type#ORTHOGRAPHIC} graphs.
+   * Returns the frame scaling that is needed to emulate foreshortening in {@link Type#ORTHOGRAPHIC} graphs
+   * as a function of the {@link #eye()} {@link Frame#position()}-to-{@link #anchor()} distance.
+   * Returns the {@link #eye()} {@link Frame#magnitude()} for the remaining graph types.
    *
    * @see #translate(float, float, float, Frame)
    * @see #moveForward(float)
    */
-  public void adaptAperture() {
-    if (type() == Type.ORTHOGRAPHIC)
-      eye().setScaling(_orthoScale());
-  }
-
-  protected float _orthoScale() {
-    float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-    float epsilon = 0.0001f;
-    return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
+  public float foreshortening() {
+    if (type() == Type.ORTHOGRAPHIC) {
+      float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
+      float epsilon = 0.0001f;
+      return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
+    }
+    return eye().magnitude();
   }
 
   /**

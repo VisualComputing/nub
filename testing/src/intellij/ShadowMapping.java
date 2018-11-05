@@ -82,6 +82,10 @@ public class ShadowMapping extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == '3')
+      scene.setAperture(PI / 3);
+    if (key == '4')
+      scene.setAperture(PI / 4);
     if (key == ' ')
       show = !show;
     if (key == 'o')
@@ -89,11 +93,14 @@ public class ShadowMapping extends PApplet {
         shadowMapType = Graph.Type.PERSPECTIVE;
       else
         shadowMapType = Graph.Type.ORTHOGRAPHIC;
-    if (key == 't')
+    if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE)
         scene.setAperture(Graph.Type.ORTHOGRAPHIC);
       else
         scene.setAperture(Graph.Type.PERSPECTIVE);
+    }
+    if (key == 'p')
+      scene.eye().position().print();
   }
 
   PShape caja() {
