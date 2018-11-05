@@ -25,7 +25,6 @@ public class Graph5 extends PApplet {
     graph = new Graph(width, height);
     GLSLMatrixHandler mh = new GLSLMatrixHandler(graph);
     graph.setMatrixHandler(mh);
-    graph.setFieldOfView(PI / 3);
     graph.fitBallInterpolation();
     frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {

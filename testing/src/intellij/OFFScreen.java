@@ -21,7 +21,7 @@ public class OFFScreen extends PApplet {
 
   public void setup() {
     scene = new Scene(this, createGraphics(1300, 900, renderer), 400, 200);
-    scene.setFieldOfView((float) Math.PI / 3);
+    scene.setAperture(PI / 3);
     scene.setRadius(300);
     scene.fitBallInterpolation();
 

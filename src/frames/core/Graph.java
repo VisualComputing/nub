@@ -48,8 +48,7 @@ import java.util.List;
  * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #autoAperture()},
- * {@link #fieldOfView()}, {@link #setHorizontalFieldOfView(float)}, {@link #fitBall()}
- * {@link #screenLocation(Vector, Frame)} and
+ * {@link #aperture()}, {@link #fitBall()}, {@link #screenLocation(Vector, Frame)} and
  * {@link #location(Vector, Frame)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Frame} parameter provide interactivity to frames, such as
@@ -356,6 +355,8 @@ public class Graph {
    * @see #setType(Type)
    * @see #setAperture(Type, float)
    * @see #setAperture(float)
+   * @see #horizontalAperture()
+   * @see #setHorizontalAperture(float)
    * @see #aperture()
    * @see #radians(float)
    * @see #magnitude(float)
@@ -372,6 +373,8 @@ public class Graph {
    * @see #setAperture(Type)
    * @see #setAperture(float)
    * @see #aperture()
+   * @see #horizontalAperture()
+   * @see #setHorizontalAperture(float)
    * @see #radians(float)
    * @see #magnitude(float)
    */
@@ -386,9 +389,12 @@ public class Graph {
    *
    * @param aperture is given radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
    *                 or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   *
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #aperture()
+   * @see #horizontalAperture()
+   * @see #setHorizontalAperture(float)
    * @see #radians(float)
    * @see #magnitude(float)
    */
@@ -397,18 +403,59 @@ public class Graph {
   }
 
   /**
+   * Sets the {@link Graph#horizontalAperture()} of the {@link #eye()} (in radians).
+   * <p>
+   * {@link Graph#horizontalAperture()} and {@link Graph#aperture()} are linked by the
+   * {@link Graph#aspectRatio()}. This method actually calls:
+   * {@code setAperture(type() == Type.PERSPECTIVE ? 2.0f * (float) Math.atan((float) Math.tan(aperture / 2.0f) / aspectRatio()) : aperture)} so that a
+   * call to {@link Graph#horizontalAperture()} returns the expected value.
+   *
+   * @param aperture is given radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
+   *                 or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   * @see #setAperture(Type)
+   * @see #setAperture(Type, float)
+   * @see #aperture()
+   * @see #horizontalAperture()
+   * @see #setAperture(float)
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
+  public void setHorizontalAperture(float aperture) {
+    setAperture(type() == Type.PERSPECTIVE ? 2.0f * (float) Math.atan((float) Math.tan(aperture / 2.0f) / aspectRatio()) : aperture);
+  }
+
+  /**
    * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude()}.
    * Returns the {@link #eye()} field-of-view in radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
    * or the {@link #eye()} {@link Frame#magnitude()} otherwise.
    *
    * @see #setAperture(Type)
-   * @see #setAperture(float)
    * @see #setAperture(Type, float)
+   * @see #setHorizontalAperture(float)
+   * @see #horizontalAperture()
+   * @see #setAperture(float)
    * @see #radians(float)
    * @see #magnitude(float)
    */
   public float aperture() {
     return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude();
+  }
+
+  /**
+   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
+   * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #type()} is
+   * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Frame#magnitude()} otherwise.
+   *
+   * @see #setAperture(Type)
+   * @see #setAperture(Type, float)
+   * @see #setHorizontalAperture(float)
+   * @see #aperture()
+   * @see #setAperture(float)
+   * @see #radians(float)
+   * @see #magnitude(float)
+   */
+  public float horizontalAperture() {
+    return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude();
   }
 
   /**
@@ -431,90 +478,31 @@ public class Graph {
   }
 
   /**
-   * Returns the vertical field of view of the {@link #eye()} (in radians) computed as
-   * {@code 2 * (float) Math.atan(eye().magnitude())}.
-   * <p>
-   * Value is set using {@link #setFieldOfView(float)}. Default value is pi/3 radians.
-   * This value is meaningless if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
-   * <p>
-   * The field of view corresponds the one used in {@code gluPerspective}. It sets the Y
-   * (vertical) aperture of the eye. The X (horizontal) angle is inferred from the
-   * window aspect ratio (see {@link #aspectRatio()} and {@link #horizontalFieldOfView()}).
-   *
-   * @see #setFieldOfView(float)
-   * @see #horizontalFieldOfView()
-   * @see #aspectRatio()
-   * @see #eye()
-   */
-  public float fieldOfView() {
-    return radians(eye().magnitude());
-  }
-
-  /**
-   * Same as {@code eye().setMagnitude((float) Math.tan(fov / 2))}.
-   * <p>
-   * Sets the field-of-view of the current {@link #eye()}.
-   *
-   * @see Frame#setMagnitude(float)
-   */
-  public void setFieldOfView(float fov) {
-    eye().setMagnitude(magnitude(fov));
-  }
-
-  /**
-   * Returns the horizontal field of view of the {@link #eye()} (in radians).
-   * <p>
-   * Value is set using {@link #setHorizontalFieldOfView(float)} or
-   * {@link #setFieldOfView(float)}.
-   *
-   * @see #setHorizontalFieldOfView(float)
-   * @see #fieldOfView()
-   * @see #aspectRatio()
-   * @see #eye()
-   */
-  public float horizontalFieldOfView() {
-    return radians(eye().magnitude() * aspectRatio());
-  }
-
-  /**
-   * Changes the {@link #eye()} {@link Graph#fieldOfView()} so that the entire scene
+   * Changes the {@link #eye()} {@link Graph#aperture()} so that the entire scene
    * (defined by {@link #center()} and {@link Graph#radius()}) is visible.
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link Graph#lookAt(Vector)},
    * {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
    *
-   * <b>Attention:</b> The {@link Graph#fieldOfView()} is clamped to PI/2. This happens
+   * <b>Attention:</b> The {@link Graph#aperture()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
    *
-   * @see #setFieldOfView(float)
+   * @see #setAperture(float)
    */
   public void autoAperture() {
     switch (type()) {
       case ORTHOGRAPHIC:
       case TWO_D:
-        float size = Math.min(width(), height());
-        eye().setMagnitude(2 * radius() / size);
+        setAperture(2 * radius() / Math.min(width(), height()));
         break;
       case PERSPECTIVE:
         if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
-          setFieldOfView(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
+          setAperture(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
         else
-          setFieldOfView((float) Math.PI / 2);
+          setAperture((float) Math.PI / 2);
         break;
     }
-  }
-
-  /**
-   * Sets the {@link Graph#horizontalFieldOfView()} of the {@link #eye()} (in radians).
-   * <p>
-   * {@link Graph#horizontalFieldOfView()} and {@link Graph#fieldOfView()} are linked by the
-   * {@link Graph#aspectRatio()}. This method actually calls:
-   * {@code setFieldOfView(( 2 * atan (tan(hfov / 2) / aspectRatio()) ))} so that a
-   * call to {@link Graph#horizontalFieldOfView()} returns the expected value.
-   */
-  public void setHorizontalFieldOfView(float hfov) {
-    setFieldOfView(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()));
   }
 
   /**
@@ -1258,7 +1246,8 @@ public class Graph {
 
     switch (type()) {
       case PERSPECTIVE: {
-        float hhfov = horizontalFieldOfView() / 2.0f;
+        // horizontal fov: radians(eye().magnitude() * aspectRatio())
+        float hhfov = radians(eye().magnitude() * aspectRatio()) / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
         _normal[0] = Vector.multiply(viewDir, -shhfov);
@@ -1267,7 +1256,7 @@ public class Graph {
         _normal[2] = Vector.multiply(viewDir, -1);
         _normal[3] = viewDir;
 
-        float hfov = fieldOfView() / 2.0f;
+        float hfov = aperture() / 2.0f;
         float chfov = (float) Math.cos(hfov);
         float shfov = (float) Math.sin(hfov);
         _normal[4] = Vector.multiply(viewDir, -shfov);
@@ -1302,8 +1291,8 @@ public class Graph {
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
+        float wh0 = aperture() * width() / 2;
+        float wh1 = aperture() * height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1338,8 +1327,8 @@ public class Graph {
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
 
-    float wh0 = eye().magnitude() * width() / 2;
-    float wh1 = eye().magnitude() * height() / 2;
+    float wh0 = aperture() * width() / 2;
+    float wh1 = aperture() * height() / 2;
     _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
     _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
     _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
@@ -1510,10 +1499,10 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math
-            .tan(fieldOfView() / 2.0f) / height();
+            .tan(aperture() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        return eye().magnitude();
+        return aperture();
     }
     return 1.0f;
   }
@@ -1989,7 +1978,7 @@ public class Graph {
    * <p>
    * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
    * sphere fits the screen. Its {@link Frame#orientation()} and its
-   * {@link #fieldOfView()} are unchanged. You should therefore orientate the eye
+   * {@link #aperture()} are unchanged. You should therefore orientate the eye
    * before you call this method.
    *
    * @see #lookAt(Vector)
@@ -2004,13 +1993,14 @@ public class Graph {
         autoAperture();
         break;
       case ORTHOGRAPHIC:
-        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
+        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / aperture());
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         autoAperture();
         break;
       case PERSPECTIVE:
-        float yview = radius / (float) Math.sin(fieldOfView() / 2.0f);
-        float xview = radius / (float) Math.sin(horizontalFieldOfView() / 2.0f);
+        float yview = radius / (float) Math.sin(aperture() / 2.0f);
+        // horizontal fov: radians(eye().magnitude() * aspectRatio())
+        float xview = radius / (float) Math.sin(radians(eye().magnitude() * aspectRatio()) / 2.0f);
         distance = Math.max(xview, yview);
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         break;
@@ -2043,14 +2033,14 @@ public class Graph {
       float rectRatio = (float) rectangle.width() / (float) rectangle.height();
       if (aspectRatio() < 1.0f) {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          setAperture(aperture() * (float) rectangle.width() / width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          setAperture(aperture() * (float) rectangle.height() / height());
       } else {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          setAperture(aperture() * (float) rectangle.width() / width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          setAperture(aperture() * (float) rectangle.height() / height());
       }
       lookAt(location(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
       return;
@@ -2071,14 +2061,15 @@ public class Graph {
     float distX, distY;
     switch (type()) {
       case PERSPECTIVE:
-        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(horizontalFieldOfView() / 2.0f);
-        distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fieldOfView() / 2.0f);
+        //horizontal fov: radians(eye().magnitude() * aspectRatio())
+        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(radians(eye().magnitude() * aspectRatio()) / 2.0f);
+        distY = Vector.distance(pointY, newCenter) / (float) Math.sin(aperture() / 2.0f);
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
         float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
-        distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
-        distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
+        distX = Vector.distance(pointX, newCenter) / aperture() / aspectRatio();
+        distY = Vector.distance(pointY, newCenter) / aperture() / 1.0f;
         distance = dist + Math.max(distX, distY);
         break;
     }
@@ -2105,8 +2096,8 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f) * aspectRatio(),
-            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * (float) Math.tan(fieldOfView() / 2.0f),
+        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
+            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * eye().magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2114,8 +2105,8 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
+        float wh0 = aperture() * width() / 2;
+        float wh1 = aperture() * height() / 2;
         origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
             -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
             0.0f));
@@ -3102,7 +3093,7 @@ public class Graph {
     dz = isEye(frame) ? dz : -dz;
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
-      float k = (float) Math.tan(fieldOfView() / 2.0f) * Math.abs(
+      float k = (float) Math.tan(aperture() / 2.0f) * Math.abs(
           eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (height() * eye().magnitude());
@@ -3135,7 +3126,7 @@ public class Graph {
 
   /**
    * Scales the {@code frame} according to {@code delta}. Note that if {@code frame} is the {@link #eye()}
-   * this call simply changes the {@link #fieldOfView()}.
+   * this call simply changes the {@link #aperture()}.
    *
    * @see #scale(String, float)
    */

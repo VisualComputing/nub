@@ -39,7 +39,6 @@ void setup() {
   scene1 = new Scene(this, canvas1);
   scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
   scene1.enableBoundaryEquations();
-  scene1.setFieldOfView(PI / 3);
   scene1.fitBallInterpolation();
 
   canvas2 = createGraphics(w, h / 2, P3D);
@@ -48,7 +47,6 @@ void setup() {
   scene2 = new Scene(this, canvas2, 0, h / 2);
   scene2.setAperture(Graph.Type.ORTHOGRAPHIC);
   scene2.setRadius(200);
-  scene1.setFieldOfView(PI / 3);
   scene2.fitBall();
 }
 
@@ -97,11 +95,9 @@ void mouseClicked(MouseEvent event) {
 void keyPressed() {
   if (key == ' ')
     if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else {
-      focus.setType(Graph.Type.PERSPECTIVE);
-      focus.setFieldOfView(PI / 3);
-    }
+      focus.setAperture(Graph.Type.ORTHOGRAPHIC);
+    else
+      focus.setAperture(Graph.Type.PERSPECTIVE);
   if (key == 'f') {
     scene1.flip();
     scene2.flip();

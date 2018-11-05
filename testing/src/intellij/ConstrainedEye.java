@@ -28,7 +28,6 @@ public class ConstrainedEye extends PApplet {
     myFont = loadFont("FreeSans-16.vlw");
     textFont(myFont);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     scene.setRadius(400);
     scene.fitBallInterpolation();
 

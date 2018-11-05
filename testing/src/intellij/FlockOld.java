@@ -29,7 +29,6 @@ public class FlockOld extends PApplet {
     scene = new Scene(this);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
-    scene.setFieldOfView(PI / 3);
     scene.fitBall();
     // create and fill the list of boids
     flock = new ArrayList();

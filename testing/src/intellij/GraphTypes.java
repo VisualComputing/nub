@@ -29,7 +29,6 @@ public class GraphTypes extends PApplet {
     //scene1.setZClippingCoefficient(1);
     scene.setRadius(200);
     scene.setType(Graph.Type.ORTHOGRAPHIC);
-    //scene1.setFieldOfView(PI / 3);
     //scene1.fitBallInterpolation();
     scene.fitBall();
 
@@ -72,9 +71,9 @@ public class GraphTypes extends PApplet {
       scene.eye().position().print();
     }
     if (key == 'n')
-      scene.eye().setMagnitude(1);
+      scene.setAperture(1);
     if (key == 'm')
-      scene.setFieldOfView(PI / 3);
+      scene.setAperture(PI / 3);
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
