@@ -6,13 +6,13 @@
  * from a light point-of-view.
  *
  * Press ' ' to toggle the shadow map display.
- * Press ' ' to change the shadow map shape (ORTHOGRAPHIC and PERSPECTIVE).
+ * Press ' ' to change the shadow map shape (ORTHOGRAPHIC / PERSPECTIVE).
  */
 
 import frames.core.*;
 import frames.processing.*;
 
-Graph.Type shodowMapType = Graph.Type.ORTHOGRAPHIC;
+Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
 Scene scene;
 Shape[] shapes;
 Shape light;
@@ -42,7 +42,7 @@ void setup() {
       pg.pushStyle();
       Scene.drawAxes(pg, 150);
       pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-      Scene.drawEye(pg, shadowMap, shodowMapType, this, zNear, zFar);
+      Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
       pg.popStyle();
     }
   };
@@ -57,7 +57,7 @@ void draw() {
   // 2. Fill in shadow map using the light point of view
   shadowMap.beginDraw();
   shadowMap.background(120);
-  scene.traverse(shadowMap, shodowMapType, light, zNear, zFar);
+  scene.traverse(shadowMap, shadowMapType, light, zNear, zFar);
   shadowMap.endDraw();
   // 3. Display shadow map
   if (show) {
@@ -88,7 +88,7 @@ void keyPressed() {
   if (key == ' ')
     show = !show;
   if (key == 't')
-    shodowMapType = shodowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+    shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
 }
 
 PShape caja() {

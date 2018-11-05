@@ -9,7 +9,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class ShadowMapping extends PApplet {
-  Graph.Type shodowMapType = Graph.Type.ORTHOGRAPHIC;
+  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Shape[] shapes;
   Shape light;
@@ -39,7 +39,7 @@ public class ShadowMapping extends PApplet {
         pg.pushStyle();
         Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-        Scene.drawEye(pg, shadowMap, shodowMapType, this, zNear, zFar);
+        Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
         pg.popStyle();
       }
     };
@@ -54,7 +54,7 @@ public class ShadowMapping extends PApplet {
     // 2. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
     shadowMap.background(120);
-    scene.traverse(shadowMap, shodowMapType, light, zNear, zFar);
+    scene.traverse(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     if (show) {
@@ -85,10 +85,10 @@ public class ShadowMapping extends PApplet {
     if (key == ' ')
       show = !show;
     if (key == 'o')
-      if (shodowMapType == Graph.Type.ORTHOGRAPHIC)
-        shodowMapType = Graph.Type.PERSPECTIVE;
+      if (shadowMapType == Graph.Type.ORTHOGRAPHIC)
+        shadowMapType = Graph.Type.PERSPECTIVE;
       else
-        shodowMapType = Graph.Type.ORTHOGRAPHIC;
+        shadowMapType = Graph.Type.ORTHOGRAPHIC;
     if (key == 't')
       if (scene.type() == Graph.Type.PERSPECTIVE)
         scene.setAperture(Graph.Type.ORTHOGRAPHIC);
