@@ -33,7 +33,6 @@ public void setup() {
     models[i] = new Shape(scene, shape());
     scene.randomize(models[i]);
   }
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 
   colorShader = loadShader("colorfrag.glsl");
@@ -215,7 +214,7 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(scene.mouseDX());
+    scene.moveForward(scene.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {

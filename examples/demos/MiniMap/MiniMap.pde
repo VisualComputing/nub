@@ -59,7 +59,6 @@ void setup() {
   torus1.translate(-30, -30);
   torus2 = new Torus(torus1, color(0, 0, 255));
   torus2.translate(80, 0);
-  scene.setFieldOfView((float) Math.PI / 3);
   scene.setRadius(150);
   scene.fitBall();
 
@@ -70,7 +69,7 @@ void setup() {
   minimapTorus2 = new Torus(minimapTorus1, color(0, 0, 255));
   minimapTorus2.translate(80, 0);
   if (minimap.is3D())
-    minimap.setType(Graph.Type.ORTHOGRAPHIC);
+    minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
   minimap.setRadius(300);
   minimap.fitBall();
 
@@ -128,7 +127,7 @@ void mouseDragged() {
 
 void mouseWheel(MouseEvent event) {
   if(g.is3D())
-    focus.zoom(event.getCount() * 50);
+    focus.moveForward(event.getCount() * 50);
   else
     focus.scale(event.getCount() * 50);
 }

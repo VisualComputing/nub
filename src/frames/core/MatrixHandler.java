@@ -85,14 +85,13 @@ public class MatrixHandler {
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
    * @see Graph#preDraw()
-   * @see Graph#computeProjection()
-   * @see Graph#computeCustomProjection()
+   * @see Frame#projection(Graph.Type, float, float, float, float, boolean)
    * @see Frame#view()
    * @see #_bindProjection(Matrix)
    * @see #_bindModelView(Matrix)
    */
   protected void _bind() {
-    _projection.set(graph().computeProjection());
+    _projection.set(graph().eye().projection(graph().type(), graph().width(), graph().height(), graph().zNear(), graph().zFar(), graph().isLeftHanded()));
     _view.set(graph().eye().view());
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     // TODO _bindProjection is redundant when there's no binding of the matrices

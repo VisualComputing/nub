@@ -892,17 +892,17 @@ public class Matrix {
   /**
    * Returns an orthographic projection matrix from the given parameters.
    * <p>
-   * All parameter values should be positive, but {@code halfHeight} which may be negative in case you want to invert
+   * All parameter values should be positive, but {@code height} which may be negative in case you want to invert
    * the projected image across the eye y-axis.
    *
    * @see #perspective(float, float, float, float)
    * @see #view(Vector, Quaternion)
    */
-  public static Matrix orthographic(float halfWidth, float halfHeight, float zNear, float zFar) {
+  public static Matrix orthographic(float width, float height, float zNear, float zFar) {
     // same as glOrtho( -w, w, -h, h, zNear(), zFar() );
     Matrix projection = new Matrix();
-    projection._matrix[0] = 1 / halfWidth;
-    projection._matrix[5] = 1 / halfHeight;
+    projection._matrix[0] = 2 / width;
+    projection._matrix[5] = 2 / height;
     projection._matrix[10] = -2 / (zFar - zNear);
     projection._matrix[11] = 0;
     projection._matrix[14] = -(zFar + zNear) / (zFar - zNear);

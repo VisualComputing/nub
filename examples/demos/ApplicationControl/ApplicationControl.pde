@@ -31,7 +31,6 @@ public void settings() {
 
 void setup() {
   scene = new Scene(this);
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
   shapes = new Shape[10];
   for (int i = 0; i < shapes.length; i++) {
@@ -110,7 +109,7 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin();
   else if (mouseButton == CENTER)
-    scene.zoom(scene.mouseDX());
+    scene.scale(scene.mouseDX());
   else
     scene.translate();
 }

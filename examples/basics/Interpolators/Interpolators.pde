@@ -29,7 +29,6 @@ void setup() {
   size(1000, 800, renderer);
   rectMode(CENTER);
   scene = new Scene(this);
-  //scene.setFieldOfView(PI / 3);
   scene.setRadius(150);
 
   // interpolation 1. Default eye interpolations
@@ -108,7 +107,7 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 void keyPressed() {

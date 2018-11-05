@@ -68,8 +68,9 @@ import java.util.List;
  * {@code // Draw your object here, in the local frame coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
- * Use {@link #view()} when rendering the scene from the frame point-of-view. Note this
- * this method is used by the graph when a frame is set as its eye.
+ * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
+ * when rendering the scene from the frame point-of-view. Note these methods are used by the
+ * graph when a frame is set as its eye, see {@link Graph#preDraw()}.
  * <p>
  * To transform a point from one frame to another use {@link #location(Vector, Frame)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
@@ -1260,11 +1261,17 @@ public class Frame {
 
   /**
    * Returns the magnitude of the frame, defined in the world coordinate system.
+   * <p>
+   * The frame magnitude is used to compute
+   * the {@link #projection(Graph.Type, float, float, float, float, boolean)} matrix
+   * when the frame represents an eye, e.g., {@link Graph#eye()} and shadow mapping
+   * computation.
    *
    * @see #orientation()
    * @see #position()
    * @see #setPosition(Vector)
    * @see #translation()
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
    */
   public float magnitude() {
     if (reference() != null)
@@ -1773,6 +1780,50 @@ public class Frame {
         new Vector(r[0][1], r[1][1], r[2][1]),
         new Vector(r[0][2], r[1][2], r[2][2]))
     );
+  }
+
+  /**
+   * Returns either {@code perspective(width / height, zNear, zFar, lefTHanded)} if
+   * the {@link Graph.Type} is {@link Graph.Type#PERSPECTIVE} or
+   * {@code orthographic(width, height, zNear, zFar, lefTHanded)}, if the
+   * the {@link Graph.Type} is {@link Graph.Type#ORTHOGRAPHIC} or {@link Graph.Type#TWO_D}.
+   * In both cases it uses the frame {@link #magnitude()}.
+   * <p>
+   * Override this method to set a {@link Graph.Type#CUSTOM} projection.
+   *
+   * @see #perspective(float, float, float, boolean)
+   * @see #orthographic(float, float, float, float, boolean)
+   * @see #magnitude()
+   */
+  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
+    if (type == Graph.Type.PERSPECTIVE)
+      return perspective(width / height, zNear, zFar, leftHanded);
+    else
+      return orthographic(width, height, zNear, zFar, leftHanded);
+  }
+
+  /**
+   * Same as {@code return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar}.
+   *
+   * @see Matrix#perspective(float, float, float, float)
+   * @see #perspective(float, float, float, boolean)
+   * @see #magnitude()
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   */
+  public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar);
+  }
+
+  /**
+   * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
+   *
+   * @see Matrix#orthographic(float, float, float, float)
+   * @see #orthographic(float, float, float, float, boolean)
+   * @see #magnitude()
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   */
+  public Matrix perspective(float aspectRatio, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar);
   }
 
   /**
