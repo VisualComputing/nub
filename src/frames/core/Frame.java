@@ -1788,17 +1788,18 @@ public class Frame {
    * {@code orthographic(width, height, zNear, zFar, lefTHanded)}, if the
    * the {@link Graph.Type} is {@link Graph.Type#ORTHOGRAPHIC} or {@link Graph.Type#TWO_D}.
    * In both cases it uses the frame {@link #magnitude()}.
+   * <p>
+   * Override this method to set a {@link Graph.Type#CUSTOM} projection.
    *
    * @see #perspective(float, float, float, boolean)
    * @see #orthographic(float, float, float, float, boolean)
-   * @see Graph#computeProjection()
    * @see #magnitude()
    */
-  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar, boolean lefTHanded) {
+  public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
     if (type == Graph.Type.PERSPECTIVE)
-      return perspective(width / height, zNear, zFar, lefTHanded);
+      return perspective(width / height, zNear, zFar, leftHanded);
     else
-      return orthographic(width, height, zNear, zFar, lefTHanded);
+      return orthographic(width, height, zNear, zFar, leftHanded);
   }
 
   /**

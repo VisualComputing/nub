@@ -55,7 +55,7 @@ public class Graph3 extends PApplet {
   }
 
   void updateMatrices() {
-    projection = graph.computeProjection();
+    projection = graph.eye().projection(graph.type(), graph.width(), graph.height(), graph.zNear(), graph.zFar(), graph.isLeftHanded());
     view = graph.eye().view();
 
     shader(framesShader);

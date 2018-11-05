@@ -30,10 +30,10 @@ import java.util.List;
  * {@link #setZNearCoefficient(float)} for a 3d graph. See also
  * {@link #setBoundingBox(Vector, Vector)}.
  * <p>
- * The way the {@link #projection()} matrix is computed (see {@link #computeProjection()}),
+ * The way the {@link #projection()} matrix is computed
+ * (see {@link Frame#projection(Type, float, float, float, float, boolean)}),
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
- * for 3d graphs and {@link Type#TWO_D} for a 2d graph. To set a {@link Type#CUSTOM}
- * override {@link #computeCustomProjection()}.
+ * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
  * <h1>2. Scene graph handling</h1>
  * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
@@ -339,11 +339,8 @@ public class Graph {
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
    * frames will be constrained so that they will remain at the x-y plane. See
    * {@link frames.core.constraint.Constraint}.
-   * <p>
-   * To set a {@link Type#CUSTOM} override {@link #computeCustomProjection()}.
    *
-   * @see #computeProjection()
-   * @see #computeCustomProjection()
+   * @see Frame#projection(Type, float, float, float, float, boolean)
    * @see Frame#magnitude()
    */
   public void setType(Type type) {
@@ -521,7 +518,8 @@ public class Graph {
   }
 
   /**
-   * Returns the near clipping plane distance used by {@link #computeProjection()} matrix in
+   * Returns the near clipping plane distance used by the eye frame
+   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix in
    * world units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
@@ -571,7 +569,8 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the {@link #computeProjection()} matrix in world units.
+   * Returns the far clipping plane distance used by the eye frame
+   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix in world units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
@@ -923,32 +922,7 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.
-   * <p>
-   * Computes and returns the projection matrix associated with the graph.
-   * <p>
-   * Override {@link #computeCustomProjection()} to define a CUSTOM projection.
-   *
-   * <b>Note:</b> This method is called by {@link #preDraw()}.
-   *
-   * @see #preDraw()
-   * @see #computeCustomProjection()
-   * @see Frame#projection(Type, float, float, float, float, boolean)
-   */
-  public Matrix computeProjection() {
-    return type() == Type.CUSTOM ? computeCustomProjection() : eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
-  }
-
-  /**
-   * Override this method to define a graph CUSTOM projection matrix.
-   */
-  protected Matrix computeCustomProjection() {
-    return new Matrix();
-  }
-
-  /**
-   * Sets the {@link MatrixHandler} defining how dandelion matrices
-   * are to be handled.
+   * Sets the {@link MatrixHandler} defining how matrices are to be handled.
    *
    * @see #matrixHandler()
    */
