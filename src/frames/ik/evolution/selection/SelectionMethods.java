@@ -139,7 +139,7 @@ public class SelectionMethods {
             int index_best = (int)(0.1*n);
             int index_normal = (int)(0.8*n);
 
-            choosed.addAll(uniform.choose(replacement, list.subList(0,index_best + 1), m/2));
+            choosed.addAll(uniform.choose(replacement, list.subList(0,index_best + 1), (int) Math.ceil(m/2.f)));
             choosed.addAll(uniform.choose(replacement, list.subList(index_best + 1, index_normal + 1), m/2));
 
             return choosed;

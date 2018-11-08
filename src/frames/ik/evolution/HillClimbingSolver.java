@@ -76,6 +76,10 @@ public class HillClimbingSolver extends Solver {
         return Vector.distance(chain.get(chain.size()-1).position(), _target.position());
     }
 
+    public double distanceToTarget(){
+        return _distanceToTarget(_chain);
+    }
+
     protected double _powerLawGenerator(double x, double alpha){
         double coarse_alpha = 1.0/(1.0-alpha);
         return Math.pow(1.0 - x, coarse_alpha);
@@ -159,6 +163,7 @@ public class HillClimbingSolver extends Solver {
 
     @Override
     protected void _reset() {
+        _x_i = _copy(_chain);
         _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
         iterations = 0;
     }

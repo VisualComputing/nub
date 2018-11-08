@@ -27,6 +27,7 @@ public class Individual{
     protected List<Frame> _structure;
     protected HashMap<String, Parameter> _parameters;
     protected float _fitness;
+    protected float _extinction;
 
     public Individual(List<Frame> structure){
         _structure = structure;
@@ -46,6 +47,14 @@ public class Individual{
 
     public float fitness() {
         return _fitness;
+    }
+
+    public float extinction(){
+        return _extinction;
+    }
+
+    public void setExtinction(float extinction){
+        _extinction = extinction;
     }
 
     public void setFitness(float fitness){
@@ -92,6 +101,7 @@ public class Individual{
         }
         Individual individual = new Individual(_copy(_structure));
         individual._fitness = _fitness;
+        individual._extinction = _extinction;
         if(_parameters != null) {
             for (String name : _parameters.keySet()) {
                 individual.putParameter(name, _parameters.get(name)._values.clone());
@@ -104,7 +114,7 @@ public class Individual{
         String s = "";
         s += "Individual : [";
         for(Frame frame : _structure){
-            s += frame.position() + ", ";
+            s += frame.rotation().eulerAngles() + ", ";
         }
         s+="] Fitness " + this._fitness;
         return s;

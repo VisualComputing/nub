@@ -25,7 +25,7 @@ public class GASolver extends Solver {
     protected Operator _crossover;
     protected float _cross_probability = 1f;
     protected int _population_size = 10;
-    protected Replacement replacement = Replacement.ELITISM;
+    protected Replacement replacement = Replacement.KEEP_BEST;
 
     protected Random _random = new Random();
     protected HashMap<Integer, Frame> _previousTarget;
@@ -85,6 +85,10 @@ public class GASolver extends Solver {
         return _structure;
     }
 
+    public float best(){
+        return _best != null ? _best.fitness() : -1;
+    }
+
     public void setTarget(Frame endEffector, Frame target) {
         this._target.put(structure().indexOf(endEffector), target);
     }
@@ -125,10 +129,10 @@ public class GASolver extends Solver {
         //2. Generate children
         List<Individual> children = new ArrayList<>();
         Individual worst = null;
-        Individual best = null;
+        Individual best = _best;
         for(int i = 0; i < parents.size(); i+=2){
             if(_random.nextFloat() < _cross_probability) {
-                Individual child = _crossover.apply(_best, parents.get(i), parents.get(i + 1));
+                Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
                 if(_debug) {
                     System.out.println("\t Best " + _best);
                     System.out.println("\t P1 " + parents.get(i));
@@ -136,7 +140,11 @@ public class GASolver extends Solver {
                     child.updateFitness(_target);
                     System.out.println("\t Child " + child);
                 }
-
+                if(_mutation instanceof OperatorMethods.UniformMutation){
+                    ((OperatorMethods.UniformMutation) _mutation).setRate(parents.get(i), parents.get(i + 1));
+                } else if(_mutation instanceof OperatorMethods.GaussianMutation){
+                    ((OperatorMethods.GaussianMutation) _mutation).setRate(parents.get(i), parents.get(i + 1));
+                }
                 child = _mutation.apply(child);
                 child.updateFitness(_target);
                 children.add(child);
@@ -190,6 +198,7 @@ public class GASolver extends Solver {
                 break;
             }
         }
+        _updateExtinction();
         return _best.fitness() < minDistance;
     }
 
@@ -206,6 +215,17 @@ public class GASolver extends Solver {
     protected void _update() {
         for(int i = 0; i < _structure.size(); i++){
             _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
+        }
+    }
+
+    protected void _updateExtinction(){
+        List<Individual> sorted = Util.sort(false, false, _population);
+        float f_max = sorted.get(sorted.size()-1).fitness();
+        float f_min = sorted.get(0).fitness();
+
+        for(int i = 0; i < _population_size; i++){
+            Individual individual = _population.get(i);
+            individual.setExtinction((individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
         }
     }
 

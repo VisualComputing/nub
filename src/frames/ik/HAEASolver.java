@@ -60,7 +60,7 @@ public class HAEASolver  extends Solver {
     protected Selection _selection;
     protected List<Operator> _operators = new ArrayList<>();
 
-    protected int _population_size = 15;
+    protected int _population_size = 10;
     protected Random _random = new Random();
     protected HashMap<Integer, Frame> _previousTarget;
     protected HashMap<Integer, Frame> _target;
@@ -74,16 +74,16 @@ public class HAEASolver  extends Solver {
 
     protected boolean _debug = false;
 
-    public HAEASolver(List<Frame> structure, int population_size){
+    public HAEASolver(List<Frame> structure, int population_size, boolean convex){
         this._structure = structure;
         this._population_size = population_size;
         this._target = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
-        this._selection = new SelectionMethods.Elitism();
+        this._selection = new SelectionMethods.Ranking();
         //Default operators
         this._operators.add(new OperatorMethods.UniformMutation());
-        this._operators.add(new OperatorMethods.ConvexCombination());
-        //this._operators.add(new OperatorMethods.GaussianMutation());
+        if(convex) this._operators.add(new OperatorMethods.ConvexCombination());
+        this._operators.add(new OperatorMethods.GaussianMutation());
     }
 
     public int populationSize(){
@@ -114,6 +114,9 @@ public class HAEASolver  extends Solver {
         _selection = selection;
     }
 
+    public float best(){
+        return _best != null ? _best.fitness() : -1;
+    }
 
     public List<Frame> structure(){
         return _structure;
@@ -160,17 +163,29 @@ public class HAEASolver  extends Solver {
 
         for(Individual individual : _population){
             //learning rate
-            float delta = _random.nextFloat();
+            float delta = _random.nextFloat()*0.5f;
             int index = ((HAEAIndividual) individual).chooseOperator(_random);
             Operator operator = _operators.get(index);
             List<Individual> children = new ArrayList<>();
             //TODO: Consider when output is more than 1 Individual and when operator requires selection
+            if(_debug) {
+                System.out.println("P1 : \n \t" + individual);
+            }
+
             if(operator instanceof OperatorMethods.ConvexCombination){
                 List<Individual> parents = _selection.choose(true, _population,1);
+                //If individual has a worst fitness - it's better to choose the selected parent
                 parents.add(individual);
-                //parents.add(_best);
+                if(_debug) {
+                    System.out.println("Cross ");
+                    System.out.println("P2 : \n \t" + parents.get(0));
+                }
                 children.add(operator.apply(parents.toArray(new Individual[parents.size()])));
-            } else{
+            } else if(operator instanceof OperatorMethods.UniformMutation){
+                ((OperatorMethods.UniformMutation) operator).setRate(individual);
+                children.add(operator.apply(individual));
+            } else if(operator instanceof OperatorMethods.GaussianMutation){
+                ((OperatorMethods.GaussianMutation) operator).setRate(individual);
                 children.add(operator.apply(individual));
             }
             //Find best between children and individual
@@ -183,6 +198,10 @@ public class HAEASolver  extends Solver {
                     better = true;
                 }
             }
+            if(_debug) {
+                System.out.println("Child : \n \t" + children.get(0));
+            }
+
             if(better) {
                 replacement = new HAEAIndividual(replacement);
                 ((HAEAIndividual) replacement)._operatorRates = ((HAEAIndividual) individual)._operatorRates;
@@ -195,12 +214,18 @@ public class HAEASolver  extends Solver {
                 ((HAEAIndividual) replacement)._operatorRates = ((HAEAIndividual) replacement)._operatorRates.clone();
 
             }
+
+            if(_debug) {
+                System.out.println("Replacement : \n \t" + replacement);
+            }
+
             ((HAEAIndividual) replacement).normalizeRates();
             next.add(replacement);
             _best = _best == null ? replacement : _best.fitness() > replacement.fitness() ? replacement: _best;
         }
 
         _population = next;
+        _updateExtinction();
         if(_debug) {
             System.out.println("Population ");
             for (Individual ind : _population) {
@@ -213,6 +238,17 @@ public class HAEASolver  extends Solver {
             }
         }
         return _best.fitness() < minDistance;
+    }
+
+    protected void _updateExtinction(){
+        List<Individual> sorted = Util.sort(false, false, _population);
+        float f_max = sorted.get(sorted.size()-1).fitness();
+        float f_min = sorted.get(0).fitness();
+
+        for(int i = 0; i < _population_size; i++){
+            Individual individual = _population.get(i);
+            individual.setExtinction((individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
+        }
     }
 
 
