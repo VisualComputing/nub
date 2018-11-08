@@ -104,10 +104,14 @@ public class Benchmark {
             e.printStackTrace();
         }
         StringBuilder sb = new StringBuilder();
-        Frame target = generateRandomReachablePosition(method.chain());
-        method.setTarget(target);
         method.maxIter = iterations;
         for(int i = 0; i < times; i++) {
+            for(Frame f : method.chain()){
+                f.setRotation(new Quaternion());
+            }
+            Frame target = generateRandomReachablePosition(method.chain());
+            method.setTarget(target);
+
             double[] r = method.execute();
             for(int j = 0; j < r.length; j++){
                 sb.append(r[j]);
@@ -134,10 +138,14 @@ public class Benchmark {
         float[][] results = new float[6][iterations];
 
         StringBuilder sb = new StringBuilder();
-        Frame target = generateRandomReachablePosition(method.structure());
-        method.setTarget(method.endEffector(), target);
         method.maxIter = iterations;
         for(int i = 0; i < times; i++) {
+            for(Frame f : method.structure()){
+                f.setRotation(new Quaternion());
+            }
+            Frame target = generateRandomReachablePosition(method.structure());
+            method.setTarget(method.endEffector(), target);
+
             method.execute();
             for(int j  = 0; j < method.statistics().size(); j++){
                 results[0][j] += method.statistics().get(j).best()/times;
@@ -176,13 +184,14 @@ public class Benchmark {
         float[][] results = new float[6 + method.operators().size()][iterations];
 
         StringBuilder sb = new StringBuilder();
-        Frame target = generateRandomReachablePosition(method.structure());
-        method.setTarget(method.endEffector(), target);
         method.maxIter = iterations;
         for(int i = 0; i < times; i++) {
             for(Frame f : method.structure()){
                 f.setRotation(new Quaternion());
             }
+            Frame target = generateRandomReachablePosition(method.structure());
+            method.setTarget(method.endEffector(), target);
+
             method.execute();
             for(int j  = 0; j < method.statistics().size(); j++){
                 results[0][j] += method.statistics().get(j).best()/times;
@@ -223,9 +232,9 @@ public class Benchmark {
         //GA
         solvers.add(new GASolver(generateChain(num_joints, boneLength), 10));
         solvers.add(new GASolver(generateChain(num_joints, boneLength), 10));
-        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 10));
-        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 15));
-        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 20));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 10, true));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 15, true));
+        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 20, true));
 
         //generate experiments
         int counter = 0;

@@ -36,7 +36,7 @@ public class VisualBenchmark extends PApplet {
 
     Scene scene;
     //Methods
-    int num_solvers = 7;
+    int num_solvers = 8;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Shape> targets = new ArrayList<Shape>();
@@ -65,7 +65,7 @@ public class VisualBenchmark extends PApplet {
         float right = PI/2;
 
         for(int i = 0; i < num_solvers; i++){
-            structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()/num_solvers - 0.8f*scene.radius(), 0, 0)));
+            structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()*0.8f/num_solvers - 0.8f*0.8f*scene.radius(), 0, 0)));
         }
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
@@ -113,13 +113,14 @@ public class VisualBenchmark extends PApplet {
         solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
         solvers.add(new ChainSolver(structures.get(4)));
         solvers.add(new GASolver(structures.get(5), 10));
-        solvers.add(new HAEASolver(structures.get(6), 10));
+        solvers.add(new HAEASolver(structures.get(6), 10, true));
+        solvers.add(new HAEASolver(structures.get(7), 10, false));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < num_solvers; i++){
             solvers.get(i).error = 0.5f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 50;
+            solvers.get(i).maxIter = 300;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
@@ -166,9 +167,9 @@ public class VisualBenchmark extends PApplet {
                 Frame f = s.chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 if(s.powerLaw()){
-                    text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                    text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()) + "\n Error: " + String.format( "%.2f", s.distanceToTarget()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
                 } else{
-                    text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                    text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Error: " + String.format( "%.2f", s.distanceToTarget()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
                 }
             } else if (solver instanceof ChainSolver) {
                 Frame f = ((ChainSolver)solver).chain().get(0);
@@ -177,11 +178,11 @@ public class VisualBenchmark extends PApplet {
             } else if(solver instanceof  GASolver){
                 Frame f = ((GASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("Genetic \n Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.2f", ((GASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  HAEASolver){
                 Frame f = ((HAEASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("HAEA \n Algorithm", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.2f", ((HAEASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
