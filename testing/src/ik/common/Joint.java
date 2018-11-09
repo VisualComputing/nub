@@ -58,6 +58,7 @@ public class Joint extends Frame{
         if (constraint() != null) {
             scene.drawConstraint(this);
         }
+        if (scene.is3D()) scene.drawAxes(_radius*2);
         if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 

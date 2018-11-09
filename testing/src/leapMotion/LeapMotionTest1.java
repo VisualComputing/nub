@@ -125,6 +125,8 @@ public class LeapMotionTest1 extends PApplet {
                 leap.getLeftHand().getRaw().palmNormal().getZ());
         normal.mult(100);
 
+        if(leap.getLeftHand().getThumb() == null) return;
+
         PVector axis =
                 PVector.sub(leap.getLeftHand().getThumb().getRawPositionOfJointTip(),
                         leap.getLeftHand().getThumb().getRawPositionOfJointDip());

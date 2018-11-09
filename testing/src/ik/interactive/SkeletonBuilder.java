@@ -9,6 +9,7 @@ import frames.processing.Scene;
 import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -20,60 +21,87 @@ import java.util.List;
  * Created by sebchaparr on 27/10/18.
  */
 public class SkeletonBuilder extends PApplet{
-    Scene scene;
+    Scene scene, focus;
+    OptionPanel panel;
+    PGraphics canvas1;
     float radius = 5;
+    int w = 1000, h = 700;
 
     /*Create different skeletons to interact with*/
     //Choose FX2D, JAVA2D, P2D or P3D
-    String renderer = P2D;
+    String renderer = P3D;
 
     /*Constraint Parameters*/
     float minAngle = radians(60);
     float maxAngle = radians(60);
-
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactive.SkeletonBuilder"});
     }
 
     public void settings() {
-        size(700, 700, renderer);
+        size(w, h, renderer);
     }
 
     public void setup(){
-        scene = new Scene(this);
+        canvas1 = createGraphics((int)(0.7f*w), h, renderer);
+        scene = new Scene(this, canvas1);
         scene.fitBallInterpolation();
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
-        createInteractiveJoint().setRoot(true);
+        Joint f  = createInteractiveJoint();
+        f.setRoot(true);
+        panel = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
+    }
+
+    void handleMouse() {
+        focus = mouseX > 0.7f * w ? panel._scene : scene ;
     }
 
     public void draw() {
-        background(0);
+        scene.beginDraw();
+        canvas1.background(0);
         scene.drawAxes();
         scene.traverse();
+        handleMouse();
+        scene.drawAxes();
+        scene.traverse();
+        scene.endDraw();
+        scene.display();
+
+        panel._scene.beginDraw();
+        panel._scene.frontBuffer().background(0);
+        if(panel._frame != null)
+            panel._scene.traverse();
+        panel._scene.endDraw();
+        panel._scene.display();
     }
 
 
     //mouse events
     @Override
     public void mouseMoved() {
-        scene.cast();
+        focus.track();
     }
 
     public void mouseDragged(MouseEvent event) {
-        if (mouseButton == RIGHT && event.isControlDown()) {
-            Vector mouse = new Vector(scene.mouse().x(), scene.mouse().y());
-            scene.defaultFrame().interact("OnAdding", scene.location(mouse));
-            return;
-        } else if (mouseButton == LEFT) {
-            scene.spin();
-        }
-        else if (mouseButton == RIGHT) {
-            scene.translate();
+        if(focus == scene) {
+            if (mouseButton == RIGHT && event.isControlDown()) {
+                Vector mouse = new Vector(scene.mouse().x(), scene.mouse().y());
+                scene.defaultFrame().interact("OnAdding", scene.location(mouse));
+                return;
+            } else if (mouseButton == LEFT) {
+                scene.spin();
+            } else if (mouseButton == RIGHT) {
+                scene.translate();
+                multipleTranslate();
+            } else {
+                scene.zoom(scene.mouseDX());
+            }
+            scene.defaultFrame().interact("Reset");
         } else {
-            scene.zoom(scene.mouseDX());
+            panel._scene.defaultFrame().interact();
         }
-        scene.defaultFrame().interact("Reset");
+        panel.updateFrameOptions();
     }
 
     public void mouseReleased(){
@@ -91,14 +119,21 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void mouseClicked(MouseEvent event) {
-        if (event.getCount() == 2)
-            if (event.getButton() == LEFT)
-                if(event.isControlDown())
+        if (event.getButton() == LEFT) {
+            if (event.getCount() == 1) {
+                panel.setFrame(scene.trackedFrame());
+                if(event.isControlDown()) scene.defaultFrame().interact("KeepSelected");
+            }
+            else if (event.getCount() == 2) {
+                if (event.isControlDown())
                     scene.defaultFrame().interact("Remove");
                 else
                     scene.focus();
-            else
+            }
+            else {
                 scene.align();
+            }
+        }
     }
 
     public void keyPressed(){
@@ -199,7 +234,22 @@ public class SkeletonBuilder extends PApplet{
                         createShape(ELLIPSE, 0,0, ((Joint) scene.trackedFrame()).radius() * 4f, ((Joint) scene.trackedFrame()).radius() * 4f);
         redBall.setStroke(false);
         redBall.setFill(color(255, 0, 0));
-        Shape target = new Shape(scene, redBall);
+        Shape target = new Shape(scene, redBall) {
+            @Override
+            public void interact(Object... gesture) {
+                String command = (String) gesture[0];
+                if (command.matches("KeepSelected")) {
+                    if(!multipleFrames.contains(this)){
+                        redBall.setFill(color(0,255,0));
+                        multipleFrames.add(this);
+                    }
+                    else{
+                        redBall.setFill(color(255,0,0));
+                        multipleFrames.remove(this);
+                    }
+                }
+            }
+        };
         target.setReference(scene.trackedFrame().reference());
         target.setPosition(position);
         return target;
@@ -255,5 +305,13 @@ public class SkeletonBuilder extends PApplet{
     }
 
 
+    //----Experimental : Multiple selection
+    ArrayList<Frame> multipleFrames = new ArrayList<>();
+    public void multipleTranslate(){
+        for(Frame frame : multipleFrames){
+            if(scene.defaultFrame() != frame)
+            scene.translate(frame);
+        }
+    }
 }
 
