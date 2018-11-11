@@ -101,7 +101,7 @@ public class SkeletonBuilder extends PApplet{
         } else {
             panel._scene.defaultFrame().interact();
         }
-        panel.updateFrameOptions();
+        if(focus == scene)panel.updateFrameOptions();
     }
 
     public void mouseReleased(){

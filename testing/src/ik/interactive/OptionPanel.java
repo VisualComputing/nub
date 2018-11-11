@@ -43,8 +43,8 @@ public class OptionPanel {
             @Override
             public void pointerInteract(Object... objects){
                 if(_frame == null) return;
-                Vector euler = _frame.rotation().eulerAngles();
-                _frame.setRotation(new Quaternion(this.value(), euler.y(), euler.z()));
+                //Get rotation around X- Axis
+                _setOrientation(new Vector(1,0,0), this.value());
             }
         };
         s.setRange(-PApplet.PI, PApplet.PI);
@@ -53,8 +53,8 @@ public class OptionPanel {
             @Override
             public void pointerInteract(Object... objects){
                 if(_frame == null) return;
-                Vector euler = _frame.rotation().eulerAngles();
-                _frame.setRotation(new Quaternion(euler.x(), this.value(), euler.z()));
+                //Get rotation around Y - Axis
+                _setOrientation(new Vector(0,1,0), this.value());
             }
         };
         s.setRange(-PApplet.PI, PApplet.PI);
@@ -63,8 +63,8 @@ public class OptionPanel {
             @Override
             public void pointerInteract(Object... objects){
                 if(_frame == null) return;
-                Vector euler = _frame.rotation().eulerAngles();
-                _frame.setRotation(new Quaternion(euler.x(), euler.y(), this.value()));
+                //Get rotation around Z - Axis
+                _setOrientation(new Vector(0,0,1), this.value());
             }
         };
         s.setRange(-PApplet.PI, PApplet.PI);
@@ -75,12 +75,30 @@ public class OptionPanel {
         if(_frame == null){
             for(Slider s : _frameSliders) s._bar.cull(true);
         } else {
-            Vector euler = _frame.rotation().eulerAngles();
+            Vector[] axes = new Vector[]{_frame.displacement(new Vector(1,0,0)),
+                     _frame.displacement(new Vector(0,1,0)),
+                    _frame.displacement(new Vector(0,0,1))};
             for(int i = 0; i < 3; i++){
                 _frameSliders.get(i)._bar.cull(false);
-                _frameSliders.get(i).setValue(euler._vector[i]);
+                _frameSliders.get(i).setValue(_twist(_frame.orientation(), axes[i]).angle());
             }
         }
+    }
+
+
+    protected Quaternion _twist(Quaternion quaternion, Vector axis){
+        Vector quat = new Vector(quaternion._quaternion[0],quaternion._quaternion[1], quaternion._quaternion[2]);
+        quat = Vector.projectVectorOnAxis(quat, axis );
+        return new Quaternion(quat.x(), quat.y(), quat.z(), quaternion._quaternion[3]);
+    }
+
+    protected void _setOrientation(Vector axis, float value){
+        Vector local = _frame.displacement(axis);
+        Quaternion orientation = _frame.orientation();
+        Quaternion twist = _twist(orientation, local);
+        Quaternion newOrientation = Quaternion.multiply(orientation, twist.inverse());
+        newOrientation.multiply(new Quaternion(local , value));
+        _frame.setOrientation(newOrientation);
     }
 
 }
