@@ -17,15 +17,16 @@ import processing.event.MouseEvent;
  */
 public class LeapMotionTest3 extends PApplet {
     LeapMotion leap;
-    PVector previousNormal;
+    PVector previousPosition;
     PVector center, current;
+    float maxSpeed = 5;
+
+    boolean updateCenter = false;
+
     // frames stuff:
     Scene scene;
 
-    float threshold = 1f;
-    float y_max;
-    float x_max;
-    boolean rangeSet = false;
+    float threshold = 50f; // In terms of pixels
 
     public void settings() {
         size(800, 600, P3D);
@@ -38,12 +39,12 @@ public class LeapMotionTest3 extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fitBallInterpolation();
         center = new PVector();
-        /*Shape[] shapes = new Shape[50];
+        Shape[] shapes = new Shape[50];
         for (int i = 0; i < shapes.length; i++) {
             shapes[i] = new Shape(scene, shape());
             scene.randomize(shapes[i]);
             shapes[i].setRotation(new Quaternion());
-        }*/
+        }
         center = new PVector(width/2, height/2);
         smooth();
         setupLeapMotion();
@@ -58,28 +59,39 @@ public class LeapMotionTest3 extends PApplet {
     }
 
     public void draw() {
-        if(!rangeSet){
-            rangeSet = setupRange();
-            System.out.println("max = " + x_max);
-        }
+        PVector position = null;
         background(0);
         scene.drawAxes();
         scene.traverse();
-        scene.beginHUD();
-        fill(255,0,0);
-        ellipse(center.x, center.y, x_max*threshold, y_max*threshold);
-        fill(255,255,0);
-        ellipse(center.x, center.y, 10, 10);
-        if(current != null){
-            ellipse(current.x, current.y, 10, 10);
-        }
-
-        scene.endHUD();
         if (isPicking())
             leapMotionPicking();
         else
-            leapMotionInteraction();
+            position = leapMotionInteraction();
+        scene.beginHUD();
+        if(position != null)drawPAD(0, 3*height/4, height/4, position);
+        scene.endHUD();
 
+    }
+
+    void drawPAD(float x, float y, float w, PVector position){
+        pushMatrix();
+        pushStyle();
+        translate(x + w/2.f,y + w/2.f);
+        noStroke();
+        fill(100, 50);
+        rect(-w/2.f, -w/2.f, w, w);
+        fill(100);
+        ellipse(0, 0, w/10, w/10);
+        fill(100);
+        PVector vector = PVector.sub(position, center).mult(w*1.f/width);
+        if(vector.mag() > w/2){
+            vector = vector.normalize().mult(w/2);
+        }
+        ellipse(vector.x, vector.y, w/10, w/10);
+        stroke(255);
+        line(vector.x, vector.y, 0,0);
+        popStyle();
+        popMatrix();
     }
 
     void setCenter(){
@@ -125,34 +137,42 @@ public class LeapMotionTest3 extends PApplet {
         popStyle();
     }
 
-    void leapMotionInteraction() {
+    PVector leapMotionInteraction() {
         if(leap.getLeftHand() == null){
-            previousNormal = null;
-            return;
+            previousPosition = null;
+            return null;
         }
         if(leap.getLeftHand().getIndexFinger() == null){
-            previousNormal = null;
-            return;
+            previousPosition = null;
+            return null;
         }
         Finger index = leap.getLeftHand().getIndexFinger();
-        PVector pos = leap.getLeftHand().getIndexFinger().getRawPosition();
-        float y = max(min(pos.y, y_max), 0);
-        float x = max(min(pos.x, x_max), -x_max);
-        pos.y = height*1.2f - map(y, 0, y_max, 0, height*1.2f);
-        pos.x = map(x, -x_max, x_max, 0, width*1.2f);
+        PVector position = index.getPosition();
 
-        PVector v = PVector.sub(pos, center);
-        v.x *= 1.f/(threshold*x_max);
-        v.y *= 1.f/(threshold*y_max);
+        if(previousPosition == null){
+            previousPosition = index.getPosition();
+            return null;
+        }
 
-        current = v;
-        //Vector velocity = getDelta(position, center, 50, 1, 40);
-        Frame reference = scene.trackedFrame("LEAP") == null ? null :
-                scene.trackedFrame("LEAP").reference();
+        //Avoid Jittering
+        PVector delta = PVector.sub(position,center);
+        if(delta.x*delta.x + delta.y*delta.y < 15){
+            //no movement
+            return null;
+        }
+        previousPosition = position;
+        delta.z = 0;
+        //damp vector
+        if(delta.mag() > width/2.f){
+            delta = delta.normalize().mult(width/2.f);
+        }
+        //linear interpolation
+        delta.x = map(delta.x, -width/2.f, width/2.f, -maxSpeed, maxSpeed);
+        delta.y = map(delta.y, -width/2.f, width/2.f, -maxSpeed, maxSpeed);
 
-        scene.translate("LEAP", v.x, v.y);
 
-
+        scene.translate("LEAP",delta.x, delta.y);
+        return position;
     }
 
     Vector getDelta(PVector position, PVector center, float threshold, float speed, float step){
@@ -205,14 +225,6 @@ public class LeapMotionTest3 extends PApplet {
         leap = new LeapMotion(this);
     }
 
-    boolean setupRange(){
-        if(!leap.getDevices().isEmpty()) {
-            y_max = leap.getDevices().get(0).getRange() * 0.8f;
-            x_max = y_max * 0.3f * tan(leap.getDevices().get(0).getHorizontalViewAngle() / 2);
-            return true;
-        }
-        return false;
-    }
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"leapMotion.LeapMotionTest3"});

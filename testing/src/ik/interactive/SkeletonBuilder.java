@@ -102,6 +102,12 @@ public class SkeletonBuilder extends PApplet{
             panel._scene.defaultFrame().interact();
         }
         if(focus == scene)panel.updateFrameOptions();
+
+        if(focus == scene && !multipleFrames.contains(focus.trackedFrame())){
+            for(int i = multipleFrames.size()-1; i >= 0; i--){
+                multipleFrames.get(i).interact("KeepSelected");
+            }
+        }
     }
 
     public void mouseReleased(){
@@ -221,7 +227,7 @@ public class SkeletonBuilder extends PApplet{
                     pg.pushStyle();
                     pg.stroke(pg.color(0,255,0));
                     pg.strokeWeight(_radius/2);
-                    pg.line(0,0,0, desiredTranslation.x(), desiredTranslation.y(), desiredTranslation.z());
+                    pg.line(0,0,0, desiredTranslation.x()/this.scaling(), desiredTranslation.y()/this.scaling(), desiredTranslation.z()/this.scaling());
                     pg.popStyle();
                 }
             }

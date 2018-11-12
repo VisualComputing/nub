@@ -47,7 +47,7 @@ public class OptionPanel {
                 _setOrientation(new Vector(1,0,0), this.value());
             }
         };
-        s.setRange(-PApplet.PI, PApplet.PI);
+        s.setRange(0, 2*PApplet.PI);
         _frameSliders.add(s);
         s = new Slider(_scene, "Pitch ", new Vector(x,y + height*2), width, height){
             @Override
@@ -57,7 +57,7 @@ public class OptionPanel {
                 _setOrientation(new Vector(0,1,0), this.value());
             }
         };
-        s.setRange(-PApplet.PI, PApplet.PI);
+        s.setRange(0, 2*PApplet.PI);
         _frameSliders.add(s);
         s = new Slider(_scene, "Yaw  ", new Vector(x,y + height*4), width, height){
             @Override
@@ -67,7 +67,7 @@ public class OptionPanel {
                 _setOrientation(new Vector(0,0,1), this.value());
             }
         };
-        s.setRange(-PApplet.PI, PApplet.PI);
+        s.setRange(0, 2*PApplet.PI);
         _frameSliders.add(s);
     }
 

@@ -16,11 +16,9 @@ import processing.event.MouseEvent;
  * Created by sebchaparr on 31/07/18.
  */
 public class LeapMotionTest1 extends PApplet {
-    //TODO : Update
     LeapMotion leap;
-    PVector previousNormal;
+    Vector previousNormal;
     PVector previousPosition;
-
     // frames stuff:
     Scene scene;
 
@@ -52,35 +50,35 @@ public class LeapMotionTest1 extends PApplet {
     }
 
     public void draw() {
-        background(0);
+        background(255);
         scene.drawAxes();
         scene.traverse();
         if (isPicking())
             leapMotionPicking();
         else
             leapMotionInteraction();
+        scene.beginHUD();
+        for (Hand hand : leap.getHands ()) {
+            hand.draw();
+            pushStyle();
+            fill(255,255,0, 200);
+            ellipse(hand.getPosition().x, hand.getPosition().y, 30,30);
+            popStyle();
+        }
+        scene.endHUD();
     }
+
 
     void leapMotionPicking(){
         if(leap.getLeftHand() == null) return;
         if(leap.getLeftHand().getIndexFinger() == null) return;
-        float y_max = leap.getDevices().get(0).getRange()*0.8f;
-        float x_max = y_max*0.3f * tan(leap.getDevices().get(0).getHorizontalViewAngle()/2);
-
-        PVector pos = leap.getLeftHand().getIndexFinger().getRawPosition();
-        float y = max(min(pos.y, y_max), 0);
-        float x = max(min(pos.x, x_max), -x_max);
-
-        y = height*1.2f - map(y, 0, y_max, 0, height*1.2f);
-        x = map(x, -x_max, x_max, 0, width*1.2f);
-
-        scene.cast("LEAP", x, y);
-        //hand.getPinchStrength();
+        PVector pos = leap.getLeftHand().getIndexFinger().getPosition();
+        scene.cast("LEAP", pos.x, pos.y);
         // draw picking visual hint
         pushStyle();
         strokeWeight(3);
         stroke(0, 255, 0);
-        scene.drawCross(x, y, 30);
+        scene.drawCross(pos.x, pos.y, 30);
         popStyle();
     }
 
@@ -96,65 +94,61 @@ public class LeapMotionTest1 extends PApplet {
             return;
         }
         Finger index = leap.getLeftHand().getIndexFinger();
-        PVector position = index.getRawPosition();
+        PVector position = index.getPosition();
+
         if(previousPosition == null){
-            previousPosition = index.getRawPosition();
+            previousPosition = index.getPosition();
             return;
         }
 
-        if(PVector.dist(previousPosition, position) < 10){
+        //Avoid Jittering
+        PVector delta = PVector.sub(position,previousPosition);
+        if(delta.x*delta.x + delta.y*delta.y < 15){
             //no movement
             return;
         }
-
-        PVector v = PVector.sub(position, previousPosition);
-
-        //PVector center = new PVector(0, 140, 0);
-        //Vector velocity = getDelta(position, center, 50, 1, 40);
-        float min = 8;
-        Vector velocity = new Vector((int)v.x - (int)v.x % min,(int)v.y - (int)v.y % min,(int)v.z - (int)v.z % min);
-        Frame reference = scene.trackedFrame("LEAP") == null ? null :
-                scene.trackedFrame("LEAP").reference();
         previousPosition = position;
+        delta.z *= min(height, width)/50.f;
 
-        velocity = reference == null ? velocity : reference.displacement(velocity);
-        scene.translate("LEAP", velocity.x(), velocity.y(), velocity.z());
+        if(scene.trackedFrame("LEAP") != null )scene.translate("LEAP",delta.x, delta.y, delta.z);
 
-        PVector normal = new PVector(leap.getLeftHand().getRaw().palmNormal().getX(),
+
+        //Rotation
+        Vector normal = new Vector(leap.getLeftHand().getRaw().palmNormal().getX(),
                 leap.getLeftHand().getRaw().palmNormal().getY(),
                 leap.getLeftHand().getRaw().palmNormal().getZ());
-        normal.mult(100);
+        normal = new Quaternion(new Vector(1,0,0), -HALF_PI).rotate(normal);
 
-        if(leap.getLeftHand().getThumb() == null) return;
+        pushStyle();
+        strokeWeight(3);
+        stroke(0, 255, 0);
+        //scene.drawArrow(normal, new Vector(), 15);
+        popStyle();
+        pushStyle();
+        strokeWeight(3);
+        stroke(0, 255, 0);
+        scene.drawCross(position.x, position.y, 30);
+        System.out.println("H - >"  + normal);
 
-        PVector axis =
-                PVector.sub(leap.getLeftHand().getThumb().getRawPositionOfJointTip(),
-                        leap.getLeftHand().getThumb().getRawPositionOfJointDip());
+        popStyle();
 
-        System.out.println(axis);
-        //System.out.println(normal);
-
-
-        Vector direction = new Vector(leap.getLeftHand().getRawDirection().x,
-                leap.getLeftHand().getRawDirection().y,
-                leap.getLeftHand().getRawDirection().z);
-    }
-
-    Vector getDelta(PVector position, PVector center, float threshold, float speed, float step){
-        PVector offset = PVector.sub(position, center);
-        PVector direction = new PVector();
-        offset.normalize(direction);
-        Vector delta = new Vector();
-        if( abs(offset.x) > threshold ){
-            delta.setX(direction.x*speed*(abs(offset.x)/step));
+        if(previousNormal == null){
+            previousNormal = normal.get();
+            return;
         }
-        if( abs(offset.y) > threshold ){
-            delta.setZ(direction.y*speed*(abs(offset.y)/step));
+
+        if(Vector.angleBetween(normal, previousNormal) < radians(10)){
+            return;
         }
-        if( abs(offset.z) > threshold ){
-            delta.setY(direction.z*speed*(abs(offset.z)/step));
+        Quaternion rotation = new Quaternion(previousNormal, normal);
+        Quaternion quat = new Quaternion();
+        Frame frame =  scene.defaultFrame("LEAP");
+        if(frame.reference() != null){
+            quat = frame.orientation().inverse();
         }
-        return delta;
+        rotation = Quaternion.multiply(quat, rotation);
+        frame.rotate(rotation);
+        previousNormal = normal;
     }
 
     boolean isPicking(){
