@@ -46,6 +46,11 @@ public class LeapMotionTest3 extends PApplet {
             shapes[i].setRotation(new Quaternion());
         }
         center = new PVector(width/2, height/2);
+
+        //Draw scene on XY, XZ and YZ PLANES
+
+
+
         smooth();
         setupLeapMotion();
     }

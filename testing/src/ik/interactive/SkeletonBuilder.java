@@ -22,6 +22,7 @@ import java.util.List;
  */
 public class SkeletonBuilder extends PApplet{
     Scene scene, focus;
+
     OptionPanel panel;
     PGraphics canvas1;
     float radius = 5;
@@ -34,6 +35,9 @@ public class SkeletonBuilder extends PApplet{
     /*Constraint Parameters*/
     float minAngle = radians(60);
     float maxAngle = radians(60);
+
+    List<Target> targets = new ArrayList<Target>();
+
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.interactive.SkeletonBuilder"});
@@ -48,8 +52,7 @@ public class SkeletonBuilder extends PApplet{
         scene = new Scene(this, canvas1);
         scene.fitBallInterpolation();
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
-        Joint f  = createInteractiveJoint();
-        f.setRoot(true);
+        new InteractiveJoint(scene, radius).setRoot(true);
         panel = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
     }
 
@@ -58,12 +61,14 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void draw() {
+        handleMouse();
         scene.beginDraw();
         canvas1.background(0);
         scene.drawAxes();
-        scene.traverse();
-        handleMouse();
-        scene.drawAxes();
+        canvas1.stroke(255,0,0);
+        for(Target target : targets){
+            scene.drawPath(target._interpolator, 5);
+        }
         scene.traverse();
         scene.endDraw();
         scene.display();
@@ -93,7 +98,7 @@ public class SkeletonBuilder extends PApplet{
                 scene.spin();
             } else if (mouseButton == RIGHT) {
                 scene.translate();
-                multipleTranslate();
+                Target.multipleTranslate();
             } else {
                 scene.zoom(scene.mouseDX());
             }
@@ -103,10 +108,8 @@ public class SkeletonBuilder extends PApplet{
         }
         if(focus == scene)panel.updateFrameOptions();
 
-        if(focus == scene && !multipleFrames.contains(focus.trackedFrame())){
-            for(int i = multipleFrames.size()-1; i >= 0; i--){
-                multipleFrames.get(i).interact("KeepSelected");
-            }
+        if(focus == scene && !Target.selectedTargets().contains(focus.trackedFrame())){
+            Target.clearSelectedTargets();
         }
     }
 
@@ -117,7 +120,7 @@ public class SkeletonBuilder extends PApplet{
 
         mouse.add(scene.defaultFrame().position());
 
-        scene.defaultFrame().interact("Add", mouse);
+        scene.defaultFrame().interact("Add", mouse, false);
     }
 
     public void mouseWheel(MouseEvent event) {
@@ -128,7 +131,7 @@ public class SkeletonBuilder extends PApplet{
         if (event.getButton() == LEFT) {
             if (event.getCount() == 1) {
                 panel.setFrame(scene.trackedFrame());
-                if(event.isControlDown()) scene.defaultFrame().interact("KeepSelected");
+                if(event.isShiftDown()) scene.defaultFrame().interact("KeepSelected");
             }
             else if (event.getCount() == 2) {
                 if (event.isControlDown())
@@ -144,7 +147,7 @@ public class SkeletonBuilder extends PApplet{
 
     public void keyPressed(){
         if(key == '+'){
-            createInteractiveJoint().setRoot(true);
+            new InteractiveJoint(scene, radius).setRoot(true);
         }
         if(key == 'A' || key == 'a'){
             addTreeSolver();
@@ -172,93 +175,12 @@ public class SkeletonBuilder extends PApplet{
             if(maxAngle <= radians(0) ) maxAngle = radians(0);
             System.out.println("maxAngle : " + degrees(maxAngle));
         }
-
-    }
-
-    //------------------------------------
-
-    //Interactive actions - same method found in Graph Class
-    public Vector translateDesired(Frame frame){
-        float dx = mouseX - scene.screenLocation(frame.position()).x();
-        float dy = mouseY - scene.screenLocation(frame.position()).y();
-
-        dy = scene.isRightHanded() ? -dy : dy;
-        if(scene.type() == Graph.Type.PERSPECTIVE){
-            float k = (float) Math.tan(scene.fieldOfView() / 2.0f) * Math.abs(
-                    scene.eye().location(scene.isEye(frame) ? scene.anchor() : frame.position())._vector[2] * scene.eye().magnitude());
-            dx *= 2.0 * k / scene.height();
-            dy *= 2.0 * k / scene.height();
+        if(key==' '){
+            for(Target target : targets){
+                target._interpolator.start();
+            }
         }
-        else {
-            float[] wh = scene.boundaryWidthHeight();
-            dx *= 2.0 * wh[0] / scene.width();
-            dy *= 2.0 * wh[1] / scene.height();
-        }
-        Vector eyeVector = new Vector(dx / scene.eye().magnitude(), dy / scene.eye().magnitude(), 0);
-        return frame.reference() == null ? scene.eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, scene.eye());
-    }
 
-    public Joint createInteractiveJoint(){
-        return new Joint(scene, radius){
-            Vector desiredTranslation;
-            @Override
-            public void interact(Object... gesture){
-                String command = (String) gesture[0];
-                if(command.matches("Add")){
-                    if(desiredTranslation != null) {
-                        addChild();
-                    }
-                    desiredTranslation = null;
-                } else if(command.matches("OnAdding")){
-                    desiredTranslation = translateDesired(this);
-                } else if(command.matches("Reset")){
-                    desiredTranslation = null;
-                } else if(command.matches("Remove")){
-                    removeChild();
-                }
-            }
-            @Override
-            public void visit(){
-                super.visit();
-                //Draw desired position
-                Scene scene = (Scene) this._graph;
-                PGraphics pg = scene.frontBuffer();
-                if(desiredTranslation != null){
-                    pg.pushStyle();
-                    pg.stroke(pg.color(0,255,0));
-                    pg.strokeWeight(_radius/2);
-                    pg.line(0,0,0, desiredTranslation.x()/this.scaling(), desiredTranslation.y()/this.scaling(), desiredTranslation.z()/this.scaling());
-                    pg.popStyle();
-                }
-            }
-        };
-    }
-
-    public Shape createTarget(Vector position){
-        PShape redBall =
-                scene.is3D() ? createShape(SPHERE, ((Joint) scene.trackedFrame()).radius() * 2f) :
-                        createShape(ELLIPSE, 0,0, ((Joint) scene.trackedFrame()).radius() * 4f, ((Joint) scene.trackedFrame()).radius() * 4f);
-        redBall.setStroke(false);
-        redBall.setFill(color(255, 0, 0));
-        Shape target = new Shape(scene, redBall) {
-            @Override
-            public void interact(Object... gesture) {
-                String command = (String) gesture[0];
-                if (command.matches("KeepSelected")) {
-                    if(!multipleFrames.contains(this)){
-                        redBall.setFill(color(0,255,0));
-                        multipleFrames.add(this);
-                    }
-                    else{
-                        redBall.setFill(color(255,0,0));
-                        multipleFrames.remove(this);
-                    }
-                }
-            }
-        };
-        target.setReference(scene.trackedFrame().reference());
-        target.setPosition(position);
-        return target;
     }
 
     public void findEndEffectors(Frame frame, List<Frame> endEffectors){
@@ -296,27 +218,9 @@ public class SkeletonBuilder extends PApplet{
         ArrayList<Frame> endEffectors = new ArrayList<Frame>();
         findEndEffectors(scene.trackedFrame(), endEffectors);
         for(Frame endEffector : endEffectors) {
-            scene.addIKTarget(endEffector, createTarget(endEffector.position()));
-        }
-    }
-
-    public void addChild(){
-        Joint j = createInteractiveJoint();
-        j.setReference(scene.trackedFrame());
-        j.setTranslation(translateDesired(j));
-    }
-
-    public void removeChild(){
-        scene.pruneBranch(scene.trackedFrame());
-    }
-
-
-    //----Experimental : Multiple selection
-    ArrayList<Frame> multipleFrames = new ArrayList<>();
-    public void multipleTranslate(){
-        for(Frame frame : multipleFrames){
-            if(scene.defaultFrame() != frame)
-            scene.translate(frame);
+            Target target = new Target(scene, endEffector);
+            scene.addIKTarget(endEffector, target);
+            targets.add(target);
         }
     }
 }

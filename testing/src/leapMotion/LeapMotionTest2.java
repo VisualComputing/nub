@@ -13,14 +13,18 @@ import processing.core.PVector;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by sebchaparr on 31/07/18.
  */
 public class LeapMotionTest2 extends PApplet {
-    //TODO : Update
+    HashMap<String, Frame> fingers;
+
     LeapMotion leap;
     PVector[] previousPosition = new PVector[10];
+
+    Frame index, index_w;
 
     // frames stuff:
     Scene scene;
@@ -33,33 +37,73 @@ public class LeapMotionTest2 extends PApplet {
         scene = new Scene(this);
         scene.setFieldOfView(PI / 3);
         scene.setRadius(1500);
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fitBallInterpolation();
         Shape[] shapes = new Shape[10];
         for (int i = 0; i < shapes.length; i++) {
+            if(i == i)break;
             shapes[i] = new Shape(scene, shape());
             shapes[i].setPosition( (i*1.f/shapes.length)*scene.radius()*2 - scene.radius(),0,0);
-            //scene.randomize(shapes[i]);
-            //shapes[i].setRotation(new Quaternion());
             scene.setTrackedFrame("LEAP"+i, shapes[i]);
         }
         smooth();
         setupLeapMotion();
+        index = new Shape(scene, shape());
+        index.setTranslation(10,10,10);
+        index_w = new Shape(scene, shape());
+        index_w.setTranslation(-10,-10,-10);
     }
 
     PShape shape() {
-        PShape fig = createShape(BOX, 150);
-        fig.setStroke(color(0, 255, 0));
-        fig.setStrokeWeight(3);
+        PShape fig = createShape(SPHERE, 50);
+        fig.setStroke(false);
         fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
         return fig;
     }
 
     public void draw() {
-        background(0);
+        background(100);
         scene.drawAxes();
         scene.traverse();
         updatePos();
+        scene.beginHUD();
+        for (Hand hand : leap.getHands ()) {
+            hand.draw();
+        }
+        scene.endHUD();
+
     }
+
+    Vector worldLocation(PVector rawPosition){
+        Vector position = new Vector();
+        position.setX(map(rawPosition.x, -200, 200, -scene.radius(), scene.radius()));
+        position.setY(map(rawPosition.y, 0, 500, -scene.radius(), scene.radius()));
+        position.setZ(map(rawPosition.z, -200, 200, -scene.radius(), scene.radius()));
+        return position;
+    }
+
+    void updateHands(){
+
+    }
+
+    void updateHand(Hand hand){
+        updateFinger("pinky", hand.getPinkyFinger());
+        updateFinger("ring", hand.getRingFinger());
+        updateFinger("middle", hand.getMiddleFinger());
+        updateFinger("index", hand.getIndexFinger());
+    }
+
+    void updateFinger(String name, Finger finger){
+        Frame frame = fingers.get(name);
+        frame.setPosition(worldLocation(finger.getRawPositionOfJointMcp()));
+        frame = frame.reference();
+        frame.setPosition(worldLocation(finger.getRawPositionOfJointPip()));
+        frame = frame.reference();
+        frame.setPosition(worldLocation(finger.getRawPositionOfJointDip()));
+        frame = frame.reference();
+        frame.setPosition(worldLocation(finger.getRawPositionOfJointTip()));
+    }
+
 
     ArrayList<Finger> sortedFingers(){
         ArrayList<Finger> fingers = new ArrayList<Finger>();
@@ -72,6 +116,11 @@ public class LeapMotionTest2 extends PApplet {
                 fingers.add(hand.getRingFinger());
                 fingers.add(hand.getMiddleFinger());
                 fingers.add(hand.getIndexFinger());
+                PVector pv = hand.getIndexFinger().getPosition();
+                Vector p = scene.location(new Vector(pv.x, pv.y, pv.z/50));
+                index.setTranslation(p.get());
+                Vector pw = worldLocation(hand.getIndexFinger().getRawPosition());
+                index_w.setTranslation(pw);
                 fingers.add(hand.getThumb());
             }
         }
@@ -90,6 +139,7 @@ public class LeapMotionTest2 extends PApplet {
                 Hand hand = leap.getRightHand();
                 fingers.add(hand.getThumb());
                 fingers.add(hand.getIndexFinger());
+                System.out.println(hand.getIndexFinger().getPosition());
                 fingers.add(hand.getMiddleFinger());
                 fingers.add(hand.getRingFinger());
                 fingers.add(hand.getPinkyFinger());
@@ -113,7 +163,7 @@ public class LeapMotionTest2 extends PApplet {
                 i++;
                 continue;
             }
-            PVector position = f.getRawPosition();
+            PVector position = f.getPosition();
             if(previousPosition[i] == null){
                 previousPosition[i] = position;
                 i++;
@@ -124,16 +174,16 @@ public class LeapMotionTest2 extends PApplet {
                 i++;
                 continue;
             }
-            PVector v = PVector.sub(position, previousPosition[i]);
-
-            float min = 8;
-            Vector velocity = new Vector((int)v.x - (int)v.x % min,(int)v.y - (int)v.y % min,(int)v.z - (int)v.z % min);
-            Frame reference = scene.trackedFrame("LEAP" + i) == null ? null :
-                    scene.trackedFrame("LEAP" + i).reference();
+            //Avoid Jittering
+            PVector delta = PVector.sub(position,previousPosition[i]);
+            if(delta.x*delta.x + delta.y*delta.y < 15){
+                //no movement
+                return;
+            }
             previousPosition[i] = position;
+            delta.z *= min(height, width)/50.f;
 
-            velocity = reference == null ? velocity : reference.displacement(velocity);
-            scene.translate("LEAP" + i, velocity.x(), velocity.y(), velocity.z());
+            if(scene.trackedFrame("LEAP" + i) != null )scene.translate("LEAP" + i,delta.x, delta.y, delta.z);
             i++;
         }
     }

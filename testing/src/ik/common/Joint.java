@@ -19,18 +19,22 @@ public class Joint extends Frame{
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false;
 
-    public Joint(Scene scn, int color){
-        super(scn);
+    public Joint(Scene scene, int color, float radius){
+        super(scene);
         _color = color;
-    }
-
-    public Joint(Scene scn){
-        this(scn, scn.pApplet().color(scn.pApplet().random(0,255),scn.pApplet().random(0,255), scn.pApplet().random(0,255)));
-    }
-
-    public Joint(Scene scn, float radius){
-        this(scn, scn.pApplet().color(scn.pApplet().random(0,255),scn.pApplet().random(0,255), scn.pApplet().random(0,255)));
         _radius = radius;
+    }
+
+    public Joint(Scene scene, int color){
+        this(scene, color, 5);
+    }
+
+    public Joint(Scene scene){
+        this(scene, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255), scene.pApplet().random(0,255)));
+    }
+
+    public Joint(Scene scene, float radius){
+        this(scene, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255), scene.pApplet().random(0,255)), radius);
     }
 
     @Override
