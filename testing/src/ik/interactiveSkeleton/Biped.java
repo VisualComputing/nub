@@ -37,7 +37,7 @@ public class Biped extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setFieldOfView(PI / 3);
+        scene.setAperture(PI / 3);
         scene.setRadius(boneLength * 5);
         scene.fitBallInterpolation();
         scene.disableBackBuffer();
@@ -155,7 +155,7 @@ public class Biped extends PApplet {
         } else if (mouseButton == RIGHT) {
             scene.translate();
         } else {
-            scene.zoom(scene.mouseDX());
+            scene.scale(scene.mouseDX());
         }
     }
 

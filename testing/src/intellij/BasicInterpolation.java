@@ -25,9 +25,8 @@ public class BasicInterpolation extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     scene.setRadius(150);
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
 
     // interpolation 1. Default eye interpolations
     scene.fitBallInterpolation();

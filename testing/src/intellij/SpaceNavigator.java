@@ -34,7 +34,6 @@ public class SpaceNavigator extends PApplet {
   public void setup() {
     openSpaceNavigator();
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fitBallInterpolation();
@@ -115,7 +114,7 @@ public class SpaceNavigator extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void keyPressed() {

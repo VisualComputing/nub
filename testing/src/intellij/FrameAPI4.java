@@ -62,7 +62,6 @@ public class FrameAPI4 extends PApplet {
     scene = new Scene(this);
     mode = Mode.m1;
 
-    scene.setFieldOfView(PI / 3);
     scene.setRadius(200);
     scene.fitBallInterpolation();
 
@@ -360,7 +359,7 @@ public class FrameAPI4 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
   }
 
   @Override

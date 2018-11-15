@@ -17,23 +17,24 @@ import frames.primitives.Vector;
  * The matrix handler specifies (and implements) various matrix operations needed by the
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
- * To set shader matrix uniform variables call {@link #projection()}, {@link #modelView()}
- * and (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * To emit the {@link #projectionModelView()} matrix to a shader override the
+ * {@link #_setUniforms()} signal, which is fired automatically by the handler every time
+ * one of its matrices change state. See also {@link #projection()}, {@link #modelView()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
- * override: {@link #bindModelView(Matrix)}, {@link #modelView()}, {@link #applyModelView(Matrix)},
+ * override: {@link #_bindModelView(Matrix)}, {@link #modelView()}, {@link #applyModelView(Matrix)},
  * {@link #pushModelView()}, {@link #popModelView()}, {@link #translate(float, float, float)},
  * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
- * {@link #scale(float, float, float)}, {@link #projection()}, {@link #bindProjection(Matrix)},
+ * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
  * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
  * implementing them in terms of the renderer params (see {@link #_bind()}).
  *
  * @see Matrix
  * @see #projection()
- * @see #bindProjection(Matrix)
+ * @see #_bindProjection(Matrix)
  * @see #modelView()
- * @see #bindModelView(Matrix)
+ * @see #_bindModelView(Matrix)
  * @see #_bind()
  * @see Graph#preDraw()
  */
@@ -74,43 +75,64 @@ public class MatrixHandler {
 
   /**
    * Updates (computes and caches) the projection and view matrices from the {@link #graph()}
-   * {@link Graph#eye()} parameters. This method is automatically called by
-   * {@link Graph#preDraw()} right at the beginning of the main event loop.
+   * {@link Graph#eye()} parameters and call {@link #_setUniforms()}. This method is automatically
+   * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
    * If {@link #graph()} is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
    * this method also binds the projection and view matrices to that renderer.
-   * In this case, note that {@link #bindProjection(Matrix)} and {@link #bindModelView(Matrix)}
+   * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindModelView(Matrix)}
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
    * @see Graph#preDraw()
-   * @see Graph#computeProjection()
-   * @see Graph#computeCustomProjection()
+   * @see Frame#projection(Graph.Type, float, float, float, float, boolean)
    * @see Frame#view()
-   * @see #bindProjection(Matrix)
-   * @see #bindModelView(Matrix)
+   * @see #_bindProjection(Matrix)
+   * @see #_bindModelView(Matrix)
    */
   protected void _bind() {
-    _projection.set(graph().computeProjection());
+    _projection.set(graph().eye().projection(graph().type(), graph().width(), graph().height(), graph().zNear(), graph().zFar(), graph().isLeftHanded()));
     _view.set(graph().eye().view());
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
-    bindProjection(cacheProjection());
-    bindModelView(cacheView());
+    // TODO _bindProjection is redundant when there's no binding of the matrices
+    // We could go like this (but I don't know if it works in JS):
+    //if(graph().getClass() != Graph.class)
+    _bindProjection(cacheProjection());
+    _bindModelView(cacheView());
+    _setUniforms();
   }
 
   // 1. May be overridden
 
   /**
-   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
-   * Default implementation is empty (see {@link #_bind()}).
+   * Returns {@link #projection()} times {@link #modelView()}.
+   *
+   * @see #_setUniforms()
+   * @see #projection()
+   * @see #modelView()
    */
-  public void bindProjection(Matrix matrix) {
+  public Matrix projectionModelView() {
+    return Matrix.multiply(projection(), modelView());
+  }
+
+  /**
+   * Emits the {@link #projectionModelView()} to the vertex shader whenever the {@link #projection()}
+   * or {@link #modelView()} matrices change. Default implementation is empty.
+   */
+  protected void _setUniforms() {
+  }
+
+  /**
+   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
+   */
+  public void _bindProjection(Matrix matrix) {
+    _projection.set(matrix);
   }
 
   /**
    * Binds the modelview matrix to the renderer.
    */
-  public void bindModelView(Matrix matrix) {
+  public void _bindModelView(Matrix matrix) {
     _modelview.set(matrix);
   }
 
@@ -132,16 +154,20 @@ public class MatrixHandler {
 
   /**
    * Multiplies the current modelview matrix by the one specified through the parameters.
+   * Calls {@link #_setUniforms()}.
    */
   public void applyModelView(Matrix source) {
     _modelview.apply(source);
+    _setUniforms();
   }
 
   /**
    * Multiplies the current projection matrix by the one specified through the parameters.
+   * Calls {@link #_setUniforms()}.
    */
   public void applyProjection(Matrix source) {
     _projection.apply(source);
+    _setUniforms();
   }
 
   /**
@@ -157,6 +183,7 @@ public class MatrixHandler {
 
   /**
    * Replace the current modelview matrix with the top of the stack.
+   * Calls {@link #_setUniforms()}.
    */
   public void popModelView() {
     if (_modelviewStackDepth == 0) {
@@ -164,34 +191,39 @@ public class MatrixHandler {
     }
     _modelviewStackDepth--;
     _modelview.set(_modelviewStack[_modelviewStackDepth]);
+    _setUniforms();
   }
 
   /**
-   * Translate in X, Y, and Z.
+   * Translate in X, Y, and Z. Calls {@link #_setUniforms()}.
    */
   public void translate(float x, float y, float z) {
     _modelview.translate(x, y, z);
+    _setUniforms();
   }
 
   /**
-   * Rotate around the Z axis.
+   * Rotate around the Z axis. Calls {@link #_setUniforms()}.
    */
   public void rotate(float angle) {
     _modelview.rotateZ(angle);
+    _setUniforms();
   }
 
   /**
-   * Rotate about a vector in space.
+   * Rotate about a vector in space. Calls {@link #_setUniforms()}.
    */
   public void rotate(float angle, float v0, float v1, float v2) {
     _modelview.rotate(angle, v0, v1, v2);
+    _setUniforms();
   }
 
   /**
-   * Scale in X, Y, and Z.
+   * Scale in X, Y, and Z. Calls {@link #_setUniforms()}.
    */
   public void scale(float x, float y, float z) {
     _modelview.scale(x, y, z);
+    _setUniforms();
   }
 
   /**
@@ -207,6 +239,7 @@ public class MatrixHandler {
 
   /**
    * Replace the current projection matrix with the top of the stack.
+   * Calls {@link #_setUniforms()}.
    */
   public void popProjection() {
     if (_projectionStackDepth == 0) {
@@ -214,6 +247,7 @@ public class MatrixHandler {
     }
     _projectionStackDepth--;
     _projection.set(_projectionStack[_projectionStackDepth]);
+    _setUniforms();
   }
 
   // 2. WARNING don't override from here ever!
@@ -311,6 +345,7 @@ public class MatrixHandler {
 
   /**
    * Begin Heads Up Display (HUD) so that drawing can be done using 2D screen coordinates.
+   * Calls {@link #_setUniforms()}.
    * <p>
    * All screen drawing should be enclosed between {@link #beginHUD()} and
    * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
@@ -325,6 +360,8 @@ public class MatrixHandler {
     _ortho2D();
     pushModelView();
     _resetViewPoint();
+    // TODO needs testing
+    _setUniforms();
   }
 
   /**
@@ -361,7 +398,7 @@ public class MatrixHandler {
     float tz = -(far + near) / (far - near);
 
     // The minus sign is needed to invert the Y axis.
-    bindProjection(new Matrix(x, 0, 0, 0, 0, -y, 0, 0, 0, 0, z, 0, tx, ty, tz, 1));
+    _bindProjection(new Matrix(x, 0, 0, 0, 0, -y, 0, 0, 0, 0, z, 0, tx, ty, tz, 1));
   }
 
   // as it's done in P5:
@@ -425,6 +462,6 @@ public class MatrixHandler {
     float tz = -eyeZ;
 
     mv.translate(tx, ty, tz);
-    bindModelView(mv);
+    _bindModelView(mv);
   }
 }

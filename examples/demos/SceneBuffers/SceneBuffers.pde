@@ -14,7 +14,6 @@ import frames.processing.*;
 
 Scene scene;
 Shape[] shapes;
-PGraphics canvas;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
@@ -36,7 +35,6 @@ void setup() {
     shapes[i].setGraphics(caja());
     shapes[i].randomize();
   }
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 }
 
@@ -61,11 +59,11 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(mouseX - pmouseX);
+    scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 PShape caja() {

@@ -16,7 +16,6 @@ PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShad
 PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, graphics, colorGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
-float posns[];
 int startTime;
 Shape[] models;
 PFont font;
@@ -26,21 +25,14 @@ public void setup() {
   font = loadFont("FreeSans-13.vlw");
   textFont(font);
   colorMode(HSB, 255);
-  posns = new float[300];
-  for (int i = 0; i<100; i++){
-    posns[3*i]=random(-1000, 1000);
-    posns[3*i+1]=random(-1000, 1000);
-    posns[3*i+2]=random(-1000, 1000);
-  }
   graphics = createGraphics(width, height, P3D);
   scene = new Scene(this, graphics);
+  scene.setRadius(1000);
   models = new Shape[100];
   for (int i = 0; i < models.length; i++) {
     models[i] = new Shape(scene, shape());
-    models[i].translate(posns[3*i], posns[3*i+1], posns[3*i+2]);
+    scene.randomize(models[i]);
   }
-  scene.setRadius(1000);
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
 
   colorShader = loadShader("colorfrag.glsl");
@@ -222,7 +214,7 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(scene.mouseDX());
+    scene.moveForward(scene.mouseDX());
 }
 
 void mouseWheel(MouseEvent event) {

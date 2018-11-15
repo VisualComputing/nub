@@ -53,11 +53,12 @@ public class SkeletonBuilder extends PApplet{
         scene.fitBallInterpolation();
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
         new InteractiveJoint(scene, radius).setRoot(true);
-        panel = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
+        // = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
     }
 
     void handleMouse() {
-        focus = mouseX > 0.7f * w ? panel._scene : scene ;
+        focus = scene;
+        //focus = mouseX > 0.7f * w ? panel._scene : scene ;
     }
 
     public void draw() {
@@ -73,12 +74,14 @@ public class SkeletonBuilder extends PApplet{
         scene.endDraw();
         scene.display();
 
+        /*
         panel._scene.beginDraw();
         panel._scene.frontBuffer().background(0);
         if(panel._frame != null)
             panel._scene.traverse();
         panel._scene.endDraw();
         panel._scene.display();
+        */
     }
 
 
@@ -100,13 +103,13 @@ public class SkeletonBuilder extends PApplet{
                 scene.translate();
                 Target.multipleTranslate();
             } else {
-                scene.zoom(scene.mouseDX());
+                scene.scale(scene.mouseDX());
             }
             scene.defaultFrame().interact("Reset");
         } else {
-            panel._scene.defaultFrame().interact();
+            //panel._scene.defaultFrame().interact();
         }
-        if(focus == scene)panel.updateFrameOptions();
+        //if(focus == scene)panel.updateFrameOptions();
 
         if(focus == scene && !Target.selectedTargets().contains(focus.trackedFrame())){
             Target.clearSelectedTargets();
@@ -130,11 +133,13 @@ public class SkeletonBuilder extends PApplet{
     public void mouseClicked(MouseEvent event) {
         if (event.getButton() == LEFT) {
             if (event.getCount() == 1) {
-                panel.setFrame(scene.trackedFrame());
-                if(event.isShiftDown()) scene.defaultFrame().interact("KeepSelected");
+                //panel.setFrame(scene.trackedFrame());
+                if(event.isControlDown()){
+                    scene.defaultFrame().interact("KeepSelected");
+                }
             }
             else if (event.getCount() == 2) {
-                if (event.isControlDown())
+                if (event.isShiftDown())
                     scene.defaultFrame().interact("Remove");
                 else
                     scene.focus();

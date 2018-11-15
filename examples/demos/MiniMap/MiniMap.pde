@@ -3,8 +3,13 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates how to use off-screen rendering to build
- * a mini-map of the main Scene where all objects are interactive. It
- * also shows Frame syncing among views.
+ * a mini-map of the main Scene where all objects are interactive.
+ * Note that the minimap displays the projection of the scene onto
+ * the near plane in 3D.
+ * 
+ * Press ' ' to toggle the minimap display.
+ * Press 's' and 'S' to show the entire scene and minimap, resp.
+ * Press 't' to toggle the scene camera type (only in 3D).
  */
 
 import frames.primitives.*;
@@ -26,15 +31,34 @@ boolean showMiniMap = true;
 //Choose FX2D, JAVA2D, P2D or P3D
 String renderer = P3D;
 
+void settings() {
+  size(w, h, renderer);
+}
+
 void setup() {
-  size(1800, 1200, renderer);
   sceneCanvas = createGraphics(w, h, renderer);
-  scene = new Scene(this, sceneCanvas);
+  // Standard camera zNear and zFar implementation allows to better
+  // display the projection of the scene onto the minimap near plane
+  scene = new Scene(this, sceneCanvas) {
+    @Override
+    public float zNear() {
+      if(is3D())
+        return 200;
+      else
+        return super.zNear();
+    }
+    @Override
+    public float zFar() {
+      if(is3D())
+        return 400;
+      else
+        return super.zFar();
+    }
+  };
   torus1 = new Torus(scene, color(255, 0, 0));
   torus1.translate(-30, -30);
   torus2 = new Torus(torus1, color(0, 0, 255));
   torus2.translate(80, 0);
-  scene.setFieldOfView((float) Math.PI / 3);
   scene.setRadius(150);
   scene.fitBall();
 
@@ -45,8 +69,8 @@ void setup() {
   minimapTorus2 = new Torus(minimapTorus1, color(0, 0, 255));
   minimapTorus2.translate(80, 0);
   if (minimap.is3D())
-    minimap.setType(Graph.Type.ORTHOGRAPHIC);
-  minimap.setRadius(500);
+    minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
+  minimap.setRadius(300);
   minimap.fitBall();
 
   eye = new Eye(minimap);
@@ -59,14 +83,14 @@ void draw() {
   sync();
   handleMouse();
   scene.beginDraw();
-  sceneCanvas.background(0);
+  sceneCanvas.background(215, 245, 250);
   scene.traverse();
   scene.drawAxes();
   scene.endDraw();
   scene.display();
   if (showMiniMap) {
     minimap.beginDraw();
-    minimapCanvas.background(29, 153, 243);
+    minimapCanvas.background(129, 253, 243);
     minimap.frontBuffer().fill(255, 0, 255, 125);
     minimap.traverse();
     minimap.drawAxes();
@@ -102,7 +126,10 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  focus.zoom(event.getCount() * 50);
+  if(g.is3D())
+    focus.moveForward(event.getCount() * 50);
+  else
+    focus.scale(event.getCount() * 50);
 }
 
 void mouseClicked(MouseEvent event) {
@@ -121,8 +148,13 @@ void keyPressed() {
   if (key == 'S')
     minimap.fitBallInterpolation();
   if (key == 't')
-    if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else
-      focus.setType(Graph.Type.PERSPECTIVE);
+    if (g.is3D())
+      if (focus.type() == Graph.Type.PERSPECTIVE)
+        focus.setType(Graph.Type.ORTHOGRAPHIC);
+      else
+        focus.setType(Graph.Type.PERSPECTIVE);
+  if (key == 'f') {
+    scene.flip();
+    minimap.flip();
+  }
 }

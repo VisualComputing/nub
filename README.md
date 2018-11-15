@@ -1,5 +1,5 @@
-FramesJS
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
+Frames
+[![All Contributors](https://img.shields.io/badge/all_contributors-0-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -11,7 +11,6 @@ FramesJS
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Control](#user-content-control)
-- [IK](#user-content-ik)
 - [Drawing](#user-content-drawing)
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
@@ -205,7 +204,7 @@ void draw() {
 }
 ```
 
-See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/basics/DepthOfField). Some advantages of using shapes are:
+See the [DepthOfField example](https://github.com/VisualComputing/frames/tree/master/examples/demos/DepthOfField). Some advantages of using shapes are:
 
 * Same as with _attached_ frames.
 * Shapes are picked precisely using ray-tracing against the pixels of their projection. See [setPrecision](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-).
@@ -236,11 +235,11 @@ which will create a random interpolator path containing [4..10] key-frames. The 
 ...
 void draw() {
   scene.traverse();
-  scene.drawPath(interpolator, 5);
+  scene.drawPath(interpolator);
 }
 ```
 
-while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator, int)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-int-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
+while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
  
 ## HIDs
 
@@ -269,20 +268,18 @@ Implementing an application control for a frame is a two step process:
 
 See the [ApplicationControl example](https://github.com/VisualComputing/frames/tree/master/examples/demos/ApplicationControl).
 
-## IK
-
 ## Drawing
 
 The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) implements several static drawing functions that complements those already provided by Processing, such as: [drawCylinder(PGraphics, int, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCylinder-processing.core.PGraphics-int-float-float-), [drawHollowCylinder(PGraphics, int, float, float, Vector, Vector)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawHollowCylinder-processing.core.PGraphics-int-float-float-frames.primitives.Vector-frames.primitives.Vector-), [drawCone(PGraphics, int, float, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-), [drawCone(PGraphics, int, float, float, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCone-processing.core.PGraphics-int-float-float-float-float-float-) and [drawTorusSolenoid(PGraphics, int, int, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawTorusSolenoid-processing.core.PGraphics-int-int-float-float-).
 
 Drawing functions that take a `PGraphics` parameter (including the above static ones), such as [beginHUD(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#beginHUD-processing.core.PGraphics-),
-[endHUD(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#endHUD-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a ([Shape](#user-content-shapes)).
+[endHUD(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#endHUD-processing.core.PGraphics-), [drawAxes(PGraphics, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawAxes-processing.core.PGraphics-float-), [drawCross(PGraphics, float, float, float)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawCross-processing.core.PGraphics-float-float-float-) and [drawGrid(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawGrid-processing.core.PGraphics-) among others, can be used to set a [Shape](#user-content-shapes).
 
 Another scene's eye (different than this one) can be drawn with [drawEye(Graph)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawEye-frames.core.Graph-). Typical usage include interactive [minimaps](https://en.wikipedia.org/wiki/Mini-map) and _visibility culling_ visualization and debugging.
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/frames/releases) and extract it to your sketchbook `libraries` folder.
+Download the [proof-of-concept implementation](https://github.com/VisualComputing/frames/releases/download/v-0.1.0-pre.1/frames-0.1.0-pre.1.zip) (read the release notes [here](https://github.com/VisualComputing/frames/releases/tag/v-0.1.0-pre.1)) and extract it to your [Processing](https://github.com/processing/processing/wiki/How-to-Install-a-Contributed-Library#manual-install) sketchbook `libraries` folder.
 
 ## Contributors
 
@@ -290,8 +287,6 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/9769647?v=4" width="100px;"/><br /><sub><b>sechaparroc</b></sub>](https://github.com/sechaparroc)<br />[📝](#blog-sechaparroc "Blogposts") [🐛](https://github.com/VisualComputing/framesjs/issues?q=author%3Asechaparroc "Bug reports") [💻](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Code") [🎨](#design-sechaparroc "Design") [📖](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Documentation") [📋](#eventOrganizing-sechaparroc "Event Organizing") [💡](#example-sechaparroc "Examples") [💵](#financial-sechaparroc "Financial") [🔍](#fundingFinding-sechaparroc "Funding Finding") [🤔](#ideas-sechaparroc "Ideas, Planning, & Feedback") [📦](#platform-sechaparroc "Packaging/porting to new platform") [🔌](#plugin-sechaparroc "Plugin/utility libraries") [💬](#question-sechaparroc "Answering Questions") [👀](#review-sechaparroc "Reviewed Pull Requests") [📢](#talk-sechaparroc "Talks") [⚠️](https://github.com/VisualComputing/framesjs/commits?author=sechaparroc "Tests") [✅](#tutorial-sechaparroc "Tutorials") [📹](#video-sechaparroc "Videos") | [<img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;"/><br /><sub><b>Jean Pierre Charalambos</b></sub>](https://github.com/nakednous)<br />[📝](#blog-nakednous "Blogposts") [🐛](https://github.com/VisualComputing/framesjs/issues?q=author%3Anakednous "Bug reports") [💻](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Code") [🎨](#design-nakednous "Design") [📖](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Documentation") [📋](#eventOrganizing-nakednous "Event Organizing") [💡](#example-nakednous "Examples") [💵](#financial-nakednous "Financial") [🔍](#fundingFinding-nakednous "Funding Finding") [🤔](#ideas-nakednous "Ideas, Planning, & Feedback") [📦](#platform-nakednous "Packaging/porting to new platform") [🔌](#plugin-nakednous "Plugin/utility libraries") [💬](#question-nakednous "Answering Questions") [👀](#review-nakednous "Reviewed Pull Requests") [📢](#talk-nakednous "Talks") [⚠️](https://github.com/VisualComputing/framesjs/commits?author=nakednous "Tests") [✅](#tutorial-nakednous "Tutorials") [📹](#video-nakednous "Videos") |
-| :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!

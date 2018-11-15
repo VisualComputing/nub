@@ -327,7 +327,7 @@ public class ConePolygon extends PApplet{
         } else if (mouseButton == RIGHT) {
             scene.translate();
         } else {
-            scene.zoom(scene.mouseDX());
+            scene.scale(scene.mouseDX());
         }
     }
 

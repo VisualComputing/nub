@@ -28,7 +28,6 @@ public class ApplicationControl1 extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     scene.fitBallInterpolation();
     shapes = new Shape[10];
     for (int i = 0; i < shapes.length; i++) {

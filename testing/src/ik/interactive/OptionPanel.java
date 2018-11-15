@@ -31,7 +31,8 @@ public class OptionPanel {
     }
 
     public void setupPanel(){
-        float[] size = _scene.boundaryWidthHeight();
+        float min = Math.min(_scene.height(), _scene.width());
+        float[] size = new float[]{_scene.radius()*2.f*_scene.width()/min , _scene.radius()*2.f*_scene.height()/min};
         float textSize = _scene.height()/50.f;
         float textHeight = (textSize*2*size[1]/_scene.height());
         createFrameOptions(-size[0], -size[1] + 2*textHeight, (int)(2*size[0]*0.8f), (int)Math.ceil(textHeight));

@@ -8,6 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
+// Thanks goes to the great Gilles Debunne Quaternion API reference
+// http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html
+// which we adopted here
+
 package frames.primitives;
 
 /**

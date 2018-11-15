@@ -17,7 +17,7 @@ class Boid {
       // Note that within visit() geometry is defined at the
       // frame local coordinate system.
       @Override
-        public void visit() {
+      public void visit() {
         if (animate)
           run(flock);
         render();

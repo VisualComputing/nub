@@ -26,7 +26,9 @@ public class Slider {
         _position = position;
         _width = width;
         _height = height;
-        _text_width = (float) Math.ceil(_scene.pApplet().textWidth(_name + " ")*2*_scene.boundaryWidthHeight()[0]/_scene.width());
+        float min = Math.min(_scene.height(), _scene.width());
+        float[] size = new float[]{_scene.radius()*2.f*_scene.width()/min , _scene.radius()*2.f*_scene.height()/min};
+        _text_width = (float) Math.ceil(_scene.pApplet().textWidth(_name + " ")*2*size[0]/_scene.width());
         _bar_width = _width - _text_width;
         _detail = 20;
         createSlider();

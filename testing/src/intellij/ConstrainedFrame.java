@@ -36,7 +36,6 @@ public class ConstrainedFrame extends PApplet {
     textFont(myFont);
 
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
 
     constraints[0] = new LocalConstraint();
     // Note that an EyeConstraint(eye) would produce the same results:
@@ -78,11 +77,11 @@ public class ConstrainedFrame extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void keyPressed() {

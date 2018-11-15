@@ -29,7 +29,6 @@ public class FlockOld extends PApplet {
     scene = new Scene(this);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
-    scene.setFieldOfView(PI / 3);
     scene.fitBall();
     // create and fill the list of boids
     flock = new ArrayList();
@@ -53,7 +52,7 @@ public class FlockOld extends PApplet {
       else if (mouseButton == RIGHT)
         scene.translate();
       else
-        scene.zoom(mouseX - pmouseX, scene.eye());
+        scene.scale(mouseX - pmouseX, scene.eye());
     //scene.scale(mouseX - pmouseX);
   }
 
@@ -66,7 +65,7 @@ public class FlockOld extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 

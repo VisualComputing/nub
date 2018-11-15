@@ -29,7 +29,6 @@ public class GraphTypes extends PApplet {
     //scene1.setZClippingCoefficient(1);
     scene.setRadius(200);
     scene.setType(Graph.Type.ORTHOGRAPHIC);
-    //scene1.setFieldOfView(PI / 3);
     //scene1.fitBallInterpolation();
     scene.fitBall();
 
@@ -54,7 +53,7 @@ public class GraphTypes extends PApplet {
     if (key == 'f')
       scene.fitBall();
     if (key == 'g')
-      scene.fitFieldOfView();
+      scene.autoAperture();
     if (key == 'b')
       box = !box;
     if (key == 's')
@@ -72,9 +71,9 @@ public class GraphTypes extends PApplet {
       scene.eye().position().print();
     }
     if (key == 'n')
-      scene.eye().setMagnitude(1);
+      scene.setAperture(1);
     if (key == 'm')
-      scene.setFieldOfView(PI / 3);
+      scene.setAperture(PI / 3);
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -126,7 +125,7 @@ public class GraphTypes extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      focus.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -252,13 +251,6 @@ public class GraphTypes extends PApplet {
         return 1000.0f;
       else
         return super.zFar();
-    }
-
-    @Override
-    protected float _rescalingFactor() {
-      if (isStandard())
-        return 1.0f;
-      return super._rescalingFactor();
     }
   }
 }

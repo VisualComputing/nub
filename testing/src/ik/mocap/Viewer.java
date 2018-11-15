@@ -50,7 +50,7 @@ public class Viewer extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setFieldOfView(PI / 3);
+        scene.setAperture(PI / 3);
         scene.fitBallInterpolation();
 
         //Add a target per limb
@@ -334,7 +334,7 @@ public class Viewer extends PApplet{
         } else if (mouseButton == RIGHT) {
             scene.translate();
         } else {
-            scene.zoom(scene.mouseDX());
+            scene.scale(scene.mouseDX());
         }
     }
 

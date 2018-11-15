@@ -31,13 +31,11 @@ public void settings() {
 
 void setup() {
   scene = new Scene(this);
-  scene.setFieldOfView(PI / 3);
   scene.fitBallInterpolation();
   shapes = new Shape[10];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Shape(scene) {
-      int id = totalShapes++;
-      int _faces = randomFaces(), _color = randomColor();
+      int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
       public void setGraphics(PGraphics pg) {
@@ -48,7 +46,7 @@ void setup() {
         Vector position = scene.screenLocation(position());
         pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
         pg.textFont(font36);
-        pg.text(id, position.x(), position.y());
+        pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
         pg.popStyle();
       }
@@ -111,7 +109,7 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin();
   else if (mouseButton == CENTER)
-    scene.zoom(scene.mouseDX());
+    scene.scale(scene.mouseDX());
   else
     scene.translate();
 }

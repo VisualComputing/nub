@@ -34,7 +34,7 @@ public class LeapMotionTest3 extends PApplet {
 
     public void setup() {
         scene = new Scene(this);
-        scene.setFieldOfView(PI / 3);
+        scene.setAperture(PI / 3);
         scene.setRadius(1500);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fitBallInterpolation();
@@ -222,7 +222,7 @@ public class LeapMotionTest3 extends PApplet {
     }
 
     public void mouseWheel(MouseEvent event) {
-        scene.zoom(event.getCount() * 20);
+        scene.scale(event.getCount() * 20);
     }
 
 

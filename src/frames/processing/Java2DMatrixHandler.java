@@ -41,7 +41,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   protected void _bind() {
-    _projection.set(graph().computeProjection());
+    _projection.set(graph().eye().projection(graph().type(), graph().width(), graph().height(), graph().zNear(), graph().zFar(), graph().isLeftHanded()));
     _view.set(graph().eye().view());
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vector pos = _graph.eye().position();
@@ -94,7 +94,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void bindModelView(Matrix matrix) {
+  public void _bindModelView(Matrix matrix) {
     pg().setMatrix(Scene.toPMatrix2D(matrix));
   }
 

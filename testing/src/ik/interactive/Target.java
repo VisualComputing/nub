@@ -111,26 +111,36 @@ public class Target extends Shape {
     }
 
     //------------------------------------
-    //Interactive actions - same method found in Graph Class
+    //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
+    protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Frame frame) {
+        Scene scene = (Scene) _graph;
+        if (scene.is2D() && dz != 0) {
+            System.out.println("Warning: graph is 2D. Z-translation reset");
+            dz = 0;
+        }
+        dx = scene.isEye(frame) ? -dx : dx;
+        dy = scene.isRightHanded() ^ scene.isEye(frame) ? -dy : dy;
+        dz = scene.isEye(frame) ? dz : -dz;
+        // Scale to fit the screen relative vector displacement
+        if (scene.type() == Graph.Type.PERSPECTIVE) {
+            float k = (float) Math.tan(scene.aperture() / 2.0f) * Math.abs(
+                    scene.eye().location(scene.isEye(frame) ? scene.anchor() : frame.position())._vector[2] * scene.eye().magnitude());
+            //TODO check me weird to find height instead of width working (may it has to do with fov?)
+            dx *= 2.0 * k / (scene.height() * scene.eye().magnitude());
+            dy *= 2.0 * k / (scene.height() *scene. eye().magnitude());
+        }
+        // this expresses the dz coordinate in world units:
+        //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
+        Vector eyeVector = new Vector(dx, dy, dz * 2 * scene.radius() / zMax);
+        return frame.reference() == null ? scene.eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, scene.eye());
+    }
+
+
     public Vector translateDesired(){
         Scene scene = (Scene) _graph;
         PApplet pApplet = scene.pApplet();
         float dx = pApplet.mouseX - scene.screenLocation(position()).x();
         float dy = pApplet.mouseY - scene.screenLocation(position()).y();
-
-        dy = scene.isRightHanded() ? -dy : dy;
-        if(scene.type() == Graph.Type.PERSPECTIVE){
-            float k = (float) Math.tan(scene.fieldOfView() / 2.0f) * Math.abs(
-                    scene.eye().location(scene.isEye(this) ? scene.anchor() : this.position())._vector[2] * scene.eye().magnitude());
-            dx *= 2.0 * k / scene.height();
-            dy *= 2.0 * k / scene.height();
-        }
-        else {
-            float[] wh = scene.boundaryWidthHeight();
-            dx *= 2.0 * wh[0] / scene.width();
-            dy *= 2.0 * wh[1] / scene.height();
-        }
-        Vector eyeVector = new Vector(dx / scene.eye().magnitude(), dy / scene.eye().magnitude(), 0);
-        return this.reference() == null ? scene.eye().worldDisplacement(eyeVector) : this.reference().displacement(eyeVector, scene.eye());
+        return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
     }
 }

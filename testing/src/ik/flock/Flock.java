@@ -42,7 +42,7 @@ public class Flock extends PApplet {
         scene = new Scene(this);
         scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
         scene.setAnchor(scene.center());
-        scene.setFieldOfView(PI / 3);
+        scene.setAperture(PI / 3);
         scene.fitBall();
         // create and fill the list of boids
         flock = new ArrayList();
@@ -84,7 +84,7 @@ public class Flock extends PApplet {
                 scene.translate();
             else
                 // same as: scene.zoom(mouseX - pmouseX, scene.eye());
-                scene.zoom(mouseX - pmouseX);
+                scene.scale(mouseX - pmouseX);
     }
 
     // highlighting and 'third-person' interaction

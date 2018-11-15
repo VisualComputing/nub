@@ -26,8 +26,7 @@ public class TwoScenes extends PApplet {
     scene1 = new Scene(this, canvas1);
     //scene1.setZClippingCoefficient(1);
     scene1.setRadius(200);
-    //scene1.setType(Graph.Type.ORTHOGRAPHIC);
-    scene1.setFieldOfView(PI / 3);
+    //scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
     //scene1.fitBallInterpolation();
     scene1.fitBall();
 
@@ -63,7 +62,7 @@ public class TwoScenes extends PApplet {
     if (key == 'n')
       scene1.eye().setMagnitude(1);
     if (key == 'm')
-      scene1.setFieldOfView(PI / 3);
+      scene1.setAperture(PI / 3);
     if (key == 't') {
       if (scene1.type() == Graph.Type.PERSPECTIVE) {
         scene1.setType(Graph.Type.ORTHOGRAPHIC);
@@ -83,7 +82,7 @@ public class TwoScenes extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      focus.moveForward(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {

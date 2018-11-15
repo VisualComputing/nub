@@ -21,7 +21,6 @@ Lamp lamp;
 void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
-  scene.setFieldOfView(PI / 3);
   scene.setRadius(100);
   scene.fitBallInterpolation();
   lamp = new Lamp(scene);
@@ -59,9 +58,9 @@ void mouseDragged() {
   else if (mouseButton == RIGHT)
     scene.translate();
   else
-    scene.zoom(mouseX - pmouseX);
+    scene.scale(mouseX - pmouseX);
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }

@@ -582,6 +582,18 @@ public class Interpolator {
   }
 
   /**
+   * Same as {@code addKeyFrame(graph().eye().get())}.
+   *
+   * @see #addKeyFrame(Frame)
+   * @see #graph()
+   * @see Frame#get()
+   * @see Graph#eye()
+   */
+  public void addKeyFrame() {
+    addKeyFrame(graph().eye().get());
+  }
+
+  /**
    * Appends a new key frame to the path.
    * <p>
    * Same as {@link #addKeyFrame(Frame, float)}, except that the
@@ -597,6 +609,18 @@ public class Interpolator {
       time = _list.get(_list.size() - 1).time() + 1.0f;
 
     addKeyFrame(frame, time);
+  }
+
+  /**
+   * Same as {@code addKeyFrame(graph().eye().get(), time)}.
+   *
+   * @see #addKeyFrame(Frame, float)
+   * @see #graph()
+   * @see Frame#get()
+   * @see Graph#eye()
+   */
+  public void addKeyFrame(float time) {
+    addKeyFrame(graph().eye().get(), time);
   }
 
   /**
