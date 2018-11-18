@@ -2,6 +2,7 @@ package ik.interactive;
 
 import frames.core.Frame;
 import frames.core.Graph;
+import frames.primitives.Point;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import ik.common.Joint;
@@ -22,11 +23,11 @@ public class InteractiveJoint extends Joint {
         String command = (String) gesture[0];
         if(command.matches("Add")){
             if(_desiredTranslation != null) {
-                addChild();
+                addChild((Vector) gesture[1]);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
-            _desiredTranslation = translateDesired();
+            _desiredTranslation = translateDesired((Vector) gesture[1]);
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         } else if(command.matches("Remove")){
@@ -37,8 +38,7 @@ public class InteractiveJoint extends Joint {
     public void visit(){
         super.visit();
         //Draw desired position
-        Scene scene = (Scene) this._graph;
-        PGraphics pg = scene.frontBuffer();
+        PGraphics pg = _pGraphics;
         if(_desiredTranslation != null){
             pg.pushStyle();
             pg.stroke(pg.color(0,255,0));
@@ -48,10 +48,10 @@ public class InteractiveJoint extends Joint {
         }
     }
 
-    public void addChild(){
+    public void addChild(Vector mouse){
         InteractiveJoint joint = new InteractiveJoint((Scene)this._graph, this.radius());
         joint.setReference(this);
-        joint.setTranslation(joint.translateDesired());
+        joint.setTranslation(joint.translateDesired(mouse));
     }
 
     public void removeChild(){
@@ -84,11 +84,10 @@ public class InteractiveJoint extends Joint {
     }
 
 
-    public Vector translateDesired(){
+    public Vector translateDesired(Vector mouse){
         Scene scene = (Scene) _graph;
-        PApplet pApplet = scene.pApplet();
-        float dx = pApplet.mouseX - scene.screenLocation(position()).x();
-        float dy = pApplet.mouseY - scene.screenLocation(position()).y();
+        float dx = mouse.x() - scene.screenLocation(position()).x();
+        float dy = mouse.y() - scene.screenLocation(position()).y();
         return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
     }
 }

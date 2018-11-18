@@ -58,12 +58,12 @@ public class Target extends Shape {
             if(_desiredTranslation != null) {
                 if(!_path.isEmpty())removeKeyFrame(_path.get(0));
                 KeyFrame frame = new KeyFrame(this);
-                frame.setTranslation(frame.translateDesired());
+                frame.setTranslation(frame.translateDesired((Vector) gesture[1]));
                 addKeyFrame(frame, 0);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
-            _desiredTranslation = translateDesired();
+            _desiredTranslation = translateDesired((Vector) gesture[1]);
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         }
@@ -136,11 +136,10 @@ public class Target extends Shape {
     }
 
 
-    public Vector translateDesired(){
+    public Vector translateDesired(Vector mouse){
         Scene scene = (Scene) _graph;
-        PApplet pApplet = scene.pApplet();
-        float dx = pApplet.mouseX - scene.screenLocation(position()).x();
-        float dy = pApplet.mouseY - scene.screenLocation(position()).y();
+        float dx = mouse.x() - scene.screenLocation(position()).x();
+        float dy = mouse.y() - scene.screenLocation(position()).y();
         return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
     }
 }

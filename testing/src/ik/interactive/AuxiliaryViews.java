@@ -3,6 +3,8 @@ package ik.interactive;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.primitives.Point;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -14,88 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AuxiliaryViews extends PApplet {
-    public class AuxiliaryView{
-        boolean _enabled = true;
-        Scene _scene;
-        Frame _eye;
-        Graph.Type _type;
-        PGraphics _pGraphics;
-        float _x, _y;
-        int _width, _height;
-        float _zNear, _zFar;
-
-        public AuxiliaryView(Scene scene, Frame eye, float x, float y, int width, int height){
-            _scene = scene;
-            _eye = eye;
-            _x = x;
-            _y = y;
-            _width = width;
-            _height = height;
-            _pGraphics = scene.pApplet().createGraphics(scene.width(), scene.height(), scene.pApplet().sketchRenderer());
-            _type = scene.type();
-            _zFar = scene.zFar();
-            _zNear = scene.zNear();
-        }
-
-        public boolean enabled(){
-            return _enabled;
-        }
-
-        public void setEnabled(boolean enabled){
-            _enabled = enabled;
-        }
-
-        public Graph.Type type(){
-            return _type;
-        }
-
-        public void setType(Graph.Type type){
-            _type = type;
-        }
-
-        public Scene scene(){
-            return _scene;
-        }
-
-        public Frame eye(){
-            return _eye;
-        }
-
-        public float zNear(){
-            return _zNear;
-        }
-
-        public float zFar(){
-            return _zFar;
-        }
-
-        public Point cursorLocation(float x, float y){
-            return new Point((x - _x)*(1.f*_scene.width()/_width), (y - _y)*(1.f*_scene.height()/_height));
-        }
-
-        public boolean focus(float x, float y){
-            return _enabled && (x >= _x && x <= _x + _width) && (y >= _y && y <= _y + _width);
-        }
-
-        public void draw(){
-            if(_enabled){
-                _pGraphics.beginDraw();
-                _pGraphics.background(90, 80, 125);
-                _scene.traverse(_pGraphics, _type, _eye, _zNear, _zFar);
-                _pGraphics.endDraw();
-                _scene.beginHUD();
-                _scene.pApplet().image(_pGraphics, _x, _y, _width, _height);
-                //Draw cursor position
-
-                _scene.pApplet().pushStyle();
-                _scene.pApplet().fill(255,0,0);
-                _scene.pApplet().ellipse(cursorLocation(mouseX, mouseY).x(), cursorLocation(mouseX, mouseY).y(), 10, 10);
-                _scene.pApplet().popStyle();
-                _scene.endHUD();
-            }
-        }
-
-    }
 
     Scene scene;
     Shape[] shapes;
@@ -128,9 +48,23 @@ public class AuxiliaryViews extends PApplet {
             }
         };
         scene.fitBallInterpolation();
-        //create an auxiliary view
+        //create an auxiliary view per Orthogonal Plane
         views = new ArrayList<AuxiliaryView>();
-        views.add(new AuxiliaryView(scene, light, w/2, h/2, w/2, h/2));
+        //create an auxiliary view to look at the XY Plane
+        Frame eyeXY = new Frame();
+        eyeXY.setPosition(0, 0, scene.radius());
+        views.add(new AuxiliaryView(scene, eyeXY, 0, 2*h/3, w/3, h/3));
+        //create an auxiliary view to look at the XY Plane
+        Frame eyeXZ = new Frame();
+        eyeXZ.setPosition(0, scene.radius(), 0);
+        eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
+        views.add(new AuxiliaryView(scene, eyeXZ, w/3, 2*h/3, w/3, h/3));
+        //create an auxiliary view to look at the XY Plane
+        Frame eyeYZ = new Frame();
+        eyeYZ.setPosition(scene.radius(), 0, 0);
+        eyeYZ.setOrientation(new Quaternion(new Vector(0,1,0), HALF_PI));
+        views.add(new AuxiliaryView(scene, eyeYZ, 2*w/3, 2*h/3, w/3, h/3));
+
     }
 
     public void draw() {
@@ -144,8 +78,10 @@ public class AuxiliaryViews extends PApplet {
         scene.endHUD();
         */
 
-        for(AuxiliaryView view : views)
+        for(AuxiliaryView view : views) {
             view.draw();
+            view.display();
+        }
     }
 
     public void setBackBuffer(float x, float y){
@@ -224,8 +160,10 @@ public class AuxiliaryViews extends PApplet {
         if (key == 't') {
             scene.setType(scene.type() == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC);
         }
-        if (key == 'p')
+        if (key == 'p') {
             scene.eye().position().print();
+            scene.eye().orientation().print();
+        }
     }
 
     PShape caja() {

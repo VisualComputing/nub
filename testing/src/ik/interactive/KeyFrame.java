@@ -28,11 +28,11 @@ public class KeyFrame extends Frame {
         String command = (String) gesture[0];
         if(command.matches("Add")){
             if(_desiredTranslation != null) {
-                add((boolean) gesture[2]);
+                add((boolean) gesture[2], (Vector) gesture[1]);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
-            _desiredTranslation = translateDesired();
+            _desiredTranslation = translateDesired((Vector) gesture[1]);
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         } else if(command.matches("Remove")){
@@ -40,9 +40,9 @@ public class KeyFrame extends Frame {
         }
     }
 
-    public void add(boolean left){
+    public void add(boolean left, Vector mouse){
         KeyFrame frame = new KeyFrame(this._target);
-        frame.setTranslation(frame.translateDesired());
+        frame.setTranslation(frame.translateDesired(mouse));
         _target.addKeyFrame(frame, this, left);
     }
 
@@ -77,11 +77,10 @@ public class KeyFrame extends Frame {
     }
 
 
-    public Vector translateDesired(){
+    public Vector translateDesired(Vector mouse){
         Scene scene = (Scene) _graph;
-        PApplet pApplet = scene.pApplet();
-        float dx = pApplet.mouseX - scene.screenLocation(position()).x();
-        float dy = pApplet.mouseY - scene.screenLocation(position()).y();
+        float dx = mouse.x() - scene.screenLocation(position()).x();
+        float dy = mouse.y() - scene.screenLocation(position()).y();
         return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
     }
 }

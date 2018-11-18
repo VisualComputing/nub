@@ -15,7 +15,8 @@ public class Joint extends Frame{
     public static boolean deph = false;
     protected String _name;
     protected int _color;
-    protected float _radius = 5;
+    protected float _radius;
+    protected static PGraphics _pGraphics;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false;
 
@@ -23,6 +24,9 @@ public class Joint extends Frame{
         super(scene);
         _color = color;
         _radius = radius;
+        _pGraphics = scene.frontBuffer();
+        _precision = Precision.ADAPTIVE;
+        _threshold = _radius*2;
     }
 
     public Joint(Scene scene, int color){
@@ -37,10 +41,14 @@ public class Joint extends Frame{
         this(scene, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255), scene.pApplet().random(0,255)), radius);
     }
 
+    public static void setPGraphics(PGraphics pg){
+        _pGraphics = pg;
+    }
+
     @Override
     public void visit(){
         Scene scene = (Scene) this._graph;
-        PGraphics pg = scene.frontBuffer();
+        PGraphics pg = _pGraphics;
         if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         pg.fill(_color);
@@ -62,7 +70,7 @@ public class Joint extends Frame{
         if (constraint() != null) {
             scene.drawConstraint(this);
         }
-        if (scene.is3D()) scene.drawAxes(_radius*2);
+        //if (scene.is3D()) scene.drawAxes(_radius*2);
         if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
