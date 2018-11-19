@@ -387,8 +387,8 @@ public class Graph {
    * Same as {@code eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture)}.
    * Sets the graph {@link #aperture()}.
    *
-   * @param aperture is given radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
-   *                 or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   * @param aperture represents the frustum field-of-view in radians if the graph {@link #type()} is
+   * {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
    *
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
@@ -410,8 +410,8 @@ public class Graph {
    * {@code setAperture(type() == Type.PERSPECTIVE ? 2.0f * (float) Math.atan((float) Math.tan(aperture / 2.0f) / aspectRatio()) : aperture)} so that a
    * call to {@link Graph#horizontalAperture()} returns the expected value.
    *
-   * @param aperture is given radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
-   *                 or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   * @param aperture represents the frustum horizontal field-of-view in radians if the graph {@link #type()} is
+   * {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #aperture()
@@ -426,9 +426,22 @@ public class Graph {
 
   /**
    * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude()}.
-   * Returns the {@link #eye()} field-of-view in radians if the graph {@link #type()} is {@link Type#PERSPECTIVE},
-   * or the {@link #eye()} {@link Frame#magnitude()} otherwise.
+   * <p>
+   * Through the aperture the {@link #eye()} {@link Frame#magnitude()} is used to compute its
+   * {@link Frame#projection(Type, float, float, float, float, boolean)} in {@link #preDraw()}.
+   * The returned value is computed as follows:
+   * <ol>
+   * <li>{@code radians(eye().magnitude())}, which corresponds to the {@link #eye()} field-of-view when the
+   * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
+   * <li>{@code eye().magnitude()}, otherwise ({@link Type#ORTHOGRAPHIC} or {@link Type#TWO_D} cases).
+   * In these cases the orthographic volume width and height are scaled by this value.</li>
+   * </ol>
+   * Set this value with {@link #setAperture(Type, float)}, {@link #setAperture(float)} or
+   * {@link #setHorizontalAperture(float)}.
    *
+   * @see Frame#magnitude()
+   * @see Frame#perspective(float, float, float, boolean)
+   * @see #preDraw()
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #setHorizontalAperture(float)
@@ -443,13 +456,14 @@ public class Graph {
 
   /**
    * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
+   * <p>
    * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #type()} is
    * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Frame#magnitude()} otherwise.
    *
+   * @see #aperture()
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #setHorizontalAperture(float)
-   * @see #aperture()
    * @see #setAperture(float)
    * @see #radians(float)
    * @see #magnitude(float)
@@ -1012,9 +1026,17 @@ public class Graph {
   /**
    * Called before your main drawing and performs the following:
    * <ol>
-   * <li>Calls {@link MatrixHandler#_bind()}</li>
+   * <li>Calls {@link TimingHandler#handle()}.</li>
+   * <li>Updates the projection matrix using the {@link #aperture()} by calling
+   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
+   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
    * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
    * </ol>
+   *
+   * @see #aperture()
+   * @see TimingHandler#handle()
+   * @see Frame#projection(Type, float, float, float, float, boolean)
+   * @see Frame#view()
    */
   public void preDraw() {
     timingHandler().handle();
