@@ -17,7 +17,6 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene, minimap, focus;
-PGraphics sceneCanvas, minimapCanvas;
 Shape torus1, torus2, minimapTorus1, minimapTorus2, eye;
 
 int w = 1800;
@@ -36,10 +35,9 @@ void settings() {
 }
 
 void setup() {
-  sceneCanvas = createGraphics(w, h, renderer);
   // Standard camera zNear and zFar implementation allows to better
   // display the projection of the scene onto the minimap near plane
-  scene = new Scene(this, sceneCanvas) {
+  scene = new Scene(this, renderer, w, h) {
     @Override
     public float zNear() {
       if(is3D())
@@ -62,8 +60,7 @@ void setup() {
   scene.setRadius(150);
   scene.fitBall();
 
-  minimapCanvas = createGraphics(oW, oH, renderer);
-  minimap = new Scene(this, minimapCanvas, oX, oY);
+  minimap = new Scene(this, renderer, oW, oH, oX, oY);
   minimapTorus1 = new Torus(minimap, color(255, 0, 0));
   minimapTorus1.translate(-30, -30);
   minimapTorus2 = new Torus(minimapTorus1, color(0, 0, 255));
@@ -83,14 +80,14 @@ void draw() {
   sync();
   handleMouse();
   scene.beginDraw();
-  sceneCanvas.background(215, 245, 250);
+  scene.frontBuffer().background(215, 245, 250);
   scene.traverse();
   scene.drawAxes();
   scene.endDraw();
   scene.display();
   if (showMiniMap) {
     minimap.beginDraw();
-    minimapCanvas.background(129, 253, 243);
+    minimap.frontBuffer().background(129, 253, 243);
     minimap.frontBuffer().fill(255, 0, 255, 125);
     minimap.traverse();
     minimap.drawAxes();
