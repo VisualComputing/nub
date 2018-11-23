@@ -324,7 +324,7 @@ public class Interpolator {
   }
 
   /**
-   * Sets the interpolator {@link #frame()}. If frame is instance of {@link frames.core.Frame},
+   * Sets the interpolator {@link #frame()}. If frame {@link Frame#isDetached()},
    * the frame graph ({@link Frame#graph()}) and {@link #graph()} should match.
    */
   public void setFrame(Frame frame) {

@@ -160,6 +160,8 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
    */
   public Scene(PApplet pApplet) {
     this(pApplet, pApplet.g);
@@ -170,9 +172,35 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics) {
     this(pApplet, pGraphics, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, renderer, width, height, 0, 0)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   */
+  public Scene(PApplet pApplet, String renderer, int width, int height) {
+    this(pApplet, renderer, width, height, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer), x, y)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   */
+  public Scene(PApplet pApplet, String renderer, int width, int height, int x, int y) {
+    this(pApplet, pApplet.createGraphics(width, height, renderer), x, y);
   }
 
   /**
@@ -193,6 +221,8 @@ public class Scene extends Graph implements PConstants {
    * @see Graph#Graph(int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
     super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
@@ -200,7 +230,7 @@ public class Scene extends Graph implements PConstants {
     _parent = pApplet;
     _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+    setOriginCorner(x, y);
 
     // 2. Matrix helper
     setMatrixHandler(matrixHandler(pGraphics));
@@ -252,6 +282,13 @@ public class Scene extends Graph implements PConstants {
    */
   public Point originCorner() {
     return _upperLeftCorner;
+  }
+
+  /**
+   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
+   */
+  public void setOriginCorner(float x, float y) {
+    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
   }
 
   // P5 STUFF

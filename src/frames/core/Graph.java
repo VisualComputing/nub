@@ -840,7 +840,6 @@ public class Graph {
    * Use {@code TimingHandler.frameCount} to retrieve the number of frames displayed since
    * the first graph was instantiated.
    */
-  //TODO check name
   public long frameCount() {
     return timingHandler().frameCount();
   }
