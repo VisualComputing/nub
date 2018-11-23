@@ -21,8 +21,8 @@ public class AuxiliaryViewer extends PApplet {
   }
 
   public void setup() {
-    scene1 = new Scene(this, P3D, w, h);
     //scene1 = new Scene(this);
+    scene1 = new Scene(this, P3D);
     scene1.setRadius(1000);
     //scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
     scene1.fitBallInterpolation();
@@ -42,10 +42,6 @@ public class AuxiliaryViewer extends PApplet {
       models[i] = new Shape(scene2, boxShape());
       scene1.randomize(models[i]);
     }
-    if (scene1.isOffscreen())
-      println("offScreen!");
-    else
-      println("onScreen!");
   }
 
   PShape boxShape() {
