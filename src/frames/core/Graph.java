@@ -388,8 +388,7 @@ public class Graph {
    * Sets the graph {@link #aperture()}.
    *
    * @param aperture represents the frustum field-of-view in radians if the graph {@link #type()} is
-   * {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
-   *
+   *                 {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #aperture()
@@ -411,7 +410,7 @@ public class Graph {
    * call to {@link Graph#horizontalAperture()} returns the expected value.
    *
    * @param aperture represents the frustum horizontal field-of-view in radians if the graph {@link #type()} is
-   * {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
+   *                 {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
    * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #aperture()
@@ -662,6 +661,31 @@ public class Graph {
       if (leadingFrame == frame)
         return true;
     return false;
+  }
+
+  /**
+   * Transfers the graph frames to the {@code target} graph. Useful to display auxiliary
+   * viewers of the main graph. Use it in your drawing code such as:
+   * <p>
+   * <pre>
+   * {@code
+   * Graph graph graph, auxiliaryGraph;
+   * void draw() {
+   *   graph.traverse();
+   *   // shift frames to the auxiliaryGraph
+   *   scene.shift(auxiliaryGraph);
+   *   auxiliaryGraph.traverse();
+   *   // shift frames back to the main graph
+   *   auxiliaryGraph.shift(graph);
+   * }
+   * }
+   * </pre>
+   */
+  public void shift(Graph target) {
+    for (Frame leadingFrame : _leadingFrames()) {
+      leadingFrame._graph = target;
+      target._addLeadingFrame(leadingFrame);
+    }
   }
 
   /**
@@ -1073,6 +1097,8 @@ public class Graph {
   public void setEye(Frame eye) {
     if (eye == null || _eye == eye)
       return;
+    //TODO experimental
+    pruneBranch(_eye);
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(this, _eye);

@@ -929,6 +929,48 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
+  /**
+   * Transfers the scene frames to the {@code target} scene. Useful to display off-screen auxiliary
+   * viewers of the main scene. Use it in your {@code draw()} function such as:
+   * <p>
+   * <pre>
+   * {@code
+   * Scene scene, auxiliaryScene;
+   * void draw() {
+   *   background(75, 25, 15);
+   *   if (scene.isOffscreen()) {
+   *     scene.beginDraw();
+   *     scene.frontBuffer().background(75, 25, 15);
+   *     scene.traverse();
+   *     scene.endDraw();
+   *     scene.display();
+   *   } else
+   *      scene.traverse();
+   *
+   *   // shift frames to the auxiliaryScene
+   *   scene.shift(auxiliaryScene);
+   *
+   *   if (!scene.isOffscreen())
+   *     scene.beginHUD();
+   *   auxiliaryScene.beginDraw();
+   *   auxiliaryScene.frontBuffer().background(175, 200, 20);
+   *   auxiliaryScene.traverse();
+   *   auxiliaryScene.endDraw();
+   *   auxiliaryScene.display();
+   *   if (!scene.isOffscreen())
+   *     scene.endHUD();
+   *
+   *   // shift frames back to the main scene
+   *   auxiliaryScene.shift(scene);
+   * }
+   * }
+   * </pre>
+   */
+  public void shift(Scene target) {
+    super.shift(target);
+    this._bbEnabled = _bbEnabled || target._bbEnabled;
+  }
+
   @Override
   protected void _track(Frame frame) {
     if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
