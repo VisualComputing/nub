@@ -2032,7 +2032,6 @@ public class Graph {
    * @see #setUpVector(Vector, boolean)
    */
   public void fitBall(Vector center, float radius) {
-    float distance = 0;
     switch (type()) {
       case TWO_D:
         //TODO test 2d case since I swapped the calling order with the above lookAt
@@ -2040,7 +2039,7 @@ public class Graph {
         autoAperture();
         break;
       case ORTHOGRAPHIC:
-        distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / aperture());
+        float distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / aperture());
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         autoAperture();
         break;
@@ -2048,8 +2047,7 @@ public class Graph {
         float yview = radius / (float) Math.sin(aperture() / 2.0f);
         // horizontal fov: radians(eye().magnitude() * aspectRatio())
         float xview = radius / (float) Math.sin(radians(eye().magnitude() * aspectRatio()) / 2.0f);
-        distance = Math.max(xview, yview);
-        eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
+        eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), Math.max(xview, yview))));
         break;
     }
   }

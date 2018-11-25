@@ -9,15 +9,14 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class MiniMap extends PApplet {
+public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
   Shape[] models;
-  Frame sceneEye;
+  Shape sceneEye;
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
   boolean onScreen = false;
-  boolean interactiveEye;
 
   int w = 1200;
   int h = 1200;
@@ -33,7 +32,8 @@ public class MiniMap extends PApplet {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
     // set a detached eye frame
-    //scene.setEye(new Frame());
+
+    scene.setEye(new Frame());
     if (renderer == P3D)
       scene.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
     else
@@ -45,7 +45,7 @@ public class MiniMap extends PApplet {
         models[i] = new Shape(scene, shape());
       } else {
         models[i] = new Shape(scene) {
-          int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
+          int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
 
           @Override
           public void setGraphics(PGraphics pg) {
@@ -64,13 +64,21 @@ public class MiniMap extends PApplet {
     minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
     minimap.setRadius(2000);
     // set a detached eye frame
-    //minimap.setEye(new Frame());
-    // TODO bug
-    if (renderer == P3D)
-      minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
+    minimap.setEye(new Frame());
+    //if (renderer == P3D)
+    //minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
     minimap.fitBallInterpolation();
-    // detached frame
-    sceneEye = new Frame();
+    sceneEye = new Shape(minimap) {
+      @Override
+      public void setGraphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
+        pg.stroke(0, 0, 255);
+        pg.strokeWeight(2);
+        minimap.drawEye(pg, scene);
+        pg.popStyle();
+      }
+    };
   }
 
   PShape shape() {
@@ -82,13 +90,6 @@ public class MiniMap extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       displayMinimap = !displayMinimap;
-    if (key == 'i') {
-      interactiveEye = !interactiveEye;
-      if (interactiveEye)
-        minimap.setTrackedFrame(sceneEye);
-      else
-        minimap.resetTrackedFrame();
-    }
     if (key == 'f')
       focus.fitBallInterpolation();
     if (key == 't')
@@ -101,8 +102,7 @@ public class MiniMap extends PApplet {
 
   @Override
   public void mouseMoved() {
-    if (!interactiveEye || focus == scene)
-      focus.cast();
+    focus.cast();
   }
 
   @Override
@@ -118,7 +118,7 @@ public class MiniMap extends PApplet {
   @Override
   public void mouseWheel(MouseEvent event) {
     if (renderer == P3D)
-      focus.moveForward(event.getCount() * 20);
+      focus.moveForward(event.getCount() * 50);
     else
       focus.scale(event.getCount() * 50);
   }
@@ -134,8 +134,7 @@ public class MiniMap extends PApplet {
 
   public void draw() {
     focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-    if (interactiveEye)
-      Frame.sync(scene.eye(), sceneEye);
+    Frame.sync(scene.eye(), sceneEye);
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
@@ -156,11 +155,6 @@ public class MiniMap extends PApplet {
       minimap.frontBuffer().background(125, 80, 90);
       minimap.drawAxes();
       minimap.traverse();
-      // draw scene eye
-      minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
-      minimap.frontBuffer().stroke(0, 0, 255);
-      minimap.frontBuffer().strokeWeight(2);
-      minimap.drawEye(scene);
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())
@@ -170,6 +164,6 @@ public class MiniMap extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.MiniMap"});
+    PApplet.main(new String[]{"intellij.MiniMap2"});
   }
 }

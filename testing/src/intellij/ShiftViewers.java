@@ -1,6 +1,5 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
@@ -15,7 +14,7 @@ public class ShiftViewers extends PApplet {
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
-  boolean onScreen;
+  boolean onScreen = false;
 
   int w = 1200;
   int h = 1200;
@@ -26,12 +25,16 @@ public class ShiftViewers extends PApplet {
 
   public void setup() {
     scene1 = onScreen ? new Scene(this) : new Scene(this, P3D);
+
+    if (scene1.eye().isAttached(scene1))
+      println("eye is attached!");
+
     scene1.setRadius(1000);
     // set a detached eye frame
-    scene1.setEye(new Frame());
+    //scene1.setEye(new Frame());
     scene1.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene1.fitBallInterpolation();
-    models = new Shape[50];
+    models = new Shape[5];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
         models[i] = new Shape(scene1, boxShape());
@@ -56,7 +59,7 @@ public class ShiftViewers extends PApplet {
     scene2 = new Scene(this, P3D, w / 2, h / 2, w / 2, 0);
     scene2.setRadius(1000);
     // set a detached eye frame
-    scene2.setEye(new Frame());
+    //scene2.setEye(new Frame());
     scene2.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene2.fitBallInterpolation();
 
@@ -64,7 +67,7 @@ public class ShiftViewers extends PApplet {
     scene3 = new Scene(this, P3D, w / 2, h / 2, w / 2, h / 2);
     scene3.setRadius(1000);
     // set a detached eye frame
-    scene3.setEye(new Frame());
+    //scene3.setEye(new Frame());
     scene3.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene3.fitBallInterpolation();
   }

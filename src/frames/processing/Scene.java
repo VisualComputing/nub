@@ -945,7 +945,7 @@ public class Scene extends Graph implements PConstants {
    *     scene.endDraw();
    *     scene.display();
    *   } else
-   *      scene.traverse();
+   *     scene.traverse();
    *
    *   // shift frames to the auxiliaryScene
    *   scene.shift(auxiliaryScene);
