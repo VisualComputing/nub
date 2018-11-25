@@ -87,10 +87,6 @@ public class ShiftViewers extends PApplet {
         focus.setType(Graph.Type.PERSPECTIVE);
       }
     }
-    if (key == 's')
-      scene1.shift(scene3);
-    if (key == 't')
-      scene3.shift(scene1);
   }
 
   @Override
