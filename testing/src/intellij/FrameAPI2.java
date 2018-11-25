@@ -59,7 +59,6 @@ public class FrameAPI2 extends PApplet {
   }
 
   public void setup() {
-    size(900, 900, P3D);
     scene = new Scene(this);
     mode = Mode.m1;
 
