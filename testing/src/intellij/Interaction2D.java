@@ -20,7 +20,7 @@ public class Interaction2D extends PApplet {
   PFont font36;
 
   public void settings() {
-    size(1600, 800, JAVA2D);
+    size(2600, 1400, JAVA2D);
   }
 
   public void setup() {
@@ -28,7 +28,8 @@ public class Interaction2D extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.eye().setScaling(1);
+    //scene.fitBallInterpolation();
 
     shape1 = new Shape(scene) {
       @Override
@@ -39,13 +40,15 @@ public class Interaction2D extends PApplet {
         pGraphics.fill(0, 255, 255);
         pGraphics.rect(10, 10, 200, 200);
         pGraphics.stroke(255, 0, 0);
-        scene.drawShooterTarget(this, 100);
+        /*
+        scene.drawShooterTarget(this);
         scene.beginHUD(pGraphics);
         Vector position = scene.screenLocation(position());
         pGraphics.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
         pGraphics.textFont(font36);
         pGraphics.text("center", position.x(), position.y());
         scene.endHUD(pGraphics);
+        */
         pGraphics.popStyle();
       }
     };
@@ -68,6 +71,19 @@ public class Interaction2D extends PApplet {
     background(0);
     scene.drawAxes();
     scene.traverse();
+
+    scene.drawShooterTarget(shape1);
+    scene.beginHUD();
+    Vector position = scene.screenLocation(shape1.position());
+    fill(shape1.isTracked() ? 0 : 255, shape1.isTracked() ? 255 : 0, shape1.isTracked() ? 0 : 255);
+    textFont(font36);
+    text("center", position.x(), position.y());
+    scene.endHUD();
+
+    scene.beginHUD();
+    textFont(font36);
+    text("Hello World", mouseX, mouseY);
+    scene.endHUD();
   }
 
   public void keyPressed() {
@@ -85,6 +101,10 @@ public class Interaction2D extends PApplet {
       }
     if (key == 'w') {
       shape3.setReference(null);
+    }
+    if (key == 'p') {
+      scene.screenLocation(shape1.position()).print();
+      println(mouseX + " " + mouseY);
     }
   }
 
