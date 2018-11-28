@@ -115,7 +115,7 @@ public class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void scale(float x, float y, float z) {
-    pggl().scale(x, y, z);
+  public void scale(float sx, float sy, float sz) {
+    pggl().scale(sx, sy, sz);
   }
 }

@@ -119,7 +119,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void scale(float x, float y, float z) {
-    pg().scale(x, y, z);
+  public void scale(float sx, float sy, float sz) {
+    pg().scale(sx, sy, sz);
   }
 }
