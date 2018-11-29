@@ -67,7 +67,7 @@ public class MiniMap extends PApplet {
     //minimap.setEye(new Frame());
     // TODO bug
     if (renderer == P3D)
-      minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
+      minimap.setType(Graph.Type.ORTHOGRAPHIC);
     minimap.fitBallInterpolation();
     // detached frame
     sceneEye = new Frame();

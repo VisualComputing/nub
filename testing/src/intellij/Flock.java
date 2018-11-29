@@ -28,7 +28,7 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.setAnchor(scene.center());
     scene.fitBall();

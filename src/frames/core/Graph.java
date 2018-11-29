@@ -133,8 +133,6 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
-  // rescale ortho when anchor changes
-  protected float _rapK = 1;
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -238,7 +236,7 @@ public class Graph {
     setCenter(new Vector());
     _anchor = center().get();
     setEye(new Frame(this));
-    setAperture(type);
+    setAperture(type, type == Type.PERSPECTIVE ? (float) Math.PI / 3 : 1);
     fitBall();
 
     setMatrixHandler(new MatrixHandler(this));
@@ -350,27 +348,9 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setType(type); setAperture(type() == Type.PERSPECTIVE ? (float)Math.PI / 3 : foreshortening())}.
-   *
-   * @see #setType(Type)
-   * @see #setAperture(Type, float)
-   * @see #setAperture(float)
-   * @see #horizontalAperture()
-   * @see #setHorizontalAperture(float)
-   * @see #aperture()
-   * @see #radians(float)
-   * @see #magnitude(float)
-   */
-  public void setAperture(Type type) {
-    setType(type);
-    setAperture(type() == Type.PERSPECTIVE ? (float) Math.PI / 3 : foreshortening());
-  }
-
-  /**
    * Same as {@code setType(type); setAperture(aperture)}.
    *
    * @see #setType(Type)
-   * @see #setAperture(Type)
    * @see #setAperture(float)
    * @see #aperture()
    * @see #horizontalAperture()
@@ -389,7 +369,7 @@ public class Graph {
    *
    * @param aperture represents the frustum field-of-view in radians if the graph {@link #type()} is
    *                 {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
-   * @see #setAperture(Type)
+   *
    * @see #setAperture(Type, float)
    * @see #aperture()
    * @see #horizontalAperture()
@@ -411,7 +391,7 @@ public class Graph {
    *
    * @param aperture represents the frustum horizontal field-of-view in radians if the graph {@link #type()} is
    *                 {@link Type#PERSPECTIVE}, or {@link #eye()} {@link Frame#magnitude()} units otherwise.
-   * @see #setAperture(Type)
+   *
    * @see #setAperture(Type, float)
    * @see #aperture()
    * @see #horizontalAperture()
@@ -441,7 +421,6 @@ public class Graph {
    * @see Frame#magnitude()
    * @see Frame#perspective(float, float, float, boolean)
    * @see #preDraw()
-   * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #setHorizontalAperture(float)
    * @see #horizontalAperture()
@@ -460,7 +439,6 @@ public class Graph {
    * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Frame#magnitude()} otherwise.
    *
    * @see #aperture()
-   * @see #setAperture(Type)
    * @see #setAperture(Type, float)
    * @see #setHorizontalAperture(float)
    * @see #setAperture(float)
@@ -1757,16 +1735,7 @@ public class Graph {
    * Sets the {@link #anchor()}, defined in the world coordinate system.
    */
   public void setAnchor(Vector anchor) {
-    if (is2D()) {
-      _anchor = anchor;
-      _anchor.setZ(0);
-    } else {
-      float prevDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-      this._anchor = anchor;
-      float newDist = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-      if (prevDist != 0 && newDist != 0)
-        _rapK *= prevDist / newDist;
-    }
+    _anchor = anchor;
   }
 
   /**
@@ -3390,33 +3359,12 @@ public class Graph {
   // only 3d eye
 
   /**
-   * Same as {@code translate(0, 0, delta, eye()); }. If {@link #type()} is
-   * {@link Type#ORTHOGRAPHIC} calls {@code eye().setMagnitude(foreshortening())} afterwards.
+   * Same as {@code translate(0, 0, delta, eye()); }.
    *
    * @see #translate(float, float, float, Frame)
-   * @see #foreshortening()
    */
   public void moveForward(float delta) {
     translate(0, 0, delta, eye());
-    if (type() == Type.ORTHOGRAPHIC)
-      eye().setMagnitude(foreshortening());
-  }
-
-  /**
-   * Returns the frame scaling that is needed to emulate foreshortening in {@link Type#ORTHOGRAPHIC} graphs
-   * as a function of the {@link #eye()} {@link Frame#position()}-to-{@link #anchor()} distance.
-   * Returns the {@link #eye()} {@link Frame#magnitude()} for the remaining graph types.
-   *
-   * @see #translate(float, float, float, Frame)
-   * @see #moveForward(float)
-   */
-  public float foreshortening() {
-    if (type() == Type.ORTHOGRAPHIC) {
-      float toAnchor = Vector.scalarProjection(Vector.subtract(eye().position(), anchor()), eye().zAxis());
-      float epsilon = 0.0001f;
-      return (2 * (toAnchor == 0 ? epsilon : toAnchor) * _rapK / height());
-    }
-    return eye().magnitude();
   }
 
   /**

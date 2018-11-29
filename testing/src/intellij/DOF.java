@@ -98,9 +98,9 @@ public class DOF extends PApplet {
     if (key == 'l') scene.loadConfig("/home/pierre/config.json");
     if (key == 't')
       if (scene.type() == Graph.Type.ORTHOGRAPHIC)
-        scene.setAperture(Graph.Type.PERSPECTIVE);
+        scene.setType(Graph.Type.PERSPECTIVE);
       else
-        scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
     if (key == 'f')
       scene.fitBallInterpolation();
     if (key == 'F')
