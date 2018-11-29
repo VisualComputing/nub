@@ -482,16 +482,16 @@ public class Graph {
    * @see #setAperture(float)
    */
   public void autoAperture() {
+    float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()));
     switch (type()) {
+      case PERSPECTIVE:
+        setAperture(magnitude);
+        break;
       case ORTHOGRAPHIC:
+        setAperture(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
       case TWO_D:
         setAperture(2 * radius() / Math.min(width(), height()));
-        break;
-      case PERSPECTIVE:
-        if (Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) > (float) Math.sqrt(2) * radius())
-          setAperture(2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())));
-        else
-          setAperture((float) Math.PI / 2);
         break;
     }
   }

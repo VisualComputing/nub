@@ -82,6 +82,8 @@ public class ShadowMapping extends PApplet {
   }
 
   public void keyPressed() {
+    if (key == 'a')
+      scene.autoAperture();
     if (key == '3')
       scene.setAperture(PI / 3);
     if (key == '4')
