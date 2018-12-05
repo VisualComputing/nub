@@ -483,7 +483,7 @@ public class Graph {
    */
   public void autoAperture() {
     float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()));
+    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / distance);
     switch (type()) {
       case PERSPECTIVE:
         setAperture(magnitude);

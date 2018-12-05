@@ -100,6 +100,7 @@ public class ShadowMapping extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
       else
         scene.setType(Graph.Type.PERSPECTIVE);
+      scene.autoAperture();
     }
     if (key == 'p')
       scene.eye().position().print();
