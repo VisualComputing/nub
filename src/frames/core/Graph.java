@@ -381,6 +381,25 @@ public class Graph {
     eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture);
   }
 
+  // TODO pending
+  /*
+  public void setFieldOfView(float fov) {
+    setAperture(type() == Type.PERSPECTIVE ? fov : 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width());
+  }
+
+  public float fov(float mag) {
+    float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    return 2 * (float)Math.atan(mag * width() / (2 * distance));
+  }
+
+  public float mag(float fov) {
+    float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    if(distance < 0)
+      System.out.println("WARNING: distance is negative!");
+    return 2 * distance * (float) Math.tan(fov / 2) / width();
+  }
+  */
+
   /**
    * Sets the {@link Graph#horizontalAperture()} of the {@link #eye()} (in radians).
    * <p>
@@ -2035,7 +2054,7 @@ public class Graph {
    * Moves the eye so that the rectangular screen region defined by {@code rectangle}
    * (pixel units, with origin in the upper left corner) fits the screen.
    * <p>
-   * in 3D the eye is translated (its {@link Frame#orientation()} is unchanged) so that
+   * In 3D the eye is translated (its {@link Frame#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
    * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
@@ -3364,7 +3383,13 @@ public class Graph {
    * @see #translate(float, float, float, Frame)
    */
   public void moveForward(float delta) {
+    float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     translate(0, 0, delta, eye());
+    float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
+    if (type() == Type.ORTHOGRAPHIC)
+      //eye().setMagnitude(_persp2ortho((float)Math.PI / 3));
+      if (d2 / d1 > 0)
+        eye().scale(d2 / d1);
   }
 
   /**
