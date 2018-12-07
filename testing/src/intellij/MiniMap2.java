@@ -38,7 +38,7 @@ public class MiniMap2 extends PApplet {
       scene.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
     else
       rectMode(CENTER);
-    scene.fitBallInterpolation();
+    scene.fit(1);
     models = new Shape[6];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
@@ -67,7 +67,7 @@ public class MiniMap2 extends PApplet {
     minimap.setEye(new Frame());
     //if (renderer == P3D)
     //minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
-    minimap.fitBallInterpolation();
+    minimap.fit(1);
     sceneEye = new Shape(minimap) {
       @Override
       public void setGraphics(PGraphics pg) {
@@ -91,7 +91,7 @@ public class MiniMap2 extends PApplet {
     if (key == ' ')
       displayMinimap = !displayMinimap;
     if (key == 'f')
-      focus.fitBallInterpolation();
+      focus.fit(1);
     if (key == 't')
       if (renderer == P3D)
         if (focus.type() == Graph.Type.PERSPECTIVE)

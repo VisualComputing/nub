@@ -29,7 +29,7 @@ public class DOF extends PApplet {
     //scene.setAperture(Graph.Type.PERSPECTIVE);
     //scene.setAperture(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     models = new Shape[100];
 
@@ -102,9 +102,9 @@ public class DOF extends PApplet {
       else
         scene.setType(Graph.Type.ORTHOGRAPHIC);
     if (key == 'f')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'F')
-      scene.fitBall();
+      scene.fit();
   }
 
   @Override

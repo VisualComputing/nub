@@ -24,11 +24,10 @@ import java.util.List;
  * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
- * A graph uses a ball to set the 2d or 3d viewing space (instead of the more traditional
- * methods to set a 3d viewing frustum). See {@link #setCenter(Vector)} and
- * {@link #setRadius(float)}, and also {@link #setZClippingCoefficient(float)} and
- * {@link #setZNearCoefficient(float)} for a 3d graph. See also
- * {@link #setBoundingBox(Vector, Vector)}.
+ * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(Vector, Vector)}.
+ * Both call {@link #setCenter(Vector)} and {@link #setRadius(float)} which defined a viewing ball
+ * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)} and
+ * {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the {@link #projection()} matrix is computed
  * (see {@link Frame#projection(Type, float, float, float, float, boolean)}),
@@ -48,7 +47,7 @@ import java.util.List;
  * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #autoAperture()},
- * {@link #aperture()}, {@link #fitBall()}, {@link #screenLocation(Vector, Frame)} and
+ * {@link #aperture()}, {@link #fit()}, {@link #screenLocation(Vector, Frame)} and
  * {@link #location(Vector, Frame)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Frame} parameter provide interactivity to frames, such as
@@ -92,8 +91,8 @@ import java.util.List;
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
- * such as {@link #fitBallInterpolation()}, {@link #zoomOnRegionInterpolation(Rectangle)},
- * {@link #interpolateTo(Frame)} and {@link #interpolateTo(Frame, float)}. Refer to the
+ * such as {@link #fit(float)}, {@link #fit(Rectangle)},
+ * {@link #fit(Frame)} and {@link #fit(Frame, float)}. Refer to the
  * {@link Interpolator} documentation for details.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
@@ -209,7 +208,7 @@ public class Graph {
    * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
    * <p>
    * The constructor sets a {@link Frame} instance as the graph {@link #eye()} and then
-   * calls {@link #fitBall()}, so that the entire scene fits the screen dimensions.
+   * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
    * The constructor also instantiates the graph {@link #matrixHandler()} and
    * {@link #timingHandler()}.
@@ -237,7 +236,7 @@ public class Graph {
     _anchor = center().get();
     setEye(new Frame(this));
     setAperture(type, type == Type.PERSPECTIVE ? (float) Math.PI / 3 : 1);
-    fitBall();
+    fit();
 
     setMatrixHandler(new MatrixHandler(this));
     _agents = new HashMap<String, Frame>();
@@ -493,7 +492,7 @@ public class Graph {
    * <p>
    * The eye position and orientation are not modified and you first have to orientate
    * the eye in order to actually see the scene (see {@link Graph#lookAt(Vector)},
-   * {@link Graph#fitBall()} or {@link Graph#fitBall(Vector, float)}).
+   * {@link Graph#fit()} or {@link Graph#fit(Vector, float)}).
    *
    * <b>Attention:</b> The {@link Graph#aperture()} is clamped to PI/2. This happens
    * when the eye is at a distance lower than sqrt(2) * radius() from the center().
@@ -531,7 +530,7 @@ public class Graph {
    * <p>
    * In order to prevent negative or too small {@link #zNear()} values (which would
    * degrade the z precision), {@link #zNearCoefficient()} is used when the eye is
-   * inside the {@link #radius()} sphere:
+   * inside the {@link #radius()} ball:
    * <p>
    * {@code zMin = zNearCoefficient() * zClippingCoefficient() * radius();} <br>
    * {@code zNear = zMin;}<br>
@@ -584,7 +583,7 @@ public class Graph {
 
   /**
    * Returns the coefficient used to set {@link #zNear()} when the {@link #eye()} is
-   * inside the sphere defined by {@link #center()} and {@link #zClippingCoefficient()} * {@link #radius()}.
+   * inside the ball defined by {@link #center()} and {@link #zClippingCoefficient()} * {@link #radius()}.
    * <p>
    * In that case, the {@link #zNear()} value is set to
    * {@code zNearCoefficient() * zClippingCoefficient() * radius()}. See the
@@ -1152,7 +1151,7 @@ public class Graph {
 
   /**
    * Returns {@link Visibility#VISIBLE}, {@link Visibility#INVISIBLE}, or
-   * {@link Visibility#SEMIVISIBLE}, depending whether the sphere (of radius {@code radius}
+   * {@link Visibility#SEMIVISIBLE}, depending whether the ball (of radius {@code radius}
    * and center {@code center}) is visible, invisible, or semi-visible, respectively.
    *
    * <b>Attention:</b> The eye boundary plane equations should be updated before calling
@@ -1713,7 +1712,7 @@ public class Graph {
    * Note that {@link Graph#radius()} (resp. {@link Graph#setRadius(float)} simply call this
    * method on its associated eye.
    *
-   * @see #setBoundingBox(Vector, Vector)
+   * @see #setFrustum(Vector, Vector)
    */
   public float radius() {
     return _radius;
@@ -1729,7 +1728,7 @@ public class Graph {
    *
    * @see #setCenter(Vector)
    * @see #setRadius(float)
-   * @see #setBoundingBox(Vector, Vector)
+   * @see #setFrustum(Vector, Vector)
    * @see #zNear()
    * @see #zFar()
    */
@@ -1776,12 +1775,25 @@ public class Graph {
   }
 
   /**
+   * Same as {@code setCenter(center); setRadius(radius)}.
+   *
+   * @see #setCenter(Vector)
+   * @see #setRadius(float)
+   * @see #setFrustum(Vector, Vector)
+   */
+  public void setFrustum(Vector center, float radius) {
+    setCenter(center);
+    setRadius(radius);
+  }
+
+  /**
    * Similar to {@link #setRadius(float)} and {@link #setCenter(Vector)}, but the
    * graph limits are defined by a world axis aligned bounding box.
+   *
+   * @see #setFrustum(Vector, float)
    */
-  public void setBoundingBox(Vector corner1, Vector corner2) {
-    setCenter(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f));
-    setRadius(0.5f * (Vector.subtract(corner2, corner1)).magnitude());
+  public void setFrustum(Vector corner1, Vector corner2) {
+    setFrustum(Vector.multiply(Vector.add(corner1, corner2), 1 / 2.0f), 0.5f * (Vector.subtract(corner2, corner1)).magnitude());
   }
 
   /**
@@ -1880,9 +1892,9 @@ public class Graph {
    *
    * @see #at()
    * @see #setUpVector(Vector)
-   * @see #fitBall()
-   * @see #fitBall(Vector, float)
-   * @see #fitBoundingBox(Vector, Vector)
+   * @see #fit()
+   * @see #fit(Vector, float)
+   * @see #fit(Vector, Vector)
    */
   public void lookAt(Vector target) {
     if (is2D())
@@ -1918,108 +1930,144 @@ public class Graph {
   }
 
   /**
-   * Returns the {@link #eye()} {@link Interpolator} used by {@link #fitBallInterpolation()},
-   * {@link #zoomOnRegionInterpolation(Rectangle)}, {@link #interpolateTo(Frame)}, etc.
+   * Returns the {@link #eye()} {@link Interpolator} used by {@link #fit(float)},
+   * {@link #fit(Rectangle)}, {@link #fit(Frame)}, etc.
    */
   public Interpolator interpolator() {
     return _interpolator;
   }
 
   /**
-   * Convenience function that simply calls {@code interpolateTo(fr, 1)}.
+   * Convenience function that simply calls {@code fit(frame, 0)}.
    *
-   * @see #interpolateTo(Frame, float)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit(float)
+   * @see #fit(Rectangle)
+   * @see #fit()
+   * @see #fit(Vector, float, float)
+   * @see #fit(Vector, Vector, float)
    */
-  public void interpolateTo(Frame frame) {
-    interpolateTo(frame, 1);
+  public void fit(Frame frame) {
+    fit(frame, 0);
   }
 
   /**
-   * Smoothly interpolates the eye on a interpolator path so that it goes to
-   * {@code frame}.
-   * <p>
-   * {@code frame} is expressed in world coordinates. {@code duration} tunes the
-   * interpolation speed.
+   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code frame}
+   * which is defined in world coordinates. The {@code duration} defines the interpolation speed.
    *
-   * @see #interpolateTo(Frame)
-   * @see #fitBallInterpolation()
+   * @see #fit(Frame)
+   * @see #fit(Vector, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit(float)
+   * @see #fit(Rectangle)
+   * @see #fit()
+   * @see #fit(Vector, float, float)
+   * @see #fit(Vector, Vector, float)
    */
-  public void interpolateTo(Frame frame, float duration) {
-    _interpolator.stop();
-    _interpolator.purge();
-    _interpolator.addKeyFrame(eye().detach());
-    _interpolator.addKeyFrame(frame.detach(), duration);
-    _interpolator.start();
-  }
-
-  /**
-   * Smoothly moves the eye so that the rectangular screen region defined by
-   * {@code rectangle} (pixel units, with origin in the upper left corner) fits the
-   * screen.
-   * <p>
-   * The eye is translated (its {@link Frame#orientation()} is unchanged) so that
-   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
-   * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
-   * (orthogonal to the {@link #viewDirection()} and passing through the
-   * {@link #center()}) that is used to define the 3D rectangle that is eventually
-   * fitted.
-   */
-  public void zoomOnRegionInterpolation(Rectangle rectangle) {
-    _interpolator.stop();
-    _interpolator.purge();
-    Frame eye = eye();
-    setEye(eye().detach());
-    _interpolator.addKeyFrame(eye().detach());
-    zoomOnRegion(rectangle);
-    _interpolator.addKeyFrame(eye().detach());
-    setEye(eye);
-    _interpolator.start();
-  }
-
-  /**
-   * Interpolates the eye so that the entire graph fits the screen.
-   * <p>
-   * The graph is defined by its {@link #center()} and its {@link #radius()}.
-   * See {@link #fitBall()}.
-   * <p>
-   * The {@link Frame#orientation()} of the {@link #eye()} is not modified.
-   */
-  public void fitBallInterpolation() {
-    _interpolator.stop();
-    _interpolator.purge();
-    Frame eye = eye();
-    setEye(eye().detach());
-    _interpolator.addKeyFrame(eye().detach());
-    fitBall();
-    _interpolator.addKeyFrame(eye().detach());
-    setEye(eye);
-    _interpolator.start();
+  public void fit(Frame frame, float duration) {
+    if (duration <= 0)
+      eye().set(frame);
+    else {
+      _interpolator.stop();
+      _interpolator.purge();
+      _interpolator.addKeyFrame(eye().detach());
+      _interpolator.addKeyFrame(frame.detach(), duration);
+      _interpolator.start();
+    }
   }
 
   /**
    * Same as {@code fitBall(center(), radius())}.
    *
-   * @see #fitBall(Vector, float)
    * @see #center()
    * @see #radius()
+   * @see #fit(Vector, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit(float)
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Vector, Vector, float)
    */
-  public void fitBall() {
-    fitBall(center(), radius());
+  public void fit() {
+    fit(center(), radius());
+  }
+
+  /**
+   * Same as {@code fitBall(center(), radius(), duration)}.
+   *
+   * @see #center()
+   * @see #radius()
+   * @see #fit(Vector, float, float)
+   * @see #fit(Vector, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
+   */
+  public void fit(float duration) {
+    fit(center(), radius(), duration);
+  }
+
+  /**
+   * Moves the eye during {@code duration} seconds so that the ball defined by {@code center}
+   * and {@code radius} is visible and fits the window.
+   * <p>
+   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
+   * ball fits the screen. Its {@link Frame#orientation()} and its
+   * {@link #aperture()} are unchanged. You should therefore orientate the eye
+   * before you call this method.
+   *
+   * @see #fit(float)
+   * @see #fit(Vector, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
+   */
+  public void fit(Vector center, float radius, float duration) {
+    if (duration <= 0)
+      fit(center, radius);
+    else {
+      _interpolator.stop();
+      _interpolator.purge();
+      Frame eye = eye();
+      setEye(eye().detach());
+      _interpolator.addKeyFrame(eye().detach());
+      fit(center, radius);
+      _interpolator.addKeyFrame(eye().detach(), duration);
+      setEye(eye);
+      _interpolator.start();
+    }
   }
 
   /**
    * Moves the eye so that the ball defined by {@code center} and {@code radius} is
    * visible and fits the window.
-   * <p>
-   * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
-   * sphere fits the screen. Its {@link Frame#orientation()} and its
-   * {@link #aperture()} are unchanged. You should therefore orientate the eye
-   * before you call this method.
    *
-   * @see #lookAt(Vector)
-   * @see #setUpVector(Vector, boolean)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
    */
-  public void fitBall(Vector center, float radius) {
+  public void fit(Vector center, float radius) {
     switch (type()) {
       case TWO_D:
         //TODO test 2d case since I swapped the calling order with the above lookAt
@@ -2041,13 +2089,91 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the world axis aligned bounding box ({@code corner1} and
-   * {@code corner2}) is entirely visible, using {@link #fitBall(Vector, float)}.
+   * Smoothly moves the eye during {@code duration} seconds so that the world axis aligned
+   * box defined by {@code corner1} and {@code corner2} is entirely visible.
+   *
+   * @see #fit(Vector, Vector)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, float, float)
    */
-  public void fitBoundingBox(Vector corner1, Vector corner2) {
+  public void fit(Vector corner1, Vector corner2, float duration) {
+    if (duration <= 0)
+      fit(corner1, corner2);
+    else {
+      _interpolator.stop();
+      _interpolator.purge();
+      Frame eye = eye();
+      setEye(eye().detach());
+      _interpolator.addKeyFrame(eye().detach());
+      fit(corner1, corner2);
+      _interpolator.addKeyFrame(eye().detach(), duration);
+      setEye(eye);
+      _interpolator.start();
+    }
+  }
+
+  /**
+   * Moves the eye so that the world axis aligned box defined by {@code corner1}
+   * and {@code corner2} is entirely visible.
+   *
+   * @see #fit(Vector, Vector, float)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, float, float)
+   */
+  public void fit(Vector corner1, Vector corner2) {
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
     diameter = Math.max(Math.abs(corner2._vector[2] - corner1._vector[2]), diameter);
-    fitBall(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
+    fit(Vector.multiply(Vector.add(corner1, corner2), 0.5f), 0.5f * diameter);
+  }
+
+  /**
+   * Smoothly moves the eye during {@code duration} seconds so that the rectangular
+   * screen region defined by {@code rectangle} (pixel units, with origin in the
+   * upper left corner) fits the screen.
+   * <p>
+   * The eye is translated (its {@link Frame#orientation()} is unchanged) so that
+   * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
+   * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
+   * (orthogonal to the {@link #viewDirection()} and passing through the
+   * {@link #center()}) that is used to define the 3D rectangle that is eventually
+   * fitted.
+   *
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit()
+   * @see #fit(Vector, float, float)
+   */
+  public void fit(Rectangle rectangle, float duration) {
+    if (duration <= 0)
+      fit(rectangle);
+    else {
+      _interpolator.stop();
+      _interpolator.purge();
+      Frame eye = eye();
+      setEye(eye().detach());
+      _interpolator.addKeyFrame(eye().detach());
+      fit(rectangle);
+      _interpolator.addKeyFrame(eye().detach(), duration);
+      setEye(eye);
+      _interpolator.start();
+    }
   }
 
   /**
@@ -2059,8 +2185,18 @@ public class Graph {
    * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
+   *
+   * @see #fit(Rectangle, float)
+   * @see #fit(Vector, Vector, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit()
+   * @see #fit(Vector, float, float)
    */
-  public void zoomOnRegion(Rectangle rectangle) {
+  public void fit(Rectangle rectangle) {
     //ad-hoc
     if (is2D()) {
       float rectRatio = (float) rectangle.width() / (float) rectangle.height();
@@ -3462,7 +3598,7 @@ public class Graph {
    * is preserved and stays projected along the eye's horizontal axis.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Frame#setYAxis(Vector)}) and {@link #fitBall()} first.
+   * {@link Frame#setYAxis(Vector)}) and {@link #fit()} first.
    *
    * @see #rotateCAD(float, float)
    */

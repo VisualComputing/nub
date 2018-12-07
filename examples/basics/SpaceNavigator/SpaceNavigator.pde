@@ -34,7 +34,7 @@ void setup() {
   openSpaceNavigator();
   scene = new Scene(this);
   scene.setRadius(1500);
-  scene.fitBallInterpolation();
+  scene.fit(1);
   Shape[] shapes = new Shape[50];
   for (int i = 0; i < shapes.length; i++) {
     tint(random(0,255), random(0,255), random(0,255), random(150,255));

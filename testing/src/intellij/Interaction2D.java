@@ -29,7 +29,7 @@ public class Interaction2D extends PApplet {
     scene = new Scene(this);
     scene.setRadius(1000);
     scene.eye().setScaling(1);
-    //scene.fitBallInterpolation();
+    //scene.fit(1);
 
     shape1 = new Shape(scene) {
       @Override
@@ -90,9 +90,9 @@ public class Interaction2D extends PApplet {
     if (key == 'f')
       scene.flip();
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
     if (key == 'r')
       if (shape3.reference() == shape2) {
         shape3.setReference(shape1);

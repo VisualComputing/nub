@@ -28,7 +28,7 @@ void setup() {
   colorMode(HSB, 255);
   scene = new Scene(this, P3D);
   scene.setRadius(1000);
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   models = new Shape[100];
 

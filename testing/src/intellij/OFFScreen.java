@@ -23,7 +23,7 @@ public class OFFScreen extends PApplet {
     scene = new Scene(this, createGraphics(1300, 900, renderer), 400, 200);
     scene.setAperture(PI / 3);
     scene.setRadius(300);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     shape1 = new Shape(scene) {
       @Override
@@ -87,9 +87,9 @@ public class OFFScreen extends PApplet {
     if (key == 'f')
       scene.flip();
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
   }
 
   PShape shape() {

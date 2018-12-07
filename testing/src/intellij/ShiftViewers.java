@@ -33,7 +33,7 @@ public class ShiftViewers extends PApplet {
     // set a detached eye frame
     //scene1.setEye(new Frame());
     scene1.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
-    scene1.fitBallInterpolation();
+    scene1.fit(1);
     models = new Shape[5];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
@@ -61,7 +61,7 @@ public class ShiftViewers extends PApplet {
     // set a detached eye frame
     //scene2.setEye(new Frame());
     scene2.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
-    scene2.fitBallInterpolation();
+    scene2.fit(1);
 
     // idem here
     scene3 = new Scene(this, P3D, w / 2, h / 2, w / 2, h / 2);
@@ -69,7 +69,7 @@ public class ShiftViewers extends PApplet {
     // set a detached eye frame
     //scene3.setEye(new Frame());
     scene3.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
-    scene3.fitBallInterpolation();
+    scene3.fit(1);
   }
 
   PShape boxShape() {
@@ -82,7 +82,7 @@ public class ShiftViewers extends PApplet {
     if (key == ' ')
       displayAuxiliarViewers = !displayAuxiliarViewers;
     if (key == 'f')
-      focus.fitBallInterpolation();
+      focus.fit(1);
     if (key == 't') {
       if (focus.type() == Graph.Type.PERSPECTIVE) {
         focus.setType(Graph.Type.ORTHOGRAPHIC);

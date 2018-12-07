@@ -32,7 +32,7 @@ public void setup() {
     models[i] = new Shape(scene, shape());
     scene.randomize(models[i]);
   }
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   colorShader = loadShader("colorfrag.glsl");
   colorShader.set("maxDepth", scene.radius()*2);

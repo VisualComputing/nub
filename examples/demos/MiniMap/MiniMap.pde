@@ -43,7 +43,7 @@ void setup() {
     scene.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
   else
     rectMode(CENTER);
-  scene.fitBallInterpolation();
+  scene.fit(1);
   models = new Shape[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
@@ -71,7 +71,7 @@ void setup() {
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
-  minimap.fitBallInterpolation();
+  minimap.fit(1);
   // detached frame
   sceneEye = new Frame();
 }
@@ -93,7 +93,7 @@ void keyPressed() {
       minimap.resetTrackedFrame();
   }
   if (key == 'f')
-    focus.fitBallInterpolation();
+    focus.fit(1);
   if (key == 't')
     if (renderer == P3D)
       if (focus.type() == Graph.Type.PERSPECTIVE)

@@ -25,7 +25,7 @@ public class Orbit extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     shape1 = new Shape(scene) {
       @Override

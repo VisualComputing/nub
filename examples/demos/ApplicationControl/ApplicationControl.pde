@@ -31,7 +31,7 @@ public void settings() {
 
 void setup() {
   scene = new Scene(this);
-  scene.fitBallInterpolation();
+  scene.fit(1);
   shapes = new Shape[10];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Shape(scene) {

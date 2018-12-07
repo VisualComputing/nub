@@ -63,7 +63,7 @@ public class FrameAPI2 extends PApplet {
     mode = Mode.m1;
 
     scene.setRadius(200);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     f1 = new InteractiveFrame(scene, f1Color);
     f1.translate(-50, -20, 30);

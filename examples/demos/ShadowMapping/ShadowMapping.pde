@@ -46,7 +46,7 @@ void setup() {
       pg.popStyle();
     }
   };
-  scene.fitBallInterpolation();
+  scene.fit(1);
   shadowMap = createGraphics(w / 2, h / 2, P3D);
 }
 

@@ -35,7 +35,7 @@ void setup() {
     shapes[i].setGraphics(caja());
     shapes[i].randomize();
   }
-  scene.fitBallInterpolation();
+  scene.fit(1);
 }
 
 void draw() {

@@ -33,7 +33,7 @@ public class ViewFrustumCulling extends PApplet {
     scene1.setType(Graph.Type.ORTHOGRAPHIC);
     scene1.enableBoundaryEquations();
     scene1.setRadius(150);
-    scene1.fitBallInterpolation();
+    scene1.fit(1);
 
     canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
@@ -41,7 +41,7 @@ public class ViewFrustumCulling extends PApplet {
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(300);
-    scene2.fitBall();
+    scene2.fit();
   }
 
   @Override

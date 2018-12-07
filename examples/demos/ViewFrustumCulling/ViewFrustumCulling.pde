@@ -37,14 +37,14 @@ void setup() {
   scene1 = new Scene(this, P3D, w, h /2);
   scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
   scene1.enableBoundaryEquations();
-  scene1.fitBallInterpolation();
+  scene1.fit(1);
 
   // Note that we pass the upper left corner coordinates where the scene
   // is to be drawn (see drawing code below) to its constructor.
   scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
   scene2.setAperture(Graph.Type.ORTHOGRAPHIC);
   scene2.setRadius(200);
-  scene2.fitBall();
+  scene2.fit();
 }
 
 void draw() {

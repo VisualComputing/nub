@@ -25,8 +25,8 @@ public class TwoScenes extends PApplet {
     //scene1.setZClippingCoefficient(1);
     scene1.setRadius(200);
     //scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
-    //scene1.fitBallInterpolation();
-    scene1.fitBall();
+    //scene1.fit(1);
+    scene1.fit();
 
     // enable computation of the frustum planes equations (disabled by default)
     scene1.enableBoundaryEquations();
@@ -36,14 +36,14 @@ public class TwoScenes extends PApplet {
     scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
     //scene2.setType(Graph.Type.ORTHOGRAPHIC);
     scene2.setRadius(400);
-    //scene2.fitBallInterpolation();
-    scene2.fitBall();
+    //scene2.fit(1);
+    scene2.fit();
     frame = new Frame();
   }
 
   public void keyPressed() {
     if (key == 'f')
-      scene1.fitBall();
+      scene1.fit();
     if (key == 'a') {
       println(scene1.zNear());
       vector = new Vector(0, 0, -scene1.zNear() / scene1.eye().magnitude());

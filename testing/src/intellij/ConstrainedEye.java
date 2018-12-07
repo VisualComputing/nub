@@ -29,7 +29,7 @@ public class ConstrainedEye extends PApplet {
     textFont(myFont);
     scene = new Scene(this);
     scene.setRadius(400);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     constraints[0] = new WorldConstraint();
     // Note that an EyeConstraint(eye) would produce the same results:
