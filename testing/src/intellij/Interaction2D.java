@@ -28,7 +28,7 @@ public class Interaction2D extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(1000);
-    scene.eye().setScaling(1);
+    //scene.eye().setScaling(1);
     //scene.fit(1);
 
     shape1 = new Shape(scene) {

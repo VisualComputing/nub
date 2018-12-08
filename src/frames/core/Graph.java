@@ -375,9 +375,9 @@ public class Graph {
    * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix),
    * according to {@code fov} (field-of-view) which is expressed in radians.
    * <p>
-   * Computed as {@code tan(fov/2)} if the graph {@link #type()} is {@link Type#PERSPECTIVE}, and as
-   * {@code 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width())},
-   * otherwise.
+   * Computed as {@code 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width())}
+   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}, and as {@code tan(fov/2)} ,
+   * otherwise (i.e., {@link Type#ORTHOGRAPHIC} and {@link Type#TWO_D} graph types).
    *
    * @see #fov()
    * @see #hfov()
@@ -385,9 +385,9 @@ public class Graph {
    * @see #setType(Type, float)
    */
   public void setFOV(float fov) {
-    eye().setMagnitude(type() == Type.PERSPECTIVE ?
-        (float) Math.tan(fov / 2) :
-        2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width());
+    eye().setMagnitude(type() == Type.ORTHOGRAPHIC ?
+        2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width() :
+        (float) Math.tan(fov / 2));
   }
 
   /**
@@ -3557,7 +3557,6 @@ public class Graph {
     translate(0, 0, delta, eye());
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
-      //eye().setMagnitude(_persp2ortho((float)Math.PI / 3));
       if (d2 / d1 > 0)
         eye().scale(d2 / d1);
   }

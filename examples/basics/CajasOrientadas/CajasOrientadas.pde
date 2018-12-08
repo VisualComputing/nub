@@ -23,8 +23,8 @@ void setup() {
   size(800, 800, P3D);
   scene = new Scene(this);
   scene.setRadius(200);
+  scene.setType(Graph.Type.ORTHOGRAPHIC);
   scene.fit();
-  scene.setAperture(Graph.Type.ORTHOGRAPHIC);
   esfera = new Sphere();
   esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
   esfera.setColor(color(0, 0, 255));

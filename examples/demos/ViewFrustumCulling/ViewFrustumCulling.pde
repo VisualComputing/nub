@@ -19,13 +19,11 @@ import frames.processing.*;
 OctreeNode root;
 Scene scene1, scene2, focus;
 
-//Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-String renderer = P3D;
 int w = 1110;
 int h = 1110;
 
 void settings() {
-  size(w, h, renderer);
+  size(w, h, P3D);
 }
 
 void setup() {
@@ -35,14 +33,14 @@ void setup() {
   root.buildBoxHierarchy(4);
 
   scene1 = new Scene(this, P3D, w, h /2);
-  scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
+  scene1.setType(Graph.Type.ORTHOGRAPHIC);
   scene1.enableBoundaryEquations();
   scene1.fit(1);
 
   // Note that we pass the upper left corner coordinates where the scene
   // is to be drawn (see drawing code below) to its constructor.
   scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
-  scene2.setAperture(Graph.Type.ORTHOGRAPHIC);
+  scene2.setType(Graph.Type.ORTHOGRAPHIC);
   scene2.setRadius(200);
   scene2.fit();
 }
@@ -92,9 +90,9 @@ void mouseClicked(MouseEvent event) {
 void keyPressed() {
   if (key == ' ')
     if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setAperture(Graph.Type.ORTHOGRAPHIC);
+      focus.setType(Graph.Type.ORTHOGRAPHIC);
     else
-      focus.setAperture(Graph.Type.PERSPECTIVE);
+      focus.setType(Graph.Type.PERSPECTIVE);
   if (key == 'f') {
     scene1.flip();
     scene2.flip();

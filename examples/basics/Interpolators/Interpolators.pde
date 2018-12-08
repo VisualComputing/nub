@@ -107,7 +107,10 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.moveForward(event.getCount() * 20);
+  if (scene.is3D())
+    scene.moveForward(event.getCount() * 20);
+  else
+    scene.scale(event.getCount() * 20, scene.eye());
 }
 
 void keyPressed() {

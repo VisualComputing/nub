@@ -40,7 +40,7 @@ void setup() {
   scene = onScreen ? new Scene(this) : new Scene(this, renderer);
   scene.setRadius(1000);
   if (renderer == P3D)
-    scene.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
+    scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
   else
     rectMode(CENTER);
   scene.fit(1);
@@ -70,7 +70,7 @@ void setup() {
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
   minimap.setRadius(2000);
   if (renderer == P3D)
-    minimap.setAperture(Graph.Type.ORTHOGRAPHIC);
+    minimap.setType(Graph.Type.ORTHOGRAPHIC);
   minimap.fit(1);
   // detached frame
   sceneEye = new Frame();
