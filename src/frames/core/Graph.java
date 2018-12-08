@@ -358,9 +358,16 @@ public class Graph {
     setFOV(fov);
   }
 
-  //TODO pending
+  /**
+   * Shifts the graph {@link #type()} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
+   * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
+   */
   public void togglePerspective() {
-
+    if (is3D()) {
+      float fov = fov();
+      setType(type() == Type.PERSPECTIVE ? Type.ORTHOGRAPHIC : Type.PERSPECTIVE);
+      setFOV(fov);
+    }
   }
 
   /**

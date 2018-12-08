@@ -100,13 +100,8 @@ public class ShadowMapping extends PApplet {
         shadowMapType = Graph.Type.PERSPECTIVE;
       else
         shadowMapType = Graph.Type.ORTHOGRAPHIC;
-    if (key == 't') {
-      if (scene.type() == Graph.Type.PERSPECTIVE) {
-        scene.setType(Graph.Type.ORTHOGRAPHIC);
-      } else {
-        scene.setType(Graph.Type.PERSPECTIVE);
-      }
-    }
+    if (key == 't')
+      scene.togglePerspective();
     if (key == 'p')
       scene.eye().position().print();
   }
