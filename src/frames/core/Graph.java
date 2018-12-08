@@ -472,35 +472,6 @@ public class Graph {
   }
 
   /**
-   * Changes the {@link #eye()} {@link #fov()} so that the entire scene
-   * (defined by {@link #center()} and {@link #radius()}) is visible.
-   * <p>
-   * The eye position and orientation are not modified and you first have to orientate
-   * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
-   * {@link #fit()} or {@link #fit(Vector, float)}).
-   *
-   * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
-   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
-   *
-   * @see #setFOV(float)
-   */
-  //TODO add interpolation
-  public void fitFOV() {
-    float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / distance);
-    switch (type()) {
-      case PERSPECTIVE:
-        setFOV(magnitude);
-        break;
-      case ORTHOGRAPHIC:
-        eye().setMagnitude(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
-      case TWO_D:
-        eye().setMagnitude(2 * radius() / Math.min(width(), height()));
-        break;
-    }
-  }
-
-  /**
    * Returns the near clipping plane distance used by the eye frame
    * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix in
    * world units.
@@ -1936,6 +1907,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Frame frame) {
     fit(frame, 0);
@@ -1954,6 +1927,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Frame frame, float duration) {
     if (duration <= 0)
@@ -1981,6 +1956,8 @@ public class Graph {
    * @see #fit(Rectangle)
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit() {
     fit(center(), radius());
@@ -2000,6 +1977,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Rectangle)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(float duration) {
     fit(center(), radius(), duration);
@@ -2023,6 +2002,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Rectangle)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius, float duration) {
     if (duration <= 0)
@@ -2053,6 +2034,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Rectangle)
    * @see #fit(Vector, Vector, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Vector center, float radius) {
     switch (type()) {
@@ -2076,6 +2059,83 @@ public class Graph {
   }
 
   /**
+   * Rescales the {@link #fov()} {@code duration} seconds so that the ball defined by {@code center}
+   * and {@code radius} is visible and fits the window.
+   * <p>
+   * The eye position and orientation are not modified and you first have to orientate
+   * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
+   * {@link #fit()} or {@link #fit(Vector, float)}).
+   *
+   * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
+   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
+   *
+   * @see #fitFOV()
+   * @see #fit(Vector, float)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
+   */
+  public void fitFOV(float duration) {
+    if (duration <= 0)
+      fitFOV();
+    else {
+      _interpolator.stop();
+      _interpolator.purge();
+      Frame eye = eye();
+      setEye(eye().detach());
+      _interpolator.addKeyFrame(eye().detach());
+      fitFOV();
+      _interpolator.addKeyFrame(eye().detach(), duration);
+      setEye(eye);
+      _interpolator.start();
+    }
+  }
+
+  /**
+   * Changes the {@link #eye()} {@link #fov()} so that the entire scene
+   * (defined by {@link #center()} and {@link #radius()}) is visible.
+   * <p>
+   * The eye position and orientation are not modified and you first have to orientate
+   * the eye in order to actually see the scene (see {@link #lookAt(Vector)},
+   * {@link #fit()} or {@link #fit(Vector, float)}).
+   *
+   * <b>Attention:</b> The {@link #fov()} is clamped to PI/2. This happens
+   * when the eye is at a distance lower than sqrt(2) * radius() from the center().
+   *
+   * @see #fitFOV(float)
+   * @see #fit(Vector, float)
+   * @see #fit(float)
+   * @see #fit(Vector, float, float)
+   * @see #fit(Frame)
+   * @see #fit(Frame, float)
+   * @see #fit(Vector, Vector)
+   * @see #fit(Rectangle, float)
+   * @see #fit()
+   * @see #fit(Rectangle)
+   * @see #fit(Vector, Vector, float)
+   */
+  public void fitFOV() {
+    float distance = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
+    float magnitude = distance < (float) Math.sqrt(2) * radius() ? ((float) Math.PI / 2) : 2 * (float) Math.asin(radius() / distance);
+    switch (type()) {
+      case PERSPECTIVE:
+        setFOV(magnitude);
+        break;
+      case ORTHOGRAPHIC:
+        eye().setMagnitude(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
+      case TWO_D:
+        eye().setMagnitude(2 * radius() / Math.min(width(), height()));
+        break;
+    }
+  }
+
+  /**
    * Smoothly moves the eye during {@code duration} seconds so that the world axis aligned
    * box defined by {@code corner1} and {@code corner2} is entirely visible.
    *
@@ -2088,6 +2148,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Rectangle)
    * @see #fit(Vector, float, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2, float duration) {
     if (duration <= 0)
@@ -2118,6 +2180,8 @@ public class Graph {
    * @see #fit()
    * @see #fit(Rectangle)
    * @see #fit(Vector, float, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Vector corner1, Vector corner2) {
     float diameter = Math.max(Math.abs(corner2._vector[1] - corner1._vector[1]), Math.abs(corner2._vector[0] - corner1._vector[0]));
@@ -2146,6 +2210,8 @@ public class Graph {
    * @see #fit(Frame, float)
    * @see #fit()
    * @see #fit(Vector, float, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Rectangle rectangle, float duration) {
     if (duration <= 0)
@@ -2182,6 +2248,8 @@ public class Graph {
    * @see #fit(Frame, float)
    * @see #fit()
    * @see #fit(Vector, float, float)
+   * @see #fitFOV()
+   * @see #fitFOV(float)
    */
   public void fit(Rectangle rectangle) {
     //ad-hoc

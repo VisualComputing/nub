@@ -44,6 +44,7 @@ public class ShadowMapping extends PApplet {
       }
     };
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
     shadowMap = createGraphics(w / 2, h / 2, P3D);
   }
@@ -84,7 +85,7 @@ public class ShadowMapping extends PApplet {
 
   public void keyPressed() {
     if (key == 'f')
-      scene.fit();
+      scene.fitFOV(1);
     if (key == 'a')
       scene.fitFOV();
     if (key == '1')
