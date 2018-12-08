@@ -352,6 +352,7 @@ public class Graph {
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
+   * @see #togglePerspective()
    */
   public void setType(Type type, float fov) {
     setType(type);
@@ -361,6 +362,13 @@ public class Graph {
   /**
    * Shifts the graph {@link #type()} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
+   *
+   * @see #setType(Type)
+   * @see #setType(Type, float)
+   * @see #setFOV(float)
+   * @see #fov()
+   * @see #hfov()
+   * @see #setHFOV(float)
    */
   public void togglePerspective() {
     if (is3D()) {
