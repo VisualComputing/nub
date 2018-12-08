@@ -13,7 +13,7 @@ import frames.core.*;
 import frames.processing.*;
 
 PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, colorShader, horizontalShader;
-PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, graphics, colorGraphics, horizontalGraphics;
+PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, colorGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
 int startTime;
@@ -25,15 +25,14 @@ public void setup() {
   font = loadFont("FreeSans-13.vlw");
   textFont(font);
   colorMode(HSB, 255);
-  graphics = createGraphics(width, height, P3D);
-  scene = new Scene(this, graphics);
+  scene = new Scene(this, P3D);
   scene.setRadius(1000);
   models = new Shape[100];
   for (int i = 0; i < models.length; i++) {
     models[i] = new Shape(scene, shape());
     scene.randomize(models[i]);
   }
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   colorShader = loadShader("colorfrag.glsl");
   colorShader.set("maxDepth", scene.radius()*2);
@@ -85,15 +84,13 @@ public void setup() {
 }
 
 public void draw() {
-  PGraphics pg = graphics;
+  PGraphics graphics = drawGraphics = scene.frontBuffer();
 
   // 1. Draw into main buffer
   scene.beginDraw();
-  pg.background(0);
+  graphics.background(0);
   scene.traverse();
   scene.endDraw();
-
-  drawGraphics = graphics;
 
   if (bdepth){
     colorGraphics.beginDraw();

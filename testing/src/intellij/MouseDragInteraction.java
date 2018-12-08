@@ -25,10 +25,9 @@ public class MouseDragInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     Shape shape1 = new Shape(scene) {
       @Override
@@ -72,14 +71,14 @@ public class MouseDragInteraction extends PApplet {
     if (key == 'f')
       scene.flip();
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
     if (key == 'c') {
       cad = !cad;
       if (cad) {
         scene.eye().setYAxis(randomVector);
-        scene.fitBall();
+        scene.fit();
       }
     }
     if (key == 'a')
@@ -120,13 +119,13 @@ public class MouseDragInteraction extends PApplet {
     } else {
       //scene.mouseZoom(mouseX - pmouseX);
       //scene.zoom(scene.mouseDX(), scene.defaultFrame());
-      scene.zoom(scene.mouseDX());
+      scene.scale(scene.mouseDX());
       //scene.scale(mouseX - pmouseX);
     }
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {

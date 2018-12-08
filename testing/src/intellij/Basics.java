@@ -21,9 +21,8 @@ public class Basics extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     frame = new Frame(scene) {
       @Override

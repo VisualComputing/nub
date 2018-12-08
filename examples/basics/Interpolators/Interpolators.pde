@@ -32,7 +32,7 @@ void setup() {
   scene.setRadius(150);
 
   // interpolation 1. Default eye interpolations
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   // interpolation 2. Custom eye interpolations
   eyeInterpolator1 = new Interpolator(scene.eye());
@@ -107,7 +107,10 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.moveForward(event.getCount() * 20);
+  if (scene.is3D())
+    scene.moveForward(event.getCount() * 20);
+  else
+    scene.scale(event.getCount() * 20, scene.eye());
 }
 
 void keyPressed() {
@@ -136,7 +139,7 @@ void keyPressed() {
     interpolator.setSpeed(interpolator.speed() + 0.25f);
 
   if (key == 's')
-    scene.fitBallInterpolation();
+    scene.fit(1);
   if (key == 'f')
-    scene.fitBall();
+    scene.fit();
 }

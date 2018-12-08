@@ -28,11 +28,10 @@ public class FrameInterpolation extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    //scene.setFieldOfView(PI / 3);
     scene.setRadius(150);
 
     // interpolation 1. Default eye interpolations
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     // interpolation 2. Custom eye interpolations
     eyeInterpolator1 = new Interpolator(scene.eye());
@@ -150,9 +149,9 @@ public class FrameInterpolation extends PApplet {
       interpolator.setSpeed(interpolator.speed() + 0.25f);
 
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
 
     if (key == 'u') scene.saveConfig("/home/pierre/config.json");
     if (key == 'v') scene.loadConfig("/home/pierre/config.json");

@@ -22,7 +22,7 @@ void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
   scene.setRadius(100);
-  scene.fitBallInterpolation();
+  scene.fit(1);
   lamp = new Lamp(scene);
 }
 

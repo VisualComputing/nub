@@ -32,17 +32,16 @@ public class ViewFrustumCulling extends PApplet {
     scene1 = new Scene(this, canvas1);
     scene1.setType(Graph.Type.ORTHOGRAPHIC);
     scene1.enableBoundaryEquations();
-    scene1.setFieldOfView(PI / 3);
-    scene1.fitBallInterpolation();
+    scene1.setRadius(150);
+    scene1.fit(1);
 
     canvas2 = createGraphics(w, h / 2, P3D);
     // Note that we pass the upper left corner coordinates where the scene
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(200);
-    scene1.setFieldOfView(PI / 3);
-    scene2.fitBall();
+    scene2.setRadius(300);
+    scene2.fit();
   }
 
   @Override
@@ -73,12 +72,13 @@ public class ViewFrustumCulling extends PApplet {
     else if (mouseButton == RIGHT)
       focus.translate();
     else
-      focus.zoom(mouseX - pmouseX);
+      //focus.zoom(mouseX - pmouseX);
+      focus.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    focus.scale(event.getCount() * 20);
-    //focus.zoom(event.getCount() * 50);
+    //focus.scale(event.getCount() * 20);
+    focus.moveForward(event.getCount() * 20);
   }
 
   public void mouseClicked(MouseEvent event) {
@@ -95,6 +95,17 @@ public class ViewFrustumCulling extends PApplet {
         focus.setType(Graph.Type.ORTHOGRAPHIC);
       else
         focus.setType(Graph.Type.PERSPECTIVE);
+    if (key == 'f') {
+      scene1.flip();
+      scene2.flip();
+    }
+    if (key == '1')
+      scene1.fitFOV();
+    if (key == '2')
+      scene2.fitFOV();
+    if (key == 'p') {
+      println(Vector.distance(scene1.eye().position(), scene1.anchor()));
+    }
   }
 
   void handleMouse() {

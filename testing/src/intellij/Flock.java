@@ -1,6 +1,7 @@
 package intellij;
 
 import frames.core.Frame;
+import frames.core.Graph;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -27,10 +28,9 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
-    scene.setAnchor(scene.center());
-    scene.setFieldOfView(PI / 3);
-    scene.fitBall();
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+    scene.fit();
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -69,7 +69,7 @@ public class Flock extends PApplet {
         scene.translate();
       else
         // same as: scene.zoom(mouseX - pmouseX, scene.eye());
-        scene.zoom(mouseX - pmouseX);
+        scene.moveForward(mouseX - pmouseX);
   }
 
   // highlighting and 'third-person' interaction
@@ -96,7 +96,7 @@ public class Flock extends PApplet {
   // Sets current avatar as the eye reference and interpolate the eye to it
   public void thirdPerson() {
     scene.eye().setReference(avatar);
-    scene.interpolateTo(avatar);
+    scene.fit(avatar, 0);
   }
 
   // Resets the eye
@@ -104,7 +104,7 @@ public class Flock extends PApplet {
     // same as: scene.eye().setReference(null);
     scene.eye().resetReference();
     scene.lookAt(scene.center());
-    scene.fitBallInterpolation();
+    scene.fit(1);
   }
 
   public void walls() {
@@ -136,7 +136,7 @@ public class Flock extends PApplet {
         break;
       case 's':
         if (scene.eye().reference() == null)
-          scene.fitBallInterpolation();
+          scene.fit(1);
         break;
       case 't':
         scene.shiftTimers();

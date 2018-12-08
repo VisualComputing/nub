@@ -18,7 +18,7 @@ import frames.core.*;
 import frames.processing.*;
 
 PShader depthShader, dofShader;
-PGraphics srcPGraphics, depthPGraphics, dofPGraphics;
+PGraphics depthPGraphics, dofPGraphics;
 Scene scene;
 Shape[] models;
 int mode = 2;
@@ -26,10 +26,9 @@ int mode = 2;
 void setup() {
   size(1000, 800, P3D);
   colorMode(HSB, 255);
-  srcPGraphics = createGraphics(width, height, P3D);
-  scene = new Scene(this, srcPGraphics);
+  scene = new Scene(this, P3D);
   scene.setRadius(1000);
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   models = new Shape[100];
 

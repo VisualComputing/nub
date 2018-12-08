@@ -1,5 +1,6 @@
 package intellij;
 
+import frames.core.Graph;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -25,9 +26,10 @@ public class DOF extends PApplet {
     colorMode(HSB, 255);
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
-    scene.setFieldOfView(PI / 3);
+    //scene.setType(Graph.Type.PERSPECTIVE);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     models = new Shape[100];
 
@@ -36,12 +38,12 @@ public class DOF extends PApplet {
       scene.randomize(models[i]);
     }
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/dof/depth.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth.glsl");
     depthShader.set("maxDepth", scene.radius() * 2);
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);
@@ -94,6 +96,15 @@ public class DOF extends PApplet {
     if (key == '2') mode = 2;
     if (key == 's') scene.saveConfig("/home/pierre/config.json");
     if (key == 'l') scene.loadConfig("/home/pierre/config.json");
+    if (key == 't')
+      if (scene.type() == Graph.Type.ORTHOGRAPHIC)
+        scene.setType(Graph.Type.PERSPECTIVE);
+      else
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
+    if (key == 'f')
+      scene.fit(1);
+    if (key == 'F')
+      scene.fit();
   }
 
   @Override
@@ -108,7 +119,7 @@ public class DOF extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(scene.mouseDX());
+      scene.moveForward(scene.mouseDX());
   }
 
   @Override

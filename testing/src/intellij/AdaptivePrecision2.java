@@ -21,8 +21,7 @@ public class AdaptivePrecision2 extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    scene.setFieldOfView(PI / 3);
-    scene.fitBallInterpolation();
+    scene.fit(1);
     shapes = new Shape[25];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene, shape());
@@ -50,7 +49,7 @@ public class AdaptivePrecision2 extends PApplet {
 
   public void keyPressed() {
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
   }
 
   public void mouseDragged() {
@@ -63,7 +62,7 @@ public class AdaptivePrecision2 extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.zoom(event.getCount() * 50);
+    scene.moveForward(event.getCount() * 50);
   }
 
   public void mouseClicked(MouseEvent event) {

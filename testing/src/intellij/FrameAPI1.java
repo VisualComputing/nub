@@ -59,13 +59,11 @@ public class FrameAPI1 extends PApplet {
   }
 
   public void setup() {
-    size(900, 900, P3D);
     scene = new Scene(this);
     mode = Mode.m1;
 
-    scene.setFieldOfView(PI / 3);
     scene.setRadius(200);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     f1 = new InteractiveFrame(scene, f1Color);
     f1.translate(-50, -20, 30);
@@ -336,7 +334,7 @@ public class FrameAPI1 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate();
     else
-      scene.zoom(mouseX - pmouseX);
+      scene.moveForward(mouseX - pmouseX);
   }
 
   @Override

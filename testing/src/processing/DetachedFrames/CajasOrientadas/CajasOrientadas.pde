@@ -30,7 +30,7 @@ void setup() {
   size(800, 800, P3D);
   scene = new Scene(this);
   scene.setRadius(200);
-  scene.fitBall();
+  scene.fit();
   scene.setType(Graph.Type.ORTHOGRAPHIC);
   esfera = new Sphere();
   esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
@@ -39,7 +39,7 @@ void setup() {
   for (int i = 0; i < cajas.length; i++)
     cajas[i] = new Box(color(random(255), random(255), random(255)));
 
-  scene.fitBallInterpolation();
+  scene.fit(1);
   scene.setTrackedFrame("keyboard", esfera);
 }
 
@@ -97,9 +97,9 @@ void keyPressed() {
   if (key == 'E')
     scene.setType(Graph.Type.PERSPECTIVE);
   if (key == 's')
-    scene.fitBallInterpolation();
+    scene.fit(1);
   if (key == 'S')
-    scene.fitBall();
+    scene.fit();
   if (key == 'u')
     if (scene.trackedFrame("keyboard") == null)
       scene.setTrackedFrame("keyboard", esfera);

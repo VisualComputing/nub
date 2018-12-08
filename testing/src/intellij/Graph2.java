@@ -21,8 +21,7 @@ public class Graph2 extends PApplet {
 
   public void setup() {
     graph = new Graph(width, height);
-    graph.setFieldOfView(PI / 3);
-    graph.fitBallInterpolation();
+    graph.fit(1);
     graph.setMatrixHandler(new GLMatrixHandler(graph, (PGraphicsOpenGL) g));
     frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {

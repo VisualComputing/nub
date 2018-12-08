@@ -27,10 +27,8 @@ public class FlockOld extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
-    scene.setAnchor(scene.center());
-    scene.setFieldOfView(PI / 3);
-    scene.fitBall();
+    scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+    scene.fit();
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -53,7 +51,7 @@ public class FlockOld extends PApplet {
       else if (mouseButton == RIGHT)
         scene.translate();
       else
-        scene.zoom(mouseX - pmouseX, scene.eye());
+        scene.scale(mouseX - pmouseX, scene.eye());
     //scene.scale(mouseX - pmouseX);
   }
 
@@ -66,7 +64,7 @@ public class FlockOld extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
+    scene.moveForward(event.getCount() * 20);
     //scene.zoom(event.getCount() * 50);
   }
 
@@ -82,14 +80,14 @@ public class FlockOld extends PApplet {
   // Sets current avatar as the eye reference and interpolate the eye to it
   public void thirdPerson() {
     scene.eye().setReference(avatar);
-    scene.interpolateTo(avatar);
+    scene.fit(avatar);
   }
 
   // Resets the eye
   public void resetEye() {
     scene.eye().setReference(null);
     scene.lookAt(scene.center());
-    scene.fitBallInterpolation();
+    scene.fit(1);
   }
 
   public void walls() {
@@ -121,7 +119,7 @@ public class FlockOld extends PApplet {
         break;
       case 's':
         if (scene.eye().reference() == null)
-          scene.fitBallInterpolation();
+          scene.fit(1);
         break;
       case 't':
         scene.shiftTimers();
