@@ -38,11 +38,11 @@ void settings() {
 
 void setup() {
   scene = onScreen ? new Scene(this) : new Scene(this, renderer);
+  // eye only should belong only to the scene
+  // so set a detached 'frame' instance as the eye
+  scene.setEye(new Frame());
   scene.setRadius(1000);
-  if (renderer == P3D)
-    scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
-  else
-    rectMode(CENTER);
+  rectMode(CENTER);
   scene.fit(1);
   models = new Shape[30];
   for (int i = 0; i < models.length; i++) {
@@ -68,6 +68,9 @@ void setup() {
   // Note that we pass the upper left corner coordinates where the scene1
   // is to be drawn (see drawing code below) to its constructor.
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
+  // eye only should belong only to the minimap
+  // so set a detached 'frame' instance as the eye
+  minimap.setEye(new Frame());
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.setType(Graph.Type.ORTHOGRAPHIC);
@@ -95,11 +98,7 @@ void keyPressed() {
   if (key == 'f')
     focus.fit(1);
   if (key == 't')
-    if (renderer == P3D)
-      if (focus.type() == Graph.Type.PERSPECTIVE)
-        focus.setType(Graph.Type.ORTHOGRAPHIC);
-      else
-        focus.setType(Graph.Type.PERSPECTIVE);
+    focus.togglePerspective();
 }
 
 void mouseMoved() {
