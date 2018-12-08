@@ -3565,7 +3565,7 @@ public class Graph {
     translate(0, 0, delta, eye());
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
-      if (d2 / d1 > 0)
+      if (d2 / d1 > 0 && d1 != 0)
         eye().scale(d2 / d1);
   }
 

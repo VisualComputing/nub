@@ -21,7 +21,7 @@ Scene scene, minimap, focus;
 Shape[] models;
 Frame sceneEye;
 boolean displayMinimap = true;
-// whilst scene1 is either on-screen or not, the minimap is always off-screen
+// whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
 boolean onScreen = false;
 boolean interactiveEye;
@@ -65,7 +65,7 @@ void setup() {
     scene.randomize(models[i]);
   }
 
-  // Note that we pass the upper left corner coordinates where the scene1
+  // Note that we pass the upper left corner coordinates where the minimap
   // is to be drawn (see drawing code below) to its constructor.
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
   // eye only should belong only to the minimap
@@ -147,6 +147,7 @@ void draw() {
     scene.traverse();
   }
   if (displayMinimap) {
+    // shift scene attached frames to minimap
     scene.shift(minimap);
     if (!scene.isOffscreen())
       scene.beginHUD();
@@ -163,6 +164,7 @@ void draw() {
     minimap.display();
     if (!scene.isOffscreen())
       scene.endHUD();
+    // shift back minimap attached frames to the scene
     minimap.shift(scene);
   }
 }
