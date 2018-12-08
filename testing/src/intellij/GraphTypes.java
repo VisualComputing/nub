@@ -53,7 +53,7 @@ public class GraphTypes extends PApplet {
     if (key == 'f')
       scene.fit();
     if (key == 'g')
-      scene.autoAperture();
+      scene.fitFOV();
     if (key == 'b')
       box = !box;
     if (key == 's')
@@ -71,9 +71,9 @@ public class GraphTypes extends PApplet {
       scene.eye().position().print();
     }
     if (key == 'n')
-      scene.setAperture(1);
+      scene.setFOV(1);
     if (key == 'm')
-      scene.setAperture(PI / 3);
+      scene.setFOV(PI / 3);
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.setType(Graph.Type.ORTHOGRAPHIC);

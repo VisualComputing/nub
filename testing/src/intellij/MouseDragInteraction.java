@@ -25,7 +25,7 @@ public class MouseDragInteraction extends PApplet {
   public void setup() {
     rectMode(CENTER);
     scene = new Scene(this);
-    //scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fit(1);
 

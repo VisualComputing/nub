@@ -100,9 +100,9 @@ public class ViewFrustumCulling extends PApplet {
       scene2.flip();
     }
     if (key == '1')
-      scene1.autoAperture();
+      scene1.fitFOV();
     if (key == '2')
-      scene2.autoAperture();
+      scene2.fitFOV();
     if (key == 'p') {
       println(Vector.distance(scene1.eye().position(), scene1.anchor()));
     }

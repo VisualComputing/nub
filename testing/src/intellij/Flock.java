@@ -1,6 +1,7 @@
 package intellij;
 
 import frames.core.Frame;
+import frames.core.Graph;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -27,7 +28,7 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
     scene.fit();
     // create and fill the list of boids
@@ -130,6 +131,17 @@ public class Flock extends PApplet {
 
   public void keyPressed() {
     switch (key) {
+      case 'u':
+        float to = scene.toFOV(scene.eye().magnitude());
+        println(to);
+        /*
+        println(THIRD_PI);
+        float from = scene.fromFOV(THIRD_PI);
+        println(from);
+        float to = scene.toFOV(from);
+        println(to);
+        */
+        break;
       case 'a':
         animate = !animate;
         break;

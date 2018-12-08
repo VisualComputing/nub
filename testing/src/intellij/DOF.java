@@ -26,8 +26,8 @@ public class DOF extends PApplet {
     colorMode(HSB, 255);
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
-    //scene.setAperture(Graph.Type.PERSPECTIVE);
-    //scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    //scene.setType(Graph.Type.PERSPECTIVE);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
     scene.fit(1);
 

@@ -32,7 +32,7 @@ public class ShiftViewers extends PApplet {
     scene1.setRadius(1000);
     // set a detached eye frame
     //scene1.setEye(new Frame());
-    scene1.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
+    scene1.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene1.fit(1);
     models = new Shape[5];
     for (int i = 0; i < models.length; i++) {
@@ -60,7 +60,7 @@ public class ShiftViewers extends PApplet {
     scene2.setRadius(1000);
     // set a detached eye frame
     //scene2.setEye(new Frame());
-    scene2.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
+    scene2.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene2.fit(1);
 
     // idem here
@@ -68,7 +68,7 @@ public class ShiftViewers extends PApplet {
     scene3.setRadius(1000);
     // set a detached eye frame
     //scene3.setEye(new Frame());
-    scene3.setAperture(Graph.Type.PERSPECTIVE, THIRD_PI);
+    scene3.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
     scene3.fit(1);
   }
 

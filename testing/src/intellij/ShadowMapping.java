@@ -43,8 +43,8 @@ public class ShadowMapping extends PApplet {
         pg.popStyle();
       }
     };
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
-    scene.fit();
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.fit(1);
     shadowMap = createGraphics(w / 2, h / 2, P3D);
   }
 
@@ -86,13 +86,13 @@ public class ShadowMapping extends PApplet {
     if (key == 'f')
       scene.fit();
     if (key == 'a')
-      scene.autoAperture();
+      scene.fitFOV();
     if (key == '1')
-      scene.setAperture(1);
+      scene.setFOV(1);
     if (key == '3')
-      scene.setAperture(PI / 3);
+      scene.setFOV(PI / 3);
     if (key == '4')
-      scene.setAperture(PI / 4);
+      scene.setFOV(PI / 4);
     if (key == ' ')
       show = !show;
     if (key == 'o')
@@ -103,14 +103,9 @@ public class ShadowMapping extends PApplet {
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        //scene.setAperture(scene._persp2ortho(scene.aperture()));
-        //scene.autoAperture();
       } else {
         scene.setType(Graph.Type.PERSPECTIVE);
-        //scene.setAperture(scene._ortho2persp(scene.aperture()));
-        //scene.setAperture(THIRD_PI);
       }
-      //scene.autoAperture();
     }
     if (key == 'p')
       scene.eye().position().print();

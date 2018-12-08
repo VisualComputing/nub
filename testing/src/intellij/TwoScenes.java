@@ -24,7 +24,7 @@ public class TwoScenes extends PApplet {
     scene1 = new Scene(this, P3D, w, h / 2);
     //scene1.setZClippingCoefficient(1);
     scene1.setRadius(200);
-    //scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
+    //scene1.setType(Graph.Type.ORTHOGRAPHIC);
     //scene1.fit(1);
     scene1.fit();
 
@@ -59,7 +59,7 @@ public class TwoScenes extends PApplet {
     if (key == 'n')
       scene1.eye().setMagnitude(1);
     if (key == 'm')
-      scene1.setAperture(PI / 3);
+      scene1.setFOV(PI / 3);
     if (key == 't') {
       if (scene1.type() == Graph.Type.PERSPECTIVE) {
         scene1.setType(Graph.Type.ORTHOGRAPHIC);
