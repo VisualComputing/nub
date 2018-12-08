@@ -231,9 +231,7 @@ public class Graph {
     _seeds = new ArrayList<Frame>();
     _timingHandler = new TimingHandler();
 
-    setRadius(100);
-    setCenter(new Vector());
-    _anchor = center().get();
+    setFrustum(new Vector(), 100);
     setEye(new Frame(this));
     setAperture(type, type == Type.PERSPECTIVE ? (float) Math.PI / 3 : 1);
     fit();
@@ -1783,6 +1781,7 @@ public class Graph {
    */
   public void setFrustum(Vector center, float radius) {
     setCenter(center);
+    setAnchor(center);
     setRadius(radius);
   }
 
