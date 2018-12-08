@@ -371,30 +371,35 @@ public class Graph {
   }
 
   /**
-   * Same as {@code eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(aperture) : aperture)}.
-   * Sets the graph {@link #fov()}.
+   * Sets the {@link #eye()} {@link Frame#magnitude()} (which is used to compute the
+   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix),
+   * according to {@code fov} (field-of-view) which is expressed in radians.
+   * <p>
+   * Computed as {@code tan(fov/2)} if the graph {@link #type()} is {@link Type#PERSPECTIVE}, and as
+   * {@code 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width())},
+   * otherwise.
    *
-   * @param fov frustum field-of-view in radians.
-   * @see #setType(Type, float)
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
+   * @see #setType(Type, float)
    */
   public void setFOV(float fov) {
-    eye().setMagnitude(type() == Type.PERSPECTIVE ? magnitude(fov) : fromFOV(fov));
+    eye().setMagnitude(type() == Type.PERSPECTIVE ?
+        (float) Math.tan(fov / 2) :
+        2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width());
   }
 
   /**
-   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : eye().magnitude()}.
+   * Retrieves the graph field-of-view in radians. The value is related to the {@link #eye()}
+   * {@link Frame#magnitude()} (which in turn is used to compute the
+   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix) as follows:
    * <p>
-   * Through the aperture the {@link #eye()} {@link Frame#magnitude()} is used to compute its
-   * {@link Frame#projection(Type, float, float, float, float, boolean)} in {@link #preDraw()}.
-   * The returned value is computed as follows:
    * <ol>
-   * <li>{@code radians(eye().magnitude())}, which corresponds to the {@link #eye()} field-of-view when the
+   * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
    * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
-   * <li>{@code eye().magnitude()}, otherwise ({@link Type#ORTHOGRAPHIC} or {@link Type#TWO_D} cases).
-   * In these cases the orthographic volume width and height are scaled by this value.</li>
+   * <li>It returns {@code 2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
+   * otherwise ({@link Type#ORTHOGRAPHIC} or {@link Type#TWO_D} cases).</li>
    * </ol>
    * Set this value with {@link #setType(Type, float)}, {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
@@ -407,18 +412,17 @@ public class Graph {
    * @see #setFOV(float)
    */
   public float fov() {
-    return type() == Type.PERSPECTIVE ? radians(eye().magnitude()) : toFOV(eye().magnitude());
+    return type() == Type.PERSPECTIVE ?
+        2 * (float) Math.atan(eye().magnitude()) :
+        2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
    * Sets the {@link #hfov()} of the {@link #eye()} (in radians).
    * <p>
-   * {@link #hfov()} and {@link #fov()} are linked by the
-   * {@link Graph#aspectRatio()}. This method actually calls:
-   * {@code setAperture(type() == Type.PERSPECTIVE ? 2.0f * (float) Math.atan((float) Math.tan(aperture / 2.0f) / aspectRatio()) : aperture)} so that a
+   * {@link #hfov()} and {@link #fov()} are linked by the {@link Graph#aspectRatio()}. This method actually
+   * calls: {@code setFOV(2.0f * (float) Math.atan((float) Math.tan(hfov / 2.0f) / aspectRatio()))} so that a
    * call to {@link #hfov()} returns the expected value.
-   *
-   * @param hfov represents the frustum horizontal field-of-view in radians.
    *
    * @see #setFOV(float)
    * @see #fov()
@@ -441,34 +445,9 @@ public class Graph {
    * @see #setFOV(float)
    */
   public float hfov() {
-    return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : toFOV(eye().magnitude() * aspectRatio());
-  }
-
-  /**
-   * Macro used to convert frame {@code magnitude} units to perspective fov (field-of-view) in radians.
-   *
-   * @see #magnitude(float)
-   */
-  public static float radians(float magnitude) {
-    return 2 * (float) Math.atan(magnitude);
-  }
-
-  /**
-   * Macro used to convert the perspective {@code fov} (field-of-view) expressed in radians,
-   * to frame magnitude units.
-   *
-   * @see #radians(float)
-   */
-  public static float magnitude(float fov) {
-    return (float) Math.tan(fov / 2);
-  }
-
-  public float fromFOV(float fov) {
-    return 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width();
-  }
-
-  public float toFOV(float mag) {
-    return 2 * (float) Math.atan(mag * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
+    return type() == Type.PERSPECTIVE ?
+        2 * (float) Math.atan(eye().magnitude() * aspectRatio()) :
+        2 * (float) Math.atan(eye().magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
@@ -2052,7 +2031,7 @@ public class Graph {
       case PERSPECTIVE:
         float yview = radius / (float) Math.sin(fov() / 2.0f);
         // horizontal fov: radians(eye().magnitude() * aspectRatio())
-        float xview = radius / (float) Math.sin(radians(eye().magnitude() * aspectRatio()) / 2.0f);
+        float xview = radius / (float) Math.sin(2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f);
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), Math.max(xview, yview))));
         break;
     }
@@ -2286,7 +2265,7 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         //horizontal fov: radians(eye().magnitude() * aspectRatio())
-        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(radians(eye().magnitude() * aspectRatio()) / 2.0f);
+        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f);
         distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fov() / 2.0f);
         distance = Math.max(distX, distY);
         break;

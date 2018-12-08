@@ -131,17 +131,6 @@ public class Flock extends PApplet {
 
   public void keyPressed() {
     switch (key) {
-      case 'u':
-        float to = scene.toFOV(scene.eye().magnitude());
-        println(to);
-        /*
-        println(THIRD_PI);
-        float from = scene.fromFOV(THIRD_PI);
-        println(from);
-        float to = scene.toFOV(from);
-        println(to);
-        */
-        break;
       case 'a':
         animate = !animate;
         break;
