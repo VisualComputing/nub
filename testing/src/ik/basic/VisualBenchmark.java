@@ -10,6 +10,8 @@ import frames.ik.HAEASolver;
 import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
+import frames.ik.jacobian.PseudoInverseSolver;
+import frames.ik.jacobian.TransposeSolver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -28,7 +30,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 15;
+    int num_joints = 10;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -36,7 +38,7 @@ public class VisualBenchmark extends PApplet {
 
     Scene scene;
     //Methods
-    int num_solvers = 8;
+    int num_solvers = 10;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Shape> targets = new ArrayList<Shape>();
@@ -115,6 +117,8 @@ public class VisualBenchmark extends PApplet {
         solvers.add(new GASolver(structures.get(5), 10));
         solvers.add(new HAEASolver(structures.get(6), 10, true));
         solvers.add(new HAEASolver(structures.get(7), 10, false));
+        solvers.add(new TransposeSolver(structures.get(8)));
+        solvers.add(new PseudoInverseSolver(structures.get(9)));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < num_solvers; i++){
@@ -144,6 +148,16 @@ public class VisualBenchmark extends PApplet {
                 solver.setTarget(solver.endEffector(), targets.get(i));
                 targets.get(i).setPosition(solver.endEffector().position());
             }
+            if(solvers.get(i) instanceof TransposeSolver) {
+                TransposeSolver solver = (TransposeSolver) solvers.get(i);
+                solver.setTarget(targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
+            }
+            if(solvers.get(i) instanceof PseudoInverseSolver) {
+                PseudoInverseSolver solver = (PseudoInverseSolver) solvers.get(i);
+                solver.setTarget(targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
+            }
         }
     }
 
@@ -154,7 +168,8 @@ public class VisualBenchmark extends PApplet {
         scene.drawAxes();
         if(solve) {
             for(Solver solver : solvers){
-                solver.solve();
+                if(solver instanceof TransposeSolver)
+                    solver.solve();
             }
         }
         scene.traverse();
@@ -183,6 +198,14 @@ public class VisualBenchmark extends PApplet {
                 Frame f = ((HAEASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.2f", ((HAEASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  TransposeSolver){
+                Frame f = ((TransposeSolver)solver).chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("Transpose", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  PseudoInverseSolver){
+                Frame f = ((PseudoInverseSolver)solver).chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("PseudoInverseSolver", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
@@ -263,6 +286,12 @@ public class VisualBenchmark extends PApplet {
                 }
             }
         }
+
+        // /* Uncomment this to debug a Specific Solver
+        if(key == 'z' || key == 'Z'){
+            solvers.get(solvers.size()-1).solve();
+        }
+        // /*
     }
 
     @Override
