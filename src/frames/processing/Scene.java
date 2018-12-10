@@ -3026,6 +3026,16 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return track(hid, mouse())}.
+   *
+   * @see #track(String, Point)
+   * @see #mouse()
+   */
+  public Frame track(String hid) {
+    return track(hid, mouse());
+  }
+
+  /**
    * Same as {@code return track(mouse())}.
    *
    * @see #track(Point)
@@ -3036,9 +3046,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code cast(mouse())}.
+   * Same as {@code cast(hid, mouse())}.
    *
    * @see #cast(String, Point)
+   * @see #mouse()
+   */
+  public void cast(String hid) {
+    cast(hid, mouse());
+  }
+
+  /**
+   * Same as {@code cast(mouse())}.
+   *
+   * @see #cast(Point)
    * @see #mouse()
    */
   public void cast() {
