@@ -29,8 +29,8 @@ public class GraphTypes extends PApplet {
     //scene1.setZClippingCoefficient(1);
     scene.setRadius(200);
     scene.setType(Graph.Type.ORTHOGRAPHIC);
-    //scene1.fitBallInterpolation();
-    scene.fitBall();
+    //scene1.fit(1);
+    scene.fit();
 
     // enable computation of the frustum planes equations (disabled by default)
     scene.enableBoundaryEquations();
@@ -41,8 +41,8 @@ public class GraphTypes extends PApplet {
     auxScene = new Scene(this, auxCanvas, 0, h / 2);
     //scene2.setType(Graph.Type.ORTHOGRAPHIC);
     auxScene.setRadius(400);
-    //scene2.fitBallInterpolation();
-    auxScene.fitBall();
+    //scene2.fit(1);
+    auxScene.fit();
     boxFrame = new Frame(auxScene);
     boxFrame.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
@@ -51,9 +51,9 @@ public class GraphTypes extends PApplet {
     if (key == ' ')
       scene.toggleMode();
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
     if (key == 'g')
-      scene.autoAperture();
+      scene.fitFOV();
     if (key == 'b')
       box = !box;
     if (key == 's')
@@ -71,17 +71,17 @@ public class GraphTypes extends PApplet {
       scene.eye().position().print();
     }
     if (key == 'n')
-      scene.setAperture(1);
+      scene.setFOV(1);
     if (key == 'm')
-      scene.setAperture(PI / 3);
+      scene.setFOV(PI / 3);
     if (key == 't') {
       if (scene.type() == Graph.Type.PERSPECTIVE) {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
       } else {
         scene.setType(Graph.Type.PERSPECTIVE);
       }
-      //scene1.fitBallInterpolation();
-      //scene1.fitBall();
+      //scene1.fit(1);
+      //scene1.fit();
     }
     if (key == 'e')
       if (auxScene.trackedFrame() == boxFrame)

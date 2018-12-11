@@ -221,8 +221,8 @@ public class MatrixHandler {
   /**
    * Scale in X, Y, and Z. Calls {@link #_setUniforms()}.
    */
-  public void scale(float x, float y, float z) {
-    _modelview.scale(x, y, z);
+  public void scale(float sx, float sy, float sz) {
+    _modelview.scale(sx, sy, sz);
     _setUniforms();
   }
 

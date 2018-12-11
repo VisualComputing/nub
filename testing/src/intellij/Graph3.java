@@ -25,7 +25,7 @@ public class Graph3 extends PApplet {
 
   public void setup() {
     graph = new Graph(width, height);
-    graph.fitBall();
+    graph.fit();
     framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
     frames = new Frame[50];
     for (int i = 0; i < frames.length; i++) {

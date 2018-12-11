@@ -19,7 +19,7 @@
  * Press 'p' to print the current frame rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
- * Press 's' to call scene.fitBallInterpolation().
+ * Press 's' to call scene.fit(1).
  */
 
 import frames.primitives.*;
@@ -41,9 +41,8 @@ boolean animate = true;
 void setup() {
   size(1000, 800, P3D);
   scene = new Scene(this);
-  scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
-  scene.setAnchor(scene.center());
-  scene.fitBall();
+  scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+  scene.fit();
   // create and fill the list of boids
   flock = new ArrayList();
   for (int i = 0; i < initBoidNum; i++)
@@ -95,7 +94,7 @@ void updateAvatar(Frame frame) {
 // Sets current avatar as the eye reference and interpolate the eye to it
 void thirdPerson() {
   scene.eye().setReference(avatar);
-  scene.interpolateTo(avatar);
+  scene.fit(avatar, 1);
 }
 
 // Resets the eye
@@ -103,7 +102,7 @@ void resetEye() {
   // same as: scene.eye().setReference(null);
   scene.eye().resetReference();
   scene.lookAt(scene.center());
-  scene.fitBallInterpolation();
+  scene.fit(1);
 }
 
 // picks up a boid avatar, may be null
@@ -155,7 +154,7 @@ void keyPressed() {
     break;
   case 's':
     if (scene.eye().reference() == null)
-      scene.fitBallInterpolation();
+      scene.fit(1);
     break;
   case 't':
     scene.shiftTimers();

@@ -36,7 +36,7 @@ public class SpaceNavigator extends PApplet {
     scene = new Scene(this);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
-    scene.fitBallInterpolation();
+    scene.fit(1);
     Shape[] shapes = new Shape[50];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene, shape());

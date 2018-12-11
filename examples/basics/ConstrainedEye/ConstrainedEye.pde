@@ -30,7 +30,7 @@ void setup() {
   textFont(myFont);
   scene = new Scene(this);
   scene.setRadius(400);
-  scene.fitBallInterpolation();
+  scene.fit(1);
 
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
@@ -65,7 +65,10 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.moveForward(event.getCount() * 20);
+  if (scene.is3D())
+    scene.moveForward(event.getCount() * 20);
+  else
+    scene.scale(event.getCount() * 20, scene.eye());
 }
 
 void keyPressed() {

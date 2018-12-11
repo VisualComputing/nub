@@ -35,7 +35,7 @@ void setup() {
     shapes[i].setGraphics(caja());
     shapes[i].randomize();
   }
-  scene.fitBallInterpolation();
+  scene.fit(1);
 }
 
 void draw() {
@@ -63,7 +63,10 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.moveForward(event.getCount() * 20);
+  if (scene.is3D())
+    scene.moveForward(event.getCount() * 20);
+  else
+    scene.scale(event.getCount() * 20, scene.eye());
 }
 
 PShape caja() {

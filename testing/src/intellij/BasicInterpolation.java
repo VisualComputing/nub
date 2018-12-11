@@ -26,10 +26,10 @@ public class BasicInterpolation extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(150);
-    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
 
     // interpolation 1. Default eye interpolations
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     interpolator = new Interpolator(scene);
     interpolator.setLoop();
@@ -86,9 +86,9 @@ public class BasicInterpolation extends PApplet {
       interpolator.setSpeed(interpolator.speed() + 0.25f);
 
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
   }
 
   public static void main(String args[]) {

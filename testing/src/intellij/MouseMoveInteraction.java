@@ -23,7 +23,7 @@ public class MouseMoveInteraction extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     Shape shape1 = new Shape(scene) {
       @Override
@@ -57,9 +57,9 @@ public class MouseMoveInteraction extends PApplet {
     if (key == 'f')
       scene.flip();
     if (key == 's')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'f')
-      scene.fitBall();
+      scene.fit();
     if (key == 'l')
       lookAround = !lookAround;
   }

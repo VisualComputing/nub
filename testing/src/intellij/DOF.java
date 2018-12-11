@@ -26,10 +26,10 @@ public class DOF extends PApplet {
     colorMode(HSB, 255);
     srcPGraphics = createGraphics(width, height, P3D);
     scene = new Scene(this, srcPGraphics);
-    //scene.setAperture(Graph.Type.PERSPECTIVE);
-    //scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+    //scene.setType(Graph.Type.PERSPECTIVE);
+    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1000);
-    scene.fitBallInterpolation();
+    scene.fit(1);
 
     models = new Shape[100];
 
@@ -98,13 +98,13 @@ public class DOF extends PApplet {
     if (key == 'l') scene.loadConfig("/home/pierre/config.json");
     if (key == 't')
       if (scene.type() == Graph.Type.ORTHOGRAPHIC)
-        scene.setAperture(Graph.Type.PERSPECTIVE);
+        scene.setType(Graph.Type.PERSPECTIVE);
       else
-        scene.setAperture(Graph.Type.ORTHOGRAPHIC);
+        scene.setType(Graph.Type.ORTHOGRAPHIC);
     if (key == 'f')
-      scene.fitBallInterpolation();
+      scene.fit(1);
     if (key == 'F')
-      scene.fitBall();
+      scene.fit();
   }
 
   @Override

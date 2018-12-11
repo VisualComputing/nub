@@ -28,10 +28,9 @@ public class Flock extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    scene.setAperture(Graph.Type.ORTHOGRAPHIC);
-    scene.setBoundingBox(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
-    scene.setAnchor(scene.center());
-    scene.fitBall();
+    scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene.setFrustum(new Vector(0, 0, 0), new Vector(flockWidth, flockHeight, flockDepth));
+    scene.fit();
     // create and fill the list of boids
     flock = new ArrayList();
     for (int i = 0; i < initBoidNum; i++)
@@ -97,7 +96,7 @@ public class Flock extends PApplet {
   // Sets current avatar as the eye reference and interpolate the eye to it
   public void thirdPerson() {
     scene.eye().setReference(avatar);
-    scene.interpolateTo(avatar);
+    scene.fit(avatar, 0);
   }
 
   // Resets the eye
@@ -105,7 +104,7 @@ public class Flock extends PApplet {
     // same as: scene.eye().setReference(null);
     scene.eye().resetReference();
     scene.lookAt(scene.center());
-    scene.fitBallInterpolation();
+    scene.fit(1);
   }
 
   public void walls() {
@@ -137,7 +136,7 @@ public class Flock extends PApplet {
         break;
       case 's':
         if (scene.eye().reference() == null)
-          scene.fitBallInterpolation();
+          scene.fit(1);
         break;
       case 't':
         scene.shiftTimers();

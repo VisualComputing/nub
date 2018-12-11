@@ -136,8 +136,8 @@ import java.util.List;
 public class Scene extends Graph implements PConstants {
   // Timing
   protected boolean _javaTiming;
-  public static String prettyVersion = "PoC";
-  public static String version = "0";
+  public static String prettyVersion = "0.1.0";
+  public static String version = "1";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -164,6 +164,9 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
    */
   public Scene(PApplet pApplet) {
     this(pApplet, pApplet.g);
@@ -174,9 +177,51 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics) {
     this(pApplet, pGraphics, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, renderer, pApplet.width, pApplet.height)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   */
+  public Scene(PApplet pApplet, String renderer) {
+    this(pApplet, renderer, pApplet.width, pApplet.height);
+  }
+
+  /**
+   * Same as {@code this(pApplet, renderer, width, height, 0, 0)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, PGraphics, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   */
+  public Scene(PApplet pApplet, String renderer, int width, int height) {
+    this(pApplet, renderer, width, height, 0, 0);
+  }
+
+  /**
+   * Same as {@code this(pApplet, pApplet.createGraphics(width, height, renderer), x, y)}.
+   *
+   * @see #Scene(PApplet)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
+   */
+  public Scene(PApplet pApplet, String renderer, int width, int height, int x, int y) {
+    this(pApplet, pApplet.createGraphics(width, height, renderer), x, y);
   }
 
   /**
@@ -197,6 +242,9 @@ public class Scene extends Graph implements PConstants {
    * @see Graph#Graph(int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
+   * @see #Scene(PApplet, String, int, int)
+   * @see #Scene(PApplet, String, int, int, int, int)
+   * @see #Scene(PApplet, String)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
     super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
@@ -204,7 +252,7 @@ public class Scene extends Graph implements PConstants {
     _parent = pApplet;
     _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+    setOriginCorner(x, y);
 
     // 2. Matrix helper
     setMatrixHandler(matrixHandler(pGraphics));
@@ -256,6 +304,13 @@ public class Scene extends Graph implements PConstants {
    */
   public Point originCorner() {
     return _upperLeftCorner;
+  }
+
+  /**
+   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
+   */
+  public void setOriginCorner(float x, float y) {
+    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
   }
 
   // P5 STUFF
@@ -876,6 +931,48 @@ public class Scene extends Graph implements PConstants {
     jsonRot.setFloat(2, quaternion.z());
     jsonRot.setFloat(3, quaternion.w());
     return jsonRot;
+  }
+
+  /**
+   * Transfers the scene frames to the {@code target} scene. Useful to display off-screen auxiliary
+   * viewers of the main scene. Use it in your {@code draw()} function such as:
+   * <p>
+   * <pre>
+   * {@code
+   * Scene scene, auxiliaryScene;
+   * void draw() {
+   *   background(75, 25, 15);
+   *   if (scene.isOffscreen()) {
+   *     scene.beginDraw();
+   *     scene.frontBuffer().background(75, 25, 15);
+   *     scene.traverse();
+   *     scene.endDraw();
+   *     scene.display();
+   *   } else
+   *     scene.traverse();
+   *
+   *   // shift frames to the auxiliaryScene
+   *   scene.shift(auxiliaryScene);
+   *
+   *   if (!scene.isOffscreen())
+   *     scene.beginHUD();
+   *   auxiliaryScene.beginDraw();
+   *   auxiliaryScene.frontBuffer().background(175, 200, 20);
+   *   auxiliaryScene.traverse();
+   *   auxiliaryScene.endDraw();
+   *   auxiliaryScene.display();
+   *   if (!scene.isOffscreen())
+   *     scene.endHUD();
+   *
+   *   // shift frames back to the main scene
+   *   auxiliaryScene.shift(scene);
+   * }
+   * }
+   * </pre>
+   */
+  public void shift(Scene target) {
+    super.shift(target);
+    this._bbEnabled = _bbEnabled || target._bbEnabled;
   }
 
   @Override
@@ -3032,6 +3129,16 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code return track(hid, mouse())}.
+   *
+   * @see #track(String, Point)
+   * @see #mouse()
+   */
+  public Frame track(String hid) {
+    return track(hid, mouse());
+  }
+
+  /**
    * Same as {@code return track(mouse())}.
    *
    * @see #track(Point)
@@ -3042,9 +3149,19 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code cast(mouse())}.
+   * Same as {@code cast(hid, mouse())}.
    *
    * @see #cast(String, Point)
+   * @see #mouse()
+   */
+  public void cast(String hid) {
+    cast(hid, mouse());
+  }
+
+  /**
+   * Same as {@code cast(mouse())}.
+   *
+   * @see #cast(Point)
    * @see #mouse()
    */
   public void cast() {

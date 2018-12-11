@@ -47,9 +47,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
     translate(_graph.width() / 2, _graph.height() / 2);
-    if (_graph.isRightHanded())
-      scale(1, -1);
-    scale(1 / _graph.eye().magnitude(), 1 / _graph.eye().magnitude());
+    scale(1 / _graph.eye().magnitude(), (_graph.isRightHanded() ? -1 : 1) / _graph.eye().magnitude());
     rotate(-o.angle2D());
     translate(-pos.x(), -pos.y());
   }
@@ -63,13 +61,10 @@ public class Java2DMatrixHandler extends MatrixHandler {
   public void beginHUD() {
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
-
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle2D());
-    scale(_graph.eye().magnitude(), _graph.eye().magnitude());
-    if (_graph.isRightHanded())
-      scale(1, -1);
+    scale(_graph.eye().magnitude(), _graph.isRightHanded() ? -_graph.eye().magnitude() : _graph.eye().magnitude());
     translate(-_graph.width() / 2, -_graph.height() / 2);
   }
 
@@ -124,7 +119,7 @@ public class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void scale(float x, float y, float z) {
-    pg().scale(x, y, z);
+  public void scale(float sx, float sy, float sz) {
+    pg().scale(sx, sy, sz);
   }
 }

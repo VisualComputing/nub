@@ -18,15 +18,12 @@ import frames.processing.*;
 
 OctreeNode root;
 Scene scene1, scene2, focus;
-PGraphics canvas1, canvas2;
 
-//Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
-String renderer = P3D;
 int w = 1110;
 int h = 1110;
 
 void settings() {
-  size(w, h, renderer);
+  size(w, h, P3D);
 }
 
 void setup() {
@@ -35,32 +32,30 @@ void setup() {
   root = new OctreeNode(p, Vector.multiply(p, -1.0f));
   root.buildBoxHierarchy(4);
 
-  canvas1 = createGraphics(w, h / 2, P3D);
-  scene1 = new Scene(this, canvas1);
-  scene1.setAperture(Graph.Type.ORTHOGRAPHIC);
+  scene1 = new Scene(this, P3D, w, h /2);
+  scene1.setType(Graph.Type.ORTHOGRAPHIC);
   scene1.enableBoundaryEquations();
-  scene1.fitBallInterpolation();
+  scene1.fit(1);
 
-  canvas2 = createGraphics(w, h / 2, P3D);
   // Note that we pass the upper left corner coordinates where the scene
   // is to be drawn (see drawing code below) to its constructor.
-  scene2 = new Scene(this, canvas2, 0, h / 2);
-  scene2.setAperture(Graph.Type.ORTHOGRAPHIC);
+  scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
+  scene2.setType(Graph.Type.ORTHOGRAPHIC);
   scene2.setRadius(200);
-  scene2.fitBall();
+  scene2.fit();
 }
 
 void draw() {
   handleMouse();
   background(0);
   scene1.beginDraw();
-  canvas1.background(0);
+  scene1.frontBuffer().background(0);
   root.drawIfAllChildrenAreVisible(scene1.frontBuffer(), scene1);
   scene1.endDraw();
   scene1.display();
 
   scene2.beginDraw();
-  canvas2.background(0);
+  scene2.frontBuffer().background(0);
   root.drawIfAllChildrenAreVisible(scene2.frontBuffer(), scene1);
   scene2.frontBuffer().pushStyle();
   scene2.frontBuffer().stroke(255, 255, 0);
@@ -95,9 +90,9 @@ void mouseClicked(MouseEvent event) {
 void keyPressed() {
   if (key == ' ')
     if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setAperture(Graph.Type.ORTHOGRAPHIC);
+      focus.setType(Graph.Type.ORTHOGRAPHIC);
     else
-      focus.setAperture(Graph.Type.PERSPECTIVE);
+      focus.setType(Graph.Type.PERSPECTIVE);
   if (key == 'f') {
     scene1.flip();
     scene2.flip();

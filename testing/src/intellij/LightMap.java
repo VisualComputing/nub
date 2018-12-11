@@ -5,15 +5,13 @@ import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
-import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class ShadowMapping extends PApplet {
+public class LightMap extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Shape[] shapes;
-  Shape light;
-  boolean show = true;
+  //Frame light;
   PGraphics shadowMap;
   float zNear = 50;
   float zFar = 500;
@@ -25,24 +23,34 @@ public class ShadowMapping extends PApplet {
   }
 
   public void setup() {
+    rectMode(CENTER);
     scene = new Scene(this);
     scene.setRadius(max(w, h));
     shapes = new Shape[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene);
-      shapes[i].setGraphics(caja());
+      shapes[i] = new Shape(scene) {
+        @Override
+        public void setGraphics(PGraphics pg) {
+          pg.pushStyle();
+          if (scene.trackedFrame("light") == this) {
+            Scene.drawAxes(pg, 150);
+            pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
+            Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
+
+          } else {
+            pg.strokeWeight(3);
+            pg.stroke(0, 255, 255);
+            pg.fill(255, 0, 0);
+            if (scene.is3D())
+              pg.box(80);
+            else
+              pg.rect(0, 0, 80, 60);
+          }
+          pg.popStyle();
+        }
+      };
       shapes[i].randomize();
     }
-    light = new Shape(scene) {
-      @Override
-      public void setGraphics(PGraphics pg) {
-        pg.pushStyle();
-        Scene.drawAxes(pg, 150);
-        pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-        Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
-        pg.popStyle();
-      }
-    };
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
@@ -54,20 +62,23 @@ public class ShadowMapping extends PApplet {
     // 1. Fill in and display front-buffer
     scene.traverse();
     // 2. Fill in shadow map using the light point of view
-    shadowMap.beginDraw();
-    shadowMap.background(120);
-    scene.traverse(shadowMap, shadowMapType, light, zNear, zFar);
-    shadowMap.endDraw();
-    // 3. Display shadow map
-    if (show) {
+    if (scene.trackedFrame("light") != null) {
+      shadowMap.beginDraw();
+      shadowMap.background(120);
+      scene.traverse(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      shadowMap.endDraw();
+      // 3. Display shadow map
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
     }
   }
 
-  public void mouseMoved() {
-    scene.cast();
+  public void mouseMoved(MouseEvent event) {
+    if (event.isControlDown())
+      scene.cast("light");
+    else
+      scene.cast();
   }
 
   public void mouseDragged() {
@@ -94,8 +105,6 @@ public class ShadowMapping extends PApplet {
       scene.setFOV(PI / 3);
     if (key == '4')
       scene.setFOV(PI / 4);
-    if (key == ' ')
-      show = !show;
     if (key == 'o')
       if (shadowMapType == Graph.Type.ORTHOGRAPHIC)
         shadowMapType = Graph.Type.PERSPECTIVE;
@@ -107,15 +116,7 @@ public class ShadowMapping extends PApplet {
       scene.eye().position().print();
   }
 
-  PShape caja() {
-    PShape caja = scene.is3D() ? createShape(BOX, random(60, 100)) : createShape(RECT, 0, 0, random(60, 100), random(60, 100));
-    caja.setStrokeWeight(3);
-    caja.setStroke(color(random(0, 255), random(0, 255), random(0, 255)));
-    caja.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
-    return caja;
-  }
-
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMapping"});
+    PApplet.main(new String[]{"intellij.LightMap"});
   }
 }

@@ -1262,10 +1262,9 @@ public class Frame {
   /**
    * Returns the magnitude of the frame, defined in the world coordinate system.
    * <p>
-   * The frame magnitude is used to compute
-   * the {@link #projection(Graph.Type, float, float, float, float, boolean)} matrix
-   * when the frame represents an eye, e.g., {@link Graph#eye()} and shadow mapping
-   * computation.
+   * Note that the magnitude is used to compute the frame
+   * {@link #projection(Graph.Type, float, float, float, float, boolean)} which is useful to render a
+   * scene from the frame point-of-view.
    *
    * @see #orientation()
    * @see #position()
@@ -1804,8 +1803,10 @@ public class Frame {
 
   /**
    * Same as {@code return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar}.
+   * <p>
+   * Note that to compute the orthographic matrix the frame {@link #magnitude()} scales the viewing volume width and height.
    *
-   * @see Matrix#perspective(float, float, float, float)
+   * @see Matrix#orthographic(float, float, float, float)
    * @see #perspective(float, float, float, boolean)
    * @see #magnitude()
    * @see #projection(Graph.Type, float, float, float, float, boolean)
@@ -1816,8 +1817,11 @@ public class Frame {
 
   /**
    * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
+   * <p>
+   * Note that to compute the perspective matrix the frame {@link #magnitude()} is taken as: {@code tan(fov / 2)},
+   * where {@code fov} stands for the frustum field-of-view.
    *
-   * @see Matrix#orthographic(float, float, float, float)
+   * @see Matrix#perspective(float, float, float, float)
    * @see #orthographic(float, float, float, float, boolean)
    * @see #magnitude()
    * @see #projection(Graph.Type, float, float, float, float, boolean)
