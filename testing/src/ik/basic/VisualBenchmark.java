@@ -30,7 +30,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 10;
+    int num_joints = 5;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -52,6 +52,7 @@ public class VisualBenchmark extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(num_joints * boneLength / 1.5f);
         scene.fitBallInterpolation();
+        scene.setRightHanded();
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -168,7 +169,7 @@ public class VisualBenchmark extends PApplet {
         scene.drawAxes();
         if(solve) {
             for(Solver solver : solvers){
-                if(solver instanceof TransposeSolver)
+                //if(solver instanceof TransposeSolver)
                     solver.solve();
             }
         }

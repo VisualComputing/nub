@@ -65,7 +65,7 @@ public class TransposeSolver extends Solver{
         if (_target == null || _chain.size() < 2) return true;
         SimpleMatrix error = SimpleMatrix.wrap(
                 Util.vectorToMatrix(Vector.subtract(_target.position() , endEffector().position()), head().graph().is3D()));
-        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() ) );
+        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector(), _target.position() ) );
 
         delta = J.transpose().mult(error);
 

@@ -70,12 +70,16 @@ public class PseudoInverseSolver extends Solver{
         //As no target is specified there is no need to perform an iteration
         if (_target == null || _chain.size() < 2) return true;
         SimpleMatrix error = SimpleMatrix.wrap(
-                Util.vectorToMatrix(Util.clampMagnitude(Vector.subtract(_target.position() , endEffector().position()), d_max/2.f), head().graph().is3D()));
-        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() ) );
+                Util.vectorToMatrix(Vector.subtract(_target.position() , endEffector().position()), head().graph().is3D()));
+        J = SimpleMatrix.wrap( Util.numericalJacobian( _chain, endEffector() ) );
+        System.out.println("J: " + J);
+        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position()) );
         System.out.println("J: " + J);
 
         delta = SimpleMatrix.wrap(Util.solvePseudoinverse(J.getDDRM(), error.getDDRM()));
-        delta.scale(0.1f);
+        //delta.scale(0.001f);
+
+
         System.out.println("delta: " + delta.transpose());
 
         System.out.println("cross: " + Vector.cross(new Vector(1,0,0), new Vector(0,0,1), null));
