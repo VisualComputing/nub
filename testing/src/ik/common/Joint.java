@@ -70,12 +70,15 @@ public class Joint extends Frame{
         if (constraint() != null) {
             scene.drawConstraint(this);
         }
+        pg.stroke(255);
+        //scene.drawCross(this);
         //if (scene.is3D()) scene.drawAxes(_radius*2);
         if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
     public void setRadius(float radius){
         _radius = radius;
+        _threshold = _radius*2;
     }
     public void setName(String name){
         _name = name;

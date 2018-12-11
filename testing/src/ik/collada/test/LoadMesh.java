@@ -81,14 +81,14 @@ public class LoadMesh extends PApplet {
     public void draw() {
         skinning.updateParams();
         background(0);
-        //lights();
-        //shader(skinning.shader);
-        //shape(model.getModel());
+        lights();
+        shader(skinning.shader);
+        shape(model.getModel());
         resetShader();
-        //hint(DISABLE_DEPTH_TEST);
+        hint(DISABLE_DEPTH_TEST);
         scene.drawAxes();
         scene.traverse();
-        //hint(ENABLE_DEPTH_TEST);
+        hint(ENABLE_DEPTH_TEST);
     }
 
     @Override
