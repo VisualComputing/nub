@@ -47,7 +47,7 @@ public class AuxiliaryViews extends PApplet {
                 pg.popStyle();
             }
         };
-        scene.fitBallInterpolation();
+        scene.fit(1);
         //create an auxiliary view per Orthogonal Plane
         views = new ArrayList<AuxiliaryView>();
         //create an auxiliary view to look at the XY Plane
@@ -148,9 +148,9 @@ public class AuxiliaryViews extends PApplet {
 
     public void keyPressed() {
         if (key == '3')
-            scene.setAperture(PI / 3);
+            scene.setFOV(PI / 3);
         if (key == '4')
-            scene.setAperture(PI / 4);
+            scene.setFOV(PI / 4);
         if (key == ' ')
             for(AuxiliaryView view : views)
                 view.setEnabled(!view.enabled());

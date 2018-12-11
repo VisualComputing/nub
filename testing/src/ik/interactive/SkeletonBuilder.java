@@ -63,7 +63,7 @@ public class SkeletonBuilder extends PApplet{
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
         new InteractiveJoint(scene, radius).setRoot(true);
         // = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
-        //scene.fitBallInterpolation();
+        //scene.fit(1);
         //create an auxiliary view per Orthogonal Plane
         views = new MultipleViews(scene);
         //create an auxiliary view to look at the XY Plane

@@ -46,8 +46,8 @@ public class InteractiveFish extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setAperture(PI / 3);
-        scene.fitBallInterpolation();
+        scene.setFOV(PI / 3);
+        scene.fit(1);
         target = createTarget(targetRadius);
 
         model = loadShape(sketchPath() + shapePath);

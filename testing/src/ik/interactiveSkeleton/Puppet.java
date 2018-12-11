@@ -41,9 +41,9 @@ public class Puppet extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setAperture(PI / 3);
+        scene.setFOV(PI / 3);
         scene.setRadius(boneLenght * 5);
-        scene.fitBallInterpolation();
+        scene.fit(1);
         scene.disableBackBuffer();
 
         targets = new HashMap<>();

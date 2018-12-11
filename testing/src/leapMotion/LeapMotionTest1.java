@@ -28,9 +28,9 @@ public class LeapMotionTest1 extends PApplet {
 
     public void setup() {
         scene = new Scene(this);
-        scene.setAperture(PI / 3);
+        scene.setFOV(PI / 3);
         scene.setRadius(1500);
-        scene.fitBallInterpolation();
+        scene.fit(1);
         Shape[] shapes = new Shape[50];
         for (int i = 0; i < shapes.length; i++) {
             shapes[i] = new Shape(scene, shape());

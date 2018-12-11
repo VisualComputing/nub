@@ -38,7 +38,7 @@ public class ConePolygon extends PApplet{
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(num_joints * boneLength / 1.5f);
-        scene.fitBallInterpolation();
+        scene.fit(1);
         scene.disableBackBuffer();
 
 

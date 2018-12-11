@@ -54,7 +54,7 @@ public class LoadMesh extends PApplet {
         scene.setRadius(model.getModel().getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
-        scene.fitBallInterpolation();
+        scene.fit(1);
         skinning = new SkinningAnimationModel(model);
 
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
@@ -81,14 +81,14 @@ public class LoadMesh extends PApplet {
     public void draw() {
         skinning.updateParams();
         background(0);
-        lights();
-        shader(skinning.shader);
-        shape(model.getModel());
+        //lights();
+        //shader(skinning.shader);
+        //shape(model.getModel());
         resetShader();
-        hint(DISABLE_DEPTH_TEST);
+        //hint(DISABLE_DEPTH_TEST);
         scene.drawAxes();
         scene.traverse();
-        hint(ENABLE_DEPTH_TEST);
+        //hint(ENABLE_DEPTH_TEST);
     }
 
     @Override
