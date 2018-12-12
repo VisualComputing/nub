@@ -34,9 +34,7 @@ public class MiniMap2 extends PApplet {
     // set a detached eye frame
 
     scene.setEye(new Frame());
-    if (renderer == P3D)
-      scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
-    else
+    if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
     models = new Shape[6];

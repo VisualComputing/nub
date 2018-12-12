@@ -43,7 +43,6 @@ public class ShadowMapping extends PApplet {
         pg.popStyle();
       }
     };
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
     shadowMap = createGraphics(w / 2, h / 2, P3D);

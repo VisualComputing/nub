@@ -233,7 +233,9 @@ public class Graph {
 
     setFrustum(new Vector(), 100);
     setEye(new Frame(this));
-    setType(type, (float) Math.PI / 3);
+    setType(type);
+    if (is3D())
+      setFOV((float) Math.PI / 3);
     fit();
 
     setMatrixHandler(new MatrixHandler(this));
@@ -345,26 +347,10 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setType(type); setFOV(fov)}.
-   *
-   * @see #setType(Type)
-   * @see #setFOV(float)
-   * @see #fov()
-   * @see #hfov()
-   * @see #setHFOV(float)
-   * @see #togglePerspective()
-   */
-  public void setType(Type type, float fov) {
-    setType(type);
-    setFOV(fov);
-  }
-
-  /**
    * Shifts the graph {@link #type()} between {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} while trying
    * to keep the {@link #fov()}. Only meaningful if graph {@link #is3D()}.
    *
    * @see #setType(Type)
-   * @see #setType(Type, float)
    * @see #setFOV(float)
    * @see #fov()
    * @see #hfov()
@@ -381,35 +367,43 @@ public class Graph {
   /**
    * Sets the {@link #eye()} {@link Frame#magnitude()} (which is used to compute the
    * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix),
-   * according to {@code fov} (field-of-view) which is expressed in radians.
+   * according to {@code fov} (field-of-view) which is expressed in radians. Meaningless
+   * if the graph {@link #is2D()}. If the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}
+   * it will match the perspective projection obtained using {@code fov} of an image
+   * centered at the world XY plane from the eye current position.
    * <p>
-   * Computed as {@code 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width())}
-   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}, and as {@code tan(fov/2)} ,
-   * otherwise (i.e., {@link Type#ORTHOGRAPHIC} and {@link Type#TWO_D} graph types).
+   * Computed as as {@code Math.tan(fov/2)} if the graph type is {@link Type#PERSPECTIVE} and as
+   * {@code Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width()}
+   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.
    *
    * @see #fov()
    * @see #hfov()
    * @see #setHFOV(float)
-   * @see #setType(Type, float)
+   * @see #setType(Type)
    */
   public void setFOV(float fov) {
-    eye().setMagnitude(type() == Type.ORTHOGRAPHIC ?
-        2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) * (float) Math.tan(fov / 2) / width() :
-        (float) Math.tan(fov / 2));
+    if (is2D()) {
+      System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
+      return;
+    }
+    eye().setMagnitude(type() == Type.PERSPECTIVE ?
+        (float) Math.tan(fov / 2) :
+        (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width());
   }
 
   /**
-   * Retrieves the graph field-of-view in radians. The value is related to the {@link #eye()}
+   * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
+   * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
    * {@link Frame#magnitude()} (which in turn is used to compute the
    * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix) as follows:
    * <p>
    * <ol>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
    * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
-   * <li>It returns {@code 2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
-   * otherwise ({@link Type#ORTHOGRAPHIC} or {@link Type#TWO_D} cases).</li>
+   * <li>It returns {@code 2 * Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
+   * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.</li>
    * </ol>
-   * Set this value with {@link #setType(Type, float)}, {@link #setFOV(float)} or {@link #setHFOV(float)}.
+   * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
    * @see Frame#magnitude()
    * @see Frame#perspective(float, float, float, boolean)
@@ -420,6 +414,10 @@ public class Graph {
    * @see #setFOV(float)
    */
   public float fov() {
+    if (is2D()) {
+      System.out.println("Warning: fov() is meaningless in 2D. Use eye().magnitude() instead");
+      return 1;
+    }
     return type() == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude()) :
         2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
@@ -448,11 +446,14 @@ public class Graph {
    * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Frame#magnitude()} otherwise.
    *
    * @see #fov()
-   * @see #setType(Type, float)
    * @see #setHFOV(float)
    * @see #setFOV(float)
    */
   public float hfov() {
+    if (is2D()) {
+      System.out.println("Warning: hfov() is meaningless in 2D. Use eye().magnitude() instead");
+      return 1;
+    }
     return type() == Type.PERSPECTIVE ?
         2 * (float) Math.atan(eye().magnitude() * aspectRatio()) :
         2 * (float) Math.atan(eye().magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));

@@ -16,14 +16,14 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = false;
+  boolean onScreen = true;
   boolean interactiveEye;
 
   int w = 1200;
   int h = 1200;
 
   //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   public void settings() {
     size(w, h, renderer);
@@ -33,10 +33,8 @@ public class MiniMap extends PApplet {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
     // set a detached eye frame
-    //scene.setEye(new Frame());
-    if (renderer == P3D)
-      scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
-    else
+    scene.setEye(new Frame());
+    if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
     models = new Shape[6];
