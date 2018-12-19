@@ -33,14 +33,14 @@ void setup() {
   root.buildBoxHierarchy(4);
 
   scene1 = new Scene(this, P3D, w, h /2);
-  scene1.setType(Graph.Type.ORTHOGRAPHIC);
+  scene1.togglePerspective();
   scene1.enableBoundaryEquations();
   scene1.fit(1);
 
   // Note that we pass the upper left corner coordinates where the scene
   // is to be drawn (see drawing code below) to its constructor.
   scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
-  scene2.setType(Graph.Type.ORTHOGRAPHIC);
+  scene2.togglePerspective();
   scene2.setRadius(200);
   scene2.fit();
 }
@@ -89,10 +89,7 @@ void mouseClicked(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ')
-    if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else
-      focus.setType(Graph.Type.PERSPECTIVE);
+    focus.togglePerspective();
   if (key == 'f') {
     scene1.flip();
     scene2.flip();

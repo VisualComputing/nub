@@ -12,8 +12,8 @@ import frames.primitives.*;
 import frames.core.*;
 import frames.processing.*;
 
-PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, colorShader, horizontalShader;
-PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, colorGraphics, horizontalGraphics;
+PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, depthShader, horizontalShader;
+PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
 int startTime;
@@ -34,10 +34,9 @@ public void setup() {
   }
   scene.fit(1);
 
-  colorShader = loadShader("colorfrag.glsl");
-  colorShader.set("maxDepth", scene.radius()*2);
-  colorGraphics = createGraphics(width, height, P3D);
-  colorGraphics.shader(colorShader);
+  depthShader = loadShader("depth.glsl");
+  depthPGraphics = createGraphics(width, height, P3D);
+  depthPGraphics.shader(depthShader);
 
   edgeShader = loadShader("edge.glsl");
   edgeGraphics = createGraphics(width, height, P3D);
@@ -93,13 +92,15 @@ public void draw() {
   scene.endDraw();
 
   if (bdepth){
-    colorGraphics.beginDraw();
-    colorGraphics.background(0);
+    depthPGraphics.beginDraw();
+    depthPGraphics.background(0);
+    depthShader.set("near", scene.zNear());
+    depthShader.set("far", scene.zFar());
     //Note that when drawing the shapes into an arbitrary PGraphics
     //the eye position of the main PGraphics is used
-    scene.traverse(colorGraphics);
-    colorGraphics.endDraw();
-    drawGraphics = colorGraphics;
+    scene.traverse(depthPGraphics);
+    depthPGraphics.endDraw();
+    drawGraphics = depthPGraphics;
   }
   if (bkaleido) {
     kaleidoGraphics.beginDraw();
@@ -126,7 +127,7 @@ public void draw() {
   if (bdof) {
     dofGraphics.beginDraw();
     dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
-    dofShader.set("tDepth", colorGraphics);
+    dofShader.set("tDepth", depthPGraphics);
     dofShader.set("tex", drawGraphics);
     dofGraphics.image(graphics, 0, 0);
     dofGraphics.endDraw();

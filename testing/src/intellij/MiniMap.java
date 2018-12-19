@@ -16,14 +16,14 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = true;
+  boolean onScreen = false;
   boolean interactiveEye;
 
   int w = 1200;
   int h = 1200;
 
   //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P2D;
+  String renderer = P3D;
 
   public void settings() {
     size(w, h, renderer);
@@ -155,7 +155,7 @@ public class MiniMap extends PApplet {
       minimap.drawAxes();
       minimap.traverse();
       // draw scene eye
-      minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
+      minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 125);
       minimap.frontBuffer().stroke(0, 0, 255);
       minimap.frontBuffer().strokeWeight(2);
       minimap.drawEye(scene);

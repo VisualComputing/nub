@@ -11,7 +11,7 @@ import processing.opengl.PShader;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;
-  PGraphics srcPGraphics, depthPGraphics, dofPGraphics;
+  PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
   Shape[] models;
   int mode = 2;
@@ -24,10 +24,7 @@ public class DOF extends PApplet {
   @Override
   public void setup() {
     colorMode(HSB, 255);
-    srcPGraphics = createGraphics(width, height, P3D);
-    scene = new Scene(this, srcPGraphics);
-    //scene.setType(Graph.Type.PERSPECTIVE);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene = new Scene(this, P3D, width, height);
     scene.setRadius(1000);
     scene.fit(1);
 
@@ -38,8 +35,10 @@ public class DOF extends PApplet {
       scene.randomize(models[i]);
     }
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth.glsl");
-    depthShader.set("maxDepth", scene.radius() * 2);
+    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth_linear.glsl");
+    //depthShader.set("maxDepth", scene.radius() * 2);
+    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
@@ -64,6 +63,8 @@ public class DOF extends PApplet {
     // 2. Draw into depth buffer
     depthPGraphics.beginDraw();
     depthPGraphics.background(0);
+    depthShader.set("near", scene.zNear());
+    depthShader.set("far", scene.zFar());
     scene.traverse(depthPGraphics);
     depthPGraphics.endDraw();
 

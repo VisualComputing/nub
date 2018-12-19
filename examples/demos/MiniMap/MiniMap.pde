@@ -73,7 +73,7 @@ void setup() {
   minimap.setEye(new Frame());
   minimap.setRadius(2000);
   if (renderer == P3D)
-    minimap.setType(Graph.Type.ORTHOGRAPHIC);
+    minimap.togglePerspective();
   minimap.fit(1);
   // detached frame
   sceneEye = new Frame();

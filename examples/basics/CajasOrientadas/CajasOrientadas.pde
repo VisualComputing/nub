@@ -23,7 +23,7 @@ void setup() {
   size(800, 800, P3D);
   scene = new Scene(this);
   scene.setRadius(200);
-  scene.setType(Graph.Type.ORTHOGRAPHIC);
+  scene.togglePerspective();
   scene.fit();
   esfera = new Sphere();
   esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
@@ -75,9 +75,7 @@ void keyPressed() {
   if (key == 'p')
     drawShooterTarget = !drawShooterTarget;
   if (key == 'e')
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
-  if (key == 'E')
-    scene.setType(Graph.Type.PERSPECTIVE);
+    scene.togglePerspective();
   if (key == 's')
     scene.fit(1);
   if (key == 'S')

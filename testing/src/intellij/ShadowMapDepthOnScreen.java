@@ -1,6 +1,8 @@
 package intellij;
 
 import frames.core.Graph;
+import frames.primitives.Quaternion;
+import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.processing.Shape;
 import processing.core.PApplet;
@@ -8,12 +10,13 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-public class ShadowMap extends PApplet {
+public class ShadowMapDepthOnScreen extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Shape[] shapes;
   PGraphics shadowMap;
   PShader depthShader;
+  boolean one;
   float zNear = 50;
   float zFar = 1000;
   int w = 1000;
@@ -52,11 +55,14 @@ public class ShadowMap extends PApplet {
 
         @Override
         public void interact(Object... gesture) {
-          if (scene.trackedFrame("light") == this && gesture.length == 1)
+          if (gesture.length == 1)
             if (gesture[0] instanceof Integer)
               if (zFar + (Integer) gesture[0] > zNear) {
                 zFar += (Integer) gesture[0];
-                depthShader.set("far", zFar);
+                if (one)
+                  depthShader.set("maxDepth", zFar - zNear);
+                else
+                  depthShader.set("far", zFar);
               }
         }
       };
@@ -66,18 +72,36 @@ public class ShadowMap extends PApplet {
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth.glsl");
-    depthShader.set("near", zNear);
-    depthShader.set("far", zFar);
     shadowMap = createGraphics(w / 2, h / 2, P3D);
-    shadowMap.shader(depthShader);
+    setShader(false);
 
     scene.setTrackedFrame("light", shapes[(int) random(0, shapes.length - 1)]);
+    scene.trackedFrame("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedFrame("light").position()));
+  }
+
+  public void setShader() {
+    setShader(true);
+  }
+
+  public void setShader(boolean one_) {
+    one = one_;
+    if (one) {
+      depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth.glsl");
+      depthShader.set("maxDepth", 10);
+      println("version 1 of the shader");
+    } else {
+      depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
+      depthShader.set("near", zNear);
+      depthShader.set("far", zFar);
+      println("version 2 of the shader");
+    }
+    shadowMap.shader(depthShader);
   }
 
   public void draw() {
     background(75, 25, 15);
     // 1. Fill in and display front-buffer
+    scene.drawAxes();
     scene.traverse();
     // 2. Fill in shadow map using the light point of view
     if (scene.trackedFrame("light") != null) {
@@ -110,7 +134,9 @@ public class ShadowMap extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown())
-      scene.defaultHIDControl(event.getCount() * 20);
+      // application control of the light: set the zfar plan of the light
+      // it is implemented as a custom behavior by frame.interact()
+      scene.control("light", event.getCount() * 20);
     else
       scene.scale(event.getCount() * 20);
   }
@@ -118,13 +144,17 @@ public class ShadowMap extends PApplet {
   public void keyPressed() {
     if (key == 'f')
       scene.fitFOV(1);
-    if (key == 'o')
-      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-    if (key == 't')
+    if (key == 'o') {
+      one = !one;
+      setShader(one);
+    }
+    if (key == 'p')
       scene.togglePerspective();
+    if (key == 't')
+      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMap"});
+    PApplet.main(new String[]{"intellij.ShadowMapDepthOnScreen"});
   }
 }

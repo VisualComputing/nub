@@ -38,7 +38,6 @@ void setup() {
   }
 
   depthShader = loadShader("depth.glsl");
-  depthShader.set("maxDepth", scene.radius() * 2);
   depthPGraphics = createGraphics(width, height, P3D);
   depthPGraphics.shader(depthShader);
 
@@ -62,6 +61,8 @@ void draw() {
   // 2. Draw into depth buffer
   depthPGraphics.beginDraw();
   depthPGraphics.background(0);
+  depthShader.set("near", scene.zNear());
+  depthShader.set("far", scene.zFar());
   scene.traverse(depthPGraphics);
   depthPGraphics.endDraw();
 
