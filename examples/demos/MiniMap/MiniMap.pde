@@ -159,7 +159,7 @@ void draw() {
     minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
     minimap.frontBuffer().stroke(0, 0, 255);
     minimap.frontBuffer().strokeWeight(2);
-    minimap.drawEye(scene);
+    minimap.drawFrustum(scene);
     minimap.endDraw();
     minimap.display();
     if (!scene.isOffscreen())

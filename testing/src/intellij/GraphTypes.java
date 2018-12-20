@@ -200,7 +200,7 @@ public class GraphTypes extends PApplet {
     auxCanvas.pushStyle();
     auxCanvas.stroke(255, 255, 0);
     auxCanvas.fill(255, 255, 0, 160);
-    auxScene.drawEye(scene);
+    auxScene.drawFrustum(scene);
     auxCanvas.popStyle();
     //axes
     auxCanvas.pushMatrix();

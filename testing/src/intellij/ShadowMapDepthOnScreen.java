@@ -38,7 +38,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
           if (scene.trackedFrame("light") == this) {
             Scene.drawAxes(pg, 150);
             pg.fill(0, scene.isTrackedFrame(this) ? 255 : 0, 255, 120);
-            Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
+            Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
 
           } else {
             if (pg == shadowMap)

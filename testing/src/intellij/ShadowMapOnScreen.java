@@ -39,7 +39,7 @@ public class ShadowMapOnScreen extends PApplet {
         pg.pushStyle();
         Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
-        Scene.drawEye(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         pg.popStyle();
       }
     };

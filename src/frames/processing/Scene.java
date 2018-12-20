@@ -106,7 +106,7 @@ import java.util.List;
  * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than this one) can be drawn with
- * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
+ * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
  * <p>
  * An {@link Interpolator} path may be drawn with code like this:
@@ -2244,75 +2244,78 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Frame)})
-   * and then calls {@link #drawEye(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
+   * and then calls {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
    *
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public void drawEye(Graph graph) {
+  public void drawFrustum(Graph graph) {
     frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEye(frontBuffer(), graph);
+    drawFrustum(frontBuffer(), graph);
     frontBuffer().popMatrix();
   }
 
   /**
-   * Draws a representations of the {@code graph.eye()} onto {@code pGraphics}.
+   * Draws a representation of the viewing frustum onto {@code pGraphics} according to
+   * {@code graph.eye()} and {@code graph.type()}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public void drawEye(PGraphics pGraphics, Graph graph) {
+  public void drawFrustum(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicEye(pGraphics, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        _drawOrthographicFrustum(pGraphics, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
-        _drawPerspectiveEye(pGraphics, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        _drawPerspectiveFrustum(pGraphics, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
     }
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
+   * Same as {@code drawFrustum(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
    *
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
-    drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
+  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
+    drawFrustum(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
   }
 
   /**
-   * Draws a representation of the eye according to the frustum parameters and the frame {@link Frame#magnitude()}.
-   * Use it in conjunction with {@link #traverse(PGraphics, Type, Frame, float, float, boolean)} as when
-   * defining a shadow map.
+   * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
+   * {@code type}, eye {@link Frame#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
+   * whether or not the scene is {@code leftHanded}.
+   * <p>
+   * Use it in conjunction with {@link #traverse(PGraphics, Type, Frame, float, float, boolean)} as when rendering
+   * a shadow map.
    *
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
    */
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
     switch (type) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicEye(pGraphics, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
+        _drawOrthographicFrustum(pGraphics, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
         break;
       case PERSPECTIVE:
-        _drawPerspectiveEye(pGraphics, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar, eyeBuffer);
+        _drawPerspectiveFrustum(pGraphics, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar, eyeBuffer);
         break;
     }
   }
 
-  protected static void _drawOrthographicEye(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
+  protected static void _drawOrthographicFrustum(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
     boolean threeD = pGraphics.is3D();
@@ -2401,7 +2404,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
-  protected static void _drawPerspectiveEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
+  protected static void _drawPerspectiveFrustum(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
     boolean lh = aspectRatio < 0;
@@ -2548,7 +2551,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
    * <p>
-   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
+   * This method should be used in conjunction with {@link #drawFrustum(PGraphics, Graph)}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *

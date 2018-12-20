@@ -73,7 +73,7 @@ public class MiniMap2 extends PApplet {
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
-        minimap.drawEye(pg, scene);
+        minimap.drawFrustum(pg, scene);
         pg.popStyle();
       }
     };

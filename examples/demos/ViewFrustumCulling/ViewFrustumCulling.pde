@@ -7,7 +7,7 @@
  *
  * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
  * A second viewer displays an external view of the scene that exhibits the clipping
- * (using scene.drawEye(Scene otherScene) to display the frustum).
+ * (using scene.drawFrustum(Scene otherScene) to display the frustum).
  *
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
@@ -60,7 +60,7 @@ void draw() {
   scene2.frontBuffer().pushStyle();
   scene2.frontBuffer().stroke(255, 255, 0);
   scene2.frontBuffer().fill(255, 255, 0, 160);
-  scene2.drawEye(scene1);
+  scene2.drawFrustum(scene1);
   scene2.frontBuffer().popStyle();
   scene2.endDraw();
   scene2.display();

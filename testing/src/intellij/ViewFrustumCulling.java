@@ -60,7 +60,7 @@ public class ViewFrustumCulling extends PApplet {
     scene2.frontBuffer().pushStyle();
     scene2.frontBuffer().stroke(255, 255, 0);
     scene2.frontBuffer().fill(255, 255, 0, 160);
-    scene2.drawEye(scene1);
+    scene2.drawFrustum(scene1);
     scene2.frontBuffer().popStyle();
     scene2.endDraw();
     scene2.display();
