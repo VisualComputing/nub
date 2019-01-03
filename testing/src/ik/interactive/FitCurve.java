@@ -58,7 +58,6 @@ public class FitCurve {
         }
     }
 
-
     public static float PIXEL_ERROR = 5.f;
     public static float SQ_ERROR = 8.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
@@ -66,26 +65,36 @@ public class FitCurve {
 
     protected List<Vector> _points = new ArrayList<Vector>();
     protected List<Float> _distances = new ArrayList<Float>();
-    protected List<Bezier> _curves;
+    protected List<Bezier> _curves = new ArrayList<Bezier>();
 
     protected int _split = -1;
+    protected boolean _changed = false;
+    protected boolean _started = false;
+
+    public boolean started(){
+        return _started;
+    }
+
+    public void setStarted(boolean started){
+        _started = started;
+    }
 
     public void add(float x, float y){
         Vector point = new Vector(x,y);
-        System.out.println("fitCurve.add(" + point.x() + "f," + point.y() + "f);");
-
         //Add only if point is far enough
         int n = _points.size();
         if(n < 1){
             if(_points == null) _points = new ArrayList<Vector>();
             _points.add(point);
             _distances.add(0.f);
+            _changed = true;
             return;
         }
         float dist = Vector.distance(point, _points.get(n-1));
         if(dist < PIXEL_ERROR) return;
         _points.add(point);
         _distances.add(_distances.get(_distances.size()-1) + dist);
+        _changed = true;
     }
 
     protected float[] _findParameters(int first, int last){
@@ -98,6 +107,8 @@ public class FitCurve {
     }
 
     public void fitCurve(){
+        if(!_changed || _points.size() < 2) return;
+
         _curves = new ArrayList<Bezier>();
         Vector t1 = Vector.subtract(_points.get(1), _points.get(0)).normalize(null);
         Vector t2 = Vector.subtract(_points.get(_points.size() - 2), _points.get(_points.size() - 1)).normalize(null);
