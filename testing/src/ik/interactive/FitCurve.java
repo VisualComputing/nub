@@ -1,6 +1,8 @@
 package ik.interactive;
 
 import frames.primitives.Vector;
+import processing.core.PGraphics;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +47,7 @@ public class FitCurve {
 
         /*Casteljau's Algorithm*/
         public static Vector evaluate(Vector[] points, float u){
-            if(points.length == 0)
+            if(points.length == 1)
                 return points[0];
             Vector[] new_points = new Vector[points.length - 1];
             for(int i = 0; i < new_points.length; i++){
@@ -57,19 +59,21 @@ public class FitCurve {
     }
 
 
-    public static float PIXEL_ERROR = 2.f;
-    public static float SQ_ERROR = 4.f;
+    public static float PIXEL_ERROR = 5.f;
+    public static float SQ_ERROR = 8.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
     public static int MAX_ITERATIONS = 4;
 
-    protected List<Vector> _points;
-    protected List<Float> _distances;
+    protected List<Vector> _points = new ArrayList<Vector>();
+    protected List<Float> _distances = new ArrayList<Float>();
     protected List<Bezier> _curves;
 
     protected int _split = -1;
 
     public void add(float x, float y){
         Vector point = new Vector(x,y);
+        System.out.println("fitCurve.add(" + point.x() + "f," + point.y() + "f);");
+
         //Add only if point is far enough
         int n = _points.size();
         if(n < 1){
@@ -88,7 +92,7 @@ public class FitCurve {
         float[] u = new float[last - first + 1];
         float length = _distances.get(last) - _distances.get(first);
         for (int i = first; i <= last; i++) {
-            u[i] = (_distances.get(i) -  _distances.get(first))/ length;
+            u[i - first] = (_distances.get(i) -  _distances.get(first))/ length;
         }
         return u;
     }
@@ -96,7 +100,7 @@ public class FitCurve {
     public void fitCurve(){
         _curves = new ArrayList<Bezier>();
         Vector t1 = Vector.subtract(_points.get(1), _points.get(0)).normalize(null);
-        Vector t2 = Vector.subtract(_points.get(2), _points.get(3)).normalize(null);
+        Vector t2 = Vector.subtract(_points.get(_points.size() - 2), _points.get(_points.size() - 1)).normalize(null);
         fitCubic(0, _points.size() - 1, t1, t2);
     }
 
@@ -111,6 +115,7 @@ public class FitCurve {
             curve.addPoint(2, Vector.add(_points.get(last), Vector.multiply(t2, dist)));
             curve.addPoint(3, _points.get(last));
             _curves.add(curve);
+            return;
         }
         //Compute chord length parametrization
         float[] u = _findParameters(first, last);
@@ -118,6 +123,8 @@ public class FitCurve {
         Bezier curve = generateBezier(first, last, u, t1, t2);
         //Get error
         float max_error = maxError(first, last, curve, u);
+        int center = _split;
+
         if(max_error < SQ_ERROR){
             _curves.add(curve);
             return;
@@ -136,13 +143,13 @@ public class FitCurve {
         }
 
         /* Fitting failed -- split at max error point and fit recursively */
-        Vector t_center = Vector.subtract(_points.get(_split - 1), _points.get(_split));
-        t_center.add(Vector.subtract(_points.get(_split), _points.get(_split + 1)));
+        Vector t_center = Vector.subtract(_points.get(center - 1), _points.get(center));
+        t_center.add(Vector.subtract(_points.get(center), _points.get(center + 1)));
         t_center.multiply(0.5f);
         t_center.normalize();
-        fitCubic(first, _split, t1, t_center);
+        fitCubic(first, center, t1, t_center);
         t_center.multiply(-1);
-        fitCubic(_split, last, t_center, t2);
+        fitCubic(center, last, t_center, t2);
     }
 
     public float maxError(int first, int last, Bezier curve, float[] u) {
@@ -180,7 +187,7 @@ public class FitCurve {
             C[0][1] += Vector.dot(A[i][0],A[i][1]);
             C[1][0] = C[0][1];
             C[1][1] += Vector.dot(A[i][1],A[i][1]);
-            Vector rhs = _points.get(i).get();
+            Vector rhs = _points.get(first + i).get();
             rhs.subtract(Vector.multiply(_points.get(first), Bezier.B03(u[i])));
             rhs.subtract(Vector.multiply(_points.get(first), Bezier.B13(u[i])));
             rhs.subtract(Vector.multiply(_points.get(last), Bezier.B23(u[i])));
@@ -208,8 +215,8 @@ public class FitCurve {
             /* fall back on standard (probably inaccurate) formula, and subdivide further if needed. */
             float dist = segLength / 3.f;
             curve.addPoint(0, _points.get(first).get());
-            curve.addPoint(1, Vector.multiply(t1, dist));
-            curve.addPoint(2, Vector.multiply(t2, dist));
+            curve.addPoint(1, Vector.add(_points.get(first), Vector.multiply(t1, dist)));
+            curve.addPoint(2, Vector.add(_points.get(last), Vector.multiply(t2, dist)));
             curve.addPoint(3, _points.get(last).get());
             return curve;
         }
@@ -219,10 +226,9 @@ public class FitCurve {
         /*  Control points 1 and 2 are positioned an alpha distance out */
         /*  on the tangent vectors, left and right, respectively */
         curve.addPoint(0, _points.get(first).get());
-        curve.addPoint(1, Vector.multiply(t1, alpha_l));
-        curve.addPoint(2, Vector.multiply(t2, alpha_r));
+        curve.addPoint(1, Vector.add(_points.get(first), Vector.multiply(t1, alpha_l)));
+        curve.addPoint(2, Vector.add(_points.get(last), Vector.multiply(t2, alpha_r)));
         curve.addPoint(3, _points.get(last).get());
-
         return curve;
     }
 
@@ -259,7 +265,7 @@ public class FitCurve {
 
         /* Generate control vertices for Q'' */
         for (int i = 0; i <= 1; i++) {
-            Q1[i] = Vector.multiply(Vector.subtract(Q1[i+1], Q1[i]), 2);
+            Q2[i] = Vector.multiply(Vector.subtract(Q1[i+1], Q1[i]), 2);
         }
 
         /* Compute Q'(u) and Q''(u)	*/
@@ -275,5 +281,26 @@ public class FitCurve {
         /* u = u - f(u)/f'(u) */
         u_prime = u - (numerator/denominator);
         return u_prime;
+    }
+
+    public void drawCurves(PGraphics pg){
+        if(_curves == null) return;
+        pg.pushStyle();
+        pg.noFill();
+        for(Bezier curve : _curves){
+            pg.stroke(255);
+            pg.strokeWeight(4);
+            pg.bezier(curve._points[0].x(), curve._points[0].y(),
+                    curve._points[1].x(), curve._points[1].y(),
+                    curve._points[2].x(), curve._points[2].y(),
+                    curve._points[3].x(), curve._points[3].y());
+            pg.strokeWeight(3);
+            pg.stroke(255,0,0);
+            pg.point(curve._points[0].x(), curve._points[0].y());
+            pg.point(curve._points[1].x(), curve._points[1].y());
+            pg.point(curve._points[2].x(), curve._points[2].y());
+            pg.point(curve._points[3].x(), curve._points[3].y());
+        }
+        pg.popStyle();
     }
 }
