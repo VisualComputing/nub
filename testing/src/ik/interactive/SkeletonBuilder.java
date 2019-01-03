@@ -33,6 +33,8 @@ public class SkeletonBuilder extends PApplet{
     //OptionPanel panel;
     //PGraphics canvas1;
 
+    FitCurve fitCurve;
+
     float radius = 15;
     int w = 1000, h = 700;
     /*Create different skeletons to interact with*/
@@ -177,7 +179,11 @@ public class SkeletonBuilder extends PApplet{
             if(focus.trackedFrame() != null)
                 focus.trackedFrame().interact("OnAdding", mouse);
         } else if (mouseButton == LEFT) {
-            focus.spin(previous, point);
+            if(event.isControlDown() && fitCurve != null){
+                fitCurve.add(mouseX, mouseY);
+            } else {
+                focus.spin(previous, point);
+            }
         } else if (mouseButton == RIGHT) {
             focus.translate(point.x() - previous.x(), point.y() - previous.y());
             Target.multipleTranslate();
@@ -198,7 +204,17 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
+    public void mousePressed(MouseEvent event){
+        if(focus.trackedFrame() == null){
+            fitCurve = new FitCurve();
+        }
+    }
+
     public void mouseReleased(){
+        if(fitCurve != null) {
+            fitCurve.fitCurve();
+            fitCurve = null;
+        }
         Point previous = new Point(pmouseX, pmouseY);
         Point point = new  Point(mouseX, mouseY);
         Vector mouse = new Vector(point.x(), point.y());
