@@ -142,6 +142,9 @@ public class SkeletonBuilder extends PApplet{
         }
         scene.endHUD();
         */
+        if(fitCurve != null)
+            if(fitCurve._interpolator != null)
+                scene.drawPath(fitCurve._interpolator, 5);
 
         for(int i = 0; i < views.length; i++) {
             scene.shift(views[i]);
@@ -224,6 +227,14 @@ public class SkeletonBuilder extends PApplet{
             //Reset Curve
             if(fitCurve != null){
                 fitCurve.setStarted(false);
+                fitCurve.printCurves();
+                fitCurve.getCatmullRomCurve(scene);
+                for(Frame f : fitCurve._interpolator.keyFrames()){
+                    System.out.println( f.position() +  " ,  ");
+                }
+                fitCurve._interpolator.start();
+                scene.drawPath(fitCurve._interpolator, 5);
+
             }
         }
 

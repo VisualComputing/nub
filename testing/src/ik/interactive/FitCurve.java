@@ -1,6 +1,9 @@
 package ik.interactive;
 
+import frames.core.Frame;
+import frames.core.Interpolator;
 import frames.primitives.Vector;
+import frames.processing.Scene;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
@@ -59,7 +62,7 @@ public class FitCurve {
     }
 
     public static float PIXEL_ERROR = 5.f;
-    public static float SQ_ERROR = 8.f;
+    public static float SQ_ERROR = 30.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
     public static int MAX_ITERATIONS = 4;
 
@@ -294,6 +297,39 @@ public class FitCurve {
         return u_prime;
     }
 
+
+    /*From Cubic Bezier to Catmull Rom*/
+    Interpolator _interpolator;
+    public void getCatmullRomCurve(Scene scene){
+        _interpolator = new Interpolator(scene);
+        for(int i = 0; i < _curves.size(); i++){
+            Bezier curve = _curves.get(i);
+            Vector v = curve.evaluate(0);
+            v = scene.location(v);
+            Frame f = new Frame(scene);
+            f.setPosition(v);
+            _interpolator.addKeyFrame(f);
+            v = curve.evaluate(0.333f);
+            v = scene.location(v);
+            f = new Frame(scene);
+            f.setPosition(v);
+            _interpolator.addKeyFrame(f);
+            v = curve.evaluate(0.666f);
+            v = scene.location(v);
+            f = new Frame(scene);
+            f.setPosition(v);
+            _interpolator.addKeyFrame(f);
+            if(i == _curves.size() - 1) {
+                v = curve.evaluate(1);
+                v = scene.location(v);
+                f = new Frame(scene);
+                f.setPosition(v);
+                _interpolator.addKeyFrame(f);
+            }
+        }
+    }
+
+
     public void drawCurves(PGraphics pg){
         if(_curves == null) return;
         pg.pushStyle();
@@ -305,13 +341,45 @@ public class FitCurve {
                     curve._points[1].x(), curve._points[1].y(),
                     curve._points[2].x(), curve._points[2].y(),
                     curve._points[3].x(), curve._points[3].y());
-            pg.strokeWeight(3);
-            pg.stroke(255,0,0);
+            pg.strokeWeight(10);
+            pg.stroke(255,0,0, 100);
             pg.point(curve._points[0].x(), curve._points[0].y());
             pg.point(curve._points[1].x(), curve._points[1].y());
             pg.point(curve._points[2].x(), curve._points[2].y());
             pg.point(curve._points[3].x(), curve._points[3].y());
+
+            pg.strokeWeight(12);
+            pg.stroke(255,255,0, 50);
+            Vector v = curve.evaluate(0);
+            pg.point(v.x(), v.y());
+            v = curve.evaluate(0.333f);
+            pg.point(v.x(), v.y());
+            v = curve.evaluate(0.666f);
+            pg.point(v.x(), v.y());
+            v = curve.evaluate(1);
+            pg.point(v.x(), v.y());
+
+            /*pg.point(curve._points[3].x() + 6*(curve._points[0].x() - curve._points[1].x()),
+                    curve._points[3].y() + 6*(curve._points[0].y() - curve._points[1].y()));
+            pg.point(curve._points[0].x(), curve._points[0].y());
+            pg.point(curve._points[3].x(), curve._points[3].y());
+            pg.point(curve._points[0].x() + 6*(curve._points[3].x() - curve._points[2].x()),
+                    curve._points[0].y() + 6*(curve._points[3].y() - curve._points[2].y()));*/
+
+
         }
         pg.popStyle();
+    }
+
+    public void printCurves(){
+        for(Bezier curve : _curves) {
+            System.out.print("[");
+            for(Vector p : curve._points){
+                System.out.print( p + ", ");
+
+            }
+            System.out.println("]");
+        }
+
     }
 }
