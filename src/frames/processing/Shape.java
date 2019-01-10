@@ -166,23 +166,6 @@ public class Shape extends Frame {
   }
 
   @Override
-  public void setPrecision(Precision precision) {
-    this._precision = precision;
-    // optimizes the back-buffer
-    if (precision() == Precision.EXACT) {
-      graph()._bbEnabled = true;
-      return;
-    }
-    for (Frame frame : graph().frames())
-      if (frame instanceof Shape)
-        if (frame.precision() == Precision.EXACT) {
-          graph()._bbEnabled = true;
-          return;
-        }
-    graph()._bbEnabled = false;
-  }
-
-  @Override
   public void visit() {
     draw(graph()._targetPGraphics);
   }

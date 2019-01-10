@@ -810,8 +810,6 @@ public class Frame {
    * @see #precisionThreshold()
    */
   public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
     _precision = precision;
   }
 
