@@ -137,7 +137,6 @@ public class Scene extends Graph implements PConstants {
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
-  protected PGraphics _fb;
 
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
@@ -148,7 +147,6 @@ public class Scene extends Graph implements PConstants {
 
   // _bb : picking buffer
   protected PGraphics _targetPGraphics;
-  protected PGraphics _bb;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // CONSTRUCTORS
@@ -322,7 +320,7 @@ public class Scene extends Graph implements PConstants {
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
   public PGraphics frontBuffer() {
-    return _fb;
+    return (PGraphics)_fb;
   }
 
   // PICKING BUFFER
@@ -332,7 +330,7 @@ public class Scene extends Graph implements PConstants {
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
   public PGraphics backBuffer() {
-    return _bb;
+    return (PGraphics)_bb;
   }
 
   /**

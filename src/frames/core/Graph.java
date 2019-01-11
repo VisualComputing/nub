@@ -126,6 +126,8 @@ import java.util.List;
  * @see MatrixHandler
  */
 public class Graph {
+  // 0. Contexts
+  protected Object _bb, _fb;
   // 1. Eye
   protected Frame _eye;
   protected long _lastEqUpdate;
