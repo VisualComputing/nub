@@ -23,11 +23,11 @@ public class InteractiveJoint extends Joint {
         String command = (String) gesture[0];
         if(command.matches("Add")){
             if(_desiredTranslation != null) {
-                addChild((Vector) gesture[1]);
+                addChild((Scene) gesture[1], (Scene) gesture[2], (Vector) gesture[3]);
             }
             _desiredTranslation = null;
         } else if(command.matches("OnAdding")){
-            _desiredTranslation = translateDesired((Vector) gesture[1]);
+            _desiredTranslation = translateDesired((Scene) gesture[1],(Vector) gesture[2]);
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
         } else if(command.matches("Remove")){
@@ -48,10 +48,10 @@ public class InteractiveJoint extends Joint {
         }
     }
 
-    public void addChild(Vector mouse){
-        InteractiveJoint joint = new InteractiveJoint((Scene)this._graph, this.radius());
+    public void addChild(Scene scene, Scene focus, Vector mouse){
+        InteractiveJoint joint = new InteractiveJoint(scene, this.radius());
         joint.setReference(this);
-        joint.setTranslation(joint.translateDesired(mouse));
+        joint.setTranslation(joint.translateDesired(focus, mouse));
     }
 
     public void removeChild(){
@@ -60,8 +60,7 @@ public class InteractiveJoint extends Joint {
 
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
-    protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Frame frame) {
-        Scene scene = (Scene) _graph;
+    protected Vector _translateDesired(Scene scene, float dx, float dy, float dz, int zMax, Frame frame) {
         if (scene.is2D() && dz != 0) {
             System.out.println("Warning: graph is 2D. Z-translation reset");
             dz = 0;
@@ -84,10 +83,8 @@ public class InteractiveJoint extends Joint {
     }
 
 
-    public Vector translateDesired(Vector mouse){
-        Scene scene = (Scene) _graph;
-        float dx = mouse.x() - scene.screenLocation(position()).x();
-        float dy = mouse.y() - scene.screenLocation(position()).y();
-        return _translateDesired(dx, dy, 0, Math.min(scene.width(), scene.height()), this);
+    public Vector translateDesired(Scene scene, Vector point){
+        Vector delta = Vector.subtract(point, scene.screenLocation(position()));
+        return _translateDesired(scene, delta.x(), delta.y(), 0, Math.min(scene.width(), scene.height()), this);
     }
 }
