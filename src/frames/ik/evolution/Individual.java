@@ -1,6 +1,7 @@
 package frames.ik.evolution;
 
 import frames.core.Frame;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.util.ArrayList;
@@ -24,9 +25,16 @@ public class Individual{
         }
     }
 
+    public enum FitnessFunction {
+        POSITION, ORIENTATION, POSE
+    }
+
+
+
     protected List<Frame> _structure;
     protected HashMap<String, Parameter> _parameters;
     protected float _fitness;
+    protected FitnessFunction _fitness_function = FitnessFunction.POSITION;
     protected float _extinction;
 
     public Individual(List<Frame> structure){
@@ -67,12 +75,42 @@ public class Individual{
     }
 
     public float updateFitness(HashMap<Integer, Frame> targets){
-        float dist = 0;
+        float dt = 0;
+        float dr  = 0;
+        //TODO : optimize calculations
         for(Integer index : targets.keySet()){
-            dist += Vector.distance(structure().get(index).position(), targets.get(index).position());
+            if(_fitness_function == FitnessFunction.POSITION || _fitness_function == FitnessFunction.POSE) {
+                float dist = Vector.distance(structure().get(index).position(), targets.get(index).position());
+                if(_fitness_function == FitnessFunction.POSE) {
+                    float l = 0;
+                    float d = Vector.distance(_structure.get(0).position(), _structure.get(index).position());
+                    Frame prev = null;
+                    for (Frame f : _structure.get(0).graph().path(_structure.get(0), _structure.get(index))) {
+                        if (prev != null) l += Vector.distance(f.position(), prev.position());
+                    }
+                    dt += (Math.PI * dist) / (Math.sqrt(l * d));
+                }
+            }
+            if(_fitness_function == FitnessFunction.ORIENTATION || _fitness_function == FitnessFunction.POSE){
+                Quaternion q1 = structure().get(index).orientation();
+                Quaternion q2 = targets.get(index).orientation();
+                float q_dot = Quaternion.dot(q1, q2);
+                dr += Math.acos((2 * q_dot * q_dot) / Math.sqrt(q1.dotProduct(q1) * q2.dotProduct(q2)));
+            }
         }
-        _fitness = dist;
-        return dist;
+
+        if(_fitness_function == FitnessFunction.POSITION){
+            _fitness = dt;
+            return dt;
+        }
+
+        if(_fitness_function == FitnessFunction.ORIENTATION){
+            _fitness = dr;
+            return dr;
+        }
+
+        float w = (float) Math.random() * 0.3f;
+        return (1-w) * dt + w * dr;
     }
 
     protected ArrayList<Frame> _copy(List<Frame> chain) {
