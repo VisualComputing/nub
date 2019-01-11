@@ -62,7 +62,7 @@ public class FitCurve {
     }
 
     public static float PIXEL_ERROR = 5.f;
-    public static float SQ_ERROR = 30.f;
+    public static float SQ_ERROR = 50.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
     public static int MAX_ITERATIONS = 4;
 
@@ -309,6 +309,13 @@ public class FitCurve {
             Frame f = new Frame(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
+            if(i == 0) {
+                v = curve.evaluate(0.15f);
+                v = scene.location(v);
+                f = new Frame(scene);
+                f.setPosition(v);
+                _interpolator.addKeyFrame(f);
+            }
             v = curve.evaluate(0.333f);
             v = scene.location(v);
             f = new Frame(scene);
