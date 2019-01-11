@@ -167,7 +167,8 @@ public class Shape extends Frame {
 
   @Override
   public void visit() {
-    draw(graph()._targetPGraphics);
+    // TODO handle me!
+    draw((PGraphics) graph()._targetPGraphics);
   }
 
   /**
@@ -181,7 +182,7 @@ public class Shape extends Frame {
   }
 
   /**
-   * Draws the shape into the {@code pGraphics}. Use it instead of {@link Scene#traverse(PGraphics)} (which
+   * Draws the shape into the {@code pGraphics}. Use it instead of {@link Scene#traverse(Object)} (which
    * in turn calls it) such as:
    *
    * <pre>
@@ -198,7 +199,7 @@ public class Shape extends Frame {
    * }
    * </pre>
    *
-   * @see Scene#traverse(PGraphics)
+   * @see Scene#traverse(Object)
    * @see #draw()
    */
   public void draw(PGraphics pGraphics) {

@@ -146,7 +146,6 @@ public class Scene extends Graph implements PConstants {
   protected boolean _offscreen;
 
   // _bb : picking buffer
-  protected PGraphics _targetPGraphics;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // CONSTRUCTORS
@@ -319,6 +318,7 @@ public class Scene extends Graph implements PConstants {
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
+  @Override
   public PGraphics frontBuffer() {
     return (PGraphics)_fb;
   }
@@ -329,6 +329,7 @@ public class Scene extends Graph implements PConstants {
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
+  @Override
   public PGraphics backBuffer() {
     return (PGraphics)_bb;
   }
@@ -1005,40 +1006,15 @@ public class Scene extends Graph implements PConstants {
     return false;
   }
 
-  /**
-   * Same as {@link super#traverse()}, but if there are any {@link Shape}s in the scene frame hierarchy
-   * they also get drawn. Call it only within Processing draw() method.
-   *
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   */
-  @Override
-  public void traverse() {
-    _targetPGraphics = frontBuffer();
-    super.traverse();
-  }
-
-  /**
-   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
-   *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics) {
-    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
-  }
+  // TODO experimental
 
   /**
    * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
    * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
    * taking the {@code eye} as the light point-of-view.
    *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics)
+   * @see #traverse(Object, Matrix, Matrix)
+   * @see #traverse(Object)
    * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
    * @see #traverse()
    */
@@ -1051,8 +1027,8 @@ public class Scene extends Graph implements PConstants {
    * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
    * taking the {@code eye} as the light point-of-view.
    *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics)
+   * @see #traverse(Object, Matrix, Matrix)
+   * @see #traverse(Object)
    * @see #traverse(PGraphics, Type, Frame, float, float)
    * @see #traverse()
    */
@@ -1060,41 +1036,25 @@ public class Scene extends Graph implements PConstants {
     traverse(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
   }
 
-  /**
-   * Renders the scene into {@code pGraphics} using the {@code view} and {@code projection}
-   * matrices. Calls {@link Graph#traverse()}. No {@code pGraphics.beginDraw()/endDraw()}
-   * calls take place. Call this method only within Processing draw() method.
-   * <p>
-   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
-   * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
-   * technique is called by {@link #draw()}.
-   *
-   * @see #frames()
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Matrix view, Matrix projection) {
-    _targetPGraphics = pGraphics;
-    if (pGraphics != frontBuffer()) {
-      MatrixHandler matrixHandler = matrixHandler(pGraphics);
-      matrixHandler._bindProjection(projection);
-      matrixHandler._bindModelView(view);
-    }
-    super.traverse();
-  }
+  // TODO move to the Graph
 
   @Override
   protected void _visit(Frame frame) {
-    _targetPGraphics.pushMatrix();
-    applyTransformation(_targetPGraphics, frame);
+    // TODO handle me!
+    ((PGraphics) _targetPGraphics).pushMatrix();
+    // TODO handle me!
+    applyTransformation((PGraphics) _targetPGraphics, frame);
     _track(frame);
     if (_targetPGraphics != backBuffer() || frame instanceof Shape)
       frame.visit();
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _visit(child);
-    _targetPGraphics.popMatrix();
+    // TODO handle me!
+    ((PGraphics) _targetPGraphics).popMatrix();
   }
 
+  // TODO end experimental
 
   /**
    * Returns a new matrix helper for the given {@code pGraphics}. Rarely needed.
@@ -1105,11 +1065,12 @@ public class Scene extends Graph implements PConstants {
    * @see #setMatrixHandler(MatrixHandler)
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
-  public MatrixHandler matrixHandler(PGraphics pGraphics) {
+  @Override
+  public MatrixHandler matrixHandler(Object pGraphics) {
     return (pGraphics instanceof processing.opengl.PGraphicsOpenGL) ?
         new GLMatrixHandler(this, (PGraphicsOpenGL) pGraphics) :
         //new Java2DMatrixHandler(this, pGraphics);
-        new MatrixHandler(width(), height());
+        super.matrixHandler(pGraphics);
   }
 
   /**

@@ -128,6 +128,8 @@ import java.util.List;
 public class Graph {
   // 0. Contexts
   protected Object _bb, _fb;
+  // TODO discard me!
+  public Object _targetPGraphics;
   // 1. Eye
   protected Frame _eye;
   protected long _lastEqUpdate;
@@ -2734,6 +2736,20 @@ public class Graph {
     _tuples.add(new Tuple(hid, pixel));
   }
 
+  public MatrixHandler matrixHandler(Object context) {
+    return new MatrixHandler(width(), height());
+  }
+
+  // TODO experimental
+
+  public Object frontBuffer() {
+    return _fb;
+  }
+
+  public Object backBuffer() {
+    return _bb;
+  }
+
   /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
    * by each traversed frame, and calling {@link Frame#visit()} on it.
@@ -2749,10 +2765,84 @@ public class Graph {
    * @see #pruneBranch(Frame)
    */
   public void traverse() {
+    _targetPGraphics = frontBuffer();
+    //super.traverse();
     for (Frame frame : _leadingFrames())
       _visit(frame);
     _tuples.clear();
   }
+
+  /**
+   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
+   *
+   * @see #traverse(Object, Matrix, Matrix)
+   * @see #traverse()
+   */
+  public void traverse(Object pGraphics) {
+    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
+  }
+
+  /**
+   * Renders the scene into {@code pGraphics} using the {@code view} and {@code projection}
+   * matrices. Calls {@link Graph#traverse()}. No {@code pGraphics.beginDraw()/endDraw()}
+   * calls take place. Call this method only within Processing draw() method.
+   * <p>
+   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
+   * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
+   * technique is called at the end of the rendering loop.
+   *
+   * @see #frames()
+   * @see #traverse()
+   */
+  public void traverse(Object pGraphics, Matrix view, Matrix projection) {
+    _targetPGraphics = pGraphics;
+    if (pGraphics != frontBuffer()) {
+      MatrixHandler matrixHandler = matrixHandler(pGraphics);
+      matrixHandler._bindProjection(projection);
+      matrixHandler._bindModelView(view);
+    }
+    //super.traverse();
+    for (Frame frame : _leadingFrames())
+      _visit(frame);
+    _tuples.clear();
+  }
+
+  /*
+  protected void _visit(Frame frame) {
+    pushModelView();
+    applyTransformation(frame);
+    _track(frame);
+    frame.visit();
+    if (!frame.isCulled())
+      for (Frame child : frame.children())
+        _visit(child);
+    popModelView();
+  }
+  */
+
+  // TODO end experimental
+
+  /**
+   * Traverse the frame hierarchy, successively applying the local transformation defined
+   * by each traversed frame, and calling {@link Frame#visit()} on it.
+   * <p>
+   * Note that only reachable frames are visited by this algorithm.
+   *
+   * <b>Attention:</b> this method should be called within the main event loop, just after
+   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
+   * modelview matrix takes place.
+   *
+   * @see #track(String, float, float)
+   * @see #isReachable(Frame)
+   * @see #pruneBranch(Frame)
+   */
+  /*
+  public void traverse() {
+    for (Frame frame : _leadingFrames())
+      _visit(frame);
+    _tuples.clear();
+  }
+  */
 
   /**
    * Used by the traversal algorithm.
