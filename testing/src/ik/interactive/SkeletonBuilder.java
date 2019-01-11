@@ -124,22 +124,14 @@ public class SkeletonBuilder extends PApplet{
 
     public void setFocus(){
         if(mouseY <= 2*h/3){
-            //if(mousePressed) System.out.println("Focus : scene");
-            //focus.shift(scene);
             focus = scene;
         } else if(mouseX <= w/3){
-            //if(mousePressed) System.out.println("Focus : v0");
-            //focus.shift(views[0]);
             focus =  views[0];
         }
         else if(mouseX <= 2*w/3){
-            //if(mousePressed) System.out.println("Focus : v1");
-            //focus.shift(views[1]);
             focus =  views[1];
         }
         else{
-            //if(mousePressed) System.out.println("Focus : v2");
-            //focus.shift(views[2]);
             focus = views[2];
         }
     }
