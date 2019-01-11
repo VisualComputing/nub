@@ -62,6 +62,7 @@ public class SkeletonBuilder extends PApplet{
         //canvas1 = createGraphics(w, h, renderer);
         //canvas1 = this.g;
         scene = new Scene(this);
+        focus = scene;
         scene.setRadius(300);
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
         new InteractiveJoint(scene, radius).setRoot(true);
@@ -118,15 +119,29 @@ public class SkeletonBuilder extends PApplet{
             if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());
             scene.endHUD();
             views[i].shift(scene);
-
         }
     }
 
     public void setFocus(){
-        if(mouseY <= 2*h/3) focus = scene;
-        else if(mouseX <= w/3) focus =  views[0];
-        else if(mouseX <= 2*w/3) focus =  views[1];
-        else focus = views[2];
+        if(mouseY <= 2*h/3){
+            //if(mousePressed) System.out.println("Focus : scene");
+            //focus.shift(scene);
+            focus = scene;
+        } else if(mouseX <= w/3){
+            //if(mousePressed) System.out.println("Focus : v0");
+            //focus.shift(views[0]);
+            focus =  views[0];
+        }
+        else if(mouseX <= 2*w/3){
+            //if(mousePressed) System.out.println("Focus : v1");
+            //focus.shift(views[1]);
+            focus =  views[1];
+        }
+        else{
+            //if(mousePressed) System.out.println("Focus : v2");
+            //focus.shift(views[2]);
+            focus = views[2];
+        }
     }
 
     //mouse events
@@ -138,12 +153,11 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void mouseDragged(MouseEvent event) {
-        Point previous = new Point(pmouseX, pmouseY);
-        Point point = new  Point(mouseX, mouseY);
         if (mouseButton == RIGHT && event.isControlDown()) {
-            Vector mouse = new Vector(point.x(), point.y());
+            Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
             if(focus.trackedFrame() != null)
-                focus.trackedFrame().interact("OnAdding", mouse);
+                if(focus.trackedFrame() instanceof  InteractiveJoint)
+                    focus.trackedFrame().interact("OnAdding", focus, vector);
         } else if (mouseButton == LEFT) {
             if(event.isControlDown() && fitCurve != null ){
                 if(fitCurve.started()) {
@@ -151,14 +165,14 @@ public class SkeletonBuilder extends PApplet{
                     fitCurve.fitCurve();
                 }
             } else {
-                focus.spin(previous, point);
+                focus.spin(focus.pmouse(), focus.mouse());
             }
         } else if (mouseButton == RIGHT) {
-            focus.translate(point.x() - previous.x(), point.y() - previous.y());
+            focus.translate(focus.mouse().x() - focus.pmouse().x(), focus.mouse().y() - focus.pmouse().y());
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
-            focus.scale(scene.mouseDX());
-        } else if(scene.trackedFrame() != null)
+            focus.scale(focus.mouseDX());
+        } else if(focus.trackedFrame() != null)
             focus.trackedFrame().interact("Reset");
         //PANEL
         //else {
@@ -168,7 +182,7 @@ public class SkeletonBuilder extends PApplet{
         //if(focus == scene && !Target.selectedTargets().contains(focus.trackedFrame())){
         //    Target.clearSelectedTargets();
         //}
-        if(!Target.selectedTargets().contains(scene.trackedFrame())){
+        if(!Target.selectedTargets().contains(focus.trackedFrame())){
             Target.clearSelectedTargets();
         }
     }
@@ -189,7 +203,7 @@ public class SkeletonBuilder extends PApplet{
                 fitCurve.printCurves();
                 fitCurve.getCatmullRomCurve(scene);
                 for(Frame f : fitCurve._interpolator.keyFrames()){
-                    System.out.println( f.position() +  " ,  ");
+                    //System.out.println( f.position() +  " ,  ");
                 }
                 fitCurve._interpolator.start();
                 scene.drawPath(fitCurve._interpolator, 5);
@@ -197,14 +211,14 @@ public class SkeletonBuilder extends PApplet{
             }
         }
 
-        Point previous = new Point(pmouseX, pmouseY);
-        Point point = new  Point(mouseX, mouseY);
-        Vector mouse = new Vector(point.x(), point.y());
         //mouse = scene.location(mouse);
         //mouse = Vector.projectVectorOnPlane(mouse, scene.viewDirection());
         //mouse.add(scene.defaultFrame().position());
+        Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
         if(focus.trackedFrame() != null)
-            focus.trackedFrame().interact("Add", mouse, false);
+            if(focus.trackedFrame() instanceof  InteractiveJoint)
+                focus.trackedFrame().interact("Add", scene, focus, vector);
+            else focus.trackedFrame().interact("Add", vector, false);
     }
 
     public void mouseWheel(MouseEvent event) {
