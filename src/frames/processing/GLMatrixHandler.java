@@ -23,7 +23,7 @@ public class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
   public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
-    super(graph);
+    super(renderer.width, renderer.height);
     _pgraphics = renderer;
   }
 
@@ -76,7 +76,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void _bindModelView(Matrix matrix) {
-    if (_graph.is3D())
+    if (pggl().is3D())
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(matrix));

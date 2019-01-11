@@ -28,18 +28,18 @@ import frames.primitives.Vector;
  * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
  * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
  * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
- * implementing them in terms of the renderer params (see {@link #_bind()}).
+ * implementing them in terms of the renderer params (see {@link #_bind(Matrix, Matrix)}).
  *
  * @see Matrix
  * @see #projection()
  * @see #_bindProjection(Matrix)
  * @see #modelView()
  * @see #_bindModelView(Matrix)
- * @see #_bind()
+ * @see #_bind(Matrix, Matrix)
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  protected Graph _graph;
+  protected int _width, _height;
   protected Matrix _projection, _view, _modelview;
   protected Matrix _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
@@ -55,10 +55,12 @@ public class MatrixHandler {
   /**
    * Instantiates matrices and sets {@link #isProjectionViewInverseCached()} to {@code false}.
    *
-   * @param graph
+   * @param width of the renderer context
+   * @param height of the renderer context
    */
-  public MatrixHandler(Graph graph) {
-    _graph = graph;
+  public MatrixHandler(int width, int height) {
+    _width = width;
+    _height = height;
     _projection = new Matrix();
     _view = new Matrix();
     _modelview = new Matrix();
@@ -67,18 +69,41 @@ public class MatrixHandler {
   }
 
   /**
-   * Returns the graph this matrix helper belongs to.
+   * @return width of the screen window.
    */
-  public Graph graph() {
-    return _graph;
+  public int width() {
+    return _width;
   }
 
   /**
-   * Updates (computes and caches) the projection and view matrices from the {@link #graph()}
+   * @return height of the screen window.
+   */
+  public int height() {
+    return _height;
+  }
+
+  /**
+   * Sets eye {@link #width()} and {@link #height()} (expressed in pixels).
+   * <p>
+   * Non-positive dimension are silently replaced by a 1 pixel value to ensure boundary
+   * coherence.
+   */
+  public void setWidth(int width) {
+    // Prevent negative and zero dimensions that would cause divisions by zero.
+    _width = width > 0 ? width : 1;
+  }
+
+  public void setHeight(int height) {
+    // Prevent negative and zero dimensions that would cause divisions by zero.
+    _height = height > 0 ? height : 1;
+  }
+
+  /**
+   * Updates (computes and caches) the projection and view matrices from the renderer context
    * {@link Graph#eye()} parameters and call {@link #_setUniforms()}. This method is automatically
    * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
    * <p>
-   * If {@link #graph()} is bound to a third party renderer (i.e., that renderer provides
+   * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
    * this method also binds the projection and view matrices to that renderer.
    * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindModelView(Matrix)}
@@ -90,9 +115,12 @@ public class MatrixHandler {
    * @see #_bindProjection(Matrix)
    * @see #_bindModelView(Matrix)
    */
-  protected void _bind() {
-    _projection.set(graph().eye().projection(graph().type(), graph().width(), graph().height(), graph().zNear(), graph().zFar(), graph().isLeftHanded()));
-    _view.set(graph().eye().view());
+  protected void _bind(Matrix projection, Matrix view) {
+    //_projection.set(projection);
+    //_view.set(view);
+    //TODO experimental
+    _projection = projection;
+    _view = view;
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     // TODO _bindProjection is redundant when there's no binding of the matrices
     // We could go like this (but I don't know if it works in JS):
@@ -378,14 +406,14 @@ public class MatrixHandler {
   // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
   // "9.030 How do I draw 2D controls over my 3D rendering?"
   protected void _ortho2D() {
-    float cameraZ = (_graph.height() / 2.0f) / (float) Math.tan((float) Math.PI / 8);
+    float cameraZ = (_height / 2.0f) / (float) Math.tan((float) Math.PI / 8);
     float cameraNear = cameraZ / 2.0f;
     float cameraFar = cameraZ * 2.0f;
 
-    float left = -_graph.width() / 2;
-    float right = _graph.width() / 2;
-    float bottom = -_graph.height() / 2;
-    float top = _graph.height() / 2;
+    float left = -_width / 2;
+    float right = _width / 2;
+    float bottom = -_height / 2;
+    float top = _height / 2;
     float near = cameraNear;
     float far = cameraFar;
 
@@ -403,11 +431,11 @@ public class MatrixHandler {
 
   // as it's done in P5:
   protected void _resetViewPoint() {
-    float eyeX = _graph.width() / 2f;
-    float eyeY = _graph.height() / 2f;
-    float eyeZ = (_graph.height() / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
-    float centerX = _graph.width() / 2f;
-    float centerY = _graph.height() / 2f;
+    float eyeX = _width / 2f;
+    float eyeY = _height / 2f;
+    float eyeZ = (_height / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
+    float centerX = _width / 2f;
+    float centerY = _height / 2f;
     float centerZ = 0;
     float upX = 0;
     float upY = 1;

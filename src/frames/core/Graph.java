@@ -144,10 +144,8 @@ public class Graph {
   // handed and HUD
   protected boolean _rightHanded;
   protected int _hudCalls;
-  // size and dim
-  protected int _width, _height;
 
-  // 2. Matrix helper
+  // 2. Matrix handler
   protected MatrixHandler _matrixHandler;
 
   // 3. Handlers
@@ -227,8 +225,7 @@ public class Graph {
    * @see #setEye(Frame)
    */
   public Graph(Type type, int width, int height) {
-    setWidth(width);
-    setHeight(height);
+    setMatrixHandler(new MatrixHandler(width, height));
 
     _seeds = new ArrayList<Frame>();
     _timingHandler = new TimingHandler();
@@ -240,7 +237,6 @@ public class Graph {
       setFOV((float) Math.PI / 3);
     fit();
 
-    setMatrixHandler(new MatrixHandler(this));
     _agents = new HashMap<String, Frame>();
     _tuples = new ArrayList<Tuple>();
     setRightHanded();
@@ -283,34 +279,34 @@ public class Graph {
    * @return width of the screen window.
    */
   public int width() {
-    return _width;
+    return matrixHandler().width();
   }
 
   /**
    * @return height of the screen window.
    */
   public int height() {
-    return _height;
+    return matrixHandler().height();
   }
 
   /**
-   * Sets eye {@link #width()} and {@link #height()} (expressed in pixels).
-   * <p>
-   * Non-positive dimension are silently replaced by a 1 pixel value to ensure boundary
-   * coherence.
+   * Sets the graph {@link #width()} in pixels.
    */
   public void setWidth(int width) {
-    // Prevent negative and zero dimensions that would cause divisions by zero.
-    if ((width != width()))
+    if ((width != width())) {
+      matrixHandler().setWidth(width);
       _modified();
-    _width = width > 0 ? width : 1;
+    }
   }
 
+  /**
+   * Sets the graph {@link #height()} in pixels.
+   */
   public void setHeight(int height) {
-    // Prevent negative and zero dimensions that would cause divisions by zero.
-    if (height != height())
+    if ((height != height())) {
+      matrixHandler().setWidth(height);
       _modified();
-    _height = height > 0 ? height : 1;
+    }
   }
 
   // Type handling stuff
@@ -1006,7 +1002,7 @@ public class Graph {
    */
   public void preDraw() {
     timingHandler().handle();
-    matrixHandler()._bind();
+    matrixHandler()._bind(eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded()), eye().view());
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;

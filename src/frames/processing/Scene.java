@@ -221,7 +221,7 @@ public class Scene extends Graph implements PConstants {
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@link #frontBuffer()} type (see
-   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}).
+   * {@link GLMatrixHandler}).
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -660,12 +660,10 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _beginOffScreenDrawingCalls++;
-    if ((_width != frontBuffer().width) || (_height != frontBuffer().height)) {
-      _width = frontBuffer().width;
-      _height = frontBuffer().height;
-      setWidth(_width);
-      setHeight(_height);
-    }
+    if ((width() != frontBuffer().width))
+      setWidth(frontBuffer().width);
+    if ((height() != frontBuffer().height))
+      setHeight(frontBuffer().height);
     // open off-screen pgraphics for drawing:
     frontBuffer().beginDraw();
     preDraw();
@@ -1110,7 +1108,8 @@ public class Scene extends Graph implements PConstants {
   public MatrixHandler matrixHandler(PGraphics pGraphics) {
     return (pGraphics instanceof processing.opengl.PGraphicsOpenGL) ?
         new GLMatrixHandler(this, (PGraphicsOpenGL) pGraphics) :
-        new Java2DMatrixHandler(this, pGraphics);
+        //new Java2DMatrixHandler(this, pGraphics);
+        new MatrixHandler(width(), height());
   }
 
   /**
