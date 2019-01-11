@@ -35,7 +35,6 @@ public class SkeletonBuilder extends PApplet{
     //PGraphics canvas1;
 
     FitCurve fitCurve;
-    boolean curveChanged = false;
 
     float radius = 15;
     int w = 1000, h = 700;
@@ -68,48 +67,7 @@ public class SkeletonBuilder extends PApplet{
         new InteractiveJoint(scene, radius).setRoot(true);
         // = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
         //scene.fit(1);
-        //create an auxiliary view per Orthogonal Plane
-        //create an auxiliary view to look at the XY Plane
-        Constraint constraint = new Constraint() {
-            @Override
-            public Vector constrainTranslation(Vector translation, Frame frame) {
-                return translation;
-            }
-
-            @Override
-            public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-                return new Quaternion();
-            }
-        };
-
-        views = new Scene[3];
-
-        Frame eyeXY = new Frame();
-        eyeXY.setMagnitude(0.5f);
-        eyeXY.setPosition(scene.eye().position());
-        eyeXY.setOrientation(scene.eye().orientation());
-        eyeXY.setConstraint(constraint);
-        views[0] = new Scene(this, P3D, w/3, h/3, 0, 2*h/3);
-        views[0].setEye(eyeXY);
-        views[0].setType(Graph.Type.ORTHOGRAPHIC);
-        //create an auxiliary view to look at the XY Plane
-        Frame eyeXZ = new Frame();
-        eyeXZ.setMagnitude(0.5f);
-        eyeXZ.setPosition(0, scene.radius(), 0);
-        eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
-        eyeXZ.setConstraint(constraint);
-        views[1] = new Scene(this, P3D, w/3, h/3, w/3, 2*h/3);
-        views[1].setEye(eyeXZ);
-        views[1].setType(Graph.Type.ORTHOGRAPHIC);
-        //create an auxiliary view to look at the XY Plane
-        Frame eyeYZ = new Frame();
-        eyeYZ.setMagnitude(0.5f);
-        eyeYZ.setPosition(scene.radius(), 0, 0);
-        eyeYZ.setOrientation(new Quaternion(new Vector(0,1,0), HALF_PI));
-        eyeYZ.setConstraint(constraint);
-        views[2] = new Scene(this, P3D, w/3, h/3, 2*w/3, 2*h/3);
-        views[2].setEye(eyeXY);
-        views[2].setType(Graph.Type.ORTHOGRAPHIC);
+        views = createViews();
     }
 
     public void draw() {
@@ -120,6 +78,7 @@ public class SkeletonBuilder extends PApplet{
         background(0);
         //canvas1.stroke(255,0,0);
         Joint.setPGraphics(scene.frontBuffer());
+        scene.drawGrid();
         stroke(255,0,0);
         scene.drawAxes();
         scene.traverse();
@@ -151,7 +110,7 @@ public class SkeletonBuilder extends PApplet{
             Joint.setPGraphics(views[i].frontBuffer());
             scene.beginHUD();
             views[i].beginDraw();
-            views[i].frontBuffer().background(175, 200, 20);
+            views[i].frontBuffer().background(100);
             views[i].drawAxes();
             views[i].traverse();
             views[i].endDraw();
@@ -351,6 +310,55 @@ public class SkeletonBuilder extends PApplet{
             scene.addIKTarget(endEffector, target);
             targets.add(target);
         }
+    }
+
+    public Scene[] createViews(){
+        //create an auxiliary view per Orthogonal Plane
+        //Disable rotation
+        Constraint constraint = new Constraint() {
+            @Override
+            public Vector constrainTranslation(Vector translation, Frame frame) {
+                return translation;
+            }
+
+            @Override
+            public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+                return new Quaternion();
+            }
+        };
+
+        Scene[] views = new Scene[3];
+        Frame eyeXY = new Frame();
+        eyeXY.scale(2f);
+        eyeXY.setPosition(scene.eye().position());
+        eyeXY.setOrientation(scene.eye().orientation());
+        eyeXY.setConstraint(constraint);
+        views[0] = new Scene(this, P3D, w/3, h/3, 0, 2*h/3);
+        views[0].setRadius(scene.radius()*4);
+        views[0].setEye(eyeXY);
+        views[0].setType(Graph.Type.ORTHOGRAPHIC);
+        //create an auxiliary view to look at the XY Plane
+        Frame eyeXZ = new Frame();
+        eyeXZ.scale(2f);
+        eyeXZ.setPosition(0, scene.radius(), 0);
+        eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
+        eyeXZ.setConstraint(constraint);
+        views[1] = new Scene(this, P3D, w/3, h/3, w/3, 2*h/3);
+        views[1].setRadius(scene.radius()*4);
+        views[1].setEye(eyeXZ);
+        views[1].setType(Graph.Type.ORTHOGRAPHIC);
+        //create an auxiliary view to look at the XY Plane
+        Frame eyeYZ = new Frame();
+        //eyeYZ.setMagnitude(0.5f);
+        eyeYZ.scale(2f);
+        eyeYZ.setPosition(scene.radius(), 0, 0);
+        eyeYZ.setOrientation(new Quaternion(new Vector(0,1,0), HALF_PI));
+        eyeYZ.setConstraint(constraint);
+        views[2] = new Scene(this, P3D, w/3, h/3, 2*w/3, 2*h/3);
+        views[2].setEye(eyeYZ);
+        views[2].setRadius(scene.radius()*4);
+        views[2].setType(Graph.Type.ORTHOGRAPHIC);
+        return views;
     }
 }
 
