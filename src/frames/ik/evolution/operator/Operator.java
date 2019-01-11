@@ -2,9 +2,18 @@ package frames.ik.evolution.operator;
 
 import frames.ik.evolution.Individual;
 
+import java.util.List;
+
 /**
  * Created by sebchaparr on 29/10/18.
  */
-public interface Operator {
-    Individual apply(Individual... individuals);
+public abstract class Operator {
+    protected int _arity = 1;
+    public int arity(){
+        return _arity;
+    }
+    public void setArity(int arity){
+        _arity = arity;
+    }
+    public abstract Individual apply(Individual... individuals);
 }

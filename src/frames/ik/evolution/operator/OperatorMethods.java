@@ -13,7 +13,7 @@ import java.util.Random;
  * Created by sebchaparr on 29/10/18.
  */
 public class OperatorMethods {
-    public static class UniformMutation implements Operator{
+    public static class UniformMutation extends Operator{
         protected Random _random = new Random();
         protected float _delta = (float) Math.toRadians(30);
         protected float _rate = 1;
@@ -29,17 +29,17 @@ public class OperatorMethods {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = (_rate*(n - 1) + 1)/n;
-            float beta = _rate*_delta;
+            float alpha = (_rate * (n - 1) + 1) / n;
+            float beta = _rate * _delta;
 
-            for(int i = 0; i < individual.structure().size(); i++){
-                if(_random.nextFloat() > alpha) continue;
+            for (int i = 0; i < individual.structure().size(); i++) {
+                if (_random.nextFloat() > alpha) continue;
                 Frame joint = individual.structure().get(i);
                 //modify each Euler Angle
                 //rotate
-                float roll = 2*beta * _random.nextFloat() - beta;
-                float pitch = 2*beta * _random.nextFloat() - beta;
-                float yaw = 2*beta * _random.nextFloat() - beta;
+                float roll = 2 * beta * _random.nextFloat() - beta;
+                float pitch = 2 * beta * _random.nextFloat() - beta;
+                float yaw = 2 * beta * _random.nextFloat() - beta;
                 //rotate method consider constraints
                 joint.rotate(new Quaternion(roll, pitch, yaw));
             }
@@ -47,7 +47,7 @@ public class OperatorMethods {
         }
     }
 
-    public static class GaussianMutation implements Operator{
+    public static class GaussianMutation extends Operator{
         protected Random _random = new Random();
         protected float _sigma = (float) Math.toRadians(30);
         protected float _rate = 1;
@@ -63,11 +63,11 @@ public class OperatorMethods {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = (_rate*(n - 1) + 1)/n;
-            float beta = _rate*_sigma;
+            float alpha = (_rate * (n - 1) + 1) / n;
+            float beta = _rate * _sigma;
 
-            for(int i = 0; i < individual.structure().size(); i++){
-                if(_random.nextFloat() > alpha) continue;
+            for (int i = 0; i < individual.structure().size(); i++) {
+                if (_random.nextFloat() > alpha) continue;
                 Frame joint = individual.structure().get(i);
                 //modify each Euler Angle
                 //rotate
@@ -81,14 +81,17 @@ public class OperatorMethods {
         }
     }
 
-    public static class ConvexCombination implements Operator{
+    public static class ConvexCombination extends Operator{
         protected Random _random = new Random();
         protected float[] _weights;
         protected boolean _randomWeights = true;
 
-        public ConvexCombination(){}
+        public ConvexCombination(){
+            _arity = 2;
+        }
 
         public ConvexCombination(float[] weights){
+            _arity = weights.length;
             _weights = weights;
         }
 
