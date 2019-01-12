@@ -70,7 +70,7 @@ public class Interaction2D extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
 
     scene.drawShooterTarget(shape1);
     scene.beginHUD();

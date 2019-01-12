@@ -2764,7 +2764,7 @@ public class Graph {
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
-  public void traverse() {
+  public void render() {
     _targetPGraphics = frontBuffer();
     //super.traverse();
     for (Frame frame : _leadingFrames())
@@ -2775,11 +2775,11 @@ public class Graph {
   /**
    * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
-   * @see #traverse(Object, Matrix, Matrix)
+   * @see #render(Object, Matrix, Matrix)
    * @see #traverse()
    */
-  public void traverse(Object pGraphics) {
-    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
+  public void render(Object pGraphics) {
+    render(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
   }
 
   /**
@@ -2794,7 +2794,7 @@ public class Graph {
    * @see #frames()
    * @see #traverse()
    */
-  public void traverse(Object pGraphics, Matrix view, Matrix projection) {
+  public void render(Object pGraphics, Matrix view, Matrix projection) {
     _targetPGraphics = pGraphics;
     if (pGraphics != frontBuffer()) {
       MatrixHandler matrixHandler = matrixHandler(pGraphics);
@@ -2836,13 +2836,11 @@ public class Graph {
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
-  /*
   public void traverse() {
     for (Frame frame : _leadingFrames())
       _visit(frame);
     _tuples.clear();
   }
-  */
 
   /**
    * Used by the traversal algorithm.

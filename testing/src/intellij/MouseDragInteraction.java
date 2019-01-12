@@ -59,8 +59,8 @@ public class MouseDragInteraction extends PApplet {
     fill(0, 255, 255);
     scene.drawArrow(randomVector);
     scene.drawAxes();
-    // visit scene frames (shapes simply get drawn)
-    scene.traverse();
+    // render scene frames (shapes simply get drawn)
+    scene.render();
   }
 
   public void keyPressed() {

@@ -97,7 +97,7 @@ public class ShadowMapDOFOffScreen extends PApplet {
     // 1. Draw into main buffer
     scene.beginDraw();
     scene.frontBuffer().background(75, 25, 15);
-    scene.traverse();
+    scene.render();
     scene.endDraw();
     scene.display();
 
@@ -105,14 +105,14 @@ public class ShadowMapDOFOffScreen extends PApplet {
     if (scene.trackedFrame("light") != null) {
       lightPGraphics.beginDraw();
       lightPGraphics.background(140, 160, 125);
-      scene.traverse(lightPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(lightPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
       lightPGraphics.endDraw();
       // calling image here IS fine!
       //if(mode == 0) image(lightPGraphics, width / 2, height / 2);
 
       depthPGraphics.beginDraw();
       depthPGraphics.background(140, 160, 125);
-      scene.traverse(depthPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(depthPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
       depthPGraphics.endDraw();
       //if(mode == 1) image(depthPGraphics, width / 2, height / 2);
 

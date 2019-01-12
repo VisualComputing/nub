@@ -56,7 +56,7 @@ public class SpaceNavigator extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     if (snPicking)
       spaceNavigatorPicking();
     else

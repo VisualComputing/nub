@@ -102,12 +102,12 @@ public class ShadowMapDepthOnScreen extends PApplet {
     background(75, 25, 15);
     // 1. Fill in and display front-buffer
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.trackedFrame("light") != null) {
       shadowMap.beginDraw();
       shadowMap.background(140, 160, 125);
-      scene.traverse(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
       scene.beginHUD();

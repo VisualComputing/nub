@@ -52,7 +52,7 @@ public class OFFScreen extends PApplet {
     scene.beginDraw();
     scene.frontBuffer().background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     scene.endDraw();
     scene.display();
   }

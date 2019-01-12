@@ -51,11 +51,11 @@ public class ShadowMapping extends PApplet {
   public void draw() {
     background(90, 80, 125);
     // 1. Fill in and display front-buffer
-    scene.traverse();
+    scene.render();
     // 2. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
     shadowMap.background(120);
-    scene.traverse(shadowMap, shadowMapType, light, zNear, zFar);
+    scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     if (show) {

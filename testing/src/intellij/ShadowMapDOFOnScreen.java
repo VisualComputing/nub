@@ -95,17 +95,17 @@ public class ShadowMapDOFOnScreen extends PApplet {
     // 1. Draw into main buffer
     background(75, 255, 125);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.trackedFrame("light") != null) {
       lightPGraphics.beginDraw();
       lightPGraphics.background(140, 160, 125);
-      scene.traverse(lightPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(lightPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
       lightPGraphics.endDraw();
 
       depthPGraphics.beginDraw();
       depthPGraphics.background(140, 160, 125);
-      scene.traverse(depthPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(depthPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
       depthPGraphics.endDraw();
 
       // 3. Draw destination buffer

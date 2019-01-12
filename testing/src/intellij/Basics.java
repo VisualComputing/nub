@@ -49,7 +49,7 @@ public class Basics extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   public void mouseMoved() {

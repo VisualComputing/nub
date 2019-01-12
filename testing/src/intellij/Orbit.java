@@ -59,7 +59,7 @@ public class Orbit extends PApplet {
     stroke(0, 255, 0, 125);
     scene.drawArrow(axis);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   public void keyPressed() {

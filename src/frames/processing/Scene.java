@@ -69,7 +69,7 @@ import java.util.List;
  * retained-mode rendering Processing {@code PShape} or from an immediate-mode
  * rendering Processing procedure. Shapes can be picked precisely using their projection
  * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #traverse()} to render all scene shapes or {@link Shape#draw()} to
+ * {@link #render()} to render all scene shapes or {@link Shape#draw()} to
  * render a specific one instead.
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
@@ -347,7 +347,7 @@ public class Scene extends Graph implements PConstants {
     backBuffer().beginDraw();
     backBuffer().pushStyle();
     backBuffer().background(0);
-    traverse(backBuffer());
+    render(backBuffer());
     backBuffer().popStyle();
     backBuffer().endDraw();
     // if (frames().size() > 0)
@@ -1013,13 +1013,13 @@ public class Scene extends Graph implements PConstants {
    * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
    * taking the {@code eye} as the light point-of-view.
    *
-   * @see #traverse(Object, Matrix, Matrix)
-   * @see #traverse(Object)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
+   * @see #render(PGraphics, Type, Frame, float, float) (Object, Matrix, Matrix)
+   * @see #render(Object)
+   * @see #render(PGraphics, Type, Frame, float, float, boolean)
    * @see #traverse()
    */
-  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
-    traverse(pGraphics, type, eye, zNear, zFar, true);
+  public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
+    render(pGraphics, type, eye, zNear, zFar, true);
   }
 
   /**
@@ -1027,13 +1027,13 @@ public class Scene extends Graph implements PConstants {
    * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
    * taking the {@code eye} as the light point-of-view.
    *
-   * @see #traverse(Object, Matrix, Matrix)
-   * @see #traverse(Object)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object)
+   * @see #render(PGraphics, Type, Frame, float, float)
    * @see #traverse()
    */
-  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
-    traverse(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
+  public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+    render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
   }
 
   // TODO move to the Graph
@@ -2211,7 +2211,7 @@ public class Scene extends Graph implements PConstants {
    * {@code type}, eye {@link Frame#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
    * whether or not the scene is {@code leftHanded}.
    * <p>
-   * Use it in conjunction with {@link #traverse(PGraphics, Type, Frame, float, float, boolean)} as when rendering
+   * Use it in conjunction with {@link #render(PGraphics, Type, Frame, float, float, boolean)} as when rendering
    * a shadow map.
    *
    * @see #drawFrustum(Graph)

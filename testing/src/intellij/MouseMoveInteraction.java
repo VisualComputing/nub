@@ -49,8 +49,8 @@ public class MouseMoveInteraction extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    // visit scene frames (shapes simply get drawn)
-    scene.traverse();
+    // render scene frames (shapes simply get drawn)
+    scene.render();
   }
 
   public void keyPressed() {

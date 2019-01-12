@@ -139,12 +139,12 @@ public class MiniMap extends PApplet {
       scene.beginDraw();
       scene.frontBuffer().background(75, 25, 15);
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
       scene.endDraw();
       scene.display();
     } else {
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
     }
     if (displayMinimap) {
       scene.shift(minimap);
@@ -153,7 +153,7 @@ public class MiniMap extends PApplet {
       minimap.beginDraw();
       minimap.frontBuffer().background(125, 80, 90);
       minimap.drawAxes();
-      minimap.traverse();
+      minimap.render();
       // draw scene eye
       minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 125);
       minimap.frontBuffer().stroke(0, 0, 255);

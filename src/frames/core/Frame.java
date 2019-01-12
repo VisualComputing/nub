@@ -2159,6 +2159,9 @@ public class Frame {
   public void visit() {
   }
 
+  public void draw(Object context) {
+  }
+
   /**
    * Same as {@code cull(true)}. Only meaningful if the frame is attached to
    * a {@code graph}.

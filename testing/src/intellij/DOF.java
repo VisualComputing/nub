@@ -65,7 +65,7 @@ public class DOF extends PApplet {
     depthPGraphics.background(0);
     depthShader.set("near", scene.zNear());
     depthShader.set("far", scene.zFar());
-    scene.traverse(depthPGraphics);
+    scene.render(depthPGraphics);
     depthPGraphics.endDraw();
 
     // 3. Draw destination buffer
