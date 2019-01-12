@@ -77,10 +77,11 @@ import java.util.List;
  * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the frame hierarchy which automatically apply the local
- * frame transformations described above may be achieved with {@link Graph#traverse()}.
- * Automatic traversals require overriding {@link #visit()} and to instantiate a frame
- * attached to a graph which is referred to as attached frame (see {@link #isAttached(Graph)}
- * and {@link #isDetached()}).
+ * frame transformations described above may be achieved with {@link Graph#traverse()} or
+ * {@link Graph#render(Object)}.
+ * Automatic traversals require overriding {@link #visit()} or {@link #draw(Object)} and to
+ * instantiate a frame attached to a graph which is referred to as attached frame (see
+ * {@link #isAttached(Graph)} and {@link #isDetached()}).
  * <p>
  * To instantiate an attached frame use the frame constructors that take a {@code graph}
  * parameter or a (reference) frame which in turn is attached to a graph. Once instantiated,
@@ -2130,9 +2131,9 @@ public class Frame {
   }
 
   /**
-   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
-   * is attached to a {@code graph}.
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#traverse()}
+   * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
+   * by derived classes.
    * <p>
    * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
@@ -2146,19 +2147,53 @@ public class Frame {
    *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
+   *       // Manipulate your object here, in the local coordinate system.
    *   }
    * }
    * }
    * </pre>
    *
    * @see Graph#traverse()
+   * @see Graph#render()
    * @see #cull(boolean)
    * @see #isCulled()
+   * @see #draw(Object)
    */
   public void visit() {
   }
 
+  /**
+   * Renders the frame, provided that it holds a visual representation, onto {@code context}.
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#render(Object)}
+   * algorithm, i.e., either call this method or the {@link Graph#render(Object)} algorithm
+   * within you main event loop.
+   * <p>
+   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
+   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * frame = new Frame(graph) {
+   *   public void draw(Object context) {
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // at the frame
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#render()
+   * @see Graph#traverse()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   * @see #visit()
+   */
   public void draw(Object context) {
   }
 

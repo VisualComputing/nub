@@ -247,7 +247,7 @@ public class Scene extends Graph implements PConstants {
     setOriginCorner(x, y);
 
     // 2. Matrix helper
-    setMatrixHandler(matrixHandler(pGraphics));
+    setMatrixHandler(_matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
     if (enableBackBuffer()) {
@@ -1006,12 +1006,10 @@ public class Scene extends Graph implements PConstants {
     return false;
   }
 
-  // TODO experimental
-
   /**
-   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
-   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
-   * taking the {@code eye} as the light point-of-view.
+   * Renders the scene onto {@code pGraphics} using the {@code eye} frame point of view and
+   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
+   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}
    *
    * @see #render(PGraphics, Type, Frame, float, float) (Object, Matrix, Matrix)
    * @see #render(Object)
@@ -1023,9 +1021,10 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
-   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
-   * taking the {@code eye} as the light point-of-view.
+   * Renders the scene onto {@code pGraphics} using the {@code eye} frame point of view and
+   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
+   * as the light point-of-view. Same as
+   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}
    *
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object)
@@ -1036,41 +1035,19 @@ public class Scene extends Graph implements PConstants {
     render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
   }
 
-  // TODO move to the Graph
-
-  @Override
-  protected void _visit(Frame frame) {
-    // TODO handle me!
-    ((PGraphics) _targetPGraphics).pushMatrix();
-    // TODO handle me!
-    applyTransformation((PGraphics) _targetPGraphics, frame);
-    _track(frame);
-    if (_targetPGraphics != backBuffer() || frame instanceof Shape)
-      frame.visit();
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child);
-    // TODO handle me!
-    ((PGraphics) _targetPGraphics).popMatrix();
+  /**
+   * Returns a new matrix handler for the given {@code context}.
+   */
+  protected static MatrixHandler _getMatrixHandler(Object context) {
+    if (!(context instanceof PGraphicsOpenGL))
+      throw new RuntimeException("PGraphicsOpenGL is currently the only renderer available");
+    else
+      return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
-  // TODO end experimental
-
-  /**
-   * Returns a new matrix helper for the given {@code pGraphics}. Rarely needed.
-   * <p>
-   * Note that the current graph matrix helper may be retrieved by {@link #matrixHandler()}.
-   *
-   * @see #matrixHandler()
-   * @see #setMatrixHandler(MatrixHandler)
-   * @see #applyWorldTransformation(PGraphics, Frame)
-   */
   @Override
-  public MatrixHandler matrixHandler(Object pGraphics) {
-    return (pGraphics instanceof processing.opengl.PGraphicsOpenGL) ?
-        new GLMatrixHandler(this, (PGraphicsOpenGL) pGraphics) :
-        //new Java2DMatrixHandler(this, pGraphics);
-        super.matrixHandler(pGraphics);
+  protected MatrixHandler _matrixHandler(Object context) {
+    return _getMatrixHandler(context);
   }
 
   /**
@@ -1080,16 +1057,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
-    if (pGraphics instanceof PGraphics3D) {
-      pGraphics.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      pGraphics.rotate(frame.rotation().angle(), frame.rotation().axis()._vector[0],
-          frame.rotation().axis()._vector[1], frame.rotation().axis()._vector[2]);
-      pGraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
-    } else {
-      pGraphics.translate(frame.translation().x(), frame.translation().y());
-      pGraphics.rotate(frame.rotation().angle2D());
-      pGraphics.scale(frame.scaling(), frame.scaling());
-    }
+    _applyTransformation(_getMatrixHandler(pGraphics), frame, pGraphics.is2D());
   }
 
   /**
@@ -1099,13 +1067,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyTransformation(PGraphics, Frame)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
-    Frame reference = frame.reference();
-    if (reference != null) {
-      applyWorldTransformation(pGraphics, reference);
-      applyTransformation(pGraphics, frame);
-    } else {
-      applyTransformation(pGraphics, frame);
-    }
+    _applyWorldTransformation(_getMatrixHandler(pGraphics), frame, pGraphics.is2D());
   }
 
   // HUD
@@ -1148,7 +1110,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().beginHUD();
     else
-      matrixHandler(pGraphics).beginHUD();
+      _matrixHandler(pGraphics).beginHUD();
   }
 
   /**
@@ -1179,7 +1141,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().endHUD();
     else
-      matrixHandler(pGraphics).endHUD();
+      _matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }

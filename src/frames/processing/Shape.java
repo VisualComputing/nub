@@ -165,129 +165,111 @@ public class Shape extends Frame {
     return _highlight;
   }
 
-  @Override
-  public void visit() {
-    // TODO handle me!
-    draw((PGraphics) graph()._targetPGraphics);
-  }
-
   /**
-   * Same as {@code draw(graph().frontBuffer())}. Use it instead of {@link Scene#traverse()}.
+   * Same as {@code draw(graph().frontBuffer())}. Use it instead of {@link Scene#render()}.
    *
-   * @see Scene#traverse()
-   * @see #draw(PGraphics)
+   * @see Scene#render()
+   * @see #draw(Object)
    */
   public void draw() {
     draw(graph().frontBuffer());
   }
 
-  /**
-   * Draws the shape into the {@code pGraphics}. Use it instead of {@link Scene#traverse(Object)} (which
-   * in turn calls it) such as:
-   *
-   * <pre>
-   * {@code
-   * void draw() {
-   *   pGraphics.pushMatrix();
-   *   // apply the local shape transformation before drawing
-   *   Scene.applyTransformation(pGraphics, shape);
-   *   // or apply the global shape transformation
-   *   //Scene.applyWorldTransformation(pGraphics, shape);
-   *   shape.draw(pGraphics);
-   *   pGraphics.popMatrix();
-   * }
-   * }
-   * </pre>
-   *
-   * @see Scene#traverse(Object)
-   * @see #draw()
-   */
-  public void draw(PGraphics pGraphics) {
-    if (pGraphics != graph().backBuffer()) {
-      pGraphics.pushStyle();
-      pGraphics.pushMatrix();
+  @Override
+  public void draw(Object context) {
+    //if(context instanceof PGraphics)
+    if (context == graph().backBuffer())
+      _drawBackBuffer((PGraphics) context);
+    else
+      _draw((PGraphics) context);
+  }
+
+  protected void _draw(PGraphics pGraphics) {
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
             /*
             if(_frontShape != null)
                 pg.shape(_frontShape);
             set(pg);
             setFrontGraphics(pg);
             //*/
-      ///*
-      //TODO needs more thinking
-      switch (highlighting()) {
-        case FRONT:
-          if (isTracked())
-            pGraphics.scale(1.15f);
-        case NONE:
-          if (_frontShape != null)
-            pGraphics.shape(_frontShape);
+    ///*
+    //TODO needs more thinking
+    switch (highlighting()) {
+      case FRONT:
+        if (isTracked())
+          pGraphics.scale(1.15f);
+      case NONE:
+        if (_frontShape != null)
+          pGraphics.shape(_frontShape);
+        else
+          setGraphics(pGraphics);
+        break;
+      case FRONT_BACK:
+        if (_frontShape != null)
+          pGraphics.shape(_frontShape);
+        else
+          setFrontGraphics(pGraphics);
+        if (isTracked()) {
+          if (_backShape != null)
+            pGraphics.shape(_backShape);
           else
-            setGraphics(pGraphics);
-          break;
-        case FRONT_BACK:
+            setBackGraphics(pGraphics);
+        }
+        break;
+      case BACK:
+        if (isTracked()) {
+          if (_backShape != null)
+            pGraphics.shape(_backShape);
+          else
+            setBackGraphics(pGraphics);
+        } else {
           if (_frontShape != null)
             pGraphics.shape(_frontShape);
           else
             setFrontGraphics(pGraphics);
-          if (isTracked()) {
-            if (_backShape != null)
-              pGraphics.shape(_backShape);
-            else
-              setBackGraphics(pGraphics);
-          }
-          break;
-        case BACK:
-          if (isTracked()) {
-            if (_backShape != null)
-              pGraphics.shape(_backShape);
-            else
-              setBackGraphics(pGraphics);
-          } else {
-            if (_frontShape != null)
-              pGraphics.shape(_frontShape);
-            else
-              setFrontGraphics(pGraphics);
-          }
-          break;
-      }
-      //*/
-      pGraphics.popStyle();
-      pGraphics.popMatrix();
-    } else {
-      if (precision() == Precision.EXACT) {
-        float r = (float) (_id & 255) / 255.f;
-        float g = (float) ((_id >> 8) & 255) / 255.f;
-        float b = (float) ((_id >> 16) & 255) / 255.f;
-        // funny, only safe way. Otherwise break things horribly when setting shapes
-        // and there are more than one iFrame
-        pGraphics.shader(graph()._triangleShader);
-        pGraphics.shader(graph()._lineShader, PApplet.LINES);
-        pGraphics.shader(graph()._pointShader, PApplet.POINTS);
+        }
+        break;
+    }
+    //*/
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
+  }
 
-        graph()._triangleShader.set("id", new PVector(r, g, b));
-        graph()._lineShader.set("id", new PVector(r, g, b));
-        graph()._pointShader.set("id", new PVector(r, g, b));
-        pGraphics.pushStyle();
-        pGraphics.pushMatrix();
+  protected void _drawBackBuffer(PGraphics pGraphics) {
+    if (precision() == Precision.EXACT) {
+      float r = (float) (_id & 255) / 255.f;
+      float g = (float) ((_id >> 8) & 255) / 255.f;
+      float b = (float) ((_id >> 16) & 255) / 255.f;
+      // funny, only safe way. Otherwise break things horribly when setting shapes
+      // and there are more than one iFrame
+      pGraphics.shader(graph()._triangleShader);
+      pGraphics.shader(graph()._lineShader, PApplet.LINES);
+      pGraphics.shader(graph()._pointShader, PApplet.POINTS);
+
+      graph()._triangleShader.set("id", new PVector(r, g, b));
+      graph()._lineShader.set("id", new PVector(r, g, b));
+      graph()._pointShader.set("id", new PVector(r, g, b));
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
                 /*
                 if (_backShape != null)
                     pg.shape(_backShape);
                 set(pg);
                 setBackGraphics(pg);
                 //*/
-        ///*
-        if (_frontShape != null)
-          pGraphics.shapeMode(graph().frontBuffer().shapeMode);
-        if (_backShape != null)
-          pGraphics.shape(_backShape);
-        else {
-          setGraphics(pGraphics);
-          setBackGraphics(pGraphics);
-        }
-        //*/
-        pGraphics.popStyle();
-        pGraphics.popMatrix();
+      ///*
+      if (_frontShape != null)
+        pGraphics.shapeMode(graph().frontBuffer().shapeMode);
+      if (_backShape != null)
+        pGraphics.shape(_backShape);
+      else {
+        setGraphics(pGraphics);
+        setBackGraphics(pGraphics);
       }
+      //*/
+      pGraphics.popStyle();
+      pGraphics.popMatrix();
     }
   }
 

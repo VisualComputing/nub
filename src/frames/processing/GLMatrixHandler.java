@@ -10,7 +10,6 @@
 
 package frames.processing;
 
-import frames.core.Graph;
 import frames.core.MatrixHandler;
 import frames.primitives.Matrix;
 import processing.core.PMatrix3D;
@@ -22,7 +21,7 @@ import processing.opengl.PGraphicsOpenGL;
 public class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
-  public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
+  public GLMatrixHandler(PGraphicsOpenGL renderer) {
     super(renderer.width, renderer.height);
     _pgraphics = renderer;
   }

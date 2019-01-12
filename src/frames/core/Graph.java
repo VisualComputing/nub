@@ -11,6 +11,7 @@
 package frames.core;
 
 import frames.primitives.*;
+import frames.processing.Shape;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -128,8 +129,6 @@ import java.util.List;
 public class Graph {
   // 0. Contexts
   protected Object _bb, _fb;
-  // TODO discard me!
-  public Object _targetPGraphics;
   // 1. Eye
   protected Frame _eye;
   protected long _lastEqUpdate;
@@ -2331,6 +2330,28 @@ public class Graph {
 
   // Nice stuff :P
 
+  protected static void _applyTransformation(MatrixHandler matrixHandler, Frame frame, boolean is2D) {
+    if (is2D) {
+      matrixHandler.translate(frame.translation().x(), frame.translation().y());
+      matrixHandler.rotate(frame.rotation().angle2D());
+      matrixHandler.scale(frame.scaling(), frame.scaling());
+    } else {
+      matrixHandler.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
+      matrixHandler.rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
+      matrixHandler.scale(frame.scaling(), frame.scaling(), frame.scaling());
+    }
+  }
+
+  protected static void _applyWorldTransformation(MatrixHandler matrixHandler, Frame frame, boolean is2D) {
+    Frame reference = frame.reference();
+    if (reference != null) {
+      _applyWorldTransformation(matrixHandler, reference, is2D);
+      _applyTransformation(matrixHandler, frame, is2D);
+    } else {
+      _applyTransformation(matrixHandler, frame, is2D);
+    }
+  }
+
   /**
    * Apply the local transformation defined by {@code frame}, i.e., respect to its
    * {@link Frame#reference()}. The Frame is first translated, then rotated around
@@ -2367,15 +2388,7 @@ public class Graph {
    * @see #applyWorldTransformation(Frame)
    */
   public void applyTransformation(Frame frame) {
-    if (is2D()) {
-      matrixHandler().translate(frame.translation().x(), frame.translation().y());
-      matrixHandler().rotate(frame.rotation().angle2D());
-      matrixHandler().scale(frame.scaling(), frame.scaling());
-    } else {
-      matrixHandler().translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      matrixHandler().rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
-      matrixHandler().scale(frame.scaling(), frame.scaling(), frame.scaling());
-    }
+    _applyTransformation(matrixHandler(), frame, is2D());
   }
 
   /**
@@ -2383,12 +2396,7 @@ public class Graph {
    * defined by the frame.
    */
   public void applyWorldTransformation(Frame frame) {
-    Frame reference = frame.reference();
-    if (reference != null) {
-      applyWorldTransformation(reference);
-      applyTransformation(frame);
-    } else
-      applyTransformation(frame);
+    _applyWorldTransformation(matrixHandler(), frame, is2D());
   }
 
   // Other stuff
@@ -2736,91 +2744,94 @@ public class Graph {
     _tuples.add(new Tuple(hid, pixel));
   }
 
-  public MatrixHandler matrixHandler(Object context) {
+  /**
+   * Override this method according to your renderer
+   */
+  protected MatrixHandler _matrixHandler(Object context) {
+    // dummy: it should be overridden
     return new MatrixHandler(width(), height());
   }
 
-  // TODO experimental
-
+  /**
+   * Returns the main renderer context.
+   */
   public Object frontBuffer() {
     return _fb;
   }
 
+  /**
+   * Returns the back buffer, used for
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
+   */
   public Object backBuffer() {
     return _bb;
   }
 
   /**
-   * Traverse the frame hierarchy, successively applying the local transformation defined
-   * by each traversed frame, and calling {@link Frame#visit()} on it.
-   * <p>
-   * Note that only reachable frames are visited by this algorithm.
+   * Renders the scene onto the {@link #frontBuffer()}. Same as {@code render(frontBuffer())}.
    *
-   * <b>Attention:</b> this method should be called within the main event loop, just after
-   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
-   * modelview matrix takes place.
-   *
-   * @see #track(String, float, float)
-   * @see #isReachable(Frame)
-   * @see #pruneBranch(Frame)
-   */
-  public void render() {
-    _targetPGraphics = frontBuffer();
-    //super.traverse();
-    for (Frame frame : _leadingFrames())
-      _visit(frame);
-    _tuples.clear();
-  }
-
-  /**
-   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
-   *
+   * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
    * @see #traverse()
    */
-  public void render(Object pGraphics) {
-    render(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
+  public void render() {
+    render(frontBuffer());
   }
 
   /**
-   * Renders the scene into {@code pGraphics} using the {@code view} and {@code projection}
-   * matrices. Calls {@link Graph#traverse()}. No {@code pGraphics.beginDraw()/endDraw()}
-   * calls take place. Call this method only within Processing draw() method.
-   * <p>
-   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
-   * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
-   * technique is called at the end of the rendering loop.
+   * Renders the scene onto {@code context}.
+   * Same as {@code render(context, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
-   * @see #frames()
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render()
    * @see #traverse()
    */
-  public void render(Object pGraphics, Matrix view, Matrix projection) {
-    _targetPGraphics = pGraphics;
-    if (pGraphics != frontBuffer()) {
-      MatrixHandler matrixHandler = matrixHandler(pGraphics);
+  public void render(Object context) {
+    render(context, matrixHandler().cacheView(), matrixHandler().projection());
+  }
+
+  /**
+   * Renders the frame hierarchy onto {@code context} using the {@code view} and
+   * {@code projection} matrices.
+   * <p>
+   * Note that only reachable frames are visited by this algorithm.
+   *
+   * <b>Attention:</b> this method should be called within the main event loop, just after
+   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
+   * modelview matrix takes place.
+   *
+   * @see #render()
+   * @see #render(Object)
+   * @see #traverse()
+   */
+  public void render(Object context, Matrix view, Matrix projection) {
+    MatrixHandler matrixHandler;
+    if (context == frontBuffer())
+      matrixHandler = matrixHandler();
+    else {
+      matrixHandler = _matrixHandler(context);
       matrixHandler._bindProjection(projection);
       matrixHandler._bindModelView(view);
     }
-    //super.traverse();
     for (Frame frame : _leadingFrames())
-      _visit(frame);
+      _draw(matrixHandler, context, frame);
     _tuples.clear();
   }
 
-  /*
-  protected void _visit(Frame frame) {
-    pushModelView();
-    applyTransformation(frame);
+  /**
+   * Used by the render algorithm.
+   */
+  protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
+    matrixHandler.pushModelView();
+    _applyTransformation(matrixHandler, frame, is2D());
     _track(frame);
-    frame.visit();
+    if (context != backBuffer() || frame instanceof Shape)
+      frame.draw(context);
     if (!frame.isCulled())
       for (Frame child : frame.children())
-        _visit(child);
-    popModelView();
+        _draw(matrixHandler, context, child);
+    matrixHandler.popModelView();
   }
-  */
-
-  // TODO end experimental
 
   /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
@@ -2832,6 +2843,7 @@ public class Graph {
    * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
    * modelview matrix takes place.
    *
+   * @see #render(Object, Matrix, Matrix)
    * @see #track(String, float, float)
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)

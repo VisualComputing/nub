@@ -57,7 +57,7 @@ public class DOF extends PApplet {
     // 1. Draw into main buffer
     scene.beginDraw();
     scene.frontBuffer().background(0);
-    scene.traverse();
+    scene.render();
     scene.endDraw();
 
     // 2. Draw into depth buffer
