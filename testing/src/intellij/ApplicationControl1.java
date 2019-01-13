@@ -81,9 +81,9 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void draw() {
-    background(0);
+    background(125);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   void control(Object... gesture) {

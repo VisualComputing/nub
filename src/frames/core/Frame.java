@@ -2178,7 +2178,7 @@ public class Frame {
    * frame = new Frame(graph) {
    *   public void draw(Object context) {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
+   *     // (which should be implemented by you) is true, scene.render() will prune the branch
    *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())

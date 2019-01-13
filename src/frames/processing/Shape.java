@@ -238,11 +238,15 @@ public class Shape extends Frame {
 
   protected void _drawBackBuffer(PGraphics pGraphics) {
     if (precision() == Precision.EXACT) {
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
+
       float r = (float) (_id & 255) / 255.f;
       float g = (float) ((_id >> 8) & 255) / 255.f;
       float b = (float) ((_id >> 16) & 255) / 255.f;
+
       // funny, only safe way. Otherwise break things horribly when setting shapes
-      // and there are more than one iFrame
+      // and there are more than one shape
       pGraphics.shader(graph()._triangleShader);
       pGraphics.shader(graph()._lineShader, PApplet.LINES);
       pGraphics.shader(graph()._pointShader, PApplet.POINTS);
@@ -250,8 +254,8 @@ public class Shape extends Frame {
       graph()._triangleShader.set("id", new PVector(r, g, b));
       graph()._lineShader.set("id", new PVector(r, g, b));
       graph()._pointShader.set("id", new PVector(r, g, b));
-      pGraphics.pushStyle();
-      pGraphics.pushMatrix();
+      //pGraphics.pushStyle();
+      //pGraphics.pushMatrix();
                 /*
                 if (_backShape != null)
                     pg.shape(_backShape);
