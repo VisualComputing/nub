@@ -29,7 +29,7 @@ public class Orbit extends PApplet {
 
     shape1 = new Shape(scene) {
       @Override
-      public void setGraphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -46,7 +46,7 @@ public class Orbit extends PApplet {
 
     //shape2 = new Shape(shape1);
     shape2 = new Shape(scene);
-    shape2.setGraphics(shape());
+    shape2.shape(shape());
     shape2.translate(275, 275, 275);
 
     scene.setTrackedFrame(shape2);

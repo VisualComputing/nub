@@ -46,7 +46,7 @@ public class MiniMap2 extends PApplet {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
 
           @Override
-          public void setGraphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
@@ -68,7 +68,7 @@ public class MiniMap2 extends PApplet {
     minimap.fit(1);
     sceneEye = new Shape(minimap) {
       @Override
-      public void setGraphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.stroke(0, 0, 255);

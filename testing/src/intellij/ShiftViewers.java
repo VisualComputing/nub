@@ -38,7 +38,7 @@ public class ShiftViewers extends PApplet {
         models[i] = new Shape(scene1) {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
           @Override
-          public void setGraphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene1.drawTorusSolenoid(pg, _faces, scene1.radius() / 30);

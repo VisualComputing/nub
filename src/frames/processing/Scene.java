@@ -74,7 +74,7 @@ import java.util.List;
  * <h3>Retained-mode shapes</h3>
  * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
  * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
- * {@link Shape#setGraphics(PGraphics)}.
+ * {@link Shape#graphics(PGraphics)}.
  * <h3>Immediate-mode shapes</h3>
  * To set an immediate-mode shape use code such as the following:
  * <pre>
@@ -103,7 +103,7 @@ import java.util.List;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
+ * among others, can be used to set a {@link Shape} (see {@link Shape#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than this one) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and

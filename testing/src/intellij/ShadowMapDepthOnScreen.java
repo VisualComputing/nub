@@ -33,7 +33,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene) {
         @Override
-        public void setGraphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           if (scene.trackedFrame("light") == this) {
             Scene.drawAxes(pg, 150);

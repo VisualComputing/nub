@@ -38,7 +38,7 @@ void setup() {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
-      public void setGraphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(_color);
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);

@@ -36,7 +36,7 @@ public class ApplicationControl3 extends PApplet {
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public void setGraphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);

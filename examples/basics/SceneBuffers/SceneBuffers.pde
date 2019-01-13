@@ -32,7 +32,7 @@ void setup() {
   shapes = new Shape[100];
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Shape(scene);
-    shapes[i].setGraphics(caja());
+    shapes[i].graphics(caja());
     shapes[i].randomize();
   }
   scene.fit(1);

@@ -27,7 +27,7 @@ public class OFFScreen extends PApplet {
 
     shape1 = new Shape(scene) {
       @Override
-      public void setGraphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -43,7 +43,7 @@ public class OFFScreen extends PApplet {
     shape1.translate(-55, -55, -55);
 
     shape2 = new Shape(shape1);
-    shape2.setGraphics(shape());
+    shape2.shape(shape());
     shape2.translate(-55, -85, 135);
   }
 

@@ -19,12 +19,11 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.core.PVector;
-import processing.opengl.PGraphicsOpenGL;
 
 /**
  * A shape is a {@link Frame} specialization that should always be attached to a {@code scene}
  * (see {@link Frame#isAttached(Graph)}) and that can be set from a retained-mode rendering Processing
- * {@code PShape} or from an immediate-mode rendering Processing procedure. Either case the shape is
+ * {@code Object} or from an immediate-mode rendering Processing procedure. Either case the shape is
  * split in two a front and a back shape. The front shape will be used for rendering and the back
  * shape for picking with exact precision by default, see {@link #setPrecision(Precision)}. When
  * picking a shape it will be highlighted according to a highlighting policy, see
@@ -34,13 +33,13 @@ import processing.opengl.PGraphicsOpenGL;
  * {@link #precision()} different than {@link Precision#EXACT} or a simpler representation
  * for the back shape.
  * <h2>Retained mode</h2>
- * To set a retained-mode shape call {@link #setGraphics(PShape)} which will set both the front and
- * the back shape to be the same pshape. Call {@link #setFrontGraphics(PShape)} and
- * {@link #setFrontGraphics(PShape)} to set different graphics for rendering and picking, respectively.
+ * To set a retained-mode shape call {@link #shape(Object)} which will set both the front and
+ * the back shape to be the same pshape. Call {@link #frontShape(Object)} and
+ * {@link #frontShape(Object)} to set different graphics for rendering and picking, respectively.
  * <h2>Immediate mode</h2>
- * To set an immediate-mode shape override {@link #setGraphics(PGraphics)} which will set both the
+ * To set an immediate-mode shape override {@link #graphics(PGraphics)} which will set both the
  * front and the back shape to be the same graphics procedure. Override
- * {@link #setFrontGraphics(PGraphics)} and {@link #setFrontGraphics(PGraphics)} to set different
+ * {@link #frontGraphics(PGraphics)} and {@link #frontGraphics(PGraphics)} to set different
  * graphics procedures for rendering and picking, respectively.
  * <h2>Picking</h2>
  * Picking a shape is done according to a precision which can either be:
@@ -55,10 +54,10 @@ import processing.opengl.PGraphicsOpenGL;
  *
  * <ol>
  * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
- * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFrontGraphics(PShape)}
- * and {@link #setFrontGraphics(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
- * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBackGraphics(PShape)} and
- * {@link #setBackGraphics(PGraphics)}) is displayed instead of the front-shape.</li>
+ * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
+ * and {@link #frontGraphics(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
+ * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
+ * {@link #backGraphics(PGraphics)}) is displayed instead of the front-shape.</li>
  * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
  * displayed. The back shape is made translucent</li>
  * </ol>
@@ -67,22 +66,11 @@ import processing.opengl.PGraphicsOpenGL;
  * {@link #setHighlighting(Highlighting)}).
  */
 public class Shape extends Frame {
-  PShape _frontShape, _backShape;
-
-  public enum Highlighting {
-    NONE, FRONT, FRONT_BACK, BACK
-  }
-
-  Highlighting _highlight;
-
   /**
    * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    */
   public Shape(Scene scene) {
     super(scene);
-    if (graph().frontBuffer() instanceof PGraphicsOpenGL)
-      setPrecision(Precision.EXACT);
-    setHighlighting(Highlighting.FRONT);
   }
 
   /**
@@ -95,18 +83,15 @@ public class Shape extends Frame {
       throw new RuntimeException("Shape reference should be attached to an scene");
     if (!(reference.graph() instanceof Scene))
       throw new RuntimeException("Graph reference of the shape should be instance of Scene");
-    if (graph().frontBuffer() instanceof PGraphicsOpenGL)
-      setPrecision(Precision.EXACT);
-    setHighlighting(Highlighting.FRONT);
   }
 
   /**
    * Constructs a scene 'attached' shape with {@link Precision#EXACT} and {@link Highlighting#FRONT} policy.
    * Sets {@code pShape} as its retained mode pshape.
    */
-  public Shape(Scene scene, PShape pShape) {
+  public Shape(Scene scene, Object pShape) {
     this(scene);
-    setGraphics(pShape);
+    shape(pShape);
   }
 
   /**
@@ -114,55 +99,14 @@ public class Shape extends Frame {
    * Sets {@code reference} as its {@link #reference() frame and {@code pShape} as its retained mode
    * pshape.
    */
-  public Shape(Frame reference, PShape pShape) {
+  public Shape(Frame reference, Object pShape) {
     this(reference);
-    setGraphics(pShape);
-  }
-
-  protected Shape(Scene scene, Shape shape) {
-    super(scene, shape);
-    this._frontShape = shape._frontShape;
-    this._backShape = shape._backShape;
-  }
-
-  @Override
-  public Shape get() {
-    return new Shape(graph(), this);
+    shape(pShape);
   }
 
   @Override
   public Scene graph() {
     return (Scene) _graph;
-  }
-
-  /**
-   * Highlights the shape when picking takes place as follows:
-   *
-   * <ol>
-   * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
-   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #setFrontGraphics(PShape)}
-   * and {@link #setFrontGraphics(PGraphics)}) is scaled by a {@code 1.15} factor.</li>
-   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #setBackGraphics(PShape)} and
-   * {@link #setBackGraphics(PGraphics)}) is displayed instead of the front-shape.</li>
-   * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
-   * displayed. The back shape is made translucent</li>
-   * </ol>
-   * <p>
-   * Default is {@link Highlighting#FRONT}.
-   *
-   * @see #highlighting()
-   */
-  public void setHighlighting(Highlighting highlighting) {
-    _highlight = highlighting;
-  }
-
-  /**
-   * Returns the highlighting mode.
-   *
-   * @see #setHighlighting(Highlighting)
-   */
-  public Highlighting highlighting() {
-    return _highlight;
   }
 
   /**
@@ -191,7 +135,7 @@ public class Shape extends Frame {
             if(_frontShape != null)
                 pg.shape(_frontShape);
             set(pg);
-            setFrontGraphics(pg);
+            frontShape(pg);
             //*/
     ///*
     //TODO needs more thinking
@@ -201,33 +145,33 @@ public class Shape extends Frame {
           pGraphics.scale(1.15f);
       case NONE:
         if (_frontShape != null)
-          pGraphics.shape(_frontShape);
+          pGraphics.shape((PShape) _frontShape);
         else
-          setGraphics(pGraphics);
+          graphics(pGraphics);
         break;
       case FRONT_BACK:
         if (_frontShape != null)
-          pGraphics.shape(_frontShape);
+          pGraphics.shape((PShape) _frontShape);
         else
-          setFrontGraphics(pGraphics);
+          frontGraphics(pGraphics);
         if (isTracked()) {
           if (_backShape != null)
-            pGraphics.shape(_backShape);
+            pGraphics.shape((PShape) _backShape);
           else
-            setBackGraphics(pGraphics);
+            backGraphics(pGraphics);
         }
         break;
       case BACK:
         if (isTracked()) {
           if (_backShape != null)
-            pGraphics.shape(_backShape);
+            pGraphics.shape((PShape) _backShape);
           else
-            setBackGraphics(pGraphics);
+            backGraphics(pGraphics);
         } else {
           if (_frontShape != null)
-            pGraphics.shape(_frontShape);
+            pGraphics.shape((PShape) _frontShape);
           else
-            setFrontGraphics(pGraphics);
+            frontGraphics(pGraphics);
         }
         break;
     }
@@ -260,86 +204,20 @@ public class Shape extends Frame {
                 if (_backShape != null)
                     pg.shape(_backShape);
                 set(pg);
-                setBackGraphics(pg);
+                backShape(pg);
                 //*/
       ///*
       if (_frontShape != null)
         pGraphics.shapeMode(graph().frontBuffer().shapeMode);
       if (_backShape != null)
-        pGraphics.shape(_backShape);
+        pGraphics.shape((PShape) _backShape);
       else {
-        setGraphics(pGraphics);
-        setBackGraphics(pGraphics);
+        graphics(pGraphics);
+        backGraphics(pGraphics);
       }
       //*/
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the shape.
-   * <p>
-   * Sets both the front and the back shape to the same graphics procedure.
-   *
-   * @see #setFrontGraphics(PGraphics)
-   * @see #setBackGraphics(PGraphics)
-   * @see #setGraphics(PShape)
-   */
-  protected void setGraphics(PGraphics pGraphics) {
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * front shape. Use it in conjunction with @see #setBackGraphics(PGraphics).
-   *
-   * @see #setGraphics(PGraphics)
-   * @see #setGraphics(PShape)
-   */
-  protected void setFrontGraphics(PGraphics pGraphics) {
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * back shape. Use it in conjunction with @see #setFrontGraphics(PGraphics).
-   *
-   * @see #setGraphics(PGraphics)
-   * @see #setGraphics(PShape)
-   */
-  protected void setBackGraphics(PGraphics pGraphics) {
-  }
-
-  /**
-   * Sets the retained mode pshape for both, the front and the back shapes.
-   *
-   * @see #setFrontGraphics(PShape)
-   * @see #setBackGraphics(PShape)
-   * @see #setGraphics(PGraphics)
-   */
-  public void setGraphics(PShape shape) {
-    setFrontGraphics(shape);
-    setBackGraphics(shape);
-  }
-
-  /**
-   * Sets the retained mode pshape for the front shape. Use it in conjunction
-   * with @see #setBackGraphics(PShape)}.
-   *
-   * @see #setGraphics(PShape)
-   * @see #setGraphics(PGraphics)
-   */
-  public void setFrontGraphics(PShape shape) {
-    _frontShape = shape;
-  }
-
-  /**
-   * Sets the retained mode pshape for the back shape. Use it in conjunction
-   * with @see #setFrontGraphics(PShape)}.
-   *
-   * @see #setGraphics(PShape)
-   * @see #setGraphics(PGraphics)
-   */
-  public void setBackGraphics(PShape shape) {
-    _backShape = shape;
   }
 }

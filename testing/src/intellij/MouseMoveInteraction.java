@@ -27,7 +27,7 @@ public class MouseMoveInteraction extends PApplet {
 
     Shape shape1 = new Shape(scene) {
       @Override
-      public void setGraphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -42,7 +42,7 @@ public class MouseMoveInteraction extends PApplet {
     shape1.translate(-375, 175, -275);
 
     Shape shape2 = new Shape(shape1);
-    shape2.setGraphics(shape());
+    shape2.shape(shape());
     shape2.translate(275, 275, 275);
   }
 

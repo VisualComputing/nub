@@ -1,9 +1,9 @@
 package intellij;
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
-import processing.core.*;
+import frames.processing.Scene;
+import frames.processing.Shape;
+import processing.core.PApplet;
+import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class SceneBuffers extends PApplet {
@@ -27,7 +27,7 @@ public class SceneBuffers extends PApplet {
     shapes = new Shape[100];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene);
-      shapes[i].setGraphics(caja());
+      shapes[i].shape(caja());
       shapes[i].randomize();
     }
     scene.fit(1);

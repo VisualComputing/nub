@@ -12,7 +12,7 @@ class Piece extends Shape {
   }
 
   @Override
-  public void setGraphics(PGraphics pGraphics) {
+  public void graphics(PGraphics pGraphics) {
     switch (mode) {
     case 1:
       pGraphics.fill(isTracked() ? 255 : 0, 0, 255);

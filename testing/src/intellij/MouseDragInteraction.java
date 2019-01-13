@@ -31,7 +31,7 @@ public class MouseDragInteraction extends PApplet {
 
     Shape shape1 = new Shape(scene) {
       @Override
-      public void setGraphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -47,7 +47,7 @@ public class MouseDragInteraction extends PApplet {
     shape1.translate(-375, 175);
 
     Shape shape2 = new Shape(shape1);
-    shape2.setGraphics(shape());
+    shape2.shape(shape());
     shape2.translate(275, 275);
 
     randomVector = Vector.random();

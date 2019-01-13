@@ -30,12 +30,12 @@ public class ShadowMapping extends PApplet {
     shapes = new Shape[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Shape(scene);
-      shapes[i].setGraphics(caja());
+      shapes[i].shape(caja());
       shapes[i].randomize();
     }
     light = new Shape(scene) {
       @Override
-      public void setGraphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);

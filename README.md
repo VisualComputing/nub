@@ -177,9 +177,9 @@ void setup() {
 
 A [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) is an attached [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) specialization that can be set from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) or from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure. Shapes can be picked precisely using their projection onto the screen, see [setPrecision(Frame.Precision)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#setPrecision-frames.core.Frame.Precision-). Use [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) to render all scene-graph shapes or [draw()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#draw--) to render a specific one instead.
 
-To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.setGraphics(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
+To set a retained-mode shape use `Shape shape = new Shape(Scene scene, PShape shape)` or `Shape shape = new Shape(Scene scene)` and then call [Shape.graphics(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html#set-processing.core.PShape-).
 
-Immediate-mode shapes should override `Shape.setGraphics(PGraphics)`, e.g., using an anonymous inner
+Immediate-mode shapes should override `Shape.graphics(PGraphics)`, e.g., using an anonymous inner
 [Shape](https://visualcomputing.github.io/frames-javadocs/frames/processing/Shape.html) class instance, such as with the following:
  
 ```java
@@ -189,7 +189,7 @@ void setup() {
   ...
   shape = new Shape(scene) {
     @Override
-    protected void setGraphics(PGraphics canvas) {
+    protected void graphics(PGraphics canvas) {
       //immediate-mode rendering procedure
     }
   };

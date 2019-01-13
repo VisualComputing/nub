@@ -100,14 +100,51 @@ import java.util.List;
  * {@link frames.core.constraint.WorldConstraint} and
  * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
- * <h2>Syncing</h2>
- * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that has been most recently updated. Syncing can be useful to share frames
- * among different off-screen canvases.
- * <h2>Picking</h2>
+ * <h2>Shapes</h2>
+ * A frame shape can be set from a retained-mode rendering object (such as a Processing PShape)
+ * or from an immediate-mode rendering. Either case the shape is split in two a front and a
+ * back shape. The front shape will be used for rendering and the back shape for picking with
+ * exact precision by default, see {@link #setPrecision(Precision)}. When
+ * picking a shape it will be highlighted according to a highlighting policy, see
+ * {@link #setHighlighting(Highlighting)}.
+ *
+ * <h3>Picking</h3>
  * Picking a frame is done accordingly to a {@link #precision()}. Refer to
  * {@link #setPrecision(Precision)} for details.
+ *
+ * <h3>Retained mode</h3>
+ * To set a retained-mode shape call {@link #shape(Object)} which will set both the front and
+ * the back shape to be the same pshape. Call {@link #frontShape(Object)} and
+ * {@link #frontShape(Object)} to set different graphics for rendering and picking, respectively.
+ * <h3>Immediate mode</h3>
+ * To set an immediate-mode shape override {@link #graphics(Object)} which will set both the
+ * front and the back shape to be the same graphics procedure. Override
+ * {@link #frontShape(Object)} and {@link #backShape(Object)} to set different
+ * graphics procedures for rendering and picking, respectively.
+ * <h3>Picking</h3>
+ * Picking a shape is done according to a precision which can either be:
+ * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
+ * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
+ * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
+ * of the pointer device over the projected pixels of the back shape. To set a different
+ * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
+ * <h3>Highlighting</h3>
+ * The shape may be highlighted when picking takes place according to a
+ * {@link #highlighting()} policy as follows:
+ *
+ * <ol>
+ * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
+ * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
+ * and {@link #frontShape(Object)}) is scaled by a {@code 1.15} factor.</li>
+ * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
+ * {@link #backShape(Object)}) is displayed instead of the front-shape.</li>
+ * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
+ * displayed. The back shape is made translucent</li>
+ * </ol>
+ * <p>
+ * Default is {@link Highlighting#FRONT}. Set the policy with
+ * {@link #setHighlighting(Highlighting)}).
+ *
  * <h2>Application Control</h2>
  * Implementing an application control for the frame is a two step process:
  * <ul>
@@ -115,6 +152,11 @@ import java.util.List;
  * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
  * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
  * </ul>
+ * <h2>Syncing</h2>
+ * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
+ * share their global parameters (position, orientation and magnitude) taken the one
+ * that has been most recently updated. Syncing can be useful to share frames
+ * among different off-screen canvases.
  */
 public class Frame {
   /**
@@ -155,6 +197,16 @@ public class Frame {
   protected List<Frame> _children;
   protected boolean _culled;
   protected boolean _tracking;
+
+  // Rendering
+
+  protected Object _frontShape, _backShape;
+
+  public enum Highlighting {
+    NONE, FRONT, FRONT_BACK, BACK
+  }
+
+  protected Highlighting _highlight;
 
   /**
    * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
@@ -282,9 +334,10 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = 0;
-    _precision = Precision.FIXED;
+    _precision = Precision.EXACT;
     setPrecisionThreshold(20);
     _tracking = true;
+    _highlight = Highlighting.FRONT;
 
     if (graph() == null)
       return;
@@ -322,6 +375,10 @@ public class Frame {
     // attached frames:
     this._children = new ArrayList<Frame>();
     this._culled = frame._culled;
+
+    this._frontShape = frame._frontShape;
+    this._backShape = frame._backShape;
+    this._highlight = frame._highlight;
   }
 
   /**
@@ -2231,5 +2288,172 @@ public class Frame {
    */
   public boolean isCulled() {
     return isDetached() ? false : _culled;
+  }
+
+  /**
+   * Highlights the shape when picking takes place as follows:
+   *
+   * <ol>
+   * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
+   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
+   * and {@link #frontGraphics(Object)}) is scaled by a {@code 1.15} factor.</li>
+   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
+   * {@link #backGraphics(Object)}) is displayed instead of the front-shape.</li>
+   * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
+   * displayed. The back shape is made translucent</li>
+   * </ol>
+   * <p>
+   * Default is {@link Highlighting#FRONT}.
+   *
+   * @see #highlighting()
+   */
+  public void setHighlighting(Highlighting highlighting) {
+    _highlight = highlighting;
+  }
+
+  /**
+   * Returns the highlighting mode.
+   *
+   * @see #setHighlighting(Highlighting)
+   */
+  public Highlighting highlighting() {
+    return _highlight;
+  }
+
+  // JS version of the rendering methods
+
+  /**
+   * Override this method to set an immediate mode graphics procedure on {@code context}.
+   * <p>
+   * Sets both the front and the back shape to the same graphics procedure.
+   *
+   * @see #frontShape(Object)
+   * @see #backShape(Object)
+   * @see #shape(Object)
+   */
+  protected void graphics(Object context) {
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * front shape. Use it in conjunction with @see #backGraphics(Object).
+   *
+   * @see #graphics(Object)
+   * @see #shape(Object)
+   */
+  protected void frontGraphics(Object context) {
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * back shape. Use it in conjunction with @see #frontGraphics(Object).
+   *
+   * @see #graphics(Object)
+   * @see #shape(Object)
+   */
+  protected void backGraphics(Object context) {
+  }
+
+  /**
+   * Sets the retained mode shape for both, the front and the back shapes.
+   *
+   * @see #frontShape(Object)
+   * @see #backShape(Object)
+   * @see #graphics(Object)
+   */
+  public void shape(Object shape) {
+    frontShape(shape);
+    backShape(shape);
+  }
+
+  /**
+   * Sets the retained mode shape for the front shape. Use it in conjunction
+   * with @see #backShape(Object)}.
+   *
+   * @see #shape(Object)
+   * @see #graphics(Object)
+   */
+  public void frontShape(Object shape) {
+    _frontShape = shape;
+  }
+
+  /**
+   * Sets the retained mode shape for the back shape. Use it in conjunction
+   * with @see #frontShape(Object)}.
+   *
+   * @see #shape(Object)
+   * @see #graphics(Object)
+   */
+  public void backShape(Object shape) {
+    _backShape = shape;
+  }
+
+  // Java version of the rendering methods
+
+  /**
+   * Override this method to set an immediate mode graphics procedure on the Processing
+   * {@code PGraphics}.
+   * <p>
+   * Sets both the front and the back shape to the same graphics procedure.
+   *
+   * @see #frontGraphics(processing.core.PGraphics)
+   * @see #backGraphics(processing.core.PGraphics)
+   * @see #shape(processing.core.PShape)
+   */
+  protected void graphics(processing.core.PGraphics pGraphics) {
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * front shape. Use it in conjunction with @see #backGraphics(processing.core.PGraphics).
+   *
+   * @see #graphics(processing.core.PGraphics)
+   * @see #shape(processing.core.PShape)
+   */
+  protected void frontGraphics(processing.core.PGraphics pGraphics) {
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * back shape. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
+   *
+   * @see #graphics(processing.core.PGraphics)
+   * @see #shape(processing.core.PShape)
+   */
+  protected void backGraphics(processing.core.PGraphics pGraphics) {
+  }
+
+  /**
+   * Sets the retained mode shape for both, the front and the back shapes.
+   *
+   * @see #frontShape(processing.core.PShape)
+   * @see #backShape(processing.core.PShape)
+   * @see #graphics(processing.core.PGraphics)
+   */
+  public void shape(processing.core.PShape pshape) {
+    frontShape(pshape);
+    backShape(pshape);
+  }
+
+  /**
+   * Sets the retained mode shape for the front shape. Use it in conjunction
+   * with @see #backShape(processing.core.PShape)}.
+   *
+   * @see #shape(processing.core.PShape)
+   * @see #graphics(processing.core.PGraphics)
+   */
+  public void frontShape(processing.core.PShape pshape) {
+    _frontShape = pshape;
+  }
+
+  /**
+   * Sets the retained mode shape for the back shape. Use it in conjunction
+   * with @see #frontShape(Object)}.
+   *
+   * @see #shape(Object)
+   * @see #graphics(Object)
+   */
+  public void backShape(processing.core.PShape pshape) {
+    _backShape = pshape;
   }
 }
