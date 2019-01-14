@@ -2846,7 +2846,7 @@ public class Graph {
     //tiene que ver con el descarte del picking policy
     //_track(frame);
     if (context == backBuffer())
-      _drawBackBuffer(context, frame);
+      _drawBackBuffer(frame);
     else {
       _track(frame);
       draw(context, frame);
@@ -2893,7 +2893,7 @@ public class Graph {
   public void draw(Object context, Frame frame) {
   }
 
-  protected void _drawBackBuffer(Object context, Frame frame) {
+  protected void _drawBackBuffer(Frame frame) {
   }
 
   /**

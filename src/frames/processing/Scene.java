@@ -1000,8 +1000,9 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popMatrix();
   }
 
-  protected void _drawBackBuffer(Object context, Frame frame) {
-    PGraphics pGraphics = (PGraphics) context;
+  @Override
+  protected void _drawBackBuffer(Frame frame) {
+    PGraphics pGraphics = backBuffer();
     if (frame.precision() == Frame.Precision.EXACT) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
