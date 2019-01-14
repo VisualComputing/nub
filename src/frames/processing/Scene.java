@@ -213,7 +213,7 @@ public class Scene extends Graph implements PConstants {
     _parent = pApplet;
     _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
-    setOriginCorner(x, y);
+    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix helper
     setMatrixHandler(_matrixHandler(pGraphics));
@@ -651,7 +651,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
-      pApplet().image(pgraphics, originCorner().x(), originCorner().y());
+      pApplet().image(pgraphics, _upperLeftCorner.x(), _upperLeftCorner.y());
   }
 
   /**
@@ -2892,14 +2892,14 @@ public class Scene extends Graph implements PConstants {
    * Returns the current mouse cursor position.
    */
   public Point mouse() {
-    return toPoint(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
+    return toPoint(pApplet().mouseX - _upperLeftCorner.x(), pApplet().mouseY - _upperLeftCorner.y());
   }
 
   /**
    * Returns the previous mouse cursor position.
    */
   public Point pmouse() {
-    return toPoint(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
+    return toPoint(pApplet().pmouseX - _upperLeftCorner.x(), pApplet().pmouseY - _upperLeftCorner.y());
   }
 
   /**

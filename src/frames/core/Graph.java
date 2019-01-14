@@ -2857,21 +2857,6 @@ public class Graph {
   }
 
   /**
-   * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
-   * scenes, but off-screen scenes may define it elsewhere on a canvas.
-   */
-  public Point originCorner() {
-    return _upperLeftCorner;
-  }
-
-  /**
-   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
-   */
-  public void setOriginCorner(float x, float y) {
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
-  }
-
-  /**
    * Used by the render algorithm.
    */
   protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
