@@ -11,7 +11,6 @@
 package frames.core;
 
 import frames.primitives.*;
-import frames.processing.Shape;
 import frames.timing.Animator;
 import frames.timing.TimingHandler;
 import frames.timing.TimingTask;
@@ -2825,12 +2824,17 @@ public class Graph {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
     _track(frame);
-    if (context != backBuffer() || frame instanceof Shape)
-      frame.draw(context);
+    _render(context, frame);
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
     matrixHandler.popModelView();
+  }
+
+  protected void _render(Object context, Frame frame) {
+    // TODO discard condition & focus on testing culling on the back buffer
+    //if (context != backBuffer() || frame instanceof Shape)
+    frame.draw(context);
   }
 
   /**
