@@ -1,14 +1,14 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class SceneBuffers extends PApplet {
   Scene scene;
-  Shape[] shapes;
+  Frame[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
   String renderer = P3D;
@@ -24,9 +24,9 @@ public class SceneBuffers extends PApplet {
     scene = new Scene(this, createGraphics(w, h / 2, renderer));
     scene.setRadius(max(w, h));
 
-    shapes = new Shape[100];
+    shapes = new Frame[100];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene);
+      shapes[i] = new Frame(scene);
       shapes[i].shape(caja());
       shapes[i].randomize();
     }

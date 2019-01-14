@@ -1,9 +1,9 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -14,7 +14,7 @@ import processing.event.MouseEvent;
  */
 public class Orbit extends PApplet {
   Scene scene;
-  Shape shape1, shape2;
+  Frame shape1, shape2;
   Vector axis;
 
   public void settings() {
@@ -27,7 +27,7 @@ public class Orbit extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    shape1 = new Shape(scene) {
+    shape1 = new Frame(scene) {
       @Override
       public void graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -44,8 +44,8 @@ public class Orbit extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
-    //shape2 = new Shape(shape1);
-    shape2 = new Shape(scene);
+    //shape2 = new Frame(shape1);
+    shape2 = new Frame(scene);
     shape2.shape(shape());
     shape2.translate(275, 275, 275);
 

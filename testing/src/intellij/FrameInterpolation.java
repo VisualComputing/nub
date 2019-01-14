@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.core.Interpolator;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -15,7 +14,7 @@ import processing.event.MouseEvent;
 public class FrameInterpolation extends PApplet {
   Scene scene;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-  Shape shape;
+  Frame shape;
   boolean showEyePath = true;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -39,7 +38,7 @@ public class FrameInterpolation extends PApplet {
 
     // interpolation 3. Custom (arbitrary)frame interpolations
 
-    shape = new Shape(scene) {
+    shape = new Frame(scene) {
       // Note that within visit() geometry is defined at the
       // frame local coordinate system.
       @Override

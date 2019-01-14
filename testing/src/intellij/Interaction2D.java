@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
@@ -15,7 +14,7 @@ import processing.event.MouseEvent;
  */
 public class Interaction2D extends PApplet {
   Scene scene;
-  Shape shape1, shape2, shape3;
+  Frame shape1, shape2, shape3;
   Vector upVector;
   PFont font36;
 
@@ -31,7 +30,7 @@ public class Interaction2D extends PApplet {
     //scene.eye().setScaling(1);
     //scene.fit(1);
 
-    shape1 = new Shape(scene) {
+    shape1 = new Frame(scene) {
       @Override
       public void graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -56,12 +55,12 @@ public class Interaction2D extends PApplet {
     shape1.translate(-375, 175);
     shape1.setPrecision(Frame.Precision.FIXED);
 
-    shape2 = new Shape(shape1);
+    shape2 = new Frame(shape1);
     shape2.shape(shape());
     shape2.translate(75, 475);
     shape2.setPrecision(Frame.Precision.FIXED);
 
-    shape3 = new Shape(shape2);
+    shape3 = new Frame(shape2);
     shape3.shape(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-775, -575);
     shape3.setPrecision(Frame.Precision.FIXED);

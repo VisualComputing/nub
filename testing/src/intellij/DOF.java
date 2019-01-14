@@ -1,8 +1,8 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -13,7 +13,7 @@ public class DOF extends PApplet {
   PShader depthShader, dofShader;
   PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
-  Shape[] models;
+  Frame[] models;
   int mode = 2;
 
   @Override
@@ -28,10 +28,12 @@ public class DOF extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    models = new Shape[100];
+    models = new Frame[100];
 
     for (int i = 0; i < models.length; i++) {
-      models[i] = new Shape(scene, boxShape());
+      //models[i] = new Frame(scene, boxShape());
+      models[i] = new Frame(scene);
+      models[i].shape(boxShape());
       scene.randomize(models[i]);
     }
 

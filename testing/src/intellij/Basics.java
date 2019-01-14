@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PShape;
 
@@ -41,7 +40,9 @@ public class Basics extends PApplet {
       }
     };
     frame.setRotation(Quaternion.random());
-    shape = new Shape(scene, shape());
+    //shape = new Frame(scene, shape());
+    shape = new Frame(scene);
+    shape.shape(shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);
   }

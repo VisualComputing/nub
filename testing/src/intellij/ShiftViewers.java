@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -11,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class ShiftViewers extends PApplet {
   Scene scene1, scene2, scene3, focus;
-  Shape[] models;
+  Frame[] models;
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
@@ -30,12 +29,14 @@ public class ShiftViewers extends PApplet {
     // set a detached eye frame
     scene1.setEye(new Frame());
     scene1.fit(1);
-    models = new Shape[5];
+    models = new Frame[5];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        models[i] = new Shape(scene1, boxShape());
+        //models[i] = new Frame(scene1, boxShape());
+        models[i] = new Frame(scene1);
+        models[i].shape(boxShape());
       } else {
-        models[i] = new Shape(scene1) {
+        models[i] = new Frame(scene1) {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
           @Override
           public void graphics(PGraphics pg) {

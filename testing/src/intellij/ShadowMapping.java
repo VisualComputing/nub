@@ -1,8 +1,8 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -11,8 +11,8 @@ import processing.event.MouseEvent;
 public class ShadowMapping extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
-  Shape[] shapes;
-  Shape light;
+  Frame[] shapes;
+  Frame light;
   boolean show = true;
   PGraphics shadowMap;
   float zNear = 50;
@@ -27,13 +27,13 @@ public class ShadowMapping extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(max(w, h));
-    shapes = new Shape[20];
+    shapes = new Frame[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene);
+      shapes[i] = new Frame(scene);
       shapes[i].shape(caja());
       shapes[i].randomize();
     }
-    light = new Shape(scene) {
+    light = new Frame(scene) {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();

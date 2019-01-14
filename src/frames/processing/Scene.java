@@ -64,33 +64,6 @@ import java.util.List;
  * }
  * </pre>
  * In this case, the scene {@link #frontBuffer()} corresponds to the {@code canvas}.
- * <h2>Shapes</h2>
- * A {@link Shape} is a {@link Frame} specialization that can be set from a
- * retained-mode rendering Processing {@code PShape} or from an immediate-mode
- * rendering Processing procedure. Shapes can be picked precisely using their projection
- * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #render()} to render all scene shapes or {@link Shape#draw()} to
- * render a specific one instead.
- * <h3>Retained-mode shapes</h3>
- * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
- * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
- * {@link Shape#graphics(PGraphics)}.
- * <h3>Immediate-mode shapes</h3>
- * To set an immediate-mode shape use code such as the following:
- * <pre>
- * {@code
- * ...
- * Shape shape;
- * void setup() {
- *   ...
- *   shape = new Shape(scene) {
- *     public void set(PGraphics canvas) {
- *       //immediate-mode rendering procedure
- *     }
- *   };
- * }
- * }
- * </pre>
  * <h1>Drawing functionality</h1>
  * There are several static drawing functions that complements those already provided
  * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
@@ -103,7 +76,8 @@ import java.util.List;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Shape} (see {@link Shape#graphics(PGraphics)}).
+ * among others, can be used to set a {@link Frame#shape(PShape)} (see
+ * also {@link Frame#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than this one) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
@@ -1002,8 +976,113 @@ public class Scene extends Graph implements PConstants {
     int index = (int) y * width() + (int) x;
     if (backBuffer().pixels != null)
       if ((0 <= index) && (index < backBuffer().pixels.length))
-        return backBuffer().pixels[index] == frame.id();
+        return backBuffer().pixels[index] == frame.colorID();
     return false;
+  }
+
+  public void draw(Frame frame) {
+    _draw(frontBuffer(), frame);
+  }
+
+  public void draw(PGraphics pGraphics, Frame frame) {
+    _draw(pGraphics, frame);
+  }
+
+  @Override
+  protected void _draw(Object context, Frame frame) {
+    PGraphics pGraphics = (PGraphics) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+            /*
+            if(_frontShape != null)
+                pg.shape(_frontShape);
+            set(pg);
+            frontShape(pg);
+            //*/
+    ///*
+    //TODO needs more thinking
+    switch (frame.highlighting()) {
+      case FRONT:
+        if (frame.isTracked())
+          pGraphics.scale(1.15f);
+      case NONE:
+        if (frame.frontShape() != null)
+          pGraphics.shape((PShape) frame.frontShape());
+        else
+          frame.graphics(pGraphics);
+        break;
+      case FRONT_BACK:
+        if (frame.frontShape() != null)
+          pGraphics.shape((PShape) frame.frontShape());
+        else
+          frame.frontGraphics(pGraphics);
+        if (frame.isTracked()) {
+          if (frame.backShape() != null)
+            pGraphics.shape((PShape) frame.backShape());
+          else
+            frame.backGraphics(pGraphics);
+        }
+        break;
+      case BACK:
+        if (frame.isTracked()) {
+          if (frame.backShape() != null)
+            pGraphics.shape((PShape) frame.backShape());
+          else
+            frame.backGraphics(pGraphics);
+        } else {
+          if (frame.frontShape() != null)
+            pGraphics.shape((PShape) frame.frontShape());
+          else
+            frame.frontGraphics(pGraphics);
+        }
+        break;
+    }
+    //*/
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
+  }
+
+  protected void _drawBackBuffer(Object context, Frame frame) {
+    PGraphics pGraphics = (PGraphics) context;
+    if (frame.precision() == Frame.Precision.EXACT) {
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
+
+      float r = (float) (frame.id() & 255) / 255.f;
+      float g = (float) ((frame.id() >> 8) & 255) / 255.f;
+      float b = (float) ((frame.id() >> 16) & 255) / 255.f;
+
+      // funny, only safe way. Otherwise break things horribly when setting shapes
+      // and there are more than one shape
+      pGraphics.shader(_triangleShader);
+      pGraphics.shader(_lineShader, PApplet.LINES);
+      pGraphics.shader(_pointShader, PApplet.POINTS);
+
+      _triangleShader.set("id", new PVector(r, g, b));
+      _lineShader.set("id", new PVector(r, g, b));
+      _pointShader.set("id", new PVector(r, g, b));
+
+      //pGraphics.pushStyle();
+      //pGraphics.pushMatrix();
+                /*
+                if (_backShape != null)
+                    pg.shape(_backShape);
+                set(pg);
+                backShape(pg);
+                //*/
+      ///*
+      if (frame.frontShape() != null)
+        pGraphics.shapeMode(frontBuffer().shapeMode);
+      if (frame.backShape() != null)
+        pGraphics.shape((PShape) frame.backShape());
+      else {
+        frame.graphics(pGraphics);
+        frame.backGraphics(pGraphics);
+      }
+      //*/
+      pGraphics.popStyle();
+      pGraphics.popMatrix();
+    }
   }
 
   /**

@@ -475,13 +475,17 @@ public class Frame {
     setScaling(1);
   }
 
-  // id
+  // colorID
+
+  public int id() {
+    return _id;
+  }
 
   /**
    * Uniquely identifies the frame. Also the color to be used for picking with a color buffer.
    * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
-  public int id() {
+  public int colorID() {
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
   }
 
@@ -2331,7 +2335,7 @@ public class Frame {
    * @see #backShape(Object)
    * @see #shape(Object)
    */
-  protected void graphics(Object context) {
+  public void graphics(Object context) {
   }
 
   /**
@@ -2341,7 +2345,7 @@ public class Frame {
    * @see #graphics(Object)
    * @see #shape(Object)
    */
-  protected void frontGraphics(Object context) {
+  public void frontGraphics(Object context) {
   }
 
   /**
@@ -2351,7 +2355,7 @@ public class Frame {
    * @see #graphics(Object)
    * @see #shape(Object)
    */
-  protected void backGraphics(Object context) {
+  public void backGraphics(Object context) {
   }
 
   /**
@@ -2388,6 +2392,14 @@ public class Frame {
     _backShape = shape;
   }
 
+  public Object frontShape() {
+    return _frontShape;
+  }
+
+  public Object backShape() {
+    return _backShape;
+  }
+
   // Java version of the rendering methods
 
   /**
@@ -2400,7 +2412,7 @@ public class Frame {
    * @see #backGraphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  protected void graphics(processing.core.PGraphics pGraphics) {
+  public void graphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
@@ -2410,7 +2422,7 @@ public class Frame {
    * @see #graphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  protected void frontGraphics(processing.core.PGraphics pGraphics) {
+  public void frontGraphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
@@ -2420,7 +2432,7 @@ public class Frame {
    * @see #graphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  protected void backGraphics(processing.core.PGraphics pGraphics) {
+  public void backGraphics(processing.core.PGraphics pGraphics) {
   }
 
   /**
@@ -2456,4 +2468,14 @@ public class Frame {
   public void backShape(processing.core.PShape pshape) {
     _backShape = pshape;
   }
+
+  /*
+  public processing.core.PShape frontShape() {
+    return (processing.core.PShape)_frontShape;
+  }
+
+  public processing.core.PShape backShape() {
+    return (processing.core.PShape)_backShape;
+  }
+  */
 }

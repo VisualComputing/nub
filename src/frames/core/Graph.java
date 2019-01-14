@@ -2824,17 +2824,22 @@ public class Graph {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
     _track(frame);
-    _render(context, frame);
+    if (context == backBuffer())
+      _drawBackBuffer(context, frame);
+    else
+      _draw(context, frame);
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
     matrixHandler.popModelView();
   }
 
-  protected void _render(Object context, Frame frame) {
-    // TODO discard condition & focus on testing culling on the back buffer
-    //if (context != backBuffer() || frame instanceof Shape)
-    frame.draw(context);
+  protected void _draw(Object context, Frame frame) {
+
+  }
+
+  protected void _drawBackBuffer(Object context, Frame frame) {
+
   }
 
   /**

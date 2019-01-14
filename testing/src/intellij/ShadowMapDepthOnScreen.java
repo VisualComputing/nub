@@ -1,10 +1,10 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -13,7 +13,7 @@ import processing.opengl.PShader;
 public class ShadowMapDepthOnScreen extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
-  Shape[] shapes;
+  Frame[] shapes;
   PGraphics shadowMap;
   PShader depthShader;
   boolean one;
@@ -29,9 +29,9 @@ public class ShadowMapDepthOnScreen extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(max(w, h));
-    shapes = new Shape[20];
+    shapes = new Frame[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene) {
+      shapes[i] = new Frame(scene) {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
@@ -67,7 +67,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
         }
       };
       shapes[i].randomize();
-      shapes[i].setHighlighting(Shape.Highlighting.NONE);
+      shapes[i].setHighlighting(Frame.Highlighting.NONE);
     }
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);

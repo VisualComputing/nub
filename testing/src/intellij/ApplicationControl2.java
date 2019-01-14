@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
@@ -11,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class ApplicationControl2 extends PApplet {
   Scene scene;
-  Shape[] shapes;
+  Frame[] shapes;
   PFont font36;
   int totalShapes;
 
@@ -29,9 +28,9 @@ public class ApplicationControl2 extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Shape[10];
+    shapes = new Frame[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene) {
+      shapes[i] = new Frame(scene) {
         int id = totalShapes++;
         int _faces = randomFaces(), _color = randomColor();
 
