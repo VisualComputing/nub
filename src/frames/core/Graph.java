@@ -2827,14 +2827,47 @@ public class Graph {
     if (context == backBuffer())
       _drawBackBuffer(context, frame);
     else
-      _draw(context, frame);
+      draw(context, frame);
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
     matrixHandler.popModelView();
   }
 
-  protected void _draw(Object context, Frame frame) {
+  /**
+   * Renders the frame, provided that it holds a visual representation, onto {@code context}.
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   * <p>
+   * This method is called on each frame of the graph hierarchy by the {@link #render(Object)}
+   * algorithm, i.e., either call this method or the {@link Graph#render(Object)} algorithm
+   * within you main event loop.
+   * <p>
+   * TODO
+   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
+   * Set the culling flag with {@link Frame#cull(boolean)} according to your culling condition:
+   *
+   * <pre>
+   * {@code
+   * frame = new Frame(graph) {
+   *   public void draw(Object context) {
+   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
+   *     // (which should be implemented by you) is true, scene.render() will prune the branch
+   *     // at the frame
+   *     cull(cullingCondition);
+   *     if(!isCulled())
+   *       // Draw your object here, in the local coordinate system.
+   *   }
+   * }
+   * }
+   * </pre>
+   *
+   * @see Graph#render()
+   * @see Graph#traverse()
+   * @see #cull(boolean)
+   * @see #isCulled()
+   * @see #visit()
+   */
+  public void draw(Object context, Frame frame) {
 
   }
 

@@ -981,15 +981,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   public void draw(Frame frame) {
-    _draw(frontBuffer(), frame);
-  }
-
-  public void draw(PGraphics pGraphics, Frame frame) {
-    _draw(pGraphics, frame);
+    draw(frontBuffer(), frame);
   }
 
   @Override
-  protected void _draw(Object context, Frame frame) {
+  public void draw(Object context, Frame frame) {
+    if (context == backBuffer())
+      return;
     PGraphics pGraphics = (PGraphics) context;
     pGraphics.pushStyle();
     pGraphics.pushMatrix();

@@ -79,8 +79,8 @@ import java.util.List;
  * Hierarchical traversals of the frame hierarchy which automatically apply the local
  * frame transformations described above may be achieved with {@link Graph#traverse()} or
  * {@link Graph#render(Object)}.
- * Automatic traversals require overriding {@link #visit()} or {@link #draw(Object)} and to
- * instantiate a frame attached to a graph which is referred to as attached frame (see
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Frame)}
+ * and to instantiate a frame attached to a graph which is referred to as attached frame (see
  * {@link #isAttached(Graph)} and {@link #isDetached()}).
  * <p>
  * To instantiate an attached frame use the frame constructors that take a {@code graph}
@@ -2218,44 +2218,9 @@ public class Frame {
    * @see Graph#render()
    * @see #cull(boolean)
    * @see #isCulled()
-   * @see #draw(Object)
+   * @see Graph#draw(Object, Frame)
    */
   public void visit() {
-  }
-
-  /**
-   * Renders the frame, provided that it holds a visual representation, onto {@code context}.
-   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   * <p>
-   * This method is called on each frame of the graph hierarchy by the {@link Graph#render(Object)}
-   * algorithm, i.e., either call this method or the {@link Graph#render(Object)} algorithm
-   * within you main event loop.
-   * <p>
-   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
-   * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
-   *
-   * <pre>
-   * {@code
-   * frame = new Frame(graph) {
-   *   public void draw(Object context) {
-   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.render() will prune the branch
-   *     // at the frame
-   *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#render()
-   * @see Graph#traverse()
-   * @see #cull(boolean)
-   * @see #isCulled()
-   * @see #visit()
-   */
-  public void draw(Object context) {
   }
 
   /**
