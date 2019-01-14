@@ -33,7 +33,6 @@ import processing.opengl.PShader;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -899,26 +898,6 @@ public class Scene extends Graph implements PConstants {
     return jsonRot;
   }
 
-  @Override
-  protected void _track(Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
-      if (!_rays.isEmpty()) {
-        Iterator<Ray> it = _rays.iterator();
-        while (it.hasNext()) {
-          Ray ray = it.next();
-          resetTrackedFrame(ray._hid);
-          // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(ray._hid))
-          if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
-            setTrackedFrame(ray._hid, frame);
-            it.remove();
-          }
-        }
-      }
-    } else
-      super._track(frame);
-  }
-
   /**
    * Same as {@code return super.track(mouse(), frameArray)}.
    *
@@ -949,25 +928,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  public boolean tracks(float x, float y, Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bb != null)
-      return _tracks(x, y, frame);
-    else
-      return _tracks(x, y, screenLocation(frame.position()), frame);
-  }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
-   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
-   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
-   * otherwise.
-   * <p>
-   * This method is only meaningful when this shape is not an eye.
-   *
-   * @see Frame#setPrecision(Frame.Precision)
-   */
   protected boolean _tracks(float x, float y, Frame frame) {
     if (frame == null || isEye(frame))
       return false;
