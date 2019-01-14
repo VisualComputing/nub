@@ -2823,6 +2823,8 @@ public class Graph {
   protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
+    //TODO revisar track y ver donde tiene sentido llamarlo
+    //tiene que ver con el descarte del picking policy
     _track(frame);
     if (context == backBuffer())
       _drawBackBuffer(context, frame);
@@ -2863,9 +2865,9 @@ public class Graph {
    *
    * @see Graph#render()
    * @see Graph#traverse()
-   * @see #cull(boolean)
-   * @see #isCulled()
-   * @see #visit()
+   * @see Frame#cull(boolean)
+   * @see Frame#isCulled()
+   * @see Frame#visit()
    */
   public void draw(Object context, Frame frame) {
 
