@@ -114,10 +114,6 @@ public class Scene extends Graph implements PConstants {
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
 
-  // offscreen
-  protected Point _upperLeftCorner;
-  protected boolean _offscreen;
-
   // _bb : picking buffer
   protected PShader _triangleShader, _lineShader, _pointShader;
 
@@ -252,30 +248,6 @@ public class Scene extends Graph implements PConstants {
         pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
         null;
     return _bb != null;
-  }
-
-  /**
-   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
-   *
-   * @see #enableBackBuffer()
-   */
-  public void disableBackBuffer() {
-    _bb = null;
-  }
-
-  /**
-   * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
-   * scenes, but off-screen scenes may define it elsewhere on a canvas.
-   */
-  public Point originCorner() {
-    return _upperLeftCorner;
-  }
-
-  /**
-   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
-   */
-  public void setOriginCorner(float x, float y) {
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
   }
 
   // P5 STUFF
@@ -601,15 +573,6 @@ public class Scene extends Graph implements PConstants {
   public void draw() {
     popModelView();
     _renderBackBuffer();
-  }
-
-  // Off-screen
-
-  /**
-   * Returns {@code true} if this scene is off-screen and {@code false} otherwise.
-   */
-  public boolean isOffscreen() {
-    return _offscreen;
   }
 
   /**
@@ -938,10 +901,6 @@ public class Scene extends Graph implements PConstants {
       if ((0 <= index) && (index < backBuffer().pixels.length))
         return backBuffer().pixels[index] == frame.colorID();
     return false;
-  }
-
-  public void draw(Frame frame) {
-    draw(frontBuffer(), frame);
   }
 
   @Override

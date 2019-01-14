@@ -126,6 +126,10 @@ import java.util.List;
  * @see MatrixHandler
  */
 public class Graph {
+  // offscreen
+  protected Point _upperLeftCorner;
+  protected boolean _offscreen;
+
   // 0. Contexts
   protected Object _bb, _fb;
   // 1. Eye
@@ -2786,6 +2790,13 @@ public class Graph {
   }
 
   /**
+   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
+   */
+  public void disableBackBuffer() {
+    _bb = null;
+  }
+
+  /**
    * Renders the scene onto the {@link #frontBuffer()}. Same as {@code render(frontBuffer())}.
    *
    * @see #render(Object)
@@ -2836,25 +2847,58 @@ public class Graph {
     _rays.clear();
   }
 
+  // Off-screen
+
+  /**
+   * Returns {@code true} if this scene is off-screen and {@code false} otherwise.
+   */
+  public boolean isOffscreen() {
+    return _offscreen;
+  }
+
+  /**
+   * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
+   * scenes, but off-screen scenes may define it elsewhere on a canvas.
+   */
+  public Point originCorner() {
+    return _upperLeftCorner;
+  }
+
+  /**
+   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
+   */
+  public void setOriginCorner(float x, float y) {
+    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+  }
+
   /**
    * Used by the render algorithm.
    */
   protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
-    //TODO revisar track y ver donde tiene sentido llamarlo
-    //tiene que ver con el descarte del picking policy
-    //_track(frame);
-    if (context == backBuffer())
+    //TODO hack to make _track work, otherwise it should be call here
+    // _track(frame);
+    if (context == backBuffer()) {
+      //if(!isOffscreen())
+      //_track(frame);
       _drawBackBuffer(frame);
+      if (!isOffscreen())
+        _track(frame);
+    }
     else {
-      _track(frame);
+      if (isOffscreen())
+        _track(frame);
       draw(context, frame);
     }
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
     matrixHandler.popModelView();
+  }
+
+  public void draw(Frame frame) {
+    draw(frontBuffer(), frame);
   }
 
   /**
