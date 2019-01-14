@@ -902,15 +902,15 @@ public class Scene extends Graph implements PConstants {
   @Override
   protected void _track(Frame frame) {
     if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
-      if (!_tuples.isEmpty()) {
-        Iterator<Tuple> it = _tuples.iterator();
+      if (!_rays.isEmpty()) {
+        Iterator<Ray> it = _rays.iterator();
         while (it.hasNext()) {
-          Tuple tuple = it.next();
-          resetTrackedFrame(tuple._hid);
+          Ray ray = it.next();
+          resetTrackedFrame(ray._hid);
           // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(tuple._hid))
-          if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
-            setTrackedFrame(tuple._hid, frame);
+          //if (!isTracking(ray._hid))
+          if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
+            setTrackedFrame(ray._hid, frame);
             it.remove();
           }
         }

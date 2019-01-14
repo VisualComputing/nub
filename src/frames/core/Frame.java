@@ -2202,6 +2202,7 @@ public class Frame {
    * <pre>
    * {@code
    * frame = new Frame(graph) {
+   *   @Override
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
    *     // (which should be implemented by you) is true, scene.traverse() will prune the branch

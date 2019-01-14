@@ -149,11 +149,11 @@ public class Graph {
   protected MatrixHandler _matrixHandler;
 
   // 3. Handlers
-  protected class Tuple {
+  protected class Ray {
     public String _hid;
     public Point _pixel;
 
-    Tuple(String hid, Point pixel) {
+    Ray(String hid, Point pixel) {
       _hid = hid;
       _pixel = pixel;
     }
@@ -161,7 +161,7 @@ public class Graph {
 
   protected TimingHandler _timingHandler;
   protected HashMap<String, Frame> _agents;
-  protected ArrayList<Tuple> _tuples;
+  protected ArrayList<Ray> _rays;
 
   // 4. Graph
   protected List<Frame> _seeds;
@@ -238,7 +238,7 @@ public class Graph {
     fit();
 
     _agents = new HashMap<String, Frame>();
-    _tuples = new ArrayList<Tuple>();
+    _rays = new ArrayList<Ray>();
     setRightHanded();
 
     enableBoundaryEquations(false);
@@ -2740,7 +2740,7 @@ public class Graph {
    * @see #cast(String, float, float)
    */
   public void cast(String hid, Point pixel) {
-    _tuples.add(new Tuple(hid, pixel));
+    _rays.add(new Ray(hid, pixel));
   }
 
   /**
@@ -2814,7 +2814,7 @@ public class Graph {
     }
     for (Frame frame : _leadingFrames())
       _draw(matrixHandler, context, frame);
-    _tuples.clear();
+    _rays.clear();
   }
 
   /**
@@ -2825,11 +2825,13 @@ public class Graph {
     _applyTransformation(matrixHandler, frame, is2D());
     //TODO revisar track y ver donde tiene sentido llamarlo
     //tiene que ver con el descarte del picking policy
-    _track(frame);
+    //_track(frame);
     if (context == backBuffer())
       _drawBackBuffer(context, frame);
-    else
+    else {
+      _track(frame);
       draw(context, frame);
+    }
     if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
@@ -2895,7 +2897,7 @@ public class Graph {
   public void traverse() {
     for (Frame frame : _leadingFrames())
       _visit(frame);
-    _tuples.clear();
+    _rays.clear();
   }
 
   /**
@@ -2916,16 +2918,16 @@ public class Graph {
    * Internally used by {@link #_visit(Frame)}.
    */
   protected void _track(Frame frame) {
-    if (!_tuples.isEmpty()) {
+    if (!_rays.isEmpty()) {
       Vector projection = screenLocation(frame.position());
-      Iterator<Tuple> it = _tuples.iterator();
+      Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
-        Tuple tuple = it.next();
-        resetTrackedFrame(tuple._hid);
+        Ray ray = it.next();
+        resetTrackedFrame(ray._hid);
         // Condition is overkill. Use it only in place of resetTrackedFrame
-        //if (!isTracking(tuple._hid))
-        if (_tracks(tuple._pixel.x(), tuple._pixel.y(), projection, frame)) {
-          setTrackedFrame(tuple._hid, frame);
+        //if (!isTracking(ray._hid))
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
+          setTrackedFrame(ray._hid, frame);
           it.remove();
         }
       }
