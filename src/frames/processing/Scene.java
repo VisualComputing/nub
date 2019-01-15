@@ -219,7 +219,8 @@ public class Scene extends Graph implements PConstants {
     setMatrixHandler(_matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
-    if (enableBackBuffer()) {
+    enableBackBuffer();
+    if (_bb != null) {
       _triangleShader = pApplet().loadShader("PickingBuffer.frag");
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
@@ -243,11 +244,11 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #disableBackBuffer()
    */
-  public boolean enableBackBuffer() {
+  @Override
+  public void enableBackBuffer() {
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
         null;
-    return _bb != null;
   }
 
   // P5 STUFF

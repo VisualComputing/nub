@@ -83,7 +83,7 @@ public class ApplicationControl3 extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   public void keyPressed() {

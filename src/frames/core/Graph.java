@@ -2789,6 +2789,10 @@ public class Graph {
     return _bb;
   }
 
+  public void enableBackBuffer() {
+
+  }
+
   /**
    * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
    */
@@ -2864,6 +2868,9 @@ public class Graph {
     _applyTransformation(matrixHandler, frame, is2D());
     //TODO hack to make _track work, otherwise it should be call here
     // _track(frame);
+    if (context != backBuffer())
+      frame.visit();
+    _track(frame);
     if (context == backBuffer()) {
       //if(!isOffscreen())
       //_track(frame);
@@ -2961,6 +2968,43 @@ public class Graph {
     }
   }
 
+  /*
+  protected void _trackBackBuffer(Frame frame) {
+    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
+      if (!_rays.isEmpty()) {
+        Iterator<Ray> it = _rays.iterator();
+        while (it.hasNext()) {
+          Ray ray = it.next();
+          resetTrackedFrame(ray._hid);
+          // Condition is overkill. Use it only in place of resetTrackedFrame
+          //if (!isTracking(ray._hid))
+          if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
+            setTrackedFrame(ray._hid, frame);
+            it.remove();
+          }
+        }
+      }
+    }
+  }
+
+  protected void _track(Frame frame) {
+    if (!_rays.isEmpty()) {
+      Vector projection = screenLocation(frame.position());
+      Iterator<Ray> it = _rays.iterator();
+      while (it.hasNext()) {
+        Ray ray = it.next();
+        resetTrackedFrame(ray._hid);
+        // Condition is overkill. Use it only in place of resetTrackedFrame
+        //if (!isTracking(ray._hid))
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
+          setTrackedFrame(ray._hid, frame);
+          it.remove();
+        }
+      }
+    }
+  }
+  */
+
   /**
    * Traverse the frame hierarchy, successively applying the local transformation defined
    * by each traversed frame, and calling {@link Frame#visit()} on it.
@@ -2976,15 +3020,18 @@ public class Graph {
    * @see #isReachable(Frame)
    * @see #pruneBranch(Frame)
    */
+  /*
   public void traverse() {
     for (Frame frame : _leadingFrames())
       _visit(frame);
     _rays.clear();
   }
+  */
 
   /**
    * Used by the traversal algorithm.
    */
+  /*
   protected void _visit(Frame frame) {
     pushModelView();
     applyTransformation(frame);
@@ -2995,6 +3042,7 @@ public class Graph {
         _visit(child);
     popModelView();
   }
+  */
 
   /**
    * Same as {@code setTrackedFrame(null, frame)}.

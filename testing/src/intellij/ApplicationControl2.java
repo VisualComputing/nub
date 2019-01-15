@@ -82,7 +82,7 @@ public class ApplicationControl2 extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   void control(String hid, Object... gesture) {

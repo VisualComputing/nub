@@ -37,6 +37,7 @@ class Boid {
         render();
       }
     };
+    frame.setPrecision(Frame.Precision.FIXED);
     frame.setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = new Vector(pApplet.random(-1, 1), pApplet.random(-1, 1), pApplet.random(1, -1));
     acceleration = new Vector(0, 0, 0);
@@ -158,6 +159,7 @@ class Boid {
     if (scene.trackedFrame("mouseMoved") == frame) {
       pApplet.stroke(pApplet.color(0, 0, 255));
       pApplet.fill(pApplet.color(0, 0, 255));
+      pApplet.println("highlighted @" + pApplet.frameCount);
     }
 
     // highlight avatar

@@ -41,7 +41,7 @@ public class Graph2 extends PApplet {
   public void draw() {
     graph.preDraw();
     background(0);
-    graph.traverse();
+    graph.render();
   }
 
   @Override

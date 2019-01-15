@@ -58,7 +58,7 @@ public class Graph4 extends PApplet {
   public void draw() {
     graph.preDraw();
     background(0);
-    graph.traverse();
+    graph.render();
   }
 
   public void mouseMoved() {

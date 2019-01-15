@@ -69,7 +69,7 @@ public class FrameInterpolation extends PApplet {
 
   public void draw() {
     background(0);
-    scene.traverse();
+    scene.render();
 
     pushStyle();
     stroke(255);

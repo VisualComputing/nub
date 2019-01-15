@@ -50,7 +50,7 @@ public class Graph5 extends PApplet {
     fill(0, 255, 0);
     Scene.drawTorusSolenoid(g);
     popStyle();
-    graph.traverse();
+    graph.render();
   }
 
   public void mouseMoved() {
