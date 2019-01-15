@@ -881,19 +881,13 @@ public class Frame {
    * @see #pickingThreshold()
    */
   public void setPickingThreshold(float threshold) {
+    if (isDetached() && threshold == 0) {
+      System.out.println("Nothing done: pickingThreshold should be positive if the frame is detached");
+      return;
+    }
     if (threshold >= 0) {
       _threshold = threshold;
-      // optimizes the back-buffer
-      if (pickingThreshold() == 0) {
-        graph().enableBackBuffer();
-        return;
-      }
-      for (Frame frame : graph().frames())
-        if (frame.pickingThreshold() == 0) {
-          graph().enableBackBuffer();
-          return;
-        }
-      graph().disableBackBuffer();
+      graph()._updateBackBuffer();
     }
   }
 

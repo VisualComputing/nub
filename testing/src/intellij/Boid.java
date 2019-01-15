@@ -5,6 +5,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 
 import java.util.ArrayList;
 
@@ -34,7 +35,52 @@ class Boid {
       public void visit() {
         if (Flock.animate)
           run(Flock.flock);
-        render();
+      }
+
+      @Override
+      public void graphics(PGraphics pg) {
+        pg.pushStyle();
+
+        // uncomment to draw boid axes
+        //scene.drawAxes(10);
+
+        pg.strokeWeight(2);
+        pg.stroke(pApplet.color(0, 255, 0));
+        pg.fill(pApplet.color(0, 255, 0, 125));
+
+        // highlight boids under the mouse
+        if (scene.trackedFrame("mouseMoved") == frame) {
+          pg.stroke(pg.color(0, 0, 255));
+          pg.fill(pg.color(0, 0, 255));
+          pApplet.println("highlighted @" + pApplet.frameCount);
+        }
+
+        // highlight avatar
+        if (frame == Flock.avatar) {
+          pg.stroke(pg.color(255, 0, 0));
+          pg.fill(pg.color(255, 0, 0));
+        }
+
+        //draw boid
+        pg.beginShape(PApplet.TRIANGLES);
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, 0, 2 * sc);
+
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 0, 2 * sc);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+
+        pg.vertex(-3 * sc, 0, 2 * sc);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+        pg.endShape();
+
+        pg.popStyle();
       }
     };
     frame.setPosition(new Vector(position.x(), position.y(), position.z()));
@@ -142,50 +188,5 @@ class Boid {
       position.setZ(0);
     if (position.z() < 0)
       position.setZ(Flock.flockDepth);
-  }
-
-  void render() {
-    pApplet.pushStyle();
-
-    // uncomment to draw boid axes
-    //scene.drawAxes(10);
-
-    pApplet.strokeWeight(2);
-    pApplet.stroke(pApplet.color(0, 255, 0));
-    pApplet.fill(pApplet.color(0, 255, 0, 125));
-
-    // highlight boids under the mouse
-    if (scene.trackedFrame("mouseMoved") == frame) {
-      pApplet.stroke(pApplet.color(0, 0, 255));
-      pApplet.fill(pApplet.color(0, 0, 255));
-      pApplet.println("highlighted @" + pApplet.frameCount);
-    }
-
-    // highlight avatar
-    if (frame == Flock.avatar) {
-      pApplet.stroke(pApplet.color(255, 0, 0));
-      pApplet.fill(pApplet.color(255, 0, 0));
-    }
-
-    //draw boid
-    pApplet.beginShape(PApplet.TRIANGLES);
-    pApplet.vertex(3 * sc, 0, 0);
-    pApplet.vertex(-3 * sc, 2 * sc, 0);
-    pApplet.vertex(-3 * sc, -2 * sc, 0);
-
-    pApplet.vertex(3 * sc, 0, 0);
-    pApplet.vertex(-3 * sc, 2 * sc, 0);
-    pApplet.vertex(-3 * sc, 0, 2 * sc);
-
-    pApplet.vertex(3 * sc, 0, 0);
-    pApplet.vertex(-3 * sc, 0, 2 * sc);
-    pApplet.vertex(-3 * sc, -2 * sc, 0);
-
-    pApplet.vertex(-3 * sc, 0, 2 * sc);
-    pApplet.vertex(-3 * sc, 2 * sc, 0);
-    pApplet.vertex(-3 * sc, -2 * sc, 0);
-    pApplet.endShape();
-
-    pApplet.popStyle();
   }
 }

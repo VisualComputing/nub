@@ -629,6 +629,8 @@ public class Graph {
       leadingFrame._graph = target;
       target._addLeadingFrame(leadingFrame);
     }
+    _updateBackBuffer();
+    target._updateBackBuffer();
   }
 
   /**
@@ -2791,6 +2793,15 @@ public class Graph {
 
   public void enableBackBuffer() {
 
+  }
+
+  protected void _updateBackBuffer() {
+    for (Frame frame : frames())
+      if (frame.pickingThreshold() == 0) {
+        enableBackBuffer();
+        return;
+      }
+    disableBackBuffer();
   }
 
   /**
