@@ -35,7 +35,7 @@ public class DOF extends PApplet {
       //models[i] = new Frame(scene, boxShape());
       models[i] = new Frame(scene);
       models[i].shape(boxShape());
-      models[i].setPrecisionThreshold(0);
+      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
@@ -115,7 +115,7 @@ public class DOF extends PApplet {
     if (key == 'p') {
       exact = !exact;
       for (int i = 0; i < models.length; i++)
-        models[i].setPrecisionThreshold(exact ? 0 : 0.7f);
+        models[i].setPickingThreshold(exact ? 0 : 0.7f);
       if (scene.backBuffer() == null)
         println("backBuffer disabled");
       else

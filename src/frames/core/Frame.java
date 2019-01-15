@@ -838,7 +838,7 @@ public class Frame {
    * When {@link #precision()} is {@link Precision#FIXED} or {@link Precision#ADAPTIVE}
    * Picking is done by checking if the pointer lies within a squared area around the frame
    * {@link #position()} screen projection which size is defined by
-   * {@link #setPrecisionThreshold(float)}.
+   * {@link #setPickingThreshold(float)}.
    * <p>
    * When {@link #precision()} is {@link Precision#EXACT}, picking is done
    * in a precise manner according to the projected pixels of the visual representation
@@ -849,8 +849,8 @@ public class Frame {
    * Default implementation of this policy will behave like {@link Precision#FIXED}.
    *
    * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   * @see #precisionThreshold()
+   * @see #setPickingThreshold(float)
+   * @see #pickingThreshold()
    */
 
 
@@ -878,18 +878,18 @@ public class Frame {
    *
    * @see #precision()
    * @see #setPrecision(Precision)
-   * @see #precisionThreshold()
+   * @see #pickingThreshold()
    */
-  public void setPrecisionThreshold(float threshold) {
+  public void setPickingThreshold(float threshold) {
     if (threshold >= 0) {
       _threshold = threshold;
       // optimizes the back-buffer
-      if (precisionThreshold() == 0) {
+      if (pickingThreshold() == 0) {
         graph().enableBackBuffer();
         return;
       }
       for (Frame frame : graph().frames())
-        if (frame.precisionThreshold() == 0) {
+        if (frame.pickingThreshold() == 0) {
           graph().enableBackBuffer();
           return;
         }
@@ -901,18 +901,18 @@ public class Frame {
    * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
    *
    * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   * @see #precisionThreshold()
+   * @see #setPickingThreshold(float)
+   * @see #pickingThreshold()
    */
 
   /**
    * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.
    *
-   * @see #setPrecisionThreshold(float)
+   * @see #setPickingThreshold(float)
    * @see #precision()
    * @see #setPrecision(Precision)
    */
-  public float precisionThreshold() {
+  public float pickingThreshold() {
     return _threshold;
   }
 

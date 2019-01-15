@@ -29,7 +29,7 @@ public class AdaptivePrecision1 extends PApplet {
       shapes[i].shape(shape());
 
       scene.randomize(shapes[i]);
-      shapes[i].setPrecisionThreshold(0.25f);
+      shapes[i].setPickingThreshold(0.25f);
     }
   }
 

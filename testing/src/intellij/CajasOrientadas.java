@@ -67,9 +67,9 @@ public class CajasOrientadas extends PApplet {
       adaptive = !adaptive;
       for (Box caja : cajas)
         if (adaptive)
-          caja.iFrame.setPrecisionThreshold(0.25f);
+          caja.iFrame.setPickingThreshold(0.25f);
         else
-          caja.iFrame.setPrecisionThreshold(25);
+          caja.iFrame.setPickingThreshold(25);
     }
     if (key == 'a')
       drawAxes = !drawAxes;
@@ -111,7 +111,7 @@ public class CajasOrientadas extends PApplet {
           draw();
         }
       };
-      iFrame.setPrecisionThreshold(0.25f);
+      iFrame.setPickingThreshold(0.25f);
       setSize();
       setColor();
       iFrame.randomize();
@@ -138,7 +138,7 @@ public class CajasOrientadas extends PApplet {
       w = random(10, 40);
       h = random(10, 40);
       d = random(10, 40);
-      //iFrame.setPrecisionThreshold(PApplet.max(w, h, d));
+      //iFrame.setPickingThreshold(PApplet.max(w, h, d));
     }
 
     public void setSize(float myW, float myH, float myD) {
@@ -191,7 +191,7 @@ public class CajasOrientadas extends PApplet {
           draw();
         }
       };
-      iFrame.setPrecisionThreshold(0.15f);
+      iFrame.setPickingThreshold(0.15f);
       setRadius(10);
     }
 
@@ -220,7 +220,7 @@ public class CajasOrientadas extends PApplet {
 
     public void setRadius(float myR) {
       r = myR;
-      iFrame.setPrecisionThreshold(2 * r);
+      iFrame.setPickingThreshold(2 * r);
     }
 
     public int getColor() {

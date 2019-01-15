@@ -2680,7 +2680,7 @@ public class Graph {
    * @see Frame#setPrecision(Frame.Precision)
    */
   public boolean tracks(float x, float y, Frame frame) {
-    if (frame.precisionThreshold() == 0 && _bb != null)
+    if (frame.pickingThreshold() == 0 && _bb != null)
       return _tracks(x, y, frame);
     else
       return _tracks(x, y, screenLocation(frame.position()), frame);
@@ -2710,8 +2710,8 @@ public class Graph {
       return false;
     if (!frame.isTrackingEnabled())
       return false;
-    float threshold = frame.precisionThreshold() < 1 ? 100 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position())
-        : frame.precisionThreshold() / 2;
+    float threshold = frame.pickingThreshold() < 1 ? 100 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position())
+        : frame.pickingThreshold() / 2;
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }
 
@@ -2936,7 +2936,7 @@ public class Graph {
    * Internally used by {@link #_visit(Frame)}.
    */
   protected void _track(Frame frame) {
-    if (frame.precisionThreshold() == 0 && _bb != null) {
+    if (frame.pickingThreshold() == 0 && _bb != null) {
       if (!_rays.isEmpty()) {
         Iterator<Ray> it = _rays.iterator();
         while (it.hasNext()) {

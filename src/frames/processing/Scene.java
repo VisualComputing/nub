@@ -775,7 +775,7 @@ public class Scene extends Graph implements PConstants {
       Frame keyFrame = new Frame(this);
       pruneBranch(keyFrame);
       keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
-      keyFrame.setPrecisionThreshold(20);
+      keyFrame.setPickingThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
       if (pathsVisualHint())
@@ -959,7 +959,7 @@ public class Scene extends Graph implements PConstants {
   @Override
   protected void _drawBackBuffer(Frame frame) {
     PGraphics pGraphics = backBuffer();
-    if (frame.precisionThreshold() == 0) {
+    if (frame.pickingThreshold() == 0) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
 
@@ -2476,7 +2476,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the cross is the frame
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * {@link Frame#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
    * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
@@ -2486,7 +2486,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame.precisionThreshold() < 1 ? 200 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawCross(frame, frame.pickingThreshold() < 1 ? 200 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.pickingThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2545,7 +2545,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the target is the frame
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * {@link Frame#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
    * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
@@ -2555,7 +2555,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame.precisionThreshold() < 1 ? 200 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawShooterTarget(frame, frame.pickingThreshold() < 1 ? 200 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.pickingThreshold());
     frontBuffer().popStyle();
   }
 
