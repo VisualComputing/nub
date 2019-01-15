@@ -37,7 +37,6 @@ class Boid {
         render();
       }
     };
-    frame.setPrecision(Frame.Precision.FIXED);
     frame.setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = new Vector(pApplet.random(-1, 1), pApplet.random(-1, 1), pApplet.random(1, -1));
     acceleration = new Vector(0, 0, 0);

@@ -219,12 +219,9 @@ public class Scene extends Graph implements PConstants {
     setMatrixHandler(_matrixHandler(pGraphics));
 
     // 3. Frames & picking buffer
-    enableBackBuffer();
-    if (_bb != null) {
-      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-      _lineShader = pApplet().loadShader("PickingBuffer.frag");
-      _pointShader = pApplet().loadShader("PickingBuffer.frag");
-    }
+    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+    _lineShader = pApplet().loadShader("PickingBuffer.frag");
+    _pointShader = pApplet().loadShader("PickingBuffer.frag");
 
     // 4. Register P5 methods
     if (!isOffscreen()) {
@@ -778,7 +775,6 @@ public class Scene extends Graph implements PConstants {
       Frame keyFrame = new Frame(this);
       pruneBranch(keyFrame);
       keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
-      keyFrame.setPrecision(Frame.Precision.FIXED);
       keyFrame.setPrecisionThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
@@ -963,7 +959,7 @@ public class Scene extends Graph implements PConstants {
   @Override
   protected void _drawBackBuffer(Frame frame) {
     PGraphics pGraphics = backBuffer();
-    if (frame.precision() == Frame.Precision.EXACT) {
+    if (frame.precisionThreshold() == 0) {
       pGraphics.pushStyle();
       pGraphics.pushMatrix();
 
@@ -2490,7 +2486,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawCross(frame, frame.precisionThreshold() < 1 ? 100 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2559,7 +2555,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawShooterTarget(frame, frame.precisionThreshold() < 1 ? 100 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
     frontBuffer().popStyle();
   }
 

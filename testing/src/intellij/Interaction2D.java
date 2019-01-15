@@ -53,17 +53,14 @@ public class Interaction2D extends PApplet {
     };
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
-    shape1.setPrecision(Frame.Precision.FIXED);
 
     shape2 = new Frame(shape1);
     shape2.shape(shape());
     shape2.translate(75, 475);
-    shape2.setPrecision(Frame.Precision.FIXED);
 
     shape3 = new Frame(shape2);
     shape3.shape(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-775, -575);
-    shape3.setPrecision(Frame.Precision.FIXED);
   }
 
   public void draw() {

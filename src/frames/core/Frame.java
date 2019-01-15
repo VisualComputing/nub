@@ -181,12 +181,6 @@ public class Frame {
   // Tracking & Precision
   protected float _threshold;
 
-  public enum Precision {
-    FIXED, ADAPTIVE, EXACT
-  }
-
-  protected Precision _precision;
-
   // ID
   protected static int _counter;
   protected int _id;
@@ -334,8 +328,7 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = 0;
-    _precision = Precision.EXACT;
-    setPrecisionThreshold(20);
+    _threshold = 20;
     _tracking = true;
     _highlight = Highlighting.FRONT;
 
@@ -365,7 +358,6 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = frame.lastUpdate();
-    this._precision = frame._precision;
     this._threshold = frame._threshold;
     this._tracking = frame._tracking;
 
@@ -841,17 +833,6 @@ public class Frame {
   // PRECISION
 
   /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
-   *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   * @see #precisionThreshold()
-   */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
    * Sets the frame picking precision.
    * <p>
    * When {@link #precision()} is {@link Precision#FIXED} or {@link Precision#ADAPTIVE}
@@ -871,9 +852,7 @@ public class Frame {
    * @see #setPrecisionThreshold(float)
    * @see #precisionThreshold()
    */
-  public void setPrecision(Precision precision) {
-    _precision = precision;
-  }
+
 
   /**
    * Sets the length of the squared area around the frame {@link #position()} screen
@@ -902,9 +881,29 @@ public class Frame {
    * @see #precisionThreshold()
    */
   public void setPrecisionThreshold(float threshold) {
-    if (threshold >= 0)
+    if (threshold >= 0) {
       _threshold = threshold;
+      // optimizes the back-buffer
+      if (precisionThreshold() == 0) {
+        graph().enableBackBuffer();
+        return;
+      }
+      for (Frame frame : graph().frames())
+        if (frame.precisionThreshold() == 0) {
+          graph().enableBackBuffer();
+          return;
+        }
+      graph().disableBackBuffer();
+    }
   }
+
+  /**
+   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
+   *
+   * @see #setPrecision(Precision)
+   * @see #setPrecisionThreshold(float)
+   * @see #precisionThreshold()
+   */
 
   /**
    * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.

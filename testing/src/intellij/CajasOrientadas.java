@@ -38,7 +38,8 @@ public class CajasOrientadas extends PApplet {
     background(0);
     // calls visit() on all scene attached frames
     // automatically applying all the frame transformations
-    scene.render();
+    scene.traverse();
+    //scene.render();
   }
 
   public void mouseMoved() {
@@ -63,9 +64,9 @@ public class CajasOrientadas extends PApplet {
       adaptive = !adaptive;
       for (Box caja : cajas)
         if (adaptive)
-          caja.iFrame.setPrecision(Frame.Precision.ADAPTIVE);
+          caja.iFrame.setPrecisionThreshold(0.25f);
         else
-          caja.iFrame.setPrecision(Frame.Precision.FIXED);
+          caja.iFrame.setPrecisionThreshold(25);
     }
     if (key == 'a')
       drawAxes = !drawAxes;
@@ -107,8 +108,7 @@ public class CajasOrientadas extends PApplet {
           draw();
         }
       };
-      iFrame.setPrecision(Frame.Precision.ADAPTIVE);
-      iFrame.setPrecisionThreshold(25);
+      iFrame.setPrecisionThreshold(0.25f);
       setSize();
       setColor();
       iFrame.randomize();
@@ -135,7 +135,7 @@ public class CajasOrientadas extends PApplet {
       w = random(10, 40);
       h = random(10, 40);
       d = random(10, 40);
-      iFrame.setPrecisionThreshold(PApplet.max(w, h, d));
+      //iFrame.setPrecisionThreshold(PApplet.max(w, h, d));
     }
 
     public void setSize(float myW, float myH, float myD) {
@@ -188,7 +188,7 @@ public class CajasOrientadas extends PApplet {
           draw();
         }
       };
-      iFrame.setPrecision(Frame.Precision.ADAPTIVE);
+      iFrame.setPrecisionThreshold(0.15f);
       setRadius(10);
     }
 
