@@ -28,7 +28,7 @@ public class HAEASolver  extends Solver {
         public HAEAIndividual(Individual individual){
             super(individual.structure());
             this._fitness = individual.fitness();
-            this._parameters = individual.parameters();
+            //this._parameters = individual.parameters();
         }
 
         public void generateRates(Random random, List<Operator> operators){

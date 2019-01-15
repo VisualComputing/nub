@@ -198,7 +198,6 @@ public class GASolver extends Solver {
                 break;
             }
         }
-        _updateExtinction();
         return _best.fitness() < minDistance;
     }
 
@@ -215,17 +214,6 @@ public class GASolver extends Solver {
     protected void _update() {
         for(int i = 0; i < _structure.size(); i++){
             _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
-        }
-    }
-
-    protected void _updateExtinction(){
-        List<Individual> sorted = Util.sort(false, false, _population);
-        float f_max = sorted.get(sorted.size()-1).fitness();
-        float f_min = sorted.get(0).fitness();
-
-        for(int i = 0; i < _population_size; i++){
-            Individual individual = _population.get(i);
-            individual.setExtinction((individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
         }
     }
 

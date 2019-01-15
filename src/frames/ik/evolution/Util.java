@@ -11,7 +11,7 @@ import java.util.*;
  * Created by sebchaparr on 28/10/18.
  */
 public class Util {
-    protected static Random _random = new Random();
+    public static Random random = new Random();
 
     public static List<Individual> sort(boolean inPlace, boolean reverse, List<Individual> population){
         final int sign = reverse ? -1 : 1;
@@ -39,9 +39,9 @@ public class Util {
         for(int i = 0; i < n; i++){
             Individual individual = original.clone();
             for(Frame frame : individual.structure()){
-                float roll = 2 * max_angle * _random.nextFloat() - max_angle;
-                float pitch = 2 * max_angle * _random.nextFloat() - max_angle;
-                float yaw =  2 * max_angle * _random.nextFloat() - max_angle;
+                float roll = 2 * max_angle * random.nextFloat() - max_angle;
+                float pitch = 2 * max_angle * random.nextFloat() - max_angle;
+                float yaw =  2 * max_angle * random.nextFloat() - max_angle;
                 frame.rotate(new Quaternion(roll, pitch, yaw ));
             }
             population.add(individual);

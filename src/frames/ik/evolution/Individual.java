@@ -12,19 +12,6 @@ import java.util.List;
  * Created by sebchaparr on 29/10/18.
  */
 public class Individual{
-
-    public static class Parameter{
-        protected float[] _values;
-
-        public Parameter(int n){
-            _values = new float[n];
-        }
-
-        public Parameter(float[] values){
-            _values = values;
-        }
-    }
-
     public enum FitnessFunction {
         POSITION, ORIENTATION, POSE
     }
@@ -32,10 +19,11 @@ public class Individual{
 
 
     protected List<Frame> _structure;
-    protected HashMap<String, Parameter> _parameters;
+    protected HashMap<String, Float> _floatParams;
+    protected HashMap<String, float[]> _arrayParams;
+
     protected float _fitness;
     protected FitnessFunction _fitness_function = FitnessFunction.POSITION;
-    protected float _extinction;
 
     public Individual(List<Frame> structure){
         _structure = structure;
@@ -43,10 +31,6 @@ public class Individual{
 
     public List<Frame> structure() {
         return _structure;
-    }
-
-    public HashMap<String, Parameter> parameters(){
-        return _parameters;
     }
 
     public void setStructure(List<Frame> _structure) {
@@ -57,21 +41,16 @@ public class Individual{
         return _fitness;
     }
 
-    public float extinction(){
-        return _extinction;
+    public HashMap<String, Float> floatParams(){
+        return _floatParams;
     }
 
-    public void setExtinction(float extinction){
-        _extinction = extinction;
+    public HashMap<String, float[]> arrayParams(){
+        return _arrayParams;
     }
 
     public void setFitness(float fitness){
         _fitness = fitness;
-    }
-
-    public void putParameter(String name, float[] values){
-        if(_parameters == null) _parameters = new HashMap<String, Parameter>();
-        _parameters.put(name, new Parameter(values));
     }
 
     public float updateFitness(HashMap<Integer, Frame> targets){
@@ -109,7 +88,7 @@ public class Individual{
             return dr;
         }
 
-        float w = (float) Math.random() * 0.3f;
+        float w = (float) Math.random() * 0.3f; //Best solutions must adapt to different sort of weights.
         return (1-w) * dt + w * dr;
     }
 
@@ -133,16 +112,16 @@ public class Individual{
 
 
     public Individual clone(){
-        List<Frame> structure = new ArrayList<>();
-        for(int i = 0; i < _structure.size(); i++){
-            //structure.add(_structure.get(i).get());
-        }
         Individual individual = new Individual(_copy(_structure));
         individual._fitness = _fitness;
-        individual._extinction = _extinction;
-        if(_parameters != null) {
-            for (String name : _parameters.keySet()) {
-                individual.putParameter(name, _parameters.get(name)._values.clone());
+        if(_floatParams != null) {
+            for (String name : _floatParams.keySet()) {
+                individual._floatParams.put(name, _floatParams.get(name).floatValue());
+            }
+        }
+        if(_arrayParams != null) {
+            for (String name : _arrayParams.keySet()) {
+                individual._arrayParams.put(name, _arrayParams.get(name).clone());
             }
         }
         return individual;
