@@ -2710,7 +2710,7 @@ public class Graph {
       return false;
     if (!frame.isTrackingEnabled())
       return false;
-    float threshold = frame.precisionThreshold() < 1 ? 100 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) / 2
+    float threshold = frame.precisionThreshold() < 1 ? 100 * frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position())
         : frame.precisionThreshold() / 2;
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }

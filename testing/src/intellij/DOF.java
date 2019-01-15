@@ -15,6 +15,7 @@ public class DOF extends PApplet {
   Scene scene;
   Frame[] models;
   int mode = 2;
+  boolean exact = true;
 
   @Override
   public void settings() {
@@ -34,6 +35,7 @@ public class DOF extends PApplet {
       //models[i] = new Frame(scene, boxShape());
       models[i] = new Frame(scene);
       models[i].shape(boxShape());
+      models[i].setPrecisionThreshold(0);
       scene.randomize(models[i]);
     }
 
@@ -58,6 +60,8 @@ public class DOF extends PApplet {
   public void draw() {
     // 1. Draw into main buffer
     scene.beginDraw();
+    for (int i = 0; i < models.length; i++)
+      scene.drawShooterTarget(models[i]);
     scene.frontBuffer().background(0);
     scene.render();
     scene.endDraw();
@@ -108,6 +112,15 @@ public class DOF extends PApplet {
       scene.fit(1);
     if (key == 'F')
       scene.fit();
+    if (key == 'p') {
+      exact = !exact;
+      for (int i = 0; i < models.length; i++)
+        models[i].setPrecisionThreshold(exact ? 0 : 0.7f);
+      if (scene.backBuffer() == null)
+        println("backBuffer disabled");
+      else
+        println("backBuffer enabled");
+    }
   }
 
   @Override

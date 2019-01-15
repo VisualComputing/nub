@@ -32,14 +32,17 @@ public class CajasOrientadas extends PApplet {
 
     scene.fit(1);
     scene.setTrackedFrame("keyboard", esfera.iFrame);
+
+    if (scene.backBuffer() == null)
+      println("win");
   }
 
   public void draw() {
     background(0);
     // calls visit() on all scene attached frames
     // automatically applying all the frame transformations
-    scene.traverse();
-    //scene.render();
+    //scene.traverse();
+    scene.render();
   }
 
   public void mouseMoved() {
