@@ -188,7 +188,6 @@ public class OperatorMethods {
                 float roll = 0;
                 float pitch = 0;
                 float yaw = 0;
-                int j = 0;
                 float sum = 0;
                 for (Individual individual : individuals){
                     float w = Util.random.nextFloat();
@@ -203,11 +202,12 @@ public class OperatorMethods {
                 yaw = yaw/sum;
 
                 for (Individual individual : individuals){
-                    float[] g = individual.arrayParams().get("Evolution_Gradient");
-                    float r = Util.random.nextFloat();
-                    roll += r*g[0];
-                    pitch += r*g[1];
-                    yaw += r*g[2];
+                        float[] g = individual.arrayParams().get("Evolution_Gradient");
+                        if(g == null) continue;
+                        float r = Util.random.nextFloat();
+                        roll += r * g[3*i];
+                        pitch += r * g[3*i + 1];
+                        yaw += r * g[3*i + 2];
                 }
                 combination.structure().get(i).setRotation(new Quaternion(roll, pitch, yaw));
             }
@@ -239,32 +239,25 @@ public class OperatorMethods {
         @Override
         public Individual apply(Individual... individuals) {
             Individual combination = individuals[0].clone();
+            Vector parents = new Vector();
             for (int i = 0; i < individuals[0].structure().size(); i++){
-                float roll = 0;
-                float pitch = 0;
-                float yaw = 0;
-                int j = 0;
-                float sum = 0;
-                for (Individual individual : individuals){
-                    float w = Util.random.nextFloat();
-                    Vector euler = individual.structure().get(i).rotation().eulerAngles();
-                    roll += w * euler.x();
-                    pitch += w * euler.y();
-                    yaw += w * euler.z();
-                    sum += w;
+                for(Individual parent : _parents){
+                    parents.add(parent.structure().get(i).rotation().eulerAngles());
                 }
-                roll = roll/sum;
-                pitch = pitch/sum;
-                yaw = yaw/sum;
+                parents.divide(_parents.length);
+                Vector mine = individuals[0].structure().get(i).rotation().eulerAngles();
+                Vector best = _best.structure().get(i).rotation().eulerAngles();
 
-                for (Individual individual : individuals){
-                    float[] g = individual.arrayParams().get("Evolution_Gradient");
-                    float r = Util.random.nextFloat();
-                    roll += r*g[0];
-                    pitch += r*g[1];
-                    yaw += r*g[2];
+                Vector result = new Vector();
+
+                float rp = Util.random.nextFloat();
+                float rb = Util.random.nextFloat();
+
+                for(int j = 0; j < 3; j++){
+                    float wi = Util.random.nextFloat();
+                    result._vector[j] = mine._vector[j] + wi*rp*(parents._vector[j] - mine._vector[j]) + (1-wi)*rb*(best._vector[i] - mine._vector[i]);
                 }
-                combination.structure().get(i).setRotation(new Quaternion(roll, pitch, yaw));
+                combination.structure().get(i).setRotation(new Quaternion(result.x(), result.y(), result.z()));
             }
             return combination;
         }

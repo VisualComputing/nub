@@ -6,8 +6,10 @@ import frames.ik.evolution.operator.Operator;
 import frames.ik.evolution.operator.OperatorMethods;
 import frames.ik.evolution.selection.Selection;
 import frames.ik.evolution.selection.SelectionMethods;
+import frames.primitives.Vector;
 
 import java.util.*;
+
 
 /**
  * Created by sebchaparr on 11/01/19.
@@ -20,6 +22,7 @@ public class BioIk extends Solver {
     protected Selection _selection = new SelectionMethods.Ranking();
     protected Operator _mutation = new OperatorMethods.Mutation();
     protected Operator _crossover = new OperatorMethods.Recombination();
+    protected Operator _adoption = new OperatorMethods.Adoption();
     protected float _cross_probability = 1f;
     protected int _population_size = 10;
     protected Replacement replacement = Replacement.ELITISM;
@@ -135,18 +138,25 @@ public class BioIk extends Solver {
         Individual best = _best;
         for(int i = 0; i < parents.size(); i+=2){
             if(_random.nextFloat() < _cross_probability) {
-                Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
+                Individual recombination = _crossover.apply(parents.get(i), parents.get(i + 1));
                 if(_debug) {
                     System.out.println("\t Best " + _best);
                     System.out.println("\t P1 " + parents.get(i));
                     System.out.println("\t P2 " + parents.get(i + 1));
-                    child.updateFitness(_target);
-                    System.out.println("\t Child " + child);
+                    recombination.updateFitness(_target);
+                    System.out.println("\t Child " + recombination);
                 }
                  if(_mutation instanceof OperatorMethods.Mutation){
                     ((OperatorMethods.Mutation) _mutation).setExtinction(parents.get(i), parents.get(i + 1));
                 }
-                child = _mutation.apply(child);
+                Individual mutation = _mutation.apply(recombination);
+                if(_adoption instanceof OperatorMethods.Adoption){
+                    ((OperatorMethods.Adoption) _adoption).setParents(parents.get(i), parents.get(i + 1));
+                    ((OperatorMethods.Adoption) _adoption).setBest(best);
+                }
+                Individual child = _mutation.apply(mutation);
+                //update gradient
+                child.arrayParams().put("Evolution_Gradient", _calculateGradient(child, recombination));
                 child.updateFitness(_target);
                 children.add(child);
                 best = best == null ? child : best.fitness() > child.fitness() ? child : best;
@@ -229,6 +239,19 @@ public class BioIk extends Solver {
             individual._floatParams.put("Extinction", (individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
         }
     }
+
+
+    protected float[] _calculateGradient(Individual amr, Individual r){
+        float[] g = new float[amr.structure().size()*3];
+        for(int i = 0; i < amr.structure().size(); i++){
+            Vector v = Vector.subtract(amr.structure().get(i).rotation().eulerAngles(), r.structure().get(i).rotation().eulerAngles());
+            g[3*i] = v.x();
+            g[3*i + 1] = v.y();
+            g[3*i + 2] = v.z();
+        }
+        return g;
+    }
+
 
     @Override
     protected boolean _changed() {

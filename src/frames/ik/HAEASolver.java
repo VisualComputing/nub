@@ -225,7 +225,6 @@ public class HAEASolver  extends Solver {
         }
 
         _population = next;
-        _updateExtinction();
         if(_debug) {
             System.out.println("Population ");
             for (Individual ind : _population) {
@@ -239,18 +238,6 @@ public class HAEASolver  extends Solver {
         }
         return _best.fitness() < minDistance;
     }
-
-    protected void _updateExtinction(){
-        List<Individual> sorted = Util.sort(false, false, _population);
-        float f_max = sorted.get(sorted.size()-1).fitness();
-        float f_min = sorted.get(0).fitness();
-
-        for(int i = 0; i < _population_size; i++){
-            Individual individual = _population.get(i);
-            individual.setExtinction((individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
-        }
-    }
-
 
     public Frame head() {
         return _structure.get(0);
