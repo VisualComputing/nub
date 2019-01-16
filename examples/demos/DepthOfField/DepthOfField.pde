@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  *
  * This example implements a Depth-Of-Field (DOF) shader effect
- * using the traverse(), traverse(PGraphics), display() and
+ * using the render(), render(PGraphics), display() and
  * display(PGraphics) Scene methods.
  *
  * Press 0 to display the original scene.
