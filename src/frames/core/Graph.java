@@ -2791,24 +2791,24 @@ public class Graph {
     return _bb;
   }
 
-  public void enableBackBuffer() {
+  protected void _enableBackBuffer() {
 
-  }
-
-  protected void _updateBackBuffer() {
-    for (Frame frame : frames())
-      if (frame.pickingThreshold() == 0) {
-        enableBackBuffer();
-        return;
-      }
-    disableBackBuffer();
   }
 
   /**
    * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
    */
-  public void disableBackBuffer() {
+  protected void _disableBackBuffer() {
     _bb = null;
+  }
+
+  protected void _updateBackBuffer() {
+    for (Frame frame : frames())
+      if (frame.pickingThreshold() == 0) {
+        _enableBackBuffer();
+        return;
+      }
+    _disableBackBuffer();
   }
 
   /**
