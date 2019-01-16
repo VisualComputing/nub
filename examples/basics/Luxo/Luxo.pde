@@ -31,7 +31,7 @@ void draw() {
   lights();
 
   //draw the lamp
-  scene.traverse();
+  scene.render();
 
   //draw the ground
   noStroke();

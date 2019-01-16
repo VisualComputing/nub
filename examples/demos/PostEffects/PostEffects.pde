@@ -17,7 +17,7 @@ PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphic
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
 int startTime;
-Shape[] models;
+Frame[] models;
 PFont font;
 
 public void setup() {
@@ -27,9 +27,9 @@ public void setup() {
   colorMode(HSB, 255);
   scene = new Scene(this, P3D);
   scene.setRadius(1000);
-  models = new Shape[100];
+  models = new Frame[100];
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Shape(scene, shape());
+    models[i] = new Frame(scene, shape());
     scene.randomize(models[i]);
   }
   scene.fit(1);
@@ -88,7 +88,7 @@ public void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
   graphics.background(0);
-  scene.traverse();
+  scene.render();
   scene.endDraw();
 
   if (bdepth){
@@ -98,7 +98,7 @@ public void draw() {
     depthShader.set("far", scene.zFar());
     //Note that when drawing the shapes into an arbitrary PGraphics
     //the eye position of the main PGraphics is used
-    scene.traverse(depthPGraphics);
+    scene.render(depthPGraphics);
     depthPGraphics.endDraw();
     drawGraphics = depthPGraphics;
   }

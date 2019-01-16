@@ -18,7 +18,7 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene;
-Shape[] shapes;
+Frame[] shapes;
 PFont font36;
 int totalShapes;
 
@@ -32,9 +32,9 @@ public void settings() {
 void setup() {
   scene = new Scene(this);
   scene.fit(1);
-  shapes = new Shape[10];
+  shapes = new Frame[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Shape(scene) {
+    shapes[i] = new Frame(scene) {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
@@ -85,7 +85,7 @@ int randomFaces() {
 void draw() {
   background(0);
   scene.drawAxes();
-  scene.traverse();
+  scene.render();
 }
 
 void keyPressed() {

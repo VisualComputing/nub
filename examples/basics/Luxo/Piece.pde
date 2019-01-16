@@ -1,4 +1,4 @@
-class Piece extends Shape {
+class Piece extends Frame {
   int mode;
 
   Piece(Scene scene) {

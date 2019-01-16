@@ -12,7 +12,6 @@ class Sphere {
         draw();
       }
     };
-    iFrame.setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
 
@@ -41,7 +40,6 @@ class Sphere {
 
   public void setRadius(float myR) {
     r = myR;
-    iFrame.setPrecisionThreshold(2 * r);
   }
 
   public int getColor() {

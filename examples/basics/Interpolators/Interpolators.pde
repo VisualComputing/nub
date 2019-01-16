@@ -19,7 +19,7 @@ import frames.processing.*;
 
 Scene scene;
 Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-Shape shape;
+Frame shape;
 boolean showEyePath = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -40,7 +40,7 @@ void setup() {
 
   // interpolation 3. Custom (arbitrary) frame interpolations
 
-  shape = new Shape(scene) {
+  shape = new Frame(scene) {
     // Note that within visit() geometry is defined at the
     // frame local coordinate system.
     @Override
@@ -66,7 +66,7 @@ void setup() {
 
 void draw() {
   background(0);
-  scene.traverse();
+  scene.render();
 
   pushStyle();
   stroke(255);

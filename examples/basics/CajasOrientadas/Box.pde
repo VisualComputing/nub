@@ -12,8 +12,6 @@ public class Box {
         draw();
       }
     };
-    iFrame.setPrecision(Frame.Precision.ADAPTIVE);
-    iFrame.setPrecisionThreshold(25);
     setSize();
     setColor();
     iFrame.randomize();
@@ -40,7 +38,7 @@ public class Box {
     w = random(10, 40);
     h = random(10, 40);
     d = random(10, 40);
-    iFrame.setPrecisionThreshold(PApplet.max(w, h, d));
+    iFrame.setPickingThreshold(PApplet.max(w, h, d)/scene.radius());
   }
 
   public void setSize(float myW, float myH, float myD) {

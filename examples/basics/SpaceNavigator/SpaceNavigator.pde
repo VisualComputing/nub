@@ -35,10 +35,10 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(1500);
   scene.fit(1);
-  Shape[] shapes = new Shape[50];
+  Frame[] shapes = new Frame[50];
   for (int i = 0; i < shapes.length; i++) {
     tint(random(0,255), random(0,255), random(0,255), random(150,255));
-    shapes[i] = new Shape(scene, loadShape("rocket.obj"));
+    shapes[i] = new Frame(scene, loadShape("rocket.obj"));
     scene.randomize(shapes[i]);
   }
   smooth();
@@ -47,7 +47,7 @@ void setup() {
 void draw() {
   background(0);
   scene.drawAxes();
-  scene.traverse();
+  scene.render();
   if (snPicking)
     spaceNavigatorPicking();
   else

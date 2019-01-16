@@ -41,7 +41,7 @@ void draw() {
   background(0);
   // calls visit() on all scene attached frames
   // automatically applying all the frame transformations
-  scene.traverse();
+  scene.render();
 }
 
 void mouseMoved() {
@@ -62,6 +62,7 @@ void mouseWheel(MouseEvent event) {
 }
 
 void keyPressed() {
+  /*
   if (key == ' ') {
     adaptive = !adaptive;
     for (Box caja : cajas)
@@ -70,6 +71,7 @@ void keyPressed() {
       else
         caja.iFrame.setPrecision(Frame.Precision.FIXED);
   }
+  */
   if (key == 'a')
     drawAxes = !drawAxes;
   if (key == 'p')

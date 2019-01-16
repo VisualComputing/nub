@@ -59,7 +59,7 @@ void setup() {
 void draw() {
   background(0);
   scene.drawAxes();
-  scene.traverse();
+  scene.render();
   fill(0, 255, 255);
   scene.beginHUD();
   displayText();

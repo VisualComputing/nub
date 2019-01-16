@@ -20,7 +20,7 @@ import frames.processing.*;
 
 Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
 Scene scene;
-Shape[] shapes;
+Frame[] shapes;
 PGraphics shadowMap;
 PShader depthShader;
 float zNear = 50;
@@ -36,9 +36,9 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(max(w, h));
   scene.fit(1);
-  shapes = new Shape[20];
+  shapes = new Frame[20];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Shape(scene) {
+    shapes[i] = new Frame(scene) {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
@@ -68,8 +68,9 @@ void setup() {
             }
       }
     };
+    shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
-    shapes[i].setHighlighting(Shape.Highlighting.NONE);
+    shapes[i].setHighlighting(Frame.Highlighting.NONE);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);
   depthShader = loadShader("depth.glsl");
@@ -84,12 +85,12 @@ void setup() {
 void draw() {
   background(75, 25, 15);
   // 1. Fill in and display front-buffer
-  scene.traverse();
+  scene.render();
   // 2. Fill in shadow map using the light point of view
   if (scene.trackedFrame("light") != null) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
-    scene.traverse(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+    scene.render(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     scene.beginHUD();

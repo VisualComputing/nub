@@ -20,7 +20,7 @@ import frames.processing.*;
 PShader depthShader, dofShader;
 PGraphics depthPGraphics, dofPGraphics;
 Scene scene;
-Shape[] models;
+Frame[] models;
 int mode = 2;
 
 void setup() {
@@ -30,10 +30,10 @@ void setup() {
   scene.setRadius(1000);
   scene.fit(1);
 
-  models = new Shape[100];
+  models = new Frame[100];
 
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Shape(scene, boxShape());
+    models[i] = new Frame(scene, boxShape());
     scene.randomize(models[i]);
   }
 
@@ -55,7 +55,7 @@ void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
   scene.frontBuffer().background(0);
-  scene.traverse();
+  scene.render();
   scene.endDraw();
 
   // 2. Draw into depth buffer
@@ -63,7 +63,7 @@ void draw() {
   depthPGraphics.background(0);
   depthShader.set("near", scene.zNear());
   depthShader.set("far", scene.zFar());
-  scene.traverse(depthPGraphics);
+  scene.render(depthPGraphics);
   depthPGraphics.endDraw();
 
   // 3. Draw destination buffer

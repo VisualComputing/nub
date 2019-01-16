@@ -13,7 +13,7 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene;
-Shape[] shapes;
+Frame[] shapes;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
@@ -29,10 +29,9 @@ void setup() {
   scene = new Scene(this, createGraphics(w, h / 2, renderer));
   scene.setRadius(max(w, h));
 
-  shapes = new Shape[100];
+  shapes = new Frame[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Shape(scene);
-    shapes[i].graphics(caja());
+    shapes[i] = new Frame(scene, caja());
     shapes[i].randomize();
   }
   scene.fit(1);
@@ -42,7 +41,7 @@ void draw() {
   // 1. Fill in and display front-buffer
   scene.beginDraw();
   scene.frontBuffer().background(10,50,25);
-  scene.traverse();
+  scene.render();
   scene.endDraw();
   scene.display();
   // 2. Display back buffer
