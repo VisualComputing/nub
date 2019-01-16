@@ -18,7 +18,7 @@ import processing.opengl.PGraphicsOpenGL;
 /**
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.
  */
-public class GLMatrixHandler extends MatrixHandler {
+class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
   public GLMatrixHandler(PGraphicsOpenGL renderer) {

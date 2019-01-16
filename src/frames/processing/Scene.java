@@ -218,12 +218,7 @@ public class Scene extends Graph implements PConstants {
     // 2. Matrix helper
     setMatrixHandler(_matrixHandler(pGraphics));
 
-    // 3. Frames & picking buffer
-    _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-    _lineShader = pApplet().loadShader("PickingBuffer.frag");
-    _pointShader = pApplet().loadShader("PickingBuffer.frag");
-
-    // 4. Register P5 methods
+    // 3. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
@@ -231,7 +226,7 @@ public class Scene extends Graph implements PConstants {
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
-    // 5. Handed
+    // 4. Handed
     setLeftHanded();
   }
 
@@ -246,6 +241,24 @@ public class Scene extends Graph implements PConstants {
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
         null;
+    // TODO
+    // goal is to avoid loading the shaders each and every time a frame gets drawn see _drawBackBuffer
+    // generates a: java.lang.NullPointerException
+    //	at processing.opengl.PJOGL.getGLSLVersion(PJOGL.java:509)
+    /*
+    if(_bb != null && (_triangleShader == null || _lineShader == null || _pointShader == null)) {
+      _triangleShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+      _lineShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+      _pointShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+    }
+    */
+    // /*
+    if (_triangleShader == null || _lineShader == null || _pointShader == null) {
+      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+      _lineShader = pApplet().loadShader("PickingBuffer.frag");
+      _pointShader = pApplet().loadShader("PickingBuffer.frag");
+    }
+    // */
   }
 
   // P5 STUFF
@@ -967,7 +980,8 @@ public class Scene extends Graph implements PConstants {
       float g = (float) ((frame.id() >> 8) & 255) / 255.f;
       float b = (float) ((frame.id() >> 16) & 255) / 255.f;
 
-      // funny, only safe way. Otherwise break things horribly when setting shapes
+      // TODO see _enableBackBuffer
+      // funny, only safe way. Otherwise break things horribly when setting frame shapes
       // and there are more than one shape
       pGraphics.shader(_triangleShader);
       pGraphics.shader(_lineShader, PApplet.LINES);
@@ -1026,7 +1040,10 @@ public class Scene extends Graph implements PConstants {
    * @see #render()
    */
   public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
-    render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
+    if (pGraphics instanceof PGraphicsOpenGL)
+      render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
+    else
+      System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
   /**
@@ -1034,13 +1051,15 @@ public class Scene extends Graph implements PConstants {
    */
   protected static MatrixHandler _getMatrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
-      throw new RuntimeException("PGraphicsOpenGL is currently the only renderer available");
+      throw new RuntimeException("Renderer should be instanceof PGraphicsOpenGL in applyTransformation(PGraphics pGraphics, Frame frame)");
     else
       return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
   @Override
   protected MatrixHandler _matrixHandler(Object context) {
+    if (!(context instanceof PGraphicsOpenGL))
+      return new Java2DMatrixHandler(this);
     return _getMatrixHandler(context);
   }
 
