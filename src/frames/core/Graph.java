@@ -34,9 +34,9 @@ import java.util.List;
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
  * <h1>2. Scene graph handling</h1>
- * A graph forms a tree of (attached) {@link Frame}s which may be {@link #traverse()},
+ * A graph forms a tree of (attached) {@link Frame}s which may be {@link #render()},
  * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
- * documentation). Note that {@link #traverse()} should be called within your main-event loop.
+ * documentation). Note that {@link #render()} should be called within your main-event loop.
  * <p>
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -61,8 +61,8 @@ import java.util.List;
  * {@link Frame#interact(Object...)} should be overridden to implement the frame custom behavior.
  * <p>
  * To check if a given frame would be picked with a ray casted at a given screen position
- * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#precision()} (and
- * {@link Frame#setPrecision(Frame.Precision)}) for the different frame picking policies.
+ * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#pickingThreshold()} (and
+ * {@link Frame#setPickingThreshold(float)}) for the different frame picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
  * is a two step process: 1. Define an {@code hid} tracked-frame instance, using an arbitrary name for it
@@ -83,7 +83,7 @@ import java.util.List;
  * {@link #cast(String, Point)} (only for attached frames too). While {@link #track(String, Point, Frame[])} and
  * {@link #track(String, Point)} update the {@code hid} tracked-frame synchronously (i.e., they return the
  * {@code hid} tracked-frame immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
- * optimally updates the {@code hid} tracked-frame during the next call to the {@link #traverse()} algorithm).</li>
+ * optimally updates the {@code hid} tracked-frame during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -109,7 +109,7 @@ import java.util.List;
  * To apply the transformation defined by a frame call {@link #applyTransformation(Frame)}
  * (see also {@link #applyWorldTransformation(Frame)}) between {@link #pushModelView()} and
  * {@link #popModelView()} (which wrap {@link MatrixHandler} functions with the same signatures).
- * Note that the frame transformations are applied automatically by the {@link #traverse()}
+ * Note that the frame transformations are applied automatically by the {@link #render()}
  * algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
@@ -586,7 +586,7 @@ public class Graph {
   /**
    * Returns the top-level frames (those which reference is null).
    * <p>
-   * All leading frames are also reachable by the {@link #traverse()} algorithm for which they are the seeds.
+   * All leading frames are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
    * @see #frames()
    * @see #isReachable(Frame)
@@ -614,10 +614,10 @@ public class Graph {
    * {@code
    * Graph graph graph, auxiliaryGraph;
    * void draw() {
-   *   graph.traverse();
+   *   graph.render();
    *   // shift frames to the auxiliaryGraph
    *   scene.shift(auxiliaryGraph);
-   *   auxiliaryGraph.traverse();
+   *   auxiliaryGraph.render();
    *   // shift frames back to the main graph
    *   auxiliaryGraph.shift(graph);
    * }
@@ -676,7 +676,7 @@ public class Graph {
    * A call to {@link #isReachable(Frame)} on all {@code frame} descendants
    * (including {@code frame}) will return false, after issuing this method. It also means
    * that all frames in the {@code frame} branch will become unreachable by the
-   * {@link #traverse()} algorithm.
+   * {@link #render()} algorithm.
    * <p>
    * To make all the frames in the branch reachable again, first cache the frames
    * belonging to the branch (i.e., {@code branch=pruneBranch(frame)}) and then call
@@ -721,13 +721,13 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the frame is reachable by the {@link #traverse()}
+   * Returns {@code true} if the frame is reachable by the {@link #render()}
    * algorithm and {@code false} otherwise.
    * <p>
    * Frames are made unreachable with {@link #pruneBranch(Frame)} and reachable
    * again with {@link Frame#setReference(Frame)}.
    *
-   * @see #traverse()
+   * @see #render()
    * @see #frames()
    */
   public boolean isReachable(Frame frame) {
@@ -737,10 +737,10 @@ public class Graph {
   }
 
   /**
-   * Returns a list of all the frames that are reachable by the {@link #traverse()}
+   * Returns a list of all the frames that are reachable by the {@link #render()}
    * algorithm.
    * <p>
-   * The method traverse the hierarchy to collect. Frame collections should thus be kept at user space
+   * The method render the hierarchy to collect. Frame collections should thus be kept at user space
    * for efficiency.
    *
    * @see #isReachable(Frame)
@@ -2520,7 +2520,7 @@ public class Graph {
    *
    * @see #track(String, float, float)
    * @see #track(String, float, float, List)
-   * @see #traverse()
+   * @see #render()
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
    * @see #defaultFrame(String)
@@ -2528,8 +2528,8 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#enableTracking(boolean)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
+   * @see Frame#pickingThreshold()
+   * @see Frame#setPickingThreshold(float)
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
@@ -2624,7 +2624,7 @@ public class Graph {
    * attached frames to the graph.
    *
    * @see #track(String, float, float, Frame[])
-   * @see #traverse()
+   * @see #render()
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
    * @see #defaultFrame(String)
@@ -2632,8 +2632,8 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#enableTracking(boolean)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
+   * @see Frame#pickingThreshold()
+   * @see Frame#setPickingThreshold(float)
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
@@ -2669,7 +2669,7 @@ public class Graph {
 
   /**
    * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
-   * {@code false} otherwise. The frame is picked according to the {@link Frame#precision()}.
+   * {@code false} otherwise. The frame is picked according to the {@link Frame#pickingThreshold()}.
    *
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
@@ -2678,8 +2678,8 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#enableTracking(boolean)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
+   * @see Frame#pickingThreshold()
+   * @see Frame#setPickingThreshold(float)
    */
   public boolean tracks(float x, float y, Frame frame) {
     if (frame.pickingThreshold() == 0 && _bb != null)
@@ -2698,7 +2698,7 @@ public class Graph {
    * <p>
    * This method should be overridden. Default implementation symply return {@code false}.
    *
-   * @see Frame#setPrecision(Frame.Precision)
+   * @see Frame#setPickingThreshold(float)
    */
   protected boolean _tracks(float x, float y, Frame frame) {
     return false;
@@ -2747,12 +2747,12 @@ public class Graph {
   /**
    * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-frame.
    * The algorithm schedules an updated of the {@code hid} tracked-frame for the next traversal and hence should be
-   * always be used in conjunction with {@link #traverse()}.
+   * always be used in conjunction with {@link #render()}.
    * <p>
    * This method is optimal since it updated the {@code hid} tracked-frame at traversal time. Prefer this method over
    * {@link #track(String, Point)} when dealing with several {@code hids}.
    *
-   * @see #traverse()
+   * @see #render()
    * @see #trackedFrame(String)
    * @see #resetTrackedFrame(String)
    * @see #defaultFrame(String)
@@ -2760,8 +2760,8 @@ public class Graph {
    * @see #setTrackedFrame(String, Frame)
    * @see #isTrackedFrame(String, Frame)
    * @see Frame#enableTracking(boolean)
-   * @see Frame#precision()
-   * @see Frame#setPrecision(Frame.Precision)
+   * @see Frame#pickingThreshold()
+   * @see Frame#setPickingThreshold(float)
    * @see #cast(String, float, float)
    */
   public void cast(String hid, Point pixel) {
@@ -2816,7 +2816,7 @@ public class Graph {
    *
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see #traverse()
+   * @see #render()
    */
   public void render() {
     render(frontBuffer());
@@ -2828,7 +2828,6 @@ public class Graph {
    *
    * @see #render(Object, Matrix, Matrix)
    * @see #render()
-   * @see #traverse()
    */
   public void render(Object context) {
     render(context, matrixHandler().cacheView(), matrixHandler().projection());
@@ -2846,7 +2845,6 @@ public class Graph {
    *
    * @see #render()
    * @see #render(Object)
-   * @see #traverse()
    */
   public void render(Object context, Matrix view, Matrix projection) {
     MatrixHandler matrixHandler;
@@ -2932,7 +2930,6 @@ public class Graph {
    * </pre>
    *
    * @see Graph#render()
-   * @see Graph#traverse()
    * @see Frame#cull(boolean)
    * @see Frame#isCulled()
    * @see Frame#visit()
@@ -2944,7 +2941,7 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_visit(Frame)}.
+   * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
   protected void _track(Frame frame) {
     if (frame.pickingThreshold() == 0 && _bb != null) {

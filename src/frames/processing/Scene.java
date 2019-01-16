@@ -86,12 +86,12 @@ import java.util.List;
  * <pre>
  * {@code
  * void draw() {
- *   scene.traverse();
+ *   scene.render();
  *   scene.drawPath(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #traverse()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
+ * while {@link #render()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
@@ -1008,7 +1008,7 @@ public class Scene extends Graph implements PConstants {
    * @see #render(PGraphics, Type, Frame, float, float) (Object, Matrix, Matrix)
    * @see #render(Object)
    * @see #render(PGraphics, Type, Frame, float, float, boolean)
-   * @see #traverse()
+   * @see #render()
    */
   public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
     render(pGraphics, type, eye, zNear, zFar, true);
@@ -1023,7 +1023,7 @@ public class Scene extends Graph implements PConstants {
    * @see #render(Object, Matrix, Matrix)
    * @see #render(Object)
    * @see #render(PGraphics, Type, Frame, float, float)
-   * @see #traverse()
+   * @see #render()
    */
   public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
     render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));

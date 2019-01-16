@@ -77,7 +77,7 @@ import java.util.List;
  * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the frame hierarchy which automatically apply the local
- * frame transformations described above may be achieved with {@link Graph#traverse()} or
+ * frame transformations described above may be achieved with {@link Graph#render()} or
  * {@link Graph#render(Object)}.
  * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Frame)}
  * and to instantiate a frame attached to a graph which is referred to as attached frame (see
@@ -104,13 +104,13 @@ import java.util.List;
  * A frame shape can be set from a retained-mode rendering object (such as a Processing PShape)
  * or from an immediate-mode rendering. Either case the shape is split in two a front and a
  * back shape. The front shape will be used for rendering and the back shape for picking with
- * exact precision by default, see {@link #setPrecision(Precision)}. When
+ * exact precision by default, see {@link #setPickingThreshold(float)}. When
  * picking a shape it will be highlighted according to a highlighting policy, see
  * {@link #setHighlighting(Highlighting)}.
  *
  * <h3>Picking</h3>
- * Picking a frame is done accordingly to a {@link #precision()}. Refer to
- * {@link #setPrecision(Precision)} for details.
+ * Picking a frame is done accordingly to a {@link #pickingThreshold()}. Refer to
+ * {@link #setPickingThreshold(float)} for details.
  *
  * <h3>Retained mode</h3>
  * To set a retained-mode shape call {@link #shape(Object)} which will set both the front and
@@ -123,11 +123,11 @@ import java.util.List;
  * graphics procedures for rendering and picking, respectively.
  * <h3>Picking</h3>
  * Picking a shape is done according to a precision which can either be:
- * {@link Precision#FIXED}, {@link Precision#ADAPTIVE} or {@link Precision#EXACT}. Refer
- * to the {@link Frame} documentation for both, {@link Precision#FIXED} and
- * {@link Precision#ADAPTIVE}. The default {@link Precision#EXACT} precision use ray-casting
+ * <i>fixed</i>, <i>adaptive</i> or <i>precise</i>. Refer
+ * to the {@link Frame} documentation for both, <i>fixed</i> and
+ * <i>adaptive</i>. The default <i>EXACT</i> precision use ray-casting
  * of the pointer device over the projected pixels of the back shape. To set a different
- * precision, use {@link #setPrecision(Precision)}. See also {@link #precision()}.
+ * precision, use {@link #setPickingThreshold(float)}. See also {@link #pickingThreshold()}.
  * <h3>Highlighting</h3>
  * The shape may be highlighted when picking takes place according to a
  * {@link #highlighting()} policy as follows:
@@ -315,7 +315,7 @@ public class Frame {
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * Sets the {@link #precision()} to {@link Precision#FIXED}.
+   * Sets the {@link #pickingThreshold()} to <i>fixed</i>.
    */
   protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
@@ -407,14 +407,14 @@ public class Frame {
   }
 
   /**
-   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#traverse()}).
+   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#render()}).
    * To test if the frame is detach from any graph hierarchy call {@code isAttached(null)}.
    * <p>
    * Note that a call to {@link #children()} never returns {@code null} if the frame is attached to
    * a graph, i.e., that graph will visit the frame during traversal.
    *
    * @see #isDetached()
-   * @see Graph#traverse()
+   * @see Graph#render()
    */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
@@ -424,10 +424,10 @@ public class Frame {
    * Same as {@code return isAttached(null)}.
    * <p>
    * Note that a call to {@link #children()} always returns {@code null} if the frame is detached,
-   * i.e., the frame is not available for graph traversal (see {@link Graph#traverse()}).
+   * i.e., the frame is not available for graph traversal (see {@link Graph#render()}).
    *
    * @see #isAttached(Graph)
-   * @see Graph#traverse()
+   * @see Graph#render()
    */
   public boolean isDetached() {
     return isAttached(null);
@@ -835,20 +835,20 @@ public class Frame {
   /**
    * Sets the frame picking precision.
    * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or {@link Precision#ADAPTIVE}
+   * When {@link #pickingThreshold()} is <i>fixed</i> or <i>adaptive</i>
    * Picking is done by checking if the pointer lies within a squared area around the frame
    * {@link #position()} screen projection which size is defined by
    * {@link #setPickingThreshold(float)}.
    * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
+   * When {@link #pickingThreshold()} is <i>EXACT</i>, picking is done
    * in a precise manner according to the projected pixels of the visual representation
    * related to the frame. It is meant to be implemented by derived classes (providing the
    * means attach a visual representation to the frame) and requires the graph to implement
    * a back buffer.
    * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
+   * Default implementation of this policy will behave like <i>fixed</i>.
    *
-   * @see #precision()
+   * @see #pickingThreshold()
    * @see #setPickingThreshold(float)
    * @see #pickingThreshold()
    */
@@ -858,26 +858,26 @@ public class Frame {
    * Sets the length of the squared area around the frame {@link #position()} screen
    * projection that defined the frame picking condition.
    * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
+   * If {@link #pickingThreshold()} is <i>fixed</i>, the {@code threshold} is expressed
    * in pixels and directly defines the fixed length of a 'shooter target', centered
    * at the projection of the frame origin onto the screen.
    * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
+   * If {@link #pickingThreshold()} is <i>adaptive</i>, the {@code threshold} is expressed
    * in object space (world units) and defines the edge length of a squared bounding box that
    * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
    * origin onto the screen. Use this version only if you have a good idea of the bounding box
    * size of the object you are attaching to the frame shape.
    * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
+   * The value is meaningless when the {@link #pickingThreshold()} is* <i>EXACT</i>. See
+   * {@link #setPickingThreshold(float)} for details.
    * <p>
    * Default behavior is to set the PRECISIONTHRESHOLD (in a non-adaptive
    * manner) to 20.
    * <p>
    * Negative {@code threshold} values are silently ignored.
    *
-   * @see #precision()
-   * @see #setPrecision(Precision)
+   * @see #pickingThreshold()
+   * @see #setPickingThreshold(float)
    * @see #pickingThreshold()
    */
   public void setPickingThreshold(float threshold) {
@@ -892,9 +892,9 @@ public class Frame {
   }
 
   /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
+   * Returns the frame picking precision. See {@link #setPickingThreshold(float)} for details.
    *
-   * @see #setPrecision(Precision)
+   * @see #setPickingThreshold(float)
    * @see #setPickingThreshold(float)
    * @see #pickingThreshold()
    */
@@ -903,8 +903,8 @@ public class Frame {
    * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.
    *
    * @see #setPickingThreshold(float)
-   * @see #precision()
-   * @see #setPrecision(Precision)
+   * @see #pickingThreshold()
+   * @see #setPickingThreshold(float)
    */
   public float pickingThreshold() {
     return _threshold;
@@ -2185,7 +2185,7 @@ public class Frame {
   }
 
   /**
-   * This method is called on each frame of the graph hierarchy by the {@link Graph#traverse()}
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#render()}
    * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
    * by derived classes.
    * <p>
@@ -2208,7 +2208,7 @@ public class Frame {
    * }
    * </pre>
    *
-   * @see Graph#traverse()
+   * @see Graph#render()
    * @see Graph#render()
    * @see #cull(boolean)
    * @see #isCulled()
@@ -2231,7 +2231,7 @@ public class Frame {
 
   /**
    * Enables or disables {@link #visit()} of this frame and its children during
-   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   * {@link Graph#render()}. Culling should be decided within {@link #visit()}.
    * Only meaningful if the frame is attached to a {@code graph}.
    *
    * @see #isCulled()
@@ -2244,7 +2244,7 @@ public class Frame {
 
   /**
    * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#traverse()} algorithm. Always returns
+   * will not be visited by the {@link Graph#render()} algorithm. Always returns
    * {@code false} if the frame {@link #isDetached()}.
    *
    * @see #cull(boolean)
