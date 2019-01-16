@@ -56,6 +56,7 @@ public class MiniMap extends PApplet {
         };
       }
       scene.randomize(models[i]);
+      models[i].setPickingThreshold(0);
     }
 
     // Note that we pass the upper left corner coordinates where the scene1

@@ -66,6 +66,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
               }
         }
       };
+      shapes[i].setPickingThreshold(0);
       shapes[i].randomize();
       shapes[i].setHighlighting(Frame.Highlighting.NONE);
     }

@@ -45,7 +45,6 @@ public class MiniMap2 extends PApplet {
       } else {
         models[i] = new Frame(scene) {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
-
           @Override
           public void graphics(PGraphics pg) {
             pg.pushStyle();
@@ -55,6 +54,7 @@ public class MiniMap2 extends PApplet {
           }
         };
       }
+      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 

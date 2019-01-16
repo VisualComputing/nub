@@ -29,8 +29,7 @@ public class ShadowMapping extends PApplet {
     scene.setRadius(max(w, h));
     shapes = new Frame[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene);
-      shapes[i].shape(caja());
+      shapes[i] = new Frame(scene, caja());
       shapes[i].randomize();
     }
     light = new Frame(scene) {
@@ -43,6 +42,7 @@ public class ShadowMapping extends PApplet {
         pg.popStyle();
       }
     };
+    light.setPickingThreshold(0);
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
     shadowMap = createGraphics(w / 2, h / 2, P3D);

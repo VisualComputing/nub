@@ -65,7 +65,7 @@ public class ShadowMapDOFOffScreen extends PApplet {
         // */
       };
       shapes[i].randomize();
-      //shapes[i].setPrecision(Frame.Precision.FIXED);
+      shapes[i].setPickingThreshold(0);
       shapes[i].setHighlighting(Frame.Highlighting.NONE);
     }
     //scene._bbEnabled = false;

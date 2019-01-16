@@ -631,6 +631,17 @@ public class Graph {
     }
     _updateBackBuffer();
     target._updateBackBuffer();
+
+    //_enableBackBuffer();
+
+    //this._bbEnabled = _bbEnabled || target._bbEnabled;
+
+    /*
+    if(_bb != null || target._bb != null)
+      _enableBackBuffer();
+    else
+      _disableBackBuffer();
+    //*/
   }
 
   /**
