@@ -203,123 +203,136 @@ public class Frame {
   protected Highlighting _highlight;
 
   /**
-   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame() {
-    this(null, null, new Vector(), new Quaternion(), 1);
+    this(null, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(translation, new Quaternion(), 1)}.
+   * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Vector translation) {
-    this(translation, new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Quaternion rotation) {
-    this(new Vector(), rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(float scaling) {
-    this(new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(translation, rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation) {
-    this(translation, rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(null, translation, rotation, scaling)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, translation, rotation, scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation) {
-    this(null, reference, translation, new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Quaternion rotation) {
-    this(null, reference, new Vector(), rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, float scaling) {
-    this(null, reference, new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, rotation, 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation, Quaternion rotation) {
-    this(null, reference, translation, rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Graph graph) {
-    this(graph, null, new Vector(), new Quaternion(), 1);
+    this(graph, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(null, reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Frame reference) {
-    this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
+    this(null, reference, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a frame with {@code reference} as {@link #reference()}, and {@code translation},
+   * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Constraint constraint) {
+    this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Object shape) {
+    this(null, null, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Vector translation, Quaternion rotation, float scaling) {
+    this(null, null, null, null, translation, rotation, scaling);
+  }
+
+  // --
+
+  /**
+   * Same as {@code this(graph, null, shape)}.
+   *
+   * @see #Frame(Graph, Constraint, Object)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Object shape) {
+    this(graph, null, shape);
+  }
+
+  /**
+   * Same as {@code this(graph, constraint, null)}.
+   *
+   * @see #Frame(Graph, Constraint, Object)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Constraint constraint) {
+    this(graph, constraint, null);
+  }
+
+  /**
+   * Same as {@code this(graph, null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Constraint constraint, Object shape) {
+    this(graph, null, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  // --
+
+  /**
+   * Same as {@code this(reference, null, shape)}.
+   *
+   * @see #Frame(Frame, Constraint, Object)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Object shape) {
+    this(reference, null, shape);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, null)}.
+   *
+   * @see #Frame(Frame, Constraint, Object)
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint) {
+    this(reference, constraint, null);
+  }
+
+  /**
+   * Same as {@code this(reference.graph(), null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint, Object shape) {
+    this(reference.graph(), null, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * having {@code reference} as {@link #reference()}, {@code translation},
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * <p>
-   * Sets the {@link #pickingThreshold()} to <i>fixed</i>.
+   * The constructor set the {@link #frontShape()} and {@link #backShape()} to {@code shape}.
+   * It {@code shape} is non-null the {@link #pickingThreshold()} set to {@code 0}, otherwise
+   * it is set to {@code 0.2}.
    */
-  protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  public Frame(Graph graph, Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
     setReference(reference);
+    setConstraint(constraint);
+    shape(shape);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
@@ -328,16 +341,16 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = 0;
-    _threshold = 20;
+    _threshold = .2f;
     _tracking = true;
     _highlight = Highlighting.FRONT;
-
     if (graph() == null)
       return;
-
     // attached frames:
     _children = new ArrayList<Frame>();
     _culled = false;
+    if (shape != null)
+      setPickingThreshold(0);
   }
 
   /**
@@ -371,6 +384,7 @@ public class Frame {
     this._frontShape = frame._frontShape;
     this._backShape = frame._backShape;
     this._highlight = frame._highlight;
+    this.graph()._updateBackBuffer();
   }
 
   /**
@@ -887,7 +901,8 @@ public class Frame {
     }
     if (threshold >= 0) {
       _threshold = threshold;
-      graph()._updateBackBuffer();
+      if (!isDetached())
+        graph()._updateBackBuffer();
     }
   }
 
@@ -1985,8 +2000,7 @@ public class Frame {
    * @see #inverse()
    */
   public Frame worldInverse() {
-    return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
-        1 / magnitude()));
+    return new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
   // VECTOR CONVERSION

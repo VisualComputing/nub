@@ -33,9 +33,7 @@ public class DOF extends PApplet {
 
     for (int i = 0; i < models.length; i++) {
       //models[i] = new Frame(scene, boxShape());
-      models[i] = new Frame(scene);
-      models[i].shape(boxShape());
-      models[i].setPickingThreshold(0);
+      models[i] = new Frame(scene, boxShape());
       scene.randomize(models[i]);
     }
 
