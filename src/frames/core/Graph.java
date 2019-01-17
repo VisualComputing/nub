@@ -2944,6 +2944,8 @@ public class Graph {
    * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
   protected void _track(Frame frame) {
+    if (!frame.isTrackingEnabled())
+      return;
     // TODO frame shape automatic picking: check if frame tracking is enabled here!!!
     if (frame.pickingThreshold() == 0 && _bb != null) {
       if (!_rays.isEmpty()) {
