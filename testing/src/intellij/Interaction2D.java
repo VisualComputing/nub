@@ -32,7 +32,7 @@ public class Interaction2D extends PApplet {
 
     shape1 = new Frame(scene) {
       @Override
-      public void graphics(PGraphics pGraphics) {
+      public boolean graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -49,6 +49,7 @@ public class Interaction2D extends PApplet {
         scene.endHUD(pGraphics);
         */
         pGraphics.popStyle();
+        return true;
       }
     };
     //shape1.setRotation(Quaternion.random());

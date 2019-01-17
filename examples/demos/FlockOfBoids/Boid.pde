@@ -14,13 +14,55 @@ class Boid {
     position = new Vector();
     position.set(inPos);
     frame = new Frame(scene) {
-      // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
       @Override
       public void visit() {
         if (animate)
           run(flock);
-        render();
+      }
+      @Override
+      public boolean graphics(PGraphics pg) {
+        pg.pushStyle();
+
+        // uncomment to draw boid axes
+        //Scene.drawAxes(pg, 10);
+
+        pg.strokeWeight(2);
+        pg.stroke(color(40, 255, 40));
+        pg.fill(color(0, 255, 0, 125));
+
+        // highlight boids under the mouse
+        if (scene.trackedFrame("mouseMoved") == frame) {
+          pg.stroke(color(0, 0, 255));
+          pg.fill(color(0, 0, 255));
+        }
+
+        // highlight avatar
+        if (frame ==  avatar) {
+          pg.stroke(color(255, 0, 0));
+          pg.fill(color(255, 0, 0));
+        }
+
+        //draw boid
+        pg.beginShape(TRIANGLES);
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, 0, 2 * sc);
+
+        pg.vertex(3 * sc, 0, 0);
+        pg.vertex(-3 * sc, 0, 2 * sc);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+
+        pg.vertex(-3 * sc, 0, 2 * sc);
+        pg.vertex(-3 * sc, 2 * sc, 0);
+        pg.vertex(-3 * sc, -2 * sc, 0);
+        pg.endShape();
+
+        pg.popStyle();
+        return true;
       }
     };
     frame.setPosition(new Vector(position.x(), position.y(), position.z()));
@@ -128,49 +170,5 @@ class Boid {
       position.setZ(0);
     if (position.z() < 0)
       position.setZ(flockDepth);
-  }
-
-  void render() {
-    pushStyle();
-
-    // uncomment to draw boid axes
-    //scene.drawAxes(10);
-
-    strokeWeight(2);
-    stroke(color(40, 255, 40));
-    fill(color(0, 255, 0, 125));
-
-    // highlight boids under the mouse
-    if (scene.trackedFrame("mouseMoved") == frame) {
-      stroke(color(0, 0, 255));
-      fill(color(0, 0, 255));
-    }
-
-    // highlight avatar
-    if (frame ==  avatar) {
-      stroke(color(255, 0, 0));
-      fill(color(255, 0, 0));
-    }
-
-    //draw boid
-    beginShape(TRIANGLES);
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, -2 * sc, 0);
-
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, 0, 2 * sc);
-
-    vertex(3 * sc, 0, 0);
-    vertex(-3 * sc, 0, 2 * sc);
-    vertex(-3 * sc, -2 * sc, 0);
-
-    vertex(-3 * sc, 0, 2 * sc);
-    vertex(-3 * sc, 2 * sc, 0);
-    vertex(-3 * sc, -2 * sc, 0);
-    endShape();
-
-    popStyle();
   }
 }

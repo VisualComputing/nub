@@ -15,7 +15,7 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = false;
+  boolean onScreen = true;
   boolean interactiveEye;
 
   int w = 1200;
@@ -47,11 +47,12 @@ public class MiniMap extends PApplet {
           int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
 
           @Override
-          public void graphics(PGraphics pg) {
+          public boolean graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
+            return true;
           }
         };
       }

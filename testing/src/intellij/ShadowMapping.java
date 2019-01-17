@@ -34,12 +34,13 @@ public class ShadowMapping extends PApplet {
     }
     light = new Frame(scene) {
       @Override
-      public void graphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
         Scene.drawAxes(pg, 150);
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         pg.popStyle();
+        return true;
       }
     };
     light.setPickingThreshold(0);

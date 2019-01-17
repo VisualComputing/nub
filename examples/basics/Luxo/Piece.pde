@@ -12,7 +12,7 @@ class Piece extends Frame {
   }
 
   @Override
-  public void graphics(PGraphics pGraphics) {
+  public boolean graphics(PGraphics pGraphics) {
     switch (mode) {
     case 1:
       pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
@@ -41,5 +41,6 @@ class Piece extends Frame {
       pGraphics.spotLight(155, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
       break;
     }
+    return true;
   }
 }

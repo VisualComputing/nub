@@ -43,15 +43,17 @@ void setup() {
   activeConstraint = 0;
 
   iFrame = new Frame(scene) {
-    // Note that within visit() geometry is defined at the
+    // Note that within render() geometry is defined at the
     // frame local coordinate system.
     @Override
-    public void visit() {
-      scene.drawAxes(40);
-      fill(isTracked() ? 255 : 0, 0, 255);
-      scene.drawTorusSolenoid();
+    public boolean graphics(PGraphics pg) {
+      Scene.drawAxes(pg, 40);
+      pg.fill(isTracked() ? 255 : 0, 0, 255);
+      Scene.drawTorusSolenoid(pg);
+      return true;
     }
   };
+  iFrame.setPickingThreshold(0);
   iFrame.translate(new Vector(20, 20, 0));
   iFrame.setConstraint(constraints[activeConstraint]);
 }

@@ -27,7 +27,7 @@ public class OFFScreen extends PApplet {
 
     shape1 = new Frame(scene) {
       @Override
-      public void graphics(PGraphics pGraphics) {
+      public boolean graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -37,6 +37,7 @@ public class OFFScreen extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
+        return true;
       }
     };
     shape1.setRotation(Quaternion.random());

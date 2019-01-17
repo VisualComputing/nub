@@ -39,7 +39,7 @@ void setup() {
 
 void draw() {
   background(0);
-  // calls visit() on all scene attached frames
+  // calls render() on all scene attached frames
   // automatically applying all the frame transformations
   scene.render();
 }

@@ -5,6 +5,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class CajasOrientadas extends PApplet {
@@ -107,31 +108,28 @@ public class CajasOrientadas extends PApplet {
         // note that within visit() geometry is defined
         // at the frame local coordinate system
         @Override
-        public void visit() {
-          draw();
+        public boolean graphics(PGraphics pg) {
+          pg.pushStyle();
+          setOrientatio(CajasOrientadas.this.esfera.getPosition());
+          if (drawAxes)
+            scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
+          pg.noStroke();
+          if (isTracked())
+            pg.fill(255, 0, 0);
+          else
+            pg.fill(getColor());
+          pg.box(w, h, d);
+          pg.stroke(255);
+          if (drawShooterTarget)
+            scene.drawShooterTarget(iFrame);
+          pg.popStyle();
+          return true;
         }
       };
       iFrame.setPickingThreshold(0.25f);
       setSize();
       setColor();
       iFrame.randomize();
-    }
-
-    public void draw() {
-      pushStyle();
-      setOrientation(esfera.getPosition());
-      if (drawAxes)
-        scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
-      noStroke();
-      if (iFrame.isTracked())
-        fill(255, 0, 0);
-      else
-        fill(getColor());
-      box(w, h, d);
-      stroke(255);
-      if (drawShooterTarget)
-        scene.drawShooterTarget(iFrame);
-      popStyle();
     }
 
     public void setSize() {
@@ -171,7 +169,7 @@ public class CajasOrientadas extends PApplet {
       return iFrame.orientation();
     }
 
-    public void setOrientation(Vector v) {
+    public void setOrientatio(Vector v) {
       Vector to = Vector.subtract(v, iFrame.position());
       iFrame.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
     }

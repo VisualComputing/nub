@@ -46,11 +46,12 @@ public class MiniMap2 extends PApplet {
         models[i] = new Frame(scene) {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
           @Override
-          public void graphics(PGraphics pg) {
+          public boolean graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
+            return true;
           }
         };
       }
@@ -69,13 +70,14 @@ public class MiniMap2 extends PApplet {
     minimap.fit(1);
     sceneEye = new Frame(minimap) {
       @Override
-      public void graphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
         minimap.drawFrustum(pg, scene);
         pg.popStyle();
+        return true;
       }
     };
   }

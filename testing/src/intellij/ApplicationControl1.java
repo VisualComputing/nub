@@ -35,7 +35,7 @@ public class ApplicationControl1 extends PApplet {
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public void graphics(PGraphics pg) {
+        public boolean graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
@@ -46,6 +46,7 @@ public class ApplicationControl1 extends PApplet {
           pg.text(id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
+          return true;
         }
 
         @Override

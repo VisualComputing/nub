@@ -5,33 +5,30 @@ public class Box {
 
   public Box() {
     iFrame = new Frame(scene) {
-      // note that within visit() geometry is defined
+      // note that within render() geometry is defined
       // at the frame local coordinate system
       @Override
-      public void visit() {
-        draw();
+      public boolean graphics(PGraphics pg) {
+        pg.pushStyle();
+        updateOrientation(esfera.getPosition());
+        if (drawAxes)
+          Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
+        pg.noStroke();
+        if (iFrame.isTracked())
+          pg.fill(255, 0, 0);
+        else
+          pg.fill(getColor());
+        pg.box(w, h, d);
+        pg.stroke(255);
+        if (drawShooterTarget)
+          scene.drawShooterTarget(iFrame);
+        pg.popStyle();
+        return true;
       }
     };
     setSize();
     setColor();
     iFrame.randomize();
-  }
-
-  public void draw() {
-    pushStyle();
-    setOrientation(esfera.getPosition());
-    if (drawAxes)
-      scene.drawAxes(PApplet.max(w, h, d) * 1.3f);
-    noStroke();
-    if (iFrame.isTracked())
-      fill(255, 0, 0);
-    else
-      fill(getColor());
-    box(w, h, d);
-    stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(iFrame);
-    popStyle();
   }
 
   public void setSize() {
@@ -71,7 +68,7 @@ public class Box {
     return iFrame.orientation();
   }
 
-  public void setOrientation(Vector v) {
+  public void updateOrientation(Vector v) {
     Vector to = Vector.subtract(v, iFrame.position());
     iFrame.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
   }

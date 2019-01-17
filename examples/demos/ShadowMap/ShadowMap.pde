@@ -40,7 +40,7 @@ void setup() {
   for (int i = 0; i < shapes.length; i++) {
     shapes[i] = new Frame(scene) {
       @Override
-      public void graphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
         if (scene.trackedFrame("light") == this) {
           Scene.drawAxes(pg, 150);
@@ -57,6 +57,7 @@ void setup() {
           pg.box(80);
         }
         pg.popStyle();
+        return true;
       }
       @Override
       public void interact(Object... gesture) {

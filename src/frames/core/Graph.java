@@ -629,19 +629,6 @@ public class Graph {
       leadingFrame._graph = target;
       target._addLeadingFrame(leadingFrame);
     }
-    _updateBackBuffer();
-    target._updateBackBuffer();
-
-    //_enableBackBuffer();
-
-    //this._bbEnabled = _bbEnabled || target._bbEnabled;
-
-    /*
-    if(_bb != null || target._bb != null)
-      _enableBackBuffer();
-    else
-      _disableBackBuffer();
-    //*/
   }
 
   /**
@@ -2813,6 +2800,7 @@ public class Graph {
     _bb = null;
   }
 
+  /*
   protected void _updateBackBuffer() {
     for (Frame frame : frames())
       if (frame.pickingThreshold() == 0) {
@@ -2821,6 +2809,7 @@ public class Graph {
       }
     _disableBackBuffer();
   }
+  */
 
   /**
    * Renders the scene onto the {@link #frontBuffer()}. Same as {@code render(frontBuffer())}.
@@ -2955,6 +2944,7 @@ public class Graph {
    * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
   protected void _track(Frame frame) {
+    // TODO frame shape automatic picking: check if frame tracking is enabled here!!!
     if (frame.pickingThreshold() == 0 && _bb != null) {
       if (!_rays.isEmpty()) {
         Iterator<Ray> it = _rays.iterator();

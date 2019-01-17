@@ -27,7 +27,7 @@ public class MouseMoveInteraction extends PApplet {
 
     Frame shape1 = new Frame(scene) {
       @Override
-      public void graphics(PGraphics pGraphics) {
+      public boolean graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -36,6 +36,7 @@ public class MouseMoveInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
+        return true;
       }
     };
     shape1.setRotation(Quaternion.random());

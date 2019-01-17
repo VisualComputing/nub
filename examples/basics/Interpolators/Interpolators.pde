@@ -41,10 +41,10 @@ void setup() {
   // interpolation 3. Custom (arbitrary) frame interpolations
 
   shape = new Frame(scene) {
-    // Note that within visit() geometry is defined at the
+    // Note that within render() geometry is defined at the
     // frame local coordinate system.
     @Override
-    public void graphics(PGraphics pg) {
+    public boolean graphics(PGraphics pg) {
       pg.pushStyle();
       pg.fill(0, 255, 255, 125);
       pg.stroke(0, 0, 255);
@@ -54,6 +54,7 @@ void setup() {
       else
         pg.box(30);
       pg.popStyle();
+      return true;
     }
   };
   interpolator = new Interpolator(shape);

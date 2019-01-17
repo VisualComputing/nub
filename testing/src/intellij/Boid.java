@@ -38,7 +38,7 @@ class Boid {
       }
 
       @Override
-      public void graphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
 
         // uncomment to draw boid axes
@@ -81,6 +81,7 @@ class Boid {
         pg.endShape();
 
         pg.popStyle();
+        return true;
       }
     };
     frame.setPosition(new Vector(position.x(), position.y(), position.z()));

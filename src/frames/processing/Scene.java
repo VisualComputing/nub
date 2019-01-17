@@ -115,6 +115,7 @@ public class Scene extends Graph implements PConstants {
   protected int _beginOffScreenDrawingCalls;
 
   // _bb : picking buffer
+  protected long _bbNeed, _bbCount;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // CONSTRUCTORS
@@ -218,6 +219,8 @@ public class Scene extends Graph implements PConstants {
     // 2. Matrix helper
     setMatrixHandler(_matrixHandler(pGraphics));
 
+    _enableBackBuffer();
+
     // 3. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
@@ -298,16 +301,17 @@ public class Scene extends Graph implements PConstants {
    * scenes).
    */
   protected void _renderBackBuffer() {
-    if (_bb == null)
-      return;
-    backBuffer().beginDraw();
-    backBuffer().pushStyle();
-    backBuffer().background(0);
-    render(backBuffer());
-    backBuffer().popStyle();
-    backBuffer().endDraw();
-    // if (frames().size() > 0)
-    backBuffer().loadPixels();
+    if (_bb != null && _bbCount < _bbNeed) {
+      backBuffer().beginDraw();
+      backBuffer().pushStyle();
+      backBuffer().background(0);
+      render(backBuffer());
+      backBuffer().popStyle();
+      backBuffer().endDraw();
+      // if (frames().size() > 0)
+      backBuffer().loadPixels();
+      _bbCount = _bbNeed;
+    }
   }
 
   // OPENGL
@@ -933,16 +937,20 @@ public class Scene extends Graph implements PConstants {
         if (frame.isTracked())
           pGraphics.scale(1.15f);
       case NONE:
-        if (frame.frontShape() != null)
+        if (frame.frontShape() != null) {
           pGraphics.shape((PShape) frame.frontShape());
-        else
-          frame.graphics(pGraphics);
+          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+        }
+        else if (frame.graphics(pGraphics))
+          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
         break;
       case FRONT_BACK:
-        if (frame.frontShape() != null)
+        if (frame.frontShape() != null) {
           pGraphics.shape((PShape) frame.frontShape());
-        else
-          frame.frontGraphics(pGraphics);
+          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+        }
+        else if (frame.frontGraphics(pGraphics))
+          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
         if (frame.isTracked()) {
           if (frame.backShape() != null)
             pGraphics.shape((PShape) frame.backShape());
@@ -957,10 +965,12 @@ public class Scene extends Graph implements PConstants {
           else
             frame.backGraphics(pGraphics);
         } else {
-          if (frame.frontShape() != null)
+          if (frame.frontShape() != null) {
             pGraphics.shape((PShape) frame.frontShape());
-          else
-            frame.frontGraphics(pGraphics);
+            if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+          }
+          else if (frame.frontGraphics(pGraphics))
+            if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
         }
         break;
     }
@@ -1004,10 +1014,8 @@ public class Scene extends Graph implements PConstants {
         pGraphics.shapeMode(frontBuffer().shapeMode);
       if (frame.backShape() != null)
         pGraphics.shape((PShape) frame.backShape());
-      else {
+      else if (!frame.backGraphics(pGraphics))
         frame.graphics(pGraphics);
-        frame.backGraphics(pGraphics);
-      }
       //*/
       pGraphics.popStyle();
       pGraphics.popMatrix();

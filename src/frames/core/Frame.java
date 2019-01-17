@@ -349,6 +349,7 @@ public class Frame {
     // attached frames:
     _children = new ArrayList<Frame>();
     _culled = false;
+    // TODO frame shape automatic picking
     if (shape != null)
       setPickingThreshold(0);
   }
@@ -384,7 +385,6 @@ public class Frame {
     this._frontShape = frame._frontShape;
     this._backShape = frame._backShape;
     this._highlight = frame._highlight;
-    this.graph()._updateBackBuffer();
   }
 
   /**
@@ -899,11 +899,8 @@ public class Frame {
       System.out.println("Nothing done: pickingThreshold should be positive if the frame is detached");
       return;
     }
-    if (threshold >= 0) {
+    if (threshold >= 0)
       _threshold = threshold;
-      if (!isDetached())
-        graph()._updateBackBuffer();
-    }
   }
 
   /**
@@ -2308,7 +2305,8 @@ public class Frame {
    * @see #backShape(Object)
    * @see #shape(Object)
    */
-  public void graphics(Object context) {
+  public boolean graphics(Object context) {
+    return false;
   }
 
   /**
@@ -2318,7 +2316,8 @@ public class Frame {
    * @see #graphics(Object)
    * @see #shape(Object)
    */
-  public void frontGraphics(Object context) {
+  public boolean frontGraphics(Object context) {
+    return false;
   }
 
   /**
@@ -2328,7 +2327,8 @@ public class Frame {
    * @see #graphics(Object)
    * @see #shape(Object)
    */
-  public void backGraphics(Object context) {
+  public boolean backGraphics(Object context) {
+    return false;
   }
 
   /**
@@ -2385,7 +2385,8 @@ public class Frame {
    * @see #backGraphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  public void graphics(processing.core.PGraphics pGraphics) {
+  public boolean graphics(processing.core.PGraphics pGraphics) {
+    return false;
   }
 
   /**
@@ -2395,7 +2396,8 @@ public class Frame {
    * @see #graphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  public void frontGraphics(processing.core.PGraphics pGraphics) {
+  public boolean frontGraphics(processing.core.PGraphics pGraphics) {
+    return false;
   }
 
   /**
@@ -2405,7 +2407,8 @@ public class Frame {
    * @see #graphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
    */
-  public void backGraphics(processing.core.PGraphics pGraphics) {
+  public boolean backGraphics(processing.core.PGraphics pGraphics) {
+    return false;
   }
 
   /**

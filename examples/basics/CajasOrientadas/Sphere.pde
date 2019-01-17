@@ -8,30 +8,27 @@ class Sphere {
       // note that within visit() geometry is defined
       // at the frame local coordinate system
       @Override
-      public void visit() {
-        draw();
+      public boolean graphics(PGraphics pg) {
+        pg.pushStyle();
+        if (drawAxes)
+          //DrawingUtils.drawAxes(parent, radius()*1.3f);
+          Scene.drawAxes(pg, radius() * 1.3f);
+        pg.noStroke();
+        if (iFrame.isTracked()) {
+          pg.fill(255, 0, 0);
+          pg.sphere(radius() * 1.2f);
+        } else {
+          pg.fill(getColor());
+          pg.sphere(radius());
+        }
+        pg.stroke(255);
+        if (drawShooterTarget)
+          scene.drawShooterTarget(iFrame);
+        pg.popStyle();
+        return true;
       }
     };
     setRadius(10);
-  }
-
-  public void draw() {
-    pushStyle();
-    if (drawAxes)
-      //DrawingUtils.drawAxes(parent, radius()*1.3f);
-      scene.drawAxes(radius() * 1.3f);
-    noStroke();
-    if (iFrame.isTracked()) {
-      fill(255, 0, 0);
-      sphere(radius() * 1.2f);
-    } else {
-      fill(getColor());
-      sphere(radius());
-    }
-    stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(iFrame);
-    popStyle();
   }
 
   public float radius() {
