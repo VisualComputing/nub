@@ -38,7 +38,7 @@ import java.util.List;
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
  * <h1>Usage</h1>
- * Typical usage comprises two steps: scene instantiation and setting some shapes.
+ * Typical usage comprises two steps: scene instantiation and setting some frames.
  * <h2>Scene instantiation</h2>
  * Instantiate your on-screen scene at the {@code PApplet.setup()}:
  * <pre>
@@ -78,7 +78,7 @@ import java.util.List;
  * among others, can be used to set a {@link Frame#shape(PShape)} (see
  * also {@link Frame#graphics(PGraphics)}).
  * <p>
- * Another scene's eye (different than this one) can be drawn with
+ * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
  * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
  * <p>
@@ -91,7 +91,7 @@ import java.util.List;
  * }
  * }
  * </pre>
- * while {@link #render()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
+ * while {@link #render()} will draw the animated frame(s), {@link #drawPath(Interpolator, int)}
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
@@ -992,7 +992,7 @@ public class Scene extends Graph implements PConstants {
 
       // TODO see _enableBackBuffer
       // funny, only safe way. Otherwise break things horribly when setting frame shapes
-      // and there are more than one shape
+      // and there are more than one frame holding a shape
       pGraphics.shader(_triangleShader);
       pGraphics.shader(_lineShader, PApplet.LINES);
       pGraphics.shader(_pointShader, PApplet.POINTS);
@@ -1110,7 +1110,7 @@ public class Scene extends Graph implements PConstants {
    * drawing ends.
    * <p>
    * All screen drawing should be enclosed between {@link #beginHUD(PGraphics)} and
-   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen shapes.
+   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen frames.
    * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
    * then draw first all your 3d before doing any call to a {@link #beginHUD(PGraphics)}
    * and {@link #endHUD(PGraphics)} pair.
