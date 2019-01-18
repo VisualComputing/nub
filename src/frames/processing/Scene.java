@@ -308,7 +308,6 @@ public class Scene extends Graph implements PConstants {
       render(backBuffer());
       backBuffer().popStyle();
       backBuffer().endDraw();
-      // if (frames().size() > 0)
       backBuffer().loadPixels();
       _bbCount = _bbNeed;
     }
@@ -939,18 +938,18 @@ public class Scene extends Graph implements PConstants {
       case NONE:
         if (frame.frontShape() != null) {
           pGraphics.shape((PShape) frame.frontShape());
-          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
         }
         else if (frame.graphics(pGraphics))
-          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
         break;
       case FRONT_BACK:
         if (frame.frontShape() != null) {
           pGraphics.shape((PShape) frame.frontShape());
-          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
         }
         else if (frame.frontGraphics(pGraphics))
-          if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
         if (frame.isTracked()) {
           if (frame.backShape() != null)
             pGraphics.shape((PShape) frame.backShape());
@@ -967,10 +966,10 @@ public class Scene extends Graph implements PConstants {
         } else {
           if (frame.frontShape() != null) {
             pGraphics.shape((PShape) frame.frontShape());
-            if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+            if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
           }
           else if (frame.frontGraphics(pGraphics))
-            if (frame.pickingThreshold() == 0) _bbNeed = frameCount();
+            if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
         }
         break;
     }
