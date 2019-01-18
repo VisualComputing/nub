@@ -16,6 +16,7 @@ import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
+import processing.core.PGraphics;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -101,50 +102,10 @@ import java.util.List;
  * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A frame shape can be set from a retained-mode rendering object (such as a Processing PShape)
- * or from an immediate-mode rendering. Either case the shape is split in two a front and a
- * back shape. The front shape will be used for rendering and the back shape for picking with
- * exact precision by default, see {@link #setPickingThreshold(float)}. When
- * picking a shape it will be highlighted according to a highlighting policy, see
- * {@link #setHighlighting(Highlighting)}.
- *
- * <h3>Picking</h3>
- * Picking a frame is done accordingly to a {@link #pickingThreshold()}. Refer to
- * {@link #setPickingThreshold(float)} for details.
- *
- * <h3>Retained mode</h3>
- * To set a retained-mode shape call {@link #shape(Object)} which will set both the front and
- * the back shape to be the same pshape. Call {@link #frontShape(Object)} and
- * {@link #frontShape(Object)} to set different graphics for rendering and picking, respectively.
- * <h3>Immediate mode</h3>
- * To set an immediate-mode shape override {@link #graphics(Object)} which will set both the
- * front and the back shape to be the same graphics procedure. Override
- * {@link #frontShape(Object)} and {@link #backShape(Object)} to set different
- * graphics procedures for rendering and picking, respectively.
- * <h3>Picking</h3>
- * Picking a shape is done according to a precision which can either be:
- * <i>fixed</i>, <i>adaptive</i> or <i>precise</i>. Refer
- * to the {@link Frame} documentation for both, <i>fixed</i> and
- * <i>adaptive</i>. The default <i>EXACT</i> precision use ray-casting
- * of the pointer device over the projected pixels of the back shape. To set a different
- * precision, use {@link #setPickingThreshold(float)}. See also {@link #pickingThreshold()}.
- * <h3>Highlighting</h3>
- * The shape may be highlighted when picking takes place according to a
- * {@link #highlighting()} policy as follows:
- *
- * <ol>
- * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
- * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
- * and {@link #frontShape(Object)}) is scaled by a {@code 1.15} factor.</li>
- * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
- * {@link #backShape(Object)}) is displayed instead of the front-shape.</li>
- * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
- * displayed. The back shape is made translucent</li>
- * </ol>
- * <p>
- * Default is {@link Highlighting#FRONT}. Set the policy with
- * {@link #setHighlighting(Highlighting)}).
- *
+ * A frame shape can be set from a retained-mode rendering object, see {@link #shape(Object)};
+ * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
+ * Picking a frame is done according to a {@link #pickingThreshold()}. When picking a
+ * frame it will be highlighted according to a {@link #highlighting()} policy.
  * <h2>Application Control</h2>
  * Implementing an application control for the frame is a two step process:
  * <ul>
@@ -924,76 +885,32 @@ public class Frame {
   // PRECISION
 
   /**
-   * Sets the frame picking precision.
-   * <p>
-   * When {@link #pickingThreshold()} is <i>fixed</i> or <i>adaptive</i>
-   * Picking is done by checking if the pointer lies within a squared area around the frame
-   * {@link #position()} screen projection which size is defined by
-   * {@link #setPickingThreshold(float)}.
-   * <p>
-   * When {@link #pickingThreshold()} is <i>EXACT</i>, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the frame. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the frame) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like <i>fixed</i>.
+   * Sets the {@link #pickingThreshold()}.
    *
    * @see #pickingThreshold()
-   * @see #setPickingThreshold(float)
-   * @see #pickingThreshold()
-   */
-
-
-  /**
-   * Sets the length of the squared area around the frame {@link #position()} screen
-   * projection that defined the frame picking condition.
-   * <p>
-   * If {@link #pickingThreshold()} is <i>fixed</i>, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
-   * <p>
-   * If {@link #pickingThreshold()} is <i>adaptive</i>, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame shape.
-   * <p>
-   * The value is meaningless when the {@link #pickingThreshold()} is* <i>EXACT</i>. See
-   * {@link #setPickingThreshold(float)} for details.
-   * <p>
-   * Default behavior is to set the PRECISIONTHRESHOLD (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #pickingThreshold()
-   * @see #setPickingThreshold(float)
-   * @see #pickingThreshold()
+   * @see #setHighlighting(Highlighting)
    */
   public void setPickingThreshold(float threshold) {
-    if (isDetached() && threshold == 0) {
-      System.out.println("Nothing done: pickingThreshold should be positive if the frame is detached");
-      return;
-    }
     if (threshold >= 0)
       _threshold = threshold;
   }
 
   /**
-   * Returns the frame picking precision. See {@link #setPickingThreshold(float)} for details.
+   * Returns the frame picking threshold. Set it with {@link #setPickingThreshold(float)}.
+   * <p>
+   * Picking a frame is done with ray casting against a screen-space shape defined according
+   * to a {@link #pickingThreshold()} as follows:
+   * <ul>
+   * <li>The projected pixels of the frame visual representation (see {@link #graphics(PGraphics)}
+   * and {@link #shape(Object)}). Set it with {@code threshold = 0}.</li>
+   * <li>A frame bounding box whose length is defined as percentage of the graph diameter
+   * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
+   * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
+   * </ul>
+   * Default picking precision is defined with {@code threshold = 0.2}.
    *
    * @see #setPickingThreshold(float)
-   * @see #setPickingThreshold(float)
-   * @see #pickingThreshold()
-   */
-
-  /**
-   * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.
-   *
-   * @see #setPickingThreshold(float)
-   * @see #pickingThreshold()
-   * @see #setPickingThreshold(float)
+   * @see #highlighting()
    */
   public float pickingThreshold() {
     return _threshold;
@@ -2273,7 +2190,7 @@ public class Frame {
   }
 
   /**
-   * This method is called on each frame of the graph hierarchy by the {@link Graph#render()}
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#render(Object)}
    * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
    * by derived classes.
    * <p>
@@ -2342,8 +2259,17 @@ public class Frame {
   }
 
   /**
-   * Highlights the shape when picking takes place as follows:
+   * Sets the frame {@link #highlighting()}.
    *
+   * @see #highlighting()
+   * @see #setPickingThreshold(float)
+   */
+  public void setHighlighting(Highlighting highlighting) {
+    _highlight = highlighting;
+  }
+
+  /**
+   * Returns the highlighting mode. Highlights the shape when picking takes place as follows:
    * <ol>
    * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
    * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
@@ -2356,16 +2282,8 @@ public class Frame {
    * <p>
    * Default is {@link Highlighting#FRONT}.
    *
-   * @see #highlighting()
-   */
-  public void setHighlighting(Highlighting highlighting) {
-    _highlight = highlighting;
-  }
-
-  /**
-   * Returns the highlighting mode.
-   *
    * @see #setHighlighting(Highlighting)
+   * @see #pickingThreshold()
    */
   public Highlighting highlighting() {
     return _highlight;
@@ -2377,9 +2295,11 @@ public class Frame {
    * Override this method to set an immediate mode graphics procedure on {@code context}.
    * <p>
    * Sets both the front and the back shape to the same graphics procedure.
+   * Override {@link #frontGraphics(Object)} and {@link #backGraphics(Object)} to set different
+   * graphics procedures for rendering and picking, respectively.
    *
-   * @see #frontShape(Object)
-   * @see #backShape(Object)
+   * @see #frontGraphics(Object)
+   * @see #backGraphics(Object)
    * @see #shape(Object)
    */
   public boolean graphics(Object context) {
@@ -2399,7 +2319,7 @@ public class Frame {
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
-   * back shape. Use it in conjunction with @see #frontGraphics(Object).
+   * shape used for picking. Use it in conjunction with @see #frontGraphics(Object).
    *
    * @see #graphics(Object)
    * @see #shape(Object)
@@ -2410,6 +2330,8 @@ public class Frame {
 
   /**
    * Sets the retained mode shape for both, the front and the back shapes.
+   * Call {@link #frontShape(Object)} and {@link #frontShape(Object)} to set
+   * different graphics for rendering and picking, respectively.
    *
    * @see #frontShape(Object)
    * @see #backShape(Object)
@@ -2432,7 +2354,7 @@ public class Frame {
   }
 
   /**
-   * Sets the retained mode shape for the back shape. Use it in conjunction
+   * Sets the retained mode shape used for picking. Use it in conjunction
    * with @see #frontShape(Object)}.
    *
    * @see #shape(Object)
@@ -2479,7 +2401,7 @@ public class Frame {
 
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
-   * back shape. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
+   * shape used for picking. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
    *
    * @see #graphics(processing.core.PGraphics)
    * @see #shape(processing.core.PShape)
@@ -2512,7 +2434,7 @@ public class Frame {
   }
 
   /**
-   * Sets the retained mode shape for the back shape. Use it in conjunction
+   * Sets the retained mode shape used for picking. Use it in conjunction
    * with @see #frontShape(Object)}.
    *
    * @see #shape(Object)

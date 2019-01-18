@@ -34,9 +34,8 @@ import java.util.List;
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
  * <h1>2. Scene graph handling</h1>
- * A graph forms a tree of (attached) {@link Frame}s which may be {@link #render()},
- * calling {@link Frame#visit()} on each visited frame (refer to the {@link Frame}
- * documentation). Note that {@link #render()} should be called within your main-event loop.
+ * A graph forms a tree of (attached) {@link Frame}s whose visual representations may be
+ * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
  * <p>
  * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
  * The graph provides other useful routines to handle the hierarchy, such as
@@ -2767,7 +2766,7 @@ public class Graph {
   }
 
   /**
-   * Override this method according to your renderer
+   * Override this method according to your renderer context.
    */
   protected MatrixHandler _matrixHandler(Object context) {
     // dummy: it should be overridden
@@ -2789,6 +2788,9 @@ public class Graph {
     return _bb;
   }
 
+  /**
+   * Override this method to set your back buffer context used for picking.
+   */
   protected void _enableBackBuffer() {
 
   }
@@ -2799,17 +2801,6 @@ public class Graph {
   protected void _disableBackBuffer() {
     _bb = null;
   }
-
-  /*
-  protected void _updateBackBuffer() {
-    for (Frame frame : frames())
-      if (frame.pickingThreshold() == 0) {
-        _enableBackBuffer();
-        return;
-      }
-    _disableBackBuffer();
-  }
-  */
 
   /**
    * Renders the scene onto the {@link #frontBuffer()}. Same as {@code render(frontBuffer())}.
@@ -2823,7 +2814,9 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context}.
+   * Renders the scene onto {@code context}. Calls {@link Frame#visit()} on each visited frame
+   * (refer to the {@link Frame} documentation).
+   * <p>
    * Same as {@code render(context, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
    * @see #render(Object, Matrix, Matrix)
@@ -2837,7 +2830,8 @@ public class Graph {
    * Renders the frame hierarchy onto {@code context} using the {@code view} and
    * {@code projection} matrices.
    * <p>
-   * Note that only reachable frames are visited by this algorithm.
+   * Note that only reachable frames (frames attached to this graph, see
+   * {@link Frame#isAttached(Graph)}) are rendered by this algorithm.
    *
    * <b>Attention:</b> this method should be called within the main event loop, just after
    * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
@@ -2903,40 +2897,34 @@ public class Graph {
   }
 
   /**
-   * Renders the frame, provided that it holds a visual representation, onto {@code context}.
+   * Visits (see {@link Frame#visit()}) and renders the frame, provided that it holds a visual
+   * representation (see {@link Frame#graphics(Object)} and {@link Frame#shape(Object)}),
+   * onto {@code context}.
+   * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
-   * <p>
-   * This method is called on each frame of the graph hierarchy by the {@link #render(Object)}
-   * algorithm, i.e., either call this method or the {@link Graph#render(Object)} algorithm
-   * within you main event loop.
-   * <p>
-   * TODO
-   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
-   * Set the culling flag with {@link Frame#cull(boolean)} according to your culling condition:
    *
-   * <pre>
-   * {@code
-   * frame = new Frame(graph) {
-   *   public void draw(Object context) {
-   *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
-   *     // (which should be implemented by you) is true, scene.render() will prune the branch
-   *     // at the frame
-   *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
-   *   }
-   * }
-   * }
-   * </pre>
-   *
-   * @see Graph#render()
+   * @see #render()
    * @see Frame#cull(boolean)
    * @see Frame#isCulled()
    * @see Frame#visit()
+   * @see Frame#graphics(Object)
+   * @see Frame#shape(Object)
    */
   public void draw(Object context, Frame frame) {
   }
 
+  /**
+   * Renders the frame onto the {@link #backBuffer()}.
+   * <p>
+   * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
+   *
+   * @see #render()
+   * @see Frame#cull(boolean)
+   * @see Frame#isCulled()
+   * @see Frame#visit()
+   * @see Frame#graphics(Object)
+   * @see Frame#shape(Object)
+   */
   protected void _drawBackBuffer(Frame frame) {
   }
 
@@ -2978,82 +2966,6 @@ public class Graph {
       }
     }
   }
-
-  /*
-  protected void _trackBackBuffer(Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
-      if (!_rays.isEmpty()) {
-        Iterator<Ray> it = _rays.iterator();
-        while (it.hasNext()) {
-          Ray ray = it.next();
-          resetTrackedFrame(ray._hid);
-          // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(ray._hid))
-          if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
-            setTrackedFrame(ray._hid, frame);
-            it.remove();
-          }
-        }
-      }
-    }
-  }
-
-  protected void _track(Frame frame) {
-    if (!_rays.isEmpty()) {
-      Vector projection = screenLocation(frame.position());
-      Iterator<Ray> it = _rays.iterator();
-      while (it.hasNext()) {
-        Ray ray = it.next();
-        resetTrackedFrame(ray._hid);
-        // Condition is overkill. Use it only in place of resetTrackedFrame
-        //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
-          setTrackedFrame(ray._hid, frame);
-          it.remove();
-        }
-      }
-    }
-  }
-  */
-
-  /**
-   * Traverse the frame hierarchy, successively applying the local transformation defined
-   * by each traversed frame, and calling {@link Frame#visit()} on it.
-   * <p>
-   * Note that only reachable frames are visited by this algorithm.
-   *
-   * <b>Attention:</b> this method should be called within the main event loop, just after
-   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
-   * modelview matrix takes place.
-   *
-   * @see #render(Object, Matrix, Matrix)
-   * @see #track(String, float, float)
-   * @see #isReachable(Frame)
-   * @see #pruneBranch(Frame)
-   */
-  /*
-  public void traverse() {
-    for (Frame frame : _leadingFrames())
-      _visit(frame);
-    _rays.clear();
-  }
-  */
-
-  /**
-   * Used by the traversal algorithm.
-   */
-  /*
-  protected void _visit(Frame frame) {
-    pushModelView();
-    applyTransformation(frame);
-    _track(frame);
-    frame.visit();
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child);
-    popModelView();
-  }
-  */
 
   /**
    * Same as {@code setTrackedFrame(null, frame)}.
