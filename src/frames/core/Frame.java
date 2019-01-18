@@ -16,7 +16,6 @@ import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.timing.TimingHandler;
-import processing.core.PGraphics;
 
 import java.util.ArrayList;
 import java.util.Iterator;
