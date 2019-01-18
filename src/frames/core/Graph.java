@@ -907,62 +907,6 @@ public class Graph {
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#modelView()}
-   */
-  public Matrix modelView() {
-    return _matrixHandler.modelView();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#pushModelView()}
-   */
-  public void pushModelView() {
-    _matrixHandler.pushModelView();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#popModelView()}
-   */
-  public void popModelView() {
-    _matrixHandler.popModelView();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#applyModelView(Matrix)}
-   */
-  public void applyModelView(Matrix source) {
-    _matrixHandler.applyModelView(source);
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#projection()}
-   */
-  public Matrix projection() {
-    return _matrixHandler.projection();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#pushProjection()}
-   */
-  public void pushProjection() {
-    _matrixHandler.pushProjection();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#popProjection()}
-   */
-  public void popProjection() {
-    _matrixHandler.popProjection();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#applyProjection(Matrix)}
-   */
-  public void applyProjection(Matrix source) {
-    _matrixHandler.applyProjection(source);
-  }
-
-  /**
    * Wrapper for {@link MatrixHandler#isProjectionViewInverseCached()}.
    * <p>
    * Use it only when continuously calling {@link #location(Vector)}.

@@ -3,6 +3,8 @@ class Piece extends Frame {
 
   Piece(Scene scene) {
     super(scene);
+    // set picking precision to the pixels of the frame projection
+    setPickingThreshold(0);
   }
 
   void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {

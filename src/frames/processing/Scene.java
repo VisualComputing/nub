@@ -567,7 +567,7 @@ public class Scene extends Graph implements PConstants {
       setHeight(frontBuffer().height);
     }
     preDraw();
-    pushModelView();
+    _matrixHandler.pushModelView();
   }
 
   /**
@@ -585,7 +585,7 @@ public class Scene extends Graph implements PConstants {
    * @see #isOffscreen()
    */
   public void draw() {
-    popModelView();
+    _matrixHandler.popModelView();
     _renderBackBuffer();
   }
 
@@ -618,7 +618,7 @@ public class Scene extends Graph implements PConstants {
     // open off-screen pgraphics for drawing:
     frontBuffer().beginDraw();
     preDraw();
-    pushModelView();
+    _matrixHandler.pushModelView();
   }
 
   /**
@@ -644,7 +644,7 @@ public class Scene extends Graph implements PConstants {
     if (_beginOffScreenDrawingCalls != 0)
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
-    popModelView();
+    _matrixHandler.popModelView();
     frontBuffer().endDraw();
     _renderBackBuffer();
   }
@@ -1417,7 +1417,7 @@ public class Scene extends Graph implements PConstants {
         for (Frame myFr : path)
           if ((count++) >= goal) {
             goal += nbSteps / (float) frameCount;
-            pushModelView();
+            _matrixHandler.pushModelView();
 
             applyTransformation(myFr);
 
@@ -1426,7 +1426,7 @@ public class Scene extends Graph implements PConstants {
             if ((mask & 4) != 0)
               drawAxes(scale / 10.0f);
 
-            popModelView();
+            _matrixHandler.popModelView();
           }
       }
       frontBuffer().strokeWeight(frontBuffer().strokeWeight / 2f);
@@ -1552,11 +1552,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawArrow(float, float)
    */
   public void drawArrow(Vector from, Vector to, float radius) {
-    pushModelView();
+    _matrixHandler.pushModelView();
     matrixHandler().translate(from.x(), from.y(), from.z());
-    applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
+    _matrixHandler.applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
-    popModelView();
+    _matrixHandler.popModelView();
   }
 
   /**

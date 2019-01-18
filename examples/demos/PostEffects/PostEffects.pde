@@ -31,6 +31,8 @@ public void setup() {
   for (int i = 0; i < models.length; i++) {
     models[i] = new Frame(scene, shape());
     scene.randomize(models[i]);
+    // set picking precision to the pixels of the frame projection
+    models[i].setPickingThreshold(0);
   }
   scene.fit(1);
 

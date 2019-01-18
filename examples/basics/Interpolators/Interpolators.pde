@@ -119,7 +119,6 @@ void keyPressed() {
     showEyePath = !showEyePath;
 
   if (key == '1')
-    // same as: eyeInterpolator1.addKeyFrame(scene.eye().get())
     eyeInterpolator1.addKeyFrame();
   if (key == 'a')
     eyeInterpolator1.toggle();
@@ -127,7 +126,6 @@ void keyPressed() {
     eyeInterpolator1.purge();
 
   if (key == '2')
-    // same as: eyeInterpolator2.addKeyFrame(scene.eye().get());
     eyeInterpolator2.addKeyFrame();
   if (key == 'c')
     eyeInterpolator2.toggle();

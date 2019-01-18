@@ -36,10 +36,10 @@ public class FrameInterpolation extends PApplet {
     eyeInterpolator1 = new Interpolator(scene.eye());
     eyeInterpolator2 = new Interpolator(scene.eye());
 
-    // interpolation 3. Custom (arbitrary)frame interpolations
+    // interpolation 3. Custom (arbitrary) frame interpolations
 
     shape = new Frame(scene) {
-      // Note that within visit() geometry is defined at the
+      // Note that within render() geometry is defined at the
       // frame local coordinate system.
       @Override
       public boolean graphics(PGraphics pg) {
@@ -58,13 +58,8 @@ public class FrameInterpolation extends PApplet {
     interpolator = new Interpolator(shape);
     interpolator.setLoop();
     // Create an initial path
-    int nbKeyFrames = 4;
-    for (int i = 0; i < nbKeyFrames; i++) {
-      Frame iFrame = new Frame(scene);
-      iFrame.setPosition(-100 + 200 * i / (nbKeyFrames - 1), 0, 0);
-      iFrame.setScaling(random(0.25f, 4.0f));
-      interpolator.addKeyFrame(iFrame);
-    }
+    for (int i = 0; i < random(4, 10); i++)
+      interpolator.addKeyFrame(scene.randomFrame());
     interpolator.start();
   }
 
@@ -74,29 +69,29 @@ public class FrameInterpolation extends PApplet {
 
     pushStyle();
     stroke(255);
-    scene.drawPath(interpolator, 5);
+    // same as:scene.drawPath(interpolator, 5);
+    scene.drawPath(interpolator);
     popStyle();
 
     for (Frame frame : interpolator.keyFrames()) {
       pushMatrix();
       scene.applyTransformation(frame);
-      if (scene.tracks(frame))
-        scene.drawAxes(40);
-      else
-        scene.drawAxes(20);
+      scene.drawAxes(scene.tracks(frame) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {
       pushStyle();
       fill(255, 0, 0);
       stroke(0, 255, 0);
-      scene.drawPath(eyeInterpolator1, 3);
-      scene.drawPath(eyeInterpolator2, 3);
+      // same as:
+      // scene.drawPath(eyeInterpolator1, 3);
+      // scene.drawPath(eyeInterpolator2, 3);
+      scene.drawPath(eyeInterpolator1);
+      scene.drawPath(eyeInterpolator2);
       popStyle();
     }
   }
 
-  @Override
   public void mouseMoved() {
     scene.track();
   }
@@ -104,40 +99,32 @@ public class FrameInterpolation extends PApplet {
   public void mouseDragged() {
     if (mouseButton == LEFT)
       scene.spin();
-      //scene.lookAround(upVector);
-      //scene.mouseCAD();
     else if (mouseButton == RIGHT)
       scene.translate();
-      //scene.mousePan();
     else
-      //scene.zoom(mouseX - pmouseX);
       scene.scale(mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
-    //scene.zoom(event.getCount() * 20);
-    scene.scale(event.getCount() * 20);
+    if (scene.is3D())
+      scene.moveForward(event.getCount() * 20);
+    else
+      scene.scale(event.getCount() * 20, scene.eye());
   }
 
   public void keyPressed() {
-    if (key == 'i') {
-      //println(((Node)scene.eye()).interpolators().size());
-      println("path 1: " + eyeInterpolator1.size());
-      println("path 2: " + eyeInterpolator2.size());
-    }
-
     if (key == ' ')
       showEyePath = !showEyePath;
 
     if (key == '1')
-      eyeInterpolator1.addKeyFrame(scene.eye().get());
+      eyeInterpolator1.addKeyFrame();
     if (key == 'a')
       eyeInterpolator1.toggle();
     if (key == 'b')
       eyeInterpolator1.purge();
 
     if (key == '2')
-      eyeInterpolator2.addKeyFrame(scene.eye().get());
+      eyeInterpolator2.addKeyFrame();
     if (key == 'c')
       eyeInterpolator2.toggle();
     if (key == 'd')
@@ -152,9 +139,6 @@ public class FrameInterpolation extends PApplet {
       scene.fit(1);
     if (key == 'f')
       scene.fit();
-
-    if (key == 'u') scene.saveConfig("/home/pierre/config.json");
-    if (key == 'v') scene.loadConfig("/home/pierre/config.json");
   }
 
   public static void main(String args[]) {

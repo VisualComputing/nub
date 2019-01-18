@@ -70,6 +70,8 @@ void setup() {
           }
       }
     };
+    // set picking precision to the pixels of the frame projection
+    shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
   }
   font36 = loadFont("FreeSans-36.vlw");

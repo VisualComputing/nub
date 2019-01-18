@@ -71,6 +71,8 @@ void setup() {
     };
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
+    // set picking precision to the pixels of the frame projection
+    shapes[i].setPickingThreshold(0);
     shapes[i].setHighlighting(Frame.Highlighting.NONE);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);

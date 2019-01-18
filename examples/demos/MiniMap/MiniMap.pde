@@ -63,6 +63,8 @@ void setup() {
         }
       };
     }
+    // set picking precision to the pixels of the frame projection
+    models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
 
