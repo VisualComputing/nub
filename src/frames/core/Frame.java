@@ -203,54 +203,111 @@ public class Frame {
   protected Highlighting _highlight;
 
   /**
+   * Creates a detached frame.
    * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Object)
+   * @see #Frame(Graph)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
    */
   public Frame() {
     this(null, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
+   * Creates a frame attached to {@code graph}.
    * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame()
+   * @see #Frame(Object)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
    */
   public Frame(Graph graph) {
     this(graph, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(null, reference, null, null, new Vector(), new Quaternion(), 1)}.
+   * Creates a detached frame with {@code reference} as {@link #reference()}.
+   * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame()
+   * @see #Frame(Graph)
+   * @see #Frame(Object)
+   * @see #Frame(Constraint)
    */
   public Frame(Frame reference) {
-    this(null, reference, null, null, new Vector(), new Quaternion(), 1);
+    this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
+   * Creates a detached frame with {@code constraint} as {@link #constraint()}.
    * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Graph)
+   * @see #Frame(Object)
+   * @see #Frame()
+   * @see #Frame(Frame)
    */
   public Frame(Constraint constraint) {
     this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
+   * Creates a detached frame with {@code shape}.
    * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame()
+   * @see #Frame(Graph)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
    */
   public Frame(Object shape) {
     this(null, null, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
+   * Constructs a shapeless frame, attached to {@code graph}, having {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(graph, null, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Vector translation, Quaternion rotation, float scaling) {
+    this(graph, null, null, null, translation, rotation, scaling);
+  }
+
+  /**
+   * Constructs a shapeless frame, having {@code reference}, {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #reference()},
+   * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(reference.graph(), reference, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Vector, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+    this(reference.graph(), reference, null, null, translation, rotation, scaling);
+  }
+
+  /**
+   * Constructs a shapeless detached frame, having {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Vector translation, Quaternion rotation, float scaling) {
     this(null, null, null, null, translation, rotation, scaling);
@@ -262,7 +319,7 @@ public class Frame {
    * Same as {@code this(graph, null, shape)}.
    *
    * @see #Frame(Graph, Constraint, Object)
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Graph graph, Object shape) {
     this(graph, null, shape);
@@ -272,19 +329,19 @@ public class Frame {
    * Same as {@code this(graph, constraint, null)}.
    *
    * @see #Frame(Graph, Constraint, Object)
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Graph graph, Constraint constraint) {
     this(graph, constraint, null);
   }
 
   /**
-   * Same as {@code this(graph, null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(graph, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Graph graph, Constraint constraint, Object shape) {
-    this(graph, null, constraint, shape, new Vector(), new Quaternion(), 1);
+    this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
   // --
@@ -293,7 +350,7 @@ public class Frame {
    * Same as {@code this(reference, null, shape)}.
    *
    * @see #Frame(Frame, Constraint, Object)
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Frame reference, Object shape) {
     this(reference, null, shape);
@@ -303,19 +360,45 @@ public class Frame {
    * Same as {@code this(reference, constraint, null)}.
    *
    * @see #Frame(Frame, Constraint, Object)
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
    */
   public Frame(Frame reference, Constraint constraint) {
     this(reference, constraint, null);
   }
 
   /**
-   * Same as {@code this(reference.graph(), null, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint, Object shape) {
+    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  // --
+
+  /**
+   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(graph, null, constraint, shape, translation, rotation, scaling)}.
    *
    * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Constraint constraint, Object shape) {
-    this(reference.graph(), null, constraint, shape, new Vector(), new Quaternion(), 1);
+  public Frame(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+    this(graph, null, constraint, shape, translation, rotation, scaling);
+  }
+
+  /**
+   * Creates a child frame of {@code reference} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(reference.graph(), reference, constraint, shape, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+    this(reference.graph(), reference, constraint, shape, translation, rotation, scaling);
   }
 
   /**
@@ -323,12 +406,9 @@ public class Frame {
    * having {@code reference} as {@link #reference()}, {@code translation},
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
-   * <p>
-   * The constructor set the {@link #frontShape()} and {@link #backShape()} to {@code shape}.
-   * It {@code shape} is non-null the {@link #pickingThreshold()} set to {@code 0}, otherwise
-   * it is set to {@code 0.2}.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
    */
-  public Frame(Graph graph, Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  protected Frame(Graph graph, Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
     setReference(reference);
     setConstraint(constraint);
@@ -349,9 +429,6 @@ public class Frame {
     // attached frames:
     _children = new ArrayList<Frame>();
     _culled = false;
-    // TODO frame shape automatic picking
-    if (shape != null)
-      setPickingThreshold(0);
   }
 
   /**
