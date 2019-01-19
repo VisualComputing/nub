@@ -1,5 +1,4 @@
-class Boid {
-  public Frame frame;
+class Boid extends Frame {
   // fields
   Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
   // a vector datatype
@@ -10,65 +9,66 @@ class Boid {
   float flap = 0;
   float t = 0;
 
-  Boid(Vector inPos) {
+  Boid(Scene scene, Vector inPos) {
+    super(scene);
     position = new Vector();
     position.set(inPos);
-    frame = new Frame(scene) {
-      @Override
-      public void visit() {
-        if (animate)
-          run(flock);
-      }
-      @Override
-      public boolean graphics(PGraphics pg) {
-        pg.pushStyle();
-
-        // uncomment to draw boid axes
-        //Scene.drawAxes(pg, 10);
-
-        pg.strokeWeight(2);
-        pg.stroke(color(40, 255, 40));
-        pg.fill(color(0, 255, 0, 125));
-
-        // highlight boids under the mouse
-        if (scene.trackedFrame("mouseMoved") == frame) {
-          pg.stroke(color(0, 0, 255));
-          pg.fill(color(0, 0, 255));
-        }
-
-        // highlight avatar
-        if (frame ==  avatar) {
-          pg.stroke(color(255, 0, 0));
-          pg.fill(color(255, 0, 0));
-        }
-
-        //draw boid
-        pg.beginShape(TRIANGLES);
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, 0, 2 * sc);
-
-        pg.vertex(3 * sc, 0, 0);
-        pg.vertex(-3 * sc, 0, 2 * sc);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-
-        pg.vertex(-3 * sc, 0, 2 * sc);
-        pg.vertex(-3 * sc, 2 * sc, 0);
-        pg.vertex(-3 * sc, -2 * sc, 0);
-        pg.endShape();
-
-        pg.popStyle();
-        return true;
-      }
-    };
-    frame.setPosition(new Vector(position.x(), position.y(), position.z()));
-    velocity = new Vector(random(-1, 1), random(-1, 1), random(1, -1));
+    setPosition(new Vector(position.x(), position.y(), position.z()));
+    velocity = new Vector(FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(-1, 1), FlockOfBoids.this.random(1, -1));
     acceleration = new Vector(0, 0, 0);
     neighborhoodRadius = 100;
+  }
+
+  @Override
+  public void visit() {
+    if (animate)
+      run(flock);
+  }
+
+  @Override
+  public boolean graphics(PGraphics pg) {
+    pg.pushStyle();
+
+    // uncomment to draw boid axes
+    //Scene.drawAxes(pg, 10);
+
+    pg.strokeWeight(2);
+    pg.stroke(color(40, 255, 40));
+    pg.fill(color(0, 255, 0, 125));
+
+    // highlight boids under the mouse
+    if (scene.trackedFrame("mouseMoved") == this) {
+      pg.stroke(color(0, 0, 255));
+      pg.fill(color(0, 0, 255));
+    }
+
+    // highlight avatar
+    if (this ==  avatar) {
+      pg.stroke(color(255, 0, 0));
+      pg.fill(color(255, 0, 0));
+    }
+
+    //draw boid
+    pg.beginShape(TRIANGLES);
+    pg.vertex(3 * sc, 0, 0);
+    pg.vertex(-3 * sc, 2 * sc, 0);
+    pg.vertex(-3 * sc, -2 * sc, 0);
+
+    pg.vertex(3 * sc, 0, 0);
+    pg.vertex(-3 * sc, 2 * sc, 0);
+    pg.vertex(-3 * sc, 0, 2 * sc);
+
+    pg.vertex(3 * sc, 0, 0);
+    pg.vertex(-3 * sc, 0, 2 * sc);
+    pg.vertex(-3 * sc, -2 * sc, 0);
+
+    pg.vertex(-3 * sc, 0, 2 * sc);
+    pg.vertex(-3 * sc, 2 * sc, 0);
+    pg.vertex(-3 * sc, -2 * sc, 0);
+    pg.endShape();
+
+    pg.popStyle();
+    return true;
   }
 
   public void run(ArrayList<Boid> bl) {
@@ -151,8 +151,8 @@ class Boid {
     velocity.limit(maxSpeed); // make sure the velocity vector magnitude does not
     // exceed maxSpeed
     position.add(velocity); // add velocity to position
-    frame.setPosition(position);
-    frame.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-velocity.z(), velocity.x())), 
+    setPosition(position);
+    setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), atan2(-velocity.z(), velocity.x())), 
       new Quaternion(new Vector(0, 0, 1), asin(velocity.y() / velocity.magnitude()))));
     acceleration.multiply(0); // reset acceleration
   }

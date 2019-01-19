@@ -29,8 +29,8 @@ import java.util.List;
  * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)} and
  * {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
- * The way the {@link #projection()} matrix is computed
- * (see {@link Frame#projection(Type, float, float, float, float, boolean)}),
+ * The way the projection matrix is computed (see
+ * {@link Frame#projection(Type, float, float, float, float, boolean)}),
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
  * <h1>2. Scene graph handling</h1>
@@ -100,16 +100,15 @@ import java.util.List;
  * boundary equations are disabled by default (see {@link #enableBoundaryEquations()} and
  * {@link #areBoundaryEquationsEnabled()}).
  * <h1>7. Matrix handling</h1>
- * The graph performs matrix handling through a {@link #matrixHandler()}.
- * To set shader matrices use {@link #projection()}, {@link #modelView()}
- * (which wrap {@link MatrixHandler} functions with the same signatures) and
- * (possibly) {@code Matrix.multiply(projection(), modelView())}.
+ * The graph performs matrix handling through a {@link #matrixHandler()} (see also
+ * {@link #setMatrixHandler(MatrixHandler)}) which should be overridden according to how your
+ * renderer handles the matrix shader uniform variables. Refer to the {@link MatrixHandler}
+ * documentation for details.
  * <p>
  * To apply the transformation defined by a frame call {@link #applyTransformation(Frame)}
- * (see also {@link #applyWorldTransformation(Frame)}) between {@link #pushModelView()} and
- * {@link #popModelView()} (which wrap {@link MatrixHandler} functions with the same signatures).
- * Note that the frame transformations are applied automatically by the {@link #render()}
- * algorithm (in this case you don't need to call them).
+ * (see also {@link #applyWorldTransformation(Frame)}) between {@code pushModelView()} and
+ * {@code popModelView()}. Note that the frame transformations are applied automatically by
+ * the {@link #render(Object)} algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -2327,7 +2326,7 @@ public class Graph {
    * {@code popModelView();} <br>
    * {@code popModelView();} <br>
    * <p>
-   * Note the use of nested {@link #pushModelView()} and {@link #popModelView()} blocks to
+   * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
    * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    *
@@ -2730,20 +2729,6 @@ public class Graph {
    */
   public Object backBuffer() {
     return _bb;
-  }
-
-  /**
-   * Override this method to set your back buffer context used for picking.
-   */
-  protected void _enableBackBuffer() {
-
-  }
-
-  /**
-   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
-   */
-  protected void _disableBackBuffer() {
-    _bb = null;
   }
 
   /**

@@ -236,10 +236,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Enable the {@link #backBuffer()} if the Processing renderer supports it. In success returns
    * {@code true} and {@code false} otherwise.
-   *
-   * @see #_disableBackBuffer()
    */
-  @Override
   public void _enableBackBuffer() {
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
