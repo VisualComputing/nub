@@ -136,7 +136,7 @@ public void mouseDragged() {
 
 See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basics/CajasOrientadas).
 
-## Rendering
+### Rendering
 
 A frame shape can be set from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) or from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure. Frame shapes can be picked precisely using their projection onto the screen, see _setPickingThreshold()_. Use _render()_ to render all scene-graph shapes or _draw(Frame)_ to render a specific one instead.
 
