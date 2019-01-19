@@ -16,7 +16,7 @@ public class SceneBuffers extends PApplet {
   int h = 1000;
 
   public void settings() {
-    size(w, h, P3D);
+    size(w, h, renderer);
   }
 
   public void setup() {
