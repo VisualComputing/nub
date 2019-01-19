@@ -8,7 +8,6 @@ FramesJS
 - [Description](#user-content-description)
 - [Scene](#user-content-scene)
 - [Frames](#user-content-frames)
-- [Shapes](#user-content-shapes)
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Control](#user-content-control)
