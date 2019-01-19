@@ -28,6 +28,7 @@ public class SceneBuffers extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Frame(scene, caja());
       shapes[i].randomize();
+      shapes[i].setPickingThreshold(0);
     }
     scene.fit(1);
   }

@@ -2800,7 +2800,7 @@ public class Graph {
     _applyTransformation(matrixHandler, frame, is2D());
     //TODO hack to make _track work, otherwise it should be call here
     // _track(frame);
-    _track(frame);
+    _trackFrontBuffer(frame);
     if (context != backBuffer())
       frame.visit();
     if (context == backBuffer()) {
@@ -2808,11 +2808,11 @@ public class Graph {
       //_track(frame);
       _drawBackBuffer(frame);
       if (!isOffscreen())
-        _track(frame);
+        _trackBackBuffer(frame);
     }
     else {
       if (isOffscreen())
-        _track(frame);
+        _trackBackBuffer(frame);
       draw(context, frame);
     }
     if (!frame.isCulled())
@@ -2860,10 +2860,31 @@ public class Graph {
   /**
    * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
-  protected void _track(Frame frame) {
+  protected void _trackFrontBuffer(Frame frame) {
     if (!frame.isTrackingEnabled())
       return;
-    // TODO frame shape automatic picking: check if frame tracking is enabled here!!!
+    if (!_rays.isEmpty()) {
+      Vector projection = screenLocation(frame.position());
+      Iterator<Ray> it = _rays.iterator();
+      while (it.hasNext()) {
+        Ray ray = it.next();
+        resetTrackedFrame(ray._hid);
+        // Condition is overkill. Use it only in place of resetTrackedFrame
+        //if (!isTracking(ray._hid))
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
+          setTrackedFrame(ray._hid, frame);
+          it.remove();
+        }
+      }
+    }
+  }
+
+  /**
+   * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
+   */
+  protected void _trackBackBuffer(Frame frame) {
+    if (!frame.isTrackingEnabled())
+      return;
     if (frame.pickingThreshold() == 0 && _bb != null) {
       if (!_rays.isEmpty()) {
         Iterator<Ray> it = _rays.iterator();
@@ -2873,21 +2894,6 @@ public class Graph {
           // Condition is overkill. Use it only in place of resetTrackedFrame
           //if (!isTracking(ray._hid))
           if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
-            setTrackedFrame(ray._hid, frame);
-            it.remove();
-          }
-        }
-      }
-    } else {
-      if (!_rays.isEmpty()) {
-        Vector projection = screenLocation(frame.position());
-        Iterator<Ray> it = _rays.iterator();
-        while (it.hasNext()) {
-          Ray ray = it.next();
-          resetTrackedFrame(ray._hid);
-          // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(ray._hid))
-          if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
             setTrackedFrame(ray._hid, frame);
             it.remove();
           }
