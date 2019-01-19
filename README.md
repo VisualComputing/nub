@@ -241,7 +241,7 @@ which will create a random interpolator path containing [4..10] key-frames. The 
 ...
 void draw() {
   scene.traverse();
-  scene.drawPath(interpolator, 5);
+  scene.drawPath(interpolator);
 }
 ```
 
