@@ -2,8 +2,7 @@ FramesJS
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
-**Table of Contents*** Frame shapes are picked precisely using ray-tracing against the pixels of their projection. See _setPickingThreshold()_.
-* Even the _eye_ can have a shape (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)) which may be useful to depict the viewer in first person camera style.
+**Table of Contents***
 
 - [Description](#user-content-description)
 - [Scene](#user-content-scene)
@@ -94,8 +93,7 @@ Some advantages of using _attached_ frames are:
 
 ### Interactivity
 
-To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it
-using ray-casting with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
+To set the scene [tracked-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame--) (the frame the mouse should interact with) call [setTrackedFrame(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setTrackedFrame-frames.core.Frame-) or update it using ray-casting with [cast()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#cast--), for example:
 
 ```processing
 void mouseMoved() {
@@ -137,8 +135,6 @@ public void mouseDragged() {
 ```
 
 See the [CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/examples/basics/CajasOrientadas).
-
-* Frames may be picked using ray-casting and the [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) provides all sorts of interactivity commands to manipulate them.
 
 ## Rendering
 
