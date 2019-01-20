@@ -93,7 +93,7 @@ void setup() {
 Some advantages of using _attached_ frames are:
 
 * The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) sets up a default _eye_ frame. To set the eye from an arbitrary [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance call [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-). To retrieve the scene _eye_ instance call [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--).
-* A frame shape can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see `Frame.graphics(PGraphics)`) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see _shape(PShape)_). Frame shapes can be picked precisely using their projection onto the screen, see _setPickingThreshold()_.
+* A frame shape can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#shape-processing.core.PShape-)). Frame shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#pickingThreshold--).
 * Even the _eye_ can have a shape which may be useful to depict the viewer in first person camera style.
 * The scene topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
 * The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between frame and screen space.
@@ -159,14 +159,14 @@ void draw() {
 }
 ```
 
-Observe that:
+observe that:
 
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--) frame.
 * Call [render(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [DepthOfField example](https://github.com/VisualComputing/framesjs/tree/master/examples/basics/DepthOfField).
 * Call [render(PGraphics, Graph.Type, Frame, zNear, zFar)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Frame-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary frame point-of-view. See the [ShadowMap example](https://github.com/VisualComputing/framesjs/tree/processing/examples/demos/ShadowMap).
 * The role played by a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method.
 
-To bypass the [render()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm use [detached frames](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the frame as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
+To bypass the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm use [detached frames](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the frame as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
 
 ```processing
 Scene scene;
@@ -177,7 +177,7 @@ void setup() {
     @Override
     public void visit() {
       // Hierarchical culling is optional and disabled by default. When the cullingCondition
-      // (which should be implemented by you) is true, scene.traverse() will prune the branch at the frame
+      // (which should be implemented by you) is true, scene.render() will prune the branch at the frame
       cull(cullingCondition);
       if(!isCulled())
         // Draw your object here, in the local coordinate system.
@@ -210,12 +210,12 @@ which will create a random interpolator path containing [4..10] key-frames. The 
 ```java
 ...
 void draw() {
-  scene.traverse();
+  scene.render();
   scene.drawPath(interpolator);
 }
 ```
 
-while [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) will draw the animated shape(s) [drawPath(Interpolator, int)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-int-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
+while [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/frames/tree/master/examples/basics/Interpolators).
 
 ## HIDs
 
@@ -231,7 +231,7 @@ Observations:
 1. An _hid_ tracked-frame (see [trackedFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame-java.lang.String-)) defines in turn an _hid_ default-frame (see [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-)) which simply returns the tracked-frame or the scene _eye_ when the _hid_ tracked-frame is `null`
 2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
 3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
-4. To update an _hid_ tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-frame synchronously (i.e., they return the _hid_ tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-frame during the next call to the [traverse()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#traverse--) algorithm).
+4. To update an _hid_ tracked-frame using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-frame synchronously (i.e., they return the _hid_ tracked-frame immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-frame during the next call to the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm).
 
 ## Control
 
