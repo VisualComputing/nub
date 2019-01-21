@@ -2857,9 +2857,7 @@ public class Graph {
    * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
   protected void _trackFrontBuffer(Frame frame) {
-    if (!frame.isTrackingEnabled())
-      return;
-    if (!_rays.isEmpty()) {
+    if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() > 0) {
       Vector projection = screenLocation(frame.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
@@ -2879,20 +2877,16 @@ public class Graph {
    * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
    */
   protected void _trackBackBuffer(Frame frame) {
-    if (!frame.isTrackingEnabled())
-      return;
-    if (frame.pickingThreshold() == 0 && _bb != null) {
-      if (!_rays.isEmpty()) {
-        Iterator<Ray> it = _rays.iterator();
-        while (it.hasNext()) {
-          Ray ray = it.next();
-          resetTrackedFrame(ray._hid);
-          // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(ray._hid))
-          if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
-            setTrackedFrame(ray._hid, frame);
-            it.remove();
-          }
+    if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() == 0 && _bb != null) {
+      Iterator<Ray> it = _rays.iterator();
+      while (it.hasNext()) {
+        Ray ray = it.next();
+        resetTrackedFrame(ray._hid);
+        // Condition is overkill. Use it only in place of resetTrackedFrame
+        //if (!isTracking(ray._hid))
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
+          setTrackedFrame(ray._hid, frame);
+          it.remove();
         }
       }
     }
