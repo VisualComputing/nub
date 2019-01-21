@@ -900,7 +900,7 @@ public class Frame {
    * Picking a frame is done with ray casting against a screen-space shape defined according
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
-   * <li>The projected pixels of the frame visual representation (see {@link #graphics(PGraphics)}
+   * <li>The projected pixels of the frame visual representation (see {@link #graphics(Object)}
    * and {@link #shape(Object)}). Set it with {@code threshold = 0}.</li>
    * <li>A frame bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
@@ -2371,7 +2371,7 @@ public class Frame {
     return _backShape;
   }
 
-  // Java version of the rendering methods
+  // Java version of the immediate mode rendering methods
 
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing
@@ -2381,7 +2381,6 @@ public class Frame {
    *
    * @see #frontGraphics(processing.core.PGraphics)
    * @see #backGraphics(processing.core.PGraphics)
-   * @see #shape(processing.core.PShape)
    */
   public boolean graphics(processing.core.PGraphics pGraphics) {
     return false;
@@ -2392,7 +2391,6 @@ public class Frame {
    * front shape. Use it in conjunction with @see #backGraphics(processing.core.PGraphics).
    *
    * @see #graphics(processing.core.PGraphics)
-   * @see #shape(processing.core.PShape)
    */
   public boolean frontGraphics(processing.core.PGraphics pGraphics) {
     return false;
@@ -2403,53 +2401,8 @@ public class Frame {
    * shape used for picking. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
    *
    * @see #graphics(processing.core.PGraphics)
-   * @see #shape(processing.core.PShape)
    */
   public boolean backGraphics(processing.core.PGraphics pGraphics) {
     return false;
   }
-
-  /**
-   * Sets the retained mode shape for both, the front and the back shapes.
-   *
-   * @see #frontShape(processing.core.PShape)
-   * @see #backShape(processing.core.PShape)
-   * @see #graphics(processing.core.PGraphics)
-   */
-  public void shape(processing.core.PShape pshape) {
-    frontShape(pshape);
-    backShape(pshape);
-  }
-
-  /**
-   * Sets the retained mode shape for the front shape. Use it in conjunction
-   * with @see #backShape(processing.core.PShape)}.
-   *
-   * @see #shape(processing.core.PShape)
-   * @see #graphics(processing.core.PGraphics)
-   */
-  public void frontShape(processing.core.PShape pshape) {
-    _frontShape = pshape;
-  }
-
-  /**
-   * Sets the retained mode shape used for picking. Use it in conjunction
-   * with @see #frontShape(Object)}.
-   *
-   * @see #shape(Object)
-   * @see #graphics(Object)
-   */
-  public void backShape(processing.core.PShape pshape) {
-    _backShape = pshape;
-  }
-
-  /*
-  public processing.core.PShape frontShape() {
-    return (processing.core.PShape)_frontShape;
-  }
-
-  public processing.core.PShape backShape() {
-    return (processing.core.PShape)_backShape;
-  }
-  */
 }
