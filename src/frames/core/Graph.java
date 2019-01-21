@@ -2798,14 +2798,10 @@ public class Graph {
   protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
-    //TODO hack to make _track work, otherwise it should be call here
-    // _track(frame);
     _trackFrontBuffer(frame);
     if (context != backBuffer())
       frame.visit();
     if (context == backBuffer()) {
-      //if(!isOffscreen())
-      //_track(frame);
       _drawBackBuffer(frame);
       if (!isOffscreen())
         _trackBackBuffer(frame);
