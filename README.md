@@ -29,7 +29,7 @@ Readers unfamiliar with geometry transformations may first check the great [Proc
 
 Instantiate your on-screen scene at the [setup()](https://processing.org/reference/setup_.html):
 
-```java
+```processing
 Scene scene;
 void setup() {
   scene = new Scene(this);
@@ -40,7 +40,7 @@ The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/
 
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
-```java
+```processing
 Scene scene;
 void setup() {
   scene = new Scene(this, createGraphics(500, 500, P3D));
@@ -114,7 +114,7 @@ void mouseMoved() {
 }
 ```
 
-To interact with a given frame use any [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) method that takes a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) parameter, such as: [spin(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin-frames.core.Frame-), [translate(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate-frames.core.Frame-), [scale(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-frames.core.Frame-) or [zoom(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-frames.core.Frame-). For example:
+To interact with a given frame use any [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) method that takes a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) parameter, such as: [spin(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin-frames.core.Frame-), [translate(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate-frames.core.Frame-) or [scale(float, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-frames.core.Frame-) For example:
 
 ```processing
 public void mouseDragged() {
@@ -124,13 +124,13 @@ public void mouseDragged() {
   // translate f3
   else if (mouseButton == RIGHT)
     scene.translate(f3);
-  // zoom f2
+  // scale f2
   else
-    scene.zoom(scene.mouseDX(), f2);
+    scene.scale(scene.mouseDX(), f2);
 }
 ```
 
-To interact with the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) (which is either the tracked-frame updated with the `mouseMoved` above or the scene _eye_ when the tracked-frame is null) use the _frameless_ versions of the above methods, e.g., [spin()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin--), [translate()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate--), [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) or [zoom(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#zoom-float-). For example:
+To interact with the [default-frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame--) (which is either the tracked-frame updated with the `mouseMoved` above or the scene _eye_ when the tracked-frame is null) use the _frameless_ versions of the above methods, e.g., [spin()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#spin--), [translate()](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#translate--) or [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-). For example:
 
 ```processing
 public void mouseDragged() {
@@ -140,9 +140,9 @@ public void mouseDragged() {
   else if (mouseButton == RIGHT)
   // translates the default-frame (the eye or the frame picked with a mouseMoved)
     scene.translate();
-  // zooms the default-frame (the eye or the frame picked with a mouseMoved)
+  // scales the default-frame (the eye or the frame picked with a mouseMoved)
   else
-    scene.zoom(scene.mouseDX());
+    scene.scale(scene.mouseDX());
 }
 ```
 
@@ -190,7 +190,7 @@ void setup() {
 
 A frame can be animated through a [key-frame](https://en.wikipedia.org/wiki/Key_frame) [Catmull-Rom](https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline) [interpolator](https://visualcomputing.github.io/frames-javadocs/frames/core/Interpolator.html) path. Use code such as the following:
 
-```java
+```processing
 Scene scene;
 PShape pshape;
 Shape shape;
@@ -207,7 +207,7 @@ void setup() {
 
 which will create a random interpolator path containing [4..10] key-frames. The interpolation is also started. The interpolator path may be drawn with code like this:
 
-```java
+```processing
 ...
 void draw() {
   scene.render();
