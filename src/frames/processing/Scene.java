@@ -75,7 +75,7 @@ import java.util.List;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Frame#shape(PShape)} (see
+ * among others, can be used to set a {@link Frame#shape(Object)} (see
  * also {@link Frame#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
