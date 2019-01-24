@@ -2189,7 +2189,7 @@ public class Frame {
   }
 
   /**
-   * This method is called on each frame of the graph hierarchy by the {@link Graph#render(Object)}
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#render()}
    * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
    * by derived classes.
    * <p>
@@ -2205,8 +2205,6 @@ public class Frame {
    *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
    *     // at the frame
    *     cull(cullingCondition);
-   *     if(!isCulled())
-   *       // Manipulate your object here, in the local coordinate system.
    *   }
    * }
    * }

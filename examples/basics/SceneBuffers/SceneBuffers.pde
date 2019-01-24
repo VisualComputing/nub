@@ -47,7 +47,7 @@ void draw() {
   scene.endDraw();
   scene.display();
   // 2. Display back buffer
-  image(scene.backBuffer(), 0, h / 2);
+  scene.displayBackBuffer(0, h / 2);
 }
 
 void mouseMoved() {

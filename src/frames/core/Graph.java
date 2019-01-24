@@ -281,14 +281,14 @@ public class Graph {
    * @return width of the screen window.
    */
   public int width() {
-    return matrixHandler().width();
+    return _matrixHandler.width();
   }
 
   /**
    * @return height of the screen window.
    */
   public int height() {
-    return matrixHandler().height();
+    return _matrixHandler.height();
   }
 
   /**
@@ -296,7 +296,7 @@ public class Graph {
    */
   public void setWidth(int width) {
     if ((width != width())) {
-      matrixHandler().setWidth(width);
+      _matrixHandler.setWidth(width);
       _modified();
     }
   }
@@ -306,7 +306,7 @@ public class Graph {
    */
   public void setHeight(int height) {
     if ((height != height())) {
-      matrixHandler().setWidth(height);
+      _matrixHandler.setWidth(height);
       _modified();
     }
   }
@@ -407,7 +407,6 @@ public class Graph {
    *
    * @see Frame#magnitude()
    * @see Frame#perspective(float, float, float, boolean)
-   * @see #preDraw()
    * @see #setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
@@ -927,32 +926,6 @@ public class Graph {
    */
   public void cacheProjectionViewInverse(boolean optimise) {
     _matrixHandler.cacheProjectionViewInverse(optimise);
-  }
-
-  // Drawing stuff
-
-  /**
-   * Called before your main drawing and performs the following:
-   * <ol>
-   * <li>Calls {@link TimingHandler#handle()}.</li>
-   * <li>Updates the projection matrix by calling
-   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
-   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
-   * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
-   * </ol>
-   *
-   * @see #fov()
-   * @see TimingHandler#handle()
-   * @see Frame#projection(Type, float, float, float, float, boolean)
-   * @see Frame#view()
-   */
-  public void preDraw() {
-    timingHandler().handle();
-    matrixHandler()._bind(eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded()), eye().view());
-    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
-      updateBoundaryEquations();
-      _lastEqUpdate = TimingHandler.frameCount;
-    }
   }
 
   // Eye stuff
@@ -2333,7 +2306,7 @@ public class Graph {
    * @see #applyWorldTransformation(Frame)
    */
   public void applyTransformation(Frame frame) {
-    _applyTransformation(matrixHandler(), frame, is2D());
+    _applyTransformation(_matrixHandler, frame, is2D());
   }
 
   /**
@@ -2341,7 +2314,7 @@ public class Graph {
    * defined by the frame.
    */
   public void applyWorldTransformation(Frame frame) {
-    _applyWorldTransformation(matrixHandler(), frame, is2D());
+    _applyWorldTransformation(_matrixHandler, frame, is2D());
   }
 
   // Other stuff
@@ -2631,8 +2604,8 @@ public class Graph {
   /**
    * A shape may be picked using
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
-   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
+   * color buffer (see {@link #_backBuffer()}). This method
+   * compares the color of the {@link #_backBuffer()} at
    * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
    * otherwise.
    * <p>
@@ -2708,6 +2681,15 @@ public class Graph {
     _rays.add(new Ray(hid, pixel));
   }
 
+  // Off-screen
+
+  /**
+   * Returns {@code true} if this scene is off-screen and {@code false} otherwise.
+   */
+  public boolean isOffscreen() {
+    return _offscreen;
+  }
+
   /**
    * Override this method according to your renderer context.
    */
@@ -2719,7 +2701,7 @@ public class Graph {
   /**
    * Returns the main renderer context.
    */
-  public Object frontBuffer() {
+  public Object context() {
     return _fb;
   }
 
@@ -2727,24 +2709,103 @@ public class Graph {
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
-  public Object backBuffer() {
+  protected Object _backBuffer() {
     return _bb;
   }
 
   /**
-   * Renders the scene onto the {@link #frontBuffer()}. Same as {@code render(frontBuffer())}.
-   *
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render()
+   * Render the scene into the back-buffer used for picking.
    */
-  public void render() {
-    render(frontBuffer());
+  protected void _renderBackBuffer() {
+    MatrixHandler matrixHandler = _matrixHandler(_backBuffer());
+    matrixHandler._bindProjection(_matrixHandler.projection());
+    matrixHandler._bindModelView(_matrixHandler.cacheView());
+    for (Frame frame : _leadingFrames())
+      _draw(matrixHandler, frame);
+    _rays.clear();
   }
 
   /**
-   * Renders the scene onto {@code context}. Calls {@link Frame#visit()} on each visited frame
+   * Used by the {@link #_renderBackBuffer()} algorithm.
+   */
+  protected void _draw(MatrixHandler matrixHandler, Frame frame) {
+    matrixHandler.pushModelView();
+    _applyTransformation(matrixHandler, frame, is2D());
+    if (!frame.isCulled()) {
+      _drawBackBuffer(frame);
+      if (!isOffscreen())
+        _trackBackBuffer(frame);
+      for (Frame child : frame.children())
+        _draw(matrixHandler, child);
+    }
+    matrixHandler.popModelView();
+  }
+
+  /**
+   * Called before your main drawing and performs the following:
+   * <ol>
+   * <li>Calls {@link TimingHandler#handle()}.</li>
+   * <li>Updates the projection matrix by calling
+   * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
+   * <li>Updates the view matrix by calling {@code eye().view()}.</li>
+   * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
+   * </ol>
+   *
+   * @see #fov()
+   * @see TimingHandler#handle()
+   * @see Frame#projection(Type, float, float, float, float, boolean)
+   * @see Frame#view()
+   */
+  public void preDraw() {
+    timingHandler().handle();
+    _matrixHandler._bind(eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded()), eye().view());
+    if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
+      updateBoundaryEquations();
+      _lastEqUpdate = TimingHandler.frameCount;
+    }
+  }
+
+  /**
+   * Renders the scene onto the {@link #context()}. Calls {@link Frame#visit()} on each visited frame
    * (refer to the {@link Frame} documentation).
+   * <p>
+   * Note that only reachable frames (frames attached to this graph, see
+   * {@link Frame#isAttached(Graph)}) are rendered by this algorithm.
+   *
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see Frame#visit()
+   * @see Frame#cull(boolean)
+   * @see Frame#isCulled()
+   * @see Frame#graphics(Object)
+   * @see Frame#shape(Object)
+   */
+  public void render() {
+    for (Frame frame : _leadingFrames())
+      _draw(frame);
+    _rays.clear();
+  }
+
+  /**
+   * Used by the {@link #render()} algorithm.
+   */
+  protected void _draw(Frame frame) {
+    _matrixHandler.pushModelView();
+    _applyTransformation(_matrixHandler, frame, is2D());
+    _trackFrontBuffer(frame);
+    frame.visit();
+    if (!frame.isCulled()) {
+      if (isOffscreen())
+        _trackBackBuffer(frame);
+      draw(context(), frame);
+      for (Frame child : frame.children())
+        _draw(child);
+    }
+    _matrixHandler.popModelView();
+  }
+
+  /**
+   * Renders the scene onto {@code context}.
    * <p>
    * Same as {@code render(context, matrixHandler().cacheView(), matrixHandler().projection())}.
    *
@@ -2752,94 +2813,69 @@ public class Graph {
    * @see #render()
    */
   public void render(Object context) {
-    render(context, matrixHandler().cacheView(), matrixHandler().projection());
+    if (context == context())
+      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context)");
+    render(context, _matrixHandler.projection(), _matrixHandler.cacheView());
   }
 
   /**
-   * Renders the frame hierarchy onto {@code context} using the {@code view} and
-   * {@code projection} matrices.
+   * Renders the frame hierarchy onto {@code context} using the {@code projection}
+   * and {@code view} matrices.
    * <p>
    * Note that only reachable frames (frames attached to this graph, see
    * {@link Frame#isAttached(Graph)}) are rendered by this algorithm.
    *
-   * <b>Attention:</b> this method should be called within the main event loop, just after
-   * {@link #preDraw()} (i.e., eye update) and before any other transformation of the
-   * modelview matrix takes place.
-   *
    * @see #render()
    * @see #render(Object)
    */
-  public void render(Object context, Matrix view, Matrix projection) {
-    MatrixHandler matrixHandler;
-    if (context == frontBuffer())
-      matrixHandler = matrixHandler();
-    else {
-      matrixHandler = _matrixHandler(context);
-      matrixHandler._bindProjection(projection);
-      matrixHandler._bindModelView(view);
-    }
+  public void render(Object context, Matrix projection, Matrix view) {
+    if (context == context())
+      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
+    MatrixHandler matrixHandler = _matrixHandler(context);
+    matrixHandler._bindProjection(projection);
+    matrixHandler._bindModelView(view);
     for (Frame frame : _leadingFrames())
       _draw(matrixHandler, context, frame);
     _rays.clear();
   }
 
-  // Off-screen
-
   /**
-   * Returns {@code true} if this scene is off-screen and {@code false} otherwise.
-   */
-  public boolean isOffscreen() {
-    return _offscreen;
-  }
-
-  /**
-   * Used by the render algorithm.
+   * Used by the {@link #render(Object, Matrix, Matrix)} algorithm.
    */
   protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, frame, is2D());
-    _trackFrontBuffer(frame);
-    if (context != backBuffer())
-      frame.visit();
-    if (context == backBuffer()) {
-      _drawBackBuffer(frame);
-      if (!isOffscreen())
-        _trackBackBuffer(frame);
-    }
-    else {
-      if (isOffscreen())
-        _trackBackBuffer(frame);
+    if (!frame.isCulled()) {
       draw(context, frame);
-    }
-    if (!frame.isCulled())
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
+    }
+
     matrixHandler.popModelView();
   }
 
+  /**
+   * Renders the frame onto {@link #context()}. Same as {@code draw(context(), frame)}.
+   *
+   * @see #draw(Object, Frame)
+   */
   public void draw(Frame frame) {
-    draw(frontBuffer(), frame);
+    draw(context(), frame);
   }
 
   /**
-   * Visits (see {@link Frame#visit()}) and renders the frame, provided that it holds a visual
-   * representation (see {@link Frame#graphics(Object)} and {@link Frame#shape(Object)}),
-   * onto {@code context}.
+   * Renders the frame onto {@code context}, provided that it holds a visual
+   * representation (see {@link Frame#graphics(Object)} and {@link Frame#shape(Object)}).
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
    * @see #render()
-   * @see Frame#cull(boolean)
-   * @see Frame#isCulled()
-   * @see Frame#visit()
-   * @see Frame#graphics(Object)
-   * @see Frame#shape(Object)
    */
   public void draw(Object context, Frame frame) {
   }
 
   /**
-   * Renders the frame onto the {@link #backBuffer()}.
+   * Renders the frame onto the {@link #_backBuffer()}.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
@@ -2854,7 +2890,7 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
+   * Internally used by {@link #_draw(Frame)}.
    */
   protected void _trackFrontBuffer(Frame frame) {
     if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() > 0) {
@@ -2874,7 +2910,7 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_draw(MatrixHandler, Object, Frame)}.
+   * Internally used by {@link #_draw(Frame)} and {@link #_draw(MatrixHandler, Frame)}.
    */
   protected void _trackBackBuffer(Frame frame) {
     if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() == 0 && _bb != null) {
@@ -3157,7 +3193,7 @@ public class Graph {
 
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    Matrix projectionViewMatrix = matrixHandler().cacheProjectionView();
+    Matrix projectionViewMatrix = _matrixHandler.cacheProjectionView();
 
     float in[] = new float[4];
     float out[] = new float[4];
@@ -3262,10 +3298,10 @@ public class Graph {
    */
   protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
-    if (matrixHandler().isProjectionViewInverseCached())
-      projectionViewInverseMatrix = matrixHandler().cacheProjectionViewInverse();
+    if (_matrixHandler.isProjectionViewInverseCached())
+      projectionViewInverseMatrix = _matrixHandler.cacheProjectionViewInverse();
     else {
-      projectionViewInverseMatrix = Matrix.multiply(matrixHandler().cacheProjection(), matrixHandler().cacheView());
+      projectionViewInverseMatrix = Matrix.multiply(_matrixHandler.cacheProjection(), _matrixHandler.cacheView());
       projectionViewInverseMatrix.invert();
     }
 

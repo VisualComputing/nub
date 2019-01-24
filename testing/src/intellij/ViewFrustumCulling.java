@@ -50,18 +50,18 @@ public class ViewFrustumCulling extends PApplet {
     background(0);
     scene1.beginDraw();
     canvas1.background(0);
-    root.drawIfAllChildrenAreVisible(scene1.frontBuffer(), scene1);
+    root.drawIfAllChildrenAreVisible(scene1.context(), scene1);
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
     canvas2.background(0);
-    root.drawIfAllChildrenAreVisible(scene2.frontBuffer(), scene1);
-    scene2.frontBuffer().pushStyle();
-    scene2.frontBuffer().stroke(255, 255, 0);
-    scene2.frontBuffer().fill(255, 255, 0, 160);
+    root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
+    scene2.context().pushStyle();
+    scene2.context().stroke(255, 255, 0);
+    scene2.context().fill(255, 255, 0, 160);
     scene2.drawFrustum(scene1);
-    scene2.frontBuffer().popStyle();
+    scene2.context().popStyle();
     scene2.endDraw();
     scene2.display();
   }

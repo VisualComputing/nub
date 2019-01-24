@@ -36,12 +36,12 @@ public class SceneBuffers extends PApplet {
   public void draw() {
     // 1. Fill in and display front-buffer
     scene.beginDraw();
-    scene.frontBuffer().background(10,50,25);
+    scene.context().background(10, 50, 25);
     scene.render();
     scene.endDraw();
     scene.display();
     // 2. Display back buffer
-    image(scene.backBuffer(), 0, h / 2);
+    scene.displayBackBuffer(0, h / 2);
   }
 
   public void mouseMoved() {

@@ -113,29 +113,29 @@ public class TwoScenes extends PApplet {
   public void draw() {
     handleMouse();
     scene1.beginDraw();
-    scene1.frontBuffer().background(0);
-    draw(scene1.frontBuffer());
+    scene1.context().background(0);
+    draw(scene1.context());
     scene1.drawAxes();
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
-    scene2.frontBuffer().background(0);
-    draw(scene2.frontBuffer());
+    scene2.context().background(0);
+    draw(scene2.context());
     scene2.drawAxes();
 
     // draw with axes
     //eye
-    scene2.frontBuffer().pushStyle();
-    scene2.frontBuffer().stroke(255, 255, 0);
-    scene2.frontBuffer().fill(255, 255, 0, 160);
+    scene2.context().pushStyle();
+    scene2.context().stroke(255, 255, 0);
+    scene2.context().fill(255, 255, 0, 160);
     scene2.drawFrustum(scene1);
-    scene2.frontBuffer().popStyle();
+    scene2.context().popStyle();
     //axes
-    scene2.frontBuffer().pushMatrix();
+    scene2.context().pushMatrix();
     scene2.applyTransformation(scene1.eye());
     scene2.drawAxes(60);
-    scene2.frontBuffer().popMatrix();
+    scene2.context().popMatrix();
 
     scene2.endDraw();
     scene2.display();

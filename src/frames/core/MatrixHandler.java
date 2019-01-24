@@ -101,7 +101,7 @@ public class MatrixHandler {
   /**
    * Updates (computes and caches) the projection and view matrices from the renderer context
    * {@link Graph#eye()} parameters and call {@link #_setUniforms()}. This method is automatically
-   * called by {@link Graph#preDraw()} right at the beginning of the main event loop.
+   * called by {@link Graph#render()} right at the beginning of the main event loop.
    * <p>
    * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
@@ -109,7 +109,7 @@ public class MatrixHandler {
    * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindModelView(Matrix)}
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
-   * @see Graph#preDraw()
+   * @see Graph#render()
    * @see Frame#projection(Graph.Type, float, float, float, float, boolean)
    * @see Frame#view()
    * @see #_bindProjection(Matrix)

@@ -97,7 +97,7 @@ public class ShadowMapDOFOffScreen extends PApplet {
   public void draw() {
     // 1. Draw into main buffer
     scene.beginDraw();
-    scene.frontBuffer().background(75, 25, 15);
+    scene.context().background(75, 25, 15);
     scene.render();
     scene.endDraw();
     scene.display();
@@ -123,9 +123,9 @@ public class ShadowMapDOFOffScreen extends PApplet {
       dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
       dofShader.set("tDepth", depthPGraphics);
       // merry christmas bug just found here!
-      // calling image here is problematic since it messes the lightPGraphics and the frontBuffer
+      // calling image here is problematic since it messes the lightPGraphics and the context
       //dofPGraphics.image(lightPGraphics, 0, 0);
-      //dofPGraphics.image(scene.frontBuffer(), 0, 0);
+      //dofPGraphics.image(scene.context(), 0, 0);
       dofPGraphics.endDraw();
       //*/
       //if(mode == 2) image(dofPGraphics, width / 2, height / 2);

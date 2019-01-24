@@ -115,7 +115,7 @@ public class ShadowMapDOFOnScreen extends PApplet {
       dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
       dofShader.set("tDepth", depthPGraphics);
       dofPGraphics.image(lightPGraphics, 0, 0);
-      //dofPGraphics.image(scene.frontBuffer(), 0, 0);
+      //dofPGraphics.image(scene.context(), 0, 0);
       dofPGraphics.endDraw();
 
       // display one of the 3 buffers

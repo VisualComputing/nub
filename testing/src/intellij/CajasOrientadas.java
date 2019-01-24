@@ -33,9 +33,6 @@ public class CajasOrientadas extends PApplet {
 
     scene.fit(1);
     scene.setTrackedFrame("keyboard", esfera.iFrame);
-
-    if (scene.backBuffer() == null)
-      println("win");
   }
 
   public void draw() {

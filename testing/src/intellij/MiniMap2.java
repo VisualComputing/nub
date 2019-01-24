@@ -139,7 +139,7 @@ public class MiniMap2 extends PApplet {
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
-      scene.frontBuffer().background(75, 25, 15);
+      scene.context().background(75, 25, 15);
       scene.drawAxes();
       scene.render();
       scene.endDraw();
@@ -153,7 +153,7 @@ public class MiniMap2 extends PApplet {
       if (!scene.isOffscreen())
         scene.beginHUD();
       minimap.beginDraw();
-      minimap.frontBuffer().background(125, 80, 90);
+      minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
       minimap.endDraw();

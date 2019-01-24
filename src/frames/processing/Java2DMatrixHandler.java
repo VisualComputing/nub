@@ -33,11 +33,11 @@ class Java2DMatrixHandler extends MatrixHandler {
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
-    return (PGraphics) _graph.frontBuffer();
+    return (PGraphics) _graph.context();
   }
 
   // Comment the above line and uncomment this one to develop the driver:
-  // public PGraphicsJava2D frontBuffer() { return (PGraphicsJava2D) frontBuffer; }
+  // public PGraphicsJava2D context() { return (PGraphicsJava2D) context; }
 
   @Override
   protected void _bind(Matrix projection, Matrix view) {
