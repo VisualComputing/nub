@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  *
  * This example implements a Depth-Of-Field (DOF) shader effect
- * using the traverse(), traverse(PGraphics), display() and
+ * using the render(), render(PGraphics), display() and
  * display(PGraphics) Scene methods.
  *
  * Press 0 to display the original scene.
@@ -20,7 +20,7 @@ import frames.processing.*;
 PShader depthShader, dofShader;
 PGraphics depthPGraphics, dofPGraphics;
 Scene scene;
-Shape[] models;
+Frame[] models;
 int mode = 2;
 
 void setup() {
@@ -30,15 +30,16 @@ void setup() {
   scene.setRadius(1000);
   scene.fit(1);
 
-  models = new Shape[100];
+  models = new Frame[100];
 
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Shape(scene, boxShape());
+    models[i] = new Frame(scene, boxShape());
+    // set picking precision to the pixels of the frame projection
+    models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
 
   depthShader = loadShader("depth.glsl");
-  depthShader.set("maxDepth", scene.radius() * 2);
   depthPGraphics = createGraphics(width, height, P3D);
   depthPGraphics.shader(depthShader);
 
@@ -56,13 +57,15 @@ void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
   scene.frontBuffer().background(0);
-  scene.traverse();
+  scene.render();
   scene.endDraw();
 
   // 2. Draw into depth buffer
   depthPGraphics.beginDraw();
   depthPGraphics.background(0);
-  scene.traverse(depthPGraphics);
+  depthShader.set("near", scene.zNear());
+  depthShader.set("far", scene.zFar());
+  scene.render(depthPGraphics);
   depthPGraphics.endDraw();
 
   // 3. Draw destination buffer

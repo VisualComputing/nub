@@ -8,7 +8,7 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
-public class ShadowMapping extends PApplet {
+public class ShadowMapOnScreen extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Frame[] shapes;
@@ -16,7 +16,7 @@ public class ShadowMapping extends PApplet {
   boolean show = true;
   PGraphics shadowMap;
   float zNear = 50;
-  float zFar = 500;
+  float zFar = 1000;
   int w = 1000;
   int h = 1000;
 
@@ -30,7 +30,6 @@ public class ShadowMapping extends PApplet {
     shapes = new Frame[20];
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Frame(scene, caja());
-      shapes[i].randomize();
     }
     light = new Frame(scene) {
       @Override
@@ -44,7 +43,6 @@ public class ShadowMapping extends PApplet {
       }
     };
     light.setPickingThreshold(0);
-    scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
     shadowMap = createGraphics(w / 2, h / 2, P3D);
   }
@@ -84,27 +82,10 @@ public class ShadowMapping extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == 'f')
-      scene.fitFOV(1);
-    if (key == 'a')
-      scene.fitFOV();
-    if (key == '1')
-      scene.setFOV(1);
-    if (key == '3')
-      scene.setFOV(PI / 3);
-    if (key == '4')
-      scene.setFOV(PI / 4);
     if (key == ' ')
       show = !show;
-    if (key == 'o')
-      if (shadowMapType == Graph.Type.ORTHOGRAPHIC)
-        shadowMapType = Graph.Type.PERSPECTIVE;
-      else
-        shadowMapType = Graph.Type.ORTHOGRAPHIC;
     if (key == 't')
-      scene.togglePerspective();
-    if (key == 'p')
-      scene.eye().position().print();
+      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
   }
 
   PShape caja() {
@@ -115,7 +96,8 @@ public class ShadowMapping extends PApplet {
     return caja;
   }
 
+
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMapping"});
+    PApplet.main(new String[]{"intellij.ShadowMapOnScreen"});
   }
 }

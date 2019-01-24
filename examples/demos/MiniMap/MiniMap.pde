@@ -18,12 +18,12 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene, minimap, focus;
-Shape[] models;
+Frame[] models;
 Frame sceneEye;
 boolean displayMinimap = true;
 // whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
-boolean onScreen = false;
+boolean onScreen = true;
 boolean interactiveEye;
 
 int w = 1200;
@@ -44,24 +44,27 @@ void setup() {
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
-  models = new Shape[30];
+  models = new Frame[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
-      models[i] = new Shape(scene, shape());
+      models[i] = new Frame(scene, shape());
     } else {
-      models[i] = new Shape(scene) {
+      models[i] = new Frame(scene) {
         int _faces = (int) MiniMap.this.random(3, 15);
         // We need to call the PApplet random function instead of the frame random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
         @Override
-        public void setGraphics(PGraphics pg) {
+        public boolean graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
           pg.popStyle();
+          return true;
         }
       };
     }
+    // set picking precision to the pixels of the frame projection
+    models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
 
@@ -73,7 +76,7 @@ void setup() {
   minimap.setEye(new Frame());
   minimap.setRadius(2000);
   if (renderer == P3D)
-    minimap.setType(Graph.Type.ORTHOGRAPHIC);
+    minimap.togglePerspective();
   minimap.fit(1);
   // detached frame
   sceneEye = new Frame();
@@ -139,12 +142,12 @@ void draw() {
     scene.beginDraw();
     scene.frontBuffer().background(75, 25, 15);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     scene.endDraw();
     scene.display();
   } else {
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
   if (displayMinimap) {
     // shift scene attached frames to minimap
@@ -154,12 +157,12 @@ void draw() {
     minimap.beginDraw();
     minimap.frontBuffer().background(125, 80, 90);
     minimap.drawAxes();
-    minimap.traverse();
+    minimap.render();
     // draw scene eye
     minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
     minimap.frontBuffer().stroke(0, 0, 255);
     minimap.frontBuffer().strokeWeight(2);
-    minimap.drawEye(scene);
+    minimap.drawFrustum(scene);
     minimap.endDraw();
     minimap.display();
     if (!scene.isOffscreen())

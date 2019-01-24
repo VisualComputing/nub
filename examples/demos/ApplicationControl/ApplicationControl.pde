@@ -18,7 +18,7 @@ import frames.core.*;
 import frames.processing.*;
 
 Scene scene;
-Shape[] shapes;
+Frame[] shapes;
 PFont font36;
 int totalShapes;
 
@@ -32,13 +32,13 @@ public void settings() {
 void setup() {
   scene = new Scene(this);
   scene.fit(1);
-  shapes = new Shape[10];
+  shapes = new Frame[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Shape(scene) {
+    shapes[i] = new Frame(scene) {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
-      public void setGraphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(_color);
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
@@ -49,6 +49,7 @@ void setup() {
         pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
         pg.popStyle();
+        return true;
       }
 
       @Override
@@ -69,6 +70,8 @@ void setup() {
           }
       }
     };
+    // set picking precision to the pixels of the frame projection
+    shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
   }
   font36 = loadFont("FreeSans-36.vlw");
@@ -85,7 +88,7 @@ int randomFaces() {
 void draw() {
   background(0);
   scene.drawAxes();
-  scene.traverse();
+  scene.render();
 }
 
 void keyPressed() {

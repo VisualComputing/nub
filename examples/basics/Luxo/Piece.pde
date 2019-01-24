@@ -1,8 +1,10 @@
-class Piece extends Shape {
+class Piece extends Frame {
   int mode;
 
   Piece(Scene scene) {
     super(scene);
+    // set picking precision to the pixels of the frame projection
+    setPickingThreshold(0);
   }
 
   void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {
@@ -12,7 +14,7 @@ class Piece extends Shape {
   }
 
   @Override
-  public void setGraphics(PGraphics pGraphics) {
+  public boolean graphics(PGraphics pGraphics) {
     switch (mode) {
     case 1:
       pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
@@ -41,5 +43,6 @@ class Piece extends Shape {
       pGraphics.spotLight(155, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
       break;
     }
+    return true;
   }
 }

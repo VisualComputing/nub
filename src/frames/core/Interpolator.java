@@ -582,7 +582,8 @@ public class Interpolator {
   }
 
   /**
-   * Same as {@code addKeyFrame(graph().eye().get())}.
+   * Appends the current {@link #graph()} {@link Graph#eye()} to the path at {@code 1s}.
+   * Sets the appended key frame {@link Frame#pickingThreshold()} to {@code 20}.
    *
    * @see #addKeyFrame(Frame)
    * @see #graph()
@@ -590,7 +591,24 @@ public class Interpolator {
    * @see Graph#eye()
    */
   public void addKeyFrame() {
-    addKeyFrame(graph().eye().get());
+    Frame frame = graph().eye().get();
+    frame.setPickingThreshold(20);
+    addKeyFrame(frame);
+  }
+
+  /**
+   * Appends the current {@link #graph()} {@link Graph#eye()} to the path at {@code time}.
+   * Sets the appended key frame {@link Frame#pickingThreshold()} to {@code 20}.
+   *
+   * @see #addKeyFrame(Frame, float)
+   * @see #graph()
+   * @see Frame#get()
+   * @see Graph#eye()
+   */
+  public void addKeyFrame(float time) {
+    Frame frame = graph().eye().get();
+    frame.setPickingThreshold(20);
+    addKeyFrame(frame, time);
   }
 
   /**
@@ -609,18 +627,6 @@ public class Interpolator {
       time = _list.get(_list.size() - 1).time() + 1.0f;
 
     addKeyFrame(frame, time);
-  }
-
-  /**
-   * Same as {@code addKeyFrame(graph().eye().get(), time)}.
-   *
-   * @see #addKeyFrame(Frame, float)
-   * @see #graph()
-   * @see Frame#get()
-   * @see Graph#eye()
-   */
-  public void addKeyFrame(float time) {
-    addKeyFrame(graph().eye().get(), time);
   }
 
   /**

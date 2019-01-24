@@ -37,13 +37,12 @@ import processing.opengl.PShader;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
  * <h1>Usage</h1>
- * Typical usage comprises two steps: scene instantiation and setting some shapes.
+ * Typical usage comprises two steps: scene instantiation and setting some frames.
  * <h2>Scene instantiation</h2>
  * Instantiate your on-screen scene at the {@code PApplet.setup()}:
  * <pre>
@@ -68,33 +67,6 @@ import java.util.List;
  * }
  * </pre>
  * In this case, the scene {@link #frontBuffer()} corresponds to the {@code canvas}.
- * <h2>Shapes</h2>
- * A {@link Shape} is a {@link Frame} specialization that can be set from a
- * retained-mode rendering Processing {@code PShape} or from an immediate-mode
- * rendering Processing procedure. Shapes can be picked precisely using their projection
- * onto the screen, see {@link Shape#setPrecision(Frame.Precision)}. Use
- * {@link #traverse()} to render all scene shapes or {@link Shape#draw()} to
- * render a specific one instead.
- * <h3>Retained-mode shapes</h3>
- * To set a retained-mode shape use {@code Shape shape = new Shape(Scene scene,
- * PShape shape)} or {@code Shape shape = new Shape(Scene scene)} and then call
- * {@link Shape#setGraphics(PGraphics)}.
- * <h3>Immediate-mode shapes</h3>
- * To set an immediate-mode shape use code such as the following:
- * <pre>
- * {@code
- * ...
- * Shape shape;
- * void setup() {
- *   ...
- *   shape = new Shape(scene) {
- *     public void set(PGraphics canvas) {
- *       //immediate-mode rendering procedure
- *     }
- *   };
- * }
- * }
- * </pre>
  * <h1>Drawing functionality</h1>
  * There are several static drawing functions that complements those already provided
  * by Processing, such as: {@link #drawCylinder(PGraphics, int, float, float)},
@@ -107,22 +79,23 @@ import java.util.List;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Shape} (see {@link Shape#setGraphics(PGraphics)}).
+ * among others, can be used to set a {@link Frame#shape(PShape)} (see
+ * also {@link Frame#graphics(PGraphics)}).
  * <p>
- * Another scene's eye (different than this one) can be drawn with
- * {@link #drawEye(Graph)}. Typical usage include interactive minimaps and
+ * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
+ * {@link #drawFrustum(Graph)}. Typical usage include interactive minimaps and
  * visibility culling visualization and debugging.
  * <p>
  * An {@link Interpolator} path may be drawn with code like this:
  * <pre>
  * {@code
  * void draw() {
- *   scene.traverse();
+ *   scene.render();
  *   scene.drawPath(interpolator, 5);
  * }
  * }
  * </pre>
- * while {@link #traverse()} will draw the animated shape(s), {@link #drawPath(Interpolator, int)}
+ * while {@link #render()} will draw the animated frame(s), {@link #drawPath(Interpolator, int)}
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
  * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
@@ -141,19 +114,12 @@ public class Scene extends Graph implements PConstants {
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
-  protected PGraphics _fb;
 
   // E X C E P T I O N H A N D L I N G
   protected int _beginOffScreenDrawingCalls;
 
-  // offscreen
-  protected Point _upperLeftCorner;
-  protected boolean _offscreen;
-
   // _bb : picking buffer
-  protected PGraphics _targetPGraphics;
-  protected PGraphics _bb;
-  protected boolean _bbEnabled;
+  protected long _bbNeed, _bbCount;
   protected PShader _triangleShader, _lineShader, _pointShader;
 
   // CONSTRUCTORS
@@ -228,7 +194,7 @@ public class Scene extends Graph implements PConstants {
    * Main constructor defining a left-handed Processing compatible scene. Calls
    * {@link #setMatrixHandler(MatrixHandler)} using a customized
    * {@link MatrixHandler} depending on the {@link #frontBuffer()} type (see
-   * {@link Java2DMatrixHandler} and {@link GLMatrixHandler}).
+   * {@link GLMatrixHandler}).
    * <p>
    * An off-screen Processing scene is defined if {@code pGraphics != pApplet.g}. In this
    * case the {@code x} and {@code y} parameters define the position of the upper-left corner
@@ -252,19 +218,14 @@ public class Scene extends Graph implements PConstants {
     _parent = pApplet;
     _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
-    setOriginCorner(x, y);
+    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix helper
-    setMatrixHandler(matrixHandler(pGraphics));
+    setMatrixHandler(_matrixHandler(pGraphics));
 
-    // 3. Frames & picking buffer
-    if (enableBackBuffer()) {
-      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-      _lineShader = pApplet().loadShader("PickingBuffer.frag");
-      _pointShader = pApplet().loadShader("PickingBuffer.frag");
-    }
+    _enableBackBuffer();
 
-    // 4. Register P5 methods
+    // 3. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
       pApplet().registerMethod("draw", this);
@@ -272,45 +233,36 @@ public class Scene extends Graph implements PConstants {
     // TODO buggy
     pApplet().registerMethod("dispose", this);
 
-    // 5. Handed
+    // 4. Handed
     setLeftHanded();
   }
 
   /**
    * Enable the {@link #backBuffer()} if the Processing renderer supports it. In success returns
    * {@code true} and {@code false} otherwise.
-   *
-   * @see #disableBackBuffer()
    */
-  public boolean enableBackBuffer() {
+  public void _enableBackBuffer() {
     _bb = (frontBuffer() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(frontBuffer().width, frontBuffer().height, frontBuffer() instanceof PGraphics3D ? P3D : P2D) :
         null;
-    return _bb != null;
-  }
-
-  /**
-   * Disables the {@link #backBuffer()}. Next call to {@link #backBuffer()} should return {@code null}.
-   *
-   * @see #enableBackBuffer()
-   */
-  public void disableBackBuffer() {
-    _bb = null;
-  }
-
-  /**
-   * Returns the upper left corner of the scene window. It's always (0,0) for on-screen
-   * scenes, but off-screen scenes may define it elsewhere on a canvas.
-   */
-  public Point originCorner() {
-    return _upperLeftCorner;
-  }
-
-  /**
-   * Sets the {@link #originCorner()}. Only meaningful if the scene {@link #isOffscreen()}.
-   */
-  public void setOriginCorner(float x, float y) {
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+    // TODO
+    // goal is to avoid loading the shaders each and every time a frame gets drawn see _drawBackBuffer
+    // generates a: java.lang.NullPointerException
+    //	at processing.opengl.PJOGL.getGLSLVersion(PJOGL.java:509)
+    /*
+    if(_bb != null && (_triangleShader == null || _lineShader == null || _pointShader == null)) {
+      _triangleShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+      _lineShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+      _pointShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
+    }
+    */
+    // /*
+    if (_triangleShader == null || _lineShader == null || _pointShader == null) {
+      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+      _lineShader = pApplet().loadShader("PickingBuffer.frag");
+      _pointShader = pApplet().loadShader("PickingBuffer.frag");
+    }
+    // */
   }
 
   // P5 STUFF
@@ -326,8 +278,9 @@ public class Scene extends Graph implements PConstants {
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
+  @Override
   public PGraphics frontBuffer() {
-    return _fb;
+    return (PGraphics)_fb;
   }
 
   // PICKING BUFFER
@@ -336,8 +289,9 @@ public class Scene extends Graph implements PConstants {
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
+  @Override
   public PGraphics backBuffer() {
-    return _bb;
+    return (PGraphics)_bb;
   }
 
   /**
@@ -348,16 +302,16 @@ public class Scene extends Graph implements PConstants {
    * scenes).
    */
   protected void _renderBackBuffer() {
-    if (_bb == null || !_bbEnabled)
-      return;
-    backBuffer().beginDraw();
-    backBuffer().pushStyle();
-    backBuffer().background(0);
-    traverse(backBuffer());
-    backBuffer().popStyle();
-    backBuffer().endDraw();
-    // if (frames().size() > 0)
-    backBuffer().loadPixels();
+    if (_bb != null && _bbCount < _bbNeed) {
+      backBuffer().beginDraw();
+      backBuffer().pushStyle();
+      backBuffer().background(0);
+      render(backBuffer());
+      backBuffer().popStyle();
+      backBuffer().endDraw();
+      backBuffer().loadPixels();
+      _bbCount = _bbNeed;
+    }
   }
 
   // OPENGL
@@ -614,7 +568,7 @@ public class Scene extends Graph implements PConstants {
       setHeight(frontBuffer().height);
     }
     preDraw();
-    pushModelView();
+    _matrixHandler.pushModelView();
   }
 
   /**
@@ -632,17 +586,8 @@ public class Scene extends Graph implements PConstants {
    * @see #isOffscreen()
    */
   public void draw() {
-    popModelView();
+    _matrixHandler.popModelView();
     _renderBackBuffer();
-  }
-
-  // Off-screen
-
-  /**
-   * Returns {@code true} if this scene is off-screen and {@code false} otherwise.
-   */
-  public boolean isOffscreen() {
-    return _offscreen;
   }
 
   /**
@@ -667,16 +612,14 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
     _beginOffScreenDrawingCalls++;
-    if ((_width != frontBuffer().width) || (_height != frontBuffer().height)) {
-      _width = frontBuffer().width;
-      _height = frontBuffer().height;
-      setWidth(_width);
-      setHeight(_height);
-    }
+    if ((width() != frontBuffer().width))
+      setWidth(frontBuffer().width);
+    if ((height() != frontBuffer().height))
+      setHeight(frontBuffer().height);
     // open off-screen pgraphics for drawing:
     frontBuffer().beginDraw();
     preDraw();
-    pushModelView();
+    _matrixHandler.pushModelView();
   }
 
   /**
@@ -702,7 +645,7 @@ public class Scene extends Graph implements PConstants {
     if (_beginOffScreenDrawingCalls != 0)
       throw new RuntimeException("There should be exactly one beginDraw() call followed by a "
           + "endDraw() and they cannot be nested. Check your implementation!");
-    popModelView();
+    _matrixHandler.popModelView();
     frontBuffer().endDraw();
     _renderBackBuffer();
   }
@@ -723,7 +666,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
-      pApplet().image(pgraphics, originCorner().x(), originCorner().y());
+      pApplet().image(pgraphics, _upperLeftCorner.x(), _upperLeftCorner.y());
   }
 
   /**
@@ -849,8 +792,7 @@ public class Scene extends Graph implements PConstants {
       Frame keyFrame = new Frame(this);
       pruneBranch(keyFrame);
       keyFrame.set(_toFrame(jsonInterpolator.getJSONObject(j)));
-      keyFrame.setPrecision(Frame.Precision.FIXED);
-      keyFrame.setPrecisionThreshold(20);
+      keyFrame.setPickingThreshold(20);
       interpolator.addKeyFrame(keyFrame, jsonInterpolator.getJSONObject(j).getFloat("time"));
       /*
       if (pathsVisualHint())
@@ -934,68 +876,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Transfers the scene frames to the {@code target} scene. Useful to display off-screen auxiliary
-   * viewers of the main scene. Use it in your {@code draw()} function such as:
-   * <p>
-   * <pre>
-   * {@code
-   * Scene scene, auxiliaryScene;
-   * void draw() {
-   *   background(75, 25, 15);
-   *   if (scene.isOffscreen()) {
-   *     scene.beginDraw();
-   *     scene.frontBuffer().background(75, 25, 15);
-   *     scene.traverse();
-   *     scene.endDraw();
-   *     scene.display();
-   *   } else
-   *     scene.traverse();
-   *
-   *   // shift frames to the auxiliaryScene
-   *   scene.shift(auxiliaryScene);
-   *
-   *   if (!scene.isOffscreen())
-   *     scene.beginHUD();
-   *   auxiliaryScene.beginDraw();
-   *   auxiliaryScene.frontBuffer().background(175, 200, 20);
-   *   auxiliaryScene.traverse();
-   *   auxiliaryScene.endDraw();
-   *   auxiliaryScene.display();
-   *   if (!scene.isOffscreen())
-   *     scene.endHUD();
-   *
-   *   // shift frames back to the main scene
-   *   auxiliaryScene.shift(scene);
-   * }
-   * }
-   * </pre>
-   */
-  public void shift(Scene target) {
-    super.shift(target);
-    this._bbEnabled = _bbEnabled || target._bbEnabled;
-  }
-
-  @Override
-  protected void _track(Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bb != null) {
-      if (!_tuples.isEmpty()) {
-        Iterator<Tuple> it = _tuples.iterator();
-        while (it.hasNext()) {
-          Tuple tuple = it.next();
-          resetTrackedFrame(tuple._hid);
-          // Condition is overkill. Use it only in place of resetTrackedFrame
-          //if (!isTracking(tuple._hid))
-          if (_tracks(tuple._pixel.x(), tuple._pixel.y(), frame)) {
-            setTrackedFrame(tuple._hid, frame);
-            it.remove();
-          }
-        }
-      }
-    } else
-      super._track(frame);
-  }
-
-  /**
    * Same as {@code return super.track(mouse(), frameArray)}.
    *
    * @see Graph#track(Point, Frame[])
@@ -1025,25 +905,6 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  public boolean tracks(float x, float y, Frame frame) {
-    if (frame.precision() == Frame.Precision.EXACT && _bb != null)
-      return _tracks(x, y, frame);
-    else
-      return _tracks(x, y, screenLocation(frame.position()), frame);
-  }
-
-  /**
-   * A shape may be picked using
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link frames.processing.Scene#backBuffer()}). This method
-   * compares the color of the {@link frames.processing.Scene#backBuffer()} at
-   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
-   * otherwise.
-   * <p>
-   * This method is only meaningful when this shape is not an eye.
-   *
-   * @see Frame#setPrecision(Frame.Precision)
-   */
   protected boolean _tracks(float x, float y, Frame frame) {
     if (frame == null || isEye(frame))
       return false;
@@ -1052,114 +913,162 @@ public class Scene extends Graph implements PConstants {
     int index = (int) y * width() + (int) x;
     if (backBuffer().pixels != null)
       if ((0 <= index) && (index < backBuffer().pixels.length))
-        return backBuffer().pixels[index] == frame.id();
+        return backBuffer().pixels[index] == frame.colorID();
     return false;
   }
 
-  /**
-   * Same as {@link super#traverse()}, but if there are any {@link Shape}s in the scene frame hierarchy
-   * they also get drawn. Call it only within Processing draw() method.
-   *
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   */
   @Override
-  public void traverse() {
-    _targetPGraphics = frontBuffer();
-    super.traverse();
-  }
-
-  /**
-   * Same as {@code traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection())}.
-   *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics) {
-    traverse(pGraphics, matrixHandler().cacheView(), matrixHandler().projection());
-  }
-
-  /**
-   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
-   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
-   * taking the {@code eye} as the light point-of-view.
-   *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
-    traverse(pGraphics, type, eye, zNear, zFar, true);
-  }
-
-  /**
-   * Same as {@code traverse(pGraphics, type, eye, zNear, zFar, true)}. Renders the scene using the
-   * {@code eye} frame point of view and remaining frustum parameters. Useful to compute a shadow map
-   * taking the {@code eye} as the light point-of-view.
-   *
-   * @see #traverse(PGraphics, Matrix, Matrix)
-   * @see #traverse(PGraphics)
-   * @see #traverse(PGraphics, Type, Frame, float, float)
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
-    traverse(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
-  }
-
-  /**
-   * Renders the scene into {@code pGraphics} using the {@code view} and {@code projection}
-   * matrices. Calls {@link Graph#traverse()}. No {@code pGraphics.beginDraw()/endDraw()}
-   * calls take place. Call this method only within Processing draw() method.
-   * <p>
-   * Note that {@code traverse(backBuffer())} (which enables 'picking' of the frames
-   * using a <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>
-   * technique is called by {@link #draw()}.
-   *
-   * @see #frames()
-   * @see #traverse()
-   */
-  public void traverse(PGraphics pGraphics, Matrix view, Matrix projection) {
-    _targetPGraphics = pGraphics;
-    if (pGraphics != frontBuffer()) {
-      MatrixHandler matrixHandler = matrixHandler(pGraphics);
-      matrixHandler._bindProjection(projection);
-      matrixHandler._bindModelView(view);
+  public void draw(Object context, Frame frame) {
+    if (context == backBuffer())
+      return;
+    PGraphics pGraphics = (PGraphics) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+            /*
+            if(_frontShape != null)
+                pg.shape(_frontShape);
+            set(pg);
+            frontShape(pg);
+            //*/
+    ///*
+    //TODO needs more thinking
+    switch (frame.highlighting()) {
+      case FRONT:
+        if (frame.isTracked())
+          pGraphics.scale(1.15f);
+      case NONE:
+        if (frame.frontShape() != null) {
+          pGraphics.shape((PShape) frame.frontShape());
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+        }
+        else if (frame.graphics(pGraphics))
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+        break;
+      case FRONT_BACK:
+        if (frame.frontShape() != null) {
+          pGraphics.shape((PShape) frame.frontShape());
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+        }
+        else if (frame.frontGraphics(pGraphics))
+          if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+        if (frame.isTracked()) {
+          if (frame.backShape() != null)
+            pGraphics.shape((PShape) frame.backShape());
+          else
+            frame.backGraphics(pGraphics);
+        }
+        break;
+      case BACK:
+        if (frame.isTracked()) {
+          if (frame.backShape() != null)
+            pGraphics.shape((PShape) frame.backShape());
+          else
+            frame.backGraphics(pGraphics);
+        } else {
+          if (frame.frontShape() != null) {
+            pGraphics.shape((PShape) frame.frontShape());
+            if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+          }
+          else if (frame.frontGraphics(pGraphics))
+            if (frame.pickingThreshold() == 0 && frame.isTrackingEnabled()) _bbNeed = frameCount();
+        }
+        break;
     }
-    super.traverse();
+    //*/
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
   }
 
   @Override
-  protected void _visit(Frame frame) {
-    _targetPGraphics.pushMatrix();
-    applyTransformation(_targetPGraphics, frame);
-    _track(frame);
-    if (_targetPGraphics != backBuffer() || frame instanceof Shape)
-      frame.visit();
-    if (!frame.isCulled())
-      for (Frame child : frame.children())
-        _visit(child);
-    _targetPGraphics.popMatrix();
+  protected void _drawBackBuffer(Frame frame) {
+    PGraphics pGraphics = backBuffer();
+    if (frame.pickingThreshold() == 0) {
+      pGraphics.pushStyle();
+      pGraphics.pushMatrix();
+
+      float r = (float) (frame.id() & 255) / 255.f;
+      float g = (float) ((frame.id() >> 8) & 255) / 255.f;
+      float b = (float) ((frame.id() >> 16) & 255) / 255.f;
+
+      // TODO see _enableBackBuffer
+      // funny, only safe way. Otherwise break things horribly when setting frame shapes
+      // and there are more than one frame holding a shape
+      pGraphics.shader(_triangleShader);
+      pGraphics.shader(_lineShader, PApplet.LINES);
+      pGraphics.shader(_pointShader, PApplet.POINTS);
+
+      _triangleShader.set("id", new PVector(r, g, b));
+      _lineShader.set("id", new PVector(r, g, b));
+      _pointShader.set("id", new PVector(r, g, b));
+
+      //pGraphics.pushStyle();
+      //pGraphics.pushMatrix();
+                /*
+                if (_backShape != null)
+                    pg.shape(_backShape);
+                set(pg);
+                backShape(pg);
+                //*/
+      ///*
+      if (frame.frontShape() != null)
+        pGraphics.shapeMode(frontBuffer().shapeMode);
+      if (frame.backShape() != null)
+        pGraphics.shape((PShape) frame.backShape());
+      else if (!frame.backGraphics(pGraphics))
+        frame.graphics(pGraphics);
+      //*/
+      pGraphics.popStyle();
+      pGraphics.popMatrix();
+    }
   }
 
+  /**
+   * Renders the scene onto {@code pGraphics} using the {@code eye} frame point of view and
+   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
+   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}
+   *
+   * @see #render(PGraphics, Type, Frame, float, float) (Object, Matrix, Matrix)
+   * @see #render(Object)
+   * @see #render(PGraphics, Type, Frame, float, float, boolean)
+   * @see #render()
+   */
+  public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar) {
+    render(pGraphics, type, eye, zNear, zFar, true);
+  }
 
   /**
-   * Returns a new matrix helper for the given {@code pGraphics}. Rarely needed.
-   * <p>
-   * Note that the current graph matrix helper may be retrieved by {@link #matrixHandler()}.
+   * Renders the scene onto {@code pGraphics} using the {@code eye} frame point of view and
+   * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
+   * as the light point-of-view. Same as
+   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}
    *
-   * @see #matrixHandler()
-   * @see #setMatrixHandler(MatrixHandler)
-   * @see #applyWorldTransformation(PGraphics, Frame)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object)
+   * @see #render(PGraphics, Type, Frame, float, float)
+   * @see #render()
    */
-  public MatrixHandler matrixHandler(PGraphics pGraphics) {
-    return (pGraphics instanceof processing.opengl.PGraphicsOpenGL) ?
-        new GLMatrixHandler(this, (PGraphicsOpenGL) pGraphics) :
-        new Java2DMatrixHandler(this, pGraphics);
+  public void render(PGraphics pGraphics, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+    if (pGraphics instanceof PGraphicsOpenGL)
+      render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded));
+    else
+      System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
+  }
+
+  /**
+   * Returns a new matrix handler for the given {@code context}.
+   */
+  protected static MatrixHandler _getMatrixHandler(Object context) {
+    if (!(context instanceof PGraphicsOpenGL))
+      throw new RuntimeException("Renderer should be instanceof PGraphicsOpenGL in applyTransformation(PGraphics pGraphics, Frame frame)");
+    else
+      return new GLMatrixHandler((PGraphicsOpenGL) context);
+  }
+
+  @Override
+  protected MatrixHandler _matrixHandler(Object context) {
+    if (!(context instanceof PGraphicsOpenGL))
+      return new Java2DMatrixHandler(this);
+    return _getMatrixHandler(context);
   }
 
   /**
@@ -1169,16 +1078,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyWorldTransformation(PGraphics, Frame)
    */
   public static void applyTransformation(PGraphics pGraphics, Frame frame) {
-    if (pGraphics instanceof PGraphics3D) {
-      pGraphics.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      pGraphics.rotate(frame.rotation().angle(), frame.rotation().axis()._vector[0],
-          frame.rotation().axis()._vector[1], frame.rotation().axis()._vector[2]);
-      pGraphics.scale(frame.scaling(), frame.scaling(), frame.scaling());
-    } else {
-      pGraphics.translate(frame.translation().x(), frame.translation().y());
-      pGraphics.rotate(frame.rotation().angle2D());
-      pGraphics.scale(frame.scaling(), frame.scaling());
-    }
+    _applyTransformation(_getMatrixHandler(pGraphics), frame, pGraphics.is2D());
   }
 
   /**
@@ -1186,16 +1086,9 @@ public class Scene extends Graph implements PConstants {
    * {@code pGraphics}.
    *
    * @see #applyTransformation(PGraphics, Frame)
-   * @see #_bind(PGraphics)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Frame frame) {
-    Frame reference = frame.reference();
-    if (reference != null) {
-      applyWorldTransformation(pGraphics, reference);
-      applyTransformation(pGraphics, frame);
-    } else {
-      applyTransformation(pGraphics, frame);
-    }
+    _applyWorldTransformation(_getMatrixHandler(pGraphics), frame, pGraphics.is2D());
   }
 
   // HUD
@@ -1217,7 +1110,7 @@ public class Scene extends Graph implements PConstants {
    * drawing ends.
    * <p>
    * All screen drawing should be enclosed between {@link #beginHUD(PGraphics)} and
-   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen shapes.
+   * {@link #endHUD(PGraphics)}. Then you can just begin drawing your screen frames.
    * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
    * then draw first all your 3d before doing any call to a {@link #beginHUD(PGraphics)}
    * and {@link #endHUD(PGraphics)} pair.
@@ -1238,7 +1131,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().beginHUD();
     else
-      matrixHandler(pGraphics).beginHUD();
+      _matrixHandler(pGraphics).beginHUD();
   }
 
   /**
@@ -1269,7 +1162,7 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == frontBuffer())
       matrixHandler().endHUD();
     else
-      matrixHandler(pGraphics).endHUD();
+      _matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
@@ -1525,7 +1418,7 @@ public class Scene extends Graph implements PConstants {
         for (Frame myFr : path)
           if ((count++) >= goal) {
             goal += nbSteps / (float) frameCount;
-            pushModelView();
+            _matrixHandler.pushModelView();
 
             applyTransformation(myFr);
 
@@ -1534,7 +1427,7 @@ public class Scene extends Graph implements PConstants {
             if ((mask & 4) != 0)
               drawAxes(scale / 10.0f);
 
-            popModelView();
+            _matrixHandler.popModelView();
           }
       }
       frontBuffer().strokeWeight(frontBuffer().strokeWeight / 2f);
@@ -1660,11 +1553,11 @@ public class Scene extends Graph implements PConstants {
    * @see #drawArrow(float, float)
    */
   public void drawArrow(Vector from, Vector to, float radius) {
-    pushModelView();
+    _matrixHandler.pushModelView();
     matrixHandler().translate(from.x(), from.y(), from.z());
-    applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
+    _matrixHandler.applyModelView(new Quaternion(new Vector(0, 0, 1), Vector.subtract(to, from)).matrix());
     drawArrow(Vector.subtract(to, from).magnitude(), radius);
-    popModelView();
+    _matrixHandler.popModelView();
   }
 
   /**
@@ -2249,75 +2142,78 @@ public class Scene extends Graph implements PConstants {
 
   /**
    * Applies the {@code graph.eye()} transformation (see {@link #applyTransformation(Frame)})
-   * and then calls {@link #drawEye(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
+   * and then calls {@link #drawFrustum(PGraphics, Graph)} on the scene {@link #frontBuffer()}.
    *
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public void drawEye(Graph graph) {
+  public void drawFrustum(Graph graph) {
     frontBuffer().pushMatrix();
     applyTransformation(graph.eye());
-    drawEye(frontBuffer(), graph);
+    drawFrustum(frontBuffer(), graph);
     frontBuffer().popMatrix();
   }
 
   /**
-   * Draws a representations of the {@code graph.eye()} onto {@code pGraphics}.
+   * Draws a representation of the viewing frustum onto {@code pGraphics} according to
+   * {@code graph.eye()} and {@code graph.type()}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public void drawEye(PGraphics pGraphics, Graph graph) {
+  public void drawFrustum(PGraphics pGraphics, Graph graph) {
     boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicEye(pGraphics, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        _drawOrthographicFrustum(pGraphics, graph.eye().magnitude(), graph.width(), graph.isLeftHanded() ? -graph.height() : graph.height(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
       case PERSPECTIVE:
-        _drawPerspectiveEye(pGraphics, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
+        _drawPerspectiveFrustum(pGraphics, graph.eye().magnitude(), graph.isLeftHanded() ? -graph.aspectRatio() : graph.aspectRatio(), graph.zNear(), graph.zFar(), texture ? ((Scene) graph).frontBuffer() : null);
         break;
     }
   }
 
   /**
-   * Same as {@code drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
+   * Same as {@code drawFrustum(pGraphics, eyeBuffer, type, eye, zNear, zFar, true)}.
    *
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float, boolean)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float, boolean)
    */
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
-    drawEye(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
+  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar) {
+    drawFrustum(pGraphics, eyeBuffer, type, eye, zNear, zFar, true);
   }
 
   /**
-   * Draws a representation of the eye according to the frustum parameters and the frame {@link Frame#magnitude()}.
-   * Use it in conjunction with {@link #traverse(PGraphics, Type, Frame, float, float, boolean)} as when
-   * defining a shadow map.
+   * Draws a representation of the {@code eyeBuffer} frustum onto {@code pGraphics} according to frustum parameters:
+   * {@code type}, eye {@link Frame#magnitude()}, {@code zNear} and {@code zFar}, while taking into account
+   * whether or not the scene is {@code leftHanded}.
+   * <p>
+   * Use it in conjunction with {@link #render(PGraphics, Type, Frame, float, float, boolean)} as when rendering
+   * a shadow map.
    *
-   * @see #traverse(PGraphics, Type, Frame, float, float, boolean)
-   * @see #drawEye(Graph)
-   * @see #drawEye(PGraphics, Graph)
-   * @see #drawEye(PGraphics, PGraphics, Type, Frame, float, float)
+   * @see #drawFrustum(Graph)
+   * @see #drawFrustum(PGraphics, Graph)
+   * @see #drawFrustum(PGraphics, PGraphics, Type, Frame, float, float)
    */
-  public static void drawEye(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
+  public static void drawFrustum(PGraphics pGraphics, PGraphics eyeBuffer, Type type, Frame eye, float zNear, float zFar, boolean leftHanded) {
     switch (type) {
       case TWO_D:
       case ORTHOGRAPHIC:
-        _drawOrthographicEye(pGraphics, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
+        _drawOrthographicFrustum(pGraphics, eye.magnitude(), eyeBuffer.width, leftHanded ? -eyeBuffer.height : eyeBuffer.height, zNear, zFar, eyeBuffer);
         break;
       case PERSPECTIVE:
-        _drawPerspectiveEye(pGraphics, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar, eyeBuffer);
+        _drawPerspectiveFrustum(pGraphics, eye.magnitude(), leftHanded ? -eyeBuffer.width / eyeBuffer.height : eyeBuffer.width / eyeBuffer.height, zNear, zFar, eyeBuffer);
         break;
     }
   }
 
-  protected static void _drawOrthographicEye(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
+  protected static void _drawOrthographicFrustum(PGraphics pGraphics, float magnitude, float width, float height, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
     boolean threeD = pGraphics.is3D();
@@ -2406,7 +2302,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.popStyle();
   }
 
-  protected static void _drawPerspectiveEye(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
+  protected static void _drawPerspectiveFrustum(PGraphics pGraphics, float magnitude, float aspectRatio, float zNear, float zFar, PGraphics eyeBuffer) {
     if (pGraphics == eyeBuffer)
       return;
     boolean lh = aspectRatio < 0;
@@ -2553,7 +2449,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws the projection of each point in {@code points} in the near plane onto {@code pGraphics}.
    * <p>
-   * This method should be used in conjunction with {@link #drawEye(PGraphics, Graph)}.
+   * This method should be used in conjunction with {@link #drawFrustum(PGraphics, Graph)}.
    * <p>
    * Note that if {@code graph == this} this method has not effect at all.
    *
@@ -2607,7 +2503,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawCross(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the cross is the frame
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * {@link Frame#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
    * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
@@ -2617,7 +2513,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawCross(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawCross(frame, frame.pickingThreshold() < 1 ? 200 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.pickingThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2676,7 +2572,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * {@link #drawShooterTarget(float, float, float)} centered at the projected frame origin.
    * If frame is a Frame instance the length of the target is the frame
-   * {@link Frame#precisionThreshold()}, otherwise it's {@link #radius()} / 5.
+   * {@link Frame#pickingThreshold()}, otherwise it's {@link #radius()} / 5.
    * If frame a Frame instance and it is {@link #isTrackedFrame(Frame)} it also applies
    * a stroke highlight.
    *
@@ -2686,7 +2582,7 @@ public class Scene extends Graph implements PConstants {
     frontBuffer().pushStyle();
     if (frame.isTracked())
       frontBuffer().strokeWeight(2 + frontBuffer().strokeWeight);
-    drawShooterTarget(frame, frame.precision() == Frame.Precision.ADAPTIVE ? frame.precisionThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.precisionThreshold());
+    drawShooterTarget(frame, frame.pickingThreshold() < 1 ? 200 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position()) : frame.pickingThreshold());
     frontBuffer().popStyle();
   }
 
@@ -2968,7 +2864,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawConstraint(Frame frame) {
     //Makes no sense to draw constraint on BackBuffer unless the user make it explicit
-    if(_targetPGraphics == frontBuffer()) drawConstraint(_targetPGraphics, frame);
+    drawConstraint(frontBuffer(), frame);
   }
 
   /**
@@ -2996,7 +2892,9 @@ public class Scene extends Graph implements PConstants {
     pGraphics.noStroke();
     //TODO: use different colors
     pGraphics.fill(246, 117, 19, 80);
-    Frame reference = new Frame(new Vector(), frame.rotation().inverse());
+    Frame reference = new Frame();
+    reference.setTranslation(new Vector());
+    reference.setRotation(frame.rotation().inverse());
     //TODO: Check implementation for non symmetric semi-axes
     //TODO: Draw Properly when left and up are big values
     if (frame.constraint() instanceof BallAndSocket) {
@@ -3118,14 +3016,14 @@ public class Scene extends Graph implements PConstants {
    * Returns the current mouse cursor position.
    */
   public Point mouse() {
-    return toPoint(pApplet().mouseX - originCorner().x(), pApplet().mouseY - originCorner().y());
+    return toPoint(pApplet().mouseX - _upperLeftCorner.x(), pApplet().mouseY - _upperLeftCorner.y());
   }
 
   /**
    * Returns the previous mouse cursor position.
    */
   public Point pmouse() {
-    return toPoint(pApplet().pmouseX - originCorner().x(), pApplet().pmouseY - originCorner().y());
+    return toPoint(pApplet().pmouseX - _upperLeftCorner.x(), pApplet().pmouseY - _upperLeftCorner.y());
   }
 
   /**

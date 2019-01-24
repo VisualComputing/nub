@@ -23,25 +23,23 @@ void setup() {
   size(800, 800, P3D);
   scene = new Scene(this);
   scene.setRadius(200);
-  scene.setType(Graph.Type.ORTHOGRAPHIC);
+  scene.togglePerspective();
   scene.fit();
-  esfera = new Sphere();
-  esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));
-  esfera.setColor(color(0, 0, 255));
-
+  esfera = new Sphere(scene, color(random(0, 255), random(0, 255), random(0, 255)), 10);
+  esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[30];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box();
-
+    cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)),
+                       random(10, 40), random(10, 40), random(10, 40));
   scene.fit(1);
-  scene.setTrackedFrame("keyboard", esfera.iFrame);
+  scene.setTrackedFrame("keyboard", esfera);
 }
 
 void draw() {
   background(0);
-  // calls visit() on all scene attached frames
+  // calls render() on all scene attached frames
   // automatically applying all the frame transformations
-  scene.traverse();
+  scene.render();
 }
 
 void mouseMoved() {
@@ -61,30 +59,28 @@ void mouseWheel(MouseEvent event) {
   scene.moveForward(event.getCount() * 20);
 }
 
+int randomColor() {
+  return color(random(0, 255), random(0, 255), random(0, 255));
+}
+
+int randomLength(int min, int max) {
+  return int(random(min, max));
+}
+
 void keyPressed() {
-  if (key == ' ') {
-    adaptive = !adaptive;
-    for (Box caja : cajas)
-      if (adaptive)
-        caja.iFrame.setPrecision(Frame.Precision.ADAPTIVE);
-      else
-        caja.iFrame.setPrecision(Frame.Precision.FIXED);
-  }
   if (key == 'a')
     drawAxes = !drawAxes;
   if (key == 'p')
     drawShooterTarget = !drawShooterTarget;
   if (key == 'e')
-    scene.setType(Graph.Type.ORTHOGRAPHIC);
-  if (key == 'E')
-    scene.setType(Graph.Type.PERSPECTIVE);
+    scene.togglePerspective();
   if (key == 's')
     scene.fit(1);
   if (key == 'S')
     scene.fit();
   if (key == 'u')
     if (scene.trackedFrame("keyboard") == null)
-      scene.setTrackedFrame("keyboard", esfera.iFrame);
+      scene.setTrackedFrame("keyboard", esfera);
     else
       scene.resetTrackedFrame("keyboard");
   if (key == CODED)

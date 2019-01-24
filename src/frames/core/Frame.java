@@ -77,10 +77,11 @@ import java.util.List;
  * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the frame hierarchy which automatically apply the local
- * frame transformations described above may be achieved with {@link Graph#traverse()}.
- * Automatic traversals require overriding {@link #visit()} and to instantiate a frame
- * attached to a graph which is referred to as attached frame (see {@link #isAttached(Graph)}
- * and {@link #isDetached()}).
+ * frame transformations described above may be achieved with {@link Graph#render()} or
+ * {@link Graph#render(Object)}.
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Frame)}
+ * and to instantiate a frame attached to a graph which is referred to as attached frame (see
+ * {@link #isAttached(Graph)} and {@link #isDetached()}).
  * <p>
  * To instantiate an attached frame use the frame constructors that take a {@code graph}
  * parameter or a (reference) frame which in turn is attached to a graph. Once instantiated,
@@ -99,14 +100,11 @@ import java.util.List;
  * {@link frames.core.constraint.WorldConstraint} and
  * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
- * <h2>Syncing</h2>
- * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
- * share their global parameters (position, orientation and magnitude) taken the one
- * that has been most recently updated. Syncing can be useful to share frames
- * among different off-screen canvases.
- * <h2>Picking</h2>
- * Picking a frame is done accordingly to a {@link #precision()}. Refer to
- * {@link #setPrecision(Precision)} for details.
+ * <h2>Shapes</h2>
+ * A frame shape can be set from a retained-mode rendering object, see {@link #shape(Object)};
+ * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
+ * Picking a frame is done according to a {@link #pickingThreshold()}. When picking a
+ * frame it will be highlighted according to a {@link #highlighting()} policy.
  * <h2>Application Control</h2>
  * Implementing an application control for the frame is a two step process:
  * <ul>
@@ -114,6 +112,11 @@ import java.util.List;
  * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
  * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
  * </ul>
+ * <h2>Syncing</h2>
+ * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
+ * share their global parameters (position, orientation and magnitude) taken the one
+ * that has been most recently updated. Syncing can be useful to share frames
+ * among different off-screen canvases.
  */
 public class Frame {
   /**
@@ -138,12 +141,6 @@ public class Frame {
   // Tracking & Precision
   protected float _threshold;
 
-  public enum Precision {
-    FIXED, ADAPTIVE, EXACT
-  }
-
-  protected Precision _precision;
-
   // ID
   protected static int _counter;
   protected int _id;
@@ -155,124 +152,227 @@ public class Frame {
   protected boolean _culled;
   protected boolean _tracking;
 
+  // Rendering
+
+  protected Object _frontShape, _backShape;
+
+  public enum Highlighting {
+    NONE, FRONT, FRONT_BACK, BACK
+  }
+
+  protected Highlighting _highlight;
+
   /**
-   * Same as {@code this(null, new Vector(), new Quaternion(), 1)}.
+   * Creates a detached frame.
+   * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Object)
+   * @see #Frame(Graph)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
    */
   public Frame() {
-    this(null, null, new Vector(), new Quaternion(), 1);
+    this(null, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(translation, new Quaternion(), 1)}.
+   * Creates a frame attached to {@code graph}.
+   * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Vector translation) {
-    this(translation, new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Quaternion rotation) {
-    this(new Vector(), rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(float scaling) {
-    this(new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(translation, rotation, 1)}.
-   *
-   * @see #Frame(Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation) {
-    this(translation, rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(null, translation, rotation, scaling)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Vector translation, Quaternion rotation, float scaling) {
-    this(null, null, translation, rotation, scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation) {
-    this(null, reference, translation, new Quaternion(), 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), rotation, 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Quaternion rotation) {
-    this(null, reference, new Vector(), rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(reference, new Vector(), new Quaternion(), scaling)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, float scaling) {
-    this(null, reference, new Vector(), new Quaternion(), scaling);
-  }
-
-  /**
-   * Same as {@code this(reference, translation, rotation, 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
-   */
-  public Frame(Frame reference, Vector translation, Quaternion rotation) {
-    this(null, reference, translation, rotation, 1);
-  }
-
-  /**
-   * Same as {@code this(graph, null, new Vector(), new Quaternion(), 1)}.
-   *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   * @see #Frame()
+   * @see #Frame(Object)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
    */
   public Frame(Graph graph) {
-    this(graph, null, new Vector(), new Quaternion(), 1);
+    this(graph, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Same as {@code this(reference.graph(), reference, new Vector(), new Quaternion(), 1)}.
+   * Creates a detached frame with {@code reference} as {@link #reference()}.
+   * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Frame, Vector, Quaternion, float)
+   * @see #Frame()
+   * @see #Frame(Graph)
+   * @see #Frame(Object)
+   * @see #Frame(Constraint)
    */
   public Frame(Frame reference) {
-    this(reference.graph(), reference, new Vector(), new Quaternion(), 1);
+    this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a frame with {@code reference} as {@link #reference()}, and {@code translation},
+   * Creates a detached frame with {@code constraint} as {@link #constraint()}.
+   * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph)
+   * @see #Frame(Object)
+   * @see #Frame()
+   * @see #Frame(Frame)
+   */
+  public Frame(Constraint constraint) {
+    this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Creates a detached frame with {@code shape}.
+   * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame()
+   * @see #Frame(Graph)
+   * @see #Frame(Frame)
+   * @see #Frame(Constraint)
+   */
+  public Frame(Object shape) {
+    this(null, null, null, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  /**
+   * Constructs a shapeless frame, attached to {@code graph}, having {@code translation},
    * {@code rotation} and {@code scaling} as the frame {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
-   * <p>
-   * Sets the {@link #precision()} to {@link Precision#FIXED}.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(graph, null, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Frame, Vector, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
    */
-  protected Frame(Graph graph, Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  public Frame(Graph graph, Vector translation, Quaternion rotation, float scaling) {
+    this(graph, null, null, null, translation, rotation, scaling);
+  }
+
+  /**
+   * Constructs a shapeless frame, having {@code reference}, {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #reference()},
+   * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(reference.graph(), reference, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Vector, Quaternion, float)
+   * @see #Frame(Vector, Quaternion, float)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+    this(reference.graph(), reference, null, null, translation, rotation, scaling);
+  }
+
+  /**
+   * Constructs a shapeless detached frame, having {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Vector translation, Quaternion rotation, float scaling) {
+    this(null, null, null, null, translation, rotation, scaling);
+  }
+
+  // --
+
+  /**
+   * Same as {@code this(graph, null, shape)}.
+   *
+   * @see #Frame(Graph, Constraint, Object)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Object shape) {
+    this(graph, null, shape);
+  }
+
+  /**
+   * Same as {@code this(graph, constraint, null)}.
+   *
+   * @see #Frame(Graph, Constraint, Object)
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Constraint constraint) {
+    this(graph, constraint, null);
+  }
+
+  /**
+   * Same as {@code this(graph, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Constraint constraint, Object shape) {
+    this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  // --
+
+  /**
+   * Same as {@code this(reference, null, shape)}.
+   *
+   * @see #Frame(Frame, Constraint, Object)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Object shape) {
+    this(reference, null, shape);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, null)}.
+   *
+   * @see #Frame(Frame, Constraint, Object)
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint) {
+    this(reference, constraint, null);
+  }
+
+  /**
+   * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
+   *
+   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint, Object shape) {
+    this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
+  }
+
+  // --
+
+  /**
+   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(graph, null, constraint, shape, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+    this(graph, null, constraint, shape, translation, rotation, scaling);
+  }
+
+  /**
+   * Creates a child frame of {@code reference} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * Same as {@code this(reference.graph(), reference, constraint, shape, translation, rotation, scaling)}.
+   *
+   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   */
+  public Frame(Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+    this(reference.graph(), reference, constraint, shape, translation, rotation, scaling);
+  }
+
+  /**
+   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * having {@code reference} as {@link #reference()}, {@code translation},
+   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()}, respectively.
+   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   */
+  protected Frame(Graph graph, Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
     setReference(reference);
+    setConstraint(constraint);
+    shape(shape);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
@@ -281,13 +381,11 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = 0;
-    _precision = Precision.FIXED;
-    setPrecisionThreshold(20);
+    _threshold = .2f;
     _tracking = true;
-
+    _highlight = Highlighting.FRONT;
     if (graph() == null)
       return;
-
     // attached frames:
     _children = new ArrayList<Frame>();
     _culled = false;
@@ -311,7 +409,6 @@ public class Frame {
     if (_id == 16777216)
       throw new RuntimeException("Maximum frame instances reached. Exiting now!");
     _lastUpdate = frame.lastUpdate();
-    this._precision = frame._precision;
     this._threshold = frame._threshold;
     this._tracking = frame._tracking;
 
@@ -321,6 +418,10 @@ public class Frame {
     // attached frames:
     this._children = new ArrayList<Frame>();
     this._culled = frame._culled;
+
+    this._frontShape = frame._frontShape;
+    this._backShape = frame._backShape;
+    this._highlight = frame._highlight;
   }
 
   /**
@@ -357,14 +458,14 @@ public class Frame {
   }
 
   /**
-   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#traverse()}).
+   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#render()}).
    * To test if the frame is detach from any graph hierarchy call {@code isAttached(null)}.
    * <p>
    * Note that a call to {@link #children()} never returns {@code null} if the frame is attached to
    * a graph, i.e., that graph will visit the frame during traversal.
    *
    * @see #isDetached()
-   * @see Graph#traverse()
+   * @see Graph#render()
    */
   public boolean isAttached(Graph graph) {
     return _graph == graph;
@@ -374,10 +475,10 @@ public class Frame {
    * Same as {@code return isAttached(null)}.
    * <p>
    * Note that a call to {@link #children()} always returns {@code null} if the frame is detached,
-   * i.e., the frame is not available for graph traversal (see {@link Graph#traverse()}).
+   * i.e., the frame is not available for graph traversal (see {@link Graph#render()}).
    *
    * @see #isAttached(Graph)
-   * @see Graph#traverse()
+   * @see Graph#render()
    */
   public boolean isDetached() {
     return isAttached(null);
@@ -417,13 +518,17 @@ public class Frame {
     setScaling(1);
   }
 
-  // id
+  // colorID
+
+  public int id() {
+    return _id;
+  }
 
   /**
    * Uniquely identifies the frame. Also the color to be used for picking with a color buffer.
    * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
-  public int id() {
+  public int colorID() {
     return (255 << 24) | ((_id & 255) << 16) | (((_id >> 8) & 255) << 8) | (_id >> 16) & 255;
   }
 
@@ -779,81 +884,34 @@ public class Frame {
   // PRECISION
 
   /**
-   * Returns the frame picking precision. See {@link #setPrecision(Precision)} for details.
+   * Sets the {@link #pickingThreshold()}.
    *
-   * @see #setPrecision(Precision)
-   * @see #setPrecisionThreshold(float)
-   * @see #precisionThreshold()
+   * @see #pickingThreshold()
+   * @see #setHighlighting(Highlighting)
    */
-  public Precision precision() {
-    return _precision;
-  }
-
-  /**
-   * Sets the frame picking precision.
-   * <p>
-   * When {@link #precision()} is {@link Precision#FIXED} or {@link Precision#ADAPTIVE}
-   * Picking is done by checking if the pointer lies within a squared area around the frame
-   * {@link #position()} screen projection which size is defined by
-   * {@link #setPrecisionThreshold(float)}.
-   * <p>
-   * When {@link #precision()} is {@link Precision#EXACT}, picking is done
-   * in a precise manner according to the projected pixels of the visual representation
-   * related to the frame. It is meant to be implemented by derived classes (providing the
-   * means attach a visual representation to the frame) and requires the graph to implement
-   * a back buffer.
-   * <p>
-   * Default implementation of this policy will behave like {@link Precision#FIXED}.
-   *
-   * @see #precision()
-   * @see #setPrecisionThreshold(float)
-   * @see #precisionThreshold()
-   */
-  public void setPrecision(Precision precision) {
-    if (precision == Precision.EXACT)
-      System.out.println("Warning: EXACT picking precision will behave like FIXED. EXACT precision is meant to be implemented for derived frames and scenes that support a backBuffer.");
-    _precision = precision;
-  }
-
-  /**
-   * Sets the length of the squared area around the frame {@link #position()} screen
-   * projection that defined the frame picking condition.
-   * <p>
-   * If {@link #precision()} is {@link Precision#FIXED}, the {@code threshold} is expressed
-   * in pixels and directly defines the fixed length of a 'shooter target', centered
-   * at the projection of the frame origin onto the screen.
-   * <p>
-   * If {@link #precision()} is {@link Precision#ADAPTIVE}, the {@code threshold} is expressed
-   * in object space (world units) and defines the edge length of a squared bounding box that
-   * leads to an adaptive length of a 'shooter target', centered at the projection of the frame
-   * origin onto the screen. Use this version only if you have a good idea of the bounding box
-   * size of the object you are attaching to the frame shape.
-   * <p>
-   * The value is meaningless when the {@link #precision()} is* {@link Precision#EXACT}. See
-   * {@link #setPrecision(Precision)} for details.
-   * <p>
-   * Default behavior is to set the PRECISIONTHRESHOLD (in a non-adaptive
-   * manner) to 20.
-   * <p>
-   * Negative {@code threshold} values are silently ignored.
-   *
-   * @see #precision()
-   * @see #setPrecision(Precision)
-   * @see #precisionThreshold()
-   */
-  public void setPrecisionThreshold(float threshold) {
+  public void setPickingThreshold(float threshold) {
     if (threshold >= 0)
       _threshold = threshold;
   }
 
   /**
-   * Returns the picking precision threshold in pixels used by {@link Graph#tracks(float, float, Frame)}.
+   * Returns the frame picking threshold. Set it with {@link #setPickingThreshold(float)}.
+   * <p>
+   * Picking a frame is done with ray casting against a screen-space shape defined according
+   * to a {@link #pickingThreshold()} as follows:
+   * <ul>
+   * <li>The projected pixels of the frame visual representation (see {@link #graphics(Object)}
+   * and {@link #shape(Object)}). Set it with {@code threshold = 0}.</li>
+   * <li>A frame bounding box whose length is defined as percentage of the graph diameter
+   * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
+   * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
+   * </ul>
+   * Default picking precision is defined with {@code threshold = 0.2}.
    *
-   * @see #setPrecisionThreshold(float)
-   * @see #precision()
-   * @see #setPrecision(Precision)
+   * @see #setPickingThreshold(float)
+   * @see #highlighting()
    */
-  public float precisionThreshold() {
+  public float pickingThreshold() {
     return _threshold;
   }
 
@@ -1932,8 +1990,7 @@ public class Frame {
    * @see #inverse()
    */
   public Frame worldInverse() {
-    return (new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(),
-        1 / magnitude()));
+    return new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
   // VECTOR CONVERSION
@@ -2132,9 +2189,9 @@ public class Frame {
   }
 
   /**
-   * Procedure called on the frame by the graph traversal algorithm. Default implementation is
-   * empty, i.e., it is meant to be implemented by derived classes. Only meaningful if the frame
-   * is attached to a {@code graph}.
+   * This method is called on each frame of the graph hierarchy by the {@link Graph#render(Object)}
+   * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
+   * by derived classes.
    * <p>
    * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
@@ -2142,21 +2199,24 @@ public class Frame {
    * <pre>
    * {@code
    * frame = new Frame(graph) {
+   *   @Override
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
    *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
    *     // at the frame
    *     cull(cullingCondition);
    *     if(!isCulled())
-   *       // Draw your object here, in the local coordinate system.
+   *       // Manipulate your object here, in the local coordinate system.
    *   }
    * }
    * }
    * </pre>
    *
-   * @see Graph#traverse()
+   * @see Graph#render()
+   * @see Graph#render()
    * @see #cull(boolean)
    * @see #isCulled()
+   * @see Graph#draw(Object, Frame)
    */
   public void visit() {
   }
@@ -2175,7 +2235,7 @@ public class Frame {
 
   /**
    * Enables or disables {@link #visit()} of this frame and its children during
-   * {@link Graph#traverse()}. Culling should be decided within {@link #visit()}.
+   * {@link Graph#render()}. Culling should be decided within {@link #visit()}.
    * Only meaningful if the frame is attached to a {@code graph}.
    *
    * @see #isCulled()
@@ -2188,12 +2248,161 @@ public class Frame {
 
   /**
    * Returns whether or not the frame culled or not. Culled frames (and their children)
-   * will not be visited by the {@link Graph#traverse()} algorithm. Always returns
+   * will not be visited by the {@link Graph#render()} algorithm. Always returns
    * {@code false} if the frame {@link #isDetached()}.
    *
    * @see #cull(boolean)
    */
   public boolean isCulled() {
     return isDetached() ? false : _culled;
+  }
+
+  /**
+   * Sets the frame {@link #highlighting()}.
+   *
+   * @see #highlighting()
+   * @see #setPickingThreshold(float)
+   */
+  public void setHighlighting(Highlighting highlighting) {
+    _highlight = highlighting;
+  }
+
+  /**
+   * Returns the highlighting mode. Highlights the shape when picking takes place as follows:
+   * <ol>
+   * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
+   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
+   * and {@link #frontGraphics(Object)}) is scaled by a {@code 1.15} factor.</li>
+   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
+   * {@link #backGraphics(Object)}) is displayed instead of the front-shape.</li>
+   * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
+   * displayed. The back shape is made translucent</li>
+   * </ol>
+   * <p>
+   * Default is {@link Highlighting#FRONT}.
+   *
+   * @see #setHighlighting(Highlighting)
+   * @see #pickingThreshold()
+   */
+  public Highlighting highlighting() {
+    return _highlight;
+  }
+
+  // JS version of the rendering methods
+
+  /**
+   * Override this method to set an immediate mode graphics procedure on {@code context}.
+   * <p>
+   * Sets both the front and the back shape to the same graphics procedure.
+   * Override {@link #frontGraphics(Object)} and {@link #backGraphics(Object)} to set different
+   * graphics procedures for rendering and picking, respectively.
+   *
+   * @see #frontGraphics(Object)
+   * @see #backGraphics(Object)
+   * @see #shape(Object)
+   */
+  public boolean graphics(Object context) {
+    return false;
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * front shape. Use it in conjunction with @see #backGraphics(Object).
+   *
+   * @see #graphics(Object)
+   * @see #shape(Object)
+   */
+  public boolean frontGraphics(Object context) {
+    return false;
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * shape used for picking. Use it in conjunction with @see #frontGraphics(Object).
+   *
+   * @see #graphics(Object)
+   * @see #shape(Object)
+   */
+  public boolean backGraphics(Object context) {
+    return false;
+  }
+
+  /**
+   * Sets the retained mode shape for both, the front and the back shapes.
+   * Call {@link #frontShape(Object)} and {@link #frontShape(Object)} to set
+   * different graphics for rendering and picking, respectively.
+   *
+   * @see #frontShape(Object)
+   * @see #backShape(Object)
+   * @see #graphics(Object)
+   */
+  public void shape(Object shape) {
+    frontShape(shape);
+    backShape(shape);
+  }
+
+  /**
+   * Sets the retained mode shape for the front shape. Use it in conjunction
+   * with @see #backShape(Object)}.
+   *
+   * @see #shape(Object)
+   * @see #graphics(Object)
+   */
+  public void frontShape(Object shape) {
+    _frontShape = shape;
+  }
+
+  /**
+   * Sets the retained mode shape used for picking. Use it in conjunction
+   * with @see #frontShape(Object)}.
+   *
+   * @see #shape(Object)
+   * @see #graphics(Object)
+   */
+  public void backShape(Object shape) {
+    _backShape = shape;
+  }
+
+  public Object frontShape() {
+    return _frontShape;
+  }
+
+  public Object backShape() {
+    return _backShape;
+  }
+
+  // Java version of the immediate mode rendering methods
+
+  /**
+   * Override this method to set an immediate mode graphics procedure on the Processing
+   * {@code PGraphics}.
+   * <p>
+   * Sets both the front and the back shape to the same graphics procedure.
+   *
+   * @see #frontGraphics(processing.core.PGraphics)
+   * @see #backGraphics(processing.core.PGraphics)
+   */
+  public boolean graphics(processing.core.PGraphics pGraphics) {
+    return false;
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * front shape. Use it in conjunction with @see #backGraphics(processing.core.PGraphics).
+   *
+   * @see #graphics(processing.core.PGraphics)
+   */
+  public boolean frontGraphics(processing.core.PGraphics pGraphics) {
+    return false;
+  }
+
+  /**
+   * Override this method to set an immediate mode graphics procedure to draw the
+   * shape used for picking. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
+   *
+   * @see #graphics(processing.core.PGraphics)
+   */
+  public boolean backGraphics(processing.core.PGraphics pGraphics) {
+    return false;
   }
 }

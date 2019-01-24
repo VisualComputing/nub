@@ -40,7 +40,7 @@ public class FlockOld extends PApplet {
     ambientLight(128, 128, 128);
     directionalLight(255, 255, 255, 0, 1, -100);
     walls();
-    scene.traverse();
+    scene.render();
   }
 
   // interaction in 'first-person'

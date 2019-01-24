@@ -12,12 +12,12 @@ import frames.primitives.*;
 import frames.core.*;
 import frames.processing.*;
 
-PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, colorShader, horizontalShader;
-PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, colorGraphics, horizontalGraphics;
+PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, depthShader, horizontalShader;
+PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
 int startTime;
-Shape[] models;
+Frame[] models;
 PFont font;
 
 public void setup() {
@@ -27,17 +27,18 @@ public void setup() {
   colorMode(HSB, 255);
   scene = new Scene(this, P3D);
   scene.setRadius(1000);
-  models = new Shape[100];
+  models = new Frame[100];
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Shape(scene, shape());
+    models[i] = new Frame(scene, shape());
     scene.randomize(models[i]);
+    // set picking precision to the pixels of the frame projection
+    models[i].setPickingThreshold(0);
   }
   scene.fit(1);
 
-  colorShader = loadShader("colorfrag.glsl");
-  colorShader.set("maxDepth", scene.radius()*2);
-  colorGraphics = createGraphics(width, height, P3D);
-  colorGraphics.shader(colorShader);
+  depthShader = loadShader("depth.glsl");
+  depthPGraphics = createGraphics(width, height, P3D);
+  depthPGraphics.shader(depthShader);
 
   edgeShader = loadShader("edge.glsl");
   edgeGraphics = createGraphics(width, height, P3D);
@@ -89,17 +90,19 @@ public void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
   graphics.background(0);
-  scene.traverse();
+  scene.render();
   scene.endDraw();
 
   if (bdepth){
-    colorGraphics.beginDraw();
-    colorGraphics.background(0);
+    depthPGraphics.beginDraw();
+    depthPGraphics.background(0);
+    depthShader.set("near", scene.zNear());
+    depthShader.set("far", scene.zFar());
     //Note that when drawing the shapes into an arbitrary PGraphics
     //the eye position of the main PGraphics is used
-    scene.traverse(colorGraphics);
-    colorGraphics.endDraw();
-    drawGraphics = colorGraphics;
+    scene.render(depthPGraphics);
+    depthPGraphics.endDraw();
+    drawGraphics = depthPGraphics;
   }
   if (bkaleido) {
     kaleidoGraphics.beginDraw();
@@ -126,7 +129,7 @@ public void draw() {
   if (bdof) {
     dofGraphics.beginDraw();
     dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
-    dofShader.set("tDepth", colorGraphics);
+    dofShader.set("tDepth", depthPGraphics);
     dofShader.set("tex", drawGraphics);
     dofGraphics.image(graphics, 0, 0);
     dofGraphics.endDraw();

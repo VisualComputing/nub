@@ -101,7 +101,7 @@ public class FrameAPI1 extends PApplet {
     point(pnt.x(), pnt.y(), pnt.z());
     popStyle();
 
-    scene.traverse();
+    scene.render();
 
     drawMode();
     displayText();

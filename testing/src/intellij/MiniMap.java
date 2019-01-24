@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -11,12 +10,12 @@ import processing.event.MouseEvent;
 
 public class MiniMap extends PApplet {
   Scene scene, minimap, focus;
-  Shape[] models;
+  Frame[] models;
   Frame sceneEye;
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = false;
+  boolean onScreen = true;
   boolean interactiveEye;
 
   int w = 1200;
@@ -33,30 +32,32 @@ public class MiniMap extends PApplet {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
     // set a detached eye frame
-    //scene.setEye(new Frame());
-    if (renderer == P3D)
-      scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
-    else
+    scene.setEye(new Frame());
+    if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
-    models = new Shape[6];
+    models = new Frame[6];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        models[i] = new Shape(scene, shape());
+        //models[i] = new Frame(scene, shape());
+        models[i] = new Frame(scene);
+        models[i].shape(shape());
       } else {
-        models[i] = new Shape(scene) {
+        models[i] = new Frame(scene) {
           int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
 
           @Override
-          public void setGraphics(PGraphics pg) {
+          public boolean graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
+            return true;
           }
         };
       }
       scene.randomize(models[i]);
+      models[i].setPickingThreshold(0);
     }
 
     // Note that we pass the upper left corner coordinates where the scene1
@@ -141,12 +142,12 @@ public class MiniMap extends PApplet {
       scene.beginDraw();
       scene.frontBuffer().background(75, 25, 15);
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
       scene.endDraw();
       scene.display();
     } else {
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
     }
     if (displayMinimap) {
       scene.shift(minimap);
@@ -155,12 +156,12 @@ public class MiniMap extends PApplet {
       minimap.beginDraw();
       minimap.frontBuffer().background(125, 80, 90);
       minimap.drawAxes();
-      minimap.traverse();
+      minimap.render();
       // draw scene eye
-      minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
+      minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 125);
       minimap.frontBuffer().stroke(0, 0, 255);
       minimap.frontBuffer().strokeWeight(2);
-      minimap.drawEye(scene);
+      minimap.drawFrustum(scene);
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())

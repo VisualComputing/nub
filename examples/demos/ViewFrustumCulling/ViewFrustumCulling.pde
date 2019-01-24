@@ -7,7 +7,7 @@
  *
  * A hierarchical octree structure is clipped against the camera's frustum clipping planes.
  * A second viewer displays an external view of the scene that exhibits the clipping
- * (using scene.drawEye(Scene otherScene) to display the frustum).
+ * (using scene.drawFrustum(Scene otherScene) to display the frustum).
  *
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
@@ -33,14 +33,14 @@ void setup() {
   root.buildBoxHierarchy(4);
 
   scene1 = new Scene(this, P3D, w, h /2);
-  scene1.setType(Graph.Type.ORTHOGRAPHIC);
+  scene1.togglePerspective();
   scene1.enableBoundaryEquations();
   scene1.fit(1);
 
   // Note that we pass the upper left corner coordinates where the scene
   // is to be drawn (see drawing code below) to its constructor.
   scene2 = new Scene(this, P3D, w, h / 2, 0, h / 2);
-  scene2.setType(Graph.Type.ORTHOGRAPHIC);
+  scene2.togglePerspective();
   scene2.setRadius(200);
   scene2.fit();
 }
@@ -60,7 +60,7 @@ void draw() {
   scene2.frontBuffer().pushStyle();
   scene2.frontBuffer().stroke(255, 255, 0);
   scene2.frontBuffer().fill(255, 255, 0, 160);
-  scene2.drawEye(scene1);
+  scene2.drawFrustum(scene1);
   scene2.frontBuffer().popStyle();
   scene2.endDraw();
   scene2.display();
@@ -89,10 +89,7 @@ void mouseClicked(MouseEvent event) {
 
 void keyPressed() {
   if (key == ' ')
-    if (focus.type() == Graph.Type.PERSPECTIVE)
-      focus.setType(Graph.Type.ORTHOGRAPHIC);
-    else
-      focus.setType(Graph.Type.PERSPECTIVE);
+    focus.togglePerspective();
   if (key == 'f') {
     scene1.flip();
     scene2.flip();

@@ -19,7 +19,7 @@ import frames.processing.*;
 
 Scene scene;
 Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-Shape shape;
+Frame shape;
 boolean showEyePath = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -40,11 +40,11 @@ void setup() {
 
   // interpolation 3. Custom (arbitrary) frame interpolations
 
-  shape = new Shape(scene) {
-    // Note that within visit() geometry is defined at the
+  shape = new Frame(scene) {
+    // Note that within render() geometry is defined at the
     // frame local coordinate system.
     @Override
-    public void setGraphics(PGraphics pg) {
+    public boolean graphics(PGraphics pg) {
       pg.pushStyle();
       pg.fill(0, 255, 255, 125);
       pg.stroke(0, 0, 255);
@@ -54,6 +54,7 @@ void setup() {
       else
         pg.box(30);
       pg.popStyle();
+      return true;
     }
   };
   interpolator = new Interpolator(shape);
@@ -66,7 +67,7 @@ void setup() {
 
 void draw() {
   background(0);
-  scene.traverse();
+  scene.render();
 
   pushStyle();
   stroke(255);
@@ -118,7 +119,6 @@ void keyPressed() {
     showEyePath = !showEyePath;
 
   if (key == '1')
-    // same as: eyeInterpolator1.addKeyFrame(scene.eye().get())
     eyeInterpolator1.addKeyFrame();
   if (key == 'a')
     eyeInterpolator1.toggle();
@@ -126,7 +126,6 @@ void keyPressed() {
     eyeInterpolator1.purge();
 
   if (key == '2')
-    // same as: eyeInterpolator2.addKeyFrame(scene.eye().get());
     eyeInterpolator2.addKeyFrame();
   if (key == 'c')
     eyeInterpolator2.toggle();

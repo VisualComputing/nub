@@ -1,7 +1,7 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import org.gamecontrolplus.ControlButton;
 import org.gamecontrolplus.ControlDevice;
 import org.gamecontrolplus.ControlIO;
@@ -37,9 +37,11 @@ public class SpaceNavigator extends PApplet {
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fit(1);
-    Shape[] shapes = new Shape[50];
+    Frame[] shapes = new Frame[50];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene, shape());
+      //shapes[i] = new Frame(scene, shape());
+      shapes[i] = new Frame(scene);
+      shapes[i].shape(shape());
       scene.randomize(shapes[i]);
     }
     smooth();
@@ -56,7 +58,7 @@ public class SpaceNavigator extends PApplet {
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
     if (snPicking)
       spaceNavigatorPicking();
     else

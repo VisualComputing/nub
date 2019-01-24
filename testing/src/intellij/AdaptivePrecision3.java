@@ -2,7 +2,6 @@ package intellij;
 
 import frames.core.Frame;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -12,7 +11,7 @@ import processing.event.MouseEvent;
  */
 public class AdaptivePrecision3 extends PApplet {
   Scene scene;
-  Shape[] shapes;
+  Frame[] shapes;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -22,19 +21,20 @@ public class AdaptivePrecision3 extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Shape[25];
+    shapes = new Frame[25];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Shape(scene, shape(shapes[i]));
+      //shapes[i] = new Frame(scene, shape(shapes[i]));
+      shapes[i] = new Frame(scene);
+      shapes[i].shape(shape());
       scene.randomize(shapes[i]);
-      shapes[i].setPrecisionThreshold(25);
-      shapes[i].setPrecision(Frame.Precision.ADAPTIVE);
+      shapes[i].setPickingThreshold(0.25f);
     }
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
-    scene.traverse();
+    scene.render();
   }
 
   public void keyPressed() {
@@ -60,7 +60,7 @@ public class AdaptivePrecision3 extends PApplet {
     scene.cast();
   }
 
-  PShape shape(Shape shape) {
+  PShape shape() {
     PShape fig = scene.is3D() ? createShape(BOX, 15) : createShape(RECT, 0, 0, 15, 15);
     fig.setStroke(255);
     fig.setFill(color(random(0, 255), random(0, 255), random(0, 255)));

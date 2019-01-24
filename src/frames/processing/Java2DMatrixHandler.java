@@ -21,28 +21,28 @@ import processing.core.PMatrix2D;
 /**
  * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics transformations.
  */
-public class Java2DMatrixHandler extends MatrixHandler {
-  protected PGraphics _pgraphics;
+class Java2DMatrixHandler extends MatrixHandler {
+  protected Graph _graph;
 
-  public Java2DMatrixHandler(Graph graph, PGraphics renderer) {
-    super(graph);
-    _pgraphics = renderer;
+  public Java2DMatrixHandler(Graph graph) {
+    super(graph.width(), graph.height());
+    _graph = graph;
   }
 
   /**
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
-    return _pgraphics;
+    return (PGraphics) _graph.frontBuffer();
   }
 
   // Comment the above line and uncomment this one to develop the driver:
   // public PGraphicsJava2D frontBuffer() { return (PGraphicsJava2D) frontBuffer; }
 
   @Override
-  protected void _bind() {
-    _projection.set(graph().eye().projection(graph().type(), graph().width(), graph().height(), graph().zNear(), graph().zFar(), graph().isLeftHanded()));
-    _view.set(graph().eye().view());
+  protected void _bind(Matrix projection, Matrix view) {
+    _projection = projection;
+    _view = view;
     _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();

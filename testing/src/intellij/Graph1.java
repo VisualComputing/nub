@@ -39,13 +39,13 @@ public class Graph1 extends PApplet {
     graph.preDraw();
     background(0);
     for (int i = 0; i < frames.length; i++) {
-      graph.pushModelView();
-      graph.applyModelView(frames[i].matrix());
+      graph.matrixHandler().pushModelView();
+      graph.matrixHandler().applyModelView(frames[i].matrix());
       //model-view changed:
       setUniforms();
       fill(0, frames[i].isTracked(graph) ? 0 : 255, 255);
       box(5);
-      graph.popModelView();
+      graph.matrixHandler().popModelView();
     }
   }
 
@@ -71,7 +71,7 @@ public class Graph1 extends PApplet {
 // we need to update the shader:
   void setUniforms() {
     shader(framesShader);
-    pmv = Matrix.multiply(graph.projection(), graph.modelView());
+    pmv = Matrix.multiply(graph.matrixHandler().projection(), graph.matrixHandler().modelView());
     pmatrix.set(pmv.get(new float[16]));
     framesShader.set("frames_transform", pmatrix);
   }

@@ -1,10 +1,10 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -29,9 +29,9 @@ public class MouseDragInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Shape shape1 = new Shape(scene) {
+    Frame shape1 = new Frame(scene) {
       @Override
-      public void setGraphics(PGraphics pGraphics) {
+      public boolean graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -41,13 +41,14 @@ public class MouseDragInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
+        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
-    Shape shape2 = new Shape(shape1);
-    shape2.setGraphics(shape());
+    Frame shape2 = new Frame(shape1);
+    shape2.shape(shape());
     shape2.translate(275, 275);
 
     randomVector = Vector.random();
@@ -59,15 +60,11 @@ public class MouseDragInteraction extends PApplet {
     fill(0, 255, 255);
     scene.drawArrow(randomVector);
     scene.drawAxes();
-    // visit scene frames (shapes simply get drawn)
-    scene.traverse();
+    // render scene frames (shapes simply get drawn)
+    scene.render();
   }
 
   public void keyPressed() {
-    if (key == 'e')
-      scene.enableBackBuffer();
-    if (key == 'd')
-      scene.disableBackBuffer();
     if (key == 'f')
       scene.flip();
     if (key == 's')

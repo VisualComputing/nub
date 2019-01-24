@@ -68,7 +68,7 @@ public class Graph3 extends PApplet {
     // can't pick because the matrixHandler cacheProjectionView is not updated
     updateMatrices();
     background(125);
-    graph.traverse();
+    graph.render();
   }
 
   public void mouseMoved() {

@@ -280,7 +280,7 @@ public class BioIk extends Solver {
             return;
         }
         for(Integer endEffector : _target.keySet()) {
-            _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation()));
+            _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
         }
         //If there is no population then genereate one
         _population = Util.generatePopulation(_structure, _population_size);

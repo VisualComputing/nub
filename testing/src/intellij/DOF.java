@@ -1,8 +1,8 @@
 package intellij;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -11,10 +11,11 @@ import processing.opengl.PShader;
 
 public class DOF extends PApplet {
   PShader depthShader, dofShader;
-  PGraphics srcPGraphics, depthPGraphics, dofPGraphics;
+  PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
-  Shape[] models;
+  Frame[] models;
   int mode = 2;
+  boolean exact = true;
 
   @Override
   public void settings() {
@@ -24,22 +25,22 @@ public class DOF extends PApplet {
   @Override
   public void setup() {
     colorMode(HSB, 255);
-    srcPGraphics = createGraphics(width, height, P3D);
-    scene = new Scene(this, srcPGraphics);
-    //scene.setType(Graph.Type.PERSPECTIVE);
-    //scene.setType(Graph.Type.ORTHOGRAPHIC);
+    scene = new Scene(this, P3D, width, height);
     scene.setRadius(1000);
     scene.fit(1);
 
-    models = new Shape[100];
+    models = new Frame[100];
 
     for (int i = 0; i < models.length; i++) {
-      models[i] = new Shape(scene, boxShape());
+      //models[i] = new Frame(scene, boxShape());
+      models[i] = new Frame(scene, boxShape());
       scene.randomize(models[i]);
     }
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth.glsl");
-    depthShader.set("maxDepth", scene.radius() * 2);
+    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth_linear.glsl");
+    //depthShader.set("maxDepth", scene.radius() * 2);
+    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
@@ -57,14 +58,18 @@ public class DOF extends PApplet {
   public void draw() {
     // 1. Draw into main buffer
     scene.beginDraw();
+    for (int i = 0; i < models.length; i++)
+      scene.drawShooterTarget(models[i]);
     scene.frontBuffer().background(0);
-    scene.traverse();
+    scene.render();
     scene.endDraw();
 
     // 2. Draw into depth buffer
     depthPGraphics.beginDraw();
     depthPGraphics.background(0);
-    scene.traverse(depthPGraphics);
+    depthShader.set("near", scene.zNear());
+    depthShader.set("far", scene.zFar());
+    scene.render(depthPGraphics);
     depthPGraphics.endDraw();
 
     // 3. Draw destination buffer
@@ -105,6 +110,15 @@ public class DOF extends PApplet {
       scene.fit(1);
     if (key == 'F')
       scene.fit();
+    if (key == 'p') {
+      exact = !exact;
+      for (int i = 0; i < models.length; i++)
+        models[i].setPickingThreshold(exact ? 0 : 0.7f);
+      if (scene.backBuffer() == null)
+        println("backBuffer disabled");
+      else
+        println("backBuffer enabled");
+    }
   }
 
   @Override

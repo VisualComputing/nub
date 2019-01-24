@@ -10,7 +10,6 @@
 
 package frames.processing;
 
-import frames.core.Graph;
 import frames.core.MatrixHandler;
 import frames.primitives.Matrix;
 import processing.core.PMatrix3D;
@@ -19,11 +18,11 @@ import processing.opengl.PGraphicsOpenGL;
 /**
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.
  */
-public class GLMatrixHandler extends MatrixHandler {
+class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
-  public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
-    super(graph);
+  public GLMatrixHandler(PGraphicsOpenGL renderer) {
+    super(renderer.width, renderer.height);
     _pgraphics = renderer;
   }
 
@@ -76,7 +75,7 @@ public class GLMatrixHandler extends MatrixHandler {
 
   @Override
   public void _bindModelView(Matrix matrix) {
-    if (_graph.is3D())
+    if (pggl().is3D())
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(matrix));

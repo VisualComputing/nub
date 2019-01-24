@@ -191,7 +191,7 @@ public class ExampleTaglet implements Taglet {
   					"dd.style.display = toOpen? 'block':''; dt.getElementsByTagName('span')[0].innerHTML  = toOpen? '-':'+' ; }\n" +
   					"-->\n</script>";
 
-		return dd+"\n<div id=\"test\" class=\"toggleList\">" +
+		return dd+"\n<div colorID=\"test\" class=\"toggleList\">" +
 		"<dl><dt onclick=\"toggle(this);\"><span>+</span>Example</dt>" +
 		"<dd><pre>"+theString+"</pre>" +
 		"</dd></dl></div>";

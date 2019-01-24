@@ -3,7 +3,6 @@ package intellij;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -11,8 +10,8 @@ import processing.event.MouseEvent;
 
 public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
-  Shape[] models;
-  Shape sceneEye;
+  Frame[] models;
+  Frame sceneEye;
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
@@ -34,28 +33,29 @@ public class MiniMap2 extends PApplet {
     // set a detached eye frame
 
     scene.setEye(new Frame());
-    if (renderer == P3D)
-      scene.setType(Graph.Type.PERSPECTIVE, THIRD_PI);
-    else
+    if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
-    models = new Shape[6];
+    models = new Frame[6];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        models[i] = new Shape(scene, shape());
+        //models[i] = new Frame(scene, shape());
+        models[i] = new Frame(scene);
+        models[i].shape(shape());
       } else {
-        models[i] = new Shape(scene) {
+        models[i] = new Frame(scene) {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
-
           @Override
-          public void setGraphics(PGraphics pg) {
+          public boolean graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
             scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
+            return true;
           }
         };
       }
+      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
@@ -68,15 +68,16 @@ public class MiniMap2 extends PApplet {
     //if (renderer == P3D)
     //minimap.setType(Graph.Type.ORTHOGRAPHIC);
     minimap.fit(1);
-    sceneEye = new Shape(minimap) {
+    sceneEye = new Frame(minimap) {
       @Override
-      public void setGraphics(PGraphics pg) {
+      public boolean graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
-        minimap.drawEye(pg, scene);
+        minimap.drawFrustum(pg, scene);
         pg.popStyle();
+        return true;
       }
     };
   }
@@ -140,12 +141,12 @@ public class MiniMap2 extends PApplet {
       scene.beginDraw();
       scene.frontBuffer().background(75, 25, 15);
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
       scene.endDraw();
       scene.display();
     } else {
       scene.drawAxes();
-      scene.traverse();
+      scene.render();
     }
     if (displayMinimap) {
       scene.shift(minimap);
@@ -154,7 +155,7 @@ public class MiniMap2 extends PApplet {
       minimap.beginDraw();
       minimap.frontBuffer().background(125, 80, 90);
       minimap.drawAxes();
-      minimap.traverse();
+      minimap.render();
       minimap.endDraw();
       minimap.display();
       if (!scene.isOffscreen())
