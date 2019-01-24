@@ -2791,7 +2791,7 @@ public class Graph {
    */
   protected void _draw(Frame frame) {
     _matrixHandler.pushModelView();
-    _applyTransformation(_matrixHandler, frame, is2D());
+    applyTransformation(frame);
     _trackFrontBuffer(frame);
     frame.visit();
     if (!frame.isCulled()) {
@@ -2850,7 +2850,6 @@ public class Graph {
       for (Frame child : frame.children())
         _draw(matrixHandler, context, child);
     }
-
     matrixHandler.popModelView();
   }
 
