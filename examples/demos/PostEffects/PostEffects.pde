@@ -85,7 +85,7 @@ public void setup() {
 }
 
 public void draw() {
-  PGraphics graphics = drawGraphics = scene.frontBuffer();
+  PGraphics graphics = drawGraphics = scene.context();
 
   // 1. Draw into main buffer
   scene.beginDraw();

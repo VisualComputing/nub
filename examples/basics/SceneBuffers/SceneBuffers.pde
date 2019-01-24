@@ -42,7 +42,7 @@ void setup() {
 void draw() {
   // 1. Fill in and display front-buffer
   scene.beginDraw();
-  scene.frontBuffer().background(10,50,25);
+  scene.context().background(10,50,25);
   scene.render();
   scene.endDraw();
   scene.display();

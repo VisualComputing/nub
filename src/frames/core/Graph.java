@@ -2792,9 +2792,9 @@ public class Graph {
   protected void _draw(Frame frame) {
     _matrixHandler.pushModelView();
     applyTransformation(frame);
-    _trackFrontBuffer(frame);
     frame.visit();
     if (!frame.isCulled()) {
+      _trackFrontBuffer(frame);
       if (isOffscreen())
         _trackBackBuffer(frame);
       draw(context(), frame);

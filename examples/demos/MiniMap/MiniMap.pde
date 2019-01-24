@@ -140,7 +140,7 @@ void draw() {
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
-    scene.frontBuffer().background(75, 25, 15);
+    scene.context().background(75, 25, 15);
     scene.drawAxes();
     scene.render();
     scene.endDraw();
@@ -155,13 +155,13 @@ void draw() {
     if (!scene.isOffscreen())
       scene.beginHUD();
     minimap.beginDraw();
-    minimap.frontBuffer().background(125, 80, 90);
+    minimap.context().background(125, 80, 90);
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    minimap.frontBuffer().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
-    minimap.frontBuffer().stroke(0, 0, 255);
-    minimap.frontBuffer().strokeWeight(2);
+    minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
+    minimap.context().stroke(0, 0, 255);
+    minimap.context().strokeWeight(2);
     minimap.drawFrustum(scene);
     minimap.endDraw();
     minimap.display();
