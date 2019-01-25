@@ -2814,8 +2814,9 @@ public class Graph {
    */
   public void render(Object context) {
     if (context == context())
-      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context)");
-    render(context, _matrixHandler.projection(), _matrixHandler.cacheView());
+      render();
+    else
+      render(context, _matrixHandler.projection(), _matrixHandler.cacheView());
   }
 
   /**
