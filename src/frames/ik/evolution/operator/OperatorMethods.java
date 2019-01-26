@@ -17,20 +17,13 @@ import java.util.Set;
 public class OperatorMethods {
     public static class UniformMutation extends Operator{
         protected float _delta = (float) Math.toRadians(30);
-        protected float _rate = 0;
-
-        public void setRate(Individual... individuals){
-            _rate = 0;
-            for(Individual individual : individuals) _rate += individual.floatParams().get("Extinction");
-            _rate /= individuals.length;
-        }
 
         @Override
         public Individual apply(Individual... individuals) {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = (_rate * (n - 1) + 1) / n;
+            float alpha = 1 / n;
             float beta = _delta;
 
             for (int i = 0; i < individual.structure().size(); i++) {
@@ -50,20 +43,13 @@ public class OperatorMethods {
 
     public static class GaussianMutation extends Operator{
         protected float _sigma = (float) Math.toRadians(30);
-        protected float _rate = 0;
-
-        public void setRate(Individual... individuals){
-            _rate = 0;
-            for(Individual individual : individuals) _rate += individual.floatParams().get("Extinction");
-            _rate /= individuals.length;
-        }
 
         @Override
         public Individual apply(Individual... individuals) {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = (_rate * (n - 1) + 1) / n;
+            float alpha = 1 / n;
             float beta = _sigma;
 
             for (int i = 0; i < individual.structure().size(); i++) {

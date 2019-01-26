@@ -181,11 +181,7 @@ public class HAEASolver  extends Solver {
                     System.out.println("P2 : \n \t" + parents.get(0));
                 }
                 children.add(operator.apply(parents.toArray(new Individual[parents.size()])));
-            } else if(operator instanceof OperatorMethods.UniformMutation){
-                ((OperatorMethods.UniformMutation) operator).setRate(individual);
-                children.add(operator.apply(individual));
-            } else if(operator instanceof OperatorMethods.GaussianMutation){
-                ((OperatorMethods.GaussianMutation) operator).setRate(individual);
+            } else{
                 children.add(operator.apply(individual));
             }
             //Find best between children and individual

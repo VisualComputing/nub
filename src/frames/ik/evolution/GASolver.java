@@ -140,11 +140,6 @@ public class GASolver extends Solver {
                     child.updateFitness(_target);
                     System.out.println("\t Child " + child);
                 }
-                if(_mutation instanceof OperatorMethods.UniformMutation){
-                    ((OperatorMethods.UniformMutation) _mutation).setRate(parents.get(i), parents.get(i + 1));
-                } else if(_mutation instanceof OperatorMethods.GaussianMutation){
-                    ((OperatorMethods.GaussianMutation) _mutation).setRate(parents.get(i), parents.get(i + 1));
-                }
                 child = _mutation.apply(child);
                 child.updateFitness(_target);
                 children.add(child);
