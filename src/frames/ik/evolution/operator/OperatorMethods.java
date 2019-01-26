@@ -23,7 +23,7 @@ public class OperatorMethods {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = 1 / n;
+            float alpha = 1.0f / n;
             float beta = _delta;
 
             for (int i = 0; i < individual.structure().size(); i++) {
@@ -49,7 +49,7 @@ public class OperatorMethods {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = 1 / n;
+            float alpha = 1.0f / n;
             float beta = _sigma;
 
             for (int i = 0; i < individual.structure().size(); i++) {

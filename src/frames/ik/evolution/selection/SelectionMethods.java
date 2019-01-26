@@ -14,13 +14,12 @@ import java.util.Random;
 public class SelectionMethods {
 
     public static class Uniform implements Selection {
-        protected Random _random = new Random();
         @Override
         public List<Individual> choose(boolean replacement, List<Individual> population, int m) {
             ArrayList<Individual> choosed = new ArrayList<Individual>();
             List<Individual> list = replacement ? population : new ArrayList<Individual>(population);
             for(int i = 0; i < m; i++){
-                int index = _random.nextInt(list.size());
+                int index = Util.random.nextInt(list.size());
                 choosed.add(list.get(index));
                 if(!replacement) list.remove(index);
             }
@@ -29,7 +28,6 @@ public class SelectionMethods {
     }
 
     public static class Roulette implements Selection {
-        protected Random _random = new Random();
         protected List<Float> _fitness;
 
         public void setFitness(List<Float> fitness){
@@ -56,7 +54,7 @@ public class SelectionMethods {
             int n = list.size();
             float sum = _sumFitness(population);
             for(int i = 0; i < m; i++){
-                float value = _random.nextFloat() * sum;
+                float value = Util.random.nextFloat() * sum;
                 boolean selected = false;
                 for(int j = 0; j < n; j++){
                     value = value - fitness(list, j);
