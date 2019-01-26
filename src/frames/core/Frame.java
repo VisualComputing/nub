@@ -2290,6 +2290,7 @@ public class Frame {
 
   /**
    * Override this method to set an immediate mode graphics procedure on {@code context}.
+   * Return {@code true} if succeeded and {@code false} otherwise.
    * <p>
    * Sets both the front and the back shape to the same graphics procedure.
    * Override {@link #frontGraphics(Object)} and {@link #backGraphics(Object)} to set different
@@ -2306,6 +2307,7 @@ public class Frame {
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
    * front shape. Use it in conjunction with @see #backGraphics(Object).
+   * Return {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #graphics(Object)
    * @see #shape(Object)
@@ -2317,6 +2319,7 @@ public class Frame {
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
    * shape used for picking. Use it in conjunction with @see #frontGraphics(Object).
+   * Return {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #graphics(Object)
    * @see #shape(Object)
@@ -2373,7 +2376,7 @@ public class Frame {
 
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing
-   * {@code PGraphics}.
+   * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
    * <p>
    * Sets both the front and the back shape to the same graphics procedure.
    *
@@ -2387,6 +2390,7 @@ public class Frame {
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
    * front shape. Use it in conjunction with @see #backGraphics(processing.core.PGraphics).
+   * Return {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #graphics(processing.core.PGraphics)
    */
@@ -2397,6 +2401,7 @@ public class Frame {
   /**
    * Override this method to set an immediate mode graphics procedure to draw the
    * shape used for picking. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
+   * Return {@code true} if succeeded and {@code false} otherwise.
    *
    * @see #graphics(processing.core.PGraphics)
    */
