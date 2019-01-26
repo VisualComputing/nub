@@ -6,10 +6,7 @@ import frames.ik.evolution.operator.Operator;
 import frames.ik.evolution.operator.OperatorMethods;
 import frames.ik.evolution.selection.Selection;
 import frames.ik.evolution.selection.SelectionMethods;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
 
-import java.io.PrintWriter;
 import java.util.*;
 
 /**
@@ -24,12 +21,12 @@ public class GASolver extends Solver {
     protected Operator _mutation;
     protected Operator _crossover;
     protected float _cross_probability = 1f;
-    protected int _population_size = 10;
-    protected Replacement replacement = Replacement.KEEP_BEST;
+    protected int _population_size;
+    protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
     protected HashMap<Integer, Frame> _previousTarget;
-    protected HashMap<Integer, Frame> _target;
+    protected HashMap<Integer, Frame> _targets;
     protected List<Frame> _structure;
     protected List<Individual> _population;
     protected Individual _best;
@@ -37,14 +34,14 @@ public class GASolver extends Solver {
 
     protected List<Statistics> _statistics;
 
-    protected boolean _debug = false;
+    protected boolean _debug = true;
 
     public GASolver(List<Frame> structure, int population_size){
         this._structure = structure;
         this._population_size = population_size;
-        this._target = new HashMap<Integer, Frame>();
+        this._targets = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
-        _selection = new SelectionMethods.Ranking();
+        _selection = new SelectionMethods.Tournament();
         _mutation = new OperatorMethods.UniformMutation();
         _crossover = new OperatorMethods.ConvexCombination();
     }
@@ -90,7 +87,7 @@ public class GASolver extends Solver {
     }
 
     public void setTarget(Frame endEffector, Frame target) {
-        this._target.put(structure().indexOf(endEffector), target);
+        this._targets.put(structure().indexOf(endEffector), target);
     }
 
     public float execute(){
@@ -100,7 +97,7 @@ public class GASolver extends Solver {
         _population = Util.generatePopulation(_structure, _population_size);
         //2. Update Fitness
         for(Individual individual : _population){
-            individual.updateFitness(_target);
+            individual.updateFitness(_targets);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
         //3. Iterate a given number of times.
@@ -137,18 +134,18 @@ public class GASolver extends Solver {
                     System.out.println("\t Best " + _best);
                     System.out.println("\t P1 " + parents.get(i));
                     System.out.println("\t P2 " + parents.get(i + 1));
-                    child.updateFitness(_target);
+                    child.updateFitness(_targets);
                     System.out.println("\t Child " + child);
                 }
                 child = _mutation.apply(child);
-                child.updateFitness(_target);
+                child.updateFitness(_targets);
                 children.add(child);
                 best = best == null ? child : best.fitness() > child.fitness() ? child : best;
                 worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
 
             } else{
                 Individual child = parents.get(i);
-                children.add(child);
+                if(replacement != Replacement.ELITISM) children.add(child);
                 best = best == null ? child : best.fitness() > child.fitness() ? child : best;
                 worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
             }
@@ -164,7 +161,7 @@ public class GASolver extends Solver {
         switch (replacement){
             case ELITISM:{
                 //Keep best individuals
-                _population = Util.concatenate(parents, children);
+                _population = Util.concatenate(_population, children);
                 _population = Util.sort(true, false, _population);
                 _best = _population.get(0);
                 _population = _population.subList(0, _population_size);
@@ -214,16 +211,16 @@ public class GASolver extends Solver {
 
     @Override
     protected boolean _changed() {
-        if (_target == null) {
+        if (_targets == null) {
             _previousTarget = null;
             return false;
         } else if (_previousTarget == null) {
             return true;
         }
-        for(Integer endEffector : _target.keySet()){
+        for(Integer endEffector : _targets.keySet()){
             if(_previousTarget.get(endEffector) == null) return true;
-            if(!(_previousTarget.get(endEffector).position().matches(_target.get(endEffector).position()) &&
-                    _previousTarget.get(endEffector).orientation().matches(_target.get(endEffector).orientation()))){
+            if(!(_previousTarget.get(endEffector).position().matches(_targets.get(endEffector).position()) &&
+                    _previousTarget.get(endEffector).orientation().matches(_targets.get(endEffector).orientation()))){
                 return true;
             }
         }
@@ -232,19 +229,20 @@ public class GASolver extends Solver {
 
     @Override
     protected void _reset() {
+        System.out.println("Entra");
         _best = null;
         iterations = 0;
-        if(_target == null){
+        if(_targets == null){
             _previousTarget = null;
             return;
         }
-        for(Integer endEffector : _target.keySet()) {
-            _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
+        for(Integer endEffector : _targets.keySet()) {
+            _previousTarget.put(endEffector, new Frame(_targets.get(endEffector).position(), _targets.get(endEffector).orientation(), 1));
         }
         //If there is no population then genereate one
         _population = Util.generatePopulation(_structure, _population_size);
         for (Individual individual : _population) {
-            individual.updateFitness(_target);
+            individual.updateFitness(_targets);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
     }
