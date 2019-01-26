@@ -5,7 +5,6 @@ import frames.core.Graph;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import de.voidplus.leapmotion.*;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -39,19 +38,22 @@ public class LeapMotionTest2 extends PApplet {
         scene.setRadius(1500);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fit(1);
-        Shape[] shapes = new Shape[10];
+        Frame[] shapes = new Frame[10];
         for (int i = 0; i < shapes.length; i++) {
             if(i == i)break;
-            shapes[i] = new Shape(scene, shape());
+            shapes[i] = new Frame(scene, shape());
             shapes[i].setPosition( (i*1.f/shapes.length)*scene.radius()*2 - scene.radius(),0,0);
+            shapes[i].setPickingThreshold(0);
             scene.setTrackedFrame("LEAP"+i, shapes[i]);
         }
         smooth();
         setupLeapMotion();
-        index = new Shape(scene, shape());
+        index = new Frame(scene, shape());
         index.setTranslation(10,10,10);
-        index_w = new Shape(scene, shape());
+        index.setPickingThreshold(0);
+        index_w = new Frame(scene, shape());
         index_w.setTranslation(-10,-10,-10);
+        index_w.setPickingThreshold(0);
     }
 
     PShape shape() {
@@ -64,7 +66,7 @@ public class LeapMotionTest2 extends PApplet {
     public void draw() {
         background(100);
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
         updatePos();
         scene.beginHUD();
         for (Hand hand : leap.getHands ()) {

@@ -9,7 +9,6 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -28,7 +27,7 @@ public class ConePolygon extends PApplet{
     Scene scene;
     CCDSolver ccd_solver;
     ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
-    ArrayList<Shape> targets = new ArrayList<Shape>();
+    ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
         size(700, 700, P3D);
@@ -39,16 +38,16 @@ public class ConePolygon extends PApplet{
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(num_joints * boneLength / 1.5f);
         scene.fit(1);
-        scene.disableBackBuffer();
-
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
+        for(int i = 0; i < 3; i++){
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.add(target);
+        }
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         float v = 20;
@@ -132,7 +131,7 @@ public class ConePolygon extends PApplet{
             ccd_solver.solve();
             for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
         }
-        scene.traverse();
+        scene.render();
 
     }
 
@@ -201,7 +200,7 @@ public class ConePolygon extends PApplet{
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPrecision(Frame.Precision.FIXED);
+            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child

@@ -25,7 +25,6 @@ public class Joint extends Frame{
         _color = color;
         _radius = radius;
         _pGraphics = scene.frontBuffer();
-        _precision = Precision.ADAPTIVE;
         _threshold = _radius*2;
     }
 

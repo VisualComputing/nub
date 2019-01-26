@@ -5,7 +5,6 @@ import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -14,7 +13,7 @@ import processing.core.PShape;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Target extends Shape {
+public class Target extends Frame {
     //TODO : Reduce code Duplicaion by means of Abstract Class
     //TODO : Improve multiple translation
     protected static List<Target> _selectedTargets = new ArrayList<Target>();
@@ -32,7 +31,7 @@ public class Target extends Shape {
         _redBall.setFill(scene.pApplet().color(255, 0, 0));
 
         _interpolator = new Interpolator(this);
-        setGraphics(_redBall);
+        shape(_redBall);
         setReference(scene.trackedFrame().reference());
         setPosition(frame.position());
         setOrientation(frame.orientation());
@@ -47,11 +46,11 @@ public class Target extends Shape {
         String command = (String) gesture[0];
         if (command.matches("KeepSelected")) {
             if(!_selectedTargets.contains(this)){
-                _redBall.setFill(graph().pApplet().color(0,255,0));
+                _redBall.setFill(((Scene)graph()).pApplet().color(0,255,0));
                 _selectedTargets.add(this);
             }
             else{
-                _redBall.setFill(graph().pApplet().color(255,0,0));
+                _redBall.setFill(((Scene)graph()).pApplet().color(255,0,0));
                 _selectedTargets.remove(this);
             }
         } else if(command.matches("Add")){
@@ -76,7 +75,7 @@ public class Target extends Shape {
     public static void multipleTranslate(){
         for(Target target : _selectedTargets){
             if(target.graph().defaultFrame() != target)
-                target.graph().translate(target);
+                ((Scene)target.graph()).translate(target);
         }
     }
 

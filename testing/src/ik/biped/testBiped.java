@@ -8,7 +8,6 @@ import frames.core.constraint.PlanarPolygon;
 import frames.ik.Solver;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -37,7 +36,7 @@ public class testBiped extends PApplet {
         scene.setFOV(PI / 3);
         scene.setRadius(50 * 5);
         scene.fit(1);
-        scene.disableBackBuffer();
+        //scene.disableBackBuffer();
 
         targets = new ArrayList<>();
 
@@ -45,10 +44,11 @@ public class testBiped extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
+        for(int i = 0; i < 4; i++){
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.add(target);
+        }
 
         biped = new Biped(scene, null, new Vector());
 
@@ -68,7 +68,7 @@ public class testBiped extends PApplet {
         scene.drawAxes();
         biped.draw();
         biped.solve();
-        scene.traverse();
+        scene.render();
     }
 
     @Override

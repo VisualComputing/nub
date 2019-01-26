@@ -81,7 +81,7 @@ public class ESSolver extends Solver {
         ArrayList<Frame> copy = new ArrayList<Frame>();
         Frame reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get());
+            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
         }
         for (Frame joint : chain) {
             Frame newJoint = new Frame();
@@ -155,7 +155,7 @@ public class ESSolver extends Solver {
 
     @Override
     protected void _reset() {
-        _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
+        _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
         iterations = 0;
     }
 

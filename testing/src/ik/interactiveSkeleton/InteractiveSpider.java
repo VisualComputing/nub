@@ -10,7 +10,6 @@ import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -34,7 +33,7 @@ public class InteractiveSpider extends PApplet {
     public static class Spider{
         float[] velocity = new float[]{0.2f, 0.2f}; //save direction and angle
 
-        Shape shape;
+        Frame shape;
         PShape pshape;
         Interpolator[] interpolator;
 
@@ -54,7 +53,8 @@ public class InteractiveSpider extends PApplet {
 
             float targetRadius = bodyWidth/10.f;
 
-            shape = new Shape(scene, pshape);
+            shape = new Frame(scene, pshape);
+            shape.setPickingThreshold(0);
             //create targets
             Frame[] targets = new Frame[legs];
             interpolator = new Interpolator[legs];
@@ -112,7 +112,7 @@ public class InteractiveSpider extends PApplet {
 
         //Skeleton and IK Stuff
         public Joint leg(int i, Frame reference, Vector upper, Vector middle, Vector lower, Frame target, boolean invert, float radius){
-            Scene scene = shape.graph();
+            Scene scene = (Scene) (shape.graph());
             Joint j1 = new Joint(scene, radius);
             j1.setReference(reference);
             j1.setPosition(reference.worldLocation(upper));
@@ -156,7 +156,7 @@ public class InteractiveSpider extends PApplet {
         }
 
         public void addIk(int i, Frame root, Frame endEffector, Frame target, boolean invert){
-            Scene scene = shape.graph();
+            Scene scene = (Scene) (shape.graph());
             target.setReference(root.reference());
             target.setPosition(endEffector.position());
             interpolator[i] = legPath(target, Vector.distance(root.position(), endEffector.position())*0.1f, invert);
@@ -167,7 +167,7 @@ public class InteractiveSpider extends PApplet {
         }
 
         public Interpolator legPath(Frame target, float amplitude, boolean invert) {
-            Scene scene = shape.graph();
+            Scene scene = (Scene) (shape.graph());
             Interpolator targetInterpolator = new Interpolator(target);
             targetInterpolator.setLoop();
             targetInterpolator.setSpeed(8.2f);
@@ -239,8 +239,8 @@ public class InteractiveSpider extends PApplet {
         userSpider.shape.setPosition(0,userSpider.shape.position().y(),0);
         userSpider.pshape.setFill(color(255,0,0));
 
-        Shape cursor = new Shape(scene);
-        cursor.setFrontGraphics(diamond(scene.radius()*0.2f, scene.radius()*0.1f, scene.radius()*0.1f));
+        Frame cursor = new Frame(scene);
+        cursor.shape(diamond(scene.radius()*0.2f, scene.radius()*0.1f, scene.radius()*0.1f));
 
         cursor.setReference(userSpider.shape);
         cursor.setTranslation(0, -scene.radius()*0.3f, 0);
@@ -256,7 +256,7 @@ public class InteractiveSpider extends PApplet {
         directionalLight(102, 102, 102, 0, 0, -1);
         specular(255, 255, 255);
 
-        scene.traverse();
+        scene.render();
         for(int i = 0; i < spiders.length; i++) {
             spiders[i].keepInside();
             Vector p = spiders[i].shape.translation();

@@ -297,7 +297,7 @@ public class BVHParser {
                 }
                 i++;
             }
-            Frame next = new Frame(current.translation().get(), current.rotation().get());
+            Frame next = new Frame(current.translation().get(), current.rotation().get(), 1);
 
             switch(properties._parametrization){
                 case "XYZ":{

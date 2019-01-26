@@ -14,7 +14,6 @@ import frames.primitives.Vector;
 import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -28,7 +27,7 @@ public class Puppet extends PApplet {
     //TODO : Update
     Scene scene;
     HashMap<String, ArrayList<Joint>> limbs;
-    HashMap<String, Shape> targets;
+    HashMap<String, Frame> targets;
     String[] keys = {"LeftArm", "RightArm", "LeftFoot", "RightFoot"};
     float boneLenght = 50;
     float targetRadius = 7;
@@ -44,7 +43,7 @@ public class Puppet extends PApplet {
         scene.setFOV(PI / 3);
         scene.setRadius(boneLenght * 5);
         scene.fit(1);
-        scene.disableBackBuffer();
+        //scene.disableBackBuffer();
 
         targets = new HashMap<>();
         limbs = new HashMap<>();
@@ -54,7 +53,9 @@ public class Puppet extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            targets.put(key, new Shape(scene, redBall));
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.put(key, target);
         }
 
         //right arm
@@ -89,7 +90,7 @@ public class Puppet extends PApplet {
         background(0);
         lights();
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
     }
 
 

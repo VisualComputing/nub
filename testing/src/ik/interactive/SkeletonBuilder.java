@@ -12,7 +12,6 @@ import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import net.java.games.input.Mouse;
 import processing.core.PApplet;
@@ -82,7 +81,7 @@ public class SkeletonBuilder extends PApplet{
         scene.drawGrid();
         stroke(255,0,0);
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
         for(Target target : targets){
             scene.drawPath(target._interpolator, 5);
         }
@@ -113,7 +112,7 @@ public class SkeletonBuilder extends PApplet{
             views[i].beginDraw();
             views[i].frontBuffer().background(100);
             views[i].drawAxes();
-            views[i].traverse();
+            views[i].render();
             views[i].endDraw();
             views[i].display();
             if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());

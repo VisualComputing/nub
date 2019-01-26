@@ -5,7 +5,7 @@ import frames.core.constraint.Constraint;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
+
 import processing.core.PConstants;
 import processing.core.PGraphics;
 
@@ -16,7 +16,7 @@ public class Slider {
     protected Scene _scene;
     protected String _name;
     protected Frame _bar;
-    protected Shape _pointer;
+    protected Frame _pointer;
     protected float _min = 0, _max = 100;
     protected float _offset, _bar_width, _text_width;
 
@@ -77,16 +77,17 @@ public class Slider {
         };
 
         _bar.setPosition(_position);
-        _bar.setPrecisionThreshold(0);
-        _pointer = new Shape(_bar){
+        _bar.setPickingThreshold(0.0001f);
+        _pointer = new Frame(_bar){
             @Override
-            public void setGraphics(PGraphics pGraphics) {
+            public boolean graphics(PGraphics pGraphics) {
                 pGraphics.pushStyle();
                 pGraphics.rectMode(PConstants.CENTER);
                 pGraphics.stroke(255,0,0);
                 pGraphics.fill(255,0,0);
                 pGraphics.rect(0,0, detail, _height*0.8f);
                 pGraphics.popStyle();
+                return true;
             }
             @Override
             public void interact(Object... objects){
@@ -96,8 +97,8 @@ public class Slider {
         };
         Vector v = new Vector(_text_width + detail/2.f,-0.8f*_height/2.f);
         _pointer.setTranslation(v);
-        _pointer.setPrecision(Frame.Precision.ADAPTIVE);
-        _pointer.setPrecisionThreshold(detail);
+        _pointer.setPickingThreshold(0.25f);
+        //_pointer.setPrecisionThreshold(detail);
 
         _offset = _text_width + detail/2.f;
         //Pointer is constrained to X-Axis

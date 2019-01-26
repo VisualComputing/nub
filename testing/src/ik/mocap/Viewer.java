@@ -11,7 +11,6 @@ import frames.primitives.Vector;
 import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -32,7 +31,7 @@ public class Viewer extends PApplet{
     BVHParser parser;
     HashMap<String, Frame> originalLimbs = new HashMap<String, Frame>();
     HashMap<String,Frame> limbs = new HashMap<String, Frame>();
-    HashMap<String,Shape> targets = new HashMap<String, Shape>();
+    HashMap<String,Frame> targets = new HashMap<String, Frame>();
 
     Frame root, rootIK;
 
@@ -130,11 +129,13 @@ public class Viewer extends PApplet{
 
     }
 
-    public Shape createTarget(float radius){
+    public Frame createTarget(float radius){
         PShape redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        return new Shape(scene, redBall);
+        Frame target = new Frame(scene, redBall);
+        target.setPickingThreshold(0);
+        return target;
     }
 
     public void draw() {
@@ -142,7 +143,7 @@ public class Viewer extends PApplet{
         lights();
         //Draw Constraints
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
         if(read){
             parser.nextPose();
             //updateTargets();

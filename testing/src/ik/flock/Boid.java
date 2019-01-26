@@ -4,7 +4,6 @@ import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;

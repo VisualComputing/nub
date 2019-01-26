@@ -137,7 +137,7 @@ public class TreeSolver extends FABRIKSolver {
       newTarget.add(Vector.multiply(child._solver()._positions().get(0), 1.f / totalWeight));
     }
     if (newTarget.magnitude() > 0) {
-      solver.setTarget(new Frame(newTarget, solver.endEffector().orientation().get()));
+      solver.setTarget(new Frame(newTarget, solver.endEffector().orientation().get(), 1));
     }
 
     //Execute Until the distance between the end effector and the target is below a threshold

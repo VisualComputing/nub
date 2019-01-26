@@ -30,7 +30,7 @@ public class TransposeSolver extends Solver{
         this._chain = chain;
         this._target = target;
         this._previousTarget =
-                target == null ? null : new Frame(target.position().get(), target.orientation().get());
+                target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
     }
 
     /*
@@ -101,7 +101,7 @@ public class TransposeSolver extends Solver{
 
     @Override
     protected void _reset() {
-        _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
+        _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
         iterations = 0;
     }
 }

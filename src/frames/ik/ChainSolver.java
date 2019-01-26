@@ -82,7 +82,7 @@ public class ChainSolver extends FABRIKSolver {
     }
     this._target = target;
     this._prevTarget =
-        target == null ? null : new Frame(target.position().get(), target.orientation().get());
+        target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
   }
 
   /*Get maximum length of a given chain*/
@@ -240,7 +240,7 @@ public class ChainSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
-    _prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get());
+    _prevTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
     iterations = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
     _init();

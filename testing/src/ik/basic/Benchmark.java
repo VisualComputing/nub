@@ -49,7 +49,7 @@ public class Benchmark {
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPrecision(Frame.Precision.FIXED);
+            joint.setPickingThreshold(0.25f);
             prevJoint = joint;
             chain.add(joint);
         }
@@ -60,7 +60,7 @@ public class Benchmark {
         ArrayList<Frame> copy = new ArrayList<Frame>();
         Frame reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get());
+            reference = new Frame(reference.position().get(), reference.orientation().get(),1);
         }
         for (Frame joint : chain) {
             Frame newJoint = new Frame();

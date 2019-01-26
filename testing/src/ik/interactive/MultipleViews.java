@@ -52,7 +52,7 @@ public class MultipleViews {
     public void setBackBuffer(){
         _scene.backBuffer().beginDraw();
         _scene.backBuffer().background(0);
-        _scene.traverse(_currentView.scene().backBuffer(), _currentView.type(), _currentView.eye(), _currentView.zNear(), _currentView.zFar());
+        _scene.render(_currentView.scene().backBuffer(), _currentView.type(), _currentView.eye(), _currentView.zNear(), _currentView.zFar());
         _scene.backBuffer().endDraw();
         _scene.backBuffer().loadPixels();
     }

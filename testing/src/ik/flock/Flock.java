@@ -7,7 +7,6 @@ import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
@@ -56,7 +55,7 @@ public class Flock extends PApplet {
         ambientLight(128, 128, 128);
         directionalLight(255, 255, 255, 0, 1, -100);
         walls();
-        scene.traverse();
+        scene.render();
         updateAvatar();
         skinning.applyTransformations();
     }

@@ -7,7 +7,6 @@ import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
@@ -25,7 +24,7 @@ public class InteractiveFish extends PApplet {
 
     boolean showSkeleton = false;
     Scene scene;
-    Shape shape;
+    Frame shape;
     Frame root;
     PShape model;
 
@@ -58,7 +57,8 @@ public class InteractiveFish extends PApplet {
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
         //model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
-        shape = new Shape(scene, model);
+        shape = new Frame(scene, model);
+        shape.setPickingThreshold(0);
 
         shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
         shape.scale(200.f * 1.f / max);
@@ -82,11 +82,13 @@ public class InteractiveFish extends PApplet {
 
     }
 
-    public Shape createTarget(float radius){
+    public Frame createTarget(float radius){
         PShape redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        return new Shape(scene, redBall);
+        Frame target = new Frame(scene, redBall);
+        target.setPickingThreshold(0);
+        return target;
     }
 
 
@@ -98,7 +100,7 @@ public class InteractiveFish extends PApplet {
         scene.drawAxes();
         //comment this line if you're using Linear Blending Skinning with CPU
         //shader(skinning.shader);
-        if(showSkeleton) scene.traverse();
+        if(showSkeleton) scene.render();
         else{
             pushMatrix();
             scene.applyWorldTransformation(shape);

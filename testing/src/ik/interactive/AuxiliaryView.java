@@ -117,7 +117,7 @@ public class AuxiliaryView{
         if(_enabled){
             _pGraphics.beginDraw();
             _pGraphics.background(_colorBackground);
-            _scene.traverse(_pGraphics, _type, _eye, zNear(), zFar());
+            _scene.render(_pGraphics, _type, _eye, zNear(), zFar());
             _pGraphics.endDraw();
         }
     }

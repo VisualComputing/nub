@@ -15,7 +15,6 @@ import frames.ik.jacobian.TransposeSolver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -41,7 +40,7 @@ public class VisualBenchmark extends PApplet {
     int num_solvers = 10;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
-    ArrayList<Shape> targets = new ArrayList<Shape>();
+    ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
         size(700, 700, P3D);
@@ -59,7 +58,9 @@ public class VisualBenchmark extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < num_solvers; i++) {
-            targets.add(new Shape(scene, redBall));
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.add(target);
         }
 
         float down = PI/2;
@@ -173,7 +174,7 @@ public class VisualBenchmark extends PApplet {
                     solver.solve();
             }
         }
-        scene.traverse();
+        scene.render();
         scene.beginHUD();
         for(Solver solver : solvers) {
             fill(255);
@@ -234,7 +235,7 @@ public class VisualBenchmark extends PApplet {
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPrecision(Frame.Precision.FIXED);
+            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
@@ -256,7 +257,7 @@ public class VisualBenchmark extends PApplet {
         ArrayList<Frame> copy = new ArrayList<Frame>();
         Frame reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get());
+            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
         }
         for (Frame joint : chain) {
             Frame newJoint = new Frame();

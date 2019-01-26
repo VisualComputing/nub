@@ -6,7 +6,6 @@ import frames.primitives.Point;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -18,8 +17,8 @@ import java.util.List;
 public class AuxiliaryViews extends PApplet {
 
     Scene scene;
-    Shape[] shapes;
-    Shape light;
+    Frame[] shapes;
+    Frame light;
     int w = 1000;
     int h = 1000;
     List<AuxiliaryView> views;
@@ -31,20 +30,21 @@ public class AuxiliaryViews extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setRadius(max(w, h));
-        shapes = new Shape[20];
+        shapes = new Frame[20];
         for (int i = 0; i < shapes.length; i++) {
-            shapes[i] = new Shape(scene);
-            shapes[i].setGraphics(caja());
+            shapes[i] = new Frame(scene, caja());
+            shapes[i].setPickingThreshold(0);
             shapes[i].randomize();
         }
-        light = new Shape(scene) {
+        light = new Frame(scene) {
             @Override
-            public void setGraphics(PGraphics pg) {
+            public boolean graphics(PGraphics pg) {
                 pg.pushStyle();
                 Scene.drawAxes(pg, 150);
                 pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
                 //Scene.drawEye(pg, views.get(0)._pGraphics, views.get(0)._type, this, views.get(0)._zNear, views.get(0)._zFar);
                 pg.popStyle();
+                return true;
             }
         };
         scene.fit(1);
@@ -69,7 +69,7 @@ public class AuxiliaryViews extends PApplet {
 
     public void draw() {
         background(90, 80, 125);
-        scene.traverse();
+        scene.render();
         setBackBuffer(mouseX, mouseY);
         //Drawing back buffer
         /*
@@ -90,7 +90,7 @@ public class AuxiliaryViews extends PApplet {
             if(view.focus(x,y)){
                 scene.backBuffer().beginDraw();
                 scene.backBuffer().background(0);
-                scene.traverse(view.scene().backBuffer(), view.type(), view.eye(), view.zNear(), view.zFar());
+                scene.render(view.scene().backBuffer(), view.type(), view.eye(), view.zNear(), view.zFar());
                 scene.backBuffer().endDraw();
                 scene.backBuffer().loadPixels();
                 return;

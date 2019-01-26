@@ -8,7 +8,6 @@ import frames.core.constraint.PlanarPolygon;
 import frames.ik.Solver;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -24,7 +23,7 @@ public class Biped extends PApplet {
     //TODO : Update
     Scene scene;
     HashMap<String, ArrayList<Joint>> limbs;
-    HashMap<String, Shape> targets;
+    HashMap<String, Frame> targets;
     String[] keys = {"LeftArm", "RightArm", "LeftFoot", "RightFoot"};
     float boneLength = 50;
     float targetRadius = 7;
@@ -40,7 +39,6 @@ public class Biped extends PApplet {
         scene.setFOV(PI / 3);
         scene.setRadius(boneLength * 5);
         scene.fit(1);
-        scene.disableBackBuffer();
 
         targets = new HashMap<>();
         limbs = new HashMap<>();
@@ -50,7 +48,9 @@ public class Biped extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            targets.put(key, new Shape(scene, redBall));
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.put(key, target);
         }
 
         Joint chest = new Joint(scene);
@@ -87,7 +87,7 @@ public class Biped extends PApplet {
         background(0);
         lights();
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
     }
 
     public void applyConstraint(Frame child, float boneLength){

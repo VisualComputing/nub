@@ -1,12 +1,12 @@
 package ik.collada.test;
 
+import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.FixedConstraint;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.processing.Shape;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.colladaLoader.ColladaLoader;
 import ik.common.SkinningAnimationModel;
@@ -27,7 +27,7 @@ public class LoadMesh extends PApplet {
     AnimatedModel model;
     SkinningAnimationModel skinning;
 
-    ArrayList<Shape> targets = new ArrayList<Shape>();
+    ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
         size(700, 700, P3D);
@@ -37,18 +37,18 @@ public class LoadMesh extends PApplet {
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.disableBackBuffer();
+        //scene.disableBackBuffer();
 
 
         PShape redBall = createShape(SPHERE, 0.3f);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
-        targets.add(new Shape(scene, redBall));
+        for(int i = 0; i < 5; i++){
+            Frame target = new Frame(scene, redBall);
+            target.setPickingThreshold(0);
+            targets.add(target);
+        }
 
         model = ColladaLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
         scene.setRadius(model.getModel().getWidth()*2);
@@ -87,7 +87,7 @@ public class LoadMesh extends PApplet {
         resetShader();
         hint(DISABLE_DEPTH_TEST);
         scene.drawAxes();
-        scene.traverse();
+        scene.render();
         hint(ENABLE_DEPTH_TEST);
     }
 

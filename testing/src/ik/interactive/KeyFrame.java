@@ -19,7 +19,7 @@ public class KeyFrame extends Frame {
     }
 
     public KeyFrame(Target target, Vector translation, Quaternion rotation){
-        super(target.graph(), null, translation, rotation, 1);
+        super(target.graph(), translation, rotation, 1);
         _target = target;
     }
 
