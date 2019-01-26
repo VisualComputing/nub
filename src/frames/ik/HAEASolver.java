@@ -79,7 +79,7 @@ public class HAEASolver  extends Solver {
         this._population_size = population_size;
         this._target = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
-        this._selection = new SelectionMethods.Ranking();
+        this._selection = new SelectionMethods.Tournament();
         //Default operators
         this._operators.add(new OperatorMethods.UniformMutation());
         if(convex) this._operators.add(new OperatorMethods.ConvexCombination());

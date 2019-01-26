@@ -34,7 +34,7 @@ public class GASolver extends Solver {
 
     protected List<Statistics> _statistics;
 
-    protected boolean _debug = true;
+    protected boolean _debug = false;
 
     public GASolver(List<Frame> structure, int population_size){
         this._structure = structure;
@@ -229,7 +229,6 @@ public class GASolver extends Solver {
 
     @Override
     protected void _reset() {
-        System.out.println("Entra");
         _best = null;
         iterations = 0;
         if(_targets == null){

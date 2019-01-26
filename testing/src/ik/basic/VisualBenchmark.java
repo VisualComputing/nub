@@ -29,7 +29,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 3;
+    int num_joints = 8;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -49,7 +49,7 @@ public class VisualBenchmark extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength / 1.5f);
+        scene.setRadius(num_joints * 2 * boneLength / 1.5f);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -111,22 +111,22 @@ public class VisualBenchmark extends PApplet {
 
         solvers = new ArrayList<>();
 
-        /*solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
+        solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
         solvers.add(new HillClimbingSolver(5, radians(3), structures.get(1)));
         solvers.add(new HillClimbingSolver(radians(5), structures.get(2)));
-        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));*/
-        //solvers.add(new ChainSolver(structures.get(4)));
+        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
+        solvers.add(new ChainSolver(structures.get(4)));
         solvers.add(new GASolver(structures.get(5), 6));
-        //solvers.add(new HAEASolver(structures.get(6), 10, true));
-        //solvers.add(new HAEASolver(structures.get(7), 10, false));
-        //solvers.add(new TransposeSolver(structures.get(8)));
-        //solvers.add(new PseudoInverseSolver(structures.get(9)));
+        solvers.add(new HAEASolver(structures.get(6), 10, true));
+        solvers.add(new HAEASolver(structures.get(7), 10, false));
+        solvers.add(new TransposeSolver(structures.get(8)));
+        solvers.add(new PseudoInverseSolver(structures.get(9)));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.5f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 20;
+            solvers.get(i).maxIter = 50;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
