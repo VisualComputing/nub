@@ -29,7 +29,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 5;
+    int num_joints = 3;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -111,22 +111,22 @@ public class VisualBenchmark extends PApplet {
 
         solvers = new ArrayList<>();
 
-        solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
+        /*solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
         solvers.add(new HillClimbingSolver(5, radians(3), structures.get(1)));
         solvers.add(new HillClimbingSolver(radians(5), structures.get(2)));
-        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
-        solvers.add(new ChainSolver(structures.get(4)));
-        solvers.add(new GASolver(structures.get(5), 10));
-        solvers.add(new HAEASolver(structures.get(6), 10, true));
-        solvers.add(new HAEASolver(structures.get(7), 10, false));
-        solvers.add(new TransposeSolver(structures.get(8)));
-        solvers.add(new PseudoInverseSolver(structures.get(9)));
+        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));*/
+        //solvers.add(new ChainSolver(structures.get(4)));
+        solvers.add(new GASolver(structures.get(5), 6));
+        //solvers.add(new HAEASolver(structures.get(6), 10, true));
+        //solvers.add(new HAEASolver(structures.get(7), 10, false));
+        //solvers.add(new TransposeSolver(structures.get(8)));
+        //solvers.add(new PseudoInverseSolver(structures.get(9)));
         //solvers.add(new CCDSolver(structures.get(2)));
 
-        for(int i = 0; i < num_solvers; i++){
+        for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.5f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 300;
+            solvers.get(i).maxIter = 20;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
@@ -235,7 +235,6 @@ public class VisualBenchmark extends PApplet {
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child

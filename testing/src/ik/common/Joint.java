@@ -25,7 +25,7 @@ public class Joint extends Frame{
         _color = color;
         _radius = radius;
         _pGraphics = scene.frontBuffer();
-        _threshold = _radius*2;
+        setPickingThreshold(_radius*2);
     }
 
     public Joint(Scene scene, int color){
