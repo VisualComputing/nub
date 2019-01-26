@@ -16,8 +16,6 @@ public class Individual{
         POSITION, ORIENTATION, POSE
     }
 
-
-
     protected List<Frame> _structure;
     protected HashMap<String, Float> _floatParams;
     protected HashMap<String, float[]> _arrayParams;
@@ -66,8 +64,11 @@ public class Individual{
                     Frame prev = null;
                     for (Frame f : _structure.get(0).graph().path(_structure.get(0), _structure.get(index))) {
                         if (prev != null) l += Vector.distance(f.position(), prev.position());
+                        prev = f;
                     }
                     dt += (Math.PI * dist) / (Math.sqrt(l * d));
+                } else{
+                    dt += dist;
                 }
             }
             if(_fitness_function == FitnessFunction.ORIENTATION || _fitness_function == FitnessFunction.POSE){
