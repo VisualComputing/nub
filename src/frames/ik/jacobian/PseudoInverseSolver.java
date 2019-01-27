@@ -83,8 +83,19 @@ public class PseudoInverseSolver extends Solver{
                 Util.vectorToMatrix(e, head().graph().is3D()));
 
         _J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position(), _axes));
+        System.out.println("J : " + _J);
         _delta = SimpleMatrix.wrap(Util.solvePseudoinverse(_J.getDDRM(), error.getDDRM()));
+        System.out.println("delta : " + _delta);
+        System.out.print("degrees : ");
+        double max = 0;
+        for(int i = 0; i < _delta.numRows(); i++ ){
+            System.out.print(Math.toDegrees(_delta.get(i,0)) + " , ");
+            max = Math.abs(_delta.get(i,0)) > max ? Math.abs(_delta.get(i,0)) : max;
+        }
+        if(max > Math.toRadians(10))_delta = _delta.scale(Math.toRadians(10) / max); //TODO: check for a better scaling value
 
+        System.out.println();
+        Util.updateChain(_chain, _delta, _axes);
         //Execute Until the distance between the end effector and the target is below a threshold
         if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
             return true;
@@ -96,7 +107,7 @@ public class PseudoInverseSolver extends Solver{
 
     @Override
     protected void _update() {
-        Util.updateChain(_chain, _delta, _axes);
+
     }
 
 

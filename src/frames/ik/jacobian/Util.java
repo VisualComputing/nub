@@ -6,7 +6,9 @@ import frames.primitives.Vector;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
 import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.ejml.simple.SimpleMatrix;
 
 import java.util.List;
@@ -27,8 +29,6 @@ public class Util {
             Quaternion prev = frame.orientation();
             Quaternion orientation = prev.get();
             float angle = (float) delta.get(i,0);
-            angle = angle > 0.5f ? 0.5f : angle;
-            angle = angle < -0.5f ? -0.5f : angle;
             orientation.multiply(new Quaternion(axes[i], angle));
             desiredOrientations[i] = orientation;
         }
@@ -49,6 +49,7 @@ public class Util {
         for(int j = 0; j < chain.size() - 1; j++){//Don't care about End Effector
             Vector joint = chain.get(j).position();
             Vector je = Vector.subtract(ef, joint);
+            System.out.println("-- Joint to End Eff : \t " + je);
             //System.out.println("distt : " + r);
             Vector change_z =  Vector.cross(z, je, null);
             if(dim == 2){
@@ -56,10 +57,16 @@ public class Util {
                 J[1][j] = change_z.y();
             } else{
                 Vector jt = Vector.subtract(target, joint);
+                System.out.println("-- Joint to Target : \t " + jt);
                 Vector axis = Vector.cross(je, jt, null);
+                System.out.println("-- Axis : \t " + axis + " mag " + axis.magnitude());
+                if(axis.magnitude() < 1E-2) axis = Vector.orthogonalVector(je);
+                System.out.println("-- Axis Chang : \t " + axis);
                 axis.normalize();
+                System.out.println("-- Axis Norma : \t " + axis);
                 axes[j] = axis;
                 Vector change = Vector.cross(axis, je, null);
+                System.out.println("-- change : \t " + change);
                 J[0][j] = change.x();
                 J[1][j] = change.y();
                 J[2][j] = change.z();
@@ -105,9 +112,18 @@ public class Util {
         solver.setA(J);
         DMatrixRMaj delta = new DMatrixRMaj(new double[J.numCols]);
         solver.solve(error, delta);
-        //System.out.println("JJT : " + SimpleMatrix.wrap(J).mult(SimpleMatrix.wrap(J).transpose()));
+        System.out.println("JJT : " + SimpleMatrix.wrap(J).mult(SimpleMatrix.wrap(J).transpose()));
+
+        DMatrixRMaj pinv = new DMatrixRMaj(J.numCols, J.numRows);
+        ((LinearSolverDense<DMatrixRMaj>) solver).invert(pinv);
+        System.out.println("PINV: " + pinv);
+        System.out.println("Delta a: " + SimpleMatrix.wrap(pinv).mult(SimpleMatrix.wrap(error)));
+        System.out.println("Error a : " + SimpleMatrix.wrap(J).mult(SimpleMatrix.wrap(delta)));
+        System.out.println("Quality : " + solver.quality());
         //System.out.println("Debug : " + SimpleMatrix.wrap(J).mult(SimpleMatrix.wrap(delta)));
-        //System.out.println("error : " + SimpleMatrix.wrap(error));
+        System.out.println("error : " + SimpleMatrix.wrap(error));
+
+        System.out.println("sing values : " + ((SolvePseudoInverseSvd_DDRM) solver).getDecomposition().getSingularValues());
         //System.out.println("Delta: " + SimpleMatrix.wrap(delta));
         return delta;
     }
