@@ -49,7 +49,7 @@ public class VisualBenchmark extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * 2 * boneLength / 1.5f);
+        scene.setRadius(num_joints * 2 * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -207,7 +207,7 @@ public class VisualBenchmark extends PApplet {
             } else if(solver instanceof  PseudoInverseSolver){
                 Frame f = ((PseudoInverseSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("PseudoInverseSolver", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("PseudoInverse", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
