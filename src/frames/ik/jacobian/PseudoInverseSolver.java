@@ -13,9 +13,10 @@ public class PseudoInverseSolver extends Solver{
     protected ArrayList<? extends Frame> _chain;
     protected Frame _target;
     protected Frame _previousTarget;
-    protected SimpleMatrix J;
-    protected SimpleMatrix delta;
-    protected float d_max;
+    protected SimpleMatrix _J;
+    protected Vector[] _axes;
+    protected SimpleMatrix _delta;
+    protected float _d_max;
 
 
 
@@ -27,8 +28,9 @@ public class PseudoInverseSolver extends Solver{
         this._chain = chain;
         for(Frame f : _chain){
             float d = Vector.distance(f.position(), f.reference() != null ? f.reference().position() : new Vector(0,0,0));
-            d_max = d_max < d ? d : d_max;
+            _d_max = _d_max < d ? d : _d_max;
         }
+        _axes = new Vector[_chain.size() - 1];
     }
 
     public PseudoInverseSolver(ArrayList<? extends Frame> chain, Frame target) {
@@ -37,6 +39,7 @@ public class PseudoInverseSolver extends Solver{
         this._target = target;
         this._previousTarget =
                 target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
+        _axes = new Vector[_chain.size() - 1];
     }
 
     /*
@@ -69,21 +72,18 @@ public class PseudoInverseSolver extends Solver{
     protected boolean _iterate() {
         //As no target is specified there is no need to perform an iteration
         if (_target == null || _chain.size() < 2) return true;
+        //Clamp error
+        Vector e = Vector.subtract(_target.position() , endEffector().position());
+        if(e.magnitude() > _d_max){
+            e.normalize();
+            e.multiply(_d_max);
+        }
+
         SimpleMatrix error = SimpleMatrix.wrap(
-                Util.vectorToMatrix(Vector.subtract(_target.position() , endEffector().position()), head().graph().is3D()));
-        J = SimpleMatrix.wrap( Util.numericalJacobian( _chain, endEffector() ) );
-        System.out.println("J: " + J);
-        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position()) );
-        System.out.println("J: " + J);
+                Util.vectorToMatrix(e, head().graph().is3D()));
 
-        delta = SimpleMatrix.wrap(Util.solvePseudoinverse(J.getDDRM(), error.getDDRM()));
-        //delta.scale(0.001f);
-
-
-        System.out.println("delta: " + delta.transpose());
-
-        System.out.println("cross: " + Vector.cross(new Vector(1,0,0), new Vector(0,0,1), null));
-
+        _J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position(), _axes));
+        _delta = SimpleMatrix.wrap(Util.solvePseudoinverse(_J.getDDRM(), error.getDDRM()));
 
         //Execute Until the distance between the end effector and the target is below a threshold
         if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
@@ -96,7 +96,7 @@ public class PseudoInverseSolver extends Solver{
 
     @Override
     protected void _update() {
-        Util.updateChain(_chain, delta);
+        Util.updateChain(_chain, _delta, _axes);
     }
 
 
@@ -114,6 +114,7 @@ public class PseudoInverseSolver extends Solver{
     @Override
     protected void _reset() {
         _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
+        _axes = new Vector[_chain.size() - 1];
         iterations = 0;
     }
 }

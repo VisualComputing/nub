@@ -13,8 +13,9 @@ public class TransposeSolver extends Solver{
     protected ArrayList<? extends Frame> _chain;
     protected Frame _target;
     protected Frame _previousTarget;
-    protected SimpleMatrix J;
-    protected SimpleMatrix delta;
+    protected SimpleMatrix _J;
+    protected SimpleMatrix _delta;
+    protected Vector[] _axes;
     float _alpha = 0.00001f;
 
     //protected List<Statistics> _statistics;
@@ -23,6 +24,7 @@ public class TransposeSolver extends Solver{
     public TransposeSolver(ArrayList<? extends Frame> chain){
         super();
         this._chain = chain;
+        _axes = new Vector[_chain.size() - 1];
     }
 
     public TransposeSolver(ArrayList<? extends Frame> chain, Frame target) {
@@ -31,6 +33,7 @@ public class TransposeSolver extends Solver{
         this._target = target;
         this._previousTarget =
                 target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
+        _axes = new Vector[_chain.size() - 1];
     }
 
     /*
@@ -65,13 +68,13 @@ public class TransposeSolver extends Solver{
         if (_target == null || _chain.size() < 2) return true;
         SimpleMatrix error = SimpleMatrix.wrap(
                 Util.vectorToMatrix(Vector.subtract(_target.position() , endEffector().position()), head().graph().is3D()));
-        J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector(), _target.position() ) );
+        _J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position(), _axes));
 
-        delta = J.transpose().mult(error);
+        _delta = _J.transpose().mult(error);
 
         //choosing alpha according to error magnitude
-        SimpleMatrix JJTe = J.mult(delta);
-        delta = delta.scale(error.dot(JJTe)/JJTe.dot(JJTe));
+        SimpleMatrix JJTe = _J.mult(_delta);
+        _delta = _delta.scale(error.dot(JJTe)/JJTe.dot(JJTe));
 
         //Execute Until the distance between the end effector and the target is below a threshold
         if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
@@ -84,7 +87,7 @@ public class TransposeSolver extends Solver{
 
     @Override
     protected void _update() {
-        Util.updateChain(_chain, delta);
+        Util.updateChain(_chain, _delta, _axes);
     }
 
 
@@ -103,6 +106,7 @@ public class TransposeSolver extends Solver{
     protected void _reset() {
         _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
         iterations = 0;
+        _axes = new Vector[_chain.size() - 1];
     }
 }
 
