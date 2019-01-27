@@ -23,18 +23,14 @@ public class Util {
     }
 
     public static void updateChain(List<? extends Frame> chain, SimpleMatrix delta, Vector[] axes){
-        Quaternion[] desiredOrientations = new Quaternion[chain.size()-1];
+        //TODO: Keep Quaternion orientation is more efficient
         for(int i = 0; i < delta.numRows(); i++){
             Frame frame = chain.get(i);
-            Quaternion prev = frame.orientation();
-            Quaternion orientation = prev.get();
+            Vector axis = frame.displacement(axes[i]);
             float angle = (float) delta.get(i,0);
-            orientation.multiply(new Quaternion(axes[i], angle));
-            desiredOrientations[i] = orientation;
-        }
-        //TODO: Consider to do for loop in reverse order
-        for(int i = 0; i < chain.size()-1; i++) {
-            chain.get(i).setOrientation(desiredOrientations[i]);
+            //orientation.multiply(new Quaternion(axes[i], angle));
+            //desiredOrientations[i] = orientation;
+            chain.get(i).rotate(new Quaternion(axis, angle));
         }
     }
 
