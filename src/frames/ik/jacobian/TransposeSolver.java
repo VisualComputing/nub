@@ -16,7 +16,8 @@ public class TransposeSolver extends Solver{
     protected SimpleMatrix _J;
     protected SimpleMatrix _delta;
     protected Vector[] _axes;
-    float _alpha = 0.00001f;
+    //protected float _alpha = 0.00001f;
+    protected float _d_max;
 
     //protected List<Statistics> _statistics;
     protected boolean _debug = false;
@@ -25,6 +26,10 @@ public class TransposeSolver extends Solver{
         super();
         this._chain = chain;
         _axes = new Vector[_chain.size() - 1];
+        for(Frame f : _chain){
+            float d = Vector.distance(f.position(), f.reference() != null ? f.reference().position() : new Vector(0,0,0));
+            _d_max = _d_max < d ? d : _d_max;
+        }
     }
 
     public TransposeSolver(ArrayList<? extends Frame> chain, Frame target) {
@@ -66,15 +71,27 @@ public class TransposeSolver extends Solver{
     protected boolean _iterate() {
         //As no target is specified there is no need to perform an iteration
         if (_target == null || _chain.size() < 2) return true;
+        //Clamp error
+        Vector e = Vector.subtract(_target.position() , endEffector().position());
+        if(e.magnitude() > _d_max){
+            e.normalize();
+            e.multiply(_d_max*2);
+        }
+
+
         SimpleMatrix error = SimpleMatrix.wrap(
-                Util.vectorToMatrix(Vector.subtract(_target.position() , endEffector().position()), head().graph().is3D()));
+                Util.vectorToMatrix(e, head().graph().is3D()));
         _J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position(), _axes));
 
         _delta = _J.transpose().mult(error);
 
         //choosing alpha according to error magnitude
         SimpleMatrix JJTe = _J.mult(_delta);
-        _delta = _delta.scale(error.dot(JJTe)/JJTe.dot(JJTe));
+        double div = JJTe.dot(JJTe);
+        if(div > 1E-3)
+            _delta = _delta.scale(error.dot(JJTe)/div);
+        else
+            _delta = _delta.scale(0);
 
         //Execute Until the distance between the end effector and the target is below a threshold
         if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
