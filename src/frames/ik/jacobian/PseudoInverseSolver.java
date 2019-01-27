@@ -18,11 +18,6 @@ public class PseudoInverseSolver extends Solver{
     protected SimpleMatrix _delta;
     protected float _d_max;
 
-
-
-    //protected List<Statistics> _statistics;
-    protected boolean _debug = false;
-
     public PseudoInverseSolver(ArrayList<? extends Frame> chain){
         super();
         this._chain = chain;
@@ -41,12 +36,6 @@ public class PseudoInverseSolver extends Solver{
                 target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
         _axes = new Vector[_chain.size() - 1];
     }
-
-    /*
-    public List<Statistics> statistics(){
-        return _statistics;
-    }
-    */
 
     public ArrayList<? extends Frame> chain() {
         return _chain;
@@ -83,18 +72,13 @@ public class PseudoInverseSolver extends Solver{
                 Util.vectorToMatrix(e, head().graph().is3D()));
 
         _J = SimpleMatrix.wrap( Util.jacobian( _chain, endEffector() , _target.position(), _axes));
-        System.out.println("J : " + _J);
         _delta = SimpleMatrix.wrap(Util.solvePseudoinverse(_J.getDDRM(), error.getDDRM()));
-        System.out.println("delta : " + _delta);
-        System.out.print("degrees : ");
         double max = 0;
         for(int i = 0; i < _delta.numRows(); i++ ){
-            System.out.print(Math.toDegrees(_delta.get(i,0)) + " , ");
             max = Math.abs(_delta.get(i,0)) > max ? Math.abs(_delta.get(i,0)) : max;
         }
         if(max > Math.toRadians(10))_delta = _delta.scale(Math.toRadians(10) / max); //TODO: check for a better scaling value
 
-        System.out.println();
         Util.updateChain(_chain, _delta, _axes);
         //Execute Until the distance between the end effector and the target is below a threshold
         if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
@@ -105,11 +89,9 @@ public class PseudoInverseSolver extends Solver{
         return false;
     }
 
+    //Update must be done at each iteration step (see line 83)
     @Override
-    protected void _update() {
-
-    }
-
+    protected void _update() { }
 
     @Override
     protected boolean _changed() {
