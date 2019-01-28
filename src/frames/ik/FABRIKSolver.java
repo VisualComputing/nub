@@ -30,6 +30,34 @@ public abstract class FABRIKSolver extends Solver {
   * to keep it's direction, due last segments could be fixed by first ones ?
   * Weights depends on iterations: First iterations must be exploratory whereas last ones must
   * preserve directions ?
+  *
+  * FABRIK K-Steps
+  * Direction D given by J_n and J_(n-1) is quite important:
+  * Choose randomly k different directions:
+  *     Axis : (J_n - J_(n-1)) cross (Target - J_(n-1))
+  *     Angle : (J_n - J_(n-1)) dot (Target - J_(n-1))
+  *     A_i = Angle + random(-1,1) * 2PI/k
+  *     D_i = Rotate (J_n - J_(n-1)) by A_i angles w.r.t Axis
+  *     J'_(n-1) = Target - D_i
+  * Apply FABRIK k times in parallel with depth d
+  * Dist^d_i  = dist(J'_(n-1-d), J_(n-1-d-1))
+  * a. Discard all executions but i* s.t Dist_i* < Dist_i for i in (1,k)
+  * Perform 1st phase of FABRIK. If dist(J'_0, J_0) is to Big discard (keep track of all Dist^d_i)
+  * Execute repeat from a. and discard at depth d if Dist^d_i is worst than best execution so far.
+  * Worst case O(k*FABRIK_Iteration_Complexity(n))
+  *
+  * FABRIK UP-DOWN (Further Thinking) - Basic idea : when movement is constrained, try to favor it by looking upward
+  * Define a threshold Thr globally or per Joint.
+  * Execute FABRIK as usual on fist Phase.
+  * At time t:
+  *   idx = n-1-t
+  *   Possible conditions:
+  *     1. dist(J'_(idx), J_(idx-1)) < Thr_(idx) and J_(idx) has constraint
+  *     2. Movement to perform is far away due to constraint
+  *   Get max movement with constaint
+  *   Move J'_(idx)  according to obtained movement
+  *   Execute Phase 2 and Get position of J_n
+  *   ...
   * */
 
   public static class Properties{
