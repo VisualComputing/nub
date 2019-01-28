@@ -1,6 +1,6 @@
 /****************************************************************************************
  * frames
- * Copyright (c) 2018 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
