@@ -15,6 +15,7 @@ import java.util.Set;
  * Created by sebchaparr on 29/10/18.
  */
 public class OperatorMethods {
+    //TODO : Keep cache of euler angles or do computations in terms of Quaternions
     public static class UniformMutation extends Operator{
         protected float _delta = (float) Math.toRadians(30);
 
@@ -123,7 +124,6 @@ public class OperatorMethods {
 
     //Operators based on Sebastian Stark's Thesis
     public static class Mutation extends Operator{
-        protected float _delta = (float) Math.toRadians(30);
         protected float _extinction;
 
         public void setExtinction(Individual... individuals){
@@ -140,7 +140,7 @@ public class OperatorMethods {
             int n = individual.structure().size();
             //Define how many genes mutate on average
             float alpha = (_extinction * (n - 1) + 1) / n;
-            float beta = _extinction * (float) Math.PI * 2.f;
+            float beta = _extinction * (float) Math.PI;
 
             for (int i = 0; i < individual.structure().size(); i++) {
                 if (Util.random.nextFloat() > alpha) continue;
@@ -210,10 +210,6 @@ public class OperatorMethods {
             _arity = 1;
         }
 
-        public Adoption(float[] weights){
-            _arity = weights.length;
-        }
-
         public void setParents(Individual... individuals){
             _parents = individuals;
         }
@@ -248,6 +244,22 @@ public class OperatorMethods {
             return combination;
         }
     }
+
+    /*TODO : Greedy operator
+    * Axis of Rotation is cross product defined by (EF - Joint) X (Target - Joint)
+    * Find angle by means of dot product (EF - Joint) dot (Target - Joint).
+    * Multiply angle by w ~ U(0,1) (Pitfall: Not consider propagation of the movement to each joint)
+    * It'll perform similar to CCD but Order is not taken into account
+    * Could perform badly when joint has constraints
+    * */
+
+    /*TODO : FABRIK operator
+     * Options:
+     * 1) Do a whole FABRIK Iteration (Stop if Error To Root is too big)
+     * 2) a. Get randomly a Joint Ji, Translate Ji+1 by (Target - EF)
+     *    b. Do a whole FABRIK Iteration From J0...Ji (Being Ji+1 the Target) (Doesn't seem promising)
+     * Pitfalls : Costly operation
+     * */
 
 
 }

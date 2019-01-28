@@ -54,7 +54,7 @@ public class Individual{
     public float updateFitness(HashMap<Integer, Frame> targets){
         float dt = 0;
         float dr  = 0;
-        //TODO : optimize calculations
+        //TODO : optimize calculations (cache positions and orientations)
         for(Integer index : targets.keySet()){
             if(_fitness_function == FitnessFunction.POSITION || _fitness_function == FitnessFunction.POSE) {
                 float dist = Vector.distance(structure().get(index).position(), targets.get(index).position());

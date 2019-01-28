@@ -154,7 +154,8 @@ public class BioIk extends Solver {
                     ((OperatorMethods.Adoption) _adoption).setParents(parents.get(i), parents.get(i + 1));
                     ((OperatorMethods.Adoption) _adoption).setBest(best);
                 }
-                Individual child = _mutation.apply(mutation);
+                Individual child = _adoption.apply(mutation);
+                //Clipping is not necessary since solutions are kept in feasible regions (see Frame setRotation())
                 //update gradient
                 child.arrayParams().put("Evolution_Gradient", _calculateGradient(child, recombination));
                 child.updateFitness(_target);
