@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -14,7 +14,7 @@ import processing.event.MouseEvent;
  */
 public class Orbit extends PApplet {
   Scene scene;
-  Frame shape1, shape2;
+  Node shape1, shape2;
   Vector axis;
 
   public void settings() {
@@ -27,7 +27,7 @@ public class Orbit extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    shape1 = new Frame(scene) {
+    shape1 = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -45,12 +45,12 @@ public class Orbit extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
-    //shape2 = new Frame(shape1);
-    shape2 = new Frame(scene);
+    //shape2 = new Node(shape1);
+    shape2 = new Node(scene);
     shape2.shape(shape());
     shape2.translate(275, 275, 275);
 
-    scene.setTrackedFrame(shape2);
+    scene.setTrackedNode(shape2);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
   }
@@ -65,7 +65,7 @@ public class Orbit extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setTrackedFrame(scene.isTrackedFrame(shape1) ? shape2 : shape1);
+      scene.setTrackedNode(scene.isTrackedNode(shape1) ? shape2 : shape1);
     if (key == 'f')
       scene.flip();
   }

@@ -71,7 +71,7 @@ void setup() {
     };
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     shapes[i].setHighlighting(Frame.Highlighting.NONE);
   }
@@ -121,7 +121,7 @@ void mouseDragged() {
 void mouseWheel(MouseEvent event) {
   if (event.isShiftDown())
     // application control of the light: setting the light zFar plane
-    // is implemented as a custom behavior by frame.interact()
+    // is implemented as a custom behavior by node.interact()
     scene.control("light", event.getCount() * 20);
   else
     scene.scale(event.getCount() * 20);

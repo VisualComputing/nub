@@ -8,8 +8,8 @@ class InteractiveFrame extends Frame {
     pnt = new Vector(40, 30, 20);
   }
 
-  InteractiveFrame(Frame frame, int colour) {
-    super(frame);
+  InteractiveFrame(Frame node, int colour) {
+    super(node);
     _c = colour;
     pnt = new Vector(40, 30, 20);
   }

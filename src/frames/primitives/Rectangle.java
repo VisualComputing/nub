@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *

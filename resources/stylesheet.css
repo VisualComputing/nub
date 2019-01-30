@@ -170,7 +170,7 @@ font.FrameHeadingFont {
 	line-height:32px;
 }
 
-/* Font used in left-hand frame lists */
+/* Font used in left-hand node lists */
 .FrameTitleFont   { 
 	font-family: Helvetica, Arial, sans-serif 
 }

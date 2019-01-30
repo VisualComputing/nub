@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -10,12 +10,12 @@
 
 package frames.core.constraint;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 /**
- * Base class for Frame constraints defined by an axis or a plane.
+ * Base class for Node constraints defined by an axis or a plane.
  * <p>
  * AxisPlaneConstraint is an interface for (translation and/or rotation) Constraint that
  * are defined by a direction. {@link #translationConstraintType()} and
@@ -66,13 +66,13 @@ public class AxisPlaneConstraint extends Constraint {
   /**
    * Returns the translation constraint Type.
    * <p>
-   * Depending on this value, the Frame will freely translate ({@link Type#FREE} ), will
+   * Depending on this value, the Node will freely translate ({@link Type#FREE} ), will
    * only be able to translate along an axis direction ( {@link Type#AXIS}), will be
    * forced to stay into a plane ({@link Type#PLANE} ) or will not able to translate at
    * all ({@link Type#FORBIDDEN}).
    * <p>
-   * Use {@link Frame#setPosition(Vector)} to define the position of
-   * the constrained Frame before it gets constrained.
+   * Use {@link Node#setPosition(Vector)} to define the position of
+   * the constrained Node before it gets constrained.
    */
   public Type translationConstraintType() {
     return transConstraintType;
@@ -86,7 +86,7 @@ public class AxisPlaneConstraint extends Constraint {
    * undefined for ({@link Type#FREE}) or ({@link Type#FORBIDDEN}).
    * <p>
    * The AxisPlaneConstraint derived classes express this direction in different
-   * coordinate system (frame for EyeConstraint, local for LocalConstraint, and world for
+   * coordinate system (node for EyeConstraint, local for LocalConstraint, and world for
    * WorldConstraint). This value can be modified with
    * {@link #setRotationConstraintDirection(Vector)}.
    */
@@ -108,7 +108,7 @@ public class AxisPlaneConstraint extends Constraint {
    * {@link Type#AXIS}.
    * <p>
    * The AxisPlaneConstraint derived classes express this direction in different
-   * coordinate system (frame for EyeConstraint, local for LocalConstraint, and world for
+   * coordinate system (node for EyeConstraint, local for LocalConstraint, and world for
    * WorldConstraint). This value can be modified with
    * {@link #setRotationConstraintDirection(Vector)}.
    */
@@ -178,12 +178,12 @@ public class AxisPlaneConstraint extends Constraint {
   /**
    * Set the Type of the {@link #rotationConstraintType()}. Default is {@link Type#FREE}.
    * <p>
-   * Depending on this value, the Frame will freely rotate ({@link Type#FREE}), will only
+   * Depending on this value, the Node will freely rotate ({@link Type#FREE}), will only
    * be able to rotate around an axis ({@link Type#AXIS}), or will not able to rotate at
    * all {@link Type#FORBIDDEN}.
    * <p>
-   * Use {@link Frame#setOrientation(Quaternion)} to define the
-   * orientation of the constrained Frame before it gets constrained.
+   * Use {@link Node#setOrientation(Quaternion)} to define the
+   * orientation of the constrained Node before it gets constrained.
    *
    * <b>Attention:</b> An {@link Type#PLANE} Type is not meaningful for rotational
    * constraints and will be ignored.

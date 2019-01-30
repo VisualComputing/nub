@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -11,8 +11,8 @@ import processing.event.MouseEvent;
  */
 public class AdaptivePrecision1 extends PApplet {
   Scene scene;
-  Frame[] shapes;
-  Frame trackedShape;
+  Node[] shapes;
+  Node trackedShape;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -22,10 +22,10 @@ public class AdaptivePrecision1 extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Frame[25];
+    shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Frame(scene, shape());
-      shapes[i] = new Frame(scene);
+      //shapes[i] = new Node(scene, shape());
+      shapes[i] = new Node(scene);
       shapes[i].shape(shape());
 
       scene.randomize(shapes[i]);
@@ -76,7 +76,7 @@ public class AdaptivePrecision1 extends PApplet {
       }
   }
 
-  Frame defaultShape() {
+  Node defaultShape() {
     return trackedShape == null ? scene.eye() : trackedShape;
   }
 

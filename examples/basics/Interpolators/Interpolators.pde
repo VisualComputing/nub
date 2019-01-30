@@ -2,7 +2,7 @@
  * Interpolators.
  * by Jean Pierre Charalambos.
  *
- * This example introduces the three different frame interpolations.
+ * This example introduces the three different node interpolations.
  *
  * Press ' ' to toggle the eye path display.
  * Press 's' to fit ball interpolation.
@@ -38,11 +38,11 @@ void setup() {
   eyeInterpolator1 = new Interpolator(scene.eye());
   eyeInterpolator2 = new Interpolator(scene.eye());
 
-  // interpolation 3. Custom (arbitrary) frame interpolations
+  // interpolation 3. Custom (arbitrary) node interpolations
 
   shape = new Frame(scene) {
     // Note that within render() geometry is defined at the
-    // frame local coordinate system.
+    // node local coordinate system.
     @Override
     public boolean graphics(PGraphics pg) {
       pg.pushStyle();
@@ -75,10 +75,10 @@ void draw() {
   scene.drawPath(interpolator);
   popStyle();
 
-  for (Frame frame : interpolator.keyFrames()) {
+  for (Frame node : interpolator.keyFrames()) {
     pushMatrix();
-    scene.applyTransformation(frame);
-    scene.drawAxes(scene.tracks(frame) ? 40 : 20);
+    scene.applyTransformation(node);
+    scene.drawAxes(scene.tracks(node) ? 40 : 20);
     popMatrix();
   }
   if (showEyePath) {

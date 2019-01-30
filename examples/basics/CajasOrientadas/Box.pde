@@ -13,7 +13,7 @@ public class Box extends Frame {
   }
 
   // note that within render() geometry is defined
-  // at the frame local coordinate system
+  // at the node local coordinate system
   @Override
   public boolean graphics(PGraphics pg) {
     pg.pushStyle();

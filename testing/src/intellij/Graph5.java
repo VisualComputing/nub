@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.MatrixHandler;
+import frames.core.Node;
 import frames.primitives.Point;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -15,7 +15,7 @@ import processing.opengl.PShader;
  */
 public class Graph5 extends PApplet {
   Graph graph;
-  Frame[] frames;
+  Node[] nodes;
 
   public void settings() {
     size(800, 800, P3D);
@@ -26,9 +26,9 @@ public class Graph5 extends PApplet {
     GLSLMatrixHandler mh = new GLSLMatrixHandler(graph.width(), graph.height());
     graph.setMatrixHandler(mh);
     graph.fit(1);
-    frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame(graph) {
+    nodes = new Node[50];
+    for (int i = 0; i < nodes.length; i++) {
+      nodes[i] = new Node(graph) {
         @Override
         public void visit() {
           pushStyle();
@@ -37,7 +37,7 @@ public class Graph5 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize();
+      nodes[i].randomize();
     }
     //discard Processing matrices
     resetMatrix();
@@ -54,7 +54,7 @@ public class Graph5 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, frames);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {
@@ -80,7 +80,7 @@ public class Graph5 extends PApplet {
 
     public GLSLMatrixHandler(int width, int height) {
       super(width, height);
-      framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
+      framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameVert_pmv.glsl");
     }
 
     @Override

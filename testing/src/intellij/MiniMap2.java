@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -10,8 +10,8 @@ import processing.event.MouseEvent;
 
 public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
-  Frame[] models;
-  Frame sceneEye;
+  Node[] models;
+  Node sceneEye;
   boolean displayMinimap = true;
   // whilst scene1 is either on-screen or not, the minimap is always off-screen
   // test both cases here:
@@ -30,20 +30,20 @@ public class MiniMap2 extends PApplet {
   public void setup() {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
-    // set a detached eye frame
+    // set a detached eye node
 
-    scene.setEye(new Frame());
+    scene.setEye(new Node());
     if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
-    models = new Frame[6];
+    models = new Node[6];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        //models[i] = new Frame(scene, shape());
-        models[i] = new Frame(scene);
+        //models[i] = new Node(scene, shape());
+        models[i] = new Node(scene);
         models[i].shape(shape());
       } else {
-        models[i] = new Frame(scene) {
+        models[i] = new Node(scene) {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
           @Override
           public boolean graphics(PGraphics pg) {
@@ -63,12 +63,12 @@ public class MiniMap2 extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
     minimap.setRadius(2000);
-    // set a detached eye frame
-    minimap.setEye(new Frame());
+    // set a detached eye node
+    minimap.setEye(new Node());
     //if (renderer == P3D)
     //minimap.setType(Graph.Type.ORTHOGRAPHIC);
     minimap.fit(1);
-    sceneEye = new Frame(minimap) {
+    sceneEye = new Node(minimap) {
       @Override
       public boolean graphics(PGraphics pg) {
         pg.pushStyle();
@@ -135,7 +135,7 @@ public class MiniMap2 extends PApplet {
 
   public void draw() {
     focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-    Frame.sync(scene.eye(), sceneEye);
+    Node.sync(scene.eye(), sceneEye);
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();

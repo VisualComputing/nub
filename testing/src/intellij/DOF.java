@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -13,7 +13,7 @@ public class DOF extends PApplet {
   PShader depthShader, dofShader;
   PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
-  Frame[] models;
+  Node[] models;
   int mode = 2;
   boolean exact = true;
 
@@ -29,18 +29,18 @@ public class DOF extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    models = new Frame[100];
+    models = new Node[100];
 
     for (int i = 0; i < models.length; i++) {
-      //models[i] = new Frame(scene, boxShape());
-      models[i] = new Frame(scene, boxShape());
+      //models[i] = new Node(scene, boxShape());
+      models[i] = new Node(scene, boxShape());
       models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/dof/depth_linear.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_nonlinear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/depth/depth_nonlinear.glsl");
     depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);

@@ -44,7 +44,7 @@ void setup() {
 
   iFrame = new Frame(scene) {
     // Note that within render() geometry is defined at the
-    // frame local coordinate system.
+    // node local coordinate system.
     @Override
     public boolean graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);

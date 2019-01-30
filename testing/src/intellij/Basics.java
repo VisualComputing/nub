@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -11,7 +11,7 @@ import processing.core.PShape;
  */
 public class Basics extends PApplet {
   Scene scene;
-  Frame frame, shape;
+  Node node, shape;
 
   public void settings() {
     size(800, 800, P3D);
@@ -23,7 +23,7 @@ public class Basics extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    frame = new Frame(scene) {
+    node = new Node(scene) {
       @Override
       public void visit() {
         scene.drawAxes(scene.radius() / 3);
@@ -39,9 +39,9 @@ public class Basics extends PApplet {
         popStyle();
       }
     };
-    frame.setRotation(Quaternion.random());
-    //shape = new Frame(scene, shape());
-    shape = new Frame(scene);
+    node.setRotation(Quaternion.random());
+    //shape = new Node(scene, shape());
+    shape = new Node(scene);
     shape.shape(shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);

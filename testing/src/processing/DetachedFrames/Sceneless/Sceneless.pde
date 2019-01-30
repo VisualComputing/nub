@@ -5,7 +5,7 @@
  * This example illustrates the use of frames without even instantiating a
  * Scene object.
  *
- * Just define an eye-frame and some frames with torus shapes.
+ * Just define an eye-node and some frames with torus shapes.
  */
 
 import frames.primitives.*;

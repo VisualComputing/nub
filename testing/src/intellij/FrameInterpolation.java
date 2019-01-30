@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Interpolator;
+import frames.core.Node;
 import frames.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -14,7 +14,7 @@ import processing.event.MouseEvent;
 public class FrameInterpolation extends PApplet {
   Scene scene;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-  Frame shape;
+  Node shape;
   boolean showEyePath = true;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -36,11 +36,11 @@ public class FrameInterpolation extends PApplet {
     eyeInterpolator1 = new Interpolator(scene.eye());
     eyeInterpolator2 = new Interpolator(scene.eye());
 
-    // interpolation 3. Custom (arbitrary) frame interpolations
+    // interpolation 3. Custom (arbitrary) node interpolations
 
-    shape = new Frame(scene) {
+    shape = new Node(scene) {
       // Note that within render() geometry is defined at the
-      // frame local coordinate system.
+      // node local coordinate system.
       @Override
       public boolean graphics(PGraphics pg) {
         pg.pushStyle();
@@ -59,7 +59,7 @@ public class FrameInterpolation extends PApplet {
     interpolator.setLoop();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomFrame());
+      interpolator.addKeyFrame(scene.randomNode());
     interpolator.start();
   }
 
@@ -73,10 +73,10 @@ public class FrameInterpolation extends PApplet {
     scene.drawPath(interpolator);
     popStyle();
 
-    for (Frame frame : interpolator.keyFrames()) {
+    for (Node node : interpolator.keyFrames()) {
       pushMatrix();
-      scene.applyTransformation(frame);
-      scene.drawAxes(scene.tracks(frame) ? 40 : 20);
+      scene.applyTransformation(node);
+      scene.drawAxes(scene.tracks(node) ? 40 : 20);
       popMatrix();
     }
     if (showEyePath) {

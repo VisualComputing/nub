@@ -34,7 +34,7 @@ void setup() {
 
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
-  // An EyeConstraint is a LocalConstraint when applied to the camera frame !
+  // An EyeConstraint is a LocalConstraint when applied to the camera node !
   constraints[1] = new LocalConstraint();
   transDir = 0;
   rotDir = 0;

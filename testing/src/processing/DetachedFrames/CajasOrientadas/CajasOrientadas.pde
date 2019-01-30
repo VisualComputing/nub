@@ -11,10 +11,10 @@
  * will be oriented towards the sphere.
  *
  * Both the sphere and the boxes are implemented as detached-frames
- * specializations and hence they require to apply the local frame
+ * specializations and hence they require to apply the local node
  * transformations, check their drawing routines.
  *
- * Contrast this example with the attached-frame version with the same name.
+ * Contrast this example with the attached-node version with the same name.
  */
 
 import frames.primitives.*;
@@ -82,11 +82,11 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == ' ') {
     adaptive = !adaptive;
-    for (Frame frame : cajas)
+    for (Frame node : cajas)
       if (adaptive)
-        frame.setPrecision(Frame.Precision.ADAPTIVE);
+        node.setPrecision(Frame.Precision.ADAPTIVE);
       else
-        frame.setPrecision(Frame.Precision.FIXED);
+        node.setPrecision(Frame.Precision.FIXED);
   }
   if (key == 'a')
     drawAxes = !drawAxes;

@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -32,13 +32,13 @@ public class CajasOrientadas extends PApplet {
       cajas[i] = new Box();
 
     scene.fit(1);
-    scene.setTrackedFrame("keyboard", esfera.iFrame);
+    scene.setTrackedNode("keyboard", esfera.iNode);
   }
 
   public void draw() {
     background(0);
-    // calls visit() on all scene attached frames
-    // automatically applying all the frame transformations
+    // calls visit() on all scene attached nodes
+    // automatically applying all the node transformations
     //scene.traverse();
     scene.render();
   }
@@ -65,9 +65,9 @@ public class CajasOrientadas extends PApplet {
       adaptive = !adaptive;
       for (Box caja : cajas)
         if (adaptive)
-          caja.iFrame.setPickingThreshold(0.25f);
+          caja.iNode.setPickingThreshold(0.25f);
         else
-          caja.iFrame.setPickingThreshold(25);
+          caja.iNode.setPickingThreshold(25);
     }
     if (key == 'a')
       drawAxes = !drawAxes;
@@ -80,10 +80,10 @@ public class CajasOrientadas extends PApplet {
     if (key == 'S')
       scene.fit();
     if (key == 'u')
-      if (scene.trackedFrame("keyboard") == null)
-        scene.setTrackedFrame("keyboard", esfera.iFrame);
+      if (scene.trackedNode("keyboard") == null)
+        scene.setTrackedNode("keyboard", esfera.iNode);
       else
-        scene.resetTrackedFrame("keyboard");
+        scene.resetTrackedNode("keyboard");
     if (key == CODED)
       if (keyCode == UP)
         scene.translate("keyboard", 0, -10);
@@ -96,14 +96,14 @@ public class CajasOrientadas extends PApplet {
   }
 
   public class Box {
-    public Frame iFrame;
+    public Node iNode;
     float w, h, d;
     int c;
 
     public Box() {
-      iFrame = new Frame(scene) {
+      iNode = new Node(scene) {
         // note that within visit() geometry is defined
-        // at the frame local coordinate system
+        // at the node local coordinate system
         @Override
         public boolean graphics(PGraphics pg) {
           pg.pushStyle();
@@ -118,22 +118,22 @@ public class CajasOrientadas extends PApplet {
           pg.box(w, h, d);
           pg.stroke(255);
           if (drawShooterTarget)
-            scene.drawShooterTarget(iFrame);
+            scene.drawShooterTarget(iNode);
           pg.popStyle();
           return true;
         }
       };
-      iFrame.setPickingThreshold(0);
+      iNode.setPickingThreshold(0);
       setSize();
       setColor();
-      iFrame.randomize();
+      iNode.randomize();
     }
 
     public void setSize() {
       w = random(10, 40);
       h = random(10, 40);
       d = random(10, 40);
-      //iFrame.setPickingThreshold(PApplet.max(w, h, d));
+      //iNode.setPickingThreshold(PApplet.max(w, h, d));
     }
 
     public void setSize(float myW, float myH, float myD) {
@@ -155,32 +155,32 @@ public class CajasOrientadas extends PApplet {
     }
 
     public Vector getPosition() {
-      return iFrame.position();
+      return iNode.position();
     }
 
     public void setPosition(Vector pos) {
-      iFrame.setPosition(pos);
+      iNode.setPosition(pos);
     }
 
     public Quaternion getOrientation() {
-      return iFrame.orientation();
+      return iNode.orientation();
     }
 
     public void setOrientatio(Vector v) {
-      Vector to = Vector.subtract(v, iFrame.position());
-      iFrame.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
+      Vector to = Vector.subtract(v, iNode.position());
+      iNode.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
     }
   }
 
   class Sphere {
-    Frame iFrame;
+    Node iNode;
     float r;
     int c;
 
     public Sphere() {
-      iFrame = new Frame(scene) {
+      iNode = new Node(scene) {
         // note that within visit() geometry is defined
-        // at the frame local coordinate system
+        // at the node local coordinate system
         @Override
         public boolean graphics(PGraphics pg) {
           pg.pushStyle();
@@ -188,7 +188,7 @@ public class CajasOrientadas extends PApplet {
             //DrawingUtils.drawAxes(parent, radius()*1.3f);
             Scene.drawAxes(pg, radius() * 1.3f);
           pg.noStroke();
-          if (iFrame.isTracked()) {
+          if (iNode.isTracked()) {
             pg.fill(255, 0, 0);
             pg.sphere(radius() * 1.2f);
           } else {
@@ -197,12 +197,12 @@ public class CajasOrientadas extends PApplet {
           }
           pg.stroke(255);
           if (drawShooterTarget)
-            scene.drawShooterTarget(iFrame);
+            scene.drawShooterTarget(iNode);
           pg.popStyle();
           return true;
         }
       };
-      iFrame.setPickingThreshold(0.15f);
+      iNode.setPickingThreshold(0.15f);
       setRadius(10);
     }
 
@@ -212,7 +212,7 @@ public class CajasOrientadas extends PApplet {
 
     public void setRadius(float myR) {
       r = myR;
-      iFrame.setPickingThreshold(2 * r);
+      iNode.setPickingThreshold(2 * r);
     }
 
     public int getColor() {
@@ -228,11 +228,11 @@ public class CajasOrientadas extends PApplet {
     }
 
     public void setPosition(Vector pos) {
-      iFrame.setPosition(pos);
+      iNode.setPosition(pos);
     }
 
     public Vector getPosition() {
-      return iFrame.position();
+      return iNode.position();
     }
   }
 

@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates how to customize shape behaviors by
- * overriding the frame interact(Object... gesture) method.
+ * overriding the node interact(Object... gesture) method.
  *
  * The toruses color and number of faces are controled with the
  * keys and the mouse. To pick a torus press the [0..9] keys
@@ -70,7 +70,7 @@ void setup() {
           }
       }
     };
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
   }

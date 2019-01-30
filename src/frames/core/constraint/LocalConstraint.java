@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -10,16 +10,16 @@
 
 package frames.core.constraint;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 /**
- * An AxisPlaneConstraint defined in the Frame local coordinate system.
+ * An AxisPlaneConstraint defined in the Node local coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
- * {@link #rotationConstraintDirection()} are expressed in the Frame local coordinate
- * system (see {@link Frame#reference()} ).
+ * {@link #rotationConstraintDirection()} are expressed in the Node local coordinate
+ * system (see {@link Node#reference()} ).
  */
 public class LocalConstraint extends AxisPlaneConstraint {
   /**
@@ -28,20 +28,20 @@ public class LocalConstraint extends AxisPlaneConstraint {
    * {@link #translationConstraintDirection()}.
    */
   @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
+  public Vector constrainTranslation(Vector translation, Node node) {
     Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
     Vector proj;
     switch (translationConstraintType()) {
       case FREE:
         break;
       case PLANE:
-        proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame._localInverseTransformOf(translationConstraintDirection());
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        proj = frame.rotation().rotate(translationConstraintDirection());
-        // proj = frame._localInverseTransformOf(translationConstraintDirection());
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
@@ -53,11 +53,11 @@ public class LocalConstraint extends AxisPlaneConstraint {
 
   /**
    * When {@link #rotationConstraintType()} is of Type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the Frame local coordinate
+   * be a rotation around an axis whose direction is defined in the Node local coordinate
    * system by {@link #rotationConstraintDirection()}.
    */
   @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+  public Quaternion constrainRotation(Quaternion rotation, Node node) {
     Quaternion res = rotation.get();
     switch (rotationConstraintType()) {
       case FREE:

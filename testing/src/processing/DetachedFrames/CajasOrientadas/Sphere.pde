@@ -2,14 +2,14 @@ class Sphere extends Frame {
   float r;
   int c;
 
-  // default detached frame constructor
+  // default detached node constructor
   Sphere() {
     //setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
 
   // detached-frames drawing require to
-  // manually apply the frame transformation
+  // manually apply the node transformation
   void draw() {
     pushStyle();
     pushMatrix();

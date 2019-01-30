@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class ApplicationControl1 extends PApplet {
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
   PFont font36;
   int totalShapes;
 
@@ -28,9 +28,9 @@ public class ApplicationControl1 extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Frame[10];
+    shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene) {
+      shapes[i] = new Node(scene) {
         int id = totalShapes++;
         int _faces = randomFaces(), _color = randomColor();
 
@@ -87,19 +87,19 @@ public class ApplicationControl1 extends PApplet {
   }
 
   void control(Object... gesture) {
-    control(scene.defaultFrame(), gesture);
+    control(scene.defaultNode(), gesture);
   }
 
-  void control(Frame frame, Object... gesture) {
-    frame.interact(gesture);
+  void control(Node node, Object... gesture) {
+    node.interact(gesture);
   }
 
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedFrame(shapes[value]);
+      scene.setTrackedNode(shapes[value]);
     if (key == ' ')
-      scene.resetTrackedFrame();
+      scene.resetTrackedNode();
     if (key == CODED)
       if (keyCode == UP)
         scene.translate(0, -10);

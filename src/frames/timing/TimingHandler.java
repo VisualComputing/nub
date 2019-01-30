@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -46,7 +46,7 @@ public class TimingHandler {
 
   /**
    * Handler's main method. It should be called from within your main event loop. It does
-   * the following: 1. Recomputes the frame rate; 2. Executes the all timers (those in the
+   * the following: 1. Recomputes the node rate; 2. Executes the all timers (those in the
    * {@link #timerPool()}) callback functions; and, 3. Performs all the animated objects
    * (those in the {@link #animatorPool()}) animation functions.
    */
@@ -113,8 +113,8 @@ public class TimingHandler {
   }
 
   /**
-   * Recomputes the frame rate based upon the frequency at which {@link #handle()} is
-   * called from within the application main event loop. The frame rate is needed to sync
+   * Recomputes the node rate based upon the frequency at which {@link #handle()} is
+   * called from within the application main event loop. The node rate is needed to sync
    * all timing operations.
    */
   protected void _updateFrameRate() {
@@ -135,16 +135,16 @@ public class TimingHandler {
   }
 
   /**
-   * Returns the approximate frame rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
-   * several frames. As such, this value won't be valid until after 5-10 frames.
+   * Returns the approximate node rate of the software as it executes. The initial value
+   * is 10 fps and is updated with each node. The value is averaged (integrated) over
+   * several nodes. As such, this value won't be valid until after 5-10 nodes.
    */
   public float frameRate() {
     return _frameRate;
   }
 
   /**
-   * Returns the number of frames displayed since this timing handler was instantiated.
+   * Returns the number of nodes displayed since this timing handler was instantiated.
    */
   public long frameCount() {
     return _localCount;

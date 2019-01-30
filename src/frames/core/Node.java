@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -22,17 +22,17 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A frame is a 2D or 3D coordinate system, represented by a {@link #position()}, an
+ * A node is a 2D or 3D coordinate system, represented by a {@link #position()}, an
  * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
- * important: the frame is first translated, then rotated around the new translated origin
+ * important: the node is first translated, then rotated around the new translated origin
  * and then scaled. This class API partially conforms that of the great
  * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
- * Frame</a>.
- * <h2>Hierarchy of frames</h2>
- * The frame position, orientation and magnitude are actually defined with respect to
- * a {@link #reference()} frame. The default {@link #reference()} is the world
+ * Node</a>.
+ * <h2>Hierarchy of nodes</h2>
+ * The node position, orientation and magnitude are actually defined with respect to
+ * a {@link #reference()} node. The default {@link #reference()} is the world
  * coordinate system (represented by a {@code null} {@link #reference()}). If you
- * {@link #setReference(Frame)} to a different frame, you must then differentiate:
+ * {@link #setReference(Node)} to a different node, you must then differentiate:
  * <ul>
  * <li>The <b>local</b> {@link #translation()}, {@link #rotation()} and {@link #scaling()},
  * defined with respect to the {@link #reference()} which represents an angle preserving
@@ -41,7 +41,7 @@ import java.util.List;
  * {@link #magnitude()}, always defined with respect to the world coordinate system.</li>
  * </ul>
  * <p>
- * A frame is actually defined by its {@link #translation()} with respect to its
+ * A node is actually defined by its {@link #translation()} with respect to its
  * {@link #reference()}, then by {@link #rotation()} of the coordinate system around
  * the new translated origin and then by a uniform positive {@link #scaling()} along its
  * rotated axes.
@@ -50,50 +50,49 @@ import java.util.List;
  * {@link #scaling()}) and <b>global</b> ({@link #position()}, {@link #orientation()} and
  * {@link #magnitude()}) definitions is used in all the methods' names and should be
  * enough to prevent ambiguities. These notions are obviously identical when the
- * {@link #reference()} is {@code null}, i.e., when the frame is defined in the world
+ * {@link #reference()} is {@code null}, i.e., when the node is defined in the world
  * coordinate system (the one you are left with after calling a graph preDraw() method).
  * <h2>Geometry transformations</h2>
- * A frame is useful to define the position, orientation and magnitude of an arbitrary object
+ * A node is useful to define the position, orientation and magnitude of an arbitrary object
  * which may represent a point-of-view.
  * <p>
- * Use {@link #matrix()} to access the frame coordinate system, as when drawing an object
+ * Use {@link #matrix()} to access the node coordinate system, as when drawing an object
  * locally:
  * <p>
- * {@code // Builds a frame at position (0.5,0,0) and oriented such that its Y axis is
+ * {@code // Builds a node at position (0.5,0,0) and oriented such that its Y axis is
  * along the (1,1,1)} direction<br>
- * {@code Frame frame = new Frame(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
+ * {@code Node node = new Node(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
  * new Vector(1,1,1)));} <br>
  * {@code graph.pushModelView();} <br>
- * {@code graph.applyModelView(frame.matrix());} <br>
- * {@code // Draw your object here, in the local frame coordinate system.} <br>
+ * {@code graph.applyModelView(node.matrix());} <br>
+ * {@code // Draw your object here, in the local node coordinate system.} <br>
  * {@code graph.popModelView();} <br>
  * <p>
  * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
- * when rendering the scene from the frame point-of-view. Note these methods are used by the
- * graph when a frame is set as its eye, see {@link Graph#preDraw()}.
+ * when rendering the scene from the node point-of-view. Note these methods are used by the
+ * graph when a node is set as its eye, see {@link Graph#preDraw()}.
  * <p>
- * To transform a point from one frame to another use {@link #location(Vector, Frame)} and
+ * To transform a point from one node to another use {@link #location(Vector, Node)} and
  * {@link #worldLocation(Vector)}. To instead transform a vector (such as a normal) use
- * {@link #displacement(Vector, Frame)} and {@link #worldDisplacement(Vector)}.
+ * {@link #displacement(Vector, Node)} and {@link #worldDisplacement(Vector)}.
  * <h2>Hierarchical traversals</h2>
- * Hierarchical traversals of the frame hierarchy which automatically apply the local
- * frame transformations described above may be achieved with {@link Graph#render()} or
+ * Hierarchical traversals of the node hierarchy which automatically apply the local
+ * node transformations described above may be achieved with {@link Graph#render()} or
  * {@link Graph#render(Object)}.
- * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Frame)}
- * and to instantiate a frame attached to a graph which is referred to as attached frame (see
+ * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}
+ * and to instantiate a node attached to a graph which is referred to as attached node (see
  * {@link #isAttached(Graph)} and {@link #isDetached()}).
  * <p>
- * To instantiate an attached frame use the frame constructors that take a {@code graph}
- * parameter or a (reference) frame which in turn is attached to a graph. Once instantiated,
- * a frame cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
+ * To instantiate an attached node use the node constructors that take a {@code graph}
+ * parameter or a (reference) node which in turn is attached to a graph. Once instantiated,
+ * a node cannot be attached nor detached, but a copy of it can (see {@link #attach(Graph)}
  * and {@link #detach()}).
  * <h2>Constraints</h2>
- * One interesting feature of a frame is that its displacements can be constrained. When a
- * {@link frames.core.constraint.Constraint} is attached to a frame, it filters
- * the input of {@link #translate(Vector)} and {@link #rotate(Quaternion)}, and only the
- * resulting filtered motion is applied to the frame. The default {@link #constraint()}
- * is {@code null} resulting in no filtering. Use {@link #setConstraint(Constraint)} to
- * attach a constraint to a frame.
+ * One interesting feature of a node is that its displacements can be constrained. When a
+ * {@link Constraint} is attached to a node, it filters the input of {@link #translate(Vector)}
+ * and {@link #rotate(Quaternion)}, and only the resulting filtered motion is applied to the
+ * node. The default {@link #constraint()} is {@code null} resulting in no filtering.
+ * Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
  * {@link frames.core.constraint.LocalConstraint},
@@ -101,40 +100,40 @@ import java.util.List;
  * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A frame shape can be set from a retained-mode rendering object, see {@link #shape(Object)};
+ * A node shape can be set from a retained-mode rendering object, see {@link #shape(Object)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
- * Picking a frame is done according to a {@link #pickingThreshold()}. When picking a
- * frame it will be highlighted according to a {@link #highlighting()} policy.
+ * Picking a node is done according to a {@link #pickingThreshold()}. When picking a
+ * node it will be highlighted according to a {@link #highlighting()} policy.
  * <h2>Application Control</h2>
- * Implementing an application control for the frame is a two step process:
+ * Implementing an application control for the node is a two step process:
  * <ul>
  * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
- * <li>Send gesture data to the frame by calling {@link Graph#defaultHIDControl(Object...)},
- * {@link Graph#control(String, Object...)} or {@link Graph#control(Frame, Object...)}.</li>
+ * <li>Send gesture data to the node by calling {@link Graph#defaultHIDControl(Object...)},
+ * {@link Graph#control(String, Object...)} or {@link Graph#control(Node, Object...)}.</li>
  * </ul>
  * <h2>Syncing</h2>
- * Two frames can be synced together ({@link #sync(Frame, Frame)}), meaning that they will
+ * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
  * share their global parameters (position, orientation and magnitude) taken the one
- * that has been most recently updated. Syncing can be useful to share frames
+ * that has been most recently updated. Syncing can be useful to share nodes
  * among different off-screen canvases.
  */
-public class Frame {
+public class Node {
   /**
-   * Returns whether or not this frame matches other taking into account the {@link #translation()},
-   * {@link #rotation()} and {@link #scaling()} frame parameters, but not its {@link #reference()}.
+   * Returns whether or not this node matches other taking into account the {@link #translation()},
+   * {@link #rotation()} and {@link #scaling()} node parameters, but not its {@link #reference()}.
    *
-   * @param frame frame
+   * @param node node
    */
-  public boolean matches(Frame frame) {
-    if (frame == null)
-      frame = new Frame();
-    return translation().matches(frame.translation()) && rotation().matches(frame.rotation()) && scaling() == frame.scaling();
+  public boolean matches(Node node) {
+    if (node == null)
+      node = new Node();
+    return translation().matches(node.translation()) && rotation().matches(node.rotation()) && scaling() == node.scaling();
   }
 
   protected Vector _translation;
   protected float _scaling;
   protected Quaternion _rotation;
-  protected Frame _reference;
+  protected Node _reference;
   protected Constraint _constraint;
   protected long _lastUpdate;
 
@@ -145,10 +144,10 @@ public class Frame {
   protected static int _counter;
   protected int _id;
 
-  // Attached frames
+  // Attached nodes
 
   protected Graph _graph;
-  protected List<Frame> _children;
+  protected List<Node> _children;
   protected boolean _culled;
   protected boolean _tracking;
 
@@ -163,113 +162,113 @@ public class Frame {
   protected Highlighting _highlight;
 
   /**
-   * Creates a detached frame.
+   * Creates a detached node.
    * Same as {@code this(null, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Object)
-   * @see #Frame(Graph)
-   * @see #Frame(Frame)
-   * @see #Frame(Constraint)
+   * @see #Node(Object)
+   * @see #Node(Graph)
+   * @see #Node(Node)
+   * @see #Node(Constraint)
    */
-  public Frame() {
+  public Node() {
     this(null, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a frame attached to {@code graph}.
+   * Creates a node attached to {@code graph}.
    * Same as {@code this(graph, null, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame()
-   * @see #Frame(Object)
-   * @see #Frame(Frame)
-   * @see #Frame(Constraint)
+   * @see #Node()
+   * @see #Node(Object)
+   * @see #Node(Node)
+   * @see #Node(Constraint)
    */
-  public Frame(Graph graph) {
+  public Node(Graph graph) {
     this(graph, null, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a detached frame with {@code reference} as {@link #reference()}.
+   * Creates a detached node with {@code reference} as {@link #reference()}.
    * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame()
-   * @see #Frame(Graph)
-   * @see #Frame(Object)
-   * @see #Frame(Constraint)
+   * @see #Node()
+   * @see #Node(Graph)
+   * @see #Node(Object)
+   * @see #Node(Constraint)
    */
-  public Frame(Frame reference) {
+  public Node(Node reference) {
     this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a detached frame with {@code constraint} as {@link #constraint()}.
+   * Creates a detached node with {@code constraint} as {@link #constraint()}.
    * Same as {@code this(null, null, constraint, null, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph)
-   * @see #Frame(Object)
-   * @see #Frame()
-   * @see #Frame(Frame)
+   * @see #Node(Graph)
+   * @see #Node(Object)
+   * @see #Node()
+   * @see #Node(Node)
    */
-  public Frame(Constraint constraint) {
+  public Node(Constraint constraint) {
     this(null, null, constraint, null, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Creates a detached frame with {@code shape}.
+   * Creates a detached node with {@code shape}.
    * Same as {@code this(null, null, null, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame()
-   * @see #Frame(Graph)
-   * @see #Frame(Frame)
-   * @see #Frame(Constraint)
+   * @see #Node()
+   * @see #Node(Graph)
+   * @see #Node(Node)
+   * @see #Node(Constraint)
    */
-  public Frame(Object shape) {
+  public Node(Object shape) {
     this(null, null, null, shape, new Vector(), new Quaternion(), 1);
   }
 
   /**
-   * Constructs a shapeless frame, attached to {@code graph}, having {@code translation},
-   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * Constructs a shapeless node, attached to {@code graph}, having {@code translation},
+   * {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(graph, null, null, null, translation, rotation, scaling)}.
    *
-   * @see #Frame(Frame, Vector, Quaternion, float)
-   * @see #Frame(Vector, Quaternion, float)
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Vector, Quaternion, float)
+   * @see #Node(Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Graph graph, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Graph graph, Vector translation, Quaternion rotation, float scaling) {
     this(graph, null, null, null, translation, rotation, scaling);
   }
 
   /**
-   * Constructs a shapeless frame, having {@code reference}, {@code translation},
-   * {@code rotation} and {@code scaling} as the frame {@link #reference()},
+   * Constructs a shapeless node, having {@code reference}, {@code translation},
+   * {@code rotation} and {@code scaling} as the node {@link #reference()},
    * {@link #translation()}, {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(reference.graph(), reference, null, null, translation, rotation, scaling)}.
    *
-   * @see #Frame(Graph, Vector, Quaternion, float)
-   * @see #Frame(Vector, Quaternion, float)
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Vector, Quaternion, float)
+   * @see #Node(Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Node reference, Vector translation, Quaternion rotation, float scaling) {
     this(reference.graph(), reference, null, null, translation, rotation, scaling);
   }
 
   /**
-   * Constructs a shapeless detached frame, having {@code translation},
-   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * Constructs a shapeless detached node, having {@code translation},
+   * {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(null, null, null, null, translation, rotation, scaling)}.
    *
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Vector translation, Quaternion rotation, float scaling) {
+  public Node(Vector translation, Quaternion rotation, float scaling) {
     this(null, null, null, null, translation, rotation, scaling);
   }
 
@@ -278,29 +277,29 @@ public class Frame {
   /**
    * Same as {@code this(graph, null, shape)}.
    *
-   * @see #Frame(Graph, Constraint, Object)
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Graph graph, Object shape) {
+  public Node(Graph graph, Object shape) {
     this(graph, null, shape);
   }
 
   /**
    * Same as {@code this(graph, constraint, null)}.
    *
-   * @see #Frame(Graph, Constraint, Object)
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Graph graph, Constraint constraint) {
+  public Node(Graph graph, Constraint constraint) {
     this(graph, constraint, null);
   }
 
   /**
    * Same as {@code this(graph, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Graph, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Graph graph, Constraint constraint, Object shape) {
+  public Node(Graph graph, Constraint constraint, Object shape) {
     this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
@@ -309,66 +308,66 @@ public class Frame {
   /**
    * Same as {@code this(reference, null, shape)}.
    *
-   * @see #Frame(Frame, Constraint, Object)
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Object shape) {
+  public Node(Node reference, Object shape) {
     this(reference, null, shape);
   }
 
   /**
    * Same as {@code this(reference, constraint, null)}.
    *
-   * @see #Frame(Frame, Constraint, Object)
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Constraint constraint) {
+  public Node(Node reference, Constraint constraint) {
     this(reference, constraint, null);
   }
 
   /**
    * Same as {@code this(reference, constraint, shape, new Vector(), new Quaternion(), 1)}.
    *
-   * @see #Frame(Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Constraint constraint, Object shape) {
+  public Node(Node reference, Constraint constraint, Object shape) {
     this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
   // --
 
   /**
-   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(graph, null, constraint, shape, translation, rotation, scaling)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Graph graph, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     this(graph, null, constraint, shape, translation, rotation, scaling);
   }
 
   /**
-   * Creates a child frame of {@code reference} with {@code constraint} as {@link #constraint()},
-   * having {@code translation}, {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * Creates a child node of {@code reference} with {@code constraint} as {@link #constraint()},
+   * having {@code translation}, {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively. The {@link #pickingThreshold()} is set to {@code 0.2}.
    * Same as {@code this(reference.graph(), reference, constraint, shape, translation, rotation, scaling)}.
    *
-   * @see #Frame(Graph, Frame, Constraint, Object, Vector, Quaternion, float)
+   * @see #Node(Graph, Node, Constraint, Object, Vector, Quaternion, float)
    */
-  public Frame(Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  public Node(Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     this(reference.graph(), reference, constraint, shape, translation, rotation, scaling);
   }
 
   /**
-   * Creates a frame attached to {@code graph} with {@code constraint} as {@link #constraint()},
+   * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
    * having {@code reference} as {@link #reference()}, {@code translation},
-   * {@code rotation} and {@code scaling} as the frame {@link #translation()},
+   * {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
    * The {@link #pickingThreshold()} is set to {@code 0.2}.
    */
-  protected Frame(Graph graph, Frame reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
+  protected Node(Graph graph, Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
     setReference(reference);
     setConstraint(constraint);
@@ -379,90 +378,90 @@ public class Frame {
     _id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
-      throw new RuntimeException("Maximum frame instances reached. Exiting now!");
+      throw new RuntimeException("Maximum node instances reached. Exiting now!");
     _lastUpdate = 0;
     _threshold = .2f;
     _tracking = true;
     _highlight = Highlighting.FRONT;
     if (graph() == null)
       return;
-    // attached frames:
-    _children = new ArrayList<Frame>();
+    // attached nodes:
+    _children = new ArrayList<Node>();
     _culled = false;
   }
 
   /**
    * Copy constructor.
    */
-  protected Frame(Graph graph, Frame frame) {
+  protected Node(Graph graph, Node node) {
     this._graph = graph;
-    this.setPosition(frame.position());
-    this.setOrientation(frame.orientation());
-    this.setMagnitude(frame.magnitude());
-    this.setConstraint(frame.constraint());
+    this.setPosition(node.position());
+    this.setOrientation(node.orientation());
+    this.setMagnitude(node.magnitude());
+    this.setConstraint(node.constraint());
 
-    if ((this.isDetached() && frame.isDetached()) || !(this.isDetached() && !frame.isDetached()))
-      setReference(frame.reference());
+    if ((this.isDetached() && node.isDetached()) || !(this.isDetached() && !node.isDetached()))
+      setReference(node.reference());
 
     this._id = ++_counter;
     // unlikely but theoretically possible
     if (_id == 16777216)
-      throw new RuntimeException("Maximum frame instances reached. Exiting now!");
-    _lastUpdate = frame.lastUpdate();
-    this._threshold = frame._threshold;
-    this._tracking = frame._tracking;
+      throw new RuntimeException("Maximum node instances reached. Exiting now!");
+    _lastUpdate = node.lastUpdate();
+    this._threshold = node._threshold;
+    this._tracking = node._tracking;
 
     if (graph() == null)
       return;
 
-    // attached frames:
-    this._children = new ArrayList<Frame>();
-    this._culled = frame._culled;
+    // attached nodes:
+    this._children = new ArrayList<Node>();
+    this._culled = node._culled;
 
-    this._frontShape = frame._frontShape;
-    this._backShape = frame._backShape;
-    this._highlight = frame._highlight;
+    this._frontShape = node._frontShape;
+    this._backShape = node._backShape;
+    this._highlight = node._highlight;
   }
 
   /**
-   * Performs a deep copy of this frame into {@code graph}.
+   * Performs a deep copy of this node into {@code graph}.
    * <p>
-   * Same as {@code return new Frame(graph, this)}.
+   * Same as {@code return new Node(graph, this)}.
    *
-   * @see #Frame(Graph, Frame)
+   * @see #Node(Graph, Node)
    */
-  public Frame attach(Graph graph) {
-    return new Frame(graph, this);
+  public Node attach(Graph graph) {
+    return new Node(graph, this);
   }
 
   /**
-   * Performs a deep copy of this frame.
+   * Performs a deep copy of this node.
    * <p>
    * Same as {@code return attach(graph())}.
    *
    * @see #attach(Graph)
    */
-  public Frame get() {
+  public Node get() {
     return attach(graph());
   }
 
   /**
-   * Returns a detached deep copy of this frame.
+   * Returns a detached deep copy of this node.
    * <p>
    * Same as {@code return attach(null)}.
    *
    * @see #attach(Graph)
    */
-  public Frame detach() {
+  public Node detach() {
     return attach(null);
   }
 
   /**
-   * Tells whether or not this frame belongs to the {@graph} hierarchy (see {@link Graph#render()}).
-   * To test if the frame is detach from any graph hierarchy call {@code isAttached(null)}.
+   * Tells whether or not this node belongs to the {@graph} hierarchy (see {@link Graph#render()}).
+   * To test if the node is detach from any graph hierarchy call {@code isAttached(null)}.
    * <p>
-   * Note that a call to {@link #children()} never returns {@code null} if the frame is attached to
-   * a graph, i.e., that graph will visit the frame during traversal.
+   * Note that a call to {@link #children()} never returns {@code null} if the node is attached to
+   * a graph, i.e., that graph will visit the node during traversal.
    *
    * @see #isDetached()
    * @see Graph#render()
@@ -474,8 +473,8 @@ public class Frame {
   /**
    * Same as {@code return isAttached(null)}.
    * <p>
-   * Note that a call to {@link #children()} always returns {@code null} if the frame is detached,
-   * i.e., the frame is not available for graph traversal (see {@link Graph#render()}).
+   * Note that a call to {@link #children()} always returns {@code null} if the node is detached,
+   * i.e., the node is not available for graph traversal (see {@link Graph#render()}).
    *
    * @see #isAttached(Graph)
    * @see Graph#render()
@@ -486,31 +485,31 @@ public class Frame {
 
   /**
    * Sets {@link #position()}, {@link #orientation()} and {@link #magnitude()} values from
-   * those of the {@code frame}. The frame {@link #graph()}, {@link #reference()} and
+   * those of the {@code node}. The node {@link #graph()}, {@link #reference()} and
    * {@link #constraint()} are not affected by this call.
    * <p>
-   * After calling {@code set(frame)} a call to {@code this.matches(frame)} should
+   * After calling {@code set(node)} a call to {@code this.matches(node)} should
    * return {@code true}.
    *
    * @see #reset()
    * @see #worldMatrix()
    */
-  public void set(Frame frame) {
-    if (frame == null)
-      frame = new Frame();
-    setPosition(frame.position());
-    setOrientation(frame.orientation());
-    setMagnitude(frame.magnitude());
+  public void set(Node node) {
+    if (node == null)
+      node = new Node();
+    setPosition(node.position());
+    setOrientation(node.orientation());
+    setMagnitude(node.magnitude());
   }
 
   /**
-   * Sets an identity frame by resetting its {@link #translation()}, {@link #rotation()}
-   * and {@link #scaling()}. The frame {@link #graph()}, {@link #reference()} and
+   * Sets an identity node by resetting its {@link #translation()}, {@link #rotation()}
+   * and {@link #scaling()}. The node {@link #graph()}, {@link #reference()} and
    * {@link #constraint()} are not affected by this call. Call {@code set(null)} if you
    * want to reset the global {@link #position()}, {@link #orientation()} and
-   * {@link #magnitude()} frame parameters instead.
+   * {@link #magnitude()} node parameters instead.
    *
-   * @see #set(Frame)
+   * @see #set(Node)
    */
   public void reset() {
     setTranslation(new Vector());
@@ -525,7 +524,7 @@ public class Frame {
   }
 
   /**
-   * Uniquely identifies the frame. Also the color to be used for picking with a color buffer.
+   * Uniquely identifies the node. Also the color to be used for picking with a color buffer.
    * See: http://stackoverflow.com/questions/2262100/rgb-int-to-rgb-python
    */
   public int colorID() {
@@ -535,7 +534,7 @@ public class Frame {
   // MODIFIED
 
   /**
-   * @return the last frame the this object was updated.
+   * @return the last node the this object was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -546,69 +545,69 @@ public class Frame {
   /**
    * Same as {@code sync(this, other)}.
    *
-   * @see #sync(Frame, Frame)
+   * @see #sync(Node, Node)
    */
-  public void sync(Frame frame) {
-    sync(this, frame);
+  public void sync(Node node) {
+    sync(this, node);
   }
 
   /**
-   * If {@code frame1} has been more recently updated than {@code frame2}, calls
-   * {@code frame2.set(frame1)}, otherwise calls {@code frame1.set(frame2)}.
+   * If {@code node1} has been more recently updated than {@code node2}, calls
+   * {@code node2.set(node1)}, otherwise calls {@code node1.set(node2)}.
    * Does nothing if both objects were updated at the same time.
    * <p>
    * This method syncs only the global geometry attributes ({@link #position()},
-   * {@link #orientation()} and {@link #magnitude()}) among the two frames. The
-   * {@link #reference()} and {@link #constraint()} (if any) of each frame are kept
+   * {@link #orientation()} and {@link #magnitude()}) among the two nodes. The
+   * {@link #reference()} and {@link #constraint()} (if any) of each node are kept
    * separately.
    *
-   * @see #set(Frame)
+   * @see #set(Node)
    */
-  public static void sync(Frame frame1, Frame frame2) {
-    if (frame1 == null || frame2 == null)
+  public static void sync(Node node1, Node node2) {
+    if (node1 == null || node2 == null)
       return;
-    if (frame1.lastUpdate() == frame2.lastUpdate())
+    if (node1.lastUpdate() == node2.lastUpdate())
       return;
-    Frame source = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame1 : frame2;
-    Frame target = (frame1.lastUpdate() > frame2.lastUpdate()) ? frame2 : frame1;
+    Node source = (node1.lastUpdate() > node2.lastUpdate()) ? node1 : node2;
+    Node target = (node1.lastUpdate() > node2.lastUpdate()) ? node2 : node1;
     target.set(source);
   }
 
   /**
-   * Internal use. Automatically call by all methods which change the Frame state.
+   * Internal use. Automatically call by all methods which change the Node state.
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
     if (_children != null)
-      for (Frame child : _children)
+      for (Node child : _children)
         child._modified();
   }
 
-  // REFERENCE_FRAME
+  // REFERENCE_node
 
   /**
-   * Returns {@code true} if {@code frame} is {@link #reference()} {@code this} frame.
+   * Returns {@code true} if {@code node} is {@link #reference()} {@code this} node.
    */
-  public boolean isReference(Frame frame) {
-    return reference() == frame;
+  public boolean isReference(Node node) {
+    return reference() == node;
   }
 
   /**
-   * Returns {@code true} if {@code frame} is ancestor of {@code this} frame.
+   * Returns {@code true} if {@code node} is ancestor of {@code this} node.
    */
-  public boolean isAncestor(Frame frame) {
-    if (frame == null)
+  public boolean isAncestor(Node node) {
+    if (node == null)
       return true;
-    return frame._isSuccessor(this);
+    return node._isSuccessor(this);
   }
 
   /**
-   * Returns {@code true} if {@code frame} is successor of {@code this} frame.
+   * Returns {@code true} if {@code node} is successor of {@code this} node.
    */
-  protected boolean _isSuccessor(Frame frame) {
-    if (frame == this || frame == null)
+  protected boolean _isSuccessor(Node node) {
+    if (node == this || node == null)
       return false;
-    Frame ancestor = frame.reference();
+    Node ancestor = node.reference();
     while (ancestor != null) {
       if (ancestor == this)
         return true;
@@ -620,23 +619,23 @@ public class Frame {
   /**
    * Same as {@code return successor.isAncestor(ancestor)}.
    *
-   * @see #isAncestor(Frame)
-   * @see #path(Frame, Frame)
+   * @see #isAncestor(Node)
+   * @see #path(Node, Node)
    */
-  public static boolean isAncestor(Frame successor, Frame ancestor) {
+  public static boolean isAncestor(Node successor, Node ancestor) {
     return successor.isAncestor(ancestor);
   }
 
   /**
-   * Returns an array containing a straight path of frames from {@code tail} to {@code tip}.
+   * Returns an array containing a straight path of nodes from {@code tail} to {@code tip}.
    * Returns an empty list if {@code tail} is not ancestor of {@code tip}.
    *
-   * @see #isAncestor(Frame, Frame)
+   * @see #isAncestor(Node, Node)
    */
-  public static List<Frame> path(Frame tail, Frame tip) {
-    ArrayList<Frame> list = new ArrayList<Frame>();
+  public static List<Node> path(Node tail, Node tip) {
+    ArrayList<Node> list = new ArrayList<Node>();
     if (tip.isAncestor(tail)) {
-      Frame _tip = tip;
+      Node _tip = tip;
       while (_tip != tail) {
         list.add(0, _tip);
         _tip = _tip.reference();
@@ -648,31 +647,31 @@ public class Frame {
   }
 
   /**
-   * Returns the reference frame, in which this frame is defined.
+   * Returns the reference node, in which this node is defined.
    * <p>
-   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
+   * The node {@link #translation()}, {@link #rotation()} and {@link #scaling()} are
    * defined with respect to the {@link #reference()} coordinate system. A
-   * {@code null} reference frame (default value) means that the frame is defined in the
+   * {@code null} reference node (default value) means that the node is defined in the
    * world coordinate system.
    * <p>
    * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to
-   * recursively convert values along the reference frame chain and to get values
-   * expressed in the world coordinate system. The values match when the reference frame
+   * recursively convert values along the reference node chain and to get values
+   * expressed in the world coordinate system. The values match when the reference node
    * is {@code null}.
    * <p>
-   * Use {@link #setReference(Frame)} to set this value and create a frame hierarchy.
-   * Convenient functions allow you to convert coordinates and vectors from one frame to
-   * another: see {@link #location(Vector, Frame)} and {@link #displacement(Vector, Frame)},
+   * Use {@link #setReference(Node)} to set this value and create a node hierarchy.
+   * Convenient functions allow you to convert coordinates and vectors from one node to
+   * another: see {@link #location(Vector, Node)} and {@link #displacement(Vector, Node)},
    * respectively.
    */
-  public Frame reference() {
+  public Node reference() {
     return _reference;
   }
 
   /**
    * Same as {@code setReference(null)}.
    *
-   * @see #setReference(Frame)
+   * @see #setReference(Node)
    * @see #resetConstraint()
    */
   public void resetReference() {
@@ -680,64 +679,64 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #reference()} of the frame.
+   * Sets the {@link #reference()} of the node.
    * <p>
-   * The frame {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
+   * The node {@link #translation()}, {@link #rotation()} and {@link #scaling()} are then
    * defined in the {@link #reference()} coordinate system.
    * <p>
    * Use {@link #position()}, {@link #orientation()} and {@link #magnitude()} to express
-   * the frame global transformation in the world coordinate system.
+   * the node global transformation in the world coordinate system.
    * <p>
-   * Using this method, you can create a hierarchy of frames. This hierarchy needs to be a
+   * Using this method, you can create a hierarchy of nodes. This hierarchy needs to be a
    * tree, which root is the world coordinate system (i.e., {@code null}
    * {@link #reference()}). No action is performed if setting {@code reference} as the
    * {@link #reference()} would create a loop in the hierarchy.
    */
-  public void setReference(Frame frame) {
-    if (frame == this) {
-      System.out.println("A Frame cannot be a reference of itself.");
+  public void setReference(Node node) {
+    if (node == this) {
+      System.out.println("A Node cannot be a reference of itself.");
       return;
     }
-    if (_isSuccessor(frame)) {
-      System.out.println("A Frame descendant cannot be set as its reference.");
+    if (_isSuccessor(node)) {
+      System.out.println("A Node descendant cannot be set as its reference.");
       return;
     }
-    if (frame != null)
-      if ((isDetached() && !frame.isDetached()) || !frame.isAttached(graph())) {
-        System.out.println("Both frame and its reference should be detached, or attached to the same graph.");
+    if (node != null)
+      if ((isDetached() && !node.isDetached()) || !node.isAttached(graph())) {
+        System.out.println("Both node and its reference should be detached, or attached to the same graph.");
         return;
       }
     if (isDetached()) {
-      if (reference() == frame)
+      if (reference() == node)
         return;
-      _reference = frame;
+      _reference = node;
     } else {
-      // 1. no need to re-parent, just check this needs to be added as leadingFrame
-      if (reference() == frame) {
+      // 1. no need to re-parent, just check this needs to be added as leadingnode
+      if (reference() == node) {
         _restorePath(reference(), this);
         return;
       }
       // 2. else re-parenting
-      // 2a. before assigning new reference frame
+      // 2a. before assigning new reference node
       if (reference() != null) // old
         reference()._removeChild(this);
       else if (graph() != null)
-        graph()._removeLeadingFrame(this);
-      // finally assign the reference frame
-      _reference = frame;// reference() returns now the new value
-      // 2b. after assigning new reference frame
+        graph()._removeLeadingNode(this);
+      // finally assign the reference node
+      _reference = node;// reference() returns now the new value
+      // 2b. after assigning new reference node
       _restorePath(reference(), this);
     }
     _modified();
   }
 
   /**
-   * Used by {@link #setReference(Frame)}.
+   * Used by {@link #setReference(Node)}.
    */
-  protected void _restorePath(Frame parent, Frame child) {
+  protected void _restorePath(Node parent, Node child) {
     if (parent == null) {
       if (graph() != null)
-        graph()._addLeadingFrame(child);
+        graph()._addLeadingNode(child);
     } else {
       if (!parent._hasChild(child)) {
         parent._addChild(child);
@@ -747,24 +746,24 @@ public class Frame {
   }
 
   /**
-   * Used by {@link #_restorePath(Frame, Frame)}.
+   * Used by {@link #_restorePath(Node, Node)}.
    */
-  protected boolean _addChild(Frame frame) {
-    if (frame == null)
+  protected boolean _addChild(Node node) {
+    if (node == null)
       return false;
-    if (_hasChild(frame))
+    if (_hasChild(node))
       return false;
-    return _children.add(frame);
+    return _children.add(node);
   }
 
   /**
-   * Removes the leading Frame if present. Typically used when re-parenting the Frame.
+   * Removes the leading Node if present. Typically used when re-parenting the Node.
    */
-  protected boolean _removeChild(Frame frame) {
+  protected boolean _removeChild(Node node) {
     boolean result = false;
-    Iterator<Frame> it = _children.iterator();
+    Iterator<Node> it = _children.iterator();
     while (it.hasNext()) {
-      if (it.next() == frame) {
+      if (it.next() == node) {
         it.remove();
         result = true;
         break;
@@ -773,18 +772,18 @@ public class Frame {
     return result;
   }
 
-  protected boolean _hasChild(Frame frame) {
-    for (Frame child : _children)
-      if (child == frame)
+  protected boolean _hasChild(Node node) {
+    for (Node child : _children)
+      if (child == node)
         return true;
     return false;
   }
 
   /**
-   * Returns the list a child frames of this frame. Only meaningful if this frame {@link #isAttached(Graph)}
-   * to a graph. Returns {@code null} if this frame {@link #isDetached()}.
+   * Returns the list a child nodes of this node. Only meaningful if this node {@link #isAttached(Graph)}
+   * to a graph. Returns {@code null} if this node {@link #isDetached()}.
    */
-  public List<Frame> children() {
+  public List<Node> children() {
     return _children;
   }
 
@@ -800,7 +799,7 @@ public class Frame {
   /**
    * Same as {@code randomize(graph().center(), graph().radius(), graph().is3D())}.
    * <p>
-   * Does nothing if the frame {@link #isDetached()}.
+   * Does nothing if the node {@link #isDetached()}.
    *
    * @see #randomize(Vector, float, boolean)
    * @see Vector#randomize()
@@ -812,11 +811,11 @@ public class Frame {
     if (graph() != null)
       randomize(graph().center(), graph().radius(), graph().is3D());
     else
-      System.out.println("randomize() is only available for attached frames, nothing done! Use randomize(center, radius, is3D) instead");
+      System.out.println("randomize() is only available for attached nodes, nothing done! Use randomize(center, radius, is3D) instead");
   }
 
   /**
-   * Randomized this frame. The frame is randomly re-positioned inside the ball
+   * Randomized this node. The node is randomly re-positioned inside the ball
    * defined by {@code center} and {@code radius}, which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is
    * randomized by {@link Quaternion#randomize()}. The new magnitude is a random
@@ -846,7 +845,7 @@ public class Frame {
   }
 
   /**
-   * Returns a random frame attached to {@code graph}. The frame is randomly positioned inside
+   * Returns a random node attached to {@code graph}. The node is randomly positioned inside
    * the {@code graph} viewing volume which is defined by {@link Graph#center()} and {@link Graph#radius()}
    * (see {@link Vector#random()}). The {@link #orientation()} is set by {@link Quaternion#random()}. The
    * magnitude is a random in [0,5...2].
@@ -857,14 +856,14 @@ public class Frame {
    * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
-  public static Frame random(Graph graph) {
-    Frame frame = new Frame(graph);
-    frame.randomize(graph.center(), graph.radius(), graph.is3D());
-    return frame;
+  public static Node random(Graph graph) {
+    Node node = new Node(graph);
+    node.randomize(graph.center(), graph.radius(), graph.is3D());
+    return node;
   }
 
   /**
-   * Returns a random detached frame. The frame is randomly positioned inside the ball defined
+   * Returns a random detached node. The node is randomly positioned inside the ball defined
    * by {@code center} and {@code radius} (see {@link Vector#random()}), which in 2D is a
    * circumference parallel to the x-y plane. The {@link #orientation()} is set by
    * {@link Quaternion#random()}. The magnitude is a random in [0,5...2].
@@ -875,10 +874,10 @@ public class Frame {
    * @see #randomize()
    * @see #randomize(Vector, float, boolean)
    */
-  public static Frame random(Vector center, float radius, boolean is3D) {
-    Frame frame = new Frame();
-    frame.randomize(center, radius, is3D);
-    return frame;
+  public static Node random(Vector center, float radius, boolean is3D) {
+    Node node = new Node();
+    node.randomize(center, radius, is3D);
+    return node;
   }
 
   // PRECISION
@@ -895,14 +894,14 @@ public class Frame {
   }
 
   /**
-   * Returns the frame picking threshold. Set it with {@link #setPickingThreshold(float)}.
+   * Returns the node picking threshold. Set it with {@link #setPickingThreshold(float)}.
    * <p>
-   * Picking a frame is done with ray casting against a screen-space shape defined according
+   * Picking a node is done with ray casting against a screen-space shape defined according
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
-   * <li>The projected pixels of the frame visual representation (see {@link #graphics(Object)}
+   * <li>The projected pixels of the node visual representation (see {@link #graphics(Object)}
    * and {@link #shape(Object)}). Set it with {@code threshold = 0}.</li>
-   * <li>A frame bounding box whose length is defined as percentage of the graph diameter
+   * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
    * </ul>
@@ -918,10 +917,9 @@ public class Frame {
   // CONSTRAINT
 
   /**
-   * Returns the current {@link frames.core.constraint.Constraint} applied to the
-   * frame.
+   * Returns the current {@link Constraint} applied to the node.
    * <p>
-   * A {@code null} value (default) means that no constraint is used to filter the frame
+   * A {@code null} value (default) means that no constraint is used to filter the node
    * translation and rotation.
    * <p>
    * See the Constraint class documentation for details.
@@ -931,7 +929,7 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #constraint()} attached to the frame.
+   * Sets the {@link #constraint()} attached to the node.
    * <p>
    * A {@code null} value means set no constraint (also reset it if there was one).
    */
@@ -952,7 +950,7 @@ public class Frame {
   // TRANSLATION
 
   /**
-   * Returns the frame translation, defined with respect to the {@link #reference()}.
+   * Returns the node translation, defined with respect to the {@link #reference()}.
    * <p>
    * Use {@link #position()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
@@ -964,11 +962,11 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #translation()} of the frame, locally defined with respect to the
+   * Sets the {@link #translation()} of the node, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    * <p>
    * Use {@link #setPosition(Vector)} to define the world coordinates {@link #position()}.
    *
@@ -1011,11 +1009,11 @@ public class Frame {
   }
 
   /**
-   * Translates the frame according to {@code vector}, locally defined with respect to the
+   * Translates the node according to {@code vector}, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * If there's a {@link #constraint()} it is satisfied. Hence the translation actually
-   * applied to the frame may differ from {@code vector} (since it can be filtered by the
+   * applied to the node may differ from {@code vector} (since it can be filtered by the
    * {@link #constraint()}).
    *
    * @see #rotate(Quaternion)
@@ -1029,7 +1027,7 @@ public class Frame {
   // POSITION
 
   /**
-   * Returns the frame position defined in the world coordinate system.
+   * Returns the node position defined in the world coordinate system.
    *
    * @see #orientation()
    * @see #magnitude()
@@ -1041,13 +1039,13 @@ public class Frame {
   }
 
   /**
-   * Sets the frame {@link #position()}, defined in the world coordinate system.
+   * Sets the node {@link #position()}, defined in the world coordinate system.
    * <p>
-   * Use {@link #setTranslation(Vector)} to define the local frame translation (with respect
+   * Use {@link #setTranslation(Vector)} to define the local node translation (with respect
    * to the {@link #reference()}).
    * <p>
-   * Note that the potential {@link #constraint()} of the frame is taken into account, i.e.,
-   * to bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
+   * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
    */
@@ -1072,7 +1070,7 @@ public class Frame {
   // ROTATION
 
   /**
-   * Returns the frame rotation, defined with respect to the {@link #reference()}
+   * Returns the node rotation, defined with respect to the {@link #reference()}
    * (i.e, the current Quaternion orientation).
    * <p>
    * Use {@link #orientation()} to get the result in world coordinates. These two values
@@ -1094,12 +1092,12 @@ public class Frame {
   /**
    * Set the current rotation. See the different {@link Quaternion} constructors.
    * <p>
-   * Sets the frame {@link #rotation()}, locally defined with respect to the
+   * Sets the node {@link #rotation()}, locally defined with respect to the
    * {@link #reference()}. Use {@link #setOrientation(Quaternion)} to define the
    * world coordinates {@link #orientation()}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
    * @see #rotation()
@@ -1116,11 +1114,11 @@ public class Frame {
   }
 
   /**
-   * Rotates the frame by {@code quaternion} (defined in the frame coordinate system):
+   * Rotates the node by {@code quaternion} (defined in the node coordinate system):
    * {@code rotation().compose(quaternion)}.
    * <p>
    * Note that if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
    * @see #translate(Vector)
@@ -1150,13 +1148,13 @@ public class Frame {
   }
 
   /**
-   * Rotates the frame by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
+   * Rotates the node by the {@code quaternion} whose axis (see {@link Quaternion#axis()})
    * passes through {@code point}. The {@code quaternion} {@link Quaternion#axis()} is
-   * defined in the frame coordinate system, while {@code point} is defined in the world
+   * defined in the node coordinate system, while {@code point} is defined in the world
    * coordinate system).
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    *
    * @see #setConstraint(Constraint)
    */
@@ -1166,9 +1164,9 @@ public class Frame {
     this.rotation().compose(quaternion);
     this.rotation().normalize(); // Prevents numerical drift
 
-    // Original in frames-0.1.x and proscene:
+    // Original in nodes-0.1.x and proscene:
     //Vector vector = Vector.add(center, (new Quaternion(orientation().rotate(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
-    // TODO test frame hierarchy, we are using worldDisplacement instead of orientation().rotate
+    // TODO test node hierarchy, we are using worldDisplacement instead of orientation().rotate
     Vector vector = Vector.add(center, (new Quaternion(worldDisplacement(quaternion.axis()), quaternion.angle())).rotate(Vector.subtract(position(), center)));
     vector.subtract(translation());
     translate(vector);
@@ -1194,42 +1192,42 @@ public class Frame {
   }
 
   /**
-   * Same as {@code orbit(new Quaternion(axis, angle), frame)}.
+   * Same as {@code orbit(new Quaternion(axis, angle), node)}.
    *
-   * @see #orbit(Quaternion, Frame)
+   * @see #orbit(Quaternion, Node)
    */
-  public void orbit(Vector axis, float angle, Frame frame) {
-    orbit(new Quaternion(axis, angle), frame);
+  public void orbit(Vector axis, float angle, Node node) {
+    orbit(new Quaternion(axis, angle), node);
   }
 
   /**
    * Same as {@code orbit(quaternion, null)}.
    *
-   * @see #orbit(Quaternion, Frame)
+   * @see #orbit(Quaternion, Node)
    */
   public void orbit(Quaternion quaternion) {
     orbit(quaternion, null);
   }
 
   /**
-   * Rotates this frame around {@code frame} (which may be null for the world coordinate system)
+   * Rotates this node around {@code node} (which may be null for the world coordinate system)
    * according to {@code quaternion}.
    * <p>
-   * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code frame}
+   * The {@code quaternion} axes (see {@link Quaternion#axis()}) is defined in the {@code node}
    * coordinate system.
    * <p>
    * Note: if there's a {@link #constraint()} it is satisfied, i.e., to
-   * bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
-  public void orbit(Quaternion quaternion, Frame frame) {
-    Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), frame), quaternion.angle());
-    _orbit(localQuaternion, frame == null ? new Vector() : frame.position());
+  public void orbit(Quaternion quaternion, Node node) {
+    Quaternion localQuaternion = new Quaternion(displacement(quaternion.axis(), node), quaternion.angle());
+    _orbit(localQuaternion, node == null ? new Vector() : node.position());
 
     // Note that the 'easy way' to do it (not relying on the _orbit() method)
-    // by-passes the frame constraint (kept for the curious):
+    // by-passes the node constraint (kept for the curious):
     /*
-    Frame reference = frame == null ? new Frame() : frame.detach();
-    Frame copy = new Frame(reference);
+    Node reference = node == null ? new Node() : node.detach();
+    Node copy = new Node(reference);
     copy.set(this);
     reference.rotate(quaternion);
     set(copy);
@@ -1239,7 +1237,7 @@ public class Frame {
   // ORIENTATION
 
   /**
-   * Returns the orientation of the frame, defined in the world coordinate system.
+   * Returns the orientation of the node, defined in the world coordinate system.
    *
    * @see #position()
    * @see #magnitude()
@@ -1248,7 +1246,7 @@ public class Frame {
    */
   public Quaternion orientation() {
     Quaternion quaternion = rotation().get();
-    Frame reference = reference();
+    Node reference = reference();
     while (reference != null) {
       quaternion = Quaternion.compose(reference.rotation(), quaternion);
       reference = reference.reference();
@@ -1257,13 +1255,13 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #orientation()} of the frame, defined in the world coordinate system.
+   * Sets the {@link #orientation()} of the node, defined in the world coordinate system.
    * <p>
-   * Use {@link #setRotation(Quaternion)} to define the local frame rotation (with respect
+   * Use {@link #setRotation(Quaternion)} to define the local node rotation (with respect
    * to the {@link #reference()}).
    * <p>
-   * Note that the potential {@link #constraint()} of the frame is taken into account, i.e.,
-   * to bypass a frame constraint simply reset it (see {@link #setConstraint(Constraint)}).
+   * Note that the potential {@link #constraint()} of the node is taken into account, i.e.,
+   * to bypass a node constraint simply reset it (see {@link #setConstraint(Constraint)}).
    */
   public void setOrientation(Quaternion quaternion) {
     setRotation(reference() != null ? Quaternion.compose(reference().orientation().inverse(), quaternion) : quaternion);
@@ -1279,7 +1277,7 @@ public class Frame {
   // SCALING
 
   /**
-   * Returns the frame scaling, defined with respect to the {@link #reference()}.
+   * Returns the node scaling, defined with respect to the {@link #reference()}.
    * <p>
    * Use {@link #magnitude()} to get the result in world coordinates. These two values are
    * identical when the {@link #reference()} is {@code null} (default).
@@ -1291,7 +1289,7 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #scaling()} of the frame, locally defined with respect to the
+   * Sets the {@link #scaling()} of the node, locally defined with respect to the
    * {@link #reference()}.
    * <p>
    * Use {@link #setMagnitude(float)} to define the world coordinates {@link #magnitude()}.
@@ -1305,7 +1303,7 @@ public class Frame {
   }
 
   /**
-   * Scales the frame according to {@code scaling}, locally defined with respect to the
+   * Scales the node according to {@code scaling}, locally defined with respect to the
    * {@link #reference()}.
    *
    * @see #rotate(Quaternion)
@@ -1318,11 +1316,11 @@ public class Frame {
   // MAGNITUDE
 
   /**
-   * Returns the magnitude of the frame, defined in the world coordinate system.
+   * Returns the magnitude of the node, defined in the world coordinate system.
    * <p>
-   * Note that the magnitude is used to compute the frame
+   * Note that the magnitude is used to compute the node
    * {@link #projection(Graph.Type, float, float, float, float, boolean)} which is useful to render a
-   * scene from the frame point-of-view.
+   * scene from the node point-of-view.
    *
    * @see #orientation()
    * @see #position()
@@ -1338,13 +1336,13 @@ public class Frame {
   }
 
   /**
-   * Sets the {@link #magnitude()} of the frame, defined in the world coordinate system.
+   * Sets the {@link #magnitude()} of the node, defined in the world coordinate system.
    * <p>
-   * Use {@link #setScaling(float)} to define the local frame scaling (with respect to the
+   * Use {@link #setScaling(float)} to define the local node scaling (with respect to the
    * {@link #reference()}).
    */
   public void setMagnitude(float magnitude) {
-    Frame reference = reference();
+    Node reference = reference();
     if (reference != null)
       setScaling(magnitude / reference.magnitude());
     else
@@ -1356,95 +1354,95 @@ public class Frame {
   /**
    * Same as {@code align(null)}.
    *
-   * @see #align(Frame)
+   * @see #align(Node)
    */
   public void align() {
     align(null);
   }
 
   /**
-   * Convenience function that simply calls {@code align(false, 0.85f, frame)}
+   * Convenience function that simply calls {@code align(false, 0.85f, node)}
    *
-   * @see #align(boolean, float, Frame)
+   * @see #align(boolean, float, Node)
    */
-  public void align(Frame frame) {
-    align(false, 0.85f, frame);
+  public void align(Node node) {
+    align(false, 0.85f, node);
   }
 
   /**
    * Same as {@code align(move, null)}.
    *
-   * @see #align(boolean, Frame)
+   * @see #align(boolean, Node)
    */
   public void align(boolean move) {
     align(move, null);
   }
 
   /**
-   * Convenience function that simply calls {@code align(move, 0.85f, frame)}.
+   * Convenience function that simply calls {@code align(move, 0.85f, node)}.
    *
-   * @see #align(boolean, float, Frame)
+   * @see #align(boolean, float, Node)
    */
-  public void align(boolean move, Frame frame) {
-    align(move, 0.85f, frame);
+  public void align(boolean move, Node node) {
+    align(move, 0.85f, node);
   }
 
   /**
    * Same as {@code align(threshold, null)}.
    *
-   * @see #align(boolean, Frame)
+   * @see #align(boolean, Node)
    */
   public void align(float threshold) {
     align(threshold, null);
   }
 
   /**
-   * Convenience function that simply calls {@code align(false, threshold, frame)}.
+   * Convenience function that simply calls {@code align(false, threshold, node)}.
    *
-   * @see #align(boolean, float, Frame)
+   * @see #align(boolean, float, Node)
    */
-  public void align(float threshold, Frame frame) {
-    align(false, threshold, frame);
+  public void align(float threshold, Node node) {
+    align(false, threshold, node);
   }
 
   /**
    * Same as {@code align(move, threshold, null)}.
    *
-   * @see #align(boolean, float, Frame)
+   * @see #align(boolean, float, Node)
    */
   public void align(boolean move, float threshold) {
     align(move, threshold, null);
   }
 
   /**
-   * Aligns the frame with {@code frame}, so that two of their axis are parallel.
+   * Aligns the node with {@code node}, so that two of their axis are parallel.
    * <p>
-   * If one of the X, Y and Z axis of the Frame is almost parallel to any of the X, Y, or
-   * Z axis of {@code frame}, the Frame is rotated so that these two axis actually become
+   * If one of the X, Y and Z axis of the Node is almost parallel to any of the X, Y, or
+   * Z axis of {@code node}, the Node is rotated so that these two axis actually become
    * parallel.
    * <p>
    * If, after this first rotation, two other axis are also almost parallel, a second
-   * alignment is performed. The two frames then have identical orientations, up to 90
+   * alignment is performed. The two nodes then have identical orientations, up to 90
    * degrees rotations.
    * <p>
    * {@code threshold} measures how close two axis must be to be considered parallel. It
    * is compared with the absolute values of the dot product of the normalized axis.
    * <p>
-   * When {@code move} is set to {@code true}, the Frame {@link #position()} is also
-   * affected by the alignment. The new Frame {@link #position()} is such that the
-   * {@code frame} frame position (computed with {@link #location(Vector)}, in the Frame
+   * When {@code move} is set to {@code true}, the Node {@link #position()} is also
+   * affected by the alignment. The new Node {@link #position()} is such that the
+   * {@code node} node position (computed with {@link #location(Vector)}, in the Node
    * coordinates system) does not change.
    * <p>
-   * {@code frame} may be {@code null} and then represents the world coordinate system
+   * {@code node} may be {@code null} and then represents the world coordinate system
    * (same convention than for the {@link #reference()}).
    */
-  public void align(boolean move, float threshold, Frame frame) {
+  public void align(boolean move, float threshold, Node node) {
     Vector[][] directions = new Vector[2][3];
 
     for (int d = 0; d < 3; ++d) {
       Vector dir = new Vector((d == 0) ? 1.0f : 0.0f, (d == 1) ? 1.0f : 0.0f, (d == 2) ? 1.0f : 0.0f);
-      if (frame != null)
-        directions[0][d] = frame.orientation().rotate(dir);
+      if (node != null)
+        directions[0][d] = node.orientation().rotate(dir);
       else
         directions[0][d] = dir;
       directions[1][d] = orientation().rotate(dir);
@@ -1468,9 +1466,9 @@ public class Frame {
       }
     }
     //TODO needs testing
-    Frame old = detach(); // correct line
-    // VFrame old = this.get();// this call the get overloaded method and
-    // hence add the frame to the mouse _grabber
+    Node old = detach(); // correct line
+    // Vnode old = this.get();// this call the get overloaded method and
+    // hence add the node to the mouse _grabber
 
     vector.set(directions[0][index[0]]);
     float coef = vector.dot(directions[1][index[1]]);
@@ -1518,8 +1516,8 @@ public class Frame {
     }
     if (move) {
       Vector center = new Vector(0.0f, 0.0f, 0.0f);
-      if (frame != null)
-        center = frame.position();
+      if (node != null)
+        center = node.position();
 
       vector = Vector.subtract(center, worldDisplacement(old.location(center)));
       vector.subtract(translation());
@@ -1529,7 +1527,7 @@ public class Frame {
 
 
   /**
-   * Translates the frame so that its {@link #position()} lies on the line defined by
+   * Translates the node so that its {@link #position()} lies on the line defined by
    * {@code origin} and {@code direction} (defined in the world coordinate system).
    * <p>
    * Simply uses an orthogonal projection. {@code direction} does not need to be
@@ -1544,7 +1542,7 @@ public class Frame {
   }
 
   /**
-   * Rotates the frame so that its {@link #xAxis()} becomes {@code axis} defined in the
+   * Rotates the node so that its {@link #xAxis()} becomes {@code axis} defined in the
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
@@ -1559,7 +1557,7 @@ public class Frame {
   }
 
   /**
-   * Rotates the frame so that its {@link #yAxis()} becomes {@code axis} defined in the
+   * Rotates the node so that its {@link #yAxis()} becomes {@code axis} defined in the
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
@@ -1574,7 +1572,7 @@ public class Frame {
   }
 
   /**
-   * Rotates the frame so that its {@link #zAxis()} becomes {@code axis} defined in the
+   * Rotates the node so that its {@link #zAxis()} becomes {@code axis} defined in the
    * world coordinate system.
    *
    * <b>Attention:</b> this rotation is not uniquely defined. See
@@ -1598,7 +1596,7 @@ public class Frame {
   }
 
   /**
-   * Returns the x-axis of the frame, represented as a normalized vector defined in the
+   * Returns the x-axis of the node, represented as a normalized vector defined in the
    * world coordinate system.
    *
    * @see #setXAxis(Vector)
@@ -1622,7 +1620,7 @@ public class Frame {
   }
 
   /**
-   * Returns the y-axis of the frame, represented as a normalized vector defined in the
+   * Returns the y-axis of the node, represented as a normalized vector defined in the
    * world coordinate system.
    *
    * @see #setYAxis(Vector)
@@ -1646,7 +1644,7 @@ public class Frame {
   }
 
   /**
-   * Returns the z-axis of the frame, represented as a normalized vector defined in the
+   * Returns the z-axis of the node, represented as a normalized vector defined in the
    * world coordinate system.
    *
    * @see #setZAxis(Vector)
@@ -1663,15 +1661,15 @@ public class Frame {
   // CONVERSION
 
   /**
-   * Returns the local transformation matrix represented by the frame.
+   * Returns the local transformation matrix represented by the node.
    * <p>
    * This method could be used in conjunction with {@code pushMatrix()}, {@code popMatrix()}
-   * and {@code applyMatrix()} to modify a graph modelView() matrix from a frame hierarchy.
-   * For example, with this frame hierarchy:
+   * and {@code applyMatrix()} to modify a graph modelView() matrix from a node hierarchy.
+   * For example, with this node hierarchy:
    * <p>
-   * {@code Frame body = new Frame();} <br>
-   * {@code Frame leftArm = new Frame();} <br>
-   * {@code Frame rightArm = new Frame();} <br>
+   * {@code Node body = new Node();} <br>
+   * {@code Node leftArm = new Node();} <br>
+   * {@code Node rightArm = new Node();} <br>
    * {@code leftArm.setReference(body);} <br>
    * {@code rightArm.setReference(body);} <br>
    * <p>
@@ -1691,19 +1689,19 @@ public class Frame {
    * {@code graph.popModelView();} <br>
    * <p>
    * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
-   * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
+   * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    * <p>
-   * This matrix only represents the local frame transformation (i.e., with respect to the
-   * {@link #reference()}). Use {@link #worldMatrix()} to get the full Frame
-   * transformation matrix (i.e., from the world to the Frame coordinate system). These
+   * This matrix only represents the local node transformation (i.e., with respect to the
+   * {@link #reference()}). Use {@link #worldMatrix()} to get the full Node
+   * transformation matrix (i.e., from the world to the Node coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
    *
    * <b>Attention:</b> In Processing this technique is inefficient because
    * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
-   * Use {@link frames.core.Graph#applyTransformation(Frame)} instead.
+   * Use {@link Graph#applyTransformation(Node)} instead.
    *
-   * @see #set(Frame)
+   * @see #set(Node)
    * @see #worldMatrix()
    * @see #view()
    */
@@ -1732,39 +1730,39 @@ public class Frame {
   }
 
   /**
-   * Returns the global transformation matrix represented by the frame which grants
+   * Returns the global transformation matrix represented by the node which grants
    * direct access to it, without the need to traverse its ancestor hierarchy first
    * (as it is the case with {@link #matrix()}).
    * <p>
    * This method should be used in conjunction with {@code applyMatrix()} to modify a
-   * graph modelView() matrix from a frame:
+   * graph modelView() matrix from a node:
    * <p>
    * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
-   * {@code Frame frame = new Frame(translation, new Rotation(from, to));} <br>
-   * {@code graph.applyModelView(frame.worldMatrix());} <br>
-   * {@code // draw object in the frame coordinate system.} <br>
+   * {@code Node node = new Node(translation, new Rotation(from, to));} <br>
+   * {@code graph.applyModelView(node.worldMatrix());} <br>
+   * {@code // draw object in the node coordinate system.} <br>
    * <p>
-   * This matrix represents the global frame transformation: the entire
-   * {@link #reference()} hierarchy is taken into account to define the frame
+   * This matrix represents the global node transformation: the entire
+   * {@link #reference()} hierarchy is taken into account to define the node
    * transformation from the world coordinate system. Use {@link #matrix()} to get the
-   * local frame transformation matrix (i.e. defined with respect to the
+   * local node transformation matrix (i.e. defined with respect to the
    * {@link #reference()}). These two match when the {@link #reference()} is
    * {@code null}.
    *
-   * @see #set(Frame)
+   * @see #set(Node)
    * @see #matrix()
    * @see #view()
    */
   public Matrix worldMatrix() {
     if (reference() != null)
-      return new Frame(position(), orientation(), magnitude()).matrix();
+      return new Node(position(), orientation(), magnitude()).matrix();
     else
       return matrix();
   }
 
   /**
-   * Returns the inverse of the matrix associated with the frame position and orientation that
-   * is to be used when the frame represents an eye. This matrix matches the inverted of the
+   * Returns the inverse of the matrix associated with the node position and orientation that
+   * is to be used when the node represents an eye. This matrix matches the inverted of the
    * {@link #worldMatrix()} when {@link #scaling()} is {@code 1}.
    * <p>
    * The view matrix converts from the world coordinates system to the eye coordinates system,
@@ -1773,15 +1771,15 @@ public class Frame {
    * @see Matrix#view(Vector, Quaternion)
    * @see #matrix()
    * @see #worldMatrix()
-   * @see #set(Frame)
-   * @see #set(Frame)
+   * @see #set(Node)
+   * @see #set(Node)
    */
   public Matrix view() {
     return Matrix.view(position(), orientation());
   }
 
   /**
-   * Sets the frame from a {@link #matrix()} representation: rotation and scaling in the upper
+   * Sets the node from a {@link #matrix()} representation: rotation and scaling in the upper
    * left 3x3 matrix and translation on the last column.
    * <p>
    * Hence, if your openGL code fragment looks like:
@@ -1791,16 +1789,16 @@ public class Frame {
    * <p>
    * It is equivalent to write:
    * <p>
-   * {@code Frame frame = new Frame();} <br>
-   * {@code frame.fromMatrix(m);} <br>
+   * {@code Node node = new Node();} <br>
+   * {@code node.fromMatrix(m);} <br>
    * {@code graph.pushModelView();} <br>
-   * {@code graph.applyModelView(frame.matrix());} <br>
-   * {@code // You are in the local frame coordinate system.} <br>
+   * {@code graph.applyModelView(node.matrix());} <br>
+   * {@code // You are in the local node coordinate system.} <br>
    * {@code graph.popModelView();} <br>
    * <p>
-   * Which allows to apply local transformations to the {@code frame} while using geometry
-   * data from other frame instances when necessary (see {@link #location(Vector, Frame)} and
-   * {@link #displacement(Vector, Frame)}).
+   * Which allows to apply local transformations to the {@code node} while using geometry
+   * data from other node instances when necessary (see {@link #location(Vector, Node)} and
+   * {@link #displacement(Vector, Node)}).
    *
    * @see #fromWorldMatrix(Matrix)
    * @see #matrix()
@@ -1844,7 +1842,7 @@ public class Frame {
    * the {@link Graph.Type} is {@link Graph.Type#PERSPECTIVE} or
    * {@code orthographic(width, height, zNear, zFar, lefTHanded)}, if the
    * the {@link Graph.Type} is {@link Graph.Type#ORTHOGRAPHIC} or {@link Graph.Type#TWO_D}.
-   * In both cases it uses the frame {@link #magnitude()}.
+   * In both cases it uses the node {@link #magnitude()}.
    * <p>
    * Override this method to set a {@link Graph.Type#CUSTOM} projection.
    *
@@ -1862,7 +1860,7 @@ public class Frame {
   /**
    * Same as {@code return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar}.
    * <p>
-   * Note that to compute the orthographic matrix the frame {@link #magnitude()} scales the viewing volume width and height.
+   * Note that to compute the orthographic matrix the node {@link #magnitude()} scales the viewing volume width and height.
    *
    * @see Matrix#orthographic(float, float, float, float)
    * @see #perspective(float, float, float, boolean)
@@ -1876,7 +1874,7 @@ public class Frame {
   /**
    * Same as {@code return Matrix.perspective(leftHanded ? -magnitude() : magnitude(), aspectRatio, zNear, zFar)}.
    * <p>
-   * Note that to compute the perspective matrix the frame {@link #magnitude()} is taken as: {@code tan(fov / 2)},
+   * Note that to compute the perspective matrix the node {@link #magnitude()} is taken as: {@code tan(fov / 2)},
    * where {@code fov} stands for the frustum field-of-view.
    *
    * @see Matrix#perspective(float, float, float, float)
@@ -1889,7 +1887,7 @@ public class Frame {
   }
 
   /**
-   * Sets the frame from {@link #worldMatrix()} representation: orientation and magnitude
+   * Sets the node from {@link #worldMatrix()} representation: orientation and magnitude
    * in the upper left 3x3 matrix and position on the last column.
    * <p>
    * Hence, if your openGL code fragment looks like:
@@ -1899,14 +1897,14 @@ public class Frame {
    * <p>
    * It is equivalent to write:
    * <p>
-   * {@code Frame frame = new Frame();} <br>
-   * {@code frame.fromWorldMatrix(m);} <br>
-   * {@code graph.applyModelView(frame.matrix());} <br>
-   * {@code // You are in the local frame coordinate system.} <br>
+   * {@code Node node = new Node();} <br>
+   * {@code node.fromWorldMatrix(m);} <br>
+   * {@code graph.applyModelView(node.matrix());} <br>
+   * {@code // You are in the local node coordinate system.} <br>
    * <p>
-   * Which allows to apply local transformations to the {@code frame} while using geometry
-   * data from other frame instances when necessary (see {@link #location(Vector, Frame)} and
-   * {@link #displacement(Vector, Frame)}).
+   * Which allows to apply local transformations to the {@code node} while using geometry
+   * data from other node instances when necessary (see {@link #location(Vector, Node)} and
+   * {@link #displacement(Vector, Node)}).
    *
    * @see #fromMatrix(Matrix)
    * @see #worldMatrix()
@@ -1946,42 +1944,42 @@ public class Frame {
   }
 
   /**
-   * Returns a frame representing the inverse of this frame space transformation.
+   * Returns a node representing the inverse of this node space transformation.
    * <p>
-   * The new frame {@link #rotation()} is the
+   * The new node {@link #rotation()} is the
    * {@link Quaternion#inverse()} of the original rotation. Its
    * {@link #translation()} is the negated inverse rotated image of the original
    * translation. Its {@link #scaling()} is 1 / original scaling.
    * <p>
-   * If a frame is considered as a space rigid transformation, i.e., translation and
-   * rotation, but no scaling (scaling=1), the inverse() frame performs the inverse
+   * If a node is considered as a space rigid transformation, i.e., translation and
+   * rotation, but no scaling (scaling=1), the inverse() node performs the inverse
    * transformation.
    * <p>
-   * Only the local frame transformation (i.e., defined with respect to the
+   * Only the local node transformation (i.e., defined with respect to the
    * {@link #reference()}) is inverted. Use {@link #worldInverse()} for a global
    * inverse.
    * <p>
-   * The resulting frame has the same {@link #reference()} as the this frame and a
+   * The resulting node has the same {@link #reference()} as the this node and a
    * {@code null} {@link #constraint()}.
    *
    * @see #worldInverse()
    */
-  public Frame inverse() {
-    Frame frame = new Frame(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
-    frame.setReference(reference());
-    return frame;
+  public Node inverse() {
+    Node node = new Node(Vector.multiply(rotation().inverseRotate(translation()), -1), rotation().inverse(), 1 / scaling());
+    node.setReference(reference());
+    return node;
   }
 
   /**
-   * Returns the {@link #inverse()} of the frame world transformation.
+   * Returns the {@link #inverse()} of the node world transformation.
    * <p>
-   * The {@link #orientation()} of the new frame is the
+   * The {@link #orientation()} of the new node is the
    * {@link Quaternion#inverse()} of the original orientation. Its
    * {@link #position()} is the negated and inverse rotated image of the original
    * position. The {@link #magnitude()} is the original magnitude multiplicative
    * inverse.
    * <p>
-   * The result frame has a {@code null} {@link #reference()} and a {@code null}
+   * The result node has a {@code null} {@link #reference()} and a {@code null}
    * {@link #constraint()}.
    * <p>
    * Use {@link #inverse()} for a local (i.e., with respect to {@link #reference()})
@@ -1989,18 +1987,18 @@ public class Frame {
    *
    * @see #inverse()
    */
-  public Frame worldInverse() {
-    return new Frame(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
+  public Node worldInverse() {
+    return new Node(Vector.multiply(orientation().inverseRotate(position()), -1), orientation().inverse(), 1 / magnitude());
   }
 
   // VECTOR CONVERSION
 
   /**
-   * Converts {@code vector} displacement from world to this frame.
+   * Converts {@code vector} displacement from world to this node.
    * Same as {@code return displacement(vector, null)}.
    * {@link #location(Vector)} converts locations instead of displacements.
    *
-   * @see #displacement(Vector, Frame)
+   * @see #displacement(Vector, Node)
    * @see #location(Vector)
    */
   public Vector displacement(Vector vector) {
@@ -2008,37 +2006,37 @@ public class Frame {
   }
 
   /**
-   * Converts {@code vector} displacement from {@code frame} to this frame.
-   * Use {@code frame.displacement(vector, this)} to perform the inverse transformation.
-   * {@link #location(Vector, Frame)} converts locations instead of displacements.
+   * Converts {@code vector} displacement from {@code node} to this node.
+   * Use {@code node.displacement(vector, this)} to perform the inverse transformation.
+   * {@link #location(Vector, Node)} converts locations instead of displacements.
    *
    * @see #displacement(Vector)
    * @see #worldDisplacement(Vector)
    */
-  public Vector displacement(Vector vector, Frame frame) {
-    return this == frame ? vector : _displacement(reference() != null ? reference().displacement(vector, frame) : frame == null ? vector : frame.worldDisplacement(vector));
+  public Vector displacement(Vector vector, Node node) {
+    return this == node ? vector : _displacement(reference() != null ? reference().displacement(vector, node) : node == null ? vector : node.worldDisplacement(vector));
   }
 
   /**
-   * Converts {@code vector} displacement from this frame to world.
+   * Converts {@code vector} displacement from this node to world.
    * {@link #displacement(Vector)} performs the inverse transformation.
    * {@link #worldLocation(Vector)} converts locations instead of displacements.
    *
    * @see #location(Vector)
-   * @see #displacement(Vector, Frame)
+   * @see #displacement(Vector, Node)
    */
   public Vector worldDisplacement(Vector vector) {
-    Frame frame = this;
+    Node node = this;
     Vector result = vector;
-    while (frame != null) {
-      result = frame._referenceDisplacement(result);
-      frame = frame.reference();
+    while (node != null) {
+      result = node._referenceDisplacement(result);
+      node = node.reference();
     }
     return result;
   }
 
   /**
-   * Converts {@code vector} displacement from {@link #reference()} to this frame.
+   * Converts {@code vector} displacement from {@link #reference()} to this node.
    * <p>
    * {@link #_referenceDisplacement(Vector)} performs the inverse transformation.
    * {@link #_location(Vector)} converts locations instead of displacements.
@@ -2050,7 +2048,7 @@ public class Frame {
   }
 
   /**
-   * Converts {@code vector} displacement from this frame to {@link #reference()}.
+   * Converts {@code vector} displacement from this node to {@link #reference()}.
    * <p>
    * {@link #_displacement(Vector)} performs the inverse transformation.
    * {@link #_referenceLocation(Vector)} converts locations instead of displacements.
@@ -2064,11 +2062,11 @@ public class Frame {
   // POINT CONVERSION
 
   /**
-   * Converts {@code vector} location from world to this frame.
+   * Converts {@code vector} location from world to this node.
    * Same as {@code return location(vector, null)}.
    * {@link #displacement(Vector)} converts displacements instead of locations.
    *
-   * @see #location(Vector, Frame)
+   * @see #location(Vector, Node)
    * @see #displacement(Vector)
    */
   public Vector location(Vector vector) {
@@ -2076,37 +2074,37 @@ public class Frame {
   }
 
   /**
-   * Converts {@code vector} location from {@code frame} to this frame.
-   * Use {@code frame.location(vector, this)} to perform the inverse transformation.
-   * {@link #displacement(Vector, Frame)} converts displacements instead of locations.
+   * Converts {@code vector} location from {@code node} to this node.
+   * Use {@code node.location(vector, this)} to perform the inverse transformation.
+   * {@link #displacement(Vector, Node)} converts displacements instead of locations.
    *
    * @see #location(Vector)
    * @see #worldLocation(Vector)
    */
-  public Vector location(Vector vector, Frame frame) {
-    return this == frame ? vector : _location(reference() != null ? reference().location(vector, frame) : frame == null ? vector : frame.worldLocation(vector));
+  public Vector location(Vector vector, Node node) {
+    return this == node ? vector : _location(reference() != null ? reference().location(vector, node) : node == null ? vector : node.worldLocation(vector));
   }
 
   /**
-   * Converts {@code vector} location from this frame to world.
+   * Converts {@code vector} location from this node to world.
    * {@link #location(Vector)} performs the inverse transformation.
    * {@link #worldDisplacement(Vector)} converts displacements instead of locations.
    *
    * @see #displacement(Vector)
-   * @see #location(Vector, Frame)
+   * @see #location(Vector, Node)
    */
   public Vector worldLocation(Vector vector) {
-    Frame frame = this;
+    Node node = this;
     Vector result = vector;
-    while (frame != null) {
-      result = frame._referenceLocation(result);
-      frame = frame.reference();
+    while (node != null) {
+      result = node._referenceLocation(result);
+      node = node.reference();
     }
     return result;
   }
 
   /**
-   * Converts {@code vector} location from {@link #reference()} to this frame.
+   * Converts {@code vector} location from {@link #reference()} to this node.
    * <p>
    * {@link #_referenceLocation(Vector)} performs the inverse transformation.
    * {@link #_displacement(Vector)} converts displacements instead of locations.
@@ -2118,7 +2116,7 @@ public class Frame {
   }
 
   /**
-   * Converts {@code vector} location from this frame to {@link #reference()}.
+   * Converts {@code vector} location from this node to {@link #reference()}.
    * <p>
    * {@link #_location(Vector)} performs the inverse transformation.
    * {@link #_referenceDisplacement(Vector)} converts displacements instead of locations.
@@ -2129,11 +2127,11 @@ public class Frame {
     return Vector.add(rotation().rotate(Vector.multiply(vector, scaling())), translation());
   }
 
-  // Attached frames
+  // Attached nodes
 
   /**
-   * Returns the {@code graph} this frame is attached to. Always returns {@code false} if
-   * the frame {@link #isDetached()}.
+   * Returns the {@code graph} this node is attached to. Always returns {@code false} if
+   * the node {@link #isDetached()}.
    */
   public Graph graph() {
     return _graph;
@@ -2149,9 +2147,9 @@ public class Frame {
   }
 
   /**
-   * Enables frame tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Point, Frame)}
-   * returns {@code false}, {@link Graph#setTrackedFrame(String, Frame)} does nothing while
-   * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the frame.
+   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Point, Node)}
+   * returns {@code false}, {@link Graph#setTrackedNode(String, Node)} does nothing while
+   * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
    *
    * @see #isTrackingEnabled()
    */
@@ -2160,8 +2158,8 @@ public class Frame {
   }
 
   /**
-   * Same as {@code return isDetached() ? false : isTracked(graph())}. Use it if the frame is
-   * attached to a {@link #graph()}. Use {@link #isTracked(Graph)} if the frame {@link #isDetached()}.
+   * Same as {@code return isDetached() ? false : isTracked(graph())}. Use it if the node is
+   * attached to a {@link #graph()}. Use {@link #isTracked(Graph)} if the node {@link #isDetached()}.
    *
    * @see #isDetached()
    * @see #isTracked(Graph)
@@ -2171,39 +2169,39 @@ public class Frame {
   }
 
   /**
-   * Returns {@code true} if the {@code frame} is being tracked by at least one {@code graph}
+   * Returns {@code true} if the {@code node} is being tracked by at least one {@code graph}
    * {@code hid} and {@code false} otherwise.
    *
-   * @see Graph#isTrackedFrame(String, Frame)
-   * @see Graph#isTrackedFrame(Frame)
+   * @see Graph#isTrackedNode(String, Node)
+   * @see Graph#isTrackedNode(Node)
    */
   public boolean isTracked(Graph graph) {
     return graph._agents.containsValue(this);
   }
 
   /**
-   * Parse {@code gesture} params. Useful to implement the frame as an for application control.
+   * Parse {@code gesture} params. Useful to implement the node as an for application control.
    * Default implementation is empty. , i.e., it is meant to be implemented by derived classes.
    */
   public void interact(Object... gesture) {
   }
 
   /**
-   * This method is called on each frame of the graph hierarchy by the {@link Graph#render()}
+   * This method is called on each node of the graph hierarchy by the {@link Graph#render()}
    * algorithm to visit it. Default implementation is empty, i.e., it is meant to be implemented
    * by derived classes.
    * <p>
-   * Hierarchical culling, i.e., culling of the frame and its children, should be decided here.
+   * Hierarchical culling, i.e., culling of the node and its children, should be decided here.
    * Set the culling flag with {@link #cull(boolean)} according to your culling condition:
    *
    * <pre>
    * {@code
-   * frame = new Frame(graph) {
+   * node = new Node(graph) {
    *   @Override
    *   public void visit() {
    *     // Hierarchical culling is optional and disabled by default. When the cullingCondition
    *     // (which should be implemented by you) is true, scene.traverse() will prune the branch
-   *     // at the frame
+   *     // at the node
    *     cull(cullingCondition);
    *   }
    * }
@@ -2214,13 +2212,13 @@ public class Frame {
    * @see Graph#render()
    * @see #cull(boolean)
    * @see #isCulled()
-   * @see Graph#draw(Object, Frame)
+   * @see Graph#draw(Object, Node)
    */
   public void visit() {
   }
 
   /**
-   * Same as {@code cull(true)}. Only meaningful if the frame is attached to
+   * Same as {@code cull(true)}. Only meaningful if the node is attached to
    * a {@code graph}.
    *
    * @see #cull(boolean)
@@ -2232,22 +2230,22 @@ public class Frame {
   }
 
   /**
-   * Enables or disables {@link #visit()} of this frame and its children during
+   * Enables or disables {@link #visit()} of this node and its children during
    * {@link Graph#render()}. Culling should be decided within {@link #visit()}.
-   * Only meaningful if the frame is attached to a {@code graph}.
+   * Only meaningful if the node is attached to a {@code graph}.
    *
    * @see #isCulled()
    */
   public void cull(boolean cull) {
     if (isDetached())
-      System.out.println("Warning: culling a detached frame does nothing");
+      System.out.println("Warning: culling a detached node does nothing");
     _culled = cull;
   }
 
   /**
-   * Returns whether or not the frame culled or not. Culled frames (and their children)
+   * Returns whether or not the node culled or not. Culled nodes (and their children)
    * will not be visited by the {@link Graph#render()} algorithm. Always returns
-   * {@code false} if the frame {@link #isDetached()}.
+   * {@code false} if the node {@link #isDetached()}.
    *
    * @see #cull(boolean)
    */
@@ -2256,7 +2254,7 @@ public class Frame {
   }
 
   /**
-   * Sets the frame {@link #highlighting()}.
+   * Sets the node {@link #highlighting()}.
    *
    * @see #highlighting()
    * @see #setPickingThreshold(float)

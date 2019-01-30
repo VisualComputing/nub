@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -664,7 +664,7 @@ public class Quaternion {
    * Converts Euler rotation angles {@code roll}, {@code pitch} and {@code yaw},
    * respectively defined to the x, y and z axes, to this quaternion. In the convention used
    * here these angles represent a composition of extrinsic rotations (rotations about the
-   * reference frame axes), which is also known as {@link #taitBryanAngles()} (See
+   * reference node axes), which is also known as {@link #taitBryanAngles()} (See
    * http://en.wikipedia.org/wiki/Euler_angles and
    * http://en.wikipedia.org/wiki/Tait-Bryan_angles). {@link #eulerAngles()} performs the
    * inverse operation.

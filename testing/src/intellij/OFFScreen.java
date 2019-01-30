@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class OFFScreen extends PApplet {
   Scene scene;
-  Frame shape1, shape2;
+  Node shape1, shape2;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -25,7 +25,7 @@ public class OFFScreen extends PApplet {
     scene.setRadius(300);
     scene.fit(1);
 
-    shape1 = new Frame(scene) {
+    shape1 = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pGraphics) {
         scene.drawAxes(pGraphics, scene.radius() / 3);
@@ -43,7 +43,7 @@ public class OFFScreen extends PApplet {
     shape1.setRotation(Quaternion.random());
     shape1.translate(-55, -55, -55);
 
-    shape2 = new Frame(shape1);
+    shape2 = new Node(shape1);
     shape2.shape(shape());
     shape2.translate(-55, -85, 135);
   }

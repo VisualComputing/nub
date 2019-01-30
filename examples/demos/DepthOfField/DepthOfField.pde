@@ -34,7 +34,7 @@ void setup() {
 
   for (int i = 0; i < models.length; i++) {
     models[i] = new Frame(scene, boxShape());
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -110,8 +110,8 @@ public class MatrixHandler {
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
    * @see Graph#render()
-   * @see Frame#projection(Graph.Type, float, float, float, float, boolean)
-   * @see Frame#view()
+   * @see Node#projection(Graph.Type, float, float, float, float, boolean)
+   * @see Node#view()
    * @see #_bindProjection(Matrix)
    * @see #_bindModelView(Matrix)
    */

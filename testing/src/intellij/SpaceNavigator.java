@@ -1,6 +1,6 @@
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.processing.Scene;
 import org.gamecontrolplus.ControlButton;
 import org.gamecontrolplus.ControlDevice;
@@ -23,7 +23,7 @@ public class SpaceNavigator extends PApplet {
   ControlButton button1; // Buttons
   ControlButton button2;
 
-  // frames stuff:
+  // nodes stuff:
   Scene scene;
   boolean snPicking;
 
@@ -37,10 +37,10 @@ public class SpaceNavigator extends PApplet {
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fit(1);
-    Frame[] shapes = new Frame[50];
+    Node[] shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Frame(scene, shape());
-      shapes[i] = new Frame(scene);
+      //shapes[i] = new Node(scene, shape());
+      shapes[i] = new Node(scene);
       shapes[i].shape(shape());
       scene.randomize(shapes[i]);
     }
@@ -68,7 +68,7 @@ public class SpaceNavigator extends PApplet {
   void spaceNavigatorPicking() {
     float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
     float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
-    // update the space navigator tracked frame:
+    // update the space navigator tracked node:
     scene.cast("SPCNAV", x, y);
     // draw picking visual hint
     pushStyle();
@@ -98,7 +98,7 @@ public class SpaceNavigator extends PApplet {
     //pitch = 0;
     //yaw = 0;
     scene.eye().rotate(new Quaternion(roll, pitch, yaw));
-    // scene.spin(new Quaternion(scene.isLeftHanded() ? roll : -roll, -pitch, scene.isLeftHanded() ? yaw : -yaw), scene.defaultFrame("SPCNAV"));
+    // scene.spin(new Quaternion(scene.isLeftHanded() ? roll : -roll, -pitch, scene.isLeftHanded() ? yaw : -yaw), scene.defaultNode("SPCNAV"));
   }
   */
 

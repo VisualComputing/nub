@@ -39,7 +39,7 @@ void settings() {
 void setup() {
   scene = onScreen ? new Scene(this) : new Scene(this, renderer);
   // eye only should belong only to the scene
-  // so set a detached 'frame' instance as the eye
+  // so set a detached 'node' instance as the eye
   scene.setEye(new Frame());
   scene.setRadius(1000);
   rectMode(CENTER);
@@ -51,7 +51,7 @@ void setup() {
     } else {
       models[i] = new Frame(scene) {
         int _faces = (int) MiniMap.this.random(3, 15);
-        // We need to call the PApplet random function instead of the frame random version
+        // We need to call the PApplet random function instead of the node random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
         @Override
         public boolean graphics(PGraphics pg) {
@@ -63,7 +63,7 @@ void setup() {
         }
       };
     }
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
@@ -72,13 +72,13 @@ void setup() {
   // is to be drawn (see drawing code below) to its constructor.
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
   // eye only should belong only to the minimap
-  // so set a detached 'frame' instance as the eye
+  // so set a detached 'node' instance as the eye
   minimap.setEye(new Frame());
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.togglePerspective();
   minimap.fit(1);
-  // detached frame
+  // detached node
   sceneEye = new Frame();
 }
 

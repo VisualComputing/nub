@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
 import processing.core.PApplet;
@@ -17,7 +17,7 @@ public class Graph3 extends PApplet {
   PShader framesShader;
   Matrix projection, view, pmv;
   PMatrix3D pmatrix = new PMatrix3D();
-  Frame[] frames;
+  Node[] nodes;
 
   public void settings() {
     size(800, 800, P3D);
@@ -26,10 +26,10 @@ public class Graph3 extends PApplet {
   public void setup() {
     graph = new Graph(width, height);
     graph.fit();
-    framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
-    frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame(graph) {
+    framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameVert_pmv.glsl");
+    nodes = new Node[50];
+    for (int i = 0; i < nodes.length; i++) {
+      nodes[i] = new Node(graph) {
         @Override
         public void visit() {
           shader(framesShader);
@@ -47,7 +47,7 @@ public class Graph3 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize();
+      nodes[i].randomize();
     }
     //discard Processing matrices
     resetMatrix();
@@ -72,7 +72,7 @@ public class Graph3 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, frames);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -10,7 +10,7 @@
 
 package frames.core.constraint;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -27,22 +27,22 @@ public class WorldConstraint extends AxisPlaneConstraint {
    * {@link #translationConstraintDirection()}.
    */
   @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
+  public Vector constrainTranslation(Vector translation, Node node) {
     Vector res = new Vector(translation._vector[0], translation._vector[1], translation._vector[2]);
     Vector proj;
     switch (translationConstraintType()) {
       case FREE:
         break;
       case PLANE:
-        if (frame.reference() != null) {
-          proj = frame.reference().displacement(translationConstraintDirection());
+        if (node.reference() != null) {
+          proj = node.reference().displacement(translationConstraintDirection());
           res = Vector.projectVectorOnPlane(translation, proj);
         } else
           res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
         break;
       case AXIS:
-        if (frame.reference() != null) {
-          proj = frame.reference().displacement(translationConstraintDirection());
+        if (node.reference() != null) {
+          proj = node.reference().displacement(translationConstraintDirection());
           res = Vector.projectVectorOnAxis(translation, proj);
         } else
           res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());
@@ -56,11 +56,11 @@ public class WorldConstraint extends AxisPlaneConstraint {
 
   /**
    * When {@link #rotationConstraintType()} is of type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the Frame world coordinate
+   * be a rotation around an axis whose direction is defined in the Node world coordinate
    * system by {@link #rotationConstraintDirection()}.
    */
   @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+  public Quaternion constrainRotation(Quaternion rotation, Node node) {
     Quaternion res = rotation.get();
     switch (rotationConstraintType()) {
       case FREE:
@@ -69,7 +69,7 @@ public class WorldConstraint extends AxisPlaneConstraint {
         break;
       case AXIS:
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-        Vector axis = frame.displacement(rotationConstraintDirection());
+        Vector axis = node.displacement(rotationConstraintDirection());
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
         break;

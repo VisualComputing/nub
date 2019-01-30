@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -10,8 +10,8 @@
 
 package frames.core.constraint;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -37,7 +37,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
   /**
    * Returns the associated Eye. Set using the EyeConstraint constructor.
    */
-  public Frame eye() {
+  public Node eye() {
     return scene.eye();
   }
 
@@ -47,7 +47,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
    * system by {@link #translationConstraintDirection()}.
    */
   @Override
-  public Vector constrainTranslation(Vector translation, Frame frame) {
+  public Vector constrainTranslation(Vector translation, Node node) {
     Vector res = translation.get();
     Vector proj;
     switch (translationConstraintType()) {
@@ -55,14 +55,14 @@ public class EyeConstraint extends AxisPlaneConstraint {
         break;
       case PLANE:
         proj = eye().worldDisplacement(translationConstraintDirection());
-        if (frame.reference() != null)
-          proj = frame.reference().displacement(proj);
+        if (node.reference() != null)
+          proj = node.reference().displacement(proj);
         res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
         proj = eye().worldDisplacement(translationConstraintDirection());
-        if (frame.reference() != null)
-          proj = frame.reference().displacement(proj);
+        if (node.reference() != null)
+          proj = node.reference().displacement(proj);
         res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
@@ -78,7 +78,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
    * coordinate system by {@link #rotationConstraintDirection()}.
    */
   @Override
-  public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+  public Quaternion constrainRotation(Quaternion rotation, Node node) {
     Quaternion res = rotation.get();
     switch (rotationConstraintType()) {
       case FREE:
@@ -86,7 +86,7 @@ public class EyeConstraint extends AxisPlaneConstraint {
       case PLANE:
         break;
       case AXIS:
-        Vector axis = frame.displacement(eye().worldDisplacement(rotationConstraintDirection()));
+        Vector axis = node.displacement(eye().worldDisplacement(rotationConstraintDirection()));
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));

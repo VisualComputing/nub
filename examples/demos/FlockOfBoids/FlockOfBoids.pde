@@ -16,7 +16,7 @@
  *
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
- * Press 'p' to print the current frame rate.
+ * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
  * Press 's' to call scene.fit(1).
@@ -81,9 +81,9 @@ void walls() {
   popStyle();
 }
 
-void updateAvatar(Frame frame) {
-  if (frame != avatar) {
-    avatar = frame;
+void updateAvatar(Frame node) {
+  if (node != avatar) {
+    avatar = node;
     if (avatar != null)
       thirdPerson();
     else if (scene.eye().reference() != null)

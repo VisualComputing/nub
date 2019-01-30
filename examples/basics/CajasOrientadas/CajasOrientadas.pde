@@ -38,7 +38,7 @@ void setup() {
 void draw() {
   background(0);
   // calls render() on all scene attached frames
-  // automatically applying all the frame transformations
+  // automatically applying all the node transformations
   scene.render();
 }
 

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -30,59 +30,59 @@ import java.util.List;
  * {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the projection matrix is computed (see
- * {@link Frame#projection(Type, float, float, float, float, boolean)}),
+ * {@link Node#projection(Type, float, float, float, float, boolean)}),
  * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
  * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
  * <h1>2. Scene graph handling</h1>
- * A graph forms a tree of (attached) {@link Frame}s whose visual representations may be
+ * A graph forms a tree of (attached) {@link Node}s whose visual representations may be
  * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
  * <p>
- * The frame collection belonging to the graph may be retrieved with {@link #frames()}.
+ * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(Frame)}, {@link #appendBranch(List)}, {@link #isReachable(Frame)},
- * {@link #branch(Frame)}, and {@link #clear()}.
+ * {@link #pruneBranch(Node)}, {@link #appendBranch(List)}, {@link #isReachable(Node)},
+ * {@link #branch(Node)}, and {@link #clear()}.
  * <h2>2.1. Eye handling</h2>
- * Any {@link Frame} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
- * (see {@link #setEye(Frame)}). Several frame wrapper functions to handle the eye, such as
+ * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
+ * (see {@link #setEye(Node)}). Several node wrapper functions to handle the eye, such as
  * {@link #lookAt(Vector)}, {@link #at()}, {@link #setViewDirection(Vector)},
  * {@link #setUpVector(Vector)}, {@link #upVector()}, {@link #fitFOV()},
- * {@link #fov()}, {@link #fit()}, {@link #screenLocation(Vector, Frame)} and
- * {@link #location(Vector, Frame)}, are provided for convenience.
+ * {@link #fov()}, {@link #fit()}, {@link #screenLocation(Vector, Node)} and
+ * {@link #location(Vector, Node)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
- * Several methods taking a {@link Frame} parameter provide interactivity to frames, such as
- * {@link #translate(float, float, float, Frame)},
- * {@link #rotate(float, float, float, Frame)} and {@link #scale(float, Frame)}.
+ * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
+ * {@link #translate(float, float, float, Node)},
+ * {@link #rotate(float, float, float, Node)} and {@link #scale(float, Node)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
- * take a frame parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
+ * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
- * Call {@link #control(Frame, Object...)} to send arbitrary gesture data to the frame. Note that
- * {@link Frame#interact(Object...)} should be overridden to implement the frame custom behavior.
+ * Call {@link #control(Node, Object...)} to send arbitrary gesture data to the node. Note that
+ * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
  * <p>
- * To check if a given frame would be picked with a ray casted at a given screen position
- * use {@link #tracks(float, float, Frame)}. Refer to {@link Frame#pickingThreshold()} (and
- * {@link Frame#setPickingThreshold(float)}) for the different frame picking policies.
+ * To check if a given node would be picked with a ray casted at a given screen position
+ * use {@link #tracks(float, float, Node)}. Refer to {@link Node#pickingThreshold()} (and
+ * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * is a two step process: 1. Define an {@code hid} tracked-frame instance, using an arbitrary name for it
- * (see {@link #setTrackedFrame(String, Frame)}); and, 2. Call any interactivity method that take an {@code hid}
+ * is a two step process: 1. Define an {@code hid} tracked-node instance, using an arbitrary name for it
+ * (see {@link #setTrackedNode(String, Node)}); and, 2. Call any interactivity method that take an {@code hid}
  * param (such as {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)}
  * or {@link #scale(String, float)}) following the name convention you defined in 1. Observations:
  * <ol>
- * <li>An {@code hid} tracked-frame (see {@link #trackedFrame(String)}) defines in turn an {@code hid} default-frame
- * (see {@link #defaultFrame(String)}) which simply returns the tracked-frame or the {@link #eye()} when the
- * {@code hid} tracked-frame is {@code null}.</li>
+ * <li>An {@code hid} tracked-node (see {@link #trackedNode(String)}) defines in turn an {@code hid} default-node
+ * (see {@link #defaultNode(String)}) which simply returns the tracked-node or the {@link #eye()} when the
+ * {@code hid} tracked-node is {@code null}.</li>
  * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the {@code hid} {@link #defaultFrame(String)} to them (e.g.,
- * {@link #scale(String, float)} calls {@link #scale(float, Frame)} passing the {@code hid} default-frame).</li>
+ * by simply passing the {@code hid} {@link #defaultNode(String)} to them (e.g.,
+ * {@link #scale(String, float)} calls {@link #scale(float, Node)} passing the {@code hid} default-node).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-frame using ray-casting call {@link #track(String, Point, Frame[])}
- * (detached or attached frames), {@link #track(String, Point)} (only attached frames) or
- * {@link #cast(String, Point)} (only for attached frames too). While {@link #track(String, Point, Frame[])} and
- * {@link #track(String, Point)} update the {@code hid} tracked-frame synchronously (i.e., they return the
- * {@code hid} tracked-frame immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
- * optimally updates the {@code hid} tracked-frame during the next call to the {@link #render()} algorithm).</li>
+ * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
+ * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
+ * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
+ * {@link #track(String, Point)} update the {@code hid} tracked-node synchronously (i.e., they return the
+ * {@code hid} tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
+ * optimally updates the {@code hid} tracked-node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -91,7 +91,7 @@ import java.util.List;
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(Rectangle)},
- * {@link #fit(Frame)} and {@link #fit(Frame, float)}. Refer to the
+ * {@link #fit(Node)} and {@link #fit(Node, float)}. Refer to the
  * {@link Interpolator} documentation for details.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
@@ -105,9 +105,9 @@ import java.util.List;
  * renderer handles the matrix shader uniform variables. Refer to the {@link MatrixHandler}
  * documentation for details.
  * <p>
- * To apply the transformation defined by a frame call {@link #applyTransformation(Frame)}
- * (see also {@link #applyWorldTransformation(Frame)}) between {@code pushModelView()} and
- * {@code popModelView()}. Note that the frame transformations are applied automatically by
+ * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
+ * (see also {@link #applyWorldTransformation(Node)}) between {@code pushModelView()} and
+ * {@code popModelView()}. Note that the node transformations are applied automatically by
  * the {@link #render(Object)} algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
@@ -120,7 +120,7 @@ import java.util.List;
  * documentation for details).
  *
  * @see TimingHandler
- * @see #applyTransformation(Frame)
+ * @see #applyTransformation(Node)
  * @see MatrixHandler
  */
 public class Graph {
@@ -131,7 +131,7 @@ public class Graph {
   // 0. Contexts
   protected Object _bb, _fb;
   // 1. Eye
-  protected Frame _eye;
+  protected Node _eye;
   protected long _lastEqUpdate;
   protected Vector _center;
   protected float _radius;
@@ -162,11 +162,11 @@ public class Graph {
   }
 
   protected TimingHandler _timingHandler;
-  protected HashMap<String, Frame> _agents;
+  protected HashMap<String, Node> _agents;
   protected ArrayList<Ray> _rays;
 
   // 4. Graph
-  protected List<Frame> _seeds;
+  protected List<Node> _seeds;
   protected long _lastNonEyeUpdate = 0;
 
   // 5. Interaction methods
@@ -209,7 +209,7 @@ public class Graph {
    * {@code height} screen window dimensions. The graph {@link #center()} and
    * {@link #anchor()} are set to {@code (0,0,0)} and its {@link #radius()} to {@code 100}.
    * <p>
-   * The constructor sets a {@link Frame} instance as the graph {@link #eye()} and then
+   * The constructor sets a {@link Node} instance as the graph {@link #eye()} and then
    * calls {@link #fit()}, so that the entire scene fits the screen dimensions.
    * <p>
    * The constructor also instantiates the graph {@link #matrixHandler()} and
@@ -224,22 +224,22 @@ public class Graph {
    * @see #timingHandler()
    * @see #setMatrixHandler(MatrixHandler)
    * @see #setRightHanded()
-   * @see #setEye(Frame)
+   * @see #setEye(Node)
    */
   public Graph(Type type, int width, int height) {
     setMatrixHandler(new MatrixHandler(width, height));
 
-    _seeds = new ArrayList<Frame>();
+    _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
 
     setFrustum(new Vector(), 100);
-    setEye(new Frame(this));
+    setEye(new Node(this));
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
 
-    _agents = new HashMap<String, Frame>();
+    _agents = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     setRightHanded();
 
@@ -250,22 +250,22 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return Frame.random(this)}. Creates a random frame attached to this graph.
+   * Same as {@code return Node.random(this)}. Creates a random node attached to this graph.
    *
-   * @see Frame#random(Graph)
-   * @see #randomize(Frame)
+   * @see Node#random(Graph)
+   * @see #randomize(Node)
    */
-  public Frame randomFrame() {
-    return Frame.random(this);
+  public Node randomNode() {
+    return Node.random(this);
   }
 
   /**
-   * Same as {@code frame.randomize(center(), radius(), is3D())}.
+   * Same as {@code node.randomize(center(), radius(), is3D())}.
    *
-   * @see Frame#randomize(Vector, float, boolean)
+   * @see Node#randomize(Vector, float, boolean)
    */
-  public void randomize(Frame frame) {
-    frame.randomize(center(), radius(), is3D());
+  public void randomize(Node node) {
+    node.randomize(center(), radius(), is3D());
   }
 
   // Dimensions stuff
@@ -328,16 +328,16 @@ public class Graph {
    * or {@link Type#CUSTOM}.
    * <p>
    * {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} use the classical projection
-   * matrices and the frame {@link Frame#magnitude()}. Both use {@link #zNear()} and
+   * matrices and the node {@link Node#magnitude()}. Both use {@link #zNear()} and
    * {@link #zFar()} (to define their clipping planes) and {@link #width()} and {@link #height()}
    * for frustum shape.
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
-   * frames will be constrained so that they will remain at the x-y plane. See
+   * nodes will be constrained so that they will remain at the x-y plane. See
    * {@link frames.core.constraint.Constraint}.
    *
-   * @see Frame#projection(Type, float, float, float, float, boolean)
-   * @see Frame#magnitude()
+   * @see Node#projection(Type, float, float, float, float, boolean)
+   * @see Node#magnitude()
    */
   public void setType(Type type) {
     if (type != type()) {
@@ -365,8 +365,8 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #eye()} {@link Frame#magnitude()} (which is used to compute the
-   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix),
+   * Sets the {@link #eye()} {@link Node#magnitude()} (which is used to compute the
+   * {@link Node#projection(Type, float, float, float, float, boolean)} matrix),
    * according to {@code fov} (field-of-view) which is expressed in radians. Meaningless
    * if the graph {@link #is2D()}. If the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}
    * it will match the perspective projection obtained using {@code fov} of an image
@@ -394,8 +394,8 @@ public class Graph {
   /**
    * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
    * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
-   * {@link Frame#magnitude()} (which in turn is used to compute the
-   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix) as follows:
+   * {@link Node#magnitude()} (which in turn is used to compute the
+   * {@link Node#projection(Type, float, float, float, float, boolean)} matrix) as follows:
    * <p>
    * <ol>
    * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
@@ -405,8 +405,8 @@ public class Graph {
    * </ol>
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
-   * @see Frame#magnitude()
-   * @see Frame#perspective(float, float, float, boolean)
+   * @see Node#magnitude()
+   * @see Node#perspective(float, float, float, boolean)
    * @see #setType(Type)
    * @see #setHFOV(float)
    * @see #hfov()
@@ -442,7 +442,7 @@ public class Graph {
    * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
    * <p>
    * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #type()} is
-   * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Frame#magnitude()} otherwise.
+   * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Node#magnitude()} otherwise.
    *
    * @see #fov()
    * @see #setHFOV(float)
@@ -459,8 +459,8 @@ public class Graph {
   }
 
   /**
-   * Returns the near clipping plane distance used by the eye frame
-   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix in
+   * Returns the near clipping plane distance used by the eye node
+   * {@link Node#projection(Type, float, float, float, float, boolean)} matrix in
    * world units.
    * <p>
    * The clipping planes' positions depend on the {@link #radius()} and {@link #center()}
@@ -510,8 +510,8 @@ public class Graph {
   }
 
   /**
-   * Returns the far clipping plane distance used by the eye frame
-   * {@link Frame#projection(Type, float, float, float, float, boolean)} matrix in world units.
+   * Returns the far clipping plane distance used by the eye node
+   * {@link Node#projection(Type, float, float, float, float, boolean)} matrix in world units.
    * <p>
    * The far clipping plane is positioned at a distance equal to
    * {@code zClippingCoefficient() * radius()} behind the {@link #center()}:
@@ -578,33 +578,33 @@ public class Graph {
     _zClippingCoefficient = coef;
   }
 
-  // Graph and frames stuff
+  // Graph and nodes stuff
 
   /**
-   * Returns the top-level frames (those which reference is null).
+   * Returns the top-level nodes (those which reference is null).
    * <p>
-   * All leading frames are also reachable by the {@link #render()} algorithm for which they are the seeds.
+   * All leading nodes are also reachable by the {@link #render()} algorithm for which they are the seeds.
    *
-   * @see #frames()
-   * @see #isReachable(Frame)
-   * @see #pruneBranch(Frame)
+   * @see #nodes()
+   * @see #isReachable(Node)
+   * @see #pruneBranch(Node)
    */
-  protected List<Frame> _leadingFrames() {
+  protected List<Node> _leadingNodes() {
     return _seeds;
   }
 
   /**
-   * Returns {@code true} if the frame is top-level.
+   * Returns {@code true} if the node is top-level.
    */
-  protected boolean _isLeadingFrame(Frame frame) {
-    for (Frame leadingFrame : _leadingFrames())
-      if (leadingFrame == frame)
+  protected boolean _isLeadingNode(Node node) {
+    for (Node leadingNode : _leadingNodes())
+      if (leadingNode == node)
         return true;
     return false;
   }
 
   /**
-   * Transfers the graph frames to the {@code target} graph. Useful to display auxiliary
+   * Transfers the graph nodes to the {@code target} graph. Useful to display auxiliary
    * viewers of the main graph. Use it in your drawing code such as:
    * <p>
    * <pre>
@@ -612,41 +612,41 @@ public class Graph {
    * Graph graph graph, auxiliaryGraph;
    * void draw() {
    *   graph.render();
-   *   // shift frames to the auxiliaryGraph
+   *   // shift nodes to the auxiliaryGraph
    *   scene.shift(auxiliaryGraph);
    *   auxiliaryGraph.render();
-   *   // shift frames back to the main graph
+   *   // shift nodes back to the main graph
    *   auxiliaryGraph.shift(graph);
    * }
    * }
    * </pre>
    */
   public void shift(Graph target) {
-    for (Frame leadingFrame : _leadingFrames()) {
-      leadingFrame._graph = target;
-      target._addLeadingFrame(leadingFrame);
+    for (Node leadingNode : _leadingNodes()) {
+      leadingNode._graph = target;
+      target._addLeadingNode(leadingNode);
     }
   }
 
   /**
-   * Add the frame as top-level if its reference frame is null and it isn't already added.
+   * Add the node as top-level if its reference node is null and it isn't already added.
    */
-  protected boolean _addLeadingFrame(Frame frame) {
-    if (frame == null || frame.reference() != null)
+  protected boolean _addLeadingNode(Node node) {
+    if (node == null || node.reference() != null)
       return false;
-    if (_isLeadingFrame(frame))
+    if (_isLeadingNode(node))
       return false;
-    return _leadingFrames().add(frame);
+    return _leadingNodes().add(node);
   }
 
   /**
-   * Removes the leading frame if present. Typically used when re-parenting the frame.
+   * Removes the leading node if present. Typically used when re-parenting the node.
    */
-  protected boolean _removeLeadingFrame(Frame frame) {
+  protected boolean _removeLeadingNode(Node node) {
     boolean result = false;
-    Iterator<Frame> it = _leadingFrames().iterator();
+    Iterator<Node> it = _leadingNodes().iterator();
     while (it.hasNext()) {
-      if (it.next() == frame) {
+      if (it.next() == node) {
         it.remove();
         result = true;
         break;
@@ -656,136 +656,136 @@ public class Graph {
   }
 
   /**
-   * Same as {@code for(Frame frame : _leadingFrames()) pruneBranch(frame)}.
+   * Same as {@code for(Node node : _leadingNodes()) pruneBranch(node)}.
    *
-   * @see #pruneBranch(Frame)
+   * @see #pruneBranch(Node)
    */
   public void clear() {
-    for (Frame frame : _leadingFrames())
-      pruneBranch(frame);
+    for (Node node : _leadingNodes())
+      pruneBranch(node);
   }
 
   /**
-   * Make all the frames in the {@code frame} branch eligible for garbage collection.
+   * Make all the nodes in the {@code node} branch eligible for garbage collection.
    * <p>
-   * A call to {@link #isReachable(Frame)} on all {@code frame} descendants
-   * (including {@code frame}) will return false, after issuing this method. It also means
-   * that all frames in the {@code frame} branch will become unreachable by the
+   * A call to {@link #isReachable(Node)} on all {@code node} descendants
+   * (including {@code node}) will return false, after issuing this method. It also means
+   * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
-   * To make all the frames in the branch reachable again, first cache the frames
-   * belonging to the branch (i.e., {@code branch=pruneBranch(frame)}) and then call
+   * To make all the nodes in the branch reachable again, first cache the nodes
+   * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
    * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link Frame#setReference(Frame)} on a frame belonging to the pruned branch will become
+   * {@link Node#setReference(Node)} on a node belonging to the pruned branch will become
    * reachable again by the traversal algorithm.
    * <p>
-   * When collected, pruned frames behave like {@link Frame}, otherwise they are eligible for
+   * When collected, pruned nodes behave like {@link Node}, otherwise they are eligible for
    * garbage collection.
    *
    * @see #clear()
    * @see #appendBranch(List)
-   * @see #isReachable(Frame)
+   * @see #isReachable(Node)
    */
-  public List<Frame> pruneBranch(Frame frame) {
-    if (!isReachable(frame))
-      return new ArrayList<Frame>();
-    ArrayList<Frame> list = new ArrayList<Frame>();
-    _collect(list, frame);
-    for (Frame collectedFrame : list)
-      if (collectedFrame.reference() != null)
-        collectedFrame.reference()._removeChild(collectedFrame);
+  public List<Node> pruneBranch(Node node) {
+    if (!isReachable(node))
+      return new ArrayList<Node>();
+    ArrayList<Node> list = new ArrayList<Node>();
+    _collect(list, node);
+    for (Node collectedNode : list)
+      if (collectedNode.reference() != null)
+        collectedNode.reference()._removeChild(collectedNode);
       else
-        _removeLeadingFrame(collectedFrame);
+        _removeLeadingNode(collectedNode);
     return list;
   }
 
   /**
    * Appends the branch which typically should come from the one pruned (and cached) with
-   * {@link #pruneBranch(Frame)}.
+   * {@link #pruneBranch(Node)}.
    * <p>
-   * {@link #pruneBranch(Frame)}
+   * {@link #pruneBranch(Node)}
    */
-  public void appendBranch(List<Frame> branch) {
+  public void appendBranch(List<Node> branch) {
     if (branch == null)
       return;
-    for (Frame frame : branch)
-      if (frame.reference() != null)
-        frame.reference()._addChild(frame);
+    for (Node node : branch)
+      if (node.reference() != null)
+        node.reference()._addChild(node);
       else
-        _addLeadingFrame(frame);
+        _addLeadingNode(node);
   }
 
   /**
-   * Returns {@code true} if the frame is reachable by the {@link #render()}
+   * Returns {@code true} if the node is reachable by the {@link #render()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Frames are made unreachable with {@link #pruneBranch(Frame)} and reachable
-   * again with {@link Frame#setReference(Frame)}.
+   * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
+   * again with {@link Node#setReference(Node)}.
    *
    * @see #render()
-   * @see #frames()
+   * @see #nodes()
    */
-  public boolean isReachable(Frame frame) {
-    if (frame == null)
+  public boolean isReachable(Node node) {
+    if (node == null)
       return false;
-    return frame.isAttached(this);
+    return node.isAttached(this);
   }
 
   /**
-   * Returns a list of all the frames that are reachable by the {@link #render()}
+   * Returns a list of all the nodes that are reachable by the {@link #render()}
    * algorithm.
    * <p>
-   * The method render the hierarchy to collect. Frame collections should thus be kept at user space
+   * The method render the hierarchy to collect. Node collections should thus be kept at user space
    * for efficiency.
    *
-   * @see #isReachable(Frame)
-   * @see #isEye(Frame)
+   * @see #isReachable(Node)
+   * @see #isEye(Node)
    */
-  public List<Frame> frames() {
-    ArrayList<Frame> list = new ArrayList<Frame>();
-    for (Frame frame : _leadingFrames())
-      _collect(list, frame);
+  public List<Node> nodes() {
+    ArrayList<Node> list = new ArrayList<Node>();
+    for (Node node : _leadingNodes())
+      _collect(list, node);
     return list;
   }
 
   /**
-   * Collects {@code frame} and all its descendant frames. Note that for a frame to be collected
+   * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
-   * @see #isReachable(Frame)
+   * @see #isReachable(Node)
    */
-  public List<Frame> branch(Frame frame) {
-    ArrayList<Frame> list = new ArrayList<Frame>();
-    _collect(list, frame);
+  public List<Node> branch(Node node) {
+    ArrayList<Node> list = new ArrayList<Node>();
+    _collect(list, node);
     return list;
   }
 
   /**
-   * Returns a straight path of frames between {@code tail} and {@code tip}. Returns an empty list
-   * if either {@code tail} or {@code tip} aren't reachable. Use {@link Frame#path(Frame, Frame)}
-   * to include all frames even if they aren't reachable.
+   * Returns a straight path of nodes between {@code tail} and {@code tip}. Returns an empty list
+   * if either {@code tail} or {@code tip} aren't reachable. Use {@link Node#path(Node, Node)}
+   * to include all nodes even if they aren't reachable.
    * <p>
    * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
    * Otherwise it will be empty.
    *
-   * @see #isReachable(Frame)
-   * @see Frame#path(Frame, Frame)
+   * @see #isReachable(Node)
+   * @see Node#path(Node, Node)
    */
-  public List<Frame> path(Frame tail, Frame tip) {
-    return (isReachable(tail) && isReachable(tip)) ? Frame.path(tail, tip) : new ArrayList<Frame>();
+  public List<Node> path(Node tail, Node tip) {
+    return (isReachable(tail) && isReachable(tip)) ? Node.path(tail, tip) : new ArrayList<Node>();
   }
 
   /**
-   * Collects {@code frame} and all its descendant frames. Note that for a frame to be collected
+   * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
-   * @see #isReachable(Frame)
+   * @see #isReachable(Node)
    */
-  protected void _collect(List<Frame> list, Frame frame) {
-    if (frame == null)
+  protected void _collect(List<Node> list, Node node) {
+    if (node == null)
       return;
-    list.add(frame);
-    for (Frame child : frame.children())
+    list.add(node);
+    for (Node child : node.children())
       _collect(list, child);
   }
 
@@ -799,9 +799,9 @@ public class Graph {
   }
 
   /**
-   * Returns the number of frames displayed since the graph was instantiated.
+   * Returns the number of nodes displayed since the graph was instantiated.
    * <p>
-   * Use {@code TimingHandler.frameCount} to retrieve the number of frames displayed since
+   * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
    * the first graph was instantiated.
    */
   public long frameCount() {
@@ -811,7 +811,7 @@ public class Graph {
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
    *
-   * @see frames.timing.TimingHandler#registerTask(TimingTask)
+   * @see TimingHandler#registerTask(TimingTask)
    */
   public void registerTask(TimingTask task) {
     timingHandler().registerTask(task);
@@ -841,7 +841,7 @@ public class Graph {
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().unregisterAnimator(animator)}.
    *
-   * @see frames.timing.TimingHandler#unregisterAnimator(Animator)
+   * @see TimingHandler#unregisterAnimator(Animator)
    */
   public void unregisterAnimator(Animator animator) {
     timingHandler().unregisterAnimator(animator);
@@ -850,7 +850,7 @@ public class Graph {
   /**
    * Convenience wrapper function that simply returns {@code timingHandler().isAnimatorRegistered(animator)}.
    *
-   * @see frames.timing.TimingHandler#isAnimatorRegistered(Animator)
+   * @see TimingHandler#isAnimatorRegistered(Animator)
    */
   public boolean isAnimatorRegistered(Animator animator) {
     return timingHandler().isAnimatorRegistered(animator);
@@ -931,28 +931,28 @@ public class Graph {
   // Eye stuff
 
   /**
-   * Checks wheter or not the given frame is the {@link #eye()}.
+   * Checks wheter or not the given node is the {@link #eye()}.
    */
-  public boolean isEye(Frame frame) {
-    return _eye == frame;
+  public boolean isEye(Node node) {
+    return _eye == node;
   }
 
   /**
    * Returns the associated eye. Never null.
    *
-   * @see #setEye(Frame)
+   * @see #setEye(Node)
    */
-  public Frame eye() {
+  public Node eye() {
     return _eye;
   }
 
   /**
    * Replaces the current {@link #eye()} with {@code eye}. If {@code eye} is instance of
-   * {@link Frame} it should belong to this graph object.
+   * {@link Node} it should belong to this graph object.
    *
    * @see #eye()
    */
-  public void setEye(Frame eye) {
+  public void setEye(Node eye) {
     if (eye == null || _eye == eye)
       return;
     //TODO experimental
@@ -961,7 +961,7 @@ public class Graph {
     if (_interpolator == null)
       _interpolator = new Interpolator(this, _eye);
     else
-      _interpolator.setFrame(_eye);
+      _interpolator.setNode(_eye);
     _modified();
   }
 
@@ -1112,7 +1112,7 @@ public class Graph {
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
-   * every frame instead.
+   * every node instead.
    */
   public float[][] updateBoundaryEquations() {
     _initCoefficients();
@@ -1250,7 +1250,7 @@ public class Graph {
   }
 
   /**
-   * Disables automatic update of the frustum plane equations every frame.
+   * Disables automatic update of the frustum plane equations every node.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1263,7 +1263,7 @@ public class Graph {
   }
 
   /**
-   * Enables automatic update of the frustum plane equations every frame.
+   * Enables automatic update of the frustum plane equations every node.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1276,7 +1276,7 @@ public class Graph {
   }
 
   /**
-   * Enables or disables automatic update of the eye boundary plane equations every frame
+   * Enables or disables automatic update of the eye boundary plane equations every node
    * according to {@code flag}. Computation of the equations is expensive and hence is
    * disabled by default.
    *
@@ -1662,11 +1662,11 @@ public class Graph {
   /**
    * Returns the normalized view direction of the eye, defined in the world coordinate
    * system. This corresponds to the negative Z axis of the {@link #eye()}
-   * ({@code frame().worldDisplacement(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
+   * ({@code node().worldDisplacement(new Vector(0.0f, 0.0f, -1.0f))}). In 2D
    * it always is (0,0,-1).
    * <p>
    * Change this value using {@link #setViewDirection(Vector)}, {@link #lookAt(Vector)} or
-   * {@link Frame#setOrientation(Quaternion)}. It is orthogonal to {@link #upVector()} and to
+   * {@link Node#setOrientation(Quaternion)}. It is orthogonal to {@link #upVector()} and to
    * {@link #rightVector()}.
    */
   public Vector viewDirection() {
@@ -1677,7 +1677,7 @@ public class Graph {
    * Rotates the eye so that its {@link #viewDirection()} is {@code direction} (defined
    * in the world coordinate system).
    * <p>
-   * The eye {@link Frame#position()} is not modified. The eye is rotated so that the
+   * The eye {@link Node#position()} is not modified. The eye is rotated so that the
    * horizon (defined by its {@link #upVector()}) is preserved.
    *
    * @see #lookAt(Vector)
@@ -1722,7 +1722,7 @@ public class Graph {
    * same position on screen. This is especially useful when the eye is an observer of the
    * graph (default action binding).
    * <p>
-   * When {@code noMove} is true, the Eye {@link Frame#position()} is left unchanged, which is
+   * When {@code noMove} is true, the Eye {@link Node#position()} is left unchanged, which is
    * an intuitive behavior when the Eye is in first person mode.
    *
    * @see #lookAt(Vector)
@@ -1737,20 +1737,20 @@ public class Graph {
   /**
    * Returns the normalized up vector of the eye, defined in the world coordinate system.
    * <p>
-   * Set using {@link #setUpVector(Vector)} or {@link Frame#setOrientation(Quaternion)}. It is
+   * Set using {@link #setUpVector(Vector)} or {@link Node#setOrientation(Quaternion)}. It is
    * orthogonal to {@link #viewDirection()} and to {@link #rightVector()}.
    * <p>
    * It corresponds to the Y axis of the associated {@link #eye()} (actually returns
-   * {@code frame().yAxis()}
+   * {@code node().yAxis()}
    */
   public Vector upVector() {
     return eye().yAxis();
   }
 
   /**
-   * 2D eyes simply call {@code frame().setPosition(target.x(), target.y())}. 3D
-   * eyes set {@link Frame#orientation()}, so that it looks at point {@code target} defined
-   * in the world coordinate system (The eye {@link Frame#position()} is not modified.
+   * 2D eyes simply call {@code node().setPosition(target.x(), target.y())}. 3D
+   * eyes set {@link Node#orientation()}, so that it looks at point {@code target} defined
+   * in the world coordinate system (The eye {@link Node#position()} is not modified.
    * Simply {@link #setViewDirection(Vector)}).
    *
    * @see #at()
@@ -1772,9 +1772,9 @@ public class Graph {
    * <p>
    * This vector lies in the eye horizontal plane, directed along the X axis (orthogonal
    * to {@link #upVector()} and to {@link #viewDirection()}. Set using
-   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link Frame#setOrientation(Quaternion)}.
+   * {@link #setUpVector(Vector)}, {@link #lookAt(Vector)} or {@link Node#setOrientation(Quaternion)}.
    * <p>
-   * Simply returns {@code frame().xAxis()}.
+   * Simply returns {@code node().xAxis()}.
    */
   public Vector rightVector() {
     return eye().xAxis();
@@ -1794,16 +1794,16 @@ public class Graph {
 
   /**
    * Returns the {@link #eye()} {@link Interpolator} used by {@link #fit(float)},
-   * {@link #fit(Rectangle)}, {@link #fit(Frame)}, etc.
+   * {@link #fit(Rectangle)}, {@link #fit(Node)}, etc.
    */
   public Interpolator interpolator() {
     return _interpolator;
   }
 
   /**
-   * Convenience function that simply calls {@code fit(frame, 0)}.
+   * Convenience function that simply calls {@code fit(node, 0)}.
    *
-   * @see #fit(Frame, float)
+   * @see #fit(Node, float)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
@@ -1815,15 +1815,15 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
-  public void fit(Frame frame) {
-    fit(frame, 0);
+  public void fit(Node node) {
+    fit(node, 0);
   }
 
   /**
-   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code frame}
+   * Smoothly interpolates the eye on a interpolator path so that it goes to {@code node}
    * which is defined in world coordinates. The {@code duration} defines the interpolation speed.
    *
-   * @see #fit(Frame)
+   * @see #fit(Node)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
@@ -1835,14 +1835,14 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
-  public void fit(Frame frame, float duration) {
+  public void fit(Node node, float duration) {
     if (duration <= 0)
-      eye().set(frame);
+      eye().set(node);
     else {
       _interpolator.stop();
       _interpolator.purge();
       _interpolator.addKeyFrame(eye().detach());
-      _interpolator.addKeyFrame(frame.detach(), duration);
+      _interpolator.addKeyFrame(node.detach(), duration);
       _interpolator.start();
     }
   }
@@ -1853,8 +1853,8 @@ public class Graph {
    * @see #center()
    * @see #radius()
    * @see #fit(Vector, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit(float)
@@ -1875,8 +1875,8 @@ public class Graph {
    * @see #radius()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit()
@@ -1894,14 +1894,14 @@ public class Graph {
    * and {@code radius} is visible and fits the window.
    * <p>
    * In 3D the eye is simply translated along its {@link #viewDirection()} so that the
-   * ball fits the screen. Its {@link Frame#orientation()} and its
+   * ball fits the screen. Its {@link Node#orientation()} and its
    * {@link #fov()} are unchanged. You should therefore orientate the eye
    * before you call this method.
    *
    * @see #fit(float)
    * @see #fit(Vector, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit()
@@ -1916,7 +1916,7 @@ public class Graph {
     else {
       _interpolator.stop();
       _interpolator.purge();
-      Frame eye = eye();
+      Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fit(center, radius);
@@ -1932,8 +1932,8 @@ public class Graph {
    *
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit()
@@ -1978,8 +1978,8 @@ public class Graph {
    * @see #fit(Vector, float)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit()
@@ -1992,7 +1992,7 @@ public class Graph {
     else {
       _interpolator.stop();
       _interpolator.purge();
-      Frame eye = eye();
+      Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fitFOV();
@@ -2017,8 +2017,8 @@ public class Graph {
    * @see #fit(Vector, float)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
    * @see #fit(Rectangle, float)
    * @see #fit()
@@ -2047,8 +2047,8 @@ public class Graph {
    * @see #fit(Vector, Vector)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Rectangle, float)
    * @see #fit()
    * @see #fit(Rectangle)
@@ -2062,7 +2062,7 @@ public class Graph {
     else {
       _interpolator.stop();
       _interpolator.purge();
-      Frame eye = eye();
+      Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fit(corner1, corner2);
@@ -2079,8 +2079,8 @@ public class Graph {
    * @see #fit(Vector, Vector, float)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit(Rectangle, float)
    * @see #fit()
    * @see #fit(Rectangle)
@@ -2099,7 +2099,7 @@ public class Graph {
    * screen region defined by {@code rectangle} (pixel units, with origin in the
    * upper left corner) fits the screen.
    * <p>
-   * The eye is translated (its {@link Frame#orientation()} is unchanged) so that
+   * The eye is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
    * <i>boundary</i> in 3D, it's the intersection of this boundary with a plane
    * (orthogonal to the {@link #viewDirection()} and passing through the
@@ -2111,8 +2111,8 @@ public class Graph {
    * @see #fit(Vector, Vector)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
@@ -2124,7 +2124,7 @@ public class Graph {
     else {
       _interpolator.stop();
       _interpolator.purge();
-      Frame eye = eye();
+      Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
       fit(rectangle);
@@ -2138,7 +2138,7 @@ public class Graph {
    * Moves the eye so that the rectangular screen region defined by {@code rectangle}
    * (pixel units, with origin in the upper left corner) fits the screen.
    * <p>
-   * In 3D the eye is translated (its {@link Frame#orientation()} is unchanged) so that
+   * In 3D the eye is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
    * <i>frustum</i> in 3D, it's the intersection of this frustum with a plane (orthogonal
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
@@ -2149,8 +2149,8 @@ public class Graph {
    * @see #fit(Vector, Vector)
    * @see #fit(float)
    * @see #fit(Vector, float, float)
-   * @see #fit(Frame)
-   * @see #fit(Frame, float)
+   * @see #fit(Node)
+   * @see #fit(Node, float)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
@@ -2248,39 +2248,39 @@ public class Graph {
 
   // Nice stuff :P
 
-  protected static void _applyTransformation(MatrixHandler matrixHandler, Frame frame, boolean is2D) {
+  protected static void _applyTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
     if (is2D) {
-      matrixHandler.translate(frame.translation().x(), frame.translation().y());
-      matrixHandler.rotate(frame.rotation().angle2D());
-      matrixHandler.scale(frame.scaling(), frame.scaling());
+      matrixHandler.translate(node.translation().x(), node.translation().y());
+      matrixHandler.rotate(node.rotation().angle2D());
+      matrixHandler.scale(node.scaling(), node.scaling());
     } else {
-      matrixHandler.translate(frame.translation()._vector[0], frame.translation()._vector[1], frame.translation()._vector[2]);
-      matrixHandler.rotate(frame.rotation().angle(), (frame.rotation()).axis()._vector[0], (frame.rotation()).axis()._vector[1], (frame.rotation()).axis()._vector[2]);
-      matrixHandler.scale(frame.scaling(), frame.scaling(), frame.scaling());
+      matrixHandler.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      matrixHandler.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      matrixHandler.scale(node.scaling(), node.scaling(), node.scaling());
     }
   }
 
-  protected static void _applyWorldTransformation(MatrixHandler matrixHandler, Frame frame, boolean is2D) {
-    Frame reference = frame.reference();
+  protected static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
+    Node reference = node.reference();
     if (reference != null) {
       _applyWorldTransformation(matrixHandler, reference, is2D);
-      _applyTransformation(matrixHandler, frame, is2D);
+      _applyTransformation(matrixHandler, node, is2D);
     } else {
-      _applyTransformation(matrixHandler, frame, is2D);
+      _applyTransformation(matrixHandler, node, is2D);
     }
   }
 
   /**
-   * Apply the local transformation defined by {@code frame}, i.e., respect to its
-   * {@link Frame#reference()}. The Frame is first translated, then rotated around
+   * Apply the local transformation defined by {@code node}, i.e., respect to its
+   * {@link Node#reference()}. The Node is first translated, then rotated around
    * the new translated origin and then scaled.
    * <p>
-   * This method may be used to modify the modelview matrix from a frame hierarchy. For
-   * example, with this frame hierarchy:
+   * This method may be used to modify the modelview matrix from a node hierarchy. For
+   * example, with this node hierarchy:
    * <p>
-   * {@code Frame body = new Frame();} <br>
-   * {@code Frame leftArm = new Frame();} <br>
-   * {@code Frame rightArm = new Frame();} <br>
+   * {@code Node body = new Node();} <br>
+   * {@code Node leftArm = new Node();} <br>
+   * {@code Node rightArm = new Node();} <br>
    * {@code leftArm.setReference(body);} <br>
    * {@code rightArm.setReference(body);} <br>
    * <p>
@@ -2300,21 +2300,21 @@ public class Graph {
    * {@code popModelView();} <br>
    * <p>
    * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
-   * represent the frame hierarchy: {@code leftArm} and {@code rightArm} are both
+   * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    *
-   * @see #applyWorldTransformation(Frame)
+   * @see #applyWorldTransformation(Node)
    */
-  public void applyTransformation(Frame frame) {
-    _applyTransformation(_matrixHandler, frame, is2D());
+  public void applyTransformation(Node node) {
+    _applyTransformation(_matrixHandler, node, is2D());
   }
 
   /**
-   * Same as {@link #applyTransformation(Frame)}, but applies the global transformation
-   * defined by the frame.
+   * Same as {@link #applyTransformation(Node)}, but applies the global transformation
+   * defined by the node.
    */
-  public void applyWorldTransformation(Frame frame) {
-    _applyWorldTransformation(_matrixHandler, frame, is2D());
+  public void applyWorldTransformation(Node node) {
+    _applyWorldTransformation(_matrixHandler, node, is2D());
   }
 
   // Other stuff
@@ -2374,9 +2374,9 @@ public class Graph {
   }
 
   /**
-   * Max between {@link Frame#lastUpdate()} and {@link #_lastNonEyeUpdate()}.
+   * Max between {@link Node#lastUpdate()} and {@link #_lastNonEyeUpdate()}.
    *
-   * @return last frame the eye was updated
+   * @return last node the eye was updated
    * @see #_lastNonEyeUpdate()
    */
   public long lastUpdate() {
@@ -2384,7 +2384,7 @@ public class Graph {
   }
 
   /**
-   * @return last frame a local eye parameter (different than the Frame) was updated.
+   * @return last node a local eye parameter (different than the Node) was updated.
    * @see #lastUpdate()
    */
   protected long _lastNonEyeUpdate() {
@@ -2393,119 +2393,119 @@ public class Graph {
 
   // traversal
 
-  // detached frames
+  // detached nodes
 
   /**
-   * Same as {@code return track(null, pixel, frameArray)}.
+   * Same as {@code return track(null, pixel, nodeArray)}.
    *
-   * @see #track(String, float, float, Frame[])
+   * @see #track(String, float, float, Node[])
    */
-  public Frame track(Point pixel, Frame[] frameArray) {
-    return track(null, pixel, frameArray);
+  public Node track(Point pixel, Node[] nodeArray) {
+    return track(null, pixel, nodeArray);
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), frameArray)}.
+   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeArray)}.
    *
-   * @see #track(String, float, float, Frame[])
+   * @see #track(String, float, float, Node[])
    */
-  public Frame track(String hid, Point pixel, Frame[] frameArray) {
-    return track(hid, pixel.x(), pixel.y(), frameArray);
+  public Node track(String hid, Point pixel, Node[] nodeArray) {
+    return track(hid, pixel.x(), pixel.y(), nodeArray);
   }
 
   /**
-   * Same as {@code return track(null, x, y, frameArray)}.
+   * Same as {@code return track(null, x, y, nodeArray)}.
    *
-   * @see #track(String, float, float, Frame[])
+   * @see #track(String, float, float, Node[])
    */
-  public Frame track(float x, float y, Frame[] frameArray) {
-    return track(null, x, y, frameArray);
+  public Node track(float x, float y, Node[] nodeArray) {
+    return track(null, x, y, nodeArray);
   }
 
   /**
-   * Updates the {@code hid} device tracked-frame from the {@code frameArray} and returns it.
+   * Updates the {@code hid} device tracked-node from the {@code nodeArray} and returns it.
    * <p>
-   * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
+   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
    * Use this version of the method instead of {@link #track(String, float, float)} when dealing with
-   * detached frames.
+   * detached nodes.
    *
    * @see #track(String, float, float)
    * @see #track(String, float, float, List)
    * @see #render()
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#enableTracking(boolean)
-   * @see Frame#pickingThreshold()
-   * @see Frame#setPickingThreshold(float)
+   * @see #trackedNode(String)
+   * @see #resetTrackedNode(String)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
+   * @see Node#enableTracking(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
-  public Frame track(String hid, float x, float y, Frame[] frameArray) {
-    resetTrackedFrame(hid);
-    for (Frame frame : frameArray)
-      if (tracks(x, y, frame)) {
-        setTrackedFrame(hid, frame);
+  public Node track(String hid, float x, float y, Node[] nodeArray) {
+    resetTrackedNode(hid);
+    for (Node node : nodeArray)
+      if (tracks(x, y, node)) {
+        setTrackedNode(hid, node);
         break;
       }
-    return trackedFrame(hid);
+    return trackedNode(hid);
   }
 
   /**
-   * Same as {@code return track(null, pixel, frameList)}.
+   * Same as {@code return track(null, pixel, nodeList)}.
    *
    * @see #track(String, float, float, List)
    */
-  public Frame track(Point pixel, List<Frame> frameList) {
-    return track(null, pixel, frameList);
+  public Node track(Point pixel, List<Node> nodeList) {
+    return track(null, pixel, nodeList);
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), frameList)}.
+   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeList)}.
    *
    * @see #track(String, float, float, List)
    */
-  public Frame track(String hid, Point pixel, List<Frame> frameList) {
-    return track(hid, pixel.x(), pixel.y(), frameList);
+  public Node track(String hid, Point pixel, List<Node> nodeList) {
+    return track(hid, pixel.x(), pixel.y(), nodeList);
   }
 
   /**
-   * Same as {@code return track(null, x, y, frameList)}.
+   * Same as {@code return track(null, x, y, nodeList)}.
    *
    * @see #track(String, float, float, List)
    */
-  public Frame track(float x, float y, List<Frame> frameList) {
-    return track(null, x, y, frameList);
+  public Node track(float x, float y, List<Node> nodeList) {
+    return track(null, x, y, nodeList);
   }
 
   /**
-   * Same as {@link #track(String, float, float, Frame[])} but using a frame list instead of an array.
+   * Same as {@link #track(String, float, float, Node[])} but using a node list instead of an array.
    *
-   * @see #track(String, float, float, Frame[])
+   * @see #track(String, float, float, Node[])
    */
-  public Frame track(String hid, float x, float y, List<Frame> frameList) {
-    resetTrackedFrame(hid);
-    for (Frame frame : frameList)
-      if (tracks(x, y, frame)) {
-        setTrackedFrame(hid, frame);
+  public Node track(String hid, float x, float y, List<Node> nodeList) {
+    resetTrackedNode(hid);
+    for (Node node : nodeList)
+      if (tracks(x, y, node)) {
+        setTrackedNode(hid, node);
         break;
       }
-    return trackedFrame(hid);
+    return trackedNode(hid);
   }
 
-  // attached frames
+  // attached nodes
 
   /**
    * Same as {@code return track(null, pixel.x(), pixel.y())}.
    *
    * @see #track(String, Point)
    */
-  public Frame track(Point pixel) {
+  public Node track(Point pixel) {
     return track(null, pixel.x(), pixel.y());
   }
 
@@ -2514,7 +2514,7 @@ public class Graph {
    *
    * @see #track(String, float, float)
    */
-  public Frame track(float x, float y) {
+  public Node track(float x, float y) {
     return track(null, x, y);
   }
 
@@ -2523,82 +2523,82 @@ public class Graph {
    *
    * @see #track(String, float, float)
    */
-  public Frame track(String hid, Point pixel) {
+  public Node track(String hid, Point pixel) {
     return track(hid, pixel.x(), pixel.y());
   }
 
   /**
-   * Updates the {@code hid} device tracked-frame and returns it.
+   * Updates the {@code hid} device tracked-node and returns it.
    * <p>
-   * To set the {@link #trackedFrame(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Frame)}). If no frame is found under the pixel, it returns {@code null}.
+   * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
+   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
-   * Use this version of the method instead of {@link #track(String, float, float, Frame[])} when dealing with
-   * attached frames to the graph.
+   * Use this version of the method instead of {@link #track(String, float, float, Node[])} when dealing with
+   * attached nodes to the graph.
    *
-   * @see #track(String, float, float, Frame[])
+   * @see #track(String, float, float, Node[])
    * @see #render()
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#enableTracking(boolean)
-   * @see Frame#pickingThreshold()
-   * @see Frame#setPickingThreshold(float)
+   * @see #trackedNode(String)
+   * @see #resetTrackedNode(String)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
+   * @see Node#enableTracking(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
-  public Frame track(String hid, float x, float y) {
-    resetTrackedFrame(hid);
-    for (Frame frame : _leadingFrames())
-      _track(hid, frame, x, y);
-    return trackedFrame(hid);
+  public Node track(String hid, float x, float y) {
+    resetTrackedNode(hid);
+    for (Node node : _leadingNodes())
+      _track(hid, node, x, y);
+    return trackedNode(hid);
   }
 
   /**
    * Use internally by {@link #track(String, float, float)}.
    */
-  protected void _track(String hid, Frame frame, float x, float y) {
-    if (trackedFrame(hid) == null && frame.isTrackingEnabled())
-      if (tracks(x, y, frame)) {
-        setTrackedFrame(hid, frame);
+  protected void _track(String hid, Node node, float x, float y) {
+    if (trackedNode(hid) == null && node.isTrackingEnabled())
+      if (tracks(x, y, node)) {
+        setTrackedNode(hid, node);
         return;
       }
-    if (!frame.isCulled() && trackedFrame(hid) == null)
-      for (Frame child : frame.children())
+    if (!node.isCulled() && trackedNode(hid) == null)
+      for (Node child : node.children())
         _track(hid, child, x, y);
   }
 
   /**
-   * Same as {tracks(pixel.x(), pixel.y(), frame)}.
+   * Same as {tracks(pixel.x(), pixel.y(), node)}.
    *
-   * @see #tracks(float, float, Frame)
+   * @see #tracks(float, float, Node)
    */
-  public boolean tracks(Point pixel, Frame frame) {
-    return tracks(pixel.x(), pixel.y(), frame);
+  public boolean tracks(Point pixel, Node node) {
+    return tracks(pixel.x(), pixel.y(), node);
   }
 
   /**
-   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code frame} and
-   * {@code false} otherwise. The frame is picked according to the {@link Frame#pickingThreshold()}.
+   * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code node} and
+   * {@code false} otherwise. The node is picked according to the {@link Node#pickingThreshold()}.
    *
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
+   * @see #trackedNode(String)
+   * @see #resetTrackedNode(String)
+   * @see #defaultNode(String)
    * @see #track(String, float, float)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#enableTracking(boolean)
-   * @see Frame#pickingThreshold()
-   * @see Frame#setPickingThreshold(float)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
+   * @see Node#enableTracking(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
    */
-  public boolean tracks(float x, float y, Frame frame) {
-    if (frame.pickingThreshold() == 0 && _bb != null)
-      return _tracks(x, y, frame);
+  public boolean tracks(float x, float y, Node node) {
+    if (node.pickingThreshold() == 0 && _bb != null)
+      return _tracks(x, y, node);
     else
-      return _tracks(x, y, screenLocation(frame.position()), frame);
+      return _tracks(x, y, screenLocation(node.position()), node);
   }
 
   /**
@@ -2611,22 +2611,22 @@ public class Graph {
    * <p>
    * This method should be overridden. Default implementation symply return {@code false}.
    *
-   * @see Frame#setPickingThreshold(float)
+   * @see Node#setPickingThreshold(float)
    */
-  protected boolean _tracks(float x, float y, Frame frame) {
+  protected boolean _tracks(float x, float y, Node node) {
     return false;
   }
 
   /**
-   * Cached version of {@link #tracks(float, float, Frame)}.
+   * Cached version of {@link #tracks(float, float, Node)}.
    */
-  protected boolean _tracks(float x, float y, Vector projection, Frame frame) {
-    if (frame == null || isEye(frame))
+  protected boolean _tracks(float x, float y, Vector projection, Node node) {
+    if (node == null || isEye(node))
       return false;
-    if (!frame.isTrackingEnabled())
+    if (!node.isTrackingEnabled())
       return false;
-    float threshold = frame.pickingThreshold() < 1 ? 100 * frame.pickingThreshold() * frame.scaling() * pixelToGraphRatio(frame.position())
-        : frame.pickingThreshold() / 2;
+    float threshold = node.pickingThreshold() < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
+        : node.pickingThreshold() / 2;
     return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
   }
 
@@ -2658,23 +2658,23 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-frame.
-   * The algorithm schedules an updated of the {@code hid} tracked-frame for the next traversal and hence should be
+   * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-node.
+   * The algorithm schedules an updated of the {@code hid} tracked-node for the next traversal and hence should be
    * always be used in conjunction with {@link #render()}.
    * <p>
-   * This method is optimal since it updated the {@code hid} tracked-frame at traversal time. Prefer this method over
+   * This method is optimal since it updated the {@code hid} tracked-node at traversal time. Prefer this method over
    * {@link #track(String, Point)} when dealing with several {@code hids}.
    *
    * @see #render()
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#enableTracking(boolean)
-   * @see Frame#pickingThreshold()
-   * @see Frame#setPickingThreshold(float)
+   * @see #trackedNode(String)
+   * @see #resetTrackedNode(String)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
+   * @see Node#enableTracking(boolean)
+   * @see Node#pickingThreshold()
+   * @see Node#setPickingThreshold(float)
    * @see #cast(String, float, float)
    */
   public void cast(String hid, Point pixel) {
@@ -2720,22 +2720,22 @@ public class Graph {
     MatrixHandler matrixHandler = _matrixHandler(_backBuffer());
     matrixHandler._bindProjection(_matrixHandler.projection());
     matrixHandler._bindModelView(_matrixHandler.cacheView());
-    for (Frame frame : _leadingFrames())
-      _draw(matrixHandler, frame);
+    for (Node node : _leadingNodes())
+      _draw(matrixHandler, node);
     _rays.clear();
   }
 
   /**
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
-  protected void _draw(MatrixHandler matrixHandler, Frame frame) {
+  protected void _draw(MatrixHandler matrixHandler, Node node) {
     matrixHandler.pushModelView();
-    _applyTransformation(matrixHandler, frame, is2D());
-    if (!frame.isCulled()) {
-      _drawBackBuffer(frame);
+    _applyTransformation(matrixHandler, node, is2D());
+    if (!node.isCulled()) {
+      _drawBackBuffer(node);
       if (!isOffscreen())
-        _trackBackBuffer(frame);
-      for (Frame child : frame.children())
+        _trackBackBuffer(node);
+      for (Node child : node.children())
         _draw(matrixHandler, child);
     }
     matrixHandler.popModelView();
@@ -2753,8 +2753,8 @@ public class Graph {
    *
    * @see #fov()
    * @see TimingHandler#handle()
-   * @see Frame#projection(Type, float, float, float, float, boolean)
-   * @see Frame#view()
+   * @see Node#projection(Type, float, float, float, float, boolean)
+   * @see Node#view()
    */
   public void preDraw() {
     timingHandler().handle();
@@ -2766,39 +2766,39 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto the {@link #context()}. Calls {@link Frame#visit()} on each visited frame
-   * (refer to the {@link Frame} documentation).
+   * Renders the scene onto the {@link #context()}. Calls {@link Node#visit()} on each visited node
+   * (refer to the {@link Node} documentation).
    * <p>
-   * Note that only reachable frames (frames attached to this graph, see
-   * {@link Frame#isAttached(Graph)}) are rendered by this algorithm.
+   * Note that only reachable nodes (nodes attached to this graph, see
+   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)
-   * @see Frame#visit()
-   * @see Frame#cull(boolean)
-   * @see Frame#isCulled()
-   * @see Frame#graphics(Object)
-   * @see Frame#shape(Object)
+   * @see Node#visit()
+   * @see Node#cull(boolean)
+   * @see Node#isCulled()
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
    */
   public void render() {
-    for (Frame frame : _leadingFrames())
-      _draw(frame);
+    for (Node node : _leadingNodes())
+      _draw(node);
     _rays.clear();
   }
 
   /**
    * Used by the {@link #render()} algorithm.
    */
-  protected void _draw(Frame frame) {
+  protected void _draw(Node node) {
     _matrixHandler.pushModelView();
-    applyTransformation(frame);
-    frame.visit();
-    if (!frame.isCulled()) {
-      _trackFrontBuffer(frame);
+    applyTransformation(node);
+    node.visit();
+    if (!node.isCulled()) {
+      _trackFrontBuffer(node);
       if (isOffscreen())
-        _trackBackBuffer(frame);
-      draw(context(), frame);
-      for (Frame child : frame.children())
+        _trackBackBuffer(node);
+      draw(context(), node);
+      for (Node child : node.children())
         _draw(child);
     }
     _matrixHandler.popModelView();
@@ -2820,11 +2820,11 @@ public class Graph {
   }
 
   /**
-   * Renders the frame hierarchy onto {@code context} using the {@code projection}
+   * Renders the node hierarchy onto {@code context} using the {@code projection}
    * and {@code view} matrices.
    * <p>
-   * Note that only reachable frames (frames attached to this graph, see
-   * {@link Frame#isAttached(Graph)}) are rendered by this algorithm.
+   * Note that only reachable nodes (nodes attached to this graph, see
+   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
    * @see #render()
    * @see #render(Object)
@@ -2835,74 +2835,74 @@ public class Graph {
     MatrixHandler matrixHandler = _matrixHandler(context);
     matrixHandler._bindProjection(projection);
     matrixHandler._bindModelView(view);
-    for (Frame frame : _leadingFrames())
-      _draw(matrixHandler, context, frame);
+    for (Node node : _leadingNodes())
+      _draw(matrixHandler, context, node);
     _rays.clear();
   }
 
   /**
    * Used by the {@link #render(Object, Matrix, Matrix)} algorithm.
    */
-  protected void _draw(MatrixHandler matrixHandler, Object context, Frame frame) {
+  protected void _draw(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
-    _applyTransformation(matrixHandler, frame, is2D());
-    if (!frame.isCulled()) {
-      draw(context, frame);
-      for (Frame child : frame.children())
+    _applyTransformation(matrixHandler, node, is2D());
+    if (!node.isCulled()) {
+      draw(context, node);
+      for (Node child : node.children())
         _draw(matrixHandler, context, child);
     }
     matrixHandler.popModelView();
   }
 
   /**
-   * Renders the frame onto {@link #context()}. Same as {@code draw(context(), frame)}.
+   * Renders the node onto {@link #context()}. Same as {@code draw(context(), node)}.
    *
-   * @see #draw(Object, Frame)
+   * @see #draw(Object, Node)
    */
-  public void draw(Frame frame) {
-    draw(context(), frame);
+  public void draw(Node node) {
+    draw(context(), node);
   }
 
   /**
-   * Renders the frame onto {@code context}, provided that it holds a visual
-   * representation (see {@link Frame#graphics(Object)} and {@link Frame#shape(Object)}).
+   * Renders the node onto {@code context}, provided that it holds a visual
+   * representation (see {@link Node#graphics(Object)} and {@link Node#shape(Object)}).
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
    * @see #render()
    */
-  public void draw(Object context, Frame frame) {
+  public void draw(Object context, Node node) {
   }
 
   /**
-   * Renders the frame onto the {@link #_backBuffer()}.
+   * Renders the node onto the {@link #_backBuffer()}.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
    * @see #render()
-   * @see Frame#cull(boolean)
-   * @see Frame#isCulled()
-   * @see Frame#visit()
-   * @see Frame#graphics(Object)
-   * @see Frame#shape(Object)
+   * @see Node#cull(boolean)
+   * @see Node#isCulled()
+   * @see Node#visit()
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
    */
-  protected void _drawBackBuffer(Frame frame) {
+  protected void _drawBackBuffer(Node node) {
   }
 
   /**
-   * Internally used by {@link #_draw(Frame)}.
+   * Internally used by {@link #_draw(Node)}.
    */
-  protected void _trackFrontBuffer(Frame frame) {
-    if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() > 0) {
-      Vector projection = screenLocation(frame.position());
+  protected void _trackFrontBuffer(Node node) {
+    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() > 0) {
+      Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedFrame(ray._hid);
-        // Condition is overkill. Use it only in place of resetTrackedFrame
+        resetTrackedNode(ray._hid);
+        // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, frame)) {
-          setTrackedFrame(ray._hid, frame);
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, node)) {
+          setTrackedNode(ray._hid, node);
           it.remove();
         }
       }
@@ -2910,18 +2910,18 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_draw(Frame)} and {@link #_draw(MatrixHandler, Frame)}.
+   * Internally used by {@link #_draw(Node)} and {@link #_draw(MatrixHandler, Node)}.
    */
-  protected void _trackBackBuffer(Frame frame) {
-    if (frame.isTrackingEnabled() && !_rays.isEmpty() && frame.pickingThreshold() == 0 && _bb != null) {
+  protected void _trackBackBuffer(Node node) {
+    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedFrame(ray._hid);
-        // Condition is overkill. Use it only in place of resetTrackedFrame
+        resetTrackedNode(ray._hid);
+        // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), frame)) {
-          setTrackedFrame(ray._hid, frame);
+        if (_tracks(ray._pixel.x(), ray._pixel.y(), node)) {
+          setTrackedNode(ray._hid, node);
           it.remove();
         }
       }
@@ -2929,59 +2929,59 @@ public class Graph {
   }
 
   /**
-   * Same as {@code setTrackedFrame(null, frame)}.
+   * Same as {@code setTrackedNode(null, node)}.
    *
-   * @see #setTrackedFrame(String, Frame)
+   * @see #setTrackedNode(String, Node)
    */
-  public void setTrackedFrame(Frame frame) {
-    setTrackedFrame(null, frame);
+  public void setTrackedNode(Node node) {
+    setTrackedNode(null, node);
   }
 
   /**
-   * Sets the {@code hid} tracked-frame (see {@link #trackedFrame(String)}). Call this function if you want to set the
-   * tracked frame manually and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it automatically
+   * Sets the {@code hid} tracked-node (see {@link #trackedNode(String)}). Call this function if you want to set the
+   * tracked node manually and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it automatically
    * using ray casting.
    *
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #resetTrackedFrame(String)
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#enableTracking(boolean)
+   * @see #resetTrackedNode(String)
+   * @see #isTrackedNode(String, Node)
+   * @see Node#enableTracking(boolean)
    */
-  public void setTrackedFrame(String hid, Frame frame) {
-    if (frame == null) {
-      System.out.println("Warning. Cannot track a null frame!");
+  public void setTrackedNode(String hid, Node node) {
+    if (node == null) {
+      System.out.println("Warning. Cannot track a null node!");
       return;
     }
-    if (!frame.isTrackingEnabled()) {
-      System.out.println("Warning. Frame cannot be tracked! Enable tracking on the frame first by call frame.enableTracking(true)");
+    if (!node.isTrackingEnabled()) {
+      System.out.println("Warning. Node cannot be tracked! Enable tracking on the node first by call node.enableTracking(true)");
       return;
     }
-    _agents.put(hid, frame);
+    _agents.put(hid, node);
   }
 
   /**
-   * Same as {@code return trackedFrame(null)}.
+   * Same as {@code return trackedNode(null)}.
    *
-   * @see #trackedFrame(String)
+   * @see #trackedNode(String)
    */
-  public Frame trackedFrame() {
-    return trackedFrame(null);
+  public Node trackedNode() {
+    return trackedNode(null);
   }
 
   /**
-   * Returns the current {@code hid} tracked frame which is usually set by ray casting (see
-   * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedFrame(String)}.
+   * Returns the current {@code hid} tracked node which is usually set by ray casting (see
+   * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedNode(String)}.
    *
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #resetTrackedFrame(String)
-   * @see #isTrackedFrame(String, Frame)
-   * @see #setTrackedFrame(String, Frame)
+   * @see #resetTrackedNode(String)
+   * @see #isTrackedNode(String, Node)
+   * @see #setTrackedNode(String, Node)
    */
-  public Frame trackedFrame(String hid) {
+  public Node trackedNode(String hid) {
     return _agents.get(hid);
   }
 
@@ -2995,96 +2995,96 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the {@code hid} has a non-null tracked frame and {@code false} otherwise.
+   * Returns {@code true} if the {@code hid} has a non-null tracked node and {@code false} otherwise.
    */
   public boolean isTracking(String hid) {
     return _agents.containsKey(hid);
   }
 
   /**
-   * Same as {@code return isTrackedFrame(null, frame)}.
+   * Same as {@code return isTrackedNode(null, node)}.
    *
-   * @see #isTrackedFrame(String, Frame)
-   * @see Frame#isTracked()
+   * @see #isTrackedNode(String, Node)
+   * @see Node#isTracked()
    */
-  public boolean isTrackedFrame(Frame frame) {
-    return isTrackedFrame(null, frame);
+  public boolean isTrackedNode(Node node) {
+    return isTrackedNode(null, node);
   }
 
   /**
-   * Returns {@code true} if {@code frame} is the current {@code hid} {@link #trackedFrame(String)} and {@code false} otherwise.
+   * Returns {@code true} if {@code node} is the current {@code hid} {@link #trackedNode(String)} and {@code false} otherwise.
    *
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #resetTrackedFrame(String)
-   * @see #setTrackedFrame(String, Frame)
-   * @see Frame#isTracked()
+   * @see #resetTrackedNode(String)
+   * @see #setTrackedNode(String, Node)
+   * @see Node#isTracked()
    */
-  public boolean isTrackedFrame(String hid, Frame frame) {
-    return trackedFrame(hid) == frame;
+  public boolean isTrackedNode(String hid, Node node) {
+    return trackedNode(hid) == node;
   }
 
   /**
-   * Resets all HID's {@link #trackedFrame(String)}.
+   * Resets all HID's {@link #trackedNode(String)}.
    *
-   * @see #trackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #trackedNode(String)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
    */
   public void resetTracking() {
     _agents.clear();
   }
 
   /**
-   * Same as {@code resetTrackedFrame(null)}.
+   * Same as {@code resetTrackedNode(null)}.
    *
-   * @see #resetTrackedFrame(String)
+   * @see #resetTrackedNode(String)
    */
-  public void resetTrackedFrame() {
-    resetTrackedFrame(null);
+  public void resetTrackedNode() {
+    resetTrackedNode(null);
   }
 
   /**
-   * Resets the current {@code hid} {@link #trackedFrame(String)} so that a call to {@link #isTracking(String)}
-   * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked frame automatically.
+   * Resets the current {@code hid} {@link #trackedNode(String)} so that a call to {@link #isTracking(String)}
+   * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked node automatically.
    *
-   * @see #trackedFrame(String)
-   * @see #defaultFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #trackedNode(String)
+   * @see #defaultNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
    */
-  public void resetTrackedFrame(String hid) {
+  public void resetTrackedNode(String hid) {
     _agents.remove(hid);
   }
 
   /**
-   * Same as {@code return defaultFrame(null)}.
+   * Same as {@code return defaultNode(null)}.
    *
-   * @see #defaultFrame(String)
+   * @see #defaultNode(String)
    */
-  public Frame defaultFrame() {
-    return defaultFrame(null);
+  public Node defaultNode() {
+    return defaultNode(null);
   }
 
   /**
-   * Returns the {@code hid} default-frame which is used by methods dealing interactivity that don take a frame
-   * param. Same as {@code return trackedFrame(hid) == null ? eye() : trackedFrame(hid)}. Never returns {@code null}.
+   * Returns the {@code hid} default-node which is used by methods dealing interactivity that don take a node
+   * param. Same as {@code return trackedNode(hid) == null ? eye() : trackedNode(hid)}. Never returns {@code null}.
    *
-   * @see #trackedFrame(String)
-   * @see #resetTrackedFrame(String)
-   * @see #tracks(float, float, Frame)
+   * @see #trackedNode(String)
+   * @see #resetTrackedNode(String)
+   * @see #tracks(float, float, Node)
    * @see #track(String, float, float)
-   * @see #setTrackedFrame(String, Frame)
-   * @see #isTrackedFrame(String, Frame)
+   * @see #setTrackedNode(String, Node)
+   * @see #isTrackedNode(String, Node)
    */
-  public Frame defaultFrame(String hid) {
-    return trackedFrame(hid) == null ? eye() : trackedFrame(hid);
+  public Node defaultNode(String hid) {
+    return trackedNode(hid) == null ? eye() : trackedNode(hid);
   }
 
   /**
@@ -3097,32 +3097,32 @@ public class Graph {
   }
 
   /**
-   * Same as {@code align(defaultFrame(hid))}.
+   * Same as {@code align(defaultNode(hid))}.
    *
-   * @see #alignWith(Frame)
-   * @see #defaultFrame(String)
+   * @see #alignWith(Node)
+   * @see #defaultNode(String)
    */
   public void align(String hid) {
-    alignWith(defaultFrame(hid));
+    alignWith(defaultNode(hid));
   }
 
   /**
-   * If {@code frame} is {@link #isEye(Frame)} aligns the {@link #eye()} with the world.
-   * Otherwise aligns the {@code frame} with the {@link #eye()}. {@code frame} should be
+   * If {@code node} is {@link #isEye(Node)} aligns the {@link #eye()} with the world.
+   * Otherwise aligns the {@code node} with the {@link #eye()}. {@code node} should be
    * non-null.
    * <p>
-   * Wrapper method for {@link Frame#align(boolean, float, Frame)}.
+   * Wrapper method for {@link Node#align(boolean, float, Node)}.
    *
-   * @see #isEye(Frame)
-   * @see #defaultFrame(String)
+   * @see #isEye(Node)
+   * @see #defaultNode(String)
    */
-  public void alignWith(Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("align(frame) requires a non-null frame param");
-    if (isEye(frame))
-      frame.align(true);
+  public void alignWith(Node node) {
+    if (node == null)
+      throw new RuntimeException("align(node) requires a non-null node param");
+    if (isEye(node))
+      node.align(true);
     else
-      frame.align(eye());
+      node.align(eye());
   }
 
   /**
@@ -3135,55 +3135,55 @@ public class Graph {
   }
 
   /**
-   * Same as {@code focus(defaultFrame())}.
+   * Same as {@code focus(defaultNode())}.
    *
-   * @see #focusWith(Frame)
-   * @see #defaultFrame(String)
+   * @see #focusWith(Node)
+   * @see #defaultNode(String)
    */
   public void focus(String hid) {
-    focusWith(defaultFrame(hid));
+    focusWith(defaultNode(hid));
   }
 
   /**
-   * Centers the frame into the graph.
+   * Centers the node into the graph.
    */
-  public void focusWith(Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("focus(frame) requires a non-null frame param");
-    if (isEye(frame))
-      frame.projectOnLine(center(), viewDirection());
+  public void focusWith(Node node) {
+    if (node == null)
+      throw new RuntimeException("focus(node) requires a non-null node param");
+    if (isEye(node))
+      node.projectOnLine(center(), viewDirection());
     else
-      frame.projectOnLine(eye().position(), eye().zAxis(false));
+      node.projectOnLine(eye().position(), eye().zAxis(false));
   }
 
-  // Screen to frame conversion
+  // Screen to node conversion
 
   /**
    * Convenience function that simply returns {@code screenLocation(src, null)}.
    *
-   * @see #screenLocation(Vector, Frame)
+   * @see #screenLocation(Vector, Node)
    */
   public Vector screenLocation(Vector vector) {
     return screenLocation(vector, null);
   }
 
   /**
-   * Converts {@code vector} location from {@code frame} to screen.
-   * Use {@code location(vector, frame)} to perform the inverse transformation.
+   * Converts {@code vector} location from {@code node} to screen.
+   * Use {@code location(vector, node)} to perform the inverse transformation.
    * <p>
    * The x and y coordinates of the returned vector are expressed in screen coordinates,
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
    * (near plane) and 1 (excluded, far plane).
    *
    * @see #screenLocation(Vector)
-   * @see #location(Vector, Frame)
+   * @see #location(Vector, Node)
    * @see #location(Vector)
    */
-  public Vector screenLocation(Vector vector, Frame frame) {
+  public Vector screenLocation(Vector vector, Node node) {
     float xyz[] = new float[3];
 
-    if (frame != null) {
-      Vector tmp = frame.worldLocation(vector);
+    if (node != null) {
+      Vector tmp = node.worldLocation(vector);
       _screenLocation(tmp._vector[0], tmp._vector[1], tmp._vector[2], xyz);
     } else
       _screenLocation(vector._vector[0], vector._vector[1], vector._vector[2], xyz);
@@ -3244,14 +3244,14 @@ public class Graph {
   /**
    * Convenience function that simply returns {@code location(pixel, null)}.
    * <p>
-   * #see {@link #location(Vector, Frame)}
+   * #see {@link #location(Vector, Node)}
    */
   public Vector location(Vector pixel) {
     return this.location(pixel, null);
   }
 
   /**
-   * Returns the {@code frame} coordinates of {@code pixel}.
+   * Returns the {@code node} coordinates of {@code pixel}.
    * <p>
    * The pixel (0,0) corresponds to the upper left corner of the window. The
    * {@code pixel.z()} is a depth value ranging in [0..1] (near and far plane respectively).
@@ -3260,12 +3260,12 @@ public class Graph {
    * {@code pixel.z = zFar() / (zFar() - zNear()) * (1.0f - zNear() / z);} where {@code z}
    * is the distance from the point you project to the camera, along the {@link #viewDirection()}.
    * <p>
-   * The result is expressed in the {@code frame} coordinate system. When {@code frame} is
+   * The result is expressed in the {@code node} coordinate system. When {@code node} is
    * {@code null}, the result is expressed in the world coordinates system. The possible
-   * {@code frame} hierarchy (i.e., when {@link Frame#reference()} is non-null) is taken into
+   * {@code node} hierarchy (i.e., when {@link Node#reference()} is non-null) is taken into
    * account.
    * <p>
-   * {@link #screenLocation(Vector, Frame)} performs the inverse transformation.
+   * {@link #screenLocation(Vector, Node)} performs the inverse transformation.
    * <p>
    * This method only uses the intrinsic eye parameters (view and projection matrices),
    * {@link #width()} and {@link #height()}). You can hence define a virtual eye and use
@@ -3275,15 +3275,15 @@ public class Graph {
    * change in the matrices, you should buffer the inverse of the projection times view matrix
    * to speed-up the queries. See {@link #cacheProjectionViewInverse(boolean)}.
    *
-   * @see #screenLocation(Vector, Frame)
+   * @see #screenLocation(Vector, Node)
    * @see #setWidth(int)
    * @see #setHeight(int)
    */
-  public Vector location(Vector pixel, Frame frame) {
+  public Vector location(Vector pixel, Node node) {
     float xyz[] = new float[3];
     _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
-    if (frame != null)
-      return frame.location(new Vector(xyz[0], xyz[1], xyz[2]));
+    if (node != null)
+      return node.location(new Vector(xyz[0], xyz[1], xyz[2]));
     else
       return new Vector(xyz[0], xyz[1], xyz[2]);
   }
@@ -3356,15 +3356,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, defaultFrame(hid))}.
+   * Same as {@code translate(dx, dy, 0, defaultNode(hid))}.
    *
-   * @see #translate(float, float, Frame)
-   * @see #translate(float, float, float, Frame)
+   * @see #translate(float, float, Node)
+   * @see #translate(float, float, float, Node)
    * @see #translate(String, float, float, float)
-   * @see #defaultFrame(String)
+   * @see #defaultNode(String)
    */
   public void translate(String hid, float dx, float dy) {
-    translate(dx, dy, 0, defaultFrame(hid));
+    translate(dx, dy, 0, defaultNode(hid));
   }
 
   /**
@@ -3377,74 +3377,74 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, dz, defaultFrame(hid))}.
+   * Same as {@code translate(dx, dy, dz, defaultNode(hid))}.
    *
-   * @see #translate(float, float, Frame)
+   * @see #translate(float, float, Node)
    * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Frame)
-   * @see #defaultFrame(String)
+   * @see #translate(float, float, float, Node)
+   * @see #defaultNode(String)
    */
   public void translate(String hid, float dx, float dy, float dz) {
-    translate(dx, dy, dz, defaultFrame(hid));
+    translate(dx, dy, dz, defaultNode(hid));
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, frame)}.
+   * Same as {@code translate(dx, dy, 0, node)}.
    *
    * @see #translate(String, float, float, float)
    * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Frame)
-   * @see #defaultFrame(String)
+   * @see #translate(float, float, float, Node)
+   * @see #defaultNode(String)
    */
-  public void translate(float dx, float dy, Frame frame) {
-    translate(dx, dy, 0, frame);
+  public void translate(float dx, float dy, Node node) {
+    translate(dx, dy, 0, node);
   }
 
   /**
-   * Translates the {@code frame} according to {@code dx}, {@code dy} and {@code dz}. The {@code dx} and {@code dy}
+   * Translates the {@code node} according to {@code dx}, {@code dy} and {@code dz}. The {@code dx} and {@code dy}
    * coordinates are expressed in screen space, and the {@code dz} coordinate is given in world units.
-   * The translated frame would be kept exactly under a pointer if such a device were used to translate it.
+   * The translated node would be kept exactly under a pointer if such a device were used to translate it.
    *
-   * @see #translate(float, float, Frame)
+   * @see #translate(float, float, Node)
    * @see #translate(String, float, float)
    * @see #translate(String, float, float, float)
-   * @see #defaultFrame(String)
+   * @see #defaultNode(String)
    */
-  public void translate(float dx, float dy, float dz, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("translate(vector, frame) requires a non-null frame param");
-    frame.translate(_translate(dx, dy, dz, frame));
+  public void translate(float dx, float dy, float dz, Node node) {
+    if (node == null)
+      throw new RuntimeException("translate(vector, node) requires a non-null node param");
+    node.translate(_translate(dx, dy, dz, node));
   }
 
   /**
-   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), frame)}.
+   * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), node)}.
    *
-   * @see #_translate(float, float, float, int, Frame)
+   * @see #_translate(float, float, float, int, Node)
    */
-  protected Vector _translate(float dx, float dy, float dz, Frame frame) {
-    return _translate(dx, dy, dz, Math.min(width(), height()), frame);
+  protected Vector _translate(float dx, float dy, float dz, Node node) {
+    return _translate(dx, dy, dz, Math.min(width(), height()), node);
   }
 
   /**
    * Interactive translation low-level implementation. Converts {@code dx} and {@code dy} defined in screen space to
-   * {@link Frame#reference()} (or world coordinates if the frame reference is null).
+   * {@link Node#reference()} (or world coordinates if the node reference is null).
    * <p>
    * The projection onto the screen of the returned vector exactly match the screen {@code (dx, dy)} vector displacement
-   * (e.g., the translated frame would be kept exactly under a pointer if such a device were used to translate it).
+   * (e.g., the translated node would be kept exactly under a pointer if such a device were used to translate it).
    * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
    */
-  protected Vector _translate(float dx, float dy, float dz, int zMax, Frame frame) {
+  protected Vector _translate(float dx, float dy, float dz, int zMax, Node node) {
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
     }
-    dx = isEye(frame) ? -dx : dx;
-    dy = isRightHanded() ^ isEye(frame) ? -dy : dy;
-    dz = isEye(frame) ? dz : -dz;
+    dx = isEye(node) ? -dx : dx;
+    dy = isRightHanded() ^ isEye(node) ? -dy : dy;
+    dz = isEye(node) ? dz : -dz;
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(isEye(frame) ? anchor() : frame.position())._vector[2] * eye().magnitude());
+          eye().location(isEye(node) ? anchor() : node.position())._vector[2] * eye().magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
       dx *= 2.0 * k / (height() * eye().magnitude());
       dy *= 2.0 * k / (height() * eye().magnitude());
@@ -3452,7 +3452,7 @@ public class Graph {
     // this expresses the dz coordinate in world units:
     //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
     Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / zMax);
-    return frame.reference() == null ? eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, eye());
+    return node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye());
   }
 
   /**
@@ -3465,24 +3465,24 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scale(delta, defaultFrame(hid))}.
+   * Same as {@code scale(delta, defaultNode(hid))}.
    *
-   * @see #scale(float, Frame)
-   * @see #defaultFrame(String)
+   * @see #scale(float, Node)
+   * @see #defaultNode(String)
    */
   public void scale(String hid, float delta) {
-    scale(delta, defaultFrame(hid));
+    scale(delta, defaultNode(hid));
   }
 
   /**
-   * Scales the {@code frame} according to {@code delta}. Note that if {@code frame} is the {@link #eye()}
+   * Scales the {@code node} according to {@code delta}. Note that if {@code node} is the {@link #eye()}
    * this call simply changes the {@link #fov()}.
    *
    * @see #scale(String, float)
    */
-  public void scale(float delta, Frame frame) {
-    float factor = 1 + Math.abs(delta) / (float) (isEye(frame) ? -height() : height());
-    frame.scale(delta >= 0 ? factor : 1 / factor);
+  public void scale(float delta, Node node) {
+    float factor = 1 + Math.abs(delta) / (float) (isEye(node) ? -height() : height());
+    node.scale(delta >= 0 ? factor : 1 / factor);
   }
 
   /**
@@ -3495,49 +3495,49 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code hid} default-frame (see {@link #defaultFrame(String)}) roll, pitch and yaw radians around screen
+   * Rotates the {@code hid} default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
    * space x, y and z axes, respectively.
    *
-   * @see #rotate(float, float, float, Frame)
+   * @see #rotate(float, float, float, Node)
    */
   public void rotate(String hid, float roll, float pitch, float yaw) {
-    rotate(roll, pitch, yaw, defaultFrame(hid));
+    rotate(roll, pitch, yaw, defaultNode(hid));
   }
 
   /**
-   * Rotates the {@code frame} {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space
-   * x, y and z axes, respectively. The center of the rotation is the graph {@link #anchor()} if the frame is the
-   * {@link #eye()}, or the frame origin (see {@link Frame#position()}) otherwise.
+   * Rotates the {@code node} {@code roll}, {@code pitch} and {@code yaw} radians relative to the screen space
+   * x, y and z axes, respectively. The center of the rotation is the graph {@link #anchor()} if the node is the
+   * {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
    * <p>
-   * To rotate an eye frame around its origin and local axes simply call:
+   * To rotate an eye node around its origin and local axes simply call:
    * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
    *
    * @see #rotate(String, float, float, float)
-   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point, float, Node)
    */
-  public void rotate(float roll, float pitch, float yaw, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("rotate(roll, pitch, yaw, frame) requires a non-null frame param");
-    spin(_rotate(roll, pitch, yaw, frame), frame);
+  public void rotate(float roll, float pitch, float yaw, Node node) {
+    if (node == null)
+      throw new RuntimeException("rotate(roll, pitch, yaw, node) requires a non-null node param");
+    spin(_rotate(roll, pitch, yaw, node), node);
   }
 
   /**
    * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
    */
-  protected Quaternion _rotate(float roll, float pitch, float yaw, Frame frame) {
+  protected Quaternion _rotate(float roll, float pitch, float yaw, Node node) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
       System.out.println("Warning: graph is 2D. Roll and/or pitch reset");
     }
-    // don't really need to differentiate among the two cases, but eyeFrame can be speeded up
+    // don't really need to differentiate among the two cases, but the eye can be speeded up
     Quaternion quaternion = new Quaternion(isLeftHanded() ? -roll : roll, pitch, isLeftHanded() ? -yaw : yaw);
-    if (isEye(frame))
+    if (isEye(node))
       return quaternion;
     else {
       Vector vector = new Vector(-quaternion.x(), -quaternion.y(), -quaternion.z());
       vector = eye().orientation().rotate(vector);
-      vector = frame.displacement(vector);
+      vector = node.displacement(vector);
       quaternion.setX(vector.x());
       quaternion.setY(vector.y());
       quaternion.setZ(vector.z());
@@ -3555,25 +3555,25 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, defaultFrame(hid))}.
+   * Same as {@code spin(tail, head, defaultNode(hid))}.
    *
-   * @see #spin(Point, Point, float, Frame)
-   * @see #spin(Point, Point, Frame)
+   * @see #spin(Point, Point, float, Node)
+   * @see #spin(Point, Point, Node)
    * @see #spin(String, Point, Point, float)
    */
   public void spin(String hid, Point tail, Point head) {
-    spin(tail, head, defaultFrame(hid));
+    spin(tail, head, defaultNode(hid));
   }
 
   /**
-   * Same as {@code spin(tail, head, 1, frame)}.
+   * Same as {@code spin(tail, head, 1, node)}.
    *
-   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point, float, Node)
    * @see #spin(String, Point, Point)
    * @see #spin(String, Point, Point, float)
    */
-  public void spin(Point tail, Point head, Frame frame) {
-    spin(tail, head, 1, frame);
+  public void spin(Point tail, Point head, Node node) {
+    spin(tail, head, 1, node);
   }
 
   /**
@@ -3586,54 +3586,54 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, sensitivity, defaultFrame(hid))}.
+   * Same as {@code spin(tail, head, sensitivity, defaultNode(hid))}.
    *
-   * @see #spin(Point, Point, float, Frame)
+   * @see #spin(Point, Point, float, Node)
    * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Frame)
-   * @see #defaultFrame(String)
+   * @see #spin(Point, Point, Node)
+   * @see #defaultNode(String)
    */
   public void spin(String hid, Point tail, Point head, float sensitivity) {
-    spin(tail, head, sensitivity, defaultFrame(hid));
+    spin(tail, head, sensitivity, defaultNode(hid));
   }
 
   /**
-   * Rotates the {@code frame} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
+   * Rotates the {@code node} using an arcball interface, from {@code tail} to {@code head} pixel positions. The
    * {@code sensitivity} controls the gesture strength. The center of the rotation is the graph {@link #anchor()}
-   * if the frame is the {@link #eye()}, or the frame origin (see {@link Frame#position()}) otherwise.
+   * if the node is the {@link #eye()}, or the node origin (see {@link Node#position()}) otherwise.
    * <p>
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
    * orientation using a mouse.
    * <p>
-   * Override this class an call {@link #_spin(Point, Point, Point, float, Frame)} if you want to define a different
+   * Override this class an call {@link #_spin(Point, Point, Point, float, Node)} if you want to define a different
    * rotation center (rare).
    *
    * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Frame)
+   * @see #spin(Point, Point, Node)
    * @see #spin(String, Point, Point, float)
-   * @see #rotate(float, float, float, Frame)
+   * @see #rotate(float, float, float, Node)
    */
-  public void spin(Point tail, Point head, float sensitivity, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, sensitivity, frame) requires a non-null frame param");
-    spin(_spin(tail, head, sensitivity, frame), frame);
+  public void spin(Point tail, Point head, float sensitivity, Node node) {
+    if (node == null)
+      throw new RuntimeException("spin(point1, point2, sensitivity, node) requires a non-null node param");
+    spin(_spin(tail, head, sensitivity, node), node);
   }
 
   /**
-   * Same as {@code return _spin(point1, point2, center, sensitivity, frame)} where {@code center} is {@link #anchor()}
-   * if the frame is the {@link #eye()} or {@link Frame#position()} otherwise.
+   * Same as {@code return _spin(point1, point2, center, sensitivity, node)} where {@code center} is {@link #anchor()}
+   * if the node is the {@link #eye()} or {@link Node#position()} otherwise.
    */
-  protected Quaternion _spin(Point point1, Point point2, float sensitivity, Frame frame) {
-    Vector vector = screenLocation(isEye(frame) ? anchor() : frame.position());
+  protected Quaternion _spin(Point point1, Point point2, float sensitivity, Node node) {
+    Vector vector = screenLocation(isEye(node) ? anchor() : node.position());
     Point center = new Point(vector.x(), vector.y());
-    return _spin(point1, point2, center, sensitivity, frame);
+    return _spin(point1, point2, center, sensitivity, node);
   }
 
   /**
    * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    */
-  protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
+  protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
     float cx = center.x();
     float cy = center.y();
     float x = point2.x();
@@ -3652,10 +3652,10 @@ public class Graph {
     // 2D is an ad-hoc
     float angle = (is2D() ? sensitivity : 2.0f) * (float) Math.asin((float) Math.sqrt(axis.squaredNorm() / p1.squaredNorm() / p2.squaredNorm()));
     Quaternion quaternion = new Quaternion(axis, angle);
-    if (!isEye(frame)) {
+    if (!isEye(node)) {
       Vector vector = quaternion.axis();
       vector = eye().orientation().rotate(vector);
-      vector = frame.displacement(vector);
+      vector = node.displacement(vector);
       quaternion = new Quaternion(vector, -quaternion.angle());
     }
     return quaternion;
@@ -3680,16 +3680,16 @@ public class Graph {
   }
 
   /**
-   * Rotates the frame using {@code quaternion} around its {@link Frame#position()} (non-eye frames)
-   * or around the {@link Graph#anchor()} when the {@code frame} is the {@link Graph#eye()}.
+   * Rotates the node using {@code quaternion} around its {@link Node#position()} (non-eye nodes)
+   * or around the {@link Graph#anchor()} when the {@code node} is the {@link Graph#eye()}.
    */
-  public void spin(Quaternion quaternion, Frame frame) {
-    if (isEye(frame))
+  public void spin(Quaternion quaternion, Node node) {
+    if (isEye(node))
       //same as:
-      //frame.orbit(new Quaternion(frame.worldDisplacement(quaternion.axis()), quaternion.angle()));
-      frame._orbit(quaternion, anchor());
+      //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
+      node._orbit(quaternion, anchor());
     else
-      frame.rotate(quaternion);
+      node.rotate(quaternion);
   }
 
   // only 3d eye
@@ -3697,7 +3697,7 @@ public class Graph {
   /**
    * Same as {@code translate(0, 0, delta, eye()); }.
    *
-   * @see #translate(float, float, float, Frame)
+   * @see #translate(float, float, float, Node)
    */
   public void moveForward(float delta) {
     float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
@@ -3717,7 +3717,7 @@ public class Graph {
   }
 
   /**
-   * Look around without moving the eye while preserving its {@link Frame#yAxis()} when the action began.
+   * Look around without moving the eye while preserving its {@link Node#yAxis()} when the action began.
    */
   protected Quaternion _lookAround(float deltaX, float deltaY) {
     if (is2D()) {
@@ -3778,7 +3778,7 @@ public class Graph {
    * is preserved and stays projected along the eye's horizontal axis.
    * <p>
    * This method requires calling {@code scene.eye().setYAxis(upVector)} (see
-   * {@link Frame#setYAxis(Vector)}) and {@link #fit()} first.
+   * {@link Node#setYAxis(Vector)}) and {@link #fit()} first.
    *
    * @see #rotateCAD(float, float)
    */
@@ -3799,36 +3799,36 @@ public class Graph {
   }
 
   /**
-   * Same as {@code control(defaultFrame(), gesture)}. This method implements application control with
-   * the {@link #defaultFrame()} which requires overriding {@link Frame#interact(Object...)}.
+   * Same as {@code control(defaultNode(), gesture)}. This method implements application control with
+   * the {@link #defaultNode()} which requires overriding {@link Node#interact(Object...)}.
    *
-   * @see #defaultFrame()
-   * @see #control(Frame, Object...)
+   * @see #defaultNode()
+   * @see #control(Node, Object...)
    */
   public void defaultHIDControl(Object... gesture) {
-    control(defaultFrame(), gesture);
+    control(defaultNode(), gesture);
   }
 
   /**
-   * Same as {@code control(defaultFrame(hid), gesture)}. This method implements application control with
-   * the {@link #defaultFrame(String)} which requires overriding {@link Frame#interact(Object...)}.
+   * Same as {@code control(defaultNode(hid), gesture)}. This method implements application control with
+   * the {@link #defaultNode(String)} which requires overriding {@link Node#interact(Object...)}.
    *
-   * @see #defaultFrame(String)
-   * @see #control(Frame, Object...)
+   * @see #defaultNode(String)
+   * @see #control(Node, Object...)
    */
   public void control(String hid, Object... gesture) {
-    control(defaultFrame(hid), gesture);
+    control(defaultNode(hid), gesture);
   }
 
   /**
-   * Same as {@code frame.interact(gesture)}.
+   * Same as {@code node.interact(gesture)}.
    *
    * @see #defaultHIDControl(Object...)
    * @see #control(String, Object...)
-   * @see Frame#interact(Object...)
+   * @see Node#interact(Object...)
    */
-  public void control(Frame frame, Object... gesture) {
-    frame.interact(gesture);
+  public void control(Node node, Object... gesture) {
+    node.interact(gesture);
   }
 
   /*
@@ -3840,31 +3840,31 @@ public class Graph {
   }
 
   public void zoom(String hid, float delta) {
-    zoom(delta, defaultFrame(hid));
+    zoom(delta, defaultNode(hid));
   }
 
-  public void zoom(float delta, Frame frame) {
-    translate(0, 0, delta, frame);
+  public void zoom(float delta, Node node) {
+    translate(0, 0, delta, node);
   }
 
   public void spin(Point point1, Point point2, Point center) {
-    spin(point1, point2, center, defaultFrame());
+    spin(point1, point2, center, defaultNode());
   }
 
-  public void spin(Point point1, Point point2, Point center, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, center, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, center, 1, frame), frame);
+  public void spin(Point point1, Point point2, Point center, Node node) {
+    if (node == null)
+      throw new RuntimeException("spin(point1, point2, center, node) requires a non-null node param");
+    spin(_spin(point1, point2, center, 1, node), node);
   }
 
   public void spin(Point point1, Point point2, Point center, float sensitivity) {
-    spin(point1, point2, center, sensitivity, defaultFrame());
+    spin(point1, point2, center, sensitivity, defaultNode());
   }
 
-  public void spin(Point point1, Point point2, Point center, float sensitivity, Frame frame) {
-    if (frame == null)
-      throw new RuntimeException("spin(point1, point2, center, sensitivity, frame) requires a non-null frame param");
-    spin(_spin(point1, point2, center, sensitivity, frame), frame);
+  public void spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
+    if (node == null)
+      throw new RuntimeException("spin(point1, point2, center, sensitivity, node) requires a non-null node param");
+    spin(_spin(point1, point2, center, sensitivity, node), node);
   }
 
   public void spinX(float roll) {
@@ -3904,15 +3904,15 @@ public class Graph {
     screenRotate(point1, point2, sensitivity, eye());
   }
 
-  public void screenRotate(Point point1, Point point2, Frame frame) {
-    screenRotate(point1, point2, 1, frame);
+  public void screenRotate(Point point1, Point point2, Node node) {
+    screenRotate(point1, point2, 1, node);
   }
 
-  public void screenRotate(Point point1, Point point2, float sensitivity, Frame frame) {
-    spin(_spin2(point1, point2, sensitivity, frame), frame);
+  public void screenRotate(Point point1, Point point2, float sensitivity, Node node) {
+    spin(_spin2(point1, point2, sensitivity, node), node);
   }
 
-  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Frame frame) {
+  protected Quaternion _spin2(Point point1, Point point2, float sensitivity, Node node) {
     Quaternion quaternion;
     Vector vector;
     float x = point2.x();
@@ -3920,7 +3920,7 @@ public class Graph {
     float prevX = point1.x();
     float prevY = point1.y();
     float angle;
-    if (isEye(frame)) {
+    if (isEye(node)) {
       vector = screenLocation(anchor());
       angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]) - (float) Math
           .atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
@@ -3928,10 +3928,10 @@ public class Graph {
         angle = -angle;
       quaternion = new Quaternion(new Vector(0.0f, 0.0f, 1.0f), angle);
     } else {
-      vector = screenLocation(frame.position());
+      vector = screenLocation(node.position());
       float prev_angle = (float) Math.atan2(prevY - vector._vector[1], prevX - vector._vector[0]);
       angle = (float) Math.atan2(y - vector._vector[1], x - vector._vector[0]);
-      Vector axis = frame.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
+      Vector axis = node.displacement(eye().orientation().rotate(new Vector(0.0f, 0.0f, -1.0f)));
       if (isRightHanded())
         quaternion = new Quaternion(axis, angle - prev_angle);
       else

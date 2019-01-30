@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -13,7 +13,7 @@ import processing.opengl.PShader;
 public class ShadowMapDOFOnScreen extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
   PGraphics lightPGraphics, depthPGraphics, dofPGraphics;
   PShader depthShader, dofShader;
   int mode = 0;
@@ -27,15 +27,15 @@ public class ShadowMapDOFOnScreen extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(max(width, height));
-    shapes = new Frame[20];
+    shapes = new Node[20];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene) {
+      shapes[i] = new Node(scene) {
         @Override
         public boolean graphics(PGraphics pg) {
           pg.pushStyle();
-          if (scene.trackedFrame("light") == this) {
+          if (scene.trackedNode("light") == this) {
             Scene.drawAxes(pg, 150);
-            pg.fill(0, scene.isTrackedFrame(this) ? 255 : 0, 255, 120);
+            pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
             //Scene.drawFrustum(pg, depthPGraphics, shadowMapType, this, zNear, zFar);
             Scene.drawFrustum(pg, lightPGraphics, shadowMapType, this, zNear, zFar);
           } else {
@@ -67,7 +67,7 @@ public class ShadowMapDOFOnScreen extends PApplet {
       };
       shapes[i].setPickingThreshold(0);
       shapes[i].randomize();
-      shapes[i].setHighlighting(Frame.Highlighting.NONE);
+      shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
@@ -89,8 +89,8 @@ public class ShadowMapDOFOnScreen extends PApplet {
     dofPGraphics = createGraphics(width, height, P3D);
     dofPGraphics.shader(dofShader);
 
-    scene.setTrackedFrame("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.trackedFrame("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedFrame("light").position()));
+    scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
+    scene.trackedNode("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedNode("light").position()));
   }
 
   public void draw() {
@@ -99,15 +99,15 @@ public class ShadowMapDOFOnScreen extends PApplet {
     scene.drawAxes();
     scene.render();
     // 2. Fill in shadow map using the light point of view
-    if (scene.trackedFrame("light") != null) {
+    if (scene.trackedNode("light") != null) {
       lightPGraphics.beginDraw();
       lightPGraphics.background(140, 160, 125);
-      scene.render(lightPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(lightPGraphics, shadowMapType, scene.trackedNode("light"), zNear, zFar);
       lightPGraphics.endDraw();
 
       depthPGraphics.beginDraw();
       depthPGraphics.background(140, 160, 125);
-      scene.render(depthPGraphics, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+      scene.render(depthPGraphics, shadowMapType, scene.trackedNode("light"), zNear, zFar);
       depthPGraphics.endDraw();
 
       // 3. Draw destination buffer
@@ -149,7 +149,7 @@ public class ShadowMapDOFOnScreen extends PApplet {
   public void mouseWheel(MouseEvent event) {
     if (event.isShiftDown())
       // application control of the light: set the zfar plan of the light
-      // it is implemented as a custom behavior by frame.interact()
+      // it is implemented as a custom behavior by node.interact()
       scene.control("light", event.getCount() * 20);
     else
       scene.scale(event.getCount() * 20);

@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.Node;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import processing.core.PApplet;
@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class TwoScenes extends PApplet {
   Scene scene1, scene2, focus;
-  Frame frame;
+  Node node;
   Vector vector;
 
   int w = 1200;
@@ -38,7 +38,7 @@ public class TwoScenes extends PApplet {
     scene2.setRadius(400);
     //scene2.fit(1);
     scene2.fit();
-    frame = new Frame();
+    node = new Node();
   }
 
   public void keyPressed() {
@@ -48,13 +48,13 @@ public class TwoScenes extends PApplet {
       println(scene1.zNear());
       vector = new Vector(0, 0, -scene1.zNear() / scene1.eye().magnitude());
       vector = scene1.eye().worldLocation(vector);
-      frame.setPosition(vector);
+      node.setPosition(vector);
     }
     if (key == 'b') {
       Vector zNear = new Vector(0, 0, scene1.zNear());
       Vector zFar = new Vector(0, 0, scene1.zFar());
       Vector zNear2ZFar = Vector.subtract(zFar, zNear);
-      scene1.translate(0, 0, zNear2ZFar.magnitude(), frame);
+      scene1.translate(0, 0, zNear2ZFar.magnitude(), node);
     }
     if (key == 'n')
       scene1.eye().setMagnitude(1);
@@ -100,8 +100,8 @@ public class TwoScenes extends PApplet {
     graphics.noStroke();
     graphics.fill(0, 255, 0);
     graphics.pushMatrix();
-    Scene.applyTransformation(graphics, frame);
-    //scene1.applyTransformation(frame);
+    Scene.applyTransformation(graphics, node);
+    //scene1.applyTransformation(node);
     graphics.sphere(50);
     graphics.popMatrix();
   }

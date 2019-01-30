@@ -3,7 +3,7 @@ class Piece extends Frame {
 
   Piece(Scene scene) {
     super(scene);
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     setPickingThreshold(0);
   }
 

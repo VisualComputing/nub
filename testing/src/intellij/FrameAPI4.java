@@ -1,9 +1,9 @@
 /**
- * Frame API.
+ * Node API.
  * by Jean Pierre Charalambos.
  * <p>
- * This example illustrates the powerful Frame API used to convert points and
- * vectors along a frame hierarchy. The following frame hierarchy is implemented:
+ * This example illustrates the powerful Node API used to convert points and
+ * vectors along a node hierarchy. The following node hierarchy is implemented:
  * <p>
  * world
  * ^
@@ -24,7 +24,7 @@
 
 package intellij;
 
-import frames.core.Frame;
+import frames.core.Node;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -34,7 +34,7 @@ import processing.event.MouseEvent;
 
 public class FrameAPI4 extends PApplet {
   Scene scene;
-  InteractiveFrame f1, f2, f3, f4, f5;
+  InteractiveNode f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
   Vector vec = new Vector(50, 50, 50);
   PFont font16, font13;
@@ -64,25 +64,25 @@ public class FrameAPI4 extends PApplet {
     scene.setRadius(200);
     scene.fit(1);
 
-    f1 = new InteractiveFrame(f1Color);
+    f1 = new InteractiveNode(f1Color);
     f1.translate(-50, -20, 30);
     f1.scale(1.3f);
 
-    f2 = new InteractiveFrame(f1, f2Color);
+    f2 = new InteractiveNode(f1, f2Color);
     f2.translate(60, -40, -30);
     f2.scale(1.2f);
 
-    f3 = new InteractiveFrame(f1, f3Color);
+    f3 = new InteractiveNode(f1, f3Color);
     f3.translate(60, 55, -30);
     f3.rotate(new Quaternion(new Vector(0, 1, 0), -HALF_PI));
     f3.scale(1.1f);
 
-    f4 = new InteractiveFrame(f2, f4Color);
+    f4 = new InteractiveNode(f2, f4Color);
     f4.translate(60, -55, 30);
     f4.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
     f4.scale(0.9f);
 
-    f5 = new InteractiveFrame(scene.eye(), f5Color);
+    f5 = new InteractiveNode(scene.eye(), f5Color);
     f5.translate(-100, 0, -250);
 
     font16 = loadFont("FreeSans-16.vlw");
@@ -247,40 +247,40 @@ public class FrameAPI4 extends PApplet {
     textFont(font13);
     fill(f1Color);
     pos = scene.screenLocation(f1.position());
-    text("Frame 1", pos.x(), pos.y());
+    text("Node 1", pos.x(), pos.y());
     fill(f2Color);
     pos = scene.screenLocation(f2.position());
-    text("Frame 2", pos.x(), pos.y());
+    text("Node 2", pos.x(), pos.y());
     fill(f3Color);
     pos = scene.screenLocation(f3.position());
-    text("Frame 3", pos.x(), pos.y());
+    text("Node 3", pos.x(), pos.y());
     fill(f4Color);
     pos = scene.screenLocation(f4.position());
-    text("Frame 4", pos.x(), pos.y());
+    text("Node 4", pos.x(), pos.y());
     fill(f5Color);
     pos = scene.screenLocation(f5.position());
-    text("Frame 5", pos.x(), pos.y());
+    text("Node 5", pos.x(), pos.y());
     fill(wColor);
     textFont(font16);
     text("Press the space bar to change mode", 5, 15);
     switch (mode) {
       case m1: // f2 -> world
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 2 to world", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 2 to world", 5, 35);
         break;
       case m2: // f2 -> f1
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 2 to frame 1", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 2 to node 1", 5, 35);
         break;
       case m3: // f1 -> f2
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 1 to frame 2", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 1 to node 2", 5, 35);
         break;
       case m4: // f3 -> f4
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 3 to frame 4", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 3 to node 4", 5, 35);
         break;
       case m5: // f4 -> f3
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 4 to frame 3", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 4 to node 3", 5, 35);
         break;
       case m6: // f5 -> f4
-        text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 5 to frame 4", 5, 35);
+        text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 5 to node 4", 5, 35);
         break;
     }
     scene.endHUD();
@@ -291,23 +291,23 @@ public class FrameAPI4 extends PApplet {
     drawArrow(null, pnt, to);
   }
 
-  void drawArrowConnectingPoints(Frame frame, Vector to) {
-    drawArrow(frame, pnt, to);
+  void drawArrowConnectingPoints(Node node, Vector to) {
+    drawArrow(node, pnt, to);
   }
 
   void drawVector(Vector to) {
     drawArrow(null, new Vector(), to);
   }
 
-  void drawVector(Frame frame, Vector to) {
-    drawArrow(frame, new Vector(), to);
+  void drawVector(Node node, Vector to) {
+    drawArrow(node, new Vector(), to);
   }
 
-  void drawArrow(Frame frame, Vector from, Vector to) {
-    if (frame != null) {
+  void drawArrow(Node node, Vector from, Vector to) {
+    if (node != null) {
       pushMatrix();
-      //scene.applyModelView(frame.worldMatrix());// world, is handy but inefficient
-      scene.applyWorldTransformation(frame);
+      //scene.applyModelView(node.worldMatrix());// world, is handy but inefficient
+      scene.applyWorldTransformation(node);
       scene.drawArrow(from, to, 1);
       popMatrix();
     } else
@@ -348,7 +348,7 @@ public class FrameAPI4 extends PApplet {
 
   @Override
   public void mouseMoved() {
-    scene.track(new Frame[]{f1, f2, f3, f4, f5});
+    scene.track(new Node[]{f1, f2, f3, f4, f5});
   }
 
   @Override
@@ -375,18 +375,18 @@ public class FrameAPI4 extends PApplet {
         scene.align();
   }
 
-  public class InteractiveFrame extends Frame {
+  public class InteractiveNode extends Node {
     int _c;
     Vector pnt;
 
-    public InteractiveFrame(int color) {
+    public InteractiveNode(int color) {
       super();
       _c = color;
       pnt = new Vector(40, 30, 20);
     }
 
-    public InteractiveFrame(Frame frame, int color) {
-      super(frame);
+    public InteractiveNode(Node node, int color) {
+      super(node);
       _c = color;
       pnt = new Vector(40, 30, 20);
     }

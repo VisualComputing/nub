@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -120,7 +120,7 @@ public class SequentialTimer implements Timer {
   }
 
   /**
-   * Returns {@code true} if the timer was triggered at the given frame.
+   * Returns {@code true} if the timer was triggered at the given node.
    *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link frames.timing.TimingHandler#handle()}).

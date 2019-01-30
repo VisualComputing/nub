@@ -1,5 +1,5 @@
 /****************************************************************************************
- * frames
+ * nodes
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -56,7 +56,7 @@ public class AnimatorObject implements Animator {
    * The animation loop period, in milliseconds. When {@link #started()}, this is
    * the delay that takes place between two consecutive iterations of the animation loop.
    * <p>
-   * This delay defines a target frame rate that will only be achieved if your
+   * This delay defines a target node rate that will only be achieved if your
    * {@link #animate()} methods is fast enough.
    * <p>
    * Default value is 40 milliseconds (25 Hz).

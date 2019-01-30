@@ -11,7 +11,7 @@ class Box extends Frame {
   }
 
   // detached-frames drawing require to
-  // manually apply the frame transformation
+  // manually apply the node transformation
   void draw() {
     pushStyle();
     pushMatrix();

@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates the powerful Frame API used to convert points and
- * vectors along a frame hierarchy. The following frame hierarchy is implemented:
+ * vectors along a node hierarchy. The following node hierarchy is implemented:
  * 
  * world
  * ^
@@ -19,9 +19,9 @@
  * |
  * f4
  *
- * Note that the hierarchy is implemented using detached-frame specializations
+ * Note that the hierarchy is implemented using detached-node specializations
  * and hence it gets manually traversed. Check the draw() method and contrast it
- * with the one implemented by the Click2Pick attached-frame example version.
+ * with the one implemented by the Click2Pick attached-node example version.
  *
  * Press the space bar to browse the different conversion methods shown here.
  */
@@ -209,22 +209,22 @@ void displayText() {
   text("Press the space bar to change mode", 5, 15);
   switch (mode) {
   case m1: // f2 -> world
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 2 to world", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 2 to world", 5, 35);
     break;
   case m2: // f2 -> f1
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 2 to frame 1", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 2 to node 1", 5, 35);
     break;
   case m3: // f1 -> f2
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 1 to frame 2", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 1 to node 2", 5, 35);
     break;
   case m4: // f3 -> f4
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 3 to frame 4", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 3 to node 4", 5, 35);
     break;
   case m5: // f4 -> f3
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 4 to frame 3", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 4 to node 3", 5, 35);
     break;
   case m6: // f5 -> f4
-    text("Converts vectors (grey arrows) and points (see the cyan arrow) from frame 5 to frame 4", 5, 35);
+    text("Converts vectors (grey arrows) and points (see the cyan arrow) from node 5 to node 4", 5, 35);
     break;
   }
   scene.endScreenDrawing();
@@ -235,23 +235,23 @@ void drawArrowConnectingPoints(Vector to) {
   drawArrow(null, pnt, to);
 }
 
-void drawArrowConnectingPoints(Frame frame, Vector to) {
-  drawArrow(frame, pnt, to);
+void drawArrowConnectingPoints(Frame node, Vector to) {
+  drawArrow(node, pnt, to);
 }
 
 void drawVector(Vector to) {
   drawArrow(null, new Vector(), to);
 }
 
-void drawVector(Frame frame, Vector to) {
-  drawArrow(frame, new Vector(), to);
+void drawVector(Frame node, Vector to) {
+  drawArrow(node, new Vector(), to);
 }
 
-void drawArrow(Frame frame, Vector from, Vector to) {
-  if (frame != null) {
+void drawArrow(Frame node, Vector from, Vector to) {
+  if (node != null) {
     pushMatrix();
-    //scene.applyModelView(frame.worldMatrix());// world, is handy but inefficient
-    scene.applyWorldTransformation(frame);
+    //scene.applyModelView(node.worldMatrix());// world, is handy but inefficient
+    scene.applyWorldTransformation(node);
     scene.drawArrow(from, to, 1);
     popMatrix();
   } else
