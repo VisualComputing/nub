@@ -188,7 +188,7 @@ public class Node {
   }
 
   /**
-   * Creates a detached node with {@code reference} as {@link #reference()}.
+   * Creates a child node with {@code reference} as {@link #reference()}.
    * Same as {@code this(reference.graph(), reference, null, null, new Vector(), new Quaternion(), 1)}.
    *
    * @see #Node()
