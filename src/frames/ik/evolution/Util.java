@@ -56,7 +56,8 @@ public class Util {
     public static List<Individual> generatePopulation(List<Frame> structure, int n, float max_angle){
         List<Individual> population = new ArrayList<>();
         Individual original = new Individual(structure);
-        for(int i = 0; i < n; i++){
+        original.arrayParams().put("Evolution_Gradient", new float[original.structure().size()*3]);
+        for(int i = 0; i < n - 1; i++){
             population.add(generateIndividual(original, max_angle));
         }
         population.add(original.clone());
