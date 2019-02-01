@@ -29,7 +29,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 8;
+    int num_joints = 16;
     float targetRadius = 12;
     float boneLength = 50;
 
@@ -178,7 +178,7 @@ public class VisualBenchmark extends PApplet {
         scene.beginHUD();
         for(Solver solver : solvers) {
             fill(255);
-            textSize(12);
+            textSize(10);
             if (solver instanceof HillClimbingSolver) {
                 HillClimbingSolver s = (HillClimbingSolver) solver;
                 Frame f = s.chain().get(0);
