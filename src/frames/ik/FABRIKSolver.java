@@ -58,6 +58,11 @@ public abstract class FABRIKSolver extends Solver {
   *   Move J'_(idx)  according to obtained movement
   *   Execute Phase 2 and Get position of J_n
   *   ...
+  *   Sub-problem Reach phi w.rt A axis while keeping J_n position
+  *   Distribute phi in remaining chain J_i to J_n
+  *   Calculate bounds phi_max_t, phi_min_t w.r.t A axis for each joint -> get phi_max_sum
+  *   Define a way to propagate:
+  *     phi_max_sum - phi_min_sum must always be > 0
   * */
 
   public static class Properties{
