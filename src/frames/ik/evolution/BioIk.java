@@ -25,8 +25,8 @@ public class BioIk extends Solver {
     protected Operator _crossover = new OperatorMethods.Recombination();
     protected Operator _adoption = new OperatorMethods.Adoption();
     protected float _cross_probability = 1f;
-    protected int _population_size = 10;
-    protected int _elitism_size = 10;
+    protected int _population_size;
+    protected int _elitism_size;
     protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
@@ -41,14 +41,15 @@ public class BioIk extends Solver {
 
     protected boolean _debug = false;
 
-    public BioIk(List<Frame> structure, int population_size){
+    public BioIk(List<Frame> structure, int population_size, int elitism_size){
         this._structure = structure;
         this._population_size = population_size;
+        this._elitism_size = elitism_size;
         this._target = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
     }
 
-    public BioIk(Frame root, int population_size){
+    public BioIk(Frame root, int population_size, int _elitism_size){
         this._structure = root.graph().branch(root);
         this._population_size = population_size;
         this._target = new HashMap<Integer, Frame>();
@@ -127,7 +128,8 @@ public class BioIk extends Solver {
     protected boolean _iterate() {
         //1. Exploit _elitism_size individuals
         _exploit(_sorted_population.subList(0, _elitism_size));
-        Individual best = _sorted_population.get(0), worst = _sorted_population.get(_sorted_population.size());
+        if(_debug) System.out.println("------- Iteration: " + iterations);
+        Individual best = _sorted_population.get(0), worst = _sorted_population.get(_sorted_population.size() - 1);
         //2. Mating pool is same as population
         List<Individual> pool = new ArrayList<Individual>(_sorted_population);
         //3. Get remaining offspring
@@ -139,13 +141,13 @@ public class BioIk extends Solver {
                 List<Individual> parents = _selection.choose(true, pool, 2);
                 //Generate an individual
                 if(_random.nextFloat() < _cross_probability) {
-                    Individual recombination = _crossover.apply(parents.get(i), parents.get(i + 1));
+                    Individual recombination = _crossover.apply(parents.get(0), parents.get(1));
                     if(_mutation instanceof OperatorMethods.Mutation){
-                        ((OperatorMethods.Mutation) _mutation).setExtinction(parents.get(i), parents.get(i + 1));
+                        ((OperatorMethods.Mutation) _mutation).setExtinction(parents.get(0), parents.get(1));
                     }
                     Individual mutation = _mutation.apply(recombination);
                     if(_adoption instanceof OperatorMethods.Adoption){
-                        ((OperatorMethods.Adoption) _adoption).setParents(parents.get(i), parents.get(i + 1));
+                        ((OperatorMethods.Adoption) _adoption).setParents(parents.get(0), parents.get(1));
                         ((OperatorMethods.Adoption) _adoption).setBest(_best);
                     }
                     child = _adoption.apply(mutation);
@@ -156,7 +158,7 @@ public class BioIk extends Solver {
                     child.arrayParams().put("Evolution_Gradient", _calculateGradient(child, recombination));
                     children.add(child);
                 } else{
-                    child = parents.get(i);
+                    child = parents.get(0);
                     children.add(child);
                     child.updateFitness(_target);
                     best = best == null ? child : best.fitness() > child.fitness() ? child : best;
@@ -175,11 +177,24 @@ public class BioIk extends Solver {
 
             }
         }
+
+        for(Individual ind : _sorted_population){
+            if(_debug) System.out.println(ind);
+        }
         _population = Util.concatenate(_sorted_population.subList(0, _elitism_size), children);
         //Sort population
+        if(_debug) System.out.println("<><><><><><><><><><><><>");
+        if(_debug) System.out.println("Elite");
+        for(Individual ind : _sorted_population.subList(0, _elitism_size)){
+            if(_debug) System.out.println(ind);
+        }
+        if(_debug) System.out.println("<><><><><><><><><><><><>");
+        if(_debug) System.out.println("Offspring");
+        for(Individual ind : children){
+            if(_debug) System.out.println(ind);
+        }
+
         _sorted_population = Util.sort(false, false, _population);
-        //Update extinction Factor
-        _updateExtinction();
         //Execute Wipe - Reinitialize population
         if(_wipe(_best, best)){
             _population = Util.generatePopulation(_structure, _population_size);
@@ -189,7 +204,10 @@ public class BioIk extends Solver {
             }
             _sorted_population = Util.sort(false, false, _population);
         }
-        _best = best;
+        //Update extinction Factor
+        _updateExtinction();
+
+        _best = best.fitness() < _best.fitness() ? best : _best;
         return _best.fitness() < minDistance;
     }
 
@@ -232,11 +250,14 @@ public class BioIk extends Solver {
 
     protected void _exploit(List<Individual> population){
         for(Individual individual : population){
+            if(_debug) System.out.println("<<<<<<< Exploitation >>>>>>>");
+            if(_debug) System.out.println("Ind " + individual);
             float error = individual.getError();
-            float fitness = individual.balancedFitness();
-            float new_fitness = 0;
             int idx = 0;
             for(Frame joint : individual.structure()){
+                float fitness = individual.balancedFitness();
+                individual.updateFitness(_target);
+                if(_debug) System.out.println("<<<<<<< Joint >>>>>>>");
                 for(int i = 0; i < 3; i++) {
                     Vector euler = joint.rotation().eulerAngles();
                     Quaternion q = joint.rotation().get();
@@ -247,33 +268,39 @@ public class BioIk extends Solver {
                     Quaternion q_plus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
                     joint.setRotation(q_plus);
                     individual.updateFitness(_target);
+                    if(_debug) System.out.println("plus " + individual);
+
                     float f_plus = individual.balancedFitness();
                     float minus = (float) Math.max(euler._vector[i] - r, -Math.PI);
                     angles._vector[i] = minus;
                     Quaternion q_minus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
                     joint.setRotation(q_minus);
                     individual.updateFitness(_target);
+
+                    if(_debug) System.out.println("minus " + individual);
                     float f_minus = individual.balancedFitness();
 
                     if(f_plus < fitness && f_plus <= f_minus){
+                        if(_debug) System.out.println("Entra plus");
                         joint.setRotation(q_plus);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + plus - euler._vector[i];
-                        new_fitness += f_plus;
                     }
                     else if(f_minus < fitness && f_minus <= f_plus) {
+                        if(_debug) System.out.println("Entra minus");
                         joint.setRotation(q_minus);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + minus - euler._vector[i];
-                        new_fitness += f_minus;
                     }
                     else {
+                        if(_debug) System.out.println("Entra normal");
                         joint.setRotation(q);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i];
-                        new_fitness += fitness;
                     }
+                    if(_debug) System.out.println("final " + individual);
                     idx += 1;
+                    individual.updateFitness(_target);
                 }
             }
-            individual.setFitness(new_fitness/individual.structure().size());
+            //individual.setFitness(new_fitness/individual.structure().size());
         }
     }
 
