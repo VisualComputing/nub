@@ -86,10 +86,17 @@ public class SelectionMethods {
         protected boolean _exponential = false;
         protected float _alpha = 2;
         protected boolean _minimization = true;
+        protected boolean _sorted = false;
+
+        public Ranking(){ }
+
+        public Ranking(boolean sorted){
+            _sorted = sorted;
+        }
 
         @Override
         public List<Individual> choose(boolean replacement, List<Individual> population, int m) {
-            List<Individual> list = Util.sort(false, _minimization, population);
+            List<Individual> list = _sorted ? population : Util.sort(false, _minimization, population);
             List<Float> rank = new ArrayList<Float>();
             float tie = 0;
             for(int i = 0; i < list.size(); i++){

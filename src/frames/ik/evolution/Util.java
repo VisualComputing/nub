@@ -33,18 +33,31 @@ public class Util {
         return sorted;
     }
 
+    public static Individual generateIndividual(List<Frame> structure){
+        return generateIndividual(new Individual(structure), (float) Math.toRadians(359));
+    }
+
+    public static Individual generateIndividual(List<Frame> structure, float max_angle){
+        return generateIndividual(new Individual(structure), max_angle);
+    }
+
+    public static Individual generateIndividual(Individual original, float max_angle){
+        Individual individual = original.clone();
+        for(Frame frame : individual.structure()){
+            float roll = 2 * max_angle * random.nextFloat() - max_angle;
+            float pitch = 2 * max_angle * random.nextFloat() - max_angle;
+            float yaw =  2 * max_angle * random.nextFloat() - max_angle;
+            frame.rotate(new Quaternion(roll, pitch, yaw ));
+        }
+        individual.arrayParams().put("Evolution_Gradient", new float[individual.structure().size()*3]);
+        return individual;
+    }
+
     public static List<Individual> generatePopulation(List<Frame> structure, int n, float max_angle){
         List<Individual> population = new ArrayList<>();
         Individual original = new Individual(structure);
         for(int i = 0; i < n; i++){
-            Individual individual = original.clone();
-            for(Frame frame : individual.structure()){
-                float roll = 2 * max_angle * random.nextFloat() - max_angle;
-                float pitch = 2 * max_angle * random.nextFloat() - max_angle;
-                float yaw =  2 * max_angle * random.nextFloat() - max_angle;
-                frame.rotate(new Quaternion(roll, pitch, yaw ));
-            }
-            population.add(individual);
+            population.add(generateIndividual(original, max_angle));
         }
         population.add(original.clone());
         return population;
