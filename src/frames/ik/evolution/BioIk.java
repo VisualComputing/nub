@@ -6,6 +6,7 @@ import frames.ik.evolution.operator.Operator;
 import frames.ik.evolution.operator.OperatorMethods;
 import frames.ik.evolution.selection.Selection;
 import frames.ik.evolution.selection.SelectionMethods;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.util.*;
@@ -19,19 +20,20 @@ public class BioIk extends Solver {
         GENERATIONAL, ELITISM, KEEP_BEST
     }
 
-    protected Selection _selection = new SelectionMethods.Ranking();
+    protected Selection _selection = new SelectionMethods.Ranking(true);
     protected Operator _mutation = new OperatorMethods.Mutation();
     protected Operator _crossover = new OperatorMethods.Recombination();
     protected Operator _adoption = new OperatorMethods.Adoption();
     protected float _cross_probability = 1f;
     protected int _population_size = 10;
+    protected int _elitism_size = 10;
     protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
     protected HashMap<Integer, Frame> _previousTarget;
     protected HashMap<Integer, Frame> _target;
     protected List<Frame> _structure;
-    protected List<Individual> _population;
+    protected List<Individual> _population, _sorted_population;
     protected Individual _best;
 
 
@@ -108,6 +110,7 @@ public class BioIk extends Solver {
             individual.updateFitness(_target);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
+        _sorted_population = Util.sort(false, false, _population);
         _updateExtinction();
         //3. Iterate a given number of times.
         int k = 0;
@@ -122,95 +125,71 @@ public class BioIk extends Solver {
 
     @Override
     protected boolean _iterate() {
-        //1. Select parents
-        List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
-        if(_debug) {
-            System.out.println("ITERATION : " + iterations);
-            System.out.println("Parents");
-            for(Individual ind : parents){
-                System.out.println(ind);
-            }
-        }
-
-        //2. Generate children
+        //1. Exploit _elitism_size individuals
+        _exploit(_sorted_population.subList(0, _elitism_size));
+        Individual best = _sorted_population.get(0), worst = _sorted_population.get(_sorted_population.size());
+        //2. Mating pool is same as population
+        List<Individual> pool = new ArrayList<Individual>(_sorted_population);
+        //3. Get remaining offspring
         List<Individual> children = new ArrayList<>();
-        Individual worst = null;
-        Individual best = _best;
-        for(int i = 0; i < parents.size(); i+=2){
-            if(_random.nextFloat() < _cross_probability) {
-                Individual recombination = _crossover.apply(parents.get(i), parents.get(i + 1));
-                if(_debug) {
-                    System.out.println("\t Best " + _best);
-                    System.out.println("\t P1 " + parents.get(i));
-                    System.out.println("\t P2 " + parents.get(i + 1));
-                    recombination.updateFitness(_target);
-                    System.out.println("\t Child " + recombination);
-                }
-                 if(_mutation instanceof OperatorMethods.Mutation){
-                    ((OperatorMethods.Mutation) _mutation).setExtinction(parents.get(i), parents.get(i + 1));
-                }
-                Individual mutation = _mutation.apply(recombination);
-                if(_adoption instanceof OperatorMethods.Adoption){
-                    ((OperatorMethods.Adoption) _adoption).setParents(parents.get(i), parents.get(i + 1));
-                    ((OperatorMethods.Adoption) _adoption).setBest(best);
-                }
-                Individual child = _adoption.apply(mutation);
-                //Clipping is not necessary since solutions are kept in feasible regions (see Frame setRotation())
-                //update gradient
-                child.arrayParams().put("Evolution_Gradient", _calculateGradient(child, recombination));
-                child.updateFitness(_target);
-                children.add(child);
-                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
-                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
-
-            } else{
-                Individual child = parents.get(i);
-                children.add(child);
-                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
-                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
-            }
-        }
-        if(_debug) {
-            System.out.println("Children ");
-            for (Individual ind : children) {
-                System.out.println(ind);
-            }
-        }
-
-        //3. Replacement
-        switch (replacement){
-            case ELITISM:{
-                //Keep best individuals
-                _population = Util.concatenate(parents, children);
-                _population = Util.sort(true, false, _population);
-                _best = _population.get(0);
-                _population = _population.subList(0, _population_size);
-                Collections.shuffle(_population);
-                if(_debug) {
-                    System.out.println("Population ");
-                    for (Individual ind : _population) {
-                        System.out.println(ind);
+        for(int i = 0; i < _population.size() - _elitism_size; i++){
+            if(!pool.isEmpty()){
+                Individual child;
+                //Choose 2 Parents
+                List<Individual> parents = _selection.choose(true, pool, 2);
+                //Generate an individual
+                if(_random.nextFloat() < _cross_probability) {
+                    Individual recombination = _crossover.apply(parents.get(i), parents.get(i + 1));
+                    if(_mutation instanceof OperatorMethods.Mutation){
+                        ((OperatorMethods.Mutation) _mutation).setExtinction(parents.get(i), parents.get(i + 1));
                     }
+                    Individual mutation = _mutation.apply(recombination);
+                    if(_adoption instanceof OperatorMethods.Adoption){
+                        ((OperatorMethods.Adoption) _adoption).setParents(parents.get(i), parents.get(i + 1));
+                        ((OperatorMethods.Adoption) _adoption).setBest(_best);
+                    }
+                    child = _adoption.apply(mutation);
+                    //Clipping is not necessary since solutions are kept in feasible regions (see Frame setRotation())
+                    best = best == null ? child : best.fitness() > child.fitness() ? child : best;
+                    worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+                    child.updateFitness(_target);
+                    child.arrayParams().put("Evolution_Gradient", _calculateGradient(child, recombination));
+                    children.add(child);
+                } else{
+                    child = parents.get(i);
+                    children.add(child);
+                    child.updateFitness(_target);
+                    best = best == null ? child : best.fitness() > child.fitness() ? child : best;
+                    worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
                 }
-                break;
-            }
-            case GENERATIONAL:{
-                _population = children;
-                _best = best;
-                break;
-            }
-            //Steady State
-            case KEEP_BEST:{
-                _population = children;
-                if(!_population.contains(best)) {
-                    _population.remove(worst);
-                    _population.add(best);
-                }
-                _best = best;
-                break;
+                //Remove parents in case child performs better.
+                if(parents.get(0).fitness() < child.fitness()) pool.remove(parents.get(0));
+                if(parents.get(1).fitness() < child.fitness()) pool.remove(parents.get(1));
+            } else{
+                //Get a random individual
+                Individual child = Util.generateIndividual(_structure);
+                children.add(child);
+                child.updateFitness(_target);
+                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
+                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+
             }
         }
+        _population = Util.concatenate(_sorted_population.subList(0, _elitism_size), children);
+        //Sort population
+        _sorted_population = Util.sort(false, false, _population);
+        //Update extinction Factor
         _updateExtinction();
+        //Execute Wipe - Reinitialize population
+        if(_wipe(_best, best)){
+            _population = Util.generatePopulation(_structure, _population_size);
+            for (Individual individual : _population) {
+                individual.updateFitness(_target);
+                _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
+            }
+            _sorted_population = Util.sort(false, false, _population);
+        }
+        _best = best;
         return _best.fitness() < minDistance;
     }
 
@@ -231,10 +210,8 @@ public class BioIk extends Solver {
     }
 
     protected void _updateExtinction(){
-        //TODO: Sort population just 1 time per iteration
-        List<Individual> sorted = Util.sort(false, false, _population);
-        float f_max = sorted.get(sorted.size()-1).fitness();
-        float f_min = sorted.get(0).fitness();
+        float f_max = _sorted_population.get(_sorted_population.size()-1).fitness();
+        float f_min = _sorted_population.get(0).fitness();
         for(int i = 0; i < _population_size; i++){
             Individual individual = _population.get(i);
             individual._floatParams.put("Extinction", (individual.fitness() + f_min*(i/(_population_size - 1)))/f_max);
@@ -253,9 +230,87 @@ public class BioIk extends Solver {
         return g;
     }
 
+    protected void _exploit(List<Individual> population){
+        for(Individual individual : population){
+            float error = individual.getError();
+            float fitness = individual.balancedFitness();
+            float new_fitness = 0;
+            int idx = 0;
+            for(Frame joint : individual.structure()){
+                for(int i = 0; i < 3; i++) {
+                    Vector euler = joint.rotation().eulerAngles();
+                    Quaternion q = joint.rotation().get();
+                    Vector angles = euler.get();
+                    float r = Util.random.nextFloat() * error;
+                    float plus =  (float) Math.min(r + euler._vector[i], Math.PI);
+                    angles._vector[i] = plus;
+                    Quaternion q_plus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
+                    joint.setRotation(q_plus);
+                    individual.updateFitness(_target);
+                    float f_plus = individual.balancedFitness();
+                    float minus = (float) Math.max(euler._vector[i] - r, -Math.PI);
+                    angles._vector[i] = minus;
+                    Quaternion q_minus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
+                    joint.setRotation(q_minus);
+                    individual.updateFitness(_target);
+                    float f_minus = individual.balancedFitness();
+
+                    if(f_plus < fitness && f_plus <= f_minus){
+                        joint.setRotation(q_plus);
+                        individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + plus - euler._vector[i];
+                        new_fitness += f_plus;
+                    }
+                    else if(f_minus < fitness && f_minus <= f_plus) {
+                        joint.setRotation(q_minus);
+                        individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + minus - euler._vector[i];
+                        new_fitness += f_minus;
+                    }
+                    else {
+                        joint.setRotation(q);
+                        individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i];
+                        new_fitness += fitness;
+                    }
+                    idx += 1;
+                }
+            }
+            individual.setFitness(new_fitness/individual.structure().size());
+        }
+    }
+
+    protected boolean _wipe(Individual current, Individual next){
+        float fitness = next.balancedFitness();
+        for(Frame joint : next.structure()){
+            for(int i = 0; i < 3; i++) {
+                Vector euler = joint.rotation().eulerAngles();
+                Quaternion q = joint.rotation().get();
+                Vector angles = euler.get();
+                float r = Util.random.nextFloat() * error;
+                float plus =  (float) Math.min(r + euler._vector[i], Math.PI);
+                angles._vector[i] = plus;
+                Quaternion q_plus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
+                joint.setRotation(q_plus);
+                next.updateFitness(_target);
+                float f_plus = next.balancedFitness();
+                float minus = (float) Math.max(euler._vector[i] - r, -Math.PI);
+                angles._vector[i] = minus;
+                Quaternion q_minus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
+                joint.setRotation(q_minus);
+                next.updateFitness(_target);
+                float f_minus = next.balancedFitness();
+
+                if((f_plus < fitness && f_plus <= f_minus) ||  (f_minus < fitness && f_minus <= f_plus)){
+                    return false;
+                }
+                joint.setRotation(q);
+            }
+        }
+        return next.balancedFitness() < current.balancedFitness();
+    }
+
 
     @Override
     protected boolean _changed() {
+        //TODO : Differentiate between Chain change and Target change
         if (_target == null) {
             _previousTarget = null;
             return false;
@@ -289,6 +344,7 @@ public class BioIk extends Solver {
             individual.updateFitness(_target);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
+        _sorted_population = Util.sort(false, false, _population);
         _updateExtinction();
     }
 }
