@@ -7,6 +7,7 @@ import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.HAEASolver;
+import frames.ik.evolution.BioIk;
 import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
@@ -29,8 +30,8 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 16;
-    float targetRadius = 12;
+    int num_joints = 10;
+    float targetRadius = 15;
     float boneLength = 50;
 
     Random random = new Random();
@@ -118,9 +119,9 @@ public class VisualBenchmark extends PApplet {
         solvers.add(new ChainSolver(structures.get(4)));
         solvers.add(new GASolver(structures.get(5), 6));
         solvers.add(new HAEASolver(structures.get(6), 10, true));
-        solvers.add(new HAEASolver(structures.get(7), 10, false));
-        solvers.add(new TransposeSolver(structures.get(8)));
-        solvers.add(new PseudoInverseSolver(structures.get(9)));
+        solvers.add(new TransposeSolver(structures.get(7)));
+        solvers.add(new PseudoInverseSolver(structures.get(8)));
+        solvers.add(new BioIk(structures.get(9),12, 4 ));
         //solvers.add(new CCDSolver(structures.get(2)));
 
         for(int i = 0; i < solvers.size(); i++){
@@ -147,6 +148,11 @@ public class VisualBenchmark extends PApplet {
             }
             if(solvers.get(i) instanceof HAEASolver) {
                 HAEASolver solver = (HAEASolver) solvers.get(i);
+                solver.setTarget(solver.endEffector(), targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
+            }
+            if(solvers.get(i) instanceof BioIk) {
+                BioIk solver = (BioIk) solvers.get(i);
                 solver.setTarget(solver.endEffector(), targets.get(i));
                 targets.get(i).setPosition(solver.endEffector().position());
             }
@@ -200,6 +206,10 @@ public class VisualBenchmark extends PApplet {
                 Frame f = ((HAEASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.2f", ((HAEASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  BioIk){
+                Frame f = ((BioIk)solver).structure().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("BioIK \n Algorithm" + "\n Error: " + String.format( "%.2f", ((BioIk)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  TransposeSolver){
                 Frame f = ((TransposeSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
