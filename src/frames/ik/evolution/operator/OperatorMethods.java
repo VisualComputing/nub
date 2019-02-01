@@ -237,7 +237,7 @@ public class OperatorMethods {
 
                 for(int j = 0; j < 3; j++){
                     float wi = Util.random.nextFloat();
-                    result._vector[j] = mine._vector[j] + wi*rp*(parents._vector[j] - mine._vector[j]) + (1-wi)*rb*(best._vector[i] - mine._vector[i]);
+                    result._vector[j] = mine._vector[j] + wi*rp*(parents._vector[j] - mine._vector[j]) + (1-wi)*rb*(best._vector[j] - mine._vector[j]);
                 }
                 combination.structure().get(i).setRotation(new Quaternion(result.x(), result.y(), result.z()));
             }
