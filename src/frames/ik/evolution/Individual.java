@@ -21,6 +21,9 @@ public class Individual{
     protected HashMap<String, float[]> _arrayParams;
 
     protected float _fitness;
+    protected float _balanced_fitness;
+    protected float _dr, _dt;
+
     protected FitnessFunction _fitness_function = FitnessFunction.POSITION;
 
     public Individual(List<Frame> structure){
@@ -39,6 +42,10 @@ public class Individual{
         return _fitness;
     }
 
+    public float balancedFitness() {
+        return _balanced_fitness;
+    }
+
     public HashMap<String, Float> floatParams(){
         return _floatParams;
     }
@@ -51,9 +58,7 @@ public class Individual{
         _fitness = fitness;
     }
 
-    public float updateFitness(HashMap<Integer, Frame> targets){
-        float dt = 0;
-        float dr  = 0;
+    public void updateFitness(HashMap<Integer, Frame> targets){
         //TODO : optimize calculations (cache positions and orientations)
         for(Integer index : targets.keySet()){
             if(_fitness_function == FitnessFunction.POSITION || _fitness_function == FitnessFunction.POSE) {
@@ -66,31 +71,53 @@ public class Individual{
                         if (prev != null) l += Vector.distance(f.position(), prev.position());
                         prev = f;
                     }
-                    dt += (Math.PI * dist) / (Math.sqrt(l * d));
+                    _dt += (Math.PI * dist) / (Math.sqrt(l * d));
                 } else{
-                    dt += dist;
+                    _dt += dist;
                 }
             }
             if(_fitness_function == FitnessFunction.ORIENTATION || _fitness_function == FitnessFunction.POSE){
                 Quaternion q1 = structure().get(index).orientation();
                 Quaternion q2 = targets.get(index).orientation();
                 float q_dot = Quaternion.dot(q1, q2);
-                dr += Math.acos((2 * q_dot * q_dot) / Math.sqrt(q1.dotProduct(q1) * q2.dotProduct(q2)));
+                _dr += Math.acos((2 * q_dot * q_dot) / Math.sqrt(q1.dotProduct(q1) * q2.dotProduct(q2)));
             }
         }
 
         if(_fitness_function == FitnessFunction.POSITION){
-            _fitness = dt;
-            return dt;
+            _fitness = _dt;
+            _balanced_fitness = _dt;
         }
 
         if(_fitness_function == FitnessFunction.ORIENTATION){
-            _fitness = dr;
-            return dr;
+            _fitness = _dr;
+            _balanced_fitness = _dr;
         }
 
         float w = (float) Math.random() * 0.3f; //Best solutions must adapt to different sort of weights.
-        return (1-w) * dt + w * dr;
+        _fitness = (1-w) * _dt + w * _dr;
+        _balanced_fitness = 0.5f * _dt + 0.5f * _dr;
+    }
+
+    public float getError(){
+        //TODO : Must be changed for Multiple end effectors
+        float length = Vector.distance(structure().get(0).position(), structure().get(structure().size()).position());
+        float error = 0;
+        switch (this._fitness_function){
+            case POSITION:{
+                error = _dt / length;
+                break;
+            }
+            case ORIENTATION:{
+                error = _dr;
+                break;
+            }
+            case POSE:{
+                error = _dt / length + _dr;
+                break;
+            }
+        }
+        return error;
     }
 
     protected ArrayList<Frame> _copy(List<Frame> chain) {
