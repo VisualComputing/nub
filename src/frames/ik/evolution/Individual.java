@@ -17,8 +17,8 @@ public class Individual{
     }
 
     protected List<Frame> _structure;
-    protected HashMap<String, Float> _floatParams;
-    protected HashMap<String, float[]> _arrayParams;
+    protected HashMap<String, Float> _floatParams = new HashMap<String, Float>();
+    protected HashMap<String, float[]> _arrayParams = new HashMap<String, float[]>();
 
     protected float _fitness;
     protected float _balanced_fitness;
@@ -59,6 +59,7 @@ public class Individual{
     }
 
     public void updateFitness(HashMap<Integer, Frame> targets){
+        _dt = _dr = 0;
         //TODO : optimize calculations (cache positions and orientations)
         for(Integer index : targets.keySet()){
             if(_fitness_function == FitnessFunction.POSITION || _fitness_function == FitnessFunction.POSE) {
@@ -87,21 +88,19 @@ public class Individual{
         if(_fitness_function == FitnessFunction.POSITION){
             _fitness = _dt;
             _balanced_fitness = _dt;
-        }
-
-        if(_fitness_function == FitnessFunction.ORIENTATION){
+        }else if(_fitness_function == FitnessFunction.ORIENTATION){
             _fitness = _dr;
             _balanced_fitness = _dr;
+        }else {
+            float w = (float) Math.random() * 0.3f; //Best solutions must adapt to different sort of weights.
+            _fitness = (1 - w) * _dt + w * _dr;
+            _balanced_fitness = 0.5f * _dt + 0.5f * _dr;
         }
-
-        float w = (float) Math.random() * 0.3f; //Best solutions must adapt to different sort of weights.
-        _fitness = (1-w) * _dt + w * _dr;
-        _balanced_fitness = 0.5f * _dt + 0.5f * _dr;
     }
 
     public float getError(){
         //TODO : Must be changed for Multiple end effectors
-        float length = Vector.distance(structure().get(0).position(), structure().get(structure().size()).position());
+        float length = Vector.distance(structure().get(0).position(), structure().get(structure().size() - 1).position());
         float error = 0;
         switch (this._fitness_function){
             case POSITION:{
