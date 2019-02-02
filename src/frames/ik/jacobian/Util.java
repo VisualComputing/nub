@@ -15,6 +15,7 @@ import java.util.List;
 
 public class Util {
 
+    //TODO : Allow this methods to work with multiple end effectors
     public static void updateChain(List<? extends Frame> chain, SimpleMatrix delta, Vector[] axes){
         //TODO: Keep Quaternion orientation is more efficient
         for(int i = 0; i < delta.numRows(); i++){
