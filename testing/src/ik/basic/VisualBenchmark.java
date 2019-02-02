@@ -12,6 +12,7 @@ import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
 import frames.ik.Solver;
 import frames.ik.jacobian.PseudoInverseSolver;
+import frames.ik.jacobian.SDLSSolver;
 import frames.ik.jacobian.TransposeSolver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -31,14 +32,14 @@ import java.util.Random;
 public class VisualBenchmark extends PApplet {
     //TODO : Update
     int num_joints = 10;
-    float targetRadius = 15;
+    float targetRadius = 20;
     float boneLength = 50;
 
     Random random = new Random();
 
     Scene scene;
     //Methods
-    int num_solvers = 10;
+    int num_solvers = 9;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Frame> targets = new ArrayList<Frame>();
@@ -50,7 +51,7 @@ public class VisualBenchmark extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * 2 * boneLength);
+        scene.setRadius(num_joints * 2.5f * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -112,17 +113,15 @@ public class VisualBenchmark extends PApplet {
 
         solvers = new ArrayList<>();
 
-        solvers.add(new HillClimbingSolver(radians(3), structures.get(0)));
-        solvers.add(new HillClimbingSolver(5, radians(3), structures.get(1)));
-        solvers.add(new HillClimbingSolver(radians(5), structures.get(2)));
-        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(3)));
-        solvers.add(new ChainSolver(structures.get(4)));
-        solvers.add(new GASolver(structures.get(5), 6));
-        solvers.add(new HAEASolver(structures.get(6), 10, true));
-        solvers.add(new TransposeSolver(structures.get(7)));
-        solvers.add(new PseudoInverseSolver(structures.get(8)));
-        solvers.add(new BioIk(structures.get(9),12, 4 ));
-        //solvers.add(new CCDSolver(structures.get(2)));
+        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(0)));
+        solvers.add(new CCDSolver(structures.get(1)));
+        solvers.add(new ChainSolver(structures.get(2)));
+        solvers.add(new GASolver(structures.get(3), 12));
+        solvers.add(new HAEASolver(structures.get(4), 12, true));
+        solvers.add(new TransposeSolver(structures.get(5)));
+        solvers.add(new PseudoInverseSolver(structures.get(6)));
+        solvers.add(new BioIk(structures.get(8),12, 4 ));
+        solvers.add(new SDLSSolver(structures.get(7)));
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.5f;
@@ -163,6 +162,11 @@ public class VisualBenchmark extends PApplet {
             }
             if(solvers.get(i) instanceof PseudoInverseSolver) {
                 PseudoInverseSolver solver = (PseudoInverseSolver) solvers.get(i);
+                solver.setTarget(targets.get(i));
+                targets.get(i).setPosition(solver.endEffector().position());
+            }
+            if(solvers.get(i) instanceof SDLSSolver) {
+                SDLSSolver solver = (SDLSSolver) solvers.get(i);
                 solver.setTarget(targets.get(i));
                 targets.get(i).setPosition(solver.endEffector().position());
             }
@@ -217,7 +221,15 @@ public class VisualBenchmark extends PApplet {
             } else if(solver instanceof  PseudoInverseSolver){
                 Frame f = ((PseudoInverseSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("PseudoInverse", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("PseudoInv", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if(solver instanceof  SDLSSolver){
+                Frame f = ((SDLSSolver)solver).chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("SDLS", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            } else if (solver instanceof CCDSolver) {
+                Frame f = ((CCDSolver)solver).chain().get(0);
+                Vector pos = scene.screenLocation(f.position());
+                text("CCD", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();
