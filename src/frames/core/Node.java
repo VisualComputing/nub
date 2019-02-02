@@ -22,12 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A node is a 2D or 3D coordinate system, represented by a {@link #position()}, an
+ * A node encapsulates a 2D or 3D coordinate system, represented by a {@link #position()}, an
  * {@link #orientation()} and {@link #magnitude()}. The order of these transformations is
  * important: the node is first translated, then rotated around the new translated origin
  * and then scaled. This class API partially conforms that of the great
- * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer
- * Node</a>.
+ * <a href="http://libqglviewer.com/refManual/classqglviewer_1_1Frame.html">libQGLViewer</a>.
  * <h2>Hierarchy of nodes</h2>
  * The node position, orientation and magnitude are actually defined with respect to
  * a {@link #reference()} node. The default {@link #reference()} is the world
