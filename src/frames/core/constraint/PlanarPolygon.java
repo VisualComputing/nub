@@ -27,8 +27,12 @@ public class PlanarPolygon extends ConeConstraint {
   //TODO: Find a Ball and Socket constraint that is enclosed by this one
 
   protected ArrayList<Vector> _vertices = new ArrayList<Vector>();
-  protected float _height = 1.f;
   protected Vector _min, _max;
+  protected float _angle;
+
+  public float angle(){
+    return _angle;
+  }
 
   public ArrayList<Vector> vertices() {
     return _vertices;
@@ -36,14 +40,8 @@ public class PlanarPolygon extends ConeConstraint {
 
   public void setVertices(ArrayList<Vector> vertices) {
     this._vertices = vertices;
-  }
-
-  public float height() {
-    return _height;
-  }
-
-  public void setHeight(float height) {
-    this._height = height;
+    _setBoundingBox();
+    _updateAngle();
   }
 
   public void setAngle(float angle){
@@ -55,32 +53,19 @@ public class PlanarPolygon extends ConeConstraint {
         max = v;
       }
     }
-    float new_max = (float)(_height*Math.tan(angle));
+    float new_max = (float)(1.f*Math.tan(angle));
     float alpha = new_max / max.magnitude();
-    System.out.println("alp " + alpha);
-    System.out.println("new_max " + new_max);
 
     for(Vector v : vertices()) {
-      System.out.println("v " + v);
       v.multiply(alpha);
-      System.out.println("v " + v);
     }
+    _setBoundingBox();
+    _angle = angle;
   }
 
   public PlanarPolygon() {
     _vertices = new ArrayList<Vector>();
     _restRotation = new Quaternion();
-    _height = 5.f;
-  }
-
-  public PlanarPolygon(ArrayList<Vector> vertices, Quaternion restRotation, float height) {
-    this._vertices = vertices;
-    this._restRotation = restRotation.get();
-    this._height = height;
-    for (Vector v : _vertices)
-      //Just not consider Z
-      v.setZ(0);
-    _setBoundingBox();
   }
 
   public PlanarPolygon(ArrayList<Vector> vertices, Quaternion restRotation) {
@@ -90,6 +75,7 @@ public class PlanarPolygon extends ConeConstraint {
       //Just not consider Z
       v.setZ(0);
     _setBoundingBox();
+    _updateAngle();
   }
 
   public PlanarPolygon(ArrayList<Vector> vertices) {
@@ -98,6 +84,7 @@ public class PlanarPolygon extends ConeConstraint {
       //Just not consider Z
       v.setZ(0);
     _setBoundingBox();
+    _updateAngle();
   }
 
   public Vector apply(Vector target) {
@@ -107,9 +94,9 @@ public class PlanarPolygon extends ConeConstraint {
   public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
     if(point.z() == 0) point.setZ(0.5f);
-    float alpha = Math.abs(_height/point.z());
+    float alpha = Math.abs(1.f/point.z());
     Vector proj = new Vector(alpha * point.x(), alpha * point.y());
-    boolean inverse = point.z() * _height < 0;
+    boolean inverse = point.z() * 1.f < 0;
     if (inverse || !_isInside(proj)) {
       //proj.multiply(inverse);
       Vector constrained = _closestPoint(proj);
@@ -130,6 +117,18 @@ public class PlanarPolygon extends ConeConstraint {
       if (v.x() > _max.x()) _max.setX(v.x());
       if (v.y() > _max.y()) _max.setY(v.y());
     }
+  }
+
+  protected void _updateAngle() {
+    if(vertices().isEmpty()) return;
+    //get the point who is farthest from the origin
+    Vector max = vertices().get(0);
+    for(Vector v : vertices()){
+      if(v.magnitude() > max.magnitude()){
+        max = v;
+      }
+    }
+    _angle = (float) Math.abs(Math.atan(max.magnitude()));
   }
 
   /*Code was transcript from https://wrf.ecse.rpi.edu//Research/Short_Notes/pnpoly.html*/
