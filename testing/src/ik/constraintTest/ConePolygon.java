@@ -19,7 +19,8 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class ConePolygon extends PApplet{
-    int num_joints = 30;
+    //TODO : Validate constraints in extreme cases (i.e Cone angle near to PI/2)
+    int num_joints = 10;
     float targetRadius = 10;
     float boneLength = 50;
 
