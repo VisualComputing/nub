@@ -25,11 +25,10 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class HingeTest extends PApplet {
-    //TODO : Update
     int num_joints = 8;
     float constraint_factor_x = 180;
     float constraint_factor_y = 180;
-    float targetRadius = 7;
+    float targetRadius = 10;
     float boneLength = 50;
 
     Scene scene;
@@ -44,9 +43,9 @@ public class HingeTest extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength / 1.5f);
+        scene.setRadius(num_joints * boneLength);
         scene.fit(1);
-        //scene.disableBackBuffer();
+        scene.setRightHanded();
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -185,7 +184,6 @@ public class HingeTest extends PApplet {
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
