@@ -168,6 +168,9 @@ public class Hinge extends Constraint {
     if((desired <= 0 && desired >= -_min)){
       return new Quaternion(axis, deltaAngle);
     }
+    if(Math.abs(_min - PI) < 10e-3 && Math.abs(_max - PI) < 10e-3){
+      return new Quaternion(axis, deltaAngle);
+    }
     //get nearest bound
     float dist_to_min = min(abs(desired + _min), abs(inverted + _min));
     float dist_to_max = min(abs(desired - _max), abs(inverted - _max));
