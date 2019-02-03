@@ -85,7 +85,6 @@ public class VisualBenchmark extends PApplet {
 
         for (int i = 0; i < num_joints - 1; i++) {
             PlanarPolygon constraint = new PlanarPolygon(vertices);
-            constraint.setHeight(boneLength / 2.f);
             Vector twist = structures.get(0).get(i + 1).translation().get();
             Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
             offset = new Quaternion();

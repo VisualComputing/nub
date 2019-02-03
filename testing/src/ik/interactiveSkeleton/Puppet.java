@@ -120,7 +120,6 @@ public class Puppet extends PApplet {
         }
 
         PlanarPolygon c1 = new PlanarPolygon(vertices);
-        c1.setHeight(boneLength / 2.f);
         c1.setAngle(radians(40));
         Vector twist = j2.translation().get();
         c1.setRestRotation(j2.rotation().get(), twist.orthogonalVector(), twist);

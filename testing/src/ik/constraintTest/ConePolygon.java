@@ -19,9 +19,8 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class ConePolygon extends PApplet{
-    //TODO : Update
     int num_joints = 30;
-    float targetRadius = 7;
+    float targetRadius = 10;
     float boneLength = 50;
 
     Scene scene;
@@ -36,8 +35,9 @@ public class ConePolygon extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength / 1.5f);
+        scene.setRadius(num_joints * boneLength);
         scene.fit(1);
+        scene.setRightHanded();
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -69,7 +69,6 @@ public class ConePolygon extends PApplet{
 
         for (int i = 0; i < structure1.size() - 1; i++) {
             PlanarPolygon constraint = new PlanarPolygon(vertices);
-            constraint.setHeight(boneLength / 2.f);
             Vector twist = structure1.get(i + 1).translation().get();
             Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
             //offset = new Quaternion();
@@ -137,7 +136,6 @@ public class ConePolygon extends PApplet{
 
     public void setConstraint(ArrayList<Vector> vertices, Frame f, Vector twist, float boneLength){
         PlanarPolygon constraint = new PlanarPolygon(vertices);
-        constraint.setHeight(boneLength / 2.f);
         constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
         constraint.setAngle(PI/3);
         f.setConstraint(constraint);
@@ -200,7 +198,6 @@ public class ConePolygon extends PApplet{
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child

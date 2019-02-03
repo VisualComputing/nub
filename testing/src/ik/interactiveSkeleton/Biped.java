@@ -106,7 +106,6 @@ public class Biped extends PApplet {
         }
 
         PlanarPolygon c = new PlanarPolygon(vertices);
-        c.setHeight(boneLength / 2.f);
         c.setAngle(radians(degrees));
         c.setRestRotation(child.reference().rotation().get(), twist.orthogonalVector(), twist);
         child.reference().setConstraint(c);

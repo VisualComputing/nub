@@ -180,7 +180,6 @@ public class Biped {
             vertices.add(new Vector(radius*cos(angle), radius*sin(angle)));
         }
         PlanarPolygon constraint = new PlanarPolygon(vertices);
-        constraint.setHeight(boneLength / 2.f);
         constraint.setAngle(radians(degrees));
         constraint.setRestRotation(frame.rotation().get(), twist.orthogonalVector(), twist);
         frame.setConstraint(constraint);
