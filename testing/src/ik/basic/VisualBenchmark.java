@@ -31,7 +31,7 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 10;
+    int num_joints = 15;
     float targetRadius = 20;
     float boneLength = 50;
 
@@ -79,30 +79,17 @@ public class VisualBenchmark extends PApplet {
         vertices.add(new Vector(-w, v));
 
         for (int i = 0; i < num_joints - 1; i++) {
-            PlanarPolygon constraint = new PlanarPolygon(vertices);
-            Vector twist = structures.get(0).get(i + 1).translation().get();
-            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
-            offset = new Quaternion();
-            Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
-            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
-            constraint.setAngle(PI/3f);
-            for(ArrayList<Frame> structure : structures){
-                //structure.get(i).setConstraint(constraint);
-            }
-        }
-
-
-        for (int i = 0; i < num_joints - 1; i++) {
             float down = radians(random(10, 40));
             float up = radians(random(10, 40));
             float left = radians(random(10, 40));
             float right = radians(random(10, 40));
 
-
             Vector twist = structures.get(0).get(i + 1).translation().get();
             //Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(random(-90, 90)));
             Quaternion offset = Quaternion.random();
             BallAndSocket constraint = new BallAndSocket(down, up, left, right);
+            //PlanarPolygon constraint = new PlanarPolygon(vertices);
+            //constraint.setAngle(radians(random(30, 50)));
             Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
             constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
             for(ArrayList<Frame> structure : structures){
@@ -123,8 +110,8 @@ public class VisualBenchmark extends PApplet {
         solvers.add(new HAEASolver(structures.get(4), 12, true));
         solvers.add(new TransposeSolver(structures.get(5)));
         solvers.add(new PseudoInverseSolver(structures.get(6)));
-        solvers.add(new BioIk(structures.get(8),12, 4 ));
         solvers.add(new SDLSSolver(structures.get(7)));
+        solvers.add(new BioIk(structures.get(8),12, 4 ));
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.5f;
@@ -245,6 +232,7 @@ public class VisualBenchmark extends PApplet {
     }
 
     public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
+        Random rand = new Random(0);
         Joint prevJoint = null;
         Joint chainRoot = null;
         for (int i = 0; i < num_joints; i++) {
@@ -253,9 +241,9 @@ public class VisualBenchmark extends PApplet {
             if (i == 0)
                 chainRoot = joint;
             if (prevJoint != null) joint.setReference(prevJoint);
-            float x = 0;
-            float z = 1;
-            float y = 0;
+            float x = 2*rand.nextFloat() - 1;
+            float z = rand.nextFloat();
+            float y = 2 * rand.nextFloat() - 1;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
             translate.multiply(boneLength);
@@ -272,7 +260,8 @@ public class VisualBenchmark extends PApplet {
     public Frame generateRandomReachablePosition(List<? extends Frame> original){
         ArrayList<? extends Frame> chain = copy(original);
         for(int i = 0; i < chain.size(); i++){
-            chain.get(i).rotate(Quaternion.random());
+            chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+            //chain.get(i).rotate(Quaternion.random());
         }
         return chain.get(chain.size()-1);
     }
