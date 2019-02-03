@@ -65,11 +65,6 @@ public class VisualBenchmark extends PApplet {
             targets.add(target);
         }
 
-        float down = PI/2;
-        float up = PI/2;
-        float left = PI/2;
-        float right = PI/2;
-
         for(int i = 0; i < num_solvers; i++){
             structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()*0.8f/num_solvers - 0.8f*0.8f*scene.radius(), 0, 0)));
         }
@@ -96,16 +91,25 @@ public class VisualBenchmark extends PApplet {
             }
         }
 
-        /*
-        for (int i = 1; i < num_joints - 1; i++) {
+
+        for (int i = 0; i < num_joints - 1; i++) {
+            float down = radians(random(10, 40));
+            float up = radians(random(10, 40));
+            float left = radians(random(10, 40));
+            float right = radians(random(10, 40));
+
+
             Vector twist = structures.get(0).get(i + 1).translation().get();
+            //Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(random(-90, 90)));
+            Quaternion offset = Quaternion.random();
             BallAndSocket constraint = new BallAndSocket(down, up, left, right);
-            constraint.setRestRotation(structures.get(0).get(i).rotation().get(), new Vector(0, 1, 0), twist);
+            Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
+            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
             for(ArrayList<Frame> structure : structures){
-                //structure.get(i).setConstraint(constraint);
+               structure.get(i).setConstraint(constraint);
             }
         }
-        */
+
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
@@ -268,7 +272,7 @@ public class VisualBenchmark extends PApplet {
     public Frame generateRandomReachablePosition(List<? extends Frame> original){
         ArrayList<? extends Frame> chain = copy(original);
         for(int i = 0; i < chain.size(); i++){
-            chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+            chain.get(i).rotate(Quaternion.random());
         }
         return chain.get(chain.size()-1);
     }
