@@ -89,7 +89,6 @@ public class SDLSSolver extends Solver {
         SimpleMatrix V = svd.getV();
         SimpleMatrix w = svd.getW();
 
-        System.out.println("---> P : ");
         double p_lj[][] = new double[_J.numRows()/_dof][_J.numCols()];
         for(int i = 0; i < _J.numCols(); i++) {
             for (int k = 0; k < _J.numRows()/_dof; k++) {
@@ -97,12 +96,8 @@ public class SDLSSolver extends Solver {
                     p_lj[k][i] += _J.get(_dof * k + d, i) * _J.get(_dof * k + d, i);
                 }
                 p_lj[k][i] = Math.sqrt(p_lj[k][i]);
-                System.out.print(p_lj[k][i] + "\t");
             }
         }
-        System.out.println();
-        System.out.println("---> W : " + w);
-        System.out.println("---> E : " + error);
 
         for(int i = 0; i < _J.numRows(); i++){
             if(Math.abs(w.get(i,i)) < 10e-6){
