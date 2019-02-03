@@ -2934,7 +2934,7 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.noStroke();
 
-    pGraphics.fill(62, 203, 55, 100);
+    pGraphics.fill(62, 203, 55, 150);
     Frame reference = new Frame();
     reference.setTranslation(new Vector());
     reference.setRotation(frame.rotation().inverse());
