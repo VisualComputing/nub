@@ -36,8 +36,9 @@ public class ConeBall extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength / 1.5f);
+        scene.setRadius(num_joints * boneLength);
         scene.fit(1);
+        scene.setRightHanded();
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -49,10 +50,10 @@ public class ConeBall extends PApplet{
             targets.add(target);
         }
 
-        float down = PI/3;
-        float up = PI/3;
-        float left = PI/3;
-        float right = PI/3;
+        float down = radians(60);
+        float up = radians(45);
+        float left = radians(55);
+        float right = radians(40);
 
         ArrayList<Frame> structure1;
         ArrayList<Frame> structure2;
@@ -63,7 +64,7 @@ public class ConeBall extends PApplet{
         structure2 = generateChain(num_joints, boneLength, new Vector(0, 0, 0));
         structure3 = generateChain(num_joints, boneLength, new Vector(scene.radius()/2.f, 0, 0));
 
-        for (int i = 1; i < structure1.size() - 1; i++) {
+        for (int i = 0; i < structure1.size() - 1; i++) {
             Vector twist = structure1.get(i + 1).translation().get();
             BallAndSocket constraint = new BallAndSocket(down, up, left, right);
             constraint.setRestRotation(structure1.get(i).rotation().get(), new Vector(0, 1, 0), twist);
@@ -190,7 +191,6 @@ public class ConeBall extends PApplet{
             translate.normalize();
             translate.multiply(boneLength);
             joint.setTranslation(translate);
-            joint.setPickingThreshold(1);
             prevJoint = joint;
         }
         //Consider Standard Form: Parent Z Axis is Pointing at its Child
@@ -304,6 +304,7 @@ public class ConeBall extends PApplet{
         }
 
     }
+
 
     @Override
     public void mouseMoved() {
