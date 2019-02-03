@@ -2839,6 +2839,49 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Draws a truncated cone onto {@code pGraphics} along the positive {@code z} axis,
+   * with its base centered at {@code (x,y)}, {@code height}, and radii {@code radius1}
+   * and {@code radius2} (basis and height respectively).
+   */
+  public static void drawCone(PGraphics pGraphics, int detail, float x, float y, float height, float left_radius, float up_radius, float right_radius, float down_radius) {
+    if (!(pGraphics instanceof PGraphics3D))
+      return;
+    pGraphics.pushStyle();
+    detail = detail % 4 != 0 ? detail + ( 4 - detail % 4) : detail;
+    detail = Math.min(16, detail);
+
+    float unitConeX[] = new float[detail + 1];
+    float unitConeY[] = new float[detail + 1];
+
+    int d = detail/4;
+
+    for (int i = 0; i <= d; i++) {
+      float a1 = (PApplet.PI * i) / (2.f * d);
+      unitConeX[i] = right_radius * (float) Math.cos(a1);
+      unitConeY[i] = up_radius * (float) Math.sin(a1);
+      unitConeX[i + d] = left_radius * (float) Math.cos(a1 + PApplet.HALF_PI);
+      unitConeY[i + d] = up_radius * (float) Math.sin(a1 + PApplet.HALF_PI);
+      unitConeX[i + 2*d] = left_radius * (float) Math.cos(a1 + PApplet.PI);
+      unitConeY[i + 2*d] = down_radius * (float) Math.sin(a1 + PApplet.PI);
+      unitConeX[i + 3*d] = right_radius * (float) Math.cos(a1 + 3*PApplet.PI/2);
+      unitConeY[i + 3*d] = down_radius * (float) Math.sin(a1 + 3*PApplet.PI/2);
+    }
+
+    pGraphics.pushMatrix();
+    pGraphics.translate(x, y);
+    pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+    vertex(pGraphics, 0, 0, 0);
+    for (int i = 0; i <= detail; i++) {
+      vertex(pGraphics, unitConeX[i], unitConeY[i], height);
+    }
+    pGraphics.endShape();
+    pGraphics.popMatrix();
+    pGraphics.popStyle();
+  }
+
+
+
+  /**
    * Draws an Arc onto {@code pGraphics} centered at {@code (0,0)} on the XY Plane
    * {@code minAngle} and {@code maxAngle} represents the Arc's width.
    *
@@ -2891,26 +2934,26 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.noStroke();
     //TODO: use different colors
-    pGraphics.fill(246, 117, 19, 80);
+    pGraphics.fill(62, 203, 55, 100);
     Frame reference = new Frame();
     reference.setTranslation(new Vector());
     reference.setRotation(frame.rotation().inverse());
-    //TODO: Check implementation for non symmetric semi-axes
     //TODO: Draw Properly when left and up are big values
     if (frame.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(((BallAndSocket) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
-      float max_width = boneLength / 8.f;
-      float max_angle = PApplet.max(constraint.left(),constraint.up());
-      float height = max_width / PApplet.tan(max_angle);
-
-      //if(constraint.left() <= PI/3 && constraint.right() <= PI/3){
-        drawCone(pGraphics, height,
-                max_width * PApplet.tan(constraint.left()),
-                max_width * PApplet.tan(constraint.up()), 20);
-      //}
+      float width = boneLength / 2.f;
+      float max = Math.max(Math.max(Math.max(constraint.up(),constraint.down()),constraint.left()),constraint.right());
+      //Max value will define max radius length
+      float height = (float)(width/Math.tan(max));
+      //get all radius
+      float up_r = (float)(height * Math.tan(constraint.up()));
+      float down_r = (float)(height * Math.tan(constraint.down()));
+      float left_r = (float)(height * Math.tan(constraint.left()));
+      float right_r = (float)(height * Math.tan(constraint.right()));
+      drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
     } else if (frame.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
