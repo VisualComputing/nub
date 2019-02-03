@@ -2808,13 +2808,13 @@ public class Scene extends Graph implements PConstants {
    * @param height
    * @param vertices
    */
-  public void drawCone(PGraphics pGraphics, float height, List<Vector> vertices) {
+  public void drawCone(PGraphics pGraphics, float height, float scaling, List<Vector> vertices) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     for (Vector v : vertices) {
-      pGraphics.vertex(v.x(), v.y(), height);
+      pGraphics.vertex(scaling*v.x(), scaling*v.y(), height);
     }
-    if (!vertices.isEmpty()) pGraphics.vertex(vertices.get(0).x(), vertices.get(0).y(), height);
+    if (!vertices.isEmpty()) pGraphics.vertex(scaling*vertices.get(0).x(), scaling*vertices.get(0).y(), height);
     pGraphics.endShape();
   }
 
@@ -2933,12 +2933,12 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushMatrix();
     pGraphics.pushStyle();
     pGraphics.noStroke();
-    //TODO: use different colors
+
     pGraphics.fill(62, 203, 55, 100);
     Frame reference = new Frame();
     reference.setTranslation(new Vector());
     reference.setRotation(frame.rotation().inverse());
-    //TODO: Draw Properly when left and up are big values
+
     if (frame.constraint() instanceof BallAndSocket) {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(((BallAndSocket) frame.constraint()).orientation());
@@ -2949,17 +2949,19 @@ public class Scene extends Graph implements PConstants {
       //Max value will define max radius length
       float height = (float)(width/Math.tan(max));
       //get all radius
-      float up_r = (float)(height * Math.tan(constraint.up()));
-      float down_r = (float)(height * Math.tan(constraint.down()));
-      float left_r = (float)(height * Math.tan(constraint.left()));
-      float right_r = (float)(height * Math.tan(constraint.right()));
+      float up_r = (float)Math.abs((height * Math.tan(constraint.up())));
+      float down_r = (float)Math.abs((height * Math.tan(constraint.down())));
+      float left_r = (float)Math.abs((height * Math.tan(constraint.left())));
+      float right_r = (float)Math.abs((height * Math.tan(constraint.right())));
       drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
     } else if (frame.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
-      //TODO: Consider when the cone must not be drawn
-      drawCone(pGraphics, ((PlanarPolygon) frame.constraint()).height(), ((PlanarPolygon) frame.constraint()).vertices());
+      float w_d = boneLength / 2.f;
+      float w_c = (float) Math.abs((Math.tan(((PlanarPolygon) frame.constraint()).angle())));
+      float height = w_d/w_c;
+      drawCone(pGraphics, height, height, ((PlanarPolygon) frame.constraint()).vertices());
     } else if (frame.constraint() instanceof SphericalPolygon) {
       reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
       applyTransformation(pGraphics,reference);
