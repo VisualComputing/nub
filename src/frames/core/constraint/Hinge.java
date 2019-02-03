@@ -12,7 +12,6 @@
 package frames.core.constraint;
 
 //TODO: CHECK FORWARD STEP WITH HINGE 3D
-//TODO : Update
 
 import frames.core.Frame;
 import frames.primitives.Quaternion;
@@ -169,7 +168,6 @@ public class Hinge extends Constraint {
     if((desired <= 0 && desired >= -_min)){
       return new Quaternion(axis, deltaAngle);
     }
-
     //get nearest bound
     float dist_to_min = min(abs(desired + _min), abs(inverted + _min));
     float dist_to_max = min(abs(desired - _max), abs(inverted - _max));
