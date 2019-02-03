@@ -11,7 +11,6 @@
 
 package frames.core.constraint;
 
-import frames.core.Frame;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
