@@ -50,20 +50,21 @@ public class Joint extends Frame{
         PGraphics pg = _pGraphics;
         if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
-        pg.fill(_color);
+        if (!_isRoot) {
+            pg.strokeWeight(_radius/4);
+            pg.stroke(_color);
+            Vector v = location(new Vector(), reference());
+            float m = v.magnitude();
+            if (scene.is2D()) {
+                pg.line(_radius * v.x() / m, _radius * v.y() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m);
+            } else {
+                pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
+            }
+        }
+        pg.fill(255);
         pg.noStroke();
         if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
         else pg.sphere(_radius);
-        if (!_isRoot) {
-            pg.strokeWeight(_radius/2);
-            pg.stroke(_color);
-            Vector v = location(new Vector(), reference());
-            if (scene.is2D()) {
-                pg.line(0, 0, v.x(), v.y());
-            } else {
-                pg.line(0, 0, 0, v.x(), v.y(), v.z());
-            }
-        }
         pg.popStyle();
 
         if (constraint() != null) {

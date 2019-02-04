@@ -31,8 +31,8 @@ import java.util.Random;
  */
 public class VisualBenchmark extends PApplet {
     //TODO : Update
-    int num_joints = 15;
-    float targetRadius = 20;
+    int num_joints = 12;
+    float targetRadius = 30;
     float boneLength = 50;
 
     Random random = new Random();
@@ -45,28 +45,32 @@ public class VisualBenchmark extends PApplet {
     ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
-        size(700, 700, P3D);
+        size(1500, 800, P3D);
     }
 
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * 2.5f * boneLength);
+        scene.setRadius(num_joints * 1f * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
-        PShape redBall = createShape(SPHERE, targetRadius);
-        redBall.setStroke(false);
-        redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < num_solvers; i++) {
+            PShape redBall = createShape(SPHERE, targetRadius);
+            redBall.setStroke(false);
+            redBall.setFill(color(255,0,0));
             Frame target = new Frame(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }
 
+        float alpha = 1.f * width / height > 1.5f ? 0.7f * width / height : 0.7f;
+        alpha *= num_solvers/4f; //avoid undesirable overlapping
+
         for(int i = 0; i < num_solvers; i++){
-            structures.add(generateChain(num_joints, boneLength, new Vector(i*2*scene.radius()*0.8f/num_solvers - 0.8f*0.8f*scene.radius(), 0, 0)));
+            int color = color(random(255), random(255), random(255));
+            structures.add(generateChain(num_joints, boneLength, new Vector(i * 2 * alpha * scene.radius()/(num_solvers - 1) - alpha * scene.radius(), 0, 0), color));
         }
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
@@ -231,13 +235,13 @@ public class VisualBenchmark extends PApplet {
         f.setConstraint(constraint);
     }
 
-    public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
+    public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation, int color) {
         Random rand = new Random(0);
         Joint prevJoint = null;
         Joint chainRoot = null;
         for (int i = 0; i < num_joints; i++) {
             Joint joint;
-            joint = new Joint(scene);
+            joint = new Joint(scene, color, targetRadius*0.3f);
             if (i == 0)
                 chainRoot = joint;
             if (prevJoint != null) joint.setReference(prevJoint);
