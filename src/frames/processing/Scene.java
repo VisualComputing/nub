@@ -2968,24 +2968,18 @@ public class Scene extends Graph implements PConstants {
       drawAxes(pGraphics,5);
       drawCone(pGraphics, ((SphericalPolygon) frame.constraint()).vertices(), boneLength);
     } else if (frame.constraint() instanceof Hinge) {
+      //TODO: Only works well if child lies on Axis Plane
       Hinge constraint = (Hinge) frame.constraint();
       if (frame.children().size() == 1) {
         //1. Find Projection w.r.t axis
         reference.rotate(constraint.restRotation());
         Vector axis = reference.rotation().rotate(constraint.axis());
         if(frame.graph().is3D()) {
-          Vector rest = Vector.projectVectorOnPlane(frame.children().get(0).translation(), axis);
-          try{
-            if(Vector.projectVectorOnAxis(rest, axis).dot(axis) < 0) rest.multiply(-1);
-          }catch (RuntimeException exception){
-            return;
-          }
           //Align Z-Axis with Axis
           reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
           //Align X-Axis with rest Axis
-          float angle = Vector.angleBetween(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest));
-          Quaternion deltaX = new Quaternion(Vector.cross(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest), null), angle);
-          reference.rotate(deltaX);
+          Vector rest = Vector.projectVectorOnPlane(reference.rotation().inverseRotate(frame.children().get(0).translation()), new Vector(0, 0, 1));
+          reference.rotate(new Quaternion(new Vector(1,0,0), rest));
         } else{
           Vector rest = frame.children().get(0).translation();
           //Align X-Axis with rest Axis
