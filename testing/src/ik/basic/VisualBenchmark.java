@@ -3,6 +3,8 @@ package ik.basic;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
+import frames.core.constraint.Constraint;
+import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
@@ -30,8 +32,12 @@ import java.util.Random;
  * Created by sebchaparr on 8/10/18.
  */
 public class VisualBenchmark extends PApplet {
-    //TODO : Update
-    int num_joints = 12;
+    enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
+
+    ConstraintType mode = ConstraintType.MIX; //Choose an option
+    boolean is3D = true;
+
+    int num_joints = 15;
     float targetRadius = 30;
     float boneLength = 50;
 
@@ -39,25 +45,28 @@ public class VisualBenchmark extends PApplet {
 
     Scene scene;
     //Methods
-    int num_solvers = 9;
+    int num_solvers = 7;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
-        size(1500, 800, P3D);
+        size(1500, 800, is3D ? P3D : P2D);
     }
 
     public void setup() {
         scene = new Scene(this);
-        scene.setType(Graph.Type.ORTHOGRAPHIC);
+        if(is3D) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(num_joints * 1f * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
-
         for(int i = 0; i < num_solvers; i++) {
-            PShape redBall = createShape(SPHERE, targetRadius);
+            PShape redBall;
+            if(is3D)
+                 redBall = createShape(SPHERE, targetRadius);
+            else
+                redBall = createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
             redBall.setStroke(false);
             redBall.setFill(color(255,0,0));
             Frame target = new Frame(scene, redBall);
@@ -65,7 +74,7 @@ public class VisualBenchmark extends PApplet {
             targets.add(target);
         }
 
-        float alpha = 1.f * width / height > 1.5f ? 0.7f * width / height : 0.7f;
+        float alpha = 1.f * width / height > 1.5f ? 0.5f * width / height : 0.5f;
         alpha *= num_solvers/4f; //avoid undesirable overlapping
 
         for(int i = 0; i < num_solvers; i++){
@@ -73,29 +82,58 @@ public class VisualBenchmark extends PApplet {
             structures.add(generateChain(num_joints, boneLength, new Vector(i * 2 * alpha * scene.radius()/(num_solvers - 1) - alpha * scene.radius(), 0, 0), color));
         }
 
-        ArrayList<Vector> vertices = new ArrayList<Vector>();
-        float v = 20;
-        float w = 20;
-
-        vertices.add(new Vector(-w, -v));
-        vertices.add(new Vector(w, -v));
-        vertices.add(new Vector(w, v));
-        vertices.add(new Vector(-w, v));
-
         for (int i = 0; i < num_joints - 1; i++) {
-            float down = radians(random(10, 40));
-            float up = radians(random(10, 40));
-            float left = radians(random(10, 40));
-            float right = radians(random(10, 40));
-
             Vector twist = structures.get(0).get(i + 1).translation().get();
             //Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(random(-90, 90)));
             Quaternion offset = Quaternion.random();
-            BallAndSocket constraint = new BallAndSocket(down, up, left, right);
-            //PlanarPolygon constraint = new PlanarPolygon(vertices);
-            //constraint.setAngle(radians(random(30, 50)));
-            Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
-            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
+            Constraint constraint = null;
+            ConstraintType mode = this.mode;
+            if(this.mode == ConstraintType.MIX){
+                int r = random.nextInt(ConstraintType.values().length);
+                r = is3D ? r : r % 2;
+                mode = ConstraintType.values()[r];
+            }
+            switch (mode){
+                case NONE:{
+                    break;
+                }
+                case CONE_ELLIPSE:{
+                    if(!is3D) break;
+                    float down = radians(random(10, 40));
+                    float up = radians(random(10, 40));
+                    float left = radians(random(10, 40));
+                    float right = radians(random(10, 40));
+                    constraint = new BallAndSocket(down, up, left, right);
+                    Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
+                    ((BallAndSocket) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
+                    break;
+                }
+                case CONE_POLYGON:{
+                    if(!is3D) break;
+                    ArrayList<Vector> vertices = new ArrayList<Vector>();
+                    float v = 20;
+                    float w = 20;
+
+                    vertices.add(new Vector(-w, -v));
+                    vertices.add(new Vector(w, -v));
+                    vertices.add(new Vector(w, v));
+                    vertices.add(new Vector(-w, v));
+
+                    constraint = new PlanarPolygon(vertices);
+                    Quaternion rest = Quaternion.compose(structures.get(0).get(i).rotation().get(), offset);
+                    ((PlanarPolygon) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
+                    ((PlanarPolygon) constraint).setAngle(radians(random(30, 50)));
+                    break;
+                }
+                case HINGE:{
+                    constraint = new Hinge(radians(random(10, 170)), radians(random(10, 170)));
+                    ((Hinge) constraint).setRestRotation(structures.get(0).get(i).rotation().get());
+                    ((Hinge) constraint).setAxis(Vector.projectVectorOnPlane(Vector.random(), structures.get(0).get(i + 1).translation()));
+                    if(Vector.squaredNorm(((Hinge) constraint).axis()) == 0) {
+                        constraint = null;
+                    }
+                }
+            }
             for(ArrayList<Frame> structure : structures){
                structure.get(i).setConstraint(constraint);
             }
@@ -107,15 +145,16 @@ public class VisualBenchmark extends PApplet {
 
         solvers = new ArrayList<>();
 
-        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(0)));
-        solvers.add(new CCDSolver(structures.get(1)));
-        solvers.add(new ChainSolver(structures.get(2)));
-        solvers.add(new GASolver(structures.get(3), 12));
-        solvers.add(new HAEASolver(structures.get(4), 12, true));
-        solvers.add(new TransposeSolver(structures.get(5)));
-        solvers.add(new PseudoInverseSolver(structures.get(6)));
-        solvers.add(new SDLSSolver(structures.get(7)));
-        solvers.add(new BioIk(structures.get(8),12, 4 ));
+        int idx = 0;
+        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(idx++)));
+        solvers.add(new CCDSolver(structures.get(idx++)));
+        solvers.add(new ChainSolver(structures.get(idx++)));
+        solvers.add(new GASolver(structures.get(idx++), 12));
+        //solvers.add(new HAEASolver(structures.get(4), 12, true));
+        //solvers.add(new TransposeSolver(structures.get(5)));
+        solvers.add(new PseudoInverseSolver(structures.get(idx++)));
+        solvers.add(new SDLSSolver(structures.get(idx++)));
+        solvers.add(new BioIk(structures.get(idx++),12, 4 ));
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.5f;
@@ -169,7 +208,7 @@ public class VisualBenchmark extends PApplet {
 
     public void draw() {
         background(0);
-        lights();
+        if(is3D) lights();
         //Draw Constraints
         scene.drawAxes();
         if(solve) {
@@ -250,7 +289,7 @@ public class VisualBenchmark extends PApplet {
             float y = 2 * rand.nextFloat() - 1;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
-            translate.multiply(boneLength);
+            translate.multiply(boneLength * (1 - 0.4f*rand.nextFloat()));
             joint.setTranslation(translate);
             prevJoint = joint;
         }
@@ -264,8 +303,10 @@ public class VisualBenchmark extends PApplet {
     public Frame generateRandomReachablePosition(List<? extends Frame> original){
         ArrayList<? extends Frame> chain = copy(original);
         for(int i = 0; i < chain.size(); i++){
-            chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
-            //chain.get(i).rotate(Quaternion.random());
+            if(is3D)
+                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+            else
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
         }
         return chain.get(chain.size()-1);
     }
