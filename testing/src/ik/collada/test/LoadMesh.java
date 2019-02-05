@@ -44,7 +44,7 @@ public class LoadMesh extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        for(int i = 0; i < 5; i++){
+        for(int i = 0; i < 4; i++){
             Frame target = new Frame(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
@@ -66,13 +66,13 @@ public class LoadMesh extends PApplet {
         targets.get(1).setPosition(model.getJoints().get("Foot_L").position());
         targets.get(2).setPosition(model.getJoints().get("Hand_L").position());
         targets.get(3).setPosition(model.getJoints().get("Hand_R").position());
-        targets.get(4).setPosition(model.getJoints().get("Head").position());
+        //targets.get(4).setPosition(model.getJoints().get("Head").position());
 
         scene.addIKTarget(model.getJoints().get("Foot_R"), targets.get(0));
         scene.addIKTarget(model.getJoints().get("Foot_L"), targets.get(1));
         scene.addIKTarget(model.getJoints().get("Hand_L"), targets.get(2));
         scene.addIKTarget(model.getJoints().get("Hand_R"), targets.get(3));
-        scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
+        //scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
 
         solver.maxIter = 20;
         solver.timesPerFrame = 20;

@@ -151,6 +151,16 @@ public class TreeSolver extends FABRIKSolver {
     }
     solver._positions().set(solver.chain().size() - 1, solver._target.position().get());
     solver._forwardReaching();
+    /* TODO: Check if it's better for convergence to try more times with local regions */
+    for(int i = 0; i < 3; i++) {
+      Vector o = solver._positions().get(0);
+      solver._positions().set(0, solver.head().position().get());
+      if(solver._positions().size() > 1)solver._positions().set(1, solver.chain().get(1).position().get());
+      solver._backwardReaching(o);
+      solver._positions().set(solver.chain().size() - 1, solver._target.position().get());
+      solver._forwardReaching();
+    }
+
     treeNode._modified = true;
     return chains + 1;
   }
@@ -178,7 +188,7 @@ public class TreeSolver extends FABRIKSolver {
         float[] cumulative = new float[4];
         Quaternion des = new Quaternion();
         Quaternion first = null;
-
+        int c = 0;
         for (TreeNode child : treeNode._children()) {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
@@ -196,6 +206,13 @@ public class TreeSolver extends FABRIKSolver {
             newCentroid.add(Vector.multiply(diff, child._weight()));
           }
           Quaternion q = new Quaternion(v1, v2);
+          if(q.angle() > Math.toRadians(40)){
+            System.out.println("-----------");
+            System.out.println("Child " + c++);
+            System.out.println("V1 : " + v1);
+            System.out.println("V2 : " + v2);
+          }
+
           if(amount == 1){
             for(int i = 0; i < 4; i++)
               cumulative[i] = q._quaternion[i];

@@ -68,6 +68,7 @@ public class Biped extends PApplet {
 
         //applyConstraint(chest.frame, boneLength);
         applyConstraint(chest.children().get(0), boneLength, chest.translation(), 20);
+        applyConstraint(chest, boneLength, chest.translation(), 80);
 
         lowerRoot.setConstraint(new FixedConstraint());
 
@@ -106,8 +107,8 @@ public class Biped extends PApplet {
         }
 
         PlanarPolygon c = new PlanarPolygon(vertices);
-        c.setAngle(radians(degrees));
         c.setRestRotation(child.reference().rotation().get(), twist.orthogonalVector(), twist);
+        c.setAngle(radians(degrees));
         child.reference().setConstraint(c);
     }
 
