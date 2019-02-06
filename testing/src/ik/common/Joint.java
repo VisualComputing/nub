@@ -78,7 +78,7 @@ public class Joint extends Frame{
 
     public void setRadius(float radius){
         _radius = radius;
-        _threshold = _radius*2;
+        setPickingThreshold(_radius*2);
     }
     public void setName(String name){
         _name = name;

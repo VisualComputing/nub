@@ -6,6 +6,7 @@ import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
 import frames.ik.Solver;
+import frames.ik.TreeSolver;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import ik.common.Joint;
@@ -72,7 +73,7 @@ public class Biped extends PApplet {
 
         lowerRoot.setConstraint(new FixedConstraint());
 
-        Solver solver  = scene.registerTreeSolver(upperRoot);
+        solver  = scene.registerTreeSolver(upperRoot);
         solver.maxIter = 100;
         solver  = scene.registerTreeSolver(lowerRoot);
         solver.maxIter = 100;
@@ -84,11 +85,41 @@ public class Biped extends PApplet {
             scene.addIKTarget(skeleton.get(skeleton.size() - 1), targets.get(key));
         }
     }
+
+    TreeSolver solver;
     public void draw() {
         background(0);
         lights();
         scene.drawAxes();
         scene.render();
+        pushStyle();
+        noStroke();
+        fill(0,0,255);
+        for(ArrayList<Vector> list : solver.aux_p) {
+            Vector prev = null;
+            for (Vector v : list) {
+                pushMatrix();
+                if(prev != null) line(v.x(),v.y(),v.z(),prev.x(),prev.y(),prev.z());
+                translate(v.x(), v.y(), v.z());
+                sphere(10);
+                popMatrix();
+                prev = v;
+            }
+        }
+        fill(0,255,0);
+        for(ArrayList<Vector> list : solver.aux_prev) {
+            Vector prev = null;
+            for (Vector v : list) {
+                pushMatrix();
+                if(prev != null) line(v.x(),v.y(),v.z(),prev.x(),prev.y(),prev.z());
+                translate(v.x(), v.y(), v.z());
+                sphere(10);
+                popMatrix();
+                prev = v;
+            }
+        }
+        popStyle();
+
     }
 
     public void applyConstraint(Frame child, float boneLength){

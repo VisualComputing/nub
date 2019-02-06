@@ -7,6 +7,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Constraint;
 import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.Hinge;
+import frames.ik.TreeSolver;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
 import frames.primitives.Quaternion;
@@ -29,6 +30,7 @@ import java.util.List;
 public class SkeletonBuilder extends PApplet{
     Scene scene, focus;
     Scene[] views;
+    boolean debug = false;
     //focus;
     //OptionPanel panel;
     //PGraphics canvas1;
@@ -101,6 +103,42 @@ public class SkeletonBuilder extends PApplet{
         }
         scene.endHUD();
         */
+        if(debug) {
+            pushStyle();
+            for (ArrayList<Vector> list : solver.aux_p) {
+                Vector prev = null;
+                for (Vector v : list) {
+                    pushMatrix();
+                    strokeWeight(radius / 4);
+                    stroke(0, 0, 255);
+                    if (prev != null) line(v.x(), v.y(), v.z(), prev.x(), prev.y(), prev.z());
+                    translate(v.x(), v.y(), v.z());
+                    noStroke();
+                    fill(0, 0, 255);
+                    sphere(radius / 2);
+                    popMatrix();
+                    prev = v;
+                }
+            }
+
+            for (ArrayList<Vector> list : solver.aux_prev) {
+                Vector prev = null;
+                for (Vector v : list) {
+                    pushMatrix();
+                    strokeWeight(radius / 4);
+                    stroke(0, 255, 0);
+                    if (prev != null) line(v.x(), v.y(), v.z(), prev.x(), prev.y(), prev.z());
+                    translate(v.x(), v.y(), v.z());
+                    noStroke();
+                    fill(0, 255, 0);
+                    sphere(radius / 2);
+                    popMatrix();
+                    prev = v;
+                }
+            }
+            popStyle();
+        }
+
         if(fitCurve != null)
             if(fitCurve._interpolator != null)
                 scene.drawPath(fitCurve._interpolator, 5);
@@ -118,6 +156,9 @@ public class SkeletonBuilder extends PApplet{
             if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());
             scene.endHUD();
             views[i].shift(scene);
+        }
+        if(solve && debug){
+            solver.solve();
         }
     }
 
@@ -149,6 +190,8 @@ public class SkeletonBuilder extends PApplet{
             if(focus.trackedFrame() != null)
                 if(focus.trackedFrame() instanceof  InteractiveJoint)
                     focus.trackedFrame().interact("OnAdding", focus, vector);
+                else
+                    focus.trackedFrame().interact("OnAdding", vector);
         } else if (mouseButton == LEFT) {
             if(event.isControlDown() && fitCurve != null ){
                 if(fitCurve.started()) {
@@ -238,6 +281,7 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
+    boolean solve = false;
     public void keyPressed(){
         if(key == '+'){
             new InteractiveJoint(scene, radius).setRoot(true);
@@ -246,8 +290,12 @@ public class SkeletonBuilder extends PApplet{
             addTreeSolver();
         }
         if(key == 'C' || key == 'c'){
-            addConstraint(focus.trackedFrame());
+            addConstraint(focus.trackedFrame(), false);
         }
+        if(key == 'H' || key == 'h'){
+            addConstraint(focus.trackedFrame(), true);
+        }
+
         if(key == 'S' || key == 's'){
             minAngle += radians(5);
             if(minAngle >= radians(170) ) minAngle = radians(170);
@@ -273,7 +321,13 @@ public class SkeletonBuilder extends PApplet{
                 target._interpolator.start();
             }
         }
+        if(key == '1'){
+            if(debug) solver.solve();
+        }
+        if(key == '2'){
+            if(debug) solve = !solve;
 
+        }
     }
 
     public void findEndEffectors(Frame frame, List<Frame> endEffectors){
@@ -286,11 +340,12 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
-    public void addConstraint(Frame frame){
+    public void addConstraint(Frame frame, boolean hinge){
         //If has a child
+        hinge = hinge || scene.is2D();
         if(frame == null) return;
         if(frame.children().size() != 1) return;
-        if(scene.is3D()) {
+        if(!hinge) {
             BallAndSocket constraint = new BallAndSocket(minAngle, minAngle, maxAngle, maxAngle);
             Vector twist = frame.children().get(0).translation().get();
             constraint.setRestRotation(frame.rotation().get(), Vector.orthogonalVector(twist), twist);
@@ -303,16 +358,25 @@ public class SkeletonBuilder extends PApplet{
 
     }
 
+    TreeSolver solver;
     public void addTreeSolver(){
         if(scene.trackedFrame() == null) return;
-        scene.registerTreeSolver(scene.trackedFrame());
+        if(debug) {
+            solver = new TreeSolver(scene.trackedFrame());
+            solver.timesPerFrame = 1;
+        } else {
+            solver = scene.registerTreeSolver(scene.trackedFrame());
+            solver.timesPerFrame = 4;
+        }
         //add target
         //get leaf nodes
         ArrayList<Frame> endEffectors = new ArrayList<Frame>();
         findEndEffectors(focus.trackedFrame(), endEffectors);
         for(Frame endEffector : endEffectors) {
+            endEffector.setPickingThreshold(0.00001f);
             Target target = new Target(scene, endEffector);
-            scene.addIKTarget(endEffector, target);
+            //scene.addIKTarget(endEffector, target);
+            solver.addTarget(endEffector, target);
             targets.add(target);
         }
     }

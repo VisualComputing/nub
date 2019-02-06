@@ -48,6 +48,7 @@ public class SkeletonLoader {
         frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
         frame.setRotation(new Quaternion(mat));
         joint.setRadius(0.2f);
+        joint.setPickingThreshold(1e-10f);
         jointCount++;
         model.getJoints().put(nameId, frame);
         model.getIdxs().put(frame.id(), index);

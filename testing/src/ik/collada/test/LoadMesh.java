@@ -2,6 +2,7 @@ package ik.collada.test;
 
 import frames.core.Frame;
 import frames.core.Graph;
+import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
@@ -37,14 +38,12 @@ public class LoadMesh extends PApplet {
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        //scene.disableBackBuffer();
-
 
         PShape redBall = createShape(SPHERE, 0.3f);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        for(int i = 0; i < 4; i++){
+        for(int i = 0; i < 5; i++){
             Frame target = new Frame(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
@@ -58,21 +57,31 @@ public class LoadMesh extends PApplet {
         skinning = new SkinningAnimationModel(model);
 
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
-        //model.getJoints().get("Chest").setConstraint(new FixedConstraint());
-        model.getRootJoint().setConstraint(new FixedConstraint());
+
+        BallAndSocket chest_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
+        Frame chest = model.getJoints().get("Chest");
+        chest_constraint.setRestRotation(chest.rotation().get(), chest.displacement(new Vector(0, 1, 0)), chest.displacement(new Vector(0, 0, 1)));
+        //chest.setConstraint(chest_constraint);
+
+        BallAndSocket root_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
+        Frame root = model.getRootJoint();
+        root_constraint.setRestRotation(root.rotation().get(), root.displacement(new Vector(0, 1, 0)), root.displacement(new Vector(0, 0, 1)));
+        //root.setConstraint(root_constraint);
+
+        //model.getRootJoint().setConstraint(new FixedConstraint());
 
         model.printNames();
         targets.get(0).setPosition(model.getJoints().get("Foot_R").position());
         targets.get(1).setPosition(model.getJoints().get("Foot_L").position());
         targets.get(2).setPosition(model.getJoints().get("Hand_L").position());
         targets.get(3).setPosition(model.getJoints().get("Hand_R").position());
-        //targets.get(4).setPosition(model.getJoints().get("Head").position());
+        targets.get(4).setPosition(model.getJoints().get("Head").position());
 
         scene.addIKTarget(model.getJoints().get("Foot_R"), targets.get(0));
         scene.addIKTarget(model.getJoints().get("Foot_L"), targets.get(1));
         scene.addIKTarget(model.getJoints().get("Hand_L"), targets.get(2));
         scene.addIKTarget(model.getJoints().get("Hand_R"), targets.get(3));
-        //scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
+        scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
 
         solver.maxIter = 20;
         solver.timesPerFrame = 20;

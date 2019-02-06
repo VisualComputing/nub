@@ -35,6 +35,7 @@ public class Target extends Frame {
         setReference(scene.trackedFrame().reference());
         setPosition(frame.position());
         setOrientation(frame.orientation());
+        setPickingThreshold(0);
     }
 
     public void drawPath(){
