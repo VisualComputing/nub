@@ -2943,11 +2943,11 @@ public class Scene extends Graph implements PConstants {
       BallAndSocket constraint = (BallAndSocket) frame.constraint();
       reference.rotate(((BallAndSocket) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
-      drawAxes(pGraphics,5);
       float width = boneLength / 2.f;
       float max = Math.max(Math.max(Math.max(constraint.up(),constraint.down()),constraint.left()),constraint.right());
       //Max value will define max radius length
       float height = (float)(width/Math.tan(max));
+      drawAxes(pGraphics,height*1.2f);
       //get all radius
       float up_r = (float)Math.abs((height * Math.tan(constraint.up())));
       float down_r = (float)Math.abs((height * Math.tan(constraint.down())));
@@ -2957,12 +2957,13 @@ public class Scene extends Graph implements PConstants {
     } else if (frame.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) frame.constraint()).orientation());
       applyTransformation(pGraphics,reference);
-      drawAxes(pGraphics,5);
       float w_d = boneLength / 2.f;
       float w_c = (float) Math.abs((Math.tan(((PlanarPolygon) frame.constraint()).angle())));
       float height = w_d/w_c;
+      drawAxes(pGraphics,height*1.2f);
       drawCone(pGraphics, height, height, ((PlanarPolygon) frame.constraint()).vertices());
     } else if (frame.constraint() instanceof SphericalPolygon) {
+      //TODO : Fix as Planar Polygon
       reference.rotate(((SphericalPolygon) frame.constraint()).restRotation());
       applyTransformation(pGraphics,reference);
       drawAxes(pGraphics,5);
@@ -2999,7 +3000,7 @@ public class Scene extends Graph implements PConstants {
         frameAngle = (float) (frameAngle - PI * 2 * Math.floor((frameAngle + PI) / (2*PI)));
         reference.rotate(new Quaternion(new Vector(0,0,1), -frameAngle));
         applyTransformation(pGraphics,reference);
-        drawAxes(pGraphics,5);
+        drawAxes(pGraphics,boneLength / 2.f);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle() , constraint.maxAngle(), 10);
       }
     }

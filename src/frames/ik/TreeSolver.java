@@ -65,6 +65,7 @@ public class TreeSolver extends FABRIKSolver {
   //TODO Relate weights with End Effectors not with chains
   /*Tree structure that contains a list of Solvers that must be accessed in a BFS way*/
   protected TreeNode root;
+  protected float _current = 10e10f, _best = 10e10f;
 
   public Frame head() {
     return (Frame) root._solver().head();
@@ -118,6 +119,10 @@ public class TreeSolver extends FABRIKSolver {
   }
 
   protected int _forwardReaching(TreeNode treeNode) {
+    ArrayList<Vector> list_a = new ArrayList<>();
+    for(Frame f : treeNode._solver._chain) list_a.add(f.worldLocation(new Vector()));
+    aux_prev.add(list_a);
+
     float totalWeight = 0;
     boolean modified = false;
     int chains = 0;
@@ -137,7 +142,7 @@ public class TreeSolver extends FABRIKSolver {
       newTarget.add(Vector.multiply(child._solver()._positions().get(0), 1.f / totalWeight));
     }
     if (newTarget.magnitude() > 0) {
-      solver.setTarget(new Frame(newTarget, solver.endEffector().orientation().get(), 1));
+      solver.setTarget(new Frame(newTarget, solver._chain.get(solver._chain.size() - 1).orientation().get(), 1));
     }
 
     //Execute Until the distance between the end effector and the target is below a threshold
@@ -145,33 +150,42 @@ public class TreeSolver extends FABRIKSolver {
       treeNode._modified = false;
       return chains;
     }
-    if (Vector.distance(solver.endEffector().position(), solver.target().position()) <= error) {
+    if (Vector.distance(solver._chain.get(solver._chain.size() - 1).position(), solver.target().position()) <= error) {
       treeNode._modified = false;
       return chains;
     }
-    solver._positions().set(solver.chain().size() - 1, solver._target.position().get());
+    solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
     solver._forwardReaching();
     /* TODO: Check if it's better for convergence to try more times with local regions */
     for(int i = 0; i < 3; i++) {
       Vector o = solver._positions().get(0);
-      solver._positions().set(0, solver.head().position().get());
-      if(solver._positions().size() > 1)solver._positions().set(1, solver.chain().get(1).position().get());
+      solver._positions().set(0, solver._chain.get(0).position().get());
+      if(solver._positions().size() > 1)solver._positions().set(1, solver._chain.get(1).position().get());
       solver._backwardReaching(o);
-      solver._positions().set(solver.chain().size() - 1, solver._target.position().get());
+      solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
       solver._forwardReaching();
     }
+    ArrayList<Vector> list = new ArrayList<>();
+    for(Vector v : solver._positions()){
+      list.add(v.get());
+    }
+    aux_p.add(list);
 
     treeNode._modified = true;
     return chains + 1;
   }
+
+  public static ArrayList<ArrayList<Vector>> aux_p = new ArrayList<>();
+  public static ArrayList<ArrayList<Vector>> aux_prev = new ArrayList<>();
 
   protected float _backwardReaching(TreeNode treeNode) {
     float change = minDistance;
     if (treeNode._modified) {
       ChainSolver solver = treeNode._solver();
       Vector o = solver._positions().get(0);
-      solver._positions().set(0, solver.head().position().get());
+      solver._positions().set(0, solver._chain.get(0).position().get());
       change = solver._backwardReaching(o);
+      //Get error
       /*When executing Backward Step, if the Frame is a SubBase (Has more than 1 Child) and
        * it is not a "dummy Frame" (Convenient Frame that constraints position but no orientation of
        * its children) then an additional step must be done: A Weighted Average of Positions to establish
@@ -192,26 +206,20 @@ public class TreeSolver extends FABRIKSolver {
         for (TreeNode child : treeNode._children()) {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
-          if (child._solver().chain().size() < 2) continue;
-          if (child._solver().chain().get(1).translation().magnitude() == 0) continue;
-          Vector diff = solver.endEffector().location(child._solver().chain().get(1).position());
+          if (child._solver()._chain.size() < 2) continue;
+          if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
+          Vector diff = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
           centroid.add(Vector.multiply(diff, child._weight()));
-          Vector v1 = solver.endEffector().location(child._solver().chain().get(1).position());
+          Vector v1 = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
           Vector v2 = v1;
           if (child._modified) {
-            diff = solver.endEffector().location(child._solver()._positions().get(1));
+            diff = solver._chain.get(solver._chain.size() - 1).location(child._solver()._positions().get(1));
             newCentroid.add(Vector.multiply(diff, child._weight()));
-            v2 = solver.endEffector().location(child._solver()._positions().get(1));
+            v2 = solver._chain.get(solver._chain.size() - 1).location(child._solver()._positions().get(1));
           } else {
             newCentroid.add(Vector.multiply(diff, child._weight()));
           }
           Quaternion q = new Quaternion(v1, v2);
-          if(q.angle() > Math.toRadians(40)){
-            System.out.println("-----------");
-            System.out.println("Child " + c++);
-            System.out.println("V1 : " + v1);
-            System.out.println("V2 : " + v2);
-          }
 
           if(amount == 1){
             for(int i = 0; i < 4; i++)
@@ -233,17 +241,19 @@ public class TreeSolver extends FABRIKSolver {
           ang = (float)Math.max(Math.min(ang, 10*Math.PI/180), -10*Math.PI/180);
           deltaOrientation = new Quaternion(deltaOrientation.axis(), ang);
           //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
-          treeNode._solver().endEffector().rotate(deltaOrientation);
+          treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotate(des);
           for (TreeNode child : treeNode._children()) {
-            if (child._solver().chain().size() < 2) continue;
-            if (child._solver().chain().get(1).translation().magnitude() == 0) continue;
+            child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation());
+            //if (child._solver()._chain.size() < 2) continue;
+            if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
-              child._solver()._positions().set(1, child._solver().chain().get(1).position());
+              child._solver()._positions().set(1, child._solver()._chain.get(1).position());
             }
           }
         }
       }
     }
+    _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
     for (TreeNode child : treeNode._children()) {
       change += _backwardReaching(child);
     }
@@ -252,6 +262,9 @@ public class TreeSolver extends FABRIKSolver {
 
   @Override
   protected boolean _iterate() {
+    aux_p = new ArrayList<>();
+    aux_prev = new ArrayList<>();
+    _current = 0;
     int modifiedChains = _forwardReaching(root);
     float change = _backwardReaching(root);
     change = modifiedChains > 0 ? change / (modifiedChains * 1.f) : change;
@@ -262,19 +275,20 @@ public class TreeSolver extends FABRIKSolver {
 
   @Override
   protected void _update() {
-    //As BackwardStep modify chains, no update is required
+    if(_current < _best){
+      _updateTree(root);
+      _best = _current;
+    }
   }
 
   //Update Subtree that have associated Frame as root
-  protected boolean _updateTree(TreeNode treeNode, Frame frame) {
-    if (treeNode._solver().endEffector() == frame) {
-      _setup(treeNode, frame, new ArrayList<Frame>());
-      return true;
+  protected void _updateTree(TreeNode treeNode) {
+    for(int i = 0; i < treeNode._solver._original.size(); i++){
+      treeNode._solver._original.get(i).setRotation(treeNode._solver._chain.get(i).rotation().get());
     }
     for (TreeNode child : treeNode._children()) {
-      _updateTree(child, frame);
+      _updateTree(child);
     }
-    return false;
   }
 
   protected boolean _changed(TreeNode treeNode) {
@@ -298,11 +312,14 @@ public class TreeSolver extends FABRIKSolver {
     for (TreeNode child : treeNode._children()) {
       _reset(child);
     }
+    if(treeNode._solver._target != null)
+      _best += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
   }
 
   @Override
   public void _reset() {
     iterations = 0;
+    _best = 0;
     _reset(root);
   }
 

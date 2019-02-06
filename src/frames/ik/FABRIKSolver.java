@@ -86,7 +86,7 @@ public abstract class FABRIKSolver extends Solver {
     }
   }
 
-  protected HashMap<Frame, Properties> _properties = new HashMap<>();
+  protected HashMap<Integer, Properties> _properties = new HashMap<>();
   /*Store Joint's desired position*/
   protected ArrayList<Vector> _positions = new ArrayList<Vector>();
   protected ArrayList<Quaternion> _orientations = new ArrayList<Quaternion>();
@@ -127,9 +127,11 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, pos_i1.get());
         continue;
       }
-      Properties props_i = _properties.get(chain.get(i));
-      Properties props_i1 = _properties.get(chain.get(i+1));
-      if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
+      Properties props_i = _properties.get(chain.get(i).id());
+      Properties props_i1 = _properties.get(chain.get(i+1).id());
+      //TODO : Is necessary to check children?
+      //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && opt < 1){
         Vector o_hat = chain.get(i + 1).position();
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
@@ -168,9 +170,11 @@ public abstract class FABRIKSolver extends Solver {
       }
       magnitude *= chain.get(i).scaling();
       //Find delta rotation
-      Properties props_i = _properties.get(chain.get(i));
-      Properties props_i1 = _properties.get(chain.get(i+1));
-      if  (chain.get(i+1).children().size() < 2 && chain.get(i+1).constraint() != null  && opt < 1){
+      Properties props_i = _properties.get(chain.get(i).id());
+      Properties props_i1 = _properties.get(chain.get(i+1).id());
+      //TODO : Is necessary to check children?
+      //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && opt < 1){
         Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
