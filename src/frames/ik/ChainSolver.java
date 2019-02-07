@@ -238,6 +238,8 @@ public class ChainSolver extends FABRIKSolver {
     _init();
     if(target != null){
       _best = Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
+    } else{
+      _best = 10e10f;
     }
   }
 

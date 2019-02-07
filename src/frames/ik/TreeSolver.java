@@ -160,7 +160,7 @@ public class TreeSolver extends FABRIKSolver {
     for(int i = 0; i < 3; i++) {
       Vector o = solver._positions().get(0);
       solver._positions().set(0, solver._chain.get(0).position().get());
-      if(solver._positions().size() > 1)solver._positions().set(1, solver._chain.get(1).position().get());
+      //if(solver._positions().size() > 1)solver._positions().set(1, solver._chain.get(1).position().get());
       solver._backwardReaching(o);
       solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
       solver._forwardReaching();
@@ -253,10 +253,10 @@ public class TreeSolver extends FABRIKSolver {
         }
       }
     }
-    _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
     for (TreeNode child : treeNode._children()) {
       change += _backwardReaching(child);
     }
+    _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
     return change;
   }
 
@@ -312,15 +312,18 @@ public class TreeSolver extends FABRIKSolver {
     for (TreeNode child : treeNode._children()) {
       _reset(child);
     }
-    if(treeNode._solver._target != null)
-      _best += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
+    if(treeNode._solver._target != null) {
+      _best += Vector.distance(treeNode._solver()._original.get(treeNode._solver()._original.size() - 1).position(), treeNode._solver().target().position());
+    }
   }
 
   @Override
   public void _reset() {
     iterations = 0;
-    _best = 0;
+    _best = -1;
+    _current = 0;
     _reset(root);
+    _best = _best == -1 ? 10e10f : _best;
   }
 
   //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors
