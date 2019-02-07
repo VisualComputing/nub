@@ -68,7 +68,7 @@ public class Joint extends Frame{
         pg.popStyle();
 
         if (constraint() != null) {
-            scene.drawConstraint(this);
+            scene.drawConstraint(pg,this);
         }
         pg.stroke(255);
         //scene.drawCross(this);
