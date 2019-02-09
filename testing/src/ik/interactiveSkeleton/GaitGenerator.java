@@ -3,21 +3,14 @@ package ik.interactiveSkeleton;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.TreeSolver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
-import processing.core.PShape;
 import processing.event.MouseEvent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * Created by sebchaparr on 07/02/18.
@@ -46,13 +39,15 @@ public class GaitGenerator extends PApplet {
         scene.fit(1);
         ref = new Frame(scene, createShape(BOX, 90, boneLength, 5.2f*boneLength));
 
-        for(int i = 0; i < 6; i++){
-            Frame f1 = new Frame(scene, new Vector(-boneLength,0,i*boneLength - boneLength*2.5f), new Quaternion(), 1);
+        int n = 5;
+        for(int i = 0; i < n; i++){
+            Frame f1 = new Frame(scene, new Vector(-boneLength,0,i*5*boneLength/n - boneLength*10/n), new Quaternion(), 1);
             f1.setReference(ref);
-            Frame f2 = new Frame(scene, new Vector(boneLength,0,i*boneLength - boneLength*2.5f), new Quaternion(new Vector(0,1,0), PI), 1);
+            Frame f2 = new Frame(scene, new Vector(boneLength,0,i*5*boneLength/n - boneLength*10/n), new Quaternion(new Vector(0,1,0), PI), 1);
             f2.setReference(ref);
-            leg(f1, i % 2 == 1, i % 2 == 1, random(0,30)*180);
-            leg(f2, i % 2 == 1, i % 2 == 0, random(0,30)*180);
+            float x = random(0,30)*180;
+            leg(f1, i % 2 == 1, i % 2 == 1, 0);
+            leg(f2, i % 2 == 1, i % 2 == 0, 0);
         }
 
 

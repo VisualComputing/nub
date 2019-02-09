@@ -84,7 +84,7 @@ public class LoadMesh extends PApplet {
         scene.addIKTarget(model.getJoints().get("Head"), targets.get(4));
 
         solver.maxIter = 20;
-        solver.timesPerFrame = 20;
+        solver.timesPerFrame = 10;
         solver.error = 0.01f;
     }
     public void draw() {

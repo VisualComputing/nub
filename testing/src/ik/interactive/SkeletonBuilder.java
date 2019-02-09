@@ -31,6 +31,7 @@ public class SkeletonBuilder extends PApplet{
     Scene scene, focus;
     Scene[] views;
     boolean debug = false;
+    boolean showPath = false, showLast = false;
     //focus;
     //OptionPanel panel;
     //PGraphics canvas1;
@@ -87,7 +88,21 @@ public class SkeletonBuilder extends PApplet{
         scene.drawAxes();
         scene.render();
         for(Target target : targets){
-            scene.drawPath(target._interpolator, 5);
+            if(showPath)scene.drawPath(target._interpolator, 5);
+            if(showLast) {
+                pushStyle();
+                colorMode(HSB);
+                strokeWeight(radius / 3.f);
+                Vector p = !target.last().isEmpty() ? target.last().get(0) : null;
+                for (int i = 0; i < target.last().size(); i++) {
+                    Vector v = target.last().get(i);
+                    fill((frameCount + i) % 255, 255, 255);
+                    stroke((frameCount + i) % 255, 255, 255);
+                    line(v.x(), v.y(), v.z(), p.x(), p.y(), p.z());
+                    p = v;
+                }
+                popStyle();
+            }
         }
         /*
         panel._scene.beginDraw();
@@ -328,7 +343,17 @@ public class SkeletonBuilder extends PApplet{
         }
         if(key == '2'){
             if(debug) solve = !solve;
-
+        }
+        if(key == '3'){
+            showLast = !showLast;
+        }
+        if(key == '4'){
+            showPath = !showPath;
+        }
+        if(key == 'r' | key == 'R'){
+            for(Target target : targets){
+                target._interpolator.setLoop(!target._interpolator.loop());
+            }
         }
     }
 

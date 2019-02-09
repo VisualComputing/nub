@@ -42,7 +42,7 @@ public class KeyFrame extends Frame {
 
     public void add(boolean left, Vector mouse){
         KeyFrame frame = new KeyFrame(this._target);
-        frame.setTranslation(frame.translateDesired(mouse));
+        frame.setTranslation(this.worldLocation(this.translateDesired(mouse)));
         _target.addKeyFrame(frame, this, left);
     }
 

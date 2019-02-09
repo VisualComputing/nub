@@ -5,6 +5,7 @@ import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -21,6 +22,7 @@ public class Target extends Frame {
     protected List<KeyFrame> _path = new ArrayList<KeyFrame>();
     protected PShape _redBall;
     protected Vector _desiredTranslation;
+    protected ArrayList<Vector> _last = new ArrayList<>();
 
 
     public Target(Scene scene, Frame frame) {
@@ -36,8 +38,20 @@ public class Target extends Frame {
         setPosition(frame.position());
         setOrientation(frame.orientation());
         setPickingThreshold(0);
+
+        Target t = this;
+        TimingTask task = new TimingTask() {
+            @Override
+            public void execute() {
+                _last.add(t.position());
+                while(_last.size() > 50) _last.remove(0);
+            }
+        };
+        scene.registerTask(task);
+        task.run(150);
     }
 
+    public ArrayList<Vector> last(){ return _last; }
     public void drawPath(){
         ((Scene) _graph).drawPath(_interpolator, 5);
     }
@@ -58,7 +72,7 @@ public class Target extends Frame {
             if(_desiredTranslation != null) {
                 if(!_path.isEmpty())removeKeyFrame(_path.get(0));
                 KeyFrame frame = new KeyFrame(this);
-                frame.setTranslation(frame.translateDesired((Vector) gesture[1]));
+                frame.translate(this.worldLocation(this.translateDesired((Vector) gesture[1])));
                 addKeyFrame(frame, 0);
             }
             _desiredTranslation = null;
