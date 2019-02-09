@@ -256,7 +256,8 @@ public class TreeSolver extends FABRIKSolver {
     for (TreeNode child : treeNode._children()) {
       change += _backwardReaching(child);
     }
-    _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
+    if(treeNode._solver().target() != null)
+      _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
     return change;
   }
 
