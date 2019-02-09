@@ -224,7 +224,7 @@ public class InteractiveSpider extends PApplet {
     }
 
     Scene scene;
-    Spider[] spiders = new Spider[5];
+    Spider[] spiders = new Spider[20];
     Spider userSpider;
     float time = 0;
     float[][] magnitudeField = new float[30][30];

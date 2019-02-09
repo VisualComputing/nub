@@ -3,12 +3,14 @@ package ik.interactiveSkeleton;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
+import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
+import processing.core.PShape;
 import processing.event.MouseEvent;
 
 
@@ -20,6 +22,7 @@ public class GaitGenerator extends PApplet {
     //TODO : Update
     Scene scene;
     Frame target;
+    float y_floor = 0;
 
     float boneLength = 50;
     float targetRadius = 7;
@@ -36,18 +39,33 @@ public class GaitGenerator extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setFOV(PI / 3);
         scene.setRadius(boneLength * 5);
-        scene.fit(1);
-        ref = new Frame(scene, createShape(BOX, 90, boneLength, 5.2f*boneLength));
+        scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI / 4));
+        scene.fit();
 
-        int n = 5;
-        for(int i = 0; i < n; i++){
-            Frame f1 = new Frame(scene, new Vector(-boneLength,0,i*5*boneLength/n - boneLength*10/n), new Quaternion(), 1);
-            f1.setReference(ref);
-            Frame f2 = new Frame(scene, new Vector(boneLength,0,i*5*boneLength/n - boneLength*10/n), new Quaternion(new Vector(0,1,0), PI), 1);
-            f2.setReference(ref);
-            float x = random(0,30)*180;
-            leg(f1, i % 2 == 1, i % 2 == 1, 0);
-            leg(f2, i % 2 == 1, i % 2 == 0, 0);
+        ref = new Frame(scene);
+        ref.setPickingThreshold(0.0001f);
+        for(int k = 0; k < 15; k++) {
+            PShape body = createShape(BOX, 90, boneLength, 5.2f * boneLength);
+            body.setStroke(false);
+            body.setTexture(scene.pApplet().loadImage(scene.pApplet().sketchPath() + "/testing/data/textures/spider.jpg"));
+            body.setShininess(10.0f);
+
+            body.setFill(color(random(255), random(255), random(255)));
+            Frame com = new Frame(scene, body);
+
+            com.setReference(ref);
+            int n = 5;
+            float x = random(0, 30) * 180;
+            for (int i = 0; i < n; i++) {
+                Frame f1 = new Frame(scene, new Vector(-boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(), 1);
+                f1.setReference(com);
+                Frame f2 = new Frame(scene, new Vector(boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(new Vector(0, 1, 0), PI), 1);
+                f2.setReference(com);
+                leg(f1, i % 2 == 1, i % 2 == 1, x);
+                leg(f2, i % 2 == 1, i % 2 == 0, x);
+            }
+            com.translate(k/3 * scene.radius()/2f - scene.radius(),0, k % 3 == 0 ? -2.5f * boneLength : k % 3 == 1 ? 0 : 2.5f * boneLength);
+            com.scale(0.25f);
         }
 
 
@@ -99,30 +117,42 @@ public class GaitGenerator extends PApplet {
         //Set initial configuration
         j1.rotate(new Quaternion(new Vector(0,0,1), radians(-30)));
 
-        scene.registerTreeSolver(j1);
+        Solver solver = scene.registerTreeSolver(j1);
+        solver.maxIter = 3;
+        solver.timesPerFrame = 1;
+
         target.setPosition(j4.position());
+        y_floor = j4.position().y();
         scene.addIKTarget(j4, target);
         Vector o = reference.location(new Vector(), j4);
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
-                updateTarget(scene.timingHandler().frameCount()*3, o, target, mirror, inv, d);
+                updateTarget(scene.timingHandler().frameCount()*8, o, target, mirror, inv, d);
             }
         };
+
         scene.registerTask(task);
-        task.run(40);
+        task.run(100);
     }
 
 
     public void draw() {
         background(0);
-        lights();
+        ambientLight(102, 102, 102);
+        lightSpecular(204, 204, 204);
+        directionalLight(102, 102, 102, 0, 0, -1);
+        specular(255, 255, 255);
         fill(255,0,0);
         scene.drawAxes();
         scene.render();
         ref.translate(0,0,-0.5f);
-        if(ref.translation().z() < -boneLength * 3f)
-            ref.setTranslation(0, 0, boneLength*3f);
+        if(ref.translation().z() < -boneLength * 12f)
+            ref.setTranslation(0, 0, boneLength*6f);
+        fill(100);
+        shininess(10.0f);
+        translate(0,y_floor/4 + scene.radius()*0.025f,0);
+        box(2.5f*scene.radius(), scene.radius()*0.05f, 5f*scene.radius());
     }
 
     public void updateTarget(float t, Vector o, Frame target, boolean mirror, boolean inv, float d){

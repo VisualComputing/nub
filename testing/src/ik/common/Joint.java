@@ -56,7 +56,7 @@ public class Joint extends Frame{
         if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         if (!_isRoot) {
-            pg.strokeWeight(_radius/4);
+            pg.strokeWeight(_radius/1.5f);
             pg.stroke(_color);
             Vector v = location(new Vector(), reference());
             float m = v.magnitude();
