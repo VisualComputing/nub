@@ -246,7 +246,7 @@ public class ChainSolver extends FABRIKSolver {
   protected void _init() {
     //Initialize List with info about Positions and Orientations
     this._chain = _copy(_original);
-    //his._chain = _original;
+    //this._chain = _original;
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();

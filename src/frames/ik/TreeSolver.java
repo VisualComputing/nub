@@ -154,17 +154,20 @@ public class TreeSolver extends FABRIKSolver {
       treeNode._modified = false;
       return chains;
     }
-    solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
-    solver._forwardReaching();
     /* TODO: Check if it's better for convergence to try more times with local regions */
-    for(int i = 0; i < 3; i++) {
-      Vector o = solver._positions().get(0);
-      solver._positions().set(0, solver._chain.get(0).position().get());
-      //if(solver._positions().size() > 1)solver._positions().set(1, solver._chain.get(1).position().get());
-      solver._backwardReaching(o);
+    Vector o = solver._chain.get(0).position();
+    Vector p = null;
+    if(solver._positions().size() > 1) p = solver._chain.get(1).position();
+    for(int i = 0; i < 3 && solver._positions().size() > 1; i++) {
       solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
       solver._forwardReaching();
+      solver._positions().set(0, o);
+      solver._positions().set(1, p);
+      solver._backwardReaching(o);
     }
+
+    solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
+    solver._forwardReaching();
     ArrayList<Vector> list = new ArrayList<>();
     for(Vector v : solver._positions()){
       list.add(v.get());
@@ -232,7 +235,7 @@ public class TreeSolver extends FABRIKSolver {
           amount++;
         }
         //Set only when Centroid and New Centroid varies
-        if (Vector.distance(centroid, newCentroid) > 0.001) {
+        //if (Vector.distance(centroid, newCentroid) > 0.001) {
           centroid.multiply(1.f / totalWeight);
           newCentroid.multiply(1.f / totalWeight);
           Quaternion deltaOrientation = new Quaternion(centroid, newCentroid);
@@ -243,20 +246,20 @@ public class TreeSolver extends FABRIKSolver {
           //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
           treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotate(des);
           for (TreeNode child : treeNode._children()) {
-            child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation());
+            child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
             //if (child._solver()._chain.size() < 2) continue;
             if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
               child._solver()._positions().set(1, child._solver()._chain.get(1).position());
             }
           }
-        }
+        //}
       }
     }
     for (TreeNode child : treeNode._children()) {
       change += _backwardReaching(child);
     }
-    if(treeNode._solver().target() != null)
+    if(treeNode._solver().target() != null && treeNode._children.isEmpty())
       _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
     return change;
   }
@@ -313,7 +316,7 @@ public class TreeSolver extends FABRIKSolver {
     for (TreeNode child : treeNode._children()) {
       _reset(child);
     }
-    if(treeNode._solver._target != null) {
+    if(treeNode._solver._target != null && treeNode._children.isEmpty()) {
       _best += Vector.distance(treeNode._solver()._original.get(treeNode._solver()._original.size() - 1).position(), treeNode._solver().target().position());
     }
   }
@@ -321,10 +324,9 @@ public class TreeSolver extends FABRIKSolver {
   @Override
   public void _reset() {
     iterations = 0;
-    _best = -1;
+    _best = 0;
     _current = 0;
     _reset(root);
-    _best = _best == -1 ? 10e10f : _best;
   }
 
   //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors

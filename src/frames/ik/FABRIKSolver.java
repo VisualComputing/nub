@@ -63,6 +63,8 @@ public abstract class FABRIKSolver extends Solver {
   *   Calculate bounds phi_max_t, phi_min_t w.r.t A axis for each joint -> get phi_max_sum
   *   Define a way to propagate:
   *     phi_max_sum - phi_min_sum must always be > 0
+  *
+  *   There're some cases in which is desirable to Propagate all movement through Joints
   * */
 
   public static class Properties{
