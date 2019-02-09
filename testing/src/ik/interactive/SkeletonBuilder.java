@@ -64,8 +64,10 @@ public class SkeletonBuilder extends PApplet{
         //canvas1 = this.g;
         scene = new Scene(this);
         focus = scene;
-        scene.setRadius(300);
         if(scene.is3D())scene.setType(Graph.Type.ORTHOGRAPHIC);
+        scene.setRadius(800);
+        scene.fit();
+
         new InteractiveJoint(scene, radius).setRoot(true);
         // = new OptionPanel(this, 0.7f * width, 0, (int)(0.3f * width), h );
         //scene.fit(1);

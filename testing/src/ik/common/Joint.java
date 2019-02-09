@@ -18,7 +18,8 @@ public class Joint extends Frame{
     protected float _radius;
     protected static PGraphics _pGraphics;
     //set to true only when the joint is the root (for rendering purposes)
-    protected boolean _isRoot = false;
+    protected boolean _isRoot = false, _drawConstraint = true;
+
 
     public Joint(Scene scene, int color, float radius){
         super(scene);
@@ -44,6 +45,10 @@ public class Joint extends Frame{
         _pGraphics = pg;
     }
 
+    public void setDrawConstraint(boolean drawConstraint){
+        _drawConstraint = drawConstraint;
+    }
+
     @Override
     public void visit(){
         Scene scene = (Scene) this._graph;
@@ -67,7 +72,7 @@ public class Joint extends Frame{
         else pg.sphere(_radius);
         pg.popStyle();
 
-        if (constraint() != null) {
+        if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this);
         }
         pg.stroke(255);

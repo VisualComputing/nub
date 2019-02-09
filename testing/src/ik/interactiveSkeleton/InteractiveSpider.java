@@ -4,6 +4,7 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.Interpolator;
 import frames.core.constraint.AxisPlaneConstraint;
+import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.LocalConstraint;
 import frames.ik.Solver;
@@ -31,7 +32,7 @@ public class InteractiveSpider extends PApplet {
     // It seems slow, probably cause target interpolation
 
     public static class Spider{
-        float[] velocity = new float[]{0.2f, 0.2f}; //save direction and angle
+        float[] velocity = new float[]{0.02f, 0.2f}; //save direction and angle
 
         Frame shape;
         PShape pshape;
@@ -114,20 +115,37 @@ public class InteractiveSpider extends PApplet {
         public Joint leg(int i, Frame reference, Vector upper, Vector middle, Vector lower, Frame target, boolean invert, float radius){
             Scene scene = (Scene) (shape.graph());
             Joint j1 = new Joint(scene, radius);
+            j1.setDrawConstraint(false);
             j1.setReference(reference);
             j1.setPosition(reference.worldLocation(upper));
             Joint j2 = new Joint(scene, radius);
+            j2.setDrawConstraint(false);
             j2.setReference(j1);
             j2.setPosition(reference.worldLocation(middle));
             Joint j21 = new Joint(scene, radius);
+            j21.setDrawConstraint(false);
             j21.setReference(j2);
             Vector v = Vector.add(middle, Vector.multiply(Vector.subtract(lower, middle),0.5f));
             j21.setPosition(reference.worldLocation(v));
             Joint j3 = new Joint(scene, radius);
+            j3.setDrawConstraint(false);
             j3.setReference(j21);
             j3.setPosition(reference.worldLocation(lower));
             j1.setRoot(true);
             addIk(i, j1, j3, target, invert);
+
+            BallAndSocket ballAndSocket = new BallAndSocket(radians(20), radians(20));
+            ballAndSocket.setRestRotation(j1.rotation().get(), Vector.orthogonalVector(j2.translation()), j2.translation());
+            j1.setConstraint(ballAndSocket);
+
+            ballAndSocket = new BallAndSocket(radians(20), radians(20));
+            ballAndSocket.setRestRotation(j2.rotation().get(), Vector.orthogonalVector(j21.translation()), j21.translation());
+            j2.setConstraint(ballAndSocket);
+
+            ballAndSocket = new BallAndSocket(radians(20), radians(20));
+            ballAndSocket.setRestRotation(j21.rotation().get(), Vector.orthogonalVector(j3.translation()), j3.translation());
+            j21.setConstraint(ballAndSocket);
+
             j21.setConstraint(new FixedConstraint());
             return j1;
         }
@@ -172,12 +190,14 @@ public class InteractiveSpider extends PApplet {
             targetInterpolator.setLoop();
             targetInterpolator.setSpeed(8.2f);
             // Create an initial path
-            int nbKeyFrames = 5;
+            int nbKeyFrames = 8;
             float step = 2*PI / (nbKeyFrames - 1);
             int inv = invert ? 1 : -1;
             for (int i = 0; i < nbKeyFrames; i++) {
                 float z = target.translation().z() + inv*amplitude*cos(step*i);
                 float y = target.translation().y() - abs(amplitude*sin(step*i));
+                if(i >= nbKeyFrames/2 - 1 && invert) y = target.translation().y();
+                if(i <= nbKeyFrames/2 - 1 && !invert) y = target.translation().y();
 
                 Frame iFrame = new Frame(scene);
                 iFrame.setReference(target.reference());
@@ -204,7 +224,7 @@ public class InteractiveSpider extends PApplet {
     }
 
     Scene scene;
-    Spider[] spiders = new Spider[30];
+    Spider[] spiders = new Spider[5];
     Spider userSpider;
     float time = 0;
     float[][] magnitudeField = new float[30][30];
