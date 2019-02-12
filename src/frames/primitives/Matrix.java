@@ -324,10 +324,8 @@ public class Matrix {
    * Sets {@code target} array from {@code source} array according to {@code columnMajorOrder}.
    */
   protected void _set(float[] target, float[] source, boolean columnMajorOrder) {
-    for (int i = 0; i < 16; i++) {
-      int idx = columnMajorOrder ? i : (i % 4) * 4 + i / 4);
-      target[i] = source[idx];
-    }
+    for (int i = 0; i < 16; i++)
+      target[i] = source[columnMajorOrder ? i : (i % 4) * 4 + i / 4];
   }
 
   /**
