@@ -82,11 +82,19 @@ public class Viewer extends PApplet{
         //rootIK.translate(50, 50, 50);
         //rootIK.setConstraint(null);
 
+        Solver solver = scene.registerTreeSolver(rootIK);
+
+        scene.addIKTarget(limbs.get("LEFTHAND"), targets.get("LEFTHAND"));
+        scene.addIKTarget(limbs.get("RIGHTHAND"), targets.get("RIGHTHAND"));
+        scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
+        scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
+        scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
+
         //Solver solver = scene.registerTreeSolver(rootIK);//limbs.get("RIGHTUPLEG"));
         //limbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
         //originalLimbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
 
-        ArrayList<Frame> list = (ArrayList<Frame>) scene.branch(limbs.get("RIGHTCOLLAR"));
+        /*ArrayList<Frame> list = (ArrayList<Frame>) scene.branch(limbs.get("RIGHTCOLLAR"));
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
         list.add(0, list.get(0).reference());
@@ -97,7 +105,7 @@ public class Viewer extends PApplet{
         list2.add(0, list2.get(0).reference());
         list2.add(0, list2.get(0).reference());
         //list2.add(0, list2.get(0).reference());
-        solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
+        //solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
         //Solver solver = scene.registerTreeSolver(limbs.get("RIGHTUPLEG").reference());
 
         chain_solver = new ChainSolver(list2);
@@ -108,7 +116,7 @@ public class Viewer extends PApplet{
 
         ((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
         chain_solver.pg = scene.pApplet().getGraphics();
-        scene.unregisterTreeSolver(limbs.get("RIGHTUPLEG").reference());
+        //scene.unregisterTreeSolver(limbs.get("RIGHTUPLEG").reference());
 
         //ccd_solver = new CCDSolver(scene.branch(originalLimbs.get("RIGHTUPLEG")));
         ccd_solver = new CCDSolver(list);
@@ -126,7 +134,7 @@ public class Viewer extends PApplet{
         //chain_solver.setTarget(targets.get("RIGHTFOOT"));
         chain_solver.setTarget(targets.get("RIGHTHAND"));
         ccd_solver.setTarget(targets.get("RIGHTHAND"));
-        //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
+        //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));*/
 
     }
 
@@ -147,14 +155,14 @@ public class Viewer extends PApplet{
         scene.render();
         if(read){
             parser.nextPose();
-            //updateTargets();
+            updateTargets();
         }
-        parser.drawFeasibleRegion(this.getGraphics());
+        //parser.drawFeasibleRegion(this.getGraphics());
         //parser.drawConstraint(this.getGraphics());
         if(chain_solver != null) {
-            if(show1) draw_pos(prev, color(0,255,0), 3);
-            if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
-            if(show3) draw_pos(constr, color(100,100,0), 3);
+            //if(show1) draw_pos(prev, color(0,255,0), 3);
+            //if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
+            //if(show3) draw_pos(constr, color(100,100,0), 3);
         }
 
         if(solve) {
@@ -222,7 +230,9 @@ public class Viewer extends PApplet{
     public void updateTargets() {
         rootIK.setPosition(root.position());
         for (Map.Entry<String, Frame> entry : originalLimbs.entrySet()) {
-            targets.get(entry.getKey()).setPosition(entry.getValue().position());
+            if(targets.containsKey(entry.getKey())) {
+                targets.get(entry.getKey()).setPosition(entry.getValue().position());
+            }
        }
     }
 
