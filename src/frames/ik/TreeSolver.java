@@ -18,7 +18,7 @@ import frames.primitives.Vector;
 import java.util.ArrayList;
 
 public class TreeSolver extends FABRIKSolver {
-  //TODO : Update
+  //TODO : Update - check copy of chains and references
   /*Convenient Class to store ChainSolvers in a Tree Structure*/
   protected static class TreeNode {
     protected TreeNode _parent;
@@ -75,13 +75,13 @@ public class TreeSolver extends FABRIKSolver {
     if (frame == null) return;
     if (frame.children().isEmpty()) {
       list.add(frame);
-      ChainSolver solver = new ChainSolver(list, null);
+      ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
       new TreeNode(parent, solver);
       return;
     }
     if (frame.children().size() > 1) {
       list.add(frame);
-      ChainSolver solver = new ChainSolver(list, null);
+      ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
       TreeNode treeNode = new TreeNode(parent, solver);
       for (Frame child : frame.children()) {
         ArrayList<Frame> newList = new ArrayList<Frame>();
@@ -110,26 +110,28 @@ public class TreeSolver extends FABRIKSolver {
     return _addTarget(root, endEffector, target);
   }
 
-  public TreeSolver(Frame genericFrame) {
+  public TreeSolver(Frame frame) {
     super();
     TreeNode dummy = new TreeNode(); //Dummy TreeNode to Keep Reference
-    _setup(dummy, genericFrame, new ArrayList<Frame>());
+    _setup(dummy, frame, new ArrayList<Frame>());
     //dummy must have only a child,
     this.root = dummy._children().get(0);
+    this.root._parent = null;
   }
 
   protected int _forwardReaching(TreeNode treeNode) {
     ArrayList<Vector> list_a = new ArrayList<>();
     for(Frame f : treeNode._solver._chain) list_a.add(f.worldLocation(new Vector()));
     aux_prev.add(list_a);
-
     float totalWeight = 0;
-    boolean modified = false;
     int chains = 0;
+
+    /*int n = treeNode._children().size();
+    int idx = n > 0 ? (int) Math.round(Math.random() * (n - 1)) : 0; //TODO: Randomization not important
+    for (int c = 0 ; c < n ; c++, idx = (idx + 1) % n){*/
     for (TreeNode child : treeNode._children()) {
       chains += _forwardReaching(child);
       if (child._solver().target() != null) totalWeight += child._weight();
-      modified = modified || child._modified;
     }
     //Stage 1: Forward Reaching
     ChainSolver solver = treeNode._solver();
@@ -175,6 +177,10 @@ public class TreeSolver extends FABRIKSolver {
     aux_p.add(list);
 
     treeNode._modified = true;
+    for (TreeNode child : treeNode._children()){
+      if(!child._modified) chains += 1;
+      child._modified = true;
+    }
     return chains + 1;
   }
 
@@ -205,7 +211,6 @@ public class TreeSolver extends FABRIKSolver {
         float[] cumulative = new float[4];
         Quaternion des = new Quaternion();
         Quaternion first = null;
-        int c = 0;
         for (TreeNode child : treeNode._children()) {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
@@ -245,22 +250,32 @@ public class TreeSolver extends FABRIKSolver {
           deltaOrientation = new Quaternion(deltaOrientation.axis(), ang);
           //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
           treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotate(des);
+          treeNode._solver()._positions().set(treeNode._solver()._chain.size() - 1, treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position());
+
           for (TreeNode child : treeNode._children()) {
-            child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
+            child._solver()._positions().set(0, child._solver()._chain.get(0).position());
+            child._solver()._positions().set(1, child._solver()._chain.get(1).position());
+            //child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
+            //child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
+            //child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
             //if (child._solver()._chain.size() < 2) continue;
-            if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
+            /*if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
+              child._solver()._positions().set(0, solver._chain.get(0).position());
               child._solver()._positions().set(1, child._solver()._chain.get(1).position());
-            }
+            }*/
           }
         //}
       }
     }
+
     for (TreeNode child : treeNode._children()) {
       change += _backwardReaching(child);
     }
+
     if(treeNode._solver().target() != null && treeNode._children.isEmpty())
       _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
+
     return change;
   }
 
@@ -327,6 +342,16 @@ public class TreeSolver extends FABRIKSolver {
     _best = 0;
     _current = 0;
     _reset(root);
+  }
+
+  protected ArrayList<Frame> _copyChain(TreeNode parent, ArrayList<Frame> list){
+    if(parent._solver != null) {
+      Frame reference = parent._solver._chain.get(parent._solver._chain.size() - 1);
+      ArrayList<Frame> copy = _copy(list.subList(1, list.size()), reference);
+      copy.add(0, reference);
+      return copy;
+    }
+    return _copy(list);
   }
 
   //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors

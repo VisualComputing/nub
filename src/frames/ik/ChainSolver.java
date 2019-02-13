@@ -23,7 +23,7 @@ public class ChainSolver extends FABRIKSolver {
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
 
-  protected ArrayList<? extends Frame> _chain;
+  protected ArrayList<Frame> _chain;
   protected ArrayList<? extends Frame> _original;
   protected float _current = 10e10f, _best = 10e10f;
 
@@ -54,18 +54,18 @@ public class ChainSolver extends FABRIKSolver {
     this(chain, null);
   }
 
-  public ChainSolver(ArrayList<? extends Frame> chain, Frame target) {
+  public ChainSolver(ArrayList<? extends Frame> chain, ArrayList<Frame> copy, Frame target) {
     super();
     this._original = chain;
-    this._chain = _copy(chain);
-    //this._chain = _original;
+    this._chain = copy == null ? _copy(chain) : copy;
+    //this._chain.addAll(_original);
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
     Vector prevPosition = chain.get(0).reference() != null
-        ? chain.get(0).reference().position().get() : new Vector(0, 0, 0);
+            ? chain.get(0).reference().position().get() : new Vector(0, 0, 0);
     Quaternion prevOrientation = chain.get(0).reference() != null
-        ? chain.get(0).reference().orientation().get() : new Quaternion();
+            ? chain.get(0).reference().orientation().get() : new Quaternion();
     for (Frame joint : _chain) {
       _properties.put(joint.id(), new Properties());
       Vector position = joint.position().get();
@@ -79,7 +79,11 @@ public class ChainSolver extends FABRIKSolver {
     }
     this._target = target;
     this._prevTarget =
-        target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
+            target == null ? null : new Frame(target.position().get(), target.orientation().get(), 1);
+  }
+
+  public ChainSolver(ArrayList<? extends Frame> chain, Frame target) {
+    this(chain, null, target);
   }
 
   /*Get maximum length of a given chain*/
@@ -245,8 +249,17 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
-    this._chain = _copy(_original);
-    //this._chain = _original;
+    if(_original.get(0).reference() != null) {
+      _chain.get(0).reference().setMagnitude(_original.get(0).reference().magnitude());
+      _chain.get(0).reference().setOrientation(_original.get(0).reference().orientation().get());
+      _chain.get(0).reference().setPosition(_original.get(0).reference().position().get());
+   }
+
+    for(int i = 0; i < _chain.size(); i++){
+      _chain.get(i).setScaling(_original.get(i).scaling());
+      _chain.get(i).setRotation(_original.get(i).rotation().get());
+      _chain.get(i).setTranslation(_original.get(i).translation().get());
+    }
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
