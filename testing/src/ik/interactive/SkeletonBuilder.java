@@ -31,14 +31,14 @@ public class SkeletonBuilder extends PApplet{
     Scene scene, focus;
     Scene[] views;
     boolean debug = false;
-    boolean showPath = false, showLast = false;
+    boolean showPath = false, showLast = false, showGrid = false;
     //focus;
     //OptionPanel panel;
     //PGraphics canvas1;
 
     FitCurve fitCurve;
 
-    float radius = 15;
+    float radius = 30;
     int w = 1000, h = 700;
     /*Create different skeletons to interact with*/
     //Choose FX2D, JAVA2D, P2D or P3D
@@ -76,16 +76,22 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void draw() {
-        setFocus();
+        //setFocus();
         //handleMouse();
         //scene.beginDraw();
         //canvas1.background(0);
         background(0);
+        ambientLight(102, 102, 102);
+        lightSpecular(204, 204, 204);
+        directionalLight(102, 102, 102, 0, 0, -1);
+        specular(255, 255, 255);
+        shininess(10);
         //canvas1.stroke(255,0,0);
         Joint.setPGraphics(scene.frontBuffer());
-        scene.drawGrid();
+        stroke(255);
+        if(showGrid) scene.drawGrid();
         stroke(255,0,0);
-        scene.drawAxes();
+        //scene.drawAxes();
         scene.render();
         for(Target target : targets){
             if(showPath)scene.drawPath(target._interpolator, 5);
@@ -96,8 +102,8 @@ public class SkeletonBuilder extends PApplet{
                 Vector p = !target.last().isEmpty() ? target.last().get(0) : null;
                 for (int i = 0; i < target.last().size(); i++) {
                     Vector v = target.last().get(i);
-                    fill((frameCount + i) % 255, 255, 255);
-                    stroke((frameCount + i) % 255, 255, 255);
+                    fill((frameCount + i) % 255, 255, 255, 100);
+                    stroke((frameCount + i) % 255, 255, 255, 100);
                     line(v.x(), v.y(), v.z(), p.x(), p.y(), p.z());
                     p = v;
                 }
@@ -160,7 +166,7 @@ public class SkeletonBuilder extends PApplet{
             if(fitCurve._interpolator != null)
                 scene.drawPath(fitCurve._interpolator, 5);
 
-        for(int i = 0; i < views.length; i++) {
+        /*for(int i = 0; i < views.length; i++) {
             scene.shift(views[i]);
             Joint.setPGraphics(views[i].frontBuffer());
             scene.beginHUD();
@@ -173,7 +179,7 @@ public class SkeletonBuilder extends PApplet{
             if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());
             scene.endHUD();
             views[i].shift(scene);
-        }
+        }*/
         if(solve && debug){
             solver.solve();
         }
@@ -350,6 +356,17 @@ public class SkeletonBuilder extends PApplet{
         if(key == '4'){
             showPath = !showPath;
         }
+        if(key == '5'){
+            showGrid = !showGrid;
+        }
+        if(key == '6'){
+            Joint.axes = !Joint.axes;
+        }
+        if(key == '7'){
+            System.out.println("Frame guardado");
+            this.g.save("/C:/Users/usuario/Desktop/Sebas/Visual/repositorios/presentation/IK-Presentation/fig/fig#####.png");
+        }
+
         if(key == 'r' | key == 'R'){
             for(Target target : targets){
                 target._interpolator.setLoop(!target._interpolator.loop());
@@ -401,7 +418,8 @@ public class SkeletonBuilder extends PApplet{
         findEndEffectors(focus.trackedFrame(), endEffectors);
         for(Frame endEffector : endEffectors) {
             endEffector.setPickingThreshold(0.00001f);
-            Target target = new Target(scene, endEffector);
+            Target target = new Target(scene, ((Joint) scene.trackedFrame()).radius(), endEffector);
+            target.setReference(((Joint) scene.trackedFrame()).reference());
             //scene.addIKTarget(endEffector, target);
             solver.addTarget(endEffector, target);
             targets.add(target);

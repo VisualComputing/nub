@@ -34,7 +34,7 @@ import java.util.Random;
 public class VisualBenchmark extends PApplet {
     enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
 
-    ConstraintType mode = ConstraintType.MIX; //Choose an option
+    ConstraintType mode = ConstraintType.CONE_POLYGON; //Choose an option
     boolean is3D = true;
 
     int num_joints = 15;
@@ -85,7 +85,7 @@ public class VisualBenchmark extends PApplet {
         for (int i = 0; i < num_joints - 1; i++) {
             Vector twist = structures.get(0).get(i + 1).translation().get();
             //Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(random(-90, 90)));
-            Quaternion offset = Quaternion.random();
+            Quaternion offset = new Quaternion();//Quaternion.random();
             Constraint constraint = null;
             ConstraintType mode = this.mode;
             if(this.mode == ConstraintType.MIX){

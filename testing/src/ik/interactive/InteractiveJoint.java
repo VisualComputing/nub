@@ -42,7 +42,7 @@ public class InteractiveJoint extends Joint {
         if(_desiredTranslation != null){
             pg.pushStyle();
             pg.stroke(pg.color(0,255,0));
-            pg.strokeWeight(_radius/2);
+            pg.strokeWeight(_radius/4f);
             pg.line(0,0,0, _desiredTranslation.x()/this.scaling(), _desiredTranslation.y()/this.scaling(), _desiredTranslation.z()/this.scaling());
             pg.popStyle();
         }

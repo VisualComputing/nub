@@ -50,6 +50,7 @@ public class Viewer extends PApplet{
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setFOV(PI / 3);
+        scene.setRadius(200);
         scene.fit(1);
 
         //Add a target per limb

@@ -123,7 +123,7 @@ class Boid {
 
         acceleration.add(Vector.multiply(alignment, 1));
         acceleration.add(Vector.multiply(cohesion, 3));
-        acceleration.add(Vector.multiply(separation, 1));
+        acceleration.add(Vector.multiply(separation, 3));
     }
 
     void move() {

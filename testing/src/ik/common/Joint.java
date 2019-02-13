@@ -17,6 +17,7 @@ public class Joint extends Frame{
     protected int _color;
     protected float _radius;
     protected static PGraphics _pGraphics;
+    public static boolean axes = false;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
 
@@ -56,7 +57,7 @@ public class Joint extends Frame{
         if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         if (!_isRoot) {
-            pg.strokeWeight(_radius/1.5f);
+            pg.strokeWeight(_radius/4f);
             pg.stroke(_color);
             Vector v = location(new Vector(), reference());
             float m = v.magnitude();
@@ -66,19 +67,21 @@ public class Joint extends Frame{
                 pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
             }
         }
-        pg.fill(255);
+        pg.fill(_color);
         pg.noStroke();
         if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
         else pg.sphere(_radius);
-        pg.popStyle();
 
         if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this);
         }
-        pg.stroke(255);
         //scene.drawCross(this);
         //if (scene.is3D()) scene.drawAxes(_radius*2);
         if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
+        pg.strokeWeight(_radius/4f);
+        if(axes) scene.drawAxes(_radius*2);
+        pg.popStyle();
+
     }
 
     public void setRadius(float radius){

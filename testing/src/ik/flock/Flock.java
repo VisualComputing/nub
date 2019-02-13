@@ -9,6 +9,7 @@ import frames.primitives.Vector;
 import frames.processing.Scene;
 import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
+import ik.interactive.Target;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -27,7 +28,7 @@ public class Flock extends PApplet {
     PShape pshape;
     Frame objShape;
 
-    int initBoidNum = 500; // amount of boids to start the program with
+    int initBoidNum = 200; // amount of boids to start the program with
     static ArrayList<Boid> flock;
     static Frame avatar;
     static boolean animate = true;
@@ -186,6 +187,7 @@ public class Flock extends PApplet {
 
         ArrayList<Frame> skeleton = (ArrayList<Frame>) scene.branch(root);
         objShape.scale(0.4f);
+        objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
         //Uncomment to use Linear Blending Skinning with CPU
         skinning = new LinearBlendSkinning(objShape, pshape);
         skinning.setup(skeleton);
@@ -196,28 +198,27 @@ public class Flock extends PApplet {
         //Making a default Path that target must follow
         setupTargetInterpolator(objShape, target);
         Solver solver = scene.registerTreeSolver(root);
-        solver.error = 0.01f;
+        solver.error = 0.1f;
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
-        objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
     }
 
     public Frame fishSkeleton(Frame reference) {
         Frame j1 = new Frame(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
-        Frame  j2 = new Frame(scene);
+        Frame j2 = new Frame(scene);
         j2.setReference(j1);
         j2.setPosition(0, 2.3f, 54.7f);
-        Frame  j3 = new Frame(scene);
+        Frame j3 = new Frame(scene);
         j3.setReference(j2);
         j3.setPosition(0, 0.4f, 22);
-        Frame  j4 = new Frame(scene);
+        Frame j4 = new Frame(scene);
         j4.setReference(j3);
         j4.setPosition(0, 0, -18);
-        Frame  j5 = new Frame(scene);
+        Frame j5 = new Frame(scene);
         j5.setReference(j4);
         j5.setPosition(0, 1.8f, -54);
-        Frame  j6 = new Frame(scene);
+        Frame j6 = new Frame(scene);
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         return j1;
@@ -226,14 +227,14 @@ public class Flock extends PApplet {
     public Interpolator setupTargetInterpolator(Frame reference, Frame target) {
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.setLoop();
-        targetInterpolator.setSpeed(10.f);
+        targetInterpolator.setSpeed(7.2f);
         // Create an initial path
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
             Frame iFrame = new Frame(scene);
             iFrame.setReference(reference);
-            iFrame.setTranslation(new Vector(200 * sin(step * i), target.translation().y(), target.translation().z()));
+            iFrame.setTranslation(new Vector(140 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
         targetInterpolator.start();

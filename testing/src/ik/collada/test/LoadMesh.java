@@ -11,6 +11,7 @@ import frames.processing.Scene;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.colladaLoader.ColladaLoader;
 import ik.common.SkinningAnimationModel;
+import ik.interactive.Target;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -39,12 +40,8 @@ public class LoadMesh extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        PShape redBall = createShape(SPHERE, 0.3f);
-        redBall.setStroke(false);
-        redBall.setFill(color(255,0,0));
-
         for(int i = 0; i < 5; i++){
-            Frame target = new Frame(scene, redBall);
+            Frame target = new Target(scene, 0.15f);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -66,7 +63,7 @@ public class LoadMesh extends PApplet {
         BallAndSocket root_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
         Frame root = model.getRootJoint();
         root_constraint.setRestRotation(root.rotation().get(), root.displacement(new Vector(0, 1, 0)), root.displacement(new Vector(0, 0, 1)));
-        //root.setConstraint(root_constraint);
+        root.setConstraint(root_constraint);
 
         //model.getRootJoint().setConstraint(new FixedConstraint());
 

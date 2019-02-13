@@ -24,19 +24,15 @@ public class Target extends Frame {
     protected Vector _desiredTranslation;
     protected ArrayList<Vector> _last = new ArrayList<>();
 
-
-    public Target(Scene scene, Frame frame) {
+    public Target(Scene scene, float radius) {
         super(scene);
-        _redBall = scene.is3D() ? scene.frontBuffer().createShape(PConstants.SPHERE, ((Joint) scene.trackedFrame()).radius() * 2f) :
-                scene.frontBuffer().createShape(PConstants.ELLIPSE, 0,0, ((Joint) scene.trackedFrame()).radius() * 4f, ((Joint) scene.trackedFrame()).radius() * 4f);
+        _redBall = scene.is3D() ? scene.frontBuffer().createShape(PConstants.SPHERE, radius * 2f) :
+                scene.frontBuffer().createShape(PConstants.ELLIPSE, 0,0, radius * 4f, radius * 4f);
         _redBall.setStroke(false);
         _redBall.setFill(scene.pApplet().color(255, 0, 0));
 
         _interpolator = new Interpolator(this);
         shape(_redBall);
-        setReference(scene.trackedFrame().reference());
-        setPosition(frame.position());
-        setOrientation(frame.orientation());
         setPickingThreshold(0);
 
         Target t = this;
@@ -49,6 +45,12 @@ public class Target extends Frame {
         };
         scene.registerTask(task);
         task.run(150);
+    }
+
+    public Target(Scene scene, float radius, Frame frame) {
+        this(scene, radius);
+        setPosition(frame.position());
+        setOrientation(frame.orientation());
     }
 
     public ArrayList<Vector> last(){ return _last; }
