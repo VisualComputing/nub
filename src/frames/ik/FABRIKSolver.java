@@ -19,6 +19,7 @@ import processing.core.PGraphics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public abstract class FABRIKSolver extends Solver {
   //TODO : Update
@@ -306,12 +307,8 @@ public abstract class FABRIKSolver extends Solver {
     return distance;
   }
 
-  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
+  protected ArrayList<Frame> _copy(List<? extends Frame> chain, Frame reference) {
     ArrayList<Frame> copy = new ArrayList<Frame>();
-    Frame reference = chain.get(0).reference();
-    if (reference != null) {
-      reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
-    }
     for (Frame joint : chain) {
       Frame newJoint = new Frame();
       newJoint.setReference(reference);
@@ -322,6 +319,14 @@ public abstract class FABRIKSolver extends Solver {
       reference = newJoint;
     }
     return copy;
+  }
+
+  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
+    Frame reference = chain.get(0).reference();
+    if (reference != null) {
+      reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
+    }
+    return _copy(chain, reference);
   }
 
   public ArrayList<Vector> positions(){
