@@ -58,7 +58,6 @@ public class ChainSolver extends FABRIKSolver {
     super();
     this._original = chain;
     this._chain = copy == null ? _copy(chain) : copy;
-    //this._chain.addAll(_original);
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
@@ -145,7 +144,7 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
     float change = _backwardReaching(o);
     //Save best solution
-    _current = Vector.distance(target, _original.get(_chain.size() - 1).position());
+    _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
     //Check total position change
     /*if (change <= minDistance){
       //avoid deadLock
