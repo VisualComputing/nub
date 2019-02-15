@@ -4,6 +4,7 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
+import frames.core.constraint.PlanarPolygon;
 import frames.ik.Solver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -58,12 +59,34 @@ public class LoadMesh extends PApplet {
         BallAndSocket chest_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
         Frame chest = model.getJoints().get("Chest");
         chest_constraint.setRestRotation(chest.rotation().get(), chest.displacement(new Vector(0, 1, 0)), chest.displacement(new Vector(0, 0, 1)));
-        //chest.setConstraint(chest_constraint);
+
+        BallAndSocket arm_constraint = new BallAndSocket(radians(89), radians(89), radians(89), radians(89));
+        Frame arm = model.getJoints().get("Upper_Arm_R");
+        Quaternion rot = arm.rotation().get();
+        //rot.compose(new Quaternion(arm.children().get(0).translation() , arm.displacement(new Vector(-1, 0, 0))));
+        //arm_constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)));
+        arm_constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)), arm.children().get(0).translation());
+        //arm.setConstraint(arm_constraint);
+
+        ArrayList<Vector> vertices = new ArrayList<Vector>();
+        float v = 20;
+        float w = 20;
+
+        vertices.add(new Vector(-w, -v));
+        vertices.add(new Vector(w, -v));
+        vertices.add(new Vector(w, v));
+        vertices.add(new Vector(-w, v));
+
+        PlanarPolygon constraint = new PlanarPolygon(vertices);
+        constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)));
+        constraint.setAngle(PI/3f);
+
+        //arm.setConstraint(constraint);
+
 
         BallAndSocket root_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
         Frame root = model.getRootJoint();
         root_constraint.setRestRotation(root.rotation().get(), root.displacement(new Vector(0, 1, 0)), root.displacement(new Vector(0, 0, 1)));
-        root.setConstraint(root_constraint);
 
         //model.getRootJoint().setConstraint(new FixedConstraint());
 
@@ -82,7 +105,7 @@ public class LoadMesh extends PApplet {
 
         solver.maxIter = 20;
         solver.timesPerFrame = 10;
-        solver.error = 0.01f;
+        solver.error = 0.05f;
     }
     public void draw() {
         skinning.updateParams();

@@ -120,9 +120,9 @@ public class HingeTest extends PApplet {
         //Draw Constraints
         scene.drawAxes();
         for(ChainSolver chain_solver : chain_solvers){
-            if(show1) draw_pos(prev, color(0,255,0), 3);
-            if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
-            if(show3) draw_pos(constr, color(100,100,0), 3);
+            //if(show1) draw_pos(prev, color(0,255,0), 3);
+            //if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
+            //if(show3) draw_pos(constr, color(100,100,0), 3);
         }
         if(solve) {
             ccd_solver.solve();
