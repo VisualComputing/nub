@@ -48,15 +48,30 @@ public abstract class ConeConstraint extends Constraint{
      * result will be stored on restRotation.
      * twist and up axis are defined locally on reference rotation
      */
-    public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
+    Quaternion off = new Quaternion();
+    public void setRestRotation(Quaternion reference, Vector up, Vector twist, Vector rest) {
         _orientation = reference.get();
         _idleRotation = reference.get();
-        //Align Y-Axis with Up Axis
-        _orientation.compose(new Quaternion(new Vector(0, 1, 0), up));
-        Vector tw = new Quaternion(new Vector(0, 1, 0), up).inverseRotate(twist);
+        Quaternion delta = new Quaternion(new Vector(0, 1, 0), up);
+        Vector tw = delta.inverseRotate(twist);
+        delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
+        _orientation.compose(delta);
+        Vector rs = delta.inverseRotate(rest);
+        off = new Quaternion(twist, rest);
+        //_idleRotation = Quaternion.compose(_idleRotation, off.inverse());
+        //delta.compose(new Quaternion(new Vector(0, 0, 1), rs));//Quaternion.compose(_idleRotation.inverse(), q);
+        _restRotation = delta;
+        //_orientation.compose(delta);
         //Align y-Axis with twist vector
-        _orientation.compose(new Quaternion(new Vector(0, 0, 1), tw));
-        _restRotation = Quaternion.compose(_idleRotation.inverse(), _orientation);
+        //_orientation.compose(new Quaternion(new Vector(0, 0, 1), tw));
+        //Vector rs = new Quaternion(new Vector(0, 1, 0), up).inverseRotate(rest);
+        //Quaternion q = Quaternion.compose(_orientation,new Quaternion(rs, new Vector(0, 0, 1)));
+        //_restRotation = Quaternion.compose(_idleRotation.inverse(), q);
+    }
+
+
+    public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
+        setRestRotation(reference, up, twist, twist);
     }
 
     @Override
@@ -65,7 +80,9 @@ public abstract class ConeConstraint extends Constraint{
         Quaternion q1 = Quaternion.compose(_idleRotation.inverse(), desired);
         Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
         Vector new_pos = q1.rotate(twist);
+        new_pos = off.rotate(new_pos);
         Vector constrained = apply(new_pos, _restRotation);
+        constrained = off.inverseRotate(constrained);
         Quaternion q2 = new Quaternion(twist, constrained);
         return Quaternion.compose(frame.rotation().inverse(), Quaternion.compose(_idleRotation,q2));
     }
