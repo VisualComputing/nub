@@ -145,6 +145,7 @@ public class ChainSolver extends FABRIKSolver {
     float change = _backwardReaching(o);
     //Save best solution
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
+    _update();
     //Check total position change
     /*if (change <= minDistance){
       //avoid deadLock
@@ -239,9 +240,10 @@ public class ChainSolver extends FABRIKSolver {
     iterations = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
     _init();
-    if(target != null){
+    if(_target != null){
       _best = Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
     } else{
+      System.out.println("entra!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       _best = 10e10f;
     }
   }
