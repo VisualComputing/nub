@@ -28,6 +28,7 @@ import java.util.List;
  * Created by sebchaparr on 27/10/18.
  */
 public class SkeletonBuilder extends PApplet{
+    //TODO Check Fitting curve method for target path
     Scene scene, focus;
     Scene[] views;
     boolean debug = false;
