@@ -71,14 +71,13 @@ public class Joint extends Frame{
         pg.noStroke();
         if (scene.is2D()) pg.ellipse(0, 0, _radius*2, _radius*2);
         else pg.sphere(_radius);
-
+        pg.strokeWeight(_radius/4f);
         if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this);
         }
         //scene.drawCross(this);
         //if (scene.is3D()) scene.drawAxes(_radius*2);
         if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
-        pg.strokeWeight(_radius/4f);
         if(axes) scene.drawAxes(_radius*2);
         pg.popStyle();
 
