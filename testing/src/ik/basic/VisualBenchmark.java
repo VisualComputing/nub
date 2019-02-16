@@ -157,7 +157,7 @@ public class VisualBenchmark extends PApplet {
         solvers.add(new BioIk(structures.get(idx++),12, 4 ));
 
         for(int i = 0; i < solvers.size(); i++){
-            solvers.get(i).error = 0.5f;
+            solvers.get(i).error = 0.001f;
             solvers.get(i).timesPerFrame = 1;
             solvers.get(i).maxIter = 50;
             if(i != 0)targets.get(i).setReference(targets.get(0));
@@ -227,42 +227,42 @@ public class VisualBenchmark extends PApplet {
                 Frame f = s.chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
                 if(s.powerLaw()){
-                    text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()) + "\n Error: " + String.format( "%.2f", s.distanceToTarget()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                    text("Power Law  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Alpha: " + String.format( "%.2f", s.alpha()) + "\n Error: " + String.format( "%.3f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
                 } else{
-                    text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Error: " + String.format( "%.2f", s.distanceToTarget()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                    text("Gaussian  \n Sigma: " + String.format( "%.2f", s.sigma()) + "\n Error: " + String.format( "%.3f", s.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
                 }
             } else if (solver instanceof ChainSolver) {
                 Frame f = ((ChainSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("FABRIK", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("FABRIK" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  GASolver){
                 Frame f = ((GASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.2f", ((GASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  HAEASolver){
                 Frame f = ((HAEASolver)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.2f", ((HAEASolver)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  BioIk){
                 Frame f = ((BioIk)solver).structure().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("BioIK \n Algorithm" + "\n Error: " + String.format( "%.2f", ((BioIk)solver).best()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("BioIK \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  TransposeSolver){
                 Frame f = ((TransposeSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("Transpose", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("Transpose" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  PseudoInverseSolver){
                 Frame f = ((PseudoInverseSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("PseudoInv", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("PseudoInv" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if(solver instanceof  SDLSSolver){
                 Frame f = ((SDLSSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("SDLS", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("SDLS" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             } else if (solver instanceof CCDSolver) {
                 Frame f = ((CCDSolver)solver).chain().get(0);
                 Vector pos = scene.screenLocation(f.position());
-                text("CCD", pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+                text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
             }
         }
         scene.endHUD();

@@ -82,6 +82,13 @@ public class Target extends Frame {
             _desiredTranslation = translateDesired((Vector) gesture[1]);
         } else if(command.matches("Reset")){
             _desiredTranslation = null;
+        } else if(command.matches("AddCurve")){
+            FitCurve fitCurve = (FitCurve) gesture[1];
+            fitCurve.getCatmullRomCurve((Scene)this.graph(), ((Scene)this.graph()).screenLocation(this.position()).z());
+            _interpolator = fitCurve._interpolator;
+            _interpolator.setFrame(this);
+            _interpolator.setSpeed(5f);
+            _desiredTranslation = null;
         }
     }
 

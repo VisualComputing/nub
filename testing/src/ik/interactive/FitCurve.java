@@ -61,8 +61,8 @@ public class FitCurve {
         }
     }
 
-    public static float PIXEL_ERROR = 5.f;
-    public static float SQ_ERROR = 50.f;
+    public static float PIXEL_ERROR = 20.f;
+    public static float SQ_ERROR = 300.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
     public static int MAX_ITERATIONS = 4;
 
@@ -300,34 +300,39 @@ public class FitCurve {
 
     /*From Cubic Bezier to Catmull Rom*/
     Interpolator _interpolator;
-    public void getCatmullRomCurve(Scene scene){
+    public void getCatmullRomCurve(Scene scene, float depth){
         _interpolator = new Interpolator(scene);
         for(int i = 0; i < _curves.size(); i++){
             Bezier curve = _curves.get(i);
             Vector v = curve.evaluate(0);
+            v.setZ(depth);
             v = scene.location(v);
             Frame f = new Frame(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == 0) {
                 v = curve.evaluate(0.15f);
+                v.setZ(depth);
                 v = scene.location(v);
                 f = new Frame(scene);
                 f.setPosition(v);
                 _interpolator.addKeyFrame(f);
             }
             v = curve.evaluate(0.333f);
+            v.setZ(depth);
             v = scene.location(v);
             f = new Frame(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             v = curve.evaluate(0.666f);
+            v.setZ(depth);
             v = scene.location(v);
             f = new Frame(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == _curves.size() - 1) {
                 v = curve.evaluate(1);
+                v.setZ(depth);
                 v = scene.location(v);
                 f = new Frame(scene);
                 f.setPosition(v);

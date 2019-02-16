@@ -166,6 +166,9 @@ public class SkeletonBuilder extends PApplet{
             if(fitCurve._interpolator != null)
                 scene.drawPath(fitCurve._interpolator, 5);
 
+        scene.beginHUD();
+        if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());
+        scene.endHUD();
         /*for(int i = 0; i < views.length; i++) {
             scene.shift(views[i]);
             Joint.setPGraphics(views[i].frontBuffer());
@@ -253,20 +256,17 @@ public class SkeletonBuilder extends PApplet{
     }
 
     public void mouseReleased(MouseEvent event){
-        if(event.isControlDown() && event.getButton() == LEFT){
+        /*if(event.isControlDown() && event.getButton() == LEFT){
             //Reset Curve
             if(fitCurve != null){
                 fitCurve.setStarted(false);
                 fitCurve.printCurves();
-                fitCurve.getCatmullRomCurve(scene);
-                for(Frame f : fitCurve._interpolator.keyFrames()){
-                    //System.out.println( f.position() +  " ,  ");
-                }
+                fitCurve.getCatmullRomCurve(scene, 0);
                 fitCurve._interpolator.start();
                 scene.drawPath(fitCurve._interpolator, 5);
 
             }
-        }
+        }*/
 
         //mouse = scene.location(mouse);
         //mouse = Vector.projectVectorOnPlane(mouse, scene.viewDirection());
@@ -275,7 +275,17 @@ public class SkeletonBuilder extends PApplet{
         if(focus.trackedFrame() != null)
             if(focus.trackedFrame() instanceof  InteractiveJoint)
                 focus.trackedFrame().interact("Add", scene, focus, vector);
-            else focus.trackedFrame().interact("Add", vector, false);
+            //else focus.trackedFrame().interact("Add", vector, false);
+            else{
+                if(fitCurve != null){
+                    fitCurve.setStarted(false);
+                    fitCurve.getCatmullRomCurve(scene, 0);
+                    fitCurve._interpolator.start();
+                    focus.trackedFrame().interact("AddCurve", fitCurve);
+                }
+            }
+        fitCurve = null;
+
     }
 
     public void mouseWheel(MouseEvent event) {
@@ -409,8 +419,10 @@ public class SkeletonBuilder extends PApplet{
             solver = new TreeSolver(scene.trackedFrame());
             solver.timesPerFrame = 1;
         } else {
-            solver = scene.registerTreeSolver(scene.trackedFrame());
-            solver.timesPerFrame = 4;
+            if(scene.trackedFrame() != null) {
+                solver = scene.registerTreeSolver(scene.trackedFrame());
+                solver.timesPerFrame = 4;
+            }
         }
         //add target
         //get leaf nodes
