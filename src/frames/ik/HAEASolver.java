@@ -288,5 +288,10 @@ public class HAEASolver  extends Solver {
             _best = _best == null ? _population.get(i) : _best.fitness() > _population.get(i).fitness() ? _population.get(i) : _best;
         }
     }
+
+    @Override
+    public float error() {
+        return _best.fitness();
+    }
 }
 

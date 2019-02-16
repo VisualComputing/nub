@@ -125,5 +125,10 @@ public class TransposeSolver extends Solver{
         iterations = 0;
         _axes = new Vector[_chain.size() - 1];
     }
+
+    @Override
+    public float error() {
+        return Vector.distance(_target.position(), _chain.get(_chain.size()-1).position());
+    }
 }
 

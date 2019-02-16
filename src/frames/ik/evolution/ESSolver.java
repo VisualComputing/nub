@@ -159,8 +159,9 @@ public class ESSolver extends Solver {
         iterations = 0;
     }
 
-    //Selection methods
-
-
+    @Override
+    public float error() {
+        return Vector.distance(_target.position(), _chain.get(_chain.size()-1).position());
+    }
 }
 

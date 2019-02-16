@@ -56,6 +56,8 @@ public abstract class Solver {
 
   protected abstract void _reset();
 
+  public abstract float error();
+
   public boolean solve() {
     //Reset counter
     if (_changed() || change_temp) {

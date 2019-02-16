@@ -119,4 +119,10 @@ public class CCDSolver extends Solver {
     _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
     iterations = 0;
   }
+
+  @Override
+  public float error() {
+    return Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
+  }
+
 }

@@ -6,6 +6,7 @@ import frames.ik.evolution.operator.Operator;
 import frames.ik.evolution.operator.OperatorMethods;
 import frames.ik.evolution.selection.Selection;
 import frames.ik.evolution.selection.SelectionMethods;
+import frames.primitives.Vector;
 
 import java.util.*;
 
@@ -244,5 +245,10 @@ public class GASolver extends Solver {
             individual.updateFitness(_targets);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
+    }
+
+    @Override
+    public float error() {
+        return _best != null ? _best.fitness() : Float.NaN;
     }
 }

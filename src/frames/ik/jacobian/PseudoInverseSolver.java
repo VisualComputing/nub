@@ -110,5 +110,10 @@ public class PseudoInverseSolver extends Solver{
         _axes = new Vector[_chain.size() - 1];
         iterations = 0;
     }
+
+    @Override
+    public float error() {
+        return Vector.distance(_target.position(), _chain.get(_chain.size()-1).position());
+    }
 }
 

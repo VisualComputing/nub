@@ -243,9 +243,13 @@ public class ChainSolver extends FABRIKSolver {
     if(_target != null){
       _best = Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
     } else{
-      System.out.println("entra!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
       _best = 10e10f;
     }
+  }
+
+  @Override
+  public float error() {
+    return Vector.distance(_original.get(_original.size() - 1).position(), _target.position());
   }
 
   protected void _init() {

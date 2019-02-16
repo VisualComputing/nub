@@ -338,12 +338,18 @@ public class TreeSolver extends FABRIKSolver {
   }
 
   @Override
-  public void _reset() {
+  protected void _reset() {
     iterations = 0;
     _best = 0;
     _current = 0;
     _reset(root);
   }
+
+  @Override
+  public float error() {
+    return _best;
+  }
+
 
   protected ArrayList<Frame> _copyChain(TreeNode parent, ArrayList<Frame> list){
     if(parent._solver != null) {

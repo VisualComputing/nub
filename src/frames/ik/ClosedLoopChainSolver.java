@@ -206,4 +206,14 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         iterations = 0;
         _hasChanged = false;
     }
+
+    @Override
+    public float error() {
+        float error = 0;
+        for(int i = 0; i < _chain.size(); i++){
+            error += Vector.distance(_chain.get(i).position(), _positions.get(i));
+        }
+        return error;
+    }
+
 }
