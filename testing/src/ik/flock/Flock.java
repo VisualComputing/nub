@@ -24,15 +24,15 @@ public class Flock extends PApplet {
     static int flockDepth = 600;
     static boolean avoidWalls = true;
 
-    String shapePath = "/testing/data/objs/fish.obj";
+    String shapePath = "/testing/data/objs/";
     PShape pshape;
     Frame objShape;
 
-    int initBoidNum = 200; // amount of boids to start the program with
-    static ArrayList<Boid> flock;
+    int initBoidNum = 40, numFlocks = 8; // amount of boids to start the program with
+    static ArrayList<ArrayList<Boid>> flocks = new ArrayList<>();
     static Frame avatar;
     static boolean animate = true;
-    LinearBlendSkinning skinning;
+    ArrayList<LinearBlendSkinning> skinning = new ArrayList<>();
 
     public void settings() {
         size(1000, 800, P3D);
@@ -45,10 +45,14 @@ public class Flock extends PApplet {
         scene.setFOV(PI / 3);
         scene.fit();
         // create and fill the list of boids
-        flock = new ArrayList();
-        generateFish();
-        for (int i = 0; i < initBoidNum; i++)
-            flock.add(new Boid(scene, objShape, pshape, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+        for(int k = 0; k < numFlocks; k++){
+            ArrayList<Boid> flock = new ArrayList();
+            generateFish("fish" + k % 4 + ".obj");
+            for (int i = 0; i < initBoidNum; i++)
+                flock.add(new Boid(scene, objShape, pshape, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), flock));
+            flocks.add(flock);
+        }
+        frameRate(30);
     }
 
     public void draw() {
@@ -56,9 +60,11 @@ public class Flock extends PApplet {
         ambientLight(128, 128, 128);
         directionalLight(255, 255, 255, 0, 1, -100);
         walls();
-        scene.render();
-        updateAvatar();
-        skinning.applyTransformations();
+        if(act) {
+            scene.render();
+            updateAvatar();
+            for (LinearBlendSkinning s : skinning) s.applyTransformations();
+        }
     }
 
     public void updateAvatar() {
@@ -144,7 +150,10 @@ public class Flock extends PApplet {
         popStyle();
     }
 
+    boolean act = false;
     public void keyPressed() {
+        act = true;
+
         switch (key) {
             case 'a':
                 animate = !animate;
@@ -171,8 +180,8 @@ public class Flock extends PApplet {
         }
     }
 
-    public void generateFish(){
-        pshape = loadShape(sketchPath() + shapePath);
+    public void generateFish(String name){
+        pshape = loadShape(sketchPath() + shapePath + name);
 
         Vector[] box = getBoundingBox(pshape);
         //Scale model
@@ -189,8 +198,9 @@ public class Flock extends PApplet {
         objShape.scale(0.4f);
         objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
         //Uncomment to use Linear Blending Skinning with CPU
-        skinning = new LinearBlendSkinning(objShape, pshape);
-        skinning.setup(skeleton);
+        LinearBlendSkinning s = new LinearBlendSkinning(objShape, pshape);
+        s.setup(skeleton);
+        skinning.add(s);
         //Adding IK behavior
         Frame target = new Frame(scene);
         target.setReference(objShape);
@@ -227,7 +237,7 @@ public class Flock extends PApplet {
     public Interpolator setupTargetInterpolator(Frame reference, Frame target) {
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.setLoop();
-        targetInterpolator.setSpeed(7.2f);
+        targetInterpolator.setSpeed(8.2f);
         // Create an initial path
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);

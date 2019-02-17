@@ -24,7 +24,7 @@ class Boid {
     float flap = 0;
     float t = 0;
 
-    Boid(Scene scn, Frame objFrame, PShape pshape, Vector inPos) {
+    Boid(Scene scn, Frame objFrame, PShape pshape, Vector inPos, ArrayList<Boid> flock) {
         scene = scn;
         pApplet = scene.pApplet();
         position = new Vector();
@@ -35,7 +35,7 @@ class Boid {
             @Override
             public void visit() {
                 if (Flock.animate)
-                    run(Flock.flock);
+                    run(flock);
                 //render();
                 //scene.drawAxes(20);
                 scene.pApplet().pushMatrix();
@@ -121,9 +121,9 @@ class Boid {
         cohesion = Vector.subtract(posSum, position);
         cohesion.limit(maxSteerForce);
 
-        acceleration.add(Vector.multiply(alignment, 1));
+        acceleration.add(Vector.multiply(alignment, 2));
         acceleration.add(Vector.multiply(cohesion, 3));
-        acceleration.add(Vector.multiply(separation, 3));
+        acceleration.add(Vector.multiply(separation, 6));
     }
 
     void move() {

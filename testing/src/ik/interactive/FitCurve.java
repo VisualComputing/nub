@@ -61,8 +61,8 @@ public class FitCurve {
         }
     }
 
-    public static float PIXEL_ERROR = 20.f;
-    public static float SQ_ERROR = 300.f;
+    public static float PIXEL_ERROR = 5.f;
+    public static float SQ_ERROR = 50.f;
     public static float SQ_ITERATION_ERROR = SQ_ERROR * 4.f;
     public static int MAX_ITERATIONS = 4;
 

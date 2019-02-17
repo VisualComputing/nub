@@ -33,8 +33,8 @@ public class InteractiveFish extends PApplet {
     //LinearBlendSkinningGPU skinning;
     Frame target;
     Interpolator targetInterpolator;
-    String shapePath = "/testing/data/objs/fish.obj";
-    String texturePath = "/testing/data/objs/fish.jpg";
+    String shapePath = "/testing/data/objs/fish0.obj";
+    String texturePath = "/testing/data/objs/fish0.jpg";
 
     float targetRadius = 7;
 
