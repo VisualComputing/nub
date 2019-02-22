@@ -2,9 +2,9 @@
  * ConstrainedNode.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates how to add constraints to your nub
+ * This example illustrates how to add constraints to your nodes
  * to limit their motion. Constraints can be defined respect to
- * the local, world or camera nub. Try all the possibilities
+ * the local, world or camera node. Try all the possibilities
  * following the on screen helping text.
  */
 

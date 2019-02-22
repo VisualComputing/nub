@@ -150,7 +150,7 @@ void draw() {
     scene.render();
   }
   if (displayMinimap) {
-    // shift scene attached nub to minimap
+    // shift scene attached nodes to minimap
     scene.shift(minimap);
     if (!scene.isOffscreen())
       scene.beginHUD();
@@ -167,7 +167,7 @@ void draw() {
     minimap.display();
     if (!scene.isOffscreen())
       scene.endHUD();
-    // shift back minimap attached nub to the scene
+    // shift back minimap attached nodes to the scene
     minimap.shift(scene);
   }
 }

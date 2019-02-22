@@ -8,7 +8,7 @@
  * Press 's' to fit ball interpolation.
  * Press 'f' to fit ball.
  * Press the arrow keys to move the camera.
- * Press '1' and '2' to add eye key-nub to the eye paths.
+ * Press '1' and '2' to add eye key-frame to the eye paths.
  * Press 'a' and 'c' to play the eye paths.
  * Press 'b' and 'd' to remove the eye paths.
  */

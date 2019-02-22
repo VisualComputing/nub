@@ -21,7 +21,7 @@ class Lamp implements PConstants {
       node(i).setHighlighting(Node.Highlighting.FRONT);
     }
 
-    // Initialize nub
+    // Initialize nodes
     node(1).setTranslation(0f, 0f, 8f); // Base height
     node(2).setTranslation(0, 0, 50);  // Arm length
     node(3).setTranslation(0, 0, 50);  // Arm length
