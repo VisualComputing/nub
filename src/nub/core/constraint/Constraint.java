@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,11 +8,11 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core.constraint;
+package nub.core.constraint;
 
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 
 /**
  * An interface class for Node constraints. This interface API aims to conform that of the

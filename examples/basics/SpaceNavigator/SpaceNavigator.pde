@@ -7,9 +7,9 @@
  * library and a Space Navigator and it has been tested only under Linux.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 import org.gamecontrolplus.*;
 import net.java.games.input.*;
@@ -25,7 +25,7 @@ ControlSlider snZRot;
 ControlButton button1; // Buttons
 ControlButton button2;
 
-// frames stuff:
+// nub stuff:
 Scene scene;
 boolean snPicking;
 
@@ -35,10 +35,10 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(1500);
   scene.fit(1);
-  Frame[] shapes = new Frame[50];
+  Node[] shapes = new Node[50];
   for (int i = 0; i < shapes.length; i++) {
     tint(random(0,255), random(0,255), random(0,255), random(150,255));
-    shapes[i] = new Frame(scene, loadShape("rocket.obj"));
+    shapes[i] = new Node(scene, loadShape("rocket.obj"));
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     scene.randomize(shapes[i]);

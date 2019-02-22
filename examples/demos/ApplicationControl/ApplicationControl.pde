@@ -13,12 +13,12 @@
  * mouse click, to control its color and number of faces.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
-Frame[] shapes;
+Node[] shapes;
 PFont font36;
 int totalShapes;
 
@@ -32,9 +32,9 @@ public void settings() {
 void setup() {
   scene = new Scene(this);
   scene.fit(1);
-  shapes = new Frame[10];
+  shapes = new Node[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Frame(scene) {
+    shapes[i] = new Node(scene) {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
@@ -94,9 +94,9 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.setTrackedFrame(shapes[value]);
+    scene.setTrackedNode(shapes[value]);
   if (key == ' ')
-    scene.resetTrackedFrame();
+    scene.resetTrackedNode();
   if (key == CODED)
     if (keyCode == UP)
       scene.translate(0, -10);

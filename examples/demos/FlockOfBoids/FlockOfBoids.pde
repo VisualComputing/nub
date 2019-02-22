@@ -22,9 +22,9 @@
  * Press 's' to call scene.fit(1).
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 //flock bounding box
@@ -35,7 +35,7 @@ boolean avoidWalls = true;
 
 int initBoidNum = 900; // amount of boids to start the program with
 ArrayList<Boid> flock;
-Frame avatar;
+Node avatar;
 boolean animate = true;
 
 void setup() {
@@ -56,7 +56,7 @@ void draw() {
   walls();
   scene.render();
   // uncomment to asynchronously update boid avatar. See mouseClicked()
-  // updateAvatar(scene.trackedFrame("mouseClicked"));
+  // updateAvatar(scene.trackedNode("mouseClicked"));
 }
 
 void walls() {
@@ -81,7 +81,7 @@ void walls() {
   popStyle();
 }
 
-void updateAvatar(Frame node) {
+void updateAvatar(Node node) {
   if (node != avatar) {
     avatar = node;
     if (avatar != null)
@@ -112,9 +112,9 @@ void mouseClicked() {
   updateAvatar(scene.track("mouseClicked", mouseX, mouseY));
   // which is the same as these two lines:
   // scene.track("mouseClicked", mouseX, mouseY);
-  // updateAvatar(scene.trackedFrame("mouseClicked"));
+  // updateAvatar(scene.trackedNode("mouseClicked"));
   // 2. Asynchronously
-  // which requires updateAvatar(scene.trackedFrame("mouseClicked")) to be called within draw()
+  // which requires updateAvatar(scene.trackedNode("mouseClicked")) to be called within draw()
   // scene.cast("mouseClicked", mouseX, mouseY);
 }
 
@@ -160,7 +160,7 @@ void keyPressed() {
     scene.shiftTimers();
     break;
   case 'p':
-    println("Frame rate: " + frameRate);
+    println("Node rate: " + frameRate);
     break;
   case 'v':
     avoidWalls = !avoidWalls;

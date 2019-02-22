@@ -8,12 +8,12 @@
  * The back buffer is used to pick them.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
-Frame[] shapes;
+Node[] shapes;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
@@ -29,9 +29,9 @@ void setup() {
   scene = new Scene(this, createGraphics(w, h / 2, renderer));
   scene.setRadius(max(w, h));
 
-  shapes = new Frame[100];
+  shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Frame(scene, caja());
+    shapes[i] = new Node(scene, caja());
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();

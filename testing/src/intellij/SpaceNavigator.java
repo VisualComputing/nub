@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Node;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.processing.Scene;
 import org.gamecontrolplus.ControlButton;
 import org.gamecontrolplus.ControlDevice;
 import org.gamecontrolplus.ControlIO;

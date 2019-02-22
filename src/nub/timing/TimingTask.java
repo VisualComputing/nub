@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,11 +8,11 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.timing;
+package nub.timing;
 
 /**
  * An abstract wrapper class holding a {@link #timer()} together with its call back method
- * ( {@link frames.timing.Taskable#execute()}) which derived classes should
+ * ( {@link nub.timing.Taskable#execute()}) which derived classes should
  * implement.
  */
 public abstract class TimingTask implements Taskable {

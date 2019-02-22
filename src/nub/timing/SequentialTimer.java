@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,7 +8,7 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.timing;
+package nub.timing;
 
 /**
  * Sequential timers are single-threaded timers handled by a TimingHandler.
@@ -61,7 +61,7 @@ public class SequentialTimer implements Timer {
    * Executes the callback method defined by the {@link #timingTask()}.
    *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
-   * (see {@link frames.timing.TimingHandler#handle()}).
+   * (see {@link nub.timing.TimingHandler#handle()}).
    */
   protected boolean _execute() {
     boolean result = trigggered();
@@ -123,7 +123,7 @@ public class SequentialTimer implements Timer {
    * Returns {@code true} if the timer was triggered at the given node.
    *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
-   * (see {@link frames.timing.TimingHandler#handle()}).
+   * (see {@link nub.timing.TimingHandler#handle()}).
    */
   public boolean trigggered() {
     if (!_active)

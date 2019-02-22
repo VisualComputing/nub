@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.primitives.Vector;
+import nub.core.Graph;
+import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 

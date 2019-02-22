@@ -3,7 +3,7 @@
  * 
  * This class is part of the Luxo example.
  * 
- * Add a graphics handler to an InteractiveFrame to automatically pick
+ * Add a graphics handler to an InteractiveNode to automatically pick
  * an object. The object is described in the graphics handler procedure.
  */
 
@@ -18,10 +18,10 @@ class Lamp implements PConstants {
     for (int i = 0; i < 4; ++i) {
       pieces[i] = new Piece(scene);
       node(i).setReference(i > 0 ? pieces[i - 1] : null);
-      node(i).setHighlighting(Frame.Highlighting.FRONT);
+      node(i).setHighlighting(Node.Highlighting.FRONT);
     }
 
-    // Initialize frames
+    // Initialize nub
     node(1).setTranslation(0f, 0f, 8f); // Base height
     node(2).setTranslation(0, 0, 50);  // Arm length
     node(3).setTranslation(0, 0, 50);  // Arm length

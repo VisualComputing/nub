@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.core.MatrixHandler;
-import frames.core.Node;
-import frames.primitives.Point;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.MatrixHandler;
+import nub.core.Node;
+import nub.primitives.Point;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;

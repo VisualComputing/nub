@@ -8,7 +8,7 @@ class Sphere extends Frame {
     setRadius(10);
   }
 
-  // detached-frames drawing require to
+  // detached-nub drawing require to
   // manually apply the node transformation
   void draw() {
     pushStyle();

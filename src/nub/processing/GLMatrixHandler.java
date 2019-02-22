@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,10 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.processing;
+package nub.processing;
 
-import frames.core.MatrixHandler;
-import frames.primitives.Matrix;
+import nub.core.MatrixHandler;
+import nub.primitives.Matrix;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphicsOpenGL;
 

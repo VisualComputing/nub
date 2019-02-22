@@ -8,18 +8,18 @@
  * Press 's' to fit ball interpolation.
  * Press 'f' to fit ball.
  * Press the arrow keys to move the camera.
- * Press '1' and '2' to add eye key-frames to the eye paths.
+ * Press '1' and '2' to add eye key-nub to the eye paths.
  * Press 'a' and 'c' to play the eye paths.
  * Press 'b' and 'd' to remove the eye paths.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-Frame shape;
+Node shape;
 boolean showEyePath = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -40,7 +40,7 @@ void setup() {
 
   // interpolation 3. Custom (arbitrary) node interpolations
 
-  shape = new Frame(scene) {
+  shape = new Node(scene) {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,7 +8,7 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.primitives;
+package nub.primitives;
 
 /**
  * 4x4 matrix affine matrix implementation. Matrix is represented in column major order: |

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,12 +8,12 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core;
+package nub.core;
 
-import frames.primitives.*;
-import frames.timing.Animator;
-import frames.timing.TimingHandler;
-import frames.timing.TimingTask;
+import nub.primitives.*;
+import nub.timing.Animator;
+import nub.timing.TimingHandler;
+import nub.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -334,7 +334,7 @@ public class Graph {
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
    * nodes will be constrained so that they will remain at the x-y plane. See
-   * {@link frames.core.constraint.Constraint}.
+   * {@link nub.core.constraint.Constraint}.
    *
    * @see Node#projection(Type, float, float, float, float, boolean)
    * @see Node#magnitude()

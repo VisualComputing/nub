@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;

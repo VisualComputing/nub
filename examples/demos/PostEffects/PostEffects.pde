@@ -8,16 +8,16 @@
  * Press '1' to '9' to (de)activate effect.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, depthShader, horizontalShader;
 PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
 boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
 int startTime;
-Frame[] models;
+Node[] models;
 PFont font;
 
 public void setup() {
@@ -27,9 +27,9 @@ public void setup() {
   colorMode(HSB, 255);
   scene = new Scene(this, P3D);
   scene.setRadius(1000);
-  models = new Frame[100];
+  models = new Node[100];
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Frame(scene, shape());
+    models[i] = new Node(scene, shape());
     scene.randomize(models[i]);
     // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);

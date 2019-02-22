@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -11,18 +11,18 @@
 // Thanks goes to Andres Colubri, https://www.sabetilab.org/andres-colubri/
 // for implementing the first off-screen scene working example
 
-package frames.processing;
+package nub.processing;
 
-import frames.core.Graph;
-import frames.core.Interpolator;
-import frames.core.MatrixHandler;
-import frames.core.Node;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.timing.SequentialTimer;
-import frames.timing.TimingTask;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.core.MatrixHandler;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Point;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.timing.SequentialTimer;
+import nub.timing.TimingTask;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;

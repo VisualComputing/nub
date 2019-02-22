@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.core.Node;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -41,11 +41,11 @@ public class DOF extends PApplet {
     //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/dof/depth_linear.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);

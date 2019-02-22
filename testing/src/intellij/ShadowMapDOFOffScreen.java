@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -75,10 +75,10 @@ public class ShadowMapDOFOffScreen extends PApplet {
 
     lightPGraphics = createGraphics(width / 2, height / 2, P3D);
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
     depthShader.set("near", zNear);
     depthShader.set("far", zFar);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth_linear.glsl");
     //depthShader.set("maxDepth", zFar - zNear);
     depthPGraphics = createGraphics(width / 2, height / 2, P3D);
     depthPGraphics.shader(depthShader);

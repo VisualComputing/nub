@@ -1,24 +1,24 @@
 /**
- * ConstrainedFrame.
+ * ConstrainedNode.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates how to add constraints to your frames
+ * This example illustrates how to add constraints to your nub
  * to limit their motion. Constraints can be defined respect to
- * the local, world or camera frames. Try all the possibilities
+ * the local, world or camera nub. Try all the possibilities
  * following the on screen helping text.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.core.constraint.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.core.constraint.*;
+import nub.processing.*;
 
 Scene scene;
 boolean mouseTracking = true;
 PFont myFont;
 int transDir;
 int rotDir;
-Frame iFrame;
+Node iNode;
 AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
 int activeConstraint;
 boolean wC = true;
@@ -42,7 +42,7 @@ void setup() {
   rotDir = 0;
   activeConstraint = 0;
 
-  iFrame = new Frame(scene) {
+  iNode = new Node(scene) {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
@@ -53,9 +53,9 @@ void setup() {
       return true;
     }
   };
-  iFrame.setPickingThreshold(0);
-  iFrame.translate(new Vector(20, 20, 0));
-  iFrame.setConstraint(constraints[activeConstraint]);
+  iNode.setPickingThreshold(0);
+  iNode.translate(new Vector(20, 20, 0));
+  iNode.setConstraint(constraints[activeConstraint]);
 }
 
 void draw() {
@@ -91,11 +91,11 @@ void mouseWheel(MouseEvent event) {
 
 void keyPressed() {
   if (key == 'i')
-    if (scene.isTrackedFrame(iFrame)) {
-      scene.resetTrackedFrame();
+    if (scene.isTrackedNode(iNode)) {
+      scene.resetTrackedNode();
       mouseTracking = true;
     } else {
-      scene.setTrackedFrame(iFrame);
+      scene.setTrackedNode(iNode);
       mouseTracking = false;
     }
   if (key == 'b' || key == 'B') {
@@ -204,7 +204,7 @@ void changeConstraint() {
     .setRotationConstraintDirection(constraints[previous]
     .rotationConstraintDirection());
 
-  iFrame.setConstraint(constraints[activeConstraint]);
+  iNode.setConstraint(constraints[activeConstraint]);
 }
 
 void displayType(AxisPlaneConstraint.Type type, int x, int y, char c) {

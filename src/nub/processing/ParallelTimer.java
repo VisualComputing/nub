@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,10 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.processing;
+package nub.processing;
 
-import frames.timing.Taskable;
-import frames.timing.Timer;
+import nub.timing.Taskable;
+import nub.timing.Timer;
 
 /**
  * Parrallel timer based on java.util.Timer and java.util.TimerTask.

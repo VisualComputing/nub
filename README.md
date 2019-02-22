@@ -63,7 +63,7 @@ A node is a coordinate system that may be translated, rotated and scaled. [Frame
   2 3
 ```
 
-To setup the scene hierarchy of _attached_ frames, i.e., frames belonging to the scene, use code such as the following:
+To setup the scene hierarchy of _attached_ nub, i.e., nub belonging to the scene, use code such as the following:
 
 ```processing
 Scene scene;
@@ -73,7 +73,7 @@ void setup() {
   // To attach a leading-node (those whose parent is the world, such as f1)
   // the scene parameter is passed to the Frame constructor:
   f1 = new Frame(scene);
-  // whereas for the remaining frames we pass any constructor taking a
+  // whereas for the remaining nub we pass any constructor taking a
   // reference node paramater, such as Frame(Frame referenceFrame)
   f2 = new Frame(f1) {
     // immediate mode rendering procedure
@@ -90,7 +90,7 @@ void setup() {
 }
 ```
 
-Some advantages of using _attached_ frames are:
+Some advantages of using _attached_ nub are:
 
 * The [Scene](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html) sets up a default _eye_ node. To set the eye from an arbitrary [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance call [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-). To retrieve the scene _eye_ instance call [eye()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#eye--).
 * A node shape can be set from an [immediate-mode](https://en.wikipedia.org/wiki/Immediate_mode_(computer_graphics)) rendering Processing procedure (see [graphics(PGraphics)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#graphics-processing.core.PGraphics-)) or from a [retained-mode](https://en.wikipedia.org/wiki/Retained_mode) rendering Processing [PShape](https://processing.org/reference/PShape.html) (see [shape(PShape)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#shape-processing.core.PShape-)). Frame shapes can be picked precisely using their projection onto the screen, see [pickingThreshold()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#pickingThreshold--).
@@ -109,7 +109,7 @@ To set the scene [tracked-node](https://visualcomputing.github.io/frames-javadoc
 
 ```processing
 void mouseMoved() {
-  // the tracked-node is updated using ray-casting from the set of scene attached frames
+  // the tracked-node is updated using ray-casting from the set of scene attached nub
   scene.cast();
 }
 ```
@@ -166,7 +166,7 @@ observe that:
 * Call [render(PGraphics, Graph.Type, Frame, zNear, zFar)](https://visualcomputing.github.io/frames-javadocs/frames/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Frame-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [ShadowMap example](https://github.com/VisualComputing/framesjs/tree/processing/examples/demos/ShadowMap).
 * The role played by a [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) method.
 
-To bypass the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm use [detached frames](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the node as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
+To bypass the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm use [detached nub](detached.md), or override [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--) to setup a _cullingCondition_ for the node as follows (see [visit()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#visit--), [cull(boolean)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#isCulled--)):
 
 ```processing
 Scene scene;
@@ -205,7 +205,7 @@ void setup() {
 }
 ```
 
-which will create a random interpolator path containing [4..10] key-frames. The interpolation is also started. The interpolator path may be drawn with code like this:
+which will create a random interpolator path containing [4..10] key-nub. The interpolation is also started. The interpolator path may be drawn with code like this:
 
 ```processing
 ...
@@ -231,7 +231,7 @@ Observations:
 1. An _hid_ tracked-node (see [trackedFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#trackedFrame-java.lang.String-)) defines in turn an _hid_ default-node (see [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-)) which simply returns the tracked-node or the scene _eye_ when the _hid_ tracked-node is `null`
 2. The _hid_ interactivity methods are implemented in terms of the ones defined previously by simply passing the _hid_ [defaultFrame(String)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#defaultFrame-java.lang.String-) to them.
 3. The default _hid_ is defined with a `null` String parameter (e.g., [scale(float)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#scale-float-) simply calls `scale(null, delta)`). The _Scene_ default mouse _hid_ presented in the [Frames](#user-content-frames) section is precisely implemented is this manner.
-4. To update an _hid_ tracked-node using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached frames), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached frames) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached frames too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-node synchronously (i.e., they return the _hid_ tracked-node immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-node during the next call to the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm).
+4. To update an _hid_ tracked-node using ray-casting call [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) (detached or attached nub), [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) (only attached nub) or [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) (only for attached nub too). While [track(String, Point, Frame[])](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-frames.core.Frame:A-) and [track(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#track-java.lang.String-frames.primitives.Point-) update the _hid_ tracked-node synchronously (i.e., they return the _hid_ tracked-node immediately), [cast(String, Point)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#cast-java.lang.String-frames.primitives.Point-) updates it asynchronously (i.e., it optimally updates the _hid_ tracked-node during the next call to the [render()](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#render--) algorithm).
 
 ## Control
 

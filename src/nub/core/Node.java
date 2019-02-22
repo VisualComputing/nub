@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,14 +8,14 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core;
+package nub.core;
 
-import frames.core.constraint.Constraint;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.timing.TimingHandler;
+import nub.core.constraint.Constraint;
+import nub.primitives.Matrix;
+import nub.primitives.Point;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -94,9 +94,9 @@ import java.util.List;
  * Use {@link #setConstraint(Constraint)} to attach a constraint to a node.
  * <p>
  * Classical constraints are provided for convenience (see
- * {@link frames.core.constraint.LocalConstraint},
- * {@link frames.core.constraint.WorldConstraint} and
- * {@link frames.core.constraint.EyeConstraint}) and new constraints can very
+ * {@link nub.core.constraint.LocalConstraint},
+ * {@link nub.core.constraint.WorldConstraint} and
+ * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
  * A node shape can be set from a retained-mode rendering object, see {@link #shape(Object)};

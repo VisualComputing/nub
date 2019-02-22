@@ -1,12 +1,12 @@
 package intellij;
 
-import frames.core.Node;
-import frames.core.constraint.AxisPlaneConstraint;
-import frames.core.constraint.EyeConstraint;
-import frames.core.constraint.LocalConstraint;
-import frames.core.constraint.WorldConstraint;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.constraint.AxisPlaneConstraint;
+import nub.core.constraint.EyeConstraint;
+import nub.core.constraint.LocalConstraint;
+import nub.core.constraint.WorldConstraint;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;

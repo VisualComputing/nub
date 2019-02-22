@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Interpolator;
-import frames.core.Node;
-import frames.processing.Scene;
+import nub.core.Interpolator;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;

@@ -1,4 +1,4 @@
-public class Box extends Frame {
+public class Box extends Node {
   float _w, _h, _d;
   int _color;
 

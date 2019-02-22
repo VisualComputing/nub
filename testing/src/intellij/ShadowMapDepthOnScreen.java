@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -87,11 +87,11 @@ public class ShadowMapDepthOnScreen extends PApplet {
   public void setShader(boolean one_) {
     one = one_;
     if (one) {
-      depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth.glsl");
+      depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth.glsl");
       depthShader.set("maxDepth", 10);
       println("version 1 of the shader");
     } else {
-      depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
+      depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
       depthShader.set("near", zNear);
       depthShader.set("far", zFar);
       println("version 2 of the shader");

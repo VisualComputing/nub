@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,10 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.timing;
+package nub.timing;
 
 /**
- * Class implementing the main {@link frames.timing.Animator} behavior.
+ * Class implementing the main {@link nub.timing.Animator} behavior.
  */
 public class AnimatorObject implements Animator {
   protected SequentialTimer _animationTimer;

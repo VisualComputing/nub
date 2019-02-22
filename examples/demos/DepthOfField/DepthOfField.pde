@@ -13,14 +13,14 @@
  * Press 'l' to load the eye previously saved.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 PShader depthShader, dofShader;
 PGraphics depthPGraphics, dofPGraphics;
 Scene scene;
-Frame[] models;
+Node[] models;
 int mode = 2;
 
 void setup() {
@@ -30,10 +30,10 @@ void setup() {
   scene.setRadius(1000);
   scene.fit(1);
 
-  models = new Frame[100];
+  models = new Node[100];
 
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Frame(scene, boxShape());
+    models[i] = new Node(scene, boxShape());
     // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);
     scene.randomize(models[i]);

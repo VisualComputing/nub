@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,12 +8,12 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core;
+package nub.core;
 
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.timing.TimingHandler;
-import frames.timing.TimingTask;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.timing.TimingHandler;
+import nub.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +75,7 @@ import java.util.ListIterator;
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
  *
- * <b>Attention:</b> If a {@link frames.core.constraint.Constraint} is attached to
+ * <b>Attention:</b> If a {@link nub.core.constraint.Constraint} is attached to
  * the {@link #node()} (see {@link Node#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
  * there was no constraint) will probably be erroneous.

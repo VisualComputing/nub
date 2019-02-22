@@ -14,13 +14,13 @@
  * Press 'p' to toggle the scene perspective.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
 Scene scene;
-Frame[] shapes;
+Node[] shapes;
 PGraphics shadowMap;
 PShader depthShader;
 float zNear = 50;
@@ -36,15 +36,15 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(max(w, h));
   scene.fit(1);
-  shapes = new Frame[20];
+  shapes = new Node[20];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Frame(scene) {
+    shapes[i] = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
         pg.pushStyle();
-        if (scene.trackedFrame("light") == this) {
+        if (scene.trackedNode("light") == this) {
           Scene.drawAxes(pg, 150);
-          pg.fill(0, scene.isTrackedFrame(this) ? 255 : 0, 255, 120);
+          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         } else {
           if (pg == shadowMap)
@@ -73,7 +73,7 @@ void setup() {
     shapes[i].randomize();
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].setHighlighting(Frame.Highlighting.NONE);
+    shapes[i].setHighlighting(Node.Highlighting.NONE);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);
   depthShader = loadShader("depth.glsl");
@@ -81,8 +81,8 @@ void setup() {
   depthShader.set("far", zFar);
   shadowMap.shader(depthShader);
 
-  scene.setTrackedFrame("light", shapes[(int) random(0, shapes.length - 1)]);
-  scene.trackedFrame("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedFrame("light").position()));
+  scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
+  scene.trackedNode("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedNode("light").position()));
 }
 
 void draw() {
@@ -90,10 +90,10 @@ void draw() {
   // 1. Fill in and display front-buffer
   scene.render();
   // 2. Fill in shadow map using the light point of view
-  if (scene.trackedFrame("light") != null) {
+  if (scene.trackedNode("light") != null) {
     shadowMap.beginDraw();
     shadowMap.background(140, 160, 125);
-    scene.render(shadowMap, shadowMapType, scene.trackedFrame("light"), zNear, zFar);
+    scene.render(shadowMap, shadowMapType, scene.trackedNode("light"), zNear, zFar);
     shadowMap.endDraw();
     // 3. Display shadow map
     scene.beginHUD();

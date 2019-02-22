@@ -10,7 +10,7 @@ class Box extends Frame {
     randomize(new Vector(), 200, g.is3D());
   }
 
-  // detached-frames drawing require to
+  // detached-nub drawing require to
   // manually apply the node transformation
   void draw() {
     pushStyle();

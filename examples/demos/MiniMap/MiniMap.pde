@@ -13,13 +13,13 @@
  * Press 't' to toggle the scene camera type (only in 3D).
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene, minimap, focus;
-Frame[] models;
-Frame sceneEye;
+Node[] models;
+Node sceneEye;
 boolean displayMinimap = true;
 // whilst scene is either on-screen or not, the minimap is always off-screen
 // test both cases here:
@@ -40,16 +40,16 @@ void setup() {
   scene = onScreen ? new Scene(this) : new Scene(this, renderer);
   // eye only should belong only to the scene
   // so set a detached 'node' instance as the eye
-  scene.setEye(new Frame());
+  scene.setEye(new Node());
   scene.setRadius(1000);
   rectMode(CENTER);
   scene.fit(1);
-  models = new Frame[30];
+  models = new Node[30];
   for (int i = 0; i < models.length; i++) {
     if ((i & 1) == 0) {
-      models[i] = new Frame(scene, shape());
+      models[i] = new Node(scene, shape());
     } else {
-      models[i] = new Frame(scene) {
+      models[i] = new Node(scene) {
         int _faces = (int) MiniMap.this.random(3, 15);
         // We need to call the PApplet random function instead of the node random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
@@ -73,13 +73,13 @@ void setup() {
   minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
   // eye only should belong only to the minimap
   // so set a detached 'node' instance as the eye
-  minimap.setEye(new Frame());
+  minimap.setEye(new Node());
   minimap.setRadius(2000);
   if (renderer == P3D)
     minimap.togglePerspective();
   minimap.fit(1);
   // detached node
-  sceneEye = new Frame();
+  sceneEye = new Node();
 }
 
 PShape shape() {
@@ -94,9 +94,9 @@ void keyPressed() {
   if (key == 'i') {
     interactiveEye = !interactiveEye;
     if (interactiveEye)
-      minimap.setTrackedFrame(sceneEye);
+      minimap.setTrackedNode(sceneEye);
     else
-      minimap.resetTrackedFrame();
+      minimap.resetTrackedNode();
   }
   if (key == 'f')
     focus.fit(1);
@@ -136,7 +136,7 @@ void mouseClicked(MouseEvent event) {
 void draw() {
   focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
   if (interactiveEye)
-    Frame.sync(scene.eye(), sceneEye);
+    Node.sync(scene.eye(), sceneEye);
   background(75, 25, 15);
   if (scene.isOffscreen()) {
     scene.beginDraw();
@@ -150,7 +150,7 @@ void draw() {
     scene.render();
   }
   if (displayMinimap) {
-    // shift scene attached frames to minimap
+    // shift scene attached nub to minimap
     scene.shift(minimap);
     if (!scene.isOffscreen())
       scene.beginHUD();
@@ -167,7 +167,7 @@ void draw() {
     minimap.display();
     if (!scene.isOffscreen())
       scene.endHUD();
-    // shift back minimap attached frames to the scene
+    // shift back minimap attached nub to the scene
     minimap.shift(scene);
   }
 }

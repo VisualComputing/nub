@@ -1,4 +1,4 @@
-# Detached frames
+# Detached nub
 
 **Table of Contents**
 
@@ -12,7 +12,7 @@ Frames can also be instantiated without attaching them to a `scene` by simply om
 
 ## Sceneless
 
-To setup the hierarchy of _detached_ frames, i.e., frames not belonging to a particular `scene`, use code such as the following:
+To setup the hierarchy of _detached_ nub, i.e., nub not belonging to a particular `scene`, use code such as the following:
 
 ```processing
 Frame eye, f1, f2, f3;
@@ -21,7 +21,7 @@ void setup() {
   // detached leading node (those whose parent is the world, such as the eye and f1):
   eye =  new Frame();
   f1 = new Frame();
-  // whereas for the remaining frames we pass any constructor taking a
+  // whereas for the remaining nub we pass any constructor taking a
   // reference node paramater, such as Frame(Frame referenceFrame, float scaling):
   f2 = new Frame(f1, 1);
   f3 = new Frame(f1, 1);
@@ -59,7 +59,7 @@ void draw() {
 }
 ```
 
-See the [Sceneless example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/Sceneless). Some advantages of using _detached_ frames without instantiating a `scene` object are:
+See the [Sceneless example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/Sceneless). Some advantages of using _detached_ nub without instantiating a `scene` object are:
 
 * The scene gets rendered respect to an `eye` node.
 * The graph topology is set (even at run time) with [setReference(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html#setReference-frames.core.Frame-).
@@ -150,12 +150,12 @@ public void mouseDragged() {
 }
 ```
 
-See the [detached-frames CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/CajasOrientadas). Some advantages of using _detached_ frames through an instantiated `scene` object:
+See the [detached-nub CajasOrientadas example](https://github.com/VisualComputing/frames/tree/master/testing/src/processing/DetachedFrames/CajasOrientadas). Some advantages of using _detached_ nub through an instantiated `scene` object:
 
-* Same as with _detached_ frames without an instantiated `scene` object.
+* Same as with _detached_ nub without an instantiated `scene` object.
 * The `eye` node is automatically handled by the `scene` and may be set from any (attached or detached) [Frame](https://visualcomputing.github.io/frames-javadocs/frames/core/Frame.html) instance (see [setEye(Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#setEye-frames.core.Frame-)).
 * By default the `scene` object instantiates and attached `eye` node.
 * Frames may be picked using ray-casting and the `scene` provides all sorts of interactivity commands to manipulate them.
 * The `scene` methods [location(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#location-frames.primitives.Vector-frames.core.Frame-) and [screenLocation(Vector, Frame)](https://visualcomputing.github.io/frames-javadocs/frames/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Frame-) transforms coordinates between node and screen space.
 
-The main disadvantage of using detached frames is that you need to know the scene hierarchy topology in advanced to be able to traverse it. To enable the scene to handle the traversal algorithm use [attached frames](README.md) instead.
+The main disadvantage of using detached nub is that you need to know the scene hierarchy topology in advanced to be able to traverse it. To enable the scene to handle the traversal algorithm use [attached nub](README.md) instead.

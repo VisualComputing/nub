@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -12,7 +12,7 @@
 // http://libqglviewer.com/refManual/classqglviewer_1_1Quaternion.html
 // which we adopted here
 
-package frames.primitives;
+package nub.primitives;
 
 /**
  * A 4 element unit quaternion represented by single precision floating point

@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;

@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,10 +8,10 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core;
+package nub.core;
 
-import frames.primitives.Matrix;
-import frames.primitives.Vector;
+import nub.primitives.Matrix;
+import nub.primitives.Vector;
 
 /**
  * The matrix handler specifies (and implements) various matrix operations needed by the

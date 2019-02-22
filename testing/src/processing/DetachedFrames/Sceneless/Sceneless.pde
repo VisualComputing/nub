@@ -2,18 +2,18 @@
  * Sceneless.
  * by Jean Pierre Charalambos.
  *
- * This example illustrates the use of frames without even instantiating a
+ * This example illustrates the use of nub without even instantiating a
  * Scene object.
  *
- * Just define an eye-node and some frames with torus shapes.
+ * Just define an eye-node and some nub with torus shapes.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Frame eye;
-Frame[] frames;
+Frame[] nub;
 boolean leftHanded = false;
 float zNear = 80;
 float zFar = 800;
@@ -27,9 +27,9 @@ void setup() {
   float fov = PI / 3;
   eye.setMagnitude(Scene.magnitude(fov));
   eye.setPosition(0, 0, 400);
-  frames = new Frame[50];
-  for (int i = 0; i < frames.length; i++)
-    frames[i] = Frame.random(new Vector(), 400, g.is3D());
+  nub = new Frame[50];
+  for (int i = 0; i < nub.length; i++)
+    nub[i] = Frame.random(new Vector(), 400, g.is3D());
 }
 
 void draw() {
@@ -48,9 +48,9 @@ void draw() {
     bind2D();
   }
   Scene.drawAxes(g, 100);
-  for (int i = 0; i < frames.length; i++) {
+  for (int i = 0; i < nub.length; i++) {
     pushMatrix();
-    Scene.applyTransformation(g, frames[i]);
+    Scene.applyTransformation(g, nub[i]);
     Scene.drawTorusSolenoid(g);
     popMatrix();
   }

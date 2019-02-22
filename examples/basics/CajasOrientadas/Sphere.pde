@@ -1,4 +1,4 @@
-class Sphere extends Frame {
+class Sphere extends Node {
   float _radius;
   int _color;
 

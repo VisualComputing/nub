@@ -2,7 +2,7 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates some basic Frame properties, particularly how to
+ * This example illustrates some basic Node properties, particularly how to
  * orient them.
  *
  * The sphere and the boxes are interactive. Pick and drag them with the
@@ -10,9 +10,9 @@
  * See how the boxes will always remain oriented towards the sphere.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 Box[] cajas;
@@ -32,12 +32,12 @@ void setup() {
     cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)),
                        random(10, 40), random(10, 40), random(10, 40));
   scene.fit(1);
-  scene.setTrackedFrame("keyboard", esfera);
+  scene.setTrackedNode("keyboard", esfera);
 }
 
 void draw() {
   background(0);
-  // calls render() on all scene attached frames
+  // calls render() on all scene attached nub
   // automatically applying all the node transformations
   scene.render();
 }
@@ -79,10 +79,10 @@ void keyPressed() {
   if (key == 'S')
     scene.fit();
   if (key == 'u')
-    if (scene.trackedFrame("keyboard") == null)
-      scene.setTrackedFrame("keyboard", esfera);
+    if (scene.trackedNode("keyboard") == null)
+      scene.setTrackedNode("keyboard", esfera);
     else
-      scene.resetTrackedFrame("keyboard");
+      scene.resetTrackedNode("keyboard");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10);

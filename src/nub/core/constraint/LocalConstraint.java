@@ -1,5 +1,5 @@
 /****************************************************************************************
- * nodes
+ * nub
  * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
@@ -8,22 +8,23 @@
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
  ****************************************************************************************/
 
-package frames.core.constraint;
+package nub.core.constraint;
 
-import frames.core.Node;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 
 /**
- * An AxisPlaneConstraint defined in the world coordinate system.
+ * An AxisPlaneConstraint defined in the Node local coordinate system.
  * <p>
  * The {@link #translationConstraintDirection()} and
- * {@link #rotationConstraintDirection()} are expressed in the world coordinate system.
+ * {@link #rotationConstraintDirection()} are expressed in the Node local coordinate
+ * system (see {@link Node#reference()} ).
  */
-public class WorldConstraint extends AxisPlaneConstraint {
+public class LocalConstraint extends AxisPlaneConstraint {
   /**
    * Depending on {@link #translationConstraintType()}, {@code constrain} translation to
-   * be along an axis or limited to a plane defined in the world coordinate system by
+   * be along an axis or limited to a plane defined in the local coordinate system by
    * {@link #translationConstraintDirection()}.
    */
   @Override
@@ -34,18 +35,14 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case FREE:
         break;
       case PLANE:
-        if (node.reference() != null) {
-          proj = node.reference().displacement(translationConstraintDirection());
-          res = Vector.projectVectorOnPlane(translation, proj);
-        } else
-          res = Vector.projectVectorOnPlane(translation, translationConstraintDirection());
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnPlane(translation, proj);
         break;
       case AXIS:
-        if (node.reference() != null) {
-          proj = node.reference().displacement(translationConstraintDirection());
-          res = Vector.projectVectorOnAxis(translation, proj);
-        } else
-          res = Vector.projectVectorOnAxis(translation, translationConstraintDirection());
+        proj = node.rotation().rotate(translationConstraintDirection());
+        // proj = node._localInverseTransformOf(translationConstraintDirection());
+        res = Vector.projectVectorOnAxis(translation, proj);
         break;
       case FORBIDDEN:
         res = new Vector(0.0f, 0.0f, 0.0f);
@@ -55,8 +52,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
   }
 
   /**
-   * When {@link #rotationConstraintType()} is of type AXIS, constrain {@code rotation} to
-   * be a rotation around an axis whose direction is defined in the Node world coordinate
+   * When {@link #rotationConstraintType()} is of Type AXIS, constrain {@code rotation} to
+   * be a rotation around an axis whose direction is defined in the Node local coordinate
    * system by {@link #rotationConstraintDirection()}.
    */
   @Override
@@ -68,8 +65,8 @@ public class WorldConstraint extends AxisPlaneConstraint {
       case PLANE:
         break;
       case AXIS:
+        Vector axis = rotationConstraintDirection();
         Vector quat = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-        Vector axis = node.displacement(rotationConstraintDirection());
         quat = Vector.projectVectorOnAxis(quat, axis);
         res = new Quaternion(quat, 2.0f * (float) Math.acos(rotation._quaternion[3]));
         break;

@@ -26,9 +26,9 @@
  * Press the space bar to browse the different conversion methods shown here.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 InteractiveFrame f1, f2, f3, f4, f5;

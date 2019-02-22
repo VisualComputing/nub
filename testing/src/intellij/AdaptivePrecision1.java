@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Node;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;

@@ -12,9 +12,9 @@
  * Press the space-bar to change the scene type: PERSPECTIVE or ORTHOGRAPHIC.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 OctreeNode root;
 Scene scene1, scene2, focus;

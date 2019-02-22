@@ -2,7 +2,7 @@
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
  * 
- * This example illustrates some basic properties of frames, particularly
+ * This example illustrates some basic properties of nub, particularly
  * how to orient them.
  *
  * Use the arrow keys to select and move the sphere and see how the boxes
@@ -10,16 +10,16 @@
  * boxes (by dragging them with the mouse right button) and still they
  * will be oriented towards the sphere.
  *
- * Both the sphere and the boxes are implemented as detached-frames
+ * Both the sphere and the boxes are implemented as detached-nub
  * specializations and hence they require to apply the local node
  * transformations, check their drawing routines.
  *
  * Contrast this example with the attached-node version with the same name.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 boolean drawAxes = true, drawShooterTarget = true, adaptive;
