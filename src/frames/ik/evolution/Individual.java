@@ -68,7 +68,7 @@ public class Individual{
                     float l = 0;
                     float d = Vector.distance(_structure.get(0).position(), _structure.get(index).position());
                     Frame prev = null;
-                    for (Frame f : _structure.get(0).graph().path(_structure.get(0), _structure.get(index))) {
+                    for (Frame f : Frame.path(_structure.get(0), _structure.get(index))) {
                         if (prev != null) l += Vector.distance(f.position(), prev.position());
                         prev = f;
                     }
@@ -81,7 +81,7 @@ public class Individual{
                 Quaternion q1 = structure().get(index).orientation();
                 Quaternion q2 = targets.get(index).orientation();
                 float q_dot = Quaternion.dot(q1, q2);
-                _dr += Math.acos((2 * q_dot * q_dot) / Math.sqrt(q1.dotProduct(q1) * q2.dotProduct(q2)));
+                _dr += Math.acos((2 * q_dot * q_dot) - 1);
             }
         }
 
