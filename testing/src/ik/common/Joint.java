@@ -17,7 +17,7 @@ public class Joint extends Frame{
     protected int _color;
     protected float _radius;
     protected static PGraphics _pGraphics;
-    public static boolean axes = false;
+    public static boolean axes = true;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
 

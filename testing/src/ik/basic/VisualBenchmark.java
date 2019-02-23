@@ -34,10 +34,10 @@ import java.util.Random;
 public class VisualBenchmark extends PApplet {
     enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
 
-    ConstraintType mode = ConstraintType.CONE_POLYGON; //Choose an option
+    ConstraintType mode = ConstraintType.NONE; //Choose an option
     boolean is3D = true;
 
-    int num_joints = 15;
+    int num_joints = 6;
     float targetRadius = 30;
     float boneLength = 50;
 
@@ -69,8 +69,20 @@ public class VisualBenchmark extends PApplet {
                 redBall = createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
             redBall.setStroke(false);
             redBall.setFill(color(255,0,0));
-            Frame target = new Frame(scene, redBall);
-            target.setPickingThreshold(0);
+            Frame target = new Frame(scene){
+                @Override
+                public void visit() {
+                    scene.drawAxes(targetRadius * 2);
+                    if(scene.trackedFrame() == this){
+                        redBall.setFill(color(0,255,0));
+                    }else{
+                        redBall.setFill(color(255,0,0));
+                    }
+                    scene.pApplet().shape(redBall);
+                }
+            };
+            target.setPickingThreshold(targetRadius);
+            target.setHighlighting(Frame.Highlighting.FRONT);
             targets.add(target);
         }
 
