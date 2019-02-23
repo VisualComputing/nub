@@ -169,6 +169,10 @@ public class OperatorMethods {
         @Override
         public Individual apply(Individual... individuals) {
             Individual combination = individuals[0].clone();
+            float [] r = new float[individuals.length];
+            for(int i = 0; i < individuals.length; i++){
+                r[i] = Util.random.nextFloat();
+            }
 
             for (int i = 0; i < individuals[0].structure().size(); i++){
                 float roll = 0;
@@ -187,13 +191,14 @@ public class OperatorMethods {
                 pitch = pitch/sum;
                 yaw = yaw/sum;
 
+                int c = 0;
                 for (Individual individual : individuals){
-                        float[] g = individual.arrayParams().get("Evolution_Gradient");
-                        if(g == null) continue;
-                        float r = Util.random.nextFloat();
-                        roll += r * g[3*i];
-                        pitch += r * g[3*i + 1];
-                        yaw += r * g[3*i + 2];
+                    float[] g = individual.arrayParams().get("Evolution_Gradient");
+                    if(g == null) continue;
+                    roll += r[c] * g[3*i];
+                    pitch += r[c] * g[3*i + 1];
+                    yaw += r[c] * g[3*i + 2];
+                    c++;
                 }
                 combination.structure().get(i).setRotation(new Quaternion(roll, pitch, yaw));
             }
