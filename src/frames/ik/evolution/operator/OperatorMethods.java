@@ -227,6 +227,9 @@ public class OperatorMethods {
         public Individual apply(Individual... individuals) {
             Individual combination = individuals[0].clone();
             Vector parents = new Vector();
+            float rp = Util.random.nextFloat();
+            float rb = Util.random.nextFloat();
+
             for (int i = 0; i < individuals[0].structure().size(); i++){
                 for(Individual parent : _parents){
                     parents.add(parent.structure().get(i).rotation().eulerAngles());
@@ -236,9 +239,6 @@ public class OperatorMethods {
                 Vector best = _best.structure().get(i).rotation().eulerAngles();
 
                 Vector result = new Vector();
-
-                float rp = Util.random.nextFloat();
-                float rb = Util.random.nextFloat();
 
                 for(int j = 0; j < 3; j++){
                     float wi = Util.random.nextFloat();

@@ -92,7 +92,7 @@ public class Individual{
             _fitness = _dr;
             _balanced_fitness = _dr;
         }else {
-            float w = (float) Math.random() * 0.3f; //Best solutions must adapt to different sort of weights.
+            float w = (float) Math.random(); //Best solutions must adapt to different sort of weights.
             _fitness = (1 - w) * _dt + w * _dr;
             _balanced_fitness = 0.5f * _dt + 0.5f * _dr;
         }
