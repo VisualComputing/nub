@@ -14,8 +14,8 @@ public class ViewFrustumCulling extends PApplet {
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
-  int w = 1110;
-  int h = 1110;
+  int w = 1200;
+  int h = 800;
 
   public void settings() {
     size(w, h, renderer);
@@ -47,15 +47,15 @@ public class ViewFrustumCulling extends PApplet {
   @Override
   public void draw() {
     handleMouse();
-    background(0);
+    background(255);
     scene1.beginDraw();
-    canvas1.background(0);
+    canvas1.background(255);
     root.drawIfAllChildrenAreVisible(scene1.context(), scene1);
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
-    canvas2.background(0);
+    canvas2.background(255);
     root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
     scene2.context().pushStyle();
     scene2.context().stroke(255, 255, 0);

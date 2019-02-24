@@ -19,8 +19,8 @@ public class ShadowMapDepthOnScreen extends PApplet {
   boolean one;
   float zNear = 50;
   float zFar = 1000;
-  int w = 1000;
-  int h = 1000;
+  int w = 1200;
+  int h = 800;
 
   public void settings() {
     size(w, h, P3D);
@@ -87,11 +87,11 @@ public class ShadowMapDepthOnScreen extends PApplet {
   public void setShader(boolean one_) {
     one = one_;
     if (one) {
-      depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth.glsl");
+      depthShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/dof/depth.glsl");
       depthShader.set("maxDepth", 10);
       println("version 1 of the shader");
     } else {
-      depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
+      depthShader = loadShader("/home/pierre/IdeaProjects/framesjs/testing/data/depth/depth_linear.glsl");
       depthShader.set("near", zNear);
       depthShader.set("far", zFar);
       println("version 2 of the shader");
@@ -100,9 +100,9 @@ public class ShadowMapDepthOnScreen extends PApplet {
   }
 
   public void draw() {
-    background(75, 25, 15);
+    background(255);
     // 1. Fill in and display front-buffer
-    scene.drawAxes();
+    //scene.drawAxes();
     scene.render();
     // 2. Fill in shadow map using the light point of view
     if (scene.trackedNode("light") != null) {
