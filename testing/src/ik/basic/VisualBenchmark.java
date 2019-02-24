@@ -37,7 +37,7 @@ public class VisualBenchmark extends PApplet {
     ConstraintType mode = ConstraintType.NONE; //Choose an option
     boolean is3D = true;
 
-    int num_joints = 6;
+    int num_joints = 15;
     float targetRadius = 30;
     float boneLength = 50;
 
@@ -170,8 +170,8 @@ public class VisualBenchmark extends PApplet {
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.001f;
-            solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 50;
+            solvers.get(i).timesPerFrame = 5;
+            solvers.get(i).maxIter = 100;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
