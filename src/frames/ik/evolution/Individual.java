@@ -81,30 +81,28 @@ public class Individual{
                 Quaternion q1 = structure().get(index).orientation();
                 Quaternion q2 = targets.get(index).orientation();
                 float q_dot = Quaternion.dot(q1, q2);
-                _dr += Math.acos((2 * q_dot * q_dot) - 1);
+                _dr += 2*Math.acos(q_dot);
             }
         }
 
         if(_fitness_function == FitnessFunction.POSITION){
-            _fitness = _dt;
-            _balanced_fitness = _dt;
+            _fitness = _dt/targets.size();
+            _balanced_fitness = _dt/targets.size();
         }else if(_fitness_function == FitnessFunction.ORIENTATION){
-            _fitness = _dr;
-            _balanced_fitness = _dr;
+            _fitness = _dr/targets.size();
+            _balanced_fitness = _dr/targets.size();
         }else {
             float w = (float) Math.random(); //Best solutions must adapt to different sort of weights.
-            _fitness = (1 - w) * _dt + w * _dr;
-            _balanced_fitness = 0.5f * _dt + 0.5f * _dr;
+            _fitness = (1 - w) * _dt/targets.size() + w * _dr/targets.size();
+            _balanced_fitness = 0.5f * _dt/targets.size() + 0.5f * _dr/targets.size();
         }
     }
 
     public float getError(){
-        //TODO : Must be changed for Multiple end effectors
-        float length = Vector.distance(structure().get(0).position(), structure().get(structure().size() - 1).position());
         float error = 0;
         switch (this._fitness_function){
             case POSITION:{
-                error = _dt / length;
+                error = _dt;
                 break;
             }
             case ORIENTATION:{
@@ -112,7 +110,7 @@ public class Individual{
                 break;
             }
             case POSE:{
-                error = _dt / length + _dr;
+                error = _dt + _dr;
                 break;
             }
         }
@@ -120,19 +118,21 @@ public class Individual{
     }
 
     protected ArrayList<Frame> _copy(List<Frame> chain) {
+        HashMap<Frame, Frame> map = new HashMap<>();
         ArrayList<Frame> copy = new ArrayList<Frame>();
         Frame reference = chain.get(0).reference();
         if (reference != null) {
             reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
         }
+        map.put(chain.get(0).reference(), reference);
         for (Frame joint : chain) {
             Frame newJoint = new Frame();
-            newJoint.setReference(reference);
+            newJoint.setReference(map.get(joint.reference()));
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
             newJoint.setConstraint(joint.constraint());
             copy.add(newJoint);
-            reference = newJoint;
+            map.put(joint, newJoint);
         }
         return copy;
     }

@@ -27,6 +27,7 @@ public class BioIk extends Solver {
     protected float _cross_probability = 1f;
     protected int _population_size;
     protected int _elitism_size;
+    protected float _max_v = 0.0f;
     protected Replacement replacement = Replacement.ELITISM;
 
     protected Random _random = new Random();
@@ -222,8 +223,17 @@ public class BioIk extends Solver {
 
     @Override
     protected void _update() {
-        for (int i = 0; i < _structure.size(); i++) {
-            _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
+        if(_max_v != 0) {
+            for (int i = 0; i < _structure.size(); i++) {
+                Quaternion delta = Quaternion.compose(_structure.get(i).orientation().inverse(), _best.structure().get(i).orientation());
+                float angle = delta.angle() > _max_v ? _max_v : delta.angle() < -_max_v ? -_max_v : delta.angle();
+                delta = new Quaternion(delta.axis(), angle);
+                _structure.get(i).setOrientation(Quaternion.compose(_structure.get(i).orientation(), delta));
+            }
+        } else{
+            for (int i = 0; i < _structure.size(); i++) {
+                _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
+            }
         }
     }
 
@@ -232,7 +242,7 @@ public class BioIk extends Solver {
         float f_min = _sorted_population.get(0).fitness();
         for (int i = 0; i < _population_size; i++) {
             Individual individual = _population.get(i);
-            individual._floatParams.put("Extinction", (individual.fitness() + f_min * (i / (_population_size - 1))) / f_max);
+            individual._floatParams.put("Extinction", (individual.fitness() + f_min * (i / (_population_size - 1) - 1)) / f_max);
         }
     }
 
