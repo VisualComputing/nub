@@ -291,7 +291,8 @@ public class HAEASolver  extends Solver {
 
     @Override
     public float error() {
-        return _best.fitness();
+        if(_best != null) _best.updateFitness(_target);
+        return _best != null ? _best.fitness() : Float.NaN;
     }
 }
 
