@@ -45,7 +45,7 @@ public class VisualBenchmark extends PApplet {
 
     Scene scene;
     //Methods
-    int num_solvers = 7;
+    int num_solvers = 4;
     ArrayList<Solver> solvers;
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
     ArrayList<Frame> targets = new ArrayList<Frame>();
@@ -158,20 +158,24 @@ public class VisualBenchmark extends PApplet {
         solvers = new ArrayList<>();
 
         int idx = 0;
-        solvers.add(new HillClimbingSolver(5, radians(5), structures.get(idx++)));
-        solvers.add(new CCDSolver(structures.get(idx++)));
-        solvers.add(new ChainSolver(structures.get(idx++)));
-        solvers.add(new GASolver(structures.get(idx++), 12));
-        //solvers.add(new HAEASolver(structures.get(4), 12, true));
+        //solvers.add(new HillClimbingSolver(5, radians(5), structures.get(idx++)));
+        //solvers.add(new CCDSolver(structures.get(idx++)));
+        //solvers.add(new ChainSolver(structures.get(idx++)));
+        //solvers.add(new GASolver(structures.get(idx++), 10));
+        //solvers.add(new HAEASolver(structures.get(idx++), 10, true));
         //solvers.add(new TransposeSolver(structures.get(5)));
-        solvers.add(new PseudoInverseSolver(structures.get(idx++)));
-        solvers.add(new SDLSSolver(structures.get(idx++)));
-        solvers.add(new BioIk(structures.get(idx++),12, 4 ));
+        //solvers.add(new PseudoInverseSolver(structures.get(idx++)));
+        //solvers.add(new SDLSSolver(structures.get(idx++)));
+        solvers.add(new BioIk(structures.get(idx++),10, 4 ));
+        solvers.add(new BioIk(structures.get(idx++),20, 8 ));
+        solvers.add(new BioIk(structures.get(idx++),30, 15 ));
+
+        solvers.add(new ChainSolver(structures.get(idx++)));
 
         for(int i = 0; i < solvers.size(); i++){
             solvers.get(i).error = 0.001f;
             solvers.get(i).timesPerFrame = 5;
-            solvers.get(i).maxIter = 100;
+            solvers.get(i).maxIter = 200;
             if(i != 0)targets.get(i).setReference(targets.get(0));
             if(solvers.get(i) instanceof HillClimbingSolver) {
                 ((HillClimbingSolver) solvers.get(i)).setTarget(targets.get(i));
@@ -296,9 +300,12 @@ public class VisualBenchmark extends PApplet {
             if (i == 0)
                 chainRoot = joint;
             if (prevJoint != null) joint.setReference(prevJoint);
-            float x = 2*rand.nextFloat() - 1;
-            float z = rand.nextFloat();
-            float y = 2 * rand.nextFloat() - 1;
+            //float x = 2*rand.nextFloat() - 1;
+            //float z = rand.nextFloat();
+            //float y = 2 * rand.nextFloat() - 1;
+            float x = 0;
+            float y = 1;
+            float z = 0;
             Vector translate = new Vector(x,y,z);
             translate.normalize();
             translate.multiply(boneLength * (1 - 0.4f*rand.nextFloat()));

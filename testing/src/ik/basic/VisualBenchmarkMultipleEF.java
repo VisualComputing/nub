@@ -31,8 +31,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
     enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
     ConstraintType mode = ConstraintType.NONE; //Choose an option
     boolean is3D = true;
-    int depth = 1;
-    int repetitions = 3;
+    int depth = 2;
+    int repetitions = 4;
     float targetRadius = 30;
     float boneLength = 50;
     Random random = new Random();
@@ -58,13 +58,15 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         alpha *= depth/2f; //avoid undesirable overlapping
 
         int color = color(random(255), random(255), random(255));
-        structures.add(generateYShape(depth, true, boneLength, 3, new Vector(), color));
+        structures.add(generateYShape(depth, true, boneLength, repetitions, new Vector(), color));
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        BioIk solver = new BioIk(structures.get(0),12,6);
+        BioIk solver = new BioIk(structures.get(0),20,12);
 
+        solver.maxIter = 200;
+        solver.timesPerFrame = 30.f;
 
 
         //scene.registerTreeSolver(structures.get(0).get(0));
