@@ -123,7 +123,9 @@ public class HillClimbingSolver extends Solver {
                 yaw = (float) (random.nextGaussian() * _sigma);
             }
             //rotate method consider constraints
-            if(_chain.get(0).graph().is3D())
+            if(_chain.get(0).graph() == null)
+                x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
+            else if(_chain.get(0).graph().is3D())
                 x_i1.get(i).rotate(new Quaternion(roll, pitch, yaw));
             else
                 x_i1.get(i).rotate(0,0,1, roll);
