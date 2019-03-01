@@ -65,7 +65,7 @@ public class Util {
     }
 
     public static List<Individual> generatePopulation(List<Frame> structure, int n){
-        return generatePopulation(structure, n, (float) Math.toRadians(30));
+        return generatePopulation(structure, n, (float) Math.toRadians(60));
     }
 
     public static List<Individual> concatenate(List<Individual>... lists){

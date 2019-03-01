@@ -34,6 +34,9 @@ public class BioIk extends Solver {
     protected HashMap<Integer, Frame> _previousTarget;
     protected HashMap<Integer, Frame> _target;
     protected List<Frame> _structure;
+    protected HashMap<Integer, Float> _chain_length; //Key : Target
+    protected HashMap<Integer, List<Float>> _chain_eff_length; // Key : Joint
+
     protected List<Individual> _population, _sorted_population;
     protected Individual _best;
 
@@ -61,6 +64,8 @@ public class BioIk extends Solver {
     public int populationSize() {
         return _population_size;
     }
+
+    public int elitismSize(){ return  _elitism_size; }
 
     public float crossProbability() {
         return _cross_probability;
@@ -118,7 +123,9 @@ public class BioIk extends Solver {
         int k = 0;
         while (k < maxIter) {
             _iterate();
-            _statistics.add(new Statistics(_population));
+            ArrayList<Individual> st = new ArrayList<>(_sorted_population);
+            st.add(_best);
+            _statistics.add(new Statistics(st));
             k++;
         }
         //4. Keep statistics
@@ -198,7 +205,7 @@ public class BioIk extends Solver {
         _sorted_population = Util.sort(false, false, _population);
         //Execute Wipe - Reinitialize population
         if (_wipe(_best, best)) {
-            _population = Util.generatePopulation(_structure, _population_size);
+            _population = Util.generatePopulation(best.fitness() < _best.fitness() ? best.structure() : _best.structure(), _population_size);
             for (Individual individual : _population) {
                 individual.updateFitness(_target);
                 _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
@@ -242,7 +249,7 @@ public class BioIk extends Solver {
         float f_min = _sorted_population.get(0).fitness();
         for (int i = 0; i < _population_size; i++) {
             Individual individual = _population.get(i);
-            individual._floatParams.put("Extinction", (individual.fitness() + f_min * (i / (_population_size - 1) - 1)) / f_max);
+            individual._floatParams.put("Extinction", (individual.fitness() + f_min * (i / (_population_size - 1.f) - 1.f)) / f_max);
         }
     }
 
@@ -251,9 +258,13 @@ public class BioIk extends Solver {
         float[] g = new float[amr.structure().size() * 3];
         for (int i = 0; i < amr.structure().size(); i++) {
             Vector v = Vector.subtract(amr.structure().get(i).rotation().eulerAngles(), r.structure().get(i).rotation().eulerAngles());
+            //Simple gradient g = 0 or Keeping information of previous gradient (Momentum)
             g[3 * i] = v.x();
             g[3 * i + 1] = v.y();
             g[3 * i + 2] = v.z();
+            //g[3 * i] = Util.random.nextFloat() * g[3 * i] + v.x();
+            //g[3 * i + 1] = Util.random.nextFloat() * g[3 * i + 1] + v.y();
+            //g[3 * i + 2] = Util.random.nextFloat() * g[3 * i + 2] + v.z();
         }
         return g;
     }
@@ -342,6 +353,23 @@ public class BioIk extends Solver {
         return next.balancedFitness() < current.balancedFitness();
     }
 
+    protected void _updateChainLength(){
+        _chain_length = new HashMap<>();
+        Frame prev = null;
+        for(Integer index : _target.keySet()) {
+            float l = 0;
+            for (Frame f : Frame.path(_structure.get(0), _structure.get(index))) {
+                if (prev != null) l += Vector.distance(f.position(), prev.position());
+                prev = f;
+            }
+            _chain_length.put(index, l);
+        }
+    }
+
+    protected  void _updateJointEffLenght(){
+        //TODO
+    }
+
 
     @Override
     protected boolean _changed() {
@@ -373,18 +401,20 @@ public class BioIk extends Solver {
         for (Integer endEffector : _target.keySet()) {
             _previousTarget.put(endEffector, new Frame(_target.get(endEffector).position(), _target.get(endEffector).orientation(), 1));
         }
-        //If there is no population then genereate one
+        //If there is no population then generate one
         _population = Util.generatePopulation(_structure, _population_size);
         for (Individual individual : _population) {
             individual.updateFitness(_target);
             _best = _best == null ? individual : _best.fitness() > individual.fitness() ? individual : _best;
         }
+
         _sorted_population = Util.sort(false, false, _population);
         _updateExtinction();
     }
 
     @Override
     public float error() {
+        if(_best != null) _best.updateFitness(_target);
         return _best != null ? _best.fitness() : Float.NaN;
     }
 }

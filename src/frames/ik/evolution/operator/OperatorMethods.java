@@ -139,12 +139,14 @@ public class OperatorMethods {
             Individual individual = individuals[0].clone();
             int n = individual.structure().size();
             //Define how many genes mutate on average
-            float alpha = (_extinction * (n - 1) + 1) / n;
+            float alpha = (_extinction * (n - 1f) + 1f) / n;
             float beta = _extinction * (float) Math.PI;
 
             for (int i = 0; i < individual.structure().size(); i++) {
                 if (Util.random.nextFloat() > alpha) continue;
                 Frame joint = individual.structure().get(i);
+                if(i < individuals[0].structure().size() - 1)
+                    if(individuals[0].structure().get(i+1).reference().translation().magnitude() < 0.0001) continue;
                 //modify each Euler Angle
                 //rotate
                 float roll = 2 * beta * Util.random.nextFloat() - beta;
@@ -175,6 +177,8 @@ public class OperatorMethods {
             }
 
             for (int i = 0; i < individuals[0].structure().size(); i++){
+                if(i < individuals[0].structure().size() - 1)
+                    if(individuals[0].structure().get(i+1).reference().translation().magnitude() < 0.0001) continue;
                 float roll = 0;
                 float pitch = 0;
                 float yaw = 0;
@@ -198,6 +202,9 @@ public class OperatorMethods {
                     roll += r[c] * g[3*i];
                     pitch += r[c] * g[3*i + 1];
                     yaw += r[c] * g[3*i + 2];
+                    //roll += Util.random.nextFloat() * g[3*i];
+                    //pitch += Util.random.nextFloat() * g[3*i + 1];
+                    //yaw += Util.random.nextFloat() * g[3*i + 2];
                     c++;
                 }
                 combination.structure().get(i).setRotation(new Quaternion(roll, pitch, yaw));
@@ -231,6 +238,8 @@ public class OperatorMethods {
             float rb = Util.random.nextFloat();
 
             for (int i = 0; i < individuals[0].structure().size(); i++){
+                if(i < individuals[0].structure().size() - 1)
+                    if(individuals[0].structure().get(i+1).reference().translation().magnitude() < 0.0001) continue;
                 for(Individual parent : _parents){
                     parents.add(parent.structure().get(i).rotation().eulerAngles());
                 }
