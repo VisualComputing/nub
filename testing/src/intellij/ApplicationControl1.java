@@ -22,7 +22,7 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void settings() {
-    size(1240, 840, renderer);
+    size(1200, 800, renderer);
   }
 
   public void setup() {
@@ -67,6 +67,7 @@ public class ApplicationControl1 extends PApplet {
             }
         }
       };
+      shapes[i].scale(23);
       shapes[i].randomize();
     }
     font36 = loadFont("FreeSans-36.vlw");
@@ -81,7 +82,12 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void draw() {
-    background(125);
+    background(255);
+    pushStyle();
+    strokeWeight(5);
+    stroke(0,0,255);
+    scene.drawDottedGrid();
+    popStyle();
     scene.drawAxes();
     scene.render();
   }
@@ -121,7 +127,10 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    control(event.getCount());
+    if(event.isShiftDown())
+      scene.moveForward(20 * event.getCount());
+    else
+      control(event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {

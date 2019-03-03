@@ -2662,7 +2662,7 @@ public class Graph {
    * The algorithm schedules an updated of the {@code hid} tracked-node for the next traversal and hence should be
    * always be used in conjunction with {@link #render()}.
    * <p>
-   * This method is optimal since it updated the {@code hid} tracked-node at traversal time. Prefer this method over
+   * This method is optimal since it updates the {@code hid} tracked-node at traversal time. Prefer this method over
    * {@link #track(String, Point)} when dealing with several {@code hids}.
    *
    * @see #render()
@@ -3073,7 +3073,7 @@ public class Graph {
   }
 
   /**
-   * Returns the {@code hid} default-node which is used by methods dealing interactivity that don take a node
+   * Returns the {@code hid} default-node. Used by methods dealing with interactivity that don't take a node
    * param. Same as {@code return trackedNode(hid) == null ? eye() : trackedNode(hid)}. Never returns {@code null}.
    *
    * @see #trackedNode(String)

@@ -40,7 +40,7 @@ public class ViewFrustumCulling extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(300);
+    scene2.setRadius(600);
     scene2.fit();
   }
 
@@ -58,8 +58,9 @@ public class ViewFrustumCulling extends PApplet {
     canvas2.background(255);
     root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
     scene2.context().pushStyle();
-    scene2.context().stroke(255, 255, 0);
-    scene2.context().fill(255, 255, 0, 160);
+    scene2.context().strokeWeight(2);
+    scene2.context().stroke(255, 0, 255);
+    scene2.context().fill(255, 0, 255, 160);
     scene2.drawFrustum(scene1);
     scene2.context().popStyle();
     scene2.endDraw();
