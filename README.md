@@ -144,7 +144,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [CajasOrientadas example](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas).
+See the [CajasOrientadas example](https://github.com/VisualComputing/nubjs/tree/processig/examples/basics/CajasOrientadas).
 
 ### Rendering
 
@@ -222,7 +222,7 @@ void draw() {
 }
 ```
 
-while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators).
+while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/nubjs/tree/processig/examples/basics/Interpolators).
 
 ## HIDs
 
@@ -231,7 +231,7 @@ Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_
 1. Define an _hid_ tracked-node instance, using an arbitrary name for it (see [setTrackedNode(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setTrackedNode-java.lang.String-frames.core.Node-)); and,
 2. Call any interactivity method that take an _hid_ param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
 
-See the [SpaceNavigator example](https://github.com/VisualComputing/nub/tree/master/examples/demos/SpaceNavigator).
+See the [SpaceNavigator example](https://github.com/VisualComputing/nubjs/tree/processig/examples/demos/SpaceNavigator).
 
 Observations:
 
@@ -249,7 +249,7 @@ Implementing an application control for a node is a two step process:
 1. Override the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
 2. Send gesture data to the node by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-frames.core.Node-java.lang.Object...-).
 
-See the [ApplicationControl example](https://github.com/VisualComputing/nub/tree/master/examples/demos/ApplicationControl).
+See the [ApplicationControl example](https://github.com/VisualComputing/nubjs/tree/processig/examples/demos/ApplicationControl).
 
 ## IK
 
