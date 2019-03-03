@@ -35,7 +35,7 @@ public class BioIk extends Solver {
     protected HashMap<Integer, Frame> _target;
     protected List<Frame> _structure;
     protected HashMap<Integer, Float> _chain_length; //Key : Target
-    protected HashMap<Integer, List<Float>> _chain_eff_length; // Key : Joint
+    protected List<HashMap<Integer, Float>> _chain_eff_length; // Key : Target
 
     protected List<Individual> _population, _sorted_population;
     protected Individual _best;
@@ -51,6 +51,7 @@ public class BioIk extends Solver {
         this._elitism_size = elitism_size;
         this._target = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
+        _updateChainLength();
     }
 
     public BioIk(Frame root, int population_size, int _elitism_size) {
@@ -58,6 +59,7 @@ public class BioIk extends Solver {
         this._population_size = population_size;
         this._target = new HashMap<Integer, Frame>();
         this._previousTarget = new HashMap<Integer, Frame>();
+        _updateChainLength();
     }
 
 
@@ -108,6 +110,7 @@ public class BioIk extends Solver {
     }
 
     public float execute() {
+        _updateChainLength();
         this._best = null;
         this._statistics = new ArrayList<Statistics>();
         //1. Generate population
@@ -182,7 +185,6 @@ public class BioIk extends Solver {
                 child.updateFitness(_target);
                 best = best == null ? child : best.fitness() > child.fitness() ? child : best;
                 worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
-
             }
         }
 
@@ -190,6 +192,8 @@ public class BioIk extends Solver {
             if (_debug) System.out.println(ind);
         }
         _population = Util.concatenate(_sorted_population.subList(0, _elitism_size), children);
+
+
         //Sort population
         if (_debug) System.out.println("<><><><><><><><><><><><>");
         if (_debug) System.out.println("Elite");
@@ -273,13 +277,21 @@ public class BioIk extends Solver {
         for (Individual individual : population) {
             if (_debug) System.out.println("<<<<<<< Exploitation >>>>>>>");
             if (_debug) System.out.println("Ind " + individual);
-            float error = individual.getError();
+            float new_fitness = 0;
             int idx = 0;
+            int f = 0;
             for (Frame joint : individual.structure()) {
-                float fitness = individual.balancedFitness();
-                individual.updateFitness(_target);
                 if (_debug) System.out.println("<<<<<<< Joint >>>>>>>");
                 for (int i = 0; i < 3; i++) {
+                    individual.updateFitness(_target);
+                    float fitness = individual.balancedFitness();
+                    float error = 0;
+                    for(int index : _chain_eff_length.get(f).keySet()){
+                        float dist = Vector.distance(individual.structure().get(individual.structure().size() - 1).position(), _target.get(index).position());
+                        float l = _chain_eff_length.get(f).get(index);
+                        float d = Vector.distance(individual.structure().get(individual.structure().size() - 1).position(), individual.structure().get(f).position());
+                        error += (Math.PI * dist) / (Math.sqrt(l * d));
+                    }
                     Vector euler = joint.rotation().eulerAngles();
                     Quaternion q = joint.rotation().get();
                     Vector angles = euler.get();
@@ -305,32 +317,36 @@ public class BioIk extends Solver {
                         if (_debug) System.out.println("Entra plus");
                         joint.setRotation(q_plus);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + plus - euler._vector[i];
+                        individual.setFitness(f_plus);
                     } else if (f_minus < fitness && f_minus <= f_plus) {
                         if (_debug) System.out.println("Entra minus");
                         joint.setRotation(q_minus);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i] * Util.random.nextFloat() + minus - euler._vector[i];
+                        individual.setFitness(f_minus);
                     } else {
                         if (_debug) System.out.println("Entra normal");
                         joint.setRotation(q);
                         individual.arrayParams().get("Evolution_Gradient")[idx] = euler._vector[i];
+                        individual.setFitness(fitness);
                     }
                     if (_debug) System.out.println("final " + individual);
                     idx += 1;
-                    individual.updateFitness(_target);
+                    new_fitness += individual.balancedFitness();
+                    assert individual.fitness() - fitness < 1e-3  : String.format("new Individual must have a lower fitness than previous one: " + (individual.fitness() - fitness));
                 }
+                f++;
             }
             //individual.setFitness(new_fitness/individual.structure().size());
         }
     }
 
     protected boolean _wipe(Individual current, Individual next) {
-        float fitness = next.balancedFitness();
         for (Frame joint : next.structure()) {
             for (int i = 0; i < 3; i++) {
                 Vector euler = joint.rotation().eulerAngles();
                 Quaternion q = joint.rotation().get();
                 Vector angles = euler.get();
-                float r = Util.random.nextFloat() * error;
+                float r = Util.random.nextFloat() * next.fitness();
                 float plus = (float) Math.min(r + euler._vector[i], Math.PI);
                 angles._vector[i] = plus;
                 Quaternion q_plus = new Quaternion(angles._vector[0], angles._vector[1], angles._vector[2]);
@@ -344,10 +360,13 @@ public class BioIk extends Solver {
                 next.updateFitness(_target);
                 float f_minus = next.balancedFitness();
 
-                if ((f_plus < fitness && f_plus <= f_minus) || (f_minus < fitness && f_minus <= f_plus)) {
+                if ((f_plus < next.fitness() && f_plus <= f_minus) || (f_minus < next.fitness() && f_minus <= f_plus)) {
+                    joint.setRotation(q);
+                    next.updateFitness(_target);
                     return false;
                 }
                 joint.setRotation(q);
+                next.updateFitness(_target);
             }
         }
         return next.balancedFitness() < current.balancedFitness();
@@ -355,19 +374,24 @@ public class BioIk extends Solver {
 
     protected void _updateChainLength(){
         _chain_length = new HashMap<>();
+        _chain_eff_length = new ArrayList<>(_structure.size());
+        HashMap<Integer, Integer> joint = new HashMap<>();
+        for(int i = 0; i < _structure.size(); i++){
+            Frame f = _structure.get(i);
+            joint.put(f.id(), i);
+            _chain_eff_length.add(new HashMap<>());
+        }
+
         Frame prev = null;
         for(Integer index : _target.keySet()) {
             float l = 0;
             for (Frame f : Frame.path(_structure.get(0), _structure.get(index))) {
                 if (prev != null) l += Vector.distance(f.position(), prev.position());
                 prev = f;
+                _chain_eff_length.get(joint.get(f.id())).put(index, l);
             }
             _chain_length.put(index, l);
         }
-    }
-
-    protected  void _updateJointEffLenght(){
-        //TODO
     }
 
 
@@ -392,6 +416,7 @@ public class BioIk extends Solver {
 
     @Override
     protected void _reset() {
+        _updateChainLength();
         _best = null;
         iterations = 0;
         if (_target == null) {
