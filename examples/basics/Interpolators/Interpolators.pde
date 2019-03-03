@@ -61,7 +61,7 @@ void setup() {
   interpolator.setLoop();
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(scene.randomFrame());
+    interpolator.addKeyFrame(scene.randomNode());
   interpolator.start();
 }
 
@@ -75,7 +75,7 @@ void draw() {
   scene.drawPath(interpolator);
   popStyle();
 
-  for (Frame node : interpolator.keyFrames()) {
+  for (Node node : interpolator.keyFrames()) {
     pushMatrix();
     scene.applyTransformation(node);
     scene.drawAxes(scene.tracks(node) ? 40 : 20);
