@@ -543,11 +543,10 @@ public class Quaternion {
   }
 
   /**
-   * Normalize this quaternion return its {@code norm}.
+   * Normalize this quaternion return its {@link #norm()}.
    */
   public float normalize() {
-    float norm = (float) Math.sqrt(this._quaternion[0] * this._quaternion[0] + this._quaternion[1] * this._quaternion[1] + this._quaternion[2] * this._quaternion[2]
-        + this._quaternion[3] * this._quaternion[3]);
+    float norm = norm();
     if (norm > 0.0f) {
       this._quaternion[0] /= norm;
       this._quaternion[1] /= norm;
@@ -560,6 +559,14 @@ public class Quaternion {
       this._quaternion[3] = (float) 1.0;
     }
     return norm;
+  }
+
+  /**
+   * Returns the norm of this quaternion.
+   */
+  public float norm() {
+    return (float) Math.sqrt(this._quaternion[0] * this._quaternion[0] + this._quaternion[1] * this._quaternion[1] + this._quaternion[2] * this._quaternion[2]
+        + this._quaternion[3] * this._quaternion[3]);
   }
 
   /**
