@@ -23,6 +23,7 @@ import static java.lang.Math.PI;
  * laid inside an Ellipse.
  */
 
+//TODO : Add Twist limit & check for unnecessary transformations
 public abstract class ConeConstraint extends Constraint{
     protected Quaternion _restRotation = new Quaternion();
     protected Quaternion _idleRotation = new Quaternion();
@@ -76,15 +77,30 @@ public abstract class ConeConstraint extends Constraint{
 
     @Override
     public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-        Quaternion desired = Quaternion.compose(frame.rotation(), rotation);
-        Quaternion q1 = Quaternion.compose(_idleRotation.inverse(), desired);
-        Vector twist = _restRotation.rotate(new Vector(0, 0, 1));
-        Vector new_pos = q1.rotate(twist);
-        new_pos = off.rotate(new_pos);
-        Vector constrained = apply(new_pos, _restRotation);
+        //Identify rotation that must be applied to move twist and up to its  new values
+        Quaternion curr = _idleRotation; //w.r.t ref
+        Quaternion next = Quaternion.compose(frame.rotation(), rotation); // w.r.t ref
+        Quaternion change = Quaternion.compose(curr.inverse(), next); // w.r.t idle
+        //Decompose change in terms of twist and swing
+        Vector tw = _restRotation.rotate(new Vector(0, 0, 1)); // w.r.t idle
+        Vector rotationAxis = new Vector(change._quaternion[0], change._quaternion[1], change._quaternion[2]);
+        rotationAxis = Vector.projectVectorOnAxis(rotationAxis, tw); // w.r.t idle
+        //Get rotation component on Axis direction
+        Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), change.w()); //w.r.t idle
+        Quaternion rotationSwing = Quaternion.compose(change, rotationTwist.inverse()); //w.r.t idle
+        //Constraint swing
+        Vector w = rotationSwing.rotate(_restRotation.rotate(new Vector(0, 0, 1)));
+        w = off.rotate(w);
+        Vector constrained = apply(w, _restRotation);
         constrained = off.inverseRotate(constrained);
-        Quaternion q2 = new Quaternion(twist, constrained);
-        return Quaternion.compose(frame.rotation().inverse(), Quaternion.compose(_idleRotation,q2));
+        rotationSwing = new Quaternion(tw, constrained);
+        //constrained change
+        Quaternion constrained_change = Quaternion.compose(rotationSwing, rotationTwist);
+        //find change in terms of frame rot
+        //_idle * constrained_change = frame * rot
+        Quaternion rot = Quaternion.compose(frame.rotation().inverse(), Quaternion.compose(_idleRotation, constrained_change));
+
+        return rot;
     }
 
     @Override
