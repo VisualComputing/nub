@@ -7,6 +7,7 @@ import ik.collada.animation.Mesh;
 import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.collada.colladaParser.xmlParser.XmlParser;
+import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 

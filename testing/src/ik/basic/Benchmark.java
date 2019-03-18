@@ -303,27 +303,25 @@ public class Benchmark {
         solvers = new ArrayList<>();
 
         //Hill Climbing
-        /*
-        solvers.add(new HillClimbingSolver(PApplet.radians(3), generateChain(num_joints, boneLength)));
+
+        /*solvers.add(new HillClimbingSolver(PApplet.radians(3), generateChain(num_joints, boneLength)));
         solvers.add(new HillClimbingSolver(2.5, PApplet.radians(3), generateChain(num_joints, boneLength)));
         solvers.add(new HillClimbingSolver(PApplet.radians(5), generateChain(num_joints, boneLength)));
-        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(5), generateChain(num_joints, boneLength)));
-        */
+        solvers.add(new HillClimbingSolver(2.5, PApplet.radians(5), generateChain(num_joints, boneLength)));*/
+
         //GA
-        /*
+
         solvers.add(new GASolver(generateChain(num_joints, boneLength), 10));
         solvers.add(new GASolver(generateChain(num_joints, boneLength), 20));
         solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 10, true));
-        solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 15, true));
+        //solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 15, true));
         solvers.add(new HAEASolver(generateChain(num_joints, boneLength), 20, true));
-        */
+
 
         //BioIK
-        solvers.add(new BioIk(generateChain(num_joints, boneLength), 10, 4));
+        /*solvers.add(new BioIk(generateChain(num_joints, boneLength), 10, 4));
         solvers.add(new BioIk(generateChain(num_joints, boneLength), 10, 6));
-        solvers.add(new BioIk(generateChain(num_joints, boneLength), 15, 8));
-        solvers.add(new BioIk(generateChain(num_joints, boneLength), 15, 10));
-        solvers.add(new BioIk(generateChain(num_joints, boneLength), 20, 12));
+        solvers.add(new BioIk(generateChain(num_joints, boneLength), 20, 12));*/
 
 
         //generate experiments

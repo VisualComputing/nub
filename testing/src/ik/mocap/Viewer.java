@@ -149,15 +149,19 @@ public class Viewer extends PApplet{
 
     public void draw() {
         background(0);
-        lights();
+        ambientLight(102, 102, 102);
+        lightSpecular(204, 204, 204);
+        directionalLight(102, 102, 102, 0, 0, -1);
+        specular(255, 255, 255);
+        shininess(10);
         //Draw Constraints
-        scene.drawAxes();
+        //scene.drawAxes();
         scene.render();
         if(read){
             parser.nextPose();
             updateTargets();
         }
-        //parser.drawFeasibleRegion(this.getGraphics());
+        parser.drawFeasibleRegion(this.getGraphics());
         //parser.drawConstraint(this.getGraphics());
         if(chain_solver != null) {
             //if(show1) draw_pos(prev, color(0,255,0), 3);

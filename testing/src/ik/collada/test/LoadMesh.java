@@ -37,12 +37,13 @@ public class LoadMesh extends PApplet {
     }
 
     public void setup() {
+        randomSeed(14);
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
         for(int i = 0; i < 5; i++){
-            Frame target = new Target(scene, 0.15f);
+            Frame target = new Target(scene, 15f);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -66,7 +67,7 @@ public class LoadMesh extends PApplet {
         //rot.compose(new Quaternion(arm.children().get(0).translation() , arm.displacement(new Vector(-1, 0, 0))));
         //arm_constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)));
         arm_constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)), arm.children().get(0).translation());
-        //arm.setConstraint(arm_constraint);
+        arm.setConstraint(arm_constraint);
 
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         float v = 20;
@@ -109,13 +110,12 @@ public class LoadMesh extends PApplet {
     }
     public void draw() {
         skinning.updateParams();
-        background(0);
+        background(255);
         lights();
         shader(skinning.shader);
         shape(model.getModel());
         resetShader();
         hint(DISABLE_DEPTH_TEST);
-        scene.drawAxes();
         scene.render();
         hint(ENABLE_DEPTH_TEST);
     }

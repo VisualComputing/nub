@@ -6,6 +6,7 @@ import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
 import frames.core.Frame;
+import frames.ik.evolution.BioIk;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
  */
 public class ConeBall extends PApplet{
     //TODO : Update
-    int num_joints = 15;
+    int num_joints = 10;
     float targetRadius = 7;
     float boneLength = 50;
 
@@ -120,10 +121,13 @@ public class ConeBall extends PApplet{
             if(show1) draw_pos(prev, color(0,255,0), 3);
             if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
             if(show3) draw_pos(constr, color(100,100,0), 3);
+            System.out.println("FABRIK Error : " + chain_solver.error());
         }
         if(solve) {
             ccd_solver.solve();
             for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
+            System.out.println("CCD Error : " + ccd_solver.error());
+
         }
         scene.render();
 
@@ -273,6 +277,15 @@ public class ConeBall extends PApplet{
 
         if(key == 'w' || key == 'W'){
             solve = !solve;
+        }
+
+        if(key == '.'){
+            //Apply random perturbation of 15 degrees
+            ArrayList<? extends Frame> chain = chain_solvers.get(1).chain();
+            for(Frame f : chain){
+                f.rotate(new Quaternion(Vector.random(), radians(random(0,15))));
+            }
+            chain_solvers.get(1).iterations = 0;
         }
     }
 

@@ -54,9 +54,9 @@ public class GeometryLoader {
         int count = Integer.parseInt(positionsData.getAttribute("count"));
         String[] posData = positionsData.getData().split(" ");
         for (int i = 0; i < count/3; i++) {
-            float x = Float.parseFloat(posData[i * 3]);
-            float y = Float.parseFloat(posData[i * 3 + 1]);
-            float z = Float.parseFloat(posData[i * 3 + 2]);
+            float x = Float.parseFloat(posData[i * 3])*100;
+            float y = Float.parseFloat(posData[i * 3 + 1])*100;
+            float z = Float.parseFloat(posData[i * 3 + 2])*100;
             PVector position = new PVector(x, y, z);
             vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x, position.y, position.z), vertexWeights.get(vertices.size())));
         }
@@ -69,9 +69,9 @@ public class GeometryLoader {
         int count = Integer.parseInt(normalsData.getAttribute("count"));
         String[] normData = normalsData.getData().split(" ");
         for (int i = 0; i < count/3; i++) {
-            float x = Float.parseFloat(normData[i * 3]);
-            float y = Float.parseFloat(normData[i * 3 + 1]);
-            float z = Float.parseFloat(normData[i * 3 + 2]);
+            float x = Float.parseFloat(normData[i * 3])*100;
+            float y = Float.parseFloat(normData[i * 3 + 1])*100;
+            float z = Float.parseFloat(normData[i * 3 + 2])*100;
             PVector norm = new PVector(x, y, z);
             normals.add(norm);
         }
