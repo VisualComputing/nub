@@ -115,7 +115,7 @@ public class GASolver extends Solver {
     @Override
     protected boolean _iterate() {
         //1. Select parents
-        List<Individual> parents = _selection.choose(true, _population, _population_size * 2);
+        List<Individual> parents = _selection.choose(true, _population, _population_size);
         if(_debug) {
             System.out.println("ITERATION : " + iterations);
             System.out.println("Parents");
@@ -130,25 +130,38 @@ public class GASolver extends Solver {
         Individual best = _best;
         for(int i = 0; i < parents.size(); i+=2){
             if(_random.nextFloat() < _cross_probability) {
-                Individual child = _crossover.apply(parents.get(i), parents.get(i + 1));
+                Individual child1 = _crossover.apply(parents.get(i), parents.get(i + 1));
                 if(_debug) {
                     System.out.println("\t Best " + _best);
                     System.out.println("\t P1 " + parents.get(i));
                     System.out.println("\t P2 " + parents.get(i + 1));
-                    child.updateFitness(_targets);
-                    System.out.println("\t Child " + child);
+                    child1.updateFitness(_targets);
+                    System.out.println("\t Child " + child1);
                 }
-                child = _mutation.apply(child);
-                child.updateFitness(_targets);
-                children.add(child);
-                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
-                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+                child1 = _mutation.apply(child1);
+                child1.updateFitness(_targets);
+                children.add(child1);
 
+                Individual child2 = _crossover.apply(parents.get(i), parents.get(i + 1));
+                child2 = _mutation.apply(child2);
+                child2.updateFitness(_targets);
+                children.add(child2);
+
+                best = best == null ? child1 : best.fitness() > child1.fitness() ? child1 : best;
+                worst = worst == null ? child1 : worst.fitness() < child1.fitness() ? child1 : worst;
+                best = best == null ? child2 : best.fitness() > child1.fitness() ? child2 : best;
+                worst = worst == null ? child2 : worst.fitness() < child1.fitness() ? child2 : worst;
             } else{
-                Individual child = parents.get(i);
-                if(replacement != Replacement.ELITISM) children.add(child);
-                best = best == null ? child : best.fitness() > child.fitness() ? child : best;
-                worst = worst == null ? child : worst.fitness() < child.fitness() ? child : worst;
+                Individual child1 = parents.get(i);
+                Individual child2 = parents.get(i + 1);
+                if(replacement != Replacement.ELITISM){
+                    children.add(child1);
+                    children.add(child2);
+                }
+                best = best == null ? child1 : best.fitness() > child1.fitness() ? child1 : best;
+                worst = worst == null ? child1 : worst.fitness() < child1.fitness() ? child1 : worst;
+                best = best == null ? child2 : best.fitness() > child1.fitness() ? child2 : best;
+                worst = worst == null ? child2 : worst.fitness() < child1.fitness() ? child2 : worst;
             }
         }
         if(_debug) {
@@ -165,7 +178,11 @@ public class GASolver extends Solver {
                 _population = Util.concatenate(_population, children);
                 _population = Util.sort(true, false, _population);
                 _best = _population.get(0);
-                _population = _population.subList(0, _population_size);
+                List<Individual> elite = _population.subList(0, 2*_population_size/3);
+                List<Individual> other = _population.subList(2*_population_size/3, _population.size());
+                Collections.shuffle(other);
+                _population = elite;
+                _population.addAll(other.subList(0, _population_size - elite.size()));
                 Collections.shuffle(_population);
                 if(_debug) {
                     System.out.println("Population ");

@@ -216,4 +216,9 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         return error;
     }
 
+    @Override
+    public void setTarget(Frame endEffector, Frame target) {
+
+    }
+
 }

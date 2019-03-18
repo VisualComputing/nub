@@ -11,6 +11,7 @@
 
 package frames.ik;
 
+import frames.core.Frame;
 import frames.timing.TimingTask;
 
 /**
@@ -21,7 +22,6 @@ import frames.timing.TimingTask;
  */
 
 public abstract class Solver {
-  //TODO : Update
   //TODO : Add visual hints to show how the solver's algorithm works.
   //TODO paper idea: optimize values per _solver / timer / local config
   public float error = 0.01f;
@@ -81,4 +81,6 @@ public abstract class Solver {
     _update();
     return false;
   }
+
+  public abstract void setTarget(Frame endEffector, Frame target);
 }

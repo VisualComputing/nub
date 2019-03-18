@@ -126,7 +126,7 @@ public class BioIk extends Solver {
         int k = 0;
         while (k < maxIter) {
             _iterate();
-            ArrayList<Individual> st = new ArrayList<>(_sorted_population);
+            ArrayList<Individual> st = new ArrayList<>(_sorted_population.subList(0, _elitism_size));
             st.add(_best);
             _statistics.add(new Statistics(st));
             k++;

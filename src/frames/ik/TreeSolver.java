@@ -350,6 +350,11 @@ public class TreeSolver extends FABRIKSolver {
     return _best;
   }
 
+  @Override
+  public void setTarget(Frame endEffector, Frame target) {
+    addTarget(endEffector,target);
+  }
+
 
   protected ArrayList<Frame> _copyChain(TreeNode parent, ArrayList<Frame> list){
     if(parent._solver != null) {

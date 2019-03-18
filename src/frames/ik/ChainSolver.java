@@ -38,6 +38,10 @@ public class ChainSolver extends FABRIKSolver {
     return _target;
   }
 
+  public void setTarget(Frame endEffector, Frame target) {
+    this._target = target;
+  }
+
   public void setTarget(Frame target) {
     this._target = target;
   }
