@@ -2,21 +2,25 @@ package intellij;
 
 import nub.core.Graph;
 import nub.core.Node;
+import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
+import processing.opengl.PShader;
 
 public class ShadowMapping extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Node[] shapes;
   Node light;
-  boolean show = true;
+  boolean debug = false;
+  boolean shadows = true;
+  PShader depthShader, shadowShader;
   PGraphics shadowMap;
   float zNear = 50;
-  float zFar = 500;
+  float zFar = 1000;
   int w = 1000;
   int h = 1000;
 
@@ -46,20 +50,40 @@ public class ShadowMapping extends PApplet {
     light.setPickingThreshold(0);
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
-    shadowMap = createGraphics(w / 2, h / 2, P3D);
+
+    if(debug) {
+      shadowMap = createGraphics(w / 2, h / 2, P3D);
+      depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
+      depthShader.set("near", zNear);
+      depthShader.set("far", zFar);
+    }
+    else {
+      shadowMap = createGraphics(w, h, P3D);
+      depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
+    }
+    shadowMap.shader(depthShader);
+
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadowvert.glsl");
   }
 
   public void draw() {
     background(90, 80, 125);
-    // 1. Fill in and display front-buffer
-    scene.render();
-    // 2. Fill in shadow map using the light point of view
+    // 1. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
     shadowMap.background(120);
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
+    // 2. Fill in and display front-buffer
+    if(shadows) {
+      shader(shadowShader);
+      Vector lightPosition = light.position();
+      pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
+    }
+    else
+      resetShader();
+    scene.render();
     // 3. Display shadow map
-    if (show) {
+    if (debug) {
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
@@ -94,8 +118,13 @@ public class ShadowMapping extends PApplet {
       scene.setFOV(PI / 3);
     if (key == '4')
       scene.setFOV(PI / 4);
-    if (key == ' ')
-      show = !show;
+    if (key == ' ') {
+      shadows = !shadows;
+      if(shadows)
+        println("shadows activated!");
+      else
+        println("shadows de-activated");
+    }
     if (key == 'o')
       if (shadowMapType == Graph.Type.ORTHOGRAPHIC)
         shadowMapType = Graph.Type.PERSPECTIVE;
@@ -111,7 +140,7 @@ public class ShadowMapping extends PApplet {
     PShape caja = scene.is3D() ? createShape(BOX, random(60, 100)) : createShape(RECT, 0, 0, random(60, 100), random(60, 100));
     caja.setStrokeWeight(3);
     caja.setStroke(color(random(0, 255), random(0, 255), random(0, 255)));
-    caja.setFill(color(random(0, 255), random(0, 255), random(0, 255), random(0, 255)));
+    caja.setFill(color(random(0, 255), random(0, 255), random(0, 255)));
     return caja;
   }
 
