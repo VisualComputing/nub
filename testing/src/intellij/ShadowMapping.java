@@ -76,6 +76,7 @@ public class ShadowMapping extends PApplet {
     // 2. Fill in and display front-buffer
     if(shadows) {
       shader(shadowShader);
+      shadowShader.set("shadowMap", shadowMap);
       Vector lightPosition = light.position();
       pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
     }
