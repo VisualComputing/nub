@@ -38,14 +38,14 @@ public class DOF extends PApplet {
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/dof/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth_linear.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);
@@ -100,8 +100,6 @@ public class DOF extends PApplet {
     if (key == '0') mode = 0;
     if (key == '1') mode = 1;
     if (key == '2') mode = 2;
-    if (key == 's') scene.saveConfig("/home/pierre/config.json");
-    if (key == 'l') scene.loadConfig("/home/pierre/config.json");
     if (key == 't')
       if (scene.type() == Graph.Type.ORTHOGRAPHIC)
         scene.setType(Graph.Type.PERSPECTIVE);

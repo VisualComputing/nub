@@ -74,7 +74,7 @@ public class ShadowMapDOFOnScreen extends PApplet {
 
     lightPGraphics = createGraphics(width / 2, height / 2, P3D);
 
-    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_linear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
     depthShader.set("near", zNear);
     depthShader.set("far", zFar);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth_linear.glsl");
@@ -82,7 +82,7 @@ public class ShadowMapDOFOnScreen extends PApplet {
     depthPGraphics = createGraphics(width / 2, height / 2, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);
