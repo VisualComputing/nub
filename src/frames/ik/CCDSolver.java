@@ -24,6 +24,9 @@ public class CCDSolver extends Solver {
   protected Frame _target;
   protected Frame _previousTarget;
 
+  //Animation Stuff
+  protected ArrayList<ArrayList<Vector>> _iterationsHistory;
+
   public ArrayList<? extends Frame> chain() {
     return _chain;
   }
@@ -97,6 +100,12 @@ public class CCDSolver extends Solver {
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
     }
+
+    ArrayList<Vector> positions = new ArrayList<Vector>();
+    for(Frame f : chain()){
+      positions.add(f.position().get());
+    }
+    addIterationRecord(positions);
     //Check total rotation change
     if (change <= minDistance) return true;
     return false;
@@ -122,11 +131,27 @@ public class CCDSolver extends Solver {
   protected void _reset() {
     _previousTarget = _target == null ? null : new Frame(_target.position().get(), _target.orientation().get(), 1);
     iterations = 0;
+    _iterationsHistory = new ArrayList<>();
+    ArrayList<Vector> positions = new ArrayList<Vector>();
+    for(Frame f : chain()){
+      positions.add(f.position().get());
+    }
+    addIterationRecord(positions);
   }
 
   @Override
   public float error() {
     return Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
   }
+
+  //Animation Stuff
+  public ArrayList<ArrayList<Vector>> iterationsHistory(){
+    return _iterationsHistory;
+  }
+
+  public void addIterationRecord(ArrayList<Vector> iteration){
+    _iterationsHistory.add(new ArrayList<>(iteration));
+  }
+
 
 }
