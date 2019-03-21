@@ -3,18 +3,14 @@ package ik.constraintTest;
 import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
-import frames.ik.animation.FABRIKAnimation;
+import frames.ik.animation.IKAnimation;
 import frames.ik.evolution.BioIk;
-import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
-import frames.timing.TimingTask;
 import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -32,6 +28,8 @@ public class Case1 extends PApplet {
     ArrayList<Frame>[] skeletons = new ArrayList[3];
     Frame[] targets = new Frame[3];
     Solver[] solvers = new Solver[3];
+    IKAnimation.FABRIKAnimation FABRIKAnimator = null;
+    IKAnimation.CCDAnimation CCDAnimator = null;
 
     public void settings() {
         size(700, 700, P3D);
@@ -89,7 +87,6 @@ public class Case1 extends PApplet {
         //Define Text Font
         textFont(createFont("Zapfino", 38));
     }
-    FABRIKAnimation animator = null;
 
     public void draw() {
         focus = displayAuxiliar ? auxiliar : scene;
@@ -108,7 +105,8 @@ public class Case1 extends PApplet {
             auxiliar.frontBuffer().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
-            if(animator != null)  animator.draw();
+            if(FABRIKAnimator != null)  FABRIKAnimator.draw();
+            if(CCDAnimator != null)  CCDAnimator.draw();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -181,12 +179,18 @@ public class Case1 extends PApplet {
     }
 
     public void keyPressed(){
-        if(key == 'a'){
+        if(key == '1'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            animator = new FABRIKAnimation(auxiliar, (ChainSolver) solvers[1], targetRadius);
+            FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, (ChainSolver) solvers[1], targetRadius);
+        } else if(key == '2'){
+            displayAuxiliar = true;
+            for (Solver s : solvers) s.solve();
+            CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers[0], targetRadius);
         } else if(key == ' '){
-            displayAuxiliar = false;
+            displayAuxiliar = !displayAuxiliar;
+        } else if(key == 's'){
+            for (Solver s : solvers) s.solve();
         }
 
     }
