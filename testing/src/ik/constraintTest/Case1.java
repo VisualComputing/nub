@@ -9,6 +9,7 @@ import frames.core.constraint.PlanarPolygon;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
+import frames.ik.animation.FABRIKAnimation;
 import frames.ik.evolution.BioIk;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
@@ -64,25 +65,31 @@ public class Case1 extends PApplet {
         solvers[1] = new ChainSolver(skeletons[1]);
         solvers[2] = new BioIk(skeletons[2], 10, 4);
 
+
         for(int i = 0; i < solvers.length; i++) {
             Solver solver = solvers[i];
             solver.setTarget(skeletons[i].get(skeletons[i].size() - 1) , targets[i]);
-            TimingTask task = new TimingTask() {
-                @Override
-                public void execute() {
-                    solver.solve();
-                }
-            };
-            scene.registerTask(task);
-            task.run(40);
+            //TimingTask task = null;
+            /*task = new TimingTask() {
+                    @Override
+                    public void execute() {
+                        solver.solve();
+                    }
+                };
+            //scene.registerTask(task);
+            //task.run(40);*/
         }
+        //Define Text Font
+        textFont(createFont("Zapfino", 38));
     }
+    FABRIKAnimation animator = null;
 
     public void draw() {
         background(0);
         lights();
         scene.drawAxes();
         scene.render();
+        if(animator != null)animator.draw();
         scene.beginHUD();
         for(int i = 0; i < solvers.length; i++) {
             Util.printInfo(scene, solvers[i], skeletons[i].get(0).position());
@@ -156,11 +163,9 @@ public class Case1 extends PApplet {
     }
 
     public void keyPressed(){
-        Frame f = scene.trackedFrame();
-        if(f == null) return;
-        Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
-        if(c == null) return;
-        scene.trackedFrame().rotate(new Quaternion(c.axis(), radians(5)));
+        for(Solver s : solvers) s.solve();
+        animator = new FABRIKAnimation(scene, (ChainSolver) solvers[1], targetRadius);
+        animator.start();
     }
 
 
