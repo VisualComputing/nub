@@ -38,6 +38,8 @@ public class ShadowMapping extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(scene, caja());
       shapes[i].randomize();
+      // TODO: fix picking (1) [there are SOME picking thresholds > 10, but at least one is 0]
+      // To test/fix disable shadowMap rendering (fix picking (2))
       shapes[i].setPickingThreshold(0);
     }
     light = new Node(scene) {
@@ -72,11 +74,15 @@ public class ShadowMapping extends PApplet {
 
   public void draw() {
     background(90, 80, 125);
+    // /*
     // 1. Fill in shadow map using the light point of view
+    // TODO: fix picking (1) [all picking thresholds > 10]
     shadowMap.beginDraw();
     shadowMap.background(120);
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
+    // /*
+    // /*
     // 2. Fill in and display front-buffer
     if(shadows) {
       shader(shadowShader);
@@ -89,7 +95,15 @@ public class ShadowMapping extends PApplet {
     }
     else
       resetShader();
+    // */
+    // */
     scene.render();
+    /*
+    // TODO: fix picking (debug both cases 1, and 2)
+    stroke(255);
+    for(Node node : scene.nodes())
+      scene.drawShooterTarget(node);
+    //*/
     // 3. Display shadow map
     if (debug) {
       scene.beginHUD();
