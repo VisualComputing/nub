@@ -96,7 +96,6 @@ public class ShadowMapOnScreen extends PApplet {
     return caja;
   }
 
-
   public static void main(String args[]) {
     PApplet.main(new String[]{"intellij.ShadowMapOnScreen"});
   }

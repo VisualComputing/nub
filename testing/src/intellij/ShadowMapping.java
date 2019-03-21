@@ -2,10 +2,12 @@ package intellij;
 
 import nub.core.Graph;
 import nub.core.Node;
+import nub.primitives.Matrix;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PMatrix3D;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
@@ -19,6 +21,7 @@ public class ShadowMapping extends PApplet {
   boolean shadows = true;
   PShader depthShader, shadowShader;
   PGraphics shadowMap;
+  PMatrix3D pmatrix = new PMatrix3D();
   float zNear = 50;
   float zFar = 1000;
   int w = 1000;
@@ -35,6 +38,7 @@ public class ShadowMapping extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(scene, caja());
       shapes[i].randomize();
+      shapes[i].setPickingThreshold(0);
     }
     light = new Node(scene) {
       @Override
@@ -76,9 +80,12 @@ public class ShadowMapping extends PApplet {
     // 2. Fill in and display front-buffer
     if(shadows) {
       shader(shadowShader);
-      shadowShader.set("shadowMap", shadowMap);
       Vector lightPosition = light.position();
       pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
+      Matrix lightMatrix = Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()), light.view());
+      pmatrix.set(lightMatrix.get(new float[16]));
+      shadowShader.set("lightSpaceMatrixUN", pmatrix);
+      shadowShader.set("shadowMapUN", shadowMap);
     }
     else
       resetShader();
