@@ -1,4 +1,4 @@
-uniform sampler2D shadowMapUN;
+uniform sampler2D shadowMap;
 varying vec4 vertColor;
 varying vec3 ecNormal;
 varying vec3 lightDirection;
@@ -14,7 +14,7 @@ float ShadowCalculation(vec4 fragPosLightSpace) {
   // transform to [0,1] range
   projCoords = projCoords * 0.5 + 0.5;
   // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-  float closestDepth = texture(shadowMapUN, projCoords.xy).r;
+  float closestDepth = texture(shadowMap, projCoords.xy).r;
   // get depth of current fragment from light's perspective
   float currentDepth = projCoords.z;
   // check whether current frag pos is in shadow

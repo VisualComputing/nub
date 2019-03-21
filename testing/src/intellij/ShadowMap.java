@@ -66,9 +66,10 @@ public class ShadowMap extends PApplet {
       shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
-    depthShader.set("near", zNear);
-    depthShader.set("far", zFar);
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
+    //depthShader.set("near", zNear);
+    //depthShader.set("far", zFar);
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
     shadowMap.shader(depthShader);
 
     scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
@@ -86,9 +87,11 @@ public class ShadowMap extends PApplet {
       scene.render(shadowMap, shadowMapType, scene.trackedNode("light"), zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
+      /*
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
+      */
     }
   }
 

@@ -2,7 +2,7 @@ uniform mat4 modelview;
 uniform mat4 transform;
 uniform mat3 normalMatrix;
 uniform vec4 lightPosition;
-uniform mat4 lightSpaceMatrixUN;
+uniform mat4 lightSpaceMatrix;
 //uniform vec3 lightNormal;
 
 attribute vec4 position;
@@ -26,7 +26,7 @@ void main() {
   ecNormal = normalize(normalMatrix * normal);
   lightDirection = normalize(lightPosition.xyz - ecPosition);
   // shadow
-  FragPosLightSpace = lightSpaceMatrixUN * vec4(ecPosition, 1.0);
+  FragPosLightSpace = lightSpaceMatrix * vec4(ecPosition, 1.0);
   // specular
   cameraDirection = normalize(0 - ecPosition);
   lightDirectionReflected = reflect(-lightDirection, ecNormal);

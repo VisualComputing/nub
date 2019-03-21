@@ -12,7 +12,7 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-public class ShadowMapping extends PApplet {
+public class ShadowMappingVBO extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Node[] shapes;
@@ -167,6 +167,6 @@ public class ShadowMapping extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMapping"});
+    PApplet.main(new String[]{"intellij.ShadowMappingVBO"});
   }
 }
