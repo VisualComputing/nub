@@ -27,6 +27,9 @@ public class ChainSolver extends FABRIKSolver {
   protected ArrayList<? extends Frame> _original;
   protected float _current = 10e10f, _best = 10e10f;
 
+  //Animation Stuff
+  protected ArrayList<ArrayList<Vector>> _iterationsHistory;
+
   protected Frame _target;
   protected Frame _prevTarget;
 
@@ -143,6 +146,8 @@ public class ChainSolver extends FABRIKSolver {
     //Stage 1: Forward Reaching
     _positions.set(_chain.size() - 1, target.get());
     _forwardReaching();
+    //Animation stuff
+    addIterationRecord(_positions);
     //Stage 2: Backward Reaching
     Vector o = _positions.get(0);
     _positions.set(0, initial);
@@ -150,6 +155,7 @@ public class ChainSolver extends FABRIKSolver {
     //Save best solution
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
     _update();
+    addIterationRecord(_positions);
     //Check total position change
     /*if (change <= minDistance){
       //avoid deadLock
@@ -272,6 +278,8 @@ public class ChainSolver extends FABRIKSolver {
     _positions = new ArrayList<Vector>();
     _distances = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
+    _iterationsHistory = new ArrayList<>();
+
     Vector prevPosition = _chain.get(0).reference() != null
         ? _chain.get(0).reference().position().get() : new Vector(0, 0, 0);
     Quaternion prevOrientation = _chain.get(0).reference() != null
@@ -287,7 +295,7 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
-
+    addIterationRecord(_positions);
   }
 
   protected void _avoidDeadlock(){
@@ -296,5 +304,14 @@ public class ChainSolver extends FABRIKSolver {
     Vector w = Vector.subtract(_target.position(), head().position());
     Vector axis = w.cross(v);
     head().rotate(new Quaternion(axis, 0.1f));
+  }
+
+  //Animation Stuff
+  public ArrayList<ArrayList<Vector>> iterationsHistory(){
+    return _iterationsHistory;
+  }
+
+  public void addIterationRecord(ArrayList<Vector> iteration){
+    _iterationsHistory.add(new ArrayList<>(iteration));
   }
 }
