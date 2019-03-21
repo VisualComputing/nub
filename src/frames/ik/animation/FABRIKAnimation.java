@@ -183,7 +183,7 @@ public class FABRIKAnimation{
         }
 
         protected void calculateSpeedPerIteration(){
-            Quaternion q = new Quaternion(_trajectory[_idx], _trajectory[_idx + 1]);
+            Quaternion q = new Quaternion(Vector.subtract(_trajectory[_idx], _base), Vector.subtract(_trajectory[_idx + 1], _base));
             float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
             _delta = new Quaternion(q.axis(), q.angle() * inc);
         }
@@ -198,7 +198,8 @@ public class FABRIKAnimation{
                 _current = v2;
                 calculateSpeedPerIteration();
             } else {
-                _current = _delta.rotate(_current);
+                _current = _delta.rotate(Vector.subtract(_current, _base));
+                _current.add(_base);
             }
         }
 
@@ -262,7 +263,7 @@ public class FABRIKAnimation{
     protected Vector[] _previousSegment;
     protected float _radius;
     protected boolean _forwardStage = true;
-    protected long _period = 5000;
+    protected long _period = 8000;
 
 
     public FABRIKAnimation(Scene scene, ChainSolver solver, float radius) {
@@ -335,6 +336,7 @@ public class FABRIKAnimation{
                     _trajectory = new FollowTrajectoryStep(_scene,_radius, _period);
                     _trajectory.start();
                     ((FollowTrajectoryStep)_trajectory).setTrajectory(j_i1_hat, j_i);
+                    ((FollowTrajectoryStep)_trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
                     ((FollowTrajectoryStep)_trajectory)._message = "Step 2: Find the Segment Line defined by J_t and J_i";
                     break;
                 }
@@ -346,6 +348,7 @@ public class FABRIKAnimation{
                     _previousSegment = ((FollowTrajectoryStep)_trajectory)._trajectory.clone();
                     _scene.unregisterAnimator(_trajectory);
                     _trajectory = new FollowTrajectoryStep(_scene,_radius, _period);
+                    ((FollowTrajectoryStep)_trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
                     _trajectory.start();
                     ((FollowTrajectoryStep)_trajectory).setTrajectory(j_i1_hat, v);
                     ((FollowTrajectoryStep)_trajectory)._message = "Step 3: Find the new joint's position by fixing the length of Segment Line";
@@ -370,6 +373,7 @@ public class FABRIKAnimation{
                     _scene.unregisterAnimator(_trajectory);
                     _trajectory = new FollowTrajectoryStep(_scene,_radius, _period);
                     _trajectory.start();
+                    ((FollowTrajectoryStep)_trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
                     ((FollowTrajectoryStep)_trajectory).setTrajectory(j_i1_hat, j_i_hat);
                     ((FollowTrajectoryStep)_trajectory)._message = "Step 4: Connect new found position with target position";
                     break;
