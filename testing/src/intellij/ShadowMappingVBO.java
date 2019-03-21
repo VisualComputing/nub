@@ -76,7 +76,7 @@ public class ShadowMappingVBO extends PApplet {
     background(90, 80, 125);
     // /*
     // 1. Fill in shadow map using the light point of view
-    // TODO: fix picking (1) [all picking thresholds > 10]
+    // TODO: fix picking (2) [all picking thresholds > 10]
     shadowMap.beginDraw();
     shadowMap.background(120);
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
