@@ -90,8 +90,8 @@ public class ShadowMappingVBO extends PApplet {
       pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
       Matrix lightMatrix = Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()), light.view());
       pmatrix.set(lightMatrix.get(new float[16]));
-      shadowShader.set("lightSpaceMatrixUN", pmatrix);
-      shadowShader.set("shadowMapUN", shadowMap);
+      shadowShader.set("lightSpaceMatrix", pmatrix);
+      shadowShader.set("shadowMap", shadowMap);
     }
     else
       resetShader();
