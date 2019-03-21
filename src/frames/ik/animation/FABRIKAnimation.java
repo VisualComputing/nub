@@ -106,44 +106,18 @@ public class FABRIKAnimation extends AnimatorObject {
             PGraphics pg = _scene.frontBuffer();
             pg.pushStyle();
             if(_scene.is3D()) {
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
-                pg.strokeWeight(_radius);
-                pg.pushMatrix();
-                pg.stroke(_cv);
+                drawSegment3D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
+                pg.noStroke();
                 pg.fill(_cv);
+                pg.pushMatrix();
                 pg.translate(_current.x(), _current.y(), _current.z());
                 pg.sphere(_radius);
                 pg.popMatrix();
-                pg.pushMatrix();
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.translate(v1.x(), v1.y(), v1.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
-                pg.pushMatrix();
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.translate(v2.x(), v2.y(), v2.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
             } else{
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v2.x(), v2.y());
-                pg.strokeWeight(_radius);
+                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
                 pg.stroke(_cv);
                 pg.fill(_cv);
                 pg.ellipse(_current.x(), _current.y(),_radius, _radius);
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.ellipse(v1.x(), v1.y(),_radius, _radius);
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.ellipse(v2.x(), v2.y(),_radius, _radius);
             }
 
             if(_message != null){
@@ -187,7 +161,7 @@ public class FABRIKAnimation extends AnimatorObject {
         _radius = radius;
         setPeriod(1000);
         stop();
-        _trajectory = new FollowTrajectoryStep(scene,radius, period());
+        _trajectory = new FollowTrajectoryStep(scene,radius, period()*5);
         _trajectory.start();
 
         PGraphics pg = _scene.frontBuffer();
@@ -230,17 +204,19 @@ public class FABRIKAnimation extends AnimatorObject {
                     break;
                 }
                 case 2:{
-                    Vector v = Vector.subtract(j_i1_hat, j_i);
+                    Vector v = Vector.subtract(j_i, j_i1_hat);
                     v.normalize();
                     v.multiply(Vector.distance(j_i1, j_i));
+                    v.add(j_i1_hat);
                     _trajectory.setTrajectory(j_i1_hat, v);
                     _trajectory._message = "Step 3: Find the new joint's position by fixing the length of Segment Line";
                     break;
                 }
                 case 3:{
-                    Vector v = Vector.subtract(j_i1_hat, j_i);
+                    Vector v = Vector.subtract(j_i, j_i1_hat);
                     v.normalize();
                     v.multiply(Vector.distance(j_i1, j_i));
+                    v.add(j_i1_hat);
                     _trajectory.setTrajectory(v, j_i_hat);
                     _trajectory._message = "Step 4: In case of constraints Move to a Feasible position";
                     break;
@@ -251,99 +227,79 @@ public class FABRIKAnimation extends AnimatorObject {
     }
 
     public void draw(){
-        drawForward();
-
-    }
-
-    public void drawForward(){
-        //Draw previous steps & previous state
-        ArrayList<Vector> next = _solver.iterationsHistory().get(_current);
+        //Draw previous iteration
         ArrayList<Vector> prev = _solver.iterationsHistory().get(_current - 1);
-
+        PGraphics pg = _scene.frontBuffer();
         for(int i = 0; i < prev.size() - 1 ; i++){
             Vector v1 = prev.get(i);
             Vector v2 = prev.get(i+1);
-
-            PGraphics pg = _scene.frontBuffer();
             pg.pushStyle();
             if(_scene.is3D()) {
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
-                pg.strokeWeight(_radius);
-                pg.pushMatrix();
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.translate(v1.x(), v1.y(), v1.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
-                pg.pushMatrix();
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.translate(v2.x(), v2.y(), v2.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
+                drawSegment3D(pg, v1, v2, _radius, pg.color(255,255,0,100), pg.color(255,255,0,100), pg.color(255,255,0,100));
             } else{
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v2.x(), v2.y());
-                pg.strokeWeight(_radius);
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.ellipse(v1.x(), v1.y(),_radius, _radius);
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.ellipse(v2.x(), v2.y(),_radius, _radius);
+                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
             }
             pg.popStyle();
-
         }
 
+        drawForward(pg);
+    }
 
+    public void drawForward(PGraphics pg){
+        //Draw previous steps & previous state
+        ArrayList<Vector> next = _solver.iterationsHistory().get(_current);
         for(int i = next.size() - 1; i > _j; i--){
             Vector v1 = next.get(i-1);
             Vector v2 = next.get(i);
-
-            PGraphics pg = _scene.frontBuffer();
             pg.pushStyle();
             if(_scene.is3D()) {
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
-                pg.strokeWeight(_radius);
-                pg.pushMatrix();
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.translate(v1.x(), v1.y(), v1.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
-                pg.pushMatrix();
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.translate(v2.x(), v2.y(), v2.z());
-                pg.sphere(_radius);
-                pg.popMatrix();
+                drawSegment3D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
             } else{
-                pg.strokeWeight(_radius/2.f);
-                pg.stroke(_cline);
-                pg.fill(_cline);
-                pg.line(v1.x(), v1.y(), v2.x(), v2.y());
-                pg.strokeWeight(_radius);
-                pg.stroke(_cv1);
-                pg.fill(_cv1);
-                pg.ellipse(v1.x(), v1.y(),_radius, _radius);
-                pg.stroke(_cv2);
-                pg.fill(_cv2);
-                pg.ellipse(v2.x(), v2.y(),_radius, _radius);
+                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
             }
             pg.popStyle();
         }
 
         //Animate current step
         if(_trajectory._trajectory != null)_trajectory.draw();
+    }
+
+    public static void drawSegment3D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2){
+        pg.pushStyle();
+        pg.strokeWeight(radius/2.f);
+        pg.stroke(cline);
+        pg.fill(cline);
+        pg.line(v1.x(), v1.y(), v1.z(), v2.x(), v2.y(), v2.z());
+        pg.strokeWeight(radius);
+        pg.pushMatrix();
+        pg.noStroke();
+        pg.fill(cv1);
+        pg.translate(v1.x(), v1.y(), v1.z());
+        pg.sphere(radius);
+        pg.popMatrix();
+        pg.pushMatrix();
+        pg.fill(cv2);
+        pg.translate(v2.x(), v2.y(), v2.z());
+        pg.sphere(radius);
+        pg.popMatrix();
+        pg.popStyle();
+    }
+
+
+    public static void drawSegment2D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2){
+        pg.pushStyle();
+        pg.strokeWeight(radius/2.f);
+        pg.stroke(cline);
+        pg.fill(cline);
+        pg.line(v1.x(), v1.y(), v2.x(), v2.y());
+        pg.strokeWeight(radius);
+        pg.stroke(cv1);
+        pg.fill(cv1);
+        pg.ellipse(v1.x(), v1.y(),radius, radius);
+        pg.stroke(cv2);
+        pg.fill(cv2);
+        pg.ellipse(v2.x(), v2.y(),radius, radius);
+        pg.popStyle();
     }
 
 }
