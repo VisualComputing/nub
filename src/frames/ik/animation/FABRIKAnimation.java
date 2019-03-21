@@ -8,7 +8,7 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import java.util.ArrayList;
 
-public class FABRIKAnimation extends AnimatorObject {
+public class FABRIKAnimation{
 
     public static abstract class Step extends AnimatorObject{
         boolean _completed = false;
@@ -49,10 +49,10 @@ public class FABRIKAnimation extends AnimatorObject {
             _radius = radius;
             //use some default colors
             PGraphics pg = _scene.frontBuffer();
-            _cv1 = pg.color(255,0,0);
-            _cv2 = pg.color(255,0,0);
-            _cv = pg.color(0,0,255);
-            _cline = pg.color(255,0,0);
+            _cv1 = pg.color(0,0,255, 200);
+            _cv2 = pg.color(0,0,255, 200);
+            _cv = pg.color(0,0,255, 200);
+            _cline = pg.color(0,0,255, 200);
             _radius = radius;
             _edgePeriod = edgePeriod;
         }
@@ -63,6 +63,7 @@ public class FABRIKAnimation extends AnimatorObject {
             _current = trajectory[_idx].get();
             _completed = false;
             calculateSpeedPerIteration();
+            this.start();
         }
 
         protected void calculateSpeedPerIteration(){
@@ -105,6 +106,7 @@ public class FABRIKAnimation extends AnimatorObject {
 
             PGraphics pg = _scene.frontBuffer();
             pg.pushStyle();
+            pg.hint(PConstants.DISABLE_DEPTH_TEST);
             if(_scene.is3D()) {
                 drawSegment3D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
                 pg.noStroke();
@@ -119,7 +121,7 @@ public class FABRIKAnimation extends AnimatorObject {
                 pg.fill(_cv);
                 pg.ellipse(_current.x(), _current.y(),_radius, _radius);
             }
-
+            pg.hint(PConstants.ENABLE_DEPTH_TEST);
             if(_message != null){
                 _scene.beginHUD();
                 pg.fill(255);
@@ -149,30 +151,19 @@ public class FABRIKAnimation extends AnimatorObject {
     protected int _current = 1; //current iteration
     protected int _step = 0, _j = 0; //useful variables to check which Joint is being animated
     protected FollowTrajectoryStep _trajectory;
+    protected Vector[] _previousSegment;
     protected float _radius;
-    protected int _cline, _cv1, _cv2, _cv;
 
 
     public FABRIKAnimation(Scene scene, ChainSolver solver, float radius) {
-        super(scene.timingHandler());
         _scene = scene;
         _solver = solver;
         _j = solver.chain().size() - 1;
         _radius = radius;
-        setPeriod(1000);
-        stop();
-        _trajectory = new FollowTrajectoryStep(scene,radius, period()*5);
+        _trajectory = new FollowTrajectoryStep(scene,radius, 5000);
         _trajectory.start();
-
-        PGraphics pg = _scene.frontBuffer();
-
-        _cv1 = pg.color(255,0,0, 100);
-        _cv2 = pg.color(255,0,0, 100);
-        _cv = pg.color(0,0,255, 100);
-        _cline = pg.color(255,0,0, 100);
     }
 
-    @Override
     public void animate(){
         animateForward();
     }
@@ -181,7 +172,7 @@ public class FABRIKAnimation extends AnimatorObject {
         ArrayList<Vector> prevStructure = _solver.iterationsHistory().get(_current - 1);
         ArrayList<Vector> nextStructure = _solver.iterationsHistory().get(_current);
         //Animate
-        if(_step > 3){
+        if(_step > 4 && _trajectory._completed){
             _step = 0;
             _j--;
         }
@@ -194,11 +185,14 @@ public class FABRIKAnimation extends AnimatorObject {
             //create next trajectory
             switch (_step){
                 case 0:{
+                    _previousSegment = null;
                     _trajectory.setTrajectory(j_i1, j_i1_hat);
+                    _trajectory._mode = FollowTrajectoryStep.Line.V1_TO_V;
                     _trajectory._message = "Step 1: Assume J_i reach its Target Position";
                     break;
                 }
                 case 1:{
+                    _previousSegment = _trajectory._trajectory.clone();
                     _trajectory.setTrajectory(j_i1_hat, j_i);
                     _trajectory._message = "Step 2: Find the Segment Line defined by J_t and J_i";
                     break;
@@ -208,6 +202,7 @@ public class FABRIKAnimation extends AnimatorObject {
                     v.normalize();
                     v.multiply(Vector.distance(j_i1, j_i));
                     v.add(j_i1_hat);
+                    _previousSegment = _trajectory._trajectory.clone();
                     _trajectory.setTrajectory(j_i1_hat, v);
                     _trajectory._message = "Step 3: Find the new joint's position by fixing the length of Segment Line";
                     break;
@@ -217,16 +212,25 @@ public class FABRIKAnimation extends AnimatorObject {
                     v.normalize();
                     v.multiply(Vector.distance(j_i1, j_i));
                     v.add(j_i1_hat);
+                    _previousSegment = _trajectory._trajectory.clone();
                     _trajectory.setTrajectory(v, j_i_hat);
                     _trajectory._message = "Step 4: In case of constraints Move to a Feasible position";
                     break;
                 }
+                case 4:{
+                    _previousSegment = _trajectory._trajectory.clone();
+                    _trajectory.setTrajectory(j_i1_hat, j_i_hat);
+                    _trajectory._message = "Step 4: Connect new found position with target position";
+                    break;
+                }
+
             }
             _step++;
         }
     }
 
     public void draw(){
+        animateForward();
         //Draw previous iteration
         ArrayList<Vector> prev = _solver.iterationsHistory().get(_current - 1);
         PGraphics pg = _scene.frontBuffer();
@@ -237,7 +241,7 @@ public class FABRIKAnimation extends AnimatorObject {
             if(_scene.is3D()) {
                 drawSegment3D(pg, v1, v2, _radius, pg.color(255,255,0,100), pg.color(255,255,0,100), pg.color(255,255,0,100));
             } else{
-                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
+                drawSegment2D(pg, v1, v2, _radius, pg.color(255,255,0,100), pg.color(255,255,0,100), pg.color(255,255,0,100));
             }
             pg.popStyle();
         }
@@ -246,16 +250,23 @@ public class FABRIKAnimation extends AnimatorObject {
     }
 
     public void drawForward(PGraphics pg){
-        //Draw previous steps & previous state
+        if(_previousSegment != null){
+            if(_scene.is3D()) {
+                drawSegment3D(pg, _previousSegment[0], _previousSegment[1], _radius, pg.color(255,0,0, 100), pg.color(255,0,0, 100), pg.color(255,0,0, 100));
+            } else{
+                drawSegment2D(pg, _previousSegment[0], _previousSegment[1], _radius, pg.color(255,0,0, 100), pg.color(255,0,0, 100), pg.color(255,0,0, 100));
+            }
+        }
+
         ArrayList<Vector> next = _solver.iterationsHistory().get(_current);
         for(int i = next.size() - 1; i > _j; i--){
             Vector v1 = next.get(i-1);
             Vector v2 = next.get(i);
             pg.pushStyle();
             if(_scene.is3D()) {
-                drawSegment3D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
+                drawSegment3D(pg, v1, v2, _radius, pg.color(0,255,0, 200), pg.color(0,255,0, 200), pg.color(0,255,0, 200));
             } else{
-                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
+                drawSegment2D(pg, v1, v2, _radius, pg.color(0,255,0, 200), pg.color(0,255,0, 200), pg.color(0,255,0, 200));
             }
             pg.popStyle();
         }
