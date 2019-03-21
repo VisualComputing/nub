@@ -23,7 +23,9 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 public class Case1 extends PApplet {
-    Scene scene;
+    Scene scene, auxiliar, focus;
+    boolean displayAuxiliar = false;
+
     float boneLenght = 50;
     float targetRadius = 7;
 
@@ -40,8 +42,13 @@ public class Case1 extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setFOV(PI / 3);
         scene.setRadius(boneLenght * 5);
-
         scene.fit(1);
+
+        auxiliar = new Scene(this, P3D, width, height , 0, 0);
+        auxiliar.setType(Graph.Type.ORTHOGRAPHIC);
+        auxiliar.setFOV(PI / 3);
+        auxiliar.setRadius(boneLenght * 2f);
+        auxiliar.fit(1);
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -85,14 +92,25 @@ public class Case1 extends PApplet {
     FABRIKAnimation animator = null;
 
     public void draw() {
+        focus = displayAuxiliar ? auxiliar : scene;
         background(0);
         lights();
         scene.drawAxes();
         scene.render();
-        if(animator != null)animator.draw();
         scene.beginHUD();
-        for(int i = 0; i < solvers.length; i++) {
+        for (int i = 0; i < solvers.length; i++) {
             Util.printInfo(scene, solvers[i], skeletons[i].get(0).position());
+        }
+
+        if(displayAuxiliar) {
+            auxiliar.beginDraw();
+            auxiliar.frontBuffer().lights();
+            auxiliar.frontBuffer().background(0);
+            auxiliar.drawAxes();
+            auxiliar.render();
+            if(animator != null)  animator.draw();
+            auxiliar.endDraw();
+            auxiliar.display();
         }
         scene.endHUD();
 
@@ -131,41 +149,46 @@ public class Case1 extends PApplet {
 
     @Override
     public void mouseMoved() {
-        scene.cast();
+        focus.cast();
     }
 
     public void mouseDragged() {
         if (mouseButton == LEFT){
-            scene.spin();
+            focus.spin();
         } else if (mouseButton == RIGHT) {
             for(Frame target : targets){
-                if(scene.trackedFrame() == target){
-                    for(Frame t : targets) scene.translate(t);
+                if(focus.trackedFrame() == target){
+                    for(Frame t : targets) focus.translate(t);
                     return;
                 }
             }
-            scene.translate();
+            focus.translate();
         } else {
-            scene.scale(mouseX - pmouseX);
+            focus.scale(mouseX - pmouseX);
         }
     }
 
     public void mouseWheel(MouseEvent event) {
-        scene.scale(event.getCount() * 20);
+        focus.scale(event.getCount() * 20);
     }
 
     public void mouseClicked(MouseEvent event) {
         if (event.getCount() == 2)
             if (event.getButton() == LEFT)
-                scene.focus();
+                focus.focus();
             else
-                scene.align();
+                focus.align();
     }
 
     public void keyPressed(){
-        for(Solver s : solvers) s.solve();
-        animator = new FABRIKAnimation(scene, (ChainSolver) solvers[1], targetRadius);
-        animator.start();
+        if(key == 'a'){
+            displayAuxiliar = true;
+            for (Solver s : solvers) s.solve();
+            animator = new FABRIKAnimation(auxiliar, (ChainSolver) solvers[1], targetRadius);
+        } else if(key == ' '){
+            displayAuxiliar = false;
+        }
+
     }
 
 
