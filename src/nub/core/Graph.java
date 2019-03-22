@@ -2799,7 +2799,7 @@ public class Graph {
       _trackFrontBuffer(node);
       if (isOffscreen())
         _trackBackBuffer(node);
-      draw(context(), node);
+      _drawFrontBuffer(node);
       for (Node child : node.children())
         _draw(child);
     }
@@ -2850,7 +2850,7 @@ public class Graph {
     matrixHandler.pushModelView();
     _applyTransformation(matrixHandler, node, is2D());
     if (!node.isCulled()) {
-      draw(context, node);
+      _drawOntoBuffer(context, node);
       for (Node child : node.children())
         _draw(matrixHandler, context, child);
     }
@@ -2874,7 +2874,6 @@ public class Graph {
    *
    * @see #render()
    */
-  //TODO Pierre can this switch be pushed up?
   public void draw(Object context, Node node) {
     if (context == _backBuffer())
       return;
