@@ -276,7 +276,7 @@ public class Scene extends Graph implements PConstants {
    */
   @Override
   public PGraphics context() {
-    return (PGraphics)_fb;
+    return (PGraphics) _fb;
   }
 
   // PICKING BUFFER
@@ -286,8 +286,8 @@ public class Scene extends Graph implements PConstants {
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
   @Override
-  protected PGraphics _backBuffer() {
-    return (PGraphics)_bb;
+  public PGraphics _backBuffer() {
+    return (PGraphics) _bb;
   }
 
   /**
@@ -923,10 +923,8 @@ public class Scene extends Graph implements PConstants {
   }
 
   @Override
-  public void draw(Object context, Node node) {
-    if (context == _backBuffer())
-      return;
-    PGraphics pGraphics = (PGraphics) context;
+  protected void _drawFrontBuffer(Node node) {
+    PGraphics pGraphics = context();
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
             /*
@@ -954,26 +952,74 @@ public class Scene extends Graph implements PConstants {
           if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
         } else if (node.frontGraphics(pGraphics))
           if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        if (node.isTracked()) {
+        if (node.isTracked())
           if (node.backShape() != null)
             pGraphics.shape((PShape) node.backShape());
           else
             node.backGraphics(pGraphics);
-        }
         break;
       case BACK:
-        if (node.isTracked()) {
+        if (node.isTracked())
           if (node.backShape() != null)
             pGraphics.shape((PShape) node.backShape());
           else
             node.backGraphics(pGraphics);
-        } else {
-          if (node.frontShape() != null) {
-            pGraphics.shape((PShape) node.frontShape());
-            if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-          } else if (node.frontGraphics(pGraphics))
-            if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        }
+        else if (node.frontShape() != null) {
+          pGraphics.shape((PShape) node.frontShape());
+          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
+        } else if (node.frontGraphics(pGraphics))
+          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
+        break;
+    }
+    //*/
+    pGraphics.popStyle();
+    pGraphics.popMatrix();
+  }
+
+  @Override
+  protected void _drawOntoBuffer(Object context, Node node) {
+    PGraphics pGraphics = (PGraphics) context;
+    pGraphics.pushStyle();
+    pGraphics.pushMatrix();
+            /*
+            if(_frontShape != null)
+                pg.shape(_frontShape);
+            set(pg);
+            frontShape(pg);
+            //*/
+    ///*
+    //TODO needs more thinking
+    switch (node.highlighting()) {
+      case FRONT:
+        if (node.isTracked())
+          pGraphics.scale(1.15f);
+      case NONE:
+        if (node.frontShape() != null)
+          pGraphics.shape((PShape) node.frontShape());
+        else
+          node.graphics(pGraphics);
+        break;
+      case FRONT_BACK:
+        if (node.frontShape() != null)
+          pGraphics.shape((PShape) node.frontShape());
+        else
+          node.frontGraphics(pGraphics);
+        if (node.isTracked())
+          if (node.backShape() != null)
+            pGraphics.shape((PShape) node.backShape());
+          else
+            node.backGraphics(pGraphics);
+        break;
+      case BACK:
+        if (node.isTracked())
+          if (node.backShape() != null)
+            pGraphics.shape((PShape) node.backShape());
+          else
+            node.backGraphics(pGraphics);
+        else if (node.frontShape() != null)
+          pGraphics.shape((PShape) node.frontShape());
+        else
+          node.frontGraphics(pGraphics);
         break;
     }
     //*/

@@ -40,7 +40,7 @@ public class ShadowMappingVBO extends PApplet {
       shapes[i].randomize();
       // TODO: fix picking (1) [there are SOME picking thresholds > 10, but at least one is 0]
       // To test/fix disable shadowMap rendering (fix picking (2))
-      shapes[i].setPickingThreshold(0);
+      shapes[i].setPickingThreshold(50);
     }
     light = new Node(scene) {
       @Override
@@ -53,7 +53,7 @@ public class ShadowMappingVBO extends PApplet {
         return true;
       }
     };
-    light.setPickingThreshold(0);
+    light.setPickingThreshold(50);
     scene.setRadius(scene.radius() * 1.2f);
     scene.fit(1);
 
@@ -103,13 +103,15 @@ public class ShadowMappingVBO extends PApplet {
     stroke(255);
     for(Node node : scene.nodes())
       scene.drawShooterTarget(node);
-    //*/
+    // */
+    /*
     // 3. Display shadow map
     if (debug) {
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
     }
+    // */
   }
 
   public void mouseMoved() {

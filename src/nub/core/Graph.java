@@ -2722,7 +2722,9 @@ public class Graph {
     matrixHandler._bindModelView(_matrixHandler.cacheView());
     for (Node node : _leadingNodes())
       _draw(matrixHandler, node);
-    _rays.clear();
+    // TODO Pierre experimental condition to fix picking (see ShadowMappingVBO)
+    if(isOffscreen())
+      _rays.clear();
   }
 
   /**
@@ -2837,7 +2839,8 @@ public class Graph {
     matrixHandler._bindModelView(view);
     for (Node node : _leadingNodes())
       _draw(matrixHandler, context, node);
-    _rays.clear();
+    // TODO Pierre experimental condition to fix picking (see ShadowMappingVBO)
+    //_rays.clear();
   }
 
   /**
@@ -2871,7 +2874,17 @@ public class Graph {
    *
    * @see #render()
    */
+  //TODO Pierre can this switch be pushed up?
   public void draw(Object context, Node node) {
+    if (context == _backBuffer())
+      return;
+    if(context == context())
+      _drawFrontBuffer(node);
+    else
+      _drawOntoBuffer(context, node);
+  }
+
+  protected void _drawFrontBuffer(Node node) {
   }
 
   /**
@@ -2887,6 +2900,10 @@ public class Graph {
    * @see Node#shape(Object)
    */
   protected void _drawBackBuffer(Node node) {
+  }
+
+  protected void _drawOntoBuffer(Object context, Node node) {
+
   }
 
   /**

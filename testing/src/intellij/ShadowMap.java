@@ -87,11 +87,9 @@ public class ShadowMap extends PApplet {
       scene.render(shadowMap, shadowMapType, scene.trackedNode("light"), zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
-      /*
       scene.beginHUD();
       image(shadowMap, w / 2, h / 2);
       scene.endHUD();
-      */
     }
   }
 
