@@ -2902,7 +2902,6 @@ public class Graph {
   }
 
   protected void _drawOntoBuffer(Object context, Node node) {
-
   }
 
   /**

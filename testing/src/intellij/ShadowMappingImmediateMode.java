@@ -42,8 +42,11 @@ public class ShadowMappingImmediateMode extends PApplet {
         public boolean graphics(PGraphics pg) {
           pg.pushStyle();
           if (scene.trackedNode("light") == this) {
-            if(shadows)
+            if(shadows) {
               Scene.drawAxes(pg, 150);
+              stroke(255,0,0);
+              scene.drawShooterTarget(this);
+            }
             else {
               pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
               Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
@@ -64,7 +67,7 @@ public class ShadowMappingImmediateMode extends PApplet {
       };
       shapes[i].randomize();
       // set picking precision to the pixels of the node projection
-      shapes[i].setPickingThreshold(0);
+      shapes[i].setPickingThreshold(shadows ? 50 : 0);
       shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     // Do w&h must match main context size? I think so
@@ -131,10 +134,9 @@ public class ShadowMappingImmediateMode extends PApplet {
   public void keyPressed() {
     if (key == ' ' || key == 's') {
       shadows = !shadows;
-      if(shadows)
-        println("shadows activated!");
-      else
-        println("shadows de-activated");
+      for(Node node : scene.nodes())
+        node.setPickingThreshold(shadows ? 50 : 0);
+      println("shadows " + (shadows ? "activated!" : "de-activated"));
     }
     if (key == 't')
       shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
