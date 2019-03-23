@@ -91,7 +91,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
       depthShader.set("maxDepth", 10);
       println("version 1 of the shader");
     } else {
-      depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
+      depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_linear.glsl");
       depthShader.set("near", zNear);
       depthShader.set("far", zFar);
       println("version 2 of the shader");

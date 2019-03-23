@@ -12,7 +12,7 @@ import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-public class ShadowMappingImmediateMode extends PApplet {
+public class ShadowsImmediateMode extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Node[] shapes;
@@ -72,10 +72,10 @@ public class ShadowMappingImmediateMode extends PApplet {
     }
     // Do w&h must match main context size? I think so
     shadowMap = createGraphics(w, h, P3D);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
     shadowMap.shader(depthShader);
 
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowvert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadowvert.glsl");
 
     light = shapes[(int) random(0, shapes.length - 1)];
     // this line is good to set a condition like: scene.trackedNode("light") == this
@@ -99,7 +99,14 @@ public class ShadowMappingImmediateMode extends PApplet {
       shader(shadowShader);
       Vector lightPosition = light.position();
       pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
-      Matrix lightMatrix = Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()), light.view());
+      Matrix biasMatrix = new Matrix(
+          0.5f, 0.0f, 0.0f, 0.0f,
+          0.0f, 0.5f, 0.0f, 0.0f,
+          0.0f, 0.0f, 0.5f, 0.0f,
+          0.5f, 0.5f, 0.5f, 1.0f
+      );
+      Matrix lightMatrix = Matrix.multiply(biasMatrix , Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()),
+                                                                        light.view()));
       pmatrix.set(lightMatrix.get(new float[16]));
       shadowShader.set("lightSpaceMatrix", pmatrix);
       shadowShader.set("shadowMap", shadowMap);
@@ -150,6 +157,6 @@ public class ShadowMappingImmediateMode extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowMappingImmediateMode"});
+    PApplet.main(new String[]{"intellij.ShadowsImmediateMode"});
   }
 }
