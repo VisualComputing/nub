@@ -72,10 +72,11 @@ public class ShadowsImmediateMode extends PApplet {
     }
     // Do w&h must match main context size? I think so
     shadowMap = createGraphics(w, h, P3D);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
+    shadowMap.noSmooth();
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     shadowMap.shader(depthShader);
 
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadowvert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadows/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadows/shadow_vert.glsl");
 
     light = shapes[(int) random(0, shapes.length - 1)];
     // this line is good to set a condition like: scene.trackedNode("light") == this
@@ -89,12 +90,12 @@ public class ShadowsImmediateMode extends PApplet {
     background(75, 25, 15);
     // 1. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
-    shadowMap.background(140, 160, 125);
+    shadowMap.background(0xffffffff);
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 2. set shadow shader stuff
     // Weird but it seems I need to do this here
-    resetShader();
+    //resetShader();
     if(shadows) {
       shader(shadowShader);
       Vector lightPosition = light.position();
@@ -108,9 +109,11 @@ public class ShadowsImmediateMode extends PApplet {
       Matrix lightMatrix = Matrix.multiply(biasMatrix , Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()),
                                                                         light.view()));
       pmatrix.set(lightMatrix.get(new float[16]));
-      shadowShader.set("lightSpaceMatrix", pmatrix);
+      shadowShader.set("shadowTransform", pmatrix);
       shadowShader.set("shadowMap", shadowMap);
     }
+    else
+      resetShader();
     // 3. Fill in and display front-buffer
     scene.render();
   }
