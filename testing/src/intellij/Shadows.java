@@ -14,6 +14,12 @@ public class Shadows extends PApplet {
   PShader shadowShader;
   PGraphics shadowMap;
   PMatrix3D pmatrix = new PMatrix3D();
+  Matrix biasMatrix = new Matrix(
+      0.5f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.5f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.5f, 0.0f,
+      0.5f, 0.5f, 0.5f, 1.0f
+  );
   int landscape = 1;
 
   float zNear = 10;
@@ -149,12 +155,6 @@ public class Shadows extends PApplet {
   }
 
   void updateDefaultShader() {
-    Matrix biasMatrix = new Matrix(
-        0.5f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.5f, 0.0f, 0.0f,
-        0.0f, 0.0f, 0.5f, 0.0f,
-        0.5f, 0.5f, 0.5f, 1.0f
-    );
     Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
