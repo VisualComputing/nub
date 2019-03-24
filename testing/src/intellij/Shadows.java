@@ -89,14 +89,13 @@ public class Shadows extends PApplet {
     // Update the shadow transformation matrix and send it, the light
     // direction normal and the shadow map to the default shader.
     // updateDefaultShader
-    // TODO discard this matrices first
     Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
     // Apply the inverted modelview matrix from the default pass to get the original vertex
     // positions inside the shader. This is needed because Processing is pre-multiplying
     // the vertices by the modelview matrix (for better performance).
-    // TODO What a horrible detail! maybe reset shader comes handy!?
+    // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
     Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
     lightMatrix.apply(modelviewInv);
 
