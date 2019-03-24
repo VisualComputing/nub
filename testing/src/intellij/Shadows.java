@@ -12,7 +12,6 @@ public class Shadows extends PApplet {
   Node nodeLandscape, light;
   PShader depthShader;
   PShader shadowShader;
-  PVector lightDir = new PVector();
   PGraphics shadowMap;
   int landscape = 1;
 
@@ -40,8 +39,11 @@ public class Shadows extends PApplet {
     light = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
-        //pg.box(5);
+        pg.pushStyle();
+        pg.fill(0,255,0);
+        pg.box(5);
         Scene.drawAxes(pg, 200);
+        pg.popStyle();
         return true;
       }
     };
@@ -52,7 +54,6 @@ public class Shadows extends PApplet {
   public void draw() {
     // Calculate the light direction (actually scaled by negative distance)
     float lightAngle = frameCount * 0.002f;
-    lightDir.set(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
@@ -60,7 +61,7 @@ public class Shadows extends PApplet {
     // Render shadow pass
     shadowMap.beginDraw();
     //shadowMap.camera(lightDir.x, lightDir.y, lightDir.z, 0, 0, 0, 0, 1, 0);
-    shadowMap.camera(lightDir.x, lightDir.y, lightDir.z, 0, 0, 0, 0, 1, 0);
+    shadowMap.camera(light.position().x(), light.position().y(), light.position().z(), 0, 0, 0, 0, 1, 0);
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     renderLandscape(shadowMap);
     shadowMap.endDraw();
@@ -74,15 +75,6 @@ public class Shadows extends PApplet {
     background(0xff222222);
     scene.drawAxes(500);
     renderLandscape(g);
-
-    // Render light source
-    // /*
-    pushMatrix();
-    fill(0xffffffff);
-    translate(lightDir.x, lightDir.y, lightDir.z);
-    box(5);
-    popMatrix();
-    // */
 
     pushMatrix();
     scene.applyWorldTransformation(light);
@@ -187,21 +179,8 @@ public class Shadows extends PApplet {
         shadowTransform.m03, shadowTransform.m13, shadowTransform.m23, shadowTransform.m33
     ));
 
-    // Calculate light direction normal, which is the transpose of the inverse of the
-    // modelview matrix and send it to the default shader.
-    float lightNormalX = lightDir.x * modelviewInv.m00 + lightDir.y * modelviewInv.m10 + lightDir.z * modelviewInv.m20;
-    float lightNormalY = lightDir.x * modelviewInv.m01 + lightDir.y * modelviewInv.m11 + lightDir.z * modelviewInv.m21;
-    float lightNormalZ = lightDir.x * modelviewInv.m02 + lightDir.y * modelviewInv.m12 + lightDir.z * modelviewInv.m22;
-    float normalLength = sqrt(lightNormalX * lightNormalX + lightNormalY * lightNormalY + lightNormalZ * lightNormalZ);
-    shadowShader.set("lightDirection", lightNormalX / -normalLength, lightNormalY / -normalLength, lightNormalZ / -normalLength);
-
-    /*
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-    //lightDirection.normalize();
-    //lightDirection.print();
-    //println("Orig: " + lightNormalX / -normalLength + " " + lightNormalY / -normalLength + " " +  lightNormalZ / -normalLength);
     shadowShader.set("lightDirection", Scene.toPVector(lightDirection));
-    */
 
     // Send the shadowmap to the default shader
     shadowShader.set("shadowMap", shadowMap);
