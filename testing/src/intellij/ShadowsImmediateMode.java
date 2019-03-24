@@ -91,6 +91,7 @@ public class ShadowsImmediateMode extends PApplet {
     // 1. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
     shadowMap.background(0xffffffff);
+    shadowMap.noStroke();
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 2. set shadow shader stuff
