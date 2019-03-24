@@ -34,7 +34,7 @@ public class Shadows extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.togglePerspective();
-    scene.setRadius(max(w, h)/2);
+    scene.setRadius(max(w, h)/3);
     scene.fit(1);
     nodeLandscape = new Node(scene) {
       @Override
@@ -43,6 +43,7 @@ public class Shadows extends PApplet {
         return true;
       }
     };
+    nodeLandscape.setPickingThreshold(20);
     light = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
@@ -54,8 +55,18 @@ public class Shadows extends PApplet {
         return true;
       }
     };
-    initShadowPass();
-    initDefaultPass();
+    light.setPickingThreshold(20);
+    // initShadowPass
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    shadowMap = createGraphics(2048, 2048, P3D);
+    shadowMap.shader(depthShader);
+    // TODO testing the appearance of artifacts fist
+    //shadowMap.noSmooth();
+
+    // initDefaultPass
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shader(shadowShader);
+    noStroke();
   }
 
   public void draw() {
@@ -67,16 +78,38 @@ public class Shadows extends PApplet {
 
     // Render shadow pass
     shadowMap.beginDraw();
-    //shadowMap.camera(lightDir.x, lightDir.y, lightDir.z, 0, 0, 0, 0, 1, 0);
+    shadowMap.noStroke();
+    shadowMap.ortho(-200, 200, -200, 200, zNear, zFar);
     shadowMap.camera(light.position().x(), light.position().y(), light.position().z(), 0, 0, 0, 0, 1, 0);
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     renderLandscape(shadowMap);
     shadowMap.endDraw();
-    shadowMap.updatePixels();
+    //shadowMap.updatePixels();
 
     // Update the shadow transformation matrix and send it, the light
     // direction normal and the shadow map to the default shader.
-    updateDefaultShader();
+    // updateDefaultShader
+    // TODO discard this matrices first
+    Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+
+    // Apply the inverted modelview matrix from the default pass to get the original vertex
+    // positions inside the shader. This is needed because Processing is pre-multiplying
+    // the vertices by the modelview matrix (for better performance).
+    // TODO What a horrible detail! maybe reset shader comes handy!?
+    Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
+    lightMatrix.apply(modelviewInv);
+
+    // Convert Matrix to PMatrix and send it to the shader.
+    // PShader.set(String, float[16]) doesn't work for some reason.
+    pmatrix.set(lightMatrix.get(new float[16]));
+    shadowShader.set("shadowTransform", pmatrix);
+
+    Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+    shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
+
+    // Send the shadowmap to the default shader
+    shadowShader.set("shadowMap", shadowMap);
 
     // Render default pass
     background(0xff222222);
@@ -129,52 +162,6 @@ public class Shadows extends PApplet {
     }
     canvas.fill(0xff222222);
     canvas.box(360, 5, 360);
-  }
-
-  public void initShadowPass() {
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-
-    shadowMap = createGraphics(2048, 2048, P3D);
-    shadowMap.noSmooth(); // Antialiasing on the shadowMap leads to weird artifacts
-    //shadowMap.loadPixels(); // Will interfere with noSmooth() (probably a bug in Processing)
-    shadowMap.beginDraw();
-    shadowMap.noStroke();
-
-    //shadowMap.shader(new PShader(this, vertSource, fragSource));
-    shadowMap.shader(depthShader);
-
-    shadowMap.ortho(-200, 200, -200, 200, zNear, zFar); // Setup orthogonal view matrix for the directional light
-    shadowMap.endDraw();
-  }
-
-  public void initDefaultPass() {
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
-    shader(shadowShader);
-    noStroke();
-    perspective(60 * DEG_TO_RAD, (float)width / height, 10, 1000);
-  }
-
-  void updateDefaultShader() {
-    Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
-    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-
-    // Apply the inverted modelview matrix from the default pass to get the original vertex
-    // positions inside the shader. This is needed because Processing is pre-multiplying
-    // the vertices by the modelview matrix (for better performance).
-    // TODO What a horrible detail! maybe reset shader comes handy!?
-    Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
-    lightMatrix.apply(modelviewInv);
-
-    // Convert Matrix to PMatrix and send it to the shader.
-    // PShader.set(String, float[16]) doesn't work for some reason.
-    pmatrix.set(lightMatrix.get(new float[16]));
-    shadowShader.set("shadowTransform", pmatrix);
-
-    Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-    shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
-
-    // Send the shadowmap to the default shader
-    shadowShader.set("shadowMap", shadowMap);
   }
 
   public void keyPressed() {
