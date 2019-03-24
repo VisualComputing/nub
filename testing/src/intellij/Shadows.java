@@ -13,10 +13,11 @@ public class Shadows extends PApplet {
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
+  PMatrix3D pmatrix = new PMatrix3D();
   int landscape = 1;
 
-  float zNear = 50;
-  float zFar = 1000;
+  float zNear = 10;
+  float zFar = 400;
   int w = 1000;
   int h = 1000;
 
@@ -136,7 +137,7 @@ public class Shadows extends PApplet {
     //shadowMap.shader(new PShader(this, vertSource, fragSource));
     shadowMap.shader(depthShader);
 
-    shadowMap.ortho(-200, 200, -200, 200, 10, 400); // Setup orthogonal view matrix for the directional light
+    shadowMap.ortho(-200, 200, -200, 200, zNear, zFar); // Setup orthogonal view matrix for the directional light
     shadowMap.endDraw();
   }
 
@@ -148,36 +149,24 @@ public class Shadows extends PApplet {
   }
 
   void updateDefaultShader() {
-    // Bias matrix to move homogeneous shadowCoords into the UV texture space
-    PMatrix3D shadowTransform = new PMatrix3D(
-        0.5f, 0.0f, 0.0f, 0.5f,
-        0.0f, 0.5f, 0.0f, 0.5f,
-        0.0f, 0.0f, 0.5f, 0.5f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
     Matrix biasMatrix = new Matrix(
         0.5f, 0.0f, 0.0f, 0.0f,
         0.0f, 0.5f, 0.0f, 0.0f,
         0.0f, 0.0f, 0.5f, 0.0f,
         0.5f, 0.5f, 0.5f, 1.0f
     );
-    // Apply project modelview matrix from the shadow pass (light direction)
-    shadowTransform.apply(((PGraphicsOpenGL)shadowMap).projmodelview);
+    Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
     // Apply the inverted modelview matrix from the default pass to get the original vertex
     // positions inside the shader. This is needed because Processing is pre-multiplying
     // the vertices by the modelview matrix (for better performance).
-    PMatrix3D modelviewInv = ((PGraphicsOpenGL)g).modelviewInv;
-    shadowTransform.apply(modelviewInv);
+    // TODO What a horrible detail! maybe reset shader comes handy!?
+    Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
+    lightMatrix.apply(modelviewInv);
 
-    // Convert column-minor PMatrix to column-major GLMatrix and send it to the shader.
-    // PShader.set(String, PMatrix3D) doesn't convert the matrix for some reason.
-    shadowShader.set("shadowTransform", new PMatrix3D(
-        shadowTransform.m00, shadowTransform.m10, shadowTransform.m20, shadowTransform.m30,
-        shadowTransform.m01, shadowTransform.m11, shadowTransform.m21, shadowTransform.m31,
-        shadowTransform.m02, shadowTransform.m12, shadowTransform.m22, shadowTransform.m32,
-        shadowTransform.m03, shadowTransform.m13, shadowTransform.m23, shadowTransform.m33
-    ));
+    pmatrix.set(lightMatrix.get(new float[16]));
+    shadowShader.set("shadowTransform", pmatrix);
 
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
     shadowShader.set("lightDirection", Scene.toPVector(lightDirection));
