@@ -165,11 +165,13 @@ public class Shadows extends PApplet {
     Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
     lightMatrix.apply(modelviewInv);
 
+    // Convert Matrix to PMatrix and send it to the shader.
+    // PShader.set(String, float[16]) doesn't work for some reason.
     pmatrix.set(lightMatrix.get(new float[16]));
     shadowShader.set("shadowTransform", pmatrix);
 
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-    shadowShader.set("lightDirection", Scene.toPVector(lightDirection));
+    shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
 
     // Send the shadowmap to the default shader
     shadowShader.set("shadowMap", shadowMap);
