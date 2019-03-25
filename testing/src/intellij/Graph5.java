@@ -80,7 +80,7 @@ public class Graph5 extends PApplet {
 
     public GLSLMatrixHandler(int width, int height) {
       super(width, height);
-      framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameVert_pmv.glsl");
+      framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     }
 
     @Override
@@ -90,7 +90,7 @@ public class Graph5 extends PApplet {
       //pmatrix.set(Scene.toPMatrix(projectionModelView()));
       //pmatrix.transpose();
       pmatrix.set(projectionModelView().get(new float[16]));
-      framesShader.set("frames_transform", pmatrix);
+      framesShader.set("nub_transform", pmatrix);
     }
   }
 }

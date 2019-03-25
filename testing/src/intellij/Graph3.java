@@ -26,7 +26,7 @@ public class Graph3 extends PApplet {
   public void setup() {
     graph = new Graph(width, height);
     graph.fit();
-    framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/FrameVert_pmv.glsl");
+    framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     nodes = new Node[50];
     for (int i = 0; i < nodes.length; i++) {
       nodes[i] = new Node(graph) {
@@ -39,7 +39,7 @@ public class Graph3 extends PApplet {
           Matrix mv = Matrix.multiply(view, worldMatrix());
           pmv = Matrix.multiply(projection, mv);
           pmatrix.set(pmv.get(new float[16]));
-          framesShader.set("frames_transform", pmatrix);
+          framesShader.set("nub_transform", pmatrix);
 
           pushStyle();
           fill(isTracked(graph) ? 0 : 255, 0, 255);
@@ -60,7 +60,7 @@ public class Graph3 extends PApplet {
     shader(framesShader);
     pmv = Matrix.multiply(projection, view);
     pmatrix.set(pmv.get(new float[16]));
-    framesShader.set("frames_transform", pmatrix);
+    framesShader.set("nub_transform", pmatrix);
   }
 
   public void draw() {

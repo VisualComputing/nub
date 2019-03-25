@@ -2,6 +2,7 @@ package intellij;
 
 import nub.primitives.*;
 import nub.core.*;
+import nub.processing.Scene;
 import processing.core.*;
 import processing.event.*;
 import processing.opengl.*;
@@ -67,17 +68,17 @@ public class PassiveTransformations extends PApplet {
 
     public GLSLMatrixHandler(Graph graph) {
       super(graph.width(), graph.height());
-      _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/FrameVert_pmv.glsl");
+      _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
     }
 
     @Override
     protected void _setUniforms() {
       shader(_shader);
+      //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
+      //_pmatrix.transpose();
       // same as:
-      //pmatrix.set(Scene.toPMatrix(projectionModelView()));
-      //pmatrix.transpose();
       _pmatrix.set(projectionModelView().get(new float[16]));
-      _shader.set("frames_transform", _pmatrix);
+      _shader.set("nub_transform", _pmatrix);
     }
   }
 
