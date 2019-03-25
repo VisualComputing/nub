@@ -5,15 +5,15 @@
  * This example illustrates the use of nub without even instantiating a
  * Scene object.
  *
- * Just define an eye-node and some nub with torus shapes.
+ * Just define an eye-node and some nodes with torus shapes.
  */
 
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 
-Frame eye;
-Frame[] nub;
+Node eye;
+Node[] nodes;
 boolean leftHanded = false;
 float zNear = 80;
 float zFar = 800;
@@ -23,13 +23,13 @@ String renderer = P3D;
 
 void setup() {
   size(800, 800, renderer);
-  eye = new Frame();
+  eye = new Node();
   float fov = PI / 3;
-  eye.setMagnitude(Scene.magnitude(fov));
+  eye.setMagnitude(tan(fov/2));
   eye.setPosition(0, 0, 400);
-  nub = new Frame[50];
-  for (int i = 0; i < nub.length; i++)
-    nub[i] = Frame.random(new Vector(), 400, g.is3D());
+  nodes = new Node[50];
+  for (int i = 0; i < nodes.length; i++)
+    nodes[i] = Node.random(new Vector(), 400, g.is3D());
 }
 
 void draw() {
@@ -48,9 +48,9 @@ void draw() {
     bind2D();
   }
   Scene.drawAxes(g, 100);
-  for (int i = 0; i < nub.length; i++) {
+  for (int i = 0; i < nodes.length; i++) {
     pushMatrix();
-    Scene.applyTransformation(g, nub[i]);
+    Scene.applyTransformation(g, nodes[i]);
     Scene.drawTorusSolenoid(g);
     popMatrix();
   }

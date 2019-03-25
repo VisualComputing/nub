@@ -1,10 +1,9 @@
-class Sphere extends Frame {
+class Sphere extends Node {
   float r;
   int c;
 
   // default detached node constructor
   Sphere() {
-    //setPrecision(Frame.Precision.ADAPTIVE);
     setRadius(10);
   }
 
@@ -33,6 +32,5 @@ class Sphere extends Frame {
 
   void setRadius(float myR) {
     r = myR;
-    setPrecisionThreshold(2 * r);
   }
 }

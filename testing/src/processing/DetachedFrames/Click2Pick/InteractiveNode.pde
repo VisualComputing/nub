@@ -1,14 +1,14 @@
-class InteractiveFrame extends Frame {
+class InteractiveNode extends Node {
   int _c;
   Vector pnt;
 
-  InteractiveFrame(int colour) {
+  InteractiveNode(int colour) {
     super();
     _c = colour;
     pnt = new Vector(40, 30, 20);
   }
 
-  InteractiveFrame(Frame node, int colour) {
+  InteractiveNode(Node node, int colour) {
     super(node);
     _c = colour;
     pnt = new Vector(40, 30, 20);

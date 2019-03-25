@@ -1,8 +1,8 @@
 /**
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
- * 
- * This example illustrates some basic properties of nub, particularly
+ *
+ * This example illustrates some basic properties of nodes, particularly
  * how to orient them.
  *
  * Use the arrow keys to select and move the sphere and see how the boxes
@@ -10,7 +10,7 @@
  * boxes (by dragging them with the mouse right button) and still they
  * will be oriented towards the sphere.
  *
- * Both the sphere and the boxes are implemented as detached-nub
+ * Both the sphere and the boxes are implemented as detached-nodes
  * specializations and hence they require to apply the local node
  * transformations, check their drawing routines.
  *
@@ -40,13 +40,13 @@ void setup() {
     cajas[i] = new Box(color(random(255), random(255), random(255)));
 
   scene.fit(1);
-  scene.setTrackedFrame("keyboard", esfera);
+  scene.setTrackedNode("keyboard", esfera);
 }
 
 void draw() {
   background(0);
 
-  // Frame drawing
+  // Node drawing
   esfera.draw();
   for (int i = 0; i < cajas.length; i++) {
     cajas[i].setOrientation(esfera.position());
@@ -56,10 +56,10 @@ void draw() {
   String text = "Cajas Orientadas";
   float w = textWidth(text);
   float h = textAscent() + textDescent();
-  scene.beginScreenDrawing();
+  scene.beginHUD();
   //textFont(font);
   text(text, 20, 20, w + 1, h);
-  scene.endScreenDrawing();
+  scene.endHUD();
 }
 
 void mouseMoved() {
@@ -76,17 +76,17 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.zoom(event.getCount() * 20);
+  scene.moveForward(event.getCount() * 20);
 }
 
 void keyPressed() {
   if (key == ' ') {
     adaptive = !adaptive;
-    for (Frame node : cajas)
+    for (Node node : cajas)
       if (adaptive)
-        node.setPrecision(Frame.Precision.ADAPTIVE);
+        node.setPickingThreshold(0.2);
       else
-        node.setPrecision(Frame.Precision.FIXED);
+        node.setPickingThreshold(25);
   }
   if (key == 'a')
     drawAxes = !drawAxes;
@@ -101,10 +101,10 @@ void keyPressed() {
   if (key == 'S')
     scene.fit();
   if (key == 'u')
-    if (scene.trackedFrame("keyboard") == null)
-      scene.setTrackedFrame("keyboard", esfera);
+    if (scene.trackedNode("keyboard") == null)
+      scene.setTrackedNode("keyboard", esfera);
     else
-      scene.resetTrackedFrame("keyboard");
+      scene.resetTrackedNode("keyboard");
   if (key == CODED)
     if (keyCode == UP)
       scene.translate("keyboard", 0, -10);

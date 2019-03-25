@@ -1,10 +1,9 @@
-class Box extends Frame {
+class Box extends Node {
   float w, h, d;
   int c;
 
   Box(color c) {
-    setPrecision(Frame.Precision.FIXED);
-    setPrecisionThreshold(25);
+    setPickingThreshold(25);
     setSize();
     setColor(c);
     randomize(new Vector(), 200, g.is3D());
@@ -36,7 +35,7 @@ class Box extends Frame {
     w = CajasOrientadas.this.random(10, 40);
     h = CajasOrientadas.this.random(10, 40);
     d = CajasOrientadas.this.random(10, 40);
-    setPrecisionThreshold(max(w, h, d));
+    setPickingThreshold(max(w, h, d));
   }
 
   void setSize(float myW, float myH, float myD) {
