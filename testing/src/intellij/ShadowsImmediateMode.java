@@ -1,28 +1,29 @@
 package intellij;
 
-import nub.core.Graph;
-import nub.core.Node;
-import nub.primitives.Matrix;
-import nub.primitives.Quaternion;
-import nub.primitives.Vector;
-import nub.processing.Scene;
-import processing.core.PApplet;
-import processing.core.PGraphics;
-import processing.core.PMatrix3D;
-import processing.event.MouseEvent;
-import processing.opengl.PShader;
+import nub.core.*;
+import nub.primitives.*;
+import nub.processing.*;
+import processing.core.*;
+import processing.event.*;
+import processing.opengl.*;
 
 public class ShadowsImmediateMode extends PApplet {
-  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
-  Node[] shapes;
-  Node light;
+  Node nodeLandscape, light;
+  PShader depthShader;
+  PShader shadowShader;
   PGraphics shadowMap;
   PMatrix3D pmatrix = new PMatrix3D();
-  PShader depthShader, shadowShader;
-  boolean shadows = true;
-  float zNear = 50;
-  float zFar = 1000;
+  Matrix biasMatrix = new Matrix(
+      0.5f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.5f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.5f, 0.0f,
+      0.5f, 0.5f, 0.5f, 1.0f
+  );
+  boolean spotLight;
+  int landscape = 1;
+  float zNear = 10;
+  float zFar = 400;
   int w = 1000;
   int h = 1000;
 
@@ -33,90 +34,146 @@ public class ShadowsImmediateMode extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.togglePerspective();
-    scene.setRadius(max(w, h));
+    scene.setRadius(max(w, h)/3);
     scene.fit(1);
-    shapes = new Node[20];
-    for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Node(scene) {
-        @Override
-        public boolean graphics(PGraphics pg) {
-          pg.pushStyle();
-          if (scene.trackedNode("light") == this) {
-            if(shadows) {
-              Scene.drawAxes(pg, 150);
-              stroke(255,0,0);
-              scene.drawShooterTarget(this);
-            }
-            else {
-              pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
-              Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
-            }
-          } else {
-            if (pg == shadowMap)
-              pg.noStroke();
-            else {
-              pg.strokeWeight(3);
-              pg.stroke(0, 255, 255);
-            }
-            pg.fill(255, 0, 0);
-            pg.box(80);
-          }
-          pg.popStyle();
-          return true;
-        }
-      };
-      shapes[i].randomize();
-      // set picking precision to the pixels of the node projection
-      shapes[i].setPickingThreshold(shadows ? 50 : 0);
-      shapes[i].setHighlighting(Node.Highlighting.NONE);
-    }
-    // Do w&h must match main context size? I think so
-    shadowMap = createGraphics(w, h, P3D);
-    shadowMap.noSmooth();
+    nodeLandscape = new Node(scene) {
+      @Override
+      public boolean graphics(PGraphics pg) {
+        renderLandscape(pg);
+        return true;
+      }
+    };
+    nodeLandscape.setPickingThreshold(20);
+    light = new Node(scene) {
+      @Override
+      public boolean graphics(PGraphics pg) {
+        pg.pushStyle();
+        pg.fill(0,255,0);
+        pg.box(5);
+        Scene.drawAxes(pg, 200);
+        pg.popStyle();
+        return true;
+      }
+    };
+    light.setPickingThreshold(20);
+    // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
+    // TODO testing the appearance of artifacts fist
+    //shadowMap.noSmooth();
 
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadows/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadows/shadow_vert.glsl");
-
-    light = shapes[(int) random(0, shapes.length - 1)];
-    // this line is good to set a condition like: scene.trackedNode("light") == this
-    // which is used to render the light node as a frustum volume above
-    scene.setTrackedNode("light", light);
-    light.setOrientation(new Quaternion(new Vector(0, 0, 1), light.position()));
-    light.setMagnitude(0.6f);
+    // initDefaultPass
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shader(shadowShader);
+    noStroke();
   }
 
   public void draw() {
-    background(75, 25, 15);
-    // 1. Fill in shadow map using the light point of view
+    // Calculate the light direction (actually scaled by negative distance)
+    float lightAngle = frameCount * 0.002f;
+    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
+    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+
+    // Render shadow pass
     shadowMap.beginDraw();
-    shadowMap.background(0xffffffff);
     shadowMap.noStroke();
-    scene.render(shadowMap, shadowMapType, light, zNear, zFar);
-    shadowMap.endDraw();
-    // 2. set shadow shader stuff
-    // Weird but it seems I need to do this here
-    //resetShader();
-    if(shadows) {
-      shader(shadowShader);
-      Vector lightPosition = light.position();
-      pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
-      Matrix biasMatrix = new Matrix(
-          0.5f, 0.0f, 0.0f, 0.0f,
-          0.0f, 0.5f, 0.0f, 0.0f,
-          0.0f, 0.0f, 0.5f, 0.0f,
-          0.5f, 0.5f, 0.5f, 1.0f
-      );
-      Matrix lightMatrix = Matrix.multiply(biasMatrix , Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()),
-                                                                        light.view()));
-      pmatrix.set(lightMatrix.get(new float[16]));
-      shadowShader.set("shadowTransform", pmatrix);
-      shadowShader.set("shadowMap", shadowMap);
-    }
+    if(spotLight)
+      shadowMap.perspective(60 * DEG_TO_RAD, 1, zNear, zFar);
     else
-      resetShader();
-    // 3. Fill in and display front-buffer
-    scene.render();
+      shadowMap.ortho(-200, 200, -200, 200, zNear, zFar);
+    shadowMap.camera(light.position().x(), light.position().y(), light.position().z(), 0, 0, 0, 0, 1, 0);
+    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
+    renderLandscape(shadowMap);
+    shadowMap.endDraw();
+    //shadowMap.updatePixels();
+
+    // Update the shadow transformation matrix and send it, the light
+    // direction normal and the shadow map to the default shader.
+    // updateDefaultShader
+    //Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+    Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
+    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+
+    // Apply the inverted modelview matrix from the default pass to get the original vertex
+    // positions inside the shader. This is needed because Processing is pre-multiplying
+    // the vertices by the modelview matrix (for better performance).
+    // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
+    Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
+    lightMatrix.apply(modelviewInv);
+
+    // Convert Matrix to PMatrix and send it to the shader.
+    // PShader.set(String, float[16]) doesn't work for some reason.
+    pmatrix.set(lightMatrix.get(new float[16]));
+    shadowShader.set("shadowTransform", pmatrix);
+
+    Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+    shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
+
+    // Send the shadowmap to the default shader
+    shadowShader.set("shadowMap", shadowMap);
+
+    // Render default pass
+    background(0xff222222);
+    scene.drawAxes(500);
+    renderLandscape(g);
+
+    pushMatrix();
+    scene.applyWorldTransformation(light);
+    scene.draw(light);
+    popMatrix();
+  }
+
+  public void renderLandscape(PGraphics canvas) {
+    switch(landscape) {
+      case 1: {
+        float offset = -frameCount * 0.01f;
+        canvas.fill(0xffff5500);
+        for(int z = -5; z < 6; ++z)
+          for(int x = -5; x < 6; ++x) {
+            canvas.pushMatrix();
+            canvas.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
+            canvas.box(10, 100, 10);
+            canvas.popMatrix();
+          }
+      } break;
+      case 2: {
+        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+        canvas.fill(0xffff5500);
+        for(int n = 0; n < 20; ++n, angle += rotation) {
+          canvas.pushMatrix();
+          canvas.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
+          canvas.box(10, 100, 10);
+          canvas.popMatrix();
+        }
+        canvas.fill(0xff0055ff);
+        canvas.sphere(50);
+      } break;
+      case 3: {
+        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
+        canvas.fill(0xffff5500);
+        for(int n = 0; n < 20; ++n, angle += rotation) {
+          canvas.pushMatrix();
+          canvas.translate(sin(angle) * 70, cos(angle) * 70, 0);
+          canvas.box(10, 10, 100);
+          canvas.popMatrix();
+        }
+        canvas.fill(0xff00ff55);
+        canvas.sphere(50);
+      }
+    }
+    canvas.fill(0xff222222);
+    canvas.box(360, 5, 360);
+  }
+
+  public void keyPressed() {
+    if(key != CODED) {
+      if(key >= '1' && key <= '3')
+        landscape = key - '0';
+      else if(key == ' ')
+        spotLight = !spotLight;
+    }
   }
 
   public void mouseMoved(MouseEvent event) {
@@ -140,24 +197,6 @@ public class ShadowsImmediateMode extends PApplet {
     }
     else
       scene.scale(event.getCount() * 20);
-  }
-
-  public void keyPressed() {
-    if (key == ' ' || key == 's') {
-      shadows = !shadows;
-      for(Node node : scene.nodes())
-        node.setPickingThreshold(shadows ? 50 : 0);
-      println("shadows " + (shadows ? "activated!" : "de-activated"));
-    }
-    if (key == 't')
-      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-    if (key == 'p')
-      scene.togglePerspective();
-    if(key == '+')
-      zFar += 20;
-    if(key == '-')
-      if(zFar - 20 > zNear + 60)
-        zFar -= 20;
   }
 
   public static void main(String args[]) {
