@@ -89,7 +89,8 @@ public class Shadows extends PApplet {
     // Update the shadow transformation matrix and send it, the light
     // direction normal and the shadow map to the default shader.
     // updateDefaultShader
-    Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+    //Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+    Matrix projectionView = light.orthographicView(400, 400, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
     // Apply the inverted modelview matrix from the default pass to get the original vertex

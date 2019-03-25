@@ -1931,6 +1931,66 @@ public class Node {
   }
 
   /**
+   * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float)
+   * @see #view()
+   */
+  public Matrix projectionView(Graph.Type type, float width, float height, float zNear, float zFar) {
+    return Matrix.multiply(projection(type, width, height, zNear, zFar), view());
+  }
+
+  /**
+   * Same as {@code return Matrix.multiply(projection(type, width, height, zNear, zFar, leftHanded), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   * @see #view()
+   */
+  public Matrix projectionView(Graph.Type type, float width, float height, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.multiply(projection(type, width, height, zNear, zFar, leftHanded), view());
+  }
+
+  /**
+   * Same as {@code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float)
+   * @see #view()
+   */
+  public Matrix orthographicView(float width, float height, float zNear, float zFar) {
+    return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar), view());
+  }
+
+  /**
+   * Same as {code return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   * @see #view()
+   */
+  public Matrix orthographicView(float width, float height, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.multiply(projection(Graph.Type.ORTHOGRAPHIC, width, height, zNear, zFar, leftHanded), view());
+  }
+
+  /**
+   * Same as {@code return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float)
+   * @see #view()
+   */
+  public Matrix perspectiveView(float width, float height, float zNear, float zFar) {
+    return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar), view());
+  }
+
+  /**
+   * Same as {@code return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded), view())}.
+   *
+   * @see #projection(Graph.Type, float, float, float, float, boolean)
+   * @see #view()
+   */
+  public Matrix perspectiveView(float width, float height, float zNear, float zFar, boolean leftHanded) {
+    return Matrix.multiply(projection(Graph.Type.PERSPECTIVE, width, height, zNear, zFar, leftHanded), view());
+  }
+
+  /**
    * Sets the node from {@link #worldMatrix()} representation: orientation and magnitude
    * in the upper left 3x3 matrix and position on the last column.
    * <p>
