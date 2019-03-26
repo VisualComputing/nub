@@ -8,11 +8,13 @@ import processing.event.*;
 import processing.opengl.*;
 
 public class ShadowsImmediateMode extends PApplet {
+  // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
   Scene scene;
   Node nodeLandscape, light;
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
+  float fov = THIRD_PI;
   Matrix biasMatrix = new Matrix(
       0.5f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.5f, 0.0f, 0.0f,
@@ -43,7 +45,8 @@ public class ShadowsImmediateMode extends PApplet {
         return true;
       }
     };
-    nodeLandscape.setPickingThreshold(20);
+    // exact picking precision
+    nodeLandscape.setPickingThreshold(0);
     light = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
@@ -57,7 +60,6 @@ public class ShadowsImmediateMode extends PApplet {
         return true;
       }
     };
-    light.setPickingThreshold(20);
     light.setMagnitude(400f / 2048f);
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
@@ -73,31 +75,29 @@ public class ShadowsImmediateMode extends PApplet {
   }
 
   public void draw() {
-    // Calculate the light direction (actually scaled by negative distance)
+    // 1. Calculate the light position and orientation
     float lightAngle = frameCount * 0.002f;
     light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
 
-    // 1. Fill in shadow map using the light point of view
+    // 2. Render the shadowmap from light node 'point-of-view'
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
 
-    // 2. Render default pass
+    // 3. Render the scene from the scene.eye() node
     background(0xff222222);
     if(!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       // TODO: how to avoid calling g.modelviewInv?
-      Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv);
-      lightMatrix.apply(modelviewInv);
+      lightMatrix.apply(Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
       Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
-      // Send the shadowmap to the default shader
       shadowShader.set("shadowMap", shadowMap);
     }
     scene.render();
@@ -151,10 +151,7 @@ public class ShadowsImmediateMode extends PApplet {
         landscape = key - '0';
       else if(key == ' ') {
         shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-        if(shadowMapType == Graph.Type.PERSPECTIVE)
-          light.setMagnitude(tan(PI / 6));
-        else
-          light.setMagnitude(400f / 2048f);
+        light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
       }
       else if(key == 'd') {
         debug = !debug;
@@ -166,6 +163,7 @@ public class ShadowsImmediateMode extends PApplet {
     }
   }
 
+  // comment to disable picking
   public void mouseMoved(MouseEvent event) {
     scene.cast();
   }
