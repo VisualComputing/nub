@@ -279,6 +279,26 @@ public class Scene extends Graph implements PConstants {
     return (PGraphics) _fb;
   }
 
+  /**
+   * Sets the {@code name} {@code shader} uniform from {@code matrix}.
+   */
+  public static void setUniform(PShader shader, String name, Matrix matrix) {
+    PMatrix3D pmatrix = new PMatrix3D();
+    //pmatrix.set(Scene.toPMatrix(matrix));
+    //pmatrix.transpose();
+    // same as:
+    pmatrix.set(matrix.get(new float[16]));
+    shader.set(name, pmatrix);
+  }
+
+  /**
+   * Sets the {@code name} {@code shader} uniform from {@code vector}.
+   */
+  public static void setUniform(PShader shader, String name, Vector vector) {
+    PVector pvector = new PVector(vector.x(), vector.y(), vector.z());
+    shader.set(name, pvector);
+  }
+
   // PICKING BUFFER
 
   /**

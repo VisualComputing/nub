@@ -85,6 +85,7 @@ public class ShadowsImmediateMode extends PApplet {
     shadowMap.endDraw();
 
     // 2. Render default pass
+    background(0xff222222);
     Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC, shadowMap.width, shadowMap.height, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
     // Apply the inverted modelview matrix from the default pass to get the original vertex
@@ -93,12 +94,9 @@ public class ShadowsImmediateMode extends PApplet {
     // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
     Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
     lightMatrix.apply(modelviewInv);
-    // Convert Matrix to PMatrix and send it to the shader.
-    // PShader.set(String, float[16]) doesn't work for some reason.
-    pmatrix.set(lightMatrix.get(new float[16]));
-    shadowShader.set("shadowTransform", pmatrix);
+    Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-    shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
+    Scene.setUniform(shadowShader, "lightDirection", lightDirection);
     // Send the shadowmap to the default shader
     shadowShader.set("shadowMap", shadowMap);
     scene.render();
