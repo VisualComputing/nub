@@ -91,10 +91,7 @@ public class ShadowsImmediateMode extends PApplet {
     if(!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-      // Apply the inverted modelview matrix from the default pass to get the original vertex
-      // positions inside the shader. This is needed because Processing is pre-multiplying
-      // the vertices by the modelview matrix (for better performance).
-      // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
+      // TODO: how to avoid calling g.modelviewInv?
       Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv);
       lightMatrix.apply(modelviewInv);
       Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
