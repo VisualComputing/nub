@@ -56,6 +56,7 @@ public class ShadowsImmediateMode extends PApplet {
       }
     };
     light.setPickingThreshold(20);
+    light.setMagnitude(400f / 2048f);
     // TODO testing
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
@@ -85,9 +86,7 @@ public class ShadowsImmediateMode extends PApplet {
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     // TODO
     //scene.render(shadowMap, spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
-    light.setMagnitude(400f / 2048f);
     scene.render(shadowMap, Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
-    light.setMagnitude(1);
     //scene.render(shadowMap, 400, 400, Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
     shadowMap.endDraw();
     // */
@@ -116,7 +115,7 @@ public class ShadowsImmediateMode extends PApplet {
     //Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
     // TODO
     //Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
-    Matrix projectionView = light.projectionView(Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
+    Matrix projectionView = light.projectionView(Graph.Type.ORTHOGRAPHIC,2048,2048, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
     // Apply the inverted modelview matrix from the default pass to get the original vertex
