@@ -13,14 +13,14 @@ public class ShadowsImmediateMode extends PApplet {
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
-  PMatrix3D pmatrix = new PMatrix3D();
   Matrix biasMatrix = new Matrix(
       0.5f, 0.0f, 0.0f, 0.0f,
       0.0f, 0.5f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.5f, 0.0f,
       0.5f, 0.5f, 0.5f, 1.0f
   );
-  boolean spotLight;
+  boolean debug;
+  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   int landscape = 1;
   float zNear = 10;
   float zFar = 1000;
@@ -48,10 +48,12 @@ public class ShadowsImmediateMode extends PApplet {
       @Override
       public boolean graphics(PGraphics pg) {
         pg.pushStyle();
-        pg.fill(0,255,0);
-        pg.box(5);
-        Scene.drawAxes(pg, 200);
-        pg.popStyle();
+        if(debug) {
+          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+          Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        }
+        Scene.drawAxes(pg, 300);
+        pg.pushStyle();
         return true;
       }
     };
@@ -81,24 +83,26 @@ public class ShadowsImmediateMode extends PApplet {
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-    scene.render(shadowMap, spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
+    scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
 
     // 2. Render default pass
     background(0xff222222);
-    Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC, shadowMap.width, shadowMap.height, zNear, zFar);
-    Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-    // Apply the inverted modelview matrix from the default pass to get the original vertex
-    // positions inside the shader. This is needed because Processing is pre-multiplying
-    // the vertices by the modelview matrix (for better performance).
-    // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
-    Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
-    lightMatrix.apply(modelviewInv);
-    Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
-    Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-    Scene.setUniform(shadowShader, "lightDirection", lightDirection);
-    // Send the shadowmap to the default shader
-    shadowShader.set("shadowMap", shadowMap);
+    if(!debug) {
+      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+      // Apply the inverted modelview matrix from the default pass to get the original vertex
+      // positions inside the shader. This is needed because Processing is pre-multiplying
+      // the vertices by the modelview matrix (for better performance).
+      // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
+      Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv);
+      lightMatrix.apply(modelviewInv);
+      Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
+      Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+      Scene.setUniform(shadowShader, "lightDirection", lightDirection);
+      // Send the shadowmap to the default shader
+      shadowShader.set("shadowMap", shadowMap);
+    }
     scene.render();
   }
 
@@ -149,11 +153,18 @@ public class ShadowsImmediateMode extends PApplet {
       if(key >= '1' && key <= '3')
         landscape = key - '0';
       else if(key == ' ') {
-        spotLight = !spotLight;
-        if(spotLight)
+        shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+        if(shadowMapType == Graph.Type.PERSPECTIVE)
           light.setMagnitude(tan(PI / 6));
         else
           light.setMagnitude(400f / 2048f);
+      }
+      else if(key == 'd') {
+        debug = !debug;
+        if(debug)
+          resetShader();
+        else
+          shader(shadowShader);
       }
     }
   }
