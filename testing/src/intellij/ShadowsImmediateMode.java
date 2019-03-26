@@ -20,7 +20,7 @@ public class ShadowsImmediateMode extends PApplet {
       0.0f, 0.0f, 0.5f, 0.0f,
       0.5f, 0.5f, 0.5f, 1.0f
   );
-  boolean spotLight;
+  //boolean spotLight;
   int landscape = 1;
   float zNear = 10;
   float zFar = 400;
@@ -56,9 +56,11 @@ public class ShadowsImmediateMode extends PApplet {
       }
     };
     light.setPickingThreshold(20);
+    // TODO testing
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
+    //shadowMap = createGraphics(400, 400, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts fist
     //shadowMap.noSmooth();
@@ -76,24 +78,45 @@ public class ShadowsImmediateMode extends PApplet {
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
 
+    // 1. Fill in shadow map using the light point of view
+    // /*
+    shadowMap.beginDraw();
+    shadowMap.noStroke();
+    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
+    // TODO
+    //scene.render(shadowMap, spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
+    light.setMagnitude(400f / 2048f);
+    scene.render(shadowMap, Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
+    light.setMagnitude(1);
+    //scene.render(shadowMap, 400, 400, Graph.Type.ORTHOGRAPHIC, light, zNear, zFar);
+    shadowMap.endDraw();
+    // */
+
+    /*
     // Render shadow pass
     shadowMap.beginDraw();
     shadowMap.noStroke();
-    if(spotLight)
-      shadowMap.perspective(60 * DEG_TO_RAD, 1, zNear, zFar);
-    else
+    // TODO
+    //if(spotLight)
+      //shadowMap.perspective(60 * DEG_TO_RAD, 1, zNear, zFar);
+    //else
       shadowMap.ortho(-200, 200, -200, 200, zNear, zFar);
+      // TODO pierre there you go!:
+    //shadowMap.ortho(-1024, 1024, -1024, 1024, zNear, zFar);
     shadowMap.camera(light.position().x(), light.position().y(), light.position().z(), 0, 0, 0, 0, 1, 0);
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     renderLandscape(shadowMap);
     shadowMap.endDraw();
     //shadowMap.updatePixels();
+    // */
 
     // Update the shadow transformation matrix and send it, the light
     // direction normal and the shadow map to the default shader.
     // updateDefaultShader
     //Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
-    Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
+    // TODO
+    //Matrix projectionView = light.projectionView(spotLight ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
+    Matrix projectionView = light.projectionView(Graph.Type.ORTHOGRAPHIC,  400, 400, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
 
     // Apply the inverted modelview matrix from the default pass to get the original vertex
@@ -116,6 +139,9 @@ public class ShadowsImmediateMode extends PApplet {
 
     // Render default pass
     background(0xff222222);
+    scene.render();
+
+    /*
     scene.drawAxes(500);
     renderLandscape(g);
 
@@ -123,6 +149,7 @@ public class ShadowsImmediateMode extends PApplet {
     scene.applyWorldTransformation(light);
     scene.draw(light);
     popMatrix();
+    // */
   }
 
   public void renderLandscape(PGraphics canvas) {
@@ -171,8 +198,9 @@ public class ShadowsImmediateMode extends PApplet {
     if(key != CODED) {
       if(key >= '1' && key <= '3')
         landscape = key - '0';
-      else if(key == ' ')
-        spotLight = !spotLight;
+      // TODO
+      //else if(key == ' ')
+        //spotLight = !spotLight;
     }
   }
 

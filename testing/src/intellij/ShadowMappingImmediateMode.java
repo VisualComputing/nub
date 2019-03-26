@@ -10,6 +10,7 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
+import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
 
 public class ShadowMappingImmediateMode extends PApplet {
@@ -18,9 +19,15 @@ public class ShadowMappingImmediateMode extends PApplet {
   Node[] shapes;
   Node light;
   PGraphics shadowMap;
+  Matrix biasMatrix = new Matrix(
+      0.5f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.5f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.5f, 0.0f,
+      0.5f, 0.5f, 0.5f, 1.0f
+  );
   PMatrix3D pmatrix = new PMatrix3D();
   PShader depthShader, shadowShader;
-  boolean shadows = true;
+  boolean shadows = false;
   float zNear = 50;
   float zFar = 1000;
   int w = 1000;
@@ -71,11 +78,13 @@ public class ShadowMappingImmediateMode extends PApplet {
       shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     // Do w&h must match main context size? I think so
-    shadowMap = createGraphics(w, h, P3D);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    shadowMap = createGraphics(2048, 2048, P3D);
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
     shadowMap.shader(depthShader);
 
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowvert.glsl");
+    //shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowfrag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow1/shadowvert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow2/shadow_vert.glsl");
 
     light = shapes[(int) random(0, shapes.length - 1)];
     // this line is good to set a condition like: scene.trackedNode("light") == this
@@ -89,21 +98,39 @@ public class ShadowMappingImmediateMode extends PApplet {
     background(75, 25, 15);
     // 1. Fill in shadow map using the light point of view
     shadowMap.beginDraw();
-    shadowMap.background(140, 160, 125);
+    shadowMap.noStroke();
+    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
     // 2. set shadow shader stuff
     // Weird but it seems I need to do this here
-    resetShader();
+    //resetShader();
     if(shadows) {
       shader(shadowShader);
-      Vector lightPosition = light.position();
-      pointLight(255, 255, 255, lightPosition.x(), lightPosition.y(), lightPosition.z());
-      Matrix lightMatrix = Matrix.multiply(light.projection(shadowMapType, width, height, zNear, zFar, scene.isLeftHanded()), light.view());
+      //Matrix projectionView = Matrix.multiply(light.orthographic(400, 400, zNear, zFar), light.view());
+      Matrix projectionView = light.projectionView(shadowMapType, 400, 400, zNear, zFar);
+      Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+
+      // Apply the inverted modelview matrix from the default pass to get the original vertex
+      // positions inside the shader. This is needed because Processing is pre-multiplying
+      // the vertices by the modelview matrix (for better performance).
+      // TODO (last step?) What a horrible detail! maybe reset shader comes handy!?
+      Matrix modelviewInv = Scene.toMatrix(((PGraphicsOpenGL)g).modelviewInv);
+      lightMatrix.apply(modelviewInv);
+
+      // Convert Matrix to PMatrix and send it to the shader.
+      // PShader.set(String, float[16]) doesn't work for some reason.
       pmatrix.set(lightMatrix.get(new float[16]));
-      shadowShader.set("lightSpaceMatrix", pmatrix);
+      shadowShader.set("shadowTransform", pmatrix);
+
+      Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+      shadowShader.set("lightDirection", lightDirection.x(), lightDirection.y(), lightDirection.z());
+
+      // Send the shadowmap to the default shader
       shadowShader.set("shadowMap", shadowMap);
     }
+    else
+      resetShader();
     // 3. Fill in and display front-buffer
     scene.render();
   }
