@@ -45,8 +45,6 @@ public class ShadowsImmediateMode extends PApplet {
         return true;
       }
     };
-    // exact picking precision
-    nodeLandscape.setPickingThreshold(0);
     light = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
@@ -63,6 +61,7 @@ public class ShadowsImmediateMode extends PApplet {
     light.setMagnitude(400f / 2048f);
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts fist
@@ -161,11 +160,6 @@ public class ShadowsImmediateMode extends PApplet {
           shader(shadowShader);
       }
     }
-  }
-
-  // comment to disable picking
-  public void mouseMoved(MouseEvent event) {
-    scene.cast();
   }
 
   public void mouseDragged() {
