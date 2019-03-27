@@ -11,7 +11,7 @@ import processing.event.MouseEvent;
  * This example introduces the three different interpolations offered
  * by the Graph.
  */
-public class FrameInterpolation extends PApplet {
+public class Interpolation extends PApplet {
   Scene scene;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
@@ -142,6 +142,6 @@ public class FrameInterpolation extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.FrameInterpolation"});
+    PApplet.main(new String[]{"intellij.Interpolation"});
   }
 }

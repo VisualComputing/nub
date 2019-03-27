@@ -24,6 +24,7 @@
 
 package intellij;
 
+
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -32,7 +33,7 @@ import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
 
-public class FrameAPI4 extends PApplet {
+public class NodeAPI1 extends PApplet {
   Scene scene;
   InteractiveNode f1, f2, f3, f4, f5;
   Vector pnt = new Vector(40, 30, 20);
@@ -64,7 +65,7 @@ public class FrameAPI4 extends PApplet {
     scene.setRadius(200);
     scene.fit(1);
 
-    f1 = new InteractiveNode(f1Color);
+    f1 = new InteractiveNode(scene, f1Color);
     f1.translate(-50, -20, 30);
     f1.scale(1.3f);
 
@@ -100,31 +101,7 @@ public class FrameAPI4 extends PApplet {
     point(pnt.x(), pnt.y(), pnt.z());
     popStyle();
 
-    pushMatrix();
-    scene.applyTransformation(f1);
-    f1.draw(scene);
-    pushMatrix();
-    scene.applyTransformation(f3);
-    f3.draw(scene);
-    popMatrix();
-    pushMatrix();
-    scene.applyTransformation(f2);
-    f2.draw(scene);
-    pushMatrix();
-    scene.applyTransformation(f4);
-    f4.draw(scene);
-    popMatrix();
-    popMatrix();
-    popMatrix();
-
-    //eye
-    pushMatrix();
-    scene.applyTransformation(scene.eye());
-    pushMatrix();
-    scene.applyTransformation(f5);
-    f5.draw(scene);
-    popMatrix();
-    popMatrix();
+    scene.render();
 
     drawMode();
     displayText();
@@ -342,13 +319,12 @@ public class FrameAPI4 extends PApplet {
       scene.eye().setScaling(scene.eye().scaling() * 1.1f);
     if (key == '-')
       scene.eye().setScaling(scene.eye().scaling() / 1.1f);
-    if (key == 'e')
-      f1.enableTracking(!f1.isTrackingEnabled());
   }
 
   @Override
   public void mouseMoved() {
-    scene.track(new Node[]{f1, f2, f3, f4, f5});
+    //scene.track();
+    scene.cast();
   }
 
   @Override
@@ -378,24 +354,28 @@ public class FrameAPI4 extends PApplet {
   public class InteractiveNode extends Node {
     int _c;
     Vector pnt;
+    Scene scene;
 
-    public InteractiveNode(int color) {
-      super();
+    public InteractiveNode(Scene graph, int color) {
+      super(graph);
+      scene = (Scene) graph();
       _c = color;
       pnt = new Vector(40, 30, 20);
     }
 
     public InteractiveNode(Node node, int color) {
       super(node);
+      scene = (Scene) graph();
       _c = color;
       pnt = new Vector(40, 30, 20);
     }
 
-    public void draw(Scene scn) {
+    @Override
+    public void visit() {
       pushStyle();
-      scn.drawAxes(40);
+      scene.drawAxes(40);
       stroke(_c);
-      scn.drawShooterTarget(this);
+      scene.drawShooterTarget(this);
       strokeWeight(10);
       point(pnt.x(), pnt.y(), pnt.z());
       popStyle();
@@ -403,6 +383,6 @@ public class FrameAPI4 extends PApplet {
   }
 
   public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.FrameAPI4"});
+    PApplet.main(new String[]{"intellij.NodeAPI1"});
   }
 }
