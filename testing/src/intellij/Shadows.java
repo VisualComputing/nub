@@ -1,18 +1,35 @@
 package intellij;
 
-import nub.core.*;
-import nub.primitives.*;
-import nub.processing.*;
-import processing.core.*;
-import processing.event.*;
-import processing.opengl.*;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.event.MouseEvent;
+import processing.opengl.PGraphicsOpenGL;
+import processing.opengl.PShader;
 
 public class Shadows extends PApplet {
+  // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
   Scene scene;
-  PVector lightDir = new PVector();
-  PShader depthShader, defaultShader;
+  Node nodeLandscape, light;
+  PShader depthShader;
+  PShader shadowShader;
   PGraphics shadowMap;
+  float fov = THIRD_PI;
+  Matrix biasMatrix = new Matrix(
+      0.5f, 0.0f, 0.0f, 0.0f,
+      0.0f, 0.5f, 0.0f, 0.0f,
+      0.0f, 0.0f, 0.5f, 0.0f,
+      0.5f, 0.5f, 0.5f, 1.0f
+  );
+  boolean debug;
+  Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   int landscape = 1;
+  float zNear = 10;
+  float zFar = 1000;
   int w = 1000;
   int h = 1000;
 
@@ -21,128 +38,72 @@ public class Shadows extends PApplet {
   }
 
   public void setup() {
-    size(w, h, P3D);
     scene = new Scene(this);
     scene.togglePerspective();
     scene.setRadius(max(w, h)/3);
     scene.fit(1);
-    initShadowPass();
-    initDefaultPass();
+    nodeLandscape = new Node(scene) {
+      @Override
+      public boolean graphics(PGraphics pg) {
+        renderLandscape(pg);
+        return true;
+      }
+    };
+    light = new Node(scene) {
+      @Override
+      public boolean graphics(PGraphics pg) {
+        pg.pushStyle();
+        if(debug) {
+          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+          Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        }
+        Scene.drawAxes(pg, 300);
+        pg.pushStyle();
+        return true;
+      }
+    };
+    light.setMagnitude(400f / 2048f);
+    // initShadowPass
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    shadowMap = createGraphics(2048, 2048, P3D);
+    shadowMap.shader(depthShader);
+    // TODO testing the appearance of artifacts first
+    //shadowMap.noSmooth();
+
+    // initDefaultPass
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shader(shadowShader);
+    noStroke();
   }
 
   public void draw() {
-    // Calculate the light direction (actually scaled by negative distance)
+    // 1. Calculate the light position and orientation
     float lightAngle = frameCount * 0.002f;
-    lightDir.set(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
+    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
 
-    // Render shadow pass
-    shadowMap.beginDraw();
-    shadowMap.camera(lightDir.x, lightDir.y, lightDir.z, 0, 0, 0, 0, 1, 0);
-    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-    renderLandscape(shadowMap);
-    shadowMap.endDraw();
-    shadowMap.updatePixels();
-
-    // Update the shadow transformation matrix and send it, the light
-    // direction normal and the shadow map to the default shader.
-    updateDefaultShader();
-
-    // Render default pass
-    background(0xff222222);
-    renderLandscape(g);
-
-    // Render light source
-    pushMatrix();
-    fill(0xffffffff);
-    translate(lightDir.x, lightDir.y, lightDir.z);
-    box(5);
-    popMatrix();
-
-  }
-
-  public void keyPressed() {
-    if(key != CODED) {
-      if(key >= '1' && key <= '3')
-        landscape = key - '0';
-      else if(key == 'd') {
-        shadowMap.beginDraw(); shadowMap.ortho(-200, 200, -200, 200, 10, 400); shadowMap.endDraw();
-      } else if(key == 's') {
-        shadowMap.beginDraw(); shadowMap.perspective(60 * DEG_TO_RAD, 1, 10, 1000); shadowMap.endDraw();
-      }
-    }
-  }
-
-  public void mouseDragged() {
-    if (mouseButton == LEFT)
-      scene.spin();
-    else if (mouseButton == RIGHT)
-      scene.translate();
-    else
-      scene.moveForward(mouseX - pmouseX);
-  }
-
-  public void mouseWheel(MouseEvent event) {
-    scene.scale(event.getCount() * 20);
-  }
-
-  public void initShadowPass() {
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    shadowMap = createGraphics(2048, 2048, P3D);
-    shadowMap.noSmooth(); // Antialiasing on the shadowMap leads to weird artifacts
-    //shadowMap.loadPixels(); // Will interfere with noSmooth() (probably a bug in Processing)
+    // 2. Render the shadowmap from light node 'point-of-view'
     shadowMap.beginDraw();
     shadowMap.noStroke();
-    shadowMap.shader(depthShader);
-    shadowMap.ortho(-200, 200, -200, 200, 10, 400); // Setup orthogonal view matrix for the directional light
+    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
+    scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
-  }
 
-  public void initDefaultPass() {
-    defaultShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
-    shader(defaultShader);
-    noStroke();
-    perspective(60 * DEG_TO_RAD, (float)width / height, 10, 1000);
-  }
-
-  void updateDefaultShader() {
-
-    // Bias matrix to move homogeneous shadowCoords into the UV texture space
-    PMatrix3D shadowTransform = new PMatrix3D(
-        0.5f, 0.0f, 0.0f, 0.5f,
-        0.0f, 0.5f, 0.0f, 0.5f,
-        0.0f, 0.0f, 0.5f, 0.5f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    );
-
-    // Apply project modelview matrix from the shadow pass (light direction)
-    shadowTransform.apply(((PGraphicsOpenGL)shadowMap).projmodelview);
-
-    // Apply the inverted modelview matrix from the default pass to get the original vertex
-    // positions inside the shader. This is needed because Processing is pre-multiplying
-    // the vertices by the modelview matrix (for better performance).
-    PMatrix3D modelviewInv = ((PGraphicsOpenGL)g).modelviewInv;
-    shadowTransform.apply(modelviewInv);
-
-    // Convert column-minor PMatrix to column-major GLMatrix and send it to the shader.
-    // PShader.set(String, PMatrix3D) doesn't convert the matrix for some reason.
-    defaultShader.set("shadowTransform", new PMatrix3D(
-        shadowTransform.m00, shadowTransform.m10, shadowTransform.m20, shadowTransform.m30,
-        shadowTransform.m01, shadowTransform.m11, shadowTransform.m21, shadowTransform.m31,
-        shadowTransform.m02, shadowTransform.m12, shadowTransform.m22, shadowTransform.m32,
-        shadowTransform.m03, shadowTransform.m13, shadowTransform.m23, shadowTransform.m33
-    ));
-
-    // Calculate light direction normal, which is the transpose of the inverse of the
-    // modelview matrix and send it to the default shader.
-    float lightNormalX = lightDir.x * modelviewInv.m00 + lightDir.y * modelviewInv.m10 + lightDir.z * modelviewInv.m20;
-    float lightNormalY = lightDir.x * modelviewInv.m01 + lightDir.y * modelviewInv.m11 + lightDir.z * modelviewInv.m21;
-    float lightNormalZ = lightDir.x * modelviewInv.m02 + lightDir.y * modelviewInv.m12 + lightDir.z * modelviewInv.m22;
-    float normalLength = sqrt(lightNormalX * lightNormalX + lightNormalY * lightNormalY + lightNormalZ * lightNormalZ);
-    defaultShader.set("lightDirection", lightNormalX / -normalLength, lightNormalY / -normalLength, lightNormalZ / -normalLength);
-
-    // Send the shadowmap to the default shader
-    defaultShader.set("shadowMap", shadowMap);
-
+    // 3. Render the scene from the scene.eye() node
+    background(0xff222222);
+    if(!debug) {
+      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+      // TODO: how to avoid calling g.modelviewInv?
+      lightMatrix.apply(Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
+      Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
+      Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+      Scene.setUniform(shadowShader, "lightDirection", lightDirection);
+      shadowShader.set("shadowMap", shadowMap);
+    }
+    scene.render();
   }
 
   public void renderLandscape(PGraphics canvas) {
@@ -185,6 +146,43 @@ public class Shadows extends PApplet {
     }
     canvas.fill(0xff222222);
     canvas.box(360, 5, 360);
+  }
+
+  public void keyPressed() {
+    if(key != CODED) {
+      if(key >= '1' && key <= '3')
+        landscape = key - '0';
+      else if(key == ' ') {
+        shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+        light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+      }
+      else if(key == 'd') {
+        debug = !debug;
+        if(debug)
+          resetShader();
+        else
+          shader(shadowShader);
+      }
+    }
+  }
+
+  public void mouseDragged() {
+    if (mouseButton == LEFT)
+      scene.spin();
+    else if (mouseButton == RIGHT)
+      scene.translate();
+    else
+      scene.moveForward(mouseX - pmouseX);
+  }
+
+  public void mouseWheel(MouseEvent event) {
+    if (event.isShiftDown()) {
+      int shift = event.getCount() * 20;
+      if (zFar + shift > zNear)
+        zFar += shift;
+    }
+    else
+      scene.scale(event.getCount() * 20);
   }
 
   public static void main(String args[]) {

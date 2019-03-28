@@ -64,7 +64,7 @@ public class ShadowsImmediateMode extends PApplet {
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
-    // TODO testing the appearance of artifacts fist
+    // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
     // initDefaultPass
