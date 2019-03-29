@@ -1,12 +1,14 @@
 package intellij;
 
 import nub.core.Graph;
+import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
+import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
 import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
@@ -44,8 +46,13 @@ public class Shadows extends PApplet {
     scene.fit(1);
     nodeLandscape = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pg) {
-        renderLandscape(pg);
+      public boolean graphics(PGraphics canvas) {
+        canvas.fill(0xffff5500);
+        canvas.box(40, 40, 100);
+        //canvas.fill(0xff00ff55);
+        //canvas.sphere(30);
+        canvas.fill(0xff222222);
+        canvas.box(360, 5, 360);
         return true;
       }
     };
@@ -64,17 +71,20 @@ public class Shadows extends PApplet {
     };
     light.setMagnitude(400f / 2048f);
     // initShadowPass
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_gen/depth_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/depth_gen/depth_vert.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
+    shadowMap.resetMatrix();
 
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow_gen/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow_gen/shadow_vert.glsl");
     shader(shadowShader);
+    GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(scene, shadowShader);
+    scene.setMatrixHandler(glslMatrixHandler);
     noStroke();
+    resetMatrix();
   }
 
   public void draw() {
@@ -88,64 +98,24 @@ public class Shadows extends PApplet {
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
+    Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+    Scene.setUniform(depthShader, "light_transform", projectionView);
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
 
     // 3. Render the scene from the scene.eye() node
     background(0xff222222);
     if(!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+      //Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       // TODO: how to avoid calling g.modelviewInv?
-      lightMatrix.apply(Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
+      //lightMatrix.apply(Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
       Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);
     }
     scene.render();
-  }
-
-  public void renderLandscape(PGraphics canvas) {
-    switch(landscape) {
-      case 1: {
-        float offset = -frameCount * 0.01f;
-        canvas.fill(0xffff5500);
-        for(int z = -5; z < 6; ++z)
-          for(int x = -5; x < 6; ++x) {
-            canvas.pushMatrix();
-            canvas.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
-            canvas.box(10, 100, 10);
-            canvas.popMatrix();
-          }
-      } break;
-      case 2: {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
-        canvas.fill(0xffff5500);
-        for(int n = 0; n < 20; ++n, angle += rotation) {
-          canvas.pushMatrix();
-          canvas.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
-          canvas.box(10, 100, 10);
-          canvas.popMatrix();
-        }
-        canvas.fill(0xff0055ff);
-        canvas.sphere(50);
-      } break;
-      case 3: {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
-        canvas.fill(0xffff5500);
-        for(int n = 0; n < 20; ++n, angle += rotation) {
-          canvas.pushMatrix();
-          canvas.translate(sin(angle) * 70, cos(angle) * 70, 0);
-          canvas.box(10, 10, 100);
-          canvas.popMatrix();
-        }
-        canvas.fill(0xff00ff55);
-        canvas.sphere(50);
-      }
-    }
-    canvas.fill(0xff222222);
-    canvas.box(360, 5, 360);
   }
 
   public void keyPressed() {
@@ -183,6 +153,23 @@ public class Shadows extends PApplet {
     }
     else
       scene.scale(event.getCount() * 20);
+  }
+
+  public class GLSLMatrixHandler extends MatrixHandler {
+    PShader _shader;
+    PMatrix3D _pmatrix = new PMatrix3D();
+
+    public GLSLMatrixHandler(Graph graph, PShader shader) {
+      super(graph.width(), graph.height());
+      _shader = shader;
+    }
+
+    @Override
+    protected void _setUniforms() {
+      shader(_shader);
+      Scene.setUniform(_shader, "nub_transform", projectionModelView());
+      Scene.setUniform(_shader, "nub_modelview", modelView());
+    }
   }
 
   public static void main(String args[]) {

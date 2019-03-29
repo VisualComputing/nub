@@ -11,9 +11,10 @@ import processing.event.MouseEvent;
 public class MiniMap extends PApplet {
   Scene scene, minimap, focus;
   Node[] models;
+  // the sceneEye doesn't hold a graphics representation
   Node sceneEye;
   boolean displayMinimap = true;
-  // whilst scene1 is either on-screen or not, the minimap is always off-screen
+  // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
   boolean onScreen = true;
   boolean interactiveEye;
@@ -45,7 +46,6 @@ public class MiniMap extends PApplet {
       } else {
         models[i] = new Node(scene) {
           int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
-
           @Override
           public boolean graphics(PGraphics pg) {
             pg.pushStyle();
@@ -56,8 +56,8 @@ public class MiniMap extends PApplet {
           }
         };
       }
-      scene.randomize(models[i]);
       models[i].setPickingThreshold(0);
+      scene.randomize(models[i]);
     }
 
     // Note that we pass the upper left corner coordinates where the scene1

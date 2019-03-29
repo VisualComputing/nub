@@ -11,9 +11,10 @@ import processing.event.MouseEvent;
 public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
   Node[] models;
+  // the sceneEye holds a graphics representation
   Node sceneEye;
   boolean displayMinimap = true;
-  // whilst scene1 is either on-screen or not, the minimap is always off-screen
+  // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
   boolean onScreen = false;
 
