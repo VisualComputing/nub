@@ -28,6 +28,7 @@ public abstract class ConeConstraint extends Constraint{
     protected Quaternion _restRotation = new Quaternion();
     protected Quaternion _idleRotation = new Quaternion();
     protected Quaternion _orientation = new Quaternion();
+    protected Quaternion _offset = new Quaternion();
 
     public Quaternion restRotation() {
         return _restRotation;
@@ -49,8 +50,7 @@ public abstract class ConeConstraint extends Constraint{
      * result will be stored on restRotation.
      * twist and up axis are defined locally on reference rotation
      */
-    Quaternion off = new Quaternion();
-    public void setRestRotation(Quaternion reference, Vector up, Vector twist, Vector rest) {
+    public void setRestRotation(Quaternion reference, Vector up, Vector twist, Vector offset) {
         _orientation = reference.get();
         _idleRotation = reference.get();
         //Align y-Axis with up vector
@@ -59,8 +59,7 @@ public abstract class ConeConstraint extends Constraint{
         //Align z-Axis with twist vector
         delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
         _orientation.compose(delta); // orientation = idle * rest
-        Vector rs = delta.inverseRotate(rest);
-        off = new Quaternion(twist, rest); // TODO : check offset
+        _offset = new Quaternion(twist, offset); // TODO : check offset
         _restRotation = delta;
     }
 
@@ -76,6 +75,7 @@ public abstract class ConeConstraint extends Constraint{
         Quaternion curr = _idleRotation; //w.r.t ref
         Quaternion next = Quaternion.compose(frame.rotation(), rotation); // w.r.t ref
         Quaternion change = Quaternion.compose(curr.inverse(), next); // w.r.t idle
+        change = Quaternion.compose(change,_offset); // w.r.t idle
         //Decompose change in terms of twist and swing (twist vector w.r.t idle)
         Vector tw = _restRotation.rotate(new Vector(0, 0, 1)); // w.r.t idle
         Vector rotationAxis = new Vector(change._quaternion[0], change._quaternion[1], change._quaternion[2]);
@@ -85,15 +85,14 @@ public abstract class ConeConstraint extends Constraint{
         Quaternion rotationSwing = Quaternion.compose(change, rotationTwist.inverse()); //w.r.t idle
         //Constraint swing
         Vector new_pos = rotationSwing.rotate(_restRotation.rotate(new Vector(0, 0, 1))); //get twist desired target position
-        new_pos = off.rotate(new_pos); //apply offset if required
+        //new_pos = _offset.rotate(new_pos);
         Vector constrained = apply(new_pos, _restRotation); // constraint target position
-        constrained = off.inverseRotate(constrained);// undo offset
         rotationSwing = new Quaternion(tw, constrained); // get constrained swing rotation
         //constrained change
         Quaternion constrained_change = Quaternion.compose(rotationSwing, rotationTwist);
         //find change in terms of frame rot
         //_idle * constrained_change = frame * rot
-        Quaternion rot = Quaternion.compose(frame.rotation().inverse(), Quaternion.compose(_idleRotation, constrained_change));
+        Quaternion rot = Quaternion.compose(frame.rotation().inverse(), Quaternion.compose(_idleRotation, Quaternion.compose(constrained_change, _offset.inverse())));
         return rot;
     }
 
