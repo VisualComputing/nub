@@ -99,8 +99,27 @@ public abstract class FABRIKSolver extends Solver {
   }
   protected int _head = 0;
 
+  /*Heuristic Parameters*/
+  protected boolean _fixTwisting = false;
+  protected boolean _keepDirection = true;
 
-  /*Move vector v to u while keeping certain distance*/
+  /*
+  * Move vector u to v while keeping certain distance.
+  *
+  * Find the point that lies on the segment v - u that is at the given distance to
+  * Point u.
+  * Fix weight is a parameter in range [0,1] that will scale the distance between V and
+  * the found point. A bigger value of this parameter implies to perform a smaller movement.
+  * */
+  public void setFixTwisting(boolean fixTwisting){
+    _fixTwisting = fixTwisting;
+  }
+
+  public void setKeepDirection(boolean keepDirection){
+    _keepDirection = keepDirection;
+  }
+
+
   public Vector _move(Vector u, Vector v, float distance, float fixWeight){
     float r = Vector.distance(u, v);
     float lambda_i = distance / r;
@@ -118,8 +137,6 @@ public abstract class FABRIKSolver extends Solver {
    * Performs First Stage of FABRIK Algorithm, receives a chain of Frames, being the Frame at i
    * the reference frame of the Frame at i + 1
    * */
-  public int opt = 0;
-
   protected float _forwardReaching(ArrayList<? extends Frame> chain) {
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
@@ -127,14 +144,23 @@ public abstract class FABRIKSolver extends Solver {
       Vector pos_i1 = _positions.get(i + 1);
       float dist_i = _distances.get(i + 1);
       if (dist_i == 0) {
+        //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
         continue;
       }
+
+      if(_fixTwisting) _applyTwistRotation(chain, pos_i1);
+
       Properties props_i = _properties.get(chain.get(i).id());
       Properties props_i1 = _properties.get(chain.get(i+1).id());
       //TODO : Is necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
-      if(chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && _keepDirection){
+        /*
+         * H1 : If Joint has a constrat it is desirable that:
+         * a) J_i reach its target position
+         * b) J_i keeps its orientation
+         * */
         Vector o_hat = chain.get(i + 1).position();
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
@@ -177,7 +203,7 @@ public abstract class FABRIKSolver extends Solver {
       Properties props_i1 = _properties.get(chain.get(i+1).id());
       //TODO : Is necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
-      if(chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && _keepDirection){
         Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
@@ -298,6 +324,47 @@ public abstract class FABRIKSolver extends Solver {
     }
     return o.get();
   }
+
+  protected void _forwardTwist(ArrayList<Vector> positions, int idx,Vector o, Vector p, Vector q, Vector t){
+    //1. Get The vector normal to Plane of interest
+    Vector n = Vector.subtract(p, o);
+    //2. Project Vector q,p into Plane
+    Vector q_proj = Vector.projectVectorOnPlane(Vector.subtract(q,p), n);
+    //3. Project Vector t,p into Plane
+    Vector t_proj = Vector.projectVectorOnPlane(Vector.subtract(t,p), n);
+    //4. Find angle between projected Vectors
+    Quaternion theta = new Quaternion(q_proj, t_proj);
+    //5. Apply rotation and update Positions from o to head
+    _applyRotation(true, positions, idx, theta);
+
+  }
+
+  protected void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
+    //Change chain state in such a way that the target approach to chain
+    Frame eff = chain.get(chain.size() - 1);
+    for(int i = 0; i < chain.size() - 2; i++){
+      Frame f_i = chain.get(i);
+      //Project Vectors to Plane given by Twist Vector
+      Vector twist = chain.get(i + 1).translation();
+      //Get Vector from EFF to this Joint
+      Vector v = Vector.projectVectorOnPlane(f_i.location(eff.position()), twist);
+      //Get Vector from EFF to this Joint
+      Vector u = Vector.projectVectorOnPlane(f_i.location(t), twist);
+      f_i.rotate(new Quaternion(v,u));
+    }
+  }
+
+  protected void _applyRotation(boolean reverse, ArrayList<Vector> positions, int idx, Quaternion q){
+    Vector v_i = positions.get(idx);
+    int update = reverse ? -1 : 1;
+    for(int i = idx + update; reverse ? i >=  0: i < positions.size(); i = i + update ){
+      Vector v_j = Vector.subtract(positions.get(i), v_i);
+      v_j = q.rotate(v_j);
+      v_j.add(v_i);
+      positions.set(i, v_j);
+    }
+  }
+
 
   protected float _distance(ArrayList<? extends Frame> chain) {
     float distance = 0.f;
