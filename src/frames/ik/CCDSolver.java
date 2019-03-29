@@ -17,7 +17,7 @@ import frames.primitives.Vector;
 
 import java.util.ArrayList;
 
-//TODO : Update
+//TODO : Enable / Disable iteration Hist
 
 public class CCDSolver extends Solver {
   protected ArrayList<? extends Frame> _chain;
@@ -80,6 +80,9 @@ public class CCDSolver extends Solver {
     float change = 0.0f;
     Vector endLocalPosition = _chain.get(_chain.size() - 2).location(end.position());
     Vector targetLocalPosition = _chain.get(_chain.size() - 2).location(target);
+
+    ArrayList<Vector> positions = new ArrayList<Vector>();
+
     for (int i = _chain.size() - 2; i >= 0; i--) {
       Quaternion delta = null;
       Quaternion initial = _chain.get(i).rotation().get();
@@ -99,12 +102,10 @@ public class CCDSolver extends Solver {
       }
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
+      positions.add(0,_chain.get(i+1).position().get());
     }
+    positions.add(0,_chain.get(0).position().get());
 
-    ArrayList<Vector> positions = new ArrayList<Vector>();
-    for(Frame f : chain()){
-      positions.add(f.position().get());
-    }
     addIterationRecord(positions);
     //Check total rotation change
     if (change <= minDistance) return true;
