@@ -12,7 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class IKAnimation {
-
+    //TODO : CCD Animation must be fixed
+    //TODO : Perform operations using Frames
     public static abstract class Step extends AnimatorObject{
         protected boolean _completed = false;
         protected Scene _scene;
@@ -387,6 +388,7 @@ public class IKAnimation {
         }
 
         public void draw() {
+            if(_solver.iterationsHistory().size() < 2) return;
             animate();
             //Draw previous iteration
             ArrayList<Vector> prev = _solver.iterationsHistory().get(_current - 1);
@@ -459,6 +461,14 @@ public class IKAnimation {
             //Animate
             if (_step > 2 && _trajectory._completed) {
                 _step = 0;
+                //Rotate previous found positions by same amount
+                Quaternion rot = new Quaternion(Vector.subtract(prevStructure.get(_j), prevStructure.get(_j - 1)),Vector.subtract(nextStructure.get(_j), prevStructure.get(_j - 1)));
+                for(int i = _j + 1; i < nextStructure.size(); i++){
+                    Vector v = Vector.subtract(nextStructure.get(i), prevStructure.get(i - 1));
+                    v = rot.rotate(v);
+                    v.add(nextStructure.get(i - 1));
+                    nextStructure.set(i, v);
+                }
                 _j--;
             }
             if (_j <= 0) {
@@ -503,7 +513,6 @@ public class IKAnimation {
                         _trajectory.start();
                         ((FollowArc) _trajectory).setTrajectory(j_i, unconstrained, j_i1_hat);
                         ((FollowArc) _trajectory)._message = "Step 3: In case of constraints Move to a Feasible position";
-                        break;
                     }
                 }
                 _step++;
@@ -511,6 +520,7 @@ public class IKAnimation {
         }
 
         public void draw() {
+            if(_solver.iterationsHistory().size() < 2) return;
             animate();
             //Draw previous iteration
             ArrayList<Vector> prev = _solver.iterationsHistory().get(_current - 1);
