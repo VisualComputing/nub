@@ -278,17 +278,52 @@ public class Graph {
   }
 
   /**
-   * @return width of the screen window.
+   * Returns width of the screen window.
    */
   public int width() {
     return _matrixHandler.width();
   }
 
   /**
-   * @return height of the screen window.
+   * Returns height of the screen window.
    */
   public int height() {
     return _matrixHandler.height();
+  }
+
+  /**
+   * Returns graph projection matrix.
+   */
+  public Matrix projection() {
+    return _matrixHandler.projection();
+  }
+
+  /**
+   * Returns graph cached view matrix.
+   */
+  public Matrix view() {
+    return _matrixHandler.cacheView();
+  }
+
+  /**
+   * Returns the projection times view cached matrix.
+   */
+  public Matrix projectionView() {
+    return _matrixHandler.cacheProjectionView();
+  }
+
+  /**
+   * Returns the projection times modelview matrix.
+   */
+  public Matrix projectionModelView() {
+    return _matrixHandler.projectionModelView();
+  }
+
+  /**
+   * Returns the modelview matrix.
+   */
+  public Matrix modelView() {
+    return _matrixHandler.modelView();
   }
 
   /**
