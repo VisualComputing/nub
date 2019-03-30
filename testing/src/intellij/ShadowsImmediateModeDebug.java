@@ -122,7 +122,11 @@ public class ShadowsImmediateModeDebug extends PApplet {
 
       // comment case 2b
       // TODO: how to avoid calling g.modelviewInv?
-      Scene.setUniform(shadowShader, "mvINV", Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
+      Matrix mvINV = Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv);
+      // test identity
+      //Matrix mv = Scene.toMatrix(((PGraphicsOpenGL) g).modelview);
+      //Matrix.multiply(mv, mvINV).print();
+      Scene.setUniform(shadowShader, "mvINV", mvINV);
 
       // uncomment case 2a
       //Matrix shadowTransform = Matrix.multiply(lightMatrix, Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
