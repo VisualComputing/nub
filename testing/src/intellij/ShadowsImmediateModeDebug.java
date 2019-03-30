@@ -11,11 +11,14 @@ import processing.event.MouseEvent;
 import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
 
+// ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
 public class ShadowsImmediateModeDebug extends PApplet {
   // TODO
-  // 1. Make the scene more compatible with nub, then;
-  // 2.
-  // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
+  // 1. Try simplify the mvINV used within shadow_vert,
+  // which requires to make the scene more compatible with nub (no transforms within graphics). See and then;
+  // 2. If the eye to light 'clip-space' transform still is needed, then compute
+  // the shader shadowTransform by software using the Node API, e.g.,
+  // eye -> world: eye().worldMatrix(); and, world -> light -> 'clip-space' biasMatrix * light.projectionView
   Scene scene;
   Node nodeLandscape, light;
   PShader depthShader;
