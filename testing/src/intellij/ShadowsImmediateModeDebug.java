@@ -59,7 +59,7 @@ public class ShadowsImmediateModeDebug extends PApplet {
         pg.fill(0xff222222);
         pg.box(360, 5, 360);
         pg.fill(0xff00ff55);
-        pg.sphere(10);
+        pg.sphere(20);
         pg.popStyle();
         return true;
       }
@@ -72,6 +72,7 @@ public class ShadowsImmediateModeDebug extends PApplet {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
+        pg.strokeWeight(2);
         Scene.drawAxes(pg, 300);
         pg.pushStyle();
         return true;
