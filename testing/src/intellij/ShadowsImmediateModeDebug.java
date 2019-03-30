@@ -31,6 +31,8 @@ public class ShadowsImmediateModeDebug extends PApplet {
       0.0f, 0.0f, 0.5f, 0.0f,
       0.5f, 0.5f, 0.5f, 1.0f
   );
+  int counter;
+  boolean animate = true;
   boolean debug;
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   int landscape = 1;
@@ -51,7 +53,14 @@ public class ShadowsImmediateModeDebug extends PApplet {
     nodeLandscape = new Node(scene) {
       @Override
       public boolean graphics(PGraphics pg) {
-        renderLandscape(pg);
+        pg.pushStyle();
+        pg.fill(0xffff5500);
+        pg.box(10, 100, 10);
+        pg.fill(0xff222222);
+        pg.box(360, 5, 360);
+        pg.fill(0xff00ff55);
+        pg.sphere(10);
+        pg.popStyle();
         return true;
       }
     };
@@ -83,12 +92,18 @@ public class ShadowsImmediateModeDebug extends PApplet {
     noStroke();
   }
 
-  public void draw() {
+  public void moveLight(int count) {
     // 1. Calculate the light position and orientation
-    float lightAngle = frameCount * 0.002f;
+    float lightAngle = count * 0.002f;
     light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+  }
+
+  public void draw() {
+    // 1. Calculate the light position and orientation
+    if (animate)
+      moveLight(counter++);
 
     // 2. Render the shadowmap from light node 'point-of-view'
     shadowMap.beginDraw();
@@ -103,60 +118,18 @@ public class ShadowsImmediateModeDebug extends PApplet {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       Scene.setUniform(shadowShader, "lightMatrix", lightMatrix);
-      //shadowShader.set("mvINV", ((PGraphicsOpenGL) g).modelviewInv);
-      Scene.setUniform(shadowShader, "mvINV", Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
       // TODO: how to avoid calling g.modelviewInv?
+      Scene.setUniform(shadowShader, "mvINV", Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
+
+      // uncomment case 2a
       //Matrix shadowTransform = Matrix.multiply(lightMatrix, Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
       //Scene.setUniform(shadowShader, "shadowTransform", shadowTransform);
+
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);
     }
     scene.render();
-  }
-
-  public void renderLandscape(PGraphics canvas) {
-    switch (landscape) {
-      case 1: {
-        float offset = -frameCount * 0.01f;
-        canvas.fill(0xffff5500);
-        for (int z = -5; z < 6; ++z)
-          for (int x = -5; x < 6; ++x) {
-            canvas.pushMatrix();
-            canvas.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
-            canvas.box(10, 100, 10);
-            canvas.popMatrix();
-          }
-      }
-      break;
-      case 2: {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
-        canvas.fill(0xffff5500);
-        for (int n = 0; n < 20; ++n, angle += rotation) {
-          canvas.pushMatrix();
-          canvas.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
-          canvas.box(10, 100, 10);
-          canvas.popMatrix();
-        }
-        canvas.fill(0xff0055ff);
-        canvas.sphere(50);
-      }
-      break;
-      case 3: {
-        float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
-        canvas.fill(0xffff5500);
-        for (int n = 0; n < 20; ++n, angle += rotation) {
-          canvas.pushMatrix();
-          canvas.translate(sin(angle) * 70, cos(angle) * 70, 0);
-          canvas.box(10, 10, 100);
-          canvas.popMatrix();
-        }
-        canvas.fill(0xff00ff55);
-        canvas.sphere(50);
-      }
-    }
-    canvas.fill(0xff222222);
-    canvas.box(360, 5, 360);
   }
 
   public void keyPressed() {
@@ -172,7 +145,8 @@ public class ShadowsImmediateModeDebug extends PApplet {
           resetShader();
         else
           shader(shadowShader);
-      }
+      } else if (key == 'a')
+        animate = !animate;
     }
   }
 
