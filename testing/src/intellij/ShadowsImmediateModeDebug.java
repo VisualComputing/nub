@@ -119,6 +119,8 @@ public class ShadowsImmediateModeDebug extends PApplet {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       Scene.setUniform(shadowShader, "lightMatrix", lightMatrix);
+
+      // comment case 2b
       // TODO: how to avoid calling g.modelviewInv?
       Scene.setUniform(shadowShader, "mvINV", Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
 
