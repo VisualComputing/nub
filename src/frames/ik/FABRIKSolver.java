@@ -111,6 +111,14 @@ public abstract class FABRIKSolver extends Solver {
   * Fix weight is a parameter in range [0,1] that will scale the distance between V and
   * the found point. A bigger value of this parameter implies to perform a smaller movement.
   * */
+  public boolean fixTwisting(){
+    return  _fixTwisting;
+  }
+
+  public boolean keepDirection(){
+    return _keepDirection;
+  }
+
   public void setFixTwisting(boolean fixTwisting){
     _fixTwisting = fixTwisting;
   }
