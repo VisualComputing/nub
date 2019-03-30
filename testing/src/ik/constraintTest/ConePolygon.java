@@ -1,6 +1,7 @@
 package ik.constraintTest;
 
 import frames.core.Graph;
+import frames.core.constraint.BallAndSocket;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
@@ -9,25 +10,36 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
+import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Created by sebchaparr on 8/07/18.
  */
 public class ConePolygon extends PApplet{
     //TODO : Validate constraints in extreme cases (i.e Cone angle near to PI/2)
-    int num_joints = 10;
-    float targetRadius = 10;
+    int numJoints = 10;
+    float targetRadius = 7;
     float boneLength = 50;
+    boolean solve = false;
 
+    //Scene Parameters
     Scene scene;
-    CCDSolver ccd_solver;
-    ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
-    ArrayList<Frame> targets = new ArrayList<Frame>();
+    //Benchmark Parameters
+    Random random = new Random();
+    ArrayList<Solver> solvers; //Will store Solvers
+    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+
+    int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
+    int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
+    int numSolvers = 5; //Set number of solvers
 
     public void settings() {
         size(700, 700, P3D);
@@ -36,20 +48,22 @@ public class ConePolygon extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength);
+        scene.setRadius(numJoints * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
-        PShape redBall = createShape(SPHERE, targetRadius);
-        redBall.setStroke(false);
-        redBall.setFill(color(255,0,0));
+        //1. Create Targets
+        targets = Util.createTargets(numSolvers, scene, targetRadius);
+        float alpha = 1.f * width / height > 1.5f ? 0.5f * width / height : 0.5f;
+        alpha *= numSolvers/4f; //avoid undesirable overlapping
 
-        for(int i = 0; i < 3; i++){
-            Frame target = new Frame(scene, redBall);
-            target.setPickingThreshold(0);
-            targets.add(target);
+        //2. Generate Structures
+        for(int i = 0; i < numSolvers; i++){
+            int color = color(random(255), random(255), random(255));
+            structures.add(Util.generateChain(scene, numJoints, 0.3f* targetRadius, boneLength, new Vector(i * 2 * alpha * scene.radius()/(numSolvers - 1) - alpha * scene.radius(), 0, 0), color, randRotation, randLength));
         }
 
+        //3. Apply constraints
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         float v = 20;
         float w = 20;
@@ -63,153 +77,96 @@ public class ConePolygon extends PApplet{
         ArrayList<Frame> structure2;
         ArrayList<Frame> structure3;
 
-
-        structure1 = generateChain(num_joints, boneLength, new Vector(-scene.radius()/2.f, 0, 0));
-        structure2 = generateChain(num_joints, boneLength, new Vector(0, 0, 0));
-        structure3 = generateChain(num_joints, boneLength, new Vector(scene.radius()/2.f, 0, 0));
-
-        for (int i = 0; i < structure1.size() - 1; i++) {
-            PlanarPolygon constraint = new PlanarPolygon(vertices);
-            Vector twist = structure1.get(i + 1).translation().get();
-            Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
-            //offset = new Quaternion();
-            Quaternion rest = Quaternion.compose(structure1.get(i).rotation().get(), offset);
-            constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
-            constraint.setAngle(PI/3f);
-            structure1.get(i).setConstraint(constraint);
-            structure2.get(i).setConstraint(constraint);
-            structure3.get(i).setConstraint(constraint);
+        for(ArrayList<Frame> structure : structures){
+            for (int i = 0; i < structure.size() - 1; i++) {
+                PlanarPolygon constraint = new PlanarPolygon(vertices);
+                Vector twist = structure.get(i + 1).translation().get();
+                Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(40));
+                //offset = new Quaternion();
+                Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
+                constraint.setRestRotation(rest, new Vector(0, 1, 0), twist);
+                constraint.setAngle(PI/3f);
+                structure.get(i).setConstraint(constraint);
+            }
         }
 
+        //4. Set eye scene
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        //structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
-        chain_solvers.add(new ChainSolver(structure1));
+        //5. generate solvers
+        solvers = new ArrayList<>();
 
-        //structure2 = generateStructure(boneLength,new Vector(0,0,0));
-        ccd_solver = new CCDSolver(structure2);
-
-        //structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
-        chain_solvers.add(new ChainSolver(structure3));
-        chain_solvers.get(1).opt = 1;
-
-        //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
         int i = 0;
-        for(ChainSolver s : chain_solvers){
-            s.pg = scene.pApplet().getGraphics();
-            //s.timesPerFrame = 20;
-            s.error = 0.5f;
-            s.timesPerFrame = 0.5f;
-            s.maxIter = 30;
-            //s.error = 1f;
-            s.setTarget(targets.get(i));
-            if(i != 0)targets.get(i).setReference(targets.get(0));
-            targets.get(i++).setPosition(s.endEffector().position());
+        //CCD
+        solvers.add(new CCDSolver(structures.get(i++)));
+        //Standard FABRIK
+        ChainSolver chainSolver;
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setKeepDirection(false);
+        chainSolver.setFixTwisting(false);
+        solvers.add(chainSolver);
+        //FABRIK Keeping directions (H1)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(true);
+        chainSolver.setKeepDirection(false);
+        solvers.add(chainSolver);
+        //FABRIK Fix Twisting (H2)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(false);
+        chainSolver.setKeepDirection(true);
+        solvers.add(chainSolver);
+        //FABRIK Fix Twisting (H1 & H2)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(true);
+        chainSolver.setKeepDirection(true);
+        solvers.add(chainSolver);
+
+        for(i = 0; i < solvers.size(); i++){
+            Solver solver = solvers.get(i);
+            if(solvers.get(i) instanceof ChainSolver){
+                ((ChainSolver)solver).pg = scene.pApplet().getGraphics();
+            }
+            //6. Define solver parameters
+            solver.error = 0.001f;
+            solver.timesPerFrame = 5;
+            solver.maxIter = 200;
+            //7. Set targets
+            solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
+            targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
+
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    if(solve) {
+                        solver.solve();
+                    }
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
         }
-
-        ccd_solver.timesPerFrame = 0.5f;
-        ccd_solver.error = 0.5f;
-
-        ccd_solver.setTarget(targets.get(targets.size()-1));
-        //scene.addIKTarget(structure3.get(structure3.size()-1), targets.get(0));
-        targets.get(targets.size()-1).setReference(targets.get(0));
-        targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
     }
 
     public void draw() {
         background(0);
         lights();
-        //Draw Constraints
         scene.drawAxes();
-        for(ChainSolver chain_solver : chain_solvers){
-            if(show1) draw_pos(prev, color(0,255,0), 3);
-            if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
-            if(show3) draw_pos(constr, color(100,100,0), 3);
-        }
-        if(solve) {
-            ccd_solver.solve();
-            for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
-        }
         scene.render();
-
-    }
-
-    public void setConstraint(ArrayList<Vector> vertices, Frame f, Vector twist, float boneLength){
-        PlanarPolygon constraint = new PlanarPolygon(vertices);
-        constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
-        constraint.setAngle(PI/3);
-        f.setConstraint(constraint);
-    }
-
-    public ArrayList<Frame> generateStructure(float boneLength, Vector o){
-        ArrayList<Vector> vertices = new ArrayList<Vector>();
-        vertices.add(new Vector(-10, -10));
-        vertices.add(new Vector(0, -10));
-        vertices.add(new Vector(0, 0));
-        vertices.add(new Vector(-10, 0));
-
-        Joint prev = new Joint(scene);
-        Joint current = prev;
-        Joint root = current;
-        root.setRoot(true);
-        current.setRotation(Quaternion.random());
-        current = new Joint(scene);
-        current.setReference(prev);
-        prev = current;
-        current.setRotation(Quaternion.random());
-        //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength,0);
-        setConstraint(vertices,current, new Vector(0,boneLength,0),boneLength);
-
-        current = new Joint(scene);
-        current.setReference(prev);
-        prev = current;
-        current.setRotation(Quaternion.random());
-        //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength*2,0);
-        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
-
-        current = new Joint(scene);
-        current.setReference(prev);
-        current.setRotation(Quaternion.random());
-
-        //current.setRotation(Quaternion.random());
-        current.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(vertices,current, new Vector(0,0,1),boneLength);
-
-        root.setPosition(o);
-
-        return (ArrayList) scene.branch(root);
-    }
-
-    public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
-        Joint prevJoint = null;
-        Joint chainRoot = null;
-        for (int i = 0; i < num_joints; i++) {
-            Joint joint;
-            joint = new Joint(scene);
-            if (i == 0)
-                chainRoot = joint;
-            if (prevJoint != null) joint.setReference(prevJoint);
-            float x = 0;
-            float z = 1;
-            float y = 0;
-            Vector translate = new Vector(x,y,z);
-            translate.normalize();
-            translate.multiply(boneLength);
-            joint.setTranslation(translate);
-            prevJoint = joint;
+        for(int  i = 0; i < solvers.size(); i++) {
+            if (solvers.get(i) instanceof ChainSolver) {
+                if (show1) draw_pos(prev, color(0, 255, 0), 3);
+                if (show2) draw_pos(((ChainSolver) solvers.get(i)).get_p(), color(255, 0, 100), 3);
+                if (show3) draw_pos(constr, color(100, 100, 0), 3);
+            }
         }
-        //Consider Standard Form: Parent Z Axis is Pointing at its Child
-        chainRoot.setTranslation(translation);
-        //chainRoot.setupHierarchy();
-        chainRoot.setRoot(true);
-        return (ArrayList) scene.branch(chainRoot);
+        scene.beginHUD();
+        for(int  i = 0; i < solvers.size(); i++) {
+            Util.printInfo(scene, solvers.get(i), structures.get(i).get(0).position());
+        }
+        scene.endHUD();
     }
 
-    boolean read = false;
-    boolean solve = false;
     Frame n = null;
     float d = 5;
     boolean show1 = true, show2 = true, show3 = true;
@@ -247,26 +204,27 @@ public class ConePolygon extends PApplet{
                 }
             }
         }
-        if(key == ' ') {
-            read = !read;
-        }
+
         if(key== 'Q' || key == 'q'){
-            ccd_solver.solve();
-            for(Solver s : chain_solvers) {
+            for(Solver s : solvers) {
                 s.solve();
             }
-
-            //chain_solver._iterate(scene.frontBuffer());
         }
         if(key == 'j' || key == 'J'){
-            for(ChainSolver chain_solver : chain_solvers) {
-                chain_solver.forward();
-                prev = copy_p(chain_solver.get_p());
-                constr = copy_p(prev);
+            for(Solver s: solvers) {
+                if(s instanceof  ChainSolver) {
+                    ((ChainSolver) s).forward();
+                    prev = copy_p(((ChainSolver) s).get_p());
+                    constr = copy_p(prev);
+                }
             }
         }
         if(key == 'k' || key == 'K'){
-            for(ChainSolver chain_solver : chain_solvers) chain_solver.backward();
+            for(Solver s: solvers) {
+                if(s instanceof  ChainSolver) {
+                    ((ChainSolver) s).backward();
+                }
+            }
         }
 
         if(key == '1'){
@@ -282,8 +240,16 @@ public class ConePolygon extends PApplet{
         if(key == 'w' || key == 'W'){
             solve = !solve;
         }
-    }
 
+        if(key == '.'){
+            //Apply random perturbation of 15 degrees
+            ArrayList<? extends Frame> chain = structures.get(1);
+            for(Frame f : chain){
+                f.rotate(new Quaternion(Vector.random(), radians(random(0,15))));
+            }
+            solvers.get(1).iterations = 0;
+        }
+    }
     ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
         ArrayList<Vector> copy = new ArrayList<Vector>();
         for(Vector p : _positions){
@@ -322,7 +288,11 @@ public class ConePolygon extends PApplet{
         if (mouseButton == LEFT){
             scene.spin();
         } else if (mouseButton == RIGHT) {
-            scene.translate();
+            if(targets.contains(scene.trackedFrame())){
+                for(Frame target : targets) scene.translate(target);
+            }else{
+                scene.translate();
+            }
         } else {
             scene.scale(scene.mouseDX());
         }

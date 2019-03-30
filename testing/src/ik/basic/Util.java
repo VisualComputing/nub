@@ -200,7 +200,11 @@ public class Util {
             pg.text("HGSA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof ChainSolver){
-            pg.text("FABRIK" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            ChainSolver s = (ChainSolver) solver;
+            String heuristics = "";
+            if(s.keepDirection()) heuristics += "\n Keep directions";
+            if(s.fixTwisting()) heuristics += "\n Fix Twisting";
+            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof CCDSolver){
             pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);

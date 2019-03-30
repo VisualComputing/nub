@@ -11,6 +11,7 @@ import frames.ik.animation.IKAnimation;
 import frames.ik.evolution.BioIk;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
 import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -22,12 +23,20 @@ public class Case1 extends PApplet {
     Scene scene, auxiliar, focus;
     boolean displayAuxiliar = false;
 
-    float boneLenght = 50;
+    int numJoints = 3;
     float targetRadius = 7;
+    float boneLength = 50;
 
-    ArrayList<Frame>[] skeletons = new ArrayList[3];
-    Frame[] targets = new Frame[3];
-    Solver[] solvers = new Solver[3];
+    int rows = 2;
+
+    //Benchmark Parameters
+    ArrayList<Solver> solvers; //Will store Solvers
+    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+
+    int numSolvers = 6; //Set number of solvers
+    boolean solve = false;
+
     IKAnimation.FABRIKAnimation FABRIKAnimator = null;
     IKAnimation.CCDAnimation CCDAnimator = null;
 
@@ -38,14 +47,14 @@ public class Case1 extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setFOV(PI / 3);
-        scene.setRadius(boneLenght * 5);
+        scene.setRadius(numJoints * boneLength * 2f);
         scene.fit(1);
+        scene.setRightHanded();
 
         auxiliar = new Scene(this, P3D, width, height , 0, 0);
         auxiliar.setType(Graph.Type.ORTHOGRAPHIC);
         auxiliar.setFOV(PI / 3);
-        auxiliar.setRadius(boneLenght * 2f);
+        auxiliar.setRadius(boneLength * numJoints);
         auxiliar.fit(1);
 
         PShape redBall = createShape(SPHERE, targetRadius);
@@ -53,37 +62,81 @@ public class Case1 extends PApplet {
         redBall.setFill(color(255,0,0));
 
         //create targets
-        for(int i = 0; i < targets.length; i++) {
+        for(int i = 0; i < numSolvers; i++) {
             Frame target = new Frame(scene, redBall);
             target.setPickingThreshold(0);
-            targets[i] = target;
+            targets.add(target);
         }
 
         //create skeleton
-        for(int i = 0; i < skeletons.length; i++) {
-            skeletons[i] = generateSkeleton(new Vector(0.8f*(scene.radius()*i - scene.radius()), 0, 0));
-            targets[i].setPosition(skeletons[i].get(skeletons[i].size() - 1).position().get());
+        int solversPerRow = (int) Math.ceil(1.f* numSolvers / rows);
+
+        for(int i = 0; i < numSolvers; i++) {
+            int row = i / solversPerRow;
+            int col = i % solversPerRow;
+            int cols = row == rows - 1 ? solversPerRow - (rows * solversPerRow - numSolvers)  : solversPerRow;
+            float xOffset = ((1.f * col)/ (cols - 1)) * scene.radius()  - scene.radius()/2;
+            float yOffset = -((1.f * row)/ (rows - 1)) * scene.radius()  + scene.radius()/2;
+            int color = color(random(255), random(255), random(255));
+
+            structures.add(generateSkeleton(new Vector(xOffset, yOffset, 0), color));
         }
 
         //create solvers
-        solvers[0] = new CCDSolver(skeletons[0]);
-        solvers[1] = new ChainSolver(skeletons[1]);
-        solvers[2] = new BioIk(skeletons[2], 10, 4);
+        solvers = new ArrayList<>();
 
+        int i = 0;
+        //CCD
+        solvers.add(new CCDSolver(structures.get(i++)));
+        //BioIK
+        solvers.add(new BioIk(structures.get(i++), 10, 4));
+        //Standard FABRIK
+        ChainSolver chainSolver;
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setKeepDirection(false);
+        chainSolver.setFixTwisting(false);
+        solvers.add(chainSolver);
+        //FABRIK Keeping directions (H1)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(true);
+        chainSolver.setKeepDirection(false);
+        solvers.add(chainSolver);
+        //FABRIK Fix Twisting (H2)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(false);
+        chainSolver.setKeepDirection(true);
+        solvers.add(chainSolver);
+        //FABRIK Fix Twisting (H1 & H2)
+        chainSolver = new ChainSolver(structures.get(i++));
+        chainSolver.setFixTwisting(true);
+        chainSolver.setKeepDirection(true);
+        solvers.add(chainSolver);
 
-        for(int i = 0; i < solvers.length; i++) {
-            Solver solver = solvers[i];
-            solver.setTarget(skeletons[i].get(skeletons[i].size() - 1) , targets[i]);
-            //TimingTask task = null;
-            /*task = new TimingTask() {
-                    @Override
-                    public void execute() {
+        for(i = 0; i < solvers.size(); i++){
+            Solver solver = solvers.get(i);
+            if(solvers.get(i) instanceof ChainSolver){
+                ((ChainSolver)solver).pg = scene.pApplet().getGraphics();
+            }
+            //6. Define solver parameters
+            solver.error = 0.001f;
+            solver.timesPerFrame = 5;
+            solver.maxIter = 200;
+            //7. Set targets
+            solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
+            targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
+
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    if(solve) {
                         solver.solve();
                     }
-                };
-            //scene.registerTask(task);
-            //task.run(40);*/
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
         }
+
         //Define Text Font
         textFont(createFont("Zapfino", 38));
     }
@@ -95,8 +148,8 @@ public class Case1 extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        for (int i = 0; i < solvers.length; i++) {
-            Util.printInfo(scene, solvers[i], skeletons[i].get(0).position());
+        for (int i = 0; i < solvers.size(); i++) {
+            Util.printInfo(scene, solvers.get(i), structures.get(i).get(0).position());
         }
 
         if(displayAuxiliar) {
@@ -114,18 +167,18 @@ public class Case1 extends PApplet {
 
     }
 
-    public ArrayList<Frame> generateSkeleton(Vector position){
+    public ArrayList<Frame> generateSkeleton(Vector position, int color){
         //3-Segment-Arm
         ArrayList<Frame> skeleton = new ArrayList<>();
-        Joint j1 = new Joint(scene);
-        Joint j2 = new Joint(scene);
+        Joint j1 = new Joint(scene, color);
+        Joint j2 = new Joint(scene, color);
         j2.setReference(j1);
-        j2.translate(boneLenght, 0, 0);
+        j2.translate(boneLength, 0, 0);
         Joint j3 = new Joint(scene);
         j3.setReference(j2);
-        Vector v = new Vector(boneLenght, -boneLenght, 0);
+        Vector v = new Vector(boneLength, -boneLength, 0);
         v.normalize();
-        v.multiply(boneLenght);
+        v.multiply(boneLength);
         j3.translate(v);
         j1.setRoot(true);
         j1.translate(position);
@@ -154,13 +207,11 @@ public class Case1 extends PApplet {
         if (mouseButton == LEFT){
             focus.spin();
         } else if (mouseButton == RIGHT) {
-            for(Frame target : targets){
-                if(focus.trackedFrame() == target){
-                    for(Frame t : targets) focus.translate(t);
-                    return;
-                }
+            if(targets.contains(focus.trackedFrame())){
+                for(Frame t : targets) focus.translate(t);
+            } else {
+                focus.translate();
             }
-            focus.translate();
         } else {
             focus.scale(mouseX - pmouseX);
         }
@@ -179,14 +230,16 @@ public class Case1 extends PApplet {
     }
 
     public void keyPressed(){
-        if(key == '1'){
+        if(key == 'w' || key == 'W'){
+            solve = !solve;
+        } else if(key == '1'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, (ChainSolver) solvers[1], targetRadius);
+            FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, (ChainSolver) solvers.get(2), targetRadius);
         } else if(key == '2'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers[0], targetRadius);
+            CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers.get(0), targetRadius);
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){

@@ -35,12 +35,12 @@ public class VisualBenchmark extends PApplet {
     //Scene Parameters
     Scene scene;
     String renderer = P3D; //Define a 2D/3D renderer
-    int numJoints = 4; //Define the number of joints that each chain will contain
+    int numJoints = 10; //Define the number of joints that each chain will contain
     float targetRadius = 30; //Define size of target
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.NONE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
