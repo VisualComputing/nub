@@ -30,7 +30,7 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
-    public enum SolverType{ HC, FABRIK, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA }
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA }
 
     public static Solver createSolver(SolverType type, ArrayList<Frame> structure){
         switch (type){
@@ -38,7 +38,30 @@ public class Util {
             case HGSA: return new BioIk(structure,10, 4 );
             case CCD: return new CCDSolver(structure);
             case PINV: new PseudoInverseSolver(structure);
-            case FABRIK: return new ChainSolver(structure);
+            case FABRIK:{
+                ChainSolver solver = new ChainSolver(structure);
+                solver.setKeepDirection(false);
+                solver.setFixTwisting(false);
+                return solver;
+            }
+            case FABRIK_H1:{
+                ChainSolver solver = new ChainSolver(structure);
+                solver.setKeepDirection(true);
+                solver.setFixTwisting(false);
+                return solver;
+            }
+            case FABRIK_H2:{
+                ChainSolver solver = new ChainSolver(structure);
+                solver.setKeepDirection(false);
+                solver.setFixTwisting(true);
+                return solver;
+            }
+            case FABRIK_H1_H2:{
+                ChainSolver solver = new ChainSolver(structure);
+                solver.setKeepDirection(true);
+                solver.setFixTwisting(true);
+                return solver;
+            }
             case TRANSPOSE: return new TransposeSolver(structure);
             case GA: return new GASolver(structure, 10);
             case HAEA: return new HAEASolver(structure, 10, true);
@@ -75,14 +98,15 @@ public class Util {
     public static ArrayList<Frame> createTargets(int num, Scene scene, float targetRadius){
         PGraphics pg = scene.frontBuffer();
         ArrayList<Frame> targets = new ArrayList<Frame>();
+        PShape redBall;
+        if(scene.is3D())
+            redBall = pg.createShape(SPHERE, targetRadius);
+        else
+            redBall = pg.createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
+        redBall.setStroke(false);
+        redBall.setFill(pg.color(255,0,0));
+
         for(int i = 0; i < num; i++) {
-            PShape redBall;
-            if(scene.is3D())
-                redBall = pg.createShape(SPHERE, targetRadius);
-            else
-                redBall = pg.createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
-            redBall.setStroke(false);
-            redBall.setFill(pg.color(255,0,0));
             Frame target = createTarget(scene, redBall, targetRadius);
             target.setPickingThreshold(targetRadius*2);
             target.setHighlighting(Frame.Highlighting.FRONT);

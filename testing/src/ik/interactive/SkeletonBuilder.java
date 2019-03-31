@@ -7,6 +7,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Constraint;
 import frames.core.constraint.FixedConstraint;
 import frames.core.constraint.Hinge;
+import frames.ik.Solver;
 import frames.ik.TreeSolver;
 import frames.primitives.Matrix;
 import frames.primitives.Point;
@@ -315,7 +316,7 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
-    boolean solve = false;
+    boolean solve = false, keepDirections = true, fixTwisting = true;
     public void keyPressed(){
         if(key == '+'){
             new InteractiveJoint(scene, radius).setRoot(true);
@@ -378,10 +379,26 @@ public class SkeletonBuilder extends PApplet{
             this.g.save("/C:/Users/usuario/Desktop/Sebas/Visual/repositorios/presentation/IK-Presentation/fig/fig#####.png");
         }
 
-        if(key == 'r' | key == 'R'){
+        if(key == 'r' || key == 'R'){
             for(Target target : targets){
                 target._interpolator.setLoop(!target._interpolator.loop());
             }
+        }
+
+        if(key == 'o' || key == 'O'){
+            keepDirections = !keepDirections;
+            for(TreeSolver solver : scene.treeSolvers()){
+                solver.setKeepDirection(keepDirections);
+            }
+            System.out.println("Keep directions : " + (keepDirections ? "Enabled" : "Disabled"));
+        }
+
+        if(key == 'p' || key == 'P'){
+            fixTwisting = !fixTwisting;
+            for(TreeSolver solver : scene.treeSolvers()){
+                solver.setFixTwisting(fixTwisting);
+            }
+            System.out.println("Fix twisting : " + (fixTwisting ? "Enabled" : "Disabled"));
         }
     }
 
@@ -425,6 +442,9 @@ public class SkeletonBuilder extends PApplet{
                 solver.timesPerFrame = 4;
             }
         }
+        solver.setFixTwisting(fixTwisting);
+        solver.setKeepDirection(keepDirections);
+
         //add target
         //get leaf nodes
         ArrayList<Frame> endEffectors = new ArrayList<Frame>();

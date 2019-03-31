@@ -63,17 +63,18 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        BioIk solver = new BioIk(structures.get(0),10,4);
+        //BioIk solver = new BioIk(structures.get(0),10,4);
 
-        solver.maxIter = 200;
-        solver.timesPerFrame = 30.f;
+        //solver.maxIter = 200;
+        //solver.timesPerFrame = 30.f;
 
 
-        //scene.registerTreeSolver(structures.get(0).get(0));
+        scene.registerTreeSolver(structures.get(0).get(0));
         for(Frame f : targets.get(0).keySet()){
-            solver.setTarget(f, targets.get(0).get(f));
-            //scene.addIKTarget(f, targets.get(0).get(f));
+            //solver.setTarget(f, targets.get(0).get(f));
+            scene.addIKTarget(f, targets.get(0).get(f));
         }
+        /*
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
@@ -81,9 +82,10 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
                 //System.out.println("Error: " + solver.error());
             }
         };
+
         scene.registerTask(task);
         task.run(40);
-
+        */
     }
 
     public void draw() {

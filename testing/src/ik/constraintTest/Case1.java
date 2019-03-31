@@ -34,7 +34,7 @@ public class Case1 extends PApplet {
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
 
-    int numSolvers = 6; //Set number of solvers
+    int numSolvers = 7; //Set number of solvers
     boolean solve = false;
 
     IKAnimation.FABRIKAnimation FABRIKAnimator = null;
@@ -47,7 +47,7 @@ public class Case1 extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(numJoints * boneLength * 2f);
+        scene.setRadius(numJoints * boneLength * 2.5f);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -111,6 +111,9 @@ public class Case1 extends PApplet {
         chainSolver.setFixTwisting(true);
         chainSolver.setKeepDirection(true);
         solvers.add(chainSolver);
+        //HGSA
+        BioIk bioIk = new BioIk(structures.get(i++), 20, 12);
+        solvers.add(bioIk);
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);

@@ -38,7 +38,7 @@ public class ConeBall extends PApplet{
 
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
-    int numSolvers = 5; //Set number of solvers
+    int numSolvers = 6; //Set number of solvers
 
     public void settings() {
         size(1500, 800, P3D);
@@ -47,7 +47,7 @@ public class ConeBall extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(numJoints * boneLength);
+        scene.setRadius(numJoints * boneLength * 1.2f);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -108,6 +108,8 @@ public class ConeBall extends PApplet{
         chainSolver.setFixTwisting(true);
         chainSolver.setKeepDirection(true);
         solvers.add(chainSolver);
+        //BioIK
+        solvers.add(new BioIk(structures.get(i++), 10, 4));
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);

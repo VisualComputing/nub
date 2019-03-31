@@ -47,7 +47,8 @@ public class VisualBenchmark extends PApplet {
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
 
-    Util.SolverType solversType [] = {Util.SolverType.SDLS, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA}; //Place Here Solvers that you want to compare
+    Util.SolverType solversType [] = {Util.SolverType.SDLS, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
+            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2 }; //Place Here Solvers that you want to compare
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
 

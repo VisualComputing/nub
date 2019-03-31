@@ -6,6 +6,7 @@ import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
 import frames.core.Frame;
+import frames.ik.evolution.BioIk;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.core.constraint.PlanarPolygon;
@@ -39,7 +40,7 @@ public class ConePolygon extends PApplet{
 
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
-    int numSolvers = 5; //Set number of solvers
+    int numSolvers = 6; //Set number of solvers
 
     public void settings() {
         size(700, 700, P3D);
@@ -121,6 +122,8 @@ public class ConePolygon extends PApplet{
         chainSolver.setFixTwisting(true);
         chainSolver.setKeepDirection(true);
         solvers.add(chainSolver);
+        //BioIK
+        solvers.add(new BioIk(structures.get(i++), 10, 4));
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);
