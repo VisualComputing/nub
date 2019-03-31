@@ -420,5 +420,32 @@ public class TreeSolver extends FABRIKSolver {
       return true;
     }
   }
+
+  public void setFixTwisting(boolean fixTwisting){
+    _fixTwisting = fixTwisting;
+    setFixTwisting(root, fixTwisting);
+  }
+
+  public void setFixTwisting(TreeNode node, boolean fixTwisting){
+    if(node == null) return;
+    node._solver.setFixTwisting(fixTwisting);
+    for(TreeNode child : node._children){
+      setFixTwisting(child, fixTwisting);
+    }
+  }
+
+  public void setKeepDirection(boolean keepDirection){
+    _keepDirection = keepDirection;
+    setKeepDirection(root, keepDirection);
+  }
+
+  public void setKeepDirection(TreeNode node, boolean keepDirection){
+    if(node == null) return;
+    node._solver.setKeepDirection(keepDirection);
+    for(TreeNode child : node._children){
+      setFixTwisting(child, keepDirection);
+    }
+  }
+
 }
 
