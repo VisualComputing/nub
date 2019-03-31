@@ -1,11 +1,14 @@
 package intellij;
 
-import nub.core.*;
-import nub.primitives.*;
-import nub.processing.*;
-import processing.core.*;
-import processing.event.*;
-import processing.opengl.*;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.event.MouseEvent;
+import processing.opengl.PShader;
 
 public class ShadowsImmediateMode extends PApplet {
   // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
@@ -92,9 +95,7 @@ public class ShadowsImmediateMode extends PApplet {
     if(!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-      Matrix viewINV = new Matrix();
-      scene.eye().view().invert(viewINV);
-      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, viewINV));
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);

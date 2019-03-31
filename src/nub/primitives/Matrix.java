@@ -733,6 +733,17 @@ public class Matrix {
   }
 
   /**
+   * Returns the inverse of {@code matrix}. Throws a runtime exception if {@code matrix} isn't invertible.
+   */
+  public static Matrix inverse(Matrix matrix) {
+    Matrix invMatrix = new Matrix();
+    if (matrix.invert(invMatrix))
+      return invMatrix;
+    else
+      throw new RuntimeException("matrix is not invertible!");
+  }
+
+  /**
    * Invert this matrix.
    *
    * @return true if successful
