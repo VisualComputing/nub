@@ -159,8 +159,8 @@ public class OffsetCone extends PApplet {
         j1.setPosition(position);
 
         j1.setConstraint(new FixedConstraint());
-        BallAndSocket c2 = new BallAndSocket(radians(89), radians(89));
-        c2.setRestRotation(j2.rotation().get(),new Vector(0,1,0), new Vector(1,0,0));
+        BallAndSocket c2 = new BallAndSocket(radians(85), radians(85));
+        c2.setRestRotation(j2.rotation().get(),new Vector(0,1,0), new Vector(1,0,0), j3.translation());
         j2.setConstraint(c2);
 
         BallAndSocket c3 = new BallAndSocket(radians(10), radians(40), radians(40), radians(40));
