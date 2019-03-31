@@ -146,6 +146,7 @@ public abstract class FABRIKSolver extends Solver {
    * the reference frame of the Frame at i + 1
    * */
   protected float _forwardReaching(ArrayList<? extends Frame> chain) {
+    if(_fixTwisting) _applyTwistRotation(chain, _positions.get(_positions.size() - 1));
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
@@ -156,8 +157,6 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, pos_i1.get());
         continue;
       }
-
-      if(_fixTwisting) _applyTwistRotation(chain, pos_i1);
 
       Properties props_i = _properties.get(chain.get(i).id());
       Properties props_i1 = _properties.get(chain.get(i+1).id());
@@ -347,6 +346,8 @@ public abstract class FABRIKSolver extends Solver {
 
   }
 
+  float min_v = 1e10f, min_u = 1e10f;
+
   protected void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
     //Change chain state in such a way that the target approach to chain
     Frame eff = chain.get(chain.size() - 1);
@@ -355,10 +356,18 @@ public abstract class FABRIKSolver extends Solver {
       //Project Vectors to Plane given by Twist Vector
       Vector twist = chain.get(i + 1).translation();
       //Get Vector from EFF to this Joint
-      Vector v = Vector.projectVectorOnPlane(f_i.location(eff.position()), twist);
+      Vector localEff = f_i.location(eff.position());
+      Vector v = Vector.projectVectorOnPlane(localEff, twist);
       //Get Vector from EFF to this Joint
       Vector u = Vector.projectVectorOnPlane(f_i.location(t), twist);
-      f_i.rotate(new Quaternion(v,u));
+      //Perform this operation only when Projected Vectors have not a despicable length
+      if(v.magnitude() > 0.1 * localEff.magnitude() && u.magnitude() > 0.1 * localEff.magnitude()) {
+        Quaternion q = new Quaternion(v, u);
+        //Perform this operation only when change is not despicable
+        if(q.angle() > Math.toRadians(5)){
+          f_i.rotate(q);
+        }
+      }
     }
   }
 
