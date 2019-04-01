@@ -8,7 +8,6 @@ import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
-import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
 
 public class Shadows2Scenes extends PApplet {
@@ -108,9 +107,7 @@ public class Shadows2Scenes extends PApplet {
     background(0xff222222);
     if (!debug) {
       Matrix lightMatrix = Matrix.multiply(biasMatrix, lightScene.projectionView());
-      // TODO: how to avoid calling g.modelviewInv?
-      lightMatrix.apply(Scene.toMatrix(((PGraphicsOpenGL) g).modelviewInv));
-      Scene.setUniform(shadowShader, "shadowTransform", lightMatrix);
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(mainScene.view())));
       Vector lightDirection = lightScene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", lightScene.context());
