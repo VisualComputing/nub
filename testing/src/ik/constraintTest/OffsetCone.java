@@ -8,6 +8,7 @@ import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.Solver;
 import frames.ik.TreeSolver;
+import frames.ik.evolution.BioIk;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
@@ -40,7 +41,7 @@ public class OffsetCone extends PApplet {
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
 
-    int numSolvers = 5; //Set number of solvers
+    int numSolvers = 6; //Set number of solvers
     boolean solve = false;
 
     public void settings() {
@@ -77,6 +78,9 @@ public class OffsetCone extends PApplet {
         int i = 0;
         //CCD
         solvers.add(new CCDSolver(structures.get(i++)));
+        //Bio IK
+        solvers.add(new BioIk(structures.get(i++), 10, 4));
+
         //Standard FABRIK
         ChainSolver chainSolver;
         chainSolver = new ChainSolver(structures.get(i++));

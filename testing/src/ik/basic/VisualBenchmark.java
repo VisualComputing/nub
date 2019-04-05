@@ -35,15 +35,15 @@ public class VisualBenchmark extends PApplet {
     //Scene Parameters
     Scene scene;
     String renderer = P3D; //Define a 2D/3D renderer
-    int numJoints = 10; //Define the number of joints that each chain will contain
+    int numJoints = 8; //Define the number of joints that each chain will contain
     float targetRadius = 30; //Define size of target
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
-    int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
+    int randRotation = 14; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
 
@@ -92,8 +92,8 @@ public class VisualBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             solvers.get(i).error = 0.001f;
-            solvers.get(i).timesPerFrame = 5;
-            solvers.get(i).maxIter = 200;
+            solvers.get(i).timesPerFrame = 1;
+            solvers.get(i).maxIter = 50;
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
@@ -110,6 +110,15 @@ public class VisualBenchmark extends PApplet {
                 solver.solve();
             }
         }
+
+        for(int  i = 0; i < solvers.size(); i++) {
+            if (solvers.get(i) instanceof ChainSolver) {
+                if (show1) draw_pos(prev, color(0, 255, 0), 3);
+                if (show2) draw_pos(((ChainSolver) solvers.get(i)).get_p(), color(255, 0, 100), 3);
+                if (show3) draw_pos(constr, color(100, 100, 0), 3);
+            }
+        }
+
         scene.render();
         scene.beginHUD();
         for(int  i = 0; i < solvers.size(); i++) {
@@ -149,6 +158,12 @@ public class VisualBenchmark extends PApplet {
 
 
     boolean solve = false;
+
+    boolean show1 = true, show2 = true, show3 = true;
+
+    ArrayList<Vector> prev = new ArrayList<Vector>();
+    ArrayList<Vector> constr = new ArrayList<Vector>();
+
     public void keyPressed(){
         if(key == 'w' || key == 'W'){
             solve = !solve;
@@ -169,9 +184,37 @@ public class VisualBenchmark extends PApplet {
 
         // /* Uncomment this to debug a Specific Solver
         if(key == 'z' || key == 'Z'){
-            solvers.get(solvers.size()-1).solve();
+            for(Solver s: solvers) s.solve();
         }
         // /*
+
+        if(key == 'j' || key == 'J'){
+            for(Solver s: solvers) {
+                if(s instanceof  ChainSolver) {
+                    ((ChainSolver) s).forward();
+                    prev = copy_p(((ChainSolver) s).get_p());
+                    constr = copy_p(prev);
+                }
+            }
+        }
+        if(key == 'k' || key == 'K'){
+            for(Solver s: solvers) {
+                if(s instanceof  ChainSolver) {
+                    ((ChainSolver) s).backward();
+                }
+            }
+        }
+
+        if(key == '1'){
+            show1 = !show1;
+        }
+        if(key == '2'){
+            show2 = !show2;
+        }
+        if(key == '3'){
+            show3 = !show3;
+        }
+
     }
 
     @Override
@@ -203,6 +246,36 @@ public class VisualBenchmark extends PApplet {
                 scene.focus();
             else
                 scene.align();
+    }
+
+
+    ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
+        ArrayList<Vector> copy = new ArrayList<Vector>();
+        for(Vector p : _positions){
+            copy.add(p.get());
+        }
+        return copy;
+    }
+
+
+    void draw_pos(ArrayList<Vector> _positions, int color, float str) {
+        if(_positions == null) return;
+        Vector prev = null;
+        for(Vector p : _positions){
+            pushMatrix();
+            pushStyle();
+            stroke(color);
+            strokeWeight(str);
+            if(prev != null) line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
+            noStroke();
+            fill(color, 100);
+            translate(p.x(),p.y(),p.z());
+            sphere(3);
+            popStyle();
+            popMatrix();
+            prev = p;
+        }
+
     }
 
 
