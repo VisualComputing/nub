@@ -26,7 +26,7 @@ public abstract class Solver {
   //TODO paper idea: optimize values per _solver / timer / local config
   public float error = 0.01f;
   public int maxIter = 200;
-  public float minDistance = 0.1f;
+  public float minDistance = 0.01f;
   public float timesPerFrame = 5.f;
   public float frameCounter = 0;
   public int iterations = 0;

@@ -16,6 +16,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ChainSolver extends FABRIKSolver {
 
@@ -153,15 +154,18 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
     float change = _backwardReaching(o);
     //Save best solution
+    if( (_keepDirection && _fixTwisting)) {
+      System.out.println("Change : " + change);
+      if (change <= minDistance) {
+        //avoid deadLock
+        System.out.println("AVOID");
+        _avoidDeadlock();
+      }
+    }
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
     _update();
     addIterationRecord(_positions);
     //Check total position change
-    /*if (change <= minDistance){
-      //avoid deadLock
-      System.out.println("AVOID");
-      _avoidDeadlock();
-    }*/
     return false;
   }
 
@@ -207,7 +211,7 @@ public class ChainSolver extends FABRIKSolver {
     //Save best solution
     _current = Vector.distance(target, _original.get(_chain.size() - 1).position());
     //Check total position change
-    if (change <= minDistance) return _positions;
+    if (change <= 0.001f) return _positions;
     return _positions;
   }
 
@@ -300,10 +304,36 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _avoidDeadlock(){
     if(_chain.size() <= 1) return;
-    Vector v = _chain.get(1).position();
-    Vector w = Vector.subtract(_target.position(), head().position());
-    Vector axis = w.cross(v);
-    head().rotate(new Quaternion(axis, 0.1f));
+    float a = (float)(30 * Math.PI / 180);
+
+    ArrayList<Frame> b_copy = null;
+    Vector curr = new Vector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
+    for(int i = 0; i < 20 ; i++) {
+      if(i > 5) a = (float)(180 * Math.PI / 180);
+      ArrayList<Frame> copy = _copy(_chain);
+      ArrayList<Vector> copy_p = new ArrayList<>();
+      HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
+      int j = 0;
+      for (Frame f : copy) {
+        copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
+        f.rotate(new Quaternion((float) (2 * Math.random() * a - a),
+                (float) (2 * Math.random() * a - a),
+                (float) (2 * Math.random() * a - a)));
+        copy_p.add(f.position().get());
+      }
+
+      copy_p.set(_chain.size() - 1, this._target.position().get());
+      _forwardReaching(copy, copy_p, _distances, copy_props, _keepDirection);
+      float d = Vector.distance(copy_p.get(0), _chain.get(0).position());
+      if(d < Vector.distance(curr, _chain.get(0).position())){
+        curr = copy_p.get(0).get();
+        b_copy = copy;
+        System.out.println("    BEST : " + curr + " Dist : " + d);
+      }
+    }
+    for(int i = 0; i < _chain.size(); i++){
+      _chain.get(i).setRotation(b_copy.get(i).rotation().get());
+    }
   }
 
   //Animation Stuff

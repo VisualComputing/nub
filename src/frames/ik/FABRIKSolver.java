@@ -128,7 +128,7 @@ public abstract class FABRIKSolver extends Solver {
   }
 
 
-  public Vector _move(Vector u, Vector v, float distance, float fixWeight){
+  public static Vector _move(Vector u, Vector v, float distance, float fixWeight){
     float r = Vector.distance(u, v);
     float lambda_i = distance / r;
     lambda_i *= (1-fixWeight);
@@ -190,6 +190,45 @@ public abstract class FABRIKSolver extends Solver {
   }
 
 
+  protected static float _forwardReaching(ArrayList<? extends Frame> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties, boolean kd) {
+    float change = 0;
+    for (int i = chain.size() - 2; i >= 0; i--) {
+      Vector pos_i = positions.get(i);
+      Vector pos_i1 = positions.get(i + 1);
+      float dist_i = distances.get(i + 1);
+      if (dist_i == 0) {
+        //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
+        positions.set(i, pos_i1.get());
+        continue;
+      }
+
+      Properties props_i = properties.get(chain.get(i).id());
+      Properties props_i1 = properties.get(chain.get(i + 1).id());
+      //TODO : Is necessary to check children?
+      //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && kd){
+        Vector o_hat = chain.get(i + 1).position();
+        Vector tr = Vector.subtract(pos_i, pos_i1);
+        Vector n_tr = Vector.subtract(pos_i, o_hat);
+        Quaternion delta = new Quaternion(tr, n_tr);
+        delta = new Quaternion(delta.axis(), props_i._directionWeight * delta.angle());
+        Vector desired = delta.rotate(tr);
+        positions.set(i, Vector.add(pos_i1, desired));
+      }
+      if(props_i1._useConstraint){
+        pos_i = _constrainForwardReaching(chain, positions, i);
+      }
+      if(props_i._enableFixWeight) {
+        positions.set(i, _move(pos_i1, pos_i, dist_i, props_i._fixWeight));
+      } else{
+        positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
+      }
+      change +=  Vector.distance(pos_i, positions.get(i));
+    }
+    return change;
+  }
+
+
   //TODO : Check for scaling when chain has constraints
   protected float _backwardReaching(ArrayList<? extends Frame> chain, Vector o) {
     float change = 0;
@@ -222,16 +261,19 @@ public abstract class FABRIKSolver extends Solver {
       Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.divide(Vector.subtract(_positions.get(i + 1), _positions.get(i)), magnitude));
       Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
       //Apply delta rotation
+      Quaternion prev = chain.get(i).rotation().get();
       if(props_i._useConstraint)chain.get(i).rotate(deltaRotation);
       else{
         chain.get(i).setRotation(Quaternion.compose(chain.get(i).rotation(), deltaRotation));
       }
+      //Get how much change was applied:
+      change = Math.max(Quaternion.compose(prev.inverse(), chain.get(i).rotation()).angle(), change);
       orientation.compose(chain.get(i).rotation());
       _orientations.set(i, orientation.get());
       Vector constrained_pos = orientation.rotate(chain.get(i + 1).translation().get());
       constrained_pos.multiply(magnitude);
       constrained_pos.add(_positions.get(i));
-      change += Vector.distance(_positions.get(i + 1), constrained_pos);
+      //change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
     }
     return change;
@@ -331,6 +373,95 @@ public abstract class FABRIKSolver extends Solver {
     }
     return o.get();
   }
+
+  public static Vector _constrainForwardReaching(ArrayList<? extends Frame> chain, ArrayList<Vector> positions, int i) {
+    Frame j = chain.get(i + 1);
+    Vector o = positions.get(i);
+    Vector p = positions.get(i + 1);
+    Vector q = i + 2 >= chain.size() ? null : positions.get(i + 2);
+
+    if(j.constraint() instanceof ConeConstraint){
+      if(q == null) return o.get();
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector z = Vector.subtract(q, p);
+      z = chain.get(i+1).displacement(z);
+      Vector w = Vector.subtract(o, p);
+      w = chain.get(i+1).displacement(w);
+      Quaternion delta = new Quaternion(z,y);
+
+      w = delta.rotate(w);
+      Quaternion desired = new Quaternion(w,x);
+      ConeConstraint constraint = (ConeConstraint) chain.get(i+1).constraint();
+      Quaternion constrained = constraint.constrainRotation(desired, chain.get(i+1));
+
+      Vector target = x.get();
+      target.normalize();
+      target.multiply(w.magnitude());
+      target = constrained.inverseRotate(target);
+      target = delta.inverseRotate(target);
+      target = chain.get(i+1).worldDisplacement(target);
+      target.add(p);
+      return target;
+    } else if (j.constraint() instanceof Hinge) {
+      if (q == null) return o.get();
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector z = Vector.subtract(q, p);
+      z = chain.get(i+1).displacement(z);
+      Vector w = Vector.subtract(o, p);
+      w = chain.get(i+1).displacement(w);
+
+      Quaternion delta = new Quaternion(z,y);
+
+      w = delta.rotate(w);
+      Hinge constraint = (Hinge) chain.get(i+1).constraint();
+
+      //project w to plane
+      w = Vector.projectVectorOnPlane(w, constraint.axis());
+
+      Quaternion desired = new Quaternion(w,x);
+
+      Quaternion constrained = constraint.constrainRotation(desired, chain.get(i+1));
+
+      Vector target = x.get();
+      target.normalize();
+      target.multiply(w.magnitude());
+      target = constrained.inverseRotate(target);
+      target = delta.inverseRotate(target);
+      target = chain.get(i+1).worldDisplacement(target);
+      target.add(p);
+      return target;
+    } else if (j.constraint() instanceof DistanceFieldConstraint) {
+      if(q == null) return o.get();
+      Vector x = chain.get(i+1).displacement(Vector.subtract(chain.get(i).position(), chain.get(i+1).position()));
+      Vector y = chain.get(i+1).displacement(Vector.subtract(chain.get(i+2).position(), chain.get(i+1).position()));
+      Vector z = Vector.subtract(q, p);
+      z = chain.get(i+1).displacement(z);
+      Vector w = Vector.subtract(o, p);
+      w = chain.get(i+1).displacement(w);
+      Quaternion delta = new Quaternion(z,y);
+
+      w = delta.rotate(w);
+      Quaternion desired = new Quaternion(w,x);
+      DistanceFieldConstraint constraint = (DistanceFieldConstraint) chain.get(i+1).constraint();
+      Quaternion constrained = Quaternion.compose(chain.get(i+1).rotation().get(),desired);
+      constrained = constraint.apply(constrained);
+      constrained = Quaternion.compose(chain.get(i+1).rotation().inverse(), constrained);
+
+      Vector target = x.get();
+      target.normalize();
+      target.multiply(w.magnitude());
+      target = constrained.inverseRotate(target);
+      target = delta.inverseRotate(target);
+      target = chain.get(i+1).worldDisplacement(target);
+      target.add(p);
+
+      return target;
+    }
+    return o.get();
+  }
+
 
   protected void _forwardTwist(ArrayList<Vector> positions, int idx,Vector o, Vector p, Vector q, Vector t){
     //1. Get The vector normal to Plane of interest
