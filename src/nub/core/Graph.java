@@ -2734,7 +2734,6 @@ public class Graph {
     _bbMatrixHandler._bindModelView(_matrixHandler.cacheView());
     for (Node node : _leadingNodes())
       _draw(_bbMatrixHandler, node);
-    // TODO Pierre experimental condition to fix picking (see ShadowMappingVBO)
     if(isOffscreen())
       _rays.clear();
   }
@@ -2851,8 +2850,6 @@ public class Graph {
     matrixHandler._bindModelView(view);
     for (Node node : _leadingNodes())
       _draw(matrixHandler, context, node);
-    // TODO Pierre experimental condition to fix picking (see ShadowMappingVBO)
-    //_rays.clear();
   }
 
   /**
