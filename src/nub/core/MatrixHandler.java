@@ -68,6 +68,28 @@ public class MatrixHandler {
     _isProjectionViewInverseCached = false;
   }
 
+  public static void _applyTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
+    if (is2D) {
+      matrixHandler.translate(node.translation().x(), node.translation().y());
+      matrixHandler.rotate(node.rotation().angle2D());
+      matrixHandler.scale(node.scaling(), node.scaling());
+    } else {
+      matrixHandler.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      matrixHandler.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      matrixHandler.scale(node.scaling(), node.scaling(), node.scaling());
+    }
+  }
+
+  public static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
+    Node reference = node.reference();
+    if (reference != null) {
+      _applyWorldTransformation(matrixHandler, reference, is2D);
+      _applyTransformation(matrixHandler, node, is2D);
+    } else {
+      _applyTransformation(matrixHandler, node, is2D);
+    }
+  }
+
   /**
    * @return width of the screen window.
    */

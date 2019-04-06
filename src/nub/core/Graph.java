@@ -2283,28 +2283,6 @@ public class Graph {
 
   // Nice stuff :P
 
-  protected static void _applyTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
-    if (is2D) {
-      matrixHandler.translate(node.translation().x(), node.translation().y());
-      matrixHandler.rotate(node.rotation().angle2D());
-      matrixHandler.scale(node.scaling(), node.scaling());
-    } else {
-      matrixHandler.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-      matrixHandler.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-      matrixHandler.scale(node.scaling(), node.scaling(), node.scaling());
-    }
-  }
-
-  protected static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
-    Node reference = node.reference();
-    if (reference != null) {
-      _applyWorldTransformation(matrixHandler, reference, is2D);
-      _applyTransformation(matrixHandler, node, is2D);
-    } else {
-      _applyTransformation(matrixHandler, node, is2D);
-    }
-  }
-
   /**
    * Apply the local transformation defined by {@code node}, i.e., respect to its
    * {@link Node#reference()}. The Node is first translated, then rotated around
@@ -2341,7 +2319,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public void applyTransformation(Node node) {
-    _applyTransformation(_matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(_matrixHandler, node, is2D());
   }
 
   /**
@@ -2349,7 +2327,7 @@ public class Graph {
    * defined by the node.
    */
   public void applyWorldTransformation(Node node) {
-    _applyWorldTransformation(_matrixHandler, node, is2D());
+    MatrixHandler._applyWorldTransformation(_matrixHandler, node, is2D());
   }
 
   // Other stuff
@@ -2767,7 +2745,7 @@ public class Graph {
    */
   protected void _draw(MatrixHandler matrixHandler, Node node) {
     matrixHandler.pushModelView();
-    _applyTransformation(matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(matrixHandler, node, is2D());
     if (!node.isCulled()) {
       _drawBackBuffer(node);
       if (!isOffscreen())
@@ -2883,7 +2861,7 @@ public class Graph {
    */
   protected void _draw(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
-    _applyTransformation(matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(matrixHandler, node, is2D());
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())

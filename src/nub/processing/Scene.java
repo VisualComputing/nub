@@ -1146,7 +1146,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyWorldTransformation(PGraphics, Node)
    */
   public static void applyTransformation(PGraphics pGraphics, Node node) {
-    _applyTransformation(_getMatrixHandler(pGraphics), node, pGraphics.is2D());
+    MatrixHandler._applyTransformation(_getMatrixHandler(pGraphics), node, pGraphics.is2D());
   }
 
   /**
@@ -1156,7 +1156,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyTransformation(PGraphics, Node)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
-    _applyWorldTransformation(_getMatrixHandler(pGraphics), node, pGraphics.is2D());
+    MatrixHandler._applyWorldTransformation(_getMatrixHandler(pGraphics), node, pGraphics.is2D());
   }
 
   // HUD
