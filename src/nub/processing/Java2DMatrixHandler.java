@@ -25,7 +25,7 @@ class Java2DMatrixHandler extends MatrixHandler {
   protected Graph _graph;
 
   public Java2DMatrixHandler(Graph graph) {
-    super(graph.width(), graph.height());
+    super(false, graph.width(), graph.height());
     _graph = graph;
   }
 

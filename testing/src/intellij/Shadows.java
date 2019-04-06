@@ -10,7 +10,6 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
-import processing.opengl.PGraphicsOpenGL;
 import processing.opengl.PShader;
 
 public class Shadows extends PApplet {
@@ -160,7 +159,7 @@ public class Shadows extends PApplet {
     PMatrix3D _pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph, PShader shader) {
-      super(graph.width(), graph.height());
+      super(graph.is3D(), graph.width(), graph.height());
       _shader = shader;
     }
 

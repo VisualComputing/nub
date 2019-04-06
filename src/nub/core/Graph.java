@@ -227,7 +227,7 @@ public class Graph {
    * @see #setEye(Node)
    */
   public Graph(Type type, int width, int height) {
-    setMatrixHandler(new MatrixHandler(width, height));
+    setMatrixHandler(new MatrixHandler(type != Type.TWO_D, width, height));
 
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
@@ -2319,7 +2319,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public void applyTransformation(Node node) {
-    MatrixHandler._applyTransformation(_matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(_matrixHandler, node);
   }
 
   /**
@@ -2327,7 +2327,7 @@ public class Graph {
    * defined by the node.
    */
   public void applyWorldTransformation(Node node) {
-    MatrixHandler._applyWorldTransformation(_matrixHandler, node, is2D());
+    MatrixHandler._applyWorldTransformation(_matrixHandler, node);
   }
 
   // Other stuff
@@ -2708,7 +2708,7 @@ public class Graph {
    */
   protected MatrixHandler _matrixHandler(Object context) {
     // dummy: it should be overridden
-    return new MatrixHandler(width(), height());
+    return new MatrixHandler(true, width(), height());
   }
 
   /**
@@ -2744,7 +2744,7 @@ public class Graph {
    */
   protected void _draw(MatrixHandler matrixHandler, Node node) {
     matrixHandler.pushModelView();
-    MatrixHandler._applyTransformation(matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(matrixHandler, node);
     if (!node.isCulled()) {
       _drawBackBuffer(node);
       if (!isOffscreen())
@@ -2860,7 +2860,7 @@ public class Graph {
    */
   protected void _draw(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
-    MatrixHandler._applyTransformation(matrixHandler, node, is2D());
+    MatrixHandler._applyTransformation(matrixHandler, node);
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())

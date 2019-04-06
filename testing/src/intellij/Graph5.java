@@ -23,7 +23,7 @@ public class Graph5 extends PApplet {
 
   public void setup() {
     graph = new Graph(width, height);
-    GLSLMatrixHandler mh = new GLSLMatrixHandler(graph.width(), graph.height());
+    GLSLMatrixHandler mh = new GLSLMatrixHandler(graph);
     graph.setMatrixHandler(mh);
     graph.fit(1);
     nodes = new Node[50];
@@ -78,8 +78,8 @@ public class Graph5 extends PApplet {
     PShader framesShader;
     PMatrix3D pmatrix = new PMatrix3D();
 
-    public GLSLMatrixHandler(int width, int height) {
-      super(width, height);
+    public GLSLMatrixHandler(Graph graph) {
+      super(graph.is3D(), graph.width(), graph.height());
       framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     }
 

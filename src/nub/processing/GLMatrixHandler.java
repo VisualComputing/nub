@@ -13,6 +13,7 @@ package nub.processing;
 import nub.core.MatrixHandler;
 import nub.primitives.Matrix;
 import processing.core.PMatrix3D;
+import processing.opengl.PGraphics3D;
 import processing.opengl.PGraphicsOpenGL;
 
 /**
@@ -22,7 +23,7 @@ class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
   public GLMatrixHandler(PGraphicsOpenGL renderer) {
-    super(renderer.width, renderer.height);
+    super(renderer instanceof PGraphics3D, renderer.width, renderer.height);
     _pgraphics = renderer;
   }
 

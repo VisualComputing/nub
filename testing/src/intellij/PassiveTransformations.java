@@ -1,11 +1,13 @@
 package intellij;
 
-import nub.primitives.*;
-import nub.core.*;
-import nub.processing.Scene;
-import processing.core.*;
-import processing.event.*;
-import processing.opengl.*;
+import nub.core.Graph;
+import nub.core.MatrixHandler;
+import nub.core.Node;
+import nub.primitives.Point;
+import processing.core.PApplet;
+import processing.core.PMatrix3D;
+import processing.event.MouseEvent;
+import processing.opengl.PShader;
 
 public class PassiveTransformations extends PApplet {
   Graph graph;
@@ -67,7 +69,7 @@ public class PassiveTransformations extends PApplet {
     PMatrix3D _pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph) {
-      super(graph.width(), graph.height());
+      super(graph.is3D(), graph.width(), graph.height());
       _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
     }
 

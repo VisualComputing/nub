@@ -39,6 +39,7 @@ import nub.primitives.Vector;
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
+  boolean _is3D;
   protected int _width, _height;
   protected Matrix _projection, _view, _modelview;
   protected Matrix _projectionView, _projectionViewInverse;
@@ -58,7 +59,8 @@ public class MatrixHandler {
    * @param width of the renderer context
    * @param height of the renderer context
    */
-  public MatrixHandler(int width, int height) {
+  public MatrixHandler(boolean is3D, int width, int height) {
+    _is3D = is3D;
     _width = width;
     _height = height;
     _projection = new Matrix();
@@ -68,25 +70,29 @@ public class MatrixHandler {
     _isProjectionViewInverseCached = false;
   }
 
-  public static void _applyTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
-    if (is2D) {
-      matrixHandler.translate(node.translation().x(), node.translation().y());
-      matrixHandler.rotate(node.rotation().angle2D());
-      matrixHandler.scale(node.scaling(), node.scaling());
-    } else {
+  public boolean is3D() {
+    return _is3D;
+  }
+
+  public static void _applyTransformation(MatrixHandler matrixHandler, Node node) {
+    if (matrixHandler.is3D()) {
       matrixHandler.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
       matrixHandler.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
       matrixHandler.scale(node.scaling(), node.scaling(), node.scaling());
+    } else {
+      matrixHandler.translate(node.translation().x(), node.translation().y());
+      matrixHandler.rotate(node.rotation().angle2D());
+      matrixHandler.scale(node.scaling(), node.scaling());
     }
   }
 
-  public static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node, boolean is2D) {
+  public static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node) {
     Node reference = node.reference();
     if (reference != null) {
-      _applyWorldTransformation(matrixHandler, reference, is2D);
-      _applyTransformation(matrixHandler, node, is2D);
+      _applyWorldTransformation(matrixHandler, reference);
+      _applyTransformation(matrixHandler, node);
     } else {
-      _applyTransformation(matrixHandler, node, is2D);
+      _applyTransformation(matrixHandler, node);
     }
   }
 
