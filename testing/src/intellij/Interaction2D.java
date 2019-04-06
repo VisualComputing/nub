@@ -58,6 +58,7 @@ public class Interaction2D extends PApplet {
     shape2 = new Node(shape1);
     shape2.shape(shape());
     shape2.translate(75, 475);
+    shape2.setPickingThreshold(0);
 
     shape3 = new Node(shape2);
     shape3.shape(createShape(RECT, 0, 0, 150, 150));

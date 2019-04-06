@@ -40,7 +40,7 @@ public class Luxo extends PApplet {
     //draw the ground
     noStroke();
     fill(125);
-    float nbPatches = 1000;
+    float nbPatches = 100;
     normal(0.0f, 0.0f, 1.0f);
     for (int j = 0; j < nbPatches; ++j) {
       beginShape(QUAD_STRIP);

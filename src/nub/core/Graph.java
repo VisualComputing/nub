@@ -148,7 +148,7 @@ public class Graph {
   protected int _hudCalls;
 
   // 2. Matrix handler
-  protected MatrixHandler _matrixHandler;
+  protected MatrixHandler _matrixHandler, _bbMatrixHandler;
 
   // 3. Handlers
   protected class Ray {
@@ -2730,11 +2730,10 @@ public class Graph {
    * Render the scene into the back-buffer used for picking.
    */
   protected void _renderBackBuffer() {
-    MatrixHandler matrixHandler = _matrixHandler(_backBuffer());
-    matrixHandler._bindProjection(_matrixHandler.projection());
-    matrixHandler._bindModelView(_matrixHandler.cacheView());
+    _bbMatrixHandler._bindProjection(_matrixHandler.projection());
+    _bbMatrixHandler._bindModelView(_matrixHandler.cacheView());
     for (Node node : _leadingNodes())
-      _draw(matrixHandler, node);
+      _draw(_bbMatrixHandler, node);
     // TODO Pierre experimental condition to fix picking (see ShadowMappingVBO)
     if(isOffscreen())
       _rays.clear();

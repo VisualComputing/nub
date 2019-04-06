@@ -216,10 +216,17 @@ public class Scene extends Graph implements PConstants {
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
-    // 2. Matrix helper
+    // 2. Matrix handlers
     setMatrixHandler(_matrixHandler(pGraphics));
-
-    _enableBackBuffer();
+    _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
+        pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
+        null;
+    if (_bb != null) {
+      _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
+      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
+      _lineShader = pApplet().loadShader("PickingBuffer.frag");
+      _pointShader = pApplet().loadShader("PickingBuffer.frag");
+    }
 
     // 3. Register P5 methods
     if (!isOffscreen()) {
@@ -237,29 +244,6 @@ public class Scene extends Graph implements PConstants {
    * Enable the {@link #_backBuffer()} if the Processing renderer supports it. In success returns
    * {@code true} and {@code false} otherwise.
    */
-  public void _enableBackBuffer() {
-    _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
-        pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
-        null;
-    // TODO
-    // goal is to avoid loading the shaders each and every time a node gets drawn see _drawBackBuffer
-    // generates a: java.lang.NullPointerException
-    //	at processing.opengl.PJOGL.getGLSLVersion(PJOGL.java:509)
-    /*
-    if(_bb != null && (_triangleShader == null || _lineShader == null || _pointShader == null)) {
-      _triangleShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
-      _lineShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
-      _pointShader = ((PGraphics)_bb).loadShader("PickingBuffer.frag");
-    }
-    */
-    // /*
-    if (_triangleShader == null || _lineShader == null || _pointShader == null) {
-      _triangleShader = pApplet().loadShader("PickingBuffer.frag");
-      _lineShader = pApplet().loadShader("PickingBuffer.frag");
-      _pointShader = pApplet().loadShader("PickingBuffer.frag");
-    }
-    // */
-  }
 
   // P5 STUFF
 
