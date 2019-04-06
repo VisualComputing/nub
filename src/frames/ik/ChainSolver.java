@@ -154,7 +154,7 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
     float change = _backwardReaching(o);
     //Save best solution
-    if( (_keepDirection && _fixTwisting)) {
+    if(true || (_keepDirection && _fixTwisting)) {
       System.out.println("Change : " + change);
       if (change <= minDistance) {
         //avoid deadLock
@@ -309,7 +309,7 @@ public class ChainSolver extends FABRIKSolver {
     ArrayList<Frame> b_copy = null;
     Vector curr = new Vector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
     for(int i = 0; i < 20 ; i++) {
-      if(i > 5) a = (float)(180 * Math.PI / 180);
+      if(i > 15) a = (float)(180 * Math.PI / 180);
       ArrayList<Frame> copy = _copy(_chain);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();

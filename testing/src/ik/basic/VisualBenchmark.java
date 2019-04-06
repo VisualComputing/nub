@@ -40,10 +40,10 @@ public class VisualBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
-    int randRotation = 14; //Set seed to generate initial random rotations, otherwise set to -1
+    int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
 
