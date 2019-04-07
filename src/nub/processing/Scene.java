@@ -1126,7 +1126,7 @@ public class Scene extends Graph implements PConstants {
    */
   /*
   public static void applyTransformation(PGraphics pGraphics, Node node) {
-    matrixHandler(pGraphics)._applyTransformation(node);
+    matrixHandler(pGraphics).applyTransformation(node);
   }
    */
 
@@ -1138,7 +1138,7 @@ public class Scene extends Graph implements PConstants {
    */
   /*
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
-    _getMatrixHandler(pGraphics)._applyWorldTransformation(node);
+    _getMatrixHandler(pGraphics).applyWorldTransformation(node);
   }
    */
 

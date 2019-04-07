@@ -77,7 +77,7 @@ import java.util.List;
  * <h2>Hierarchical traversals</h2>
  * Hierarchical traversals of the node hierarchy which automatically apply the local
  * node transformations described above may be achieved with {@link Graph#render()} or
- * {@link Graph#render(Object)}.
+ * {@link Graph#render()}.
  * Automatic traversals require overriding {@link #visit()} or {@link Graph#draw(Object, Node)}
  * and to instantiate a node attached to a graph which is referred to as attached node (see
  * {@link #isAttached(Graph)} and {@link #isDetached()}).

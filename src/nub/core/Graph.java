@@ -2319,7 +2319,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public void applyTransformation(Node node) {
-    _matrixHandler._applyTransformation(node);
+    _matrixHandler.applyTransformation(node);
   }
 
   /**
@@ -2327,7 +2327,7 @@ public class Graph {
    * defined by the node.
    */
   public void applyWorldTransformation(Node node) {
-    _matrixHandler._applyWorldTransformation(node);
+    _matrixHandler.applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2735,7 +2735,7 @@ public class Graph {
    */
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushModelView();
-    _bbMatrixHandler._applyTransformation(node);
+    _bbMatrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       _drawBackBuffer(node);
       if (!isOffscreen())
@@ -2855,7 +2855,7 @@ public class Graph {
    */
   protected void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
-    matrixHandler._applyTransformation(node);
+    matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())

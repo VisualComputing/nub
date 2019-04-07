@@ -11,6 +11,7 @@
 package nub.processing;
 
 import nub.core.MatrixHandler;
+import nub.core.Node;
 import nub.primitives.Matrix;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics3D;
@@ -25,6 +26,30 @@ class GLMatrixHandler extends MatrixHandler {
   public GLMatrixHandler(PGraphicsOpenGL renderer) {
     super(renderer instanceof PGraphics3D, renderer.width, renderer.height);
     _pgraphics = renderer;
+  }
+
+  @Override
+  public void applyTransformation(Node node) {
+    if (is3D()) {
+      translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      scale(node.scaling(), node.scaling(), node.scaling());
+    } else {
+      translate(node.translation().x(), node.translation().y());
+      rotate(node.rotation().angle2D());
+      scale(node.scaling(), node.scaling());
+    }
+  }
+
+  @Override
+  public void applyWorldTransformation(Node node) {
+    Node reference = node.reference();
+    if (reference != null) {
+      applyWorldTransformation(reference);
+      applyTransformation(node);
+    } else {
+      applyTransformation(node);
+    }
   }
 
   /**
