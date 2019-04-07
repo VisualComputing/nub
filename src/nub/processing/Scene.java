@@ -1101,9 +1101,13 @@ public class Scene extends Graph implements PConstants {
    */
   public void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(pGraphics, eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded), eye.view());
+      render(_matrixHandler(pGraphics), pGraphics, eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded), eye.view());
     else
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
+  }
+
+  public void render(PGraphics pGraphics) {
+    render(_matrixHandler(pGraphics), pGraphics);
   }
 
   /**
@@ -1116,7 +1120,7 @@ public class Scene extends Graph implements PConstants {
       return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
-  @Override
+  // TODO pending
   protected MatrixHandler _matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this);
@@ -1130,7 +1134,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyWorldTransformation(PGraphics, Node)
    */
   public static void applyTransformation(PGraphics pGraphics, Node node) {
-    MatrixHandler._applyTransformation(_getMatrixHandler(pGraphics), node);
+    _getMatrixHandler(pGraphics)._applyTransformation(node);
   }
 
   /**
@@ -1140,7 +1144,7 @@ public class Scene extends Graph implements PConstants {
    * @see #applyTransformation(PGraphics, Node)
    */
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
-    MatrixHandler._applyWorldTransformation(_getMatrixHandler(pGraphics), node);
+    _getMatrixHandler(pGraphics)._applyWorldTransformation(node);
   }
 
   // HUD

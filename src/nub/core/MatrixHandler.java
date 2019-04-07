@@ -74,25 +74,25 @@ public class MatrixHandler {
     return _is3D;
   }
 
-  public static void _applyTransformation(MatrixHandler matrixHandler, Node node) {
-    if (matrixHandler.is3D()) {
-      matrixHandler.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-      matrixHandler.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-      matrixHandler.scale(node.scaling(), node.scaling(), node.scaling());
+  public void _applyTransformation(Node node) {
+    if (is3D()) {
+      translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      scale(node.scaling(), node.scaling(), node.scaling());
     } else {
-      matrixHandler.translate(node.translation().x(), node.translation().y());
-      matrixHandler.rotate(node.rotation().angle2D());
-      matrixHandler.scale(node.scaling(), node.scaling());
+      translate(node.translation().x(), node.translation().y());
+      rotate(node.rotation().angle2D());
+      scale(node.scaling(), node.scaling());
     }
   }
 
-  public static void _applyWorldTransformation(MatrixHandler matrixHandler, Node node) {
+  public void _applyWorldTransformation(Node node) {
     Node reference = node.reference();
     if (reference != null) {
-      _applyWorldTransformation(matrixHandler, reference);
-      _applyTransformation(matrixHandler, node);
+      _applyWorldTransformation(reference);
+      _applyTransformation(node);
     } else {
-      _applyTransformation(matrixHandler, node);
+      _applyTransformation(node);
     }
   }
 

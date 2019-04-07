@@ -41,7 +41,7 @@ public class DOF extends PApplet {
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth_linear.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 

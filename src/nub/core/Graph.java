@@ -108,7 +108,7 @@ import java.util.List;
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
  * (see also {@link #applyWorldTransformation(Node)}) between {@code pushModelView()} and
  * {@code popModelView()}. Note that the node transformations are applied automatically by
- * the {@link #render(Object)} algorithm (in this case you don't need to call them).
+ * the {@link #render(MatrixHandler, Object)} algorithm (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -2319,7 +2319,7 @@ public class Graph {
    * @see #applyWorldTransformation(Node)
    */
   public void applyTransformation(Node node) {
-    MatrixHandler._applyTransformation(_matrixHandler, node);
+    _matrixHandler._applyTransformation(node);
   }
 
   /**
@@ -2327,7 +2327,7 @@ public class Graph {
    * defined by the node.
    */
   public void applyWorldTransformation(Node node) {
-    MatrixHandler._applyWorldTransformation(_matrixHandler, node);
+    _matrixHandler._applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2704,14 +2704,6 @@ public class Graph {
   }
 
   /**
-   * Override this method according to your renderer context.
-   */
-  protected MatrixHandler _matrixHandler(Object context) {
-    // dummy: it should be overridden
-    return new MatrixHandler(true, width(), height());
-  }
-
-  /**
    * Returns the main renderer context.
    */
   public Object context() {
@@ -2743,7 +2735,7 @@ public class Graph {
    */
   protected void _renderBackBuffer(Node node) {
     _bbMatrixHandler.pushModelView();
-    MatrixHandler._applyTransformation(_bbMatrixHandler, node);
+    _bbMatrixHandler._applyTransformation(node);
     if (!node.isCulled()) {
       _drawBackBuffer(node);
       if (!isOffscreen())
@@ -2785,8 +2777,7 @@ public class Graph {
    * Note that only reachable nodes (nodes attached to this graph, see
    * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
-   * @see #render(Object)
-   * @see #render(Object, Matrix, Matrix)
+   * @see #render(MatrixHandler, Object)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2818,46 +2809,44 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context}.
-   * <p>
-   * Same as {@code render(context, matrixHandler().cacheView(), matrixHandler().projection())}.
-   *
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render()
-   */
-  public void render(Object context) {
-    if (context == context())
-      render();
-    else
-      render(context, _matrixHandler.projection(), _matrixHandler.cacheView());
-  }
-
-  /**
-   * Renders the node hierarchy onto {@code context} using the {@code projection}
-   * and {@code view} matrices.
-   * <p>
-   * Note that only reachable nodes (nodes attached to this graph, see
-   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
+   * Renders the scene onto {@code context} using {@code matrixHandler}.
    *
    * @see #render()
-   * @see #render(Object)
    */
-  public void render(Object context, Matrix projection, Matrix view) {
+  public void render(MatrixHandler matrixHandler, Object context) {
+    // TODO adjust
     if (context == context())
       throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
-    MatrixHandler matrixHandler = _matrixHandler(context);
-    matrixHandler._bindProjection(projection);
-    matrixHandler._bindModelView(view);
-    for (Node node : _leadingNodes())
-      _render(matrixHandler, context, node);
+      //if (context == context())
+      //render();
+    else {
+      matrixHandler._bindProjection(_matrixHandler.projection());
+      matrixHandler._bindModelView(_matrixHandler.cacheView());
+      for (Node node : _leadingNodes())
+        _render(matrixHandler, context, node);
+    }
+  }
+
+  public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
+    // TODO adjust
+    if (context == context())
+      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
+      //if (context == context())
+      //render();
+    else {
+      matrixHandler._bindProjection(projection);
+      matrixHandler._bindModelView(view);
+      for (Node node : _leadingNodes())
+        _render(matrixHandler, context, node);
+    }
   }
 
   /**
-   * Used by the {@link #render(Object, Matrix, Matrix)} algorithm.
+   * Used by the {@link #render(MatrixHandler, Object)} algorithm.
    */
   protected void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
-    MatrixHandler._applyTransformation(matrixHandler, node);
+    matrixHandler._applyTransformation(node);
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())
