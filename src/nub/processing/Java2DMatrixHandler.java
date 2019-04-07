@@ -26,21 +26,15 @@ class Java2DMatrixHandler extends MatrixHandler {
   protected Graph _graph;
 
   public Java2DMatrixHandler(Graph graph) {
-    super(false, graph.width(), graph.height());
+    super(graph.width(), graph.height());
     _graph = graph;
   }
 
   @Override
   public void applyTransformation(Node node) {
-    if (is3D()) {
-      translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-      rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-      scale(node.scaling(), node.scaling(), node.scaling());
-    } else {
-      translate(node.translation().x(), node.translation().y());
-      rotate(node.rotation().angle2D());
-      scale(node.scaling(), node.scaling());
-    }
+    translate(node.translation().x(), node.translation().y());
+    rotate(node.rotation().angle2D());
+    scale(node.scaling(), node.scaling());
   }
 
   @Override

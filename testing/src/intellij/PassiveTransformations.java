@@ -69,7 +69,7 @@ public class PassiveTransformations extends PApplet {
     PMatrix3D _pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph) {
-      super(graph.is3D(), graph.width(), graph.height());
+      super(graph.width(), graph.height());
       _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
     }
 

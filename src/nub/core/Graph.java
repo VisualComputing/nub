@@ -227,7 +227,7 @@ public class Graph {
    * @see #setEye(Node)
    */
   public Graph(Type type, int width, int height) {
-    setMatrixHandler(new MatrixHandler(type != Type.TWO_D, width, height));
+    setMatrixHandler(new MatrixHandler(width, height));
 
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();

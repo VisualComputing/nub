@@ -24,13 +24,13 @@ class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
   public GLMatrixHandler(PGraphicsOpenGL renderer) {
-    super(renderer instanceof PGraphics3D, renderer.width, renderer.height);
+    super(renderer.width, renderer.height);
     _pgraphics = renderer;
   }
 
   @Override
   public void applyTransformation(Node node) {
-    if (is3D()) {
+    if (_pgraphics instanceof PGraphics3D) {
       translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
       rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
       scale(node.scaling(), node.scaling(), node.scaling());

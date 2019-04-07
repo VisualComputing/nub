@@ -39,7 +39,6 @@ import nub.primitives.Vector;
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  boolean _is3D;
   protected int _width, _height;
   protected Matrix _projection, _view, _modelview;
   protected Matrix _projectionView, _projectionViewInverse;
@@ -59,8 +58,7 @@ public class MatrixHandler {
    * @param width of the renderer context
    * @param height of the renderer context
    */
-  public MatrixHandler(boolean is3D, int width, int height) {
-    _is3D = is3D;
+  public MatrixHandler(int width, int height) {
     _width = width;
     _height = height;
     _projection = new Matrix();
@@ -68,10 +66,6 @@ public class MatrixHandler {
     _modelview = new Matrix();
     _projectionView = new Matrix();
     _isProjectionViewInverseCached = false;
-  }
-
-  public boolean is3D() {
-    return _is3D;
   }
 
   public void applyTransformation(Node node) {
