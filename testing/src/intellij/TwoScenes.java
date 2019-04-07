@@ -100,7 +100,8 @@ public class TwoScenes extends PApplet {
     graphics.noStroke();
     graphics.fill(0, 255, 0);
     graphics.pushMatrix();
-    Scene.applyTransformation(graphics, node);
+    // TODO fix me!
+    //Scene.applyTransformation(graphics, node);
     //scene1.applyTransformation(node);
     graphics.sphere(50);
     graphics.popMatrix();

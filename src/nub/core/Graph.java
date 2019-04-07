@@ -2827,6 +2827,15 @@ public class Graph {
     }
   }
 
+  // TODO pending
+  //public MatrixHandler matrixHandler(Object context, Type type, float zNear, float zFar, boolean leftHanded) {
+  public MatrixHandler matrixHandler(Object context) {
+    return null;
+  }
+
+  // TODO goal. Big Q: perhaps move type, zNear, zFar and lh into matrixHandler???
+  // public void render(MatrixHandler matrixHandler, Node eye)
+
   public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     // TODO adjust
     if (context == context())

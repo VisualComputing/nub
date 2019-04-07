@@ -27,7 +27,8 @@ public class DetachedFrames1 extends PApplet {
     background(0);
     for (int i = 0; i < nodes.length; i++) {
       pushMatrix();
-      Scene.applyTransformation(g, nodes[i]);
+      // TODO fix me!
+      //Scene.applyTransformation(g, nodes[i]);
       Scene.drawTorusSolenoid(g);
       popMatrix();
     }

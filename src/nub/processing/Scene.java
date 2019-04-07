@@ -217,7 +217,7 @@ public class Scene extends Graph implements PConstants {
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix handlers
-    setMatrixHandler(_matrixHandler(pGraphics));
+    setMatrixHandler(matrixHandler(pGraphics));
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
         null;
@@ -1080,7 +1080,7 @@ public class Scene extends Graph implements PConstants {
    * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}
    *
    * @see #render(PGraphics, Type, Node, float, float) (Object, Matrix, Matrix)
-   * @see #render(Object)
+   * @see #render(PGraphics)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
    * @see #render()
    */
@@ -1094,37 +1094,28 @@ public class Scene extends Graph implements PConstants {
    * as the light point-of-view. Same as
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}
    *
-   * @see #render(Object, Matrix, Matrix)
-   * @see #render(Object)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #render(PGraphics)
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()
    */
+  // TODO push up into line
   public void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(_matrixHandler(pGraphics), pGraphics, eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded), eye.view());
+      render(matrixHandler(pGraphics), pGraphics, eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded), eye.view());
     else
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
   public void render(PGraphics pGraphics) {
-    render(_matrixHandler(pGraphics), pGraphics);
+    render(matrixHandler(pGraphics), pGraphics);
   }
 
-  /**
-   * Returns a new matrix handler for the given {@code context}.
-   */
-  protected static MatrixHandler _getMatrixHandler(Object context) {
-    if (!(context instanceof PGraphicsOpenGL))
-      throw new RuntimeException("Renderer should be instanceof PGraphicsOpenGL in applyTransformation(PGraphics pGraphics, Node node)");
-    else
-      return new GLMatrixHandler((PGraphicsOpenGL) context);
-  }
-
-  // TODO pending
-  protected MatrixHandler _matrixHandler(Object context) {
+  @Override
+  public MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this);
-    return _getMatrixHandler(context);
+    return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
   /**
@@ -1133,9 +1124,11 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #applyWorldTransformation(PGraphics, Node)
    */
+  /*
   public static void applyTransformation(PGraphics pGraphics, Node node) {
-    _getMatrixHandler(pGraphics)._applyTransformation(node);
+    matrixHandler(pGraphics)._applyTransformation(node);
   }
+   */
 
   /**
    * Apply the global transformation defined by the given {@code node} on the given
@@ -1143,9 +1136,11 @@ public class Scene extends Graph implements PConstants {
    *
    * @see #applyTransformation(PGraphics, Node)
    */
+  /*
   public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
     _getMatrixHandler(pGraphics)._applyWorldTransformation(node);
   }
+   */
 
   // HUD
 
@@ -1174,6 +1169,7 @@ public class Scene extends Graph implements PConstants {
    * @see #endHUD(PGraphics)
    * @see #beginHUD()
    */
+  // TODO fix me
   public void beginHUD(PGraphics pGraphics) {
     if (_hudCalls != 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
@@ -1187,7 +1183,8 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.beginHUD();
     else
-      _matrixHandler(pGraphics).beginHUD();
+      // TODO fix me
+      matrixHandler(pGraphics).beginHUD();
   }
 
   /**
@@ -1207,6 +1204,7 @@ public class Scene extends Graph implements PConstants {
    * @see #beginHUD(PGraphics)
    * @see #endHUD()
    */
+  // TODO fix me
   public void endHUD(PGraphics pGraphics) {
     _hudCalls--;
     if (_hudCalls != 0)
@@ -1218,7 +1216,8 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.endHUD();
     else
-      _matrixHandler(pGraphics).endHUD();
+      // TODO fix me
+      matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
   }
