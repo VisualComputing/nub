@@ -2733,7 +2733,7 @@ public class Graph {
     _bbMatrixHandler._bindProjection(_matrixHandler.projection());
     _bbMatrixHandler._bindModelView(_matrixHandler.cacheView());
     for (Node node : _leadingNodes())
-      _draw(_bbMatrixHandler, node);
+      _renderBackBuffer(node);
     if(isOffscreen())
       _rays.clear();
   }
@@ -2741,17 +2741,17 @@ public class Graph {
   /**
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
-  protected void _draw(MatrixHandler matrixHandler, Node node) {
-    matrixHandler.pushModelView();
-    MatrixHandler._applyTransformation(matrixHandler, node);
+  protected void _renderBackBuffer(Node node) {
+    _bbMatrixHandler.pushModelView();
+    MatrixHandler._applyTransformation(_bbMatrixHandler, node);
     if (!node.isCulled()) {
       _drawBackBuffer(node);
       if (!isOffscreen())
         _trackBackBuffer(node);
       for (Node child : node.children())
-        _draw(matrixHandler, child);
+        _renderBackBuffer(child);
     }
-    matrixHandler.popModelView();
+    _bbMatrixHandler.popModelView();
   }
 
   /**
@@ -2795,14 +2795,14 @@ public class Graph {
    */
   public void render() {
     for (Node node : _leadingNodes())
-      _draw(node);
+      _render(node);
     _rays.clear();
   }
 
   /**
    * Used by the {@link #render()} algorithm.
    */
-  protected void _draw(Node node) {
+  protected void _render(Node node) {
     _matrixHandler.pushModelView();
     applyTransformation(node);
     node.visit();
@@ -2812,7 +2812,7 @@ public class Graph {
         _trackBackBuffer(node);
       _drawFrontBuffer(node);
       for (Node child : node.children())
-        _draw(child);
+        _render(child);
     }
     _matrixHandler.popModelView();
   }
@@ -2849,19 +2849,19 @@ public class Graph {
     matrixHandler._bindProjection(projection);
     matrixHandler._bindModelView(view);
     for (Node node : _leadingNodes())
-      _draw(matrixHandler, context, node);
+      _render(matrixHandler, context, node);
   }
 
   /**
    * Used by the {@link #render(Object, Matrix, Matrix)} algorithm.
    */
-  protected void _draw(MatrixHandler matrixHandler, Object context, Node node) {
+  protected void _render(MatrixHandler matrixHandler, Object context, Node node) {
     matrixHandler.pushModelView();
     MatrixHandler._applyTransformation(matrixHandler, node);
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())
-        _draw(matrixHandler, context, child);
+        _render(matrixHandler, context, child);
     }
     matrixHandler.popModelView();
   }
@@ -2914,7 +2914,7 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_draw(Node)}.
+   * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
     if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() > 0) {
@@ -2934,7 +2934,7 @@ public class Graph {
   }
 
   /**
-   * Internally used by {@link #_draw(Node)} and {@link #_draw(MatrixHandler, Node)}.
+   * Internally used by {@link #_render(Node)} and {@link #_renderBackBuffer(Node)}.
    */
   protected void _trackBackBuffer(Node node) {
     if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() == 0 && _bb != null) {
