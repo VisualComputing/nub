@@ -2813,6 +2813,10 @@ public class Graph {
    *
    * @see #render()
    */
+  // TODO check mh <-> fbo relationship. Either is it one to one or (only) one to many?
+  // in the 2nd case (which I root for) we need only matrixhandler for everything!
+  // by seeing if this can be transform into:
+  // public void render(Object context)
   public void render(MatrixHandler matrixHandler, Object context) {
     // TODO adjust
     if (context == context())
