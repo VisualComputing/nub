@@ -1110,8 +1110,7 @@ public class Scene extends Graph implements PConstants {
   public void render(PGraphics pGraphics) {
     render(matrixHandler(pGraphics), pGraphics);
   }
-
-  @Override
+  
   public MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this);
