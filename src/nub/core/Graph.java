@@ -2707,20 +2707,26 @@ public class Graph {
     return _offscreen;
   }
 
+  // TODO decide these two
+
   /**
    * Returns the main renderer context.
    */
+  /*
   public Object context() {
     return _fb;
   }
+   */
 
   /**
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
+  /*
   protected Object _backBuffer() {
     return _bb;
   }
+   */
 
   /**
    * Render the scene into the back-buffer used for picking.
@@ -2823,9 +2829,9 @@ public class Graph {
   // public void render(Object context)
   public void render(MatrixHandler matrixHandler, Object context) {
     // TODO adjust
-    if (context == context())
+    if (context == _fb)
       throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
-      //if (context == context())
+      //if (context == _fb)
       //render();
     else {
       matrixHandler._bindProjection(_matrixHandler.projection());
@@ -2840,9 +2846,9 @@ public class Graph {
 
   public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     // TODO adjust
-    if (context == context())
+    if (context == _fb)
       throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
-      //if (context == context())
+      //if (context == _fb)
       //render();
     else {
       matrixHandler._bindProjection(projection);
@@ -2872,7 +2878,7 @@ public class Graph {
    * @see #draw(Object, Node)
    */
   public void draw(Node node) {
-    draw(context(), node);
+    draw(_fb, node);
   }
 
   /**
@@ -2884,9 +2890,9 @@ public class Graph {
    * @see #render()
    */
   public void draw(Object context, Node node) {
-    if (context == _backBuffer())
+    if (context == _bb)
       return;
-    if(context == context())
+    if (context == _fb)
       _drawFrontBuffer(node);
     else
       _drawOntoBuffer(context, node);

@@ -254,11 +254,12 @@ public class Scene extends Graph implements PConstants {
     return _parent;
   }
 
+  // TODO decide
+
   /**
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
-  @Override
   public PGraphics context() {
     return (PGraphics) _fb;
   }
@@ -285,11 +286,12 @@ public class Scene extends Graph implements PConstants {
 
   // PICKING BUFFER
 
+  // TODO decide
+
   /**
    * Returns the back buffer, used for
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
    */
-  @Override
   public PGraphics _backBuffer() {
     return (PGraphics) _bb;
   }
@@ -1110,7 +1112,7 @@ public class Scene extends Graph implements PConstants {
   public void render(PGraphics pGraphics) {
     render(matrixHandler(pGraphics), pGraphics);
   }
-  
+
   public MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this);

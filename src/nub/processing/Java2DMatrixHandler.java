@@ -49,7 +49,7 @@ class Java2DMatrixHandler extends MatrixHandler {
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
-    return (PGraphics) _graph.context();
+    return (PGraphics) _graph._fb;
   }
 
   // Comment the above line and uncomment this one to develop the driver:
