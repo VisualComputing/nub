@@ -129,7 +129,8 @@ public class Graph {
   protected boolean _offscreen;
 
   // 0. Contexts
-  protected Object _bb, _fb;
+  // TODO fix me
+  public Object _bb, _fb;
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
@@ -148,6 +149,7 @@ public class Graph {
   protected int _hudCalls;
 
   // 2. Matrix handler
+  protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
 
   // 3. Handlers
@@ -227,7 +229,9 @@ public class Graph {
    * @see #setEye(Node)
    */
   public Graph(Type type, int width, int height) {
-    setMatrixHandler(new MatrixHandler(width, height));
+    setWidth(width);
+    setHeight(height);
+    setMatrixHandler(new MatrixHandler(this));
 
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
@@ -281,14 +285,34 @@ public class Graph {
    * Returns width of the screen window.
    */
   public int width() {
-    return _matrixHandler.width();
+    return _width;
   }
 
   /**
    * Returns height of the screen window.
    */
   public int height() {
-    return _matrixHandler.height();
+    return _height;
+  }
+
+  /**
+   * Sets the graph {@link #width()} in pixels.
+   */
+  public void setWidth(int width) {
+    if (width != width() && width > 0) {
+      _width = width;
+      _modified();
+    }
+  }
+
+  /**
+   * Sets the graph {@link #height()} in pixels.
+   */
+  public void setHeight(int height) {
+    if (height != height() && height > 0) {
+      _height = height;
+      _modified();
+    }
   }
 
   /**
@@ -324,26 +348,6 @@ public class Graph {
    */
   public Matrix modelView() {
     return _matrixHandler.modelView();
-  }
-
-  /**
-   * Sets the graph {@link #width()} in pixels.
-   */
-  public void setWidth(int width) {
-    if ((width != width())) {
-      _matrixHandler.setWidth(width);
-      _modified();
-    }
-  }
-
-  /**
-   * Sets the graph {@link #height()} in pixels.
-   */
-  public void setHeight(int height) {
-    if ((height != height())) {
-      _matrixHandler.setWidth(height);
-      _modified();
-    }
   }
 
   // Type handling stuff

@@ -159,7 +159,7 @@ public class Shadows extends PApplet {
     PMatrix3D _pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph, PShader shader) {
-      super(graph.width(), graph.height());
+      super(graph);
       _shader = shader;
     }
 

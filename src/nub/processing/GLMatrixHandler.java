@@ -10,6 +10,7 @@
 
 package nub.processing;
 
+import nub.core.Graph;
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
@@ -23,8 +24,8 @@ import processing.opengl.PGraphicsOpenGL;
 class GLMatrixHandler extends MatrixHandler {
   PGraphicsOpenGL _pgraphics;
 
-  public GLMatrixHandler(PGraphicsOpenGL renderer) {
-    super(renderer.width, renderer.height);
+  public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
+    super(graph);
     _pgraphics = renderer;
   }
 

@@ -39,7 +39,7 @@ import nub.primitives.Vector;
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  protected int _width, _height;
+  protected Graph _graph;
   protected Matrix _projection, _view, _modelview;
   protected Matrix _projectionView, _projectionViewInverse;
   protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
@@ -55,12 +55,10 @@ public class MatrixHandler {
   /**
    * Instantiates matrices and sets {@link #isProjectionViewInverseCached()} to {@code false}.
    *
-   * @param width of the renderer context
-   * @param height of the renderer context
+   * @param graph this matrix handler belongs to
    */
-  public MatrixHandler(int width, int height) {
-    _width = width;
-    _height = height;
+  public MatrixHandler(Graph graph) {
+    _graph = graph;
     _projection = new Matrix();
     _view = new Matrix();
     _modelview = new Matrix();
@@ -74,36 +72,6 @@ public class MatrixHandler {
 
   public void applyWorldTransformation(Node node) {
     applyModelView(node.worldMatrix());
-  }
-
-  /**
-   * @return width of the screen window.
-   */
-  public int width() {
-    return _width;
-  }
-
-  /**
-   * @return height of the screen window.
-   */
-  public int height() {
-    return _height;
-  }
-
-  /**
-   * Sets eye {@link #width()} and {@link #height()} (expressed in pixels).
-   * <p>
-   * Non-positive dimension are silently replaced by a 1 pixel value to ensure boundary
-   * coherence.
-   */
-  public void setWidth(int width) {
-    // Prevent negative and zero dimensions that would cause divisions by zero.
-    _width = width > 0 ? width : 1;
-  }
-
-  public void setHeight(int height) {
-    // Prevent negative and zero dimensions that would cause divisions by zero.
-    _height = height > 0 ? height : 1;
   }
 
   /**
@@ -414,14 +382,14 @@ public class MatrixHandler {
   // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
   // "9.030 How do I draw 2D controls over my 3D rendering?"
   protected void _ortho2D() {
-    float cameraZ = (_height / 2.0f) / (float) Math.tan((float) Math.PI / 8);
+    float cameraZ = (_graph._height / 2.0f) / (float) Math.tan((float) Math.PI / 8);
     float cameraNear = cameraZ / 2.0f;
     float cameraFar = cameraZ * 2.0f;
 
-    float left = -_width / 2;
-    float right = _width / 2;
-    float bottom = -_height / 2;
-    float top = _height / 2;
+    float left = -_graph._width / 2;
+    float right = _graph._width / 2;
+    float bottom = -_graph._height / 2;
+    float top = _graph._height / 2;
     float near = cameraNear;
     float far = cameraFar;
 
@@ -439,11 +407,11 @@ public class MatrixHandler {
 
   // as it's done in P5:
   protected void _resetViewPoint() {
-    float eyeX = _width / 2f;
-    float eyeY = _height / 2f;
-    float eyeZ = (_height / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
-    float centerX = _width / 2f;
-    float centerY = _height / 2f;
+    float eyeX = _graph._width / 2f;
+    float eyeY = _graph._height / 2f;
+    float eyeZ = (_graph._height / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
+    float centerX = _graph._width / 2f;
+    float centerY = _graph._height / 2f;
     float centerZ = 0;
     float upX = 0;
     float upY = 1;

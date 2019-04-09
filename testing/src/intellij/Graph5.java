@@ -79,7 +79,7 @@ public class Graph5 extends PApplet {
     PMatrix3D pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler(Graph graph) {
-      super(graph.width(), graph.height());
+      super(graph);
       framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     }
 
