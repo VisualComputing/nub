@@ -132,7 +132,7 @@ public class ChainSolver extends FABRIKSolver {
     Frame end = _chain.get(_chain.size() - 1);
     Vector target = this._target.position().get();
 
-    e  = iterations % 3 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.min(Vector.distance(end.position(), _target.position()), e);
+    e  = iterations % 2 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.min(Vector.distance(end.position(), _target.position()), e);
     //Execute Until the distance between the end effector and the target is below a threshold
     if (Vector.distance(end.position(), target) <= error) {
       return true;
@@ -161,7 +161,7 @@ public class ChainSolver extends FABRIKSolver {
     //Save best solution
     if(true || (_keepDirection && _fixTwisting)) {
       float ne  = Vector.distance(end.position(), _target.position());
-      if (change <= minDistance || (iterations % 3 == 2 && ne >= e)) {
+      if (change <= minDistance || (iterations % 2 == 1 && ne >= e)) {
         boolean x = ne > e;
         System.out.println("change :" + change);
         for(Float jc : _jointChange)
@@ -316,9 +316,12 @@ public class ChainSolver extends FABRIKSolver {
     _jointChange.remove(0);
     addIterationRecord(_positions);
     exploration = 0;
+    avoid_pos_hist = new ArrayList<>();
+    diverge_hist= new ArrayList<>();
   }
 
   public ArrayList<Vector> avoid_pos, p_avoid_pos;
+  public ArrayList<ArrayList<Vector>> avoid_pos_hist, diverge_hist;
   public float exploration = 0;
   protected void _avoidDeadlock(boolean x){
     if(_chain.size() <= 1) return;
@@ -378,6 +381,8 @@ public class ChainSolver extends FABRIKSolver {
         b_d = d;
         b_copy = copy;
         avoid_pos = copy_p;
+        if(x)avoid_pos_hist.add(avoid_pos);
+        else diverge_hist.add(avoid_pos);
         System.out.println("    BEST : " + b_d + " Dist : " + d);
         System.out.println("    BEST Joint Change : " + b_d + " Dist : " + d);
       }

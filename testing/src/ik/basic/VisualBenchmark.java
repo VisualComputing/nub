@@ -116,6 +116,17 @@ public class VisualBenchmark extends PApplet {
                 if (show1) draw_pos(prev, color(0, 255, 0), 3);
                 if (show2) draw_pos(((ChainSolver) solvers.get(i)).get_p(), color(255, 0, 100), 3);
                 if (show3) draw_pos(constr, color(100, 100, 0), 3);
+                if (show4) {
+                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).avoid_pos_hist){
+                        draw_pos(l, color(255, 255, 0, 50), 3);
+                    }
+                }
+                if (show5) {
+                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).diverge_hist){
+                        draw_pos(l, color(255, 0, 0, 50), 3);
+                    }
+                }
+
                 if(((ChainSolver) solvers.get(i)).avoid_pos != null && show1){
                     draw_pos(((ChainSolver) solvers.get(i)).avoid_pos, color(255, 0, 0), 6);
                 }
@@ -166,7 +177,7 @@ public class VisualBenchmark extends PApplet {
 
     boolean solve = false;
 
-    boolean show1 = true, show2 = true, show3 = true;
+    boolean show1 = false, show2 = false, show3 = false, show4 = false, show5 = false;
 
     ArrayList<Vector> prev = new ArrayList<Vector>();
     ArrayList<Vector> constr = new ArrayList<Vector>();
@@ -221,7 +232,12 @@ public class VisualBenchmark extends PApplet {
         if(key == '3'){
             show3 = !show3;
         }
-
+        if(key == '4'){
+            show4 = !show4;
+        }
+        if(key == '5'){
+            show5 = !show5;
+        }
     }
 
     @Override
@@ -266,6 +282,7 @@ public class VisualBenchmark extends PApplet {
 
 
     void draw_pos(ArrayList<Vector> _positions, int color, float str) {
+        sphereDetail(3);
         if(_positions == null) return;
         Vector prev = null;
         for(Vector p : _positions){
@@ -275,14 +292,14 @@ public class VisualBenchmark extends PApplet {
             strokeWeight(str);
             if(prev != null) line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
             noStroke();
-            fill(color, 100);
+            fill(color);
             translate(p.x(),p.y(),p.z());
             sphere(3);
             popStyle();
             popMatrix();
             prev = p;
         }
-
+        sphereDetail(40);
     }
 
 

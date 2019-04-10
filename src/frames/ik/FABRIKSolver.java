@@ -107,6 +107,7 @@ public abstract class FABRIKSolver extends Solver {
 
   //TODO : Clean code
   static Random r = new Random();
+  static boolean rand = false;
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -177,7 +178,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(), (float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(), rand ? (float)(Math.abs(r.nextGaussian())) : 1 * props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         _positions.set(i, Vector.add(pos_i1, desired));
       }
@@ -216,7 +217,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(), (float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(), rand ? (float)(Math.abs(r.nextGaussian())) : 1 * props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         positions.set(i, Vector.add(pos_i1, desired));
       }
@@ -258,7 +259,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(),(float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(),rand ? (float)(Math.abs(r.nextGaussian())) : 1 * props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         o_hat = positions.get(i + 1);
         positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
@@ -307,7 +308,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(),(float)(Math.abs(r.nextGaussian())) * props_i1._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(),rand ? (float)(Math.abs(r.nextGaussian())) : 1 * props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         o_hat = _positions.get(i + 1);
         _positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
