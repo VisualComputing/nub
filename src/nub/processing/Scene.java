@@ -303,12 +303,13 @@ public class Scene extends Graph implements PConstants {
    * Called by {@link #draw()} (on-screen scenes) and {@link #endDraw()} (off-screen
    * scenes).
    */
-  protected void _updateBackBuffer() {
+  @Override
+  protected void _renderBackBuffer() {
     if (_bb != null && _bbCount < _bbNeed) {
       _backBuffer().beginDraw();
       _backBuffer().pushStyle();
       _backBuffer().background(0);
-      _renderBackBuffer();
+      super._renderBackBuffer();
       _backBuffer().popStyle();
       _backBuffer().endDraw();
       _backBuffer().loadPixels();
@@ -589,7 +590,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void draw() {
     _matrixHandler.popModelView();
-    _updateBackBuffer();
+    _renderBackBuffer();
   }
 
   /**
@@ -649,7 +650,7 @@ public class Scene extends Graph implements PConstants {
           + "endDraw() and they cannot be nested. Check your implementation!");
     _matrixHandler.popModelView();
     context().endDraw();
-    _updateBackBuffer();
+    _renderBackBuffer();
   }
 
   /**
