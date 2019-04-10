@@ -6,13 +6,10 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Constraint;
 import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.HAEASolver;
+import frames.ik.*;
 import frames.ik.evolution.BioIk;
 import frames.ik.evolution.GASolver;
 import frames.ik.evolution.HillClimbingSolver;
-import frames.ik.Solver;
 import frames.ik.jacobian.PseudoInverseSolver;
 import frames.ik.jacobian.SDLSSolver;
 import frames.ik.jacobian.TransposeSolver;
@@ -48,7 +45,7 @@ public class VisualBenchmark extends PApplet {
 
 
     Util.SolverType solversType [] = {Util.SolverType.SDLS, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
-            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2 }; //Place Here Solvers that you want to compare
+            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2}; //Place Here Solvers that you want to compare
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
 
@@ -237,6 +234,9 @@ public class VisualBenchmark extends PApplet {
         }
         if(key == '5'){
             show5 = !show5;
+        }
+        if(key == '6'){
+            FABRIKSolver.rand = !FABRIKSolver.rand;
         }
     }
 

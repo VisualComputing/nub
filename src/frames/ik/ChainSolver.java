@@ -370,6 +370,7 @@ public class ChainSolver extends FABRIKSolver {
       }
 
       copy_p.set(_chain.size() - 1, this._target.position().get());
+      //if(_fixTwisting) _applyTwistRotation(copy, copy_p.get(copy_p.size() - 1));
       _forwardReaching(copy, copy_p, _distances, copy_props, _keepDirection);
 
       Vector o = copy_p.get(0);

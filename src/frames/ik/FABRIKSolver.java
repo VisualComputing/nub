@@ -74,7 +74,7 @@ public abstract class FABRIKSolver extends Solver {
     protected boolean _useConstraint = true;
     protected boolean _enableFixWeight = true;
     //It is useful when the chain is highly constrained
-    protected float _directionWeight = 0.5f;
+    protected float _directionWeight = 0.3f;
     //When it is 1 the Joint will not move at all
     protected float _fixWeight = 0;
 
@@ -107,7 +107,7 @@ public abstract class FABRIKSolver extends Solver {
 
   //TODO : Clean code
   static Random r = new Random();
-  static boolean rand = false;
+  public static boolean rand = false;
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -540,7 +540,7 @@ public abstract class FABRIKSolver extends Solver {
 
   float min_v = 1e10f, min_u = 1e10f;
 
-  protected void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
+  protected static void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
     //Change chain state in such a way that the target approach to chain
     Frame eff = chain.get(chain.size() - 1);
     for(int i = 0; i < chain.size() - 2; i++){
