@@ -40,7 +40,7 @@ public class VisualBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
@@ -116,6 +116,13 @@ public class VisualBenchmark extends PApplet {
                 if (show1) draw_pos(prev, color(0, 255, 0), 3);
                 if (show2) draw_pos(((ChainSolver) solvers.get(i)).get_p(), color(255, 0, 100), 3);
                 if (show3) draw_pos(constr, color(100, 100, 0), 3);
+                if(((ChainSolver) solvers.get(i)).avoid_pos != null && show1){
+                    draw_pos(((ChainSolver) solvers.get(i)).avoid_pos, color(255, 0, 0), 6);
+                }
+                if(((ChainSolver) solvers.get(i)).p_avoid_pos != null && show1){
+                    draw_pos(((ChainSolver) solvers.get(i)).p_avoid_pos, color(0, 255, 0), 6);
+                }
+
             }
         }
 

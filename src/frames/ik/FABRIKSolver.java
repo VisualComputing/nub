@@ -20,6 +20,7 @@ import processing.core.PGraphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public abstract class FABRIKSolver extends Solver {
   //TODO : Update
@@ -94,6 +95,7 @@ public abstract class FABRIKSolver extends Solver {
   protected ArrayList<Vector> _positions = new ArrayList<Vector>();
   protected ArrayList<Quaternion> _orientations = new ArrayList<Quaternion>();
   protected ArrayList<Float> _distances = new ArrayList<Float>();
+  protected ArrayList<Float> _jointChange = new ArrayList<Float>();
   protected ArrayList<Vector> _positions() {
     return _positions;
   }
@@ -102,6 +104,9 @@ public abstract class FABRIKSolver extends Solver {
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = false;
   protected boolean _keepDirection = true;
+
+  //TODO : Clean code
+  static Random r = new Random();
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -172,7 +177,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(), props_i._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(), (float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         _positions.set(i, Vector.add(pos_i1, desired));
       }
@@ -211,7 +216,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(pos_i, pos_i1);
         Vector n_tr = Vector.subtract(pos_i, o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(), props_i._directionWeight * delta.angle());
+        delta = new Quaternion(delta.axis(), (float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         positions.set(i, Vector.add(pos_i1, desired));
       }
@@ -230,6 +235,55 @@ public abstract class FABRIKSolver extends Solver {
 
 
   //TODO : Check for scaling when chain has constraints
+  protected static float _backwardReaching(ArrayList<? extends Frame> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties,  boolean kd, Vector o) {
+    float change = 0;
+    Quaternion orientation;
+    float magnitude;
+    orientation = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
+    magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
+
+    Vector o_hat = o;
+    for (int i = 0; i < chain.size() - 1; i++) {
+      if (distances.get(i + 1) == 0) {
+        positions.set(i + 1, positions.get(i));
+        continue;
+      }
+      magnitude *= chain.get(i).scaling();
+      //Find delta rotation
+      Properties props_i = properties.get(chain.get(i).id());
+      Properties props_i1 = properties.get(chain.get(i+1).id());
+      //TODO : Is necessary to check children?
+      //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
+      if(chain.get(i).constraint() != null && kd){
+        Vector tr = Vector.subtract(positions.get(i + 1), chain.get(i).position());
+        Vector n_tr = Vector.subtract(positions.get(i + 1), o_hat);
+        Quaternion delta = new Quaternion(tr, n_tr);
+        delta = new Quaternion(delta.axis(),(float)(Math.abs(r.nextGaussian()))* props_i1._directionWeight * delta.angle());
+        Vector desired = delta.rotate(tr);
+        o_hat = positions.get(i + 1);
+        positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
+      }
+      Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.divide(Vector.subtract(positions.get(i + 1), positions.get(i)), magnitude));
+      Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
+      //Apply delta rotation
+      Quaternion prev = chain.get(i).rotation().get();
+      if(props_i._useConstraint)chain.get(i).rotate(deltaRotation);
+      else{
+        chain.get(i).setRotation(Quaternion.compose(chain.get(i).rotation(), deltaRotation));
+      }
+      //Get how much change was applied:
+      change = Math.max(Quaternion.compose(prev.inverse(), chain.get(i).rotation()).angle(), change);
+      orientation.compose(chain.get(i).rotation());
+      Vector constrained_pos = orientation.rotate(chain.get(i + 1).translation().get());
+      constrained_pos.multiply(magnitude);
+      constrained_pos.add(positions.get(i));
+      //change += Vector.distance(_positions.get(i + 1), constrained_pos);
+      positions.set(i + 1, constrained_pos);
+    }
+    return change;
+  }
+
+  //TODO : All this code is a mess, remove duplicate code later, this is jusst to prove ideas
   protected float _backwardReaching(ArrayList<? extends Frame> chain, Vector o) {
     float change = 0;
     Quaternion orientation;
@@ -253,7 +307,7 @@ public abstract class FABRIKSolver extends Solver {
         Vector tr = Vector.subtract(_positions.get(i + 1), chain.get(i).position());
         Vector n_tr = Vector.subtract(_positions.get(i + 1), o_hat);
         Quaternion delta = new Quaternion(tr, n_tr);
-        delta = new Quaternion(delta.axis(),props_i1._directionWeight* delta.angle());
+        delta = new Quaternion(delta.axis(),(float)(Math.abs(r.nextGaussian())) * props_i1._directionWeight * delta.angle());
         Vector desired = delta.rotate(tr);
         o_hat = _positions.get(i + 1);
         _positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
@@ -267,7 +321,10 @@ public abstract class FABRIKSolver extends Solver {
         chain.get(i).setRotation(Quaternion.compose(chain.get(i).rotation(), deltaRotation));
       }
       //Get how much change was applied:
-      change = Math.max(Quaternion.compose(prev.inverse(), chain.get(i).rotation()).angle(), change);
+      float jointChange = Quaternion.compose(prev.inverse(), chain.get(i).rotation()).angle();
+      change = Math.max(jointChange, change);
+
+      _jointChange.set(i, _jointChange.get(i) + jointChange);
       orientation.compose(chain.get(i).rotation());
       _orientations.set(i, orientation.get());
       Vector constrained_pos = orientation.rotate(chain.get(i + 1).translation().get());
@@ -278,6 +335,9 @@ public abstract class FABRIKSolver extends Solver {
     }
     return change;
   }
+
+
+
 
   /*
    * Check the type of the constraint related to the Frame Parent (at the i-th position),

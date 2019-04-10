@@ -204,7 +204,9 @@ public class Util {
                 case HINGE:{
                     constraint = new Hinge(radians(random.nextFloat()*160 + 10), radians(radians(random.nextFloat()*160 + 10)));
                     ((Hinge) constraint).setRestRotation(structure.get(i).rotation().get());
-                    ((Hinge) constraint).setAxis(Vector.projectVectorOnPlane(Vector.random(), structure.get(i + 1).translation()));
+                    Vector vector = new Vector(2*random.nextFloat() - 1, 2*random.nextFloat() - 1, 2*random.nextFloat() - 1);
+                    vector.normalize();
+                    ((Hinge) constraint).setAxis(Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation()));
                     if(Vector.squaredNorm(((Hinge) constraint).axis()) == 0) {
                         constraint = null;
                     }
@@ -228,7 +230,7 @@ public class Util {
             String heuristics = "";
             if(s.keepDirection()) heuristics += "\n Keep directions";
             if(s.fixTwisting()) heuristics += "\n Fix Twisting";
-            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.exploration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof CCDSolver){
             pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
