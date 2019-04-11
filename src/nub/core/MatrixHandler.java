@@ -276,11 +276,9 @@ public class MatrixHandler {
    */
   public void beginHUD() {
     pushProjection();
-    _ortho2D();
+    _bindProjection(Matrix.hudProjection(_graph.width(), _graph.height()));
     pushModelView();
-    _resetViewPoint();
-    // TODO needs testing
-    _setUniforms();
+    _bindModelView(Matrix.hudView(_graph.width(), _graph.height()));
   }
 
   /**
@@ -291,96 +289,5 @@ public class MatrixHandler {
   public void endHUD() {
     popProjection();
     popModelView();
-  }
-
-  // see:
-  // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
-  // "9.030 How do I draw 2D controls over my 3D rendering?"
-  protected void _ortho2D() {
-    float cameraZ = (_graph._height / 2.0f) / (float) Math.tan((float) Math.PI / 8);
-    float cameraNear = cameraZ / 2.0f;
-    float cameraFar = cameraZ * 2.0f;
-
-    float left = -_graph._width / 2;
-    float right = _graph._width / 2;
-    float bottom = -_graph._height / 2;
-    float top = _graph._height / 2;
-    float near = cameraNear;
-    float far = cameraFar;
-
-    float x = +2.0f / (right - left);
-    float y = +2.0f / (top - bottom);
-    float z = -2.0f / (far - near);
-
-    float tx = -(right + left) / (right - left);
-    float ty = -(top + bottom) / (top - bottom);
-    float tz = -(far + near) / (far - near);
-
-    // The minus sign is needed to invert the Y axis.
-    _bindProjection(new Matrix(x, 0, 0, 0, 0, -y, 0, 0, 0, 0, z, 0, tx, ty, tz, 1));
-  }
-
-  // as it's done in P5:
-  protected void _resetViewPoint() {
-    float eyeX = _graph._width / 2f;
-    float eyeY = _graph._height / 2f;
-    float eyeZ = (_graph._height / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
-    float centerX = _graph._width / 2f;
-    float centerY = _graph._height / 2f;
-    float centerZ = 0;
-    float upX = 0;
-    float upY = 1;
-    float upZ = 0;
-
-    // Calculating Z vector
-    float z0 = eyeX - centerX;
-    float z1 = eyeY - centerY;
-    float z2 = eyeZ - centerZ;
-    float mag = (float) Math.sqrt(z0 * z0 + z1 * z1 + z2 * z2);
-    if (mag != 0) {
-      z0 /= mag;
-      z1 /= mag;
-      z2 /= mag;
-    }
-
-    // Calculating Y vector
-    float y0 = upX;
-    float y1 = upY;
-    float y2 = upZ;
-
-    // Computing X vector as Y cross Z
-    float x0 = y1 * z2 - y2 * z1;
-    float x1 = -y0 * z2 + y2 * z0;
-    float x2 = y0 * z1 - y1 * z0;
-
-    // Recompute Y = Z cross X
-    y0 = z1 * x2 - z2 * x1;
-    y1 = -z0 * x2 + z2 * x0;
-    y2 = z0 * x1 - z1 * x0;
-
-    // Cross product gives area of parallelogram, which is < 1.0 for
-    // non-perpendicular unit-length vectors; so normalize x, y here:
-    mag = (float) Math.sqrt(x0 * x0 + x1 * x1 + x2 * x2);
-    if (mag != 0) {
-      x0 /= mag;
-      x1 /= mag;
-      x2 /= mag;
-    }
-
-    mag = (float) Math.sqrt(y0 * y0 + y1 * y1 + y2 * y2);
-    if (mag != 0) {
-      y0 /= mag;
-      y1 /= mag;
-      y2 /= mag;
-    }
-
-    Matrix mv = new Matrix(x0, y0, z0, 0, x1, y1, z1, 0, x2, y2, z2, 0, 0, 0, 0, 1);
-
-    float tx = -eyeX;
-    float ty = -eyeY;
-    float tz = -eyeZ;
-
-    mv.translate(tx, ty, tz);
-    _bindModelView(mv);
   }
 }
