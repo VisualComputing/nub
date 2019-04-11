@@ -932,10 +932,6 @@ public class Matrix {
     return view;
   }
 
-  // see:
-  // http://www.opengl.org/archives/resources/faq/technical/transformations.htm
-  // "9.030 How do I draw 2D controls over my 3D rendering?"
-
   /**
    * Returns a hud (heads-up-display) projection matrix according to the window {@code width} and {@code height}
    * dimensions. It should be used in conjunction with {@link #hudView(int, int)} which properly positions the
@@ -973,6 +969,7 @@ public class Matrix {
    * See <a href="http://www.opengl.org/archives/resources/faq/technical/transformations.htm">9.030 How do I draw 2D controls over my 3D rendering?</a>
    */
   public static Matrix hudView(int width, int height) {
+    // as it's done in Processing:
     float eyeX = width / 2f;
     float eyeY = height / 2f;
     float eyeZ = (height / 2f) / (float) Math.tan((float) Math.PI * 60 / 360);
