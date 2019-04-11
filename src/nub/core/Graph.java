@@ -152,7 +152,7 @@ public class Graph {
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
   protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
-  protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
+  protected boolean _isProjectionViewInverseCached;
 
   // 3. Handlers
   protected class Ray {
@@ -234,8 +234,7 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     setMatrixHandler(new MatrixHandler(this));
-    _projectionView = new Matrix();
-    _isProjectionViewInverseCached = false;
+    cacheProjectionViewInverse(false);
 
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
@@ -2720,7 +2719,9 @@ public class Graph {
     timingHandler().handle();
     _projection = eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
     _view = eye().view();
-    _cacheProjectionView(Matrix.multiply(_projection, _view));
+    _projectionView = Matrix.multiply(_projection, _view);
+    if (isProjectionViewInverseCached())
+      _projectionViewInverse = Matrix.inverse(_projectionView);
     // TODO set context
     _matrixHandler._bind(_projection, _view);
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
@@ -2787,20 +2788,6 @@ public class Graph {
    */
   public void cacheProjectionViewInverse(boolean optimise) {
     _isProjectionViewInverseCached = optimise;
-  }
-
-  /**
-   * Caches the projection * view matrix.
-   *
-   * @see #isProjectionViewInverseCached()
-   */
-  protected void _cacheProjectionView(Matrix matrix) {
-    _projectionView.set(matrix);
-    if (isProjectionViewInverseCached()) {
-      if (_projectionViewInverse == null)
-        _projectionViewInverse = new Matrix();
-      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
-    }
   }
 
   /**
