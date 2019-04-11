@@ -14,6 +14,7 @@ public class ShadowMapDepthOnScreen extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
   Scene scene;
   Node[] shapes;
+  Node circle;
   PGraphics shadowMap;
   PShader depthShader;
   boolean one;
@@ -78,6 +79,21 @@ public class ShadowMapDepthOnScreen extends PApplet {
 
     scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
     scene.trackedNode("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedNode("light").position()));
+
+    circle = new Node(scene) {
+      @Override
+      public boolean graphics(PGraphics pg) {
+        scene.beginHUD(pg);
+        pg.pushStyle();
+        pg.noStroke();
+        pg.fill(255, 0, 255);
+        pg.circle(400, 400, 150);
+        scene.endHUD(pg);
+        pg.popStyle();
+        return true;
+      }
+    };
+    circle.setPickingThreshold(0);
   }
 
   public void setShader() {
