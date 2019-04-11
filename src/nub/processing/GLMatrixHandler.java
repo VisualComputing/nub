@@ -106,7 +106,10 @@ class GLMatrixHandler extends MatrixHandler {
       pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
       pggl().modelview.set(Scene.toPMatrix(matrix));
-      pggl().projmodelview.set(Matrix.multiply(projection(), cacheView()).get(new float[16], false));
+      // TODO maybe the cacheView needs testing
+      //pggl().projmodelview.set(Matrix.multiply(projection(), _graph.cacheView()).get(new float[16], false));
+      // maybe better like this: needs testing
+      pggl().projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
     }
   }
 

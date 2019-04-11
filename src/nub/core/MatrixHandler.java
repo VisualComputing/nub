@@ -11,7 +11,6 @@
 package nub.core;
 
 import nub.primitives.Matrix;
-import nub.primitives.Vector;
 
 /**
  * The matrix handler specifies (and implements) various matrix operations needed by the
@@ -40,9 +39,7 @@ import nub.primitives.Vector;
  */
 public class MatrixHandler {
   protected Graph _graph;
-  protected Matrix _projection, _view, _modelview;
-  protected Matrix _projectionView, _projectionViewInverse;
-  protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
+  protected Matrix _projection, _modelview;
 
   public static int STACK_DEPTH = 32;
   public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
@@ -53,17 +50,14 @@ public class MatrixHandler {
   protected int _projectionStackDepth;
 
   /**
-   * Instantiates matrices and sets {@link #isProjectionViewInverseCached()} to {@code false}.
+   * Instantiates matrices.
    *
    * @param graph this matrix handler belongs to
    */
   public MatrixHandler(Graph graph) {
     _graph = graph;
     _projection = new Matrix();
-    _view = new Matrix();
     _modelview = new Matrix();
-    _projectionView = new Matrix();
-    _isProjectionViewInverseCached = false;
   }
 
   public void applyTransformation(Node node) {
@@ -92,18 +86,9 @@ public class MatrixHandler {
    * @see #_bindModelView(Matrix)
    */
   protected void _bind(Matrix projection, Matrix view) {
-    //_projection.set(projection);
-    //_view.set(view);
-    //TODO experimental
-    _projection = projection;
-    _view = view;
-    _cacheProjectionView(Matrix.multiply(cacheProjection(), cacheView()));
-    // TODO _bindProjection is redundant when there's no binding of the matrices
-    // We could go like this (but I don't know if it works in JS):
-    //if(graph().getClass() != Graph.class)
-    _bindProjection(cacheProjection());
-    _bindModelView(cacheView());
-    _setUniforms();
+    _bindProjection(projection);
+    _bindModelView(view);
+    //_setUniforms();
   }
 
   // 1. May be overridden
@@ -131,6 +116,7 @@ public class MatrixHandler {
    */
   public void _bindProjection(Matrix matrix) {
     _projection.set(matrix);
+    _setUniforms();
   }
 
   /**
@@ -138,13 +124,14 @@ public class MatrixHandler {
    */
   public void _bindModelView(Matrix matrix) {
     _modelview.set(matrix);
+    _setUniforms();
   }
 
   /**
    * @return projection matrix
    */
   public Matrix projection() {
-    return cacheProjection();
+    return _projection;
   }
 
   /**
@@ -273,76 +260,6 @@ public class MatrixHandler {
    */
   public void scale(float sx, float sy) {
     scale(sx, sy, 1);
-  }
-
-  // 2b caches
-
-  /**
-   * Returns the cached projection matrix.
-   */
-  public Matrix cacheProjection() {
-    return _projection;
-  }
-
-  /**
-   * Returns the cached view matrix.
-   */
-  public Matrix cacheView() {
-    return _view;
-  }
-
-  /**
-   * Returns the cached projection * view matrix.
-   */
-  public Matrix cacheProjectionView() {
-    return _projectionView;
-  }
-
-  /**
-   * Returns the cached projection times view inverse matrix.
-   */
-  public Matrix cacheProjectionViewInverse() {
-    if (!isProjectionViewInverseCached())
-      throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
-    return _projectionViewInverse;
-  }
-
-  // cache setters for projection times view and its inverse
-
-  /**
-   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
-   * {@code false} otherwise.
-   *
-   * @see #cacheProjectionView()
-   * @see #cacheProjectionViewInverse(boolean)
-   */
-  public boolean isProjectionViewInverseCached() {
-    return _isProjectionViewInverseCached;
-  }
-
-  /**
-   * Caches the projection * view matrix.
-   *
-   * @see #isProjectionViewInverseCached()
-   */
-  protected void _cacheProjectionView(Matrix matrix) {
-    _projectionView.set(matrix);
-    if (isProjectionViewInverseCached()) {
-      if (_projectionViewInverse == null)
-        _projectionViewInverse = new Matrix();
-      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
-    }
-  }
-
-  /**
-   * Cache projection * view inverse matrix (and also projection * view) so that
-   * {@link Graph#location(Vector)} is optimized.
-   *
-   * @see #isProjectionViewInverseCached()
-   * @see #cacheProjectionView()
-   */
-  public void cacheProjectionViewInverse(boolean optimise) {
-    _isProjectionViewInverseCached = optimise;
   }
 
   // 2c screen drawing

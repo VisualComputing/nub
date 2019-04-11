@@ -151,6 +151,8 @@ public class Graph {
   // 2. Matrix handler
   protected int _width, _height;
   protected MatrixHandler _matrixHandler, _bbMatrixHandler;
+  protected Matrix _projection, _view, _projectionView, _projectionViewInverse;
+  protected boolean _isProjectionViewInverseCached, _projectionViewHasInverse;
 
   // 3. Handlers
   protected class Ray {
@@ -232,6 +234,8 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     setMatrixHandler(new MatrixHandler(this));
+    _projectionView = new Matrix();
+    _isProjectionViewInverseCached = false;
 
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
@@ -313,41 +317,6 @@ public class Graph {
       _height = height;
       _modified();
     }
-  }
-
-  /**
-   * Returns graph projection matrix.
-   */
-  public Matrix projection() {
-    return _matrixHandler.projection();
-  }
-
-  /**
-   * Returns graph cached view matrix.
-   */
-  public Matrix view() {
-    return _matrixHandler.cacheView();
-  }
-
-  /**
-   * Returns the projection times view cached matrix.
-   */
-  public Matrix projectionView() {
-    return _matrixHandler.cacheProjectionView();
-  }
-
-  /**
-   * Returns the projection times modelview matrix.
-   */
-  public Matrix projectionModelView() {
-    return _matrixHandler.projectionModelView();
-  }
-
-  /**
-   * Returns the modelview matrix.
-   */
-  public Matrix modelView() {
-    return _matrixHandler.modelView();
   }
 
   // Type handling stuff
@@ -941,30 +910,6 @@ public class Graph {
    */
   public MatrixHandler matrixHandler() {
     return _matrixHandler;
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#isProjectionViewInverseCached()}.
-   * <p>
-   * Use it only when continuously calling {@link #location(Vector)}.
-   *
-   * @see #cacheProjectionViewInverse(boolean)
-   * @see #location(Vector)
-   */
-  public boolean isProjectionViewInverseCached() {
-    return _matrixHandler.isProjectionViewInverseCached();
-  }
-
-  /**
-   * Wrapper for {@link MatrixHandler#cacheProjectionViewInverse(boolean)}.
-   * <p>
-   * Use it only when continuously calling {@link #location(Vector)}.
-   *
-   * @see #isProjectionViewInverseCached()
-   * @see #location(Vector)
-   */
-  public void cacheProjectionViewInverse(boolean optimise) {
-    _matrixHandler.cacheProjectionViewInverse(optimise);
   }
 
   // Eye stuff
@@ -2732,8 +2677,8 @@ public class Graph {
    * Render the scene into the back-buffer used for picking.
    */
   protected void _renderBackBuffer() {
-    _bbMatrixHandler._bindProjection(_matrixHandler.projection());
-    _bbMatrixHandler._bindModelView(_matrixHandler.cacheView());
+    _bbMatrixHandler._bindProjection(cacheProjection());
+    _bbMatrixHandler._bindModelView(cacheView());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
     if(isOffscreen())
@@ -2773,10 +2718,88 @@ public class Graph {
    */
   public void preDraw() {
     timingHandler().handle();
-    _matrixHandler._bind(eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded()), eye().view());
+    _projection = eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded());
+    _view = eye().view();
+    _cacheProjectionView(Matrix.multiply(_projection, _view));
+    // TODO set context
+    _matrixHandler._bind(_projection, _view);
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
+    }
+  }
+
+  // 2b caches
+
+  /**
+   * Returns the cached projection matrix.
+   */
+  public Matrix cacheProjection() {
+    return _projection;
+  }
+
+  /**
+   * Returns the cached view matrix.
+   */
+  public Matrix cacheView() {
+    return _view;
+  }
+
+  /**
+   * Returns the projection times view cached matrix.
+   */
+  public Matrix cacheProjectionView() {
+    return _projectionView;
+  }
+
+  /**
+   * Returns the cached projection times view inverse matrix.
+   */
+  public Matrix cacheProjectionViewInverse() {
+    if (!isProjectionViewInverseCached())
+      throw new RuntimeException("optimizeUnprojectCache(true) should be called first");
+    return _projectionViewInverse;
+  }
+
+  // cache setters for projection times view and its inverse
+
+  /**
+   * Returns {@code true} if the projection * view matrix and its inverse are being cached, and
+   * {@code false} otherwise.
+   * <p>
+   * Use it only when continuously calling {@link #location(Vector)}.
+   *
+   * @see #cacheProjectionView()
+   * @see #cacheProjectionViewInverse(boolean)
+   */
+  public boolean isProjectionViewInverseCached() {
+    return _isProjectionViewInverseCached;
+  }
+
+  /**
+   * Cache projection * view inverse matrix (and also projection * view) so that
+   * {@link Graph#location(Vector)} is optimized.
+   * <p>
+   * Use it only when continuously calling {@link #location(Vector)}.
+   *
+   * @see #isProjectionViewInverseCached()
+   * @see #cacheProjectionView()
+   */
+  public void cacheProjectionViewInverse(boolean optimise) {
+    _isProjectionViewInverseCached = optimise;
+  }
+
+  /**
+   * Caches the projection * view matrix.
+   *
+   * @see #isProjectionViewInverseCached()
+   */
+  protected void _cacheProjectionView(Matrix matrix) {
+    _projectionView.set(matrix);
+    if (isProjectionViewInverseCached()) {
+      if (_projectionViewInverse == null)
+        _projectionViewInverse = new Matrix();
+      _projectionViewHasInverse = _projectionView.invert(_projectionViewInverse);
     }
   }
 
@@ -2834,8 +2857,8 @@ public class Graph {
       //if (context == _fb)
       //render();
     else {
-      matrixHandler._bindProjection(_matrixHandler.projection());
-      matrixHandler._bindModelView(_matrixHandler.cacheView());
+      matrixHandler._bindProjection(cacheProjection());
+      matrixHandler._bindModelView(cacheView());
       for (Node node : _leadingNodes())
         _render(matrixHandler, context, node);
     }
@@ -3223,7 +3246,7 @@ public class Graph {
 
   // cached version
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
-    Matrix projectionViewMatrix = _matrixHandler.cacheProjectionView();
+    Matrix projectionViewMatrix = cacheProjectionView();
 
     float in[] = new float[4];
     float out[] = new float[4];
@@ -3328,10 +3351,10 @@ public class Graph {
    */
   protected boolean _location(float winx, float winy, float winz, float[] objCoordinate) {
     Matrix projectionViewInverseMatrix;
-    if (_matrixHandler.isProjectionViewInverseCached())
-      projectionViewInverseMatrix = _matrixHandler.cacheProjectionViewInverse();
+    if (isProjectionViewInverseCached())
+      projectionViewInverseMatrix = cacheProjectionViewInverse();
     else {
-      projectionViewInverseMatrix = Matrix.multiply(_matrixHandler.cacheProjection(), _matrixHandler.cacheView());
+      projectionViewInverseMatrix = Matrix.multiply(cacheProjection(), cacheView());
       projectionViewInverseMatrix.invert();
     }
 

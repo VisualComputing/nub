@@ -106,8 +106,8 @@ public class Shadows2Scenes extends PApplet {
     lightScene.shift(mainScene);
     background(0xff222222);
     if (!debug) {
-      Matrix lightMatrix = Matrix.multiply(biasMatrix, lightScene.projectionView());
-      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(mainScene.view())));
+      Matrix lightMatrix = Matrix.multiply(biasMatrix, lightScene.cacheProjectionView());
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(mainScene.cacheView())));
       Vector lightDirection = lightScene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", lightScene.context());
