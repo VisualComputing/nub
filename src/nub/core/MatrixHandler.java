@@ -56,8 +56,6 @@ public class MatrixHandler {
    */
   public MatrixHandler(Graph graph) {
     _graph = graph;
-    _projection = new Matrix();
-    _modelview = new Matrix();
   }
 
   public void applyTransformation(Node node) {
@@ -115,7 +113,7 @@ public class MatrixHandler {
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
    */
   public void _bindProjection(Matrix matrix) {
-    _projection.set(matrix);
+    _projection = matrix;
     _setUniforms();
   }
 
@@ -123,7 +121,7 @@ public class MatrixHandler {
    * Binds the modelview matrix to the renderer.
    */
   public void _bindModelView(Matrix matrix) {
-    _modelview.set(matrix);
+    _modelview = matrix;
     _setUniforms();
   }
 
@@ -131,14 +129,14 @@ public class MatrixHandler {
    * @return projection matrix
    */
   public Matrix projection() {
-    return _projection;
+    return _projection == null ? Matrix.perspective(1, 1, 1, 100) : _projection;
   }
 
   /**
    * @return modelview matrix
    */
   public Matrix modelView() {
-    return _modelview;
+    return _modelview == null ? new Matrix() : _modelview;
   }
 
   // matrix operations
