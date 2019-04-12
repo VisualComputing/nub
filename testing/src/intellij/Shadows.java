@@ -80,7 +80,7 @@ public class Shadows extends PApplet {
     // initDefaultPass
     shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow_gen/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow_gen/shadow_vert.glsl");
     shader(shadowShader);
-    GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(scene, shadowShader);
+    GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(shadowShader);
     scene.setMatrixHandler(glslMatrixHandler);
     noStroke();
     resetMatrix();
@@ -158,8 +158,7 @@ public class Shadows extends PApplet {
     PShader _shader;
     PMatrix3D _pmatrix = new PMatrix3D();
 
-    public GLSLMatrixHandler(Graph graph, PShader shader) {
-      super(graph);
+    public GLSLMatrixHandler(PShader shader) {
       _shader = shader;
     }
 

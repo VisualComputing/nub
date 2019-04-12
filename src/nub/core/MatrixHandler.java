@@ -38,7 +38,6 @@ import nub.primitives.Matrix;
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  protected Object _context;
   protected Matrix _projection, _modelview;
 
   public static int STACK_DEPTH = 32;
@@ -48,15 +47,6 @@ public class MatrixHandler {
   protected int _modelviewStackDepth;
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
-
-  /**
-   * Wraps {@code context}.
-   *
-   * @param context to be wrapped
-   */
-  public MatrixHandler(Object context) {
-    _context = context;
-  }
 
   /**
    * Updates (computes and caches) the projection and view matrices from the renderer context

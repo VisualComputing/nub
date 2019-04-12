@@ -24,10 +24,11 @@ import processing.core.PMatrix2D;
  */
 class Java2DMatrixHandler extends MatrixHandler {
   Graph _graph;
+  PGraphics _pg;
 
-  public Java2DMatrixHandler(Graph graph) {
-    super(graph._fb);
+  public Java2DMatrixHandler(Graph graph, PGraphics pg) {
     _graph = graph;
+    _pg = pg;
   }
 
   @Override
@@ -48,16 +49,6 @@ class Java2DMatrixHandler extends MatrixHandler {
     }
   }
 
-  /**
-   * Returns the PGraphics object to be bound by this handler.
-   */
-  public PGraphics pg() {
-    return (PGraphics) _context;
-  }
-
-  // Comment the above line and uncomment this one to develop the driver:
-  // public PGraphicsJava2D context() { return (PGraphicsJava2D) context; }
-
   @Override
   protected void _bind(Matrix projection, Matrix view) {
     _projection = projection;
@@ -72,7 +63,7 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void applyModelView(Matrix matrix) {
-    pg().applyMatrix(Scene.toPMatrix2D(matrix));
+    _pg.applyMatrix(Scene.toPMatrix2D(matrix));
   }
 
   @Override
@@ -93,51 +84,51 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void pushModelView() {
-    pg().pushMatrix();
+    _pg.pushMatrix();
   }
 
   @Override
   public void popModelView() {
-    pg().popMatrix();
+    _pg.popMatrix();
   }
 
   @Override
   public Matrix modelView() {
-    return Scene.toMatrix(new PMatrix2D(pg().getMatrix()));
+    return Scene.toMatrix(new PMatrix2D(_pg.getMatrix()));
   }
 
   @Override
   public void _bindModelView(Matrix matrix) {
-    pg().setMatrix(Scene.toPMatrix2D(matrix));
+    _pg.setMatrix(Scene.toPMatrix2D(matrix));
   }
 
   @Override
   public void translate(float x, float y) {
-    pg().translate(x, y);
+    _pg.translate(x, y);
   }
 
   @Override
   public void translate(float x, float y, float z) {
-    pg().translate(x, y, z);
+    _pg.translate(x, y, z);
   }
 
   @Override
   public void rotate(float angle) {
-    pg().rotate(angle);
+    _pg.rotate(angle);
   }
 
   @Override
   public void rotate(float angle, float vx, float vy, float vz) {
-    pg().rotate(angle, vx, vy, vz);
+    _pg.rotate(angle, vx, vy, vz);
   }
 
   @Override
   public void scale(float sx, float sy) {
-    pg().scale(sx, sy);
+    _pg.scale(sx, sy);
   }
 
   @Override
   public void scale(float sx, float sy, float sz) {
-    pg().scale(sx, sy, sz);
+    _pg.scale(sx, sy, sz);
   }
 }

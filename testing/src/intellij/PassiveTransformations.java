@@ -19,8 +19,7 @@ public class PassiveTransformations extends PApplet {
 
   public void setup() {
     graph = new Graph(width, height);
-    GLSLMatrixHandler glslMatrixHandler = new GLSLMatrixHandler(graph);
-    graph.setMatrixHandler(glslMatrixHandler);
+    graph.setMatrixHandler(new GLSLMatrixHandler());
     graph.setFOV(PI / 3);
     graph.fit(1);
     nodes = new Node[50];
@@ -68,8 +67,7 @@ public class PassiveTransformations extends PApplet {
     PShader _shader;
     PMatrix3D _pmatrix = new PMatrix3D();
 
-    public GLSLMatrixHandler(Graph graph) {
-      super(graph);
+    public GLSLMatrixHandler() {
       _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
     }
 

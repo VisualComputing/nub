@@ -21,13 +21,15 @@ import processing.opengl.PGraphicsOpenGL;
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.
  */
 class GLMatrixHandler extends MatrixHandler {
-  public GLMatrixHandler(PGraphicsOpenGL renderer) {
-    super(renderer);
+  PGraphicsOpenGL _pggl;
+
+  public GLMatrixHandler(PGraphicsOpenGL pggl) {
+    _pggl = pggl;
   }
 
   @Override
   public void applyTransformation(Node node) {
-    if (pggl() instanceof PGraphics3D) {
+    if (_pggl instanceof PGraphics3D) {
       translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
       rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
       scale(node.scaling(), node.scaling(), node.scaling());
@@ -49,95 +51,88 @@ class GLMatrixHandler extends MatrixHandler {
     }
   }
 
-  /**
-   * Returns the PGraphics object to be bound by this handler.
-   */
-  public PGraphicsOpenGL pggl() {
-    return (PGraphicsOpenGL) _context;
-  }
-
   @Override
   public void pushProjection() {
-    pggl().pushProjection();
+    _pggl.pushProjection();
   }
 
   @Override
   public void popProjection() {
-    pggl().popProjection();
+    _pggl.popProjection();
   }
 
   @Override
   public Matrix projection() {
-    return Scene.toMatrix(pggl().projection.get());
+    return Scene.toMatrix(_pggl.projection.get());
   }
 
   @Override
   public void _bindProjection(Matrix matrix) {
-    pggl().setProjection(Scene.toPMatrix(matrix));
+    _pggl.setProjection(Scene.toPMatrix(matrix));
   }
 
   @Override
   public void applyProjection(Matrix matrix) {
-    pggl().applyProjection(Scene.toPMatrix(matrix));
+    _pggl.applyProjection(Scene.toPMatrix(matrix));
   }
 
   @Override
   public void pushModelView() {
-    pggl().pushMatrix();
+    _pggl.pushMatrix();
   }
 
   @Override
   public void popModelView() {
-    pggl().popMatrix();
+    _pggl.popMatrix();
   }
 
   @Override
   public Matrix modelView() {
-    return Scene.toMatrix((PMatrix3D) pggl().getMatrix());
+    return Scene.toMatrix((PMatrix3D) _pggl.getMatrix());
   }
 
   @Override
   public void _bindModelView(Matrix matrix) {
-    if (pggl().is3D())
-      pggl().setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
+    if (_pggl.is3D())
+      _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
-      pggl().modelview.set(Scene.toPMatrix(matrix));
-      pggl().projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
+      _pggl.modelview.set(Scene.toPMatrix(matrix));
+      _pggl.projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
     }
   }
 
   @Override
   public void applyModelView(Matrix matrix) {
-    pggl().applyMatrix(Scene.toPMatrix(matrix));
+    _pggl.applyMatrix(Scene.toPMatrix(matrix));
   }
 
   @Override
   public void translate(float x, float y) {
-    pggl().translate(x, y);
+    _pggl.translate(x, y);
   }
 
   @Override
   public void translate(float x, float y, float z) {
-    pggl().translate(x, y, z);
+    _pggl.translate(x, y, z);
   }
 
   @Override
   public void rotate(float angle) {
-    pggl().rotate(angle);
+    _pggl.rotate(angle);
   }
 
   @Override
   public void rotate(float angle, float vx, float vy, float vz) {
-    pggl().rotate(angle, vx, vy, vz);
+    _pggl.rotate(angle, vx, vy, vz);
   }
 
   @Override
   public void scale(float sx, float sy) {
-    pggl().scale(sx, sy);
+    _pggl.scale(sx, sy);
   }
 
   @Override
   public void scale(float sx, float sy, float sz) {
-    pggl().scale(sx, sy, sz);
+    _pggl.scale(sx, sy, sz);
   }
 }
