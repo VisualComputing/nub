@@ -38,7 +38,7 @@ import nub.primitives.Matrix;
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  protected Graph _graph;
+  protected Graph _context;
   protected Matrix _projection, _modelview;
 
   public static int STACK_DEPTH = 32;
@@ -55,15 +55,7 @@ public class MatrixHandler {
    * @param graph this matrix handler belongs to
    */
   public MatrixHandler(Graph graph) {
-    _graph = graph;
-  }
-
-  public void applyTransformation(Node node) {
-    applyModelView(node.matrix());
-  }
-
-  public void applyWorldTransformation(Node node) {
-    applyModelView(node.worldMatrix());
+    _context = graph;
   }
 
   /**
@@ -90,6 +82,8 @@ public class MatrixHandler {
   }
 
   // 1. May be overridden
+
+  // bind
 
   /**
    * Returns {@link #projection()} times {@link #modelView()}.
@@ -239,9 +233,52 @@ public class MatrixHandler {
     _setUniforms();
   }
 
-  // 2. WARNING don't override from here ever!
+  // heads up display
 
-  // 2a macros
+  /**
+   * Begins Heads Up Display (HUD).
+   * <p>
+   * Binds {@code Matrix.hudProjection(width, height)} and {@code Matrix.hudView(width, height)}
+   * so that so that drawing can be done using 2D screen coordinates.
+   * Calls {@link #_setUniforms()}.
+   * <p>
+   *
+   * @see #endHUD()
+   * @see Matrix#hudProjection(int, int)
+   * @see Matrix#hudView(int, int)
+   */
+  public void beginHUD(int width, int height) {
+    pushProjection();
+    _bindProjection(Matrix.hudProjection(width, height));
+    pushModelView();
+    _bindModelView(Matrix.hudView(width, height));
+  }
+
+  /**
+   * Ends Heads Up Display (HUD).
+   * <p>
+   * Restores the projection and modelview matrices. See {@link #beginHUD(int, int)} for details.
+   *
+   * @see #beginHUD(int, int)
+   */
+  public void endHUD() {
+    popProjection();
+    popModelView();
+  }
+
+  // nub specific transformations
+
+  // TODO docs are missing
+
+  public void applyTransformation(Node node) {
+    applyModelView(node.matrix());
+  }
+
+  public void applyWorldTransformation(Node node) {
+    applyModelView(node.worldMatrix());
+  }
+
+  // 2. WARNING don't override from here ever!
 
   /**
    * Translate in X and Y.
@@ -258,36 +295,5 @@ public class MatrixHandler {
    */
   public void scale(float sx, float sy) {
     scale(sx, sy, 1);
-  }
-
-  // 2c screen drawing
-
-  /**
-   * Begin Heads Up Display (HUD) so that drawing can be done using 2D screen coordinates.
-   * Calls {@link #_setUniforms()}.
-   * <p>
-   * All screen drawing should be enclosed between {@link #beginHUD()} and
-   * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
-   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
-   * then draw first all your 3d before doing any call to a {@link #beginHUD()}
-   * and {@link #endHUD()} pair.
-   *
-   * @see #endHUD()
-   */
-  public void beginHUD() {
-    pushProjection();
-    _bindProjection(Matrix.hudProjection(_graph.width(), _graph.height()));
-    pushModelView();
-    _bindModelView(Matrix.hudView(_graph.width(), _graph.height()));
-  }
-
-  /**
-   * Ends Heads Up Display (HUD). See {@link #beginHUD()} for details.
-   *
-   * @see #beginHUD()
-   */
-  public void endHUD() {
-    popProjection();
-    popModelView();
   }
 }

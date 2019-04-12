@@ -49,7 +49,7 @@ class Java2DMatrixHandler extends MatrixHandler {
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
-    return (PGraphics) _graph._fb;
+    return (PGraphics) _context._fb;
   }
 
   // Comment the above line and uncomment this one to develop the driver:
@@ -59,10 +59,10 @@ class Java2DMatrixHandler extends MatrixHandler {
   protected void _bind(Matrix projection, Matrix view) {
     _projection = projection;
     _modelview = view;
-    Vector pos = _graph.eye().position();
-    Quaternion o = _graph.eye().orientation();
-    translate(_graph.width() / 2, _graph.height() / 2);
-    scale(1 / _graph.eye().magnitude(), (_graph.isRightHanded() ? -1 : 1) / _graph.eye().magnitude());
+    Vector pos = _context.eye().position();
+    Quaternion o = _context.eye().orientation();
+    translate(_context.width() / 2, _context.height() / 2);
+    scale(1 / _context.eye().magnitude(), (_context.isRightHanded() ? -1 : 1) / _context.eye().magnitude());
     rotate(-o.angle2D());
     translate(-pos.x(), -pos.y());
   }
@@ -73,14 +73,14 @@ class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void beginHUD() {
-    Vector pos = _graph.eye().position();
-    Quaternion o = _graph.eye().orientation();
+  public void beginHUD(int width, int height) {
+    Vector pos = _context.eye().position();
+    Quaternion o = _context.eye().orientation();
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle2D());
-    scale(_graph.eye().magnitude(), _graph.isRightHanded() ? -_graph.eye().magnitude() : _graph.eye().magnitude());
-    translate(-_graph.width() / 2, -_graph.height() / 2);
+    scale(_context.eye().magnitude(), _context.isRightHanded() ? -_context.eye().magnitude() : _context.eye().magnitude());
+    translate(-width / 2, -height / 2);
   }
 
   @Override

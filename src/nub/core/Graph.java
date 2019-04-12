@@ -866,23 +866,33 @@ public class Graph {
   // Matrix and transformations stuff
 
   /**
-   * Wrapper for {@link MatrixHandler#beginHUD()}. Adds exception when no properly
-   * closing the screen drawing with a call to {@link #endHUD()}.
+   * Begin Heads Up Display (HUD) so that drawing can be done using 2D screen coordinates.
+   * <p>
+   * All screen drawing should be enclosed between {@link #beginHUD()} and
+   * {@link #endHUD()}. Then you can just begin drawing your screen shapes.
+   * <b>Attention:</b> If you want your screen drawing to appear on top of your 3d graph
+   * then draw first all your 3d before doing any call to a {@link #beginHUD()}
+   * and {@link #endHUD()} pair.
+   * <p>
+   * Wrapper for {@link MatrixHandler#beginHUD(int, int)}.
    *
-   * @see MatrixHandler#beginHUD()
+   * @see #endHUD()
+   * @see MatrixHandler#beginHUD(int, int)
    */
   public void beginHUD() {
     if (_hudCalls != 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     _hudCalls++;
-    _matrixHandler.beginHUD();
+    _matrixHandler.beginHUD(width(), height());
   }
 
   /**
-   * Wrapper for {@link MatrixHandler#endHUD()} . Adds exception
-   * if {@link #beginHUD()} wasn't properly called before
+   * Ends Heads Up Display (HUD). Throws an exception if {@link #beginHUD()} wasn't properly called before.
+   * <p>
+   * Wrapper for {@link MatrixHandler#endHUD()}.
    *
+   * @see #beginHUD()
    * @see MatrixHandler#endHUD()
    */
   public void endHUD() {

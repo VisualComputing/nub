@@ -1183,10 +1183,9 @@ public class Scene extends Graph implements PConstants {
     // matrixHandler(p).beginHUD();
     // but perhaps a bit more efficient
     if (pGraphics == context())
-      _matrixHandler.beginHUD();
+      _matrixHandler.beginHUD(width(), height());
     else
-      // TODO fix me
-      matrixHandler(pGraphics).beginHUD();
+      matrixHandler(pGraphics).beginHUD(pGraphics.width, pGraphics.height);
   }
 
   /**
