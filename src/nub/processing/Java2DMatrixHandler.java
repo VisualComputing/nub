@@ -23,8 +23,11 @@ import processing.core.PMatrix2D;
  * Internal {@link MatrixHandler} based on PGraphicsJava2D graphics transformations.
  */
 class Java2DMatrixHandler extends MatrixHandler {
+  Graph _graph;
+
   public Java2DMatrixHandler(Graph graph) {
-    super(graph);
+    super(graph._fb);
+    _graph = graph;
   }
 
   @Override
@@ -49,7 +52,7 @@ class Java2DMatrixHandler extends MatrixHandler {
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphics pg() {
-    return (PGraphics) _context._fb;
+    return (PGraphics) _context;
   }
 
   // Comment the above line and uncomment this one to develop the driver:
@@ -59,10 +62,10 @@ class Java2DMatrixHandler extends MatrixHandler {
   protected void _bind(Matrix projection, Matrix view) {
     _projection = projection;
     _modelview = view;
-    Vector pos = _context.eye().position();
-    Quaternion o = _context.eye().orientation();
-    translate(_context.width() / 2, _context.height() / 2);
-    scale(1 / _context.eye().magnitude(), (_context.isRightHanded() ? -1 : 1) / _context.eye().magnitude());
+    Vector pos = _graph.eye().position();
+    Quaternion o = _graph.eye().orientation();
+    translate(_graph.width() / 2, _graph.height() / 2);
+    scale(1 / _graph.eye().magnitude(), (_graph.isRightHanded() ? -1 : 1) / _graph.eye().magnitude());
     rotate(-o.angle2D());
     translate(-pos.x(), -pos.y());
   }
@@ -74,12 +77,12 @@ class Java2DMatrixHandler extends MatrixHandler {
 
   @Override
   public void beginHUD(int width, int height) {
-    Vector pos = _context.eye().position();
-    Quaternion o = _context.eye().orientation();
+    Vector pos = _graph.eye().position();
+    Quaternion o = _graph.eye().orientation();
     pushModelView();
     translate(pos.x(), pos.y());
     rotate(o.angle2D());
-    scale(_context.eye().magnitude(), _context.isRightHanded() ? -_context.eye().magnitude() : _context.eye().magnitude());
+    scale(_graph.eye().magnitude(), _graph.isRightHanded() ? -_graph.eye().magnitude() : _graph.eye().magnitude());
     translate(-width / 2, -height / 2);
   }
 

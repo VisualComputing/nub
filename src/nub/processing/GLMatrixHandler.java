@@ -10,7 +10,6 @@
 
 package nub.processing;
 
-import nub.core.Graph;
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
@@ -22,16 +21,13 @@ import processing.opengl.PGraphicsOpenGL;
  * Internal {@link MatrixHandler} based on PGraphicsOpenGL graphics transformation.
  */
 class GLMatrixHandler extends MatrixHandler {
-  PGraphicsOpenGL _pgraphics;
-
-  public GLMatrixHandler(Graph graph, PGraphicsOpenGL renderer) {
-    super(graph);
-    _pgraphics = renderer;
+  public GLMatrixHandler(PGraphicsOpenGL renderer) {
+    super(renderer);
   }
 
   @Override
   public void applyTransformation(Node node) {
-    if (_pgraphics instanceof PGraphics3D) {
+    if (pggl() instanceof PGraphics3D) {
       translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
       rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
       scale(node.scaling(), node.scaling(), node.scaling());
@@ -57,7 +53,7 @@ class GLMatrixHandler extends MatrixHandler {
    * Returns the PGraphics object to be bound by this handler.
    */
   public PGraphicsOpenGL pggl() {
-    return _pgraphics;
+    return (PGraphicsOpenGL) _context;
   }
 
   @Override

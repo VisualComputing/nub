@@ -222,7 +222,7 @@ public class Scene extends Graph implements PConstants {
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
         null;
     if (_bb != null) {
-      _bbMatrixHandler = new GLMatrixHandler(this, (PGraphicsOpenGL) _bb);
+      _bbMatrixHandler = new GLMatrixHandler((PGraphicsOpenGL) _bb);
       _triangleShader = pApplet().loadShader("PickingBuffer.frag");
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
@@ -1117,7 +1117,7 @@ public class Scene extends Graph implements PConstants {
   public MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this);
-    return new GLMatrixHandler(this, (PGraphicsOpenGL) context);
+    return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
   /**

@@ -233,7 +233,7 @@ public class Graph {
   public Graph(Type type, int width, int height) {
     setWidth(width);
     setHeight(height);
-    setMatrixHandler(new MatrixHandler(this));
+    setMatrixHandler(new MatrixHandler(_fb));
     cacheProjectionViewInverse(false);
 
     _seeds = new ArrayList<Node>();
