@@ -921,6 +921,13 @@ public class Graph {
     return _matrixHandler;
   }
 
+  /**
+   * Dummy should be overridden
+   */
+  public MatrixHandler matrixHandler(Object context) {
+    return new MatrixHandler();
+  }
+
   // Eye stuff
 
   /**
@@ -2838,15 +2845,15 @@ public class Graph {
     _matrixHandler.popModelView();
   }
 
+  public void render(Object context) {
+    render(matrixHandler(context), context);
+  }
+
   /**
    * Renders the scene onto {@code context} using {@code matrixHandler}.
    *
    * @see #render()
    */
-  // TODO check mh <-> fbo relationship. Either is it one to one or (only) one to many?
-  // in the 2nd case (which I root for) we need only matrixhandler for everything!
-  // by seeing if this can be transform into:
-  // public void render(Object context)
   public void render(MatrixHandler matrixHandler, Object context) {
     // TODO adjust
     if (context == _fb)
@@ -2860,9 +2867,18 @@ public class Graph {
         _render(matrixHandler, context, node);
     }
   }
+  
+  public void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
+  }
 
-  // TODO goal. Big Q: perhaps move type, zNear, zFar and lh into matrixHandler???
-  // public void render(MatrixHandler matrixHandler, Node eye)
+  public void render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
+    render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
+  }
+
+  public void render(Object context, Matrix projection, Matrix view) {
+    render(matrixHandler(context), context, projection, view);
+  }
 
   public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     // TODO adjust

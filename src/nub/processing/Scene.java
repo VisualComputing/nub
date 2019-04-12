@@ -1082,8 +1082,7 @@ public class Scene extends Graph implements PConstants {
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
    * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}
    *
-   * @see #render(PGraphics, Type, Node, float, float) (Object, Matrix, Matrix)
-   * @see #render(PGraphics)
+   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
    * @see #render()
    */
@@ -1098,22 +1097,18 @@ public class Scene extends Graph implements PConstants {
    * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}
    *
    * @see #render(MatrixHandler, Object, Matrix, Matrix)
-   * @see #render(PGraphics)
+   * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float)
    * @see #render()
    */
-  // TODO push up into line
   public void render(PGraphics pGraphics, Type type, Node eye, float zNear, float zFar, boolean leftHanded) {
     if (pGraphics instanceof PGraphicsOpenGL)
-      render(matrixHandler(pGraphics), pGraphics, eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded), eye.view());
+      render(pGraphics, type, eye, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded);
     else
       System.out.println("Nothing done: pg should be instance of PGraphicsOpenGL in render()");
   }
 
-  public void render(PGraphics pGraphics) {
-    render(matrixHandler(pGraphics), pGraphics);
-  }
-
+  @Override
   public MatrixHandler matrixHandler(Object context) {
     if (!(context instanceof PGraphicsOpenGL))
       return new Java2DMatrixHandler(this, (PGraphics) context);
