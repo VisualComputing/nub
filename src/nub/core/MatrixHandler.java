@@ -18,11 +18,11 @@ import nub.primitives.Matrix;
  * <p>
  * To emit the {@link #transform()} matrix to a shader override the
  * {@link #_setUniforms()} signal, which is fired automatically by the handler every time
- * one of its matrices change state. See also {@link #projection()}, {@link #matrix()}.
+ * one of its matrices change state. See also {@link #projection()}, {@link #model()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
- * override: {@link #_bindMatrix(Matrix)}, {@link #matrix()}, {@link #applyMatrix(Matrix)},
+ * override: {@link #_bindMatrix(Matrix)}, {@link #model()}, {@link #applyMatrix(Matrix)},
  * {@link #pushMatrix()}, {@link #popMatrix()}, {@link #translate(float, float, float)},
  * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
  * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
@@ -32,13 +32,13 @@ import nub.primitives.Matrix;
  * @see Matrix
  * @see #projection()
  * @see #_bindProjection(Matrix)
- * @see #matrix()
+ * @see #model()
  * @see #_bindMatrix(Matrix)
  * @see #_bind(Matrix, Matrix)
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
-  protected Matrix _projection, _modelview;
+  protected Matrix _projection, _view, _model;
 
   public static int STACK_DEPTH = 32;
   public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushMatrix().";
@@ -67,7 +67,11 @@ public class MatrixHandler {
    */
   protected void _bind(Matrix projection, Matrix view) {
     _bindProjection(projection);
-    _bindMatrix(view);
+    _bindView(view);
+    if (_model == null)
+      _model = new Matrix();
+    else
+      _model.reset();
     //_setUniforms();
   }
 
@@ -76,19 +80,8 @@ public class MatrixHandler {
   // bind
 
   /**
-   * Returns {@link #projection()} times {@link #matrix()}.
-   *
-   * @see #_setUniforms()
-   * @see #projection()
-   * @see #matrix()
-   */
-  public Matrix transform() {
-    return Matrix.multiply(projection(), matrix());
-  }
-
-  /**
    * Emits the {@link #transform()} to the vertex shader whenever the {@link #projection()}
-   * or {@link #matrix()} matrices change. Default implementation is empty.
+   * or {@link #model()} matrices change. Default implementation is empty.
    */
   protected void _setUniforms() {
   }
@@ -102,25 +95,81 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds the matrix to the renderer.
+   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
    */
-  public void _bindMatrix(Matrix matrix) {
-    _modelview = matrix;
+  public void _bindView(Matrix matrix) {
+    _view = matrix;
     _setUniforms();
   }
 
   /**
-   * @return projection matrix
+   * Binds the matrix to the renderer.
+   */
+  public void _bindMatrix(Matrix matrix) {
+    _model = matrix;
+    _setUniforms();
+  }
+
+  // matrices
+
+  /**
+   * Returns the projection matrix.
+   *
+   * @see #view()
+   * @see #model()
+   * @see #modelview()
+   * @see #transform()
    */
   public Matrix projection() {
     return _projection == null ? Matrix.perspective(1, 1, 1, 100) : _projection;
   }
 
   /**
-   * @return modelview matrix
+   * Returns the view matrix.
+   *
+   * @see #projection()
+   * @see #model()
+   * @see #modelview()
+   * @see #transform()
    */
-  public Matrix matrix() {
-    return _modelview == null ? new Matrix() : _modelview;
+  public Matrix view() {
+    return _view == null ? new Matrix() : _view;
+  }
+
+  /**
+   * Returns the model matrix.
+   *
+   * @see #projection()
+   * @see #view()
+   * @see #modelview()
+   * @see #transform()
+   */
+  public Matrix model() {
+    return _model == null ? new Matrix() : _model;
+  }
+
+  /**
+   * Same as {@code return Matrix.multiply(view(), model())}.
+   *
+   * @see #projection()
+   * @see #view()
+   * @see #model()
+   * @see #transform()
+   */
+  public Matrix modelview() {
+    return Matrix.multiply(view(), model());
+  }
+
+  /**
+   * Returns {@link #projection()} times {@link #modelview()}.
+   *
+   * @see #projection()
+   * @see #view()
+   * @see #model()
+   * @see #modelview()
+   */
+  public Matrix transform() {
+    return Matrix.multiply(projection(), modelview());
   }
 
   // matrix operations
@@ -130,7 +179,7 @@ public class MatrixHandler {
    * Calls {@link #_setUniforms()}.
    */
   public void applyMatrix(Matrix source) {
-    _modelview.apply(source);
+    _model.apply(source);
     _setUniforms();
   }
 
@@ -150,7 +199,7 @@ public class MatrixHandler {
     if (_matrixStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    _modelview.get(_matrixStack[_matrixStackDepth]);
+    _model.get(_matrixStack[_matrixStackDepth]);
     _matrixStackDepth++;
   }
 
@@ -163,7 +212,7 @@ public class MatrixHandler {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
     _matrixStackDepth--;
-    _modelview.set(_matrixStack[_matrixStackDepth]);
+    _model.set(_matrixStack[_matrixStackDepth]);
     _setUniforms();
   }
 
@@ -171,7 +220,7 @@ public class MatrixHandler {
    * Translate in X, Y, and Z. Calls {@link #_setUniforms()}.
    */
   public void translate(float x, float y, float z) {
-    _modelview.translate(x, y, z);
+    _model.translate(x, y, z);
     _setUniforms();
   }
 
@@ -179,7 +228,7 @@ public class MatrixHandler {
    * Rotate around the Z axis. Calls {@link #_setUniforms()}.
    */
   public void rotate(float angle) {
-    _modelview.rotateZ(angle);
+    _model.rotateZ(angle);
     _setUniforms();
   }
 
@@ -187,7 +236,7 @@ public class MatrixHandler {
    * Rotate about a vector in space. Calls {@link #_setUniforms()}.
    */
   public void rotate(float angle, float v0, float v1, float v2) {
-    _modelview.rotate(angle, v0, v1, v2);
+    _model.rotate(angle, v0, v1, v2);
     _setUniforms();
   }
 
@@ -195,7 +244,7 @@ public class MatrixHandler {
    * Scale in X, Y, and Z. Calls {@link #_setUniforms()}.
    */
   public void scale(float sx, float sy, float sz) {
-    _modelview.scale(sx, sy, sz);
+    _model.scale(sx, sy, sz);
     _setUniforms();
   }
 

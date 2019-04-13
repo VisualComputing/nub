@@ -19,7 +19,7 @@ public class Interaction2D extends PApplet {
   PFont font36;
 
   public void settings() {
-    size(2600, 1400, P2D);
+    size(2600, 1400, JAVA2D);
   }
 
   public void setup() {

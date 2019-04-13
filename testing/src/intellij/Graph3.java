@@ -65,7 +65,7 @@ public class Graph3 extends PApplet {
 
   public void draw() {
     //graph.preDraw();
-    // can't pick because the matrixHandler cacheProjectionView is not updated
+    // can't pick because the matrixHandler projectionView is not updated
     updateMatrices();
     background(125);
     graph.render();

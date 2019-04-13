@@ -1976,7 +1976,7 @@ public class Node {
    */
   public void fromWorldMatrix(Matrix matrix) {
     if (matrix._matrix[15] == 0) {
-      System.out.println("Doing nothing: matrix.mat[15] should be non-zero!");
+      System.out.println("Doing nothing: model.mat[15] should be non-zero!");
       return;
     }
 

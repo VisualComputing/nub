@@ -28,6 +28,43 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
+  protected void _bind(Matrix projection, Matrix view) {
+    _bindProjection(projection);
+    _bindView(view);
+    _bindMatrix(view);
+  }
+
+  @Override
+  public void _bindProjection(Matrix matrix) {
+    _pggl.setProjection(Scene.toPMatrix(matrix));
+  }
+
+  @Override
+  public void _bindMatrix(Matrix matrix) {
+    if (_pggl.is3D())
+      _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
+    else {
+      _pggl.modelview.set(Scene.toPMatrix(matrix));
+      _pggl.projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
+    }
+  }
+
+  @Override
+  public Matrix projection() {
+    return Scene.toMatrix(_pggl.projection.get());
+  }
+
+  @Override
+  public Matrix model() {
+    return Matrix.multiply(Matrix.inverse(view()), modelview());
+  }
+
+  @Override
+  public Matrix modelview() {
+    return Scene.toMatrix((PMatrix3D) _pggl.getMatrix());
+  }
+
+  @Override
   public void applyTransformation(Node node) {
     if (_pggl instanceof PGraphics3D) {
       translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
@@ -62,16 +99,6 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public Matrix projection() {
-    return Scene.toMatrix(_pggl.projection.get());
-  }
-
-  @Override
-  public void _bindProjection(Matrix matrix) {
-    _pggl.setProjection(Scene.toPMatrix(matrix));
-  }
-
-  @Override
   public void applyProjection(Matrix matrix) {
     _pggl.applyProjection(Scene.toPMatrix(matrix));
   }
@@ -84,21 +111,6 @@ class GLMatrixHandler extends MatrixHandler {
   @Override
   public void popMatrix() {
     _pggl.popMatrix();
-  }
-
-  @Override
-  public Matrix matrix() {
-    return Scene.toMatrix((PMatrix3D) _pggl.getMatrix());
-  }
-
-  @Override
-  public void _bindMatrix(Matrix matrix) {
-    if (_pggl.is3D())
-      _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
-    else {
-      _pggl.modelview.set(Scene.toPMatrix(matrix));
-      _pggl.projmodelview.set(Matrix.multiply(projection(), matrix).get(new float[16], false));
-    }
   }
 
   @Override

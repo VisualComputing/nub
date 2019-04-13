@@ -71,7 +71,7 @@ public class Graph1 extends PApplet {
 // we need to update the shader:
   void setUniforms() {
     shader(framesShader);
-    pmv = Matrix.multiply(graph.matrixHandler().projection(), graph.matrixHandler().matrix());
+    pmv = Matrix.multiply(graph.matrixHandler().projection(), graph.matrixHandler().model());
     pmatrix.set(pmv.get(new float[16]));
     framesShader.set("nub_transform", pmatrix);
   }

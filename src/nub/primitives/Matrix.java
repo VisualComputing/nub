@@ -740,7 +740,7 @@ public class Matrix {
     if (matrix.invert(invMatrix))
       return invMatrix;
     else
-      throw new RuntimeException("matrix is not invertible!");
+      throw new RuntimeException("model is not invertible!");
   }
 
   /**
