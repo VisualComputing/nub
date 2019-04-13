@@ -231,9 +231,9 @@ public class Graph {
    */
   public Graph(Object context, Type type, int width, int height) {
     _fb = context;
+    setMatrixHandler(matrixHandler(_fb));
     setWidth(width);
     setHeight(height);
-    setMatrixHandler(matrixHandler(_fb));
     cacheProjectionViewInverse(false);
 
     _seeds = new ArrayList<Node>();
@@ -2701,12 +2701,13 @@ public class Graph {
     return _fb;
   }
 
-  /*
+  /**
+   * Returns the back buffer, used for
+   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>. Maybe {@code null}
+   */
   protected Object _backBuffer() {
-    //<a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
     return _bb;
   }
-   */
 
   /**
    * Render the scene into the back-buffer used for picking.

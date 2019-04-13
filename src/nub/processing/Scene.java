@@ -216,7 +216,7 @@ public class Scene extends Graph implements PConstants {
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
-    // 2. Matrix handlers
+    // 2. Back buffer
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
         null;
@@ -279,13 +279,8 @@ public class Scene extends Graph implements PConstants {
 
   // PICKING BUFFER
 
-  // TODO decide
-
-  /**
-   * Returns the back buffer, used for
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
-   */
-  public PGraphics _backBuffer() {
+  @Override
+  protected PGraphics _backBuffer() {
     return (PGraphics) _bb;
   }
 
