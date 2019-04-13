@@ -47,10 +47,10 @@ import java.util.ListIterator;
  * <pre>
  * {@code
  * void mainLoop() {
- *   graph.pushModelView();
+ *   pushMatrix();
  *   graph.applyTransformation(interpolator.node());
  *   // draw your object here. Its position, orientation and magnitude are interpolated.
- *   graph.popModelView();
+ *   popMatrix();
  * }
  * }
  * </pre>

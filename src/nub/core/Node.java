@@ -62,10 +62,10 @@ import java.util.List;
  * along the (1,1,1)} direction<br>
  * {@code Node node = new Node(new Vector(0.5,0,0), new Quaternion(new Vector(0,1,0),
  * new Vector(1,1,1)));} <br>
- * {@code graph.pushModelView();} <br>
- * {@code graph.applyModelView(node.matrix());} <br>
+ * {@code pushMatrix();} <br>
+ * {@code graph.applyTransformation(node);} <br>
  * {@code // Draw your object here, in the local node coordinate system.} <br>
- * {@code graph.popModelView();} <br>
+ * {@code popMatrix();} <br>
  * <p>
  * Use {@link #view()} and {@link #projection(Graph.Type, float, float, float, float, boolean)}
  * when rendering the scene from the node point-of-view. Note these methods are used by the
@@ -1662,44 +1662,12 @@ public class Node {
   /**
    * Returns the local transformation matrix represented by the node.
    * <p>
-   * This method could be used in conjunction with {@code pushMatrix()}, {@code popMatrix()}
-   * and {@code applyMatrix()} to modify a graph modelView() matrix from a node hierarchy.
-   * For example, with this node hierarchy:
-   * <p>
-   * {@code Node body = new Node();} <br>
-   * {@code Node leftArm = new Node();} <br>
-   * {@code Node rightArm = new Node();} <br>
-   * {@code leftArm.setReference(body);} <br>
-   * {@code rightArm.setReference(body);} <br>
-   * <p>
-   * The associated drawing code should look like:
-   * <p>
-   * {@code graph.pushModelView();}<br>
-   * {@code graph.applyMatrix(body.matrix());} <br>
-   * {@code drawBody();} <br>
-   * {@code graph.pushModelView();} <br>
-   * {@code graph.applyMatrix(leftArm.matrix());} <br>
-   * {@code drawArm();} <br>
-   * {@code graph.popModelView();} <br>
-   * {@code graph.pushModelView();} <br>
-   * {@code graph.applyMatrix(rightArm.matrix());} <br>
-   * {@code drawArm();} <br>
-   * {@code graph.popModelView();} <br>
-   * {@code graph.popModelView();} <br>
-   * <p>
-   * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
-   * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
-   * correctly drawn with respect to the {@code body} coordinate system.
-   * <p>
    * This matrix only represents the local node transformation (i.e., with respect to the
    * {@link #reference()}). Use {@link #worldMatrix()} to get the full Node
    * transformation matrix (i.e., from the world to the Node coordinate system). These
    * two match when the {@link #reference()} is {@code null}.
    *
-   * <b>Attention:</b> In Processing this technique is inefficient because
-   * {@code papplet.applyMatrix} will try to calculate the inverse of the transform.
-   * Use {@link Graph#applyTransformation(Node)} instead.
-   *
+   * @see Graph#applyTransformation(Node)
    * @see #set(Node)
    * @see #worldMatrix()
    * @see #view()
@@ -1733,14 +1701,6 @@ public class Node {
    * direct access to it, without the need to traverse its ancestor hierarchy first
    * (as it is the case with {@link #matrix()}).
    * <p>
-   * This method should be used in conjunction with {@code applyMatrix()} to modify a
-   * graph modelView() matrix from a node:
-   * <p>
-   * {@code // Here the modelview matrix corresponds to the world coordinate system.} <br>
-   * {@code Node node = new Node(translation, new Rotation(from, to));} <br>
-   * {@code graph.applyModelView(node.worldMatrix());} <br>
-   * {@code // draw object in the node coordinate system.} <br>
-   * <p>
    * This matrix represents the global node transformation: the entire
    * {@link #reference()} hierarchy is taken into account to define the node
    * transformation from the world coordinate system. Use {@link #matrix()} to get the
@@ -1748,6 +1708,7 @@ public class Node {
    * {@link #reference()}). These two match when the {@link #reference()} is
    * {@code null}.
    *
+   * @see Graph#applyWorldTransformation(Node)
    * @see #set(Node)
    * @see #matrix()
    * @see #view()
@@ -1790,10 +1751,10 @@ public class Node {
    * <p>
    * {@code Node node = new Node();} <br>
    * {@code node.fromMatrix(m);} <br>
-   * {@code graph.pushModelView();} <br>
-   * {@code graph.applyModelView(node.matrix());} <br>
+   * {@code pushMatrix();} <br>
+   * {@code graph.applyTransformation(node);} <br>
    * {@code // You are in the local node coordinate system.} <br>
-   * {@code graph.popModelView();} <br>
+   * {@code popMatrix();} <br>
    * <p>
    * Which allows to apply local transformations to the {@code node} while using geometry
    * data from other node instances when necessary (see {@link #location(Vector, Node)} and
@@ -2003,7 +1964,7 @@ public class Node {
    * <p>
    * {@code Node node = new Node();} <br>
    * {@code node.fromWorldMatrix(m);} <br>
-   * {@code graph.applyModelView(node.matrix());} <br>
+   * {@code graph.applyWorldTransformation(node);} <br>
    * {@code // You are in the local node coordinate system.} <br>
    * <p>
    * Which allows to apply local transformations to the {@code node} while using geometry

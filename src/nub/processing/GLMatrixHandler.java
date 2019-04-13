@@ -77,22 +77,22 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void pushModelView() {
+  public void pushMatrix() {
     _pggl.pushMatrix();
   }
 
   @Override
-  public void popModelView() {
+  public void popMatrix() {
     _pggl.popMatrix();
   }
 
   @Override
-  public Matrix modelView() {
+  public Matrix matrix() {
     return Scene.toMatrix((PMatrix3D) _pggl.getMatrix());
   }
 
   @Override
-  public void _bindModelView(Matrix matrix) {
+  public void _bindMatrix(Matrix matrix) {
     if (_pggl.is3D())
       _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {
@@ -102,7 +102,7 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  public void applyModelView(Matrix matrix) {
+  public void applyMatrix(Matrix matrix) {
     _pggl.applyMatrix(Scene.toPMatrix(matrix));
   }
 

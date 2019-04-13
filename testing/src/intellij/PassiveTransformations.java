@@ -74,10 +74,10 @@ public class PassiveTransformations extends PApplet {
     @Override
     protected void _setUniforms() {
       shader(_shader);
-      //_pmatrix.set(Scene.toPMatrix(projectionModelView()));
+      //_pmatrix.set(Scene.toPMatrix(transform()));
       //_pmatrix.transpose();
       // same as:
-      _pmatrix.set(projectionModelView().get(new float[16]));
+      _pmatrix.set(transform().get(new float[16]));
       _shader.set("nub_transform", _pmatrix);
     }
   }

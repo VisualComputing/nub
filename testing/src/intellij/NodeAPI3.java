@@ -306,7 +306,6 @@ public class NodeAPI3 extends PApplet {
   void drawArrow(Node node, Vector from, Vector to) {
     if (node != null) {
       pushMatrix();
-      //scene.applyModelView(node.worldMatrix());// world, is handy but inefficient
       scene.applyWorldTransformation(node);
       scene.drawArrow(from, to, 1);
       popMatrix();

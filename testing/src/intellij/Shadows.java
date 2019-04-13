@@ -165,8 +165,8 @@ public class Shadows extends PApplet {
     @Override
     protected void _setUniforms() {
       shader(_shader);
-      Scene.setUniform(_shader, "nub_transform", projectionModelView());
-      Scene.setUniform(_shader, "nub_modelview", modelView());
+      Scene.setUniform(_shader, "nub_transform", transform());
+      Scene.setUniform(_shader, "nub_modelview", matrix());
     }
   }
 

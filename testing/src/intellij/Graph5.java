@@ -86,9 +86,9 @@ public class Graph5 extends PApplet {
     protected void _setUniforms() {
       shader(framesShader);
       // same as:
-      //pmatrix.set(Scene.toPMatrix(projectionModelView()));
+      //pmatrix.set(Scene.toPMatrix(transform()));
       //pmatrix.transpose();
-      pmatrix.set(projectionModelView().get(new float[16]));
+      pmatrix.set(transform().get(new float[16]));
       framesShader.set("nub_transform", pmatrix);
     }
   }

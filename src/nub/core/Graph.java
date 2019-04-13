@@ -106,9 +106,9 @@ import java.util.List;
  * documentation for details.
  * <p>
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
- * (see also {@link #applyWorldTransformation(Node)}) between {@code pushModelView()} and
- * {@code popModelView()}. Note that the node transformations are applied automatically by
- * the {@link #render(MatrixHandler, Object)} algorithm (in this case you don't need to call them).
+ * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
+ * applied automatically by the {@link #render(MatrixHandler, Object)} algorithm
+ * (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
@@ -2253,31 +2253,29 @@ public class Graph {
    * {@link Node#reference()}. The Node is first translated, then rotated around
    * the new translated origin and then scaled.
    * <p>
-   * This method may be used to modify the modelview matrix from a node hierarchy. For
+   * This method may be used to modify the transform matrix from a node hierarchy. For
    * example, with this node hierarchy:
    * <p>
    * {@code Node body = new Node();} <br>
-   * {@code Node leftArm = new Node();} <br>
-   * {@code Node rightArm = new Node();} <br>
-   * {@code leftArm.setReference(body);} <br>
-   * {@code rightArm.setReference(body);} <br>
+   * {@code Node leftArm = new Node(body);} <br>
+   * {@code Node rightArm = new Node(body);} <br>
    * <p>
    * The associated drawing code should look like:
    * <p>
-   * {@code pushModelView();} <br>
-   * {@code applyTransformation(body);} <br>
+   * {@code pushMatrix();} <br>
+   * {@code this.applyTransformation(body);} <br>
    * {@code drawBody();} <br>
-   * {@code pushModelView();} <br>
-   * {@code applyTransformation(leftArm);} <br>
+   * {@code pushMatrix();} <br>
+   * {@code this.applyTransformation(leftArm);} <br>
    * {@code drawArm();} <br>
    * {@code popMatrix();} <br>
    * {@code pushMatrix();} <br>
    * {@code applyTransformation(rightArm);} <br>
    * {@code drawArm();} <br>
-   * {@code popModelView();} <br>
-   * {@code popModelView();} <br>
+   * {@code popMatrix();} <br>
+   * {@code popMatrix();} <br>
    * <p>
-   * Note the use of nested {@code pushModelView()} and {@code popModelView()} blocks to
+   * Note the use of nested {@code pushMatrix()} and {@code popMatrix()} blocks to
    * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    *
@@ -2694,7 +2692,7 @@ public class Graph {
    */
   protected void _renderBackBuffer() {
     _bbMatrixHandler._bindProjection(cacheProjection());
-    _bbMatrixHandler._bindModelView(cacheView());
+    _bbMatrixHandler._bindMatrix(cacheView());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
     if(isOffscreen())
@@ -2705,7 +2703,7 @@ public class Graph {
    * Used by the {@link #_renderBackBuffer()} algorithm.
    */
   protected void _renderBackBuffer(Node node) {
-    _bbMatrixHandler.pushModelView();
+    _bbMatrixHandler.pushMatrix();
     _bbMatrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       _drawBackBuffer(node);
@@ -2714,7 +2712,7 @@ public class Graph {
       for (Node child : node.children())
         _renderBackBuffer(child);
     }
-    _bbMatrixHandler.popModelView();
+    _bbMatrixHandler.popMatrix();
   }
 
   /**
@@ -2831,7 +2829,7 @@ public class Graph {
    * Used by the {@link #render()} algorithm.
    */
   protected void _render(Node node) {
-    _matrixHandler.pushModelView();
+    _matrixHandler.pushMatrix();
     applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
@@ -2842,7 +2840,7 @@ public class Graph {
       for (Node child : node.children())
         _render(child);
     }
-    _matrixHandler.popModelView();
+    _matrixHandler.popMatrix();
   }
 
   public void render(Object context) {
@@ -2862,7 +2860,7 @@ public class Graph {
       //render();
     else {
       matrixHandler._bindProjection(cacheProjection());
-      matrixHandler._bindModelView(cacheView());
+      matrixHandler._bindMatrix(cacheView());
       for (Node node : _leadingNodes())
         _render(matrixHandler, context, node);
     }
@@ -2888,7 +2886,7 @@ public class Graph {
       //render();
     else {
       matrixHandler._bindProjection(projection);
-      matrixHandler._bindModelView(view);
+      matrixHandler._bindMatrix(view);
       for (Node node : _leadingNodes())
         _render(matrixHandler, context, node);
     }
@@ -2898,14 +2896,14 @@ public class Graph {
    * Used by the {@link #render(MatrixHandler, Object)} algorithm.
    */
   protected void _render(MatrixHandler matrixHandler, Object context, Node node) {
-    matrixHandler.pushModelView();
+    matrixHandler.pushMatrix();
     matrixHandler.applyTransformation(node);
     if (!node.isCulled()) {
       _drawOntoBuffer(context, node);
       for (Node child : node.children())
         _render(matrixHandler, context, child);
     }
-    matrixHandler.popModelView();
+    matrixHandler.popMatrix();
   }
 
   /**

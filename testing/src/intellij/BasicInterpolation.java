@@ -49,10 +49,10 @@ public class BasicInterpolation extends PApplet {
 
     pushStyle();
     fill(255, 0, 0, 125);
-    scene.matrixHandler().pushModelView();
+    scene.matrixHandler().pushMatrix();
     scene.applyTransformation(interpolator.node());
     box(50);
-    scene.matrixHandler().popModelView();
+    scene.matrixHandler().popMatrix();
     popStyle();
   }
 

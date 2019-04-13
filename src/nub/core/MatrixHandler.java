@@ -16,14 +16,14 @@ import nub.primitives.Matrix;
  * The matrix handler specifies (and implements) various matrix operations needed by the
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
- * To emit the {@link #projectionModelView()} matrix to a shader override the
+ * To emit the {@link #transform()} matrix to a shader override the
  * {@link #_setUniforms()} signal, which is fired automatically by the handler every time
- * one of its matrices change state. See also {@link #projection()}, {@link #modelView()}.
+ * one of its matrices change state. See also {@link #projection()}, {@link #matrix()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
- * override: {@link #_bindModelView(Matrix)}, {@link #modelView()}, {@link #applyModelView(Matrix)},
- * {@link #pushModelView()}, {@link #popModelView()}, {@link #translate(float, float, float)},
+ * override: {@link #_bindMatrix(Matrix)}, {@link #matrix()}, {@link #applyMatrix(Matrix)},
+ * {@link #pushMatrix()}, {@link #popMatrix()}, {@link #translate(float, float, float)},
  * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
  * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
  * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
@@ -32,8 +32,8 @@ import nub.primitives.Matrix;
  * @see Matrix
  * @see #projection()
  * @see #_bindProjection(Matrix)
- * @see #modelView()
- * @see #_bindModelView(Matrix)
+ * @see #matrix()
+ * @see #_bindMatrix(Matrix)
  * @see #_bind(Matrix, Matrix)
  * @see Graph#preDraw()
  */
@@ -41,10 +41,10 @@ public class MatrixHandler {
   protected Matrix _projection, _modelview;
 
   public static int STACK_DEPTH = 32;
-  public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushModelView().";
-  public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popModelView(), and not enough to pushModelView().";
-  protected float[][] _modelviewStack = new float[STACK_DEPTH][16];
-  protected int _modelviewStackDepth;
+  public static String ERROR_PUSHMATRIX_OVERFLOW = "Too many calls to pushMatrix().";
+  public static String ERROR_PUSHMATRIX_UNDERFLOW = "Too many calls to popMatrix(), and not enough to pushMatrix().";
+  protected float[][] _matrixStack = new float[STACK_DEPTH][16];
+  protected int _matrixStackDepth;
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
 
@@ -56,18 +56,18 @@ public class MatrixHandler {
    * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
    * this method also binds the projection and view matrices to that renderer.
-   * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindModelView(Matrix)}
+   * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindMatrix(Matrix)}
    * should be overridden, by implementing them in terms of the renderer parameters.
    *
    * @see Graph#render()
    * @see Node#projection(Graph.Type, float, float, float, float, boolean)
    * @see Node#view()
    * @see #_bindProjection(Matrix)
-   * @see #_bindModelView(Matrix)
+   * @see #_bindMatrix(Matrix)
    */
   protected void _bind(Matrix projection, Matrix view) {
     _bindProjection(projection);
-    _bindModelView(view);
+    _bindMatrix(view);
     //_setUniforms();
   }
 
@@ -76,19 +76,19 @@ public class MatrixHandler {
   // bind
 
   /**
-   * Returns {@link #projection()} times {@link #modelView()}.
+   * Returns {@link #projection()} times {@link #matrix()}.
    *
    * @see #_setUniforms()
    * @see #projection()
-   * @see #modelView()
+   * @see #matrix()
    */
-  public Matrix projectionModelView() {
-    return Matrix.multiply(projection(), modelView());
+  public Matrix transform() {
+    return Matrix.multiply(projection(), matrix());
   }
 
   /**
-   * Emits the {@link #projectionModelView()} to the vertex shader whenever the {@link #projection()}
-   * or {@link #modelView()} matrices change. Default implementation is empty.
+   * Emits the {@link #transform()} to the vertex shader whenever the {@link #projection()}
+   * or {@link #matrix()} matrices change. Default implementation is empty.
    */
   protected void _setUniforms() {
   }
@@ -102,9 +102,9 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds the modelview matrix to the renderer.
+   * Binds the matrix to the renderer.
    */
-  public void _bindModelView(Matrix matrix) {
+  public void _bindMatrix(Matrix matrix) {
     _modelview = matrix;
     _setUniforms();
   }
@@ -119,7 +119,7 @@ public class MatrixHandler {
   /**
    * @return modelview matrix
    */
-  public Matrix modelView() {
+  public Matrix matrix() {
     return _modelview == null ? new Matrix() : _modelview;
   }
 
@@ -129,7 +129,7 @@ public class MatrixHandler {
    * Multiplies the current modelview matrix by the one specified through the parameters.
    * Calls {@link #_setUniforms()}.
    */
-  public void applyModelView(Matrix source) {
+  public void applyMatrix(Matrix source) {
     _modelview.apply(source);
     _setUniforms();
   }
@@ -146,24 +146,24 @@ public class MatrixHandler {
   /**
    * Push a copy of the modelview matrix onto the stack.
    */
-  public void pushModelView() {
-    if (_modelviewStackDepth == STACK_DEPTH) {
+  public void pushMatrix() {
+    if (_matrixStackDepth == STACK_DEPTH) {
       throw new RuntimeException(ERROR_PUSHMATRIX_OVERFLOW);
     }
-    _modelview.get(_modelviewStack[_modelviewStackDepth]);
-    _modelviewStackDepth++;
+    _modelview.get(_matrixStack[_matrixStackDepth]);
+    _matrixStackDepth++;
   }
 
   /**
    * Replace the current modelview matrix with the top of the stack.
    * Calls {@link #_setUniforms()}.
    */
-  public void popModelView() {
-    if (_modelviewStackDepth == 0) {
+  public void popMatrix() {
+    if (_matrixStackDepth == 0) {
       throw new RuntimeException(ERROR_PUSHMATRIX_UNDERFLOW);
     }
-    _modelviewStackDepth--;
-    _modelview.set(_modelviewStack[_modelviewStackDepth]);
+    _matrixStackDepth--;
+    _modelview.set(_matrixStack[_matrixStackDepth]);
     _setUniforms();
   }
 
@@ -240,8 +240,8 @@ public class MatrixHandler {
   public void beginHUD(int width, int height) {
     pushProjection();
     _bindProjection(Matrix.hudProjection(width, height));
-    pushModelView();
-    _bindModelView(Matrix.hudView(width, height));
+    pushMatrix();
+    _bindMatrix(Matrix.hudView(width, height));
   }
 
   /**
@@ -253,7 +253,7 @@ public class MatrixHandler {
    */
   public void endHUD() {
     popProjection();
-    popModelView();
+    popMatrix();
   }
 
   // nub specific transformations
@@ -261,11 +261,11 @@ public class MatrixHandler {
   // TODO docs are missing
 
   public void applyTransformation(Node node) {
-    applyModelView(node.matrix());
+    applyMatrix(node.matrix());
   }
 
   public void applyWorldTransformation(Node node) {
-    applyModelView(node.worldMatrix());
+    applyMatrix(node.worldMatrix());
   }
 
   // 2. WARNING don't override from here ever!
