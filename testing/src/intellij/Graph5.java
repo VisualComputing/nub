@@ -22,7 +22,7 @@ public class Graph5 extends PApplet {
   }
 
   public void setup() {
-    graph = new Graph(width, height);
+    graph = new Graph(g, width, height);
     GLSLMatrixHandler mh = new GLSLMatrixHandler();
     graph.setMatrixHandler(mh);
     graph.fit(1);

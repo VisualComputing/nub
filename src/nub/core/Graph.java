@@ -201,10 +201,10 @@ public class Graph {
   /**
    * Same as {@code this(Type.PERSPECTIVE, w, h)}
    *
-   * @see #Graph(Type, int, int)
+   * @see #Graph(Object, Type, int, int)
    */
-  public Graph(int width, int height) {
-    this(Type.PERSPECTIVE, width, height);
+  public Graph(Object context, int width, int height) {
+    this(context, Type.PERSPECTIVE, width, height);
   }
 
   /**
@@ -229,10 +229,11 @@ public class Graph {
    * @see #setRightHanded()
    * @see #setEye(Node)
    */
-  public Graph(Type type, int width, int height) {
+  public Graph(Object context, Type type, int width, int height) {
+    _fb = context;
     setWidth(width);
     setHeight(height);
-    setMatrixHandler(new MatrixHandler());
+    setMatrixHandler(matrixHandler(_fb));
     cacheProjectionViewInverse(false);
 
     _seeds = new ArrayList<Node>();

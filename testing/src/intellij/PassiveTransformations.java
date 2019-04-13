@@ -18,7 +18,7 @@ public class PassiveTransformations extends PApplet {
   }
 
   public void setup() {
-    graph = new Graph(width, height);
+    graph = new Graph(g, width, height);
     graph.setMatrixHandler(new GLSLMatrixHandler());
     graph.setFOV(PI / 3);
     graph.fit(1);

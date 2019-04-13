@@ -201,7 +201,7 @@ public class Scene extends Graph implements PConstants {
    * enclose by {@link #beginDraw()} and {@link #endDraw()}. To display an off-screen scene
    * call {@link #display()}.
    *
-   * @see Graph#Graph(int, int)
+   * @see Graph#Graph(Object, nub.core.Graph.Type, int, int)
    * @see #Scene(PApplet)
    * @see #Scene(PApplet, PGraphics)
    * @see #Scene(PApplet, String, int, int)
@@ -209,7 +209,7 @@ public class Scene extends Graph implements PConstants {
    * @see #Scene(PApplet, String)
    */
   public Scene(PApplet pApplet, PGraphics pGraphics, int x, int y) {
-    super(pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
+    super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
     _fb = pGraphics;
@@ -217,7 +217,6 @@ public class Scene extends Graph implements PConstants {
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
     // 2. Matrix handlers
-    setMatrixHandler(matrixHandler(pGraphics));
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
         null;

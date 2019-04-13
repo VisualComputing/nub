@@ -24,7 +24,7 @@ public class Graph4 extends PApplet {
   }
 
   public void setup() {
-    graph = new Graph(width, height) {
+    graph = new Graph(g, width, height) {
       // Note that within visit() geometry is defined
       // at the node local coordinate system.
       @Override

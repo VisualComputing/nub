@@ -25,7 +25,7 @@ public class Graph1 extends PApplet {
   }
 
   public void setup() {
-    graph = new Graph(width, height);
+    graph = new Graph(g, width, height);
     graph.fit(1);
     framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     nodes = new Node[50];
