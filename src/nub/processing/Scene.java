@@ -240,11 +240,6 @@ public class Scene extends Graph implements PConstants {
     setLeftHanded();
   }
 
-  /**
-   * Enable the {@link #_backBuffer()} if the Processing renderer supports it. In success returns
-   * {@code true} and {@code false} otherwise.
-   */
-
   // P5 STUFF
 
   /**
@@ -254,12 +249,11 @@ public class Scene extends Graph implements PConstants {
     return _parent;
   }
 
-  // TODO decide
-
   /**
    * Returns the PGraphics instance this scene is related to. It may be the PApplet's,
    * if the scene is on-screen or an user-defined one if the scene {@link #isOffscreen()}.
    */
+  @Override
   public PGraphics context() {
     return (PGraphics) _fb;
   }
@@ -1115,31 +1109,9 @@ public class Scene extends Graph implements PConstants {
     return new GLMatrixHandler((PGraphicsOpenGL) context);
   }
 
-  /**
-   * Apply the local transformation defined by the given {@code node} on the given
-   * {@code pGraphics}. Needed by {@link #applyWorldTransformation(PGraphics, Node)}.
-   *
-   * @see #applyWorldTransformation(PGraphics, Node)
-   */
-  /*
-  public static void applyTransformation(PGraphics pGraphics, Node node) {
-    matrixHandler(pGraphics).applyTransformation(node);
-  }
-   */
-
-  /**
-   * Apply the global transformation defined by the given {@code node} on the given
-   * {@code pGraphics}.
-   *
-   * @see #applyTransformation(PGraphics, Node)
-   */
-  /*
-  public static void applyWorldTransformation(PGraphics pGraphics, Node node) {
-    _getMatrixHandler(pGraphics).applyWorldTransformation(node);
-  }
-   */
-
   // HUD
+
+  // TODO decide if it makes sense to beginHUD(PGraphics)
 
   /**
    * Same as {@code beginHUD(context())}.
@@ -1166,7 +1138,6 @@ public class Scene extends Graph implements PConstants {
    * @see #endHUD(PGraphics)
    * @see #beginHUD()
    */
-  // TODO fix me
   public void beginHUD(PGraphics pGraphics) {
     if (_hudCalls != 0)
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
@@ -1200,7 +1171,6 @@ public class Scene extends Graph implements PConstants {
    * @see #beginHUD(PGraphics)
    * @see #endHUD()
    */
-  // TODO fix me
   public void endHUD(PGraphics pGraphics) {
     _hudCalls--;
     if (_hudCalls != 0)
@@ -1212,7 +1182,6 @@ public class Scene extends Graph implements PConstants {
     if (pGraphics == context())
       _matrixHandler.endHUD();
     else
-      // TODO fix me
       matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
     pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS

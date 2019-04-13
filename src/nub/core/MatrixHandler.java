@@ -307,12 +307,19 @@ public class MatrixHandler {
 
   // nub specific transformations
 
-  // TODO docs are missing
-
+  /**
+   * Apply the local transformation defined by {@code node}, i.e., respect to its
+   * {@link Node#reference()}. The Node is first translated, then rotated around
+   * the new translated origin and then scaled.
+   */
   public void applyTransformation(Node node) {
     applyMatrix(node.matrix());
   }
 
+  /**
+   * Similar to {@link #applyTransformation(Node)}, but applies the global transformation
+   * defined by the node.
+   */
   public void applyWorldTransformation(Node node) {
     applyMatrix(node.worldMatrix());
   }

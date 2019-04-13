@@ -36,10 +36,21 @@ public class DetachedFrames2 extends PApplet {
     Scene.drawAxes(g, 100);
     for (int i = 0; i < nodes.length; i++) {
       pushMatrix();
-      // TODO fix me!
-      //Scene.applyTransformation(g, nodes[i]);
+      applyTransformation(nodes[i]);
       Scene.drawTorusSolenoid(g);
       popMatrix();
+    }
+  }
+
+  public void applyTransformation(Node node) {
+    if (g.is3D()) {
+      translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      scale(node.scaling(), node.scaling(), node.scaling());
+    } else {
+      translate(node.translation().x(), node.translation().y());
+      rotate(node.rotation().angle2D());
+      scale(node.scaling(), node.scaling());
     }
   }
 

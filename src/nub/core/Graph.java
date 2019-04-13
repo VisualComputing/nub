@@ -129,8 +129,7 @@ public class Graph {
   protected boolean _offscreen;
 
   // 0. Contexts
-  // TODO fix me
-  public Object _bb, _fb;
+  protected Object _bb, _fb;
   // 1. Eye
   protected Node _eye;
   protected long _lastEqUpdate;
@@ -2279,18 +2278,47 @@ public class Graph {
    * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
    *
+   * @see #applyTransformation(Object, Node)
    * @see #applyWorldTransformation(Node)
+   * @see #applyWorldTransformation(Object, Node)
    */
   public void applyTransformation(Node node) {
-    _matrixHandler.applyTransformation(node);
+    applyTransformation(_fb, node);
   }
 
   /**
-   * Same as {@link #applyTransformation(Node)}, but applies the global transformation
+   * Apply the local transformation defined by the {@code node} on {@code context}.
+   * Needed by {@link #applyWorldTransformation(Object, Node)}.
+   *
+   * @see #applyTransformation(Node)
+   * @see #applyWorldTransformation(Node)
+   * @see #applyWorldTransformation(Object, Node)
+   */
+  public void applyTransformation(Object context, Node node) {
+    matrixHandler(context).applyTransformation(node);
+  }
+
+  /**
+   * Similar to {@link #applyTransformation(Node)}, but applies the global transformation
    * defined by the node.
+   *
+   * @see #applyWorldTransformation(Node)
+   * @see #applyTransformation(Object, Node)
+   * @see #applyWorldTransformation(Object, Node)
    */
   public void applyWorldTransformation(Node node) {
-    _matrixHandler.applyWorldTransformation(node);
+    applyWorldTransformation(_fb, node);
+  }
+
+  /**
+   * Apply the global transformation defined by the {@code node} on {@code context}.
+   *
+   * @see #applyWorldTransformation(Node)
+   * @see #applyTransformation(Object, Node)
+   * @see #applyWorldTransformation(Node)
+   */
+  public void applyWorldTransformation(Object context, Node node) {
+    matrixHandler(context).applyWorldTransformation(node);
   }
 
   // Other stuff
@@ -2580,10 +2608,9 @@ public class Graph {
   /**
    * A shape may be picked using
    * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a> with a
-   * color buffer (see {@link #_backBuffer()}). This method
-   * compares the color of the {@link #_backBuffer()} at
-   * {@code (x,y)} with the shape id. Returns true if both colors are the same, and false
-   * otherwise.
+   * color buffer. This method
+   * compares the color of a back-buffer at {@code (x,y)} against the {@link Node#id()}.
+   * Returns true if both colors are the same, and false otherwise.
    * <p>
    * This method should be overridden. Default implementation symply return {@code false}.
    *
@@ -2666,23 +2693,16 @@ public class Graph {
     return _offscreen;
   }
 
-  // TODO decide these two
-
   /**
    * Returns the main renderer context.
    */
-  /*
   public Object context() {
     return _fb;
   }
-   */
 
-  /**
-   * Returns the back buffer, used for
-   * <a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
-   */
   /*
   protected Object _backBuffer() {
+    //<a href="http://schabby.de/picking-opengl-ray-tracing/">'ray-picking'</a>.
     return _bb;
   }
    */
@@ -2811,7 +2831,12 @@ public class Graph {
    * Note that only reachable nodes (nodes attached to this graph, see
    * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
    *
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object)
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#visit()
    * @see Node#cull(boolean)
    * @see Node#isCulled()
@@ -2829,7 +2854,7 @@ public class Graph {
    */
   protected void _render(Node node) {
     _matrixHandler.pushMatrix();
-    applyTransformation(node);
+    _matrixHandler.applyTransformation(node);
     node.visit();
     if (!node.isCulled()) {
       _trackFrontBuffer(node);
@@ -2842,21 +2867,41 @@ public class Graph {
     _matrixHandler.popMatrix();
   }
 
+  /**
+   * Renders the scene onto the {@code context}.
+   * <p>
+   * Note that only reachable nodes (nodes attached to this graph, see
+   * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
+   *
+   * @see #render()
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object)
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
+   */
   public void render(Object context) {
     render(matrixHandler(context), context);
   }
 
   /**
-   * Renders the scene onto {@code context} using {@code matrixHandler}.
+   * Renders the scene onto {@code context} using {@code matrixHandler} from the {@link #eye()}
+   * point-of-view.
    *
    * @see #render()
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
    */
   public void render(MatrixHandler matrixHandler, Object context) {
-    // TODO adjust
     if (context == _fb)
-      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
-      //if (context == _fb)
-      //render();
+      throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
     else {
       matrixHandler._bindProjection(projection());
       matrixHandler._bindMatrix(view());
@@ -2864,25 +2909,73 @@ public class Graph {
         _render(matrixHandler, context, node);
     }
   }
-  
+
+  /**
+   * Same as {@code render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded)}.
+   *
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render()
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #render(MatrixHandler, Object)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
+   */
   public void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
   }
 
+  /**
+   * Same as {@code render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view())}.
+   *
+   * @see Node#view()
+   * @see Node#projection(Type, float, float, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #render()
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
+   */
   public void render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
   }
 
+  /**
+   * Same as {@code render(matrixHandler(context), context, projection, view)}.
+   *
+   * @see #render(MatrixHandler, Object, Matrix, Matrix)
+   * @see #render()
+   * @see #render(Object)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
+   */
   public void render(Object context, Matrix projection, Matrix view) {
     render(matrixHandler(context), context, projection, view);
   }
 
+  /**
+   * Renders the scene node hierarchy onto {@code context} binding the {@code projection}
+   * and {@code view} matrices using {@code matrixHandler}.
+   *
+   * @see #render()
+   * @see #render(Object)
+   * @see #render(Object, Matrix, Matrix)
+   * @see #render(Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
+   * @see #render(MatrixHandler, Object)
+   * @see Node#graphics(Object)
+   * @see Node#shape(Object)
+   */
   public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
-    // TODO adjust
     if (context == _fb)
-      throw new RuntimeException("Cannot render into front-buffer, use render() instead of render(context, view, projection)");
-      //if (context == _fb)
-      //render();
+      throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
     else {
       matrixHandler._bindProjection(projection);
       matrixHandler._bindMatrix(view);
@@ -2935,7 +3028,7 @@ public class Graph {
   }
 
   /**
-   * Renders the node onto the {@link #_backBuffer()}.
+   * Renders the node onto the back-buffer.
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *

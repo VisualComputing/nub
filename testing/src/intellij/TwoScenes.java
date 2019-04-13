@@ -39,6 +39,8 @@ public class TwoScenes extends PApplet {
     //scene2.fit(1);
     scene2.fit();
     node = new Node();
+    node.translate(50, 50, 30);
+    node.setPickingThreshold(10);
   }
 
   public void keyPressed() {
@@ -95,16 +97,27 @@ public class TwoScenes extends PApplet {
         focus.align();
   }
 
-  void draw(PGraphics graphics) {
+  void draw(Scene scn) {
+    PGraphics graphics = scn.context();
     graphics.background(0);
     graphics.noStroke();
     graphics.fill(0, 255, 0);
     graphics.pushMatrix();
-    // TODO fix me!
-    //Scene.applyTransformation(graphics, node);
-    //scene1.applyTransformation(node);
+    applyTransformation(graphics, node);
     graphics.sphere(50);
     graphics.popMatrix();
+  }
+
+  public void applyTransformation(PGraphics pg, Node node) {
+    if (pg.is3D()) {
+      pg.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      pg.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      pg.scale(node.scaling(), node.scaling(), node.scaling());
+    } else {
+      pg.translate(node.translation().x(), node.translation().y());
+      pg.rotate(node.rotation().angle2D());
+      pg.scale(node.scaling(), node.scaling());
+    }
   }
 
   void handleMouse() {
@@ -115,14 +128,14 @@ public class TwoScenes extends PApplet {
     handleMouse();
     scene1.beginDraw();
     scene1.context().background(0);
-    draw(scene1.context());
+    draw(scene1);
     scene1.drawAxes();
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
     scene2.context().background(0);
-    draw(scene2.context());
+    draw(scene2);
     scene2.drawAxes();
 
     // draw with axes
