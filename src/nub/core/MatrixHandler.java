@@ -27,14 +27,14 @@ import nub.primitives.Matrix;
  * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
  * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
  * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
- * implementing them in terms of the renderer params (see {@link #_bind(Matrix, Matrix)}).
+ * implementing them in terms of the renderer params (see {@link #bind(Matrix, Matrix)}).
  *
  * @see Matrix
  * @see #projection()
  * @see #_bindProjection(Matrix)
  * @see #model()
  * @see #_bindMatrix(Matrix)
- * @see #_bind(Matrix, Matrix)
+ * @see #bind(Matrix, Matrix)
  * @see Graph#preDraw()
  */
 public class MatrixHandler {
@@ -49,9 +49,9 @@ public class MatrixHandler {
   protected int _projectionStackDepth;
 
   /**
-   * Updates (computes and caches) the projection and view matrices from the renderer context
-   * {@link Graph#eye()} parameters and call {@link #_setUniforms()}. This method is automatically
-   * called by {@link Graph#render()} right at the beginning of the main event loop.
+   * Updates the projection, view and model matrices and call {@link #_setUniforms()}.
+   * This method is automatically called by {@link Graph#render()} right at the beginning
+   * of the main event loop.
    * <p>
    * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
@@ -65,14 +65,11 @@ public class MatrixHandler {
    * @see #_bindProjection(Matrix)
    * @see #_bindMatrix(Matrix)
    */
-  protected void _bind(Matrix projection, Matrix view) {
-    _bindProjection(projection);
-    _bindView(view);
-    if (_model == null)
-      _model = new Matrix();
-    else
-      _model.reset();
-    //_setUniforms();
+  public void bind(Matrix projection, Matrix view) {
+    _projection = projection;
+    _view = view;
+    _model = new Matrix();
+    _setUniforms();
   }
 
   // 1. May be overridden
@@ -89,7 +86,7 @@ public class MatrixHandler {
   /**
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
    */
-  public void _bindProjection(Matrix matrix) {
+  protected void _bindProjection(Matrix matrix) {
     _projection = matrix;
     _setUniforms();
   }
@@ -97,7 +94,7 @@ public class MatrixHandler {
   /**
    * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
    */
-  public void _bindView(Matrix matrix) {
+  protected void _bindView(Matrix matrix) {
     _view = matrix;
     _setUniforms();
   }
@@ -105,7 +102,7 @@ public class MatrixHandler {
   /**
    * Binds the matrix to the renderer.
    */
-  public void _bindMatrix(Matrix matrix) {
+  protected void _bindMatrix(Matrix matrix) {
     _model = matrix;
     _setUniforms();
   }

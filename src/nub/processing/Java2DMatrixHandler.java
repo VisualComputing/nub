@@ -50,9 +50,9 @@ class Java2DMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  protected void _bind(Matrix projection, Matrix view) {
+  public void bind(Matrix projection, Matrix view) {
     _projection = projection;
-    _model = view;
+    _view = view;
     Vector pos = _graph.eye().position();
     Quaternion o = _graph.eye().orientation();
     translate(_graph.width() / 2, _graph.height() / 2);

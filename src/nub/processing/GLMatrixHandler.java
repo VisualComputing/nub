@@ -28,19 +28,19 @@ class GLMatrixHandler extends MatrixHandler {
   }
 
   @Override
-  protected void _bind(Matrix projection, Matrix view) {
+  public void bind(Matrix projection, Matrix view) {
     _bindProjection(projection);
     _bindView(view);
     _bindMatrix(view);
   }
 
   @Override
-  public void _bindProjection(Matrix matrix) {
+  protected void _bindProjection(Matrix matrix) {
     _pggl.setProjection(Scene.toPMatrix(matrix));
   }
 
   @Override
-  public void _bindMatrix(Matrix matrix) {
+  protected void _bindMatrix(Matrix matrix) {
     if (_pggl.is3D())
       _pggl.setMatrix(Scene.toPMatrix(matrix));// in P5 this caches projmodelview
     else {

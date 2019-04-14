@@ -38,36 +38,22 @@ void draw() {
   setMatrix(Scene.toPMatrix(eye.view()));
   // enter n1
   pushMatrix();
-  // g happens to be the name of the
-  // PApplet main PGraphics instance
-  applyTransformation(n1);
+  applyMatrix(Scene.toPMatrix(n1.matrix()));
   drawN1();
   // enter n2
   pushMatrix();
-  applyTransformation(n2);
+  applyMatrix(Scene.toPMatrix(n2.matrix()));
   drawN2();
   // "return" to n1
   popMatrix();
   // enter n3
   pushMatrix();
-  applyTransformation(n3);
+  applyMatrix(Scene.toPMatrix(n3.matrix()));
   drawN3();
   // return to n1
   popMatrix();
   // return to World
   popMatrix();
-}
-
-void applyTransformation(Node node) {
-  if (g.is3D()) {
-    translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
-    rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
-    scale(node.scaling(), node.scaling(), node.scaling());
-  } else {
-    translate(node.translation().x(), node.translation().y());
-    rotate(node.rotation().angle2D());
-    scale(node.scaling(), node.scaling());
-  }
 }
 ```
 

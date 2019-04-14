@@ -2713,8 +2713,7 @@ public class Graph {
    * Render the scene into the back-buffer used for picking.
    */
   protected void _renderBackBuffer() {
-    _bbMatrixHandler._bindProjection(projection());
-    _bbMatrixHandler._bindMatrix(view());
+    _bbMatrixHandler.bind(projection(), view());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
     if(isOffscreen())
@@ -2759,7 +2758,7 @@ public class Graph {
     _projectionView = Matrix.multiply(_projection, _view);
     if (isProjectionViewInverseCached())
       _projectionViewInverse = Matrix.inverse(_projectionView);
-    _matrixHandler._bind(_projection, _view);
+    _matrixHandler.bind(_projection, _view);
     if (areBoundaryEquationsEnabled() && (eye().lastUpdate() > _lastEqUpdate || _lastEqUpdate == 0)) {
       updateBoundaryEquations();
       _lastEqUpdate = TimingHandler.frameCount;
@@ -2905,8 +2904,7 @@ public class Graph {
     if (context == _fb)
       throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
     else {
-      matrixHandler._bindProjection(projection());
-      matrixHandler._bindMatrix(view());
+      matrixHandler.bind(projection(), view());
       for (Node node : _leadingNodes())
         _render(matrixHandler, context, node);
     }
@@ -2979,8 +2977,7 @@ public class Graph {
     if (context == _fb)
       throw new RuntimeException("Cannot render into context, use render() instead of render(context, view, projection)");
     else {
-      matrixHandler._bindProjection(projection);
-      matrixHandler._bindMatrix(view);
+      matrixHandler.bind(projection, view);
       for (Node node : _leadingNodes())
         _render(matrixHandler, context, node);
     }

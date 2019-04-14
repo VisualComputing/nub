@@ -50,7 +50,7 @@ void draw() {
   Scene.drawAxes(g, 100);
   for (int i = 0; i < nodes.length; i++) {
     pushMatrix();
-    Scene.applyTransformation(g, nodes[i]);
+    applyMatrix(Scene.toPMatrix(nodes[i].matrix()));
     Scene.drawTorusSolenoid(g);
     popMatrix();
   }
