@@ -1105,8 +1105,6 @@ public class Scene extends Graph implements PConstants {
 
   // HUD
 
-  // TODO decide if it makes sense to beginHUD(PGraphics)
-
   /**
    * Same as {@code beginHUD(context())}.
    *

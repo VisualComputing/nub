@@ -17,8 +17,8 @@ import nub.primitives.Matrix;
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
  * To emit the {@link #transform()} matrix to a shader override the
- * {@link #_setUniforms()} signal, which is fired automatically by the handler every time
- * one of its matrices change state. See also {@link #projection()}, {@link #model()}.
+ * {@link #_setUniforms()} signal, which is fired automatically by the handler every time one of
+ * its matrices change state. See also {@link #projection()}, {@link #view()} and {@link #model()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
@@ -48,6 +48,10 @@ public class MatrixHandler {
   protected float[][] _projectionStack = new float[STACK_DEPTH][16];
   protected int _projectionStackDepth;
 
+  // 1. May be overridden
+
+  // bind
+
   /**
    * Updates the projection, view and model matrices and call {@link #_setUniforms()}.
    * This method is automatically called by {@link Graph#render()} right at the beginning
@@ -71,10 +75,6 @@ public class MatrixHandler {
     _model = new Matrix();
     _setUniforms();
   }
-
-  // 1. May be overridden
-
-  // bind
 
   /**
    * Emits the {@link #transform()} to the vertex shader whenever the {@link #projection()}
@@ -269,6 +269,8 @@ public class MatrixHandler {
     _setUniforms();
   }
 
+  // 2. WARNING don't override from here ever!
+
   // heads up display
 
   /**
@@ -320,8 +322,6 @@ public class MatrixHandler {
   public void applyWorldTransformation(Node node) {
     applyMatrix(node.worldMatrix());
   }
-
-  // 2. WARNING don't override from here ever!
 
   /**
    * Translate in X and Y.
