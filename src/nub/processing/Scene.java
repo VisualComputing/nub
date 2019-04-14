@@ -1431,14 +1431,11 @@ public class Scene extends Graph implements PConstants {
           if ((count++) >= goal) {
             goal += nbSteps / (float) steps;
             _matrixHandler.pushMatrix();
-
-            applyTransformation(node);
-
+            _matrixHandler.applyTransformation(node);
             if ((mask & 2) != 0)
               _drawEye(scale);
             if ((mask & 4) != 0)
               drawAxes(scale / 10.0f);
-
             _matrixHandler.popMatrix();
           }
       }
@@ -2161,10 +2158,10 @@ public class Scene extends Graph implements PConstants {
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float, boolean)
    */
   public void drawFrustum(Graph graph) {
-    context().pushMatrix();
-    applyTransformation(graph.eye());
+    _matrixHandler.pushMatrix();
+    _matrixHandler.applyTransformation(graph.eye());
     drawFrustum(context(), graph);
-    context().popMatrix();
+    _matrixHandler.popMatrix();
   }
 
   /**
@@ -2484,7 +2481,7 @@ public class Scene extends Graph implements PConstants {
       Vector o = new Vector();
       if (graph.type() == Graph.Type.ORTHOGRAPHIC) {
         pGraphics.pushMatrix();
-        applyTransformation(graph.eye());
+        matrixHandler(pGraphics).applyTransformation(graph.eye());
       }
       // in PERSPECTIVE cache the transformed origin
       else
