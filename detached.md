@@ -38,17 +38,17 @@ void draw() {
   setMatrix(Scene.toPMatrix(eye.view()));
   // enter n1
   pushMatrix();
-  applyMatrix(Scene.toPMatrix(n1.matrix()));
+  Scene.applyTransformation(g, n1);
   drawN1();
   // enter n2
   pushMatrix();
-  applyMatrix(Scene.toPMatrix(n2.matrix()));
+  Scene.applyTransformation(g, n2);
   drawN2();
   // "return" to n1
   popMatrix();
   // enter n3
   pushMatrix();
-  applyMatrix(Scene.toPMatrix(n3.matrix()));
+  Scene.applyTransformation(g, n3);
   drawN3();
   // return to n1
   popMatrix();
