@@ -21,19 +21,19 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * A 2D or 3D scene graph providing eye, input and timing handling to a raster or ray-tracing
+ * A 2D or 3D scene-graph providing eye, input and timing handling to a raster or ray-tracing
  * renderer.
  * <h1>1. Types and dimensions</h1>
  * To set the viewing volume use {@link #setFrustum(Vector, float)} or {@link #setFrustum(Vector, Vector)}.
  * Both call {@link #setCenter(Vector)} and {@link #setRadius(float)} which defined a viewing ball
- * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)} and
- * {@link #setZNearCoefficient(float)} for a 3d graph.
+ * with {@link #center()} and {@link #radius()} parameters. See also {@link #setZClippingCoefficient(float)}
+ * and {@link #setZNearCoefficient(float)} for a 3d graph.
  * <p>
  * The way the projection matrix is computed (see
- * {@link Node#projection(Type, float, float, float, float, boolean)}),
- * defines the type of the graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC}
- * for 3d graphs and {@link Type#TWO_D} for a 2d graph.
- * <h1>2. Scene graph handling</h1>
+ * {@link Node#projection(Type, float, float, float, float, boolean)}), defines the type of the
+ * graph as: {@link Type#PERSPECTIVE}, {@link Type#ORTHOGRAPHIC} for 3d graphs and {@link Type#TWO_D}
+ * for a 2d graph.
+ * <h1>2. Scene-graph handling</h1>
  * A graph forms a tree of (attached) {@link Node}s whose visual representations may be
  * {@link #render()}. Note that {@link #render()} should be called within your main-event loop.
  * <p>
@@ -50,8 +50,8 @@ import java.util.List;
  * {@link #location(Vector, Node)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(float, float, float, Node)},
- * {@link #rotate(float, float, float, Node)} and {@link #scale(float, Node)}.
+ * {@link #translate(float, float, float, Node)}, {@link #rotate(float, float, float, Node)}
+ * and {@link #scale(float, Node)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
@@ -90,9 +90,8 @@ import java.util.List;
  * and {@link #registerAnimator(Animator)}, are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
- * such as {@link #fit(float)}, {@link #fit(Rectangle)},
- * {@link #fit(Node)} and {@link #fit(Node, float)}. Refer to the
- * {@link Interpolator} documentation for details.
+ * such as {@link #fit(float)}, {@link #fit(Rectangle)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
+ * Refer to the {@link Interpolator} documentation for details.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
  * {@link #ballVisibility(Vector, float)} or {@link #boxVisibility(Vector, Vector)}. Make sure
@@ -107,20 +106,15 @@ import java.util.List;
  * <p>
  * To apply the transformation defined by a node call {@link #applyTransformation(Node)}
  * (see also {@link #applyWorldTransformation(Node)}). Note that the node transformations are
- * applied automatically by the {@link #render(MatrixHandler, Object)} algorithm
+ * applied automatically by the {@link #render()} (together with all its variants) algorithm
  * (in this case you don't need to call them).
  * <p>
  * To define your geometry on the screen coordinate system (such as when drawing 2d controls
  * on top of a 3d graph) issue your drawing code between {@link #beginHUD()} and
  * {@link #endHUD()}. These methods are {@link MatrixHandler} wrapper functions
  * with the same signatures provided for convenience.
- * <p>
- * To bind a graph to a third party renderer override {@link MatrixHandler} and set it
- * with {@link #setMatrixHandler(MatrixHandler)} (refer to the {@link MatrixHandler}
- * documentation for details).
  *
  * @see TimingHandler
- * @see #applyTransformation(Node)
  * @see MatrixHandler
  */
 public class Graph {
@@ -2250,7 +2244,7 @@ public class Graph {
 
   /**
    * Apply the local transformation defined by {@code node}, i.e., respect to its
-   * {@link Node#reference()}. The Node is first translated, then rotated around
+   * {@link Node#reference()}. The {@code node} is first translated, then rotated around
    * the new translated origin and then scaled.
    * <p>
    * This method may be used to modify the transform matrix from a node hierarchy. For
@@ -2278,7 +2272,11 @@ public class Graph {
    * Note the use of nested {@code pushMatrix()} and {@code popMatrix()} blocks to
    * represent the node hierarchy: {@code leftArm} and {@code rightArm} are both
    * correctly drawn with respect to the {@code body} coordinate system.
+   * <p>
+   * Note that {@link #render()} traverses the scene-graph hierarchy and automatically applies
+   * the geometry transformations on all nodes.
    *
+   * @see #render()
    * @see #applyTransformation(Object, Node)
    * @see #applyWorldTransformation(Node)
    * @see #applyWorldTransformation(Object, Node)
@@ -2290,7 +2288,11 @@ public class Graph {
   /**
    * Apply the local transformation defined by the {@code node} on {@code context}.
    * Needed by {@link #applyWorldTransformation(Object, Node)}.
+   * <p>
+   * Note that {@link #render(Object)} traverses the scene-graph hierarchy and automatically
+   * applies all the node geometry transformations on a given context.
    *
+   * @see #render(Object)
    * @see #applyTransformation(Node)
    * @see #applyWorldTransformation(Node)
    * @see #applyWorldTransformation(Object, Node)
@@ -2312,7 +2314,8 @@ public class Graph {
   }
 
   /**
-   * Apply the global transformation defined by the {@code node} on {@code context}.
+   * Similar to {@link #applyTransformation(Object, Node)}, but applies the global
+   * transformation defined by the {@code node} on {@code context}.
    *
    * @see #applyWorldTransformation(Node)
    * @see #applyTransformation(Object, Node)
@@ -2743,6 +2746,9 @@ public class Graph {
    * <li>Updates the projection matrix by calling
    * {@code eye().projection(type(), width(), height(), zNear(), zFar(), isLeftHanded())}.</li>
    * <li>Updates the view matrix by calling {@code eye().view()}.</li>
+   * <li>Updates the {@link #projectionView()} matrix.</li>
+   * <li>Updates the {@link #projectionViewInverse()} matrix if
+   * {@link #isProjectionViewInverseCached()}.</li>
    * <li>Calls {@link #updateBoundaryEquations()} if {@link #areBoundaryEquationsEnabled()}</li>
    * </ol>
    *
@@ -2768,28 +2774,28 @@ public class Graph {
   // 2b caches
 
   /**
-   * Returns the cached projection matrix.
+   * Returns the cached projection matrix computed at {@link #preDraw()}.
    */
   public Matrix projection() {
     return _projection;
   }
 
   /**
-   * Returns the cached view matrix.
+   * Returns the cached view matrix computed at {@link #preDraw()}.
    */
   public Matrix view() {
     return _view;
   }
 
   /**
-   * Returns the projection times view cached matrix.
+   * Returns the projection times view cached matrix computed at {@link #preDraw()}.
    */
   public Matrix projectionView() {
     return _projectionView;
   }
 
   /**
-   * Returns the cached projection times view inverse matrix.
+   * Returns the cached projection times view inverse matrix computed at {@link #preDraw()}.
    */
   public Matrix projectionViewInverse() {
     if (!isProjectionViewInverseCached())
@@ -2869,7 +2875,7 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto the {@code context}.
+   * Renders the scene onto {@code context}.
    * <p>
    * Note that only reachable nodes (nodes attached to this graph, see
    * {@link Node#isAttached(Graph)}) are rendered by this algorithm.
@@ -2888,8 +2894,8 @@ public class Graph {
   }
 
   /**
-   * Renders the scene onto {@code context} using {@code matrixHandler} from the {@link #eye()}
-   * point-of-view.
+   * Renders the scene onto {@code context} from the {@link #eye()}
+   * point-of-view, using {@code matrixHandler}.
    *
    * @see #render()
    * @see #render(Object)
@@ -2961,9 +2967,10 @@ public class Graph {
   }
 
   /**
-   * Renders the scene node hierarchy onto {@code context} binding the {@code projection}
-   * and {@code view} matrices using {@code matrixHandler}.
+   * Renders the scene onto {@code context}, using {@code matrixHandler} to
+   * bind the {@code projection} and {@code view} matrices.
    *
+   * @see MatrixHandler
    * @see #render()
    * @see #render(Object)
    * @see #render(Object, Matrix, Matrix)

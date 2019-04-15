@@ -59,6 +59,8 @@ import java.util.List;
  * void setup() {
  *   canvas = createGraphics(500, 500, P3D);
  *   scene = new Scene(this, canvas);
+ *   // or use the equivalent (to the previous two lines) but simpler version:
+ *   // scene = new Scene(this, P3D, 500, 500);
  * }
  * }
  * </pre>
@@ -212,7 +214,6 @@ public class Scene extends Graph implements PConstants {
     super(pGraphics, pGraphics instanceof PGraphics3D ? Type.PERSPECTIVE : Type.TWO_D, pGraphics.width, pGraphics.height);
     // 1. P5 objects
     _parent = pApplet;
-    _fb = pGraphics;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
 
@@ -1100,7 +1101,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Renders the scene onto {@code pGraphics} using the {@code eye} node point of view and
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye} as
-   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}
+   * the light point-of-view. Same as {@code render(pGraphics, type, eye, zNear, zFar, true)}.
    *
    * @see #render(Object)
    * @see #render(PGraphics, Type, Node, float, float, boolean)
@@ -1114,7 +1115,7 @@ public class Scene extends Graph implements PConstants {
    * Renders the scene onto {@code pGraphics} using the {@code eye} node point of view and
    * remaining frustum parameters. Useful to compute a shadow map taking the {@code eye}
    * as the light point-of-view. Same as
-   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}
+   * {@code render(pGraphics, eye.view(), eye.projection(type, pGraphics.width, pGraphics.height, zNear, zFar, leftHanded))}.
    *
    * @see #render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render(Object)

@@ -26,7 +26,8 @@ void settings() {
 
 void setup() {
   rectMode(CENTER);
-  scene = new Scene(this, createGraphics(w, h / 2, renderer));
+  // same as: scene = new Scene(this, createGraphics(w, h / 2, renderer));
+  scene = new Scene(this, renderer, w, h /2);
   scene.setRadius(max(w, h));
 
   shapes = new Node[100];

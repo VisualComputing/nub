@@ -16,26 +16,13 @@ import nub.primitives.Matrix;
  * The matrix handler specifies (and implements) various matrix operations needed by the
  * {@link Graph} to properly perform its geometry transformations.
  * <p>
- * To emit the {@link #transform()} matrix to a shader override the
- * {@link #_setUniforms()} signal, which is fired automatically by the handler every time one of
- * its matrices change state. See also {@link #projection()}, {@link #view()} and {@link #model()}.
+ * To emit the {@link #transform()} matrix to a shader override the {@link #_setUniforms()} signal,
+ * which is fired automatically by the handler every time one of its matrices change state.
+ * See also {@link #projection()}, {@link #view()} and {@link #model()}.
  * <p>
  * To bind a {@link Graph} object to a third party renderer (i.e., that renderer provides
  * its own matrix handling: matrix transformations, shader uniforms transfers, etc),
- * override: {@link #_bindMatrix(Matrix)}, {@link #model()}, {@link #applyMatrix(Matrix)},
- * {@link #pushMatrix()}, {@link #popMatrix()}, {@link #translate(float, float, float)},
- * {@link #rotate(float)}, {@link #rotate(float, float, float, float)},
- * {@link #scale(float, float, float)}, {@link #projection()}, {@link #_bindProjection(Matrix)},
- * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
- * implementing them in terms of the renderer params (see {@link #bind(Matrix, Matrix)}).
- *
- * @see Matrix
- * @see #projection()
- * @see #_bindProjection(Matrix)
- * @see #model()
- * @see #_bindMatrix(Matrix)
- * @see #bind(Matrix, Matrix)
- * @see Graph#preDraw()
+ * refer to the {@link #bind(Matrix, Matrix)} documentation.
  */
 public class MatrixHandler {
   protected Matrix _projection, _view, _model;
@@ -53,21 +40,23 @@ public class MatrixHandler {
   // bind
 
   /**
-   * Updates the projection, view and model matrices and call {@link #_setUniforms()}.
-   * This method is automatically called by {@link Graph#render()} right at the beginning
-   * of the main event loop.
+   * Updates the {@link #projection()}, {@link #view()} and {@link #model()} matrices and call
+   * {@link #_setUniforms()}. This method is automatically called by {@link Graph#render()}
+   * right at the beginning of the main event loop.
    * <p>
    * If this matrix handler is bound to a third party renderer (i.e., that renderer provides
    * its own matrix matrix handling: matrix transformations, shader uniforms transfers, etc.)
-   * this method also binds the projection and view matrices to that renderer.
-   * In this case, note that {@link #_bindProjection(Matrix)} and {@link #_bindMatrix(Matrix)}
-   * should be overridden, by implementing them in terms of the renderer parameters.
+   * override this method together with: {@link #_bindProjection(Matrix)}, {@link #_bindMatrix(Matrix)},
+   * {@link #model()}, {@link #modelview()}, {@link #applyMatrix(Matrix)}, {@link #pushMatrix()},
+   * {@link #popMatrix()}, {@link #translate(float, float, float)}, {@link #rotate(float)},
+   * {@link #rotate(float, float, float, float)}, {@link #scale(float, float, float)},
+   * {@link #projection()}, {@link #_bindProjection(Matrix)},
+   * {@link #applyProjection(Matrix)}, {@link #pushProjection()} and {@link #popProjection()} by
+   * implementing them in terms of that renderer.
    *
    * @see Graph#render()
    * @see Node#projection(Graph.Type, float, float, float, float, boolean)
    * @see Node#view()
-   * @see #_bindProjection(Matrix)
-   * @see #_bindMatrix(Matrix)
    */
   public void bind(Matrix projection, Matrix view) {
     _projection = projection;
@@ -172,7 +161,7 @@ public class MatrixHandler {
   // matrix operations
 
   /**
-   * Multiplies the current modelview matrix by the one specified through the parameters.
+   * Multiplies the current {@link #model()} matrix by the one specified through the parameters.
    * Calls {@link #_setUniforms()}.
    */
   public void applyMatrix(Matrix source) {
@@ -181,7 +170,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Multiplies the current projection matrix by the one specified through the parameters.
+   * Multiplies the current {@link #projection()} matrix by the one specified through the parameters.
    * Calls {@link #_setUniforms()}.
    */
   public void applyProjection(Matrix source) {
@@ -190,7 +179,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Push a copy of the modelview matrix onto the stack.
+   * Push a copy of the {@link #model()} matrix onto the stack.
    */
   public void pushMatrix() {
     if (_matrixStackDepth == STACK_DEPTH) {
@@ -201,7 +190,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Replace the current modelview matrix with the top of the stack.
+   * Replace the current {@link #model()} matrix with the top of the stack.
    * Calls {@link #_setUniforms()}.
    */
   public void popMatrix() {
@@ -246,7 +235,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Push a copy of the projection matrix onto the stack.
+   * Push a copy of the {@link #projection()} matrix onto the stack.
    */
   public void pushProjection() {
     if (_projectionStackDepth == STACK_DEPTH) {
@@ -257,7 +246,7 @@ public class MatrixHandler {
   }
 
   /**
-   * Replace the current projection matrix with the top of the stack.
+   * Replace the current {@link #projection()} matrix with the top of the stack.
    * Calls {@link #_setUniforms()}.
    */
   public void popProjection() {
@@ -295,7 +284,8 @@ public class MatrixHandler {
   /**
    * Ends Heads Up Display (HUD).
    * <p>
-   * Restores the projection and modelview matrices. See {@link #beginHUD(int, int)} for details.
+   * Restores the {@link #projection()} and {@link #model()} matrices.
+   * See {@link #beginHUD(int, int)} for details.
    *
    * @see #beginHUD(int, int)
    */
@@ -308,7 +298,7 @@ public class MatrixHandler {
 
   /**
    * Apply the local transformation defined by {@code node}, i.e., respect to its
-   * {@link Node#reference()}. The Node is first translated, then rotated around
+   * {@link Node#reference()}. The {@code node} is first translated, then rotated around
    * the new translated origin and then scaled.
    */
   public void applyTransformation(Node node) {
@@ -317,7 +307,7 @@ public class MatrixHandler {
 
   /**
    * Similar to {@link #applyTransformation(Node)}, but applies the global transformation
-   * defined by the node.
+   * defined by the {@code node}.
    */
   public void applyWorldTransformation(Node node) {
     applyMatrix(node.worldMatrix());

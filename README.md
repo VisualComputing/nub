@@ -42,6 +42,8 @@ Off-screen scenes should be instantiated upon a [PGraphics](https://processing.o
 Scene scene;
 void setup() {
   scene = new Scene(this, createGraphics(500, 500, P3D));
+  // or use the equivalent but simpler version:
+  // scene = new Scene(this, P3D, 500, 500);
 }
 ```
 
