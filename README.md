@@ -34,7 +34,7 @@ void setup() {
 }
 ```
 
-The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) [frontBuffer()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#frontBuffer--) corresponds to the *PApplet* main `PGraphics` instance.
+The [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) corresponds to the *PApplet* main `PGraphics` instance.
 
 Off-screen scenes should be instantiated upon a [PGraphics](https://processing.org/reference/PGraphics.html) object:
 
@@ -47,7 +47,7 @@ void setup() {
 }
 ```
 
-In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) [frontBuffer()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#frontBuffer--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
+In this case, the [Scene](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html) [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) corresponds to the `PGraphics` instantiated with [createGraphics()](https://processing.org/reference/createGraphics_.html) (which is of course different than the *PApplet* main `PGraphics` instance).
 
 ## Nodes
 
@@ -150,7 +150,7 @@ See the [CajasOrientadas example](https://github.com/VisualComputing/nubjs/tree/
 
 ### Rendering
 
-Render the node hierarchy into the [frontBuffer()](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#frontBuffer--) with:
+Render the node hierarchy onto [context()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#context--) with:
 
 ```processing
 void draw() {
