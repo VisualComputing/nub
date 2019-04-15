@@ -26,9 +26,9 @@ class Java2DMatrixHandler extends MatrixHandler {
   Graph _graph;
   PGraphics _pg;
 
-  public Java2DMatrixHandler(Graph graph, PGraphics pg) {
+  public Java2DMatrixHandler(Graph graph) {
     _graph = graph;
-    _pg = pg;
+    _pg = (PGraphics) graph.context();
   }
 
   @Override
