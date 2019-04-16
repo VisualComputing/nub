@@ -30,7 +30,7 @@ class GLMatrixHandler extends MatrixHandler {
   @Override
   public void bind(Matrix projection, Matrix view) {
     _bindProjection(projection);
-    _bindView(view);
+    _view = view;
     _bindMatrix(view);
   }
 

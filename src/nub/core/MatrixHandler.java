@@ -81,14 +81,6 @@ public class MatrixHandler {
   }
 
   /**
-   * Binds the projection matrix to the renderer. Only meaningful for raster renderers.
-   */
-  protected void _bindView(Matrix matrix) {
-    _view = matrix;
-    _setUniforms();
-  }
-
-  /**
    * Binds the matrix to the renderer.
    */
   protected void _bindMatrix(Matrix matrix) {
