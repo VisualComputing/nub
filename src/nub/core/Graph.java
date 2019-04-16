@@ -133,10 +133,10 @@ public class Graph {
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
-  protected float _coefficients[][];
+  protected float[][] _coefficients;
   protected boolean _coefficientsUpdate;
-  protected Vector _normal[];
-  protected float _distance[];
+  protected Vector[] _normal;
+  protected float[] _distance;
   // handed and HUD
   protected boolean _rightHanded;
   protected int _hudCalls;
@@ -229,23 +229,18 @@ public class Graph {
     setWidth(width);
     setHeight(height);
     cacheProjectionViewInverse(false);
-
     _seeds = new ArrayList<Node>();
     _timingHandler = new TimingHandler();
-
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
-
     _agents = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     setRightHanded();
-
     enableBoundaryEquations(false);
-
     setZNearCoefficient(0.005f);
     setZClippingCoefficient((float) Math.sqrt(3.0f));
   }
@@ -3342,7 +3337,7 @@ public class Graph {
    * @see #location(Vector)
    */
   public Vector screenLocation(Vector vector, Node node) {
-    float xyz[] = new float[3];
+    float[] xyz = new float[3];
 
     if (node != null) {
       Vector tmp = node.worldLocation(vector);
@@ -3357,8 +3352,8 @@ public class Graph {
   protected boolean _screenLocation(float objx, float objy, float objz, float[] windowCoordinate) {
     Matrix projectionViewMatrix = projectionView();
 
-    float in[] = new float[4];
-    float out[] = new float[4];
+    float[] in = new float[4];
+    float[] out = new float[4];
 
     in[0] = objx;
     in[1] = objy;
@@ -3442,7 +3437,7 @@ public class Graph {
    * @see #setHeight(int)
    */
   public Vector location(Vector pixel, Node node) {
-    float xyz[] = new float[3];
+    float[] xyz = new float[3];
     _location(pixel._vector[0], pixel._vector[1], pixel._vector[2], xyz);
     if (node != null)
       return node.location(new Vector(xyz[0], xyz[1], xyz[2]));
@@ -3473,8 +3468,8 @@ public class Graph {
     viewport[2] = width();
     viewport[3] = -height();
 
-    float in[] = new float[4];
-    float out[] = new float[4];
+    float[] in = new float[4];
+    float[] out = new float[4];
 
     in[0] = winx;
     in[1] = winy;

@@ -216,7 +216,6 @@ public class Scene extends Graph implements PConstants {
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
     _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
-
     // 2. Back buffer
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
@@ -227,7 +226,6 @@ public class Scene extends Graph implements PConstants {
       _lineShader = pApplet().loadShader("PickingBuffer.frag");
       _pointShader = pApplet().loadShader("PickingBuffer.frag");
     }
-
     // 3. Register P5 methods
     if (!isOffscreen()) {
       pApplet().registerMethod("pre", this);
@@ -235,7 +233,6 @@ public class Scene extends Graph implements PConstants {
     }
     // TODO buggy
     pApplet().registerMethod("dispose", this);
-
     // 4. Handed
     setLeftHanded();
   }
@@ -1816,8 +1813,8 @@ public class Scene extends Graph implements PConstants {
     if (!(pGraphics instanceof PGraphics3D))
       return;
     pGraphics.pushStyle();
-    float unitConeX[] = new float[detail + 1];
-    float unitConeY[] = new float[detail + 1];
+    float[] unitConeX = new float[detail + 1];
+    float[] unitConeY = new float[detail + 1];
 
     for (int i = 0; i <= detail; i++) {
       float a1 = PApplet.TWO_PI * i / detail;
@@ -1894,10 +1891,10 @@ public class Scene extends Graph implements PConstants {
     if (!(pGraphics instanceof PGraphics3D))
       return;
     pGraphics.pushStyle();
-    float firstCircleX[] = new float[detail + 1];
-    float firstCircleY[] = new float[detail + 1];
-    float secondCircleX[] = new float[detail + 1];
-    float secondCircleY[] = new float[detail + 1];
+    float[] firstCircleX = new float[detail + 1];
+    float[] firstCircleY = new float[detail + 1];
+    float[] secondCircleX = new float[detail + 1];
+    float[] secondCircleY = new float[detail + 1];
 
     for (int i = 0; i <= detail; i++) {
       float a1 = PApplet.TWO_PI * i / detail;
@@ -2825,8 +2822,8 @@ public class Scene extends Graph implements PConstants {
    * @param detail
    */
   public void drawCone(PGraphics pGraphics, float height, float a, float b, int detail) {
-    float x[] = new float[detail + 1];
-    float y[] = new float[detail + 1];
+    float[] x = new float[detail + 1];
+    float[] y = new float[detail + 1];
 
     for (int i = 0; i <= detail; i++) {
       float theta = PApplet.TWO_PI * i / detail;
