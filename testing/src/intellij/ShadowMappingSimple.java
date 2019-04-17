@@ -10,7 +10,7 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-public class ShadowsImmediateMode extends PApplet {
+public class ShadowMappingSimple extends PApplet {
   // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
   Scene scene;
   Node nodeLandscape, light;
@@ -39,7 +39,7 @@ public class ShadowsImmediateMode extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.togglePerspective();
-    scene.setRadius(max(w, h)/3);
+    scene.setRadius(max(w, h) / 3);
     scene.fit(1);
     nodeLandscape = new Node(scene) {
       @Override
@@ -52,7 +52,7 @@ public class ShadowsImmediateMode extends PApplet {
       @Override
       public boolean graphics(PGraphics pg) {
         pg.pushStyle();
-        if(debug) {
+        if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
@@ -80,7 +80,7 @@ public class ShadowsImmediateMode extends PApplet {
     // 1. Calculate the light position and orientation
     float lightAngle = frameCount * 0.002f;
     light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0,1,0)));
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
 
     // 2. Render the shadowmap from light node 'point-of-view'
@@ -92,7 +92,7 @@ public class ShadowsImmediateMode extends PApplet {
 
     // 3. Render the scene from the scene.eye() node
     background(0xff222222);
-    if(!debug) {
+    if (!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
       Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
@@ -104,22 +104,23 @@ public class ShadowsImmediateMode extends PApplet {
   }
 
   public void renderLandscape(PGraphics canvas) {
-    switch(landscape) {
+    switch (landscape) {
       case 1: {
         float offset = -frameCount * 0.01f;
         canvas.fill(0xffff5500);
-        for(int z = -5; z < 6; ++z)
-          for(int x = -5; x < 6; ++x) {
+        for (int z = -5; z < 6; ++z)
+          for (int x = -5; x < 6; ++x) {
             canvas.pushMatrix();
             canvas.translate(x * 12, sin(offset + x) * 20 + cos(offset + z) * 20, z * 12);
             canvas.box(10, 100, 10);
             canvas.popMatrix();
           }
-      } break;
+      }
+      break;
       case 2: {
         float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
         canvas.fill(0xffff5500);
-        for(int n = 0; n < 20; ++n, angle += rotation) {
+        for (int n = 0; n < 20; ++n, angle += rotation) {
           canvas.pushMatrix();
           canvas.translate(sin(angle) * 70, cos(angle * 4) * 10, cos(angle) * 70);
           canvas.box(10, 100, 10);
@@ -127,11 +128,12 @@ public class ShadowsImmediateMode extends PApplet {
         }
         canvas.fill(0xff0055ff);
         canvas.sphere(50);
-      } break;
+      }
+      break;
       case 3: {
         float angle = -frameCount * 0.0015f, rotation = TWO_PI / 20;
         canvas.fill(0xffff5500);
-        for(int n = 0; n < 20; ++n, angle += rotation) {
+        for (int n = 0; n < 20; ++n, angle += rotation) {
           canvas.pushMatrix();
           canvas.translate(sin(angle) * 70, cos(angle) * 70, 0);
           canvas.box(10, 10, 100);
@@ -146,16 +148,15 @@ public class ShadowsImmediateMode extends PApplet {
   }
 
   public void keyPressed() {
-    if(key != CODED) {
-      if(key >= '1' && key <= '3')
+    if (key != CODED) {
+      if (key >= '1' && key <= '3')
         landscape = key - '0';
-      else if(key == ' ') {
+      else if (key == ' ') {
         shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
         light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
-      }
-      else if(key == 'd') {
+      } else if (key == 'd') {
         debug = !debug;
-        if(debug)
+        if (debug)
           resetShader();
         else
           shader(shadowShader);
@@ -177,12 +178,11 @@ public class ShadowsImmediateMode extends PApplet {
       int shift = event.getCount() * 20;
       if (zFar + shift > zNear)
         zFar += shift;
-    }
-    else
+    } else
       scene.scale(event.getCount() * 20);
   }
 
-  public static void main(String args[]) {
-    PApplet.main(new String[]{"intellij.ShadowsImmediateMode"});
+  public static void main(String[] args) {
+    PApplet.main(new String[]{"intellij.ShadowMappingSimple"});
   }
 }
