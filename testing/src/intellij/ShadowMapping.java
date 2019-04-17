@@ -82,9 +82,8 @@ public class ShadowMapping extends PApplet {
   }
 
   public void draw() {
-    background(0);
-    Node light = scene.trackedNode("light");
-    if (light != null) {
+    if (scene.trackedNode("light") != null) {
+      Node light = scene.trackedNode("light");
       light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
       // 1. Render the shadowmap from light node 'point-of-view'
       shadowMap.beginDraw();
@@ -92,7 +91,6 @@ public class ShadowMapping extends PApplet {
       shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
       scene.render(shadowMap, shadowMapType, light, zNear, zFar);
       shadowMap.endDraw();
-
       // 2. Render the scene from the scene.eye() node
       background(0xff222222);
       if (!debug) {
@@ -103,7 +101,8 @@ public class ShadowMapping extends PApplet {
         Scene.setUniform(shadowShader, "lightDirection", lightDirection);
         shadowShader.set("shadowMap", shadowMap);
       }
-    }
+    } else
+      background(0);
     scene.render();
   }
 
