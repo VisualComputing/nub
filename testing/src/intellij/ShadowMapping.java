@@ -13,7 +13,6 @@ import processing.opengl.PShader;
 public class ShadowMapping extends PApplet {
   Scene scene;
   Node[] shapes;
-  Node light;
   PShader depthShader;
   PShader shadowShader;
   PGraphics shadowMap;
@@ -46,33 +45,28 @@ public class ShadowMapping extends PApplet {
         @Override
         public boolean graphics(PGraphics pg) {
           pg.pushStyle();
-          pg.noStroke();
-          pg.fill(255, 0, 0);
-          pg.box(80);
+          if (scene.trackedNode("light") == this) {
+            if (debug) {
+              pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+              Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+            }
+            Scene.drawAxes(pg, 300);
+          } else {
+            pg.noStroke();
+            pg.fill(255, 0, 0);
+            pg.box(80);
+          }
           pg.popStyle();
           return true;
         }
       };
       shapes[i].randomize();
       // set picking precision to the pixels of the node projection
-      shapes[i].setPickingThreshold(0);
+      shapes[i].setPickingThreshold(debug ? 0 : 20);
       //shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
-    light = new Node(scene) {
-      @Override
-      public boolean graphics(PGraphics pg) {
-        pg.pushStyle();
-        if (debug) {
-          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
-          Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
-        }
-        Scene.drawAxes(pg, 300);
-        pg.pushStyle();
-        return true;
-      }
-    };
-    light.setPickingThreshold(debug ? 0 : 20);
-    light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+    scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
+    scene.trackedNode("light").setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -88,28 +82,36 @@ public class ShadowMapping extends PApplet {
   }
 
   public void draw() {
-    // 1. Render the shadowmap from light node 'point-of-view'
-    shadowMap.beginDraw();
-    shadowMap.noStroke();
-    shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
-    scene.render(shadowMap, shadowMapType, light, zNear, zFar);
-    shadowMap.endDraw();
+    background(0);
+    Node light = scene.trackedNode("light");
+    if (light != null) {
+      light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+      // 1. Render the shadowmap from light node 'point-of-view'
+      shadowMap.beginDraw();
+      shadowMap.noStroke();
+      shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
+      scene.render(shadowMap, shadowMapType, light, zNear, zFar);
+      shadowMap.endDraw();
 
-    // 2. Render the scene from the scene.eye() node
-    background(0xff222222);
-    if (!debug) {
-      Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
-      Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
-      Vector lightDirection = scene.eye().displacement(light.zAxis(false));
-      Scene.setUniform(shadowShader, "lightDirection", lightDirection);
-      shadowShader.set("shadowMap", shadowMap);
+      // 2. Render the scene from the scene.eye() node
+      background(0xff222222);
+      if (!debug) {
+        Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
+        Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
+        Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
+        Vector lightDirection = scene.eye().displacement(light.zAxis(false));
+        Scene.setUniform(shadowShader, "lightDirection", lightDirection);
+        shadowShader.set("shadowMap", shadowMap);
+      }
     }
     scene.render();
   }
 
   public void mouseMoved(MouseEvent event) {
-    scene.cast();
+    if (event.isShiftDown())
+      scene.cast("light");
+    else
+      scene.cast();
   }
 
   public void mouseDragged() {
@@ -133,7 +135,9 @@ public class ShadowMapping extends PApplet {
   public void keyPressed() {
     if (key == ' ') {
       shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-      light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+      Node light = scene.trackedNode("light");
+      if (light != null)
+        light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
     }
     if (key == 'd') {
       debug = !debug;
@@ -141,7 +145,8 @@ public class ShadowMapping extends PApplet {
         resetShader();
       else
         shader(shadowShader);
-      light.setPickingThreshold(debug ? 0 : 20);
+      for (Node shape : shapes)
+        shape.setPickingThreshold(debug ? 0 : 20);
     }
     if (key == 'p')
       scene.togglePerspective();

@@ -1,11 +1,14 @@
 package intellij;
 
-import nub.primitives.*;
-import nub.core.*;
-import nub.processing.*;
-import processing.core.*;
-import processing.event.*;
-import processing.opengl.*;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import processing.core.PApplet;
+import processing.core.PGraphics;
+import processing.event.MouseEvent;
+import processing.opengl.PShader;
 
 public class ShadowMap extends PApplet {
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
@@ -66,10 +69,10 @@ public class ShadowMap extends PApplet {
       shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");
     //depthShader.set("near", zNear);
     //depthShader.set("far", zFar);
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
     shadowMap.shader(depthShader);
 
     scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
@@ -125,7 +128,7 @@ public class ShadowMap extends PApplet {
       scene.togglePerspective();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ShadowMap"});
   }
 }
