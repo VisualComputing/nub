@@ -10,7 +10,7 @@ import processing.core.PGraphics;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
-public class ShadowsMappingSimple2 extends PApplet {
+public class ShadowMappingSimple2 extends PApplet {
   // ported to nub from: https://forum.processing.org/two/discussion/12775/simple-shadow-mapping
   Scene lightScene, mainScene;
   Node nodeLandscape, light;
@@ -195,6 +195,6 @@ public class ShadowsMappingSimple2 extends PApplet {
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.ShadowsMappingSimple2"});
+    PApplet.main(new String[]{"intellij.ShadowMappingSimple2"});
   }
 }
