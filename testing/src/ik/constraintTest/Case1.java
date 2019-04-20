@@ -193,9 +193,7 @@ public class Case1 extends PApplet {
         c1.setRestRotation(j1.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
         j1.setConstraint(c1);
 
-        Hinge c2 = new Hinge(0,radians(120));
-        c2.setRestRotation(j2.rotation().get());
-        c2.setAxis(j2.rotation().get(), new Vector(0,0,-1));
+        Hinge c2 = new Hinge(0,radians(120),j2.rotation().get(), new Vector(1,0,0), new Vector(0,0,-1));
         j2.setConstraint(c2);
         return skeleton;
     }
