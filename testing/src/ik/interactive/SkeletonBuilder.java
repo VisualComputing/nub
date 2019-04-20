@@ -423,8 +423,13 @@ public class SkeletonBuilder extends PApplet{
             constraint.setRestRotation(frame.rotation().get(), Vector.orthogonalVector(twist), twist);
             frame.setConstraint(constraint);
         } else{
-            Hinge constraint = new Hinge(true, minAngle, maxAngle);
-            constraint.setRestRotation(frame.rotation().get());
+            Vector twist = new Vector(0,0,1);
+            Vector up = new Vector(0,1,0);
+            if(frame.children() != null){
+                up = frame.children().get(0).translation().get();
+                twist = Vector.orthogonalVector(up);
+            }
+            Hinge constraint = new Hinge(minAngle, maxAngle, frame.rotation().get(), up, twist);
             frame.setConstraint(constraint);
         }
 
@@ -439,9 +444,10 @@ public class SkeletonBuilder extends PApplet{
         } else {
             if(scene.trackedFrame() != null) {
                 solver = scene.registerTreeSolver(scene.trackedFrame());
-                solver.timesPerFrame = 4;
+                solver.timesPerFrame = 1; //TODO : Allow more times
             }
         }
+        solver.maxIter = 50;
         solver.setFixTwisting(fixTwisting);
         solver.setKeepDirection(keepDirections);
 
