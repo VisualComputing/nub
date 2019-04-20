@@ -2,15 +2,18 @@ package ik.mocap;
 
 import frames.core.Graph;
 import frames.core.Frame;
+import frames.core.constraint.Hinge;
 import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.FABRIKSolver;
 import frames.ik.Solver;
+import frames.ik.evolution.BioIk;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.FixedConstraint;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -39,6 +42,9 @@ public class Viewer extends PApplet{
     ChainSolver chain_solver;
     Solver solver;
 
+    ArrayList<ChainSolver> chainsolvers = new ArrayList<>();
+    float[] exploration;
+
     float targetRadius = 7;
 
 
@@ -49,8 +55,8 @@ public class Viewer extends PApplet{
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setFOV(PI / 3);
         scene.setRadius(200);
+        scene.eye().rotate(new Quaternion(0,0,PI));
         scene.fit(1);
 
         //Add a target per limb
@@ -64,31 +70,20 @@ public class Viewer extends PApplet{
         root = parser.root();
         ((Joint) root).setRoot(true);
 
-
-        /*TESTING BALL AND SOCKET*/
-        /*
-        BallAndSocket constraint = new BallAndSocket(radians(10), radians(10), radians(10), radians(10));
-        Vector twist = root.children().get(0).translation().get();
-        constraint.setRestRotation(root.rotation().get(), new Vector(0, 1, 0), twist);
-        //root.setConstraint(constraint);
-        */
-
         //parser.constraintJoints();
-        //root.setConstraint(null);
-        //root.setConstraint(constraint);
 
         //make a copy of the skeleton
         rootIK = (Joint) copy(scene.branch(root));
         //rootIK.translate(50, 50, 50);
         //rootIK.setConstraint(null);
 
-        Solver solver = scene.registerTreeSolver(rootIK);
+        //Solver solver = scene.registerTreeSolver(rootIK);
 
-        scene.addIKTarget(limbs.get("LEFTHAND"), targets.get("LEFTHAND"));
-        scene.addIKTarget(limbs.get("RIGHTHAND"), targets.get("RIGHTHAND"));
-        scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
-        scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
-        scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
+        //scene.addIKTarget(limbs.get("LEFTHAND"), targets.get("LEFTHAND"));
+        //scene.addIKTarget(limbs.get("RIGHTHAND"), targets.get("RIGHTHAND"));
+        //scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
+        //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
+        //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
 
         //Solver solver = scene.registerTreeSolver(rootIK);//limbs.get("RIGHTUPLEG"));
         //limbs.get("RIGHTUPLEG").reference().setConstraint(new FixedConstraint());
@@ -136,6 +131,99 @@ public class Viewer extends PApplet{
         ccd_solver.setTarget(targets.get("RIGHTHAND"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));*/
 
+        String[] target_names = {"RIGHTFOOT", "RIGHTHAND", "LEFTHAND", "LEFTFOOT"};
+        String[] head_names = {"RIGHTUPLEG", "RIGHTUPARM", "LEFTUPARM", "LEFTUPLEG"};
+
+        //Adding constraints
+        //CHEST  [ 45.6711, 116.072105, -16.3786 ] -> B & S - NECK  [ 46.18769, 145.8957, -9.860168 ]
+        Frame chest = limbs.get("CHEST");
+        Frame neck = limbs.get("NECK");
+        BallAndSocket chestConstraint = new BallAndSocket(radians(45), radians(45));
+        chestConstraint.setRestRotation(chest.rotation().get(), neck.translation().get(), new Vector(1,0,0));
+        chest.setConstraint(chestConstraint);
+
+        //LEFTUPARM  [ 29.100441, 145.6254, -13.055123 ]
+        Frame LUArm= limbs.get("LEFTUPARM");
+        Frame LLArm = limbs.get("LEFTLOWARM");
+        BallAndSocket LUArmConstraint = new BallAndSocket(radians(85), radians(85));
+        LUArmConstraint.setRestRotation(LUArm.rotation().get(), new Vector(0,1,0), new Vector(1,0,0),  LLArm.translation().get());
+        LUArm.setConstraint(LUArmConstraint);
+        // LEFTLOWARM  [ 25.23188, 120.4344, -14.801453 ]
+        Vector LLArmTwist = Vector.cross(limbs.get("LEFTHAND").translation(), new Vector(0,0,1), null);
+        Hinge LLArmConstraint = new Hinge(radians(0), radians(178),LLArm.rotation().get(), limbs.get("LEFTHAND").translation() , LLArmTwist);
+        LLArm.setConstraint(LLArmConstraint);
+
+        //RIGTHUPARM  [ 29.100441, 145.6254, -13.055123 ]
+        Frame RUArm= limbs.get("RIGHTUPARM");
+        Frame RLArm = limbs.get("RIGHTLOWARM");
+        BallAndSocket RUArmConstraint = new BallAndSocket(radians(85), radians(85));
+        RUArmConstraint.setRestRotation(RUArm.rotation().get(), new Vector(0,1,0), new Vector(-1,0,0),  RLArm.translation().get());
+        RUArm.setConstraint(RUArmConstraint);
+        // LEFTLOWARM  [ 25.23188, 120.4344, -14.801453 ]
+        Vector RLArmTwist = Vector.cross(limbs.get("RIGHTHAND").translation(), new Vector(0,0,1), null);
+        Hinge RLArmConstraint = new Hinge(radians(0), radians(178),RLArm.rotation().get(), limbs.get("RIGHTHAND").translation(), RLArmTwist);
+        RLArm.setConstraint(RLArmConstraint);
+
+
+        //LEFTUPLEG  [ 54.6711, 101.23, -16.3786 ] - > B&S
+        Frame LULeg = limbs.get("LEFTUPLEG");
+        Frame LLLeg = limbs.get("LEFTLOWLEG");
+        BallAndSocket LULegConstraint = new BallAndSocket(radians(50), radians(50));
+        LULegConstraint.setRestRotation(LULeg.rotation().get(), new Vector(1,0,0), LLLeg.translation().get());
+        LULeg.setConstraint(LULegConstraint);
+        //LEFTLOWLEG  [ 54.0961, 49.799, -12.47683 ] - > hinge
+        Hinge LLLegConstraint = new Hinge(radians(0), radians(170), LLLeg.rotation().get(), new Vector(0,-1,0),new Vector(1,0,0));
+        LLLeg.setConstraint(LLLegConstraint);
+
+
+        //RIGHTUPLEG  [ 37.2461, 49.798904, -12.47683 ]
+        Frame RULeg = limbs.get("RIGHTUPLEG");
+        Frame RLLeg = limbs.get("RIGHTLOWLEG");
+        BallAndSocket RULegConstraint = new BallAndSocket(radians(50), radians(50));
+        RULegConstraint.setRestRotation(RULeg.rotation().get(), new Vector(1,0,0), RLLeg.translation().get());
+        RULeg.setConstraint(RULegConstraint);
+        //RIGHTLOWLEG  [ 37.2461, 49.798904, -12.47683 ]
+        Hinge RLLegConstraint = new Hinge(radians(0), radians(170),RLLeg.rotation().get(), new Vector(0,-1,0), new Vector(1,0,0));
+        RLLeg.setConstraint(RLLegConstraint);
+
+        for(int i = 0; i < target_names.length; i++){
+            List<Frame> fr = new ArrayList<>();
+            for(Frame f : scene.branch(limbs.get(head_names[i]))){
+                fr.add(f);
+            }
+
+            //BioIk chain = new BioIk(fr, 10, 4);
+            ChainSolver chain = new ChainSolver((ArrayList) fr);
+            chain.setKeepDirection(true);
+            chain.setFixTwisting(true);
+
+            chain.timesPerFrame = 5;
+            chain.maxIter = 50;
+            chain.error = chain.minDistance = 0.1f;
+            chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    //if(solve) {
+                    chain.solve();
+                    //}
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
+            chainsolvers.add(chain);
+        }
+        exploration = new float[chainsolvers.size()];
+
+        //Solver solver = scene.registerTreeSolver(rootIK);
+
+        //scene.addIKTarget(limbs.get("LEFTHAND"), targets.get("LEFTHAND"));
+        //scene.addIKTarget(limbs.get("RIGHTHAND"), targets.get("RIGHTHAND"));
+        //scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
+        //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
+        //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
+
+        root.cull(true);
     }
 
     public Frame createTarget(float radius){
@@ -155,13 +243,35 @@ public class Viewer extends PApplet{
         specular(255, 255, 255);
         shininess(10);
         //Draw Constraints
-        //scene.drawAxes();
+        scene.drawAxes();
         scene.render();
+        scene.beginHUD();
+//        for(String k : limbs.keySet()){
+//            Vector sc = scene.screenLocation(limbs.get(k).position());
+//            fill(255);
+//            text("" +  limbs.get(k).position().x() + "\n" + limbs.get(k).position().y() + "\n" + limbs.get(k).position().z(), sc.x(), sc.y());
+//        }
+//        for(String k : targets.keySet()){
+//            Vector sc = scene.screenLocation(targets.get(k).position());
+//            fill(255);
+//            text("" +  targets.get(k).position().x() + "\n" + targets.get(k).position().y() + "\n" + targets.get(k).position().z(), sc.x(), sc.y());
+//        }
+        for(int i = 0; i < chainsolvers.size(); i++){
+            ChainSolver ch = chainsolvers.get(i);
+            Vector sc = scene.screenLocation(ch.target().position());
+            fill(255);
+            exploration[i] = ch.exploration > exploration[i] ? ch.exploration : exploration[i];
+            text("" +  exploration[i], sc.x(), sc.y());
+        }
+
+        scene.endHUD();
+
         if(read){
             parser.nextPose();
             updateTargets();
+            rootIK.setRotation(root.rotation());
         }
-        parser.drawFeasibleRegion(this.getGraphics());
+        //parser.drawFeasibleRegion(this.getGraphics());
         //parser.drawConstraint(this.getGraphics());
         if(chain_solver != null) {
             //if(show1) draw_pos(prev, color(0,255,0), 3);
