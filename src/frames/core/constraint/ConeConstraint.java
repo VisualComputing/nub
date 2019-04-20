@@ -16,6 +16,7 @@ import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
 import static java.lang.Math.PI;
+import static java.lang.Math.abs;
 
 /**
  * A Frame is constrained to disable translation and
@@ -29,6 +30,8 @@ public abstract class ConeConstraint extends Constraint{
     protected Quaternion _idleRotation = new Quaternion();
     protected Quaternion _orientation = new Quaternion();
     protected Quaternion _offset = new Quaternion();
+    protected float _min = (float) Math.PI, _max = (float) Math.PI;
+
 
     public Quaternion restRotation() {
         return _restRotation;
@@ -63,6 +66,11 @@ public abstract class ConeConstraint extends Constraint{
         _restRotation = delta;
     }
 
+    public void setTwistLimits(float min, float max){
+        _min = min;
+        _max = max;
+    }
+
 
     public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
         setRestRotation(reference, up, twist, twist);
@@ -85,9 +93,28 @@ public abstract class ConeConstraint extends Constraint{
         Quaternion rotationSwing = Quaternion.compose(change, rotationTwist.inverse()); //w.r.t idle
         //Constraint swing
         Vector new_pos = rotationSwing.rotate(_restRotation.rotate(new Vector(0, 0, 1))); //get twist desired target position
-        //new_pos = _offset.rotate(new_pos);
         Vector constrained = apply(new_pos, _restRotation); // constraint target position
         rotationSwing = new Quaternion(tw, constrained); // get constrained swing rotation
+        //Constraint twist
+        //Find idle twist
+        Vector idleAxis = new Vector(_idleRotation._quaternion[0], _idleRotation._quaternion[1], _idleRotation._quaternion[2]);
+        idleAxis = Vector.projectVectorOnAxis(idleAxis, tw); // w.r.t idle
+        //Get rotation component on Axis direction
+        Quaternion idleTwist = new Quaternion(idleAxis.x(), idleAxis.y(), idleAxis.z(), _idleRotation.w()); //w.r.t idle
+        //compare angles
+        float twistAngle = rotationTwist.angle();
+        float idleAngle = idleTwist.angle();
+        if (rotationAxis.dot(tw ) < 0) twistAngle = (float)(2 * Math.PI - twistAngle);
+        if (idleAxis.dot(tw ) < 0) idleAngle = (float)(2 * Math.PI - idleAngle);
+        //difference between angles
+        float diff1 = twistAngle - idleAngle;
+        float diff2 = (float)(twistAngle - 2 * Math.PI + idleAngle);
+        float diff = abs(diff1) < abs(diff2) ? diff1 : diff2;
+        if( (diff < 0 && -diff > _min) || (diff > 0 && diff > _max) ){
+            twistAngle = twistAngle - _max < (float) (-_min + 2*Math.PI) - twistAngle ? _max : -_min;
+        }
+        rotationTwist = new Quaternion(tw, twistAngle); //w.r.t idle
+
         //constrained change
         Quaternion constrained_change = Quaternion.compose(rotationSwing, rotationTwist);
         //find change in terms of frame rot
