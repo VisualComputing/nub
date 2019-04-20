@@ -9,6 +9,7 @@ import frames.ik.ChainSolver;
 import frames.ik.Solver;
 import frames.ik.animation.IKAnimation;
 import frames.ik.evolution.BioIk;
+import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.timing.TimingTask;
@@ -191,6 +192,7 @@ public class Case1 extends PApplet {
         //Add constraints
         BallAndSocket c1 = new BallAndSocket(radians(45),radians(45));
         c1.setRestRotation(j1.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
+        c1.setTwistLimits(radians(0),radians(180));
         j1.setConstraint(c1);
 
         Hinge c2 = new Hinge(0,radians(120),j2.rotation().get(), new Vector(1,0,0), new Vector(0,0,-1));
@@ -246,9 +248,7 @@ public class Case1 extends PApplet {
         } else if(key == 's'){
             for (Solver s : solvers) s.solve();
         }
-
     }
-
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.constraintTest.Case1"});
