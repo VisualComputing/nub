@@ -29,7 +29,7 @@ import java.util.Random;
 import static processing.core.PApplet.*;
 
 public class Util {
-    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, MIX }
+    public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
     public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA }
 
     public static Solver createSolver(SolverType type, ArrayList<Frame> structure){
@@ -166,12 +166,13 @@ public class Util {
             //Quaternion offset = new Quaternion(new Vector(0, 1, 0), radians(random(-90, 90)));
             Quaternion offset = new Quaternion();//Quaternion.random();
             Constraint constraint = null;
+            ConstraintType current = type;
             if(type == ConstraintType.MIX){
-                int r = random.nextInt(ConstraintType.values().length);
+                int r = random.nextInt(ConstraintType.values().length - 1);
                 r = is3D ? r : r % 2;
-                type = ConstraintType.values()[r];
+                current = ConstraintType.values()[r];
             }
-            switch (type){
+            switch (current){
                 case NONE:{
                     break;
                 }
@@ -182,6 +183,14 @@ public class Util {
                     float left = radians(random.nextFloat()*40 + 10);
                     float right = radians(random.nextFloat()*40 + 10);
                     constraint = new BallAndSocket(down, up, left, right);
+                    Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
+                    ((BallAndSocket) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
+                    break;
+                }
+                case CONE_CIRCLE:{
+                    if(!is3D) break;
+                    float r = radians(random.nextFloat()*40 + 10);
+                    constraint = new BallAndSocket(r,r,r,r);
                     Quaternion rest = Quaternion.compose(structure.get(i).rotation().get(), offset);
                     ((BallAndSocket) constraint).setRestRotation(rest, new Vector(0, 1, 0), twist);
                     break;
@@ -202,14 +211,15 @@ public class Util {
                     break;
                 }
                 case HINGE:{
-                    constraint = new Hinge(radians(random.nextFloat()*160 + 10), radians(radians(random.nextFloat()*160 + 10)));
-                    ((Hinge) constraint).setRestRotation(structure.get(i).rotation().get());
                     Vector vector = new Vector(2*random.nextFloat() - 1, 2*random.nextFloat() - 1, 2*random.nextFloat() - 1);
                     vector.normalize();
-                    ((Hinge) constraint).setAxis(Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation()));
-                    if(Vector.squaredNorm(((Hinge) constraint).axis()) == 0) {
+                    vector = Vector.projectVectorOnPlane(vector, structure.get(i + 1).translation());
+                    if(Vector.squaredNorm(vector) == 0) {
                         constraint = null;
                     }
+                    constraint = new Hinge(radians(random.nextFloat()*160 + 10),
+                            radians(radians(random.nextFloat()*160 + 10)),
+                            structure.get(i).rotation().get(), structure.get(i + 1).translation(), vector);
                 }
             }
             structure.get(i).setConstraint(constraint);

@@ -37,7 +37,7 @@ public class VisualBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.MIX; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
@@ -90,7 +90,8 @@ public class VisualBenchmark extends PApplet {
             //6. Define solver parameters
             solvers.get(i).error = 0.001f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 50;
+            solvers.get(i).maxIter = 30;
+            solvers.get(i).minDistance = 0.001f;
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
