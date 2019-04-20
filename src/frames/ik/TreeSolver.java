@@ -18,6 +18,7 @@ import frames.primitives.Vector;
 import java.util.ArrayList;
 
 public class TreeSolver extends FABRIKSolver {
+  //TODO : How to apply proposed heuristics to this solver?
   //TODO : Update - check copy of chains and references
   /*Convenient Class to store ChainSolvers in a Tree Structure*/
   protected static class TreeNode {
@@ -76,12 +77,18 @@ public class TreeSolver extends FABRIKSolver {
     if (frame.children().isEmpty()) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
+      //TODO : clean code
+      solver.setFixTwisting(true);
+      solver.setKeepDirection(true);
       new TreeNode(parent, solver);
       return;
     }
     if (frame.children().size() > 1) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
+      //TODO : clean code
+      solver.setFixTwisting(true);
+      solver.setKeepDirection(true);
       TreeNode treeNode = new TreeNode(parent, solver);
       for (Frame child : frame.children()) {
         ArrayList<Frame> newList = new ArrayList<Frame>();

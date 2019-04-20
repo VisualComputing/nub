@@ -12,6 +12,7 @@
 package frames.ik;
 
 import frames.core.Frame;
+import frames.core.constraint.Constraint;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 
@@ -122,7 +123,8 @@ public class ChainSolver extends FABRIKSolver {
    * Performs a FABRIK ITERATION
    */
 
-  float e;
+  float e; //TODO : Rename or discard this param
+
   @Override
   protected boolean _iterate() {
     //As no target is specified there is no need to perform FABRIK
@@ -132,7 +134,8 @@ public class ChainSolver extends FABRIKSolver {
     Frame end = _chain.get(_chain.size() - 1);
     Vector target = this._target.position().get();
 
-    e  = iterations % 2 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.min(Vector.distance(end.position(), _target.position()), e);
+    //TODO: Check blocked and oscillation decisions based on "e"
+    e  = iterations % 2 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.max(Vector.distance(end.position(), _target.position()), e);
     //Execute Until the distance between the end effector and the target is below a threshold
     if (Vector.distance(end.position(), target) <= error) {
       return true;
@@ -159,22 +162,33 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
     float change = _backwardReaching(o);
     //Save best solution
-    if(true || (_keepDirection && _fixTwisting)) {
-      float ne  = Vector.distance(end.position(), _target.position());
-      if (change <= minDistance || (iterations % 2 == 1 && ne >= e)) {
+    float ne  = Vector.distance(end.position(), _target.position());
+    //TODO : clean code
+//    System.out.println("ne is greater than error : " + " ne : " + ne + " error : " + error);
+//    System.out.println("change is : " + change);
+//    System.out.println("e is : " + e);
+//    System.out.println("current is : " + _current);
+//    System.out.println("best is : " + _best);
+
+    if(ne > error) {
+      if(debug) System.out.println("ne is greater than error : " + " ne : " + ne + " error : " + error);
+      if(debug) System.out.println("change is : " + change);
+      if(debug) System.out.println("e is : " + e);
+
+      if ((change < 10e-6) || (iterations % 2 == 1 && ne > e)) {
         boolean x = ne > e;
-        System.out.println("change :" + change);
-        for(Float jc : _jointChange)
-          System.out.print(jc + " , ");
-        System.out.println();
+        for(Float jc : _jointChange) {
+          if (debug) System.out.print(jc + " , ");
+        }
+        if(debug) System.out.println();
         //avoid deadLock
-        System.out.println(x ? "AVOID" : "EXPLORE");
+        if(debug) System.out.println(x ? "AVOID" : "EXPLORE");
         _avoidDeadlock(x);
       }
     }
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
     _update();
-    addIterationRecord(_positions);
+    if(debug) addIterationRecord(_positions);
     //Check total position change
     return false;
   }
@@ -219,7 +233,7 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
     float change = _backwardReaching(o);
     //Save best solution
-    _current = Vector.distance(target, _original.get(_chain.size() - 1).position());
+    _current = Vector.distance(target, _chain.get(_chain.size() - 1).position()); //TODO : Check on Tree Solver
     //Check total position change
     if (change <= 0.001f) return _positions;
     return _positions;
@@ -320,6 +334,8 @@ public class ChainSolver extends FABRIKSolver {
     diverge_hist= new ArrayList<>();
   }
 
+
+  //TODO : Check this ideas and refine (*)
   public ArrayList<Vector> avoid_pos, p_avoid_pos;
   public ArrayList<ArrayList<Vector>> avoid_pos_hist, diverge_hist;
   public float exploration = 0;
@@ -343,29 +359,65 @@ public class ChainSolver extends FABRIKSolver {
       }
     });
 
-    System.out.println("sorted change : ");
-    for(int idx : indices)
-      System.out.print(_jointChange.get(idx) + " , ");
-    System.out.println();
+    //TODO : think about exploration strategies
+    if(debug) System.out.println("sorted change : ");
+    for(int idx : indices) {
+      if (debug) System.out.print(_jointChange.get(idx) + " , ");
+    }
+    if(debug) System.out.println();
 
-    for(int i = 0; i < 10; i++) {
-      ArrayList<Frame> copy = _copy(_chain);
+    for(int i = 0; i < 20; i++) {
+      ArrayList<Frame> copy = i < 10 ? _copy(_chain) : _copy(b_copy);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
       for (Frame f : copy) {
         copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
-        if(j < _jointChange.size()) {
+        if(j < _jointChange.size() && i < 10) {
           //focus on change joints who preserves direction
           a = 1 - i/(_jointChange.size() - 1);
           a = (float)(a * 180 * Math.PI / 180);
         } else{
-          a = (float)(60 * Math.PI / 180);
+          a = (float)(180 * Math.PI / 180);
         }
-
         f.rotate(new Quaternion((float) (2 * Math.random() * a - a),
                 (float) (2 * Math.random() * a - a),
                 (float) (2 * Math.random() * a - a)));
+        copy_p.add(f.position().get());
+      }
+
+      /*copy_p.set(_chain.size() - 1, this._target.position().get());
+      //if(_fixTwisting) _applyTwistRotation(copy, copy_p.get(copy_p.size() - 1));
+      _forwardReaching(copy, copy_p, _distances, copy_props, _keepDirection);
+
+      Vector o = copy_p.get(0);
+      copy_p.set(0, _chain.get(0).position());
+      _backwardReaching(copy, copy_p, _distances, copy_props , _keepDirection, o);*/
+
+      float d = Vector.distance(copy_p.get(copy_p.size() -1), target);
+      if(d <= b_d){
+        b_d = d;
+        b_copy = copy;
+        avoid_pos = copy_p;
+        if(x)avoid_pos_hist.add(avoid_pos);
+        else diverge_hist.add(avoid_pos);
+        if(debug) System.out.println("    BEST : " + b_d + " Dist : " + d);
+        if(debug) System.out.println("    BEST Joint Change : " + b_d + " Dist : " + d);
+      }
+    }
+
+
+    for(int i = 0; i < 20; i++) {
+      ArrayList<Frame> copy = i < 10 ? _copy(b_copy) : _copy(_original);
+      ArrayList<Vector> copy_p = new ArrayList<>();
+      HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
+      int j = 0;
+      int k = r.nextInt(_chain.size());
+
+      for (Frame f : copy) {
+        copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
+        a = (float)(60 * Math.PI / 180);
+        if(j < _chain.size())f.rotate(new Quaternion(copy.get(j).translation(), (float) (2 * Math.random() * a - a)));
         copy_p.add(f.position().get());
       }
 
@@ -384,10 +436,11 @@ public class ChainSolver extends FABRIKSolver {
         avoid_pos = copy_p;
         if(x)avoid_pos_hist.add(avoid_pos);
         else diverge_hist.add(avoid_pos);
-        System.out.println("    BEST : " + b_d + " Dist : " + d);
-        System.out.println("    BEST Joint Change : " + b_d + " Dist : " + d);
+        if(debug) System.out.println("    BEST : " + b_d + " Dist : " + d);
+        if(debug) System.out.println("    BEST Joint Change : " + b_d + " Dist : " + d);
       }
     }
+
     for(int i = 0; i < _chain.size(); i++){
       if(i < _jointChange.size()) _jointChange.set(i,0f);
       _chain.get(i).setRotation(b_copy.get(i).rotation().get());

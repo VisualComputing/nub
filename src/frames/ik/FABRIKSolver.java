@@ -74,7 +74,7 @@ public abstract class FABRIKSolver extends Solver {
     protected boolean _useConstraint = true;
     protected boolean _enableFixWeight = true;
     //It is useful when the chain is highly constrained
-    protected float _directionWeight = 0.3f;
+    protected float _directionWeight = 0.5f; //TODO: experiment with this parameter
     //When it is 1 the Joint will not move at all
     protected float _fixWeight = 0;
 
@@ -108,6 +108,7 @@ public abstract class FABRIKSolver extends Solver {
   //TODO : Clean code
   static Random r = new Random();
   public static boolean rand = false;
+  static boolean debug = true; //TODO : discard
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -152,7 +153,8 @@ public abstract class FABRIKSolver extends Solver {
    * the reference frame of the Frame at i + 1
    * */
   protected float _forwardReaching(ArrayList<? extends Frame> chain) {
-    if(_fixTwisting) _applyTwistRotation(chain, _positions.get(_positions.size() - 1));
+    //TODO : Check for a better appraoach to include Twist (*)
+    if(_fixTwisting && iterations % 3 == 0) _applyTwistRotation(chain, _positions.get(_positions.size() - 1));
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
@@ -166,7 +168,7 @@ public abstract class FABRIKSolver extends Solver {
 
       Properties props_i = _properties.get(chain.get(i).id());
       Properties props_i1 = _properties.get(chain.get(i+1).id());
-      //TODO : Is necessary to check children?
+      //TODO : Is it necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
       if(chain.get(i).constraint() != null && _keepDirection){
         /*
@@ -391,7 +393,8 @@ public abstract class FABRIKSolver extends Solver {
       Hinge constraint = (Hinge) chain.get(i+1).constraint();
 
       //project w to plane
-      w = Vector.projectVectorOnPlane(w, constraint.axis());
+      //TODO : Check Projection on plane - Axis
+      //w = Vector.projectVectorOnPlane(w, constraint.axis());
 
       Quaternion desired = new Quaternion(w,x);
 
@@ -479,7 +482,8 @@ public abstract class FABRIKSolver extends Solver {
       Hinge constraint = (Hinge) chain.get(i+1).constraint();
 
       //project w to plane
-      w = Vector.projectVectorOnPlane(w, constraint.axis());
+      // TODO : Check Projection on plane
+      //w = Vector.projectVectorOnPlane(w, constraint.axis());
 
       Quaternion desired = new Quaternion(w,x);
 
@@ -542,22 +546,41 @@ public abstract class FABRIKSolver extends Solver {
 
   protected static void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
     //Change chain state in such a way that the target approach to chain
-    Frame eff = chain.get(chain.size() - 1);
-    for(int i = 0; i < chain.size() - 2; i++){
+    //TODO : consider alternatives to twisting approach (is it possible as intermediary step)
+    Vector eff = chain.get(chain.size() - 1).position();
+    for(int i = chain.size() - 2; i >= 0 ; i--){
       Frame f_i = chain.get(i);
       //Project Vectors to Plane given by Twist Vector
       Vector twist = chain.get(i + 1).translation();
       //Get Vector from EFF to this Joint
-      Vector localEff = f_i.location(eff.position());
-      Vector v = Vector.projectVectorOnPlane(localEff, twist);
-      //Get Vector from EFF to this Joint
-      Vector u = Vector.projectVectorOnPlane(f_i.location(t), twist);
+      Vector localEff = f_i.location(eff);
+      Vector localTarget = f_i.location(t);
+      Vector v, u;
+      try {
+        v = Vector.projectVectorOnPlane(localEff, twist);
+        //Get Vector from EFF to this Joint
+        u = Vector.projectVectorOnPlane(localTarget, twist);
+      }catch(Exception e){
+        continue;
+      }
       //Perform this operation only when Projected Vectors have not a despicable length
-      if(v.magnitude() > 0.1 * localEff.magnitude() && u.magnitude() > 0.1 * localEff.magnitude()) {
+      if(v.magnitude() > 0.5 * localEff.magnitude() && u.magnitude() > 0.5 * localEff.magnitude()) {
+        if(debug) {
+          System.out.println("############");
+          System.out.println("############");
+          System.out.println("--> Local EFF : " + localEff);
+          System.out.println("--> Local Target : " + localTarget);
+          System.out.println("--> Local EFF Proj : " + v);
+          System.out.println("--> Local Target Proj : " + u);
+          System.out.println("--> Twist : " + twist);
+          System.out.println("$$$$$$$$$$$$$$$$$");
+          System.out.println("$$$$$$$$$$$$$$$$$");
+        }
+
         Quaternion q = new Quaternion(v, u);
         //Perform this operation only when change is not despicable
-        if(q.angle() > Math.toRadians(5)){
-          f_i.rotate(q);
+        if(q.angle() > Math.toRadians(10)){
+          f_i.rotate(new Quaternion(q.axis(), q.angle() * 0.7f)); //TODO : Apply whole rotation or part of it (explore)
         }
       }
     }
@@ -625,6 +648,7 @@ public abstract class FABRIKSolver extends Solver {
     draw_pos(cop, pg.color(0,255,0), 3);
   }
 
+  //TODO : Remove this methods
   public void draw_pos(ArrayList<Vector> pos, int color, float str) {
     if(pos == null) return;
     Vector prev = null;
