@@ -37,87 +37,44 @@ public class Hinge extends Constraint {
   protected float _max;
   protected float _min;
   protected Quaternion _restRotation = new Quaternion();
-  protected Vector _axis;
+  protected Quaternion _idleRotation = new Quaternion();
+  protected Quaternion _orientation = new Quaternion();
 
 
-  public Vector axis() {
-    return _axis;
+  public Hinge(float min, float max, Quaternion rotation, Vector up, Vector twist) {
+    _min = min;
+    _max = max;
+    setRestRotation(rotation, up, twist);
   }
 
   /**
-   * Set the twist axis.
-   * The axis must be defined with respect to {@link #restRotation()} Quaternion
-   *
-   * @param axis
+   * reference is a Quaternion that will be aligned to point to the given Basis Vectors
+   * result will be stored on restRotation.
+   * twist and up axis are defined locally on reference rotation
    */
-  public void setAxis(Vector axis) {
-    this._axis = axis;
+  public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
+    _orientation = reference.get();
+    _idleRotation = reference.get();
+    //Align y-Axis with up vector
+    System.out.println("up : " + up);
+    System.out.println("twist : " + twist);
+    Quaternion delta = new Quaternion(new Vector(0, 1, 0), up);
+    System.out.println("d1 :  " + delta.axis() + " " + delta.angle());
+    Vector tw = delta.inverseRotate(twist);
+    //Align z-Axis with twist vector
+    delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
+    System.out.println("d2 :  " + delta.axis() + " " + delta.angle());
+
+    _orientation.compose(delta); // orientation = idle * rest
+    System.out.println("Or :  " + orientation().axis() + " " + Math.toDegrees(orientation().angle()));
+    System.out.println("up :  " + orientation().rotate(new Vector(0,1,0)));
+    System.out.println("tw :  " + orientation().rotate(new Vector(0,0,1)));
+
+    _restRotation = delta;
   }
 
-  /**
-   * Set the twist axis.
-   * The axis must be defined with respect to reference Quaternion.
-   * Call this method only after setting {@link #restRotation()} Quaternion
-   *
-   * @param reference
-   * @param axis
-   */
-  public void setAxis(Quaternion reference, Vector axis) {
-    this._axis = _restRotation.inverse().rotate(reference.rotate(axis));
-  }
-
-  /**
-   * Get the restRotation Quaternion.
-   *
-   * @return
-   */
-  public Quaternion restRotation() {
-    return _restRotation;
-  }
-
-  public void setRestRotation(Quaternion restRotation) {
-    this._restRotation = restRotation.get();
-  }
-
-
-  public Hinge() {
-    _max = (float) (PI);
-    _min = (float) (PI);
-    _axis = new Vector(0, 1, 0);
-  }
-
-  public Hinge(boolean is2D) {
-    this();
-    if (is2D) _axis = new Vector(0, 0, 1);
-  }
-
-  /*Create a Hinge constraint in a with rest rotation
-   * Given by the axis (0,0,1) and angle restAngle*/
-  public Hinge(float min, float max, float restAngle) {
-    this(true);
-    this._restRotation = new Quaternion(new Vector(0, 0, 1), restAngle);
-  }
-
-  public Hinge(float min, float max, Quaternion rotation) {
-    this(min, max);
-    this._restRotation = rotation.get();
-  }
-
-  public Hinge(float min, float max, Quaternion rotation, Vector axis) {
-    this(min, max, rotation);
-    this._axis = axis;
-  }
-
-  public Hinge(boolean is2D, float min, float max) {
-    this(is2D);
-    this._max = max;
-    this._min = min;
-  }
-
-  public Hinge(float min, float max) {
-    this(false);
-    this._max = max;
-    this._min = min;
+  public Quaternion orientation(){
+    return _orientation;
   }
 
   public float maxAngle() {
@@ -138,49 +95,37 @@ public class Hinge extends Constraint {
 
   @Override
   public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
-    Vector axis = _restRotation.rotate(this._axis);
-    Vector rotationAxis = new Vector(rotation._quaternion[0], rotation._quaternion[1], rotation._quaternion[2]);
-    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, axis);
-    //Get rotation component on Axis direction
-    Quaternion rotationTwist= new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rotation.w());
+    Quaternion desired = Quaternion.compose(frame.rotation(), rotation); //w.r.t reference
+
+    desired = Quaternion.compose(_orientation.inverse(), desired);
+    desired = Quaternion.compose(desired, _restRotation);
+    System.out.println("desired : " + desired.axis() + "  " + Math.toDegrees(desired.angle()));
+    //desired = Quaternion.compose(_restRotation.inverse(), desired); //w.r.t rest
+    System.out.println("up :  " + orientation().rotate(new Vector(0,1,0)));
+    System.out.println("tw :  " + orientation().rotate(new Vector(0,0,1)));
+    System.out.println("idle : " + _idleRotation.axis() + "  " + Math.toDegrees(_idleRotation.angle()));
+    System.out.println("desired : " + desired.axis() + "  " + Math.toDegrees(desired.angle()));
+    System.out.println("des up :  " + desired.rotate(new Vector(0,1,0)));
+    System.out.println("des tw :  " + desired.rotate(new Vector(0,0,1)));
+
+    Vector rotationAxis = new Vector(desired._quaternion[0], desired._quaternion[1], desired._quaternion[2]);
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0,0,1));
+    //Get rotation component on Axis direction w.r.t reference
+    Quaternion rotationTwist= new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), desired.w());
     float deltaAngle = rotationTwist.angle();
-    if (rotationAxis.dot(axis) < 0) deltaAngle *= -1;
-    /*First rotation of Frame with respect to Axis*/
-    Quaternion current = Quaternion.compose(_restRotation.inverse(), frame.rotation());
-    /*It is possible that the current rotation axis is not parallel to Axis*/
-    Vector currentAxis = new Vector(current._quaternion[0], current._quaternion[1], current._quaternion[2]);
-    currentAxis = Vector.projectVectorOnAxis(currentAxis, axis);
-    //Get rotation component on Axis direction
-    Quaternion currentTwist = new Quaternion(currentAxis.x(), currentAxis.y(), currentAxis.z(), current.w());
-    float frameAngle = currentTwist.angle();
-    if (current.axis().dot(axis) < 0) frameAngle *= -1;
-    float desired = frameAngle + deltaAngle;
-    desired = (float) (desired - PI * 2 * Math.floor((desired + PI) / (2*PI)));
-    float inverted;
-    if(desired > 0){
-      inverted = (float)(-2*PI + desired);
-    } else{
-      inverted = (float)(2*PI + desired);
+    if (rotationAxis.dot(new Vector(0,0,1)) < 0) deltaAngle *= -1;
+    //get signed distance
+    float change = deltaAngle;
+    if(-_min > change || change > _max ){
+      change = change < 0 ? (float) (change + 2*Math.PI) : change;
+      change = change - _max < (float) (-_min + 2*Math.PI) - change ? _max : -_min;
     }
-    if((desired >= 0 && desired <= _max)){
-      return new Quaternion(axis, deltaAngle);
-    }
-    if((desired <= 0 && desired >= -_min)){
-      return new Quaternion(axis, deltaAngle);
-    }
-    if(Math.abs(_min - PI) < 10e-3 && Math.abs(_max - PI) < 10e-3){
-      return new Quaternion(axis, deltaAngle);
-    }
-    //get nearest bound
-    float dist_to_min = min(abs(desired + _min), abs(inverted + _min));
-    float dist_to_max = min(abs(desired - _max), abs(inverted - _max));
-    if(dist_to_min < dist_to_max){
-      float r = -_min - frameAngle;
-      return new Quaternion(axis, r);
-    }else{
-      float r = _max - frameAngle;
-      return new Quaternion(axis, r);
-    }
+    System.out.println("Change : " + change);
+
+    //apply constrained rotation orientation * constrained_change = frame * rot
+    Quaternion rot = Quaternion.compose(frame.rotation().inverse(),
+            Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0,0,1), change), _restRotation.inverse())));
+    return rot;
   }
   @Override
   public Vector constrainTranslation(Vector translation, Frame frame) {
