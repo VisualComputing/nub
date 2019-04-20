@@ -2895,8 +2895,9 @@ public class Scene extends Graph implements PConstants {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
     pGraphics.vertex(0, 0, 0);
     float step = (maxAngle - minAngle) / detail;
-    for (float theta = minAngle; theta <= maxAngle; theta += step)
+    for (float theta = minAngle; theta < maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
+    pGraphics.vertex(radius * (float) Math.cos(maxAngle), radius * (float) Math.sin(maxAngle));
     pGraphics.endShape(PApplet.CLOSE);
   }
 
@@ -2974,35 +2975,9 @@ public class Scene extends Graph implements PConstants {
       //TODO: Only works well if child lies on Axis Plane
       Hinge constraint = (Hinge) frame.constraint();
       if (frame.children().size() == 1) {
-        //1. Find Projection w.r.t axis
-        reference.rotate(constraint.restRotation());
-        Vector axis = reference.rotation().rotate(constraint.axis());
-        if(frame.graph().is3D()) {
-          //Align Z-Axis with Axis
-          reference.rotate(new Quaternion(new Vector(0, 0, 1), axis));
-          //Align X-Axis with rest Axis
-          Vector rest = Vector.projectVectorOnPlane(reference.rotation().inverseRotate(frame.children().get(0).translation()), new Vector(0, 0, 1));
-          reference.rotate(new Quaternion(new Vector(1,0,0), rest));
-        } else{
-          Vector rest = frame.children().get(0).translation();
-          //Align X-Axis with rest Axis
-          float angle = Vector.angleBetween(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest));
-          Quaternion deltaX = new Quaternion(Vector.cross(new Vector(1, 0, 0), reference.rotation().inverseRotate(rest), null), angle);
-          reference.rotate(deltaX);
-        }
-        //Get delta angle
-        Quaternion current = Quaternion.compose(constraint.restRotation().inverse(), frame.rotation());
-        /*It is possible that the current rotation axis is not parallel to Axis*/
-        Vector currentAxis = new Vector(current._quaternion[0], current._quaternion[1], current._quaternion[2]);
-        currentAxis = Vector.projectVectorOnAxis(currentAxis, constraint.restRotation().rotate(constraint.axis()));
-        //Get rotation component on Axis direction
-        Quaternion currentTwist = new Quaternion(currentAxis.x(), currentAxis.y(), currentAxis.z(), current.w());
-        float frameAngle = currentTwist.angle();
-        if (current.axis().dot(constraint.restRotation().rotate(constraint.axis())) < 0) frameAngle *= -1;
-        frameAngle = (float) (frameAngle - PI * 2 * Math.floor((frameAngle + PI) / (2*PI)));
-        reference.rotate(new Quaternion(new Vector(0,0,1), -frameAngle));
+        reference.rotate(constraint.orientation());
+        reference.rotate(new Quaternion(new Vector(1,0,0), new Vector(0,1,0)));
         applyTransformation(pGraphics,reference);
-        //drawAxes(pGraphics,boneLength / 2.f);
         drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle() , constraint.maxAngle(), 10);
       }
     }
