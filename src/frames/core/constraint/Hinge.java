@@ -56,20 +56,12 @@ public class Hinge extends Constraint {
     _orientation = reference.get();
     _idleRotation = reference.get();
     //Align y-Axis with up vector
-    System.out.println("up : " + up);
-    System.out.println("twist : " + twist);
     Quaternion delta = new Quaternion(new Vector(0, 1, 0), up);
-    System.out.println("d1 :  " + delta.axis() + " " + delta.angle());
     Vector tw = delta.inverseRotate(twist);
     //Align z-Axis with twist vector
     delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
-    System.out.println("d2 :  " + delta.axis() + " " + delta.angle());
 
     _orientation.compose(delta); // orientation = idle * rest
-    System.out.println("Or :  " + orientation().axis() + " " + Math.toDegrees(orientation().angle()));
-    System.out.println("up :  " + orientation().rotate(new Vector(0,1,0)));
-    System.out.println("tw :  " + orientation().rotate(new Vector(0,0,1)));
-
     _restRotation = delta;
   }
 
@@ -99,14 +91,6 @@ public class Hinge extends Constraint {
 
     desired = Quaternion.compose(_orientation.inverse(), desired);
     desired = Quaternion.compose(desired, _restRotation);
-    System.out.println("desired : " + desired.axis() + "  " + Math.toDegrees(desired.angle()));
-    //desired = Quaternion.compose(_restRotation.inverse(), desired); //w.r.t rest
-    System.out.println("up :  " + orientation().rotate(new Vector(0,1,0)));
-    System.out.println("tw :  " + orientation().rotate(new Vector(0,0,1)));
-    System.out.println("idle : " + _idleRotation.axis() + "  " + Math.toDegrees(_idleRotation.angle()));
-    System.out.println("desired : " + desired.axis() + "  " + Math.toDegrees(desired.angle()));
-    System.out.println("des up :  " + desired.rotate(new Vector(0,1,0)));
-    System.out.println("des tw :  " + desired.rotate(new Vector(0,0,1)));
 
     Vector rotationAxis = new Vector(desired._quaternion[0], desired._quaternion[1], desired._quaternion[2]);
     rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0,0,1));
@@ -120,9 +104,8 @@ public class Hinge extends Constraint {
       change = change < 0 ? (float) (change + 2*Math.PI) : change;
       change = change - _max < (float) (-_min + 2*Math.PI) - change ? _max : -_min;
     }
-    System.out.println("Change : " + change);
 
-    //apply constrained rotation orientation * constrained_change = frame * rot
+    //apply constrained rotation
     Quaternion rot = Quaternion.compose(frame.rotation().inverse(),
             Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0,0,1), change), _restRotation.inverse())));
     return rot;
