@@ -137,11 +137,10 @@ public class Biped extends PApplet {
         //applyConstraint(j2.frame, boneLength);
 
         float constraint_factor_x = 170;
-        Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x));
-        c2.setRestRotation(j2.rotation().get());
-        c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.translation()));
-        if(Vector.squaredNorm(c2.axis()) != 0) {
-            //j2.frame.setConstraint(c2);
+        Vector axis = Vector.projectVectorOnPlane(hinge, j2.translation());
+        if(Vector.squaredNorm(axis) != 0) {
+            Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x),j2.rotation().get(), j3.translation(), axis);
+            //j2.setConstraint(c2);
         }
         skeleton.add(j1);
         skeleton.add(j2);
