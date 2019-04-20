@@ -14,7 +14,6 @@ import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
 import ik.common.Joint;
-import ik.mocap.BVHParser;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -65,10 +64,9 @@ public class HingeTest extends PApplet {
         ArrayList<Frame> branchHingeConstraintCCD = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
 
         for (int i = 0; i < branchHingeConstraint.size() - 1; i++) {
-            Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x));
-            constraint.setRestRotation(branchHingeConstraint.get(i).rotation().get());
-            constraint.setAxis(Vector.projectVectorOnPlane(new Vector(0, 1, 0), branchHingeConstraint.get(i + 1).translation()));
-            if(Vector.squaredNorm(constraint.axis()) != 0) {
+            Vector vector = Vector.projectVectorOnPlane(new Vector(0, 1, 0), branchHingeConstraint.get(i + 1).translation());
+            if(Vector.squaredNorm(vector) != 0) {
+                Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x),branchHingeConstraint.get(i).rotation().get(), new Vector(0,1,0), vector);
                 branchHingeConstraint.get(i).setConstraint(constraint);
                 branchHingeConstraintCCD.get(i).setConstraint(constraint);
             }
@@ -131,10 +129,8 @@ public class HingeTest extends PApplet {
         scene.render();
     }
 
-    public void setConstraint(Frame f, Vector twist){
-        Hinge constraint = new Hinge(radians(45), radians(45));
-        constraint.setRestRotation(f.rotation().get());
-        constraint.setAxis(twist.get());
+    public void setConstraint(Frame f, Vector up, Vector twist){
+        Hinge constraint = new Hinge(radians(45), radians(45),f.rotation().get(), up, twist.get());
         f.setConstraint(constraint);
     }
 
@@ -149,21 +145,18 @@ public class HingeTest extends PApplet {
         prev = current;
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength,0);
-        setConstraint(current, new Vector(0,0,1));
-
+        setConstraint(current, new Vector(0,1,0), new Vector(0,0,1));
         current = new Joint(scene);
         current.setReference(prev);
         prev = current;
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,0);
-        setConstraint(current, new Vector(1,0,0));
-
+        setConstraint(current, new Vector(0,0,1), new Vector(1,0,0));
         current = new Joint(scene);
         current.setReference(prev);
         //current.setRotation(Quaternion._random());
         current.setPosition(0,boneLength*2,boneLength*2);
-        setConstraint(current, new Vector(1,0,0));
-
+        //setConstraint(current, new Vector(1,0,0));
         root.setPosition(o);
         return (ArrayList) scene.branch(root);
     }
