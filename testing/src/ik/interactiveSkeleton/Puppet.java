@@ -126,12 +126,10 @@ public class Puppet extends PApplet {
         j1.setConstraint(c1);
 
         float constraint_factor_x = 170;
-        Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x));
-        c2.setRestRotation(j2.rotation().get());
+        Hinge c2 = new Hinge(radians(0), radians(constraint_factor_x),j2.rotation().get(), j3.translation(),hinge);
         //c2.setAxis(Vector.projectVectorOnPlane(hinge, j2.frame.translation()));
-        c2.setAxis(hinge);
         //if(Vector.squaredNorm(c2.axis()) != 0) {
-            System.out.println("axis : " + c2.axis());
+            System.out.println("axis : " + c2.orientation().rotate(new Vector(0,0,1)));
             j2.setConstraint(c2);
         //}
 
@@ -175,7 +173,7 @@ public class Puppet extends PApplet {
         if(f == null) return;
         Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
         if(c == null) return;
-        scene.trackedFrame().rotate(new Quaternion(c.axis(), radians(5)));
+        scene.trackedFrame().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
 
     }
 
