@@ -58,7 +58,7 @@ public class LuxoIK extends PApplet {
                     drawCone(pGraphics, -2, 6, 4, 4, 30);
                     drawCone(pGraphics, 6, 15, 4, 17, 30);
                     drawCone(pGraphics, 15, 17, 17, 17, 30);
-                    pGraphics.spotLight(155, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
+                    pGraphics.spotLight(0, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
                     break;
             }
             return true;
@@ -99,8 +99,8 @@ public class LuxoIK extends PApplet {
             Hinge base = new Hinge(radians(180), radians(180), frame(0).rotation().get(), frame(1).translation(), new Vector(0,0,1));
             frame(0).setConstraint(base);
 
-            Hinge h1 = new Hinge(radians(100), radians(100), frame(1).rotation().get(), frame(2).translation(), new Vector(1,0,0));
-            Hinge h2 = new Hinge(radians(100), radians(100), frame(2).rotation().get(), frame(3).translation(), new Vector(1,0,0));
+            Hinge h1 = new Hinge(radians(60), radians(5), frame(1).rotation().get(), frame(2).translation(), new Vector(1,0,0));
+            Hinge h2 = new Hinge(radians(30), radians(30), frame(2).rotation().get(), frame(3).translation(), new Vector(1,0,0));
 
             frame(1).setConstraint(h1);
             frame(2).setConstraint(h2);
