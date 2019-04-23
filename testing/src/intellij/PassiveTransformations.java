@@ -4,8 +4,8 @@ import nub.core.Graph;
 import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Point;
+import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
 import processing.opengl.PShader;
 
@@ -65,7 +65,6 @@ public class PassiveTransformations extends PApplet {
 
   public class GLSLMatrixHandler extends MatrixHandler {
     PShader _shader;
-    PMatrix3D _pmatrix = new PMatrix3D();
 
     public GLSLMatrixHandler() {
       _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
@@ -74,15 +73,11 @@ public class PassiveTransformations extends PApplet {
     @Override
     protected void _setUniforms() {
       shader(_shader);
-      //_pmatrix.set(Scene.toPMatrix(transform()));
-      //_pmatrix.transpose();
-      // same as:
-      _pmatrix.set(transform().get(new float[16]));
-      _shader.set("nub_transform", _pmatrix);
+      Scene.setUniform(_shader, "nub_transform", transform());
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.PassiveTransformations"});
   }
 }
