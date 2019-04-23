@@ -1063,7 +1063,8 @@ public class Scene extends Graph implements PConstants {
       float g = (float) ((node.id() >> 8) & 255) / 255.f;
       float b = (float) ((node.id() >> 16) & 255) / 255.f;
 
-      // TODO How to deal with this command. Seems related to: PassiveTransformation
+      // TODO How to deal with these commands: breaks picking in Luxo when they're moved to the constructor
+      // Seems related to: PassiveTransformations
       // funny, only safe way. Otherwise break things horribly when setting node shapes
       // and there are more than one node holding a shape
       pGraphics.shader(_triangleShader);
