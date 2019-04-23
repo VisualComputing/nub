@@ -1063,7 +1063,7 @@ public class Scene extends Graph implements PConstants {
       float g = (float) ((node.id() >> 8) & 255) / 255.f;
       float b = (float) ((node.id() >> 16) & 255) / 255.f;
 
-      // TODO see _enableBackBuffer
+      // TODO How to deal with this command. Seems related to: PassiveTransformation
       // funny, only safe way. Otherwise break things horribly when setting node shapes
       // and there are more than one node holding a shape
       pGraphics.shader(_triangleShader);

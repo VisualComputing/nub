@@ -12,6 +12,7 @@ import processing.opengl.PShader;
 public class PassiveTransformations extends PApplet {
   Graph graph;
   Node[] nodes;
+  PShader _shader;
 
   public void settings() {
     size(800, 800, P3D);
@@ -19,7 +20,14 @@ public class PassiveTransformations extends PApplet {
 
   public void setup() {
     graph = new Graph(g, width, height);
-    graph.setMatrixHandler(new GLSLMatrixHandler());
+    graph.setMatrixHandler(new MatrixHandler() {
+      @Override
+      protected void _setUniforms() {
+        // TODO How to deal with this command. Seems related to: Scene._drawBackBuffer(Node node)
+        shader(_shader);
+        Scene.setUniform(_shader, "nub_transform", transform());
+      }
+    });
     graph.setFOV(PI / 3);
     graph.fit(1);
     nodes = new Node[50];
@@ -38,6 +46,7 @@ public class PassiveTransformations extends PApplet {
     }
     //discard Processing matrices
     resetMatrix();
+    _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
   }
 
   public void draw() {
@@ -61,20 +70,6 @@ public class PassiveTransformations extends PApplet {
 
   public void mouseWheel(MouseEvent event) {
     graph.scale(event.getCount() * 20);
-  }
-
-  public class GLSLMatrixHandler extends MatrixHandler {
-    PShader _shader;
-
-    public GLSLMatrixHandler() {
-      _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
-    }
-
-    @Override
-    protected void _setUniforms() {
-      shader(_shader);
-      Scene.setUniform(_shader, "nub_transform", transform());
-    }
   }
 
   public static void main(String[] args) {
