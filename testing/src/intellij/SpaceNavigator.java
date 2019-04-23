@@ -25,24 +25,26 @@ public class SpaceNavigator extends PApplet {
 
   // nodes stuff:
   Scene scene;
+  boolean rocket;
   boolean snPicking;
+  boolean success;
 
   public void settings() {
     size(1600, 800, P3D);
   }
 
   public void setup() {
-    openSpaceNavigator();
+    success = openSpaceNavigator();
     scene = new Scene(this);
     //scene.setType(Graph.Type.ORTHOGRAPHIC);
     scene.setRadius(1500);
     scene.fit(1);
     Node[] shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Node(scene, shape());
-      shapes[i] = new Node(scene);
-      shapes[i].shape(shape());
+      PShape pshape = rocket ? loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj") : shape();
+      shapes[i] = new Node(scene, pshape);
       scene.randomize(shapes[i]);
+      shapes[i].setPickingThreshold(0);
     }
     smooth();
   }
@@ -59,10 +61,11 @@ public class SpaceNavigator extends PApplet {
     background(0);
     scene.drawAxes();
     scene.render();
-    if (snPicking)
-      spaceNavigatorPicking();
-    else
-      spaceNavigatorInteraction();
+    if (success)
+      if (snPicking)
+        spaceNavigatorPicking();
+      else
+        spaceNavigatorInteraction();
   }
 
   void spaceNavigatorPicking() {
@@ -129,19 +132,22 @@ public class SpaceNavigator extends PApplet {
       snPicking = !snPicking;
   }
 
-  void openSpaceNavigator() {
-    println(System.getProperty("os.name"));
+  boolean openSpaceNavigator() {
     control = ControlIO.getInstance(this);
     String os = System.getProperty("os.name").toLowerCase();
-    if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0)
+    try {
       device = control.getDevice("3Dconnexion SpaceNavigator");// magic name for linux
-    else
-      device = control.getDevice("SpaceNavigator");//magic name, for windows
-    if (device == null) {
-      println("No suitable device configured");
-      System.exit(-1); // End the program NOW!
+    } catch (Exception exc) {
+      println("No suitable device configured for Linux");
     }
-    //device.setTolerance(5.00f);
+    try {
+      device = control.getDevice("SpaceNavigator");//magic name, for windows
+    } catch (Exception exc) {
+      println("No suitable device configured for Win");
+    }
+    if (device == null)
+      return false;
+
     snXPos = device.getSlider(0);
     snYPos = device.getSlider(1);
     snZPos = device.getSlider(2);
@@ -150,9 +156,11 @@ public class SpaceNavigator extends PApplet {
     snZRot = device.getSlider(5);
     //button1 = device.getButton(0);
     //button2 = device.getButton(1);
+    //device.setTolerance(5.00f);
+    return true;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.SpaceNavigator"});
   }
 }
