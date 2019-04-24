@@ -2230,7 +2230,7 @@ public class Node {
    * @see #isTracked(Graph)
    */
   public boolean isTracked() {
-    return isDetached() ? false : isTracked(graph());
+    return !isDetached() && isTracked(graph());
   }
 
   /**
@@ -2315,7 +2315,7 @@ public class Node {
    * @see #cull(boolean)
    */
   public boolean isCulled() {
-    return isDetached() ? false : _culled;
+    return !isDetached() && _culled;
   }
 
   /**
@@ -2392,6 +2392,15 @@ public class Node {
   }
 
   /**
+   * Same as {@code shape(null)}.
+   *
+   * @see #shape(Object)
+   */
+  public void resetShape() {
+    shape(null);
+  }
+
+  /**
    * Sets the retained mode shape for both, the front and the back shapes.
    * Call {@link #frontShape(Object)} and {@link #frontShape(Object)} to set
    * different graphics for rendering and picking, respectively.
@@ -2399,6 +2408,7 @@ public class Node {
    * @see #frontShape(Object)
    * @see #backShape(Object)
    * @see #graphics(Object)
+   * @see #resetShape()
    */
   public void shape(Object shape) {
     frontShape(shape);
