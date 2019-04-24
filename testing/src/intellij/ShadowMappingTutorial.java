@@ -29,7 +29,6 @@ public class ShadowMappingTutorial extends PApplet {
   );
   boolean debug;
   Graph.Type shadowMapType = Graph.Type.ORTHOGRAPHIC;
-  int landscape = 1;
   float zNear = 10;
   float zFar = 1000;
   int w = 1000;
@@ -44,27 +43,51 @@ public class ShadowMappingTutorial extends PApplet {
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
-    Node[] shapes = new Node[50];
+    shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
-      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
+      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj")) {
+        @Override
+        public boolean graphics(PGraphics pg) {
+          pg.pushStyle();
+          pg.fill(255, 255, 0);
+          Scene.drawTorusSolenoid(pg);
+          pg.pushStyle();
+          return immediate;
+        }
+      };
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0);
       shapes[i].scale(0.2f);
     }
     light = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pg) {
+      public boolean frontGraphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
-        Scene.drawAxes(pg, 300);
+        Scene.drawAxes(pg, 500);
+        pg.popStyle();
+        return true;
+      }
+
+      @Override
+      public boolean backGraphics(PGraphics pg) {
         pg.pushStyle();
+        pg.fill(255);
+        pg.sphere(200);
+        pg.popStyle();
         return true;
       }
     };
+    light.setPickingThreshold(0);
+    light.setMagnitude(400f / 2048f);
+    light.setPosition(0, 160, 160);
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
+    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+
     PShape box = createShape(BOX, 360, 5, 360);
     //rectMode(CENTER);
     //PShape box = createShape(RECT, 0, 0, 360, 360);
@@ -72,7 +95,6 @@ public class ShadowMappingTutorial extends PApplet {
     box.setStroke(false);
     floor = new Node(scene);
     floor.shape(box);
-    light.setMagnitude(400f / 2048f);
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -88,20 +110,14 @@ public class ShadowMappingTutorial extends PApplet {
   }
 
   public void draw() {
-    // 1. Calculate the light position and orientation
-    float lightAngle = frameCount * 0.002f;
-    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
-    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
-
-    // 2. Render the shadowmap from light node 'point-of-view'
+    // 1. Render the shadowmap from light node 'point-of-view'
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
 
-    // 3. Render the scene from the scene.eye() node
+    // 2. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
@@ -115,19 +131,24 @@ public class ShadowMappingTutorial extends PApplet {
   }
 
   public void keyPressed() {
-    if (key != CODED) {
-      if (key >= '1' && key <= '3')
-        landscape = key - '0';
-      else if (key == ' ') {
-        shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-        light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
-      } else if (key == 'd') {
-        debug = !debug;
-        if (debug)
-          resetShader();
+    if (key == ' ') {
+      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+      light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+    }
+    if (key == 'i') {
+      immediate = !immediate;
+      for (Node node : shapes)
+        if (immediate)
+          node.resetShape();
         else
-          shader(shadowShader);
-      }
+          node.shape(loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
+    }
+    if (key == 'd') {
+      debug = !debug;
+      if (debug)
+        resetShader();
+      else
+        shader(shadowShader);
     }
   }
 

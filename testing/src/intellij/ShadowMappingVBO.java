@@ -43,7 +43,7 @@ public class ShadowMappingVBO extends PApplet {
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
-    Node[] shapes = new Node[50];
+    shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
       shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));

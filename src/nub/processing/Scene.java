@@ -1006,48 +1006,14 @@ public class Scene extends Graph implements PConstants {
     PGraphics pGraphics = (PGraphics) context;
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-            /*
-            if(_frontShape != null)
-                pg.shape(_frontShape);
-            set(pg);
-            frontShape(pg);
-            //*/
-    ///*
-    //TODO needs more thinking
-    switch (node.highlighting()) {
-      case FRONT:
-        if (node.isTracked())
-          pGraphics.scale(1.15f);
-      case NONE:
-        if (node.frontShape() != null)
-          pGraphics.shape((PShape) node.frontShape());
-        else
-          node.graphics(pGraphics);
-        break;
-      case FRONT_BACK:
-        if (node.frontShape() != null)
-          pGraphics.shape((PShape) node.frontShape());
-        else
-          node.frontGraphics(pGraphics);
-        if (node.isTracked())
-          if (node.backShape() != null)
-            pGraphics.shape((PShape) node.backShape());
-          else
-            node.backGraphics(pGraphics);
-        break;
-      case BACK:
-        if (node.isTracked())
-          if (node.backShape() != null)
-            pGraphics.shape((PShape) node.backShape());
-          else
-            node.backGraphics(pGraphics);
-        else if (node.frontShape() != null)
-          pGraphics.shape((PShape) node.frontShape());
-        else
-          node.frontGraphics(pGraphics);
-        break;
-    }
-    //*/
+
+    if (node.frontShape() != null)
+      pGraphics.shapeMode(context().shapeMode);
+    if (node.frontShape() != null)
+      pGraphics.shape((PShape) node.frontShape());
+    else if (!node.frontGraphics(pGraphics))
+      node.graphics(pGraphics);
+
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -1075,22 +1041,13 @@ public class Scene extends Graph implements PConstants {
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
 
-      //pGraphics.pushStyle();
-      //pGraphics.pushMatrix();
-                /*
-                if (_backShape != null)
-                    pg.shape(_backShape);
-                set(pg);
-                backShape(pg);
-                //*/
-      ///*
       if (node.frontShape() != null)
         pGraphics.shapeMode(context().shapeMode);
       if (node.backShape() != null)
         pGraphics.shape((PShape) node.backShape());
       else if (!node.backGraphics(pGraphics))
         node.graphics(pGraphics);
-      //*/
+
       pGraphics.popStyle();
       pGraphics.popMatrix();
     }

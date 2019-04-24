@@ -38,7 +38,7 @@ public class DOF extends PApplet {
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
@@ -145,7 +145,7 @@ public class DOF extends PApplet {
         scene.align();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.DOF"});
   }
 }
