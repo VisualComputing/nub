@@ -9,7 +9,7 @@ class Sphere extends Node {
   }
 
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
     if (drawAxes)
       Scene.drawAxes(pg, _radius * 1.3);
@@ -20,6 +20,5 @@ class Sphere extends Node {
     if (drawShooterTarget)
       scene.drawShooterTarget(this);
     pg.popStyle();
-    return true;
   }
 }

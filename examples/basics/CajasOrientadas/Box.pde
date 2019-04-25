@@ -15,7 +15,7 @@ public class Box extends Node {
   // note that within render() geometry is defined
   // at the node local coordinate system
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
     updateOrientation(esfera.position());
     if (drawAxes)
@@ -27,7 +27,6 @@ public class Box extends Node {
     if (drawShooterTarget)
       scene.drawShooterTarget(this);
     pg.popStyle();
-    return true;
   }
 
   public void updateOrientation(Vector v) {

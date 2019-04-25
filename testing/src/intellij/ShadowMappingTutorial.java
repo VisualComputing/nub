@@ -48,12 +48,11 @@ public class ShadowMappingTutorial extends PApplet {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
       shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj")) {
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(255, 255, 0);
           Scene.drawTorusSolenoid(pg);
           pg.pushStyle();
-          return immediate;
         }
       };
       scene.randomize(shapes[i]);
@@ -62,7 +61,7 @@ public class ShadowMappingTutorial extends PApplet {
     }
     light = new Node(scene) {
       @Override
-      public boolean frontGraphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
@@ -70,16 +69,6 @@ public class ShadowMappingTutorial extends PApplet {
         }
         Scene.drawAxes(pg, 500);
         pg.popStyle();
-        return true;
-      }
-
-      @Override
-      public boolean backGraphics(PGraphics pg) {
-        pg.pushStyle();
-        pg.fill(255);
-        pg.sphere(200);
-        pg.popStyle();
-        return true;
       }
     };
     light.setPickingThreshold(0);
@@ -94,7 +83,7 @@ public class ShadowMappingTutorial extends PApplet {
     box.setFill(0xff222222);
     box.setStroke(false);
     floor = new Node(scene);
-    floor.shape(box);
+    floor.setShape(box);
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -141,7 +130,7 @@ public class ShadowMappingTutorial extends PApplet {
         if (immediate)
           node.resetShape();
         else
-          node.shape(loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
+          node.setShape(loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
     }
     if (key == 'd') {
       debug = !debug;

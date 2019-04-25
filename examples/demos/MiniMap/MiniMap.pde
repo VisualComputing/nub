@@ -54,12 +54,11 @@ void setup() {
         // We need to call the PApplet random function instead of the node random version
         int _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
           Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
           pg.popStyle();
-          return true;
         }
       };
     }

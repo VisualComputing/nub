@@ -43,7 +43,7 @@ public class ShadowMapping extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(scene) {
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           if (scene.trackedNode("light") == this) {
             if (debug) {
@@ -57,7 +57,6 @@ public class ShadowMapping extends PApplet {
             pg.box(80);
           }
           pg.popStyle();
-          return true;
         }
       };
       shapes[i].randomize();

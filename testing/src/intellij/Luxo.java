@@ -80,7 +80,6 @@ public class Luxo extends PApplet {
       for (int i = 0; i < 4; ++i) {
         pieces[i] = new Piece(scene);
         node(i).setReference(i > 0 ? pieces[i - 1] : null);
-        node(i).setHighlighting(Node.Highlighting.FRONT);
       }
 
       // Initialize nodes
@@ -136,7 +135,7 @@ public class Luxo extends PApplet {
     }
 
     @Override
-    public boolean graphics(PGraphics pGraphics) {
+    public void graphics(PGraphics pGraphics) {
       switch (mode) {
         case 1:
           pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
@@ -165,11 +164,10 @@ public class Luxo extends PApplet {
           pGraphics.spotLight(155, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
           break;
       }
-      return true;
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Luxo"});
   }
 }

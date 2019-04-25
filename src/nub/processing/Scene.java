@@ -77,7 +77,7 @@ import java.util.List;
  * static ones), such as {@link #beginHUD(PGraphics)},
  * {@link #endHUD(PGraphics)}, {@link #drawAxes(PGraphics, float)},
  * {@link #drawCross(PGraphics, float, float, float)} and {@link #drawGrid(PGraphics)}
- * among others, can be used to set a {@link Node#shape(Object)} (see
+ * among others, can be used to set a {@link Node#setShape(Object)} (see
  * also {@link Node#graphics(PGraphics)}).
  * <p>
  * Another scene's eye (different than the graph {@link Graph#eye()}) can be drawn with
@@ -952,51 +952,20 @@ public class Scene extends Graph implements PConstants {
     PGraphics pGraphics = context();
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
-            /*
-            if(_frontShape != null)
-                pg.shape(_frontShape);
-            set(pg);
-            frontShape(pg);
-            //*/
-    ///*
-    //TODO needs more thinking
-    switch (node.highlighting()) {
-      case FRONT:
-        if (node.isTracked())
-          pGraphics.scale(1.15f);
-      case NONE:
-        if (node.frontShape() != null) {
-          pGraphics.shape((PShape) node.frontShape());
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        } else if (node.graphics(pGraphics))
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        break;
-      case FRONT_BACK:
-        if (node.frontShape() != null) {
-          pGraphics.shape((PShape) node.frontShape());
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        } else if (node.frontGraphics(pGraphics))
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        if (node.isTracked())
-          if (node.backShape() != null)
-            pGraphics.shape((PShape) node.backShape());
-          else
-            node.backGraphics(pGraphics);
-        break;
-      case BACK:
-        if (node.isTracked())
-          if (node.backShape() != null)
-            pGraphics.shape((PShape) node.backShape());
-          else
-            node.backGraphics(pGraphics);
-        else if (node.frontShape() != null) {
-          pGraphics.shape((PShape) node.frontShape());
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        } else if (node.frontGraphics(pGraphics))
-          if (node.pickingThreshold() == 0 && node.isTrackingEnabled()) _bbNeed = frameCount();
-        break;
-    }
-    //*/
+
+    if (node.isTracked())
+      pGraphics.scale(1 + node.highlighting());
+
+    if (node.shape() != null)
+      pGraphics.shapeMode(context().shapeMode);
+    if (node.shape() != null)
+      pGraphics.shape((PShape) node.shape());
+    else
+      node.graphics(pGraphics);
+
+    if (node.pickingThreshold() == 0 && node.isTrackingEnabled())
+      _bbNeed = frameCount();
+
     pGraphics.popStyle();
     pGraphics.popMatrix();
   }
@@ -1007,11 +976,11 @@ public class Scene extends Graph implements PConstants {
     pGraphics.pushStyle();
     pGraphics.pushMatrix();
 
-    if (node.frontShape() != null)
+    if (node.shape() != null)
       pGraphics.shapeMode(context().shapeMode);
-    if (node.frontShape() != null)
-      pGraphics.shape((PShape) node.frontShape());
-    else if (!node.frontGraphics(pGraphics))
+    if (node.shape() != null)
+      pGraphics.shape((PShape) node.shape());
+    else
       node.graphics(pGraphics);
 
     pGraphics.popStyle();
@@ -1041,11 +1010,11 @@ public class Scene extends Graph implements PConstants {
       _lineShader.set("id", new PVector(r, g, b));
       _pointShader.set("id", new PVector(r, g, b));
 
-      if (node.frontShape() != null)
+      if (node.shape() != null)
         pGraphics.shapeMode(context().shapeMode);
-      if (node.backShape() != null)
-        pGraphics.shape((PShape) node.backShape());
-      else if (!node.backGraphics(pGraphics))
+      if (node.shape() != null)
+        pGraphics.shape((PShape) node.shape());
+      else
         node.graphics(pGraphics);
 
       pGraphics.popStyle();

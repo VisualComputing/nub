@@ -42,7 +42,7 @@ public class Basics extends PApplet {
     node.setRotation(Quaternion.random());
     //shape = new Node(scene, shape());
     shape = new Node(scene);
-    shape.shape(shape());
+    shape.setShape(shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);
   }
@@ -71,7 +71,7 @@ public class Basics extends PApplet {
       scene.flip();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Basics"});
   }
 }

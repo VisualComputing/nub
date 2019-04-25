@@ -53,7 +53,7 @@ public class ShadowMappingVBO extends PApplet {
     }
     light = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
@@ -61,7 +61,6 @@ public class ShadowMappingVBO extends PApplet {
         }
         Scene.drawAxes(pg, 300);
         pg.pushStyle();
-        return true;
       }
     };
     PShape box = createShape(BOX, 360, 5, 360);
@@ -70,7 +69,7 @@ public class ShadowMappingVBO extends PApplet {
     box.setFill(0xff222222);
     box.setStroke(false);
     floor = new Node(scene);
-    floor.shape(box);
+    floor.setShape(box);
     light.setMagnitude(400f / 2048f);
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");

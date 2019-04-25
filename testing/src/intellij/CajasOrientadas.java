@@ -105,11 +105,11 @@ public class CajasOrientadas extends PApplet {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           setOrientatio(CajasOrientadas.this.esfera.getPosition());
           if (drawAxes)
-            scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
+            Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
           pg.noStroke();
           if (isTracked())
             pg.fill(255, 0, 0);
@@ -120,7 +120,6 @@ public class CajasOrientadas extends PApplet {
           if (drawShooterTarget)
             scene.drawShooterTarget(iNode);
           pg.popStyle();
-          return true;
         }
       };
       iNode.setPickingThreshold(0);
@@ -182,7 +181,7 @@ public class CajasOrientadas extends PApplet {
         // note that within visit() geometry is defined
         // at the node local coordinate system
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           if (drawAxes)
             //DrawingUtils.drawAxes(parent, radius()*1.3f);
@@ -199,7 +198,6 @@ public class CajasOrientadas extends PApplet {
           if (drawShooterTarget)
             scene.drawShooterTarget(iNode);
           pg.popStyle();
-          return true;
         }
       };
       iNode.setPickingThreshold(0.15f);
@@ -236,7 +234,7 @@ public class CajasOrientadas extends PApplet {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.CajasOrientadas"});
   }
 }

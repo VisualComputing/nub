@@ -17,7 +17,7 @@ public class ApplicationControl3 extends PApplet {
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ApplicationControl3"});
   }
 
@@ -36,10 +36,10 @@ public class ApplicationControl3 extends PApplet {
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
-          scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
+          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
           scene.beginHUD(pg);
           Vector position = scene.screenLocation(position());
           pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -47,7 +47,6 @@ public class ApplicationControl3 extends PApplet {
           pg.text(id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
-          return true;
         }
 
         @Override

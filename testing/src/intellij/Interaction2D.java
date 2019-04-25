@@ -33,8 +33,8 @@ public class Interaction2D extends PApplet {
 
     shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
-        scene.drawAxes(pGraphics, scene.radius() / 3);
+      public void graphics(PGraphics pGraphics) {
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(0, 255, 255);
@@ -50,20 +50,19 @@ public class Interaction2D extends PApplet {
         scene.endHUD(pGraphics);
         */
         pGraphics.popStyle();
-        return true;
       }
     };
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
     shape2 = new Node(shape1);
-    shape2.shape(shape());
+    shape2.setShape(shape());
     shape2.translate(75, 475);
     if (g instanceof PGraphics2D)
       shape2.setPickingThreshold(0);
 
     shape3 = new Node(shape2);
-    shape3.shape(createShape(RECT, 0, 0, 150, 150));
+    shape3.setShape(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-775, -575);
   }
 
@@ -158,7 +157,7 @@ public class Interaction2D extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Interaction2D"});
   }
 }

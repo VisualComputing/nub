@@ -43,14 +43,13 @@ public class ShadowMappingSimple extends PApplet {
     scene.fit(1);
     nodeLandscape = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         renderLandscape(pg);
-        return true;
       }
     };
     light = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
@@ -58,7 +57,6 @@ public class ShadowMappingSimple extends PApplet {
         }
         Scene.drawAxes(pg, 300);
         pg.pushStyle();
-        return true;
       }
     };
     light.setMagnitude(400f / 2048f);

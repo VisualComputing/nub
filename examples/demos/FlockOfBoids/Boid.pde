@@ -26,7 +26,7 @@ class Boid extends Node {
   }
 
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
 
     // uncomment to draw boid axes
@@ -68,7 +68,6 @@ class Boid extends Node {
     pg.endShape();
 
     pg.popStyle();
-    return true;
   }
 
   public void run(ArrayList<Boid> bl) {

@@ -46,11 +46,10 @@ void setup() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
       Scene.drawAxes(pg, 40);
       pg.fill(isTracked() ? 255 : 0, 0, 255);
       Scene.drawTorusSolenoid(pg);
-      return true;
     }
   };
   iNode.setPickingThreshold(0);

@@ -34,17 +34,16 @@ public class ShiftViewers extends PApplet {
       if ((i & 1) == 0) {
         //models[i] = new Node(scene1, boxShape());
         models[i] = new Node(scene1);
-        models[i].shape(boxShape());
+        models[i].setShape(boxShape());
       } else {
         models[i] = new Node(scene1) {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
           @Override
-          public boolean graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
-            scene1.drawTorusSolenoid(pg, _faces, scene1.radius() / 30);
+            Scene.drawTorusSolenoid(pg, _faces, scene1.radius() / 30);
             pg.popStyle();
-            return true;
           }
         };
       }
@@ -163,7 +162,7 @@ public class ShiftViewers extends PApplet {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ShiftViewers"});
   }
 }

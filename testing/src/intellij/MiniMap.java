@@ -42,17 +42,16 @@ public class MiniMap extends PApplet {
       if ((i & 1) == 0) {
         //models[i] = new Node(scene, shape());
         models[i] = new Node(scene);
-        models[i].shape(shape());
+        models[i].setShape(shape());
       } else {
         models[i] = new Node(scene) {
           int _faces = (int) MiniMap.this.random(3, 15), _color = color(MiniMap.this.random(255), MiniMap.this.random(255), MiniMap.this.random(255));
           @Override
-          public boolean graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
-            scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
+            Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
-            return true;
           }
         };
       }
@@ -170,7 +169,7 @@ public class MiniMap extends PApplet {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MiniMap"});
   }
 }

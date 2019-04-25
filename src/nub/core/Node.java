@@ -99,7 +99,7 @@ import java.util.List;
  * {@link nub.core.constraint.EyeConstraint}) and new constraints can very
  * easily be implemented.
  * <h2>Shapes</h2>
- * A node shape can be set from a retained-mode rendering object, see {@link #shape(Object)};
+ * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
  * Picking a node is done according to a {@link #pickingThreshold()}. When picking a
  * node it will be highlighted according to a {@link #highlighting()} policy.
@@ -144,21 +144,14 @@ public class Node {
   protected int _id;
 
   // Attached nodes
-
   protected Graph _graph;
   protected List<Node> _children;
   protected boolean _culled;
   protected boolean _tracking;
 
   // Rendering
-
-  protected Object _frontShape, _backShape;
-
-  public enum Highlighting {
-    NONE, FRONT, FRONT_BACK, BACK
-  }
-
-  protected Highlighting _highlight;
+  protected Object _shape;
+  protected float _highlight;
 
   /**
    * Creates a detached node.
@@ -271,8 +264,6 @@ public class Node {
     this(null, null, null, null, translation, rotation, scaling);
   }
 
-  // --
-
   /**
    * Same as {@code this(graph, null, shape)}.
    *
@@ -302,8 +293,6 @@ public class Node {
     this(graph, constraint, shape, new Vector(), new Quaternion(), 1);
   }
 
-  // --
-
   /**
    * Same as {@code this(reference, null, shape)}.
    *
@@ -332,8 +321,6 @@ public class Node {
   public Node(Node reference, Constraint constraint, Object shape) {
     this(reference, constraint, shape, new Vector(), new Quaternion(), 1);
   }
-
-  // --
 
   /**
    * Creates a node attached to {@code graph} with {@code constraint} as {@link #constraint()},
@@ -370,7 +357,7 @@ public class Node {
     _graph = graph;
     setReference(reference);
     setConstraint(constraint);
-    shape(shape);
+    setShape(shape);
     setTranslation(translation);
     setRotation(rotation);
     setScaling(scaling);
@@ -381,7 +368,7 @@ public class Node {
     _lastUpdate = 0;
     _threshold = .2f;
     _tracking = true;
-    _highlight = Highlighting.FRONT;
+    _highlight = 0.15f;
     if (graph() == null)
       return;
     // attached nodes:
@@ -417,8 +404,7 @@ public class Node {
     this._children = new ArrayList<Node>();
     this._culled = node._culled;
 
-    this._frontShape = node._frontShape;
-    this._backShape = node._backShape;
+    this._shape = node._shape;
     this._highlight = node._highlight;
   }
 
@@ -885,7 +871,7 @@ public class Node {
    * Sets the {@link #pickingThreshold()}.
    *
    * @see #pickingThreshold()
-   * @see #setHighlighting(Highlighting)
+   * @see #setHighlighting(float)
    */
   public void setPickingThreshold(float threshold) {
     if (threshold >= 0)
@@ -899,7 +885,7 @@ public class Node {
    * to a {@link #pickingThreshold()} as follows:
    * <ul>
    * <li>The projected pixels of the node visual representation (see {@link #graphics(Object)}
-   * and {@link #shape(Object)}). Set it with {@code threshold = 0}.</li>
+   * and {@link #setShape(Object)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
    * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
@@ -2319,33 +2305,23 @@ public class Node {
   }
 
   /**
-   * Sets the node {@link #highlighting()}.
+   * Sets the node {@link #highlighting()} which should be a value in  {@code [0..1]}.
+   * Default value is {@code 0.15}.
    *
    * @see #highlighting()
    * @see #setPickingThreshold(float)
    */
-  public void setHighlighting(Highlighting highlighting) {
+  public void setHighlighting(float highlighting) {
     _highlight = highlighting;
   }
 
   /**
-   * Returns the highlighting mode. Highlights the shape when picking takes place as follows:
-   * <ol>
-   * <li>{@link Highlighting#NONE}: no highlighting takes place.</li>
-   * <li>{@link Highlighting#FRONT}: the front-shape (see {@link #frontShape(Object)}
-   * and {@link #frontGraphics(Object)}) is scaled by a {@code 1.15} factor.</li>
-   * <li>{@link Highlighting#BACK}: the back-shape (see {@link #backShape(Object)} and
-   * {@link #backGraphics(Object)}) is displayed instead of the front-shape.</li>
-   * <li>{@link Highlighting#FRONT_BACK}: both, the front and the back shapes are
-   * displayed. The back shape is made translucent</li>
-   * </ol>
-   * <p>
-   * Default is {@link Highlighting#FRONT}.
+   * Returns the highlighting magnitude use to scale the node when it's picked.
    *
-   * @see #setHighlighting(Highlighting)
+   * @see #setHighlighting(float)
    * @see #pickingThreshold()
    */
-  public Highlighting highlighting() {
+  public float highlighting() {
     return _highlight;
   }
 
@@ -2353,132 +2329,49 @@ public class Node {
 
   /**
    * Override this method to set an immediate mode graphics procedure on {@code context}.
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   * <p>
-   * Sets both the front and the back shape to the same graphics procedure.
-   * Override {@link #frontGraphics(Object)} and {@link #backGraphics(Object)} to set different
-   * graphics procedures for rendering and picking, respectively.
    *
-   * @see #frontGraphics(Object)
-   * @see #backGraphics(Object)
-   * @see #shape(Object)
+   * @see #setShape(Object)
    */
-  public boolean graphics(Object context) {
-    return false;
+  public void graphics(Object context) {
   }
 
   /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * front shape. Use it in conjunction with @see #backGraphics(Object).
-   * Return {@code true} if succeeded and {@code false} otherwise.
+   * Same as {@code setShape(null)}.
    *
-   * @see #graphics(Object)
-   * @see #shape(Object)
-   */
-  public boolean frontGraphics(Object context) {
-    return false;
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * shape used for picking. Use it in conjunction with @see #frontGraphics(Object).
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #graphics(Object)
-   * @see #shape(Object)
-   */
-  public boolean backGraphics(Object context) {
-    return false;
-  }
-
-  /**
-   * Same as {@code shape(null)}.
-   *
-   * @see #shape(Object)
+   * @see #setShape(Object)
    */
   public void resetShape() {
-    shape(null);
+    setShape(null);
   }
 
   /**
-   * Sets the retained mode shape for both, the front and the back shapes.
-   * Call {@link #frontShape(Object)} and {@link #frontShape(Object)} to set
-   * different graphics for rendering and picking, respectively.
+   * Sets the node retained mode shape.
    *
-   * @see #frontShape(Object)
-   * @see #backShape(Object)
    * @see #graphics(Object)
    * @see #resetShape()
    */
-  public void shape(Object shape) {
-    frontShape(shape);
-    backShape(shape);
+  public void setShape(Object shape) {
+    _shape = shape;
   }
 
   /**
-   * Sets the retained mode shape for the front shape. Use it in conjunction
-   * with @see #backShape(Object)}.
+   * Returns the node retained mode shape. Maybe null.
    *
-   * @see #shape(Object)
+   * @see #resetShape()
+   * @see #shape()
    * @see #graphics(Object)
    */
-  public void frontShape(Object shape) {
-    _frontShape = shape;
+  public Object shape() {
+    return _shape;
   }
 
-  /**
-   * Sets the retained mode shape used for picking. Use it in conjunction
-   * with @see #frontShape(Object)}.
-   *
-   * @see #shape(Object)
-   * @see #graphics(Object)
-   */
-  public void backShape(Object shape) {
-    _backShape = shape;
-  }
-
-  public Object frontShape() {
-    return _frontShape;
-  }
-
-  public Object backShape() {
-    return _backShape;
-  }
 
   // Java version of the immediate mode rendering methods
 
   /**
    * Override this method to set an immediate mode graphics procedure on the Processing
    * {@code PGraphics}. Return {@code true} if succeeded and {@code false} otherwise.
-   * <p>
-   * Sets both the front and the back shape to the same graphics procedure.
-   *
-   * @see #frontGraphics(processing.core.PGraphics)
-   * @see #backGraphics(processing.core.PGraphics)
    */
-  public boolean graphics(processing.core.PGraphics pGraphics) {
-    return false;
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * front shape. Use it in conjunction with @see #backGraphics(processing.core.PGraphics).
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #graphics(processing.core.PGraphics)
-   */
-  public boolean frontGraphics(processing.core.PGraphics pGraphics) {
-    return false;
-  }
-
-  /**
-   * Override this method to set an immediate mode graphics procedure to draw the
-   * shape used for picking. Use it in conjunction with @see #frontGraphics(processing.core.PGraphics).
-   * Return {@code true} if succeeded and {@code false} otherwise.
-   *
-   * @see #graphics(processing.core.PGraphics)
-   */
-  public boolean backGraphics(processing.core.PGraphics pGraphics) {
-    return false;
+  public void graphics(processing.core.PGraphics pGraphics) {
   }
 }

@@ -2843,7 +2843,7 @@ public class Graph {
    * @see Node#cull(boolean)
    * @see Node#isCulled()
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render() {
     for (Node node : _leadingNodes())
@@ -2882,7 +2882,7 @@ public class Graph {
    * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(Object context) {
     render(matrixHandler(context), context);
@@ -2899,7 +2899,7 @@ public class Graph {
    * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object, Matrix, Matrix)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(MatrixHandler matrixHandler, Object context) {
     if (context == _fb)
@@ -2921,7 +2921,7 @@ public class Graph {
    * @see #render(MatrixHandler, Object, Matrix, Matrix)
    * @see #render(MatrixHandler, Object)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     render(matrixHandler(context), context, type, eye, width, height, zNear, zFar, leftHanded);
@@ -2939,7 +2939,7 @@ public class Graph {
    * @see #render(Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(MatrixHandler matrixHandler, Object context, Type type, Node eye, int width, int height, float zNear, float zFar, boolean leftHanded) {
     render(matrixHandler, context, eye.projection(type, width, height, zNear, zFar, leftHanded), eye.view());
@@ -2955,7 +2955,7 @@ public class Graph {
    * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(Object context, Matrix projection, Matrix view) {
     render(matrixHandler(context), context, projection, view);
@@ -2973,7 +2973,7 @@ public class Graph {
    * @see #render(MatrixHandler, Object, Type, Node, int, int, float, float, boolean)
    * @see #render(MatrixHandler, Object)
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   public void render(MatrixHandler matrixHandler, Object context, Matrix projection, Matrix view) {
     if (context == _fb)
@@ -3010,7 +3010,7 @@ public class Graph {
 
   /**
    * Renders the node onto {@code context}, provided that it holds a visual
-   * representation (see {@link Node#graphics(Object)} and {@link Node#shape(Object)}).
+   * representation (see {@link Node#graphics(Object)} and {@link Node#setShape(Object)}).
    * <p>
    * Default implementation is empty, i.e., it is meant to be implemented by derived classes.
    *
@@ -3038,7 +3038,7 @@ public class Graph {
    * @see Node#isCulled()
    * @see Node#visit()
    * @see Node#graphics(Object)
-   * @see Node#shape(Object)
+   * @see Node#setShape(Object)
    */
   protected void _drawBackBuffer(Node node) {
   }

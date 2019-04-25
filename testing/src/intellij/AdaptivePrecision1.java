@@ -26,7 +26,7 @@ public class AdaptivePrecision1 extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       //shapes[i] = new Node(scene, shape());
       shapes[i] = new Node(scene);
-      shapes[i].shape(shape());
+      shapes[i].setShape(shape());
 
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0.25f);
@@ -87,7 +87,7 @@ public class AdaptivePrecision1 extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.AdaptivePrecision1"});
   }
 }

@@ -31,7 +31,7 @@ public class MouseDragInteraction extends PApplet {
 
     Node shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -41,14 +41,13 @@ public class MouseDragInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
-        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
     Node shape2 = new Node(shape1);
-    shape2.shape(shape());
+    shape2.setShape(shape());
     shape2.translate(275, 275);
 
     randomVector = Vector.random();
@@ -140,7 +139,7 @@ public class MouseDragInteraction extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MouseDragInteraction"});
   }
 }

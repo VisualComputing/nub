@@ -44,7 +44,7 @@ void setup() {
     // Note that within render() geometry is defined at the
     // node local coordinate system.
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
       pg.pushStyle();
       pg.fill(0, 255, 255, 125);
       pg.stroke(0, 0, 255);
@@ -54,7 +54,6 @@ void setup() {
       else
         pg.box(30);
       pg.popStyle();
-      return true;
     }
   };
   interpolator = new Interpolator(shape);

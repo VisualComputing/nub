@@ -38,7 +38,7 @@ class Boid {
       }
 
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
 
         // uncomment to draw boid axes
@@ -52,7 +52,7 @@ class Boid {
         if (scene.trackedNode("mouseMoved") == node) {
           pg.stroke(pg.color(0, 0, 255));
           pg.fill(pg.color(0, 0, 255));
-          pApplet.println("highlighted @" + pApplet.frameCount);
+          PApplet.println("highlighted @" + pApplet.frameCount);
         }
 
         // highlight avatar
@@ -81,7 +81,6 @@ class Boid {
         pg.endShape();
 
         pg.popStyle();
-        return true;
       }
     };
     node.setPosition(new Vector(position.x(), position.y(), position.z()));

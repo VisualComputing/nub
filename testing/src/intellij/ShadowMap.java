@@ -33,7 +33,7 @@ public class ShadowMap extends PApplet {
     for (int i = 0; i < shapes.length; i++) {
       shapes[i] = new Node(scene) {
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           if (scene.trackedNode("light") == this) {
             Scene.drawAxes(pg, 150);
@@ -50,7 +50,6 @@ public class ShadowMap extends PApplet {
             pg.box(80);
           }
           pg.popStyle();
-          return true;
         }
         @Override
         public void interact(Object... gesture) {
@@ -66,7 +65,7 @@ public class ShadowMap extends PApplet {
       shapes[i].randomize();
       // set picking precision to the pixels of the node projection
       shapes[i].setPickingThreshold(0);
-      shapes[i].setHighlighting(Node.Highlighting.NONE);
+      shapes[i].setHighlighting(0);
     }
     shadowMap = createGraphics(w / 2, h / 2, P3D);
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_linear.glsl");

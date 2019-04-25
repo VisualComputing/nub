@@ -42,7 +42,7 @@ public class Interpolation extends PApplet {
       // Note that within render() geometry is defined at the
       // node local coordinate system.
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(0, 255, 255, 125);
         pg.stroke(0, 0, 255);
@@ -52,7 +52,6 @@ public class Interpolation extends PApplet {
         else
           pg.box(30);
         pg.popStyle();
-        return true;
       }
     };
     interpolator = new Interpolator(shape);
@@ -141,7 +140,7 @@ public class Interpolation extends PApplet {
       scene.fit();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Interpolation"});
   }
 }

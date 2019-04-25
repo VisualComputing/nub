@@ -27,7 +27,7 @@ public class MouseMoveInteraction extends PApplet {
 
     Node shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -36,14 +36,13 @@ public class MouseMoveInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
-        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
     Node shape2 = new Node(shape1);
-    shape2.shape(shape());
+    shape2.setShape(shape());
     shape2.translate(275, 275, 275);
   }
 
@@ -97,7 +96,7 @@ public class MouseMoveInteraction extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MouseMoveInteraction"});
   }
 }
