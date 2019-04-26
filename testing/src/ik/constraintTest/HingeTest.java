@@ -13,6 +13,7 @@ import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Hinge;
 import frames.core.constraint.PlanarPolygon;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -24,15 +25,16 @@ import java.util.ArrayList;
  * Created by sebchaparr on 8/07/18.
  */
 public class HingeTest extends PApplet {
-    int num_joints = 8;
-    float constraint_factor_x = 180;
-    float constraint_factor_y = 180;
+    int numJoints = 8;
+    float min = 180;
+    float max = 180;
     float targetRadius = 10;
     float boneLength = 50;
+    boolean solve = true;
 
     Scene scene;
-    CCDSolver ccd_solver;
-    ArrayList<ChainSolver> chain_solvers = new ArrayList<ChainSolver>();
+    ArrayList<CCDSolver> ccdSolvers = new ArrayList<CCDSolver>();
+    ArrayList<ChainSolver> chainSolvers = new ArrayList<ChainSolver>();
     ArrayList<Frame> targets = new ArrayList<Frame>();
 
     public void settings() {
@@ -42,7 +44,7 @@ public class HingeTest extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(num_joints * boneLength);
+        scene.setRadius(numJoints * boneLength);
         scene.fit(1);
         scene.setRightHanded();
 
@@ -50,7 +52,7 @@ public class HingeTest extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < 5; i++) {
             Frame target = new Frame(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
@@ -59,35 +61,32 @@ public class HingeTest extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        //((FABRIKSolver) solver).pg = scene.pApplet().getGraphics();
-        ArrayList<Frame> branchHingeConstraint = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
-        ArrayList<Frame> branchHingeConstraintCCD = generateChain(num_joints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+        ArrayList<Frame> branchHingeConstraint = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+        ArrayList<Frame> branchHingeConstraintCCD = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
 
         for (int i = 0; i < branchHingeConstraint.size() - 1; i++) {
             Vector vector = Vector.projectVectorOnPlane(new Vector(0, 1, 0), branchHingeConstraint.get(i + 1).translation());
             if(Vector.squaredNorm(vector) != 0) {
-                Hinge constraint = new Hinge(radians(constraint_factor_x), radians(constraint_factor_x),branchHingeConstraint.get(i).rotation().get(), new Vector(0,1,0), vector);
+                Hinge constraint = new Hinge(radians(min), radians(max),branchHingeConstraint.get(i).rotation().get(), new Vector(0,1,0), vector);
                 branchHingeConstraint.get(i).setConstraint(constraint);
                 branchHingeConstraintCCD.get(i).setConstraint(constraint);
             }
         }
 
         ArrayList<Frame> structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
-        chain_solvers.add(new ChainSolver(structure1));
+        chainSolvers.add(new ChainSolver(structure1));
 
         ArrayList<Frame> structure2 = generateStructure(boneLength,new Vector(0,0,0));
-        ccd_solver = new CCDSolver(structure2);
-        //ccd_solver = new CCDSolver(branchHingeConstraintCCD);
+        ccdSolvers.add(new CCDSolver(structure2));
+        ccdSolvers.add(new CCDSolver(branchHingeConstraintCCD));
 
         ArrayList<Frame> structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
-        chain_solvers.add(new ChainSolver(structure3));
-
-        chain_solvers.add(new ChainSolver(branchHingeConstraint));
+        chainSolvers.add(new ChainSolver(structure3));
+        chainSolvers.add(new ChainSolver(branchHingeConstraint));
 
 
         int i = 0;
-        for(ChainSolver s : chain_solvers){
-            s.pg = scene.pApplet().getGraphics();
+        for(ChainSolver s : chainSolvers){
             //s.timesPerFrame = 20;
             s.error = 0.5f;
             s.timesPerFrame = 0.5f;
@@ -96,36 +95,38 @@ public class HingeTest extends PApplet {
             s.setTarget(targets.get(i));
             if(i != 0)targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    if(solve) s.solve();
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
         }
 
-        ccd_solver.timesPerFrame = 0.5f;
-        ccd_solver.error = 0.5f;
-        ccd_solver.maxIter = 30;
-
-        ccd_solver.setTarget(targets.get(targets.size()-1));
-        //ccd_solver.setTarget(targets.get(targets.size()-2));
-        //scene.addIKTarget(structure3.get(structure3.size()-1), targets.get(0));
-        targets.get(targets.size()-1).setReference(targets.get(0));
-        targets.get(targets.size()-1).setPosition(structure2.get(structure3.size()-1).position());
-        //targets.get(targets.size()-1).setPosition(branchHingeConstraintCCD.get(branchHingeConstraintCCD.size()-1).position());
-        //chain_solvers.get(1).opt = 1;
-        //chain_solvers.get(0).opt = 1;
+        for(CCDSolver s : ccdSolvers){
+            s.error = 0.5f;
+            s.timesPerFrame = 0.5f;
+            s.maxIter = 30;
+            s.setTarget(targets.get(i));
+            targets.get(i).setReference(targets.get(0));
+            targets.get(i++).setPosition(s.endEffector().position());
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    if(solve) s.solve();
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
+        }
     }
 
     public void draw() {
         background(0);
         lights();
-        //Draw Constraints
         scene.drawAxes();
-        for(ChainSolver chain_solver : chain_solvers){
-            //if(show1) draw_pos(prev, color(0,255,0), 3);
-            //if(show2) draw_pos(chain_solver.get_p(), color(255,0,100), 3);
-            //if(show3) draw_pos(constr, color(100,100,0), 3);
-        }
-        if(solve) {
-            ccd_solver.solve();
-            for(ChainSolver chain_solver : chain_solvers) chain_solver.solve();
-        }
         scene.render();
     }
 
@@ -186,110 +187,13 @@ public class HingeTest extends PApplet {
         return (ArrayList) scene.branch(chainRoot);
     }
 
-
-
-    boolean read = false;
-    boolean solve = false;
-    Frame n = null;
-    float d = 5;
-    boolean show1 = true, show2 = true, show3 = true;
-
     ArrayList<Vector> prev = new ArrayList<Vector>();
     ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
-        if(scene.trackedFrame() != null) {
-            n =  scene.trackedFrame();
-            if(n != null) {
-                if (key == 'A' || key == 'a') {
-                    d += 1;
-                    System.out.println("Speed --- : " + d);
-                }
-                if (key == 's' || key == 'S') {
-                    d *= -1;
-                    System.out.println("Speed --- : " + d);
-                }
-
-                Frame ref = n.reference() != null ? n.reference() : new Frame();
-
-                if (key == 'X' || key == 'x') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(1, 0, 0), radians(d))));
-                }
-                if (key == 'Y' || key == 'y') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(0, 1, 0), radians(d))));
-                }
-                if (key == 'Z' || key == 'z') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(0, 0, 1), radians(d))));
-                }
-
-                if (key == 'd' || key == 'D') {
-                    n.reference().setConstraint(null);
-                }
-            }
-        }
-        if(key == ' ') {
-            read = !read;
-        }
-        if(key== 'Q' || key == 'q'){
-            ccd_solver.solve();
-            for(Solver s : chain_solvers) {
-                s.solve();
-            }
-
-            //chain_solver._iterate(scene.frontBuffer());
-        }
-        if(key == 'j' || key == 'J'){
-            for(ChainSolver chain_solver : chain_solvers) {
-                chain_solver.forward();
-                prev = copy_p(chain_solver.get_p());
-                constr = copy_p(prev);
-            }
-        }
-        if(key == 'k' || key == 'K'){
-            for(ChainSolver chain_solver : chain_solvers) chain_solver.backward();
-        }
-        if(key == '1'){
-            show1 = !show1;
-        }
-        if(key == '2'){
-            show2 = !show2;
-        }
-        if(key == '3'){
-            show3 = !show3;
-        }
-
-        if(key == 'w' || key == 'W'){
+        if(key == 's' || key == 'S'){
             solve = !solve;
         }
-    }
-
-    ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
-        ArrayList<Vector> copy = new ArrayList<Vector>();
-        for(Vector p : _positions){
-            copy.add(p.get());
-        }
-        return copy;
-    }
-
-
-    void draw_pos(ArrayList<Vector> _positions, int color, float str) {
-        if(_positions == null) return;
-        Vector prev = null;
-        for(Vector p : _positions){
-            pushMatrix();
-            pushStyle();
-            stroke(color);
-            strokeWeight(str);
-            if(prev != null) line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
-            noStroke();
-            fill(color, 100);
-            translate(p.x(),p.y(),p.z());
-            sphere(3);
-            popStyle();
-            popMatrix();
-            prev = p;
-        }
-
     }
 
     @Override
@@ -319,9 +223,7 @@ public class HingeTest extends PApplet {
                 scene.align();
     }
 
-
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.constraintTest.HingeTest"});
     }
-
 }

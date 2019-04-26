@@ -61,6 +61,11 @@ public class LuxoIK extends PApplet {
                     pGraphics.spotLight(0, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
                     break;
             }
+
+            if (constraint() != null) {
+                scene.drawConstraint(pGraphics,this);
+            }
+
             return true;
         }
     }
@@ -107,7 +112,17 @@ public class LuxoIK extends PApplet {
 
             LocalConstraint headConstraint = new LocalConstraint();
             headConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, new Vector(0.0f, 0.0f, 0.0f));
-            frame(3).setConstraint(new FixedConstraint());
+            frame(3).setConstraint(new Constraint() {
+                @Override
+                public Vector constrainTranslation(Vector translation, Frame frame) {
+                    return new Vector();
+                }
+
+                @Override
+                public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+                    return rotation;
+                }
+            });
         }
 
         Piece frame(int i) {
@@ -127,7 +142,7 @@ public class LuxoIK extends PApplet {
         scene.setRadius(100);
         scene.fit(1);
 
-        PShape redBall = createShape(SPHERE, 10);
+        PShape redBall = createShape(SPHERE, 5);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
@@ -190,6 +205,14 @@ public class LuxoIK extends PApplet {
             scene.translate();
         else
             scene.scale(mouseX - pmouseX);
+    }
+
+    public void mouseClicked(MouseEvent event) {
+        if (event.getCount() == 2)
+            if (event.getButton() == LEFT)
+                scene.focus();
+            else
+                scene.align();
     }
 
     public void mouseWheel(MouseEvent event) {

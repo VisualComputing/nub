@@ -16,6 +16,7 @@ import frames.ik.jacobian.TransposeSolver;
 import frames.primitives.Quaternion;
 import frames.primitives.Vector;
 import frames.processing.Scene;
+import frames.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -48,6 +49,9 @@ public class VisualBenchmark extends PApplet {
             Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2}; //Place Here Solvers that you want to compare
     ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+
+    boolean solve = false;
+    boolean show1 = false, show2 = false, show3 = false, show4 = false, show5 = false;
 
     public void settings() {
         size(1500, 800, renderer);
@@ -95,6 +99,15 @@ public class VisualBenchmark extends PApplet {
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
+            //8. Register task
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    if(solve) solver.solve();
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
         }
     }
 
@@ -103,33 +116,27 @@ public class VisualBenchmark extends PApplet {
         if(scene.is3D()) lights();
         //Draw Constraints
         scene.drawAxes();
-        if(solve) {
-            for(Solver solver : solvers){
-                solver.solve();
-            }
-        }
 
+        //Debuggin exploration
         for(int  i = 0; i < solvers.size(); i++) {
             if (solvers.get(i) instanceof ChainSolver) {
-                if (show1) draw_pos(prev, color(0, 255, 0), 3);
-                if (show2) draw_pos(((ChainSolver) solvers.get(i)).get_p(), color(255, 0, 100), 3);
-                if (show3) draw_pos(constr, color(100, 100, 0), 3);
-                if (show4) {
-                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).avoid_pos_hist){
-                        draw_pos(l, color(255, 255, 0, 50), 3);
+                if (show2) Util.drawPositions(scene.frontBuffer(), ((ChainSolver) solvers.get(i)).positions(), color(255, 0, 100), 3);
+                if (show4 && ((ChainSolver) solvers.get(i)).avoidHistory() != null) {
+                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).avoidHistory()){
+                        Util.drawPositions(scene.frontBuffer(), l, color(255, 255, 0, 50), 3);
                     }
                 }
-                if (show5) {
-                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).diverge_hist){
-                        draw_pos(l, color(255, 0, 0, 50), 3);
+                if (show5 && ((ChainSolver) solvers.get(i)).divergeHistory() != null) {
+                    for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).divergeHistory()){
+                        Util.drawPositions(scene.frontBuffer(), l, color(255, 0, 0, 50), 3);
                     }
                 }
 
-                if(((ChainSolver) solvers.get(i)).avoid_pos != null && show1){
-                    draw_pos(((ChainSolver) solvers.get(i)).avoid_pos, color(255, 0, 0), 6);
+                if(((ChainSolver) solvers.get(i)).bestAvoidPosition() != null && show1){
+                    Util.drawPositions(scene.frontBuffer(),((ChainSolver) solvers.get(i)).bestAvoidPosition(), color(255, 0, 0), 6);
                 }
-                if(((ChainSolver) solvers.get(i)).p_avoid_pos != null && show1){
-                    draw_pos(((ChainSolver) solvers.get(i)).p_avoid_pos, color(0, 255, 0), 6);
+                if(((ChainSolver) solvers.get(i)).afterAvoidPosition() != null && show1){
+                    Util.drawPositions(scene.frontBuffer(),((ChainSolver) solvers.get(i)).afterAvoidPosition(), color(0, 255, 0), 6);
                 }
 
             }
@@ -144,7 +151,7 @@ public class VisualBenchmark extends PApplet {
     }
 
     public Frame generateRandomReachablePosition(List<? extends Frame> original, boolean is3D){
-        ArrayList<? extends Frame> chain = copy(original);
+        ArrayList<? extends Frame> chain = Util.copy(original);
         for(int i = 0; i < chain.size(); i++){
             if(is3D)
                 chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
@@ -153,32 +160,6 @@ public class VisualBenchmark extends PApplet {
         }
         return chain.get(chain.size()-1);
     }
-
-    public ArrayList<Frame> copy(List<? extends Frame> chain) {
-        ArrayList<Frame> copy = new ArrayList<Frame>();
-        Frame reference = chain.get(0).reference();
-        if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
-        }
-        for (Frame joint : chain) {
-            Frame newJoint = new Frame();
-            newJoint.setReference(reference);
-            newJoint.setPosition(joint.position().get());
-            newJoint.setOrientation(joint.orientation().get());
-            newJoint.setConstraint(joint.constraint());
-            copy.add(newJoint);
-            reference = newJoint;
-        }
-        return copy;
-    }
-
-
-    boolean solve = false;
-
-    boolean show1 = false, show2 = false, show3 = false, show4 = false, show5 = false;
-
-    ArrayList<Vector> prev = new ArrayList<Vector>();
-    ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
         if(key == 'w' || key == 'W'){
@@ -203,23 +184,6 @@ public class VisualBenchmark extends PApplet {
             for(Solver s: solvers) s.solve();
         }
         // /*
-
-        if(key == 'j' || key == 'J'){
-            for(Solver s: solvers) {
-                if(s instanceof  ChainSolver) {
-                    ((ChainSolver) s).forward();
-                    prev = copy_p(((ChainSolver) s).get_p());
-                    constr = copy_p(prev);
-                }
-            }
-        }
-        if(key == 'k' || key == 'K'){
-            for(Solver s: solvers) {
-                if(s instanceof  ChainSolver) {
-                    ((ChainSolver) s).backward();
-                }
-            }
-        }
 
         if(key == '1'){
             show1 = !show1;
@@ -271,38 +235,6 @@ public class VisualBenchmark extends PApplet {
             else
                 scene.align();
     }
-
-
-    ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
-        ArrayList<Vector> copy = new ArrayList<Vector>();
-        for(Vector p : _positions){
-            copy.add(p.get());
-        }
-        return copy;
-    }
-
-
-    void draw_pos(ArrayList<Vector> _positions, int color, float str) {
-        sphereDetail(3);
-        if(_positions == null) return;
-        Vector prev = null;
-        for(Vector p : _positions){
-            pushMatrix();
-            pushStyle();
-            stroke(color);
-            strokeWeight(str);
-            if(prev != null) line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
-            noStroke();
-            fill(color);
-            translate(p.x(),p.y(),p.z());
-            sphere(3);
-            popStyle();
-            popMatrix();
-            prev = p;
-        }
-        sphereDetail(40);
-    }
-
 
     public static void main(String args[]) {
         PApplet.main(new String[]{"ik.basic.VisualBenchmark"});

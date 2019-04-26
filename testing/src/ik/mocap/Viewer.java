@@ -47,6 +47,8 @@ public class Viewer extends PApplet{
 
     float targetRadius = 7;
 
+    boolean read = false;
+    boolean solve = false;
 
     public void settings() {
         size(700, 700, P3D);
@@ -260,7 +262,7 @@ public class Viewer extends PApplet{
             ChainSolver ch = chainsolvers.get(i);
             Vector sc = scene.screenLocation(ch.target().position());
             fill(255);
-            exploration[i] = ch.exploration > exploration[i] ? ch.exploration : exploration[i];
+            exploration[i] = ch.exploration() > exploration[i] ? ch.exploration() : exploration[i];
             text("" +  exploration[i], sc.x(), sc.y());
         }
 
@@ -350,102 +352,18 @@ public class Viewer extends PApplet{
        }
     }
 
-    boolean read = false;
-    boolean solve = false;
-    Frame n = null;
-    float d = 5;
-    boolean show1 = true, show2 = true, show3 = true;
-
     ArrayList<Vector> prev = new ArrayList<Vector>();
     ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
-        if(scene.trackedFrame() != null) {
-            n =  scene.trackedFrame();
-            if(n != null) {
-                if (key == 'A' || key == 'a') {
-                    d += 1;
-                    System.out.println("Speed --- : " + d);
-                }
-                if (key == 's' || key == 'S') {
-                    d *= -1;
-                    System.out.println("Speed --- : " + d);
-                }
-
-                Frame ref = n.reference() != null ? n.reference() : new Frame();
-
-                if (key == 'X' || key == 'x') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(1, 0, 0), radians(d))));
-                }
-                if (key == 'Y' || key == 'y') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(0, 1, 0), radians(d))));
-                }
-                if (key == 'Z' || key == 'z') {
-                    n.rotate(Quaternion.multiply(ref.rotation().inverse(), new Quaternion(new Vector(0, 0, 1), radians(d))));
-                }
-
-                if (key == 'd' || key == 'D') {
-                    n.reference().setConstraint(null);
-                }
-            }
-        }
         if(key == ' ') {
             read = !read;
         }
         if(key== 'Q' || key == 'q'){
             ccd_solver.solve();
-            //chain_solver.solve();
-            //chain_solver._iterate(scene.frontBuffer());
         }
-        if(key == 'j' || key == 'J'){
-            chain_solver.forward();
-            prev = copy_p(chain_solver.get_p());
-            constr = copy_p(prev);
-        }
-        if(key == 'k' || key == 'K'){
-            chain_solver.backward();
-        }
-
-        if(key == '1'){
-            show1 = !show1;
-        }
-        if(key == '2'){
-            show2 = !show2;
-        }
-        if(key == '3'){
-            show3 = !show3;
-        }
-
         if(key == 'w' || key == 'W'){
             solve = !solve;
-        }
-    }
-
-    ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
-        ArrayList<Vector> copy = new ArrayList<Vector>();
-        for(Vector p : _positions){
-            copy.add(p.get());
-        }
-        return copy;
-    }
-
-
-    void draw_pos(ArrayList<Vector> _positions, int color, float str) {
-        if(_positions == null) return;
-        Vector prev = null;
-        for(Vector p : _positions){
-            pushMatrix();
-            pushStyle();
-            stroke(color);
-            strokeWeight(str);
-            if(prev != null) line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
-            noStroke();
-            fill(color, 100);
-            translate(p.x(),p.y(),p.z());
-            sphere(3);
-            popStyle();
-            popMatrix();
-            prev = p;
         }
     }
 

@@ -240,7 +240,7 @@ public class Util {
             String heuristics = "";
             if(s.keepDirection()) heuristics += "\n Keep directions";
             if(s.fixTwisting()) heuristics += "\n Fix Twisting";
-            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.exploration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.exploration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof CCDSolver){
             pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
@@ -269,5 +269,44 @@ public class Util {
             pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         pg.popStyle();
+    }
+
+    public static ArrayList<Frame> copy(List<? extends Frame> chain) {
+        ArrayList<Frame> copy = new ArrayList<Frame>();
+        Frame reference = chain.get(0).reference();
+        if (reference != null) {
+            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
+        }
+        for (Frame joint : chain) {
+            Frame newJoint = new Frame();
+            newJoint.setReference(reference);
+            newJoint.setPosition(joint.position().get());
+            newJoint.setOrientation(joint.orientation().get());
+            newJoint.setConstraint(joint.constraint());
+            copy.add(newJoint);
+            reference = newJoint;
+        }
+        return copy;
+    }
+
+    public static void drawPositions(PGraphics pg, ArrayList<Vector> positions, int color, float str) {
+        pg.sphereDetail(3);
+        if(positions == null) return;
+        Vector prev = null;
+        for(Vector p : positions){
+            pg.pushMatrix();
+            pg.pushStyle();
+            pg.stroke(color);
+            pg.strokeWeight(str);
+            if(prev != null) pg.line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
+            pg.noStroke();
+            pg.fill(color);
+            pg.translate(p.x(),p.y(),p.z());
+            pg.sphere(3);
+            pg.popStyle();
+            pg.popMatrix();
+            prev = p;
+        }
+        pg.sphereDetail(40);
     }
 }
