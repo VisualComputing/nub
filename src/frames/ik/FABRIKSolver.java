@@ -78,10 +78,6 @@ public abstract class FABRIKSolver extends Solver {
     //When it is 1 the Joint will not move at all
     protected float _fixWeight = 0;
 
-
-    public Properties(){
-    }
-
     public Properties(boolean basic){
       if(basic){
         _useConstraint = false;
@@ -108,7 +104,7 @@ public abstract class FABRIKSolver extends Solver {
   //TODO : Clean code
   static Random r = new Random();
   public static boolean rand = false;
-  static boolean debug = true; //TODO : discard
+  public static boolean debug = true; //TODO : discard
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -566,15 +562,14 @@ public abstract class FABRIKSolver extends Solver {
       //Perform this operation only when Projected Vectors have not a despicable length
       if(v.magnitude() > 0.5 * localEff.magnitude() && u.magnitude() > 0.5 * localEff.magnitude()) {
         if(debug) {
-          System.out.println("############");
-          System.out.println("############");
+          System.out.println("+-------------------+");
+          System.out.println("ON APPLY TWIST MEDHOD");
           System.out.println("--> Local EFF : " + localEff);
           System.out.println("--> Local Target : " + localTarget);
           System.out.println("--> Local EFF Proj : " + v);
           System.out.println("--> Local Target Proj : " + u);
           System.out.println("--> Twist : " + twist);
-          System.out.println("$$$$$$$$$$$$$$$$$");
-          System.out.println("$$$$$$$$$$$$$$$$$");
+          System.out.println("+-------------------+");
         }
 
         Quaternion q = new Quaternion(v, u);
@@ -586,7 +581,7 @@ public abstract class FABRIKSolver extends Solver {
     }
   }
 
-  protected void _applyRotation(boolean reverse, ArrayList<Vector> positions, int idx, Quaternion q){
+  protected static void _applyRotation(boolean reverse, ArrayList<Vector> positions, int idx, Quaternion q){
     Vector v_i = positions.get(idx);
     int update = reverse ? -1 : 1;
     for(int i = idx + update; reverse ? i >=  0: i < positions.size(); i = i + update ){
@@ -606,7 +601,7 @@ public abstract class FABRIKSolver extends Solver {
     return distance;
   }
 
-  protected ArrayList<Frame> _copy(List<? extends Frame> chain, Frame reference) {
+  protected static ArrayList<Frame> _copy(List<? extends Frame> chain, Frame reference) {
     ArrayList<Frame> copy = new ArrayList<Frame>();
     for (Frame joint : chain) {
       Frame newJoint = new Frame();
@@ -620,7 +615,7 @@ public abstract class FABRIKSolver extends Solver {
     return copy;
   }
 
-  protected ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
+  protected static ArrayList<Frame> _copy(ArrayList<? extends Frame> chain) {
     Frame reference = chain.get(0).reference();
     if (reference != null) {
       reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
@@ -630,43 +625,6 @@ public abstract class FABRIKSolver extends Solver {
 
   public ArrayList<Vector> positions(){
     return _positions;
-  }
-
-  /// TO DEBUG
-  public ArrayList<Vector> copy_p(ArrayList<Vector> _positions){
-    ArrayList<Vector> copy = new ArrayList<Vector>();
-    for(Vector p : _positions){
-      copy.add(p.get());
-    }
-    return copy;
-  }
-
-  public static PGraphics pg;
-  public ArrayList<Vector> cop;
-
-  public void draw_pos(){
-    draw_pos(cop, pg.color(0,255,0), 3);
-  }
-
-  //TODO : Remove this methods
-  public void draw_pos(ArrayList<Vector> pos, int color, float str) {
-    if(pos == null) return;
-    Vector prev = null;
-    for(Vector p : pos){
-      pg.pushMatrix();
-      pg.pushStyle();
-      pg.stroke(color);
-      pg.strokeWeight(str);
-      if(prev != null) pg.line(prev.x(),prev.y(),prev.z(), p.x(),p.y(),p.z());
-      pg.noStroke();
-      pg.fill(color, 100);
-      pg.translate(p.x(),p.y(),p.z());
-      pg.sphere(3);
-      pg.popStyle();
-      pg.popMatrix();
-      prev = p;
-    }
-
   }
 
   public FABRIKSolver() {
