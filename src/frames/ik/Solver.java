@@ -25,12 +25,12 @@ public abstract class Solver {
   //TODO : Add visual hints to show how the solver's algorithm works.
   //TODO paper idea: optimize values per _solver / timer / local config
   public float error = 0.01f;
-  public int maxIter = 200;
+  public int maxIter = 50;
   public float minDistance = 0.01f;
   public float timesPerFrame = 5.f;
   public float frameCounter = 0;
   public int iterations = 0;
-  public boolean change_temp = false;
+  public boolean change_temp = false; //TODO : Clean this!
 
   protected TimingTask _task;
 
@@ -58,10 +58,15 @@ public abstract class Solver {
 
   public abstract float error();
 
+  public void change(boolean change){
+    change_temp = change;
+  }
+
   public boolean solve() {
     //Reset counter
     if (_changed() || change_temp) {
       _reset();
+      change_temp = false;
     }
 
     if (iterations >= maxIter) {
