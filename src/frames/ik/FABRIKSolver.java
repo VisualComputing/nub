@@ -74,6 +74,7 @@ public abstract class FABRIKSolver extends Solver {
     protected boolean _useConstraint = true;
     protected boolean _enableFixWeight = true;
     //It is useful when the chain is highly constrained
+    protected boolean _enableDirectionWeight = false; // TODO : Clean
     protected float _directionWeight = 0.5f; //TODO: experiment with this parameter
     //When it is 1 the Joint will not move at all
     protected float _fixWeight = 0;
@@ -86,7 +87,7 @@ public abstract class FABRIKSolver extends Solver {
     }
   }
 
-  protected HashMap<Integer, Properties> _properties = new HashMap<>();
+  protected HashMap<Integer, Properties> _properties = new HashMap<>(); //TODO : Use an Array instead of a HashMap
   /*Store Joint's desired position*/
   protected ArrayList<Vector> _positions = new ArrayList<Vector>();
   protected ArrayList<Quaternion> _orientations = new ArrayList<Quaternion>();
@@ -98,13 +99,13 @@ public abstract class FABRIKSolver extends Solver {
   protected int _head = 0;
 
   /*Heuristic Parameters*/
-  protected boolean _fixTwisting = false;
+  protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
 
   //TODO : Clean code
   static Random r = new Random();
   public static boolean rand = false;
-  public static boolean debug = true; //TODO : discard
+  public static boolean debug = false; //TODO : discard
 
   /*
   * Move vector u to v while keeping certain distance.
@@ -130,6 +131,19 @@ public abstract class FABRIKSolver extends Solver {
     _keepDirection = keepDirection;
   }
 
+  public void setDirectionWeight(float weight){
+    for(Integer i : _properties.keySet()){
+      _properties.get(i)._enableDirectionWeight = true;
+      _properties.get(i)._directionWeight = weight;
+    }
+  }
+
+  public void setFixedWeight(float weight){
+    for(Integer i : _properties.keySet()){
+      _properties.get(i)._enableFixWeight = true;
+      _properties.get(i)._fixWeight = weight;
+    }
+  }
 
   public static Vector _move(Vector u, Vector v, float distance, float fixWeight){
     float r = Vector.distance(u, v);
@@ -149,8 +163,6 @@ public abstract class FABRIKSolver extends Solver {
    * the reference frame of the Frame at i + 1
    * */
   protected float _forwardReaching(ArrayList<? extends Frame> chain) {
-    //TODO : Check for a better appraoach to include Twist (*)
-    if(_fixTwisting && iterations % 3 == 0) _applyTwistRotation(chain, _positions.get(_positions.size() - 1));
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
@@ -166,7 +178,7 @@ public abstract class FABRIKSolver extends Solver {
       Properties props_i1 = _properties.get(chain.get(i+1).id());
       //TODO : Is it necessary to check children?
       //if(chain.get(i).children().size() < 2 && chain.get(i).constraint() != null && opt < 1){
-      if(chain.get(i).constraint() != null && _keepDirection){
+      if((chain.get(i).constraint() != null && _keepDirection) || props_i1._enableDirectionWeight){
         /*
          * H1 : If Joint has a constrat it is desirable that:
          * a) J_i reach its target position
@@ -540,7 +552,7 @@ public abstract class FABRIKSolver extends Solver {
 
   float min_v = 1e10f, min_u = 1e10f;
 
-  protected static void _applyTwistRotation(ArrayList<? extends Frame> chain, Vector t){
+  protected static void _applyTwistRotation(List<? extends Frame> chain, Vector t){
     //Change chain state in such a way that the target approach to chain
     //TODO : consider alternatives to twisting approach (is it possible as intermediary step)
     Vector eff = chain.get(chain.size() - 1).position();
