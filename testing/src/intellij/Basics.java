@@ -35,7 +35,7 @@ public class Basics extends PApplet {
         else
           rect(10, 10, 200, 200);
         stroke(255, 255, 0);
-        scene.drawShooterTarget(this);
+        scene.drawSquaredBullsEye(this);
         popStyle();
       }
     };

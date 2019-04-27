@@ -374,14 +374,14 @@ public class NodeAPI1 extends PApplet {
       pushStyle();
       scene.drawAxes(40);
       stroke(_c);
-      scene.drawShooterTarget(this);
+      scene.drawSquaredBullsEye(this);
       strokeWeight(10);
       point(pnt.x(), pnt.y(), pnt.z());
       popStyle();
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.NodeAPI1"});
   }
 }

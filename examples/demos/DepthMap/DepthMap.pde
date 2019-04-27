@@ -1,8 +1,8 @@
 /**
- * ShadowMap.
+ * DepthMap.
  * by Jean Pierre Charalambos.
  *
- * This example shows how to generate and display a shadow map from a light point-of-view.
+ * This example shows how to generate and display a depth map from a light point-of-view.
  *
  * The actual shadow mapping implementation is left as an exercise. Readers may refer to:
  * http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/ and,
@@ -72,7 +72,7 @@ void setup() {
     shapes[i].randomize();
     // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
-    shapes[i].setHighlighting(Node.Highlighting.NONE);
+    shapes[i].setHighlighting(0);
   }
   shadowMap = createGraphics(w / 2, h / 2, P3D);
   depthShader = loadShader("depth.glsl");

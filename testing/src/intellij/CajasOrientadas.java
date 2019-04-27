@@ -11,7 +11,7 @@ import processing.event.MouseEvent;
 public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
-  boolean drawAxes = true, drawShooterTarget = true;
+  boolean drawAxes = true, bullsEye = true;
   Sphere esfera;
 
   public void settings() {
@@ -71,7 +71,7 @@ public class CajasOrientadas extends PApplet {
     if (key == 'a')
       drawAxes = !drawAxes;
     if (key == 'p')
-      drawShooterTarget = !drawShooterTarget;
+      bullsEye = !bullsEye;
     if (key == 'e')
       scene.togglePerspective();
     if (key == 's')
@@ -116,10 +116,8 @@ public class CajasOrientadas extends PApplet {
             pg.fill(getColor());
           pg.box(w, h, d);
           pg.stroke(0, 225, 0);
-          if (drawShooterTarget) {
+          if (bullsEye)
             scene.drawBullsEye(iNode);
-            scene.drawShooterTarget(iNode);
-          }
           pg.popStyle();
         }
       };
@@ -196,8 +194,8 @@ public class CajasOrientadas extends PApplet {
             pg.sphere(radius());
           }
           pg.stroke(255);
-          if (drawShooterTarget)
-            scene.drawShooterTarget(iNode);
+          if (bullsEye)
+            scene.drawSquaredBullsEye(iNode);
           pg.popStyle();
         }
       };

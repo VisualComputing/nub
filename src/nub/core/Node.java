@@ -101,8 +101,9 @@ import java.util.List;
  * <h2>Shapes</h2>
  * A node shape can be set from a retained-mode rendering object, see {@link #setShape(Object)};
  * or from an immediate-mode rendering procedure, see {@link #graphics(Object)}.
- * Picking a node is done according to a {@link #pickingThreshold()}. When picking a
- * node it will be highlighted according to a {@link #highlighting()} policy.
+ * Picking a node is done according to a {@link #pickingThreshold()}. When a node is tracked
+ * it will be highlighted (scaled) according to a {@link #highlighting()} magnitude.
+ * See also {@link #enableTracking(boolean)}.
  * <h2>Application Control</h2>
  * Implementing an application control for the node is a two step process:
  * <ul>
@@ -351,7 +352,8 @@ public class Node {
    * having {@code reference} as {@link #reference()}, {@code translation},
    * {@code rotation} and {@code scaling} as the node {@link #translation()},
    * {@link #rotation()} and {@link #scaling()}, respectively.
-   * The {@link #pickingThreshold()} is set to {@code 0.2}.
+   * The {@link #pickingThreshold()} is set to {@code 0.2} and the {@link #highlighting()}
+   * magnitude to {@code 0.15}.
    */
   protected Node(Graph graph, Node reference, Constraint constraint, Object shape, Vector translation, Quaternion rotation, float scaling) {
     _graph = graph;
@@ -2318,7 +2320,7 @@ public class Node {
   }
 
   /**
-   * Returns the highlighting magnitude use to scale the node when it's picked.
+   * Returns the highlighting magnitude use to scale the node when it's tracked.
    *
    * @see #setHighlighting(float)
    * @see #pickingThreshold()

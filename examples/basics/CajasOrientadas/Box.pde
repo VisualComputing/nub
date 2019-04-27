@@ -24,8 +24,8 @@ public class Box extends Node {
     pg.fill(isTracked() ? color(255, 0, 0) : _color);
     pg.box(_w, _h, _d);
     pg.stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(this);
+    if (bullseye)
+      scene.drawBullsEye(this);
     pg.popStyle();
   }
 

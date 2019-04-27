@@ -41,7 +41,7 @@ public class Interaction2D extends PApplet {
         pGraphics.rect(10, 10, 200, 200);
         pGraphics.stroke(255, 0, 0);
         /*
-        scene.drawShooterTarget(this);
+        scene.drawSquaredBullsEye(this);
         scene.beginHUD(pGraphics);
         Vector position = scene.screenLocation(position());
         pGraphics.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -71,7 +71,7 @@ public class Interaction2D extends PApplet {
     scene.drawAxes();
     scene.render();
 
-    scene.drawShooterTarget(shape1);
+    scene.drawSquaredBullsEye(shape1);
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());
     fill(shape1.isTracked() ? 0 : 255, shape1.isTracked() ? 255 : 0, shape1.isTracked() ? 0 : 255);

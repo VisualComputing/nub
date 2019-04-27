@@ -60,7 +60,7 @@ public class DOF extends PApplet {
     // 1. Draw into main buffer
     scene.beginDraw();
     for (int i = 0; i < models.length; i++)
-      scene.drawShooterTarget(models[i]);
+      scene.drawSquaredBullsEye(models[i]);
     scene.context().background(0);
     scene.render();
     scene.endDraw();

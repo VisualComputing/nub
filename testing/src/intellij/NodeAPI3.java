@@ -392,14 +392,14 @@ public class NodeAPI3 extends PApplet {
       pushStyle();
       scn.drawAxes(40);
       stroke(_c);
-      scn.drawShooterTarget(this);
+      scn.drawSquaredBullsEye(this);
       strokeWeight(10);
       point(pnt.x(), pnt.y(), pnt.z());
       popStyle();
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.NodeAPI3"});
   }
 }

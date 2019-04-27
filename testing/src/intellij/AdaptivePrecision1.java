@@ -44,7 +44,7 @@ public class AdaptivePrecision1 extends PApplet {
       popMatrix();
       pushStyle();
       stroke(255);
-      scene.drawShooterTarget(shapes[i]);
+      scene.drawSquaredBullsEye(shapes[i]);
       popStyle();
     }
   }

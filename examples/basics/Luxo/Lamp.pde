@@ -18,7 +18,6 @@ class Lamp implements PConstants {
     for (int i = 0; i < 4; ++i) {
       pieces[i] = new Piece(scene);
       node(i).setReference(i > 0 ? pieces[i - 1] : null);
-      node(i).setHighlighting(Node.Highlighting.FRONT);
     }
 
     // Initialize nodes

@@ -17,8 +17,8 @@ class Sphere extends Node {
     pg.fill(isTracked() ? color(255, 0, 0) : _color);
     pg.sphere(isTracked() ? _radius * 1.2 : _radius);
     pg.stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(this);
+    if (bullseye)
+      scene.drawBullsEye(this);
     pg.popStyle();
   }
 }

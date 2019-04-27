@@ -8,6 +8,9 @@
  * The sphere and the boxes are interactive. Pick and drag them with the
  * right mouse button. Use also the arrow keys to select and move the sphere.
  * See how the boxes will always remain oriented towards the sphere.
+ * 
+ * Press ' ' the change the picking policy adaptive/fixed.
+ * Press 'c' to change the bullseye shape.
  */
 
 import nub.primitives.*;
@@ -16,7 +19,7 @@ import nub.processing.*;
 
 Scene scene;
 Box[] cajas;
-boolean drawAxes = true, drawShooterTarget = true, adaptive = true;
+boolean drawAxes = true, bullseye = true;
 Sphere esfera;
 
 void setup() {
@@ -29,8 +32,8 @@ void setup() {
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[30];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)),
-                       random(10, 40), random(10, 40), random(10, 40));
+    cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)), 
+      random(10, 40), random(10, 40), random(10, 40));
   scene.fit(1);
   scene.setTrackedNode("keyboard", esfera);
 }
@@ -68,10 +71,20 @@ int randomLength(int min, int max) {
 }
 
 void keyPressed() {
+  if (key == ' ')
+    for (Box caja : cajas)
+      if (caja.pickingThreshold() != 0)
+        if (abs(caja.pickingThreshold()) < 1)
+          caja.setPickingThreshold(100 * caja.pickingThreshold());
+        else
+          caja.setPickingThreshold(caja.pickingThreshold() / 100);
+  if(key == 'c')
+    for (Box caja : cajas)
+      caja.setPickingThreshold(-1 * caja.pickingThreshold());
   if (key == 'a')
     drawAxes = !drawAxes;
   if (key == 'p')
-    drawShooterTarget = !drawShooterTarget;
+    bullseye = !bullseye;
   if (key == 'e')
     scene.togglePerspective();
   if (key == 's')

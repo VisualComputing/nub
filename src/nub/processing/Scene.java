@@ -1400,7 +1400,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Node node : interpolator.keyFrames())
-      drawShooterTarget(node);
+      drawSquaredBullsEye(node);
     context().popStyle();
   }
 
@@ -2473,7 +2473,7 @@ public class Scene extends Graph implements PConstants {
    * If node a Node instance and it is {@link #isTrackedNode(Node)} it also applies
    * a stroke highlight.
    *
-   * @see #drawShooterTarget(Node, float)
+   * @see #drawSquaredBullsEye(Node, float)
    */
   public void drawCross(Node node) {
     context().pushStyle();
@@ -2536,61 +2536,86 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * {@link #drawShooterTarget(float, float, float)} centered at the projected node origin.
+   * Draws a bullseye around the node {@link Node#position()} projection.
+   * <p>
+   * The shape of the bullseye may be squared or circled dependeing on the node
+   * {@link Node#pickingThreshold()} sign.
+   *
+   * @see Node#pickingThreshold()
+   * @see Node#position()
+   * @see #drawSquaredBullsEye(Node)
+   * @see #drawCircledBullsEye(Node)
+   */
+  public void drawBullsEye(Node node) {
+    if (node.pickingThreshold() > 0)
+      this.drawSquaredBullsEye(node);
+    else if (node.pickingThreshold() < 0)
+      this.drawCircledBullsEye(node);
+  }
+
+  /**
+   * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
    * If node {@link #isTrackedNode(Node)} it also applies a stroke highlight.
    *
-   * @see #drawShooterTarget(Node, float)
+   * @see #drawSquaredBullsEye(Node, float)
+   * @see #drawCircledBullsEye(Node)
+   * @see #drawBullsEye(Node)
    */
-  public void drawShooterTarget(Node node) {
+  public void drawSquaredBullsEye(Node node) {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
     if (node.isTracked())
       context().strokeWeight(2 + context().strokeWeight);
-    drawShooterTarget(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
+    drawSquaredBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));
     context().popStyle();
   }
 
   /**
-   * {@link #drawShooterTarget(float, float, float)} centered at the projected node origin, having
+   * {@link #drawSquaredBullsEye(float, float, float)} centered at the projected node origin, having
    * {@code length} pixels.
    *
-   * @see #drawShooterTarget(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
    */
-  public void drawShooterTarget(Node node, float length) {
+  public void drawSquaredBullsEye(Node node, float length) {
     if (eye() == node) {
       System.err.println("eye nodes don't have an screen target");
       return;
     }
     Vector center = screenLocation(node.position());
-    drawShooterTarget(center.x(), center.y(), length);
+    drawSquaredBullsEye(center.x(), center.y(), length);
   }
 
   /**
-   * Same as {@code drawShooterTarget(context(), x, y, radius() / 5)}.
+   * Same as {@code drawSquaredBullsEye(context(), x, y, radius() / 5)}.
    *
-   * @see #drawShooterTarget(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
    */
-  public void drawShooterTarget(float x, float y) {
-    drawShooterTarget(context(), x, y, radius() / 5);
+  public void drawSquaredBullsEye(float x, float y) {
+    drawSquaredBullsEye(context(), x, y, radius() / 5);
   }
 
   /**
-   * Same as {@code drawShooterTarget(context(), center, length)}.
+   * Same as {@code drawSquaredBullsEye(context(), center, length)}.
    *
-   * @see #drawShooterTarget(PGraphics, float, float, float)
+   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
+   * @see #drawCircledBullsEye(PGraphics, float, float, float)
    */
-  public void drawShooterTarget(float x, float y, float length) {
-    drawShooterTarget(context(), x, y, length);
+  public void drawSquaredBullsEye(float x, float y, float length) {
+    drawSquaredBullsEye(context(), x, y, length);
   }
 
   /**
    * Draws a squared shooter target onto {@code pGraphics}, centered at {@code (x, y)},
    * having {@code length} pixels.
+   *
+   * @see #drawCircledBullsEye(PGraphics, float, float, float)
    */
-  public void drawShooterTarget(PGraphics pGraphics, float x, float y, float length) {
+  public void drawSquaredBullsEye(PGraphics pGraphics, float x, float y, float length) {
     float half_length = length / 2f;
     pGraphics.pushStyle();
     beginHUD(pGraphics);
@@ -2625,61 +2650,68 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * {@link #drawBullsEye(float, float, float)} centered at the projected node origin.
+   * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin.
    * The length of the target is the node {@link Node#pickingThreshold()}.
    * If node {@link #isTrackedNode(Node)} it also applies a stroke highlight.
    *
-   * @see #drawShooterTarget(Node, float)
+   * @see #drawSquaredBullsEye(Node, float)
+   * @see #drawCircledBullsEye(Node)
+   * @see #drawBullsEye(Node)
    */
-  public void drawBullsEye(Node node) {
+  public void drawCircledBullsEye(Node node) {
     if (node.pickingThreshold() == 0)
       return;
     context().pushStyle();
     if (node.isTracked())
       context().strokeWeight(2 + context().strokeWeight);
-    drawBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
+    drawCircledBullsEye(node, Math.abs(node.pickingThreshold()) < 1 ? 200 * Math.abs(node.pickingThreshold()) * node.scaling() * pixelToGraphRatio(node.position())
         : Math.abs(node.pickingThreshold()));
     context().popStyle();
   }
 
   /**
-   * {@link #drawBullsEye(float, float, float)} centered at the projected node origin, having
+   * {@link #drawCircledBullsEye(float, float, float)} centered at the projected node origin, having
    * {@code length} pixels.
    *
-   * @see #drawBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
    */
-  public void drawBullsEye(Node node, float length) {
+  public void drawCircledBullsEye(Node node, float length) {
     if (eye() == node) {
       System.err.println("eye nodes don't have an screen target");
       return;
     }
     Vector center = screenLocation(node.position());
-    drawBullsEye(center.x(), center.y(), length);
+    drawCircledBullsEye(center.x(), center.y(), length);
   }
 
   /**
-   * Same as {@code drawBullsEye(context(), x, y, radius() / 5)}.
+   * Same as {@code drawCircledBullsEye(context(), x, y, radius() / 5)}.
    *
-   * @see #drawBullsEye(float, float, float)
+   * @see #drawCircledBullsEye(float, float, float)
+   * @see #drawSquaredBullsEye(float, float, float)
    */
-  public void drawBullsEye(float x, float y) {
-    drawBullsEye(context(), x, y, radius() / 5);
+  public void drawCircledBullsEye(float x, float y) {
+    drawCircledBullsEye(context(), x, y, radius() / 5);
   }
 
   /**
-   * Same as {@code drawBullsEye(context(), x, y, diameter)}.
+   * Same as {@code drawCircledBullsEye(context(), x, y, diameter)}.
    *
-   * @see #drawBullsEye(PGraphics, float, float, float)
+   * @see #drawCircledBullsEye(PGraphics, float, float, float)
+   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
    */
-  public void drawBullsEye(float x, float y, float diameter) {
-    drawBullsEye(context(), x, y, diameter);
+  public void drawCircledBullsEye(float x, float y, float diameter) {
+    drawCircledBullsEye(context(), x, y, diameter);
   }
 
   /**
    * Draws a circled bullseye onto {@code pGraphics}, centered at {@code (x, y)},
    * having {@code length} pixels.
+   *
+   * @see #drawSquaredBullsEye(PGraphics, float, float, float)
    */
-  public void drawBullsEye(PGraphics pGraphics, float x, float y, float diameter) {
+  public void drawCircledBullsEye(PGraphics pGraphics, float x, float y, float diameter) {
     pGraphics.pushStyle();
     beginHUD(pGraphics);
     pGraphics.noFill();
