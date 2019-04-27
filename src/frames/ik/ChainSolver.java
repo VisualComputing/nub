@@ -39,9 +39,14 @@ public class ChainSolver extends FABRIKSolver {
   protected Vector _targetDirection;
   protected ArrayList<Vector> _bestAvoidPosition, _afterAvoidPosition;
   protected ArrayList<ArrayList<Vector>> _avoidHistory, _divergeHistory;
+  protected boolean _explore = true;
   protected float _exploration = 0;
   protected float _lastError;
   //----------------------------------------------------
+
+  public void explore(boolean explore){
+    _explore = explore;
+  }
 
   public float exploration(){
       return  _exploration;
@@ -185,17 +190,18 @@ public class ChainSolver extends FABRIKSolver {
     //Initial root position
     Vector initial = _chain.get(0).position().get();
     //Stage 1: Forward Reaching
+    //TODO : Check for a better approach to include Twist (*)
+    if(_fixTwisting && iterations % 3 == 0){
+      _applyTwistRotation(_chain, target);
+      //TODO : Do it efficiently
+      for(int i = 0; i < _chain.size(); i++){
+        _positions.set(i, _chain.get(i).position());
+      }
+    }
+
     //TODO : Clean and consider twisting
     if(_targetDirection != null){
-      //Use target orientation
-      Vector o = _chain.get(_chain.size() - 2).position();
-      Vector p = _chain.get(_chain.size() - 1).position();
-      Vector op = Vector.subtract(o,p);
-      Vector direction = _target.worldDisplacement(_targetDirection);
-      direction.normalize();
-      direction.multiply(-1);
-      direction.multiply(op.magnitude());
-      _positions.set(_chain.size() - 2, Vector.add(direction, p));
+      _applyTargetdirection();
     }
     _positions.set(_chain.size() - 1, target.get());
     _forwardReaching();
@@ -207,7 +213,7 @@ public class ChainSolver extends FABRIKSolver {
     float change = _backwardReaching(o);
     //Save best solution
     float currentError  = Vector.distance(end.position(), _target.position());
-    if(currentError > error) {
+    if(_explore && currentError > error) {
       if(debug) System.out.println("ne is greater than error : " + " ne : " + currentError + " error : " + error);
       if(debug) System.out.println("change is : " + change);
       if(debug) System.out.println("e is : " + _lastError);
@@ -303,7 +309,10 @@ public class ChainSolver extends FABRIKSolver {
     Quaternion prevOrientation = _chain.get(0).reference() != null
         ? _chain.get(0).reference().orientation().get() : new Quaternion();
     for (Frame joint : _chain) {
-      _properties.put(joint.id(), new Properties(false));
+      if(!_properties.containsKey(joint.id())) {
+        Properties props = new Properties(false); //TODO : CLEAN!!!
+        _properties.put(joint.id(), props);
+      }
       Vector position = joint.position().get();
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
@@ -317,9 +326,21 @@ public class ChainSolver extends FABRIKSolver {
     _jointChange.remove(0);
     addIterationRecord(_positions);
     _exploration = 0;
-    //TODO : REFINE
+    //TODO : REFINE & USE ONLY IN DEBUG MODE
     _avoidHistory = new ArrayList<>();
     _divergeHistory = new ArrayList<>();
+  }
+
+  protected void _applyTargetdirection(){
+    //Use target orientation
+    Vector o = _chain.get(_chain.size() - 2).position();
+    Vector p = _chain.get(_chain.size() - 1).position();
+    Vector op = Vector.subtract(o,p);
+    Vector direction = _target.worldDisplacement(_targetDirection);
+    direction.normalize();
+    direction.multiply(-1);
+    direction.multiply(op.magnitude());
+    _positions.set(_chain.size() - 2, Vector.add(direction, p));
   }
 
 
