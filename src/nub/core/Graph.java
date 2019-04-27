@@ -2627,9 +2627,10 @@ public class Graph {
       return false;
     if (!node.isTrackingEnabled())
       return false;
-    float threshold = node.pickingThreshold() < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
+    float threshold = Math.abs(node.pickingThreshold()) < 1 ? 100 * node.pickingThreshold() * node.scaling() * pixelToGraphRatio(node.position())
         : node.pickingThreshold() / 2;
-    return ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold));
+    return threshold > 0 ? ((Math.abs(x - projection._vector[0]) < threshold) && (Math.abs(y - projection._vector[1]) < threshold)) :
+        Point.distance(x, y, projection._vector[0], projection._vector[1]) < -threshold;
   }
 
   /**
@@ -3050,7 +3051,7 @@ public class Graph {
    * Internally used by {@link #_render(Node)}.
    */
   protected void _trackFrontBuffer(Node node) {
-    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() > 0) {
+    if (node.isTrackingEnabled() && !_rays.isEmpty() && node.pickingThreshold() != 0) {
       Vector projection = screenLocation(node.position());
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {

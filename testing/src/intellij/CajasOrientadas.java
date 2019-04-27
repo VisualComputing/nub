@@ -11,7 +11,7 @@ import processing.event.MouseEvent;
 public class CajasOrientadas extends PApplet {
   Scene scene;
   Box[] cajas;
-  boolean drawAxes = true, drawShooterTarget = true, adaptive = true;
+  boolean drawAxes = true, drawShooterTarget = true;
   Sphere esfera;
 
   public void settings() {
@@ -61,14 +61,13 @@ public class CajasOrientadas extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == ' ') {
-      adaptive = !adaptive;
+    if (key == ' ')
       for (Box caja : cajas)
-        if (adaptive)
-          caja.iNode.setPickingThreshold(0.25f);
-        else
-          caja.iNode.setPickingThreshold(25);
-    }
+        if (caja.iNode.pickingThreshold() != 0)
+          if (abs(caja.iNode.pickingThreshold()) < 1)
+            caja.iNode.setPickingThreshold(100 * caja.iNode.pickingThreshold());
+          else
+            caja.iNode.setPickingThreshold(caja.iNode.pickingThreshold() / 100);
     if (key == 'a')
       drawAxes = !drawAxes;
     if (key == 'p')
@@ -107,7 +106,7 @@ public class CajasOrientadas extends PApplet {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
-          setOrientatio(CajasOrientadas.this.esfera.getPosition());
+          Box.this.setOrientation(CajasOrientadas.this.esfera.getPosition());
           if (drawAxes)
             Scene.drawAxes(pg, PApplet.max(w, h, d) * 1.3f);
           pg.noStroke();
@@ -116,13 +115,15 @@ public class CajasOrientadas extends PApplet {
           else
             pg.fill(getColor());
           pg.box(w, h, d);
-          pg.stroke(255);
-          if (drawShooterTarget)
+          pg.stroke(0, 225, 0);
+          if (drawShooterTarget) {
+            scene.drawBullsEye(iNode);
             scene.drawShooterTarget(iNode);
+          }
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(0);
+      iNode.setPickingThreshold(-25);
       setSize();
       setColor();
       iNode.randomize();
@@ -165,7 +166,7 @@ public class CajasOrientadas extends PApplet {
       return iNode.orientation();
     }
 
-    public void setOrientatio(Vector v) {
+    public void setOrientation(Vector v) {
       Vector to = Vector.subtract(v, iNode.position());
       iNode.setOrientation(new Quaternion(new Vector(0, 1, 0), to));
     }
@@ -200,7 +201,8 @@ public class CajasOrientadas extends PApplet {
           pg.popStyle();
         }
       };
-      iNode.setPickingThreshold(0.15f);
+      //iNode.setPickingThreshold(0.15f);
+      iNode.setPickingThreshold(0);
       setRadius(10);
     }
 
