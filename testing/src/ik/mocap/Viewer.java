@@ -149,7 +149,9 @@ public class Viewer extends PApplet{
         Frame LLArm = limbs.get("LEFTLOWARM");
         BallAndSocket LUArmConstraint = new BallAndSocket(radians(85), radians(85));
         LUArmConstraint.setRestRotation(LUArm.rotation().get(), new Vector(0,1,0), new Vector(1,0,0),  LLArm.translation().get());
+        LUArmConstraint.setTwistLimits(radians(70), radians(90));
         LUArm.setConstraint(LUArmConstraint);
+
         // LEFTLOWARM  [ 25.23188, 120.4344, -14.801453 ]
         Vector LLArmTwist = Vector.cross(limbs.get("LEFTHAND").translation(), new Vector(0,0,1), null);
         Hinge LLArmConstraint = new Hinge(radians(0), radians(178),LLArm.rotation().get(), limbs.get("LEFTHAND").translation() , LLArmTwist);
@@ -160,6 +162,8 @@ public class Viewer extends PApplet{
         Frame RLArm = limbs.get("RIGHTLOWARM");
         BallAndSocket RUArmConstraint = new BallAndSocket(radians(85), radians(85));
         RUArmConstraint.setRestRotation(RUArm.rotation().get(), new Vector(0,1,0), new Vector(-1,0,0),  RLArm.translation().get());
+        RUArmConstraint.setTwistLimits(radians(70), radians(90));
+
         RUArm.setConstraint(RUArmConstraint);
         // LEFTLOWARM  [ 25.23188, 120.4344, -14.801453 ]
         Vector RLArmTwist = Vector.cross(limbs.get("RIGHTHAND").translation(), new Vector(0,0,1), null);
@@ -172,6 +176,7 @@ public class Viewer extends PApplet{
         Frame LLLeg = limbs.get("LEFTLOWLEG");
         BallAndSocket LULegConstraint = new BallAndSocket(radians(50), radians(50));
         LULegConstraint.setRestRotation(LULeg.rotation().get(), new Vector(1,0,0), LLLeg.translation().get());
+        LULegConstraint.setTwistLimits(radians(10), radians(10));
         LULeg.setConstraint(LULegConstraint);
         //LEFTLOWLEG  [ 54.0961, 49.799, -12.47683 ] - > hinge
         Hinge LLLegConstraint = new Hinge(radians(0), radians(170), LLLeg.rotation().get(), new Vector(0,-1,0),new Vector(1,0,0));
@@ -183,6 +188,7 @@ public class Viewer extends PApplet{
         Frame RLLeg = limbs.get("RIGHTLOWLEG");
         BallAndSocket RULegConstraint = new BallAndSocket(radians(50), radians(50));
         RULegConstraint.setRestRotation(RULeg.rotation().get(), new Vector(1,0,0), RLLeg.translation().get());
+        RULegConstraint.setTwistLimits(radians(10), radians(10));
         RULeg.setConstraint(RULegConstraint);
         //RIGHTLOWLEG  [ 37.2461, 49.798904, -12.47683 ]
         Hinge RLLegConstraint = new Hinge(radians(0), radians(170),RLLeg.rotation().get(), new Vector(0,-1,0), new Vector(1,0,0));
@@ -225,7 +231,7 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
 
-        root.cull(true);
+        //root.cull(true);
     }
 
     public Frame createTarget(float radius){
@@ -351,9 +357,6 @@ public class Viewer extends PApplet{
             }
        }
     }
-
-    ArrayList<Vector> prev = new ArrayList<Vector>();
-    ArrayList<Vector> constr = new ArrayList<Vector>();
 
     public void keyPressed(){
         if(key == ' ') {

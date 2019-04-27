@@ -124,9 +124,6 @@ public class ConePolygon extends PApplet{
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);
-            if(solvers.get(i) instanceof ChainSolver){
-                ((ChainSolver)solver).pg = scene.pApplet().getGraphics();
-            }
             //6. Define solver parameters
             solver.error = 0.001f;
             solver.timesPerFrame = 5;
