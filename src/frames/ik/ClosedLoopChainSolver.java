@@ -40,7 +40,7 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
                 ? chain.get(0).reference().orientation().get() : new Quaternion();
         _reversedChain = new ArrayList<>();
         for (Frame joint : chain) {
-            _properties.put(joint.id(), new Properties());
+            _properties.put(joint.id(), new Properties(false));
             _reversedChain.add(_reversedChain.size(), joint);
             Vector position = joint.position().get();
             Quaternion orientation = prevOrientation.get();

@@ -67,6 +67,9 @@ public class TreeSolver extends FABRIKSolver {
   /*Tree structure that contains a list of Solvers that must be accessed in a BFS way*/
   protected TreeNode root;
   protected float _current = 10e10f, _best = 10e10f;
+  /*Heuristic Parameters*/
+  protected boolean _fixTwisting = true;
+  protected boolean _keepDirection = true;
 
   public Frame head() {
     return (Frame) root._solver().head();
@@ -77,18 +80,12 @@ public class TreeSolver extends FABRIKSolver {
     if (frame.children().isEmpty()) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
-      //TODO : clean code
-      solver.setFixTwisting(true);
-      solver.setKeepDirection(true);
       new TreeNode(parent, solver);
       return;
     }
     if (frame.children().size() > 1) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
-      //TODO : clean code
-      solver.setFixTwisting(true);
-      solver.setKeepDirection(true);
       TreeNode treeNode = new TreeNode(parent, solver);
       for (Frame child : frame.children()) {
         ArrayList<Frame> newList = new ArrayList<Frame>();
@@ -113,8 +110,24 @@ public class TreeSolver extends FABRIKSolver {
     return false;
   }
 
+  protected boolean _addTargetDirection(TreeNode treeNode, Frame endEffector, Vector direction) {
+    if (treeNode == null) return false;
+    if (treeNode._solver().endEffector() == endEffector) {
+      treeNode._solver().setTargetDirection(direction);
+      return true;
+    }
+    for (TreeNode child : treeNode._children()) {
+      _addTargetDirection(child, endEffector, direction);
+    }
+    return false;
+  }
+
   public boolean addTarget(Frame endEffector, Frame target) {
     return _addTarget(root, endEffector, target);
+  }
+
+  public boolean addTargetDirection(Frame endEffector, Vector direction) {
+    return _addTargetDirection(root, endEffector, direction);
   }
 
   public TreeSolver(Frame frame) {
@@ -163,12 +176,38 @@ public class TreeSolver extends FABRIKSolver {
       treeNode._modified = false;
       return chains;
     }
+
+
+    //TODO: Check blocked and oscillation decisions based on "e"
+    /*solver._lastError = iterations % 2 == 0 ?
+            Vector.distance(solver._chain.get(solver._chain.size()-1).position(), solver._target.position()) :
+            Math.max(Vector.distance(solver._chain.get(solver._chain.size()-1).position(), solver._target.position()), solver._lastError);*/
+
+    //Apply Fix Twisting before applying a Full Fabrik iteration to whole chain
+    //TODO: 1. is there a better condition ? 2. How to consider properly twisting of a Node with 2 or more children
+    //TODO : Twisting to favour region of movement
+    if(_fixTwisting && solver._chain.size() > 2 && iterations % 3 == 0){
+      if(treeNode._parent != null && treeNode._parent._children.size() > 1){
+        _applyTwistRotation(solver._chain.subList(1, solver._chain.size()), solver._target.position());
+      } else{
+        _applyTwistRotation(solver._chain, solver._target.position());
+      }
+      //TODO : Do it efficiently
+      for(int i = 0; i < solver._chain.size(); i++){
+        solver._positions.set(i, solver._chain.get(i).position());
+      }
+    }
+
     /* TODO: Check if it's better for convergence to try more times with local regions */
     Vector o = solver._chain.get(0).position();
     Vector p = null;
     if(solver._positions().size() > 1) p = solver._chain.get(1).position();
+
     for(int i = 0; i < 3 && solver._positions().size() > 1; i++) {
       solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
+      if(solver._targetDirection != null){
+        solver._applyTargetdirection();
+      }
       solver._forwardReaching();
       solver._positions().set(0, o);
       solver._positions().set(1, p);
@@ -430,15 +469,6 @@ public class TreeSolver extends FABRIKSolver {
 
   public void setFixTwisting(boolean fixTwisting){
     _fixTwisting = fixTwisting;
-    setFixTwisting(root, fixTwisting);
-  }
-
-  public void setFixTwisting(TreeNode node, boolean fixTwisting){
-    if(node == null) return;
-    node._solver.setFixTwisting(fixTwisting);
-    for(TreeNode child : node._children){
-      setFixTwisting(child, fixTwisting);
-    }
   }
 
   public void setKeepDirection(boolean keepDirection){
@@ -450,7 +480,7 @@ public class TreeSolver extends FABRIKSolver {
     if(node == null) return;
     node._solver.setKeepDirection(keepDirection);
     for(TreeNode child : node._children){
-      setFixTwisting(child, keepDirection);
+      setKeepDirection(child, keepDirection);
     }
   }
 
