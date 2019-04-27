@@ -40,6 +40,17 @@ public class ShadowMappingTutorial extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
+    /*
+    scene.setMatrixHandler(new MatrixHandler() {
+      @Override
+      protected void _setUniforms() {
+        // TODO How to deal with this command. Seems related to: Scene._drawBackBuffer(Node node)
+        shader(shadowShader);
+        Scene.setUniform(shadowShader, "nub_transform", transform());
+        Scene.setUniform(shadowShader, "nub_modelview", modelview());
+      }
+    });
+    // */
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
@@ -66,12 +77,16 @@ public class ShadowMappingTutorial extends PApplet {
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
+        } else {
+          pg.strokeWeight(2);
+          pg.stroke(0, 255, 0);
+          scene.drawBullsEye(this);
         }
         Scene.drawAxes(pg, 500);
         pg.popStyle();
       }
     };
-    light.setPickingThreshold(0);
+    light.setPickingThreshold(debug ? 0 : -50);
     light.setMagnitude(400f / 2048f);
     light.setPosition(0, 160, 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
@@ -94,6 +109,7 @@ public class ShadowMappingTutorial extends PApplet {
 
     // initDefaultPass
     shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    //shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
     shader(shadowShader);
     noStroke();
   }
@@ -138,6 +154,7 @@ public class ShadowMappingTutorial extends PApplet {
         resetShader();
       else
         shader(shadowShader);
+      light.setPickingThreshold(debug ? 0 : -50);
     }
   }
 
