@@ -77,20 +77,19 @@ public class ShadowMappingTutorial extends PApplet {
         if (debug) {
           pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
-        } else {
-          pg.strokeWeight(2);
-          pg.stroke(0, 255, 0);
-          scene.drawBullsEye(this);
         }
-        Scene.drawAxes(pg, 500);
-        pg.popStyle();
+        Scene.drawAxes(pg, 300);
+        pg.noStroke();
+        pg.fill(0, 255, 0);
+        Scene.drawCone(pg, 100f, 10, 100);
+        pg.pushStyle();
       }
     };
-    light.setPickingThreshold(debug ? 0 : -50);
     light.setMagnitude(400f / 2048f);
     light.setPosition(0, 160, 160);
     light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
     light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+    light.setPickingThreshold(-50);
 
     PShape box = createShape(BOX, 360, 5, 360);
     //rectMode(CENTER);
@@ -99,6 +98,7 @@ public class ShadowMappingTutorial extends PApplet {
     box.setStroke(false);
     floor = new Node(scene);
     floor.setShape(box);
+
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -107,12 +107,10 @@ public class ShadowMappingTutorial extends PApplet {
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
+    // initDefaultPass
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
     //discard Processing matrices
     resetMatrix();
-
-    // initDefaultPass
-    //shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
     shader(shadowShader);
     noStroke();
   }

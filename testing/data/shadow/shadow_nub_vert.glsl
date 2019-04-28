@@ -15,7 +15,7 @@ varying float lightIntensity;
 void main() {
     vertColor = color;
     // transpose(inverse(mat3(nub_model))) leads the normalMatrix
-    vec3 vertNormal = normalize(transpose(inverse(mat3(nub_model))) * normal);// Get normal direction in model view space
+    vec3 vertNormal = normalize(transpose(inverse(mat3(nub_model))) * normal);// Get normal direction in world space
     vec4 vertPosition = nub_model * vertex;
     shadowCoord = lightMatrix * (vertPosition + vec4(vertNormal, 0.0));// Normal bias removes the shadow acne
     lightIntensity = 0.5 + dot(-lightDirection, vertNormal) * 0.5;

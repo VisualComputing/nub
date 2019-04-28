@@ -60,9 +60,18 @@ public class ShadowMappingVBO extends PApplet {
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         }
         Scene.drawAxes(pg, 300);
+        pg.noStroke();
+        pg.fill(0, 255, 0);
+        Scene.drawCone(pg, 100f, 10, 100);
         pg.pushStyle();
       }
     };
+    light.setMagnitude(400f / 2048f);
+    light.setPosition(0, 160, 160);
+    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
+    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+    light.setPickingThreshold(-50);
+
     PShape box = createShape(BOX, 360, 5, 360);
     //rectMode(CENTER);
     //PShape box = createShape(RECT, 0, 0, 360, 360);
@@ -70,7 +79,7 @@ public class ShadowMappingVBO extends PApplet {
     box.setStroke(false);
     floor = new Node(scene);
     floor.setShape(box);
-    light.setMagnitude(400f / 2048f);
+
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -86,20 +95,14 @@ public class ShadowMappingVBO extends PApplet {
   }
 
   public void draw() {
-    // 1. Calculate the light position and orientation
-    float lightAngle = frameCount * 0.002f;
-    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-    light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
-    light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
-
-    // 2. Render the shadowmap from light node 'point-of-view'
+    // 1. Render the shadowmap from light node 'point-of-view'
     shadowMap.beginDraw();
     shadowMap.noStroke();
     shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
     scene.render(shadowMap, shadowMapType, light, zNear, zFar);
     shadowMap.endDraw();
 
-    // 3. Render the scene from the scene.eye() node
+    // 2. Render the scene from the scene.eye() node
     background(0xff222222);
     if (!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
@@ -113,19 +116,16 @@ public class ShadowMappingVBO extends PApplet {
   }
 
   public void keyPressed() {
-    if (key != CODED) {
-      if (key >= '1' && key <= '3')
-        landscape = key - '0';
-      else if (key == ' ') {
-        shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-        light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
-      } else if (key == 'd') {
-        debug = !debug;
-        if (debug)
-          resetShader();
-        else
-          shader(shadowShader);
-      }
+    if (key == ' ') {
+      shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
+      light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+    }
+    if (key == 'd') {
+      debug = !debug;
+      if (debug)
+        resetShader();
+      else
+        shader(shadowShader);
     }
   }
 
