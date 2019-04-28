@@ -1,6 +1,7 @@
 package intellij;
 
 import nub.core.Graph;
+import nub.core.MatrixHandler;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Vector;
@@ -40,17 +41,16 @@ public class ShadowMappingTutorial extends PApplet {
 
   public void setup() {
     scene = new Scene(this);
-    /*
     scene.setMatrixHandler(new MatrixHandler() {
       @Override
       protected void _setUniforms() {
         // TODO How to deal with this command. Seems related to: Scene._drawBackBuffer(Node node)
         shader(shadowShader);
-        Scene.setUniform(shadowShader, "nub_transform", transform());
-        Scene.setUniform(shadowShader, "nub_modelview", modelview());
+        Scene.setUniform(shadowShader, "nub_projection", projection());
+        Scene.setUniform(shadowShader, "nub_view", view());
+        Scene.setUniform(shadowShader, "nub_model", model());
       }
     });
-    // */
     scene.togglePerspective();
     scene.setRadius(max(w, h) / 3);
     scene.fit(1);
@@ -107,9 +107,12 @@ public class ShadowMappingTutorial extends PApplet {
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
+    //discard Processing matrices
+    resetMatrix();
+
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
-    //shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
+    //shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
     shader(shadowShader);
     noStroke();
   }
