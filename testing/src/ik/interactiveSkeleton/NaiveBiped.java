@@ -4,8 +4,11 @@ import frames.core.Frame;
 import frames.core.Graph;
 import frames.core.constraint.BallAndSocket;
 import frames.core.constraint.Hinge;
+import frames.ik.CCDSolver;
 import frames.ik.ChainSolver;
 import frames.ik.FABRIKSolver;
+import frames.ik.Solver;
+import frames.ik.evolution.BioIk;
 import frames.primitives.Vector;
 import frames.processing.Scene;
 import frames.timing.TimingTask;
@@ -21,25 +24,25 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
+    public enum IKMode{ BIOIK, FABRIK, CCD};
 
     Scene scene;
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 5;
+    int segments = 12;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
         size(700, 700, P3D);
     }
-    Joint root;
 
     //DEBUGGING VARS
     boolean debug = false;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
-    ArrayList<ChainSolver> solvers = new ArrayList<>();
+    ArrayList<Solver> solvers = new ArrayList<>();
 
     public void setup(){
         FABRIKSolver.debug = debug;
@@ -48,19 +51,10 @@ public class NaiveBiped extends PApplet {
         scene.setRadius(segments * 2 * boneLength);
         scene.fit(1);
 
-        Frame reference = new Frame(scene);
+        //createStructure(scene, segments, boneLength, radius, color(255,0,0), new Vector(-boneLength*3, 0,0), IKMode.BIOIK);
+        //createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(boneLength*1, 0,0), IKMode.CCD);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
 
-        //1. Create reference Frame
-        root = new Joint(scene, color(255,0,0), radius);
-        root.setRoot(true);
-        root.setReference(reference);
-
-        //2. Create Limbs & IK Solver
-        solvers.add(createLimb(scene, segments, boneLength, radius, color(100), root, new Vector(-boneLength,0,0)));
-        solvers.add(createLimb(scene, segments, boneLength, radius, color(100), root, new Vector(boneLength,0,0)));
-
-        //3. Create walking cycle
-        if(!debug)createBipedCycle(scene, root, solvers.get(0), solvers.get(1));
     }
 
     public void draw(){
@@ -69,7 +63,9 @@ public class NaiveBiped extends PApplet {
         scene.drawAxes();
         scene.render();
         if(debug){
-            for(ChainSolver s : solvers){
+            for(Solver solver : solvers){
+                if(!(solver instanceof ChainSolver)) continue;
+                ChainSolver s = (ChainSolver) solver;
                 if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
                     int last = s.iterationsHistory().size() - 1;
                     int prev = last > 0 ? last - 1 : 0;
@@ -86,8 +82,6 @@ public class NaiveBiped extends PApplet {
                         Util.drawPositions(scene.frontBuffer(), l, color(255, 0, 255, 50), 3);
                     }
                 }
-
-
             }
         }
     }
@@ -123,7 +117,7 @@ public class NaiveBiped extends PApplet {
         if(key == 'S' || key == 's') {
             solve = !solve;
         }else if(key =='a' || key == 'A'){
-            for(ChainSolver s : solvers){
+            for(Solver s : solvers){
                 s.solve();
             }
         }else {
@@ -135,42 +129,80 @@ public class NaiveBiped extends PApplet {
         }
     }
 
-    public ChainSolver addIKbehavior(Scene scene, ArrayList<Frame> limb, Frame target){
-        ChainSolver chainSolver = new ChainSolver(limb);
+    public Solver addIKbehavior(Scene scene, ArrayList<Frame> limb, Frame target, IKMode mode){
+        Solver solver;
+        switch (mode){
+            case CCD:{
+                solver = new CCDSolver(limb);
+                ((CCDSolver)solver).setTarget(target);
+                break;
+            }
+            case FABRIK:{
+                solver = new ChainSolver(limb);
+                //chainSolver.setFixTwisting(false);
+                //chainSolver.maxIter = 5;
+                //chainSolver.setDirectionWeight(0.5f);
+                //chainSolver.explore(false);
+                ((ChainSolver)solver).setTarget(target);
+                ((ChainSolver)solver).setTargetDirection(new Vector(0, 0, 1));
+                break;
+            }
+            case BIOIK:{
+                solver = new BioIk(limb, 10,4);
+                solver.setTarget(limb.get(limb.size() - 1), target);
+                break;
+            }
+            default:{
+                return null;
+            }
+        }
+
+        solver.error = 1f;
+        if (!debug) solver.timesPerFrame = 5;
+        else solver.timesPerFrame = 1;
+        target.setPosition(limb.get(limb.size() - 1).position());
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
-                if(solve) chainSolver.solve();
+                if (solve) solver.solve();
             }
         };
-        chainSolver.error = 1f;
-        if(!debug) chainSolver.timesPerFrame = 5;
-        else chainSolver.timesPerFrame = 1;
-        //chainSolver.setFixTwisting(false);
-        //chainSolver.maxIter = 5;
-        //chainSolver.setDirectionWeight(0.5f);
-        //chainSolver.explore(false);
-
-
-
-        target.setPosition(limb.get(limb.size() - 1).position());
-
-        chainSolver.setTarget(target);
-        chainSolver.setTargetDirection(new Vector(0,0,1));
-
         scene.registerTask(task);
         task.run(20);
-        return chainSolver;
+        return solver;
     }
 
-
-    public ChainSolver createLimb(Scene scene, int segments, float length, float radius, int color, Frame reference, Vector translation){
+    public Frame createTarget(Scene scene){
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
-        Frame target = new Frame(scene, ball);
-        target.setReference(reference.reference());
+        return new Frame(scene, ball);
+    }
 
+    public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode){
+        Frame reference = new Frame(scene);
+        reference.translate(translation);
+
+        //1. Create reference Frame
+        Joint root = new Joint(scene, color(255,0,0), radius);
+        root.setRoot(true);
+        root.setReference(reference);
+
+        //2. Create Targets, Limbs & Solvers
+        Frame target1 = createTarget(scene);
+        Frame target2 = createTarget(scene);
+
+        solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
+        solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
+
+        //3. Create walking cycle
+        if(!debug)createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
+
+    }
+
+
+    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Frame reference, Frame target, Vector translation, IKMode mode){
+        target.setReference(reference.reference());
         ArrayList<Frame> joints = new ArrayList<>();
         Joint root = new Joint(scene, color, radius);
         root.setReference(reference);
@@ -200,12 +232,12 @@ public class NaiveBiped extends PApplet {
         joints.add(low);
         root.translate(translation);
         root.setConstraint(new Hinge(radians(60), radians(60), root.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0)));
-        return addIKbehavior(scene, joints, target);
+        return addIKbehavior(scene, joints, target, mode);
     }
 
 
 
-    public void createBipedCycle(Scene scene, Frame root, ChainSolver leg1, ChainSolver leg2){
+    public void createBipedCycle(Scene scene, Frame root, Solver leg1, Solver leg2, Frame target1, Frame target2){
         //Create Walking Cycle
         Cycle cycle = new Cycle(scene);
         //Create Steps
@@ -219,15 +251,14 @@ public class NaiveBiped extends PApplet {
             @Override
             public void start() {
                 angle = 0;
-                initial = leg1.target().translation().get();
+                initial = target1.translation();
             }
 
             @Override
             public void execute(){
-                Frame target = leg1.target();
                 //Follow a sin trajectory
                 float y = stepHeight * sin(radians(angle));
-                target.setTranslation(new Vector(initial.x(), initial.y() - y, initial.z() + w*angle));
+                target1.setTranslation(new Vector(initial.x(), initial.y() - y, initial.z() + w*angle));
                 angle +=  step;
             }
 
@@ -277,15 +308,14 @@ public class NaiveBiped extends PApplet {
             @Override
             public void start() {
                 angle = 0;
-                initial = leg2.target().translation().get();
+                initial = target2.translation().get();
             }
 
             @Override
             public void execute(){
-                Frame target = leg2.target();
                 //Follow a sin trajectory
                 float y = stepHeight * sin(radians(angle));
-                target.setTranslation(new Vector(initial.x(), initial.y() - y, initial.z() + w*angle));
+                target2.setTranslation(new Vector(initial.x(), initial.y() - y, initial.z() + w*angle));
                 angle +=  step;
             }
 
