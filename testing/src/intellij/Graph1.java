@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
-import frames.primitives.Vector;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Point;
+import nub.primitives.Vector;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
@@ -18,19 +18,19 @@ public class Graph1 extends PApplet {
   PShader framesShader;
   Matrix pmv;
   PMatrix3D pmatrix = new PMatrix3D();
-  Frame[] frames;
+  Node[] nodes;
 
   public void settings() {
     size(800, 800, P3D);
   }
 
   public void setup() {
-    graph = new Graph(width, height);
+    graph = new Graph(g, width, height);
     graph.fit(1);
-    framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
-    frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++)
-      frames[i] = Frame.random(new Vector(), 100, g.is3D());
+    framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
+    nodes = new Node[50];
+    for (int i = 0; i < nodes.length; i++)
+      nodes[i] = Node.random(new Vector(), 100, g.is3D());
     //discard Processing matrices
     resetMatrix();
   }
@@ -38,20 +38,20 @@ public class Graph1 extends PApplet {
   public void draw() {
     graph.preDraw();
     background(0);
-    for (int i = 0; i < frames.length; i++) {
-      graph.matrixHandler().pushModelView();
-      graph.matrixHandler().applyModelView(frames[i].matrix());
+    for (int i = 0; i < nodes.length; i++) {
+      graph.matrixHandler().pushMatrix();
+      graph.matrixHandler().applyMatrix(nodes[i].matrix());
       //model-view changed:
       setUniforms();
-      fill(0, frames[i].isTracked(graph) ? 0 : 255, 255);
+      fill(0, nodes[i].isTracked(graph) ? 0 : 255, 255);
       box(5);
-      graph.matrixHandler().popModelView();
+      graph.matrixHandler().popMatrix();
     }
   }
 
   @Override
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, frames);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {
@@ -71,9 +71,9 @@ public class Graph1 extends PApplet {
 // we need to update the shader:
   void setUniforms() {
     shader(framesShader);
-    pmv = Matrix.multiply(graph.matrixHandler().projection(), graph.matrixHandler().modelView());
+    pmv = Matrix.multiply(graph.matrixHandler().projection(), graph.matrixHandler().model());
     pmatrix.set(pmv.get(new float[16]));
-    framesShader.set("frames_transform", pmatrix);
+    framesShader.set("nub_transform", pmatrix);
   }
 
   public static void main(String args[]) {

@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class ShiftViewers extends PApplet {
   Scene scene1, scene2, scene3, focus;
-  Frame[] models;
+  Node[] models;
   boolean displayAuxiliarViewers = true;
   // whilst scene1 is either on-screen or not; scene2 and scene3 are off-screen
   // test both cases here
@@ -26,25 +26,24 @@ public class ShiftViewers extends PApplet {
   public void setup() {
     scene1 = onScreen ? new Scene(this) : new Scene(this, P3D);
     scene1.setRadius(1000);
-    // set a detached eye frame
-    scene1.setEye(new Frame());
+    // set a detached eye node
+    scene1.setEye(new Node());
     scene1.fit(1);
-    models = new Frame[5];
+    models = new Node[5];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        //models[i] = new Frame(scene1, boxShape());
-        models[i] = new Frame(scene1);
-        models[i].shape(boxShape());
+        //models[i] = new Node(scene1, boxShape());
+        models[i] = new Node(scene1);
+        models[i].setShape(boxShape());
       } else {
-        models[i] = new Frame(scene1) {
+        models[i] = new Node(scene1) {
           int _faces = (int) ShiftViewers.this.random(3, 15), _color = color(ShiftViewers.this.random(255), ShiftViewers.this.random(255), ShiftViewers.this.random(255));
           @Override
-          public boolean graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
-            scene1.drawTorusSolenoid(pg, _faces, scene1.radius() / 30);
+            Scene.drawTorusSolenoid(pg, _faces, scene1.radius() / 30);
             pg.popStyle();
-            return true;
           }
         };
       }
@@ -55,15 +54,15 @@ public class ShiftViewers extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, P3D, w / 2, h / 2, w / 2, 0);
     scene2.setRadius(1000);
-    // set a detached eye frame
-    scene2.setEye(new Frame());
+    // set a detached eye node
+    scene2.setEye(new Node());
     scene2.fit(1);
 
     // idem here
     scene3 = new Scene(this, P3D, w / 2, h / 2, w / 2, h / 2);
     scene3.setRadius(1000);
-    // set a detached eye frame
-    scene3.setEye(new Frame());
+    // set a detached eye node
+    scene3.setEye(new Node());
     scene3.fit(1);
   }
 
@@ -124,7 +123,7 @@ public class ShiftViewers extends PApplet {
 
     if (scene1.isOffscreen()) {
       scene1.beginDraw();
-      scene1.frontBuffer().background(75, 25, 15);
+      scene1.context().background(75, 25, 15);
       scene1.drawAxes();
       scene1.render();
       scene1.endDraw();
@@ -139,7 +138,7 @@ public class ShiftViewers extends PApplet {
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene2.beginDraw();
-      scene2.frontBuffer().background(175, 200, 20);
+      scene2.context().background(175, 200, 20);
       scene2.drawAxes();
       scene2.render();
       scene2.endDraw();
@@ -151,7 +150,7 @@ public class ShiftViewers extends PApplet {
       if (!scene1.isOffscreen())
         scene1.beginHUD();
       scene3.beginDraw();
-      scene3.frontBuffer().background(125, 80, 90);
+      scene3.context().background(125, 80, 90);
       scene3.drawAxes();
       scene3.render();
       scene3.endDraw();
@@ -163,7 +162,7 @@ public class ShiftViewers extends PApplet {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ShiftViewers"});
   }
 }

@@ -1,8 +1,8 @@
 package ik.collada.colladaParser.colladaLoader;
 
-import frames.core.Frame;
-import frames.primitives.Matrix;
-import frames.primitives.Quaternion;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Quaternion;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.common.Joint;
@@ -43,7 +43,7 @@ public class SkeletonLoader {
         float[] matrixData = convertData(matrixRawData);
         Matrix mat = new Matrix(matrixData);
         Joint joint = new Joint(model.getScene());
-        Frame frame = joint;
+        Node frame = joint;
         if(parent != null) frame.setReference(parent);
         frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
         frame.setRotation(new Quaternion(mat));

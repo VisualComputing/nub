@@ -1,11 +1,11 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Point;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Point;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -17,8 +17,8 @@ import java.util.List;
 public class AuxiliaryViews extends PApplet {
 
     Scene scene;
-    Frame[] shapes;
-    Frame light;
+    Node[] shapes;
+    Node light;
     int w = 1000;
     int h = 1000;
     List<AuxiliaryView> views;
@@ -30,37 +30,36 @@ public class AuxiliaryViews extends PApplet {
     public void setup() {
         scene = new Scene(this);
         scene.setRadius(max(w, h));
-        shapes = new Frame[20];
+        shapes = new Node[20];
         for (int i = 0; i < shapes.length; i++) {
-            shapes[i] = new Frame(scene, caja());
+            shapes[i] = new Node(scene, caja());
             shapes[i].setPickingThreshold(0);
             shapes[i].randomize();
         }
-        light = new Frame(scene) {
+        light = new Node(scene) {
             @Override
-            public boolean graphics(PGraphics pg) {
+            public void graphics(PGraphics pg) {
                 pg.pushStyle();
                 Scene.drawAxes(pg, 150);
                 pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
                 //Scene.drawEye(pg, views.get(0)._pGraphics, views.get(0)._type, this, views.get(0)._zNear, views.get(0)._zFar);
                 pg.popStyle();
-                return true;
             }
         };
         scene.fit(1);
         //create an auxiliary view per Orthogonal Plane
         views = new ArrayList<AuxiliaryView>();
         //create an auxiliary view to look at the XY Plane
-        Frame eyeXY = new Frame();
+        Node eyeXY = new Node();
         eyeXY.setPosition(0, 0, scene.radius());
         views.add(new AuxiliaryView(scene, eyeXY, 0, 2*h/3, w/3, h/3));
         //create an auxiliary view to look at the XY Plane
-        Frame eyeXZ = new Frame();
+        Node eyeXZ = new Node();
         eyeXZ.setPosition(0, scene.radius(), 0);
         eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
         views.add(new AuxiliaryView(scene, eyeXZ, w/3, 2*h/3, w/3, h/3));
         //create an auxiliary view to look at the XY Plane
-        Frame eyeYZ = new Frame();
+        Node eyeYZ = new Node();
         eyeYZ.setPosition(scene.radius(), 0, 0);
         eyeYZ.setOrientation(new Quaternion(new Vector(0,1,0), HALF_PI));
         views.add(new AuxiliaryView(scene, eyeYZ, 2*w/3, 2*h/3, w/3, h/3));
@@ -70,7 +69,6 @@ public class AuxiliaryViews extends PApplet {
     public void draw() {
         background(90, 80, 125);
         scene.render();
-        setBackBuffer(mouseX, mouseY);
         //Drawing back buffer
         /*
         scene.beginHUD();
@@ -81,20 +79,6 @@ public class AuxiliaryViews extends PApplet {
         for(AuxiliaryView view : views) {
             view.draw();
             view.display();
-        }
-    }
-
-    public void setBackBuffer(float x, float y){
-        for(AuxiliaryView view : views){
-            //check bounds
-            if(view.focus(x,y)){
-                scene.backBuffer().beginDraw();
-                scene.backBuffer().background(0);
-                scene.render(view.scene().backBuffer(), view.type(), view.eye(), view.zNear(), view.zFar());
-                scene.backBuffer().endDraw();
-                scene.backBuffer().loadPixels();
-                return;
-            }
         }
     }
 
@@ -124,7 +108,7 @@ public class AuxiliaryViews extends PApplet {
         AuxiliaryView current = currentView(mouseX, mouseY);
         Point previous = current == null ? new Point(pmouseX, pmouseY) : current.cursorLocation(pmouseX, pmouseY);
         Point point = current == null ? new Point(mouseX, mouseY) : current.cursorLocation(mouseX, mouseY);
-        Frame eye = scene.eye();
+        Node eye = scene.eye();
         Graph.Type type = scene.type();
         if(current != null){
             scene.setEye(current.eye());

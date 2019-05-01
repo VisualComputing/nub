@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
@@ -10,14 +10,14 @@ import processing.event.MouseEvent;
 
 public class ApplicationControl3 extends PApplet {
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
   PFont font36;
   int totalShapes;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ApplicationControl3"});
   }
 
@@ -29,17 +29,17 @@ public class ApplicationControl3 extends PApplet {
     scene = new Scene(this);
     scene.setFOV(PI / 3);
     scene.fit(1);
-    shapes = new Frame[10];
+    shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene) {
+      shapes[i] = new Node(scene) {
         int id = totalShapes++;
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
-          scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
+          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
           scene.beginHUD(pg);
           Vector position = scene.screenLocation(position());
           pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -47,7 +47,6 @@ public class ApplicationControl3 extends PApplet {
           pg.text(id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
-          return true;
         }
 
         @Override
@@ -90,9 +89,9 @@ public class ApplicationControl3 extends PApplet {
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedFrame(shapes[value]);
+      scene.setTrackedNode(shapes[value]);
     if (key == ' ')
-      scene.resetTrackedFrame();
+      scene.resetTrackedNode();
     if (key == CODED)
       if (keyCode == UP)
         scene.translate(0, -10);

@@ -1,9 +1,9 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 class Boid {
   Scene scene;
   PApplet pApplet;
-  public Frame frame;
+  public Node node;
   // fields
   Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
   // a vector datatype
@@ -28,9 +28,9 @@ class Boid {
     pApplet = scene.pApplet();
     position = new Vector();
     position.set(inPos);
-    frame = new Frame(scene) {
+    node = new Node(scene) {
       // Note that within visit() geometry is defined at the
-      // frame local coordinate system.
+      // node local coordinate system.
       @Override
       public void visit() {
         if (Flock.animate)
@@ -38,7 +38,7 @@ class Boid {
       }
 
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
 
         // uncomment to draw boid axes
@@ -49,14 +49,14 @@ class Boid {
         pg.fill(pApplet.color(0, 255, 0, 125));
 
         // highlight boids under the mouse
-        if (scene.trackedFrame("mouseMoved") == frame) {
+        if (scene.trackedNode("mouseMoved") == node) {
           pg.stroke(pg.color(0, 0, 255));
           pg.fill(pg.color(0, 0, 255));
-          pApplet.println("highlighted @" + pApplet.frameCount);
+          PApplet.println("highlighted @" + pApplet.frameCount);
         }
 
         // highlight avatar
-        if (frame == Flock.avatar) {
+        if (node == Flock.avatar) {
           pg.stroke(pg.color(255, 0, 0));
           pg.fill(pg.color(255, 0, 0));
         }
@@ -81,10 +81,9 @@ class Boid {
         pg.endShape();
 
         pg.popStyle();
-        return true;
       }
     };
-    frame.setPosition(new Vector(position.x(), position.y(), position.z()));
+    node.setPosition(new Vector(position.x(), position.y(), position.z()));
     velocity = new Vector(pApplet.random(-1, 1), pApplet.random(-1, 1), pApplet.random(1, -1));
     acceleration = new Vector(0, 0, 0);
     neighborhoodRadius = 100;
@@ -170,8 +169,8 @@ class Boid {
     velocity.limit(maxSpeed); // make sure the velocity vector magnitude does not
     // exceed maxSpeed
     position.add(velocity); // add velocity to position
-    frame.setPosition(position);
-    frame.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-velocity.z(), velocity.x())),
+    node.setPosition(position);
+    node.setRotation(Quaternion.multiply(new Quaternion(new Vector(0, 1, 0), PApplet.atan2(-velocity.z(), velocity.x())),
         new Quaternion(new Vector(0, 0, 1), PApplet.asin(velocity.y() / velocity.magnitude()))));
     acceleration.multiply(0); // reset acceleration
   }

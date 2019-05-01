@@ -1,19 +1,19 @@
 package ik.mocap;
 
-import frames.core.Graph;
-import frames.core.Frame;
-import frames.core.constraint.Hinge;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.FABRIKSolver;
-import frames.ik.Solver;
-import frames.ik.evolution.BioIk;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.FixedConstraint;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.core.constraint.Hinge;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.FABRIKSolver;
+import nub.ik.Solver;
+import nub.ik.evolution.BioIk;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.FixedConstraint;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -32,11 +32,11 @@ public class Viewer extends PApplet{
     String path = "/testing/data/bvh/mocap.bvh";
 
     BVHParser parser;
-    HashMap<String, Frame> originalLimbs = new HashMap<String, Frame>();
-    HashMap<String,Frame> limbs = new HashMap<String, Frame>();
-    HashMap<String,Frame> targets = new HashMap<String, Frame>();
+    HashMap<String, Node> originalLimbs = new HashMap<String, Node>();
+    HashMap<String,Node> limbs = new HashMap<String, Node>();
+    HashMap<String,Node> targets = new HashMap<String, Node>();
 
-    Frame root, rootIK;
+    Node root, rootIK;
 
     CCDSolver ccd_solver;
     ChainSolver chain_solver;
@@ -138,15 +138,15 @@ public class Viewer extends PApplet{
 
         //Adding constraints
         //CHEST  [ 45.6711, 116.072105, -16.3786 ] -> B & S - NECK  [ 46.18769, 145.8957, -9.860168 ]
-        Frame chest = limbs.get("CHEST");
-        Frame neck = limbs.get("NECK");
+        Node chest = limbs.get("CHEST");
+        Node neck = limbs.get("NECK");
         BallAndSocket chestConstraint = new BallAndSocket(radians(45), radians(45));
         chestConstraint.setRestRotation(chest.rotation().get(), neck.translation().get(), new Vector(1,0,0));
         chest.setConstraint(chestConstraint);
 
         //LEFTUPARM  [ 29.100441, 145.6254, -13.055123 ]
-        Frame LUArm= limbs.get("LEFTUPARM");
-        Frame LLArm = limbs.get("LEFTLOWARM");
+        Node LUArm= limbs.get("LEFTUPARM");
+        Node LLArm = limbs.get("LEFTLOWARM");
         BallAndSocket LUArmConstraint = new BallAndSocket(radians(85), radians(85));
         LUArmConstraint.setRestRotation(LUArm.rotation().get(), new Vector(0,1,0), new Vector(1,0,0),  LLArm.translation().get());
         LUArmConstraint.setTwistLimits(radians(70), radians(90));
@@ -158,8 +158,8 @@ public class Viewer extends PApplet{
         LLArm.setConstraint(LLArmConstraint);
 
         //RIGTHUPARM  [ 29.100441, 145.6254, -13.055123 ]
-        Frame RUArm= limbs.get("RIGHTUPARM");
-        Frame RLArm = limbs.get("RIGHTLOWARM");
+        Node RUArm= limbs.get("RIGHTUPARM");
+        Node RLArm = limbs.get("RIGHTLOWARM");
         BallAndSocket RUArmConstraint = new BallAndSocket(radians(85), radians(85));
         RUArmConstraint.setRestRotation(RUArm.rotation().get(), new Vector(0,1,0), new Vector(-1,0,0),  RLArm.translation().get());
         RUArmConstraint.setTwistLimits(radians(70), radians(90));
@@ -172,8 +172,8 @@ public class Viewer extends PApplet{
 
 
         //LEFTUPLEG  [ 54.6711, 101.23, -16.3786 ] - > B&S
-        Frame LULeg = limbs.get("LEFTUPLEG");
-        Frame LLLeg = limbs.get("LEFTLOWLEG");
+        Node LULeg = limbs.get("LEFTUPLEG");
+        Node LLLeg = limbs.get("LEFTLOWLEG");
         BallAndSocket LULegConstraint = new BallAndSocket(radians(50), radians(50));
         LULegConstraint.setRestRotation(LULeg.rotation().get(), new Vector(1,0,0), LLLeg.translation().get());
         LULegConstraint.setTwistLimits(radians(10), radians(10));
@@ -184,8 +184,8 @@ public class Viewer extends PApplet{
 
 
         //RIGHTUPLEG  [ 37.2461, 49.798904, -12.47683 ]
-        Frame RULeg = limbs.get("RIGHTUPLEG");
-        Frame RLLeg = limbs.get("RIGHTLOWLEG");
+        Node RULeg = limbs.get("RIGHTUPLEG");
+        Node RLLeg = limbs.get("RIGHTLOWLEG");
         BallAndSocket RULegConstraint = new BallAndSocket(radians(50), radians(50));
         RULegConstraint.setRestRotation(RULeg.rotation().get(), new Vector(1,0,0), RLLeg.translation().get());
         RULegConstraint.setTwistLimits(radians(10), radians(10));
@@ -195,8 +195,8 @@ public class Viewer extends PApplet{
         RLLeg.setConstraint(RLLegConstraint);
 
         for(int i = 0; i < target_names.length; i++){
-            List<Frame> fr = new ArrayList<>();
-            for(Frame f : scene.branch(limbs.get(head_names[i]))){
+            List<Node> fr = new ArrayList<>();
+            for(Node f : scene.branch(limbs.get(head_names[i]))){
                 fr.add(f);
             }
 
@@ -234,11 +234,11 @@ public class Viewer extends PApplet{
         //root.cull(true);
     }
 
-    public Frame createTarget(float radius){
+    public Node createTarget(float radius){
         PShape redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        Frame target = new Frame(scene, redBall);
+        Node target = new Node(scene, redBall);
         target.setPickingThreshold(0);
         return target;
     }
@@ -293,12 +293,12 @@ public class Viewer extends PApplet{
         }
     }
 
-    public Frame copy(List<Frame> branch) {
-        ArrayList<Frame> copy = new ArrayList<Frame>();
-        Frame reference = branch.get(0).reference();
-        HashMap<Integer, Frame> map = new HashMap<Integer, Frame>();
+    public Node copy(List<Node> branch) {
+        ArrayList<Node> copy = new ArrayList<Node>();
+        Node reference = branch.get(0).reference();
+        HashMap<Integer, Node> map = new HashMap<Integer, Node>();
         map.put(branch.get(0).id(), reference);
-        for (Frame joint : branch) {
+        for (Node joint : branch) {
             Joint newJoint = new Joint(scene);
             newJoint.setReference(map.get(joint.id()));
             newJoint.setPosition(joint.position().get());
@@ -306,10 +306,10 @@ public class Viewer extends PApplet{
             newJoint.setConstraint(joint.constraint());
             copy.add(newJoint);
             //it's no too efficient but it is just executed once
-            for (Frame child : joint.children()) {
+            for (Node child : joint.children()) {
                 if(joint.children().size() > 1) {
                     //add a new joint per child
-                    Frame dummy = new Frame(scene);
+                    Node dummy = new Node(scene);
                     dummy.setReference(newJoint);
                     dummy.setConstraint(newJoint.constraint());
                     dummy.setPosition(newJoint.position().get());
@@ -351,7 +351,7 @@ public class Viewer extends PApplet{
 
     public void updateTargets() {
         rootIK.setPosition(root.position());
-        for (Map.Entry<String, Frame> entry : originalLimbs.entrySet()) {
+        for (Map.Entry<String, Node> entry : originalLimbs.entrySet()) {
             if(targets.containsKey(entry.getKey())) {
                 targets.get(entry.getKey()).setPosition(entry.getValue().position());
             }

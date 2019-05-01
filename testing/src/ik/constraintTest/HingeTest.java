@@ -1,19 +1,19 @@
 package ik.constraintTest;
 
 
-import frames.core.Graph;
-import frames.core.Frame;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.FABRIKSolver;
-import frames.ik.Solver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.FABRIKSolver;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -35,7 +35,7 @@ public class HingeTest extends PApplet {
     Scene scene;
     ArrayList<CCDSolver> ccdSolvers = new ArrayList<CCDSolver>();
     ArrayList<ChainSolver> chainSolvers = new ArrayList<ChainSolver>();
-    ArrayList<Frame> targets = new ArrayList<Frame>();
+    ArrayList<Node> targets = new ArrayList<Node>();
 
     public void settings() {
         size(700, 700, P3D);
@@ -53,7 +53,7 @@ public class HingeTest extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < 5; i++) {
-            Frame target = new Frame(scene, redBall);
+            Node target = new Node(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -61,8 +61,8 @@ public class HingeTest extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        ArrayList<Frame> branchHingeConstraint = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
-        ArrayList<Frame> branchHingeConstraintCCD = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+        ArrayList<Node> branchHingeConstraint = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
+        ArrayList<Node> branchHingeConstraintCCD = generateChain(numJoints, boneLength, new Vector(-scene.radius(), -scene.radius(), 0));
 
         for (int i = 0; i < branchHingeConstraint.size() - 1; i++) {
             Vector vector = Vector.projectVectorOnPlane(new Vector(0, 1, 0), branchHingeConstraint.get(i + 1).translation());
@@ -73,14 +73,14 @@ public class HingeTest extends PApplet {
             }
         }
 
-        ArrayList<Frame> structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
+        ArrayList<Node> structure1 = generateStructure(boneLength,new Vector(-boneLength,0,0));
         chainSolvers.add(new ChainSolver(structure1));
 
-        ArrayList<Frame> structure2 = generateStructure(boneLength,new Vector(0,0,0));
+        ArrayList<Node> structure2 = generateStructure(boneLength,new Vector(0,0,0));
         ccdSolvers.add(new CCDSolver(structure2));
         ccdSolvers.add(new CCDSolver(branchHingeConstraintCCD));
 
-        ArrayList<Frame> structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
+        ArrayList<Node> structure3 = generateStructure(boneLength,new Vector(boneLength,0,0));
         chainSolvers.add(new ChainSolver(structure3));
         chainSolvers.add(new ChainSolver(branchHingeConstraint));
 
@@ -130,12 +130,12 @@ public class HingeTest extends PApplet {
         scene.render();
     }
 
-    public void setConstraint(Frame f, Vector up, Vector twist){
+    public void setConstraint(Node f, Vector up, Vector twist){
         Hinge constraint = new Hinge(radians(45), radians(45),f.rotation().get(), up, twist.get());
         f.setConstraint(constraint);
     }
 
-    public ArrayList<Frame> generateStructure(float boneLength, Vector o){
+    public ArrayList<Node> generateStructure(float boneLength, Vector o){
         Joint prev = new Joint(scene);
         Joint current = prev;
         Joint root = current;
@@ -162,7 +162,7 @@ public class HingeTest extends PApplet {
         return (ArrayList) scene.branch(root);
     }
 
-    public ArrayList<Frame> generateChain(int num_joints, float boneLength, Vector translation) {
+    public ArrayList<Node> generateChain(int num_joints, float boneLength, Vector translation) {
         Joint prevJoint = null;
         Joint chainRoot = null;
         for (int i = 0; i < num_joints; i++) {

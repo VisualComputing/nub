@@ -1,10 +1,10 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Point;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Point;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -60,18 +60,18 @@ public class InteractiveJoint extends Joint {
 
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
-    protected Vector _translateDesired(Scene scene, float dx, float dy, float dz, int zMax, Frame frame) {
+    protected Vector _translateDesired(Scene scene, float dx, float dy, float dz, int zMax, Node node) {
         if (scene.is2D() && dz != 0) {
             System.out.println("Warning: graph is 2D. Z-translation reset");
             dz = 0;
         }
-        dx = scene.isEye(frame) ? -dx : dx;
-        dy = scene.isRightHanded() ^ scene.isEye(frame) ? -dy : dy;
-        dz = scene.isEye(frame) ? dz : -dz;
+        dx = scene.isEye(node) ? -dx : dx;
+        dy = scene.isRightHanded() ^ scene.isEye(node) ? -dy : dy;
+        dz = scene.isEye(node) ? dz : -dz;
         // Scale to fit the screen relative vector displacement
         if (scene.type() == Graph.Type.PERSPECTIVE) {
             float k = (float) Math.tan(scene.fov() / 2.0f) * Math.abs(
-                    scene.eye().location(scene.isEye(frame) ? scene.anchor() : frame.position())._vector[2] * scene.eye().magnitude());
+                    scene.eye().location(scene.isEye(node) ? scene.anchor() : node.position())._vector[2] * scene.eye().magnitude());
             //TODO check me weird to find height instead of width working (may it has to do with fov?)
             dx *= 2.0 * k / (scene.height() * scene.eye().magnitude());
             dy *= 2.0 * k / (scene.height() *scene. eye().magnitude());
@@ -79,7 +79,7 @@ public class InteractiveJoint extends Joint {
         // this expresses the dz coordinate in world units:
         //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
         Vector eyeVector = new Vector(dx, dy, dz * 2 * scene.radius() / zMax);
-        return frame.reference() == null ? scene.eye().worldDisplacement(eyeVector) : frame.reference().displacement(eyeVector, scene.eye());
+        return node.reference() == null ? scene.eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, scene.eye());
     }
 
 

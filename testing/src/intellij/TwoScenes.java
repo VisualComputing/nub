@@ -1,16 +1,16 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
 
 public class TwoScenes extends PApplet {
   Scene scene1, scene2, focus;
-  Frame frame;
+  Node node;
   Vector vector;
 
   int w = 1200;
@@ -38,7 +38,9 @@ public class TwoScenes extends PApplet {
     scene2.setRadius(400);
     //scene2.fit(1);
     scene2.fit();
-    frame = new Frame();
+    node = new Node();
+    node.translate(50, 50, 30);
+    node.setPickingThreshold(10);
   }
 
   public void keyPressed() {
@@ -48,13 +50,13 @@ public class TwoScenes extends PApplet {
       println(scene1.zNear());
       vector = new Vector(0, 0, -scene1.zNear() / scene1.eye().magnitude());
       vector = scene1.eye().worldLocation(vector);
-      frame.setPosition(vector);
+      node.setPosition(vector);
     }
     if (key == 'b') {
       Vector zNear = new Vector(0, 0, scene1.zNear());
       Vector zFar = new Vector(0, 0, scene1.zFar());
       Vector zNear2ZFar = Vector.subtract(zFar, zNear);
-      scene1.translate(0, 0, zNear2ZFar.magnitude(), frame);
+      scene1.translate(0, 0, zNear2ZFar.magnitude(), node);
     }
     if (key == 'n')
       scene1.eye().setMagnitude(1);
@@ -95,15 +97,27 @@ public class TwoScenes extends PApplet {
         focus.align();
   }
 
-  void draw(PGraphics graphics) {
+  void draw(Scene scn) {
+    PGraphics graphics = scn.context();
     graphics.background(0);
     graphics.noStroke();
     graphics.fill(0, 255, 0);
     graphics.pushMatrix();
-    Scene.applyTransformation(graphics, frame);
-    //scene1.applyTransformation(frame);
+    applyTransformation(graphics, node);
     graphics.sphere(50);
     graphics.popMatrix();
+  }
+
+  public void applyTransformation(PGraphics pg, Node node) {
+    if (pg.is3D()) {
+      pg.translate(node.translation()._vector[0], node.translation()._vector[1], node.translation()._vector[2]);
+      pg.rotate(node.rotation().angle(), (node.rotation()).axis()._vector[0], (node.rotation()).axis()._vector[1], (node.rotation()).axis()._vector[2]);
+      pg.scale(node.scaling(), node.scaling(), node.scaling());
+    } else {
+      pg.translate(node.translation().x(), node.translation().y());
+      pg.rotate(node.rotation().angle2D());
+      pg.scale(node.scaling(), node.scaling());
+    }
   }
 
   void handleMouse() {
@@ -113,29 +127,29 @@ public class TwoScenes extends PApplet {
   public void draw() {
     handleMouse();
     scene1.beginDraw();
-    scene1.frontBuffer().background(0);
-    draw(scene1.frontBuffer());
+    scene1.context().background(0);
+    draw(scene1);
     scene1.drawAxes();
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
-    scene2.frontBuffer().background(0);
-    draw(scene2.frontBuffer());
+    scene2.context().background(0);
+    draw(scene2);
     scene2.drawAxes();
 
     // draw with axes
     //eye
-    scene2.frontBuffer().pushStyle();
-    scene2.frontBuffer().stroke(255, 255, 0);
-    scene2.frontBuffer().fill(255, 255, 0, 160);
+    scene2.context().pushStyle();
+    scene2.context().stroke(255, 255, 0);
+    scene2.context().fill(255, 255, 0, 160);
     scene2.drawFrustum(scene1);
-    scene2.frontBuffer().popStyle();
+    scene2.context().popStyle();
     //axes
-    scene2.frontBuffer().pushMatrix();
+    scene2.context().pushMatrix();
     scene2.applyTransformation(scene1.eye());
     scene2.drawAxes(60);
-    scene2.frontBuffer().popMatrix();
+    scene2.context().popMatrix();
 
     scene2.endDraw();
     scene2.display();

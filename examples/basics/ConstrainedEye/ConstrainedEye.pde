@@ -4,14 +4,14 @@
  *
  * This example illustrates how to add constraints to your eye
  * to limit its motion. Constraints can be defined respect to
- * the local, world or camera frames. Try all the possibilities
+ * the local, world or camera node. Try all the possibilities
  * following the on screen helping text.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.core.constraint.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.core.constraint.*;
+import nub.processing.*;
 
 Scene scene;
 PFont myFont;
@@ -34,7 +34,7 @@ void setup() {
 
   constraints[0] = new WorldConstraint();
   // Note that an EyeConstraint(eye) would produce the same results:
-  // An EyeConstraint is a LocalConstraint when applied to the camera frame !
+  // An EyeConstraint is a LocalConstraint when applied to the camera node !
   constraints[1] = new LocalConstraint();
   transDir = 0;
   rotDir = 0;

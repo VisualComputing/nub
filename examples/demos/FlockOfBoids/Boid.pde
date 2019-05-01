@@ -1,4 +1,4 @@
-class Boid extends Frame {
+class Boid extends Node {
   // fields
   Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
   // a vector datatype
@@ -26,7 +26,7 @@ class Boid extends Frame {
   }
 
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
 
     // uncomment to draw boid axes
@@ -37,7 +37,7 @@ class Boid extends Frame {
     pg.fill(color(0, 255, 0, 125));
 
     // highlight boids under the mouse
-    if (scene.trackedFrame("mouseMoved") == this) {
+    if (scene.trackedNode("mouseMoved") == this) {
       pg.stroke(color(0, 0, 255));
       pg.fill(color(0, 0, 255));
     }
@@ -68,7 +68,6 @@ class Boid extends Frame {
     pg.endShape();
 
     pg.popStyle();
-    return true;
   }
 
   public void run(ArrayList<Boid> bl) {

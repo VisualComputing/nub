@@ -1,12 +1,12 @@
 package ik.constraintTest;
 
-import frames.core.Frame;
-import frames.core.constraint.*;
-import frames.ik.ChainSolver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.constraint.*;
+import nub.ik.ChainSolver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
@@ -16,7 +16,7 @@ import processing.event.MouseEvent;
 import java.util.ArrayList;
 
 public class LuxoIK extends PApplet {
-    class Piece extends Frame {
+    class Piece extends Node {
         int mode;
 
         Piece(Scene scene) {
@@ -32,7 +32,7 @@ public class LuxoIK extends PApplet {
         }
 
         @Override
-        public boolean graphics(PGraphics pGraphics) {
+        public void graphics(PGraphics pGraphics) {
             switch (mode) {
                 case 1:
                     pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
@@ -65,8 +65,6 @@ public class LuxoIK extends PApplet {
             if (constraint() != null) {
                 scene.drawConstraint(pGraphics,this);
             }
-
-            return true;
         }
     }
 
@@ -82,7 +80,6 @@ public class LuxoIK extends PApplet {
             for (int i = 0; i < 4; ++i) {
                 pieces[i] = new Piece(scene);
                 frame(i).setReference(i > 0 ? pieces[i - 1] : null);
-                frame(i).setHighlighting(Frame.Highlighting.FRONT);
             }
 
             // Initialize frames
@@ -114,12 +111,12 @@ public class LuxoIK extends PApplet {
             headConstraint.setTranslationConstraint(AxisPlaneConstraint.Type.FORBIDDEN, new Vector(0.0f, 0.0f, 0.0f));
             frame(3).setConstraint(new Constraint() {
                 @Override
-                public Vector constrainTranslation(Vector translation, Frame frame) {
+                public Vector constrainTranslation(Vector translation, Node frame) {
                     return new Vector();
                 }
 
                 @Override
-                public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+                public Quaternion constrainRotation(Quaternion rotation, Node frame) {
                     return rotation;
                 }
             });
@@ -146,13 +143,13 @@ public class LuxoIK extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        Frame target = new Frame(scene, redBall);
+        Node target = new Node(scene, redBall);
         target.setPickingThreshold(0);
 
         lamp = new Lamp(scene);
         target.setPosition(lamp.frame(3).position());
 
-        ChainSolver solver = new ChainSolver( (ArrayList<? extends Frame>) scene.branch(lamp.frame(0)));
+        ChainSolver solver = new ChainSolver( (ArrayList<? extends Node>) scene.branch(lamp.frame(0)));
         solver.setTarget(target);
         solver.setKeepDirection(true);
         solver.setFixTwisting(true);

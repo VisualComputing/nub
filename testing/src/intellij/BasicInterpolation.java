@@ -1,9 +1,9 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.Interpolator;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
@@ -35,7 +35,7 @@ public class BasicInterpolation extends PApplet {
     interpolator.setLoop();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(Frame.random(scene));
+      interpolator.addKeyFrame(Node.random(scene));
     interpolator.start();
   }
 
@@ -49,10 +49,10 @@ public class BasicInterpolation extends PApplet {
 
     pushStyle();
     fill(255, 0, 0, 125);
-    scene.matrixHandler().pushModelView();
-    scene.applyTransformation(interpolator.frame());
+    scene.matrixHandler().pushMatrix();
+    scene.applyTransformation(interpolator.node());
     box(50);
-    scene.matrixHandler().popModelView();
+    scene.matrixHandler().popMatrix();
     popStyle();
   }
 

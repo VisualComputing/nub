@@ -1,8 +1,8 @@
 package ik.collada.colladaParser.colladaLoader;
 
-import frames.core.Frame;
-import frames.primitives.Matrix;
-import frames.primitives.Quaternion;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Quaternion;
 import ik.collada.animation.Animation;
 import ik.collada.animation.KeyFrame;
 import ik.collada.colladaParser.xmlParser.XmlNode;
@@ -75,7 +75,7 @@ public class AnimationLoader {
                 matrixData[j] = Float.parseFloat(rawData[i*16 + j]);
             }
             Matrix mat = new Matrix(matrixData);
-            Frame frame = new Frame();
+            Node frame = new Node();
             frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
             frame.setRotation(new Quaternion(mat));
             keyFrames[i].getPose().put(jointName, frame);

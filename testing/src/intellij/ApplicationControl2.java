@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
@@ -10,14 +10,14 @@ import processing.event.MouseEvent;
 
 public class ApplicationControl2 extends PApplet {
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
   PFont font36;
   int totalShapes;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ApplicationControl2"});
   }
 
@@ -28,17 +28,17 @@ public class ApplicationControl2 extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Frame[10];
+    shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene) {
+      shapes[i] = new Node(scene) {
         int id = totalShapes++;
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
-          scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
+          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
           scene.beginHUD(pg);
           Vector position = scene.screenLocation(position());
           pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -46,7 +46,6 @@ public class ApplicationControl2 extends PApplet {
           pg.text(id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
-          return true;
         }
 
         @Override
@@ -87,19 +86,19 @@ public class ApplicationControl2 extends PApplet {
   }
 
   void control(String hid, Object... gesture) {
-    control(scene.defaultFrame(hid), gesture);
+    control(scene.defaultNode(hid), gesture);
   }
 
-  void control(Frame frame, Object... gesture) {
-    frame.interact(gesture);
+  void control(Node node, Object... gesture) {
+    node.interact(gesture);
   }
 
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedFrame("hid", shapes[value]);
+      scene.setTrackedNode("hid", shapes[value]);
     if (key == ' ')
-      scene.resetTrackedFrame("hid");
+      scene.resetTrackedNode("hid");
     if (key == CODED)
       if (keyCode == UP)
         scene.translate("hid", 0, -10);

@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -25,9 +25,9 @@ public class MouseMoveInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Frame shape1 = new Frame(scene) {
+    Node shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -36,21 +36,20 @@ public class MouseMoveInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
-        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175, -275);
 
-    Frame shape2 = new Frame(shape1);
-    shape2.shape(shape());
+    Node shape2 = new Node(shape1);
+    shape2.setShape(shape());
     shape2.translate(275, 275, 275);
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
-    // render scene frames (shapes simply get drawn)
+    // render scene nodes (shapes simply get drawn)
     scene.render();
   }
 
@@ -68,7 +67,7 @@ public class MouseMoveInteraction extends PApplet {
   public void mouseMoved(MouseEvent event) {
     if (event.isShiftDown())
       scene.translate();
-    else if (lookAround && scene.trackedFrame() == null)
+    else if (lookAround && scene.trackedNode() == null)
       scene.lookAround();
     else
       scene.spin();
@@ -97,7 +96,7 @@ public class MouseMoveInteraction extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MouseMoveInteraction"});
   }
 }

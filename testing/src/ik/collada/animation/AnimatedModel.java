@@ -1,7 +1,7 @@
 package ik.collada.animation;
 
-import frames.core.Frame;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PShape;
@@ -20,14 +20,14 @@ public class AnimatedModel {
     private Scene scene;
 
     // skeleton
-    private Frame rootJoint;
-    private HashMap<String, Frame> joints;
+    private Node rootJoint;
+    private HashMap<String, Node> joints;
     private HashMap<Integer, Integer> idxs; //Frame idx - Data idx
     private int jointCount;
 
     private Animator animator;
 
-    public void setRootJoint(Frame root){
+    public void setRootJoint(Node root){
         this.rootJoint = root;
     }
 
@@ -35,7 +35,7 @@ public class AnimatedModel {
         this.jointCount = jointCount;
     }
 
-    public HashMap<String, Frame> getJoints(){
+    public HashMap<String, Node> getJoints(){
         return joints;
     }
 
@@ -44,12 +44,12 @@ public class AnimatedModel {
     }
 
     public AnimatedModel(Scene scene){
-        joints = new HashMap<String, Frame>();
+        joints = new HashMap<String, Node>();
         idxs = new HashMap<Integer, Integer>();
         this.scene = scene;
     }
 
-    public AnimatedModel(PShape model, PImage texture, HashMap<String, Frame> joints, Frame rootJoint) {
+    public AnimatedModel(PShape model, PImage texture, HashMap<String, Node> joints, Node rootJoint) {
         this.model = model;
         this.texture = texture;
         this.rootJoint = rootJoint;
@@ -83,7 +83,7 @@ public class AnimatedModel {
      *         and every other joint in the skeleton is a descendant of this
      *         joint.
      */
-    public Frame getRootJoint() {
+    public Node getRootJoint() {
         return rootJoint;
     }
 
@@ -116,15 +116,15 @@ public class AnimatedModel {
      * @return The array of model-space transforms of the joints in the current
      *         animation pose.
      */
-    public Frame[] getJointTransforms() {
-        Frame[] jointMatrices = new Frame[jointCount];
+    public Node[] getJointTransforms() {
+        Node[] jointMatrices = new Node[jointCount];
         addJointsToArray(rootJoint, jointMatrices);
         return jointMatrices;
     }
 
-    public void addJointsToArray(Frame frame, Frame[] jointMatrices){
+    public void addJointsToArray(Node frame, Node[] jointMatrices){
         jointMatrices[idxs.get(frame.id())]  = frame;
-        for(Frame child : frame.children()){
+        for(Node child : frame.children()){
             addJointsToArray(child, jointMatrices);
         }
     }

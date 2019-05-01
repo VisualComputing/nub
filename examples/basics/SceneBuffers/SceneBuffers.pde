@@ -8,12 +8,12 @@
  * The back buffer is used to pick them.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
-Frame[] shapes;
+Node[] shapes;
 
 //Choose one of P3D for a 3D scene or P2D for a 2D one.
 String renderer = P3D;
@@ -26,13 +26,14 @@ void settings() {
 
 void setup() {
   rectMode(CENTER);
-  scene = new Scene(this, createGraphics(w, h / 2, renderer));
+  // same as: scene = new Scene(this, createGraphics(w, h / 2, renderer));
+  scene = new Scene(this, renderer, w, h /2);
   scene.setRadius(max(w, h));
 
-  shapes = new Frame[100];
+  shapes = new Node[100];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Frame(scene, caja());
-    // set picking precision to the pixels of the frame projection
+    shapes[i] = new Node(scene, caja());
+    // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
   }
@@ -42,12 +43,12 @@ void setup() {
 void draw() {
   // 1. Fill in and display front-buffer
   scene.beginDraw();
-  scene.frontBuffer().background(10,50,25);
+  scene.context().background(10,50,25);
   scene.render();
   scene.endDraw();
   scene.display();
   // 2. Display back buffer
-  image(scene.backBuffer(), 0, h / 2);
+  scene.displayBackBuffer(0, h / 2);
 }
 
 void mouseMoved() {

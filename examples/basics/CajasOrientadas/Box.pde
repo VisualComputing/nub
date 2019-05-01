@@ -1,4 +1,4 @@
-public class Box extends Frame {
+public class Box extends Node {
   float _w, _h, _d;
   int _color;
 
@@ -13,9 +13,9 @@ public class Box extends Frame {
   }
 
   // note that within render() geometry is defined
-  // at the frame local coordinate system
+  // at the node local coordinate system
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
     updateOrientation(esfera.position());
     if (drawAxes)
@@ -24,10 +24,9 @@ public class Box extends Frame {
     pg.fill(isTracked() ? color(255, 0, 0) : _color);
     pg.box(_w, _h, _d);
     pg.stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(this);
+    if (bullseye)
+      scene.drawBullsEye(this);
     pg.popStyle();
-    return true;
   }
 
   public void updateOrientation(Vector v) {

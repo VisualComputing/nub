@@ -1,18 +1,18 @@
 package ik.constraintTest;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.Solver;
-import frames.ik.animation.IKAnimation;
-import frames.ik.evolution.BioIk;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Hinge;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.Solver;
+import nub.ik.animation.IKAnimation;
+import nub.ik.evolution.BioIk;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -32,8 +32,8 @@ public class Case1 extends PApplet {
 
     //Benchmark Parameters
     ArrayList<Solver> solvers; //Will store Solvers
-    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
-    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+    ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
     int numSolvers = 7; //Set number of solvers
     boolean solve = false;
@@ -64,7 +64,7 @@ public class Case1 extends PApplet {
 
         //create targets
         for(int i = 0; i < numSolvers; i++) {
-            Frame target = new Frame(scene, redBall);
+            Node target = new Node(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -155,8 +155,8 @@ public class Case1 extends PApplet {
 
         if(displayAuxiliar) {
             auxiliar.beginDraw();
-            auxiliar.frontBuffer().lights();
-            auxiliar.frontBuffer().background(0);
+            auxiliar.context().lights();
+            auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
             if(FABRIKAnimator != null)  FABRIKAnimator.draw();
@@ -168,9 +168,9 @@ public class Case1 extends PApplet {
 
     }
 
-    public ArrayList<Frame> generateSkeleton(Vector position, int color){
+    public ArrayList<Node> generateSkeleton(Vector position, int color){
         //3-Segment-Arm
-        ArrayList<Frame> skeleton = new ArrayList<>();
+        ArrayList<Node> skeleton = new ArrayList<>();
         Joint j1 = new Joint(scene, color);
         Joint j2 = new Joint(scene, color);
         j2.setReference(j1);
@@ -207,8 +207,8 @@ public class Case1 extends PApplet {
         if (mouseButton == LEFT){
             focus.spin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(focus.trackedFrame())){
-                for(Frame t : targets) focus.translate(t);
+            if(targets.contains(focus.trackedNode())){
+                for(Node t : targets) focus.translate(t);
             } else {
                 focus.translate();
             }

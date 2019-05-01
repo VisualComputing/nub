@@ -1,8 +1,8 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.primitives.Point;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Point;
+import nub.processing.Scene;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class MultipleViews {
 
     public MultipleViews(Scene scene) {
         _scene = scene;
-        _defaultView = new AuxiliaryView(_scene, new Frame(_scene.eye().position(), _scene.eye().orientation(), _scene.eye().magnitude()), 0,0, scene.width(), scene.height());
+        _defaultView = new AuxiliaryView(_scene, new Node(_scene.eye().position(), _scene.eye().orientation(), _scene.eye().magnitude()), 0,0, scene.width(), scene.height());
         _currentView = _defaultView;
         _auxiliaryViews = new ArrayList<>();
     }
@@ -49,16 +49,7 @@ public class MultipleViews {
 
     }
 
-    public void setBackBuffer(){
-        _scene.backBuffer().beginDraw();
-        _scene.backBuffer().background(0);
-        _scene.render(_currentView.scene().backBuffer(), _currentView.type(), _currentView.eye(), _currentView.zNear(), _currentView.zFar());
-        _scene.backBuffer().endDraw();
-        _scene.backBuffer().loadPixels();
-    }
-
     protected void draw(){
-        setBackBuffer();
         //InteractiveJoint.setPGraphics(_defaultView._pGraphics);
         //_defaultView.draw();
         for(AuxiliaryView view : _auxiliaryViews) {

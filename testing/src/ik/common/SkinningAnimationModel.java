@@ -1,8 +1,8 @@
 package ik.common;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 import ik.collada.animation.AnimatedModel;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -36,7 +36,7 @@ public class SkinningAnimationModel {
     }
 
     public void initParams() {
-        Frame[] skeleton = model.getJointTransforms();
+        Node[] skeleton = model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
             //TODO : IF there is a reference frame not null
             Vector v = skeleton[i].position();
@@ -53,7 +53,7 @@ public class SkinningAnimationModel {
 
     public void updateParams() {
         //TODO: IT COULD BE DONE WITH LESS OPERATIONS
-        Frame[] skeleton = model.getJointTransforms();
+        Node[] skeleton = model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
             Vector v = Vector.subtract(skeleton[i].position(), bonePos[i]);
             Quaternion q = Quaternion.compose(skeleton[i].orientation(), boneQuat[i].inverse());

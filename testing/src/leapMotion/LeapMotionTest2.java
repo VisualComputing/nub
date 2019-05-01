@@ -1,10 +1,10 @@
 package leapMotion;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import de.voidplus.leapmotion.*;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -18,12 +18,12 @@ import java.util.HashMap;
  * Created by sebchaparr on 31/07/18.
  */
 public class LeapMotionTest2 extends PApplet {
-    HashMap<String, Frame> fingers;
+    HashMap<String, Node> fingers;
 
     LeapMotion leap;
     PVector[] previousPosition = new PVector[10];
 
-    Frame index, index_w;
+    Node index, index_w;
 
     // frames stuff:
     Scene scene;
@@ -38,20 +38,20 @@ public class LeapMotionTest2 extends PApplet {
         scene.setRadius(1500);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fit(1);
-        Frame[] shapes = new Frame[10];
+        Node[] shapes = new Node[10];
         for (int i = 0; i < shapes.length; i++) {
             if(i == i)break;
-            shapes[i] = new Frame(scene, shape());
+            shapes[i] = new Node(scene, shape());
             shapes[i].setPosition( (i*1.f/shapes.length)*scene.radius()*2 - scene.radius(),0,0);
             shapes[i].setPickingThreshold(0);
-            scene.setTrackedFrame("LEAP"+i, shapes[i]);
+            scene.setTrackedNode("LEAP"+i, shapes[i]);
         }
         smooth();
         setupLeapMotion();
-        index = new Frame(scene, shape());
+        index = new Node(scene, shape());
         index.setTranslation(10,10,10);
         index.setPickingThreshold(0);
-        index_w = new Frame(scene, shape());
+        index_w = new Node(scene, shape());
         index_w.setTranslation(-10,-10,-10);
         index_w.setPickingThreshold(0);
     }
@@ -96,7 +96,7 @@ public class LeapMotionTest2 extends PApplet {
     }
 
     void updateFinger(String name, Finger finger){
-        Frame frame = fingers.get(name);
+        Node frame = fingers.get(name);
         frame.setPosition(worldLocation(finger.getRawPositionOfJointMcp()));
         frame = frame.reference();
         frame.setPosition(worldLocation(finger.getRawPositionOfJointPip()));
@@ -185,7 +185,7 @@ public class LeapMotionTest2 extends PApplet {
             previousPosition[i] = position;
             delta.z *= min(height, width)/50.f;
 
-            if(scene.trackedFrame("LEAP" + i) != null )scene.translate("LEAP" + i,delta.x, delta.y, delta.z);
+            if(scene.trackedNode("LEAP" + i) != null )scene.translate("LEAP" + i,delta.x, delta.y, delta.z);
             i++;
         }
     }

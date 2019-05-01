@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.MatrixHandler;
-import frames.primitives.Point;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.MatrixHandler;
+import nub.core.Node;
+import nub.primitives.Point;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
@@ -15,20 +15,20 @@ import processing.opengl.PShader;
  */
 public class Graph5 extends PApplet {
   Graph graph;
-  Frame[] frames;
+  Node[] nodes;
 
   public void settings() {
     size(800, 800, P3D);
   }
 
   public void setup() {
-    graph = new Graph(width, height);
-    GLSLMatrixHandler mh = new GLSLMatrixHandler(graph.width(), graph.height());
+    graph = new Graph(g, width, height);
+    GLSLMatrixHandler mh = new GLSLMatrixHandler();
     graph.setMatrixHandler(mh);
     graph.fit(1);
-    frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame(graph) {
+    nodes = new Node[50];
+    for (int i = 0; i < nodes.length; i++) {
+      nodes[i] = new Node(graph) {
         @Override
         public void visit() {
           pushStyle();
@@ -37,7 +37,7 @@ public class Graph5 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize();
+      nodes[i].randomize();
     }
     //discard Processing matrices
     resetMatrix();
@@ -54,7 +54,7 @@ public class Graph5 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, frames);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {
@@ -78,19 +78,18 @@ public class Graph5 extends PApplet {
     PShader framesShader;
     PMatrix3D pmatrix = new PMatrix3D();
 
-    public GLSLMatrixHandler(int width, int height) {
-      super(width, height);
-      framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
+    public GLSLMatrixHandler() {
+      framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
     }
 
     @Override
     protected void _setUniforms() {
       shader(framesShader);
       // same as:
-      //pmatrix.set(Scene.toPMatrix(projectionModelView()));
+      //pmatrix.set(Scene.toPMatrix(transform()));
       //pmatrix.transpose();
-      pmatrix.set(projectionModelView().get(new float[16]));
-      framesShader.set("frames_transform", pmatrix);
+      pmatrix.set(transform().get(new float[16]));
+      framesShader.set("nub_transform", pmatrix);
     }
   }
 }

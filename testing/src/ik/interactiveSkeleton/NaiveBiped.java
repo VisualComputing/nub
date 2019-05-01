@@ -1,17 +1,17 @@
 package ik.interactiveSkeleton;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Hinge;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.FABRIKSolver;
-import frames.ik.Solver;
-import frames.ik.evolution.BioIk;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Hinge;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.FABRIKSolver;
+import nub.ik.Solver;
+import nub.ik.evolution.BioIk;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -69,17 +69,17 @@ public class NaiveBiped extends PApplet {
                 if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
                     int last = s.iterationsHistory().size() - 1;
                     int prev = last > 0 ? last - 1 : 0;
-                    Util.drawPositions(scene.frontBuffer(), s.iterationsHistory().get(prev), color(0, 255, 0), 3);
-                    Util.drawPositions(scene.frontBuffer(), s.iterationsHistory().get(last), color(255, 0, 0), 3);
+                    Util.drawPositions(scene.context(), s.iterationsHistory().get(prev), color(0, 255, 0), 3);
+                    Util.drawPositions(scene.context(), s.iterationsHistory().get(last), color(255, 0, 0), 3);
                 }
                 if(s.divergeHistory() != null && !s.divergeHistory().isEmpty() && show[1]) {
                     for (ArrayList<Vector> l : s.divergeHistory()) {
-                        Util.drawPositions(scene.frontBuffer(), l, color(255, 255, 0, 50), 3);
+                        Util.drawPositions(scene.context(), l, color(255, 255, 0, 50), 3);
                     }
                 }
                 if(s.avoidHistory() != null && !s.avoidHistory().isEmpty() && show[2]) {
                     for (ArrayList<Vector> l : s.avoidHistory()) {
-                        Util.drawPositions(scene.frontBuffer(), l, color(255, 0, 255, 50), 3);
+                        Util.drawPositions(scene.context(), l, color(255, 0, 255, 50), 3);
                     }
                 }
             }
@@ -129,7 +129,7 @@ public class NaiveBiped extends PApplet {
         }
     }
 
-    public Solver addIKbehavior(Scene scene, ArrayList<Frame> limb, Frame target, IKMode mode){
+    public Solver addIKbehavior(Scene scene, ArrayList<Node> limb, Node target, IKMode mode){
         Solver solver;
         switch (mode){
             case CCD:{
@@ -172,15 +172,15 @@ public class NaiveBiped extends PApplet {
         return solver;
     }
 
-    public Frame createTarget(Scene scene, float radius){
+    public Node createTarget(Scene scene, float radius){
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
-        return new Frame(scene, ball);
+        return new Node(scene, ball);
     }
 
     public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode){
-        Frame reference = new Frame(scene);
+        Node reference = new Node(scene);
         reference.translate(translation);
 
         //1. Create reference Frame
@@ -189,8 +189,8 @@ public class NaiveBiped extends PApplet {
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
-        Frame target1 = createTarget(scene, radius*1.2f);
-        Frame target2 = createTarget(scene, radius*1.2f);
+        Node target1 = createTarget(scene, radius*1.2f);
+        Node target2 = createTarget(scene, radius*1.2f);
 
         solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
         solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
@@ -201,9 +201,9 @@ public class NaiveBiped extends PApplet {
     }
 
 
-    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Frame reference, Frame target, Vector translation, IKMode mode){
+    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode){
         target.setReference(reference.reference());
-        ArrayList<Frame> joints = new ArrayList<>();
+        ArrayList<Node> joints = new ArrayList<>();
         Joint root = new Joint(scene, color, radius);
         root.setReference(reference);
         joints.add(root);
@@ -237,7 +237,7 @@ public class NaiveBiped extends PApplet {
 
 
 
-    public void createBipedCycle(Scene scene, Frame root, Solver leg1, Solver leg2, Frame target1, Frame target2){
+    public void createBipedCycle(Scene scene, Node root, Solver leg1, Solver leg2, Node target1, Node target2){
         //Create Walking Cycle
         Cycle cycle = new Cycle(scene);
         //Create Steps

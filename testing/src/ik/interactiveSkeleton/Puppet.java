@@ -4,17 +4,17 @@ package ik.interactiveSkeleton;
  * Created by sebchaparr on 17/07/18.
  */
 
-import frames.core.Graph;
-import frames.core.Interpolator;
-import frames.core.Frame;
-import frames.ik.CCDSolver;
-import frames.ik.Solver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.core.Node;
+import nub.ik.CCDSolver;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -27,7 +27,7 @@ public class Puppet extends PApplet {
     //TODO : Update
     Scene scene;
     HashMap<String, ArrayList<Joint>> limbs;
-    HashMap<String, Frame> targets;
+    HashMap<String, Node> targets;
     String[] keys = {"LeftArm", "RightArm", "LeftFoot", "RightFoot"};
     float boneLenght = 50;
     float targetRadius = 7;
@@ -53,7 +53,7 @@ public class Puppet extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            Frame target = new Frame(scene, redBall);
+            Node target = new Node(scene, redBall);
             target.setPickingThreshold(0);
             targets.put(key, target);
         }
@@ -169,11 +169,11 @@ public class Puppet extends PApplet {
     }
 
     public void keyPressed(){
-        Frame f = scene.trackedFrame();
+        Node f = scene.trackedNode();
         if(f == null) return;
         Hinge c = f.constraint() instanceof Hinge ? (Hinge) f.constraint() : null;
         if(c == null) return;
-        scene.trackedFrame().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
+        scene.trackedNode().rotate(new Quaternion( c.orientation().rotate(new Vector(0,0,1)), radians(5)));
 
     }
 

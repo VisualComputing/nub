@@ -1,6 +1,6 @@
 package ik.collada.colladaParser.colladaLoader;
 
-import frames.processing.Scene;
+import nub.processing.Scene;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.animation.Animation;
 import ik.collada.animation.Mesh;
@@ -28,7 +28,7 @@ public class ColladaLoader {
 
         GeometryLoader g = new GeometryLoader(node.getChild("library_geometries"), skinningData.verticesSkinData);
         Mesh meshData = g.extractModelData();
-        model.setModel(meshData.generatePShape(scene.frontBuffer(), colladaFile + tex));
+        model.setModel(meshData.generatePShape(scene.context(), colladaFile + tex));
         return model;
     }
 

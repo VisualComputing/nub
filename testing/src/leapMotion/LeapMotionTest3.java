@@ -1,10 +1,10 @@
 package leapMotion;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import de.voidplus.leapmotion.*;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -38,9 +38,9 @@ public class LeapMotionTest3 extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.fit(1);
         center = new PVector();
-        Frame[] shapes = new Frame[50];
+        Node[] shapes = new Node[50];
         for (int i = 0; i < shapes.length; i++) {
-            shapes[i] = new Frame(scene, shape());
+            shapes[i] = new Node(scene, shape());
             shapes[i].setPickingThreshold(0);
             scene.randomize(shapes[i]);
             shapes[i].setRotation(new Quaternion());

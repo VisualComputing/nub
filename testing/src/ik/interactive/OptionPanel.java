@@ -1,11 +1,11 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 
 import processing.core.PApplet;
 import processing.core.PConstants;
@@ -16,7 +16,7 @@ import java.util.List;
 public class OptionPanel {
 
     protected Scene _scene;
-    protected Frame _frame;
+    protected Node _frame;
     protected List<Slider> _frameSliders = new ArrayList<>();
 
     public OptionPanel(PApplet pApplet, float x, float y, int width, int height){
@@ -25,7 +25,7 @@ public class OptionPanel {
         setupPanel();
     }
 
-    public void setFrame(Frame frame){
+    public void setFrame(Node frame){
         _frame = frame;
         updateFrameOptions();
     }

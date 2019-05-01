@@ -1,14 +1,14 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 public class SceneBuffers extends PApplet {
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
 
   //Choose one of P3D for a 3D scene or P2D for a 2D one.
   String renderer = P3D;
@@ -24,9 +24,9 @@ public class SceneBuffers extends PApplet {
     scene = new Scene(this, createGraphics(w, h / 2, renderer));
     scene.setRadius(max(w, h));
 
-    shapes = new Frame[100];
+    shapes = new Node[100];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene, caja());
+      shapes[i] = new Node(scene, caja());
       shapes[i].randomize();
       shapes[i].setPickingThreshold(0);
     }
@@ -36,12 +36,12 @@ public class SceneBuffers extends PApplet {
   public void draw() {
     // 1. Fill in and display front-buffer
     scene.beginDraw();
-    scene.frontBuffer().background(10,50,25);
+    scene.context().background(10, 50, 25);
     scene.render();
     scene.endDraw();
     scene.display();
     // 2. Display back buffer
-    image(scene.backBuffer(), 0, h / 2);
+    scene.displayBackBuffer(0, h / 2);
   }
 
   public void mouseMoved() {

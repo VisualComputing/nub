@@ -13,14 +13,14 @@
  * Press 'l' to load the eye previously saved.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 PShader depthShader, dofShader;
 PGraphics depthPGraphics, dofPGraphics;
 Scene scene;
-Frame[] models;
+Node[] models;
 int mode = 2;
 
 void setup() {
@@ -30,11 +30,11 @@ void setup() {
   scene.setRadius(1000);
   scene.fit(1);
 
-  models = new Frame[100];
+  models = new Node[100];
 
   for (int i = 0; i < models.length; i++) {
-    models[i] = new Frame(scene, boxShape());
-    // set picking precision to the pixels of the frame projection
+    models[i] = new Node(scene, boxShape());
+    // set picking precision to the pixels of the node projection
     models[i].setPickingThreshold(0);
     scene.randomize(models[i]);
   }
@@ -56,7 +56,7 @@ void setup() {
 void draw() {
   // 1. Draw into main buffer
   scene.beginDraw();
-  scene.frontBuffer().background(0);
+  scene.context().background(0);
   scene.render();
   scene.endDraw();
 
@@ -72,7 +72,7 @@ void draw() {
   dofPGraphics.beginDraw();
   dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
   dofShader.set("tDepth", depthPGraphics);
-  dofPGraphics.image(scene.frontBuffer(), 0, 0);
+  dofPGraphics.image(scene.context(), 0, 0);
   dofPGraphics.endDraw();
 
   // display one of the 3 buffers

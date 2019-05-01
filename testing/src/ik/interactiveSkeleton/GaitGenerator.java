@@ -1,13 +1,13 @@
 package ik.interactiveSkeleton;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.ik.Solver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -21,7 +21,7 @@ import processing.event.MouseEvent;
 public class GaitGenerator extends PApplet {
     //TODO : Update
     Scene scene;
-    Frame target;
+    Node target;
     float y_floor = 0;
 
     float boneLength = 50;
@@ -32,7 +32,7 @@ public class GaitGenerator extends PApplet {
         size(700, 700, P3D);
     }
 
-    Frame ref;
+    Node ref;
     public void setup() {
         Joint.deph = true;
         scene = new Scene(this);
@@ -42,7 +42,7 @@ public class GaitGenerator extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI / 4));
         scene.fit();
 
-        ref = new Frame(scene);
+        ref = new Node(scene);
         ref.setPickingThreshold(0.0001f);
         for(int k = 0; k < 15; k++) {
             PShape body = createShape(BOX, 90, boneLength, 5.2f * boneLength);
@@ -51,15 +51,15 @@ public class GaitGenerator extends PApplet {
             body.setShininess(10.0f);
 
             body.setFill(color(random(255), random(255), random(255)));
-            Frame com = new Frame(scene, body);
+            Node com = new Node(scene, body);
 
             com.setReference(ref);
             int n = 5;
             float x = random(0, 30) * 180;
             for (int i = 0; i < n; i++) {
-                Frame f1 = new Frame(scene, new Vector(-boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(), 1);
+                Node f1 = new Node(scene, new Vector(-boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(), 1);
                 f1.setReference(com);
-                Frame f2 = new Frame(scene, new Vector(boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(new Vector(0, 1, 0), PI), 1);
+                Node f2 = new Node(scene, new Vector(boneLength, 0, i * 5 * boneLength / n - boneLength * 10 / n), new Quaternion(new Vector(0, 1, 0), PI), 1);
                 f2.setReference(com);
                 leg(f1, i % 2 == 1, i % 2 == 1, x);
                 leg(f2, i % 2 == 1, i % 2 == 0, x);
@@ -77,8 +77,8 @@ public class GaitGenerator extends PApplet {
         //}
     }
 
-    public void leg(Frame reference, boolean mirror, boolean inv, float d){
-        Frame target = new Frame(scene);
+    public void leg(Node reference, boolean mirror, boolean inv, float d){
+        Node target = new Node(scene);
         target.setReference(reference);
 
         //Create a leg
@@ -155,7 +155,7 @@ public class GaitGenerator extends PApplet {
         box(2.5f*scene.radius(), scene.radius()*0.05f, 5f*scene.radius());
     }
 
-    public void updateTarget(float t, Vector o, Frame target, boolean mirror, boolean inv, float d){
+    public void updateTarget(float t, Vector o, Node target, boolean mirror, boolean inv, float d){
         t += d;
         float z = -boneLength/2.5f * cos(radians(t));
         z = mirror ? -z : z;

@@ -1,10 +1,10 @@
 package leapMotion;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import de.voidplus.leapmotion.*;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -30,9 +30,9 @@ public class LeapMotionTest1 extends PApplet {
         scene.setFOV(PI / 3);
         scene.setRadius(1500);
         scene.fit(1);
-        Frame[] shapes = new Frame[50];
+        Node[] shapes = new Node[50];
         for (int i = 0; i < shapes.length; i++) {
-            shapes[i] = new Frame(scene, shape());
+            shapes[i] = new Node(scene, shape());
             shapes[i].setPickingThreshold(0);
             scene.randomize(shapes[i]);
             shapes[i].setRotation(new Quaternion());
@@ -110,7 +110,7 @@ public class LeapMotionTest1 extends PApplet {
         previousPosition = position;
         delta.z *= min(height, width)/50.f;
 
-        if(scene.trackedFrame("LEAP") != null )scene.translate("LEAP",delta.x, delta.y, delta.z);
+        if(scene.trackedNode("LEAP") != null )scene.translate("LEAP",delta.x, delta.y, delta.z);
 
 
         //Rotation
@@ -142,7 +142,7 @@ public class LeapMotionTest1 extends PApplet {
         }
         Quaternion rotation = new Quaternion(previousNormal, normal);
         Quaternion quat = new Quaternion();
-        Frame frame =  scene.defaultFrame("LEAP");
+        Node frame =  scene.defaultNode("LEAP");
         if(frame.reference() != null){
             quat = frame.orientation().inverse();
         }

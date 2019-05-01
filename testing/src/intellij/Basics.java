@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 
@@ -11,7 +11,7 @@ import processing.core.PShape;
  */
 public class Basics extends PApplet {
   Scene scene;
-  Frame frame, shape;
+  Node node, shape;
 
   public void settings() {
     size(800, 800, P3D);
@@ -23,7 +23,7 @@ public class Basics extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    frame = new Frame(scene) {
+    node = new Node(scene) {
       @Override
       public void visit() {
         scene.drawAxes(scene.radius() / 3);
@@ -35,14 +35,14 @@ public class Basics extends PApplet {
         else
           rect(10, 10, 200, 200);
         stroke(255, 255, 0);
-        scene.drawShooterTarget(this);
+        scene.drawSquaredBullsEye(this);
         popStyle();
       }
     };
-    frame.setRotation(Quaternion.random());
-    //shape = new Frame(scene, shape());
-    shape = new Frame(scene);
-    shape.shape(shape());
+    node.setRotation(Quaternion.random());
+    //shape = new Node(scene, shape());
+    shape = new Node(scene);
+    shape.setShape(shape());
     shape.setRotation(Quaternion.random());
     shape.translate(275, 275, 275);
   }
@@ -71,7 +71,7 @@ public class Basics extends PApplet {
       scene.flip();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Basics"});
   }
 }

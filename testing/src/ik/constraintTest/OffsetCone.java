@@ -1,18 +1,18 @@
 package ik.constraintTest;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.FixedConstraint;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.Solver;
-import frames.ik.TreeSolver;
-import frames.ik.evolution.BioIk;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.FixedConstraint;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.Solver;
+import nub.ik.TreeSolver;
+import nub.ik.evolution.BioIk;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.basic.Util;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -38,8 +38,8 @@ public class OffsetCone extends PApplet {
     Scene scene;
     //Benchmark Parameters
     ArrayList<Solver> solvers; //Will store Solvers
-    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
-    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+    ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
     int numSolvers = 6; //Set number of solvers
     boolean solve = false;
@@ -140,8 +140,8 @@ public class OffsetCone extends PApplet {
 
     }
 
-    public ArrayList<Frame> createLimb(Vector position, int color){
-        ArrayList<Frame> limb = new ArrayList<>();
+    public ArrayList<Node> createLimb(Vector position, int color){
+        ArrayList<Node> limb = new ArrayList<>();
 
         //Create a simple limb
         Joint j1 = new Joint(scene, color, targetRadius * 0.7f);
@@ -185,8 +185,8 @@ public class OffsetCone extends PApplet {
         if (mouseButton == LEFT){
             scene.spin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(scene.trackedFrame())){
-                for(Frame target : targets) scene.translate(target);
+            if(targets.contains(scene.trackedNode())){
+                for(Node target : targets) scene.translate(target);
             }else{
                 scene.translate();
             }

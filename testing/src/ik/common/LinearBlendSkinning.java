@@ -1,7 +1,7 @@
 package ik.common;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
+import nub.core.Node;
+import nub.primitives.Vector;
 import processing.core.PShape;
 import processing.core.PVector;
 
@@ -14,10 +14,10 @@ import java.util.Map;
  */
 public class LinearBlendSkinning {
     public HashMap<PVector, Vertex> vertices;
-    public Frame reference = new Frame();
+    public Node reference = new Node();
     public PShape shape;
 
-    public LinearBlendSkinning(Frame reference, PShape shape) {
+    public LinearBlendSkinning(Node reference, PShape shape) {
         this.shape = shape;
         this.reference = reference;
     }
@@ -27,11 +27,11 @@ public class LinearBlendSkinning {
         ArrayList<Properties> properties;
 
         public class Properties {
-            Frame joint;
+            Node joint;
             Vector local;
             float weight;
 
-            public Properties(Frame joint, Vector local, float weight) {
+            public Properties(Node joint, Vector local, float weight) {
                 this.joint = joint;
                 this.weight = weight;
                 this.local = local;
@@ -69,13 +69,13 @@ public class LinearBlendSkinning {
             }
         }
 
-        public void addProperties(Frame joint, Vector local, float dist) {
+        public void addProperties(Node joint, Vector local, float dist) {
             properties.add(new Vertex.Properties(joint, local, dist));
         }
 
     }
 
-    public void setup(ArrayList<Frame> branch) {
+    public void setup(ArrayList<Node> branch) {
         vertices = new HashMap<PVector, Vertex>();
         for (int i = 0; i < shape.getChildCount(); i++) {
             PShape child = shape.getChild(i);
@@ -86,13 +86,13 @@ public class LinearBlendSkinning {
                     Vector position = new Vector(vector.x, vector.y, vector.z);
                     float total_dist = 0.f;
                     float max_dist = -999;
-                    for (Frame joint : branch) {
+                    for (Node joint : branch) {
                         if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
                         float dist = getDistance(position, joint, reference);
                         max_dist = dist > max_dist ? dist : max_dist;
                     }
 
-                    for (Frame joint : branch) {
+                    for (Node joint : branch) {
                         if (joint == branch.get(0)) continue;
                         if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
                         float dist = getDistance(position, joint, reference);
@@ -129,7 +129,7 @@ public class LinearBlendSkinning {
      * Distance will be measure according to root coordinates.
      * In case of reference frame of frame is root, it will return distance from vertex to frame
      * */
-    public static float getDistance(Vector vertex, Frame frame, Frame root) {
+    public static float getDistance(Vector vertex, Node frame, Node root) {
         if (frame == null) return 9999;
         Vector position = root.location(frame.position());
         Vector parentPosition = root.location(frame.reference().position());

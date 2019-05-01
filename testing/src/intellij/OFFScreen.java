@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -10,7 +10,7 @@ import processing.event.MouseEvent;
 
 public class OFFScreen extends PApplet {
   Scene scene;
-  Frame shape1, shape2;
+  Node shape1, shape2;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
@@ -25,10 +25,10 @@ public class OFFScreen extends PApplet {
     scene.setRadius(300);
     scene.fit(1);
 
-    shape1 = new Frame(scene) {
+    shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
-        scene.drawAxes(pGraphics, scene.radius() / 3);
+      public void graphics(PGraphics pGraphics) {
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(255, 0, 255);
@@ -37,21 +37,20 @@ public class OFFScreen extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
-        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-55, -55, -55);
 
-    shape2 = new Frame(shape1);
-    shape2.shape(shape());
+    shape2 = new Node(shape1);
+    shape2.setShape(shape());
     shape2.translate(-55, -85, 135);
   }
 
   public void draw() {
     background(255);
     scene.beginDraw();
-    scene.frontBuffer().background(0);
+    scene.context().background(0);
     scene.drawAxes();
     scene.render();
     scene.endDraw();
@@ -100,7 +99,7 @@ public class OFFScreen extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.OFFScreen"});
   }
 }

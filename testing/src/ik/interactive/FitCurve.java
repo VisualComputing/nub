@@ -1,9 +1,9 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.Interpolator;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Interpolator;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PGraphics;
 
 import java.util.ArrayList;
@@ -307,34 +307,34 @@ public class FitCurve {
             Vector v = curve.evaluate(0);
             v.setZ(depth);
             v = scene.location(v);
-            Frame f = new Frame(scene);
+            Node f = new Node(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == 0) {
                 v = curve.evaluate(0.15f);
                 v.setZ(depth);
                 v = scene.location(v);
-                f = new Frame(scene);
+                f = new Node(scene);
                 f.setPosition(v);
                 _interpolator.addKeyFrame(f);
             }
             v = curve.evaluate(0.333f);
             v.setZ(depth);
             v = scene.location(v);
-            f = new Frame(scene);
+            f = new Node(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             v = curve.evaluate(0.666f);
             v.setZ(depth);
             v = scene.location(v);
-            f = new Frame(scene);
+            f = new Node(scene);
             f.setPosition(v);
             _interpolator.addKeyFrame(f);
             if(i == _curves.size() - 1) {
                 v = curve.evaluate(1);
                 v.setZ(depth);
                 v = scene.location(v);
-                f = new Frame(scene);
+                f = new Node(scene);
                 f.setPosition(v);
                 _interpolator.addKeyFrame(f);
             }

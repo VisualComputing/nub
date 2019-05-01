@@ -4,14 +4,14 @@ package ik.common;
  * Created by sebchaparr on 21/07/18.
  */
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.core.Node;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 
-public class Joint extends Frame{
+public class Joint extends Node {
     public static boolean deph = false;
     protected String _name;
     protected int _color;
@@ -26,7 +26,7 @@ public class Joint extends Frame{
         super(scene);
         _color = color;
         _radius = radius;
-        _pGraphics = scene.frontBuffer();
+        _pGraphics = scene.context();
         setPickingThreshold(_radius*2);
     }
 

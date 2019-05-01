@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -12,7 +12,7 @@ import processing.event.MouseEvent;
 public class GraphTypes extends PApplet {
   StdCamera scene;
   Scene auxScene, focus;
-  Frame boxFrame;
+  Node boxNode;
   PGraphics canvas, auxCanvas;
   boolean box, sphere;
 
@@ -43,8 +43,8 @@ public class GraphTypes extends PApplet {
     auxScene.setRadius(400);
     //scene2.fit(1);
     auxScene.fit();
-    boxFrame = new Frame(auxScene);
-    boxFrame.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
+    boxNode = new Node(auxScene);
+    boxNode.rotate(new Quaternion(new Vector(0, 1, 0), QUARTER_PI));
   }
 
   public void keyPressed() {
@@ -84,10 +84,10 @@ public class GraphTypes extends PApplet {
       //scene1.fit();
     }
     if (key == 'e')
-      if (auxScene.trackedFrame() == boxFrame)
-        auxScene.resetTrackedFrame();
+      if (auxScene.trackedNode() == boxNode)
+        auxScene.resetTrackedNode();
       else
-        auxScene.setTrackedFrame(boxFrame);
+        auxScene.setTrackedNode(boxNode);
     if (key == '+')
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')
@@ -98,7 +98,7 @@ public class GraphTypes extends PApplet {
     float z = Vector.scalarProjection(Vector.subtract(scene.eye().position(), scene.center()), scene.eye().zAxis()) - scene.zClippingCoefficient() * scene.radius();
     // Prevents negative or null zNear values.
     float zMin = scene.zNearCoefficient() * scene.zClippingCoefficient() * scene.radius();
-    return ("frames z: " + z + " frames zMin: " + zMin);
+    return ("nodes z: " + z + " nodes zMin: " + zMin);
   }
 
   public String version2() {
@@ -188,7 +188,7 @@ public class GraphTypes extends PApplet {
     if (box) {
       auxCanvas.pushStyle();
       auxCanvas.pushMatrix();
-      auxScene.applyTransformation(boxFrame);
+      auxScene.applyTransformation(boxNode);
       auxCanvas.fill(0, 255, 0, 160);
       auxCanvas.box(2 * scene.radius());
       auxCanvas.popMatrix();

@@ -1,8 +1,8 @@
 package ik.collada.animation;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 
 import java.util.Map;
 
@@ -71,7 +71,7 @@ public class Animator {
             return;
         }
         increaseAnimationTime(deltaTime);
-        Map<String, Frame> currentPose = calculateCurrentAnimationPose();
+        Map<String, Node> currentPose = calculateCurrentAnimationPose();
     }
 
     /**
@@ -106,7 +106,7 @@ public class Animator {
      *         for all the joints. The transforms are indexed by the name ID of
      *         the joint that they should be applied to.
      */
-    private Map<String, Frame> calculateCurrentAnimationPose() {
+    private Map<String, Node> calculateCurrentAnimationPose() {
         KeyFrame[] frames = getPreviousAndNextFrames();
         float progression = calculateProgression(frames[0], frames[1]);
         return interpolatePoses(frames[0], frames[1], progression);
@@ -171,13 +171,13 @@ public class Animator {
      *         current pose. They are returned in a map, indexed by the name of
      *         the joint to which they should be applied.
      */
-    private Map<String, Frame> interpolatePoses(KeyFrame previousFrame, KeyFrame nextFrame, float progression) {
-        Map<String, Frame> currentPose = entity.getJoints();
+    private Map<String, Node> interpolatePoses(KeyFrame previousFrame, KeyFrame nextFrame, float progression) {
+        Map<String, Node> currentPose = entity.getJoints();
         for (String jointName : previousFrame.getJointKeyFrames().keySet()) {
-            Frame previous = previousFrame.getJointKeyFrames().get(jointName);
-            Frame next = nextFrame.getJointKeyFrames().get(jointName);
+            Node previous = previousFrame.getJointKeyFrames().get(jointName);
+            Node next = nextFrame.getJointKeyFrames().get(jointName);
             //interpolate position
-            Frame frame = entity.getJoints().get(jointName);
+            Node frame = entity.getJoints().get(jointName);
             Vector translation = Vector.subtract(next.translation(), previous.translation());
             translation.multiply(progression);
             previous.translate(next.translation());

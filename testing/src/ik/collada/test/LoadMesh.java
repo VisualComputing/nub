@@ -1,14 +1,14 @@
 package ik.collada.test;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.Solver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.FixedConstraint;
+import nub.core.constraint.PlanarPolygon;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.colladaLoader.ColladaLoader;
 import ik.common.SkinningAnimationModel;
@@ -30,7 +30,7 @@ public class LoadMesh extends PApplet {
     AnimatedModel model;
     SkinningAnimationModel skinning;
 
-    ArrayList<Frame> targets = new ArrayList<Frame>();
+    ArrayList<Node> targets = new ArrayList<Node>();
 
     public void settings() {
         size(700, 700, P3D);
@@ -43,7 +43,7 @@ public class LoadMesh extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
         for(int i = 0; i < 5; i++){
-            Frame target = new Target(scene, 15f);
+            Node target = new Target(scene, 15f);
             target.setPickingThreshold(0);
             targets.add(target);
         }
@@ -58,11 +58,11 @@ public class LoadMesh extends PApplet {
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
 
         BallAndSocket chest_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
-        Frame chest = model.getJoints().get("Chest");
+        Node chest = model.getJoints().get("Chest");
         chest_constraint.setRestRotation(chest.rotation().get(), chest.displacement(new Vector(0, 1, 0)), chest.displacement(new Vector(0, 0, 1)));
 
         BallAndSocket arm_constraint = new BallAndSocket(radians(89), radians(89), radians(89), radians(89));
-        Frame arm = model.getJoints().get("Upper_Arm_R");
+        Node arm = model.getJoints().get("Upper_Arm_R");
         Quaternion rot = arm.rotation().get();
         //rot.compose(new Quaternion(arm.children().get(0).translation() , arm.displacement(new Vector(-1, 0, 0))));
         //arm_constraint.setRestRotation(rot, arm.displacement(new Vector(0, 1, 0)), arm.displacement(new Vector(-1, 0, 0)));
@@ -86,7 +86,7 @@ public class LoadMesh extends PApplet {
 
 
         BallAndSocket root_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
-        Frame root = model.getRootJoint();
+        Node root = model.getRootJoint();
         root_constraint.setRestRotation(root.rotation().get(), root.displacement(new Vector(0, 1, 0)), root.displacement(new Vector(0, 0, 1)));
 
         //model.getRootJoint().setConstraint(new FixedConstraint());

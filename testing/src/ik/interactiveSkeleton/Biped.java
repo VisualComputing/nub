@@ -1,14 +1,14 @@
 package ik.interactiveSkeleton;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.Solver;
-import frames.ik.TreeSolver;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.FixedConstraint;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.ik.Solver;
+import nub.ik.TreeSolver;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -24,7 +24,7 @@ public class Biped extends PApplet {
     //TODO : Update
     Scene scene;
     HashMap<String, ArrayList<Joint>> limbs;
-    HashMap<String, Frame> targets;
+    HashMap<String, Node> targets;
     String[] keys = {"LeftArm", "RightArm", "LeftFoot", "RightFoot"};
     float boneLength = 50;
     float targetRadius = 7;
@@ -49,7 +49,7 @@ public class Biped extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(String key : keys){
-            Frame target = new Frame(scene, redBall);
+            Node target = new Node(scene, redBall);
             target.setPickingThreshold(0);
             targets.put(key, target);
         }
@@ -97,11 +97,11 @@ public class Biped extends PApplet {
         popStyle();
     }
 
-    public void applyConstraint(Frame child, float boneLength){
+    public void applyConstraint(Node child, float boneLength){
         applyConstraint(child, boneLength, child.translation().get(), 40);
     }
 
-    public void applyConstraint(Frame child, float boneLength, Vector twist, float degrees){
+    public void applyConstraint(Node child, float boneLength, Vector twist, float degrees){
         //APPLY CONSTRAINTS
         ArrayList<Vector> vertices = new ArrayList<Vector>();
         int sides = 10;
@@ -119,7 +119,7 @@ public class Biped extends PApplet {
     }
 
 
-    public ArrayList<Joint> limb(Frame root, Vector origin, Vector direction, float boneLength, Vector hinge) {
+    public ArrayList<Joint> limb(Node root, Vector origin, Vector direction, float boneLength, Vector hinge) {
         ArrayList<Joint> skeleton = new ArrayList<Joint>();
         Vector bone = direction.normalize(null);
         bone.multiply(boneLength);

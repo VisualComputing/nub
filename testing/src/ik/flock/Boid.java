@@ -1,9 +1,9 @@
 package ik.flock;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 class Boid {
     Scene scene;
     PApplet pApplet;
-    public Frame frame;
+    public Node frame;
     // fields
     Vector position, velocity, acceleration, alignment, cohesion, separation; // position, velocity, and acceleration in
     // a vector datatype
@@ -24,12 +24,12 @@ class Boid {
     float flap = 0;
     float t = 0;
 
-    Boid(Scene scn, Frame objFrame, PShape pshape, Vector inPos, ArrayList<Boid> flock) {
+    Boid(Scene scn, Node objFrame, PShape pshape, Vector inPos, ArrayList<Boid> flock) {
         scene = scn;
         pApplet = scene.pApplet();
         position = new Vector();
         position.set(inPos);
-        frame = new Frame(scene) {
+        frame = new Node(scene) {
             // Note that within visit() geometry is defined at the
             // frame local coordinate system.
             @Override
@@ -163,7 +163,7 @@ class Boid {
         pApplet.fill(pApplet.color(0, 255, 0, 125));
 
         // highlight boids under the mouse
-        if (scene.trackedFrame("mouseMoved") == frame) {
+        if (scene.trackedNode("mouseMoved") == frame) {
             pApplet.stroke(pApplet.color(0, 0, 255));
             pApplet.fill(pApplet.color(0, 0, 255));
         }

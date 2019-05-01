@@ -1,19 +1,19 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.MatrixHandler;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Constraint;
-import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.Hinge;
-import frames.ik.Solver;
-import frames.ik.TreeSolver;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.MatrixHandler;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Constraint;
+import nub.core.constraint.FixedConstraint;
+import nub.core.constraint.Hinge;
+import nub.ik.Solver;
+import nub.ik.TreeSolver;
+import nub.primitives.Matrix;
+import nub.primitives.Point;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import net.java.games.input.Mouse;
 import processing.core.PApplet;
@@ -89,7 +89,7 @@ public class SkeletonBuilder extends PApplet{
         specular(255, 255, 255);
         shininess(10);
         //canvas1.stroke(255,0,0);
-        Joint.setPGraphics(scene.frontBuffer());
+        Joint.setPGraphics(scene.context());
         stroke(255);
         if(showGrid) scene.drawGrid();
         stroke(255,0,0);
@@ -169,7 +169,7 @@ public class SkeletonBuilder extends PApplet{
                 scene.drawPath(fitCurve._interpolator, 5);
 
         scene.beginHUD();
-        if(fitCurve != null) fitCurve.drawCurves(scene.frontBuffer());
+        if(fitCurve != null) fitCurve.drawCurves(scene.context());
         scene.endHUD();
         /*for(int i = 0; i < views.length; i++) {
             scene.shift(views[i]);
@@ -215,11 +215,11 @@ public class SkeletonBuilder extends PApplet{
     public void mouseDragged(MouseEvent event) {
         if (mouseButton == RIGHT && event.isControlDown()) {
             Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
-            if(focus.trackedFrame() != null)
-                if(focus.trackedFrame() instanceof  InteractiveJoint)
-                    focus.trackedFrame().interact("OnAdding", focus, vector);
+            if(focus.trackedNode() != null)
+                if(focus.trackedNode() instanceof  InteractiveJoint)
+                    focus.trackedNode().interact("OnAdding", focus, vector);
                 else
-                    focus.trackedFrame().interact("OnAdding", vector);
+                    focus.trackedNode().interact("OnAdding", vector);
         } else if (mouseButton == LEFT) {
             if(event.isControlDown() && fitCurve != null ){
                 if(fitCurve.started()) {
@@ -234,8 +234,8 @@ public class SkeletonBuilder extends PApplet{
             Target.multipleTranslate();
         } else if (mouseButton == CENTER){
             focus.scale(focus.mouseDX());
-        } else if(focus.trackedFrame() != null)
-            focus.trackedFrame().interact("Reset");
+        } else if(focus.trackedNode() != null)
+            focus.trackedNode().interact("Reset");
         //PANEL
         //else {
             //panel._scene.defaultFrame().interact();
@@ -244,7 +244,7 @@ public class SkeletonBuilder extends PApplet{
         //if(focus == scene && !Target.selectedTargets().contains(focus.trackedFrame())){
         //    Target.clearSelectedTargets();
         //}
-        if(!Target.selectedTargets().contains(focus.trackedFrame())){
+        if(!Target.selectedTargets().contains(focus.trackedNode())){
             Target.clearSelectedTargets();
         }
     }
@@ -274,16 +274,16 @@ public class SkeletonBuilder extends PApplet{
         //mouse = Vector.projectVectorOnPlane(mouse, scene.viewDirection());
         //mouse.add(scene.defaultFrame().position());
         Vector vector = new Vector(focus.mouse().x(), focus.mouse().y());
-        if(focus.trackedFrame() != null)
-            if(focus.trackedFrame() instanceof  InteractiveJoint)
-                focus.trackedFrame().interact("Add", scene, focus, vector);
+        if(focus.trackedNode() != null)
+            if(focus.trackedNode() instanceof  InteractiveJoint)
+                focus.trackedNode().interact("Add", scene, focus, vector);
             //else focus.trackedFrame().interact("Add", vector, false);
             else{
                 if(fitCurve != null){
                     fitCurve.setStarted(false);
                     fitCurve.getCatmullRomCurve(scene, 0);
                     fitCurve._interpolator.start();
-                    focus.trackedFrame().interact("AddCurve", fitCurve);
+                    focus.trackedNode().interact("AddCurve", fitCurve);
                 }
             }
         fitCurve = null;
@@ -299,14 +299,14 @@ public class SkeletonBuilder extends PApplet{
             if (event.getCount() == 1) {
                 //panel.setFrame(scene.trackedFrame());
                 if(event.isControlDown()){
-                    if(focus.trackedFrame() != null)
-                        focus.trackedFrame().interact("KeepSelected");
+                    if(focus.trackedNode() != null)
+                        focus.trackedNode().interact("KeepSelected");
                 }
             }
             else if (event.getCount() == 2) {
                 if (event.isShiftDown())
-                    if(scene.trackedFrame() != null)
-                        scene.trackedFrame().interact("Remove");
+                    if(scene.trackedNode() != null)
+                        scene.trackedNode().interact("Remove");
                 else
                     focus.focus();
             }
@@ -325,10 +325,10 @@ public class SkeletonBuilder extends PApplet{
             addTreeSolver();
         }
         if(key == 'C' || key == 'c'){
-            addConstraint(focus.trackedFrame(), false);
+            addConstraint(focus.trackedNode(), false);
         }
         if(key == 'H' || key == 'h'){
-            addConstraint(focus.trackedFrame(), true);
+            addConstraint(focus.trackedNode(), true);
         }
 
         if(key == 'S' || key == 's'){
@@ -402,17 +402,17 @@ public class SkeletonBuilder extends PApplet{
         }
     }
 
-    public void findEndEffectors(Frame frame, List<Frame> endEffectors){
+    public void findEndEffectors(Node frame, List<Node> endEffectors){
         if(frame.children().isEmpty()){
             endEffectors.add(frame);
             return;
         }
-        for(Frame child : frame.children()){
+        for(Node child : frame.children()){
             findEndEffectors(child, endEffectors);
         }
     }
 
-    public void addConstraint(Frame frame, boolean hinge){
+    public void addConstraint(Node frame, boolean hinge){
         //If has a child
         hinge = hinge || scene.is2D();
         if(frame == null) return;
@@ -437,13 +437,13 @@ public class SkeletonBuilder extends PApplet{
 
     TreeSolver solver;
     public void addTreeSolver(){
-        if(scene.trackedFrame() == null) return;
+        if(scene.trackedNode() == null) return;
         if(debug) {
-            solver = new TreeSolver(scene.trackedFrame());
+            solver = new TreeSolver(scene.trackedNode());
             solver.timesPerFrame = 1;
         } else {
-            if(scene.trackedFrame() != null) {
-                solver = scene.registerTreeSolver(scene.trackedFrame());
+            if(scene.trackedNode() != null) {
+                solver = scene.registerTreeSolver(scene.trackedNode());
                 solver.timesPerFrame = 1; //TODO : Allow more times
             }
         }
@@ -453,12 +453,12 @@ public class SkeletonBuilder extends PApplet{
 
         //add target
         //get leaf nodes
-        ArrayList<Frame> endEffectors = new ArrayList<Frame>();
-        findEndEffectors(focus.trackedFrame(), endEffectors);
-        for(Frame endEffector : endEffectors) {
+        ArrayList<Node> endEffectors = new ArrayList<Node>();
+        findEndEffectors(focus.trackedNode(), endEffectors);
+        for(Node endEffector : endEffectors) {
             endEffector.setPickingThreshold(0.00001f);
-            Target target = new Target(scene, ((Joint) scene.trackedFrame()).radius(), endEffector);
-            target.setReference(((Joint) scene.trackedFrame()).reference());
+            Target target = new Target(scene, ((Joint) scene.trackedNode()).radius(), endEffector);
+            target.setReference(((Joint) scene.trackedNode()).reference());
             //scene.addIKTarget(endEffector, target);
             solver.addTarget(endEffector, target);
             targets.add(target);
@@ -470,18 +470,18 @@ public class SkeletonBuilder extends PApplet{
         //Disable rotation
         Constraint constraint = new Constraint() {
             @Override
-            public Vector constrainTranslation(Vector translation, Frame frame) {
+            public Vector constrainTranslation(Vector translation, Node frame) {
                 return translation;
             }
 
             @Override
-            public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+            public Quaternion constrainRotation(Quaternion rotation, Node frame) {
                 return new Quaternion();
             }
         };
 
         Scene[] views = new Scene[3];
-        Frame eyeXY = new Frame();
+        Node eyeXY = new Node();
         eyeXY.scale(2f);
         eyeXY.setPosition(scene.eye().position());
         eyeXY.setOrientation(scene.eye().orientation());
@@ -491,7 +491,7 @@ public class SkeletonBuilder extends PApplet{
         views[0].setEye(eyeXY);
         views[0].setType(Graph.Type.ORTHOGRAPHIC);
         //create an auxiliary view to look at the XY Plane
-        Frame eyeXZ = new Frame();
+        Node eyeXZ = new Node();
         eyeXZ.scale(2f);
         eyeXZ.setPosition(0, scene.radius(), 0);
         eyeXZ.setOrientation(new Quaternion(new Vector(1,0,0), -HALF_PI));
@@ -501,7 +501,7 @@ public class SkeletonBuilder extends PApplet{
         views[1].setEye(eyeXZ);
         views[1].setType(Graph.Type.ORTHOGRAPHIC);
         //create an auxiliary view to look at the XY Plane
-        Frame eyeYZ = new Frame();
+        Node eyeYZ = new Node();
         //eyeYZ.setMagnitude(0.5f);
         eyeYZ.scale(2f);
         eyeYZ.setPosition(scene.radius(), 0, 0);

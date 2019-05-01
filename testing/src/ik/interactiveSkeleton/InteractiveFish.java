@@ -1,12 +1,12 @@
 package ik.interactiveSkeleton;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.Interpolator;
-import frames.ik.Solver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.Interpolator;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
@@ -24,14 +24,14 @@ public class InteractiveFish extends PApplet {
 
     boolean showSkeleton = false;
     Scene scene;
-    Frame shape;
-    Frame root;
+    Node shape;
+    Node root;
     PShape model;
 
     //Uncomment to use Linear Blending Skinning with CPU
     LinearBlendSkinning skinning;
     //LinearBlendSkinningGPU skinning;
-    Frame target;
+    Node target;
     Interpolator targetInterpolator;
     String shapePath = "/testing/data/objs/fish0.obj";
     String texturePath = "/testing/data/objs/fish0.jpg";
@@ -57,14 +57,14 @@ public class InteractiveFish extends PApplet {
         float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
         //model.scale(200.f*1.f/max);
         //Invert Y Axis and set Fill
-        shape = new Frame(scene, model);
+        shape = new Node(scene, model);
         shape.setPickingThreshold(0);
 
         shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
         shape.scale(200.f * 1.f / max);
         root = fishSkeleton(shape);
 
-        ArrayList<Frame> skeleton = (ArrayList<Frame>) scene.branch(root);
+        ArrayList<Node> skeleton = (ArrayList<Node>) scene.branch(root);
         shape.scale(0.25f);
         //Uncomment to use Linear Blending Skinning with CPU
         skinning = new LinearBlendSkinning(shape, model);
@@ -82,11 +82,11 @@ public class InteractiveFish extends PApplet {
 
     }
 
-    public Frame createTarget(float radius){
+    public Node createTarget(float radius){
         PShape redBall = createShape(SPHERE, radius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        Frame target = new Frame(scene, redBall);
+        Node target = new Node(scene, redBall);
         target.setPickingThreshold(0);
         return target;
     }
@@ -140,7 +140,7 @@ public class InteractiveFish extends PApplet {
         return v;
     }
 
-    public Joint fishSkeleton(Frame reference) {
+    public Joint fishSkeleton(Node reference) {
         Joint j1 = new Joint(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
@@ -163,7 +163,7 @@ public class InteractiveFish extends PApplet {
         return j1;
     }
 
-    public Interpolator setupTargetInterpolator(Frame target) {
+    public Interpolator setupTargetInterpolator(Node target) {
         Interpolator targetInterpolator = new Interpolator(target);
         targetInterpolator.setLoop();
         targetInterpolator.setSpeed(5.2f);
@@ -171,7 +171,7 @@ public class InteractiveFish extends PApplet {
         int nbKeyFrames = 10;
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
-            Frame iFrame = new Frame(scene);
+            Node iFrame = new Node(scene);
             iFrame.setReference(shape);
             iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
@@ -180,9 +180,9 @@ public class InteractiveFish extends PApplet {
         return targetInterpolator;
     }
 
-    public void printSkeleton(Frame root) {
+    public void printSkeleton(Node root) {
         int i = 0;
-        for (Frame node : scene.branch(root)) {
+        for (Node node : scene.branch(root)) {
             System.out.println("Node " + i + " : " + node.position());
             i++;
         }

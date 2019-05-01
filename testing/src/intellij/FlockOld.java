@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
@@ -18,7 +18,7 @@ public class FlockOld extends PApplet {
 
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<BoidOld> flock;
-  static Frame avatar;
+  static Node avatar;
   static boolean animate = true;
 
   public void settings() {
@@ -125,7 +125,7 @@ public class FlockOld extends PApplet {
         scene.shiftTimers();
         break;
       case 'p':
-        println("Frame rate: " + frameRate);
+        println("Node rate: " + frameRate);
         break;
       case 'v':
         avoidWalls = !avoidWalls;

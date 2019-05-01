@@ -1,23 +1,23 @@
 package ik.basic;
 
-import frames.core.Frame;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Constraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.HAEASolver;
-import frames.ik.Solver;
-import frames.ik.evolution.BioIk;
-import frames.ik.evolution.GASolver;
-import frames.ik.evolution.HillClimbingSolver;
-import frames.ik.jacobian.PseudoInverseSolver;
-import frames.ik.jacobian.SDLSSolver;
-import frames.ik.jacobian.TransposeSolver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.Constraint;
+import nub.core.constraint.Hinge;
+import nub.core.constraint.PlanarPolygon;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.HAEASolver;
+import nub.ik.Solver;
+import nub.ik.evolution.BioIk;
+import nub.ik.evolution.GASolver;
+import nub.ik.evolution.HillClimbingSolver;
+import nub.ik.jacobian.PseudoInverseSolver;
+import nub.ik.jacobian.SDLSSolver;
+import nub.ik.jacobian.TransposeSolver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -32,7 +32,7 @@ public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
     public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA }
 
-    public static Solver createSolver(SolverType type, ArrayList<Frame> structure){
+    public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
             case HC: return new HillClimbingSolver(5, radians(5), structure);
             case HGSA: return new BioIk(structure,10, 4 );
@@ -70,22 +70,22 @@ public class Util {
         }
     }
 
-    public static Frame createTarget(Scene scene, float targetRadius){
+    public static Node createTarget(Scene scene, float targetRadius){
         PShape redBall;
         if(scene.is3D())
-            redBall = scene.frontBuffer().createShape(SPHERE, targetRadius);
+            redBall = scene.context().createShape(SPHERE, targetRadius);
         else
-            redBall = scene.frontBuffer().createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
+            redBall = scene.context().createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
         return createTarget(scene, redBall, targetRadius);
     }
 
-    public static Frame createTarget(Scene scene, PShape shape, float targetRadius){
-        PGraphics pg = scene.frontBuffer();
-        return new Frame(scene){
+    public static Node createTarget(Scene scene, PShape shape, float targetRadius){
+        PGraphics pg = scene.context();
+        return new Node(scene){
             @Override
             public void visit() {
                 scene.drawAxes(targetRadius * 2);
-                if(scene.trackedFrame() == this){
+                if(scene.trackedNode() == this){
                     shape.setFill(pg.color(0,255,0));
                 }else{
                     shape.setFill(pg.color(255,0,0));
@@ -95,9 +95,9 @@ public class Util {
         };
     }
 
-    public static ArrayList<Frame> createTargets(int num, Scene scene, float targetRadius){
-        PGraphics pg = scene.frontBuffer();
-        ArrayList<Frame> targets = new ArrayList<Frame>();
+    public static ArrayList<Node> createTargets(int num, Scene scene, float targetRadius){
+        PGraphics pg = scene.context();
+        ArrayList<Node> targets = new ArrayList<Node>();
         PShape redBall;
         if(scene.is3D())
             redBall = pg.createShape(SPHERE, targetRadius);
@@ -107,19 +107,18 @@ public class Util {
         redBall.setFill(pg.color(255,0,0));
 
         for(int i = 0; i < num; i++) {
-            Frame target = createTarget(scene, redBall, targetRadius);
+            Node target = createTarget(scene, redBall, targetRadius);
             target.setPickingThreshold(targetRadius*2);
-            target.setHighlighting(Frame.Highlighting.FRONT);
             targets.add(target);
         }
         return targets;
     }
 
-    public static ArrayList<Frame> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color) {
+    public static ArrayList<Node> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color) {
         return generateChain(scene, numJoints, radius, boneLength, translation, color, -1, 0);
     }
 
-    public static ArrayList<Frame> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color, int randRotation, int randLength) {
+    public static ArrayList<Node> generateChain(Scene scene, int numJoints, float radius, float boneLength, Vector translation, int color, int randRotation, int randLength) {
         Random r1 = randRotation != -1 ? new Random(randRotation) : null;
         Random r2 = randLength != -1 ? new Random(randLength) : null;
 
@@ -158,7 +157,7 @@ public class Util {
         return (ArrayList) scene.branch(chainRoot);
     }
 
-    public static void generateConstraints(List<? extends Frame> structure, ConstraintType type, int seed, boolean is3D){
+    public static void generateConstraints(List<? extends Node> structure, ConstraintType type, int seed, boolean is3D){
         Random random = new Random(seed);
         int numJoints = structure.size();
         for (int i = 0; i < numJoints - 1; i++) {
@@ -227,7 +226,7 @@ public class Util {
     }
 
     public static void printInfo(Scene scene, Solver solver, Vector basePosition){
-        PGraphics pg = scene.frontBuffer();
+        PGraphics pg = scene.context();
         pg.pushStyle();
         pg.fill(255);
         pg.textSize(15);
@@ -271,14 +270,14 @@ public class Util {
         pg.popStyle();
     }
 
-    public static ArrayList<Frame> copy(List<? extends Frame> chain) {
-        ArrayList<Frame> copy = new ArrayList<Frame>();
-        Frame reference = chain.get(0).reference();
+    public static ArrayList<Node> copy(List<? extends Node> chain) {
+        ArrayList<Node> copy = new ArrayList<Node>();
+        Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
+            reference = new Node(reference.position().get(), reference.orientation().get(), 1);
         }
-        for (Frame joint : chain) {
-            Frame newJoint = new Frame();
+        for (Node joint : chain) {
+            Node newJoint = new Node();
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());

@@ -1,43 +1,42 @@
 package ik.common;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.Constraint;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.core.constraint.Constraint;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PGraphics;
 
-public class Arrow extends Frame {
+public class Arrow extends Node {
     int _color;
 
-    public Arrow(Scene scene, Frame reference, Vector translation, int color){
+    public Arrow(Scene scene, Node reference, Vector translation, int color){
         super(scene);
         setReference(reference);
         translate(translation);
         _color = color;
         this.setConstraint(new Constraint() {
             @Override
-            public Vector constrainTranslation(Vector translation, Frame frame) {
+            public Vector constrainTranslation(Vector translation, Node frame) {
                 return new Vector();
             }
 
             @Override
-            public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+            public Quaternion constrainRotation(Quaternion rotation, Node frame) {
                 return new Quaternion();
             }
         });
-        setHighlighting(Highlighting.NONE);
+        setHighlighting(0);
     }
 
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.noStroke();
         pg.fill(_color);
         ((Scene) graph()).drawArrow(Vector.multiply(translation(), -1) , new Vector(0,0,0), 1);
         pg.popStyle();
-        return true;
     }
 
     public void applyReferenceRotation(Vector mouse){
@@ -54,7 +53,7 @@ public class Arrow extends Frame {
 
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)
-    protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Frame frame) {
+    protected Vector _translateDesired(float dx, float dy, float dz, int zMax, Node frame) {
         if (graph().is2D() && dz != 0) {
             System.out.println("Warning: graph is 2D. Z-translation reset");
             dz = 0;

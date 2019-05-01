@@ -10,10 +10,10 @@
  * Hover over lamp elements to select them, and then drag them with the mouse.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.core.constraint.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.core.constraint.*;
+import nub.processing.*;
 
 Scene scene;
 Lamp lamp;

@@ -1,14 +1,10 @@
 package ik.biped;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.FixedConstraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.Solver;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import ik.common.Joint;
+
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -20,10 +16,9 @@ import java.util.HashMap;
  * Created by sebchaparr on 7/08/18.
  */
 
-//TODO : Update
 public class testBiped extends PApplet {
     Scene scene;
-    ArrayList<Frame> targets;
+    ArrayList<Node> targets;
     Biped biped;
 
     public void settings() {
@@ -45,7 +40,7 @@ public class testBiped extends PApplet {
         redBall.setFill(color(255,0,0));
 
         for(int i = 0; i < 4; i++){
-            Frame target = new Frame(scene, redBall);
+            Node target = new Node(scene, redBall);
             target.setPickingThreshold(0);
             targets.add(target);
         }

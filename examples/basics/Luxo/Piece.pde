@@ -1,9 +1,9 @@
-class Piece extends Frame {
+class Piece extends Node {
   int mode;
 
   Piece(Scene scene) {
     super(scene);
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     setPickingThreshold(0);
   }
 
@@ -14,7 +14,7 @@ class Piece extends Frame {
   }
 
   @Override
-  public boolean graphics(PGraphics pGraphics) {
+  public void graphics(PGraphics pGraphics) {
     switch (mode) {
     case 1:
       pGraphics.fill(isTracked() ? 255 : 0, 0, 255);
@@ -43,6 +43,5 @@ class Piece extends Frame {
       pGraphics.spotLight(155, 255, 255, 0, 0, 0, 0, 0, 1, THIRD_PI, 1);
       break;
     }
-    return true;
   }
 }

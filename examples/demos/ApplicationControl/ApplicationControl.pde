@@ -3,7 +3,7 @@
  * by Jean Pierre Charalambos.
  * 
  * This example illustrates how to customize shape behaviors by
- * overriding the frame interact(Object... gesture) method.
+ * overriding the node interact(Object... gesture) method.
  *
  * The toruses color and number of faces are controled with the
  * keys and the mouse. To pick a torus press the [0..9] keys
@@ -13,12 +13,12 @@
  * mouse click, to control its color and number of faces.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
-Frame[] shapes;
+Node[] shapes;
 PFont font36;
 int totalShapes;
 
@@ -32,13 +32,13 @@ public void settings() {
 void setup() {
   scene = new Scene(this);
   scene.fit(1);
-  shapes = new Frame[10];
+  shapes = new Node[10];
   for (int i = 0; i < shapes.length; i++) {
-    shapes[i] = new Frame(scene) {
+    shapes[i] = new Node(scene) {
       int _id = totalShapes++, _faces = randomFaces(), _color = randomColor();
 
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(_color);
         Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
@@ -49,7 +49,6 @@ void setup() {
         pg.text(_id, position.x(), position.y());
         scene.endHUD(pg);
         pg.popStyle();
-        return true;
       }
 
       @Override
@@ -70,7 +69,7 @@ void setup() {
           }
       }
     };
-    // set picking precision to the pixels of the frame projection
+    // set picking precision to the pixels of the node projection
     shapes[i].setPickingThreshold(0);
     shapes[i].randomize();
   }
@@ -94,9 +93,9 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.setTrackedFrame(shapes[value]);
+    scene.setTrackedNode(shapes[value]);
   if (key == ' ')
-    scene.resetTrackedFrame();
+    scene.resetTrackedNode();
   if (key == CODED)
     if (keyCode == UP)
       scene.translate(0, -10);

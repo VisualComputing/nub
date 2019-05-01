@@ -1,9 +1,9 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
@@ -19,7 +19,7 @@ public class Flock extends PApplet {
 
   int initBoidNum = 900; // amount of boids to start the program with
   static ArrayList<Boid> flock;
-  static Frame avatar;
+  static Node avatar;
   static boolean animate = true;
 
   public void settings() {
@@ -48,7 +48,7 @@ public class Flock extends PApplet {
 
   public void updateAvatar() {
     // boid is the one picked with a 'mouseClicked'
-    Frame boid = scene.trackedFrame("mouseClicked");
+    Node boid = scene.trackedNode("mouseClicked");
     if (boid != avatar) {
       avatar = boid;
       if (avatar != null)
@@ -142,7 +142,7 @@ public class Flock extends PApplet {
         scene.shiftTimers();
         break;
       case 'p':
-        println("Frame rate: " + frameRate);
+        println("Node rate: " + frameRate);
         break;
       case 'v':
         avoidWalls = !avoidWalls;

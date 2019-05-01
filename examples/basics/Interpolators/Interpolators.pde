@@ -2,24 +2,24 @@
  * Interpolators.
  * by Jean Pierre Charalambos.
  *
- * This example introduces the three different frame interpolations.
+ * This example introduces the three different node interpolations.
  *
  * Press ' ' to toggle the eye path display.
  * Press 's' to fit ball interpolation.
  * Press 'f' to fit ball.
  * Press the arrow keys to move the camera.
- * Press '1' and '2' to add eye key-frames to the eye paths.
+ * Press '1' and '2' to add eye key-frame to the eye paths.
  * Press 'a' and 'c' to play the eye paths.
  * Press 'b' and 'd' to remove the eye paths.
  */
 
-import frames.primitives.*;
-import frames.core.*;
-import frames.processing.*;
+import nub.primitives.*;
+import nub.core.*;
+import nub.processing.*;
 
 Scene scene;
 Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
-Frame shape;
+Node shape;
 boolean showEyePath = true;
 
 //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
@@ -38,13 +38,13 @@ void setup() {
   eyeInterpolator1 = new Interpolator(scene.eye());
   eyeInterpolator2 = new Interpolator(scene.eye());
 
-  // interpolation 3. Custom (arbitrary) frame interpolations
+  // interpolation 3. Custom (arbitrary) node interpolations
 
-  shape = new Frame(scene) {
+  shape = new Node(scene) {
     // Note that within render() geometry is defined at the
-    // frame local coordinate system.
+    // node local coordinate system.
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
       pg.pushStyle();
       pg.fill(0, 255, 255, 125);
       pg.stroke(0, 0, 255);
@@ -54,14 +54,13 @@ void setup() {
       else
         pg.box(30);
       pg.popStyle();
-      return true;
     }
   };
   interpolator = new Interpolator(shape);
   interpolator.setLoop();
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)
-    interpolator.addKeyFrame(scene.randomFrame());
+    interpolator.addKeyFrame(scene.randomNode());
   interpolator.start();
 }
 
@@ -75,10 +74,10 @@ void draw() {
   scene.drawPath(interpolator);
   popStyle();
 
-  for (Frame frame : interpolator.keyFrames()) {
+  for (Node node : interpolator.keyFrames()) {
     pushMatrix();
-    scene.applyTransformation(frame);
-    scene.drawAxes(scene.tracks(frame) ? 40 : 20);
+    scene.applyTransformation(node);
+    scene.drawAxes(scene.tracks(node) ? 40 : 20);
     popMatrix();
   }
   if (showEyePath) {

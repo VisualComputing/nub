@@ -1,10 +1,10 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -29,9 +29,9 @@ public class MouseDragInteraction extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    Frame shape1 = new Frame(scene) {
+    Node shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
+      public void graphics(PGraphics pGraphics) {
         Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
@@ -41,14 +41,13 @@ public class MouseDragInteraction extends PApplet {
         else
           pGraphics.rect(10, 10, 200, 200);
         pGraphics.popStyle();
-        return true;
       }
     };
     shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
-    Frame shape2 = new Frame(shape1);
-    shape2.shape(shape());
+    Node shape2 = new Node(shape1);
+    shape2.setShape(shape());
     shape2.translate(275, 275);
 
     randomVector = Vector.random();
@@ -60,7 +59,7 @@ public class MouseDragInteraction extends PApplet {
     fill(0, 255, 255);
     scene.drawArrow(randomVector);
     scene.drawAxes();
-    // render scene frames (shapes simply get drawn)
+    // render scene nodes (shapes simply get drawn)
     scene.render();
   }
 
@@ -111,11 +110,11 @@ public class MouseDragInteraction extends PApplet {
       }
     else if (mouseButton == RIGHT) {
       //scene.translate();
-      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultFrame());
+      //scene.translate(scene.mouseDX(), scene.mouseDY(), scene.defaultNode());
       scene.translate();
     } else {
       //scene.mouseZoom(mouseX - pmouseX);
-      //scene.zoom(scene.mouseDX(), scene.defaultFrame());
+      //scene.zoom(scene.mouseDX(), scene.defaultNode());
       scene.scale(scene.mouseDX());
       //scene.scale(mouseX - pmouseX);
     }
@@ -140,7 +139,7 @@ public class MouseDragInteraction extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MouseDragInteraction"});
   }
 }

@@ -1,9 +1,9 @@
 package ik.mocap;
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.core.constraint.DistanceFieldConstraint;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.core.constraint.DistanceFieldConstraint;
+import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -32,20 +32,20 @@ public class BVHParser {
     protected HashMap<Integer, Properties> _joint;
     protected int _frames;
     protected int _period;
-    protected Class< ? extends  Frame> _class;
-    protected Frame _root;
-    protected List<Frame> _branch;
-    protected HashMap<Integer, ArrayList<Frame>> _poses;
+    protected Class< ? extends  Node> _class;
+    protected Node _root;
+    protected List<Node> _branch;
+    protected HashMap<Integer, ArrayList<Node>> _poses;
     protected int _currentPose;
     protected boolean _loop;
 
 
-    public BVHParser(String path, Scene scene, Frame reference){
+    public BVHParser(String path, Scene scene, Node reference){
         _class = Joint.class;
         _setup(path, scene, reference);
     }
 
-    public BVHParser(Class<? extends Frame> frameClass, String path, Scene scene, Frame reference){
+    public BVHParser(Class<? extends Node> frameClass, String path, Scene scene, Node reference){
         _class = frameClass;
         _setup(path, scene, reference);
     }
@@ -75,11 +75,11 @@ public class BVHParser {
 
     }
 
-    public Frame root(){
+    public Node root(){
         return _root;
     }
 
-    protected void _setup(String path, Scene scene, Frame reference){
+    protected void _setup(String path, Scene scene, Node reference){
         _frames = 0;
         _period = 0;
         _currentPose = 0;
@@ -96,16 +96,16 @@ public class BVHParser {
      * Reads a .bvh file from the given path and builds
      * A Hierarchy of Nodes given by the .bvh header
      * */
-    protected Frame _readHeader(String path, Scene scene, Frame reference){
-        Frame root = null;
+    protected Node _readHeader(String path, Scene scene, Node reference){
+        Node root = null;
         try {
             _buffer = new BufferedReader(new FileReader(path));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
         }
-        Frame current = root;
-        Frame currentRoot = reference;
+        Node current = root;
+        Node currentRoot = reference;
         Properties currentProperties = null;
         boolean boneBraceOpened = false;
         //READ ALL THE HEADER
@@ -254,7 +254,7 @@ public class BVHParser {
         String[] expression = line.split(" ");
         //traverse each line
         int i = 0;
-        for(Frame current : _branch){
+        for(Node current : _branch){
             Properties properties = _joint.get(current.id());
             boolean translationInfo = false;
             boolean rotationInfo = false;
@@ -297,7 +297,7 @@ public class BVHParser {
                 }
                 i++;
             }
-            Frame next = new Frame(current.translation().get(), current.rotation().get(), 1);
+            Node next = new Node(current.translation().get(), current.rotation().get(), 1);
 
             switch(properties._parametrization){
                 case "XYZ":{
@@ -330,7 +330,7 @@ public class BVHParser {
             if(_loop) _currentPose = 0;
             else return;
         }
-        for(Frame frame : _branch){
+        for(Node frame : _branch){
             frame.setRotation(_poses.get(frame.id()).get(_currentPose).rotation().get());
             frame.setTranslation(_poses.get(frame.id()).get(_currentPose).translation().get());
         }
@@ -347,7 +347,7 @@ public class BVHParser {
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,0,255);
-        for(Frame node : _branch){
+        for(Node node : _branch){
             //if(node == _root) continue;
             DistanceFieldConstraint constraint = (DistanceFieldConstraint) node.constraint();
             pg.pushMatrix();
@@ -404,7 +404,7 @@ public class BVHParser {
         pg.pushStyle();
         pg.strokeWeight(3);
         pg.stroke(0,255,0);
-        for(Frame node : _branch){
+        for(Node node : _branch){
             pg.pushMatrix();
             node.graph().applyWorldTransformation(node);
             for(Vector vv : _joint.get(node.id())._feasibleRegion){
@@ -422,16 +422,16 @@ public class BVHParser {
     }
 
     public void constraintJoints(){
-        for(Frame frame : _branch){
+        for(Node node : _branch){
             //if(node == _root) continue;
             ArrayList<Quaternion> rots = new ArrayList<Quaternion>();
             //int j = 0;
-            for(Frame next : _poses.get(frame.id())){
+            for(Node next : _poses.get(node.id())){
                 //if(j == 20) break;
                 rots.add(next.rotation());
                 //j++;
             }
-            frame.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots, _dim, _dim, _dim)));
+            node.setConstraint(new DistanceFieldConstraint(LearnConstraint.getDistanceField(rots, _dim, _dim, _dim)));
         }
     }
 }

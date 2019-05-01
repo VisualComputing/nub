@@ -1,16 +1,16 @@
 package ik.constraintTest;
 
-import frames.core.Graph;
-import frames.ik.CCDSolver;
-import frames.ik.ChainSolver;
-import frames.ik.Solver;
-import frames.core.Frame;
-import frames.ik.evolution.BioIk;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.core.constraint.PlanarPolygon;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Graph;
+import nub.ik.CCDSolver;
+import nub.ik.ChainSolver;
+import nub.ik.Solver;
+import nub.core.Node;
+import nub.ik.evolution.BioIk;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.core.constraint.PlanarPolygon;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.basic.Util;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
@@ -32,8 +32,8 @@ public class ConePolygon extends PApplet{
     //Benchmark Parameters
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
-    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
-    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+    ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
@@ -71,11 +71,11 @@ public class ConePolygon extends PApplet{
         vertices.add(new Vector(w, v));
         vertices.add(new Vector(-w, v));
 
-        ArrayList<Frame> structure1;
-        ArrayList<Frame> structure2;
-        ArrayList<Frame> structure3;
+        ArrayList<Node> structure1;
+        ArrayList<Node> structure2;
+        ArrayList<Node> structure3;
 
-        for(ArrayList<Frame> structure : structures){
+        for(ArrayList<Node> structure : structures){
             for (int i = 0; i < structure.size() - 1; i++) {
                 PlanarPolygon constraint = new PlanarPolygon(vertices);
                 Vector twist = structure.get(i + 1).translation().get();
@@ -177,8 +177,8 @@ public class ConePolygon extends PApplet{
         if (mouseButton == LEFT){
             scene.spin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(scene.trackedFrame())){
-                for(Frame target : targets) scene.translate(target);
+            if(targets.contains(scene.trackedNode())){
+                for(Node target : targets) scene.translate(target);
             }else{
                 scene.translate();
             }

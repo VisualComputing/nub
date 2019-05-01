@@ -1,22 +1,14 @@
 package ik.basic;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Constraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.*;
-import frames.ik.evolution.BioIk;
-import frames.ik.evolution.GASolver;
-import frames.ik.evolution.HillClimbingSolver;
-import frames.ik.jacobian.PseudoInverseSolver;
-import frames.ik.jacobian.SDLSSolver;
-import frames.ik.jacobian.TransposeSolver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.ik.ChainSolver;
+import nub.ik.FABRIKSolver;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -47,8 +39,8 @@ public class VisualBenchmark extends PApplet {
 
     Util.SolverType solversType [] = {Util.SolverType.SDLS, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
             Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2}; //Place Here Solvers that you want to compare
-    ArrayList<ArrayList<Frame>> structures = new ArrayList<>(); //Keep Structures
-    ArrayList<Frame> targets = new ArrayList<Frame>(); //Keep targets
+    ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
+    ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
     boolean solve = false;
     boolean show1 = false, show2 = false, show3 = false, show4 = false, show5 = false;
@@ -78,7 +70,7 @@ public class VisualBenchmark extends PApplet {
         }
 
         //3. Apply constraints
-        for(ArrayList<Frame> structure : structures){
+        for(ArrayList<Node> structure : structures){
             Util.generateConstraints(structure, constraintType, 0, scene.is3D());
         }
 
@@ -120,23 +112,23 @@ public class VisualBenchmark extends PApplet {
         //Debuggin exploration
         for(int  i = 0; i < solvers.size(); i++) {
             if (solvers.get(i) instanceof ChainSolver) {
-                if (show2) Util.drawPositions(scene.frontBuffer(), ((ChainSolver) solvers.get(i)).positions(), color(255, 0, 100), 3);
+                if (show2) Util.drawPositions(scene.context(), ((ChainSolver) solvers.get(i)).positions(), color(255, 0, 100), 3);
                 if (show4 && ((ChainSolver) solvers.get(i)).avoidHistory() != null) {
                     for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).avoidHistory()){
-                        Util.drawPositions(scene.frontBuffer(), l, color(255, 255, 0, 50), 3);
+                        Util.drawPositions(scene.context(), l, color(255, 255, 0, 50), 3);
                     }
                 }
                 if (show5 && ((ChainSolver) solvers.get(i)).divergeHistory() != null) {
                     for(ArrayList<Vector> l : ((ChainSolver) solvers.get(i)).divergeHistory()){
-                        Util.drawPositions(scene.frontBuffer(), l, color(255, 0, 0, 50), 3);
+                        Util.drawPositions(scene.context(), l, color(255, 0, 0, 50), 3);
                     }
                 }
 
                 if(((ChainSolver) solvers.get(i)).bestAvoidPosition() != null && show1){
-                    Util.drawPositions(scene.frontBuffer(),((ChainSolver) solvers.get(i)).bestAvoidPosition(), color(255, 0, 0), 6);
+                    Util.drawPositions(scene.context(),((ChainSolver) solvers.get(i)).bestAvoidPosition(), color(255, 0, 0), 6);
                 }
                 if(((ChainSolver) solvers.get(i)).afterAvoidPosition() != null && show1){
-                    Util.drawPositions(scene.frontBuffer(),((ChainSolver) solvers.get(i)).afterAvoidPosition(), color(0, 255, 0), 6);
+                    Util.drawPositions(scene.context(),((ChainSolver) solvers.get(i)).afterAvoidPosition(), color(0, 255, 0), 6);
                 }
 
             }
@@ -150,8 +142,8 @@ public class VisualBenchmark extends PApplet {
         scene.endHUD();
     }
 
-    public Frame generateRandomReachablePosition(List<? extends Frame> original, boolean is3D){
-        ArrayList<? extends Frame> chain = Util.copy(original);
+    public Node generateRandomReachablePosition(List<? extends Node> original, boolean is3D){
+        ArrayList<? extends Node> chain = Util.copy(original);
         for(int i = 0; i < chain.size(); i++){
             if(is3D)
                 chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
@@ -166,14 +158,14 @@ public class VisualBenchmark extends PApplet {
             solve = !solve;
         }
         if(key == 's' || key == 'S'){
-            Frame f = generateRandomReachablePosition(structures.get(0), scene.is3D());
+            Node f = generateRandomReachablePosition(structures.get(0), scene.is3D());
             Vector delta = Vector.subtract(f.position(), targets.get(0).position());
-            for(Frame target : targets)
+            for(Node target : targets)
                 target.setPosition(Vector.add(target.position(), delta));
         }
         if(key == 'd' || key == 'D'){
-            for(List<Frame> structure : structures) {
-                for (Frame f : structure) {
+            for(List<Node> structure : structures) {
+                for (Node f : structure) {
                     f.setRotation(new Quaternion());
                 }
             }
@@ -214,8 +206,8 @@ public class VisualBenchmark extends PApplet {
         if (mouseButton == LEFT){
             scene.spin();
         } else if (mouseButton == RIGHT) {
-            if(targets.contains(scene.trackedFrame())){
-                for(Frame target : targets) scene.translate(target);
+            if(targets.contains(scene.trackedNode())){
+                for(Node target : targets) scene.translate(target);
             }else{
                 scene.translate();
             }

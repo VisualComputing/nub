@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -13,7 +13,7 @@ public class DOF extends PApplet {
   PShader depthShader, dofShader;
   PGraphics depthPGraphics, dofPGraphics;
   Scene scene;
-  Frame[] models;
+  Node[] models;
   int mode = 2;
   boolean exact = true;
 
@@ -29,22 +29,23 @@ public class DOF extends PApplet {
     scene.setRadius(1000);
     scene.fit(1);
 
-    models = new Frame[100];
+    models = new Node[100];
 
     for (int i = 0; i < models.length; i++) {
-      //models[i] = new Frame(scene, boxShape());
-      models[i] = new Frame(scene, boxShape());
+      //models[i] = new Node(scene, boxShape());
+      models[i] = new Node(scene, boxShape());
+      models[i].setPickingThreshold(0);
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/depth/depth_linear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);
@@ -59,8 +60,8 @@ public class DOF extends PApplet {
     // 1. Draw into main buffer
     scene.beginDraw();
     for (int i = 0; i < models.length; i++)
-      scene.drawShooterTarget(models[i]);
-    scene.frontBuffer().background(0);
+      scene.drawSquaredBullsEye(models[i]);
+    scene.context().background(0);
     scene.render();
     scene.endDraw();
 
@@ -76,7 +77,7 @@ public class DOF extends PApplet {
     dofPGraphics.beginDraw();
     dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
     dofShader.set("tDepth", depthPGraphics);
-    dofPGraphics.image(scene.frontBuffer(), 0, 0);
+    dofPGraphics.image(scene.context(), 0, 0);
     dofPGraphics.endDraw();
 
     // display one of the 3 buffers
@@ -99,8 +100,6 @@ public class DOF extends PApplet {
     if (key == '0') mode = 0;
     if (key == '1') mode = 1;
     if (key == '2') mode = 2;
-    if (key == 's') scene.saveConfig("/home/pierre/config.json");
-    if (key == 'l') scene.loadConfig("/home/pierre/config.json");
     if (key == 't')
       if (scene.type() == Graph.Type.ORTHOGRAPHIC)
         scene.setType(Graph.Type.PERSPECTIVE);
@@ -114,10 +113,6 @@ public class DOF extends PApplet {
       exact = !exact;
       for (int i = 0; i < models.length; i++)
         models[i].setPickingThreshold(exact ? 0 : 0.7f);
-      if (scene.backBuffer() == null)
-        println("backBuffer disabled");
-      else
-        println("backBuffer enabled");
     }
   }
 
@@ -150,7 +145,7 @@ public class DOF extends PApplet {
         scene.align();
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.DOF"});
   }
 }

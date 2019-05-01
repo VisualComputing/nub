@@ -1,20 +1,21 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
+import processing.opengl.PGraphics2D;
 
 /**
  * Created by pierre on 11/15/16.
  */
 public class Interaction2D extends PApplet {
   Scene scene;
-  Frame shape1, shape2, shape3;
+  Node shape1, shape2, shape3;
   Vector upVector;
   PFont font36;
 
@@ -30,17 +31,17 @@ public class Interaction2D extends PApplet {
     //scene.eye().setScaling(1);
     scene.fit(1);
 
-    shape1 = new Frame(scene) {
+    shape1 = new Node(scene) {
       @Override
-      public boolean graphics(PGraphics pGraphics) {
-        scene.drawAxes(pGraphics, scene.radius() / 3);
+      public void graphics(PGraphics pGraphics) {
+        Scene.drawAxes(pGraphics, scene.radius() / 3);
         pGraphics.pushStyle();
         pGraphics.rectMode(CENTER);
         pGraphics.fill(0, 255, 255);
         pGraphics.rect(10, 10, 200, 200);
         pGraphics.stroke(255, 0, 0);
         /*
-        scene.drawShooterTarget(this);
+        scene.drawSquaredBullsEye(this);
         scene.beginHUD(pGraphics);
         Vector position = scene.screenLocation(position());
         pGraphics.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -49,18 +50,19 @@ public class Interaction2D extends PApplet {
         scene.endHUD(pGraphics);
         */
         pGraphics.popStyle();
-        return true;
       }
     };
     //shape1.setRotation(Quaternion.random());
     shape1.translate(-375, 175);
 
-    shape2 = new Frame(shape1);
-    shape2.shape(shape());
+    shape2 = new Node(shape1);
+    shape2.setShape(shape());
     shape2.translate(75, 475);
+    if (g instanceof PGraphics2D)
+      shape2.setPickingThreshold(0);
 
-    shape3 = new Frame(shape2);
-    shape3.shape(createShape(RECT, 0, 0, 150, 150));
+    shape3 = new Node(shape2);
+    shape3.setShape(createShape(RECT, 0, 0, 150, 150));
     shape3.translate(-775, -575);
   }
 
@@ -69,7 +71,7 @@ public class Interaction2D extends PApplet {
     scene.drawAxes();
     scene.render();
 
-    scene.drawShooterTarget(shape1);
+    scene.drawSquaredBullsEye(shape1);
     scene.beginHUD();
     Vector position = scene.screenLocation(shape1.position());
     fill(shape1.isTracked() ? 0 : 255, shape1.isTracked() ? 255 : 0, shape1.isTracked() ? 0 : 255);
@@ -116,10 +118,10 @@ public class Interaction2D extends PApplet {
 
   public void mouseDragged() {
     // Note 1.
-    // When mouse methods are invoked without the frame parameter
-    // the scene.defaultFrame is used.
+    // When mouse methods are invoked without the node parameter
+    // the scene.defaultNode is used.
     // Note 2.
-    // Mouse methods that don't take a frame parameter (such as mouseCAD)
+    // Mouse methods that don't take a node parameter (such as mouseCAD)
     // are only available to the scene.eye().
     if (mouseButton == LEFT)
       scene.spin();
@@ -155,7 +157,7 @@ public class Interaction2D extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.Interaction2D"});
   }
 }

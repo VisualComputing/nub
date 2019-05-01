@@ -1,9 +1,9 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Matrix;
-import frames.primitives.Point;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.primitives.Matrix;
+import nub.primitives.Point;
 import processing.core.PApplet;
 import processing.core.PMatrix3D;
 import processing.event.MouseEvent;
@@ -17,30 +17,30 @@ public class Graph4 extends PApplet {
   PShader framesShader;
   Matrix pmv;
   PMatrix3D pmatrix = new PMatrix3D();
-  Frame[] frames;
+  Node[] nodes;
 
   public void settings() {
     size(800, 800, P3D);
   }
 
   public void setup() {
-    graph = new Graph(width, height) {
+    graph = new Graph(g, width, height) {
       // Note that within visit() geometry is defined
-      // at the frame local coordinate system.
+      // at the node local coordinate system.
       @Override
-      public void applyTransformation(Frame frame) {
-        super.applyTransformation(frame);
+      public void applyTransformation(Node node) {
+        super.applyTransformation(node);
         shader(framesShader);
-        pmv = Matrix.multiply(matrixHandler().projection(), matrixHandler().modelView());
+        pmv = Matrix.multiply(matrixHandler().projection(), matrixHandler().model());
         pmatrix.set(pmv.get(new float[16]));
-        framesShader.set("frames_transform", pmatrix);
+        framesShader.set("nub_transform", pmatrix);
       }
     };
     graph.fit(1);
-    framesShader = loadShader("/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameFrag.glsl", "/home/pierre/IdeaProjects/frames/testing/data/matrix_handler/FrameVert_pmv.glsl");
-    frames = new Frame[50];
-    for (int i = 0; i < frames.length; i++) {
-      frames[i] = new Frame(graph) {
+    framesShader = loadShader("/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nodes/testing/data/matrix_handler/vertex.glsl");
+    nodes = new Node[50];
+    for (int i = 0; i < nodes.length; i++) {
+      nodes[i] = new Node(graph) {
         @Override
         public void visit() {
           pushStyle();
@@ -49,7 +49,7 @@ public class Graph4 extends PApplet {
           popStyle();
         }
       };
-      frames[i].randomize();
+      nodes[i].randomize();
     }
     //discard Processing matrices
     resetMatrix();
@@ -62,7 +62,7 @@ public class Graph4 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, frames);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {

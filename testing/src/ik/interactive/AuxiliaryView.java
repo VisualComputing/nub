@@ -1,16 +1,16 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.primitives.Point;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.primitives.Point;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PGraphics;
 
 public class AuxiliaryView{
     boolean _enabled = true;
     Scene _scene;
-    Frame _eye;
+    Node _eye;
     Graph.Type _type;
     PGraphics _pGraphics;
     float _x, _y;
@@ -19,7 +19,7 @@ public class AuxiliaryView{
     Vector _center;
     float _radius;
 
-    public AuxiliaryView(Scene scene, PGraphics pGraphics, Frame eye, float x, float y, int width, int height){
+    public AuxiliaryView(Scene scene, PGraphics pGraphics, Node eye, float x, float y, int width, int height){
         _scene = scene;
         _eye = eye;
         _x = x;
@@ -32,7 +32,7 @@ public class AuxiliaryView{
         _radius = scene.radius();
     }
 
-    public AuxiliaryView(Scene scene, Frame eye, float x, float y, int width, int height){
+    public AuxiliaryView(Scene scene, Node eye, float x, float y, int width, int height){
         this(scene, scene.pApplet().createGraphics(scene.width(), scene.height(), scene.pApplet().sketchRenderer()), eye, x, y, width, height);
     }
 
@@ -56,7 +56,7 @@ public class AuxiliaryView{
         return _scene;
     }
 
-    public Frame eye(){
+    public Node eye(){
         return _eye;
     }
 

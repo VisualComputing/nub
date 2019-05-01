@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Graph;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -14,8 +14,8 @@ public class ViewFrustumCulling extends PApplet {
 
   //Choose one of P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
-  int w = 1110;
-  int h = 1110;
+  int w = 1200;
+  int h = 800;
 
   public void settings() {
     size(w, h, renderer);
@@ -40,28 +40,29 @@ public class ViewFrustumCulling extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     scene2 = new Scene(this, canvas2, 0, h / 2);
     scene2.setType(Graph.Type.ORTHOGRAPHIC);
-    scene2.setRadius(300);
+    scene2.setRadius(600);
     scene2.fit();
   }
 
   @Override
   public void draw() {
     handleMouse();
-    background(0);
+    background(255);
     scene1.beginDraw();
-    canvas1.background(0);
-    root.drawIfAllChildrenAreVisible(scene1.frontBuffer(), scene1);
+    canvas1.background(255);
+    root.drawIfAllChildrenAreVisible(scene1.context(), scene1);
     scene1.endDraw();
     scene1.display();
 
     scene2.beginDraw();
-    canvas2.background(0);
-    root.drawIfAllChildrenAreVisible(scene2.frontBuffer(), scene1);
-    scene2.frontBuffer().pushStyle();
-    scene2.frontBuffer().stroke(255, 255, 0);
-    scene2.frontBuffer().fill(255, 255, 0, 160);
+    canvas2.background(255);
+    root.drawIfAllChildrenAreVisible(scene2.context(), scene1);
+    scene2.context().pushStyle();
+    scene2.context().strokeWeight(2);
+    scene2.context().stroke(255, 0, 255);
+    scene2.context().fill(255, 0, 255, 160);
     scene2.drawFrustum(scene1);
-    scene2.frontBuffer().popStyle();
+    scene2.context().popStyle();
     scene2.endDraw();
     scene2.display();
   }

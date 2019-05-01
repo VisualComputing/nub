@@ -1,7 +1,7 @@
 package ik.mocap;
 
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 import java.util.*;
 
 /**

@@ -1,11 +1,11 @@
 package ik.constraintTest;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.Hinge;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.Hinge;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -62,11 +62,11 @@ public class SimpleHinge extends PApplet {
         scene.render();
     }
 
-    Frame n = null;
+    Node n = null;
     float d = 5;
     public void keyPressed(){
-        if(scene.trackedFrame() != null) {
-            n =  scene.trackedFrame();
+        if(scene.trackedNode() != null) {
+            n =  scene.trackedNode();
             if(n != null) {
                 if (key == 'A' || key == 'a') {
                     d += 1;

@@ -1,9 +1,9 @@
 package ik.common;
 
-import frames.core.Frame;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.core.PVector;
@@ -16,7 +16,7 @@ import java.util.HashMap;
  * Created by sebchaparr on 11/03/18.
  */
 public class LinearBlendSkinningGPU {
-    public Frame reference = new Frame();
+    public Node reference = new Node();
     public PShape shape;
     public PShader shader;
     public Quaternion[] boneQuat = new Quaternion[120];
@@ -25,9 +25,9 @@ public class LinearBlendSkinningGPU {
     public float[] bonePosition = new float[120];
     float[] boneRotation = new float[120];
 
-    public ArrayList<Frame> skeleton;
+    public ArrayList<Node> skeleton;
 
-    public LinearBlendSkinningGPU(PShape shape, ArrayList<Frame> skeleton) {
+    public LinearBlendSkinningGPU(PShape shape, ArrayList<Node> skeleton) {
         this.shape = shape;
         this.skeleton = skeleton;
     }
@@ -36,7 +36,7 @@ public class LinearBlendSkinningGPU {
         shader = applet.loadShader(applet.sketchPath() + "/testing/src/ik/common/frag.glsl",
                 applet.sketchPath() + "/testing/src/ik/common/skinning.glsl");
         for(int i = 0; i < skeleton.size(); i++){
-            Frame frame = skeleton.get(i);
+            Node frame = skeleton.get(i);
             Vector position = frame.position();
             boneQuat[i] = frame.orientation();
             bonePos[i] = position;
@@ -52,7 +52,7 @@ public class LinearBlendSkinningGPU {
     public void updateParams() {
         //TODO: IT COULD BE DONE WITH LESS OPERATIONS
         for(int i = 0; i < skeleton.size(); i++){
-            Frame frame = skeleton.get(i);
+            Node frame = skeleton.get(i);
             Vector v = Vector.subtract(frame.position(), bonePos[i]);
             Quaternion q = Quaternion.compose(frame.orientation(), boneQuat[i].inverse());
             bonePosition[i*3 + 0] =  v.x();
@@ -67,7 +67,7 @@ public class LinearBlendSkinningGPU {
         shader.set("boneRotation", boneRotation);
     }
 
-    public void setup(ArrayList<Frame> branch) {
+    public void setup(ArrayList<Node> branch) {
         for (int i = 0; i < shape.getChildCount(); i++) {
             PShape child = shape.getChild(i);
             for (int j = 0; j < child.getVertexCount(); j++) {
@@ -81,7 +81,7 @@ public class LinearBlendSkinningGPU {
                 int k = 0;
                 //Find the nearest 3 joints
                 //TODO : Perhaps enable more joints - use QuickSort
-                for (Frame joint : branch) {
+                for (Node joint : branch) {
                     if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
                     float dist = getDistance(position, joint, reference);
                     dist = 1 / ((float) Math.pow(dist, 10));
@@ -118,7 +118,7 @@ public class LinearBlendSkinningGPU {
      * Distance will be measure according to root coordinates.
      * In case of reference frame of frame is root, it will return distance from vertex to frame
      * */
-    public static float getDistance(Vector vertex, Frame frame, Frame root) {
+    public static float getDistance(Vector vertex, Node frame, Node root) {
         if (frame == null) return 9999;
         Vector position = root.location(frame.position());
         Vector parentPosition = root.location(frame.reference().position());

@@ -1,10 +1,10 @@
 package ik.interactive;
 
-import frames.core.Frame;
-import frames.core.constraint.Constraint;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.constraint.Constraint;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 
 import processing.core.PConstants;
 import processing.core.PGraphics;
@@ -15,8 +15,8 @@ public class Slider {
     protected float _detail;
     protected Scene _scene;
     protected String _name;
-    protected Frame _bar;
-    protected Frame _pointer;
+    protected Node _bar;
+    protected Node _pointer;
     protected float _min = 0, _max = 100;
     protected float _offset, _bar_width, _text_width;
 
@@ -62,10 +62,10 @@ public class Slider {
 
     protected void createSlider(){
         float detail = _bar_width/_detail;
-        _bar = new Frame(_scene){
+        _bar = new Node(_scene){
             @Override
             public void visit() {
-                PGraphics pGraphics = _scene.frontBuffer();
+                PGraphics pGraphics = _scene.context();
                 pGraphics.text(_name + " ", 0, 0);
                 pGraphics.rectMode(PConstants.CENTER);
                 pGraphics.stroke(100);
@@ -78,16 +78,15 @@ public class Slider {
 
         _bar.setPosition(_position);
         _bar.setPickingThreshold(0.0001f);
-        _pointer = new Frame(_bar){
+        _pointer = new Node(_bar){
             @Override
-            public boolean graphics(PGraphics pGraphics) {
+            public void graphics(PGraphics pGraphics) {
                 pGraphics.pushStyle();
                 pGraphics.rectMode(PConstants.CENTER);
                 pGraphics.stroke(255,0,0);
                 pGraphics.fill(255,0,0);
                 pGraphics.rect(0,0, detail, _height*0.8f);
                 pGraphics.popStyle();
-                return true;
             }
             @Override
             public void interact(Object... objects){
@@ -104,7 +103,7 @@ public class Slider {
         //Pointer is constrained to X-Axis
         _pointer.setConstraint(new Constraint() {
             @Override
-            public Vector constrainTranslation(Vector translation, Frame frame) {
+            public Vector constrainTranslation(Vector translation, Node frame) {
                 float delta = translation.x();
 
                 if(frame.translation().x() + delta > _bar_width + _offset){
@@ -117,7 +116,7 @@ public class Slider {
             }
 
             @Override
-            public Quaternion constrainRotation(Quaternion rotation, Frame frame) {
+            public Quaternion constrainRotation(Quaternion rotation, Node frame) {
                 return new Quaternion();
             }
         });

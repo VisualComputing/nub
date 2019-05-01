@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.processing.Scene;
+import nub.core.Graph;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -10,10 +10,11 @@ import processing.event.MouseEvent;
 
 public class MiniMap2 extends PApplet {
   Scene scene, minimap, focus;
-  Frame[] models;
-  Frame sceneEye;
+  Node[] models;
+  // the sceneEye holds a graphics representation
+  Node sceneEye;
   boolean displayMinimap = true;
-  // whilst scene1 is either on-screen or not, the minimap is always off-screen
+  // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
   boolean onScreen = false;
 
@@ -30,28 +31,27 @@ public class MiniMap2 extends PApplet {
   public void setup() {
     scene = onScreen ? new Scene(this) : new Scene(this, renderer);
     scene.setRadius(1000);
-    // set a detached eye frame
+    // set a detached eye node
 
-    scene.setEye(new Frame());
+    scene.setEye(new Node());
     if (scene.is2D())
       rectMode(CENTER);
     scene.fit(1);
-    models = new Frame[6];
+    models = new Node[6];
     for (int i = 0; i < models.length; i++) {
       if ((i & 1) == 0) {
-        //models[i] = new Frame(scene, shape());
-        models[i] = new Frame(scene);
-        models[i].shape(shape());
+        //models[i] = new Node(scene, shape());
+        models[i] = new Node(scene);
+        models[i].setShape(shape());
       } else {
-        models[i] = new Frame(scene) {
+        models[i] = new Node(scene) {
           int _faces = (int) MiniMap2.this.random(3, 15), _color = color(MiniMap2.this.random(255), MiniMap2.this.random(255), MiniMap2.this.random(255));
           @Override
-          public boolean graphics(PGraphics pg) {
+          public void graphics(PGraphics pg) {
             pg.pushStyle();
             pg.fill(_color);
-            scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
+            Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 30);
             pg.popStyle();
-            return true;
           }
         };
       }
@@ -63,21 +63,20 @@ public class MiniMap2 extends PApplet {
     // is to be drawn (see drawing code below) to its constructor.
     minimap = new Scene(this, renderer, w / 2, h / 2, w / 2, h / 2);
     minimap.setRadius(2000);
-    // set a detached eye frame
-    minimap.setEye(new Frame());
+    // set a detached eye node
+    minimap.setEye(new Node());
     //if (renderer == P3D)
     //minimap.setType(Graph.Type.ORTHOGRAPHIC);
     minimap.fit(1);
-    sceneEye = new Frame(minimap) {
+    sceneEye = new Node(minimap) {
       @Override
-      public boolean graphics(PGraphics pg) {
+      public void graphics(PGraphics pg) {
         pg.pushStyle();
         pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
         minimap.drawFrustum(pg, scene);
         pg.popStyle();
-        return true;
       }
     };
   }
@@ -135,11 +134,11 @@ public class MiniMap2 extends PApplet {
 
   public void draw() {
     focus = displayMinimap ? (mouseX > w / 2 && mouseY > h / 2) ? minimap : scene : scene;
-    Frame.sync(scene.eye(), sceneEye);
+    Node.sync(scene.eye(), sceneEye);
     background(75, 25, 15);
     if (scene.isOffscreen()) {
       scene.beginDraw();
-      scene.frontBuffer().background(75, 25, 15);
+      scene.context().background(75, 25, 15);
       scene.drawAxes();
       scene.render();
       scene.endDraw();
@@ -153,7 +152,7 @@ public class MiniMap2 extends PApplet {
       if (!scene.isOffscreen())
         scene.beginHUD();
       minimap.beginDraw();
-      minimap.frontBuffer().background(125, 80, 90);
+      minimap.context().background(125, 80, 90);
       minimap.drawAxes();
       minimap.render();
       minimap.endDraw();
@@ -164,7 +163,7 @@ public class MiniMap2 extends PApplet {
     }
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.MiniMap2"});
   }
 }

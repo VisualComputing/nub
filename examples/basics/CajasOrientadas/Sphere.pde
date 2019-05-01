@@ -1,4 +1,4 @@
-class Sphere extends Frame {
+class Sphere extends Node {
   float _radius;
   int _color;
 
@@ -9,7 +9,7 @@ class Sphere extends Frame {
   }
 
   @Override
-  public boolean graphics(PGraphics pg) {
+  public void graphics(PGraphics pg) {
     pg.pushStyle();
     if (drawAxes)
       Scene.drawAxes(pg, _radius * 1.3);
@@ -17,9 +17,8 @@ class Sphere extends Frame {
     pg.fill(isTracked() ? color(255, 0, 0) : _color);
     pg.sphere(isTracked() ? _radius * 1.2 : _radius);
     pg.stroke(255);
-    if (drawShooterTarget)
-      scene.drawShooterTarget(this);
+    if (bullseye)
+      scene.drawBullsEye(this);
     pg.popStyle();
-    return true;
   }
 }

@@ -1,12 +1,12 @@
 package ik.constraintTest;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.ik.ChainSolver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.ik.ChainSolver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
+import nub.timing.TimingTask;
 import ik.common.Arrow;
 import ik.common.Joint;
 import processing.core.PApplet;
@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class TargetWithDirection  extends PApplet {
     float radius = 10;
-    Frame target;
+    Node target;
 
     Scene scene;
     ArrayList<Joint> joints = new ArrayList<>();
@@ -38,7 +38,7 @@ public class TargetWithDirection  extends PApplet {
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
 
-        target = new Frame(scene, redBall);
+        target = new Node(scene, redBall);
         target.setPickingThreshold(0);
 
         //Generate a basic structure
@@ -59,7 +59,7 @@ public class TargetWithDirection  extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2.f));
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
-        solver = new ChainSolver((ArrayList<? extends Frame>) scene.branch(joints.get(0)));
+        solver = new ChainSolver((ArrayList<? extends Node>) scene.branch(joints.get(0)));
         solver.timesPerFrame = 1;
         solver.setTargetDirection(new Vector(1,0,0));
         solver.setTarget(target);
@@ -86,7 +86,7 @@ public class TargetWithDirection  extends PApplet {
         popStyle();
     }
 
-    Frame n = null;
+    Node n = null;
     float d = 5;
     boolean solve = false;
     public void keyPressed(){
@@ -107,9 +107,9 @@ public class TargetWithDirection  extends PApplet {
         if (mouseButton == LEFT){
             scene.spin();
         } else if (mouseButton == RIGHT) {
-            if(scene.trackedFrame() instanceof Arrow){
+            if(scene.trackedNode() instanceof Arrow){
                 Vector vector = new Vector(scene.mouse().x(), scene.mouse().y());
-                ((Arrow) scene.trackedFrame()).applyReferenceRotation(vector);
+                ((Arrow) scene.trackedNode()).applyReferenceRotation(vector);
             }else {
                 scene.translate();
             }

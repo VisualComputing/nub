@@ -1,8 +1,8 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PGraphics;
@@ -10,35 +10,35 @@ import processing.event.MouseEvent;
 
 public class ApplicationControl1 extends PApplet {
   Scene scene;
-  Frame[] shapes;
+  Node[] shapes;
   PFont font36;
   int totalShapes;
 
   //Choose FX2D, JAVA2D, P2D or P3D
   String renderer = P3D;
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.ApplicationControl1"});
   }
 
   public void settings() {
-    size(1240, 840, renderer);
+    size(1200, 800, renderer);
   }
 
   public void setup() {
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Frame[10];
+    shapes = new Node[10];
     for (int i = 0; i < shapes.length; i++) {
-      shapes[i] = new Frame(scene) {
+      shapes[i] = new Node(scene) {
         int id = totalShapes++;
         int _faces = randomFaces(), _color = randomColor();
 
         @Override
-        public boolean graphics(PGraphics pg) {
+        public void graphics(PGraphics pg) {
           pg.pushStyle();
           pg.fill(_color);
-          scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
+          Scene.drawTorusSolenoid(pg, _faces, scene.radius() / 20);
           scene.beginHUD(pg);
           Vector position = scene.screenLocation(position());
           pg.fill(isTracked() ? 0 : 255, isTracked() ? 255 : 0, isTracked() ? 0 : 255);
@@ -46,7 +46,6 @@ public class ApplicationControl1 extends PApplet {
           pg.text(id, position.x(), position.y());
           scene.endHUD(pg);
           pg.popStyle();
-          return true;
         }
 
         @Override
@@ -67,6 +66,7 @@ public class ApplicationControl1 extends PApplet {
             }
         }
       };
+      shapes[i].scale(23);
       shapes[i].randomize();
     }
     font36 = loadFont("FreeSans-36.vlw");
@@ -81,25 +81,30 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void draw() {
-    background(125);
+    background(255);
+    pushStyle();
+    strokeWeight(5);
+    stroke(0,0,255);
+    scene.drawDottedGrid();
+    popStyle();
     scene.drawAxes();
     scene.render();
   }
 
   void control(Object... gesture) {
-    control(scene.defaultFrame(), gesture);
+    control(scene.defaultNode(), gesture);
   }
 
-  void control(Frame frame, Object... gesture) {
-    frame.interact(gesture);
+  void control(Node node, Object... gesture) {
+    node.interact(gesture);
   }
 
   public void keyPressed() {
     int value = Character.getNumericValue(key);
     if (value >= 0 && value < 10)
-      scene.setTrackedFrame(shapes[value]);
+      scene.setTrackedNode(shapes[value]);
     if (key == ' ')
-      scene.resetTrackedFrame();
+      scene.resetTrackedNode();
     if (key == CODED)
       if (keyCode == UP)
         scene.translate(0, -10);
@@ -121,7 +126,10 @@ public class ApplicationControl1 extends PApplet {
   }
 
   public void mouseWheel(MouseEvent event) {
-    control(event.getCount());
+    if(event.isShiftDown())
+      scene.moveForward(20 * event.getCount());
+    else
+      control(event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {

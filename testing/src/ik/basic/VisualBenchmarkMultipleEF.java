@@ -1,23 +1,13 @@
 package ik.basic;
 
-import frames.core.Frame;
-import frames.core.Graph;
-import frames.core.constraint.BallAndSocket;
-import frames.core.constraint.Constraint;
-import frames.core.constraint.Hinge;
-import frames.core.constraint.PlanarPolygon;
-import frames.ik.*;
-import frames.ik.evolution.BioIk;
-import frames.ik.evolution.GASolver;
-import frames.ik.evolution.HillClimbingSolver;
-import frames.ik.jacobian.PseudoInverseSolver;
-import frames.ik.jacobian.SDLSSolver;
-import frames.ik.jacobian.TransposeSolver;
-import frames.primitives.Quaternion;
-import frames.primitives.Vector;
-import frames.processing.Scene;
-import frames.timing.TimingTask;
+import nub.core.Node;
+import nub.core.Graph;
+import nub.core.constraint.BallAndSocket;
 import ik.common.Joint;
+import nub.ik.Solver;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -40,8 +30,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
     Scene scene;
     //Methods
     ArrayList<Solver> solvers;
-    ArrayList<ArrayList<Frame>> structures = new ArrayList<>();
-    ArrayList<HashMap<Frame,Frame>> targets = new ArrayList<>();
+    ArrayList<ArrayList<Node>> structures = new ArrayList<>();
+    ArrayList<HashMap<Node,Node>> targets = new ArrayList<>();
 
     public void settings() {
         size(1500, 800, is3D ? P3D : P2D);
@@ -70,7 +60,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
 
 
         scene.registerTreeSolver(structures.get(0).get(0));
-        for(Frame f : targets.get(0).keySet()){
+        for(Node f : targets.get(0).keySet()){
             //solver.setTarget(f, targets.get(0).get(f));
             scene.addIKTarget(f, targets.get(0).get(f));
         }
@@ -99,23 +89,23 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         scene.endHUD();
     }
 
-    public void setConstraint(float down, float up, float left, float right, Frame f, Vector twist, float boneLength){
+    public void setConstraint(float down, float up, float left, float right, Node f, Vector twist, float boneLength){
         BallAndSocket constraint = new BallAndSocket(down, up, left, right);
         constraint.setRestRotation(f.rotation().get(), f.displacement(new Vector(0, 1, 0)), f.displacement(twist));
         f.setConstraint(constraint);
     }
 
-    public Frame generateTarget(Frame frame){
+    public Node generateTarget(Node frame){
         PShape redBall;
         if(is3D)  redBall = createShape(SPHERE, targetRadius);
         else  redBall = createShape(ELLIPSE, 0,0, targetRadius, targetRadius);
         redBall.setStroke(false);
         redBall.setFill(color(255,0,0));
-        Frame target = new Frame(scene){
+        Node target = new Node(scene){
             @Override
             public void visit() {
                 scene.drawAxes(targetRadius * 2);
-                if(scene.trackedFrame() == this){
+                if(scene.trackedNode() == this){
                     redBall.setFill(color(0,255,0));
                 }else{
                     redBall.setFill(color(255,0,0));
@@ -124,23 +114,22 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
             }
         };
         target.setPickingThreshold(targetRadius);
-        target.setHighlighting(Frame.Highlighting.FRONT);
         target.setPosition(frame.position().get());
         target.setOrientation(frame.orientation().get());
         return target;
     }
 
-    public ArrayList<Frame> generateYShape(int depth, boolean independent, float boneLength, int repetitions, Vector translation, int color) {
+    public ArrayList<Node> generateYShape(int depth, boolean independent, float boneLength, int repetitions, Vector translation, int color) {
         Joint reference = independent ? null : new Joint(scene, color, targetRadius * 0.3f);
-        HashMap<Frame, Frame> target = new HashMap<>();
+        HashMap<Node, Node> target = new HashMap<>();
         Joint root = generateYShape(reference, independent, depth, repetitions, boneLength, color, target);
         root.setRoot(true);
         root.translate(translation);
         targets.add(target);
-        return new ArrayList<Frame>(scene.branch(root));
+        return new ArrayList<Node>(scene.branch(root));
     }
 
-    public Joint generateYShape(Joint reference, boolean independent, int depth, int repetitions, float boneLength, int color, HashMap<Frame, Frame> targets) {
+    public Joint generateYShape(Joint reference, boolean independent, int depth, int repetitions, float boneLength, int color, HashMap<Node, Node> targets) {
         if(depth < 1){
             targets.put(reference, generateTarget(reference));
             return null;
@@ -185,8 +174,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         return independent ? reference : j1;
     }
 
-    public Frame generateRandomReachablePosition(List<? extends Frame> original){
-        ArrayList<? extends Frame> chain = copy(original);
+    public Node generateRandomReachablePosition(List<? extends Node> original){
+        ArrayList<? extends Node> chain = copy(original);
         for(int i = 0; i < chain.size(); i++){
             if(is3D)
                 chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
@@ -196,14 +185,14 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
         return chain.get(chain.size()-1);
     }
 
-    public ArrayList<Frame> copy(List<? extends Frame> chain) {
-        ArrayList<Frame> copy = new ArrayList<Frame>();
-        Frame reference = chain.get(0).reference();
+    public ArrayList<Node> copy(List<? extends Node> chain) {
+        ArrayList<Node> copy = new ArrayList<Node>();
+        Node reference = chain.get(0).reference();
         if (reference != null) {
-            reference = new Frame(reference.position().get(), reference.orientation().get(), 1);
+            reference = new Node(reference.position().get(), reference.orientation().get(), 1);
         }
-        for (Frame joint : chain) {
-            Frame newJoint = new Frame();
+        for (Node joint : chain) {
+            Node newJoint = new Node();
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
@@ -221,12 +210,12 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
             solve = !solve;
         }
         if(key == 's' || key == 'S'){
-            Frame f = generateRandomReachablePosition(structures.get(0));
+            Node f = generateRandomReachablePosition(structures.get(0));
             //targets.get(0).setPosition(f.position());
         }
         if(key == 'd' || key == 'D'){
-            for(List<Frame> structure : structures) {
-                for (Frame f : structure) {
+            for(List<Node> structure : structures) {
+                for (Node f : structure) {
                     f.setRotation(new Quaternion());
                 }
             }

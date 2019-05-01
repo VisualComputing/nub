@@ -1,6 +1,6 @@
 package ik.collada.animation;
 
-import frames.core.Frame;
+import nub.core.Node;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,11 +23,11 @@ import java.util.Map;
 public class KeyFrame {
     //TODO : Update
     private final float timeStamp;
-    private final HashMap<String, Frame> pose;
+    private final HashMap<String, Node> pose;
 
     public KeyFrame(float timeStamp){
         this.timeStamp = timeStamp;
-        this.pose = new HashMap<String, Frame>();
+        this.pose = new HashMap<String, Node>();
     }
 
     /**
@@ -40,12 +40,12 @@ public class KeyFrame {
      *            applied to.
      */
 
-    public KeyFrame(float timeStamp, HashMap<String, Frame> jointKeyFrames) {
+    public KeyFrame(float timeStamp, HashMap<String, Node> jointKeyFrames) {
         this.timeStamp = timeStamp;
         this.pose = jointKeyFrames;
     }
 
-    public HashMap<String, Frame> getPose(){
+    public HashMap<String, Node> getPose(){
         return pose;
     }
 
@@ -62,7 +62,7 @@ public class KeyFrame {
      *         they correspond to. This basically represents the "pose" at this
      *         keyframe.
      */
-    protected Map<String, Frame> getJointKeyFrames() {
+    protected Map<String, Node> getJointKeyFrames() {
         return pose;
     }
 }

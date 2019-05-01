@@ -1,4 +1,4 @@
-<project name="frames Library" default="clean" basedir="../">
+<project name="nub Library" default="clean" basedir="../">
 
     
 <!--	

@@ -1,7 +1,7 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -11,8 +11,8 @@ import processing.event.MouseEvent;
  */
 public class AdaptivePrecision1 extends PApplet {
   Scene scene;
-  Frame[] shapes;
-  Frame trackedShape;
+  Node[] shapes;
+  Node trackedShape;
 
   public void settings() {
     size(1600, 800, P3D);
@@ -22,11 +22,11 @@ public class AdaptivePrecision1 extends PApplet {
     rectMode(CENTER);
     scene = new Scene(this);
     scene.fit(1);
-    shapes = new Frame[25];
+    shapes = new Node[25];
     for (int i = 0; i < shapes.length; i++) {
-      //shapes[i] = new Frame(scene, shape());
-      shapes[i] = new Frame(scene);
-      shapes[i].shape(shape());
+      //shapes[i] = new Node(scene, shape());
+      shapes[i] = new Node(scene);
+      shapes[i].setShape(shape());
 
       scene.randomize(shapes[i]);
       shapes[i].setPickingThreshold(0.25f);
@@ -44,7 +44,7 @@ public class AdaptivePrecision1 extends PApplet {
       popMatrix();
       pushStyle();
       stroke(255);
-      scene.drawShooterTarget(shapes[i]);
+      scene.drawSquaredBullsEye(shapes[i]);
       popStyle();
     }
   }
@@ -76,7 +76,7 @@ public class AdaptivePrecision1 extends PApplet {
       }
   }
 
-  Frame defaultShape() {
+  Node defaultShape() {
     return trackedShape == null ? scene.eye() : trackedShape;
   }
 
@@ -87,7 +87,7 @@ public class AdaptivePrecision1 extends PApplet {
     return fig;
   }
 
-  public static void main(String args[]) {
+  public static void main(String[] args) {
     PApplet.main(new String[]{"intellij.AdaptivePrecision1"});
   }
 }

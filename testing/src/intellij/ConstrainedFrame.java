@@ -1,12 +1,12 @@
 package intellij;
 
-import frames.core.Frame;
-import frames.core.constraint.AxisPlaneConstraint;
-import frames.core.constraint.EyeConstraint;
-import frames.core.constraint.LocalConstraint;
-import frames.core.constraint.WorldConstraint;
-import frames.primitives.Vector;
-import frames.processing.Scene;
+import nub.core.Node;
+import nub.core.constraint.AxisPlaneConstraint;
+import nub.core.constraint.EyeConstraint;
+import nub.core.constraint.LocalConstraint;
+import nub.core.constraint.WorldConstraint;
+import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.MouseEvent;
@@ -22,7 +22,7 @@ public class ConstrainedFrame extends PApplet {
   PFont myFont;
   int transDir;
   int rotDir;
-  Frame iFrame;
+  Node iNode;
   AxisPlaneConstraint constraints[] = new AxisPlaneConstraint[3];
   int activeConstraint;
   boolean wC = true;
@@ -46,18 +46,18 @@ public class ConstrainedFrame extends PApplet {
     rotDir = 0;
     activeConstraint = 0;
 
-    iFrame = new Frame(scene);
-    iFrame.translate(new Vector(20, 20, 0));
-    iFrame.setConstraint(constraints[activeConstraint]);
+    iNode = new Node(scene);
+    iNode.translate(new Vector(20, 20, 0));
+    iNode.setConstraint(constraints[activeConstraint]);
   }
 
   public void draw() {
     background(0);
     scene.drawAxes();
     pushMatrix();
-    scene.applyTransformation(iFrame);
+    scene.applyTransformation(iNode);
     scene.drawAxes(40);
-    fill(iFrame.isTracked() ? 255 : 0, 0, 255);
+    fill(iNode.isTracked() ? 255 : 0, 0, 255);
     scene.drawTorusSolenoid();
     popMatrix();
     fill(0, 0, 255);
@@ -86,11 +86,11 @@ public class ConstrainedFrame extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      if (scene.isTrackedFrame(iFrame)) {
-        scene.resetTrackedFrame();
+      if (scene.isTrackedNode(iNode)) {
+        scene.resetTrackedNode();
         mouseTracking = true;
       } else {
-        scene.setTrackedFrame(iFrame);
+        scene.setTrackedNode(iNode);
         mouseTracking = false;
       }
     if (key == 'b' || key == 'B') {
@@ -199,7 +199,7 @@ public class ConstrainedFrame extends PApplet {
         .setRotationConstraintDirection(constraints[previous]
             .rotationConstraintDirection());
 
-    iFrame.setConstraint(constraints[activeConstraint]);
+    iNode.setConstraint(constraints[activeConstraint]);
   }
 
   void displayType(AxisPlaneConstraint.Type type, int x, int y, char c) {
