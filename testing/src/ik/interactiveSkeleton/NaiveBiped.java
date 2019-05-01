@@ -172,7 +172,7 @@ public class NaiveBiped extends PApplet {
         return solver;
     }
 
-    public Frame createTarget(Scene scene){
+    public Frame createTarget(Scene scene, float radius){
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
@@ -189,8 +189,8 @@ public class NaiveBiped extends PApplet {
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
-        Frame target1 = createTarget(scene);
-        Frame target2 = createTarget(scene);
+        Frame target1 = createTarget(scene, radius*1.2f);
+        Frame target2 = createTarget(scene, radius*1.2f);
 
         solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
         solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
