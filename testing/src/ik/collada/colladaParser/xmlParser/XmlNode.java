@@ -1,5 +1,7 @@
 package ik.collada.colladaParser.xmlParser;
 
+import processing.data.XML;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ public class XmlNode {
     private Map<String, String> attributes;
     private String data;
     private Map<String, List<XmlNode>> childNodes;
+    private List<XmlNode> childNodesList;
 
     protected XmlNode(String name) {
         this.name = name;
@@ -103,6 +106,23 @@ public class XmlNode {
         return null;
     }
 
+    public XmlNode getChildContainsAttribute(String childName, String attr, String value) {
+        List<XmlNode> children = getChildren(childName);
+        if (children == null || children.isEmpty()) {
+            return null;
+        }
+        for (XmlNode child : children) {
+            System.out.println("value -- : "  + value);
+            String val = child.getAttribute(attr);
+            System.out.println("val   -- : "  + val);
+
+            if (val.contains(value)) {
+                return child;
+            }
+        }
+        return null;
+    }
+
     /**
      * Get the child nodes of this node that have a given name.
      *
@@ -147,13 +167,19 @@ public class XmlNode {
     protected void addChild(XmlNode child) {
         if (childNodes == null) {
             childNodes = new HashMap<String, List<XmlNode>>();
+            childNodesList = new ArrayList<>();
         }
         List<XmlNode> list = childNodes.get(child.name);
         if (list == null) {
             list = new ArrayList<XmlNode>();
             childNodes.put(child.name, list);
         }
+        childNodesList.add(child);
         list.add(child);
+    }
+
+    public  List<XmlNode> getChildren(){
+        return childNodesList;
     }
 
     /**

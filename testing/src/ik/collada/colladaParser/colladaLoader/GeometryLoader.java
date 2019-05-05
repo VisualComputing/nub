@@ -16,62 +16,62 @@ import java.util.List;
  *
  */
 public class GeometryLoader {
-    //TODO : Update
-    private final XmlNode meshData;
+    private XmlNode meshData;
 
     private final List<SkinningData.VertexSkinData> vertexWeights;
-
-    private float[] verticesArray;
-    private float[] normalsArray;
-    private float[] texturesArray;
-    private int[] indicesArray;
-    private int[] jointIdsArray;
-    private float[] weightsArray;
-
-    List<Mesh.Vertex> vertices = new ArrayList<Mesh.Vertex>();
     List<PVector> textures = new ArrayList<PVector>();
     List<PVector> normals = new ArrayList<PVector>();
 
     public GeometryLoader(XmlNode geometryNode, List<SkinningData.VertexSkinData> vertexWeights) {
         this.vertexWeights = vertexWeights;
-        this.meshData = geometryNode.getChild("geometry").getChild("mesh");
+        this.meshData = geometryNode;
     }
 
-    public Mesh extractModelData(){
-        readRawData();
-        return assembleVertices();
-    }
-
-    private void readRawData() {
-        readPositions();
-        readNormals();
-        readTextureCoords();
-    }
-
-    private void readPositions() {
+    public Mesh extractBlenderModelData(){
+        meshData = meshData.getChild("geometry").getChild("mesh");
         String positionsId = meshData.getChild("vertices").getChild("input").getAttribute("source").substring(1);
         XmlNode positionsData = meshData.getChildWithAttribute("source", "id", positionsId).getChild("float_array");
+        List<Mesh.Vertex> vertices = readPositions(true , positionsData);
+        readNormals();
+        readTextureCoords();
+        return assembleVertices(vertices);
+    }
+
+    public List<Mesh> extractURDFModelData(){
+        List<Mesh> meshes = new ArrayList<>();
+        for(XmlNode xmlNode : meshData.getChildren("geometry")){
+            XmlNode positionsData = xmlNode.getChild("mesh").getChild("source").getChild("float_array");
+            List<Mesh.Vertex> vertices = readPositions(false, positionsData);
+            meshes.add(assembleTriangles(xmlNode.getChild("mesh"), vertices));
+        }
+        return meshes;
+    }
+
+    private List<Mesh.Vertex> readPositions(boolean blender, XmlNode positionsData) {
         int count = Integer.parseInt(positionsData.getAttribute("count"));
         String[] posData = positionsData.getData().split(" ");
-        for (int i = 0; i < count/3; i++) {
-            float x = Float.parseFloat(posData[i * 3])*100;
-            float y = Float.parseFloat(posData[i * 3 + 1])*100;
-            float z = Float.parseFloat(posData[i * 3 + 2])*100;
+        List<Mesh.Vertex> vertices = new ArrayList<>();
+        for (int i = 0; i < posData.length/3; i++) {
+            float x = Float.parseFloat(posData[i * 3]);
+            float y = Float.parseFloat(posData[i * 3 + 1]);
+            float z = Float.parseFloat(posData[i * 3 + 2]);
             PVector position = new PVector(x, y, z);
-            vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x, position.y, position.z), vertexWeights.get(vertices.size())));
+            vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x, position.y, position.z), blender ? vertexWeights.get(vertices.size()) : null));
         }
+        return vertices;
     }
 
     private void readNormals() {
         String normalsId = meshData.getChild("polylist").getChildWithAttribute("input", "semantic", "NORMAL")
                 .getAttribute("source").substring(1);
         XmlNode normalsData = meshData.getChildWithAttribute("source", "id", normalsId).getChild("float_array");
+
         int count = Integer.parseInt(normalsData.getAttribute("count"));
         String[] normData = normalsData.getData().split(" ");
         for (int i = 0; i < count/3; i++) {
-            float x = Float.parseFloat(normData[i * 3])*100;
-            float y = Float.parseFloat(normData[i * 3 + 1])*100;
-            float z = Float.parseFloat(normData[i * 3 + 2])*100;
+            float x = Float.parseFloat(normData[i * 3]);
+            float y = Float.parseFloat(normData[i * 3 + 1]);
+            float z = Float.parseFloat(normData[i * 3 + 2]);
             PVector norm = new PVector(x, y, z);
             normals.add(norm);
         }
@@ -91,7 +91,41 @@ public class GeometryLoader {
         }
     }
 
-    private Mesh assembleVertices(){
+    private Mesh assembleTriangles(XmlNode geom, List<Mesh.Vertex> vertices){
+        Mesh mesh = new Mesh();
+        for(XmlNode triangles : geom.getChildren("triangles")){
+            String[] rawIndexData = triangles.getChild("p").getData().split(" ");
+            int[] indexData = new int[rawIndexData.length];
+            for(int i = 0; i < rawIndexData.length; i++){
+                indexData[i] = Integer.parseInt(rawIndexData[i]);
+            }
+            for(int i=0;i<indexData.length; i+=3){
+                Mesh.Face face = new Mesh.Face();
+
+                int i1 = indexData[i];
+                int i2 = indexData[i + 1];
+                int i3 = indexData[i + 2];
+                //Create a Vertex
+                Mesh.Vertex v1 = new Mesh.Vertex(vertices.get(i1));
+                Mesh.Vertex v2 = new Mesh.Vertex(vertices.get(i2));
+                Mesh.Vertex v3 = new Mesh.Vertex(vertices.get(i3));
+
+                mesh.getVertices().add(v1);
+                mesh.getVertices().add(v2);
+                mesh.getVertices().add(v3);
+
+                face.getVertices().add(v1);
+                face.getVertices().add(v2);
+                face.getVertices().add(v3);
+
+                mesh.getFaces().add(face);
+            }
+        }
+
+        return mesh;
+    }
+
+    private Mesh assembleVertices(List<Mesh.Vertex> vertices){
         XmlNode poly = meshData.getChild("polylist");
         int typeCount = poly.getChildren("input").size();
         String[] rawSides = poly.getChild("vcount").getData().split(" ");

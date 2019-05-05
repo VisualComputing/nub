@@ -1,5 +1,7 @@
 package ik.collada.colladaParser.colladaLoader;
 
+import ik.common.Joint;
+import nub.core.Node;
 import nub.processing.Scene;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.animation.Animation;
@@ -12,8 +14,9 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 
 import java.io.File;
+import java.util.List;
 
-public class ColladaLoader {
+public class ColladaBlenderLoader {
     //TODO : Update
     public static AnimatedModel loadColladaModel(String colladaFile, String dae, String tex, Scene scene, int maxWeights) {
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
@@ -22,13 +25,21 @@ public class ColladaLoader {
 
         SkinLoader skinLoader = new SkinLoader(node.getChild("library_controllers"), maxWeights);
         SkinningData skinningData = skinLoader.extractSkinData();
-
         SkeletonLoader jointsLoader = new SkeletonLoader(node.getChild("library_visual_scenes"), skinningData.jointOrder);
-        jointsLoader.extractBoneData(model);
-
+        jointsLoader.extractBoneData(model, true);
         GeometryLoader g = new GeometryLoader(node.getChild("library_geometries"), skinningData.verticesSkinData);
-        Mesh meshData = g.extractModelData();
-        model.setModel(meshData.generatePShape(scene.context(), colladaFile + tex));
+        Mesh meshData = g.extractBlenderModelData();
+        model.addModel(null,meshData.generatePShape(scene.context(), colladaFile + tex));
+
+        /*Fix radius*/
+        scene.setRadius(model.getModels().get(null).getWidth()*2);
+        for(Node joint : model.getJoints().values()){
+            if(joint instanceof Joint) {
+                ((Joint)joint).setRadius(scene.radius() * 0.03f);
+            }
+            joint.setPickingThreshold(-0.003f);
+        }
+
         return model;
     }
 

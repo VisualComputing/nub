@@ -6,32 +6,38 @@ import nub.primitives.Quaternion;
 import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.common.Joint;
+import nub.primitives.Vector;
 
+import java.awt.*;
 import java.util.List;
 
 public class SkeletonLoader {
-    //TODO : Update
     private XmlNode armatureData;
     private List<String> boneOrder;
     private int jointCount = 0;
 
     public SkeletonLoader(XmlNode visualSceneNode, List<String> boneOrder) {
-        this.armatureData = visualSceneNode.getChild("visual_scene").getChildWithAttribute("node", "id", "Armature");
+        XmlNode node = visualSceneNode.getChild("visual_scene").getChildWithAttribute("node", "id", "Armature");
+        if(node != null) {
+            this.armatureData = visualSceneNode.getChild("visual_scene").getChildWithAttribute("node", "id", "Armature");
+        } else{
+            this.armatureData = visualSceneNode.getChild("visual_scene").getChild("node");
+        }
         this.boneOrder = boneOrder;
     }
 
-    public void extractBoneData(AnimatedModel model){
+    public void extractBoneData(AnimatedModel model, boolean blender){
         XmlNode headNode = armatureData.getChild("node");
-        Joint root = loadJointData(headNode, model, null);
+        Joint root = loadJointData(headNode, model, null, blender);
         root.setRoot(true);
         model.setRootJoint(root);
         model.setJointCount(jointCount);
     }
 
-    private Joint loadJointData(XmlNode jointNode, AnimatedModel model, Joint parent){
-        Joint joint = extractMainJointData(jointNode, model, parent);
+    private Joint loadJointData(XmlNode jointNode, AnimatedModel model, Joint parent, boolean blender){
+        Joint joint = blender ? extractMainJointData(jointNode, model, parent) : extractMainJointTransformationData(jointNode, model, parent);
         for(XmlNode childNode : jointNode.getChildren("node")){
-            loadJointData(childNode, model, joint);
+            loadJointData(childNode, model, joint, blender);
         }
         return joint;
     }
@@ -43,20 +49,45 @@ public class SkeletonLoader {
         float[] matrixData = convertData(matrixRawData);
         Matrix mat = new Matrix(matrixData);
         Joint joint = new Joint(model.getScene());
-        Node frame = joint;
-        if(parent != null) frame.setReference(parent);
-        frame.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
-        frame.setRotation(new Quaternion(mat));
-        joint.setRadius(0.2f);
-        joint.setPickingThreshold(1e-10f);
+        if(parent != null) joint.setReference(parent);
+        joint.setTranslation(matrixData[3], matrixData[7], matrixData[11]);
+        joint.setRotation(new Quaternion(mat));
         jointCount++;
-        model.getJoints().put(nameId, frame);
-        model.getIdxs().put(frame.id(), index);
+        model.getJoints().put(nameId, joint);
+        model.getIdxs().put(joint.id(), index);
+        return joint;
+    }
+
+    private Joint extractMainJointTransformationData(XmlNode jointNode, AnimatedModel model, Joint parent){
+        Joint joint = new Joint(model.getScene());
+        if(parent != null) joint.setReference(parent);
+
+        String nameId = jointNode.getAttribute("id");
+        for(XmlNode transformations : jointNode.getChildren()){
+            if(transformations.getName().equals("translate")){
+                float[] translation = convertData(transformations.getData().split(" "));
+                joint.translate(translation[0],translation[1], translation[2]);
+            }else if(transformations.getName().equals("rotate")){
+                float[] rotation = convertData(transformations.getData().split(" "));
+                joint.rotate(new Quaternion(new Vector(rotation[0], rotation[1], rotation[2]), rotation[3]));
+            }
+        }
+
+
+
+        //Related geom
+        XmlNode geom = jointNode.getChild("instance_geometry");
+
+        if(geom != null) {
+            joint.setMesh(model.getModels().get(geom.getAttribute("url").substring(1)));
+        }
+        jointCount++;
+        model.getJoints().put(nameId, joint);
         return joint;
     }
 
     private float[] convertData(String[] rawData){
-        float[] matrixData = new float[16];
+        float[] matrixData = new float[Math.min(rawData.length,16)];
         for(int i=0;i<matrixData.length;i++){
             matrixData[i] = Float.parseFloat(rawData[i]);
         }

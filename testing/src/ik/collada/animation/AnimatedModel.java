@@ -5,7 +5,10 @@ import nub.processing.Scene;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PShape;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Adapted by sebchaparr on 22/07/18.
@@ -15,8 +18,8 @@ public class AnimatedModel {
 
 
     // skin
-    private PShape model;
-    private PImage texture;
+    private HashMap<String, PShape> models;
+    private List<PImage> textures;
     private Scene scene;
 
     // skeleton
@@ -47,26 +50,19 @@ public class AnimatedModel {
         joints = new HashMap<String, Node>();
         idxs = new HashMap<Integer, Integer>();
         this.scene = scene;
-    }
-
-    public AnimatedModel(PShape model, PImage texture, HashMap<String, Node> joints, Node rootJoint) {
-        this.model = model;
-        this.texture = texture;
-        this.rootJoint = rootJoint;
-        this.joints = joints;
-        this.jointCount = joints.size();
-        this.animator = new Animator(this);
-    }
-
-    public void setModel(PShape model){
-        this.model = model;
+        models = new HashMap<>();
+        textures = new ArrayList<>();
     }
 
     /**
      * @return The VAO containing all the mesh data for this entity.
      */
-    public PShape getModel() {
-        return model;
+    public HashMap<String, PShape> getModels() {
+        return models;
+    }
+
+    public void addModel(String id, PShape model){
+        models.put(id, model);
     }
 
     public Scene getScene(){ return scene;}
@@ -74,8 +70,8 @@ public class AnimatedModel {
     /**
      * @return The diffuse texture for this entity.
      */
-    public PImage getTexture() {
-        return texture;
+    public List<PImage> getTexture() {
+        return textures;
     }
 
     /**

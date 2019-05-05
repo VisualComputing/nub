@@ -19,7 +19,7 @@ public class XmlParser {
     private static final Pattern DATA = Pattern.compile(">(.+?)<");
     private static final Pattern START_TAG = Pattern.compile("<(.+?)>");
     private static final Pattern ATTR_NAME = Pattern.compile("(.+?)=");
-    private static final Pattern ATTR_VAL = Pattern.compile("\"(.+?)\"");
+    private static final Pattern ATTR_VAL = Pattern.compile("\"(.*?)\"");
     private static final Pattern CLOSED = Pattern.compile("(</|/>)");
 
     /**
@@ -37,7 +37,7 @@ public class XmlParser {
             e.printStackTrace();
         }
         try {
-            reader.readLine();
+            String s = reader.readLine();
             XmlNode node = loadNode(reader);
             reader.close();
             return node;
@@ -54,7 +54,7 @@ public class XmlParser {
         if (line.startsWith("</")) {
             return null;
         }
-        String[] startTagParts = getStartTag(line).split(" ");
+        String[] startTagParts = getStartTag(line).split("[ ]+(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
         XmlNode node = new XmlNode(startTagParts[0].replace("/", ""));
         addAttributes(startTagParts, node);
         addData(line, node);
