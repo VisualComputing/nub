@@ -16,6 +16,8 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.min;
+import static java.lang.Math.toDegrees;
 
 /**
  * A Frame is constrained to disable translation and
@@ -96,20 +98,13 @@ public abstract class ConeConstraint extends Constraint{
         rotationSwing = new Quaternion(tw, constrained); // get constrained swing rotation
         //Constraint twist
         //Find idle twist
-        Vector idleAxis = new Vector(_idleRotation._quaternion[0], _idleRotation._quaternion[1], _idleRotation._quaternion[2]);
-        idleAxis = Vector.projectVectorOnAxis(idleAxis, tw); // w.r.t idle
-        //Get rotation component on Axis direction
-        Quaternion idleTwist = new Quaternion(idleAxis.x(), idleAxis.y(), idleAxis.z(), _idleRotation.w()); //w.r.t idle
         //compare angles
         float twistAngle = rotationTwist.angle();
-        float idleAngle = idleTwist.angle();
-        if (rotationAxis.dot(tw ) < 0) twistAngle = (float)(2 * Math.PI - twistAngle);
-        if (idleAxis.dot(tw ) < 0) idleAngle = (float)(2 * Math.PI - idleAngle);
-        //difference between angles
-        float diff1 = twistAngle - idleAngle;
-        float diff2 = (float)(twistAngle - 2 * Math.PI + idleAngle);
-        float diff = abs(diff1) < abs(diff2) ? diff1 : diff2;
-        if( (diff < 0 && -diff > _min) || (diff > 0 && diff > _max) ){
+        if (rotationAxis.dot(tw ) < 0) twistAngle = -twistAngle;
+        //Check that twist angle is in range [-min, max]
+        if( (twistAngle < 0 && -twistAngle > _min) || (twistAngle > 0 && twistAngle > _max) ){
+
+            twistAngle = twistAngle < 0 ? (float) (twistAngle + 2*Math.PI) : twistAngle;
             twistAngle = twistAngle - _max < (float) (-_min + 2*Math.PI) - twistAngle ? _max : -_min;
         }
         rotationTwist = new Quaternion(tw, twistAngle); //w.r.t idle

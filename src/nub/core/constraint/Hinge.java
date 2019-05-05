@@ -15,6 +15,9 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.min;
+
 /**
  * A Frame is constrained to disable translation and
  * allow 1-DOF rotation limiting Rotation by defining an
