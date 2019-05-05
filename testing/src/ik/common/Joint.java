@@ -108,4 +108,7 @@ public class Joint extends Node {
     public float radius(){
         return _radius;
     }
+    public int color(){
+        return _color;
+    }
 }

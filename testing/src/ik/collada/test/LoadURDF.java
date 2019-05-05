@@ -25,8 +25,8 @@ import java.util.List;
 public class LoadURDF extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
-    String dae = "humanoid.dae";
-    String tex = "texture.png";
+    String[] daes = {"ur10_joint_limited_robot.dae", "kuka_kr16_2.dae"};
+    int dae = 0; //choose between example models
     AnimatedModel model;
 
     public void settings() {
@@ -39,8 +39,7 @@ public class LoadURDF extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        //model = ColladaURDFLoader.loadColladaModel("C:\\Users\\usuario\\Desktop\\Computer_Graphics_books\\Models\\collada-robots-collection-master\\kuka_kr16_2\\", "kuka_kr16_2.dae", scene);
-        model = ColladaURDFLoader.loadColladaModel("C:/Users/usuario/Desktop/Computer_Graphics_books/Models/collada-robots-collection-master/ur10_joint_limited_robot/", "ur10_joint_limited_robot.dae", scene);
+        model = ColladaURDFLoader.loadColladaModel(sketchPath() + path, daes[dae], scene);
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
@@ -49,7 +48,7 @@ public class LoadURDF extends PApplet {
         model.printNames();
         Target target = new Target(scene, ((Joint)model.getRootJoint()).radius());
         /*Chain solver*/
-        List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get("vkmodel0_node10"));
+        List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get(dae == 0 ? "vkmodel0_node10" : "vkmodel0_node8"));
 
         ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
         solver.setKeepDirection(true);
