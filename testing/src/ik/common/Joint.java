@@ -7,20 +7,24 @@ package ik.common;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.core.Node;
-import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
+import processing.core.PShape;
 
 public class Joint extends Node {
-    public static boolean deph = false;
+    public static boolean depth = false;
     protected String _name;
     protected int _color;
     protected float _radius;
+    protected PShape _mesh;
     protected static PGraphics _pGraphics;
     public static boolean axes = true;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
 
+    public void setMesh(PShape mesh){
+        _mesh = mesh;
+    }
 
     public Joint(Scene scene, int color, float radius){
         super(scene);
@@ -54,7 +58,11 @@ public class Joint extends Node {
     public void visit(){
         Scene scene = (Scene) this._graph;
         PGraphics pg = _pGraphics;
-        if(!deph)pg.hint(PConstants.DISABLE_DEPTH_TEST);
+        if(_mesh != null){
+            pg.shape(_mesh);
+        }
+
+        if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         if (!_isRoot) {
             pg.strokeWeight(_radius/4f);
@@ -75,10 +83,14 @@ public class Joint extends Node {
         if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this);
         }
-        //scene.drawCross(this);
         //if (scene.is3D()) scene.drawAxes(_radius*2);
-        if(!deph) pg.hint(PConstants.ENABLE_DEPTH_TEST);
+        if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
         if(axes) scene.drawAxes(_radius*2);
+
+        pg.stroke(255);
+        //pg.strokeWeight(2);
+        scene.drawBullsEye(this);
+
         pg.popStyle();
 
     }
