@@ -34,7 +34,7 @@ public class GaitGenerator extends PApplet {
 
     Node ref;
     public void setup() {
-        Joint.deph = true;
+        Joint.depth = true;
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setFOV(PI / 3);

@@ -51,8 +51,8 @@ public class NaiveBiped extends PApplet {
         scene.setRadius(segments * 2 * boneLength);
         scene.fit(1);
 
-        //createStructure(scene, segments, boneLength, radius, color(255,0,0), new Vector(-boneLength*3, 0,0), IKMode.BIOIK);
-        //createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(boneLength*1, 0,0), IKMode.CCD);
+        createStructure(scene, segments, boneLength, radius, color(255,0,0), new Vector(-boneLength*3, 0,0), IKMode.BIOIK);
+        createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(boneLength*1, 0,0), IKMode.CCD);
         createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
 
     }
@@ -144,7 +144,7 @@ public class NaiveBiped extends PApplet {
                 //chainSolver.setDirectionWeight(0.5f);
                 //chainSolver.explore(false);
                 ((ChainSolver)solver).setTarget(target);
-                ((ChainSolver)solver).setTargetDirection(new Vector(0, 0, 1));
+                //((ChainSolver)solver).setTargetDirection(new Vector(0, 0, 1));
                 break;
             }
             case BIOIK:{

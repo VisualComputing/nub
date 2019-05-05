@@ -241,7 +241,7 @@ public class InteractiveSpider extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setFOV(PI / 3);
-        Joint.deph = true;
+        Joint.depth = true;
         for(int i = 0; i < spiders.length; i++) {
             spiders[i] = new Spider(scene,
                     random(6, 14),

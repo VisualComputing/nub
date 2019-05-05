@@ -230,7 +230,7 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
         //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
-
+        //rootIK.cull(true);
         //root.cull(true);
     }
 
