@@ -25,10 +25,21 @@ public class AnimatedModel {
     // skeleton
     private Node rootJoint;
     private HashMap<String, Node> joints;
+    private HashMap<String, Node> geometry;
     private HashMap<Integer, Integer> idxs; //Frame idx - Data idx
     private int jointCount;
-
+    private float scaling = 1;
     private Animator animator;
+
+
+    public void setScaling(float scaling){
+        this.scaling = scaling;
+    }
+
+    public float scaling(){
+        return scaling;
+    }
+
 
     public void setRootJoint(Node root){
         this.rootJoint = root;
@@ -46,9 +57,15 @@ public class AnimatedModel {
         return idxs;
     }
 
+    public HashMap<String, Node> getGeometry(){
+        return geometry;
+    }
+
+
     public AnimatedModel(Scene scene){
         joints = new HashMap<String, Node>();
         idxs = new HashMap<Integer, Integer>();
+        geometry = new HashMap<String, Node>();
         this.scene = scene;
         models = new HashMap<>();
         textures = new ArrayList<>();

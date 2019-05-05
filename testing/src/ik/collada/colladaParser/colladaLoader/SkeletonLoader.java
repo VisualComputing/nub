@@ -7,14 +7,13 @@ import ik.collada.animation.AnimatedModel;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.common.Joint;
 import nub.primitives.Vector;
-
-import java.awt.*;
 import java.util.List;
 
 public class SkeletonLoader {
     private XmlNode armatureData;
     private List<String> boneOrder;
     private int jointCount = 0;
+    private float max = -1;
 
     public SkeletonLoader(XmlNode visualSceneNode, List<String> boneOrder) {
         XmlNode node = visualSceneNode.getChild("visual_scene").getChildWithAttribute("node", "id", "Armature");
@@ -26,16 +25,25 @@ public class SkeletonLoader {
         this.boneOrder = boneOrder;
     }
 
+
     public void extractBoneData(AnimatedModel model, boolean blender){
         XmlNode headNode = armatureData.getChild("node");
         Joint root = loadJointData(headNode, model, null, blender);
         root.setRoot(true);
         model.setRootJoint(root);
         model.setJointCount(jointCount);
+        System.out.println("max val : " + max);
+        model.setScaling(100/max);
+        //scale skeleton from children to root
+        for(Node j : model.getJoints().values()){
+            j.setTranslation(Vector.multiply(j.translation(), model.scaling()));
+        }
     }
 
     private Joint loadJointData(XmlNode jointNode, AnimatedModel model, Joint parent, boolean blender){
         Joint joint = blender ? extractMainJointData(jointNode, model, parent) : extractMainJointTransformationData(jointNode, model, parent);
+        float mag = joint.position().magnitude();
+        max =  max < mag ? mag : max;
         for(XmlNode childNode : jointNode.getChildren("node")){
             loadJointData(childNode, model, joint, blender);
         }
@@ -73,13 +81,11 @@ public class SkeletonLoader {
             }
         }
 
-
-
         //Related geom
         XmlNode geom = jointNode.getChild("instance_geometry");
 
         if(geom != null) {
-            joint.setMesh(model.getModels().get(geom.getAttribute("url").substring(1)));
+            model.getGeometry().put(geom.getAttribute("url").substring(1), joint);
         }
         jointCount++;
         model.getJoints().put(nameId, joint);

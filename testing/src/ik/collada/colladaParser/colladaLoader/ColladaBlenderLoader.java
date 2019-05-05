@@ -27,8 +27,9 @@ public class ColladaBlenderLoader {
         SkinningData skinningData = skinLoader.extractSkinData();
         SkeletonLoader jointsLoader = new SkeletonLoader(node.getChild("library_visual_scenes"), skinningData.jointOrder);
         jointsLoader.extractBoneData(model, true);
+
         GeometryLoader g = new GeometryLoader(node.getChild("library_geometries"), skinningData.verticesSkinData);
-        Mesh meshData = g.extractBlenderModelData();
+        Mesh meshData = g.extractBlenderModelData(model.scaling());
         model.addModel(null,meshData.generatePShape(scene.context(), colladaFile + tex));
 
         /*Fix radius*/
@@ -37,7 +38,7 @@ public class ColladaBlenderLoader {
             if(joint instanceof Joint) {
                 ((Joint)joint).setRadius(scene.radius() * 0.03f);
             }
-            joint.setPickingThreshold(-0.003f);
+            joint.setPickingThreshold(-0.03f);
         }
 
         return model;

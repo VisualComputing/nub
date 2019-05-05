@@ -39,18 +39,17 @@ public class LoadURDF extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        model = ColladaURDFLoader.loadColladaModel("C:\\Users\\usuario\\Desktop\\Computer_Graphics_books\\Models\\collada-robots-collection-master\\kuka_kr16_2\\", "kuka_kr16_2.dae", scene);
-        //model = ColladaURDFLoader.loadColladaModel("C:/Users/usuario/Desktop/Computer_Graphics_books/Models/collada-robots-collection-master/ur10_joint_limited_robot/", "ur10_joint_limited_robot.dae", scene);
+        //model = ColladaURDFLoader.loadColladaModel("C:\\Users\\usuario\\Desktop\\Computer_Graphics_books\\Models\\collada-robots-collection-master\\kuka_kr16_2\\", "kuka_kr16_2.dae", scene);
+        model = ColladaURDFLoader.loadColladaModel("C:/Users/usuario/Desktop/Computer_Graphics_books/Models/collada-robots-collection-master/ur10_joint_limited_robot/", "ur10_joint_limited_robot.dae", scene);
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
 
         model.printNames();
-        Target target = new Target(scene, ((Joint)model.getRootJoint()).radius()*1.2f);
-
+        Target target = new Target(scene, ((Joint)model.getRootJoint()).radius());
         /*Chain solver*/
-        List<Node> branch = scene.branch(model.getRootJoint());
+        List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get("vkmodel0_node10"));
 
         ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
         solver.setKeepDirection(true);
@@ -60,7 +59,7 @@ public class LoadURDF extends PApplet {
         solver.maxIter = 50;
         solver.error = solver.minDistance = scene.radius()*0.001f;
         solver.setTarget(branch.get(branch.size() - 1), target);
-        target.setPosition(branch.get(branch.size() - 1).position());
+        target.setPosition(branch.get(branch.size() - 1).position().get());
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
@@ -75,6 +74,13 @@ public class LoadURDF extends PApplet {
         lights();
         scene.drawAxes();
         scene.render();
+        scene.beginHUD();
+        for(String s : model.getJoints().keySet()){
+            Node n = model.getJoints().get(s);
+            Vector sc = scene.screenLocation(new Vector(), n);
+            text(s, sc.x(), sc.y());
+        }
+        scene.endHUD();
     }
 
     @Override
@@ -104,19 +110,6 @@ public class LoadURDF extends PApplet {
                 scene.align();
     }
 
-    boolean constraint_hips = true;
-    public void keyPressed(){
-        if(key == 'h' || key == 'H'){
-            if(constraint_hips) {
-                System.out.println("Constraint Hips Enabled");
-                model.getJoints().get("Torso").setConstraint(new FixedConstraint());
-            } else {
-                System.out.println("Constraint Hips Disabled");
-                model.getJoints().get("Torso").setConstraint(null);
-            }
-            constraint_hips = !constraint_hips;
-        }
-    }
 
 
     public static void main(String args[]) {

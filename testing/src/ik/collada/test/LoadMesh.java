@@ -1,5 +1,6 @@
 package ik.collada.test;
 
+import ik.common.Joint;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
@@ -46,18 +47,19 @@ public class LoadMesh extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        for(int i = 0; i < effectors.length; i++){
-            Node target = new Target(scene, 0.2f);
-            target.setPickingThreshold(0);
-            targets.add(target);
-        }
-
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
         scene.setRadius(model.getModels().get(null).getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
         skinning = new SkinningAnimationModel(model);
+
+        for(int i = 0; i < effectors.length; i++){
+            Node target = new Target(scene, ((Joint)model.getRootJoint()).radius() * 0.6f);
+            target.setPickingThreshold(0);
+            targets.add(target);
+        }
+
 
         BallAndSocket chest_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
         Node chest = model.getJoints().get("Chest");

@@ -27,34 +27,34 @@ public class GeometryLoader {
         this.meshData = geometryNode;
     }
 
-    public Mesh extractBlenderModelData(){
+    public Mesh extractBlenderModelData(float scaling){
         meshData = meshData.getChild("geometry").getChild("mesh");
         String positionsId = meshData.getChild("vertices").getChild("input").getAttribute("source").substring(1);
         XmlNode positionsData = meshData.getChildWithAttribute("source", "id", positionsId).getChild("float_array");
-        List<Mesh.Vertex> vertices = readPositions(true , positionsData);
+        List<Mesh.Vertex> vertices = readPositions(true , positionsData, scaling);
         readNormals();
         readTextureCoords();
         return assembleVertices(vertices);
     }
 
-    public List<Mesh> extractURDFModelData(){
+    public List<Mesh> extractURDFModelData(float scaling){
         List<Mesh> meshes = new ArrayList<>();
         for(XmlNode xmlNode : meshData.getChildren("geometry")){
             XmlNode positionsData = xmlNode.getChild("mesh").getChild("source").getChild("float_array");
-            List<Mesh.Vertex> vertices = readPositions(false, positionsData);
+            List<Mesh.Vertex> vertices = readPositions(false, positionsData, scaling);
             meshes.add(assembleTriangles(xmlNode.getChild("mesh"), vertices));
         }
         return meshes;
     }
 
-    private List<Mesh.Vertex> readPositions(boolean blender, XmlNode positionsData) {
+    private List<Mesh.Vertex> readPositions(boolean blender, XmlNode positionsData, float scaling) {
         int count = Integer.parseInt(positionsData.getAttribute("count"));
         String[] posData = positionsData.getData().split(" ");
         List<Mesh.Vertex> vertices = new ArrayList<>();
         for (int i = 0; i < posData.length/3; i++) {
-            float x = Float.parseFloat(posData[i * 3]);
-            float y = Float.parseFloat(posData[i * 3 + 1]);
-            float z = Float.parseFloat(posData[i * 3 + 2]);
+            float x = Float.parseFloat(posData[i * 3]) * scaling;
+            float y = Float.parseFloat(posData[i * 3 + 1]) * scaling;
+            float z = Float.parseFloat(posData[i * 3 + 2]) * scaling;
             PVector position = new PVector(x, y, z);
             vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x, position.y, position.z), blender ? vertexWeights.get(vertices.size()) : null));
         }

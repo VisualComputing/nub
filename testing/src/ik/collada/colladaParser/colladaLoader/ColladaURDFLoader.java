@@ -21,26 +21,29 @@ public class ColladaURDFLoader {
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
         AnimatedModel model = new AnimatedModel(scene);
 
+        SkeletonLoader jointsLoader = new SkeletonLoader(node.getChild("library_visual_scenes"), null);
+        jointsLoader.extractBoneData(model, false);
+
         GeometryLoader g = new GeometryLoader(node.getChild("library_geometries"), null);
-        List<Mesh> meshes = g.extractURDFModelData();
+        List<Mesh> meshes = g.extractURDFModelData(model.scaling());
         int i = 0;
         List<XmlNode> xmlNodes = node.getChild("library_geometries").getChildren("geometry");
         float max = -1;
         for(Mesh mesh : meshes){
             PShape pshape = mesh.generatePShape(scene.context(), null);
-            model.addModel(xmlNodes.get(i++).getAttribute("id"), pshape);
+            String id = xmlNodes.get(i++).getAttribute("id");
+            model.addModel(id, pshape);
             max = max < pshape.getWidth() ? pshape.getWidth() : max;
+            ((Joint) model.getGeometry().get(id)).setMesh(pshape);
         }
 
-        SkeletonLoader jointsLoader = new SkeletonLoader(node.getChild("library_visual_scenes"), null);
-        jointsLoader.extractBoneData(model, false);
 
         scene.setRadius(max * 5f);
         for(Node joint : model.getJoints().values()){
             if(joint instanceof Joint) {
                 ((Joint)joint).setRadius(scene.radius() * 0.03f);
             }
-            joint.setPickingThreshold(-0.0009f);
+            joint.setPickingThreshold(-0.03f);
         }
 
         return model;
