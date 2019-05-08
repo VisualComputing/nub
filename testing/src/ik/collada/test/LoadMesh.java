@@ -43,6 +43,7 @@ public class LoadMesh extends PApplet {
 
     public void setup() {
         randomSeed(14);
+        Joint.markers = true;
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
@@ -92,7 +93,7 @@ public class LoadMesh extends PApplet {
 
         //LEGS
         Node r_leg = model.getJoints().get("Upper_Leg_R");
-        BallAndSocket r_leg_constraint = new BallAndSocket(radians(30), radians(30), radians(50), radians(89));
+        BallAndSocket r_leg_constraint = new BallAndSocket(radians(30), radians(50), radians(50), radians(89));
         r_leg_constraint.setTwistLimits(radians(30), radians(30));
         rot = r_leg.rotation().get();
         r_leg_constraint.setRestRotation(rot, new Vector(1, 0, 0), new Vector(0,1,0));
@@ -103,7 +104,7 @@ public class LoadMesh extends PApplet {
         r_knee.setConstraint(r_knee_constraint);
 
         Node l_leg = model.getJoints().get("Upper_Leg_L");
-        BallAndSocket l_leg_constraint = new BallAndSocket(radians(30), radians(30), radians(50), radians(89));
+        BallAndSocket l_leg_constraint = new BallAndSocket(radians(30), radians(50), radians(50), radians(89));
         l_leg_constraint.setTwistLimits(radians(30), radians(30));
         rot = l_leg.rotation().get();
         l_leg_constraint.setRestRotation(rot, new Vector(1, 0, 0), new Vector(0,1,0));

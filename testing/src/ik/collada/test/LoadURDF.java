@@ -5,13 +5,11 @@ import ik.common.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.core.constraint.FixedConstraint;
 import nub.ik.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.collada.animation.AnimatedModel;
-import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
@@ -25,8 +23,8 @@ import java.util.List;
 public class LoadURDF extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
-    String[] daes = {"ur10_joint_limited_robot.dae", "kuka_kr16_2.dae"};
-    int dae = 0; //choose between example models
+    String[] daes = {"ur10_joint_limited_robot.dae", "kuka_kr16_2.dae", "nasa_valkyrie.dae"};
+    int dae = 1; //choose between example models
     AnimatedModel model;
 
     public void settings() {
@@ -34,6 +32,8 @@ public class LoadURDF extends PApplet {
     }
 
     public void setup() {
+        Joint.axes = true;
+        Joint.markers = true;
         randomSeed(14);
         this.g.textureMode(NORMAL);
         scene = new Scene(this);
@@ -46,40 +46,45 @@ public class LoadURDF extends PApplet {
         scene.fit();
 
         model.printNames();
-        Target target = new Target(scene, ((Joint)model.getRootJoint()).radius());
-        /*Chain solver*/
-        List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get(dae == 0 ? "vkmodel0_node10" : "vkmodel0_node8"));
+        if(dae != 2) {
+            Target target = new Target(scene, ((Joint) model.getRootJoint()).radius());
+            /*Chain solver*/
 
-        ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
-        solver.setKeepDirection(true);
-        solver.setFixTwisting(true);
+            List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get(dae == 0 ? "vkmodel0_node10" : "vkmodel0_node8"));
 
-        solver.timesPerFrame = 5;
-        solver.maxIter = 50;
-        solver.error = solver.minDistance = scene.radius()*0.001f;
-        solver.setTarget(branch.get(branch.size() - 1), target);
-        target.setPosition(branch.get(branch.size() - 1).position().get());
-        TimingTask task = new TimingTask() {
-            @Override
-            public void execute() {
-                solver.solve();
-            }
-        };
-        scene.registerTask(task);
-        task.run(40);
+            ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
+            solver.setKeepDirection(true);
+            solver.setFixTwisting(true);
+
+            solver.timesPerFrame = 5;
+            solver.maxIter = 50;
+            solver.error = solver.minDistance = scene.radius() * 0.001f;
+            solver.setTarget(branch.get(branch.size() - 1), target);
+            target.setPosition(branch.get(branch.size() - 1).position().get());
+            TimingTask task = new TimingTask() {
+                @Override
+                public void execute() {
+                    solver.solve();
+                }
+            };
+            scene.registerTask(task);
+            task.run(40);
+        }
     }
     public void draw() {
         background(0);
         lights();
         scene.drawAxes();
         scene.render();
-        scene.beginHUD();
-        for(String s : model.getJoints().keySet()){
-            Node n = model.getJoints().get(s);
-            Vector sc = scene.screenLocation(new Vector(), n);
-            text(s, sc.x(), sc.y());
+        if(dae != 2) {
+            scene.beginHUD();
+            for (String s : model.getJoints().keySet()) {
+                Node n = model.getJoints().get(s);
+                Vector sc = scene.screenLocation(new Vector(), n);
+                text(s, sc.x(), sc.y());
+            }
+            scene.endHUD();
         }
-        scene.endHUD();
     }
 
     @Override
