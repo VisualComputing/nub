@@ -30,7 +30,7 @@ public class Target extends Node {
         _redBall.setFill(scene.pApplet().color(255, 0, 0));
 
         _interpolator = new Interpolator(this);
-        setShape(_redBall);
+        //setShape(_redBall);
         setPickingThreshold(0);
 
         Target t = this;
@@ -50,6 +50,14 @@ public class Target extends Node {
         setPosition(frame.position());
         setOrientation(frame.orientation());
     }
+
+    @Override
+    public void graphics(processing.core.PGraphics pGraphics){
+        pGraphics.hint(PConstants.DISABLE_DEPTH_TEST);
+        pGraphics.shape(_redBall);
+        pGraphics.hint(PConstants.ENABLE_DEPTH_TEST);
+    }
+
 
     public ArrayList<Vector> last(){ return _last; }
     public void drawPath(){

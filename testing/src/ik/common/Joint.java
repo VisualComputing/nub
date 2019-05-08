@@ -11,19 +11,24 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Joint extends Node {
     public static boolean depth = false;
+    public static boolean markers = false;
     protected String _name;
     protected int _color;
     protected float _radius;
-    protected PShape _mesh;
+    protected List<PShape> _mesh;
     protected static PGraphics _pGraphics;
     public static boolean axes = true;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
 
-    public void setMesh(PShape mesh){
-        _mesh = mesh;
+    public void addMesh(PShape mesh){
+        if(_mesh == null) _mesh = new ArrayList<>();
+        _mesh.add(mesh);
     }
 
     public Joint(Scene scene, int color, float radius){
@@ -31,7 +36,7 @@ public class Joint extends Node {
         _color = color;
         _radius = radius;
         _pGraphics = scene.context();
-        setPickingThreshold(_radius*2);
+        setPickingThreshold(-_radius*2);
     }
 
     public Joint(Scene scene, int color){
@@ -59,7 +64,7 @@ public class Joint extends Node {
         Scene scene = (Scene) this._graph;
         PGraphics pg = _pGraphics;
         if(_mesh != null){
-            pg.shape(_mesh);
+            for(PShape shape : _mesh) pg.shape(shape);
         }
 
         if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
@@ -83,13 +88,12 @@ public class Joint extends Node {
         if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this);
         }
-        //if (scene.is3D()) scene.drawAxes(_radius*2);
-        if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
         if(axes) scene.drawAxes(_radius*2);
+        if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
 
         pg.stroke(255);
         //pg.strokeWeight(2);
-        scene.drawBullsEye(this);
+        if(markers) scene.drawBullsEye(this);
 
         pg.popStyle();
 
@@ -97,7 +101,7 @@ public class Joint extends Node {
 
     public void setRadius(float radius){
         _radius = radius;
-        setPickingThreshold(_radius*2);
+        setPickingThreshold(-_radius*2);
     }
     public void setName(String name){
         _name = name;
