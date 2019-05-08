@@ -77,15 +77,14 @@ public class SkeletonLoader {
                 joint.translate(translation[0],translation[1], translation[2]);
             }else if(transformations.getName().equals("rotate")){
                 float[] rotation = convertData(transformations.getData().split(" "));
-                joint.rotate(new Quaternion(new Vector(rotation[0], rotation[1], rotation[2]), rotation[3]));
+                joint.rotate(new Quaternion(new Vector(rotation[0], rotation[1], rotation[2]), (float) Math.toRadians(rotation[3])));
             }
         }
 
         //Related geom
-        XmlNode geom = jointNode.getChild("instance_geometry");
-
-        if(geom != null) {
-            model.getGeometry().put(geom.getAttribute("url").substring(1), joint);
+        List<XmlNode> geom = jointNode.getChildren("instance_geometry");
+        for(XmlNode g : geom){
+            model.getGeometry().put(g.getAttribute("url").substring(1), joint);
         }
         jointCount++;
         model.getJoints().put(nameId, joint);

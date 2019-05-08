@@ -35,8 +35,9 @@ public class ColladaURDFLoader {
             model.addModel(id, pshape);
             max = max < pshape.getWidth() ? pshape.getWidth() : max;
             Joint joint = ((Joint) model.getGeometry().get(id));
+            System.out.println(id);
             pshape.setFill(joint.color());
-            joint.setMesh(pshape);
+            joint.addMesh(pshape);
         }
 
 
