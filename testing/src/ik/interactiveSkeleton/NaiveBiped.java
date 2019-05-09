@@ -38,14 +38,18 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = true;
+    boolean debug = false;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
     ArrayList<Solver> solvers = new ArrayList<>();
 
     public void setup(){
-        FABRIKSolver.debug = debug;
+        if(debug){
+            FABRIKSolver.debug = true;
+            for(int i = 0; i < show.length; i++) show[i] = true;
+        }
+
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(segments * 2 * boneLength);
@@ -65,13 +69,16 @@ public class NaiveBiped extends PApplet {
         scene.drawAxes();
         scene.render();
         if(debug){
+            hint(DISABLE_DEPTH_TEST);
             for(Solver solver : solvers){
                 if(!(solver instanceof ChainSolver)) continue;
                 ChainSolver s = (ChainSolver) solver;
                 if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
                     int last = s.iterationsHistory().size() - 1;
-                    int prev = last > 0 ? last - 1 : 0;
-                    Util.drawPositions(scene.context(), s.iterationsHistory().get(prev), color(0, 255, 0), 3);
+                    int prev1 = last > 0 ? last - 1 : 0;
+                    int prev2 = last > 1 ? last - 2 : 0;
+                    Util.drawPositions(scene.context(), s.iterationsHistory().get(prev2), color(255, 255, 255), 3);
+                    Util.drawPositions(scene.context(), s.iterationsHistory().get(prev1), color(0, 255, 0), 3);
                     Util.drawPositions(scene.context(), s.iterationsHistory().get(last), color(255, 0, 0), 3);
                 }
                 if(s.divergeHistory() != null && !s.divergeHistory().isEmpty() && show[1]) {
@@ -85,6 +92,7 @@ public class NaiveBiped extends PApplet {
                     }
                 }
             }
+            hint(ENABLE_DEPTH_TEST);
         }
     }
 
@@ -159,7 +167,7 @@ public class NaiveBiped extends PApplet {
             }
         }
 
-        solver.error = 1f;
+        solver.error = 3f;
         if (!debug) solver.timesPerFrame = 5;
         else solver.timesPerFrame = 1;
         target.setPosition(limb.get(limb.size() - 1).position());
@@ -191,14 +199,19 @@ public class NaiveBiped extends PApplet {
         root.setReference(reference);
 
         //2. Create Targets, Limbs & Solvers
-        Node target1 = createTarget(scene, radius*1.2f);
-        Node target2 = createTarget(scene, radius*1.2f);
+        if(!debug){
+            Node target1 = createTarget(scene, radius*1.2f);
+            Node target2 = createTarget(scene, radius*1.2f);
 
-        solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
-        solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
 
-        //3. Create walking cycle
-        if(!debug)createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
+            //3. Create walking cycle
+            createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
+        } else{
+            Node target = createTarget(scene, radius*1.2f);
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target, new Vector(length,length,0), mode));
+        }
 
     }
 

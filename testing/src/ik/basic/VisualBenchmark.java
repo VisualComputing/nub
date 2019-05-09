@@ -86,7 +86,7 @@ public class VisualBenchmark extends PApplet {
             //6. Define solver parameters
             solvers.get(i).error = 0.001f;
             solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 30;
+            solvers.get(i).maxIter = 300;
             solvers.get(i).minDistance = 0.001f;
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
@@ -109,7 +109,7 @@ public class VisualBenchmark extends PApplet {
         //Draw Constraints
         scene.drawAxes();
 
-        //Debuggin exploration
+        //Debugging exploration
         for(int  i = 0; i < solvers.size(); i++) {
             if (solvers.get(i) instanceof ChainSolver) {
                 if (show2) Util.drawPositions(scene.context(), ((ChainSolver) solvers.get(i)).positions(), color(255, 0, 100), 3);

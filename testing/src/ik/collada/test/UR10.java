@@ -9,6 +9,7 @@ import nub.core.Node;
 import nub.core.constraint.Hinge;
 import nub.ik.CCDSolver;
 import nub.ik.ChainSolver;
+import nub.ik.FABRIKSolver;
 import nub.ik.Solver;
 import nub.ik.evolution.BioIk;
 import nub.ik.jacobian.SDLSSolver;
@@ -22,6 +23,7 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by sebchaparr on 08/05/19.
@@ -34,13 +36,25 @@ public class UR10 extends PApplet {
     Solver solver;
     Vector base;
     Target target;
-    boolean ccd = true;
+
+
+    //DEBUG VARIABLES
+    boolean debug = true;
+    boolean ccd = false;
+    boolean solve = !debug;
+    boolean show[] = new boolean[4];
+    Random random = new Random();
 
     public void settings() {
         size(700, 700, P3D);
     }
 
     public void setup() {
+        if(debug){
+            FABRIKSolver.debug = true;
+            for(int i = 0; i < show.length; i++) show[i] = true;
+        }
+
         Joint.axes = true;
         Joint.markers = true;
         randomSeed(14);
@@ -100,7 +114,7 @@ public class UR10 extends PApplet {
             solver = new CCDSolver((ArrayList<? extends Node>) branch);
         }
 
-        solver.timesPerFrame = 10;
+        solver.timesPerFrame = debug ? 1 : 10;
         solver.maxIter = 50;
         solver.error = solver.minDistance = scene.radius() * 0.01f;
         solver.setTarget(branch.get(branch.size() - 1), target);
@@ -108,7 +122,7 @@ public class UR10 extends PApplet {
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
-                solver.solve();
+                if (solve) solver.solve();
             }
         };
         scene.registerTask(task);
@@ -118,6 +132,7 @@ public class UR10 extends PApplet {
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
+        scene.setRadius(scene.radius()*2f);
         scene.fit();
     }
     public void draw() {
@@ -128,13 +143,50 @@ public class UR10 extends PApplet {
         scene.beginHUD();
         for (String s : model.getJoints().keySet()) {
             Node n = model.getJoints().get(s);
-            if(n.isCulled() || !n.isTrackingEnabled()) continue;
+            if(n.isCulled() || !n.isTrackingEnabled() || debug) continue;
             Vector sc = scene.screenLocation(new Vector(), n);
             text(s, sc.x(), sc.y());
         }
-
         Util.printInfo(scene, solver, base);
         scene.endHUD();
+
+        if(debug){
+            hint(DISABLE_DEPTH_TEST);
+            ChainSolver s = (ChainSolver) solver;
+            if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
+                int last = s.iterationsHistory().size() - 1;
+                int prev1 = last > 0 ? last - 1 : 0;
+                int prev2 = last > 1 ? last - 2 : 0;
+                int prev3 = last > 1 ? last - 3 : 0;
+                Util.drawPositions(scene.context(), s.iterationsHistory().get(prev3), color(255,150), 5);
+                Util.drawPositions(scene.context(), s.iterationsHistory().get(prev2), color(0, 0, 255,150), 3);
+                Util.drawPositions(scene.context(), s.iterationsHistory().get(prev1), color(0, 255, 0,150), 3);
+                Util.drawPositions(scene.context(), s.iterationsHistory().get(last), color(255, 0, 0,150), 3);
+            }
+            if(s.divergeHistory() != null && !s.divergeHistory().isEmpty() && show[1]) {
+                for (ArrayList<Vector> l : s.divergeHistory()) {
+                    Util.drawPositions(scene.context(), l, color(255, 255, 0, 50), 3);
+                }
+            }
+            if(s.avoidHistory() != null && !s.avoidHistory().isEmpty() && show[2]) {
+                for (ArrayList<Vector> l : s.avoidHistory()) {
+                    Util.drawPositions(scene.context(), l, color(255, 0, 255, 50), 3);
+                }
+            }
+
+            for(int i = 0; i < ((ChainSolver) solver).dir_temp.size(); i++){
+                pushStyle();
+                strokeWeight(5);
+                stroke(255,255,0);
+                Vector v = ((ChainSolver) solver).dir_temp_i.get(i);
+                Vector u = ((ChainSolver) solver).dir_temp.get(i);
+                line(v.x(),v.y(),v.z(), u.x(), u.y(), u.z());
+
+                popStyle();
+            }
+
+            hint(ENABLE_DEPTH_TEST);
+        }
     }
 
     @Override
@@ -162,6 +214,48 @@ public class UR10 extends PApplet {
                 scene.focus();
             else
                 scene.align();
+    }
+
+    public void keyPressed(){
+        if(key == 'S' || key == 's') {
+            solve = !solve;
+        }else if(key =='a' || key == 'A'){
+            solver.solve();
+        }else if(key == ' '){
+            Node f = generateRandomReachablePosition(scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get("vkmodel0_node2")), scene.is3D());
+            Vector delta = Vector.subtract(f.position(), target.position());
+            target.setPosition(Vector.add(target.position(), delta));
+        }else if(key == 'k' || key == 'K') {
+            ((ChainSolver) solver).setKeepDirection(!((ChainSolver) solver).keepDirection());
+            System.out.println("Keep direction : " + (((ChainSolver) solver).keepDirection() ? "True" : "False"));
+        }else if(key == 't' || key == 'T') {
+            ((ChainSolver) solver).setFixTwisting(!((ChainSolver) solver).fixTwisting());
+            System.out.println("Fix twisting : " + (((ChainSolver) solver).fixTwisting() ? "True" : "False"));
+        }else if(key == 'e' || key == 'E') {
+            ((ChainSolver) solver).explore(!((ChainSolver) solver).explore());
+            System.out.println("Explore : " + (((ChainSolver) solver).explore() ? "True" : "False"));
+        }else if(key == 'd' || key == 'D') {
+            ((ChainSolver) solver).dir_temp.clear();
+            ((ChainSolver) solver).dir_temp_i.clear();
+            System.out.println("Dir temp cleared");
+        }else {
+            try {
+                int i = Integer.parseInt("" + key) - 1;
+                show[i] = !show[i];
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public Node generateRandomReachablePosition(List<? extends Node> original, boolean is3D){
+        ArrayList<? extends Node> chain = Util.copy(original);
+        for(int i = 0; i < chain.size(); i++){
+            if(is3D)
+                chain.get(i).rotate(new Quaternion(Vector.random(), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+            else
+                chain.get(i).rotate(new Quaternion(new Vector(0,0,1), (float)(random.nextGaussian()*random.nextFloat()*PI/2)));
+        }
+        return chain.get(chain.size()-1);
     }
 
 

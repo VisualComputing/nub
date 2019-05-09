@@ -232,26 +232,26 @@ public class Util {
         pg.textSize(15);
         Vector pos = scene.screenLocation(basePosition);
         if(solver instanceof BioIk){
-            pg.text("HGSA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("HGSA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof ChainSolver){
             ChainSolver s = (ChainSolver) solver;
             String heuristics = "";
             if(s.keepDirection()) heuristics += "\n Keep directions";
             if(s.fixTwisting()) heuristics += "\n Fix Twisting";
-            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.exploration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("FABRIK" + heuristics + "\n Error: " + String.format( "%.3f", solver.error()) + "\n Exploration : " + s.explorationTimes() + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof CCDSolver){
-            pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("CCD" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof TransposeSolver){
-            pg.text("Transpose" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("Transpose" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof SDLSSolver){
-            pg.text("SDLS" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("SDLS" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof PseudoInverseSolver){
-            pg.text("PseudoInv" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("PseudoInv" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof HillClimbingSolver){
             HillClimbingSolver s = (HillClimbingSolver) solver;
@@ -265,7 +265,7 @@ public class Util {
             pg.text("Genetic \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof HAEASolver){
-            pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+            pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.final_iteration, pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         pg.popStyle();
     }
@@ -289,7 +289,7 @@ public class Util {
     }
 
     public static void drawPositions(PGraphics pg, ArrayList<Vector> positions, int color, float str) {
-        pg.sphereDetail(3);
+        pg.sphereDetail(5);
         if(positions == null) return;
         Vector prev = null;
         for(Vector p : positions){

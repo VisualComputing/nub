@@ -35,7 +35,7 @@ public class BenchmarkUR10 extends PApplet {
     List<Solver> solvers = new ArrayList<>();
     List<Vector> positions = new ArrayList<>();
     List<Target> targets = new ArrayList<>();
-    int[] enable = {0,2};
+    int[] enable = {0,1,2};
 
 
     public void settings() {
@@ -101,7 +101,7 @@ public class BenchmarkUR10 extends PApplet {
                     solver = new ChainSolver((ArrayList<? extends Node>) branch);
                     ((ChainSolver)solver).setKeepDirection(true);
                     ((ChainSolver)solver).setFixTwisting(true);
-                    ((ChainSolver)solver).explore(false);
+                    ((ChainSolver)solver).explore(true);
                     break;
                 }
                 case "BIOIK":{

@@ -5,13 +5,10 @@ import nub.core.Node;
 import nub.core.constraint.Hinge;
 import nub.ik.CCDSolver;
 import nub.ik.ChainSolver;
-import nub.ik.FABRIKSolver;
 import nub.ik.Solver;
-import nub.ik.evolution.BioIk;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.FixedConstraint;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
 import ik.common.Joint;
@@ -268,7 +265,7 @@ public class Viewer extends PApplet{
             ChainSolver ch = chainsolvers.get(i);
             Vector sc = scene.screenLocation(ch.target().position());
             fill(255);
-            exploration[i] = ch.exploration() > exploration[i] ? ch.exploration() : exploration[i];
+            exploration[i] = ch.explorationTimes() > exploration[i] ? ch.explorationTimes() : exploration[i];
             text("" +  exploration[i], sc.x(), sc.y());
         }
 
