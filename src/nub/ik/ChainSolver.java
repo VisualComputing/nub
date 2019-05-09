@@ -40,7 +40,7 @@ public class ChainSolver extends FABRIKSolver {
   protected ArrayList<Vector> _bestAvoidPosition, _afterAvoidPosition;
   protected ArrayList<ArrayList<Vector>> _avoidHistory, _divergeHistory;
   protected boolean _explore = true;
-  protected float _exploration = 0;
+  protected float _explorationTimes = 0;
   protected float _lastError;
   //----------------------------------------------------
 
@@ -48,8 +48,12 @@ public class ChainSolver extends FABRIKSolver {
     _explore = explore;
   }
 
-  public float exploration(){
-      return  _exploration;
+  public boolean explore(){
+    return _explore;
+  }
+
+  public float explorationTimes(){
+      return  _explorationTimes;
   }
 
   public ArrayList<Vector> bestAvoidPosition(){
@@ -197,6 +201,7 @@ public class ChainSolver extends FABRIKSolver {
       for(int i = 0; i < _chain.size(); i++){
         _positions.set(i, _chain.get(i).position());
       }
+      if(debug) addIterationRecord(_positions);
     }
 
     //TODO : Clean and consider twisting
@@ -206,7 +211,7 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(_chain.size() - 1, target.get());
     _forwardReaching();
     //Animation stuff
-    addIterationRecord(_positions);
+    if(debug) addIterationRecord(_positions);
     //Stage 2: Backward Reaching
     Vector o = _positions.get(0);
     _positions.set(0, initial);
@@ -269,7 +274,7 @@ public class ChainSolver extends FABRIKSolver {
   protected void _reset() {
     _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
     iterations = 0;
-    _exploration = 0;
+    _explorationTimes = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
     _init();
     if(_target != null){
@@ -324,8 +329,8 @@ public class ChainSolver extends FABRIKSolver {
       prevOrientation = orientation.get();
     }
     _jointChange.remove(0);
-    addIterationRecord(_positions);
-    _exploration = 0;
+    if(debug) addIterationRecord(_positions);
+    _explorationTimes = 0;
     //TODO : REFINE & USE ONLY IN DEBUG MODE
     _avoidHistory = new ArrayList<>();
     _divergeHistory = new ArrayList<>();
@@ -344,9 +349,12 @@ public class ChainSolver extends FABRIKSolver {
   }
 
 
+  public ArrayList<Vector> dir_temp = new ArrayList<>();
+  public ArrayList<Vector> dir_temp_i = new ArrayList<>();
+
   protected void _avoidDeadlock(boolean avoid){
     if(_chain.size() <= 1) return;
-    _exploration++;
+    _explorationTimes++;
     float a;
     ArrayList<Node> b_copy = null;
     float b_d = Float.POSITIVE_INFINITY;
@@ -415,17 +423,41 @@ public class ChainSolver extends FABRIKSolver {
 
 
     for(int i = 0; i < 20; i++) {
-      ArrayList<Node> copy = i < 10 ? _copy(b_copy) : _copy(_original);
+      ArrayList<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
       int k = r.nextInt(_chain.size());
 
-      for (Node f : copy) {
-        copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
-        a = (float)(60 * Math.PI / 180);
-        if(j < _chain.size())f.rotate(new Quaternion(copy.get(j).translation(), (float) (2 * Math.random() * a - a)));
-        copy_p.add(f.position().get());
+      if(i % 2 == 0) { // TODO : Clean!
+        for (Node f : copy) {
+          copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
+          a = (float) (60 * Math.PI / 180);
+          if (j < _chain.size())
+            f.rotate(new Quaternion(copy.get(j).translation(), (float) (2 * Math.random() * a - a)));
+          copy_p.add(f.position().get());
+        }
+      } else{
+        for (Node f : copy) {
+          copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
+          copy_p.add(f.position().get());
+        }
+        //Use target orientation
+        Vector o = _chain.get(_chain.size() - 3).position();
+        Vector p = _chain.get(_chain.size() - 2).position();
+        Vector q = _chain.get(_chain.size() - 1).position();
+
+        Vector po = Vector.subtract(o,p);
+        Vector qp = Vector.subtract(q,p);
+
+        Vector axis = Vector.cross(po, qp, null);
+        Quaternion quat = new Quaternion(axis, (float)(2 * Math.random() * Math.PI - Math.PI));
+        qp = quat.rotate(qp);
+        copy_p.set(_chain.size() - 2, Vector.add(qp, p));
+        if(debug){
+          dir_temp_i.add(p.get());
+          dir_temp.add(Vector.add(qp, p));
+        }
       }
 
       copy_p.set(_chain.size() - 1, this._target.position().get());

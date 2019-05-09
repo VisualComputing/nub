@@ -572,21 +572,23 @@ public abstract class FABRIKSolver extends Solver {
       }
       //Perform this operation only when Projected Vectors have not a despicable length
       if(v.magnitude() > 0.5 * localEff.magnitude() && u.magnitude() > 0.5 * localEff.magnitude()) {
+        Quaternion q = new Quaternion(v, u);
         if(debug) {
           System.out.println("+-------------------+");
           System.out.println("ON APPLY TWIST MEDHOD");
+          System.out.println("NODE : " + i);
           System.out.println("--> Local EFF : " + localEff);
           System.out.println("--> Local Target : " + localTarget);
           System.out.println("--> Local EFF Proj : " + v);
           System.out.println("--> Local Target Proj : " + u);
           System.out.println("--> Twist : " + twist);
+          System.out.println("--> Twist Rotation: " + q.axis() + " angle : " + Math.toDegrees(q.angle()));
           System.out.println("+-------------------+");
         }
-
-        Quaternion q = new Quaternion(v, u);
         //Perform this operation only when change is not despicable
         if(q.angle() > Math.toRadians(10)){
           f_i.rotate(new Quaternion(q.axis(), q.angle() * 0.7f)); //TODO : Apply whole rotation or part of it (explore)
+          eff = chain.get(chain.size() - 1).position();
         }
       }
     }

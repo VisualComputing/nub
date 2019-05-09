@@ -30,6 +30,7 @@ public abstract class Solver {
   public float timesPerFrame = 5.f;
   public float frameCounter = 0;
   public int iterations = 0;
+  public int final_iteration = 0; //TODO : Clean this!
   public boolean change_temp = false; //TODO : Clean this!
 
   protected TimingTask _task;
@@ -77,9 +78,13 @@ public abstract class Solver {
     while (Math.floor(frameCounter) > 0) {
       //Returns a boolean that indicates if a termination condition has been accomplished
       if (_iterate()) {
+        final_iteration = iterations;
         iterations = maxIter;
         break;
-      } else iterations += 1;
+      } else {
+        final_iteration = iterations;
+        iterations += 1;
+      }
       frameCounter -= 1;
     }
     //update positions
