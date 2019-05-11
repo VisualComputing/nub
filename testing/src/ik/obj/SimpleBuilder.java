@@ -30,8 +30,8 @@ public class SimpleBuilder extends PApplet{
     PShape model;
 
     //Set this path to load your objs
-    String shapePath = "/testing/data/objs/T-Rex-Model.obj";
-    String texturePath = "/testing/data/objs/T-Rex.jpg";
+    String shapePath = "/testing/data/objs/Rigged_Hand.obj";
+    String texturePath = "/testing/data/objs/HAND_C.jpg";
 
     float radius = 0;
     int w = 1000, h = 700;
