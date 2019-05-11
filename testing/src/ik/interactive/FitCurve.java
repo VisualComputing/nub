@@ -74,6 +74,10 @@ public class FitCurve {
     protected boolean _changed = false;
     protected boolean _started = false;
 
+    public Interpolator interpolator(){
+        return _interpolator;
+    }
+
     public boolean started(){
         return _started;
     }
@@ -299,7 +303,7 @@ public class FitCurve {
 
 
     /*From Cubic Bezier to Catmull Rom*/
-    Interpolator _interpolator;
+    protected Interpolator _interpolator;
     public void getCatmullRomCurve(Scene scene, float depth){
         _interpolator = new Interpolator(scene);
         for(int i = 0; i < _curves.size(); i++){

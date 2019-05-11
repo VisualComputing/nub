@@ -89,7 +89,6 @@ public class SkeletonBuilder extends PApplet{
         specular(255, 255, 255);
         shininess(10);
         //canvas1.stroke(255,0,0);
-        Joint.setPGraphics(scene.context());
         stroke(255);
         if(showGrid) scene.drawGrid();
         stroke(255,0,0);
@@ -351,6 +350,10 @@ public class SkeletonBuilder extends PApplet{
             if(maxAngle <= radians(0) ) maxAngle = radians(0);
             System.out.println("maxAngle : " + degrees(maxAngle));
         }
+        if(key == 'i' || key == 'I'){
+            printTree(scene.trackedNode(), "");
+        }
+
         if(key==' '){
             for(Target target : targets){
                 target._interpolator.start();
@@ -374,10 +377,6 @@ public class SkeletonBuilder extends PApplet{
         if(key == '6'){
             Joint.axes = !Joint.axes;
         }
-        if(key == '7'){
-            System.out.println("Frame guardado");
-            this.g.save("/C:/Users/usuario/Desktop/Sebas/Visual/repositorios/presentation/IK-Presentation/fig/fig#####.png");
-        }
 
         if(key == 'r' || key == 'R'){
             for(Target target : targets){
@@ -398,7 +397,6 @@ public class SkeletonBuilder extends PApplet{
             for(TreeSolver solver : scene.treeSolvers()){
                 solver.setFixTwisting(fixTwisting);
             }
-            System.out.println("Fix twisting : " + (fixTwisting ? "Enabled" : "Disabled"));
         }
     }
 
@@ -462,6 +460,15 @@ public class SkeletonBuilder extends PApplet{
             //scene.addIKTarget(endEffector, target);
             solver.addTarget(endEffector, target);
             targets.add(target);
+        }
+    }
+
+    public void printTree(Node root, String sep){
+        if(root == null) return;
+        System.out.print(sep + "|-> Node ");
+        System.out.println("translation: " + root.translation() + "rotation axis: " + root.rotation().axis() + "rotation angle : " + root.rotation().angle());
+        for(Node child : root.children()){
+            printTree(child, sep + "\t");
         }
     }
 

@@ -64,8 +64,13 @@ public class LinearBlendSkinning {
 
         public void setVertexPosition(Vector position) {
             for (int[] ids : this.id) {
-                PShape p = shape.getChild(ids[0]);
-                p.setVertex(ids[1], new PVector(position.x(), position.y(), position.z()));
+                if(shape.getChildCount() > 0) {
+                    PShape p = shape.getChild(ids[0]);
+                    p.setVertex(ids[1], new PVector(position.x(), position.y(), position.z()));
+                }
+                else{
+                    shape.setVertex(ids[1], new PVector(position.x(), position.y(), position.z()));
+                }
             }
         }
 
@@ -75,7 +80,53 @@ public class LinearBlendSkinning {
 
     }
 
-    public void setup(ArrayList<Node> branch) {
+    public void setup(ArrayList<Node> branch){
+        if(shape.getChildCount() > 0)
+            setupGroupedPShape(branch);
+        else
+            setupBasicPShape(branch);
+    }
+
+    public void setupBasicPShape(ArrayList<Node> branch) {
+        vertices = new HashMap<PVector, Vertex>();
+        for (int j = 0; j < shape.getVertexCount(); j++) {
+            PVector vector = shape.getVertex(j);
+            if (!vertices.containsKey(vector)) {
+                Vertex vertex = new Vertex(j, 1);
+                Vector position = new Vector(vector.x, vector.y, vector.z);
+                float total_dist = 0.f;
+                float max_dist = -999;
+                for (Node joint : branch) {
+                    if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
+                    float dist = getDistance(position, joint, reference);
+                    max_dist = dist > max_dist ? dist : max_dist;
+                }
+
+                for (Node joint : branch) {
+                    if (joint == branch.get(0)) continue;
+                    if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
+                    float dist = getDistance(position, joint, reference);
+                    dist = 1 / ((float) Math.pow(dist, 10));
+                    total_dist += dist;
+                    vertex.addProperties(joint.reference(),
+                            joint.reference().location(position, reference), dist);
+                }
+                //The more near, the more weight the bone applies
+                float sum = 0;
+                for (Vertex.Properties properties : vertex.properties) {
+                    properties.weight = properties.weight / (total_dist * 1.f);
+                    sum += properties.weight;
+                }
+                vertices.put(vector, vertex);
+            } else {
+                Vertex vertex = vertices.get(vector);
+                //add the id of the face and the vertex
+                vertex.addId(j, 1);
+            }
+        }
+    }
+
+    public void setupGroupedPShape(ArrayList<Node> branch) {
         vertices = new HashMap<PVector, Vertex>();
         for (int i = 0; i < shape.getChildCount(); i++) {
             PShape child = shape.getChild(i);
@@ -116,6 +167,7 @@ public class LinearBlendSkinning {
             }
         }
     }
+
 
     public void applyTransformations() {
         for (Map.Entry<PVector, Vertex> entry : vertices.entrySet()) {

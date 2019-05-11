@@ -21,7 +21,6 @@ public class Joint extends Node {
     protected int _color;
     protected float _radius;
     protected List<PShape> _mesh;
-    protected static PGraphics _pGraphics;
     public static boolean axes = true;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
@@ -35,7 +34,6 @@ public class Joint extends Node {
         super(scene);
         _color = color;
         _radius = radius;
-        _pGraphics = scene.context();
         setPickingThreshold(-_radius*2);
     }
 
@@ -51,18 +49,13 @@ public class Joint extends Node {
         this(scene, scene.pApplet().color(scene.pApplet().random(0,255),scene.pApplet().random(0,255), scene.pApplet().random(0,255)), radius);
     }
 
-    public static void setPGraphics(PGraphics pg){
-        _pGraphics = pg;
-    }
-
     public void setDrawConstraint(boolean drawConstraint){
         _drawConstraint = drawConstraint;
     }
 
     @Override
-    public void visit(){
+    public void graphics(PGraphics pg){
         Scene scene = (Scene) this._graph;
-        PGraphics pg = _pGraphics;
         if(_mesh != null){
             for(PShape shape : _mesh) pg.shape(shape);
         }

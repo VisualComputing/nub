@@ -53,7 +53,7 @@ public class MultipleViews {
         //InteractiveJoint.setPGraphics(_defaultView._pGraphics);
         //_defaultView.draw();
         for(AuxiliaryView view : _auxiliaryViews) {
-            InteractiveJoint.setPGraphics(view._pGraphics);
+            //InteractiveJoint.setPGraphics(view._pGraphics);
             view.draw();
             view._pGraphics.beginDraw();
             setPGraphics(view._pGraphics);

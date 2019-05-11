@@ -22,6 +22,10 @@ public class Target extends Node {
     protected Vector _desiredTranslation;
     protected ArrayList<Vector> _last = new ArrayList<>();
 
+    public Interpolator interpolator(){
+        return _interpolator;
+    }
+
     public Target(Scene scene, float radius) {
         super(scene);
         _redBall = scene.is3D() ? scene.context().createShape(PConstants.SPHERE, radius * 2f) :

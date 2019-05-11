@@ -7,6 +7,7 @@ import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.common.Joint;
 import processing.core.PApplet;
+import processing.core.PConstants;
 import processing.core.PGraphics;
 
 public class InteractiveJoint extends Joint {
@@ -35,10 +36,10 @@ public class InteractiveJoint extends Joint {
         }
     }
     @Override
-    public void visit(){
-        super.visit();
+    public void graphics(PGraphics pg) {
+        super.graphics(pg);
         //Draw desired position
-        PGraphics pg = _pGraphics;
+        if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         if(_desiredTranslation != null){
             pg.pushStyle();
             pg.stroke(pg.color(0,255,0));
@@ -46,10 +47,12 @@ public class InteractiveJoint extends Joint {
             pg.line(0,0,0, _desiredTranslation.x()/this.scaling(), _desiredTranslation.y()/this.scaling(), _desiredTranslation.z()/this.scaling());
             pg.popStyle();
         }
+        if(!depth)pg.hint(PConstants.ENABLE_DEPTH_TEST);
     }
 
     public void addChild(Scene scene, Scene focus, Vector mouse){
         InteractiveJoint joint = new InteractiveJoint(scene, this.radius());
+        joint.setPickingThreshold(this.pickingThreshold());
         joint.setReference(this);
         joint.setTranslation(joint.translateDesired(focus, mouse));
     }
