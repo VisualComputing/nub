@@ -889,7 +889,7 @@ public class Node {
    * and {@link #setShape(Object)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
-   * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
+   * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
    * <li>A node bounding sphere whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [-1..0]}.</li>
    * <li>A circled 'bullseye' of a fixed pixels length. Set it with {@code threshold < -1}.</li>
