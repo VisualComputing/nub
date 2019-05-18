@@ -9,10 +9,14 @@ uniform int boneLength;
 uniform vec2 texOffset;
 
 varying vec4 vertColor;
+varying vec3 ecNormal;
+varying vec3 lightDir;
 varying vec4 vertTexCoord;
 
 void main() {
-  //TODO : Update
-  gl_FragColor = texture2D(texture, vertTexCoord.st) * vertColor;
-  //gl_FragColor = vertColor;
+  vec3 direction = normalize(lightDir);
+  vec3 normal = normalize(ecNormal);
+  float intensity = max(0.0, dot(direction, normal));
+  vec4 tintColor = vec4(intensity, intensity, intensity, 1) * vertColor;
+  gl_FragColor = texture2D(texture, vertTexCoord.st) * tintColor;
 }

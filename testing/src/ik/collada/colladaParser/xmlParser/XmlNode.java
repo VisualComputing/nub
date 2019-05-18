@@ -92,35 +92,25 @@ public class XmlNode {
      * @return The child node which has the correct name and the correct value
      *         for the chosen attribute.
      */
-    public XmlNode getChildWithAttribute(String childName, String attr, String value) {
+    public XmlNode getChildWithAttribute(String childName, String attr, String value, boolean substring) {
         List<XmlNode> children = getChildren(childName);
         if (children == null || children.isEmpty()) {
             return null;
         }
         for (XmlNode child : children) {
             String val = child.getAttribute(attr);
-            if (value.equals(val)) {
+            if(!substring && value.equals(val)){
+                return child;
+            }
+            if(substring && val.contains(value)){
                 return child;
             }
         }
         return null;
     }
 
-    public XmlNode getChildContainsAttribute(String childName, String attr, String value) {
-        List<XmlNode> children = getChildren(childName);
-        if (children == null || children.isEmpty()) {
-            return null;
-        }
-        for (XmlNode child : children) {
-            System.out.println("value -- : "  + value);
-            String val = child.getAttribute(attr);
-            System.out.println("val   -- : "  + val);
-
-            if (val.contains(value)) {
-                return child;
-            }
-        }
-        return null;
+    public XmlNode getChildWithAttribute(String childName, String attr, String value) {
+        return getChildWithAttribute(childName, attr, value, false);
     }
 
     /**

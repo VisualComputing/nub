@@ -50,7 +50,7 @@ public class LoadURDF extends PApplet {
             Target target = new Target(scene, ((Joint) model.getRootJoint()).radius());
             /*Chain solver*/
 
-            List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get(dae == 0 ? "vkmodel0_node10" : "vkmodel0_node8"));
+            List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get(dae == 0 ? "node10" : "node8"));
 
             ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
             solver.setKeepDirection(true);

@@ -15,6 +15,13 @@ uniform mat4 texMatrix;
 attribute vec2 texCoord;
 varying vec4 vertTexCoord;
 
+uniform mat3 normalMatrix;
+uniform vec4 lightPosition;
+attribute vec3 normal;
+
+varying vec3 ecNormal;
+varying vec3 lightDir;
+
 vec3 rot(vec4 quaternion, vec3 vector) {
 //TODO : Update
     float q00 = 2.0f * quaternion[0] * quaternion[0];
@@ -38,7 +45,10 @@ vec3 rot(vec4 quaternion, vec3 vector) {
 
 void main() {
   vec4 curPos = position;
+  vec3 curNor = normal;
   vec3 v = vec3(0.0);
+  vec3 n = vec3(0.0);
+
   vec3 idd = vec3(1.0);
 
   for(int i = 0; i < 3; i++){
@@ -52,9 +62,13 @@ void main() {
     u = rot(quat, u) + pos;
     u = u + offset;
     v = v + u*weights[i];
+    n = n + rot(quat, normal)*weights[i];
   }
 
-  gl_Position = projection * modelview * vec4(v,1);
+  vec4 ecPosition = modelview * vec4(v,1);
+  gl_Position = projection * ecPosition;
+  ecNormal = normalize(normalMatrix * n);
+  lightDir = normalize(lightPosition.xyz - vec3(ecPosition));
   vertColor = color;
   vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
 }

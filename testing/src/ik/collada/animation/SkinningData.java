@@ -1,5 +1,7 @@
 package ik.collada.animation;
 
+import nub.primitives.Matrix;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,10 +77,11 @@ public class SkinningData {
     }
     public List<String> jointOrder;
     public List<VertexSkinData> verticesSkinData;
-
-    public SkinningData(List<String> joints, List<VertexSkinData> verticesSkinData){
+    public List<Matrix> bindMatrices;
+    public SkinningData(List<String> joints, List<VertexSkinData> verticesSkinData, List<Matrix> bindMatrices){
         this.jointOrder = joints;
         this.verticesSkinData = verticesSkinData;
+        this.bindMatrices = bindMatrices;
     }
 
 

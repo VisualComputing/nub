@@ -3,6 +3,8 @@ package ik.collada.colladaParser.colladaLoader;
 import ik.collada.animation.Mesh;
 import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
+import nub.primitives.Matrix;
+import nub.primitives.Vector;
 import processing.core.PVector;
 
 import java.util.ArrayList;
@@ -18,13 +20,19 @@ import java.util.List;
 public class GeometryLoader {
     private XmlNode meshData;
 
+    private Matrix bind;
     private final List<SkinningData.VertexSkinData> vertexWeights;
     List<PVector> textures = new ArrayList<PVector>();
     List<PVector> normals = new ArrayList<PVector>();
 
-    public GeometryLoader(XmlNode geometryNode, List<SkinningData.VertexSkinData> vertexWeights) {
+    public GeometryLoader(XmlNode geometryNode, List<SkinningData.VertexSkinData> vertexWeights){
+        this(geometryNode, vertexWeights, null);
+    }
+
+    public GeometryLoader(XmlNode geometryNode, List<SkinningData.VertexSkinData> vertexWeights, Matrix bind) {
         this.vertexWeights = vertexWeights;
         this.meshData = geometryNode;
+        this.bind = bind;
     }
 
     public Mesh extractBlenderModelData(float scaling){
@@ -32,9 +40,12 @@ public class GeometryLoader {
         String positionsId = meshData.getChild("vertices").getChild("input").getAttribute("source").substring(1);
         XmlNode positionsData = meshData.getChildWithAttribute("source", "id", positionsId).getChild("float_array");
         List<Mesh.Vertex> vertices = readPositions(true , positionsData, scaling);
-        readNormals();
-        readTextureCoords();
-        return assembleVertices(vertices);
+        if(meshData.getChild("polylist") != null) {
+            readNormals();
+            readTextureCoords();
+            return assembleVertices(vertices);
+        }
+        return assembleTriangles(meshData, vertices);
     }
 
     public List<Mesh> extractURDFModelData(float scaling){
@@ -52,11 +63,14 @@ public class GeometryLoader {
         String[] posData = positionsData.getData().split(" ");
         List<Mesh.Vertex> vertices = new ArrayList<>();
         for (int i = 0; i < posData.length/3; i++) {
-            float x = Float.parseFloat(posData[i * 3]) * scaling;
-            float y = Float.parseFloat(posData[i * 3 + 1]) * scaling;
-            float z = Float.parseFloat(posData[i * 3 + 2]) * scaling;
-            PVector position = new PVector(x, y, z);
-            vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x, position.y, position.z), blender ? vertexWeights.get(vertices.size()) : null));
+            float x = Float.parseFloat(posData[i * 3]) * 1;
+            float y = Float.parseFloat(posData[i * 3 + 1]) * 1;
+            float z = Float.parseFloat(posData[i * 3 + 2]) * 1;
+            Vector position = new Vector(x, y, z);
+            if(bind != null) position = this.bind.multiply(position);
+            position.multiply(scaling);
+
+            vertices.add(new Mesh.Vertex(vertices.size(), new PVector(position.x(), position.y(), position.z()), blender ? vertexWeights.get(vertices.size()) : null));
         }
         return vertices;
     }
@@ -94,10 +108,20 @@ public class GeometryLoader {
     private Mesh assembleTriangles(XmlNode geom, List<Mesh.Vertex> vertices){
         Mesh mesh = new Mesh();
         for(XmlNode triangles : geom.getChildren("triangles")){
+            int total = -1;
+            for(XmlNode node : triangles.getChildren("input")){
+                int next = Integer.parseInt(node.getAttribute("offset"));
+                if(total < next) total = next;
+
+            }
+            total  += 1;
+            int offset = Integer.parseInt(triangles.getChildWithAttribute("input", "semantic", "VERTEX").getAttribute("offset"));
             String[] rawIndexData = triangles.getChild("p").getData().split(" ");
-            int[] indexData = new int[rawIndexData.length];
-            for(int i = 0; i < rawIndexData.length; i++){
-                indexData[i] = Integer.parseInt(rawIndexData[i]);
+
+            int[] indexData = new int[rawIndexData.length / total];
+
+            for(int i = offset; i < indexData.length; i++){
+                indexData[i] = Integer.parseInt(rawIndexData[i * total]);
             }
             for(int i=0;i<indexData.length; i+=3){
                 Mesh.Face face = new Mesh.Face();

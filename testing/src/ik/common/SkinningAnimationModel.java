@@ -15,12 +15,12 @@ public class SkinningAnimationModel {
     public PShader shader;
     private AnimatedModel model;
 
-    public Quaternion[] boneQuat = new Quaternion[120];
-    public Vector[] bonePos = new Vector[120];
+    public Quaternion[] boneQuat = new Quaternion[300];
+    public Vector[] bonePos = new Vector[300];
 
-    public float[] bonePositionOrig = new float[120];
-    public float[] bonePosition = new float[120];
-    float[] boneRotation = new float[120];
+    public float[] bonePositionOrig = new float[300];
+    public float[] bonePosition = new float[300];
+    float[] boneRotation = new float[300];
 
     String fragmentPath = "/testing/src/ik/common/frag.glsl";
     String vertexPath = "/testing/src/ik/common/skinning.glsl";
@@ -38,6 +38,7 @@ public class SkinningAnimationModel {
     public void initParams() {
         Node[] skeleton = model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
+            if(skeleton[i] == null) continue;
             //TODO : IF there is a reference frame not null
             Vector v = skeleton[i].position();
             Quaternion q = skeleton[i].orientation();
@@ -55,6 +56,7 @@ public class SkinningAnimationModel {
         //TODO: IT COULD BE DONE WITH LESS OPERATIONS
         Node[] skeleton = model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
+            if(skeleton[i] == null) continue;
             Vector v = Vector.subtract(skeleton[i].position(), bonePos[i]);
             Quaternion q = Quaternion.compose(skeleton[i].orientation(), boneQuat[i].inverse());
             bonePosition[i*3 + 0] =  v.x();

@@ -69,40 +69,40 @@ public class UR10 extends PApplet {
         target = new Target(scene, ((Joint) model.getRootJoint()).radius());
 
         /*Adding constraints*/
-        Node node_1 = model.getJoints().get("vkmodel0_node1");
+        Node node_1 = model.getJoints().get("node1");
         Hinge hinge_1 = new Hinge(radians(180),radians(180), node_1.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_1.setConstraint(hinge_1);
 
 
-        Node node_3 = model.getJoints().get("vkmodel0_node3");
+        Node node_3 = model.getJoints().get("node3");
         Hinge hinge_3 = new Hinge(radians(180),radians(180), node_3.rotation(), new Vector(1,0,0), new Vector(0,1,0));
         node_3.setConstraint(hinge_3);
 
-        Node node_4 = model.getJoints().get("vkmodel0_node4");
+        Node node_4 = model.getJoints().get("node4");
         Hinge hinge_4 = new Hinge(radians(180),radians(180), node_4.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_4.setConstraint(hinge_4);
 
-        Node node_6 = model.getJoints().get("vkmodel0_node6");
+        Node node_6 = model.getJoints().get("node6");
         Hinge hinge_6 = new Hinge(radians(180),radians(180), node_6.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_6.setConstraint(hinge_6);
 
-        Node node_8 = model.getJoints().get("vkmodel0_node8");
+        Node node_8 = model.getJoints().get("node8");
         Hinge hinge_8 = new Hinge(radians(180),radians(180), node_8.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_8.setConstraint(hinge_8);
 
-        Node node_9 = model.getJoints().get("vkmodel0_node9");
+        Node node_9 = model.getJoints().get("node9");
         Hinge hinge_9 = new Hinge(radians(180),radians(180), node_9.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_9.setConstraint(hinge_9);
 
-        Node node_10 = model.getJoints().get("vkmodel0_node10");
+        Node node_10 = model.getJoints().get("node10");
         Hinge hinge_10 = new Hinge(radians(180),radians(180), node_10.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_10.setConstraint(hinge_10);
 
         //Cull unnecesary nodes
-        model.getJoints().get("vkmodel0_node2").cull();
+        model.getJoints().get("node2").cull();
 
         //Adding solver
-        List<Node> branch = scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get("vkmodel0_node2"));
+        List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get("node2"));
 
 
         if(!ccd) {
@@ -127,7 +127,7 @@ public class UR10 extends PApplet {
         };
         scene.registerTask(task);
         task.run(40);
-        base = model.getJoints().get("vkmodel0_node1").reference().translation();
+        base = model.getJoints().get("node1").reference().translation();
 
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));

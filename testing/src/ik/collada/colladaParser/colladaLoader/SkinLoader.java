@@ -3,6 +3,7 @@ package ik.collada.colladaParser.colladaLoader;
 import ik.collada.animation.Mesh;
 import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
+import nub.primitives.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,7 @@ public class SkinLoader {
         XmlNode weightsDataNode = skinningData.getChild("vertex_weights");
         int[] effectorJointCounts = getEffectiveJointsCounts(weightsDataNode);
         List<SkinningData.VertexSkinData> vertexWeights = getSkinData(weightsDataNode, effectorJointCounts, weights);
-        return new SkinningData(jointsList, vertexWeights);
+        return new SkinningData(jointsList, vertexWeights, getInvBindMatrices());
     }
 
     private List<String> loadJointsList() {
@@ -33,8 +34,10 @@ public class SkinLoader {
                 .substring(1);
         XmlNode jointsNode = skinningData.getChildWithAttribute("source", "id", jointDataId).getChild("Name_array");
         String[] names = jointsNode.getData().split(" ");
+
         List<String> jointsList = new ArrayList<String>();
         for (String name : names) {
+            System.out.println("name -- " + name);
             jointsList.add(name);
         }
         return jointsList;
@@ -77,6 +80,25 @@ public class SkinLoader {
             skinningData.add(skinData);
         }
         return skinningData;
+    }
+
+    private List<Matrix> getInvBindMatrices(){
+        XmlNode inputNode = skinningData.getChild("joints");
+        String jointDataId = inputNode.getChildWithAttribute("input", "semantic", "INV_BIND_MATRIX").getAttribute("source")
+                .substring(1);
+        XmlNode bindsNode = skinningData.getChildWithAttribute("source", "id", jointDataId).getChild("float_array");
+        String[] rawData = bindsNode.getData().split(" ");
+        List<Matrix> bindMatrices = new ArrayList<>();
+        float[] m = new float[16];
+        for(int i = 0; i < rawData.length; i++){
+            m[i % 16] = Float.parseFloat(rawData[i]);
+            if(i % 16 == 15){
+                Matrix mat = new Matrix(m,false);
+                mat.invert();
+                bindMatrices.add(mat);
+            }
+        }
+        return bindMatrices;
     }
 
 }
