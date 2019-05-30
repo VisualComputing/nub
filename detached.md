@@ -156,4 +156,4 @@ See the [detached-nodes CajasOrientadas example](https://github.com/VisualComput
 * Nodes may be picked using ray-casting and the `scene` provides all sorts of interactivity commands to manipulate them.
 * The `scene` methods [location(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#location-frames.primitives.Vector-frames.core.Node-) and [screenLocation(Vector, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#screenLocation-frames.primitives.Vector-frames.core.Node-) transforms coordinates between node and screen space.
 
-The main disadvantage of using detached nodes is that you need to know the scene hierarchy topology in advanced to be able to traverse it. To enable the scene to handle the traversal algorithm use [attached frames](README.md) instead.
+The main disadvantage of using detached nodes is that you need to know the scene hierarchy topology in advanced to be able to traverse it. To enable the scene to handle the traversal algorithm use [attached nodes](README.md) instead.
