@@ -12,7 +12,6 @@
 package nub.ik;
 
 import nub.core.Node;
-import nub.ik.evolution.GASolver;
 import nub.ik.evolution.Individual;
 import nub.ik.evolution.Statistics;
 import nub.ik.evolution.Util;
@@ -140,7 +139,7 @@ public class HAEASolver  extends Solver {
     public float execute(){
         this._best = null;
         this._statistics = new ArrayList<Statistics>();
-        _operatorsValues = new float[_operators.size()][maxIter];
+        _operatorsValues = new float[_operators.size()][_maxIterations];
         //1. Generate population
         _population = Util.generatePopulation(_structure, _population_size);
         //2. Update Fitness
@@ -152,7 +151,7 @@ public class HAEASolver  extends Solver {
         }
         //3. Iterate a given number of times.
         int k = 0;
-        while(k < maxIter){
+        while(k < _maxIterations){
             _iterate();
             _statistics.add(new Statistics(_population));
             for(int i = 0; i < _operators.size(); i++){
@@ -243,7 +242,7 @@ public class HAEASolver  extends Solver {
                 System.out.println();
             }
         }
-        return _best.fitness() < minDistance;
+        return _best.fitness() < _minDistance;
     }
 
     public Node head() {
@@ -282,7 +281,7 @@ public class HAEASolver  extends Solver {
     @Override
     protected void _reset() {
         _best = null;
-        iterations = 0;
+        _iterations = 0;
         if(_target == null){
             _previousTarget = null;
             return;

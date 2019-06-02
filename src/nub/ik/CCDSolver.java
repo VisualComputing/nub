@@ -74,7 +74,7 @@ public class CCDSolver extends Solver {
     Node end = _chain.get(_chain.size() - 1);
     Vector target = this._target.position().get();
     //Execute Until the distance between the end effector and the target is below a threshold
-    if (Vector.distance(end.position(), target) <= error) {
+    if (Vector.distance(end.position(), target) <= _maxError) {
       return true;
     }
     float change = 0.0f;
@@ -108,7 +108,7 @@ public class CCDSolver extends Solver {
 
     addIterationRecord(positions);
     //Check total rotation change
-    if (change <= minDistance) return true;
+    if (change <= _minDistance) return true;
     return false;
   }
 
@@ -131,7 +131,7 @@ public class CCDSolver extends Solver {
   @Override
   protected void _reset() {
     _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-    iterations = 0;
+    _iterations = 0;
     _iterationsHistory = new ArrayList<>();
     ArrayList<Vector> positions = new ArrayList<Vector>();
     for(Node node : chain()){

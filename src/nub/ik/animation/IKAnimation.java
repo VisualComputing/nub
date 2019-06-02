@@ -41,7 +41,7 @@ public class IKAnimation {
         protected enum Line{ V1_TO_V2, V_TO_V2, V1_TO_V}
 
         protected long _edgePeriod;
-        protected float _radius;//iterations per edge is updated according to Animator period
+        protected float _radius;//_iterations per edge is updated according to Animator period
         protected Vector[] _trajectory;
         protected Vector _current, _delta;
         protected int _idx = 0;
@@ -153,7 +153,7 @@ public class IKAnimation {
     public static class FollowArc extends Step{
         protected enum Arc{ V1_TO_V2, V_TO_V2, V1_TO_V}
         protected long _edgePeriod;
-        protected float _radius;//iterations per edge is updated according to Animator period
+        protected float _radius;//_iterations per edge is updated according to Animator period
         protected Vector[] _trajectory;
         protected Vector _base, _current;
         protected Quaternion _delta;
@@ -258,7 +258,7 @@ public class IKAnimation {
     }
 
     public static class FABRIKAnimation {
-        //Keep hist of iterations using FABRIK
+        //Keep hist of _iterations using FABRIK
         protected ChainSolver _solver;
         protected Scene _scene; //where to display animation
         protected int _current = 1; //current iteration
@@ -438,7 +438,7 @@ public class IKAnimation {
     }
 
     public static class CCDAnimation {
-        //Keep hist of iterations using FABRIK
+        //Keep hist of _iterations using FABRIK
         protected CCDSolver _solver;
         protected Scene _scene; //where to display animation
         protected int _current = 1; //current iteration

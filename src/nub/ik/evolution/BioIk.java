@@ -124,7 +124,7 @@ public class BioIk extends Solver {
         _updateExtinction();
         //3. Iterate a given number of times.
         int k = 0;
-        while (k < maxIter) {
+        while (k < _maxIterations) {
             _iterate();
             ArrayList<Individual> st = new ArrayList<>(_sorted_population.subList(0, _elitism_size));
             st.add(_best);
@@ -139,7 +139,7 @@ public class BioIk extends Solver {
     protected boolean _iterate() {
         //1. Exploit _elitism_size individuals
         _exploit(_sorted_population.subList(0, _elitism_size));
-        if (_debug) System.out.println("------- Iteration: " + iterations);
+        if (_debug) System.out.println("------- Iteration: " + _iterations);
         Individual best = _sorted_population.get(0), worst = _sorted_population.get(_sorted_population.size() - 1);
         //2. Mating pool is same as population
         List<Individual> pool = new ArrayList<Individual>(_sorted_population);
@@ -220,7 +220,7 @@ public class BioIk extends Solver {
         _updateExtinction();
 
         _best = best.fitness() < _best.fitness() ? best : _best;
-        return _best.fitness() < minDistance;
+        return _best.fitness() < _minDistance;
     }
 
 
@@ -418,7 +418,7 @@ public class BioIk extends Solver {
     protected void _reset() {
         _updateChainLength();
         _best = null;
-        iterations = 0;
+        _iterations = 0;
         if (_target == null) {
             _previousTarget = null;
             return;

@@ -172,21 +172,21 @@ public class TreeSolver extends FABRIKSolver {
       treeNode._modified = false;
       return chains;
     }
-    if (Vector.distance(solver._chain.get(solver._chain.size() - 1).position(), solver.target().position()) <= error) {
+    if (Vector.distance(solver._chain.get(solver._chain.size() - 1).position(), solver.target().position()) <= _maxError) {
       treeNode._modified = false;
       return chains;
     }
 
 
     //TODO: Check blocked and oscillation decisions based on "e"
-    /*solver._lastError = iterations % 2 == 0 ?
+    /*solver._lastError = _iterations % 2 == 0 ?
             Vector.distance(solver._chain.get(solver._chain.size()-1).position(), solver._target.position()) :
             Math.max(Vector.distance(solver._chain.get(solver._chain.size()-1).position(), solver._target.position()), solver._lastError);*/
 
     //Apply Fix Twisting before applying a Full Fabrik iteration to whole chain
     //TODO: 1. is there a better condition ? 2. How to consider properly twisting of a Node with 2 or more children
     //TODO : Twisting to favour region of movement
-    if(_fixTwisting && solver._chain.size() > 2 && iterations % 3 == 0){
+    if(_fixTwisting && solver._chain.size() > 2 && _iterations % 3 == 0){
       if(treeNode._parent != null && treeNode._parent._children.size() > 1){
         _applyTwistRotation(solver._chain.subList(1, solver._chain.size()), solver._target.position());
       } else{
@@ -234,13 +234,13 @@ public class TreeSolver extends FABRIKSolver {
   public static ArrayList<ArrayList<Vector>> aux_prev = new ArrayList<>();
 
   protected float _backwardReaching(TreeNode treeNode) {
-    float change = minDistance;
+    float change = _minDistance;
     if (treeNode._modified) {
       ChainSolver solver = treeNode._solver();
       Vector o = solver._positions().get(0);
       solver._positions().set(0, solver._chain.get(0).position().get());
       change = solver._backwardReaching(o);
-      //Get error
+      //Get _maxError
       /*When executing Backward Step, if the Frame is a SubBase (Has more than 1 Child) and
        * it is not a "dummy Frame" (Convenient Frame that constraints position but no orientation of
        * its children) then an additional step must be done: A Weighted Average of Positions to establish
@@ -335,7 +335,7 @@ public class TreeSolver extends FABRIKSolver {
     change = modifiedChains > 0 ? change / (modifiedChains * 1.f) : change;
     //Check total position change
     _update();
-    if (change / (modifiedChains * 1.) <= minDistance) return true;
+    if (change / (modifiedChains * 1.) <= _minDistance) return true;
     return false;
   }
 
@@ -385,7 +385,7 @@ public class TreeSolver extends FABRIKSolver {
 
   @Override
   protected void _reset() {
-    iterations = 0;
+    _iterations = 0;
     _best = 0;
     _current = 0;
     _reset(root);

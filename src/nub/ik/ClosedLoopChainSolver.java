@@ -184,13 +184,13 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
         for(int i = 0; i < _chain.size(); i++){
             error += Vector.distance(_chain.get(i).position(), _positions.get(i));
         }
-        if (error <= this.error){
+        if (error <= this._maxError){
             return true;
         }
 
         float change = fixNoisyJoints();
         //Check total position change
-        if (change <= minDistance){
+        if (change <= _minDistance){
             return true;
         }
         return false;
@@ -214,7 +214,7 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
 
     @Override
     protected void _reset() {
-        iterations = 0;
+        _iterations = 0;
         _hasChanged = false;
     }
 

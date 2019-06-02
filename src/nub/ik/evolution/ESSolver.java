@@ -45,10 +45,10 @@ public class ESSolver extends Solver {
     }
 
     public double[] execute(){
-        double[] results = new double[maxIter];
+        double[] results = new double[_maxIterations];
         int k = 0;
         _x_i = _copy(_chain);
-        while(k < maxIter){
+        while(k < _maxIterations){
             _iterate();
             results[k] = _distanceToTarget(_x_i);
             k++;
@@ -127,7 +127,7 @@ public class ESSolver extends Solver {
             _x_i = x_i1;
             d1 = d2;
         }
-        return d1 < minDistance;
+        return d1 < _minDistance;
     }
 
 
@@ -160,7 +160,7 @@ public class ESSolver extends Solver {
     @Override
     protected void _reset() {
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-        iterations = 0;
+        _iterations = 0;
     }
 
     @Override

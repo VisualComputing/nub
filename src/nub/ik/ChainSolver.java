@@ -12,7 +12,6 @@
 package nub.ik;
 
 import nub.core.Node;
-import nub.core.constraint.Constraint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -177,9 +176,9 @@ public class ChainSolver extends FABRIKSolver {
     Node end = _chain.get(_chain.size() - 1);
     Vector target = this._target.position().get();
     //TODO: Check blocked and oscillation decisions based on "e"
-    _lastError = iterations % 2 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.max(Vector.distance(end.position(), _target.position()), _lastError);
+    _lastError = _iterations % 2 == 0 ?  Vector.distance(end.position(), _target.position()) : Math.max(Vector.distance(end.position(), _target.position()), _lastError);
     //Execute Until the distance between the end effector and the target is below a threshold
-    if (Vector.distance(end.position(), target) <= error) {
+    if (Vector.distance(end.position(), target) <= _maxError) {
       return true;
     }
     //Get the distance between the Root and the End Effector
@@ -195,7 +194,7 @@ public class ChainSolver extends FABRIKSolver {
     Vector initial = _chain.get(0).position().get();
     //Stage 1: Forward Reaching
     //TODO : Check for a better approach to include Twist (*)
-    if(_fixTwisting && iterations % 3 == 0){
+    if(_fixTwisting && _iterations % 3 == 0){
       _applyTwistRotation(_chain, target);
       //TODO : Do it efficiently
       for(int i = 0; i < _chain.size(); i++){
@@ -218,12 +217,12 @@ public class ChainSolver extends FABRIKSolver {
     float change = _backwardReaching(o);
     //Save best solution
     float currentError  = Vector.distance(end.position(), _target.position());
-    if(_explore && currentError > error) {
-      if(debug) System.out.println("ne is greater than error : " + " ne : " + currentError + " error : " + error);
+    if(_explore && currentError > _maxError) {
+      if(debug) System.out.println("ne is greater than _maxError : " + " ne : " + currentError + " _maxError : " + _maxError);
       if(debug) System.out.println("change is : " + change);
       if(debug) System.out.println("e is : " + _lastError);
 
-      if ((change < 10e-6) || (iterations % 2 == 1 && currentError > _lastError)) {
+      if ((change < 10e-6) || (_iterations % 2 == 1 && currentError > _lastError)) {
         boolean avoid = currentError > _lastError;
         for(Float jc : _jointChange) {
           if (debug) System.out.print(jc + " , ");
@@ -273,7 +272,7 @@ public class ChainSolver extends FABRIKSolver {
   @Override
   protected void _reset() {
     _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-    iterations = 0;
+    _iterations = 0;
     _explorationTimes = 0;
     //We know that State has change but not where, then it is better to reset Global Positions and Orientations
     _init();

@@ -15,23 +15,23 @@ import nub.core.Node;
 import nub.timing.TimingTask;
 
 /**
- * A Solver is a convenient class to solve IK problem
- * Given a Chain or a Tree Structure of Frames, this class will
- * solve the configuration that the frames must have to reach
- * a desired position
+ * A Solver is a convenient class to solve IK problem,
+ * Given a Chain or a Tree Structure of Nodes, this class will
+ * solve the configuration that the Nodes must have to reach
+ * a desired position.
  */
 
 public abstract class Solver {
   //TODO : Add visual hints to show how the solver's algorithm works.
   //TODO paper idea: optimize values per _solver / timer / local config
-  public float error = 0.01f;
-  public int maxIter = 50;
-  public float minDistance = 0.01f;
-  public float timesPerFrame = 5.f;
-  public float frameCounter = 0;
-  public int iterations = 0;
-  public int final_iteration = 0; //TODO : Clean this!
-  public boolean change_temp = false; //TODO : Clean this!
+  protected float _maxError = 0.01f;
+  protected int _maxIterations = 50;
+  protected float _minDistance = 0.01f;
+  protected float _timesPerFrame = 5.f;
+  protected float _frameCounter = 0;
+  protected int _iterations = 0;
+  protected int _last_iteration = 0; //TODO : Clean this!
+  protected boolean _change_temp = false; //TODO : Clean this!
 
   protected TimingTask _task;
 
@@ -48,6 +48,31 @@ public abstract class Solver {
     };
   }
 
+  /*Getters and setters*/
+  public int lastIteration(){
+    return _last_iteration;
+  }
+
+  public void setMaxError(float maxError){
+    _maxError = maxError;
+  }
+
+  public void setMaxIterations(int maxIterations){
+    _maxIterations= maxIterations;
+  }
+
+  public void setMinDistance(float minDistance){
+    _minDistance = minDistance;
+  }
+
+  public void setTimesPerFrame(float timesPerFrame){
+    _timesPerFrame = timesPerFrame;
+  }
+
+  public void hasChanged(boolean change){
+    _change_temp = change;
+  }
+
   /*Performs an Iteration of Solver Algorithm */
   protected abstract boolean _iterate();
 
@@ -60,32 +85,32 @@ public abstract class Solver {
   public abstract float error();
 
   public void change(boolean change){
-    change_temp = change;
+    _change_temp = change;
   }
 
   public boolean solve() {
     //Reset counter
-    if (_changed() || change_temp) {
+    if (_changed() || _change_temp) {
       _reset();
-      change_temp = false;
+      _change_temp = false;
     }
 
-    if (iterations >= maxIter) {
+    if (_iterations >= _maxIterations) {
       return true;
     }
-    frameCounter += timesPerFrame;
+    _frameCounter += _timesPerFrame;
 
-    while (Math.floor(frameCounter) > 0) {
+    while (Math.floor(_frameCounter) > 0) {
       //Returns a boolean that indicates if a termination condition has been accomplished
       if (_iterate()) {
-        final_iteration = iterations;
-        iterations = maxIter;
+        _last_iteration = _iterations;
+        _iterations = _maxIterations;
         break;
       } else {
-        final_iteration = iterations;
-        iterations += 1;
+        _last_iteration = _iterations;
+        _iterations += 1;
       }
-      frameCounter -= 1;
+      _frameCounter -= 1;
     }
     //update positions
     _update();

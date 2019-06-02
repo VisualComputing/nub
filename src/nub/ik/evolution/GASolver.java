@@ -102,7 +102,7 @@ public class GASolver extends Solver {
         }
         //3. Iterate a given number of times.
         int k = 0;
-        while(k < maxIter){
+        while(k < _maxIterations){
             _iterate();
             _statistics.add(new Statistics(_population));
             k++;
@@ -116,7 +116,7 @@ public class GASolver extends Solver {
         //1. Select parents
         List<Individual> parents = _selection.choose(true, _population, _population_size);
         if(_debug) {
-            System.out.println("ITERATION : " + iterations);
+            System.out.println("ITERATION : " + _iterations);
             System.out.println("Parents");
             for(Individual ind : parents){
                 System.out.println(ind);
@@ -207,7 +207,7 @@ public class GASolver extends Solver {
                 break;
             }
         }
-        return _best.fitness() < minDistance;
+        return _best.fitness() < _minDistance;
     }
 
 
@@ -247,7 +247,7 @@ public class GASolver extends Solver {
     @Override
     protected void _reset() {
         _best = null;
-        iterations = 0;
+        _iterations = 0;
         if(_targets == null){
             _previousTarget = null;
             return;

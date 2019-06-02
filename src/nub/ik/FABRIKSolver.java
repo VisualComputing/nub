@@ -29,7 +29,7 @@ public abstract class FABRIKSolver extends Solver {
   * Some ideas:
   * Increase of weight direction: Last segments must move a lot, but First ones must try
   * to keep it's direction, due last segments could be fixed by first ones ?
-  * Weights depends on iterations: First iterations must be exploratory whereas last ones must
+  * Weights depends on _iterations: First _iterations must be exploratory whereas last ones must
   * preserve directions ?
   *
   * FABRIK K-Steps

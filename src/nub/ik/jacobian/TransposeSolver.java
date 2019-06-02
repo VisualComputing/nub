@@ -86,7 +86,7 @@ public class TransposeSolver extends Solver{
     protected boolean _iterate() {
         //As no target is specified there is no need to perform an iteration
         if (_target == null || _chain.size() < 2) return true;
-        //Clamp error
+        //Clamp _maxError
         Vector e = Vector.subtract(_target.position() , endEffector().position());
         if(e.magnitude() > _d_max){
             e.normalize();
@@ -100,7 +100,7 @@ public class TransposeSolver extends Solver{
 
         _delta = _J.transpose().mult(error);
 
-        //choosing alpha according to error magnitude
+        //choosing alpha according to _maxError magnitude
         SimpleMatrix JJTe = _J.mult(_delta);
         double div = JJTe.dot(JJTe);
         if(div > 1E-3)
@@ -109,11 +109,11 @@ public class TransposeSolver extends Solver{
             _delta = _delta.scale(0);
 
         //Execute Until the distance between the end effector and the target is below a threshold
-        if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
+        if (Vector.distance(endEffector().position(), _target.position()) <= super._maxError) {
             return true;
         }
         //Check total rotation change
-        //if (change <= minDistance) return true;
+        //if (change <= _minDistance) return true;
         return false;
     }
 
@@ -137,7 +137,7 @@ public class TransposeSolver extends Solver{
     @Override
     protected void _reset() {
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-        iterations = 0;
+        _iterations = 0;
         _axes = new Vector[_chain.size() - 1];
     }
 

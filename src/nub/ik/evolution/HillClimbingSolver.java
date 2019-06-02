@@ -5,9 +5,6 @@ import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -49,10 +46,10 @@ public class HillClimbingSolver extends Solver {
     }
 
     public double[] execute(){
-        double[] results = new double[maxIter];
+        double[] results = new double[_maxIterations];
         int k = 0;
         _x_i = _copy(_chain);
-        while(k < maxIter){
+        while(k < _maxIterations){
             _iterate();
             results[k] = _distanceToTarget(_x_i);
             k++;
@@ -140,7 +137,7 @@ public class HillClimbingSolver extends Solver {
             _x_i = x_i1;
             d1 = d2;
         }
-        return d1 < minDistance;
+        return d1 < _minDistance;
     }
 
 
@@ -174,7 +171,7 @@ public class HillClimbingSolver extends Solver {
     protected void _reset() {
         _x_i = _copy(_chain);
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
-        iterations = 0;
+        _iterations = 0;
     }
 
     @Override

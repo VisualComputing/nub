@@ -76,7 +76,7 @@ public class PseudoInverseSolver extends Solver{
     protected boolean _iterate() {
         //As no target is specified there is no need to perform an iteration
         if (_target == null || _chain.size() < 2) return true;
-        //Clamp error
+        //Clamp _maxError
         Vector e = Vector.subtract(_target.position() , endEffector().position());
         if(e.magnitude() > _d_max){
             e.normalize();
@@ -96,11 +96,11 @@ public class PseudoInverseSolver extends Solver{
 
         Util.updateChain(_chain, _delta, _axes);
         //Execute Until the distance between the end effector and the target is below a threshold
-        if (Vector.distance(endEffector().position(), _target.position()) <= super.error) {
+        if (Vector.distance(endEffector().position(), _target.position()) <= super._maxError) {
             return true;
         }
         //Check total rotation change
-        //if (change <= minDistance) return true;
+        //if (change <= _minDistance) return true;
         return false;
     }
 
@@ -123,7 +123,7 @@ public class PseudoInverseSolver extends Solver{
     protected void _reset() {
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
         _axes = new Vector[_chain.size() - 1];
-        iterations = 0;
+        _iterations = 0;
     }
 
     @Override
