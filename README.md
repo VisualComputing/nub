@@ -255,6 +255,104 @@ See the [ApplicationControl example](https://github.com/VisualComputing/nubjs/tr
 
 ## IK
 
+Forward Kinematics (FK) and Inverse Kinematics (IK) is used on nub to describe the motion of a skeleton structure (this  [video](https://www.youtube.com/watch?v=euFe1S0OltQ) summarizes the difference between this two approaches). 
+
+To solve IK on nub it is required to follow the next steps:
+
+### Define the Skeleton (Hierarchy of Nodes)
+A Skeleton structure is represented by a branch of a graph (see [branch(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#branch-nub.core.Node-)). Each Node of the branch is a Joint capable of rotational motion. Leaf nodes of the branch are special parts of the structure known as End effectors whose position and orientation depends on the configuration of non-leaf nodes. 
+
+### Define the Targets
+Once a Skeleton has been defined, the next step consist on identify which End Effectors must be active (That is, which of the leaf nodes could be handled to modify the posture of the whole structure). 
+
+To do so we require to create a Target per active End Effector. Creating a Target is just to instantiate a Node that indicates which is the desired position of an End Effector (If we move a Target, the associated End Effector will try to follow the new desired position). 
+
+### Define a Solver
+Solving IK problem could be done in many different ways (see [IK survey](http://www.andreasaristidou.com/publications/papers/IK_survey.pdf)). Nub by default allows to solve the IK problem using an Adaptation of [FABRIK](http://www.andreasaristidou.com/publications/papers/FABRIK.pdf) algorithm.
+
+Once you have specified a Skeleton and the Target(s). It is required to relate this information with a Solver (see Solver class) that will update the non-leaf nodes rotations in order to reach the Target(s). 
+
+To define a solver there are two options: Register a Solver on the graph scene, or instantiate a Solver. The former is the simplest form to add IK behavior to the Skeleton structure. The latter is more customizable.
+
+
+#### Register a Solver
+Register a Solver task managed by a Graph scene is done just by calling registerTreeSolver(Node) method, where Node is the root of the Skeleton.
+
+##### Relate Target(s) and End Effector(s)
+You must specify explicitly which leaf node (End Effector) is related to which target node. To do so call graph method addIKTarget(Node, Node). Where the former node is an End Effector, and the latter is the Target to follow.
+
+It is usual to set initial target(s) position to be the same as end effector(s) position. Assuming that the Skeleton is determined by branch(Node) and it is a single chain (i.e each Node has as much one child) the code must look like:
+```processing
+void setup() {
+  ...
+  Node target = new Node(scene);
+  Node root = new Node(scene);
+  ...
+  List<Node> chain = scene.branch(root);
+  Node endEffector = chain.get(chain.size()-1);
+  ...
+  Solver solver = scene.registerTreeSolver(root);
+  target.setPosition(endEffector.position());  
+  scene.addIKTarget(endEffector, target);
+}
+```
+See registering Solver example.
+
+
+#### Instantiate a Solver
+As a Skeleton become complex (e.g. the structure contains many branches or the Nodes motion is highly constrained), it is harder to solve the IK problem. For instance, a usual simplification is to divide the Skeleton in independent chains (structures in which a Node is related to as much another Node).
+
+Depending on the Skeleton structure you have defined or the problem you are solving, it could happen that registering a Solver on a graph is not the best alternative. If you prefer, you could use the following IK solvers (among others) that Nub provides (see benchmark example):
+
+* TreeSolver: The default solver used by the graph Scene.
+* ChainSolver: An adaptation of FABRIK for chain structures.
+* CCDSolver: An implementation of CCD Solver for chain structures.
+
+##### Relate Target(s) and End Effector(s)
+You must specify explicitly which leaf node (End Effector) is related to which target node. To do so call solver method setIKTarget(Node, Node). 
+Once you have defined the kind of solver to use you could register a TimingTask that invokes solver method solve() to perform a single iteration of the solver whenever it is required.
+
+Assuming that the Skeleton is determined by branch(Node) and it is a single chain (i.e each Node has as much one child) the code must look like:
+
+```processing
+void setup() {
+  ...
+  Node target = new Node(scene);
+  Node root = new Node(scene);
+  ...
+  List<Node> chain = scene.branch(root);
+  Node endEffector = chain.get(chain.size()-1);
+  ...
+  Solver solver = new ChainSolver(chain);
+  target.setPosition(endEffector.position());  
+  scene.addIKTarget(endEffector, target);
+  
+  TimingTask solverTask = new TimingTask() {
+    @Override
+    public void execute() {
+      //a solver perform an iteration when solve method is called
+      solver.solve();
+    }
+  };
+  scene.registerTask(solverTask); 
+  solverTask.run(40); //Execute the solverTask each 40 ms  
+}
+```
+
+See the IK basic examples.
+
+
+### Define Node constraints
+
+
+It is desirable to obtain natural, predictable and intuitive poses when End Effectors are manipulated, however it could exist many solutions (i.e many different poses) that satisfy the IK problem. In such cases you could add constraints to some nodes (see [setConstraint(Constraint)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setConstraint-nub.core.constraint.Constraint-)) in the Skeleton to improve the Solver performance (e.g see [Human Skeleton](https://en.wikipedia.org/wiki/Synovial_joint#/media/File:909_Types_of_Synovial_Joints.jpg)). Currently the supported rotation constraints for Kinematics are:
+
+* Hinge: 1-DOF constraint. i.e the joint will rotate just in one direction defined by a given Axis (Called Twist Axis).
+* BallAndSocket: 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with an elliptical base. User must specify ellipse semi-axis to constraint the movement. (for further info look here)
+* PlanarPolygon: As Ball and Socket, is a 3-DOF constraint. i.e the joint could rotate in any direction but the twist axis (defined by the user) must remain inside a cone with a polygonal base. A set of vertices on XY plane in Clockwise or Counter Clockwise order must be given to constraint the movement. (for further info look here)
+
+See the IK basic examples.
+
 ## Installation
 
 Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/nubjs/releases) and extract it to your sketchbook `libraries` folder.
