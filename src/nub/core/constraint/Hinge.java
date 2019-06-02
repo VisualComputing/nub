@@ -38,6 +38,11 @@ public class Hinge extends Constraint {
   protected Quaternion _orientation = new Quaternion();
 
 
+  public Hinge(float min, float max){
+    _min = min;
+    _max = max;
+  }
+
   public Hinge(float min, float max, Quaternion rotation, Vector up, Vector twist) {
     _min = min;
     _max = max;
