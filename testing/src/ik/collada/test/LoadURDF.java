@@ -52,7 +52,7 @@ public class LoadURDF extends PApplet {
 
             List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get(dae == 0 ? "node10" : "node8"));
 
-            ChainSolver solver = new ChainSolver((ArrayList<? extends Node>) branch);
+            ChainSolver solver = new ChainSolver( branch);
             solver.setKeepDirection(true);
             solver.setFixTwisting(true);
 

@@ -132,7 +132,7 @@ public class LoadMesh extends PApplet {
         /*Chain solver*/
         for(int i = 0; i < effectors.length; i++) {
             targets.get(i).setPosition(model.getJoints().get(effectors[i]).position());
-            ChainSolver solver_r_leg = new ChainSolver((ArrayList<? extends Node>) scene.branch(model.getJoints().get(roots[i])));
+            ChainSolver solver_r_leg = new ChainSolver( scene.branch(model.getJoints().get(roots[i])));
             solver_r_leg.setKeepDirection(true);
             solver_r_leg.setFixTwisting(true);
 

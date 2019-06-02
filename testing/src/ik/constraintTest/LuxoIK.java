@@ -149,7 +149,7 @@ public class LuxoIK extends PApplet {
         lamp = new Lamp(scene);
         target.setPosition(lamp.frame(3).position());
 
-        ChainSolver solver = new ChainSolver( (ArrayList<? extends Node>) scene.branch(lamp.frame(0)));
+        ChainSolver solver = new ChainSolver(  scene.branch(lamp.frame(0)));
         solver.setTarget(target);
         solver.setKeepDirection(true);
         solver.setFixTwisting(true);

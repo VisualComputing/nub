@@ -28,6 +28,9 @@ public class InstantiateIK extends PApplet {
                                0 eye
                                ^
                                |
+                               1
+                               ^
+                               |
                                2
                                ^
                                |
@@ -35,11 +38,8 @@ public class InstantiateIK extends PApplet {
                                ^
                                |
                                4
-                               ^
-                               |
-                               5
 
-    As Node 5 is the End effector of the structure (leaf node) we will attach a Target to it.
+    As Node 4 is the End effector of the structure (leaf node) we will attach a Target to it.
     */
 
     Scene scene;
@@ -74,7 +74,7 @@ public class InstantiateIK extends PApplet {
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
         endEffector.enableTracking(false);
 
-        //2. Lets create a Target (a bit bigger than a Joint structure)
+        //2. Lets create a Target (a bit bigger than a Joint in the structure)
         Node target = createTarget(scene, jointRadius * 1.5f);
 
         //Locate the Target on same spot of the end effectors

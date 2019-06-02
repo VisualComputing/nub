@@ -98,7 +98,7 @@ public class BenchmarkUR10 extends PApplet {
 
             switch (solvers_type[i]){
                 case "FABRIK":{
-                    solver = new ChainSolver((ArrayList<? extends Node>) branch);
+                    solver = new ChainSolver( branch);
                     ((ChainSolver)solver).setKeepDirection(true);
                     ((ChainSolver)solver).setFixTwisting(true);
                     ((ChainSolver)solver).explore(true);
@@ -109,15 +109,15 @@ public class BenchmarkUR10 extends PApplet {
                     break;
                 }
                 case "CCD":{
-                    solver = new CCDSolver((ArrayList<? extends Node>) branch);
+                    solver = new CCDSolver( branch);
                     break;
                 }
                 case "NUMERICAL":{
-                    solver = new SDLSSolver((ArrayList<? extends Node>) branch);
+                    solver = new SDLSSolver( branch);
                     break;
                 }
                 default:{
-                    solver = new ChainSolver((ArrayList<? extends Node>) branch);
+                    solver = new ChainSolver( branch);
                     ((ChainSolver)solver).setKeepDirection(true);
                     ((ChainSolver)solver).setFixTwisting(true);
                     break;

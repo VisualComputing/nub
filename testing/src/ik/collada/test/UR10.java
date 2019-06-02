@@ -104,12 +104,12 @@ public class UR10 extends PApplet {
 
 
         if(!ccd) {
-            solver = new ChainSolver((ArrayList<? extends Node>) branch);
+            solver = new ChainSolver( branch);
             ((ChainSolver) solver).setKeepDirection(true);
             ((ChainSolver) solver).setFixTwisting(true);
             ((ChainSolver) solver).explore(false);
         } else{
-            solver = new CCDSolver((ArrayList<? extends Node>) branch);
+            solver = new CCDSolver( branch);
         }
 
         solver.setTimesPerFrame(debug ? 1 : 10);

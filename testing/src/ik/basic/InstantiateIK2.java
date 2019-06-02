@@ -23,23 +23,23 @@ public class InstantiateIK2 extends PApplet {
     /*
     In this example we will compare the performance of two common IK solver
     related with a pretty simple chain structure on the XY-Plane:
-                             World
-                               ^
-                               | \
-                               0 eye
-                               ^
-                               |
-                               2
-                               ^
-                               |
-                               3
-                               ^
-                               |
-                               4
-                               ^
-                               |
-                               5
-    As Node 5 is the End effector of the structure (leaf node) we will attach a Target to it.
+                                     World
+                                       ^
+                                       |
+                                       0
+                                       ^
+                                       |
+                                       1
+                                       ^
+                                       |
+                                       2
+                                       ^
+                                       |
+                                       3
+                                       ^
+                                       |
+                                       4
+    As Node 4 is the End effector of the structure (leaf node) we will attach a Target to it.
     */
 
     Scene scene;
@@ -107,7 +107,7 @@ public class InstantiateIK2 extends PApplet {
         solver1.setTarget(skeleton1.get(skeleton1.size() - 1), target1);
         solver2.setTarget(skeleton2.get(skeleton2.size() - 1), target2);
 
-        //5. Create a Timing Task for solver such that the solver executes each amount of time
+        //5. Create a Timing Task for each solver such that the solver executes each amount of time
         TimingTask solverTask1 = new TimingTask() {
             @Override
             public void execute() {
