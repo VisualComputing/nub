@@ -2962,7 +2962,12 @@ public class Scene extends Graph implements PConstants {
    */
   public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
     pGraphics.beginShape(PApplet.TRIANGLE_FAN);
-    pGraphics.vertex(0, 0, 0);
+    if(pGraphics.is3D()) {
+      pGraphics.vertex(0, 0, 0);
+    }
+    else{
+      pGraphics.vertex(0, 0);
+    }
     float step = (maxAngle - minAngle) / detail;
     for (float theta = minAngle; theta < maxAngle; theta += step)
       pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
