@@ -52,7 +52,7 @@ void setup() {
     scene.setRadius(200);
     scene.fit(1);
     //1. Create the Skeleton (Y-Shape described above)
-    skeleton[0] = createJoint(scene,null, new Vector(), jointRadius, false);
+    skeleton[0] = createJoint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false);
     skeleton[1] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
     skeleton[2] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
     skeleton[3] = createJoint(scene,skeleton[1], new Vector(-length, length), jointRadius, true);
@@ -135,7 +135,7 @@ Node createTarget(Scene scene, float radius){
     return target;
 }
 
-Node createJoint(Scene scene, Node node, Vector translation, float radius, boolean drawLine){
+Node createJoint(Scene scene, Node node, Vector translation, final float radius, final boolean drawLine){
     /*
     * A Joint will be represented as a green ball
     * that is joined to its reference Node
@@ -194,4 +194,3 @@ void mouseClicked(MouseEvent event) {
         else
             scene.align();
 }
-
