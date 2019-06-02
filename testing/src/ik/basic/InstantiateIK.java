@@ -2,39 +2,44 @@ package ik.basic;
 
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.Solver;
+import nub.ik.ChainSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import nub.timing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
+import java.util.ArrayList;
+
 /**
  * Created by sebchaparr on 01/06/19.
  */
 
-public class RegisterIK extends PApplet {
+public class InstantiateIK extends PApplet {
 
     /*
     In this example an IK solver will be related
-    with a Y-Shape structure on the XY-Plane:
+    with a pretty simple chain structure on the XY-Plane:
                              World
                                ^
-                               |\
+                               | \
                                0 eye
                                ^
-                              / \
-                             1   2                               ^
-                            /     \
-                           3       4
-                          /         \
-                         5           6
-    As Nodes 5 and 6 are the End effectors of the structure (leaf nodes)
-    we will add a Target for each one of them.
-    Note: Nodes 1 and 2 lie on the same position (Visually it seems like a single Node).
-    This is done in order to make the motion of branches 1,3,5 and 2,4,6 independent .
-    So if Node 1 is rotated Nodes 2,4,6 will not move.
+                               |
+                               2
+                               ^
+                               |
+                               3
+                               ^
+                               |
+                               4
+                               ^
+                               |
+                               5
+
+    As Node 5 is the End effector of the structure (leaf node) we will attach a Target to it.
     */
 
     Scene scene;
@@ -42,8 +47,9 @@ public class RegisterIK extends PApplet {
     String renderer = P3D;
     float jointRadius = 5;
     float length = 50;
+    boolean enableSolver = true;
     //Skeleton structure defined above
-    Node[] skeleton = new Node[7];
+    ArrayList<Node> skeleton = new ArrayList<Node>();
 
 
     public void settings() {
@@ -54,34 +60,30 @@ public class RegisterIK extends PApplet {
         //Setting the scene
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setRadius(200);
+        scene.setRadius(280);
         scene.fit(1);
-        //1. Create the Skeleton (Y-Shape described above)
-        skeleton[0] = createJoint(scene,null, new Vector(), jointRadius, false);
-        skeleton[1] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-        skeleton[2] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-        skeleton[3] = createJoint(scene,skeleton[1], new Vector(-length, length), jointRadius, true);
-        skeleton[4] = createJoint(scene,skeleton[2], new Vector(length, length), jointRadius, true);
-
-        //Left End Effector
-        skeleton[5] = createJoint(scene,skeleton[3], new Vector(-length, length), jointRadius, true);
-        //Right End Effector
-        skeleton[6] = createJoint(scene,skeleton[4], new Vector(length, length), jointRadius, true);
-
+        //1. Create the Skeleton (chain described above)
+        skeleton.add(createJoint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false));
+        skeleton.add(createJoint(scene,skeleton.get(0), new Vector(0, length), jointRadius, true));
+        skeleton.add(createJoint(scene,skeleton.get(1), new Vector(0, length), jointRadius, true));
+        skeleton.add(createJoint(scene,skeleton.get(2), new Vector(0, length), jointRadius, true));
+        skeleton.add(createJoint(scene,skeleton.get(3), new Vector(0, length), jointRadius, true));
+        //End Effector
+        Node endEffector = createJoint(scene,skeleton.get(4), new Vector(0, length), jointRadius, true);
+        skeleton.add(endEffector);
         //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-        skeleton[5].enableTracking(false);
-        skeleton[6].enableTracking(false);
+        endEffector.enableTracking(false);
 
-        //2. Lets create two Targets (a bit bigger than a Joint structure)
-        Node leftTarget = createTarget(scene, jointRadius * 1.1f);
-        Node rightTarget = createTarget(scene, jointRadius * 1.1f);
+        //2. Lets create a Target (a bit bigger than a Joint structure)
+        Node target = createTarget(scene, jointRadius * 1.5f);
 
-        //Locate the Targets on same spot of the end effectors
-        leftTarget.setPosition(skeleton[5].position());
-        rightTarget.setPosition(skeleton[6].position());
+        //Locate the Target on same spot of the end effectors
+        target.setPosition(endEffector.position());
 
-        //3. Relate the structure with a Solver. In this example we register a solver in the graph scene
-        Solver solver = scene.registerTreeSolver(skeleton[0]);
+        //3. Relate the structure with a Solver. In this example we instantiate a solver
+        //As we're dealing with a Chain Structure a Chain Solver is preferable
+        //A Chain solver constructor receives an ArrayList containing the Skeleton structure
+        ChainSolver solver = new ChainSolver(skeleton);
 
         //Optionally you could modify the following parameters of the Solver:
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
@@ -94,8 +96,20 @@ public class RegisterIK extends PApplet {
         solver.setMinDistance(0.5f);
 
         //4. relate targets with end effectors
-        scene.addIKTarget(skeleton[5], leftTarget);
-        scene.addIKTarget(skeleton[6], rightTarget);
+        solver.setTarget(endEffector, target);
+
+        //5. Create a Timing Task such that the solver executes each amount of time
+        TimingTask solverTask = new TimingTask() {
+            @Override
+            public void execute() {
+                //a solver perform an iteration when solve method is called
+                if(enableSolver){
+                    solver.solve();
+                }
+            }
+        };
+        scene.registerTask(solverTask); //Add solverTask to the Graph scene
+        solverTask.run(40); //Execute the solverTask each 40 ms
 
         //Define Text Properties
         textAlign(CENTER);
@@ -108,16 +122,10 @@ public class RegisterIK extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        for (int i = 0; i < skeleton.length; i++) {
-            if(i == 2) continue;
+        for (int i = 0; i < skeleton.size(); i++) {
             //Print Node names
-            Vector screenLocation = scene.screenLocation(skeleton[i].position());
-            String s = "";
-            if(i == 1) {
-                s += ", " + (i + 1);
-            }
-            text("Node " + i + s, screenLocation.x(), screenLocation.y());
-
+            Vector screenLocation = scene.screenLocation(skeleton.get(i).position());
+            text("Node " + i, screenLocation.x(), screenLocation.y());
         }
         scene.endHUD();
 
@@ -126,9 +134,9 @@ public class RegisterIK extends PApplet {
 
     public Node createTarget(Scene scene, float radius){
         /*
-        * A target is a Node, we represent a Target as a
-        * Red ball.
-        * */
+         * A target is a Node, we represent a Target as a
+         * Red ball.
+         * */
         PShape redBall;
         if (scene.is2D()) redBall = createShape(ELLIPSE,0, 0, radius*2, radius*2);
         else  redBall = createShape(SPHERE, radius);
@@ -143,9 +151,9 @@ public class RegisterIK extends PApplet {
 
     public Node createJoint(Scene scene, Node node, Vector translation, float radius, boolean drawLine){
         /*
-        * A Joint will be represented as a ball
-        * that is joined to its reference Node
-        * */
+         * A Joint will be represented as a ball
+         * that is joined to its reference Node
+         * */
 
         Node joint = new Node(scene){
             @Override
@@ -202,7 +210,13 @@ public class RegisterIK extends PApplet {
                 scene.align();
     }
 
+    public void keyPressed(){
+        if(key == 'S'){
+            enableSolver = !enableSolver;
+        }
+    }
+
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.RegisterIK"});
+        PApplet.main(new String[]{"ik.basic.InstantiateIK"});
     }
 }
