@@ -1,5 +1,5 @@
 package leapMotion;
-
+/*
 import nub.core.Node;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 /**
  * Created by sebchaparr on 31/07/18.
- */
+
 public class LeapMotionTest2 extends PApplet {
     HashMap<String, Node> fingers;
 
@@ -217,3 +217,4 @@ public class LeapMotionTest2 extends PApplet {
     }
 }
 
+*/

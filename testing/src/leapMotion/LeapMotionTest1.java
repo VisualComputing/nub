@@ -1,5 +1,5 @@
 package leapMotion;
-
+/*
 import nub.core.Node;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
@@ -13,7 +13,7 @@ import processing.event.MouseEvent;
 
 /**
  * Created by sebchaparr on 31/07/18.
- */
+
 public class LeapMotionTest1 extends PApplet {
     LeapMotion leap;
     Vector previousNormal;
@@ -185,3 +185,4 @@ public class LeapMotionTest1 extends PApplet {
     }
 }
 
+*/

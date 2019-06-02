@@ -1,4 +1,5 @@
 package leapMotion;
+/*
 
 import nub.core.Node;
 import nub.core.Graph;
@@ -13,7 +14,7 @@ import processing.event.MouseEvent;
 
 /**
  * Created by sebchaparr on 31/07/18.
- */
+
 public class LeapMotionTest3 extends PApplet {
     LeapMotion leap;
     PVector previousPosition;
@@ -237,3 +238,4 @@ public class LeapMotionTest3 extends PApplet {
 
 }
 
+*/
