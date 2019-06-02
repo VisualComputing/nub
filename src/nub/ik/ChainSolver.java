@@ -32,6 +32,8 @@ public class ChainSolver extends FABRIKSolver {
   protected Node _target;
   protected Node _prevTarget;
 
+  protected boolean _is3D = true;
+
 
   //TODO : Check this ideas, clean and refine (*)
   //----------------------------------------------------
@@ -132,6 +134,8 @@ public class ChainSolver extends FABRIKSolver {
       prevPosition = position;
       prevOrientation = orientation.get();
     }
+    _is3D = chain.get(0).graph().is3D();
+    if(!_is3D) _fixTwisting = false;
     _jointChange.remove(0);
     this._target = target;
     this._prevTarget =
@@ -393,9 +397,10 @@ public class ChainSolver extends FABRIKSolver {
           a = (float)(180 * Math.PI / 180);
         }
         if(j < _jointChange.size()) {
-          f.rotate(new Quaternion((float) (2 * Math.random() * a - a),
-                  (float) (2 * Math.random() * a - a),
-                  (float) (2 * Math.random() * a - a)));
+          float x = (float) (2 * Math.random() * a - a);
+          float y = (float) (2 * Math.random() * a - a);
+          float z = _is3D ? (float) (2 * Math.random() * a - a) : 0;
+          f.rotate(new Quaternion(x,y,z));
         }
         copy_p.add(f.position().get());
       }
@@ -428,7 +433,7 @@ public class ChainSolver extends FABRIKSolver {
       int j = 0;
       int k = r.nextInt(_chain.size());
 
-      if(i % 2 == 0) { // TODO : Clean!
+      if(i % 2 == 0 && _is3D) { // TODO : Clean!
         for (Node f : copy) {
           copy_props.put(f.id(), _properties.get(_chain.get(j++).id()));
           a = (float) (60 * Math.PI / 180);
@@ -449,7 +454,7 @@ public class ChainSolver extends FABRIKSolver {
         Vector po = Vector.subtract(o,p);
         Vector qp = Vector.subtract(q,p);
 
-        Vector axis = Vector.cross(po, qp, null);
+        Vector axis = _is3D ? Vector.cross(po, qp, null) : new Vector(0,0,1);
         Quaternion quat = new Quaternion(axis, (float)(2 * Math.random() * Math.PI - Math.PI));
         qp = quat.rotate(qp);
         copy_p.set(_chain.size() - 2, Vector.add(qp, p));

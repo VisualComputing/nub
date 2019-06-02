@@ -70,6 +70,7 @@ public class TreeSolver extends FABRIKSolver {
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
+  protected boolean _is3D;
 
   public Node head() {
     return (Node) root._solver().head();
@@ -137,6 +138,7 @@ public class TreeSolver extends FABRIKSolver {
     //dummy must have only a child,
     this.root = dummy._children().get(0);
     this.root._parent = null;
+    this._is3D = frame.graph().is3D();
   }
 
   protected int _forwardReaching(TreeNode treeNode) {
@@ -186,7 +188,7 @@ public class TreeSolver extends FABRIKSolver {
     //Apply Fix Twisting before applying a Full Fabrik iteration to whole chain
     //TODO: 1. is there a better condition ? 2. How to consider properly twisting of a Node with 2 or more children
     //TODO : Twisting to favour region of movement
-    if(_fixTwisting && solver._chain.size() > 2 && _iterations % 3 == 0){
+    if(_is3D && _fixTwisting && solver._chain.size() > 2 && _iterations % 3 == 0){
       if(treeNode._parent != null && treeNode._parent._children.size() > 1){
         _applyTwistRotation(solver._chain.subList(1, solver._chain.size()), solver._target.position());
       } else{
