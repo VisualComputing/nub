@@ -60,7 +60,7 @@ public class TargetWithDirection  extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(0,1,0), PI));
 
         solver = new ChainSolver((ArrayList<? extends Node>) scene.branch(joints.get(0)));
-        solver.timesPerFrame = 1;
+        solver.setTimesPerFrame(1f);
         solver.setTargetDirection(new Vector(1,0,0));
         solver.setTarget(target);
         TimingTask task = new TimingTask() {

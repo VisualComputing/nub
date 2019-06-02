@@ -118,8 +118,8 @@ public class GaitGenerator extends PApplet {
         j1.rotate(new Quaternion(new Vector(0,0,1), radians(-30)));
 
         Solver solver = scene.registerTreeSolver(j1);
-        solver.maxIter = 3;
-        solver.timesPerFrame = 1;
+        solver.setMaxIterations(3);
+        solver.setTimesPerFrame(1f);
 
         target.setPosition(j4.position());
         y_floor = j4.position().y();

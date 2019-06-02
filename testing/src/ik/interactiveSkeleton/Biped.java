@@ -6,7 +6,6 @@ import nub.core.constraint.FixedConstraint;
 import nub.core.constraint.Hinge;
 import nub.core.constraint.PlanarPolygon;
 import nub.ik.Solver;
-import nub.ik.TreeSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.common.Joint;
@@ -74,9 +73,9 @@ public class Biped extends PApplet {
         lowerRoot.setConstraint(new FixedConstraint());
 
         Solver solver  = scene.registerTreeSolver(upperRoot);
-        solver.maxIter = 100;
+        solver.setMaxIterations(100);
         solver  = scene.registerTreeSolver(lowerRoot);
-        solver.maxIter = 100;
+        solver.setMaxIterations(100);
 
         for(String key : keys){
             ArrayList<Joint> skeleton = limbs.get(key);

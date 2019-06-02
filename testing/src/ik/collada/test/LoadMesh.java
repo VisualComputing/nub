@@ -118,9 +118,9 @@ public class LoadMesh extends PApplet {
 
         /* TODO: Fix Tree Solver when model has constraints!
         Solver solver = scene.registerTreeSolver(model.getRootJoint());
-        solver.error = 0.05f;
-        solver.maxIter = 20;
-        solver.timesPerFrame = 10;
+        solver._maxError = 0.05f;
+        solver._maxIterations = 20;
+        solver.setTimesPerFrame(10);
 
         scene.addIKTarget(model.getJoints().get("Foot_R"), targets.get(0));
         scene.addIKTarget(model.getJoints().get("Foot_L"), targets.get(1));
@@ -136,9 +136,10 @@ public class LoadMesh extends PApplet {
             solver_r_leg.setKeepDirection(true);
             solver_r_leg.setFixTwisting(true);
 
-            solver_r_leg.timesPerFrame = 5;
-            solver_r_leg.maxIter = 50;
-            solver_r_leg.error = solver_r_leg.minDistance = 0.01f;
+            solver_r_leg.setTimesPerFrame(5);
+            solver_r_leg.setMaxIterations(50);
+            solver_r_leg.setMaxError(0.01f);
+            solver_r_leg.setMinDistance(0.01f);
             solver_r_leg.setTarget(model.getJoints().get(effectors[i]), targets.get(i));
             TimingTask task = new TimingTask() {
                 @Override

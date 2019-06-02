@@ -9,7 +9,6 @@ import nub.ik.ChainSolver;
 import nub.ik.Solver;
 import nub.ik.animation.IKAnimation;
 import nub.ik.evolution.BioIk;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
@@ -119,9 +118,9 @@ public class Case1 extends PApplet {
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);
             //6. Define solver parameters
-            solver.error = 0.001f;
-            solver.timesPerFrame = 5;
-            solver.maxIter = 200;
+            solver.setMaxError(0.001f);
+            solver.setTimesPerFrame(5);
+            solver.setMaxIterations(200);
             //7. Set targets
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());

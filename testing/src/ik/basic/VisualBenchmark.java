@@ -9,9 +9,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
-import ik.common.Joint;
 import processing.core.PApplet;
-import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
@@ -84,10 +82,10 @@ public class VisualBenchmark extends PApplet {
             Solver solver = Util.createSolver(solversType[i], structures.get(i));
             solvers.add(solver);
             //6. Define solver parameters
-            solvers.get(i).error = 0.001f;
-            solvers.get(i).timesPerFrame = 1;
-            solvers.get(i).maxIter = 300;
-            solvers.get(i).minDistance = 0.001f;
+            solvers.get(i).setMaxError(0.001f);
+            solvers.get(i).setTimesPerFrame(1f);
+            solvers.get(i).setMaxIterations(300);
+            solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());

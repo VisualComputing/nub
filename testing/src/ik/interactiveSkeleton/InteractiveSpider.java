@@ -178,8 +178,8 @@ public class InteractiveSpider extends PApplet {
             target.setPosition(endEffector.position());
             interpolator[i] = legPath(target, Vector.distance(root.position(), endEffector.position())*0.1f, invert);
             Solver solver = scene.registerTreeSolver(root);
-            solver.error = 0.01f;
-            solver.timesPerFrame = 1f;
+            solver.setMaxError(0.01f);
+            solver.setTimesPerFrame(1f);
             scene.addIKTarget(endEffector, target);
         }
 

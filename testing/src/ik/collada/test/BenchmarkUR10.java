@@ -124,9 +124,9 @@ public class BenchmarkUR10 extends PApplet {
                 }
             }
 
-            solver.timesPerFrame = 10;
-            solver.maxIter = 50;
-            solver.error = solver.minDistance = scene.radius() * 0.01f;
+            solver.setTimesPerFrame(10);
+            solver.setMaxIterations(50);
+            solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());
             TimingTask task = new TimingTask() {

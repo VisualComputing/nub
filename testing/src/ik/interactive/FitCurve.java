@@ -139,7 +139,7 @@ public class FitCurve {
         float[] u = _findParameters(first, last);
         //Find cubic bezier using least squares optimization
         Bezier curve = generateBezier(first, last, u, t1, t2);
-        //Get error
+        //Get _maxError
         float max_error = maxError(first, last, curve, u);
         int center = _split;
 
@@ -147,7 +147,7 @@ public class FitCurve {
             _curves.add(curve);
             return;
         }
-        /*  If error not too large, try some reparameterization  */
+        /*  If _maxError not too large, try some reparameterization  */
         if (SQ_ERROR < SQ_ITERATION_ERROR) {
             for (int i = 0; i < MAX_ITERATIONS; i++) {
                 u = reparameterize(first, last, u, curve);
@@ -160,7 +160,7 @@ public class FitCurve {
             }
         }
 
-        /* Fitting failed -- split at max error point and fit recursively */
+        /* Fitting failed -- split at max _maxError point and fit recursively */
         Vector t_center = Vector.subtract(_points.get(center - 1), _points.get(center));
         t_center.add(Vector.subtract(_points.get(center), _points.get(center + 1)));
         t_center.multiply(0.5f);

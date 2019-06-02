@@ -7,10 +7,8 @@ import nub.ik.evolution.BioIk;
 import nub.ik.evolution.GASolver;
 import nub.ik.evolution.HillClimbingSolver;
 import nub.ik.Solver;
-import nub.ik.evolution.Statistics;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import processing.core.PApplet;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -108,7 +106,7 @@ public class Benchmark {
             e.printStackTrace();
         }
         StringBuilder sb = new StringBuilder();
-        method.maxIter = iterations;
+        method.setMaxIterations(iterations);
         double avg_time = 0;
         for(int i = 0; i < times; i++) {
             for(Node f : method.chain()){
@@ -147,7 +145,7 @@ public class Benchmark {
         float[][] results = new float[6][iterations];
 
         StringBuilder sb = new StringBuilder();
-        method.maxIter = iterations;
+        method.setMaxIterations(iterations);
         double avg_time = 0;
         for(int i = 0; i < times; i++) {
             for(Node f : method.structure()){
@@ -200,7 +198,7 @@ public class Benchmark {
         float[][] results = new float[6 + method.operators().size()][iterations];
 
         StringBuilder sb = new StringBuilder();
-        method.maxIter = iterations;
+        method.setMaxIterations(iterations);
 
         double avg_time = 0;
 
@@ -258,7 +256,7 @@ public class Benchmark {
         float[][] results = new float[6][iterations];
 
         StringBuilder sb = new StringBuilder();
-        method.maxIter = iterations;
+        method.setMaxIterations(iterations);
 
         double avg_time = 0;
 

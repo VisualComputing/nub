@@ -24,7 +24,7 @@ public class LoadURDF extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
     String[] daes = {"ur10_joint_limited_robot.dae", "kuka_kr16_2.dae", "nasa_valkyrie.dae"};
-    int dae = 1; //choose between example models
+    int dae = 2; //choose between example models
     AnimatedModel model;
 
     public void settings() {
@@ -56,9 +56,10 @@ public class LoadURDF extends PApplet {
             solver.setKeepDirection(true);
             solver.setFixTwisting(true);
 
-            solver.timesPerFrame = 5;
-            solver.maxIter = 50;
-            solver.error = solver.minDistance = scene.radius() * 0.001f;
+            solver.setTimesPerFrame(5);
+            solver.setMaxIterations(50);
+            solver.setMaxError(scene.radius() * 0.001f);
+            solver.setMinDistance(scene.radius() * 0.001f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());
             TimingTask task = new TimingTask() {
@@ -76,7 +77,7 @@ public class LoadURDF extends PApplet {
         lights();
         scene.drawAxes();
         scene.render();
-        if(dae != 2) {
+        if(dae != 3) {
             scene.beginHUD();
             for (String s : model.getJoints().keySet()) {
                 Node n = model.getJoints().get(s);

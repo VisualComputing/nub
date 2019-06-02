@@ -153,7 +153,7 @@ public class LuxoIK extends PApplet {
         solver.setTarget(target);
         solver.setKeepDirection(true);
         solver.setFixTwisting(true);
-        solver.error = 3;
+        solver.setMaxError(3);
 
         TimingTask task = new TimingTask() {
             @Override

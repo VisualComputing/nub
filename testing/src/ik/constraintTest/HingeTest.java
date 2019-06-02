@@ -5,13 +5,9 @@ import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.CCDSolver;
 import nub.ik.ChainSolver;
-import nub.ik.FABRIKSolver;
-import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
-import nub.core.constraint.PlanarPolygon;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
 import ik.common.Joint;
@@ -87,11 +83,11 @@ public class HingeTest extends PApplet {
 
         int i = 0;
         for(ChainSolver s : chainSolvers){
-            //s.timesPerFrame = 20;
-            s.error = 0.5f;
-            s.timesPerFrame = 0.5f;
-            s.maxIter = 30;
-            //s.error = 1f;
+            //s._timesPerFrame = 20;
+            s.setMaxError(0.5f);
+            s.setTimesPerFrame(0.5f);
+            s.setMaxIterations(30);
+            //s.setMaxError(1f);
             s.setTarget(targets.get(i));
             if(i != 0)targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
@@ -106,9 +102,9 @@ public class HingeTest extends PApplet {
         }
 
         for(CCDSolver s : ccdSolvers){
-            s.error = 0.5f;
-            s.timesPerFrame = 0.5f;
-            s.maxIter = 30;
+            s.setMaxError(0.5f);
+            s.setTimesPerFrame(0.5f);
+            s.setMaxIterations(30);
             s.setTarget(targets.get(i));
             targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());

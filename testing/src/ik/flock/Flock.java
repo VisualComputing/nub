@@ -7,9 +7,7 @@ import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
-import ik.interactive.Target;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -208,7 +206,7 @@ public class Flock extends PApplet {
         //Making a default Path that target must follow
         setupTargetInterpolator(objShape, target);
         Solver solver = scene.registerTreeSolver(root);
-        solver.error = 0.1f;
+        solver.setMaxError(0.1f);
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
     }
 

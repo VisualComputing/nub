@@ -2,24 +2,15 @@ package ik.interactive;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.core.MatrixHandler;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
-import nub.core.constraint.FixedConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.Solver;
 import nub.ik.TreeSolver;
-import nub.primitives.Matrix;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.common.Joint;
-import net.java.games.input.Mouse;
 import processing.core.PApplet;
-import processing.core.PConstants;
-import processing.core.PGraphics;
-import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
@@ -438,14 +429,14 @@ public class SkeletonBuilder extends PApplet{
         if(scene.trackedNode() == null) return;
         if(debug) {
             solver = new TreeSolver(scene.trackedNode());
-            solver.timesPerFrame = 1;
+            solver.setTimesPerFrame(1f);
         } else {
             if(scene.trackedNode() != null) {
                 solver = scene.registerTreeSolver(scene.trackedNode());
-                solver.timesPerFrame = 1; //TODO : Allow more times
+                solver.setTimesPerFrame(1f); //TODO : Allow more times
             }
         }
-        solver.maxIter = 50;
+        solver.setMaxIterations(50);
         solver.setFixTwisting(fixTwisting);
         solver.setKeepDirection(keepDirections);
 

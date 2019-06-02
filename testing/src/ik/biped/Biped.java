@@ -160,13 +160,13 @@ public class Biped {
         right_arm = new ChainSolver(r_arm);
         left_leg = new ChainSolver(l_leg);
         right_leg = new ChainSolver(r_leg);
-        //set number of iterations
-        upper_body.maxIter = 5;
-        lower_body.maxIter = 5;
-        left_arm.maxIter = 5;
-        right_arm.maxIter = 5;
-        left_leg.maxIter = 5;
-        right_leg.maxIter = 5;
+        //set number of _iterations
+        upper_body.setMaxIterations(5);
+        lower_body.setMaxIterations(5);
+        left_arm.setMaxIterations(5);
+        right_arm.setMaxIterations(5);
+        left_leg.setMaxIterations(5);
+        right_leg.setMaxIterations(5);
     }
 
     void setConstraint(Node frame, float boneLength, Vector twist, float degrees){
@@ -215,10 +215,10 @@ public class Biped {
 
     public void solve() {
         //solve arms
-        left_arm.change_temp = true;
-        right_arm.change_temp = true;
-        left_leg.change_temp = true;
-        right_leg.change_temp = true;
+        left_arm.hasChanged(true);
+        right_arm.hasChanged(true);
+        left_leg.hasChanged(true);
+        right_leg.hasChanged(true);
 
         left_arm.solve();
         right_arm.solve();

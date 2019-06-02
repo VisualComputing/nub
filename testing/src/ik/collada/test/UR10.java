@@ -11,8 +11,6 @@ import nub.ik.CCDSolver;
 import nub.ik.ChainSolver;
 import nub.ik.FABRIKSolver;
 import nub.ik.Solver;
-import nub.ik.evolution.BioIk;
-import nub.ik.jacobian.SDLSSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -114,9 +112,9 @@ public class UR10 extends PApplet {
             solver = new CCDSolver((ArrayList<? extends Node>) branch);
         }
 
-        solver.timesPerFrame = debug ? 1 : 10;
-        solver.maxIter = 50;
-        solver.error = solver.minDistance = scene.radius() * 0.01f;
+        solver.setTimesPerFrame(debug ? 1 : 10);
+        solver.setMaxIterations(50);
+        solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
         solver.setTarget(branch.get(branch.size() - 1), target);
         target.setPosition(branch.get(branch.size() - 1).position().get());
         TimingTask task = new TimingTask() {

@@ -112,9 +112,9 @@ public class ConeBall extends PApplet{
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);
             //6. Define solver parameters
-            solver.error = 0.001f;
-            solver.timesPerFrame = 5;
-            solver.maxIter = 200;
+            solver.setMaxError(0.001f);
+            solver.setTimesPerFrame(5);
+            solver.setMaxIterations(200);
             //7. Set targets
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());

@@ -133,7 +133,7 @@ public class SimpleBuilder extends PApplet{
             initial.setRoot(true);
             initial.setPickingThreshold(-0.01f);
         }else if(key == 'P' || key == 'p'){
-            printJoints(scene.trackedNode(), "reference", 1);
+                printJoints(scene.trackedNode(), "reference", 1);
         }else if(key == 'A' || key == 'a'){
             Joint.axes = !Joint.axes;
         }else if(key == 'E' || key == 'e'){

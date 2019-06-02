@@ -38,7 +38,7 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = false;
+    boolean debug = true;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
@@ -150,7 +150,7 @@ public class NaiveBiped extends PApplet {
             case FABRIK:{
                 solver = new ChainSolver(limb);
                 //chainSolver.setFixTwisting(false);
-                //chainSolver.maxIter = 5;
+                //chainSolver.setMaxIterations(5);
                 //chainSolver.setDirectionWeight(0.5f);
                 //chainSolver.explore(false);
                 ((ChainSolver)solver).setTarget(target);
@@ -167,9 +167,9 @@ public class NaiveBiped extends PApplet {
             }
         }
 
-        solver.error = 3f;
-        if (!debug) solver.timesPerFrame = 5;
-        else solver.timesPerFrame = 1;
+        solver.setMaxError(3f);
+        if (!debug) solver.setTimesPerFrame(5);
+        else solver.setTimesPerFrame(1f);
         target.setPosition(limb.get(limb.size() - 1).position());
         TimingTask task = new TimingTask() {
             @Override

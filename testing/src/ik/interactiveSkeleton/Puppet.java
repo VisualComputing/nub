@@ -5,16 +5,13 @@ package ik.interactiveSkeleton;
  */
 
 import nub.core.Graph;
-import nub.core.Interpolator;
 import nub.core.Node;
-import nub.ik.CCDSolver;
 import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.Hinge;
 import nub.core.constraint.PlanarPolygon;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
 import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -69,7 +66,7 @@ public class Puppet extends PApplet {
             targets.get(key).setPosition(skeleton.get(skeleton.size()-1).position());
             //TESTING WITH FABRIK
             Solver solver = scene.registerTreeSolver(skeleton.get(0));
-            solver.maxIter = 100;
+            solver.setMaxIterations(100);
             scene.addIKTarget(skeleton.get(skeleton.size() - 1), targets.get(key));
             //TESTING WITH CCD
             /*

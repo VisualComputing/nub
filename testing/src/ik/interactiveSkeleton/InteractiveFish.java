@@ -77,7 +77,7 @@ public class InteractiveFish extends PApplet {
         //Making a default Path that target must follow
         targetInterpolator = setupTargetInterpolator(target);
         Solver solver = scene.registerTreeSolver(root);
-        solver.error = 0.01f;
+        solver.setMaxError(0.01f);
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
 
     }

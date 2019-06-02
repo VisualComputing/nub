@@ -114,12 +114,12 @@ public class Viewer extends PApplet{
 
         //ccd_solver = new CCDSolver(scene.branch(originalLimbs.get("RIGHTUPLEG")));
         ccd_solver = new CCDSolver(list);
-        ccd_solver.timesPerFrame = 20;
-        chain_solver.timesPerFrame = 20;
-        chain_solver.error = 0.1f;
-        solver.timesPerFrame = 0.5f;
-        solver.error = 1f;
-        ccd_solver.error = 0.1f;
+        ccd_solver._timesPerFrame = 20;
+        chain_solver._timesPerFrame = 20;
+        chain_solver._maxError = 0.1f;
+        solver._timesPerFrame = 0.5f;
+        solver.setMaxError(1f);
+        ccd_solver._maxError = 0.1f;
         //scene.addIKTarget(limbs.get("LEFTHAND"), targets.get("LEFTHAND"));
         scene.addIKTarget(limbs.get("RIGHTHAND"), targets.get("RIGHTHAND"));
         scene.addIKTarget(limbs.get("LEFTFOOT"), targets.get("LEFTFOOT"));
@@ -202,9 +202,10 @@ public class Viewer extends PApplet{
             chain.setKeepDirection(true);
             chain.setFixTwisting(true);
 
-            chain.timesPerFrame = 5;
-            chain.maxIter = 50;
-            chain.error = chain.minDistance = 0.1f;
+            chain.setTimesPerFrame(5);
+            chain.setMaxIterations(50);
+            chain.setMaxError(0.1f);
+            chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
             TimingTask task = new TimingTask() {
                 @Override

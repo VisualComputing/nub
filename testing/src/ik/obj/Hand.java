@@ -64,7 +64,7 @@ public class Hand extends PApplet {
         //5.1 register an IK Solver
         Solver solver = scene.registerTreeSolver(skeleton.get(0));
         //Update params
-        solver.error = 1f;
+        solver.setMaxError(1f);
 
         //5.2 Identify end effectors (leaf nodes)
         List<Node> endEffectors = new ArrayList<>();

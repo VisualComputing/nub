@@ -55,8 +55,8 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
 
         //BioIk solver = new BioIk(structures.get(0),10,4);
 
-        //solver.maxIter = 200;
-        //solver.timesPerFrame = 30.f;
+        //solver.setMaxIterations(200);
+        //solver._timesPerFrame = 30.f;
 
 
         scene.registerTreeSolver(structures.get(0).get(0));
@@ -69,7 +69,7 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
             @Override
             public void execute() {
                 solver.solve();
-                //System.out.println("Error: " + solver.error());
+                //System.out.println("Error: " + solver._maxError());
             }
         };
 
