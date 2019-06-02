@@ -19,12 +19,13 @@ import org.ejml.simple.SimpleMatrix;
 import org.ejml.simple.SimpleSVD;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //Look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/SdlsPaper.pdf
 public class SDLSSolver extends Solver {
     //look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
 
-    protected ArrayList<? extends Node> _chain;
+    protected List<? extends Node> _chain;
     protected Node _target;
     protected Node _previousTarget;
     protected SimpleMatrix _J;
@@ -33,7 +34,7 @@ public class SDLSSolver extends Solver {
     protected int _dof; //TODO : Consider EF with ORIENTATIONAL DOF
     protected float _max_d, _max_change = (float) Math.toRadians(45);
 
-    public SDLSSolver(ArrayList<? extends Node> chain){
+    public SDLSSolver(List<? extends Node> chain){
         super();
         this._chain = chain;
         for(Node f : _chain){
@@ -54,7 +55,7 @@ public class SDLSSolver extends Solver {
         _dof = chain.get(0).graph().is3D() ? 3 : 2;
     }
 
-    public ArrayList<? extends Node> chain() {
+    public List<? extends Node> chain() {
         return _chain;
     }
 

@@ -16,6 +16,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TreeSolver extends FABRIKSolver {
   //TODO : How to apply proposed heuristics to this solver?
@@ -76,7 +77,7 @@ public class TreeSolver extends FABRIKSolver {
     return (Node) root._solver().head();
   }
 
-  protected void _setup(TreeNode parent, Node frame, ArrayList<Node> list) {
+  protected void _setup(TreeNode parent, Node frame, List<Node> list) {
     if (frame == null) return;
     if (frame.children().isEmpty()) {
       list.add(frame);
@@ -404,10 +405,10 @@ public class TreeSolver extends FABRIKSolver {
   }
 
 
-  protected ArrayList<Node> _copyChain(TreeNode parent, ArrayList<Node> list){
+  protected List<Node> _copyChain(TreeNode parent, List<Node> list){
     if(parent._solver != null) {
       Node reference = parent._solver._chain.get(parent._solver._chain.size() - 1);
-      ArrayList<Node> copy = _copy(list.subList(1, list.size()), reference);
+      List<Node> copy = _copy(list.subList(1, list.size()), reference);
       copy.add(0, reference);
       return copy;
     }

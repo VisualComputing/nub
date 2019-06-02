@@ -161,7 +161,7 @@ public abstract class FABRIKSolver extends Solver {
    * Performs First Stage of FABRIK Algorithm, receives a chain of Frames, being the Frame at i
    * the reference frame of the Frame at i + 1
    * */
-  protected float _forwardReaching(ArrayList<? extends Node> chain) {
+  protected float _forwardReaching(List<? extends Node> chain) {
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
@@ -205,7 +205,7 @@ public abstract class FABRIKSolver extends Solver {
   }
 
 
-  protected static float _forwardReaching(ArrayList<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties, boolean kd) {
+  protected static float _forwardReaching(List<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties, boolean kd) {
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = positions.get(i);
@@ -245,7 +245,7 @@ public abstract class FABRIKSolver extends Solver {
 
 
   //TODO : Check for scaling when chain has constraints
-  protected static float _backwardReaching(ArrayList<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties,  boolean kd, Vector o) {
+  protected static float _backwardReaching(List<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties,  boolean kd, Vector o) {
     float change = 0;
     Quaternion orientation;
     float magnitude;
@@ -294,7 +294,7 @@ public abstract class FABRIKSolver extends Solver {
   }
 
   //TODO : All this code is a mess, remove duplicate code later, this is jusst to prove ideas
-  protected float _backwardReaching(ArrayList<? extends Node> chain, Vector o) {
+  protected float _backwardReaching(List<? extends Node> chain, Vector o) {
     float change = 0;
     Quaternion orientation;
     float magnitude;
@@ -356,7 +356,7 @@ public abstract class FABRIKSolver extends Solver {
    * Vector q is the position of Child of J.
    * */
 
-  public Vector _constrainForwardReaching(ArrayList<? extends Node> chain, int i) {
+  public Vector _constrainForwardReaching(List<? extends Node> chain, int i) {
     Node j = chain.get(i + 1);
     Vector o = _positions.get(i);
     Vector p = _positions.get(i + 1);
@@ -445,7 +445,7 @@ public abstract class FABRIKSolver extends Solver {
     return o.get();
   }
 
-  public static Vector _constrainForwardReaching(ArrayList<? extends Node> chain, ArrayList<Vector> positions, int i) {
+  public static Vector _constrainForwardReaching(List<? extends Node> chain, List<Vector> positions, int i) {
     Node j = chain.get(i + 1);
     Vector o = positions.get(i);
     Vector p = positions.get(i + 1);
@@ -614,8 +614,8 @@ public abstract class FABRIKSolver extends Solver {
     return distance;
   }
 
-  protected static ArrayList<Node> _copy(List<? extends Node> chain, Node reference) {
-    ArrayList<Node> copy = new ArrayList<Node>();
+  protected static List<Node> _copy(List<? extends Node> chain, Node reference) {
+    List<Node> copy = new ArrayList<Node>();
     for (Node joint : chain) {
       Node newJoint = new Node();
       newJoint.setReference(reference);
@@ -628,7 +628,7 @@ public abstract class FABRIKSolver extends Solver {
     return copy;
   }
 
-  protected static ArrayList<Node> _copy(ArrayList<? extends Node> chain) {
+  protected static List<Node> _copy(List<? extends Node> chain) {
     Node reference = chain.get(0).reference();
     if (reference != null) {
       reference = new Node(reference.position().get(), reference.orientation().get(), 1);

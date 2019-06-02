@@ -22,8 +22,8 @@ public class ChainSolver extends FABRIKSolver {
   //TODO : Update
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
-  protected ArrayList<Node> _chain;
-  protected ArrayList<? extends Node> _original;
+  protected List<Node> _chain;
+  protected List<? extends Node> _original;
   protected float _current = 10e10f, _best = 10e10f;
 
   //Animation Stuff
@@ -78,7 +78,7 @@ public class ChainSolver extends FABRIKSolver {
   }
 
 
-  public ArrayList<? extends Node> chain() {
+  public List<? extends Node> chain() {
     return _original;
   }
 
@@ -106,11 +106,11 @@ public class ChainSolver extends FABRIKSolver {
     return _original.get(_original.size() - 1);
   }
 
-  public ChainSolver(ArrayList<? extends Node> chain) {
+  public ChainSolver(List<? extends Node> chain) {
     this(chain, null);
   }
 
-  public ChainSolver(ArrayList<? extends Node> chain, ArrayList<Node> copy, Node target) {
+  public ChainSolver(List<? extends Node> chain, List<Node> copy, Node target) {
     super();
     this._original = chain;
     this._chain = copy == null ? _copy(chain) : copy;
@@ -142,7 +142,7 @@ public class ChainSolver extends FABRIKSolver {
             target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
   }
 
-  public ChainSolver(ArrayList<? extends Node> chain, Node target) {
+  public ChainSolver(List<? extends Node> chain, Node target) {
     this(chain, null, target);
   }
 
@@ -359,7 +359,7 @@ public class ChainSolver extends FABRIKSolver {
     if(_chain.size() <= 1) return;
     _explorationTimes++;
     float a;
-    ArrayList<Node> b_copy = null;
+    List<Node> b_copy = null;
     float b_d = Float.POSITIVE_INFINITY;
     Vector target = _target.position();
 
@@ -383,7 +383,7 @@ public class ChainSolver extends FABRIKSolver {
     if(debug) System.out.println();
 
     for(int i = 0; i < 20; i++) {
-      ArrayList<Node> copy = i < 10 ? _copy(_chain) : _copy(b_copy);
+      List<Node> copy = i < 10 ? _copy(_chain) : _copy(b_copy);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;
@@ -427,7 +427,7 @@ public class ChainSolver extends FABRIKSolver {
 
 
     for(int i = 0; i < 20; i++) {
-      ArrayList<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);
+      List<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);
       ArrayList<Vector> copy_p = new ArrayList<>();
       HashMap<Integer, Properties> copy_props = new HashMap<Integer, Properties>();
       int j = 0;

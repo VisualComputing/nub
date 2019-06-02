@@ -16,18 +16,19 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //TODO : Enable / Disable iteration Hist
 
 public class CCDSolver extends Solver {
-  protected ArrayList<? extends Node> _chain;
+  protected List<? extends Node> _chain;
   protected Node _target;
   protected Node _previousTarget;
 
   //Animation Stuff
   protected ArrayList<ArrayList<Vector>> _iterationsHistory;
 
-  public ArrayList<? extends Node> chain() {
+  public List<? extends Node> chain() {
     return _chain;
   }
 
@@ -51,11 +52,11 @@ public class CCDSolver extends Solver {
     return _chain.get(_chain.size() - 1);
   }
 
-  public CCDSolver(ArrayList<? extends Node> chain) {
+  public CCDSolver(List<? extends Node> chain) {
     this(chain, null);
   }
 
-  public CCDSolver(ArrayList<? extends Node> chain, Node target) {
+  public CCDSolver(List<? extends Node> chain, Node target) {
     super();
     this._chain = chain;
     this._target = target;
