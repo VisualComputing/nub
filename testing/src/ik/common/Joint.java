@@ -63,7 +63,7 @@ public class Joint extends Node {
         if(!depth)pg.hint(PConstants.DISABLE_DEPTH_TEST);
         pg.pushStyle();
         if (!_isRoot) {
-            pg.strokeWeight(_radius/4f);
+            pg.strokeWeight(Math.max(_radius/4f, 2));
             pg.stroke(_color);
             Vector v = location(new Vector(), reference());
             float m = v.magnitude();
