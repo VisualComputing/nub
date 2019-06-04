@@ -28,6 +28,7 @@ public class DrawingConstraint  extends PApplet {
         sceneUD.fit(1);
 
         createBaseControl(sceneUD, color(100,203,30));
+        createThetaControl(sceneLR, color(100,203,30));
     }
 
     public void draw() {
@@ -212,6 +213,119 @@ public class DrawingConstraint  extends PApplet {
         pGraphics.popStyle();
     }
 
+    public void createThetaControl(final Scene scene, final int color){
+        Node triangle = new Node(scene){
+            int _color = color;
+            float _min = 20, _max = 20;
+            float _pmin = 20, _pmax = 20;
+
+            Vector _initial, _end;
+
+            @Override
+            public void graphics(PGraphics pg) {
+                pg.pushStyle();
+                //Draw base according to each radius
+                pg.fill(_color, scene.trackedNode() == this ? 255 : 100);
+                pg.noStroke();
+                drawArc(pg, scene.radius()*0.8f, -radians(_min) , radians(_max), 30);
+                //draw semi-axe
+                pg.fill(0,255,0);
+                pg.stroke(0,255,0);
+                pg.strokeWeight(3);
+                pg.line(0,0, scene.radius()*0.8f, 0);
+                pg.ellipse(scene.radius()*0.8f,0, 3,3);
+
+                pg.fill(255);
+                pg.stroke(255);
+                pg.ellipse(0,0, 3,3);
+
+                if(_initial != null && _end != null){
+                    pg.stroke(pg.color(255));
+                    pg.line(_initial.x(), _initial.y(), _end.x(), _end.y());
+                    pg.fill(pg.color(255,0,0));
+                    pg.noStroke();
+                    pg.ellipse(_initial.x(), _initial.y(), 5,5);
+                    pg.ellipse(_end.x(), _end.y(), 5,5);
+                    pg.fill(pg.color(255));
+                }
+
+                scene.beginHUD(pg);
+                Vector position = scene.screenLocation(this.position());
+
+                pg.fill(255);
+                pg.textAlign(CENTER);
+                pg.text("\u03B8", position.x() + 10, position.y() - 10);
+                pg.text("\u03B8", position.x() + 10, position.y() + 10);
+                scene.endHUD(pg);
+                pg.popStyle();
+            }
+
+            @Override
+            public void interact(Object... gesture) {
+                String command = (String) gesture[0];
+                if(command.matches("Scale")){
+                    if(_initial != null && _end != null) {
+                        //scale
+                        scale();
+                    }
+                    _initial = null;
+                    _end = null;
+                } else if(command.matches("OnScaling")){
+                    if(_initial == null){
+                        //Get initial point
+                        _initial = scene.location((Vector) gesture[1], this);
+                        _pmin = _min;
+                        _pmax = _max;
+                    }else{
+                        //Get final point
+                        _end = scene.location((Vector) gesture[1], this);
+                        scale();
+                    }
+                } else if(command.matches("Clear")){
+                    _initial = null;
+                    _end = null;
+                }
+            }
+
+            public void scale(){
+                float angle = degrees(Vector.angleBetween(_initial, _end));
+                angle *= Vector.cross(_initial, _end, null).dot(new Vector(0,0,1)) > 0 ? 1 : -1;
+
+                //determine Which radius to scale
+                if(_initial.y() > 0){
+                    //Scale right radius
+                    _max = _pmax + angle;
+                    //Clamp
+                    _max = max(min(90, _max), 5);
+                }else{
+                    _min = _pmin - angle;
+                    //Clamp
+                    _min = max(min(90, _min), 5);
+                }
+            }
+        };
+        triangle.setPickingThreshold(0);
+        triangle.setHighlighting(0);
+    }
+
+
+    public void drawArc(PGraphics pGraphics, float radius, float minAngle, float maxAngle, int detail) {
+        pGraphics.beginShape(PApplet.TRIANGLE_FAN);
+        if(pGraphics.is3D()) {
+            pGraphics.vertex(0, 0, 0);
+        }
+        else{
+            pGraphics.vertex(0, 0);
+        }
+        float step = (maxAngle - minAngle) / detail;
+        for (float theta = minAngle; theta < maxAngle; theta += step)
+            pGraphics.vertex(radius * (float) Math.cos(theta), radius * (float) Math.sin(theta));
+        pGraphics.vertex(radius * (float) Math.cos(maxAngle), radius * (float) Math.sin(maxAngle));
+        pGraphics.endShape(PApplet.CLOSE);
+    }
+
+
+
 
     public void handleMouse() {
         Scene prev = focus;
@@ -228,7 +342,7 @@ public class DrawingConstraint  extends PApplet {
     }
 
     public void mouseDragged() {
-        if(focus == sceneUD) {
+        if(focus == sceneUD || focus == sceneLR) {
             focus.defaultNode().interact("OnScaling", new Vector(focus.mouse().x(), focus.mouse().y()));
             return;
         }
@@ -242,7 +356,7 @@ public class DrawingConstraint  extends PApplet {
     }
 
     public void mouseReleased(){
-        if(focus == sceneUD) {
+        if(focus == sceneUD || focus == sceneLR) {
             focus.defaultNode().interact("Scale");
             return;
         }
