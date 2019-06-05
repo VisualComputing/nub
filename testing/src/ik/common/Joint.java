@@ -22,6 +22,7 @@ public class Joint extends Node {
     protected float _radius;
     protected List<PShape> _mesh;
     public static boolean axes = true;
+    public static float constraintFactor = 0.5f;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
 
@@ -79,7 +80,7 @@ public class Joint extends Node {
         else pg.sphere(_radius);
         pg.strokeWeight(_radius/4f);
         if (constraint() != null && _drawConstraint) {
-            scene.drawConstraint(pg,this);
+            scene.drawConstraint(pg,this, constraintFactor);
         }
         if(axes) scene.drawAxes(_radius*2);
         if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
