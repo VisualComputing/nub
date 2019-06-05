@@ -2991,7 +2991,17 @@ public class Scene extends Graph implements PConstants {
    * @see Node#constraint()
    * @see nub.core.constraint.Constraint
    */
-  public void drawConstraint(PGraphics pGraphics, Node node) {
+  public void drawConstraint(PGraphics pGraphics, Node node){
+    drawConstraint(pGraphics, node, 0.5f);
+  }
+
+  /**
+   * Draws the frame constraint if it's non-null.
+   *
+   * @see Node#constraint()
+   * @see nub.core.constraint.Constraint
+   */
+  public void drawConstraint(PGraphics pGraphics, Node node, float factor) {
     if (node == null) return;
     if (node.constraint() == null) return;
     // TODO test
@@ -3018,11 +3028,11 @@ public class Scene extends Graph implements PConstants {
       BallAndSocket constraint = (BallAndSocket) node.constraint();
       reference.rotate(((BallAndSocket) node.constraint()).orientation());
       applyTransformation(pGraphics,reference);
-      float width = boneLength / 2.f;
+      float width = boneLength * factor;
       float max = Math.max(Math.max(Math.max(constraint.up(),constraint.down()),constraint.left()),constraint.right());
       //Max value will define max radius length
       float height = (float)(width/Math.tan(max));
-      if(height > boneLength / 2.f) height = width;
+      if(height > boneLength * factor) height = width;
       //drawAxes(pGraphics,height*1.2f);
       //get all radius
       float up_r = (float)Math.abs((height * Math.tan(constraint.up())));
@@ -3033,10 +3043,10 @@ public class Scene extends Graph implements PConstants {
     } else if (node.constraint() instanceof PlanarPolygon) {
       reference.rotate(((PlanarPolygon) node.constraint()).orientation());
       applyTransformation(pGraphics,reference);
-      float w_d = boneLength / 2.f;
+      float w_d = boneLength * factor;
       float w_c = (float) Math.abs((Math.tan(((PlanarPolygon) node.constraint()).angle())));
       float height = w_d/w_c;
-      if(height > boneLength / 2.f) height = w_d;
+      if(height > boneLength * factor) height = w_d;
       //drawAxes(pGraphics,height*1.2f);
       drawCone(pGraphics, height, height, ((PlanarPolygon) node.constraint()).vertices());
     } else if (node.constraint() instanceof SphericalPolygon) {
@@ -3052,7 +3062,7 @@ public class Scene extends Graph implements PConstants {
         reference.rotate(constraint.orientation());
         reference.rotate(new Quaternion(new Vector(1,0,0), new Vector(0,1,0)));
         applyTransformation(pGraphics,reference);
-        drawArc(pGraphics, boneLength / 2.f, -constraint.minAngle() , constraint.maxAngle(), 10);
+        drawArc(pGraphics, boneLength * factor, -constraint.minAngle() , constraint.maxAngle(), 10);
       }
     }
     pGraphics.popMatrix();
