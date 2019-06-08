@@ -117,8 +117,6 @@ public class Mesh {
             shape.setStroke(g.color(255));
             shape.setFill(g.color(255));
         }
-        //shape.setTint(true);
-        //shape.setTint(g.color(255,100));
         return shape;
     }
 }

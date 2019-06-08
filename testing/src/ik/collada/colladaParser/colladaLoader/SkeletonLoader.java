@@ -3,7 +3,7 @@ package ik.collada.colladaParser.colladaLoader;
 import nub.core.Node;
 import nub.primitives.Matrix;
 import nub.primitives.Quaternion;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.common.Joint;
 import nub.primitives.Vector;
@@ -31,20 +31,20 @@ public class SkeletonLoader {
     }
 
 
-    public void extractBoneData(AnimatedModel model, boolean blender){
+    public void extractBoneData(Model model, boolean blender){
         XmlNode headNode = armatureData.getChild("node");
         Joint root = loadJointData(headNode, model, null, blender);
         root.setRoot(true);
-        model.setRootJoint(root);
+        model.set_root(root);
         model.setJointCount(jointCount);
         model.setScaling(100/max);
         //scale skeleton from children to root
-        for(Node j : model.getJoints().values()){
+        for(Node j : model.skeleton().values()){
             j.setTranslation(Vector.multiply(j.translation(), model.scaling()));
         }
     }
 
-    private Joint loadJointData(XmlNode jointNode, AnimatedModel model, Joint parent, boolean blender){
+    private Joint loadJointData(XmlNode jointNode, Model model, Joint parent, boolean blender){
         Joint joint = blender ? extractMainJointData(jointNode, model, parent) : extractMainJointTransformationData(jointNode, model, parent);
         float mag = joint.position().magnitude();
         max =  max < mag ? mag : max;
@@ -54,7 +54,7 @@ public class SkeletonLoader {
         return joint;
     }
 
-    private Joint extractMainJointData(XmlNode jointNode, AnimatedModel model, Joint parent){
+    private Joint extractMainJointData(XmlNode jointNode, Model model, Joint parent){
         String nameId = jointNode.getAttribute("sid");
         int index = boneOrder.indexOf(nameId);
 
@@ -78,12 +78,12 @@ public class SkeletonLoader {
         //joint.setRotation(new Quaternion(mat));
         //joint.fromMatrix(mat);
         jointCount++;
-        model.getJoints().put(nameId, joint);
+        model.skeleton().put(nameId, joint);
         model.getIdxs().put(joint.id(), index);
         return joint;
     }
 
-    private Joint extractMainJointTransformationData(XmlNode jointNode, AnimatedModel model, Joint parent){
+    private Joint extractMainJointTransformationData(XmlNode jointNode, Model model, Joint parent){
         Joint joint = new Joint(model.getScene());
         if(parent != null) joint.setReference(parent);
 
@@ -101,10 +101,10 @@ public class SkeletonLoader {
         //Related geom
         List<XmlNode> geom = jointNode.getChildren("instance_geometry");
         for(XmlNode g : geom){
-            model.getGeometry().put(g.getAttribute("url").substring(1), joint);
+            model.meshMap().put(g.getAttribute("url").substring(1), joint);
         }
         jointCount++;
-        model.getJoints().put(nameId, joint);
+        model.skeleton().put(nameId, joint);
         return joint;
     }
 

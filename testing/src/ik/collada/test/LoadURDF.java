@@ -9,12 +9,11 @@ import nub.ik.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -24,8 +23,8 @@ public class LoadURDF extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
     String[] daes = {"ur10_joint_limited_robot.dae", "kuka_kr16_2.dae", "nasa_valkyrie.dae"};
-    int dae = 2; //choose between example models
-    AnimatedModel model;
+    int dae = 2; //choose between example _mesh
+    Model model;
 
     public void settings() {
         size(700, 700, P3D);
@@ -47,10 +46,10 @@ public class LoadURDF extends PApplet {
 
         model.printNames();
         if(dae != 2) {
-            Target target = new Target(scene, ((Joint) model.getRootJoint()).radius());
+            Target target = new Target(scene, ((Joint) model.root()).radius());
             /*Chain solver*/
 
-            List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get(dae == 0 ? "node10" : "node8"));
+            List<Node> branch = scene.path(model.skeleton().get("node1"), model.skeleton().get(dae == 0 ? "node10" : "node8"));
 
             ChainSolver solver = new ChainSolver( branch);
             solver.setKeepDirection(true);
@@ -79,8 +78,8 @@ public class LoadURDF extends PApplet {
         scene.render();
         if(dae != 3) {
             scene.beginHUD();
-            for (String s : model.getJoints().keySet()) {
-                Node n = model.getJoints().get(s);
+            for (String s : model.skeleton().keySet()) {
+                Node n = model.skeleton().get(s);
                 Vector sc = scene.screenLocation(new Vector(), n);
                 text(s, sc.x(), sc.y());
             }

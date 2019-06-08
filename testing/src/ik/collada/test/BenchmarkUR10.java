@@ -15,7 +15,7 @@ import nub.ik.jacobian.SDLSSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
@@ -30,7 +30,7 @@ public class BenchmarkUR10 extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
     String dae = "ur10_joint_limited_robot.dae";
-    AnimatedModel[] models = new AnimatedModel[4];
+    Model[] models = new Model[4];
     String solvers_type[] = {"FABRIK", "BIOIK", "CCD", "NUMERICAL"};
     List<Solver> solvers = new ArrayList<>();
     List<Vector> positions = new ArrayList<>();
@@ -53,48 +53,48 @@ public class BenchmarkUR10 extends PApplet {
         for(int k = 0; k < enable.length; k++){
             int i = enable[k];
             models[i] = ColladaURDFLoader.loadColladaModel(sketchPath() + path, dae, scene);
-            AnimatedModel model = models[i];
+            Model model = models[i];
 
             model.printNames();
-            Target target = new Target(scene, ((Joint) model.getRootJoint()).radius());
+            Target target = new Target(scene, ((Joint) model.root()).radius());
 
             /*Adding constraints*/
-            Node node_1 = model.getJoints().get("node1");
+            Node node_1 = model.skeleton().get("node1");
             Hinge hinge_1 = new Hinge(radians(180),radians(180), node_1.rotation(), new Vector(1,0,0), new Vector(0,0,1));
             node_1.setConstraint(hinge_1);
 
 
-            Node node_3 = model.getJoints().get("node3");
+            Node node_3 = model.skeleton().get("node3");
             Hinge hinge_3 = new Hinge(radians(180),radians(180), node_3.rotation(), new Vector(1,0,0), new Vector(0,1,0));
             node_3.setConstraint(hinge_3);
 
-            Node node_4 = model.getJoints().get("node4");
+            Node node_4 = model.skeleton().get("node4");
             Hinge hinge_4 = new Hinge(radians(180),radians(180), node_4.rotation(), new Vector(1,0,0), new Vector(0,0,1));
             node_4.setConstraint(hinge_4);
 
-            Node node_6 = model.getJoints().get("node6");
+            Node node_6 = model.skeleton().get("node6");
             Hinge hinge_6 = new Hinge(radians(180),radians(180), node_6.rotation(), new Vector(0,0,1), new Vector(0,1,0));
             node_6.setConstraint(hinge_6);
 
-            Node node_8 = model.getJoints().get("node8");
+            Node node_8 = model.skeleton().get("node8");
             Hinge hinge_8 = new Hinge(radians(180),radians(180), node_8.rotation(), new Vector(0,0,1), new Vector(0,1,0));
             node_8.setConstraint(hinge_8);
 
-            Node node_9 = model.getJoints().get("node9");
+            Node node_9 = model.skeleton().get("node9");
             Hinge hinge_9 = new Hinge(radians(180),radians(180), node_9.rotation(), new Vector(1,0,0), new Vector(0,0,1));
             node_9.setConstraint(hinge_9);
 
-            Node node_10 = model.getJoints().get("node10");
+            Node node_10 = model.skeleton().get("node10");
             Hinge hinge_10 = new Hinge(radians(180),radians(180), node_10.rotation(), new Vector(0,0,1), new Vector(0,1,0));
             node_10.setConstraint(hinge_10);
 
             //Cull unnecesary nodes
-            model.getJoints().get("node2").cull();
-            model.getJoints().get("node1").reference().translate(new Vector(i * scene.radius() * 2,i * scene.radius() * 2, 0));
+            model.skeleton().get("node2").cull();
+            model.skeleton().get("node1").reference().translate(new Vector(i * scene.radius() * 2,i * scene.radius() * 2, 0));
 
             //Adding solver
             Solver solver;
-            List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get("node2"));
+            List<Node> branch = scene.path(model.skeleton().get("node1"), model.skeleton().get("node2"));
 
             switch (solvers_type[i]){
                 case "FABRIK":{
@@ -138,7 +138,7 @@ public class BenchmarkUR10 extends PApplet {
             scene.registerTask(task);
             task.run(40);
             solvers.add(solver);
-            positions.add(model.getJoints().get("node1").reference().translation());
+            positions.add(model.skeleton().get("node1").reference().translation());
             targets.add(target);
         }
 
@@ -153,8 +153,8 @@ public class BenchmarkUR10 extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        for (String s : models[0].getJoints().keySet()) {
-            Node n = models[0].getJoints().get(s);
+        for (String s : models[0].skeleton().keySet()) {
+            Node n = models[0].skeleton().get(s);
             if(n.isCulled() || !n.isTrackingEnabled()) continue;
             Vector sc = scene.screenLocation(new Vector(), n);
             text(s, sc.x(), sc.y());

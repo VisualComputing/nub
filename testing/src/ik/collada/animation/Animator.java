@@ -12,7 +12,7 @@ import java.util.Map;
  *
  * This class contains all the functionality to apply an animation to an
  * animated entity. An Animator instance is associated with just one
- * {@link AnimatedModel}. It also keeps track of the running time (in seconds)
+ * {@link Model}. It also keeps track of the running time (in seconds)
  * of the current animation, along with a reference to the currently playing
  * animation for the corresponding entity.
  *
@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public class Animator {
     //TODO : Update
-    private final AnimatedModel entity;
+    private final Model entity;
 
     private Animation currentAnimation;
     private float previousTime = 0;
@@ -42,7 +42,7 @@ public class Animator {
      * @param entity
      *            - the entity which will by animated by this animator.
      */
-    public Animator(AnimatedModel entity) {
+    public Animator(Model entity) {
         this.entity = entity;
     }
 
@@ -172,12 +172,12 @@ public class Animator {
      *         the joint to which they should be applied.
      */
     private Map<String, Node> interpolatePoses(KeyFrame previousFrame, KeyFrame nextFrame, float progression) {
-        Map<String, Node> currentPose = entity.getJoints();
+        Map<String, Node> currentPose = entity.skeleton();
         for (String jointName : previousFrame.getJointKeyFrames().keySet()) {
             Node previous = previousFrame.getJointKeyFrames().get(jointName);
             Node next = nextFrame.getJointKeyFrames().get(jointName);
             //interpolate position
-            Node frame = entity.getJoints().get(jointName);
+            Node frame = entity.skeleton().get(jointName);
             Vector translation = Vector.subtract(next.translation(), previous.translation());
             translation.multiply(progression);
             previous.translate(next.translation());

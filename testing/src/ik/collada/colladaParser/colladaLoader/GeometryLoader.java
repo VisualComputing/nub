@@ -13,8 +13,9 @@ import java.util.List;
 
 
 /**
+ * Adapted by sebchaparr on 22/07/18.
+ * See https://github.com/TheThinMatrix/OpenGL-Animation
  * Loads the mesh data for a model from a collada XML file.
- * @author Karl
  *
  */
 public class GeometryLoader {

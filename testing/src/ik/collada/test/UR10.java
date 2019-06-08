@@ -14,7 +14,7 @@ import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
@@ -30,7 +30,7 @@ public class UR10 extends PApplet {
     Scene scene;
     String path = "/testing/data/dae/";
     String dae = "ur10_joint_limited_robot.dae";
-    AnimatedModel model;
+    Model model;
     Solver solver;
     Vector base;
     Target target;
@@ -64,43 +64,43 @@ public class UR10 extends PApplet {
 
 
         model.printNames();
-        target = new Target(scene, ((Joint) model.getRootJoint()).radius());
+        target = new Target(scene, ((Joint) model.root()).radius());
 
         /*Adding constraints*/
-        Node node_1 = model.getJoints().get("node1");
+        Node node_1 = model.skeleton().get("node1");
         Hinge hinge_1 = new Hinge(radians(180),radians(180), node_1.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_1.setConstraint(hinge_1);
 
 
-        Node node_3 = model.getJoints().get("node3");
+        Node node_3 = model.skeleton().get("node3");
         Hinge hinge_3 = new Hinge(radians(180),radians(180), node_3.rotation(), new Vector(1,0,0), new Vector(0,1,0));
         node_3.setConstraint(hinge_3);
 
-        Node node_4 = model.getJoints().get("node4");
+        Node node_4 = model.skeleton().get("node4");
         Hinge hinge_4 = new Hinge(radians(180),radians(180), node_4.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_4.setConstraint(hinge_4);
 
-        Node node_6 = model.getJoints().get("node6");
+        Node node_6 = model.skeleton().get("node6");
         Hinge hinge_6 = new Hinge(radians(180),radians(180), node_6.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_6.setConstraint(hinge_6);
 
-        Node node_8 = model.getJoints().get("node8");
+        Node node_8 = model.skeleton().get("node8");
         Hinge hinge_8 = new Hinge(radians(180),radians(180), node_8.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_8.setConstraint(hinge_8);
 
-        Node node_9 = model.getJoints().get("node9");
+        Node node_9 = model.skeleton().get("node9");
         Hinge hinge_9 = new Hinge(radians(180),radians(180), node_9.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         node_9.setConstraint(hinge_9);
 
-        Node node_10 = model.getJoints().get("node10");
+        Node node_10 = model.skeleton().get("node10");
         Hinge hinge_10 = new Hinge(radians(180),radians(180), node_10.rotation(), new Vector(0,0,1), new Vector(0,1,0));
         node_10.setConstraint(hinge_10);
 
         //Cull unnecesary nodes
-        model.getJoints().get("node2").cull();
+        model.skeleton().get("node2").cull();
 
         //Adding solver
-        List<Node> branch = scene.path(model.getJoints().get("node1"), model.getJoints().get("node2"));
+        List<Node> branch = scene.path(model.skeleton().get("node1"), model.skeleton().get("node2"));
 
 
         if(!ccd) {
@@ -125,7 +125,7 @@ public class UR10 extends PApplet {
         };
         scene.registerTask(task);
         task.run(40);
-        base = model.getJoints().get("node1").reference().translation();
+        base = model.skeleton().get("node1").reference().translation();
 
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
@@ -139,8 +139,8 @@ public class UR10 extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        for (String s : model.getJoints().keySet()) {
-            Node n = model.getJoints().get(s);
+        for (String s : model.skeleton().keySet()) {
+            Node n = model.skeleton().get(s);
             if(n.isCulled() || !n.isTrackingEnabled() || debug) continue;
             Vector sc = scene.screenLocation(new Vector(), n);
             text(s, sc.x(), sc.y());
@@ -220,7 +220,7 @@ public class UR10 extends PApplet {
         }else if(key =='a' || key == 'A'){
             solver.solve();
         }else if(key == ' '){
-            Node f = generateRandomReachablePosition(scene.path(model.getJoints().get("vkmodel0_node1"), model.getJoints().get("vkmodel0_node2")), scene.is3D());
+            Node f = generateRandomReachablePosition(scene.path(model.skeleton().get("vkmodel0_node1"), model.skeleton().get("vkmodel0_node2")), scene.is3D());
             Vector delta = Vector.subtract(f.position(), target.position());
             target.setPosition(Vector.add(target.position(), delta));
         }else if(key == 'k' || key == 'K') {

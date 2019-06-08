@@ -9,16 +9,13 @@ import java.util.Map;
 
 /**
  * Acquired from https://github.com/TheThinMatrix/OpenGL-Animation
- *
  * Represents a node in an XML file. This contains the name of the node, a map
  * of the attributes and their values, any text data between the start and end
  * tag, and a list of all its children nodes.
- *
  * @author Karl
- *
  */
+
 public class XmlNode {
-    //TODO : Update
     private String name;
     private Map<String, String> attributes;
     private String data;

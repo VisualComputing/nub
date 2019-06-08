@@ -1,25 +1,21 @@
 package ik.collada.colladaParser.colladaLoader;
 
+import ik.collada.colladaParser.xmlParser.XmlParser;
 import ik.common.Joint;
 import nub.core.Node;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import ik.collada.animation.Animation;
 import ik.collada.animation.Mesh;
-import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
-import ik.collada.colladaParser.xmlParser.XmlParser;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PShape;
 
-import java.io.File;
 import java.util.List;
 
 public class ColladaURDFLoader {
-    public static AnimatedModel loadColladaModel(String colladaFile, String dae, Scene scene) {
+    public static Model loadColladaModel(String colladaFile, String dae, Scene scene) {
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
-        AnimatedModel model = new AnimatedModel(scene);
+        Model model = new Model(scene);
 
         SkeletonLoader jointsLoader = new SkeletonLoader(node.getChild("library_visual_scenes"), null);
         jointsLoader.extractBoneData(model, false);
@@ -34,7 +30,7 @@ public class ColladaURDFLoader {
             String id = xmlNodes.get(i++).getAttribute("id");
             model.addModel(id, pshape);
             max = max < pshape.getWidth() ? pshape.getWidth() : max;
-            Joint joint = ((Joint) model.getGeometry().get(id));
+            Joint joint = ((Joint) model.meshMap().get(id));
             System.out.println(id);
             pshape.setFill(joint.color());
             joint.addMesh(pshape);
@@ -42,7 +38,7 @@ public class ColladaURDFLoader {
 
 
         scene.setRadius(max * 5f);
-        for(Node joint : model.getJoints().values()){
+        for(Node joint : model.skeleton().values()){
             if(joint instanceof Joint) {
                 ((Joint)joint).setRadius(scene.radius() * 0.03f);
             }

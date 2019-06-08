@@ -8,7 +8,7 @@ import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
 import ik.common.SkinningAnimationModel;
 import processing.core.*;
@@ -26,7 +26,7 @@ public class LoadMesh2 extends PApplet {
     String path = "/testing/data/dae/";
     String dae = "dummy.dae";
     String tex = null;
-    AnimatedModel model;
+    Model model;
     SkinningAnimationModel skinning;
     Solver solver;
     public void settings() {
@@ -44,29 +44,29 @@ public class LoadMesh2 extends PApplet {
 
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
 
-        scene.setRadius(model.getModels().get(null).getWidth()*2);
+        scene.setRadius(model.mesh().get(null).getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
         skinning = new SkinningAnimationModel(model);
         //Adding IK behavior
         //Register an IK Solver
-        solver = scene.registerTreeSolver(model.getRootJoint());
+        solver = scene.registerTreeSolver(model.root());
         //Update params
         solver.setMaxError(1f);
 
-        //solver = scene.registerTreeSolver(model.getJoints().get("Bone_004"));
+        //solver = scene.registerTreeSolver(model.skeleton().get("Bone_004"));
         //Update params
         solver.setMaxError(1f);
 
-        //solver = scene.registerTreeSolver(model.getJoints().get("Bone_009"));
+        //solver = scene.registerTreeSolver(model.skeleton().get("Bone_009"));
 
         //Update params
         solver.setMaxError(1f);
         //Identify end effectors (leaf nodes)
         List<Node> endEffectors = new ArrayList<>();
-        for (String s : model.getJoints().keySet()) {
-            Node node = model.getJoints().get(s);
+        for (String s : model.skeleton().keySet()) {
+            Node node = model.skeleton().get(s);
             if(s.equals("Bone_020") || s.equals("Bone_016") || s.equals("Bone_008") || s.equals("Bone_007")) {
                 endEffectors.add(node);
                 // Create targets
@@ -84,16 +84,16 @@ public class LoadMesh2 extends PApplet {
         background(0);
         lights();
         scene.drawAxes();
-        shader(skinning.shader);
-        shape(model.getModels().get(null));
+        shader(skinning.shader());
+        shape(model.mesh().get(null));
         resetShader();
         hint(DISABLE_DEPTH_TEST);
         scene.render();
         hint(ENABLE_DEPTH_TEST);
 
         scene.beginHUD();
-        for (String s : model.getJoints().keySet()) {
-            Node n = model.getJoints().get(s);
+        for (String s : model.skeleton().keySet()) {
+            Node n = model.skeleton().get(s);
             if(n.isCulled() || !n.isTrackingEnabled()) continue;
             Vector sc = scene.screenLocation(new Vector(), n);
             text(s, sc.x(), sc.y());

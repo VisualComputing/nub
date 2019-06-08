@@ -6,7 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by sebchaparr on 23/07/18.
+ * Adapted by sebchaparr on 22/07/18.
+ * See https://github.com/TheThinMatrix/OpenGL-Animation
  */
 public class SkinningData {
     //TODO : Update
@@ -19,10 +20,6 @@ public class SkinningData {
             weights = new ArrayList<Float>();
         }
 
-        public VertexSkinData(List<Integer> joints, List<Float> weights){
-            this.jointIds = joints;
-            this.weights = weights;
-        }
         public void addJointEffect(int jointId, float weight){
             for(int i=0;i<weights.size();i++){
                 if(weight > weights.get(i)){
@@ -83,7 +80,4 @@ public class SkinningData {
         this.verticesSkinData = verticesSkinData;
         this.bindMatrices = bindMatrices;
     }
-
-
-
 }

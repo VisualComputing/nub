@@ -8,14 +8,13 @@ import java.util.regex.Pattern;
 
 
 /**
+ * Acquired from https://github.com/TheThinMatrix/OpenGL-Animation
  * Reads an XML file and stores all the data in {@link XmlNode} objects,
  * allowing for easy access to the data contained in the XML file.
- *
  * @author Karl
- *
  */
+
 public class XmlParser {
-    //TODO : Update
     private static final Pattern DATA = Pattern.compile(">(.+?)<");
     private static final Pattern START_TAG = Pattern.compile("<(.+?)>");
     private static final Pattern ATTR_NAME = Pattern.compile("(.+?)=");

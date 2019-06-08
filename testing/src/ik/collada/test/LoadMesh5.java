@@ -5,7 +5,7 @@ import nub.core.Graph;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
 import ik.common.SkinningAnimationModel;
 import processing.core.*;
@@ -20,7 +20,7 @@ public class LoadMesh5 extends PApplet {
     String path = "/testing/data/dae/";
     String dae = "wolf.dae";
     String tex = null;
-    AnimatedModel model;
+    Model model;
     SkinningAnimationModel skinning;
 
     public void settings() {
@@ -36,7 +36,7 @@ public class LoadMesh5 extends PApplet {
 
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
 
-        scene.setRadius(model.getModels().get(null).getWidth()*2);
+        scene.setRadius(model.mesh().get(null).getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
@@ -48,8 +48,8 @@ public class LoadMesh5 extends PApplet {
         background(0);
         lights();
         scene.drawAxes();
-        shader(skinning.shader);
-        shape(model.getModels().get(null));
+        shader(skinning.shader());
+        shape(model.mesh().get(null));
         resetShader();
         hint(DISABLE_DEPTH_TEST);
         scene.render();

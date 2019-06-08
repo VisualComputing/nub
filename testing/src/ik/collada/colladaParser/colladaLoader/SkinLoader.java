@@ -1,6 +1,5 @@
 package ik.collada.colladaParser.colladaLoader;
 
-import ik.collada.animation.Mesh;
 import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import nub.primitives.Matrix;

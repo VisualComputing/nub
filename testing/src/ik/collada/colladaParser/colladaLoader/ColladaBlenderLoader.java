@@ -3,29 +3,25 @@ package ik.collada.colladaParser.colladaLoader;
 import ik.common.Joint;
 import nub.core.Node;
 import nub.primitives.Matrix;
-import nub.primitives.Quaternion;
-import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import ik.collada.animation.Animation;
 import ik.collada.animation.Mesh;
 import ik.collada.animation.SkinningData;
 import ik.collada.colladaParser.xmlParser.XmlNode;
 import ik.collada.colladaParser.xmlParser.XmlParser;
-import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.core.PImage;
-import processing.core.PShape;
-
-import java.io.File;
-import java.util.List;
 
 public class ColladaBlenderLoader {
-    //TODO : Update
-    public static AnimatedModel loadColladaModel(String colladaFile, String dae, String tex, Scene scene, int maxWeights){
+    /**
+     * Load a Collada model from Blender
+     * This parser is usable only for quite simple structures
+     * */
+
+    public static Model loadColladaModel(String colladaFile, String dae, String tex, Scene scene, int maxWeights){
         XmlNode node = XmlParser.loadXmlFile(colladaFile + dae);
 
-        AnimatedModel model = new AnimatedModel(scene);
+        Model model = new Model(scene);
 
         SkinLoader skinLoader = new SkinLoader(node.getChild("library_controllers"), maxWeights);
         SkinningData skinningData = skinLoader.extractSkinData();
@@ -53,7 +49,7 @@ public class ColladaBlenderLoader {
             for (int i = 0; i < img.pixels.length; i++) {
                 img.pixels[i] = scene.context().color(222, 184, 135);
             }
-            model.getModels().get(null).setTexture(img);
+            model.mesh().get(null).setTexture(img);
         }
 
         scene.setRadius(100);
@@ -75,5 +71,6 @@ public class ColladaBlenderLoader {
         Animation animData = loader.extractAnimation();
         return animData;
     }
+
 
 }

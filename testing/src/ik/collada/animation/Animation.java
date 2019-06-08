@@ -2,7 +2,7 @@ package ik.collada.animation;
 
 /**
  *
- * * Represents an animation that can applied to an {@link AnimatedModel} . It
+ * * Represents an animation that can applied to an {@link Model} . It
  * contains the length of the animation in seconds, and a list of
  * {@link KeyFrame}s.
  *
