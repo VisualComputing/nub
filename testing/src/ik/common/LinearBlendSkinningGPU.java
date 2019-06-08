@@ -3,114 +3,183 @@ package ik.common;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
-import processing.core.PApplet;
-import processing.core.PShape;
-import processing.core.PVector;
+import processing.core.*;
 import processing.opengl.PShader;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by sebchaparr on 11/03/18.
  */
 public class LinearBlendSkinningGPU {
-    public Node reference = new Node();
-    public PShape shape;
-    public PShader shader;
-    public Quaternion[] boneQuat = new Quaternion[120];
-    public Vector[] bonePos = new Vector[120];
-    public float[] bonePositionOrig = new float[120];
-    public float[] bonePosition = new float[120];
-    float[] boneRotation = new float[120];
+    //Skeleton & Geometry information
+    protected List<PShape> _shapes;
+    protected List<Node> _skeleton;
+    //Shader information
+    protected PShader _shader;
+    protected Quaternion[] _initialOrientations;
+    protected Vector[] _initialPositions;
+    protected float[] _initialPositionsArray;
+    protected float[] _positionsArray;
+    protected float[] _orientationsArray;
+    protected Map<Node, Integer> _ids;
+    protected final String _fragmentPath = "/testing/src/ik/common/frag.glsl";
+    protected final String _vertexPath = "/testing/src/ik/common/skinning.glsl";
 
-    public ArrayList<Node> skeleton;
 
-    public LinearBlendSkinningGPU(PShape shape, ArrayList<Node> skeleton) {
-        this.shape = shape;
-        this.skeleton = skeleton;
-    }
-
-    public void initParams(PApplet applet, Scene scene) {
-        shader = applet.loadShader(applet.sketchPath() + "/testing/src/ik/common/frag.glsl",
-                applet.sketchPath() + "/testing/src/ik/common/skinning.glsl");
-        for(int i = 0; i < skeleton.size(); i++){
-            Node frame = skeleton.get(i);
-            Vector position = frame.position();
-            boneQuat[i] = frame.orientation();
-            bonePos[i] = position;
-            bonePositionOrig[i*3 + 0] = position.x();
-            bonePositionOrig[i*3 + 1] = position.y();
-            bonePositionOrig[i*3 + 2] = position.z();
-        }
-        shader.set("bonePositionOrig", bonePositionOrig);
-        shader.set("boneLength", skeleton.size());
-        setup(skeleton);
-    }
-
-    public void updateParams() {
-        //TODO: IT COULD BE DONE WITH LESS OPERATIONS
-        for(int i = 0; i < skeleton.size(); i++){
-            Node frame = skeleton.get(i);
-            Vector v = Vector.subtract(frame.position(), bonePos[i]);
-            Quaternion q = Quaternion.compose(frame.orientation(), boneQuat[i].inverse());
-            bonePosition[i*3 + 0] =  v.x();
-            bonePosition[i*3 + 1] =  v.y();
-            bonePosition[i*3 + 2] =  v.z();
-            boneRotation[i*4 + 0] =  q.x();
-            boneRotation[i*4 + 1] =  q.y();
-            boneRotation[i*4 + 2] =  q.z();
-            boneRotation[i*4 + 3] =  q.w();
-        }
-        shader.set("bonePosition", bonePosition);
-        shader.set("boneRotation", boneRotation);
-    }
-
-    public void setup(ArrayList<Node> branch) {
-        for (int i = 0; i < shape.getChildCount(); i++) {
-            PShape child = shape.getChild(i);
-            for (int j = 0; j < child.getVertexCount(); j++) {
-                PVector vector = child.getVertex(j);
-                Vector position = new Vector(vector.x, vector.y, vector.z);
-                float total_dist = 0.f;
-                int[] joints = new int[]{-1, -1, -1};
-                float[] w = new float[]{0, 0, 0};
-                float[] d = new float[]{9999, 9999, 9999};
-
-                int k = 0;
-                //Find the nearest 3 joints
-                //TODO : Perhaps enable more joints - use QuickSort
-                for (Node joint : branch) {
-                    if (joint.translation().magnitude() < Float.MIN_VALUE) continue;
-                    float dist = getDistance(position, joint, reference);
-                    dist = 1 / ((float) Math.pow(dist, 10));
-                    if(dist <= d[0]){
-                        //swap
-                        for(int l = joints.length-1; l > 0; l--){
-                            joints[l] = joints[l-1];
-                            d[l] = d[l-1];
-                        }
-                        joints[0] = k;
-                        d[0] = dist;
-                    }
-                    k++;
-                }
-
-                for(k = 0; k < joints.length; k++){
-                    total_dist += 1.f/d[k];
-                }
-
-                for(k = 0; k < joints.length; k++){
-                    w[k] += 1.f/d[k] / total_dist;
-                }
-
-                System.out.println("joints _ " + joints[0] + " " + joints[1] + " " + joints[2]);
-
-                child.setAttrib("joints", j,joints[0]*1.f, joints[1]*1.f, joints[2]*1.f);
-                child.setAttrib("weights", j, w[0], w[1], w[2]);
+    public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, PShape shape) {
+        this._shapes = new ArrayList<>();
+        _ids = new HashMap<>();
+        _skeleton = skeleton;
+        int joints = skeleton.size();
+        for(int i = 0; i < joints; i++){
+            _ids.put(_skeleton.get(i), i);
+            if(_skeleton.get(i) instanceof Joint) {
+                int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
+                ((Joint) _skeleton.get(i)).setColor(c);
             }
         }
+
+        _initialOrientations = new Quaternion[joints];
+        _initialPositions = new Vector[joints];
+        _initialPositionsArray = new float[joints*3];
+        _positionsArray = new float[joints*3];
+        _orientationsArray = new float[joints*4];
+        PApplet pApplet = pg.parent;
+        _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
+                pApplet.sketchPath() + _vertexPath);
+        initParams();
+        _shapes.add(shape);
+    }
+
+    public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, PShape shape, String texture, float factor) {
+        this._shapes = new ArrayList<>();
+        _ids = new HashMap<>();
+        _skeleton = skeleton;
+        int joints = skeleton.size();
+        for(int i = 0; i < joints; i++){
+            _ids.put(_skeleton.get(i), i);
+            if(_skeleton.get(i) instanceof Joint) {
+                int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
+                ((Joint) _skeleton.get(i)).setColor(c);
+            }
+        }
+        _initialOrientations = new Quaternion[joints];
+        _initialPositions = new Vector[joints];
+        _initialPositionsArray = new float[joints*3];
+        _positionsArray = new float[joints*3];
+        _orientationsArray = new float[joints*4];
+        PApplet pApplet = pg.parent;
+        _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
+                pApplet.sketchPath() + _vertexPath);
+        initParams();
+        _shapes.add(createShapeTri(pg, shape, texture, factor));
+    }
+
+    public PShader shader(){
+        return _shader;
+    }
+
+    public List<PShape> shapes(){
+        return _shapes;
+    }
+
+    public List<Node> skeleton(){
+        return _skeleton;
+    }
+
+    public Map<Node, Integer> ids(){
+        return _ids;
+    }
+
+    public void initParams() {
+        for(int i = 0; i < _skeleton.size(); i++){
+            Vector v = _skeleton.get(i).position();
+            Quaternion q = _skeleton.get(i).orientation();
+            _initialOrientations[i] = q;
+            _initialPositions[i] = v.get();
+            _initialPositionsArray[i*3 + 0] =  v.x();
+            _initialPositionsArray[i*3 + 1] =  v.y();
+            _initialPositionsArray[i*3 + 2] =  v.z();
+        }
+        _shader.set("bonePositionOrig", _initialPositionsArray);
+        _shader.set("boneLength", _skeleton.size());
+        _shader.set("paintMode", -1);
+    }
+    public void updateParams() {
+        //TODO: IT COULD BE DONE WITH LESS OPERATIONS
+        for(int i = 0; i < _skeleton.size(); i++){
+            Vector v = Vector.subtract(_skeleton.get(i).position(), _initialPositions[i]);
+            Quaternion q = Quaternion.compose(_skeleton.get(i).orientation(), _initialOrientations[i].inverse());
+            _positionsArray[i*3 + 0] =  v.x();
+            _positionsArray[i*3 + 1] =  v.y();
+            _positionsArray[i*3 + 2] =  v.z();
+            _orientationsArray[i*4 + 0] =  q.x();
+            _orientationsArray[i*4 + 1] =  q.y();
+            _orientationsArray[i*4 + 2] =  q.z();
+            _orientationsArray[i*4 + 3] =  q.w();
+        }
+        _shader.set("bonePosition", _positionsArray);
+        _shader.set("boneRotation", _orientationsArray);
+    }
+
+    public void paintAllJoints(){
+        _shader.set("paintMode", 0);
+    }
+
+    public void paintJoint(int id){
+        _shader.set("paintMode", id);
+    }
+
+    public void disablePaintMode(){
+        _shader.set("paintMode", -1);
+    }
+
+    public float[] addWeights(List<Node> branch, PVector vector){
+        Vector position = new Vector(vector.x, vector.y, vector.z);
+        float total_dist = 0.f;
+        int[] joints = new int[]{-1, -1, -1};
+        float[] w = new float[]{0, 0, 0};
+        float[] d = new float[]{Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE};
+        //Find the nearest 3 joints
+        //TODO : Perhaps enable more joints - use QuickSort
+        for (Node joint : branch) {
+            if (joint == branch.get(0)) continue;
+            if (joint.translation().magnitude() <= Float.MIN_VALUE) continue;
+            float dist = (float) Math.pow(getDistance(position, joint), 10);
+            //System.out.println("Distance " + dist + " pos " + position + " j " + joint.position() );
+            if(dist <= d[0] || dist <= d[1] || dist <= d[2]){
+                int start = dist <= d[0] ? 0 : dist <= d[1] ? 1 : 2;
+                //System.out.println("Entra" );
+                //swap
+                //System.out.print("Update : " );
+
+                for(int l = joints.length-1; l > start; l--){
+                    joints[l] = joints[l-1];
+                    d[l] = d[l-1];
+                    //System.out.print(joints[l] + " ");
+                }
+                joints[start] = _ids.get(joint.reference());
+                //System.out.println(joints[start] + " ");
+                d[start] = dist;
+            }
+        }
+
+        for(int k = 0; k < joints.length; k++){
+            total_dist += 1.f/d[k];
+        }
+        for(int k = 0; k < joints.length; k++){
+            w[k] += 1.f/d[k] / total_dist;
+        }
+        //System.out.println("Pos:" + position);
+        //System.out.println("j0 pos : " + branch.get(joints[0]).position() + " j1 : " + branch.get(joints[1]).position()  + "j2 : " + branch.get(joints[2]).position());
+        //System.out.println("j0 : " + joints[0] + " j1 : " + joints[1]  + "j2 : " + joints[2]);
+
+        return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
     }
 
     /*
@@ -118,13 +187,11 @@ public class LinearBlendSkinningGPU {
      * Distance will be measure according to root coordinates.
      * In case of reference frame of frame is root, it will return distance from vertex to frame
      * */
-    public static float getDistance(Vector vertex, Node frame, Node root) {
-        if (frame == null) return 9999;
-        Vector position = root.location(frame.position());
-        Vector parentPosition = root.location(frame.reference().position());
-        if (frame.reference() == root) {
-            return Vector.distance(position, vertex);
-        }
+    public static float getDistance(Vector vertex, Node node) {
+        if (node == null) return Float.MAX_VALUE;
+        Vector position = node.position();
+        if(node.reference() == null) return Vector.distance(position, vertex);
+        Vector parentPosition = node.reference().position();
         //is the distance between line formed by b and its parent and v
         Vector line = Vector.subtract(position, parentPosition);
         Vector projection = Vector.subtract(vertex, parentPosition);
@@ -146,4 +213,51 @@ public class LinearBlendSkinningGPU {
         return distance.magnitude();
     }
 
+    //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
+    public PShape createShapeTri(PGraphics pg, PShape r, String texture, float size) {
+        float scaleFactor = size / Math.max(r.getWidth(), r.getHeight());
+        PImage tex = pg.parent.loadImage(texture);
+        PShape s = pg.createShape();
+        s.beginShape(PConstants.TRIANGLES);
+        s.noStroke();
+        s.texture(tex);
+        s.textureMode(PConstants.NORMAL);
+        if(r.getChildCount() == 0) {
+            for (int j = 0; j < r.getVertexCount(); j++) {
+                PVector p = r.getVertex(j).mult(scaleFactor);
+                System.out.println("scale " + scaleFactor);
+                System.out.println("v " + p);
+                PVector n = r.getNormal(j);
+                float u = r.getTextureU(j);
+                float v = r.getTextureV(j);
+                s.normal(n.x, n.y, n.z);
+                float[] params = addWeights(_skeleton, p);
+                s.attrib("joints", params[0] * 1.f, params[1] * 1.f, params[2] * 1.f);
+                s.attrib("weights", params[3], params[4], params[5]);
+                s.vertex(p.x, p.y, p.z, u, v);
+            }
+        } else {
+            for (int i = 0; i < r.getChildCount(); i++) {
+                for (int j = 0; j < r.getChild(i).getVertexCount(); j++) {
+                    PVector p = r.getChild(i).getVertex(j).mult(scaleFactor);
+                    System.out.println("scale " + scaleFactor);
+                    System.out.println("p " + p);
+                    PVector n = r.getChild(i).getNormal(j);
+                    float u = r.getChild(i).getTextureU(j);
+                    float v = r.getChild(i).getTextureV(j);
+                    s.normal(n.x, n.y, n.z);
+                    float[] params = addWeights(_skeleton, p);
+                    System.out.println("joints " + params[0] * 1.f + " " + params[1] * 1.f + " " + params[2] * 1.f);
+                    System.out.println("w " + params[3] * 1.f + " " + params[4] * 1.f + " " + params[5] * 1.f);
+
+                    s.attrib("joints", params[0] * 1.f, params[1] * 1.f, params[2] * 1.f);
+                    s.attrib("weights", params[3], params[4], params[5]);
+
+                    s.vertex(p.x, p.y, p.z, u, v);
+                }
+            }
+        }
+        s.endShape();
+        return s;
+    }
 }

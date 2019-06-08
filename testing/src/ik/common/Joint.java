@@ -65,7 +65,7 @@ public class Joint extends Node {
         pg.pushStyle();
         if (!_isRoot) {
             pg.strokeWeight(Math.max(_radius/4f, 2));
-            pg.stroke(_color);
+            pg.stroke(reference() instanceof Joint ? ((Joint) reference())._color : _color);
             Vector v = location(new Vector(), reference());
             float m = v.magnitude();
             if (scene.is2D()) {
@@ -91,6 +91,10 @@ public class Joint extends Node {
 
         pg.popStyle();
 
+    }
+
+    public void setColor(int color){
+        _color = color;
     }
 
     public void setRadius(float radius){

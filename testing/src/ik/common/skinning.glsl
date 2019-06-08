@@ -14,6 +14,7 @@ varying vec4 vertColor;
 uniform mat4 texMatrix;
 attribute vec2 texCoord;
 varying vec4 vertTexCoord;
+uniform int paintMode;
 
 uniform mat3 normalMatrix;
 uniform vec4 lightPosition;
@@ -21,6 +22,15 @@ attribute vec3 normal;
 
 varying vec3 ecNormal;
 varying vec3 lightDir;
+
+// All components are in the range [0…1], including hue.
+// see  https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 vec3 rot(vec4 quaternion, vec3 vector) {
 //TODO : Update
@@ -39,7 +49,7 @@ vec3 rot(vec4 quaternion, vec3 vector) {
 
     return vec3((1.0f - q11 - q22) * vector[0] + (q01 - q23) * vector[1] + (q02 + q13) * vector[2],
                    (q01 + q23) * vector[0] + (1.0f - q22 - q00) * vector[1] + (q12 - q03) * vector[2],
-                   (q02 - q13) * vector[0] + (q12 + q03) * vector[1] + (1.0f - q11 - q00) * vector[2]);;
+                   (q02 - q13) * vector[0] + (q12 + q03) * vector[1] + (1.0f - q11 - q00) * vector[2]);
 }
 
 
@@ -67,8 +77,25 @@ void main() {
 
   vec4 ecPosition = modelview * vec4(v,1);
   gl_Position = projection * ecPosition;
-  ecNormal = normalize(normalMatrix * n);
-  lightDir = normalize(lightPosition.xyz - vec3(ecPosition));
-  vertColor = color;
+
+  if(paintMode == -1){
+      ecNormal = normalize(normalMatrix * n);
+      lightDir = normalize(lightPosition.xyz - vec3(ecPosition));
+      vertColor = color;
+  } else if(paintMode == 0){
+      ecNormal = vec3(1,1,1);
+      lightDir = ecNormal;
+      vertColor = vec4(hsv2rgb(vec3((joints[0]+1.0)/boneLength, 1.0 , 1.0)), 1);
+  } else{
+      if(joints[0] == paintMode){
+          ecNormal = vec3(1,1,1);
+          lightDir = ecNormal;
+          vertColor = vec4(hsv2rgb(vec3((joints[0]+1.0)/boneLength, 1.0 , 1.0)), 1);
+      }else{
+          ecNormal = normalize(normalMatrix * n);
+          lightDir = normalize(lightPosition.xyz - vec3(ecPosition));
+          vertColor = color;
+      }
+  }
   vertTexCoord = texMatrix * vec4(texCoord, 1.0, 1.0);
 }

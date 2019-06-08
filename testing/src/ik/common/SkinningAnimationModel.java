@@ -3,71 +3,79 @@ package ik.common;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import ik.collada.animation.AnimatedModel;
+import ik.collada.animation.Model;
 import processing.core.PApplet;
-import processing.core.PGraphics;
 import processing.opengl.PShader;
 
 /**
  * Created by sebchaparr on 24/07/18.
  */
 public class SkinningAnimationModel {
-    public PShader shader;
-    private AnimatedModel model;
+    protected PShader _shader;
+    protected Model _model;
 
-    public Quaternion[] boneQuat = new Quaternion[300];
-    public Vector[] bonePos = new Vector[300];
+    protected Quaternion[] _initialOrientations;
+    public Vector[] _initialPositions;
 
-    public float[] bonePositionOrig = new float[300];
-    public float[] bonePosition = new float[300];
-    float[] boneRotation = new float[300];
+    public float[] _initialPositionsArray;
+    public float[] _positionsArray;
+    float[] _orientationsArray;
 
     String fragmentPath = "/testing/src/ik/common/frag.glsl";
     String vertexPath = "/testing/src/ik/common/skinning.glsl";
 
-    public SkinningAnimationModel(AnimatedModel model){
-        this.model = model;
+    public SkinningAnimationModel(Model model){
+        this._model = model;
         PApplet pApplet = model.getScene().pApplet();
-        shader = pApplet.loadShader(pApplet.sketchPath() + fragmentPath,
+        _shader = pApplet.loadShader(pApplet.sketchPath() + fragmentPath,
                 pApplet.sketchPath() + vertexPath);
+
+        int joints = _model.getJointTransforms().length;
+        _initialOrientations = new Quaternion[joints];
+        _initialPositions = new Vector[joints];
+        _initialPositionsArray = new float[joints*3];
+        _positionsArray = new float[joints*3];
+        _orientationsArray = new float[joints*4];
         initParams();
         updateParams();
+    }
 
+    public PShader shader(){
+        return _shader;
     }
 
     public void initParams() {
-        Node[] skeleton = model.getJointTransforms();
+        Node[] skeleton = _model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
             if(skeleton[i] == null) continue;
-            //TODO : IF there is a reference frame not null
             Vector v = skeleton[i].position();
             Quaternion q = skeleton[i].orientation();
-            boneQuat[i] = q;
-            bonePos[i] = v.get();
-            bonePositionOrig[i*3 + 0] =  v.x();
-            bonePositionOrig[i*3 + 1] =  v.y();
-            bonePositionOrig[i*3 + 2] =  v.z();
+            _initialOrientations[i] = q;
+            _initialPositions[i] = v.get();
+            _initialPositionsArray[i*3 + 0] =  v.x();
+            _initialPositionsArray[i*3 + 1] =  v.y();
+            _initialPositionsArray[i*3 + 2] =  v.z();
         }
-        shader.set("bonePositionOrig", bonePositionOrig);
-        shader.set("boneLength", skeleton.length);
+        _shader.set("bonePositionOrig", _initialPositionsArray);
+        _shader.set("boneLength", skeleton.length);
     }
 
     public void updateParams() {
         //TODO: IT COULD BE DONE WITH LESS OPERATIONS
-        Node[] skeleton = model.getJointTransforms();
+        Node[] skeleton = _model.getJointTransforms();
         for(int i = 0; i < skeleton.length; i++){
             if(skeleton[i] == null) continue;
-            Vector v = Vector.subtract(skeleton[i].position(), bonePos[i]);
-            Quaternion q = Quaternion.compose(skeleton[i].orientation(), boneQuat[i].inverse());
-            bonePosition[i*3 + 0] =  v.x();
-            bonePosition[i*3 + 1] =  v.y();
-            bonePosition[i*3 + 2] =  v.z();
-            boneRotation[i*4 + 0] =  q.x();
-            boneRotation[i*4 + 1] =  q.y();
-            boneRotation[i*4 + 2] =  q.z();
-            boneRotation[i*4 + 3] =  q.w();
+            Vector v = Vector.subtract(skeleton[i].position(), _initialPositions[i]);
+            Quaternion q = Quaternion.compose(skeleton[i].orientation(), _initialOrientations[i].inverse());
+            _positionsArray[i*3 + 0] =  v.x();
+            _positionsArray[i*3 + 1] =  v.y();
+            _positionsArray[i*3 + 2] =  v.z();
+            _orientationsArray[i*4 + 0] =  q.x();
+            _orientationsArray[i*4 + 1] =  q.y();
+            _orientationsArray[i*4 + 2] =  q.z();
+            _orientationsArray[i*4 + 3] =  q.w();
         }
-        shader.set("bonePosition", bonePosition);
-        shader.set("boneRotation", boneRotation);
+        _shader.set("bonePosition", _positionsArray);
+        _shader.set("boneRotation", _orientationsArray);
     }
 }
