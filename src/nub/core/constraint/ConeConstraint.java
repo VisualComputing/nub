@@ -40,6 +40,9 @@ public abstract class ConeConstraint extends Constraint{
     public Quaternion idleRotation() {
         return _idleRotation;
     }
+    public Quaternion offset(){
+        return _offset;
+    }
 
     public Quaternion orientation() {
         return _orientation;
