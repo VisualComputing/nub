@@ -2,6 +2,7 @@ package ik.obj;
 
 import ik.common.Joint;
 import ik.common.LinearBlendSkinning;
+import ik.common.LinearBlendSkinningCPU;
 import ik.common.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
@@ -18,18 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by sebchaparr on 10/05/19.
+ * Created by sebchaparr on 08/06/19.
  */
-public class Eagle extends PApplet {
+public class EagleCPU extends PApplet {
     Scene scene;
     //LinearBlendSkinning skinning;
-    LinearBlendSkinningGPU skinningGPU;
+    LinearBlendSkinningCPU skinningCPU;
 
     String shapePath = "/testing/data/objs/EAGLE_2.OBJ";
     String texturePath = "/testing/data/objs/EAGLE2.jpg";
     PShape psh;
-
-    int activeJ = 0;
 
     public void settings() {
         size(700, 700, P3D);
@@ -65,9 +64,9 @@ public class Eagle extends PApplet {
         //skinning = new LinearBlendSkinning(shape, model);
         //skinning.setup(skeleton);
 
-        skinningGPU = new LinearBlendSkinningGPU(skeleton, this.g, loadShape(sketchPath() + shapePath),  sketchPath() + texturePath, 100);
+        skinningCPU = new LinearBlendSkinningCPU(skeleton, this.g, sketchPath() + shapePath,  sketchPath() + texturePath, 100);
         //skinningGPU.setup(skeleton, psh);
-        skinningGPU.initParams();
+        skinningCPU.initParams();
 
         /* IDEALLY
         Node skinningNode = new Node(scene){
@@ -103,36 +102,30 @@ public class Eagle extends PApplet {
                 scene.addIKTarget(node, target);
             }
         }
-
-        skinningGPU.paintAllJoints();
-
     }
 
     public void draw(){
         background(0);
         lights();
         scene.drawAxes();
-        skinningGPU.updateParams();
-        shader(skinningGPU.shader());
-        shape(skinningGPU.shapes().get(0));
-        resetShader();
+        skinningCPU.updateParams();
+        shape(skinningCPU.shapes().get(0));
+
         scene.render();
 
         scene.beginHUD();
-        for(int i = 0; i < skinningGPU.skeleton().size(); i++){
+        for(int i = 0; i < skinningCPU.skeleton().size(); i++){
             fill(255);
-            Vector p = scene.screenLocation(skinningGPU.skeleton().get(i).position());
-            text(skinningGPU.ids().get(skinningGPU.skeleton().get(i)).toString(), p.x(), p.y());
+            Vector p = scene.screenLocation(skinningCPU.skeleton().get(i).position());
+            text(skinningCPU.ids().get(skinningCPU.skeleton().get(i)).toString(), p.x(), p.y());
 
-            Vector pos = skinningGPU.skeleton().get(i).position();
+            Vector pos = skinningCPU.skeleton().get(i).position();
             String spos = "" + Math.round(pos.x()) + ", " + Math.round(pos.y()) + ", " + Math.round(pos.z());
 
             text(spos, p.x(), p.y() + 10);
 
         }
-        text("Activej : " + activeJ,width/2, height - 50);
         scene.endHUD();
-        //skinning.applyTransformations();
     }
 
     @Override
@@ -160,20 +153,6 @@ public class Eagle extends PApplet {
                 scene.focus();
             else
                 scene.align();
-    }
-
-    public void keyPressed(){
-        if(key == 'A' || key == 'a') {
-            activeJ = (activeJ + 1) % skinningGPU.skeleton().size();
-            skinningGPU.paintJoint(activeJ);
-        }
-        if(key == 's' || key == 'S') {
-            activeJ = activeJ > 0 ? (activeJ - 1) : skinningGPU.skeleton().size() -1;
-            skinningGPU.paintJoint(activeJ);
-        }
-        if(key == 'd' || key == 'D'){
-            skinningGPU.disablePaintMode();
-        }
     }
 
     //Skeleton is founded by interacting with SimpleBuilder
@@ -332,7 +311,7 @@ public class Eagle extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.obj.Eagle"});
+        PApplet.main(new String[]{"ik.obj.EagleCPU"});
     }
 
 }

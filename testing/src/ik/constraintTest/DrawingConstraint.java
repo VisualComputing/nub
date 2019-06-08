@@ -3,6 +3,7 @@ package ik.constraintTest;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
+import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -43,11 +44,15 @@ public class DrawingConstraint  extends PApplet {
         j0.translate(-sceneConstraint.radius() * 0.5f,0,0);
         j1 = new Joint(sceneConstraint, color(255), 0.1f * sceneConstraint.radius());
         j1.setReference(j0);
-        j1.translate(sceneConstraint.radius(),0,0);
+
+        Vector v = new Vector(1f,0.3f,0);
+        v.normalize();
+        v.multiply(sceneConstraint.radius());
+        j1.translate(v);
 
         //Add constraint to joint j0
         BallAndSocket constraint = new BallAndSocket(radians(30), radians(30));
-        constraint.setRestRotation(j0.rotation(), new Vector(0,1,0), new Vector(1,0,0));
+        constraint.setRestRotation(j0.rotation(), new Vector(0,1,0), new Vector(1,0,0), j1.translation());
 
         j0.setConstraint(constraint);
 
@@ -581,6 +586,13 @@ public class DrawingConstraint  extends PApplet {
                 ((Scene) graph()).drawCone(pGraphics, 20, 0, 0, height, left_r, up_r, right_r, down_r);
                 //Draw Up - Down Triangle
                 pGraphics.pushStyle();
+                //Draw offset
+                Quaternion q = Quaternion.compose(constraint.restRotation().inverse(), constraint.offset());
+                q.compose(constraint.restRotation());
+                Vector off = q.rotate(new Vector(0,0,boneLength));
+                pGraphics.stroke(255,255,0);
+                pGraphics.line(0,0,0,off.x(), off.y(), off.z());
+                pGraphics.noStroke();
                 pGraphics.fill(255, 154, 31, 100);
                 pGraphics.beginShape(PConstants.TRIANGLES);
                     pGraphics.vertex(0,0,0);
@@ -612,6 +624,8 @@ public class DrawingConstraint  extends PApplet {
                 pGraphics.text("Down", 0,-down_r, height);
                 pGraphics.textAlign(CENTER, TOP);
                 pGraphics.text("Up", 0, up_r, height);
+                pGraphics.textAlign(CENTER, CENTER);
+                pGraphics.text("Offset", off.x(), off.y(), off.z());
                 pGraphics.lights();
                 pGraphics.popStyle();
             }

@@ -99,7 +99,7 @@ public class InteractiveFish extends PApplet {
         //Draw Constraints
         scene.drawAxes();
         //comment this line if you're using Linear Blending Skinning with CPU
-        //shader(skinning.shader);
+        //_shader(skinning._shader);
         if(showSkeleton) scene.render();
         else{
             pushMatrix();
