@@ -130,6 +130,7 @@ public class Graph {
   protected Vector _center;
   protected float _radius;
   protected Vector _anchor;
+  protected float _magnitude;
   //Interpolator
   protected Interpolator _interpolator;
   //boundary eqns
@@ -236,6 +237,8 @@ public class Graph {
     setType(type);
     if (is3D())
       setFOV((float) Math.PI / 3);
+    else
+      setMagnitude(1);
     fit();
     _agents = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
@@ -324,8 +327,8 @@ public class Graph {
    * or {@link Type#CUSTOM}.
    * <p>
    * {@link Type#PERSPECTIVE} and {@link Type#ORTHOGRAPHIC} use the classical projection
-   * matrices and the node {@link Node#magnitude()}. Both use {@link #zNear()} and
-   * {@link #zFar()} (to define their clipping planes) and {@link #width()} and {@link #height()}
+   * matrices and the {@link #magnitude()}. Both use {@link #zNear()} and {@link #zFar()}
+   * (to define their clipping planes) and {@link #width()} and {@link #height()}
    * for frustum shape.
    * <p>
    * A {@link Type#TWO_D} behaves like {@link Type#ORTHOGRAPHIC}, but instantiated graph
@@ -333,7 +336,7 @@ public class Graph {
    * {@link nub.core.constraint.Constraint}.
    *
    * @see Node#projection(Type, float, float, float, float, boolean)
-   * @see Node#magnitude()
+   * @see #magnitude()
    */
   public void setType(Type type) {
     if (type != type()) {
@@ -361,7 +364,7 @@ public class Graph {
   }
 
   /**
-   * Sets the {@link #eye()} {@link Node#magnitude()} (which is used to compute the
+   * Sets the {@link #magnitude()} (which is used to compute the
    * {@link Node#projection(Type, float, float, float, float, boolean)} matrix),
    * according to {@code fov} (field-of-view) which is expressed in radians. Meaningless
    * if the graph {@link #is2D()}. If the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}
@@ -379,29 +382,37 @@ public class Graph {
    */
   public void setFOV(float fov) {
     if (is2D()) {
-      System.out.println("Warning: setFOV() is meaningless in 2D. Use eye().setMagnitude() instead");
+      System.out.println("Warning: setFOV() is meaningless in 2D. Use setMagnitude() instead");
       return;
     }
-    eye().setMagnitude(type() == Type.PERSPECTIVE ?
+    setMagnitude(type() == Type.PERSPECTIVE ?
         (float) Math.tan(fov / 2) :
         (float) Math.tan(fov / 2) * 2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis())) / width());
   }
 
+  public void setMagnitude(float magnitude) {
+    _magnitude = magnitude;
+  }
+
+  public float magnitude() {
+    return _magnitude;
+  }
+
   /**
    * Retrieves the graph field-of-view in radians. Meaningless if the graph {@link #is2D()}.
-   * See {@link #setFOV(float)} for details. The value is related to the {@link #eye()}
-   * {@link Node#magnitude()} (which in turn is used to compute the
+   * See {@link #setFOV(float)} for details. The value is related to the {@link #magnitude()}
+   * (which in turn is used to compute the
    * {@link Node#projection(Type, float, float, float, float, boolean)} matrix) as follows:
    * <p>
    * <ol>
-   * <li>It returns {@code 2 * Math.atan(eye().magnitude())}, when the
+   * <li>It returns {@code 2 * Math.atan(magnitude())}, when the
    * graph {@link #type()} is {@link Type#PERSPECTIVE}.</li>
-   * <li>It returns {@code 2 * Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
+   * <li>It returns {@code 2 * Math.atan(magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))))},
    * if the graph {@link #type()} is {@link Type#ORTHOGRAPHIC}.</li>
    * </ol>
    * Set this value with {@link #setFOV(float)} or {@link #setHFOV(float)}.
    *
-   * @see Node#magnitude()
+   * @see #magnitude()
    * @see Node#perspective(float, float, float, boolean)
    * @see #setType(Type)
    * @see #setHFOV(float)
@@ -410,12 +421,12 @@ public class Graph {
    */
   public float fov() {
     if (is2D()) {
-      System.out.println("Warning: fov() is meaningless in 2D. Use eye().magnitude() instead");
+      System.out.println("Warning: fov() is meaningless in 2D. Use magnitude() instead");
       return 1;
     }
     return type() == Type.PERSPECTIVE ?
-        2 * (float) Math.atan(eye().magnitude()) :
-        2 * (float) Math.atan(eye().magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(magnitude()) :
+        2 * (float) Math.atan(magnitude() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
@@ -435,10 +446,10 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return type() == Type.PERSPECTIVE ? radians(eye().magnitude() * aspectRatio()) : eye().magnitude()}.
+   * Same as {@code return type() == Type.PERSPECTIVE ? radians(magnitude() * aspectRatio()) : magnitude()}.
    * <p>
    * Returns the {@link #eye()} horizontal field-of-view in radians if the graph {@link #type()} is
-   * {@link Type#PERSPECTIVE}, or the {@link #eye()} {@link Node#magnitude()} otherwise.
+   * {@link Type#PERSPECTIVE}, or the {@link #magnitude()} otherwise.
    *
    * @see #fov()
    * @see #setHFOV(float)
@@ -446,12 +457,12 @@ public class Graph {
    */
   public float hfov() {
     if (is2D()) {
-      System.out.println("Warning: hfov() is meaningless in 2D. Use eye().magnitude() instead");
+      System.out.println("Warning: hfov() is meaningless in 2D. Use magnitude() instead");
       return 1;
     }
     return type() == Type.PERSPECTIVE ?
-        2 * (float) Math.atan(eye().magnitude() * aspectRatio()) :
-        2 * (float) Math.atan(eye().magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
+        2 * (float) Math.atan(magnitude() * aspectRatio()) :
+        2 * (float) Math.atan(magnitude() * aspectRatio() * width() / (2 * Math.abs(Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()))));
   }
 
   /**
@@ -1140,8 +1151,8 @@ public class Graph {
 
     switch (type()) {
       case PERSPECTIVE: {
-        // horizontal fov: radians(eye().magnitude() * aspectRatio())
-        float hhfov = 2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f;
+        // horizontal fov: radians(magnitude() * aspectRatio())
+        float hhfov = 2 * (float) Math.atan(magnitude() * aspectRatio()) / 2.0f;
         float chhfov = (float) Math.cos(hhfov);
         float shhfov = (float) Math.sin(hhfov);
         _normal[0] = Vector.multiply(viewDir, -shhfov);
@@ -1185,8 +1196,8 @@ public class Graph {
         _normal[4] = up;
         _normal[5] = Vector.multiply(up, -1);
 
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
+        float wh0 = magnitude() * width() / 2;
+        float wh1 = magnitude() * height() / 2;
         _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
         _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
         _distance[4] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[4]);
@@ -1221,8 +1232,8 @@ public class Graph {
     _normal[2] = up;
     _normal[3] = Vector.multiply(up, -1);
 
-    float wh0 = eye().magnitude() * width() / 2;
-    float wh1 = eye().magnitude() * height() / 2;
+    float wh0 = magnitude() * width() / 2;
+    float wh1 = magnitude() * height() / 2;
     _distance[0] = Vector.dot(Vector.subtract(pos, Vector.multiply(right, wh0)), _normal[0]);
     _distance[1] = Vector.dot(Vector.add(pos, Vector.multiply(right, wh0)), _normal[1]);
     _distance[2] = Vector.dot(Vector.add(pos, Vector.multiply(up, wh1)), _normal[2]);
@@ -1392,11 +1403,11 @@ public class Graph {
   public float graphToPixelRatio(Vector position) {
     switch (type()) {
       case PERSPECTIVE:
-        return 2.0f * Math.abs((eye().location(position))._vector[2] * eye().magnitude()) * (float) Math
+        return 2.0f * Math.abs((eye().location(position))._vector[2] * magnitude()) * (float) Math
             .tan(fov() / 2.0f) / height();
       case TWO_D:
       case ORTHOGRAPHIC:
-        return eye().magnitude();
+        return magnitude();
     }
     return 1.0f;
   }
@@ -1939,14 +1950,14 @@ public class Graph {
         fitFOV();
         break;
       case ORTHOGRAPHIC:
-        float distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / eye().magnitude());
+        float distance = Vector.dot(Vector.subtract(center, anchor()), viewDirection()) + (radius / magnitude());
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), distance)));
         fitFOV();
         break;
       case PERSPECTIVE:
         float yview = radius / (float) Math.sin(fov() / 2.0f);
-        // horizontal fov: radians(eye().magnitude() * aspectRatio())
-        float xview = radius / (float) Math.sin(2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f);
+        // horizontal fov: radians(magnitude() * aspectRatio())
+        float xview = radius / (float) Math.sin(2 * (float) Math.atan(magnitude() * aspectRatio()) / 2.0f);
         eye().setPosition(Vector.subtract(center, Vector.multiply(viewDirection(), Math.max(xview, yview))));
         break;
     }
@@ -2022,9 +2033,9 @@ public class Graph {
         setFOV(magnitude);
         break;
       case ORTHOGRAPHIC:
-        eye().setMagnitude(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
+        setMagnitude(distance < (float) Math.sqrt(2) * radius() ? 2 * radius() / Math.min(width(), height()) : 2 * (float) Math.sin(magnitude) * distance / width());
       case TWO_D:
-        eye().setMagnitude(2 * radius() / Math.min(width(), height()));
+        setMagnitude(2 * radius() / Math.min(width(), height()));
         break;
     }
   }
@@ -2151,14 +2162,14 @@ public class Graph {
       float rectRatio = (float) rectangle.width() / (float) rectangle.height();
       if (aspectRatio() < 1.0f) {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          setMagnitude(magnitude() * (float) rectangle.width() / width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          setMagnitude(magnitude() * (float) rectangle.height() / height());
       } else {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          setMagnitude(magnitude() * (float) rectangle.width() / width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          setMagnitude(magnitude() * (float) rectangle.height() / height());
       }
       lookAt(location(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
       return;
@@ -2179,15 +2190,15 @@ public class Graph {
     float distX, distY;
     switch (type()) {
       case PERSPECTIVE:
-        //horizontal fov: radians(eye().magnitude() * aspectRatio())
-        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(2 * (float) Math.atan(eye().magnitude() * aspectRatio()) / 2.0f);
+        //horizontal fov: radians(magnitude() * aspectRatio())
+        distX = Vector.distance(pointX, newCenter) / (float) Math.sin(2 * (float) Math.atan(magnitude() * aspectRatio()) / 2.0f);
         distY = Vector.distance(pointY, newCenter) / (float) Math.sin(fov() / 2.0f);
         distance = Math.max(distX, distY);
         break;
       case ORTHOGRAPHIC:
         float dist = Vector.dot(Vector.subtract(newCenter, anchor()), vd);
-        distX = Vector.distance(pointX, newCenter) / eye().magnitude() / aspectRatio();
-        distY = Vector.distance(pointY, newCenter) / eye().magnitude() / 1.0f;
+        distX = Vector.distance(pointX, newCenter) / magnitude() / aspectRatio();
+        distY = Vector.distance(pointY, newCenter) / magnitude() / 1.0f;
         distance = dist + Math.max(distX, distY);
         break;
     }
@@ -2214,8 +2225,8 @@ public class Graph {
     switch (type()) {
       case PERSPECTIVE:
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
-            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * eye().magnitude(),
+        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * magnitude() * aspectRatio(),
+            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2223,8 +2234,8 @@ public class Graph {
 
       case TWO_D:
       case ORTHOGRAPHIC: {
-        float wh0 = eye().magnitude() * width() / 2;
-        float wh1 = eye().magnitude() * height() / 2;
+        float wh0 = magnitude() * width() / 2;
+        float wh1 = magnitude() * height() / 2;
         origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
             -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
             0.0f));
@@ -3602,13 +3613,13 @@ public class Graph {
     // Scale to fit the screen relative vector displacement
     if (type() == Type.PERSPECTIVE) {
       float k = (float) Math.tan(fov() / 2.0f) * Math.abs(
-          eye().location(isEye(node) ? anchor() : node.position())._vector[2] * eye().magnitude());
+          eye().location(isEye(node) ? anchor() : node.position())._vector[2] * magnitude());
       //TODO check me weird to find height instead of width working (may it has to do with fov?)
-      dx *= 2.0 * k / (height() * eye().magnitude());
-      dy *= 2.0 * k / (height() * eye().magnitude());
+      dx *= 2.0 * k / (height() * magnitude());
+      dy *= 2.0 * k / (height() * magnitude());
     }
     // this expresses the dz coordinate in world units:
-    //Vector eyeVector = new Vector(dx, dy, dz / eye().magnitude());
+    //Vector eyeVector = new Vector(dx, dy, dz / magnitude());
     Vector eyeVector = new Vector(dx, dy, dz * 2 * radius() / zMax);
     return node.reference() == null ? eye().worldDisplacement(eyeVector) : node.reference().displacement(eyeVector, eye());
   }
