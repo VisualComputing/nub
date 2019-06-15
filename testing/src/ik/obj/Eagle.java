@@ -120,6 +120,9 @@ public class Eagle extends PApplet {
 
         scene.beginHUD();
         for(int i = 0; i < skinningGPU.skeleton().size(); i++){
+            if(skinningGPU.skeleton().get(i).translation().magnitude() == 0){
+                continue;
+            }
             fill(255);
             Vector p = scene.screenLocation(skinningGPU.skeleton().get(i).position());
             text(skinningGPU.ids().get(skinningGPU.skeleton().get(i)).toString(), p.x(), p.y());
@@ -127,10 +130,11 @@ public class Eagle extends PApplet {
             Vector pos = skinningGPU.skeleton().get(i).position();
             String spos = "" + Math.round(pos.x()) + ", " + Math.round(pos.y()) + ", " + Math.round(pos.z());
 
-            text(spos, p.x(), p.y() + 10);
+            //text(spos, p.x(), p.y() + 10);
 
         }
-        text("Activej : " + activeJ,width/2, height - 50);
+        String msg = activeJ == 0 ? "Painting all Joints" : activeJ == -1 ? "" : "Painting Joint : " + activeJ;
+        text(msg,width/2, height - 50);
         scene.endHUD();
         //skinning.applyTransformations();
     }
