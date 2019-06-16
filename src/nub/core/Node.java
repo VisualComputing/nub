@@ -1713,19 +1713,19 @@ public class Node {
   /**
    * Returns the inverse of the matrix associated with the node position and orientation that
    * is to be used when the node represents an eye. This matrix matches the inverted of the
-   * {@link #worldMatrix()} when {@link #scaling()} is {@code 1}.
+   * {@link #worldMatrix()}.
    * <p>
    * The view matrix converts from the world coordinates system to the eye coordinates system,
    * so that coordinates can then be projected on screen using a projection matrix.
    *
-   * @see Matrix#view(Vector, Quaternion)
+   * @see Matrix#view(Vector, Quaternion, float)
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Node)
    * @see #set(Node)
    */
   public Matrix view() {
-    return Matrix.view(position(), orientation());
+    return Matrix.view(position(), orientation(), magnitude());
   }
 
   /**
@@ -1842,13 +1842,13 @@ public class Node {
    * <p>
    * Note that to compute the orthographic matrix the node {@link #magnitude()} scales the viewing volume width and height.
    *
-   * @see Matrix#orthographic(float, float, float, float)
+   * @see Matrix#orthographic(float, float, float, float, float)
    * @see #perspective(float, float, float, boolean)
    * @see #magnitude()
    * @see #projection(Graph.Type, float, float, float, float, boolean)
    */
   public Matrix orthographic(float width, float height, float zNear, float zFar, boolean leftHanded) {
-    return Matrix.orthographic(width * magnitude(), (leftHanded ? -height : height) * magnitude(), zNear, zFar);
+    return Matrix.orthographic(magnitude(), width, leftHanded ? -height : height, zNear, zFar);
   }
 
   /**

@@ -21,7 +21,7 @@ public class CajasOrientadas extends PApplet {
   public void setup() {
     scene = new Scene(this);
     scene.setRadius(200);
-    scene.togglePerspective();
+    //scene.togglePerspective();
     scene.fit();
     esfera = new Sphere();
     esfera.setPosition(new Vector(0.0f, 1.4f, 0.0f));

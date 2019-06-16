@@ -31,8 +31,8 @@ public class ShadowMappingVBO extends PApplet {
   int landscape = 1;
   float zNear = 10;
   float zFar = 1000;
-  int w = 1000;
-  int h = 1000;
+  int w = 800;
+  int h = 600;
 
   public void settings() {
     size(w, h, P3D);
@@ -107,7 +107,8 @@ public class ShadowMappingVBO extends PApplet {
     if (!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
+      //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().worldMatrix()));
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);
