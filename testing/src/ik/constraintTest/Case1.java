@@ -53,9 +53,9 @@ public class Case1 extends PApplet {
 
         auxiliar = new Scene(this, P3D, width, height , 0, 0);
         auxiliar.setType(Graph.Type.ORTHOGRAPHIC);
-        auxiliar.setFOV(PI / 3);
-        auxiliar.setRadius(boneLength * numJoints);
-        auxiliar.fit(1);
+        auxiliar.setRadius(numJoints * boneLength * 2.5f);
+        auxiliar.setRightHanded();
+        auxiliar.fit();
 
         PShape redBall = createShape(SPHERE, targetRadius);
         redBall.setStroke(false);
@@ -87,7 +87,9 @@ public class Case1 extends PApplet {
 
         int i = 0;
         //CCD
-        solvers.add(new CCDSolver(structures.get(i++)));
+        CCDSolver ccdSolver = new CCDSolver(structures.get(i++));
+        ccdSolver.enableHistory(true);
+        solvers.add(ccdSolver);
         //BioIK
         solvers.add(new BioIk(structures.get(i++), 10, 4));
         //Standard FABRIK
@@ -191,7 +193,7 @@ public class Case1 extends PApplet {
         c1.setTwistLimits(radians(0),radians(180));
         j1.setConstraint(c1);
 
-        Hinge c2 = new Hinge(0,radians(120),j2.rotation().get(), new Vector(1,0,0), new Vector(0,0,-1));
+        Hinge c2 = new Hinge(radians(0),radians(120),j2.rotation().get(), j3.translation().get(), new Vector(0,0,-1));
         j2.setConstraint(c2);
         return skeleton;
     }
@@ -238,7 +240,8 @@ public class Case1 extends PApplet {
         } else if(key == '2'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers.get(0), targetRadius);
+            if(CCDAnimator == null) CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers.get(0), targetRadius);
+            else CCDAnimator.reset();
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){
