@@ -12,10 +12,12 @@
 package nub.ik;
 
 import nub.core.Node;
+import nub.ik.animation.IKAnimation;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 //TODO : Enable / Disable iteration Hist
@@ -26,7 +28,12 @@ public class CCDSolver extends Solver {
   protected Node _previousTarget;
 
   //Animation Stuff
-  protected ArrayList<ArrayList<Vector>> _iterationsHistory;
+  protected boolean _enableHistory;
+  protected IKAnimation.NodeStates _history;
+
+  public void enableHistory(boolean enableHistory){
+    _enableHistory = enableHistory;
+  }
 
   public List<? extends Node> chain() {
     return _chain;
@@ -62,6 +69,7 @@ public class CCDSolver extends Solver {
     this._target = target;
     this._previousTarget =
         target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+    if(_enableHistory)_history = new IKAnimation.NodeStates();
   }
 
   /*
@@ -85,9 +93,8 @@ public class CCDSolver extends Solver {
     ArrayList<Vector> positions = new ArrayList<Vector>();
 
     for (int i = _chain.size() - 2; i >= 0; i--) {
-      Quaternion delta = null;
       Quaternion initial = _chain.get(i).rotation().get();
-      delta = new Quaternion(endLocalPosition, targetLocalPosition);
+      Quaternion delta = new Quaternion(endLocalPosition, targetLocalPosition);
       //update target local position
       if(_chain.get(i).reference() == null){
         targetLocalPosition = _chain.get(i).worldLocation(targetLocalPosition);
@@ -104,10 +111,14 @@ public class CCDSolver extends Solver {
       initial.compose(_chain.get(i).rotation().get());
       change += Math.abs(initial.angle());
       positions.add(0,_chain.get(i+1).position().get());
+
+      if(_enableHistory){
+        history().addNodeState("step", _chain.get(i), _chain.get(i).reference(), null, _chain.get(i).rotation().get());
+        history().incrementStep();
+      }
     }
     positions.add(0,_chain.get(0).position().get());
-
-    addIterationRecord(positions);
+    if(_enableHistory) history().incrementIteration();
     //Check total rotation change
     if (change <= _minDistance) return true;
     return false;
@@ -133,12 +144,20 @@ public class CCDSolver extends Solver {
   protected void _reset() {
     _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
-    _iterationsHistory = new ArrayList<>();
+    if(_enableHistory){
+      if(_history == null) _history = new IKAnimation.NodeStates();
+      else _history.clear();
+    }
     ArrayList<Vector> positions = new ArrayList<Vector>();
     for(Node node : chain()){
-      positions.add(node.position().get());
+      Vector position = node.position().get();
+      positions.add(position);
+      if(_enableHistory) _history.addNodeState("initialization", node, node.reference(), node.translation().get(), node.rotation().get());
     }
-    addIterationRecord(positions);
+    if(_enableHistory){
+      _history.incrementStep();
+      _history.incrementIteration();
+    }
   }
 
   @Override
@@ -147,13 +166,8 @@ public class CCDSolver extends Solver {
   }
 
   //Animation Stuff
-  public ArrayList<ArrayList<Vector>> iterationsHistory(){
-    return _iterationsHistory;
+  public IKAnimation.NodeStates history(){
+    return _history;
   }
-
-  public void addIterationRecord(ArrayList<Vector> iteration){
-    _iterationsHistory.add(new ArrayList<>(iteration));
-  }
-
 
 }
