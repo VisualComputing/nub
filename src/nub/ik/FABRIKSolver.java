@@ -219,7 +219,7 @@ public abstract class FABRIKSolver extends Solver {
       change +=  Vector.distance(pos_i, _positions().get(i));
     }
 
-    history().incrementIteration();
+    if(_enableHistory) history().incrementIteration();
     return change;
   }
 
@@ -371,8 +371,8 @@ public abstract class FABRIKSolver extends Solver {
         history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i+1).get(), null);
         history().incrementStep();
       }
-      history().incrementIteration();
     }
+    if(_enableHistory) history().incrementIteration();
     return change;
   }
 
