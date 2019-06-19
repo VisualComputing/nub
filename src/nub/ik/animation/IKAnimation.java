@@ -317,8 +317,8 @@ public class IKAnimation {
 
         public void setTrajectory(Quaternion initial, Quaternion end, Vector vector){
             _node.setRotation(initial.get());
-            _initial = _node.worldLocation(vector);
-            _end = _node.worldLocation(Quaternion.compose(initial.inverse(), end).rotate(vector));
+            _initial = _node.worldLocation(vector).get();
+            _end = _node.worldLocation(Quaternion.compose(initial.inverse(), end).rotate(vector)).get();
             _current = _initial.get();
             _base = _node.position().get();
             _completed = false;
@@ -400,186 +400,139 @@ public class IKAnimation {
         }
     }
 
+    public static class TranslateNode extends Step{
+        protected enum Translate{ V1_TO_V2, V_TO_V2, V1_TO_V, V}
+        protected long _edgePeriod;
+        protected boolean _fixChildren = true;
+        protected boolean _updateNode = true;
+        protected float _radius;//_iterations per edge is updated according to Animator period
+        protected Node _node;
+        protected Vector _delta;
+        protected Vector _initial, _end, _current;
+        protected int _cline, _cv1, _cv2, _cv;
+        protected int _times, _totalTimes;
+        protected String _message = null;
+        protected Translate _mode = Translate.V1_TO_V2;
 
-    public static class FABRIKAnimation {
-        //Keep hist of _iterations using FABRIK
-        protected ChainSolver _solver;
-        protected Scene _scene; //where to display animation
-        protected int _current = 1; //current iteration
-        protected int _step = 0, _j = 0; //useful variables to check which Joint is being animated
-        protected Step _trajectory;
-        protected Vector[] _previousSegment;
-        protected float _radius;
-        protected boolean _forwardStage = true;
-        protected long _period = 8000;
-
-
-        public FABRIKAnimation(Scene scene, ChainSolver solver, float radius) {
-            _scene = scene;
-            _solver = solver;
-            _j = solver.chain().size() - 1;
+        public TranslateNode(Scene scene, Node node, float radius, long edgePeriod){
+            super(scene);
             _radius = radius;
-        }
-
-        public void animate() {
-            if (_forwardStage) animateForward();
-            else animateBackward();
-        }
-
-        public void animateForward() {
-            ArrayList<Vector> prevStructure = _solver.iterationsHistory().get(_current - 1);
-            ArrayList<Vector> nextStructure = _solver.iterationsHistory().get(_current);
-            //Animate
-            if (_step > 4 && _trajectory._completed) {
-                _step = 0;
-                _j--;
-            }
-            if (_j <= 0) {
-                _current++;
-                _j = 0;
-                _forwardStage = false;
-                _step = 0;
-                return;
-            }
-            animateStep(prevStructure.get(_j - 1), prevStructure.get(_j), nextStructure.get(_j - 1), nextStructure.get(_j));
-        }
-
-        public void animateBackward() {
-            ArrayList<Vector> prevStructure = _solver.iterationsHistory().get(_current - 1);
-            ArrayList<Vector> nextStructure = _solver.iterationsHistory().get(_current);
-            //Animate
-            if (_step > 4 && _trajectory._completed) {
-                _step = 0;
-                _j++;
-            }
-            if (_j >= nextStructure.size() - 1) {
-                _current++;
-                _j = nextStructure.size() - 1;
-                _step = 0;
-                _forwardStage = true;
-                return;
-            }
-            animateStep(prevStructure.get(_j + 1), prevStructure.get(_j), nextStructure.get(_j + 1), nextStructure.get(_j));
-        }
-
-
-        public void animateStep(Vector j_i, Vector j_i1, Vector j_i_hat, Vector j_i1_hat) {
-
-            if (_trajectory == null || _trajectory._completed) {
-                //create next trajectory
-                switch (_step) {
-                    case 0: {
-                        _previousSegment = null;
-                        _scene.unregisterAnimator(_trajectory);
-                        _trajectory = new FollowTrajectoryStep(_scene, _radius, _period);
-                        _trajectory.start();
-                        ((FollowTrajectoryStep) _trajectory).setTrajectory(j_i1, j_i1_hat);
-                        ((FollowTrajectoryStep) _trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
-                        ((FollowTrajectoryStep) _trajectory)._message = "Step 1: Assume J_i reach its Target Position";
-                        break;
-                    }
-                    case 1: {
-                        _previousSegment = ((FollowTrajectoryStep) _trajectory)._trajectory.clone();
-                        _scene.unregisterAnimator(_trajectory);
-                        _trajectory = new FollowTrajectoryStep(_scene, _radius, _period);
-                        _trajectory.start();
-                        ((FollowTrajectoryStep) _trajectory).setTrajectory(j_i1_hat, j_i);
-                        ((FollowTrajectoryStep) _trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
-                        ((FollowTrajectoryStep) _trajectory)._message = "Step 2: Find the Segment Line defined by J_t and J_i";
-                        break;
-                    }
-                    case 2: {
-                        Vector v = Vector.subtract(j_i, j_i1_hat);
-                        v.normalize();
-                        v.multiply(Vector.distance(j_i1, j_i));
-                        v.add(j_i1_hat);
-                        _previousSegment = ((FollowTrajectoryStep) _trajectory)._trajectory.clone();
-                        _scene.unregisterAnimator(_trajectory);
-                        _trajectory = new FollowTrajectoryStep(_scene, _radius, _period);
-                        ((FollowTrajectoryStep) _trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
-                        _trajectory.start();
-                        ((FollowTrajectoryStep) _trajectory).setTrajectory(j_i1_hat, v);
-                        ((FollowTrajectoryStep) _trajectory)._message = "Step 3: Find the new joint's position by fixing the length of Segment Line";
-                        break;
-                    }
-                    case 3: {
-                        Vector v = Vector.subtract(j_i, j_i1_hat);
-                        v.normalize();
-                        v.multiply(Vector.distance(j_i1, j_i));
-                        v.add(j_i1_hat);
-                        _previousSegment = ((FollowTrajectoryStep) _trajectory)._trajectory.clone();
-                        _scene.unregisterAnimator(_trajectory);
-                        _trajectory = new FollowArc(_scene, _radius, _period);
-                        _trajectory.start();
-                        ((FollowArc) _trajectory).setTrajectory(j_i1_hat, v, j_i_hat);
-                        ((FollowArc) _trajectory)._mode = FollowArc.Arc.V1_TO_V;
-                        ((FollowArc) _trajectory)._message = "Step 4: In case of constraints Move to a Feasible position";
-                        break;
-                    }
-                    case 4: {
-                        _previousSegment = Arrays.copyOfRange(((FollowArc) _trajectory)._trajectory, 1, ((FollowArc) _trajectory)._trajectory.length);
-                        _scene.unregisterAnimator(_trajectory);
-                        _trajectory = new FollowTrajectoryStep(_scene, _radius, _period);
-                        _trajectory.start();
-                        ((FollowTrajectoryStep) _trajectory)._mode = FollowTrajectoryStep.Line.V1_TO_V;
-                        ((FollowTrajectoryStep) _trajectory).setTrajectory(j_i1_hat, j_i_hat);
-                        ((FollowTrajectoryStep) _trajectory)._message = "Step 4: Connect new found position with target position";
-                        break;
-                    }
-
-                }
-                _step++;
-            }
-        }
-
-        public void draw() {
-            if(_solver.iterationsHistory().size() < 2) return;
-            animate();
-            //Draw previous iteration
-            ArrayList<Vector> prev = _solver.iterationsHistory().get(_current - 1);
+            //use some default colors
             PGraphics pg = _scene.context();
-            for (int i = 0; i < prev.size() - 1; i++) {
-                Vector v1 = prev.get(i);
-                Vector v2 = prev.get(i + 1);
-                pg.pushStyle();
-                if (_scene.is3D()) {
-                    drawSegment3D(pg, v1, v2, _radius, pg.color(255, 255, 0, 100), pg.color(255, 255, 0, 100), pg.color(255, 255, 0, 100));
-                } else {
-                    drawSegment2D(pg, v1, v2, _radius, pg.color(255, 255, 0, 100), pg.color(255, 255, 0, 100), pg.color(255, 255, 0, 100));
-                }
-                pg.popStyle();
-            }
-
-            drawIteration(pg);
+            _cv1 = pg.color(0,0,255, 200);
+            _cv2 = pg.color(0,0,255, 200);
+            _cv = pg.color(0,0,255, 200);
+            _cline = pg.color(0,0,255, 200);
+            _edgePeriod = edgePeriod;
+            _node = node;
         }
 
-        public void drawIteration(PGraphics pg) {
-            if (_previousSegment != null) {
-                if (_scene.is3D()) {
-                    drawSegment3D(pg, _previousSegment[0], _previousSegment[1], _radius, pg.color(255, 0, 0, 100), pg.color(255, 0, 0, 100), pg.color(255, 0, 0, 100));
-                } else {
-                    drawSegment2D(pg, _previousSegment[0], _previousSegment[1], _radius, pg.color(255, 0, 0, 100), pg.color(255, 0, 0, 100), pg.color(255, 0, 0, 100));
+        public void fixPosition(Node node, Vector newPosition){
+            Vector diff = Vector.subtract(newPosition, node.position());
+            node.setPosition(newPosition.get());
+            if(!_fixChildren) return;
+
+            for(Node child : node.children()){
+                child.setPosition(Vector.subtract(child.position(), diff));
+            }
+        }
+
+        public void setTrajectory(Vector initial, Vector end){
+            fixPosition(_node, initial.get());
+            _initial = initial;
+            _end = end;
+            _current = initial.get();
+            _completed = false;
+            calculateSpeedPerIteration();
+            _times = 0;
+            //how many times to execute?
+            _totalTimes = (int) Math.ceil(_edgePeriod / period()) + 1;
+            this.start();
+        }
+
+
+        protected void calculateSpeedPerIteration(){
+            float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
+            _delta = Vector.subtract(_end,_initial);
+            _delta.multiply(inc);
+        }
+
+        @Override
+        public void update() {
+            if(_initial == null || _end == null) return;
+            if(_times++ >= _totalTimes){
+                _completed = true;
+                return;
+            }
+
+            if(Vector.distance(_current, _end) >= 0.1) {
+                _current.add(_delta);
+                if (_updateNode) {
+                    fixPosition(_node, _current);
+                }
+            }
+        }
+
+
+        @Override
+        public void draw() {
+            Vector v1 = _initial;
+            Vector v2 = _end;
+
+            switch (_mode){
+                case V1_TO_V:{
+                    v2 = _current;
+                    break;
+                }
+                case V_TO_V2:{
+                    v1 = _current;
+                    break;
+                }
+                case V:{
+                    v1 = v2 = _current;
                 }
             }
 
-            ArrayList<Vector> next = _solver.iterationsHistory().get(_current);
-            int i = _forwardStage ? next.size() - 1 : 0;
-            while (i != _j) {
-                Vector v1 = _forwardStage ? next.get(i - 1) : next.get(i + 1);
-                Vector v2 = next.get(i);
-                pg.pushStyle();
-                if (_scene.is3D()) {
-                    drawSegment3D(pg, v1, v2, _radius, pg.color(0, 255, 0, 200), pg.color(0, 255, 0, 200), pg.color(0, 255, 0, 200));
-                } else {
-                    drawSegment2D(pg, v1, v2, _radius, pg.color(0, 255, 0, 200), pg.color(0, 255, 0, 200), pg.color(0, 255, 0, 200));
-                }
-                pg.popStyle();
-                i = _forwardStage ? i - 1 : i + 1;
+            PGraphics pg = _scene.context();
+            pg.pushStyle();
+            pg.hint(PConstants.DISABLE_DEPTH_TEST);
+            if(_scene.is3D()) {
+                pg.noStroke();
+                pg.pushMatrix();
+                pg.translate(v1.x(), v1.y(), v1.z());
+                pg.fill(_cv1);
+                pg.sphere(_radius);
+                pg.popMatrix();
+
+                pg.noStroke();
+                pg.pushMatrix();
+                pg.translate(v2.x(), v2.y(), v2.z());
+                pg.fill(_cv2);
+                pg.sphere(_radius);
+                pg.popMatrix();
+
+                pg.fill(_cline);
+                if(Vector.distance(v1,v2) > 1.2f*_radius) _scene.drawArrow(v1,v2, _radius/4f);
+            } else{
+                drawSegment2D(pg, v1, v2, _radius, _cline, _cv1, _cv2);
+                pg.stroke(_cv);
+                pg.fill(_cv);
+                pg.ellipse(_current.x(), _current.y(),_radius, _radius);
             }
-            //Animate current step
-            if (_trajectory != null) _trajectory.draw();
+            pg.hint(PConstants.ENABLE_DEPTH_TEST);
+            if(_message != null){
+                _scene.beginHUD();
+                pg.fill(255);
+                pg.textSize(28);
+                pg.textAlign(PConstants.CENTER);
+                pg.text(_message, pg.width*0.05f, pg.height*0.8f, pg.width*0.9f, pg.height);
+                _scene.endHUD();
+            }
+            pg.popStyle();
         }
     }
+
+
 
     public static class CCDAnimation {
         protected CCDSolver _solver; //Keep hist of _iterations using CCD
@@ -594,6 +547,10 @@ public class IKAnimation {
         protected float _radius;
         protected long _period = 3000;
         protected String _message;
+
+        public void setPeriod(long period){
+            _period = period;
+        }
 
         public CCDAnimation(Scene scene, CCDSolver solver, float radius){
             this(scene, solver, radius, -1);
@@ -777,11 +734,256 @@ public class IKAnimation {
 
             _scene.endHUD();
             _scene.context().lights();
-
-
-
         }
     }
+
+
+    public static class FABRIKAnimation {
+        //Keep hist of _iterations using FABRIK
+        protected ChainSolver _solver;
+        protected Scene _scene; //where to display animation
+        protected int _current = 1; //current iteration
+        protected int _step = 0; //useful variables to check which Joint is being animated
+        protected int _state, _initial;
+        protected List<Step> _steps;
+        protected HashMap<Integer, Node> _structure; //copy of CCDSolver structure
+        protected HashMap<Integer, Node> _previousStructure; //copy of CCDSolver structure
+
+        protected Node _target;
+        protected Vector _initialPosition;
+
+        protected float _radius;
+        protected long _period = 3000;
+        protected String _message;
+
+        public void setPeriod(long period){
+            _period = period;
+        }
+
+        public FABRIKAnimation(Scene scene, ChainSolver solver, float radius) {
+            this(scene, solver, radius, -1);
+        }
+
+        public FABRIKAnimation(Scene scene, ChainSolver solver, float radius, int color) {
+            _scene = scene;
+            _solver = solver;
+            _radius = radius;
+
+            //Make a copy of previous iteration
+            _previousStructure = _copy(scene, solver.internalChain(), true);
+
+            //Make a copy of the CCD Structure
+            _structure = _copy(scene, solver.internalChain(), true);
+
+            for(Node n : _structure.values()){
+                if(color != -1) ((Joint) n).setColor(color);
+                ((Joint) n).setRadius(_radius);
+                n.setConstraint(null);
+            }
+
+
+            for(Node n : _previousStructure.values()){
+                int c = _scene.pApplet().color(200, 200);
+                if(color != -1) ((Joint) n).setColor(c); //opaque
+                ((Joint) n).setRadius(_radius * 0.7f);
+                n.setConstraint(null);
+            }
+
+
+            //Center the scene on the root node
+            scene.setCenter(_structure.get(_solver.internalChain().get(0).id()).position());
+            scene.fit();
+            //Make a copy of target
+            PShape redBall = scene.pApplet().createShape(PConstants.SPHERE, _radius * 1.2f);
+            redBall.setStroke(false);
+            redBall.setFill(scene.pApplet().color(255,0,0, 150));
+            _target = new Node(_scene, redBall);
+            _target.setPosition(_solver.target().position().get());
+            setInitialConditions();
+        }
+
+        public void setInitialConditions(){
+            if(_solver.history()._states.size() < 1) return;
+            //Set structure to be on initial conditions
+            while(_state < _solver.history()._states.size() && _solver.history()._states.get(_state)._name == "initialization"){
+                NodeState state = _solver.history()._states.get(_state++);
+                Node copy = _structure.get(state._node.id());
+                copy.setRotation(state.quaternion());
+                copy.setTranslation(state.vector());
+            }
+            _initialPosition = _structure.get(_solver.internalChain().get(0).id()).position().get();
+            _target.setPosition(_solver.target().position());
+            _initial = _state;
+            if(_steps == null){
+                _steps = new ArrayList<>();
+            } else {
+                //clear all
+                for(Step s : _steps){
+                    _scene.unregisterAnimator(s);
+                }
+                _steps.clear();
+            }
+        }
+
+        public void reset(){
+            _state = 0;
+            setInitialConditions();
+        }
+
+
+
+        public void animate() {
+            //animate each step
+            animateStep();
+        }
+
+        protected void _updatePrevious(){
+            for(Integer i : _structure.keySet()){
+                _previousStructure.get(i).setTranslation(_structure.get(i).translation().get());
+                _previousStructure.get(i).setRotation(_structure.get(i).rotation().get());
+            }
+        }
+
+
+
+        protected boolean _done(){
+            if(_steps.isEmpty() && _state == _initial){
+                return true;
+            }
+            return _steps.get(_steps.size() - 1)._completed;
+        }
+
+        public void animateStep(){
+            if (_done() && _state < _solver.history()._states.size()) {
+                NodeState state = _solver.history()._states.get(_state);
+                switch (state._name){
+                    case "Effector to Target step":{
+                        _updatePrevious();
+                        animateEffToTarget();
+                        break;
+                    }
+                    case "Backward step":{
+
+                    }
+
+                    case "Forward step":{
+                        animateForwardStep();
+                        break;
+                    }
+                    case "Head to Initial":{
+                        animateHeadToInitial();
+                        break;
+                    }
+                }
+            }
+        }
+
+        public void animateEffToTarget(){
+            //clear all
+            for(Step s : _steps){
+                _scene.unregisterAnimator(s);
+            }
+            _steps.clear();
+
+            NodeState state = _solver.history()._states.get(_state);
+            Node node = _structure.get(state.node().id());
+            TranslateNode s = new TranslateNode(_scene, node, _radius * 0.8f, _period);
+            s.start();
+            s.setTrajectory(node.position(), state.vector());
+            s._fixChildren = true;
+            s._mode = TranslateNode.Translate.V1_TO_V;
+            s._cline = _scene.context().color(255,0,0);
+            s._cv1 = s._cv2 = _scene.context().color(255);
+            _message = "Assume that End Effector (" + ((Joint) node).name() + ") reaches the Target (T)";
+            _steps.add(s);
+            _state += 1;
+        }
+
+        public void animateForwardStep(){
+            //clear all
+            for(Step s : _steps){
+                _scene.unregisterAnimator(s);
+            }
+            _steps.clear();
+            NodeState state = _solver.history()._states.get(_state);
+            Node node = _structure.get(state.node().id());
+            TranslateNode s = new TranslateNode(_scene, node,_radius * 0.8f, _period);
+            s.start();
+            s.setTrajectory(node.position(), state.vector());
+            s._fixChildren = true;
+            s._mode = TranslateNode.Translate.V1_TO_V;
+            s._cline = _scene.context().color(255,255,0);
+            s._cv1 = s._cv2 = _scene.context().color(255);
+            _message = "Find the desired position of Joint " + ((Joint) node).name() + " by fixing the length of the bone";
+            _steps.add(s);
+            _state += 1;
+        }
+
+        public void animateHeadToInitial(){
+            //clear all
+            for(Step s : _steps){
+                _scene.unregisterAnimator(s);
+            }
+            _steps.clear();
+
+            NodeState state = _solver.history()._states.get(_state);
+            Node node = _structure.get(state.node().id());
+            TranslateNode s = new TranslateNode(_scene, node, _radius * 0.8f, _period);
+            s.start();
+            s.setTrajectory(node.position(), state.vector());
+            s._fixChildren = true;
+            s._mode = TranslateNode.Translate.V1_TO_V;
+            s._cline = _scene.context().color(255,0,0);
+            s._cv1 = s._cv2 = _scene.context().color(255);
+            _message = "Assume that Joint " + ((Joint) node).name() + " reaches the root position (R)";
+            _steps.add(s);
+            _state += 1;
+        }
+
+        public void draw() {
+            if (_solver.history()._totalIterations < 2) return;
+            animate();
+            //draw initial position
+            _scene.context().pushStyle();
+            _scene.context().noStroke();
+            _scene.context().fill(0,255,0);
+            _scene.context().push();
+            _scene.context().translate(_initialPosition.x(), _initialPosition.y(), _initialPosition.z());
+            _scene.context().sphere(_radius * 1.2f);
+            _scene.context().pop();
+            _scene.context().popStyle();
+
+            for (Step step : _steps) {
+                if (step != null) step.draw();
+            }
+
+            _scene.context().noLights();
+            _scene.beginHUD();
+            _scene.context().fill(255);
+            _scene.context().textSize(28);
+            _scene.context().textAlign(PConstants.CENTER);
+            _scene.context().text("FABRIK Solver", _scene.context().width * 0.05f, _scene.context().height * 0.05f, _scene.context().width * 0.9f, _scene.context().height);
+            _scene.context().text(_message, _scene.context().width * 0.05f, _scene.context().height * 0.8f, _scene.context().width * 0.9f, _scene.context().height);
+
+            _scene.context().textSize(14);
+            _scene.context().textAlign(PConstants.CENTER, PConstants.CENTER);
+            //draw node names
+            for (Node node : _structure.values()) {
+                String name = ((Joint) node).name();
+                Vector scr = _scene.screenLocation(node.position());
+                _scene.context().text(name, scr.x() - 15, scr.y());
+            }
+            Vector scr = _scene.screenLocation(_target.position());
+            _scene.context().text("T", scr.x() + 15, scr.y());
+
+            scr = _scene.screenLocation(_initialPosition);
+            _scene.context().text("R", scr.x() + 15, scr.y());
+
+            _scene.endHUD();
+            _scene.context().lights();
+        }
+    }
+
 
 
     public static class NodeState{

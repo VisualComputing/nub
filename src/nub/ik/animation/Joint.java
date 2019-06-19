@@ -13,7 +13,7 @@ public class Joint extends Node {
     protected String _name;
     protected int _color;
     protected float _radius;
-    public static boolean axes = true;
+    protected boolean _axes = false;
     public static float constraintFactor = 0.5f;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
@@ -68,7 +68,7 @@ public class Joint extends Node {
         if (constraint() != null && _drawConstraint) {
             scene.drawConstraint(pg,this, constraintFactor);
         }
-        if(axes) scene.drawAxes(_radius*2);
+        if(_axes) scene.drawAxes(_radius*2);
         if(!depth) pg.hint(PConstants.ENABLE_DEPTH_TEST);
 
         pg.stroke(255);
