@@ -1,26 +1,24 @@
 package ik.animation;
 
-import nub.core.Node;
+import ik.basic.Util;
+import ik.common.Joint;
 import nub.core.Graph;
+import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.CCDSolver;
 import nub.ik.ChainSolver;
-import nub.ik.Solver;
 import nub.ik.animation.IKAnimation;
-import nub.ik.evolution.BioIk;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
-import ik.basic.Util;
-import ik.common.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 
-public class CCDAnim extends PApplet {
+public class FABRIKAnim extends PApplet {
     Scene scene, auxiliar, focus;
     boolean displayAuxiliar = false;
 
@@ -30,12 +28,12 @@ public class CCDAnim extends PApplet {
 
     int color;
 
-    CCDSolver solver;
+    ChainSolver solver;
     ArrayList<Node> structure = new ArrayList<>(); //Keep Structures
     Node target; //Keep targets
     boolean solve = false;
 
-    IKAnimation.CCDAnimation CCDAnimator = null;
+    IKAnimation.FABRIKAnimation FABRIKAnimator = null;
 
     public void settings() {
         size(700, 700, P3D);
@@ -68,7 +66,7 @@ public class CCDAnim extends PApplet {
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
         //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
-        solver = new CCDSolver(structure);
+        solver = new ChainSolver(structure);
         solver.enableHistory(true);
 
         solver.setMaxError(0.001f);
@@ -107,7 +105,7 @@ public class CCDAnim extends PApplet {
             auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
-            if(CCDAnimator != null)  CCDAnimator.draw();
+            if(FABRIKAnimator != null)  FABRIKAnimator.draw();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -178,18 +176,18 @@ public class CCDAnim extends PApplet {
         } else if(key == 'q'){
             displayAuxiliar = true;
             solver.solve();
-            if(CCDAnimator == null) CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, solver, targetRadius, color);
-            else CCDAnimator.reset();
+            if(FABRIKAnimator == null) FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, solver, targetRadius, color);
+            else FABRIKAnimator.reset();
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            CCDAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
+            FABRIKAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
         }
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.animation.CCDAnim"});
+        PApplet.main(new String[]{"ik.animation.FABRIKAnim"});
     }
 }

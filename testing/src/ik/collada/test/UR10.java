@@ -151,7 +151,7 @@ public class UR10 extends PApplet {
         if(debug){
             hint(DISABLE_DEPTH_TEST);
             ChainSolver s = (ChainSolver) solver;
-            if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
+            /*if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
                 int last = s.iterationsHistory().size() - 1;
                 int prev1 = last > 0 ? last - 1 : 0;
                 int prev2 = last > 1 ? last - 2 : 0;
@@ -160,7 +160,7 @@ public class UR10 extends PApplet {
                 Util.drawPositions(scene.context(), s.iterationsHistory().get(prev2), color(0, 0, 255,150), 3);
                 Util.drawPositions(scene.context(), s.iterationsHistory().get(prev1), color(0, 255, 0,150), 3);
                 Util.drawPositions(scene.context(), s.iterationsHistory().get(last), color(255, 0, 0,150), 3);
-            }
+            }*/
             if(s.divergeHistory() != null && !s.divergeHistory().isEmpty() && show[1]) {
                 for (ArrayList<Vector> l : s.divergeHistory()) {
                     Util.drawPositions(scene.context(), l, color(255, 255, 0, 50), 3);
