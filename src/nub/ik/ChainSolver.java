@@ -12,6 +12,7 @@
 package nub.ik;
 
 import nub.core.Node;
+import nub.ik.animation.IKAnimation;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -26,8 +27,6 @@ public class ChainSolver extends FABRIKSolver {
   protected List<? extends Node> _original;
   protected float _current = 10e10f, _best = 10e10f;
 
-  //Animation Stuff
-  protected ArrayList<ArrayList<Vector>> _iterationsHistory;
 
   protected Node _target;
   protected Node _prevTarget;
@@ -77,6 +76,11 @@ public class ChainSolver extends FABRIKSolver {
     return  _divergeHistory;
   }
 
+
+  //TODO : clean
+  public List<? extends Node> internalChain() {
+    return _chain;
+  }
 
   public List<? extends Node> chain() {
     return _original;
@@ -204,7 +208,7 @@ public class ChainSolver extends FABRIKSolver {
       for(int i = 0; i < _chain.size(); i++){
         _positions.set(i, _chain.get(i).position());
       }
-      if(debug) addIterationRecord(_positions);
+      //if(debug) addIterationRecord(_positions);
     }
 
     //TODO : Clean and consider twisting
@@ -212,12 +216,26 @@ public class ChainSolver extends FABRIKSolver {
       _applyTargetdirection();
     }
     _positions.set(_chain.size() - 1, target.get());
+
+    //Animation
+    if(_enableHistory){
+      history().addNodeState("Effector to Target step", _chain.get(_chain.size() - 1), _chain.get(_chain.size() - 1).reference(), target.get(), null);
+      history().incrementStep();
+    }
+
     _forwardReaching();
     //Animation stuff
-    if(debug) addIterationRecord(_positions);
+    //if(debug) addIterationRecord(_positions);
     //Stage 2: Backward Reaching
     Vector o = _positions.get(0);
     _positions.set(0, initial);
+
+    //Animation
+    if(_enableHistory){
+      history().addNodeState("Head to Initial", _chain.get(0), _chain.get(0).reference(), initial, null);
+      history().incrementStep();
+    }
+
     float change = _backwardReaching(o);
     //Save best solution
     float currentError  = Vector.distance(end.position(), _target.position());
@@ -239,7 +257,7 @@ public class ChainSolver extends FABRIKSolver {
     }
     _current = Vector.distance(target, _chain.get(_chain.size() - 1).position());
     _update();
-    if(debug) addIterationRecord(_positions);
+    //if(debug) addIterationRecord(_positions);
     //Check total position change
     return false;
   }
@@ -294,11 +312,16 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
+    if(_enableHistory){
+      if(_history == null) _history = new IKAnimation.NodeStates();
+      else _history.clear();
+    }
+
     if(_original.get(0).reference() != null) {
       _chain.get(0).reference().setMagnitude(_original.get(0).reference().magnitude());
       _chain.get(0).reference().setOrientation(_original.get(0).reference().orientation().get());
       _chain.get(0).reference().setPosition(_original.get(0).reference().position().get());
-   }
+    }
 
     for(int i = 0; i < _chain.size(); i++){
       _chain.get(i).setScaling(_original.get(i).scaling());
@@ -310,29 +333,28 @@ public class ChainSolver extends FABRIKSolver {
     //TODO : rename and clean jointChange
     _jointChange = new ArrayList<Float>();
     _orientations = new ArrayList<Quaternion>();
-    _iterationsHistory = new ArrayList<>();
 
     Vector prevPosition = _chain.get(0).reference() != null
         ? _chain.get(0).reference().position().get() : new Vector(0, 0, 0);
     Quaternion prevOrientation = _chain.get(0).reference() != null
         ? _chain.get(0).reference().orientation().get() : new Quaternion();
-    for (Node joint : _chain) {
-      if(!_properties.containsKey(joint.id())) {
+    for (Node node : _chain) {
+      if(!_properties.containsKey(node.id())) {
         Properties props = new Properties(false); //TODO : CLEAN!!!
-        _properties.put(joint.id(), props);
+        _properties.put(node.id(), props);
       }
-      Vector position = joint.position().get();
+      Vector position = node.position().get();
       Quaternion orientation = prevOrientation.get();
-      orientation.compose(joint.rotation().get());
+      orientation.compose(node.rotation().get());
       _positions.add(position);
       _distances.add(Vector.subtract(position, prevPosition).magnitude());
       _jointChange.add(0f);
       _orientations.add(orientation);
       prevPosition = position;
       prevOrientation = orientation.get();
+      if(_enableHistory) _history.addNodeState("initialization", node, node.reference(), node.translation().get(), node.rotation().get());
     }
     _jointChange.remove(0);
-    if(debug) addIterationRecord(_positions);
     _explorationTimes = 0;
     //TODO : REFINE & USE ONLY IN DEBUG MODE
     _avoidHistory = new ArrayList<>();
@@ -490,14 +512,5 @@ public class ChainSolver extends FABRIKSolver {
       _positions.set(i,b_copy.get(i).position().get());
     }
     _afterAvoidPosition = (ArrayList<Vector>) _positions.clone();
-  }
-
-  //Animation Stuff
-  public ArrayList<ArrayList<Vector>> iterationsHistory(){
-    return _iterationsHistory;
-  }
-
-  public void addIterationRecord(ArrayList<Vector> iteration){
-    _iterationsHistory.add(new ArrayList<>(iteration));
   }
 }

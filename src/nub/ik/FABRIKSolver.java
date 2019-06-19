@@ -13,6 +13,7 @@ package nub.ik;
 
 import nub.core.Node;
 import nub.core.constraint.*;
+import nub.ik.animation.IKAnimation;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -97,6 +98,12 @@ public abstract class FABRIKSolver extends Solver {
   }
   protected int _head = 0;
 
+
+  //Animation Stuff
+  //TODO : Animation with proposed heuristics
+  protected boolean _enableHistory;
+  protected IKAnimation.NodeStates _history;
+
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
@@ -170,6 +177,10 @@ public abstract class FABRIKSolver extends Solver {
       if (dist_i == 0) {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
+        if(_enableHistory){
+          history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), pos_i1.get(), null);
+          history().incrementStep();
+        }
         continue;
       }
 
@@ -199,8 +210,16 @@ public abstract class FABRIKSolver extends Solver {
       } else{
         _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
       }
+
+      if(_enableHistory){
+        history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), _positions.get(i).get(), null);
+        history().incrementStep();
+      }
+
       change +=  Vector.distance(pos_i, _positions().get(i));
     }
+
+    history().incrementIteration();
     return change;
   }
 
@@ -305,6 +324,11 @@ public abstract class FABRIKSolver extends Solver {
     for (int i = 0; i < chain.size() - 1; i++) {
       if (_distances.get(i + 1) == 0) {
         _positions.set(i + 1, _positions.get(i));
+        //Animation
+        if(_enableHistory){
+          history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i+1).get(), null);
+          history().incrementStep();
+        }
         continue;
       }
       magnitude *= chain.get(i).scaling();
@@ -342,6 +366,12 @@ public abstract class FABRIKSolver extends Solver {
       constrained_pos.add(_positions.get(i));
       //change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
+
+      if(_enableHistory){
+        history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i+1).get(), null);
+        history().incrementStep();
+      }
+      history().incrementIteration();
     }
     return change;
   }
@@ -643,4 +673,14 @@ public abstract class FABRIKSolver extends Solver {
   public FABRIKSolver() {
     super();
   }
+
+  //Animation Stuff
+  public IKAnimation.NodeStates history(){
+    return _history;
+  }
+
+  public void enableHistory(boolean enable){
+    _enableHistory = enable;
+  }
+
 }
