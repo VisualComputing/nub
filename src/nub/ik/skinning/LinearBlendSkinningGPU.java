@@ -29,8 +29,8 @@ public class LinearBlendSkinningGPU {
     protected float[] _positionsArray;
     protected float[] _orientationsArray;
     protected Map<Node, Integer> _ids;
-    protected final String _fragmentPath = "/testing/src/ik/common/frag.glsl";
-    protected final String _vertexPath = "/testing/src/ik/common/skinning.glsl";
+    protected final String _fragmentPath = "frag.glsl";
+    protected final String _vertexPath = "skinning.glsl";
 
 
     public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, PShape shape) {
@@ -52,8 +52,7 @@ public class LinearBlendSkinningGPU {
         _positionsArray = new float[joints*3];
         _orientationsArray = new float[joints*4];
         PApplet pApplet = pg.parent;
-        _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
-                pApplet.sketchPath() + _vertexPath);
+        _shader = pApplet.loadShader(_fragmentPath, _vertexPath);
         _shapes.add(shape);
         _pg = pg;
         initParams();
@@ -82,8 +81,7 @@ public class LinearBlendSkinningGPU {
         _positionsArray = new float[joints*3];
         _orientationsArray = new float[joints*4];
         PApplet pApplet = pg.parent;
-        _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
-                pApplet.sketchPath() + _vertexPath);
+        _shader = pApplet.loadShader(_fragmentPath, _vertexPath);
         _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
         initParams();
     }
@@ -163,20 +161,13 @@ public class LinearBlendSkinningGPU {
             if (joint == branch.get(0)) continue;
             if (joint.translation().magnitude() <= Float.MIN_VALUE) continue;
             float dist = (float) Math.pow(getDistance(position, joint), 10);
-            //System.out.println("Distance " + dist + " pos " + position + " j " + joint.position() );
             if(dist <= d[0] || dist <= d[1] || dist <= d[2]){
                 int start = dist <= d[0] ? 0 : dist <= d[1] ? 1 : 2;
-                //System.out.println("Entra" );
-                //swap
-                //System.out.print("Update : " );
-
                 for(int l = joints.length-1; l > start; l--){
                     joints[l] = joints[l-1];
                     d[l] = d[l-1];
-                    //System.out.print(joints[l] + " ");
                 }
                 joints[start] = _ids.get(joint.reference());
-                //System.out.println(joints[start] + " ");
                 d[start] = dist;
             }
         }
@@ -187,9 +178,6 @@ public class LinearBlendSkinningGPU {
         for(int k = 0; k < joints.length; k++){
             w[k] += 1.f/d[k] / total_dist;
         }
-        //System.out.println("Pos:" + position);
-        //System.out.println("j0 pos : " + branch.get(joints[0]).position() + " j1 : " + branch.get(joints[1]).position()  + "j2 : " + branch.get(joints[2]).position());
-        //System.out.println("j0 : " + joints[0] + " j1 : " + joints[1]  + "j2 : " + joints[2]);
 
         return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
     }
@@ -275,16 +263,11 @@ public class LinearBlendSkinningGPU {
             for (int i = 0; i < r.getChildCount(); i++) {
                 for (int j = 0; j < r.getChild(i).getVertexCount(); j++) {
                     PVector p = r.getChild(i).getVertex(j).mult(scaleFactor);
-                    System.out.println("scale " + scaleFactor);
-                    System.out.println("p " + p);
                     PVector n = r.getChild(i).getNormal(j);
                     float u = r.getChild(i).getTextureU(j);
                     float v = r.getChild(i).getTextureV(j);
                     s.normal(n.x, n.y, n.z);
                     float[] params = addWeights(_skeleton, p);
-                    System.out.println("joints " + params[0] * 1.f + " " + params[1] * 1.f + " " + params[2] * 1.f);
-                    System.out.println("w " + params[3] * 1.f + " " + params[4] * 1.f + " " + params[5] * 1.f);
-
                     s.attrib("joints", params[0] * 1.f, params[1] * 1.f, params[2] * 1.f);
                     s.attrib("weights", params[3], params[4], params[5]);
 
