@@ -1,13 +1,13 @@
 package ik.collada.test;
 
 import ik.common.Joint;
+import ik.common.LinearBlendSkinningGPU;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.collada.animation.Model;
 import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
-import ik.common.SkinningAnimationModel;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -21,7 +21,7 @@ public class LoadMesh4 extends PApplet {
     String dae = "t_rex.dae";
     String tex = null;
     Model model;
-    SkinningAnimationModel skinning;
+    LinearBlendSkinningGPU skinning;
 
     public void settings() {
         size(700, 700, P3D);
@@ -30,27 +30,31 @@ public class LoadMesh4 extends PApplet {
     public void setup() {
         randomSeed(14);
         Joint.markers = true;
-        this.g.textureMode(NORMAL);
+        //1. Create the scene
+        textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
+        //2. Load the model
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
 
-        scene.setRadius(model.mesh().get(null).getWidth()*2);
+        //3. Setup scene
+        scene.setRadius(model.mesh().getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
-        skinning = new SkinningAnimationModel(model);
+
+        //4. Relate mesh and skinning
+        skinning = new LinearBlendSkinningGPU(model.structure(), scene.context(), model.mesh());
     }
 
     public void draw() {
-        skinning.updateParams();
         background(0);
         lights();
         scene.drawAxes();
-        shader(skinning.shader());
-        shape(model.mesh().get(null));
-        resetShader();
+        //Render mesh
+        skinning.renderMesh();
+        //Render skeleton
         hint(DISABLE_DEPTH_TEST);
         scene.render();
         hint(ENABLE_DEPTH_TEST);

@@ -1,6 +1,7 @@
 package ik.collada.test;
 
 import ik.common.Joint;
+import ik.common.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
@@ -10,7 +11,6 @@ import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.collada.animation.Model;
 import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
-import ik.common.SkinningAnimationModel;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -27,7 +27,7 @@ public class LoadMesh2 extends PApplet {
     String dae = "dummy.dae";
     String tex = null;
     Model model;
-    SkinningAnimationModel skinning;
+    LinearBlendSkinningGPU skinning;
     Solver solver;
     public void settings() {
         size(700, 700, P3D);
@@ -36,20 +36,25 @@ public class LoadMesh2 extends PApplet {
     public void setup() {
         randomSeed(14);
         textSize(24);
-
         Joint.markers = true;
-        this.g.textureMode(NORMAL);
+        //1. Create the scene
+        textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
+        //2. Load the model
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
 
-        scene.setRadius(model.mesh().get(null).getWidth()*2);
+        //3. Setup scene
+        scene.setRadius(model.mesh().getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
-        skinning = new SkinningAnimationModel(model);
-        //Adding IK behavior
+
+        //4. Relate mesh and skinning
+        skinning = new LinearBlendSkinningGPU(model.structure(), scene.context(), model.mesh());
+
+        //5. Adding IK behavior
         //Register an IK Solver
         solver = scene.registerTreeSolver(model.root());
         //Update params
@@ -80,13 +85,13 @@ public class LoadMesh2 extends PApplet {
     }
 
     public void draw() {
-        skinning.updateParams();
         background(0);
         lights();
         scene.drawAxes();
-        shader(skinning.shader());
-        shape(model.mesh().get(null));
-        resetShader();
+
+        //Render mesh
+        skinning.renderMesh();
+        //Render skeleton
         hint(DISABLE_DEPTH_TEST);
         scene.render();
         hint(ENABLE_DEPTH_TEST);

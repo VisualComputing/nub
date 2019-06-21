@@ -1,14 +1,11 @@
 package ik.obj;
 
 import ik.common.Joint;
-import ik.common.LinearBlendSkinning;
 import ik.common.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.core.constraint.Hinge;
 import nub.ik.Solver;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.*;
@@ -22,12 +19,12 @@ import java.util.List;
  */
 public class Eagle extends PApplet {
     Scene scene;
-    //LinearBlendSkinning skinning;
-    LinearBlendSkinningGPU skinningGPU;
+    LinearBlendSkinningGPU skinning;
 
     String shapePath = "/testing/data/objs/EAGLE_2.OBJ";
     String texturePath = "/testing/data/objs/EAGLE2.jpg";
-    PShape psh;
+    Node reference;
+
 
     int activeJ = 0;
 
@@ -38,96 +35,68 @@ public class Eagle extends PApplet {
     public void setup() {
         Joint.markers = true;
         Joint.depth = false;
-
-        //Setting the scene and loading mesh
-        //1. Create the scene
+        //1. Create and set the scene
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        //2. Import the model
-        //2.1 create a root node which is parent of shape node
-        Node root = new Node(scene);
-        root.enableTracking(false);
-        //2.2 Load the mesh
-        psh = createShapeTri(loadShape(sketchPath() + shapePath), sketchPath() + texturePath, 100);
-        //Node shape = new Node(scene, model);
-        //shape.enableTracking(false); //use exact picking precision
-        //2.3 set root as reference
-        //shape.setReference(root);
-        //3. Scale scene
-        float size = max(psh.getHeight(), psh.getWidth());
         scene.setRightHanded();
-        scene.setRadius(size);
-        scene.fit();
-        //4. Adding the Skeleton
-        //4.1 Use SimpleBuilder example (or a Modelling Sw if desired) and position each Joint accordingly to mesh
-        //4.2 Create the Joints based on 1.
-        ArrayList<Node> skeleton = (ArrayList<Node>) buildSkeleton(root);
-        //skinning = new LinearBlendSkinning(shape, model);
-        //skinning.setup(skeleton);
+        scene.fit(1);
+        //2. Define the Skeleton
+        //2.1 Define a reference node to the skeleton and the mesh
+        reference = new Node(scene);
+        reference.enableTracking(false); //disable interaction
+        //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
+        //2.3 Create the Joints based on 2.2.
+        List<Node> skeleton = buildSkeleton(reference);
+        //3. Relate the shape with a skinning method (CPU or GPU)
+        skinning = new LinearBlendSkinningGPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
 
-        skinningGPU = new LinearBlendSkinningGPU(skeleton, this.g, loadShape(sketchPath() + shapePath),  sketchPath() + texturePath, 100);
-        //skinningGPU.setup(skeleton, psh);
-        skinningGPU.initParams();
-
-        /* IDEALLY
-        Node skinningNode = new Node(scene){
-            @Override
-            public void graphics(PGraphics pGraphics) {
-                skinningGPU.updateParams();
-                shader(skinningGPU.shader());
-                pGraphics.shape(skinningGPU.shapes().get(0));
-                resetShader();
-            }
-        };
-        skinningNode.enableTracking(false);
-        skinningNode.setReference(skeleton.get(0));
-         */
-
-        //5. Adding IK behavior
-        //5.1 register an IK Solver
-        Solver solver = scene.registerTreeSolver(skeleton.get(0));
-        //Update params
-        solver.setMaxError(1f);
-
-        //5.2 Identify end effectors (leaf nodes)
-        List<Node> endEffectors = new ArrayList<>();
-        List<Node> targets = new ArrayList<>();
-        for(Node node : skeleton){
-            if(node.children().size() == 0) {
+        //4. Adding IK behavior
+        //4.1 Identify root and end effector(s)
+        Node root = skeleton.get(0); //root is the fist joint of the structure
+        List<Node> endEffectors = new ArrayList<>(); //Ende Effectors are leaf nodes (with no children)
+        for(Node node : skeleton) {
+            if (node.children().size() == 0) {
                 endEffectors.add(node);
-                //5.3 Create targets
-                Target target = new Target(scene, scene.radius() * 0.01f);
-                target.setReference(root);
-                target.setPosition(node.position().get());
-                //add IK target to solver
-                scene.addIKTarget(node, target);
             }
         }
 
-        skinningGPU.paintAllJoints();
+        //4.2 relate a skeleton with an IK Solver
+        Solver solver = scene.registerTreeSolver(root);
+        //Update params
+        solver.setMaxError(1f);
 
+        for(Node endEffector : endEffectors){
+            //4.3 Create target(s) to relate with End Effector(s)
+            Target target = new Target(scene, scene.radius() * 0.01f);
+            target.setReference(reference); //Target also depends on reference
+            target.setPosition(endEffector.position().get());
+            //4.4 Relate target(s) with end effector(s)
+            scene.addIKTarget(endEffector, target);
+        }
+
+        //use this method to visualize which node influences the most on a region of the mesh.
+        skinning.paintAllJoints();
     }
 
     public void draw(){
         background(0);
         lights();
         scene.drawAxes();
-        skinningGPU.updateParams();
-        shader(skinningGPU.shader());
-        shape(skinningGPU.shapes().get(0));
-        resetShader();
+        //Render mesh with respect to the node
+        skinning.renderMesh(reference);
         scene.render();
 
+        //Optionally print some info:
         scene.beginHUD();
-        for(int i = 0; i < skinningGPU.skeleton().size(); i++){
-            if(skinningGPU.skeleton().get(i).translation().magnitude() == 0){
+        for(int i = 0; i < skinning.skeleton().size(); i++){
+            if(skinning.skeleton().get(i).translation().magnitude() == 0){
                 continue;
             }
             fill(255);
-            Vector p = scene.screenLocation(skinningGPU.skeleton().get(i).position());
-            text(skinningGPU.ids().get(skinningGPU.skeleton().get(i)).toString(), p.x(), p.y());
+            Vector p = scene.screenLocation(skinning.skeleton().get(i).position());
+            text(skinning.ids().get(skinning.skeleton().get(i)).toString(), p.x(), p.y());
 
-            Vector pos = skinningGPU.skeleton().get(i).position();
+            Vector pos = skinning.skeleton().get(i).position();
             String spos = "" + Math.round(pos.x()) + ", " + Math.round(pos.y()) + ", " + Math.round(pos.z());
 
             //text(spos, p.x(), p.y() + 10);
@@ -168,15 +137,15 @@ public class Eagle extends PApplet {
 
     public void keyPressed(){
         if(key == 'A' || key == 'a') {
-            activeJ = (activeJ + 1) % skinningGPU.skeleton().size();
-            skinningGPU.paintJoint(activeJ);
+            activeJ = (activeJ + 1) % skinning.skeleton().size();
+            skinning.paintJoint(activeJ);
         }
         if(key == 's' || key == 'S') {
-            activeJ = activeJ > 0 ? (activeJ - 1) : skinningGPU.skeleton().size() -1;
-            skinningGPU.paintJoint(activeJ);
+            activeJ = activeJ > 0 ? (activeJ - 1) : skinning.skeleton().size() -1;
+            skinning.paintJoint(activeJ);
         }
         if(key == 'd' || key == 'D'){
-            skinningGPU.disablePaintMode();
+            skinning.disablePaintMode();
         }
     }
 
@@ -281,58 +250,6 @@ public class Eagle extends PApplet {
 
         j1.setRoot(true);
         return scene.branch(j1);
-    }
-
-
-
-
-    //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
-    public PShape createShapeTri(PShape r, String texture, float size) {
-        float scaleFactor = size / max(r.getWidth(), r.getHeight());
-        PImage tex = loadImage(texture);
-        PShape s = createShape();
-        s.beginShape(TRIANGLES);
-        s.noStroke();
-        s.texture(tex);
-        s.textureMode(NORMAL);
-        for (int i=100; i<r.getChildCount (); i++) {
-            if (r.getChild(i).getVertexCount() ==3) {
-                for (int j=0; j<r.getChild (i).getVertexCount(); j++) {
-                    PVector p = r.getChild(i).getVertex(j).mult(scaleFactor);
-                    PVector n = r.getChild(i).getNormal(j);
-                    float u = r.getChild(i).getTextureU(j);
-                    float v = r.getChild(i).getTextureV(j);
-                    s.normal(n.x, n.y, n.z);
-                    s.vertex(p.x, p.y, p.z, u, v);
-                }
-            }
-        }
-        s.endShape();
-        return s;
-    }
-
-    public PShape createShapeQuad(PShape r, String texture, float size) {
-        float scaleFactor = size / max(r.getWidth(), r.getHeight());
-        PImage tex = loadImage(texture);
-        PShape s = createShape();
-        s.beginShape(QUADS);
-        s.noStroke();
-        s.texture(tex);
-        s.textureMode(NORMAL);
-        for (int i=100; i<r.getChildCount (); i++) {
-            if (r.getChild(i).getVertexCount() ==4) {
-                for (int j=0; j<r.getChild (i).getVertexCount(); j++) {
-                    PVector p = r.getChild(i).getVertex(j).mult(scaleFactor);
-                    PVector n = r.getChild(i).getNormal(j);
-                    float u = r.getChild(i).getTextureU(j);
-                    float v = r.getChild(i).getTextureV(j);
-                    s.normal(n.x, n.y, n.z);
-                    s.vertex(p.x, p.y, p.z, u, v);
-                }
-            }
-        }
-        s.endShape();
-        return s;
     }
 
     public static void main(String args[]) {

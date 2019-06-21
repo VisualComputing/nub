@@ -1,10 +1,11 @@
 package ik.flock;
 
+import ik.common.LinearBlendSkinningCPU;
+import ik.common.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;
 
@@ -24,7 +25,7 @@ class Boid {
     float flap = 0;
     float t = 0;
 
-    Boid(Scene scn, Node objFrame, PShape pshape, Vector inPos, ArrayList<Boid> flock) {
+    Boid(Scene scn, Node objFrame, LinearBlendSkinningGPU skinning, Vector inPos, ArrayList<Boid> flock) {
         scene = scn;
         pApplet = scene.pApplet();
         position = new Vector();
@@ -40,8 +41,7 @@ class Boid {
                 //scene.drawAxes(20);
                 scene.pApplet().pushMatrix();
                 scene.applyTransformation(objFrame);
-                //scene.drawAxes(20);
-                scene.pApplet().shape(pshape);
+                skinning.renderMesh(scene.context());
                 scene.pApplet().popMatrix();
             }
         };

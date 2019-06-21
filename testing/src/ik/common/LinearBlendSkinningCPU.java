@@ -3,6 +3,7 @@ package ik.common;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ public class LinearBlendSkinningCPU {
     protected Vector[] _currentPositions;
     protected Map<Node, Integer> _ids;
     protected List<Vertex> _vertices;
+    protected PGraphics _pg;
 
     protected class Vertex{
         protected int[] _joints;
@@ -68,6 +70,11 @@ public class LinearBlendSkinningCPU {
     }
 
     public LinearBlendSkinningCPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
+        this(skeleton, pg, shape, texture, factor, false);
+    }
+
+
+    public LinearBlendSkinningCPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
         this._shapes = new ArrayList<>();
         _ids = new HashMap<>();
         _skeleton = skeleton;
@@ -86,12 +93,17 @@ public class LinearBlendSkinningCPU {
 
 
         _vertices = new ArrayList<Vertex>();
+        _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
+        _pg = pg;
         initParams();
-        _shapes.add(createShapeTri(pg, pg.loadShape(shape), texture, factor));
     }
 
     public List<PShape> shapes(){
         return _shapes;
+    }
+
+    public PShape shape(){
+        return _shapes.get(0);
     }
 
     public List<Node> skeleton(){
@@ -157,6 +169,27 @@ public class LinearBlendSkinningCPU {
         return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
     }
 
+    public void renderMesh(PGraphics pg){
+        updateParams();
+        for(PShape shape : _shapes){
+            pg.shape(shape);
+        }
+    }
+
+    public void renderMesh(){
+        renderMesh(_pg);
+    }
+
+    public void renderMesh(Node reference){
+        PGraphics pg = _pg;
+        if(reference.graph() instanceof Scene){
+            pg = ((Scene) reference.graph()).context();
+        }
+        reference.graph().applyWorldTransformation(reference);
+        renderMesh(pg);
+    }
+
+
     /*
      * Get the distance from vertex to line formed by frame and the reference frame of frame
      * Distance will be measure according to root coordinates.
@@ -188,12 +221,13 @@ public class LinearBlendSkinningCPU {
         return distance.magnitude();
     }
 
+
     //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
-    public PShape createShapeTri(PGraphics pg, PShape r, String texture, float size) {
+    public PShape createShape(PGraphics pg, PShape r, String texture, float size, boolean quad) {
         float scaleFactor = size / Math.max(r.getWidth(), r.getHeight());
         PImage tex = pg.parent.loadImage(texture);
         PShape s = pg.createShape();
-        s.beginShape(PConstants.TRIANGLES);
+        s.beginShape(quad ? PConstants.QUADS : PConstants.TRIANGLES);
         s.noStroke();
         s.texture(tex);
         s.textureMode(PConstants.NORMAL);

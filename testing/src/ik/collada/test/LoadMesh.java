@@ -13,7 +13,6 @@ import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.collada.animation.Model;
 import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
-import ik.common.SkinningAnimationModel;
 import ik.interactive.Target;
 import nub.timing.TimingTask;
 import processing.core.*;
@@ -21,7 +20,6 @@ import processing.event.MouseEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by sebchaparr on 23/07/18.
@@ -46,16 +44,16 @@ public class LoadMesh extends PApplet {
     public void setup() {
         randomSeed(14);
         Joint.markers = true;
-        this.g.textureMode(NORMAL);
+        textureMode(NORMAL);
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
         model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
-        scene.setRadius(model.mesh().get(null).getWidth()*2);
+        scene.setRadius(model.mesh().getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
-        skinning = new LinearBlendSkinningGPU(Arrays.asList(model.getJointTransforms()), this.g, model.mesh().get(null));
+        skinning = new LinearBlendSkinningGPU(model.structure(), this.g, model.mesh());
 
         for(int i = 0; i < effectors.length; i++){
             Node target = new Target(scene, ((Joint)model.root()).radius() * 0.6f);
@@ -154,12 +152,13 @@ public class LoadMesh extends PApplet {
         }
     }
     public void draw() {
-        skinning.updateParams();
         background(0);
         lights();
-        shader(skinning.shader());
-        shape(model.mesh().get(null));
-        resetShader();
+        scene.drawAxes();
+
+        //Render mesh
+        skinning.renderMesh();
+        //Render skeleton
         hint(DISABLE_DEPTH_TEST);
         scene.render();
         hint(ENABLE_DEPTH_TEST);

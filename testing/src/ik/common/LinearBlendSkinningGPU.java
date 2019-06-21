@@ -3,6 +3,7 @@ package ik.common;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 import processing.core.*;
 import processing.opengl.PShader;
 
@@ -19,6 +20,7 @@ public class LinearBlendSkinningGPU {
     //Skeleton & Geometry information
     protected List<PShape> _shapes;
     protected List<Node> _skeleton;
+    protected PGraphics _pg;
     //Shader information
     protected PShader _shader;
     protected Quaternion[] _initialOrientations;
@@ -52,11 +54,17 @@ public class LinearBlendSkinningGPU {
         PApplet pApplet = pg.parent;
         _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
                 pApplet.sketchPath() + _vertexPath);
-        initParams();
         _shapes.add(shape);
+        _pg = pg;
+        initParams();
     }
 
-    public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, PShape shape, String texture, float factor) {
+    public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
+        this(skeleton, pg, shape, texture, factor, false);
+    }
+
+
+    public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
         this._shapes = new ArrayList<>();
         _ids = new HashMap<>();
         _skeleton = skeleton;
@@ -76,8 +84,8 @@ public class LinearBlendSkinningGPU {
         PApplet pApplet = pg.parent;
         _shader = pApplet.loadShader(pApplet.sketchPath() + _fragmentPath,
                 pApplet.sketchPath() + _vertexPath);
+        _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
         initParams();
-        _shapes.add(createShapeTri(pg, shape, texture, factor));
     }
 
     public PShader shader(){
@@ -86,6 +94,10 @@ public class LinearBlendSkinningGPU {
 
     public List<PShape> shapes(){
         return _shapes;
+    }
+
+    public PShape shape(){
+        return _shapes.get(0);
     }
 
     public List<Node> skeleton(){
@@ -213,12 +225,35 @@ public class LinearBlendSkinningGPU {
         return distance.magnitude();
     }
 
+    public void renderMesh(PGraphics pg){
+        updateParams();
+        pg.shader(_shader);
+        for(PShape shape : _shapes){
+            pg.shape(shape);
+        }
+        pg.resetShader();
+    }
+
+    public void renderMesh(){
+        renderMesh(_pg);
+    }
+
+
+    public void renderMesh(Node reference){
+        PGraphics pg = _pg;
+        if(reference.graph() instanceof Scene){
+            pg = ((Scene) reference.graph()).context();
+        }
+        reference.graph().applyWorldTransformation(reference);
+        renderMesh(pg);
+    }
+
     //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
-    public PShape createShapeTri(PGraphics pg, PShape r, String texture, float size) {
+    public PShape createShape(PGraphics pg, PShape r, String texture, float size, boolean quad) {
         float scaleFactor = size / Math.max(r.getWidth(), r.getHeight());
         PImage tex = pg.parent.loadImage(texture);
         PShape s = pg.createShape();
-        s.beginShape(PConstants.TRIANGLES);
+        s.beginShape(quad ? PConstants.QUADS : PConstants.TRIANGLES);
         s.noStroke();
         s.texture(tex);
         s.textureMode(PConstants.NORMAL);

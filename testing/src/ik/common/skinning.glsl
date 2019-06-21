@@ -58,7 +58,6 @@ void main() {
   vec3 curNor = normal;
   vec3 v = vec3(0.0);
   vec3 n = vec3(0.0);
-
   vec3 idd = vec3(1.0);
 
   for(int i = 0; i < 3; i++){

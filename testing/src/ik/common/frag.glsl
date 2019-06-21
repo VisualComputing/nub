@@ -16,7 +16,7 @@ varying vec4 vertTexCoord;
 void main() {
   vec3 direction = normalize(lightDir);
   vec3 normal = normalize(ecNormal);
-  float intensity = max(0.0, dot(direction, normal));
+  float intensity = max(0.5, dot(direction, normal));
   vec4 tintColor = vec4(intensity, intensity, intensity, 1) * vertColor;
   gl_FragColor = texture2D(texture, vertTexCoord.st) * tintColor;
 }

@@ -72,8 +72,8 @@ public class Model {
     /**
      * @return The VAO containing all the mesh data for this entity.
      */
-    public HashMap<String, PShape> mesh() {
-        return _mesh;
+    public PShape mesh() {
+        return _mesh.get(null);
     }
 
     public void addModel(String id, PShape model){
@@ -108,10 +108,9 @@ public class Model {
      * @return The array of model-space transforms of the _skeleton in the current
      *         animation pose.
      */
-    public Node[] getJointTransforms() {
-        Node[] jointMatrices = new Node[jointCount];
-        addJointsToArray(_root, jointMatrices);
-        return jointMatrices;
+
+    public List<Node> structure(){
+        return _scene.branch(_root);
     }
 
     public void addJointsToArray(Node frame, Node[] jointMatrices){

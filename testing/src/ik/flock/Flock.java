@@ -1,18 +1,21 @@
 package ik.flock;
 
 
+import ik.common.Joint;
+import ik.common.LinearBlendSkinningCPU;
+import ik.common.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Interpolator;
 import nub.ik.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Flock extends PApplet {
     Scene scene;
@@ -26,11 +29,11 @@ public class Flock extends PApplet {
     PShape pshape;
     Node objShape;
 
-    int initBoidNum = 40, numFlocks = 8; // amount of boids to start the program with
+    int initBoidNum = 80, numFlocks = 10; // amount of boids to start the program with
     static ArrayList<ArrayList<Boid>> flocks = new ArrayList<>();
     static Node avatar;
     static boolean animate = true;
-    ArrayList<LinearBlendSkinning> skinning = new ArrayList<>();
+    ArrayList<LinearBlendSkinningGPU> skinning = new ArrayList<>();
 
     public void settings() {
         size(1000, 800, P3D);
@@ -45,9 +48,9 @@ public class Flock extends PApplet {
         // create and fill the list of boids
         for(int k = 0; k < numFlocks; k++){
             ArrayList<Boid> flock = new ArrayList();
-            generateFish("fish" + k % 4 + ".obj");
+            generateFish("fish" + k % 4);
             for (int i = 0; i < initBoidNum; i++)
-                flock.add(new Boid(scene, objShape, pshape, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), flock));
+                flock.add(new Boid(scene, objShape, skinning.get(k), new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2), flock));
             flocks.add(flock);
         }
         frameRate(30);
@@ -61,7 +64,6 @@ public class Flock extends PApplet {
         if(act) {
             scene.render();
             updateAvatar();
-            for (LinearBlendSkinning s : skinning) s.applyTransformations();
         }
     }
 
@@ -179,38 +181,30 @@ public class Flock extends PApplet {
     }
 
     public void generateFish(String name){
-        pshape = loadShape(sketchPath() + shapePath + name);
-
-        Vector[] box = getBoundingBox(pshape);
-        //Scale model
-        float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
-        //model.scale(200.f*1.f/max);
+        String  shapeFile = sketchPath() + shapePath + name + ".obj";
+        String  textureFile = sketchPath() + shapePath + name + ".jpg";
         //Invert Y Axis and set Fill
         objShape = new Node(scene);
-
         objShape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
-        objShape.scale(200.f * 1.f / max);
-        Node root = fishSkeleton(objShape);
 
-        ArrayList<Node> skeleton = (ArrayList<Node>) scene.branch(root);
-        objShape.scale(0.4f);
+        List<Node> skeleton = fishSkeleton(objShape);
+        objShape.scale(0.2f);
         objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
+
         //Uncomment to use Linear Blending Skinning with CPU
-        LinearBlendSkinning s = new LinearBlendSkinning(objShape, pshape);
-        s.setup(skeleton);
-        skinning.add(s);
+        skinning.add(new LinearBlendSkinningGPU(skeleton, scene.context(), shapeFile, textureFile, 200, true));
         //Adding IK behavior
         Node target = new Node(scene);
         target.setReference(objShape);
         target.setPosition(skeleton.get(skeleton.size() - 1).position());
         //Making a default Path that target must follow
         setupTargetInterpolator(objShape, target);
-        Solver solver = scene.registerTreeSolver(root);
+        Solver solver = scene.registerTreeSolver(skeleton.get(0));
         solver.setMaxError(0.1f);
         scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
     }
 
-    public Node fishSkeleton(Node reference) {
+    public List<Node>  fishSkeleton(Node reference) {
         Node j1 = new Node(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
@@ -229,7 +223,7 @@ public class Flock extends PApplet {
         Node j6 = new Node(scene);
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
-        return j1;
+        return scene.branch(j1);
     }
 
     public Interpolator setupTargetInterpolator(Node reference, Node target) {
@@ -247,34 +241,6 @@ public class Flock extends PApplet {
         }
         targetInterpolator.start();
         return targetInterpolator;
-    }
-
-    public static Vector[] getBoundingBox(PShape shape) {
-        Vector v[] = new Vector[2];
-        float minx = 999;
-        float miny = 999;
-        float maxx = -999;
-        float maxy = -999;
-        float minz = 999;
-        float maxz = -999;
-        for (int j = 0; j < shape.getChildCount(); j++) {
-            PShape aux = shape.getChild(j);
-            for (int i = 0; i < aux.getVertexCount(); i++) {
-                float x = aux.getVertex(i).x;
-                float y = aux.getVertex(i).y;
-                float z = aux.getVertex(i).z;
-                minx = minx > x ? x : minx;
-                miny = miny > y ? y : miny;
-                minz = minz > z ? z : minz;
-                maxx = maxx < x ? x : maxx;
-                maxy = maxy < y ? y : maxy;
-                maxz = maxz < z ? z : maxz;
-            }
-        }
-
-        v[0] = new Vector(minx, miny, minz);
-        v[1] = new Vector(maxx, maxy, maxz);
-        return v;
     }
 
     public static void main(String args[]) {

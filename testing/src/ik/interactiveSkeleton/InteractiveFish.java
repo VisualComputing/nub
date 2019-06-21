@@ -1,19 +1,17 @@
 package ik.interactiveSkeleton;
 
+import ik.common.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.Interpolator;
 import nub.ik.Solver;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import ik.common.Joint;
-import ik.common.LinearBlendSkinning;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by sebchaparr on 11/03/18.
@@ -24,13 +22,10 @@ public class InteractiveFish extends PApplet {
 
     boolean showSkeleton = false;
     Scene scene;
-    Node shape;
-    Node root;
-    PShape model;
+    Node reference;
 
-    //Uncomment to use Linear Blending Skinning with CPU
-    LinearBlendSkinning skinning;
-    //LinearBlendSkinningGPU skinning;
+    LinearBlendSkinningGPU skinning;
+
     Node target;
     Interpolator targetInterpolator;
     String shapePath = "/testing/data/objs/fish0.obj";
@@ -43,43 +38,43 @@ public class InteractiveFish extends PApplet {
     }
 
     public void setup() {
+        //1. Create and set the scene
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
-        scene.setFOV(PI / 3);
+        scene.setRightHanded();
+        scene.setRadius(200);
         scene.fit(1);
-        target = createTarget(targetRadius);
+        //2. Define the Skeleton
+        //2.1 Define a reference node to the skeleton and the mesh
+        reference = new Node(scene);
+        //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
+        //2.3 Create the Joints based on 2.2.
+        List<Node> skeleton = fishSkeleton(reference);
+        //3. Relate the shape with a skinning method (CPU or GPU)
+        skinning = new LinearBlendSkinningGPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, 200, true);
 
-        model = loadShape(sketchPath() + shapePath);
-        model.setTexture(loadImage(sketchPath() + texturePath));
+        //4. Adding IK behavior
+        //4.1 Identify root and end effector(s) (first and last joint on the skeleton)
+        Node root = skeleton.get(0);
+        Node endEffector = skeleton.get(skeleton.size()- 1);
 
-        Vector[] box = getBoundingBox(model);
-        //Scale model
-        float max = max(abs(box[0].x() - box[1].x()), abs(box[0].y() - box[1].y()), abs(box[0].z() - box[1].z()));
-        //model.scale(200.f*1.f/max);
-        //Invert Y Axis and set Fill
-        shape = new Node(scene, model);
-        shape.setPickingThreshold(0);
-
-        shape.rotate(new Quaternion(new Vector(0, 0, 1), PI));
-        shape.scale(200.f * 1.f / max);
-        root = fishSkeleton(shape);
-
-        ArrayList<Node> skeleton = (ArrayList<Node>) scene.branch(root);
-        shape.scale(0.25f);
-        //Uncomment to use Linear Blending Skinning with CPU
-        skinning = new LinearBlendSkinning(shape, model);
-        skinning.setup(skeleton);
-        //skinning = new LinearBlendSkinningGPU(model, skeleton);
-        //skinning.initParams(this, scene);
-        //Adding IK behavior
-        target.setReference(shape);
-        target.setPosition(skeleton.get(skeleton.size() - 1).position());
-        //Making a default Path that target must follow
-        targetInterpolator = setupTargetInterpolator(target);
+        //4.2 relate a skeleton with an IK Solver
         Solver solver = scene.registerTreeSolver(root);
-        solver.setMaxError(0.01f);
-        scene.addIKTarget(skeleton.get(skeleton.size() - 1), target);
+        //Update params
+        solver.setMaxError(1f);
 
+        //4.3 Create target(s) to relate with End Effector(s)
+        target = createTarget(targetRadius);
+        //Target also depends on reference
+        target.setReference(reference);
+        //Make target to be on same position/orientation as endEffector
+        target.setPosition(endEffector.position());
+
+        //4.4 Relate target(s) with end effector(s)
+        scene.addIKTarget(endEffector, target);
+
+        //Generates a default Path that target must follow
+        targetInterpolator = setupTargetInterpolator(target);
     }
 
     public Node createTarget(float radius){
@@ -93,54 +88,15 @@ public class InteractiveFish extends PApplet {
 
 
     public void draw() {
-        //skinning.updateParams();
         background(0);
         lights();
-        //Draw Constraints
         scene.drawAxes();
-        //comment this line if you're using Linear Blending Skinning with CPU
-        //_shader(skinning._shader);
+        //Render mesh with respect to the node
+        skinning.renderMesh(reference);
         if(showSkeleton) scene.render();
-        else{
-            pushMatrix();
-            scene.applyWorldTransformation(shape);
-            shape(model);
-            popMatrix();
-        }
-        //resetShader();
-        //Uncomment to use Linear Blending Skinning with CPU
-        skinning.applyTransformations();
     }
 
-    public static Vector[] getBoundingBox(PShape shape) {
-        Vector v[] = new Vector[2];
-        float minx = 999;
-        float miny = 999;
-        float maxx = -999;
-        float maxy = -999;
-        float minz = 999;
-        float maxz = -999;
-        for (int j = 0; j < shape.getChildCount(); j++) {
-            PShape aux = shape.getChild(j);
-            for (int i = 0; i < aux.getVertexCount(); i++) {
-                float x = aux.getVertex(i).x;
-                float y = aux.getVertex(i).y;
-                float z = aux.getVertex(i).z;
-                minx = minx > x ? x : minx;
-                miny = miny > y ? y : miny;
-                minz = minz > z ? z : minz;
-                maxx = maxx < x ? x : maxx;
-                maxy = maxy < y ? y : maxy;
-                maxz = maxz < z ? z : maxz;
-            }
-        }
-
-        v[0] = new Vector(minx, miny, minz);
-        v[1] = new Vector(maxx, maxy, maxz);
-        return v;
-    }
-
-    public Joint fishSkeleton(Node reference) {
+    public List<Node> fishSkeleton(Node reference) {
         Joint j1 = new Joint(scene);
         j1.setReference(reference);
         j1.setPosition(0, 10.8f, 93);
@@ -160,7 +116,7 @@ public class InteractiveFish extends PApplet {
         j6.setReference(j5);
         j6.setPosition(0, -1.1f, -95);
         j1.setRoot(true);
-        return j1;
+        return scene.branch(j1);
     }
 
     public Interpolator setupTargetInterpolator(Node target) {
@@ -172,7 +128,7 @@ public class InteractiveFish extends PApplet {
         float step = 2.0f * PI / (nbKeyFrames - 1);
         for (int i = 0; i < nbKeyFrames; i++) {
             Node iFrame = new Node(scene);
-            iFrame.setReference(shape);
+            iFrame.setReference(target.reference());
             iFrame.setTranslation(new Vector(100 * sin(step * i), target.translation().y(), target.translation().z()));
             targetInterpolator.addKeyFrame(iFrame);
         }
@@ -180,18 +136,7 @@ public class InteractiveFish extends PApplet {
         return targetInterpolator;
     }
 
-    public void printSkeleton(Node root) {
-        int i = 0;
-        for (Node node : scene.branch(root)) {
-            System.out.println("Node " + i + " : " + node.position());
-            i++;
-        }
-    }
-
     public void keyPressed() {
-        if (key == ' ') {
-            printSkeleton(root);
-        }
         if(key == 'S' || key == 's'){
             showSkeleton = !showSkeleton;
         }

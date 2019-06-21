@@ -49,7 +49,7 @@ public class ColladaBlenderLoader {
             for (int i = 0; i < img.pixels.length; i++) {
                 img.pixels[i] = scene.context().color(222, 184, 135);
             }
-            model.mesh().get(null).setTexture(img);
+            model.mesh().setTexture(img);
         }
 
         scene.setRadius(100);
