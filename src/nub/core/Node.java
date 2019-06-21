@@ -889,7 +889,7 @@ public class Node {
    * and {@link #setShape(Object)}). Set it with {@code threshold = 0}.</li>
    * <li>A node bounding box whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [0..1]}.</li>
-   * <li>A 'shooter target' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
+   * <li>A squared 'bullseye' of a fixed pixels length. Set it with {@code threshold > 1}.</li>
    * <li>A node bounding sphere whose length is defined as percentage of the graph diameter
    * (see {@link Graph#radius()}). Set it with {@code threshold in [-1..0]}.</li>
    * <li>A circled 'bullseye' of a fixed pixels length. Set it with {@code threshold < -1}.</li>
@@ -1661,6 +1661,7 @@ public class Node {
    * @see #set(Node)
    * @see #worldMatrix()
    * @see #view()
+   * @see #viewInverse()
    */
   public Matrix matrix() {
     Matrix matrix = rotation().matrix();
@@ -1702,6 +1703,7 @@ public class Node {
    * @see #set(Node)
    * @see #matrix()
    * @see #view()
+   * @see #viewInverse()
    */
   public Matrix worldMatrix() {
     if (reference() != null)
@@ -1719,6 +1721,7 @@ public class Node {
    * so that coordinates can then be projected on screen using a projection matrix.
    *
    * @see Matrix#view(Vector, Quaternion)
+   * @see #viewInverse()
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Node)
@@ -1726,6 +1729,22 @@ public class Node {
    */
   public Matrix view() {
     return Matrix.view(position(), orientation());
+  }
+
+  /**
+   * Returns the inverse of the {@link #view()} matrix. This matrix matches the
+   * {@link #worldMatrix()} when {@link #magnitude()} is {@code 1}.
+   * <p>
+   * This matrix converts from the eye to world space.
+   *
+   * @see #view()
+   * @see #matrix()
+   * @see #worldMatrix()
+   * @see #set(Node)
+   * @see #set(Node)
+   */
+  public Matrix viewInverse() {
+    return new Node(position(), orientation(), 1).matrix();
   }
 
   /**

@@ -1404,7 +1404,7 @@ public class Scene extends Graph implements PConstants {
     }
     // draw the picking targets:
     for (Node node : interpolator.keyFrames())
-      drawSquaredBullsEye(node);
+      drawBullsEye(node);
     context().popStyle();
   }
 
@@ -2614,7 +2614,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Draws a squared shooter target onto {@code pGraphics}, centered at {@code (x, y)},
+   * Draws a squared bullseye onto {@code pGraphics}, centered at {@code (x, y)},
    * having {@code length} pixels.
    *
    * @see #drawCircledBullsEye(PGraphics, float, float, float)
