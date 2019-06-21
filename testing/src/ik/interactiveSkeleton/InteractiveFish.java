@@ -1,6 +1,6 @@
 package ik.interactiveSkeleton;
 
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.Interpolator;

@@ -1,7 +1,7 @@
 package ik.collada.test;
 
 import ik.common.Joint;
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;

@@ -1,9 +1,7 @@
 package ik.flock;
 
 
-import ik.common.Joint;
-import ik.common.LinearBlendSkinningCPU;
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Interpolator;
 import nub.ik.Solver;

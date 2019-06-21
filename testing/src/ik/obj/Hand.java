@@ -1,7 +1,7 @@
 package ik.obj;
 
 import ik.common.Joint;
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;

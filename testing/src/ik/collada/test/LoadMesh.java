@@ -1,7 +1,7 @@
 package ik.collada.test;
 
 import ik.common.Joint;
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
@@ -19,7 +19,6 @@ import processing.core.*;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Created by sebchaparr on 23/07/18.

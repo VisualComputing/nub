@@ -1,13 +1,11 @@
 package ik.flock;
 
-import ik.common.LinearBlendSkinningCPU;
-import ik.common.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
-import processing.core.PShape;
 
 import java.util.ArrayList;
 
