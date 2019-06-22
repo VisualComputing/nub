@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Created by sebchaparr on 11/03/18.
  */
-public class LinearBlendSkinningCPU {
+public class LinearBlendSkinningCPU implements Skinning {
     //Skeleton & Geometry information
     protected List<PShape> _shapes;
     protected List<Node> _skeleton;
@@ -168,24 +168,24 @@ public class LinearBlendSkinningCPU {
         return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
     }
 
-    public void renderMesh(PGraphics pg){
+    public void render(PGraphics pg){
         updateParams();
         for(PShape shape : _shapes){
             pg.shape(shape);
         }
     }
 
-    public void renderMesh(){
-        renderMesh(_pg);
+    public void render(){
+        render(_pg);
     }
 
-    public void renderMesh(Node reference){
+    public void render(Node reference){
         PGraphics pg = _pg;
         if(reference.graph() instanceof Scene){
             pg = ((Scene) reference.graph()).context();
         }
         reference.graph().applyWorldTransformation(reference);
-        renderMesh(pg);
+        render(pg);
     }
 
 

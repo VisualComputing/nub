@@ -7,7 +7,6 @@ import nub.processing.Scene;
 import processing.core.*;
 import processing.opengl.PShader;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +15,7 @@ import java.util.Map;
 /**
  * Created by sebchaparr on 11/03/18.
  */
-public class LinearBlendSkinningGPU {
+public class LinearBlendSkinningGPU implements Skinning{
     //Skeleton & Geometry information
     protected List<PShape> _shapes;
     protected List<Node> _skeleton;
@@ -213,7 +212,7 @@ public class LinearBlendSkinningGPU {
         return distance.magnitude();
     }
 
-    public void renderMesh(PGraphics pg){
+    public void render(PGraphics pg){
         updateParams();
         pg.shader(_shader);
         for(PShape shape : _shapes){
@@ -222,18 +221,18 @@ public class LinearBlendSkinningGPU {
         pg.resetShader();
     }
 
-    public void renderMesh(){
-        renderMesh(_pg);
+    public void render(){
+        render(_pg);
     }
 
 
-    public void renderMesh(Node reference){
+    public void render(Node reference){
         PGraphics pg = _pg;
         if(reference.graph() instanceof Scene){
             pg = ((Scene) reference.graph()).context();
         }
         reference.graph().applyWorldTransformation(reference);
-        renderMesh(pg);
+        render(pg);
     }
 
     //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
