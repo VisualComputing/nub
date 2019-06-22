@@ -40,7 +40,7 @@ class Boid {
                 //scene.drawAxes(20);
                 scene.pApplet().pushMatrix();
                 scene.applyTransformation(objFrame);
-                skinning.renderMesh(scene.context());
+                skinning.render(scene.context());
                 scene.pApplet().popMatrix();
             }
         };

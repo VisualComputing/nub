@@ -81,7 +81,7 @@ public class Hand extends PApplet {
         lights();
         scene.drawAxes();
         //Render mesh with respect to the node
-        skinning.renderMesh(reference);
+        skinning.render(reference);
         scene.render();
     }
 

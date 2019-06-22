@@ -53,7 +53,7 @@ public class LoadMesh4 extends PApplet {
         lights();
         scene.drawAxes();
         //Render mesh
-        skinning.renderMesh();
+        skinning.render();
         //Render skeleton
         hint(DISABLE_DEPTH_TEST);
         scene.render();

@@ -92,7 +92,7 @@ public class InteractiveFish extends PApplet {
         lights();
         scene.drawAxes();
         //Render mesh with respect to the node
-        skinning.renderMesh(reference);
+        skinning.render(reference);
         if(showSkeleton) scene.render();
     }
 
