@@ -30,7 +30,6 @@ public class URDFLoader {
             model.addModel(id, pshape);
             max = max < pshape.getWidth() ? pshape.getWidth() : max;
             Joint joint = ((Joint) model.meshMap().get(id));
-            System.out.println(id);
             pshape.setFill(joint.color());
             joint.addMesh(pshape);
         }

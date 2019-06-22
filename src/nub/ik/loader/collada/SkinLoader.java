@@ -36,7 +36,6 @@ public class SkinLoader {
 
         List<String> jointsList = new ArrayList<String>();
         for (String name : names) {
-            System.out.println("name -- " + name);
             jointsList.add(name);
         }
         return jointsList;

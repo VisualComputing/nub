@@ -182,7 +182,7 @@ public class CCDAnim extends PApplet {
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            CCDAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
+            if(CCDAnimator != null) CCDAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
         }
     }
 

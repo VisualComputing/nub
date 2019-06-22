@@ -182,7 +182,7 @@ public class FABRIKAnim extends PApplet {
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            FABRIKAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
+            if(FABRIKAnimator != null) FABRIKAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
         }
     }
 

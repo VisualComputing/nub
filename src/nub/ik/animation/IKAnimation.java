@@ -580,6 +580,7 @@ public class IKAnimation {
 
         public void reset(){
             _state = 0;
+            _step = 0;
             setInitialConditions();
         }
 
@@ -596,6 +597,11 @@ public class IKAnimation {
                 Node copy = _structure.get(state._node.id());
                 copy.setRotation(state.quaternion());
                 copy.setTranslation(state.vector());
+            }
+            //clear all
+            for(int i = 0; i < _trajectory.length; i++){
+                _scene.unregisterAnimator(_trajectory[i]);
+                _trajectory[i] = null;
             }
             _target.setPosition(_solver.target().position());
             _initial = _state;
