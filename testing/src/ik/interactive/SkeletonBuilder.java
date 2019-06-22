@@ -5,11 +5,11 @@ import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Constraint;
 import nub.core.constraint.Hinge;
-import nub.ik.TreeSolver;
+import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 

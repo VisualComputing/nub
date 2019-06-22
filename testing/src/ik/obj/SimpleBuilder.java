@@ -1,22 +1,16 @@
 package ik.obj;
 
-import ik.interactive.FitCurve;
 import ik.interactive.InteractiveJoint;
-import ik.interactive.Target;
 import nub.core.Node;
 import nub.core.Graph;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.core.PShape;
 import processing.core.PVector;
 import processing.event.MouseEvent;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by sebchaparr on 10/05/19.

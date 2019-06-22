@@ -1,18 +1,18 @@
 package ik.collada.test;
 
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.FixedConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.Model;
-import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
+import nub.ik.loader.collada.data.Model;
+import nub.ik.loader.collada.BlenderLoader;
 import ik.interactive.Target;
 import nub.timing.TimingTask;
 import processing.core.*;
@@ -47,7 +47,7 @@ public class LoadMesh extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
+        model = BlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
         scene.setRadius(model.mesh().getWidth()*2);
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));

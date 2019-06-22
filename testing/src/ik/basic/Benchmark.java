@@ -2,11 +2,11 @@ package ik.basic;
 
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
-import nub.ik.HAEASolver;
-import nub.ik.evolution.BioIk;
-import nub.ik.evolution.GASolver;
-import nub.ik.evolution.HillClimbingSolver;
-import nub.ik.Solver;
+import nub.ik.solver.evolutionary.HAEASolver;
+import nub.ik.solver.evolutionary.BioIk;
+import nub.ik.solver.evolutionary.GASolver;
+import nub.ik.solver.evolutionary.HillClimbingSolver;
+import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 

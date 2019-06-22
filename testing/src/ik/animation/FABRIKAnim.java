@@ -1,13 +1,12 @@
 package ik.animation;
 
 import ik.basic.Util;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
-import nub.ik.CCDSolver;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.animation.IKAnimation;
 import nub.primitives.Vector;
 import nub.processing.Scene;

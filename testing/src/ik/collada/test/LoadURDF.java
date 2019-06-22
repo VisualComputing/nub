@@ -1,15 +1,15 @@
 package ik.collada.test;
 
-import ik.collada.colladaParser.colladaLoader.ColladaURDFLoader;
-import ik.common.Joint;
+import nub.ik.loader.collada.URDFLoader;
+import nub.ik.visual.Joint;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.Model;
+import nub.ik.loader.collada.data.Model;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
@@ -38,7 +38,7 @@ public class LoadURDF extends PApplet {
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
-        model = ColladaURDFLoader.loadColladaModel(sketchPath() + path, daes[dae], scene);
+        model = URDFLoader.loadColladaModel(sketchPath() + path, daes[dae], scene);
 
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));

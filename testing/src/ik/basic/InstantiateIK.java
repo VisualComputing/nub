@@ -2,7 +2,7 @@ package ik.basic;
 
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;

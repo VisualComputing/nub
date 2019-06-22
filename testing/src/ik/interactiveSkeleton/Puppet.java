@@ -6,13 +6,13 @@ package ik.interactiveSkeleton;
 
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.Solver;
+import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.Hinge;
 import nub.core.constraint.PlanarPolygon;
 import nub.processing.Scene;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;

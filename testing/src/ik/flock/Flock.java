@@ -1,10 +1,10 @@
 package ik.flock;
 
 
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.LinearBlendSkinningCPU;
 import nub.core.Node;
 import nub.core.Interpolator;
-import nub.ik.Solver;
+import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -31,7 +31,7 @@ public class Flock extends PApplet {
     static ArrayList<ArrayList<Boid>> flocks = new ArrayList<>();
     static Node avatar;
     static boolean animate = true;
-    ArrayList<LinearBlendSkinningGPU> skinning = new ArrayList<>();
+    ArrayList<LinearBlendSkinningCPU> skinning = new ArrayList<>();
 
     public void settings() {
         size(1000, 800, P3D);
@@ -190,7 +190,7 @@ public class Flock extends PApplet {
         objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
 
         //Uncomment to use Linear Blending Skinning with CPU
-        skinning.add(new LinearBlendSkinningGPU(skeleton, scene.context(), shapeFile, textureFile, 200, true));
+        skinning.add(new LinearBlendSkinningCPU(skeleton, scene.context(), shapeFile, textureFile, 200, true));
         //Adding IK behavior
         Node target = new Node(scene);
         target.setReference(objShape);

@@ -2,13 +2,13 @@ package ik.constraintTest;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
-import ik.common.Arrow;
-import ik.common.Joint;
+import nub.ik.visual.Arrow;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;

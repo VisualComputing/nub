@@ -2,11 +2,11 @@ package ik.constraintTest;
 
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
-import nub.ik.CCDSolver;
-import nub.ik.ChainSolver;
-import nub.ik.Solver;
+import nub.ik.solver.geometric.CCDSolver;
+import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.solver.Solver;
 import nub.core.Node;
-import nub.ik.evolution.BioIk;
+import nub.ik.solver.evolutionary.BioIk;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

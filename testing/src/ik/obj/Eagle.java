@@ -1,16 +1,17 @@
 package ik.obj;
 
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import nub.ik.skinning.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.Solver;
+import nub.ik.solver.Solver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.*;
 import processing.event.MouseEvent;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +48,14 @@ public class Eagle extends PApplet {
         //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = buildSkeleton(reference);
+
+        for(int i = 0; i < skeleton.size(); i++){
+            if(skeleton.get(i) instanceof Joint) {
+                int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
+                ((Joint) skeleton.get(i)).setColor(c);
+            }
+        }
+
         //3. Relate the shape with a skinning method (CPU or GPU)
         skinning = new LinearBlendSkinningGPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
 

@@ -3,15 +3,16 @@ package ik.mocap;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
-import nub.ik.CCDSolver;
-import nub.ik.ChainSolver;
-import nub.ik.Solver;
+import nub.ik.loader.bvh.BVHLoader;
+import nub.ik.solver.geometric.CCDSolver;
+import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.BallAndSocket;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -28,7 +29,7 @@ public class Viewer extends PApplet{
     Scene scene;
     String path = "/testing/data/bvh/mocap.bvh";
 
-    BVHParser parser;
+    BVHLoader parser;
     HashMap<String, Node> originalLimbs = new HashMap<String, Node>();
     HashMap<String,Node> limbs = new HashMap<String, Node>();
     HashMap<String,Node> targets = new HashMap<String, Node>();
@@ -65,7 +66,7 @@ public class Viewer extends PApplet{
         targets.put("RIGHTFOOT", createTarget(targetRadius));
         targets.put("HEAD",      createTarget(targetRadius));
 
-        parser = new BVHParser(sketchPath() + path, scene, null);
+        parser = new BVHLoader(sketchPath() + path, scene, null);
         root = parser.root();
         ((Joint) root).setRoot(true);
 
@@ -319,29 +320,29 @@ public class Viewer extends PApplet{
                     map.put(child.id(), newJoint);
                 }
             }
-            if(parser._joint.get(joint.id())._name.equals("LEFTHAND")){
+            if(parser.joint().get(joint.id()).name().equals("LEFTHAND")){
                 originalLimbs.put("LEFTHAND", joint);
                 limbs.put("LEFTHAND", newJoint);
                 targets.get("LEFTHAND").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint.id())._name.equals("RIGHTHAND")){
+            } else if(parser.joint().get(joint.id()).name().equals("RIGHTHAND")){
                 originalLimbs.put("RIGHTHAND", joint);
                 limbs.put("RIGHTHAND", newJoint);
                 targets.get("RIGHTHAND").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint.id())._name.equals("LEFTFOOT")){
+            } else if(parser.joint().get(joint.id()).name().equals("LEFTFOOT")){
                 originalLimbs.put("LEFTFOOT", joint);
                 limbs.put("LEFTFOOT", newJoint);
                 targets.get("LEFTFOOT").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint.id())._name.equals("RIGHTFOOT")){
+            } else if(parser.joint().get(joint.id()).name().equals("RIGHTFOOT")){
                 originalLimbs.put("RIGHTFOOT", joint);
                 limbs.put("RIGHTFOOT", newJoint);
                 targets.get("RIGHTFOOT").setPosition(newJoint.position());
-            } else if(parser._joint.get(joint.id())._name.equals("HEAD")){
+            } else if(parser.joint().get(joint.id()).name().equals("HEAD")){
                 originalLimbs.put("HEAD", joint);
                 limbs.put("HEAD", newJoint);
                 targets.get("HEAD").setPosition(newJoint.position());
             }
-            originalLimbs.put(parser._joint.get(joint.id())._name, joint);
-            limbs.put(parser._joint.get(joint.id())._name, newJoint);
+            originalLimbs.put(parser.joint().get(joint.id()).name(), joint);
+            limbs.put(parser.joint().get(joint.id()).name(), newJoint);
         }
         ((Joint) copy.get(0)).setRoot(true);
         return copy.get(0);

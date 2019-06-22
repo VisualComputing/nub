@@ -1,5 +1,6 @@
 package ik.flock;
 
+import nub.ik.skinning.LinearBlendSkinningCPU;
 import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Node;
 import nub.primitives.Quaternion;
@@ -23,7 +24,7 @@ class Boid {
     float flap = 0;
     float t = 0;
 
-    Boid(Scene scn, Node objFrame, LinearBlendSkinningGPU skinning, Vector inPos, ArrayList<Boid> flock) {
+    Boid(Scene scn, Node objFrame, LinearBlendSkinningCPU skinning, Vector inPos, ArrayList<Boid> flock) {
         scene = scn;
         pApplet = scene.pApplet();
         position = new Vector();

@@ -1,12 +1,12 @@
 package ik.obj;
 
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import nub.ik.skinning.LinearBlendSkinningGPU;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.Hinge;
-import nub.ik.Solver;
+import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

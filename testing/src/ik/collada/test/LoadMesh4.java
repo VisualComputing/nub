@@ -1,13 +1,13 @@
 package ik.collada.test;
 
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import nub.ik.skinning.LinearBlendSkinningGPU;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.collada.animation.Model;
-import ik.collada.colladaParser.colladaLoader.ColladaBlenderLoader;
+import nub.ik.loader.collada.data.Model;
+import nub.ik.loader.collada.BlenderLoader;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -36,7 +36,7 @@ public class LoadMesh4 extends PApplet {
         scene.setType(Graph.Type.ORTHOGRAPHIC);
 
         //2. Load the model
-        model = ColladaBlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
+        model = BlenderLoader.loadColladaModel(sketchPath() + path, dae, tex, scene, 3);
 
         //3. Setup scene
         scene.setRadius(model.mesh().getWidth()*2);

@@ -2,7 +2,7 @@ package ik.constraintTest;
 
 import nub.core.Node;
 import nub.core.constraint.*;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -12,8 +12,6 @@ import processing.core.PConstants;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
-
-import java.util.ArrayList;
 
 public class LuxoIK extends PApplet {
     class Piece extends Node {

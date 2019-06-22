@@ -2,11 +2,9 @@ package ik.interactive;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.primitives.Point;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.Joint;
-import processing.core.PApplet;
+import nub.ik.visual.Joint;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 

@@ -2,7 +2,7 @@ package ik.basic;
 
 import nub.core.Graph;
 import nub.core.Node;
-import nub.ik.Solver;
+import nub.ik.solver.Solver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;

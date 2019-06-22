@@ -2,8 +2,8 @@ package ik.biped;
 
 import nub.core.Node;
 import nub.core.constraint.PlanarPolygon;
-import nub.ik.ChainSolver;
-import nub.ik.ClosedLoopChainSolver;
+import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.solver.geometric.ClosedLoopChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;

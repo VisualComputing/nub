@@ -6,7 +6,7 @@ import nub.core.constraint.Hinge;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import ik.common.Joint;
+import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
