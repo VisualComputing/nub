@@ -22,6 +22,7 @@ attribute vec3 normal;
 
 varying vec3 ecNormal;
 varying vec3 lightDir;
+uniform vec3 lightAmbient[8];
 
 // All components are in the range [0…1], including hue.
 // see  https://stackoverflow.com/questions/15095909/from-rgb-to-hsv-in-opengl-glsl

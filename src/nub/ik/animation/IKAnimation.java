@@ -1,8 +1,9 @@
 package nub.ik.animation;
 
 import nub.core.Node;
-import nub.ik.CCDSolver;
-import nub.ik.ChainSolver;
+import nub.ik.solver.geometric.CCDSolver;
+import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -12,7 +13,6 @@ import processing.core.PGraphics;
 import processing.core.PShape;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
