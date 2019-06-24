@@ -19,7 +19,7 @@ import java.util.List;
 public class IKAnimation {
   //TODO : Remove this class
   //TODO : CCD Animation must be fixed
-  //TODO : Perform operations using Frames
+  //TODO : Perform operations using nub
   public static abstract class Step extends AnimatorObject {
     protected boolean _completed = false;
     protected Scene _scene;
@@ -78,13 +78,13 @@ public class IKAnimation {
       _current = trajectory[_idx].get();
       _completed = false;
       _times = 0;
-      calculateSpeedPerIteration();
+      _calculateSpeedPerIteration();
       //how many times to execute?
       _totalTimes = (int) Math.ceil(_edgePeriod / period()) + 1;
       this.start();
     }
 
-    protected void calculateSpeedPerIteration() {
+    protected void _calculateSpeedPerIteration() {
       Vector v1 = _trajectory[_idx];
       Vector v2 = _trajectory[_idx + 1];
       float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
@@ -100,7 +100,6 @@ public class IKAnimation {
         _completed = true;
         return;
       }
-
       if (Vector.distance(_current, v2) < 0.1) {
         _idx++;
         if (_idx == _trajectory.length - 1) {
@@ -108,7 +107,7 @@ public class IKAnimation {
           return;
         }
         _current = v2;
-        calculateSpeedPerIteration();
+        _calculateSpeedPerIteration();
       } else {
         _current.add(_delta);
       }
@@ -118,7 +117,6 @@ public class IKAnimation {
     public void draw() {
       Vector v1 = _trajectory[_idx];
       Vector v2 = _trajectory[_idx + 1 < _trajectory.length ? _idx + 1 : _idx];
-
       switch (_mode) {
         case V1_TO_V: {
           v2 = _current;
@@ -129,7 +127,6 @@ public class IKAnimation {
           break;
         }
       }
-
       PGraphics pg = _scene.context();
       pg.pushStyle();
       pg.hint(PConstants.DISABLE_DEPTH_TEST);
@@ -162,10 +159,8 @@ public class IKAnimation {
     }
   }
 
-
   public static class FollowArc extends Step {
     protected enum Arc {V1_TO_V2, V_TO_V2, V1_TO_V, V}
-
     protected long _edgePeriod;
     protected float _radius;//_iterations per edge is updated according to Animator period
     protected Vector[] _trajectory;
@@ -197,13 +192,13 @@ public class IKAnimation {
       _current = trajectory[_idx].get();
       _completed = false;
       _times = 0;
-      calculateSpeedPerIteration();
+      _calculateSpeedPerIteration();
       //how many times to execute?
       _totalTimes = (int) Math.ceil(_edgePeriod / period()) + 3;
       this.start();
     }
 
-    protected void calculateSpeedPerIteration() {
+    protected void _calculateSpeedPerIteration() {
       Quaternion q = new Quaternion(Vector.subtract(_trajectory[_idx], _base), Vector.subtract(_trajectory[_idx + 1], _base));
       float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
       _delta = new Quaternion(q.axis(), q.angle() * inc);
@@ -216,9 +211,7 @@ public class IKAnimation {
         _completed = true;
         return;
       }
-
       Vector v2 = _trajectory[_idx + 1];
-
       if (Math.abs(Vector.angleBetween(Vector.subtract(_current, _base), Vector.subtract(v2, _base))) < 0.001) {
         _idx++;
         if (_idx == _trajectory.length - 1) {
@@ -226,21 +219,18 @@ public class IKAnimation {
           return;
         }
         _current = v2;
-        calculateSpeedPerIteration();
+        _calculateSpeedPerIteration();
       } else {
         _current = _delta.rotate(Vector.subtract(_current, _base));
         _current.add(_base);
       }
     }
 
-
     @Override
     public void draw() {
       if (_trajectory == null) return;
-
       Vector v1 = _trajectory[_idx];
       Vector v2 = _trajectory[_idx + 1 < _trajectory.length ? _idx + 1 : _idx];
-
       switch (_mode) {
         case V1_TO_V: {
           v2 = _current;
@@ -254,7 +244,6 @@ public class IKAnimation {
           v1 = v2 = _current;
         }
       }
-
       PGraphics pg = _scene.context();
       pg.pushStyle();
       pg.hint(PConstants.DISABLE_DEPTH_TEST);
@@ -291,10 +280,8 @@ public class IKAnimation {
     }
   }
 
-
   public static class RotateNode extends Step {
     protected enum Rotate {V1_TO_V2, V_TO_V2, V1_TO_V, V}
-
     protected long _edgePeriod;
     protected boolean _updateNode = true;
     protected float _radius;//_iterations per edge is updated according to Animator period
@@ -326,7 +313,7 @@ public class IKAnimation {
       _current = _initial.get();
       _base = _node.position().get();
       _completed = false;
-      calculateSpeedPerIteration();
+      _calculateSpeedPerIteration();
       _deltaGlobal = new Quaternion(Quaternion.compose(initial.inverse(), end).axis(), _deltaLocal.angle());
 
       _times = 0;
@@ -335,7 +322,7 @@ public class IKAnimation {
       this.start();
     }
 
-    protected void calculateSpeedPerIteration() {
+    protected void _calculateSpeedPerIteration() {
       Quaternion q = new Quaternion(Vector.subtract(_initial, _base), Vector.subtract(_end, _base));
       float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
       _deltaLocal = new Quaternion(q.axis(), q.angle() * inc);
@@ -348,7 +335,6 @@ public class IKAnimation {
         _completed = true;
         return;
       }
-
       if (Math.abs(Vector.angleBetween(Vector.subtract(_current, _base), Vector.subtract(_end, _base))) < 0.001) {
         return;
       } else {
@@ -406,7 +392,6 @@ public class IKAnimation {
 
   public static class TranslateNode extends Step {
     protected enum Translate {V1_TO_V2, V_TO_V2, V1_TO_V, V}
-
     protected long _edgePeriod;
     protected boolean _fixChildren = true;
     protected boolean _updateNode = true;
@@ -436,7 +421,6 @@ public class IKAnimation {
       Vector diff = Vector.subtract(newPosition, node.position());
       node.setPosition(newPosition.get());
       if (!_fixChildren) return;
-
       for (Node child : node.children()) {
         child.setPosition(Vector.subtract(child.position(), diff));
       }
@@ -448,15 +432,14 @@ public class IKAnimation {
       _end = end;
       _current = initial.get();
       _completed = false;
-      calculateSpeedPerIteration();
+      _calculateSpeedPerIteration();
       _times = 0;
       //how many times to execute?
       _totalTimes = (int) Math.ceil(_edgePeriod / period()) + 1;
       this.start();
     }
 
-
-    protected void calculateSpeedPerIteration() {
+    protected void _calculateSpeedPerIteration() {
       float inc = ((float) period()) / (_edgePeriod - _edgePeriod % period());
       _delta = Vector.subtract(_end, _initial);
       _delta.multiply(inc);
@@ -469,7 +452,6 @@ public class IKAnimation {
         _completed = true;
         return;
       }
-
       if (Vector.distance(_current, _end) >= 0.1) {
         _current.add(_delta);
         if (_updateNode) {
@@ -478,12 +460,10 @@ public class IKAnimation {
       }
     }
 
-
     @Override
     public void draw() {
       Vector v1 = _initial;
       Vector v2 = _end;
-
       switch (_mode) {
         case V1_TO_V: {
           v2 = _current;
@@ -497,7 +477,6 @@ public class IKAnimation {
           v1 = v2 = _current;
         }
       }
-
       PGraphics pg = _scene.context();
       pg.pushStyle();
       pg.hint(PConstants.DISABLE_DEPTH_TEST);
@@ -620,7 +599,6 @@ public class IKAnimation {
       return _trajectory[_trajectory.length - 1]._completed;
     }
 
-
     public void animateStep() {
       if (_done() && _state < _solver.history()._states.size()) {
         //create next trajectory
@@ -632,7 +610,6 @@ public class IKAnimation {
               _scene.unregisterAnimator(_trajectory[i]);
               _trajectory[i] = null;
             }
-
             NodeState state = _solver.history()._states.get(_state);
             Node node = _structure.get(state.node().id());
             Node eff = _structure.get(_solver.chain().get(_solver.chain().size() - 1).id());
@@ -687,7 +664,6 @@ public class IKAnimation {
             ((FollowArc) _trajectory[2])._mode = FollowArc.Arc.V;
             ((FollowArc) _trajectory[2])._cline = _scene.context().color(255, 255, 0);
             ((FollowArc) _trajectory[2])._cv2 = _scene.context().color(255);
-
 
             Node eff = _structure.get(_solver.chain().get(_solver.chain().size() - 1).id());
             Quaternion d = Quaternion.compose(node.rotation().inverse(), state.quaternion());
@@ -746,7 +722,6 @@ public class IKAnimation {
     }
   }
 
-
   public static class FABRIKAnimation {
     //Keep hist of _iterations using FABRIK
     protected ChainSolver _solver;
@@ -790,14 +765,12 @@ public class IKAnimation {
         n.setConstraint(null);
       }
 
-
       for (Node n : _previousStructure.values()) {
         int c = _scene.pApplet().color(200, 200);
         if (color != -1) ((Joint) n).setColor(c); //opaque
         ((Joint) n).setRadius(_radius * 0.7f);
         n.setConstraint(null);
       }
-
 
       //Center the scene on the root node
       scene.setCenter(_structure.get(_solver.internalChain().get(0).id()).position());
@@ -839,7 +812,6 @@ public class IKAnimation {
       setInitialConditions();
     }
 
-
     public void animate() {
       //animate each step
       animateStep();
@@ -851,7 +823,6 @@ public class IKAnimation {
         _previousStructure.get(i).setRotation(_structure.get(i).rotation().get());
       }
     }
-
 
     protected boolean _done() {
       if (_steps.isEmpty() && _state == _initial) {
@@ -991,7 +962,6 @@ public class IKAnimation {
     }
   }
 
-
   public static class NodeState {
     protected String _name;
     protected int _step, _iteration;
@@ -1061,7 +1031,6 @@ public class IKAnimation {
     }
   }
 
-
   public static void drawSegment3D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2) {
     pg.pushStyle();
     pg.strokeWeight(radius / 2.f);
@@ -1082,7 +1051,6 @@ public class IKAnimation {
     pg.popMatrix();
     pg.popStyle();
   }
-
 
   public static void drawSegment2D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2) {
     pg.pushStyle();
@@ -1112,17 +1080,14 @@ public class IKAnimation {
         Node reference = copy.get(node.reference().id());
         newNode = _copyNode(scene, node, reference, asJoint);
       }
-
       if (asJoint) {
         ((Joint) newNode).setName("" + idx++);
       }
       copy.put(node.id(), newNode);
     }
-
     if (asJoint) {
       ((Joint) copy.get(chain.get(0).id())).setRoot(true);
     }
-
     return copy;
   }
 
