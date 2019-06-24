@@ -160,7 +160,7 @@ public class SimpleBuilder extends PApplet{
                 + root.rotation().axis().z() + "f), " + root.rotation().angle() + "f));");
         int idx = i;
         for(Node child : root.children()){
-            idx = idx + printJoints(child, "j"+ i, idx + 1);
+            idx = printJoints(child, "j"+ i, idx + 1);
         }
         return idx;
     }

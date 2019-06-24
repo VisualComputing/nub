@@ -1,6 +1,7 @@
 package ik.constraintTest;
 
 import nub.core.Graph;
+import nub.core.Interpolator;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
@@ -51,6 +52,7 @@ public class DrawingHinge  extends PApplet {
         //Add constraint to joint j0
         Hinge constraint = new Hinge(radians(30), radians(30), j0.rotation(), new Vector(1,0,0), new Vector(0,0,1));
         j0.setConstraint(constraint);
+        Interpolator intp;
 
         //Create controllers
         control = new ThetaControl(sceneTheta, color(100,203,30));

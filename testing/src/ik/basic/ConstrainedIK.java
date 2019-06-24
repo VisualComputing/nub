@@ -21,9 +21,8 @@ import java.util.ArrayList;
 public class ConstrainedIK extends PApplet {
 
     /*
-    In this example an IK solver will be related
-    with a pretty simple chain structure on the XY-Plane,
-    furthermore each node has a 3-DOF or 1-DOF constraint:
+    In this example an IK solver will be related with a pretty simple chain structure on the XY-Plane,
+    furthermore each node has a 3-DOF (Ball and Socket) or 1-DOF (Hinge) constraint:
                              World
                                ^
                                |
@@ -44,7 +43,6 @@ public class ConstrainedIK extends PApplet {
     */
 
     Scene scene;
-    //Set the scene as P3D or P2D
     float jointRadius = 5;
     float length = 50;
     boolean enableSolver = true;
@@ -93,9 +91,9 @@ public class ConstrainedIK extends PApplet {
          *  1. Which is the maximum and minimum angle of a Hinge rotation:
          *   A Hinge rotation is a rotation whose Axis of rotation is the Twist Vector.
          *   There's a whole plane that is Orthogonal to Twist vector. You must define a
-         *   Vector on this plane (Called up Vector) that will define the rest rotation.
+         *   Vector on this plane (Called up Vector) that will correspond to the rest rotation.
          *
-         *   It is allow to rotate clockwise of the rest rotation while the angle of the Up Vector and the
+         *   It is allowed to rotate clockwise of the rest rotation while the angle of the Up Vector and the
          *   new Up Vector is not larger than minimum angle.
          *
          *   Similarly, it is allow to rotate anti-clockwise of the rest rotation while the angle of the Up Vector and the

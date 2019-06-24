@@ -53,7 +53,6 @@ public class DrawingConstraint  extends PApplet {
         //Add constraint to joint j0
         BallAndSocket constraint = new BallAndSocket(radians(30), radians(30));
         constraint.setRestRotation(j0.rotation(), new Vector(0,1,0), new Vector(1,0,0), j1.translation());
-
         j0.setConstraint(constraint);
 
         //Create controllers
