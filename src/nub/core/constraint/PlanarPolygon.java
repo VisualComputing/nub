@@ -17,10 +17,10 @@ import nub.primitives.Vector;
 import java.util.ArrayList;
 
 /**
-* A Frame is constrained to disable translation and
-* allow 2-DOF rotation limiting Z-Axis Rotation on a Cone which base is a Polygon.
-* If no restRotation is set Quat() is assumed as restRotation
-*/
+ * A Frame is constrained to disable translation and
+ * allow 2-DOF rotation limiting Z-Axis Rotation on a Cone which base is a Polygon.
+ * If no restRotation is set Quat() is assumed as restRotation
+ */
 
 public class PlanarPolygon extends ConeConstraint {
   //TODO: Find a Ball and Socket constraint that is enclosed by this one
@@ -29,7 +29,7 @@ public class PlanarPolygon extends ConeConstraint {
   protected Vector _min, _max;
   protected float _angle;
 
-  public float angle(){
+  public float angle() {
     return _angle;
   }
 
@@ -43,19 +43,19 @@ public class PlanarPolygon extends ConeConstraint {
     _updateAngle();
   }
 
-  public void setAngle(float angle){
-    if(vertices().isEmpty()) return;
+  public void setAngle(float angle) {
+    if (vertices().isEmpty()) return;
     //get the point who is farthest from the origin
     Vector max = vertices().get(0);
-    for(Vector v : vertices()){
-      if(v.magnitude() > max.magnitude()){
+    for (Vector v : vertices()) {
+      if (v.magnitude() > max.magnitude()) {
         max = v;
       }
     }
-    float new_max = (float)(1.f*Math.tan(angle));
+    float new_max = (float) (1.f * Math.tan(angle));
     float alpha = new_max / max.magnitude();
 
-    for(Vector v : vertices()) {
+    for (Vector v : vertices()) {
       v.multiply(alpha);
     }
     _setBoundingBox();
@@ -92,14 +92,14 @@ public class PlanarPolygon extends ConeConstraint {
 
   public Vector apply(Vector target, Quaternion restRotation) {
     Vector point = restRotation.inverse().multiply(target);
-    if(point.z() == 0) point.setZ(0.5f);
-    float alpha = Math.abs(1.f/point.z());
+    if (point.z() == 0) point.setZ(0.5f);
+    float alpha = Math.abs(1.f / point.z());
     Vector proj = new Vector(alpha * point.x(), alpha * point.y());
     boolean inverse = point.z() * 1.f < 0;
     if (inverse || !_isInside(proj)) {
       //proj.multiply(inverse);
       Vector constrained = _closestPoint(proj);
-      constrained.multiply(1.f/alpha);
+      constrained.multiply(1.f / alpha);
       float z = inverse ? -point.z() : point.z();
       constrained.setZ(z);
       return restRotation.rotate(constrained);
@@ -119,11 +119,11 @@ public class PlanarPolygon extends ConeConstraint {
   }
 
   protected void _updateAngle() {
-    if(vertices().isEmpty()) return;
+    if (vertices().isEmpty()) return;
     //get the point who is farthest from the origin
     Vector max = vertices().get(0);
-    for(Vector v : vertices()){
-      if(v.magnitude() > max.magnitude()){
+    for (Vector v : vertices()) {
+      if (v.magnitude() > max.magnitude()) {
         max = v;
       }
     }

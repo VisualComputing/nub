@@ -8,7 +8,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-3x" level="project" />
-    <orderEntry type="module" module-name="frames" />
+    <orderEntry type="module" module-name="nub" />
     <orderEntry type="module-library">
       <library>
         <CLASSES>

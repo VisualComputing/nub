@@ -8,5 +8,18 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-3x" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="file://$USER_HOME$/.lib/ejml" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="file://$USER_HOME$/.lib/ejml" />
+        </SOURCES>
+        <jarDirectory url="file://$USER_HOME$/.lib/ejml" recursive="false" />
+        <jarDirectory url="file://$USER_HOME$/.lib/ejml" recursive="false" type="SOURCES" />
+      </library>
+    </orderEntry>
   </component>
 </module>

@@ -144,7 +144,7 @@ public class TreeSolver extends FABRIKSolver {
 
   protected int _forwardReaching(TreeNode treeNode) {
     ArrayList<Vector> list_a = new ArrayList<>();
-    for(Node f : treeNode._solver._chain) list_a.add(f.worldLocation(new Vector()));
+    for (Node f : treeNode._solver._chain) list_a.add(f.worldLocation(new Vector()));
     aux_prev.add(list_a);
     float totalWeight = 0;
     int chains = 0;
@@ -189,14 +189,14 @@ public class TreeSolver extends FABRIKSolver {
     //Apply Fix Twisting before applying a Full Fabrik iteration to whole chain
     //TODO: 1. is there a better condition ? 2. How to consider properly twisting of a Node with 2 or more children
     //TODO : Twisting to favour region of movement
-    if(_is3D && _fixTwisting && solver._chain.size() > 2 && _iterations % 3 == 0){
-      if(treeNode._parent != null && treeNode._parent._children.size() > 1){
+    if (_is3D && _fixTwisting && solver._chain.size() > 2 && _iterations % 3 == 0) {
+      if (treeNode._parent != null && treeNode._parent._children.size() > 1) {
         _applyTwistRotation(solver._chain.subList(1, solver._chain.size()), solver._target.position());
-      } else{
+      } else {
         _applyTwistRotation(solver._chain, solver._target.position());
       }
       //TODO : Do it efficiently
-      for(int i = 0; i < solver._chain.size(); i++){
+      for (int i = 0; i < solver._chain.size(); i++) {
         solver._positions.set(i, solver._chain.get(i).position());
       }
     }
@@ -204,11 +204,11 @@ public class TreeSolver extends FABRIKSolver {
     /* TODO: Check if it's better for convergence to try more times with local regions */
     Vector o = solver._chain.get(0).position();
     Vector p = null;
-    if(solver._positions().size() > 1) p = solver._chain.get(1).position();
+    if (solver._positions().size() > 1) p = solver._chain.get(1).position();
 
-    for(int i = 0; i < 3 && solver._positions().size() > 1; i++) {
+    for (int i = 0; i < 3 && solver._positions().size() > 1; i++) {
       solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
-      if(solver._targetDirection != null){
+      if (solver._targetDirection != null) {
         solver._applyTargetdirection();
       }
       solver._forwardReaching();
@@ -220,14 +220,14 @@ public class TreeSolver extends FABRIKSolver {
     solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
     solver._forwardReaching();
     ArrayList<Vector> list = new ArrayList<>();
-    for(Vector v : solver._positions()){
+    for (Vector v : solver._positions()) {
       list.add(v.get());
     }
     aux_p.add(list);
 
     treeNode._modified = true;
-    for (TreeNode child : treeNode._children()){
-      if(!child._modified) chains += 1;
+    for (TreeNode child : treeNode._children()) {
+      if (!child._modified) chains += 1;
       child._modified = true;
     }
     return chains + 1;
@@ -278,11 +278,11 @@ public class TreeSolver extends FABRIKSolver {
           }
           Quaternion q = new Quaternion(v1, v2);
 
-          if(amount == 1){
-            for(int i = 0; i < 4; i++)
+          if (amount == 1) {
+            for (int i = 0; i < 4; i++)
               cumulative[i] = q._quaternion[i];
-              first = q;
-          }else {
+            first = q;
+          } else {
             des = averageQuaternion(cumulative, q, first, amount);
           }
           totalWeight += child._weight();
@@ -290,30 +290,30 @@ public class TreeSolver extends FABRIKSolver {
         }
         //Set only when Centroid and New Centroid varies
         //if (Vector.distance(centroid, newCentroid) > 0.001) {
-          centroid.multiply(1.f / totalWeight);
-          newCentroid.multiply(1.f / totalWeight);
-          Quaternion deltaOrientation = new Quaternion(centroid, newCentroid);
-          float ang = deltaOrientation.angle();
-          //clamp rotation
-          ang = (float)Math.max(Math.min(ang, 10*Math.PI/180), -10*Math.PI/180);
-          deltaOrientation = new Quaternion(deltaOrientation.axis(), ang);
-          //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
-          treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotate(des);
-          treeNode._solver()._positions().set(treeNode._solver()._chain.size() - 1, treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position());
+        centroid.multiply(1.f / totalWeight);
+        newCentroid.multiply(1.f / totalWeight);
+        Quaternion deltaOrientation = new Quaternion(centroid, newCentroid);
+        float ang = deltaOrientation.angle();
+        //clamp rotation
+        ang = (float) Math.max(Math.min(ang, 10 * Math.PI / 180), -10 * Math.PI / 180);
+        deltaOrientation = new Quaternion(deltaOrientation.axis(), ang);
+        //System.out.println(" ax : " + deltaOrientation.axis() + " ang : " + ang);
+        treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotate(des);
+        treeNode._solver()._positions().set(treeNode._solver()._chain.size() - 1, treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position());
 
-          for (TreeNode child : treeNode._children()) {
-            child._solver()._positions().set(0, child._solver()._chain.get(0).position());
-            child._solver()._positions().set(1, child._solver()._chain.get(1).position());
-            //child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
-            //child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
-            //child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
-            //if (child._solver()._chain.size() < 2) continue;
+        for (TreeNode child : treeNode._children()) {
+          child._solver()._positions().set(0, child._solver()._chain.get(0).position());
+          child._solver()._positions().set(1, child._solver()._chain.get(1).position());
+          //child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
+          //child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
+          //child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
+          //if (child._solver()._chain.size() < 2) continue;
             /*if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
               child._solver()._positions().set(0, solver._chain.get(0).position());
               child._solver()._positions().set(1, child._solver()._chain.get(1).position());
             }*/
-          }
+        }
         //}
       }
     }
@@ -322,7 +322,7 @@ public class TreeSolver extends FABRIKSolver {
       change += _backwardReaching(child);
     }
 
-    if(treeNode._solver().target() != null && treeNode._children.isEmpty())
+    if (treeNode._solver().target() != null && treeNode._children.isEmpty())
       _current += Vector.distance(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position(), treeNode._solver().target().position());
 
     return change;
@@ -344,7 +344,7 @@ public class TreeSolver extends FABRIKSolver {
 
   @Override
   protected void _update() {
-    if(_current < _best){
+    if (_current < _best) {
       _updateTree(root);
       _best = _current;
     }
@@ -352,7 +352,7 @@ public class TreeSolver extends FABRIKSolver {
 
   //Update Subtree that have associated Frame as root
   protected void _updateTree(TreeNode treeNode) {
-    for(int i = 0; i < treeNode._solver._original.size(); i++){
+    for (int i = 0; i < treeNode._solver._original.size(); i++) {
       treeNode._solver._original.get(i).setRotation(treeNode._solver._chain.get(i).rotation().get());
     }
     for (TreeNode child : treeNode._children()) {
@@ -381,7 +381,7 @@ public class TreeSolver extends FABRIKSolver {
     for (TreeNode child : treeNode._children()) {
       _reset(child);
     }
-    if(treeNode._solver._target != null && treeNode._children.isEmpty()) {
+    if (treeNode._solver._target != null && treeNode._children.isEmpty()) {
       _best += Vector.distance(treeNode._solver()._original.get(treeNode._solver()._original.size() - 1).position(), treeNode._solver().target().position());
     }
   }
@@ -401,12 +401,12 @@ public class TreeSolver extends FABRIKSolver {
 
   @Override
   public void setTarget(Node endEffector, Node target) {
-    addTarget(endEffector,target);
+    addTarget(endEffector, target);
   }
 
 
-  protected List<Node> _copyChain(TreeNode parent, List<Node> list){
-    if(parent._solver != null) {
+  protected List<Node> _copyChain(TreeNode parent, List<Node> list) {
+    if (parent._solver != null) {
       Node reference = parent._solver._chain.get(parent._solver._chain.size() - 1);
       List<Node> copy = _copy(list.subList(1, list.size()), reference);
       copy.add(0, reference);
@@ -416,19 +416,19 @@ public class TreeSolver extends FABRIKSolver {
   }
 
   //AVERAGING QUATERNIONS AS SUGGESTED IN http://wiki.unity3d.com/index.php/Averaging_Quaternions_and_Vectors
-  public static Quaternion averageQuaternion(float[] cumulative, Quaternion newRotation, Quaternion firstRotation, int addAmount){
+  public static Quaternion averageQuaternion(float[] cumulative, Quaternion newRotation, Quaternion firstRotation, int addAmount) {
     float w = 0.0f;
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
     //Before we add the new rotation to the average (mean), we have to check whether the quaternion has to be inverted. Because
     //q and -q are the same rotation, but cannot be averaged, we have to make sure they are all the same.
-    if(!areQuaternionsClose(newRotation, firstRotation)){
+    if (!areQuaternionsClose(newRotation, firstRotation)) {
       newRotation = inverseSignQuaternion(newRotation);
     }
 
     //Average the values
-    float addDet = 1f/(float)addAmount;
+    float addDet = 1f / (float) addAmount;
     cumulative[0] += newRotation.x();
     x = cumulative[0] * addDet;
     cumulative[1] += newRotation.y();
@@ -442,8 +442,8 @@ public class TreeSolver extends FABRIKSolver {
     return normalizeQuaternion(x, y, z, w);
   }
 
-  public static Quaternion normalizeQuaternion(float x, float y, float z, float w){
-    float lengthD = 1.0f / (w*w + x*x + y*y + z*z);
+  public static Quaternion normalizeQuaternion(float x, float y, float z, float w) {
+    float lengthD = 1.0f / (w * w + x * x + y * y + z * z);
     w *= lengthD;
     x *= lengthD;
     y *= lengthD;
@@ -452,7 +452,7 @@ public class TreeSolver extends FABRIKSolver {
   }
 
   //Changes the sign of the quaternion components. This is not the same as the inverse.
-  public static Quaternion inverseSignQuaternion(Quaternion q){
+  public static Quaternion inverseSignQuaternion(Quaternion q) {
     return new Quaternion(-q.x(), -q.y(), -q.z(), -q.w());
   }
 
@@ -460,29 +460,28 @@ public class TreeSolver extends FABRIKSolver {
 //be used to check whether or not one of two quaternions which are supposed to
 //be very similar but has its component signs reversed (q has the same rotation as
 //-q)
-  public static boolean areQuaternionsClose(Quaternion q1, Quaternion q2){
+  public static boolean areQuaternionsClose(Quaternion q1, Quaternion q2) {
     float dot = Quaternion.dot(q1, q2);
-    if(dot < 0.0f){
+    if (dot < 0.0f) {
       return false;
-    }
-    else{
+    } else {
       return true;
     }
   }
 
-  public void setFixTwisting(boolean fixTwisting){
+  public void setFixTwisting(boolean fixTwisting) {
     _fixTwisting = fixTwisting;
   }
 
-  public void setKeepDirection(boolean keepDirection){
+  public void setKeepDirection(boolean keepDirection) {
     _keepDirection = keepDirection;
     setKeepDirection(root, keepDirection);
   }
 
-  public void setKeepDirection(TreeNode node, boolean keepDirection){
-    if(node == null) return;
+  public void setKeepDirection(TreeNode node, boolean keepDirection) {
+    if (node == null) return;
     node._solver.setKeepDirection(keepDirection);
-    for(TreeNode child : node._children){
+    for (TreeNode child : node._children) {
       setKeepDirection(child, keepDirection);
     }
   }

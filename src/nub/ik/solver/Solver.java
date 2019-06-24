@@ -49,27 +49,27 @@ public abstract class Solver {
   }
 
   /*Getters and setters*/
-  public int lastIteration(){
+  public int lastIteration() {
     return _last_iteration;
   }
 
-  public void setMaxError(float maxError){
+  public void setMaxError(float maxError) {
     _maxError = maxError;
   }
 
-  public void setMaxIterations(int maxIterations){
-    _maxIterations= maxIterations;
+  public void setMaxIterations(int maxIterations) {
+    _maxIterations = maxIterations;
   }
 
-  public void setMinDistance(float minDistance){
+  public void setMinDistance(float minDistance) {
     _minDistance = minDistance;
   }
 
-  public void setTimesPerFrame(float timesPerFrame){
+  public void setTimesPerFrame(float timesPerFrame) {
     _timesPerFrame = timesPerFrame;
   }
 
-  public void hasChanged(boolean change){
+  public void hasChanged(boolean change) {
     _change_temp = change;
   }
 
@@ -84,7 +84,7 @@ public abstract class Solver {
 
   public abstract float error();
 
-  public void change(boolean change){
+  public void change(boolean change) {
     _change_temp = change;
   }
 

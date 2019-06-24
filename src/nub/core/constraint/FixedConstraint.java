@@ -11,20 +11,20 @@
 
 package nub.core.constraint;
 
+import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.core.Node;
 
 public class FixedConstraint extends Constraint {
 
-    @Override
-    public Quaternion constrainRotation(Quaternion rotation, Node frame) {
-        return new Quaternion();
-    }
+  @Override
+  public Quaternion constrainRotation(Quaternion rotation, Node frame) {
+    return new Quaternion();
+  }
 
-    @Override
-    public Vector constrainTranslation(Vector translation, Node frame) {
-        return new Vector();
-    }
+  @Override
+  public Vector constrainTranslation(Vector translation, Node frame) {
+    return new Vector();
+  }
 }
 

@@ -15,9 +15,6 @@ import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.min;
-
 /**
  * A Frame is constrained to disable translation and
  * allow 1-DOF rotation limiting Rotation by defining an
@@ -38,7 +35,7 @@ public class Hinge extends Constraint {
   protected Quaternion _orientation = new Quaternion();
 
 
-  public Hinge(float min, float max){
+  public Hinge(float min, float max) {
     _min = min;
     _max = max;
   }
@@ -67,7 +64,7 @@ public class Hinge extends Constraint {
     _restRotation = delta;
   }
 
-  public Quaternion orientation(){
+  public Quaternion orientation() {
     return _orientation;
   }
 
@@ -95,22 +92,23 @@ public class Hinge extends Constraint {
     desired = Quaternion.compose(desired, _restRotation);
 
     Vector rotationAxis = new Vector(desired._quaternion[0], desired._quaternion[1], desired._quaternion[2]);
-    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0,0,1));
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, new Vector(0, 0, 1));
     //Get rotation component on Axis direction w.r.t reference
-    Quaternion rotationTwist= new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), desired.w());
+    Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), desired.w());
     float deltaAngle = rotationTwist.angle();
-    if (rotationAxis.dot(new Vector(0,0,1)) < 0) deltaAngle *= -1;
+    if (rotationAxis.dot(new Vector(0, 0, 1)) < 0) deltaAngle *= -1;
     float change = deltaAngle;
-    if(-_min > change || change > _max ){
-      change = change < 0 ? (float) (change + 2*Math.PI) : change;
-      change = change - _max < (float) (-_min + 2*Math.PI) - change ? _max : -_min;
+    if (-_min > change || change > _max) {
+      change = change < 0 ? (float) (change + 2 * Math.PI) : change;
+      change = change - _max < (float) (-_min + 2 * Math.PI) - change ? _max : -_min;
     }
 
     //apply constrained rotation
     Quaternion rot = Quaternion.compose(node.rotation().inverse(),
-            Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0,0,1), change), _restRotation.inverse())));
+        Quaternion.compose(_orientation, Quaternion.compose(new Quaternion(new Vector(0, 0, 1), change), _restRotation.inverse())));
     return rot;
   }
+
   @Override
   public Vector constrainTranslation(Vector translation, Node frame) {
     return new Vector();

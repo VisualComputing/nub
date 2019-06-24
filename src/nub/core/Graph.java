@@ -10,12 +10,12 @@
 
 package nub.core;
 
+import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.*;
 import nub.timing.Animator;
 import nub.timing.TimingHandler;
 import nub.timing.TimingTask;
-import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.TreeSolver;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -2800,7 +2800,7 @@ public class Graph {
     _bbMatrixHandler.bind(projection(), view());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
-    if(isOffscreen())
+    if (isOffscreen())
       _rays.clear();
   }
 
