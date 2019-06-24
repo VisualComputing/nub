@@ -952,7 +952,7 @@ public class IKAnimation {
             //draw initial position
             _scene.context().pushStyle();
             _scene.context().noStroke();
-            _scene.context().fill(0,255,0);
+            _scene.context().fill(0,255,0, 220);
             _scene.context().push();
             _scene.context().translate(_initialPosition.x(), _initialPosition.y(), _initialPosition.z());
             _scene.context().sphere(_radius * 1.2f);

@@ -1,12 +1,14 @@
 package nub.ik.skinning;
 
 import nub.core.Node;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.*;
 import processing.opengl.PShader;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -69,10 +71,10 @@ public class LinearBlendSkinningGPU implements Skinning{
         int joints = skeleton.size();
         for(int i = 0; i < joints; i++){
             _ids.put(_skeleton.get(i), i);
-            /*if(_skeleton.get(i) instanceof Joint) {
+            if(_skeleton.get(i) instanceof Joint) {
                 int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
                 ((Joint) _skeleton.get(i)).setColor(c);
-            }*/
+            }
         }
         _initialOrientations = new Quaternion[joints];
         _initialPositions = new Vector[joints];

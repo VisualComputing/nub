@@ -256,9 +256,6 @@ public class LinearBlendSkinningCPU implements Skinning {
                     float[] params = addWeights(_skeleton, p);
                     s.vertex(p.x, p.y, p.z, u, v);
                     //create vertex
-                    for(float f : params)
-                        System.out.print(" =>V : " +  f);
-                    System.out.println();
                     _vertices.add(new Vertex(s, vc, new int[]{(int)params[0] ,
                             (int)params[1], (int)params[2]}, new float[]{params[3], params[4], params[5]}));
                     vc++;

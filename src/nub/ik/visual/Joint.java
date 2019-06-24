@@ -21,7 +21,7 @@ public class Joint extends Node {
     protected int _color;
     protected float _radius;
     protected List<PShape> _mesh;
-    public static boolean axes = true;
+    public static boolean axes = false;
     public static float constraintFactor = 0.5f;
     //set to true only when the joint is the root (for rendering purposes)
     protected boolean _isRoot = false, _drawConstraint = true;
@@ -101,6 +101,7 @@ public class Joint extends Node {
         _radius = radius;
         setPickingThreshold(-_radius*2);
     }
+
     public void setName(String name){
         _name = name;
     }
