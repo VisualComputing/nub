@@ -180,7 +180,6 @@ public class TreeSolver extends FABRIKSolver {
       return chains;
     }
 
-
     //TODO: Check blocked and oscillation decisions based on "e"
     /*solver._lastError = _iterations % 2 == 0 ?
             Vector.distance(solver._chain.get(solver._chain.size()-1).position(), solver._target.position()) :
@@ -485,6 +484,5 @@ public class TreeSolver extends FABRIKSolver {
       setKeepDirection(child, keepDirection);
     }
   }
-
 }
 

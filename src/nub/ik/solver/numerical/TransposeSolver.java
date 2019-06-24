@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 public class TransposeSolver extends Solver {
   //look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
-
   protected ArrayList<? extends Node> _chain;
   protected Node _target;
   protected Node _previousTarget;
@@ -92,7 +91,6 @@ public class TransposeSolver extends Solver {
       e.normalize();
       e.multiply(_d_max * 2);
     }
-
 
     SimpleMatrix error = SimpleMatrix.wrap(
         Util.vectorToMatrix(e, head().graph().is3D()));

@@ -65,7 +65,6 @@ public class BioIk extends Solver {
     _updateChainLength();
   }
 
-
   public int populationSize() {
     return _population_size;
   }
@@ -398,7 +397,6 @@ public class BioIk extends Solver {
       _chain_length.put(index, l);
     }
   }
-
 
   @Override
   protected boolean _changed() {

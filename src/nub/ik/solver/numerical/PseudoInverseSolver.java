@@ -20,7 +20,6 @@ import java.util.ArrayList;
 
 public class PseudoInverseSolver extends Solver {
   //look at https://www.math.ucsd.edu/~sbuss/ResearchWeb/ikmethods/iksurvey.pdf
-
   protected ArrayList<? extends Node> _chain;
   protected Node _target;
   protected Node _previousTarget;
@@ -133,4 +132,3 @@ public class PseudoInverseSolver extends Solver {
     return Vector.distance(_target.position(), _chain.get(_chain.size() - 1).position());
   }
 }
-

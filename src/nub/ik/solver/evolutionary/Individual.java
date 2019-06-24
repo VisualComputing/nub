@@ -15,15 +15,12 @@ public class Individual {
   public enum FitnessFunction {
     POSITION, ORIENTATION, POSE
   }
-
   protected List<Node> _structure;
   protected HashMap<String, Float> _floatParams = new HashMap<String, Float>();
   protected HashMap<String, float[]> _arrayParams = new HashMap<String, float[]>();
-
   protected float _fitness;
   protected float _balanced_fitness;
   protected float _dr, _dt;
-
   protected FitnessFunction _fitness_function = FitnessFunction.POSITION;
 
   public Individual(List<Node> structure) {
@@ -136,7 +133,6 @@ public class Individual {
     }
     return copy;
   }
-
 
   public Individual clone() {
     Individual individual = new Individual(_copy(_structure));

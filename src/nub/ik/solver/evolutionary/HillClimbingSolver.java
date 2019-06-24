@@ -13,7 +13,6 @@ import java.util.Random;
  * Created by sebchaparr on 8/10/18.
  */
 public class HillClimbingSolver extends Solver {
-
   protected Random random = new Random();
   protected Node _target;
   protected Node _previousTarget;
@@ -108,7 +107,6 @@ public class HillClimbingSolver extends Solver {
     return copy;
   }
 
-
   @Override
   protected boolean _iterate() {
     ArrayList<Node> x_i1 = _copy(_x_i);
@@ -143,7 +141,6 @@ public class HillClimbingSolver extends Solver {
     }
     return d1 < _minDistance;
   }
-
 
   public Node head() {
     return _chain.get(0);

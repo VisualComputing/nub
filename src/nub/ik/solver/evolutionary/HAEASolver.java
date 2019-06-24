@@ -50,7 +50,6 @@ public class HAEASolver extends Solver {
       normalizeRates();
     }
 
-
     public void normalizeRates() {
       float sum = 0;
       for (int i = 0; i < _operatorRates.length; i++) sum += _operatorRates[i];
@@ -67,10 +66,8 @@ public class HAEASolver extends Solver {
     }
   }
 
-
   protected Selection _selection;
   protected List<Operator> _operators = new ArrayList<>();
-
   protected int _population_size = 10;
   protected Random _random = new Random();
   protected HashMap<Integer, Node> _previousTarget;
@@ -78,11 +75,8 @@ public class HAEASolver extends Solver {
   protected List<Node> _structure;
   protected List<Individual> _population;
   protected Individual _best;
-
-
   protected List<Statistics> _statistics;
   protected float[][] _operatorsValues;
-
   protected boolean _debug = false;
 
   public HAEASolver(List<Node> structure, int population_size, boolean convex) {
@@ -230,7 +224,6 @@ public class HAEASolver extends Solver {
       next.add(replacement);
       _best = _best == null ? replacement : _best.fitness() > replacement.fitness() ? replacement : _best;
     }
-
     _population = next;
     if (_debug) {
       System.out.println("Population ");
@@ -306,4 +299,3 @@ public class HAEASolver extends Solver {
     return _best != null ? _best.fitness() : Float.NaN;
   }
 }
-

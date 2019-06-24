@@ -19,20 +19,15 @@ import nub.primitives.Vector;
 import java.util.*;
 
 public class ChainSolver extends FABRIKSolver {
-
   //TODO : Update
   //TODO: It will be useful that any Joint in the chain could have a Target ?
   //TODO: Enable Translation of Head (Skip Backward Step)
   protected List<Node> _chain;
   protected List<? extends Node> _original;
   protected float _current = 10e10f, _best = 10e10f;
-
-
   protected Node _target;
   protected Node _prevTarget;
-
   protected boolean _is3D = true;
-
 
   //TODO : Check this ideas, clean and refine (*)
   //----------------------------------------------------
@@ -75,7 +70,6 @@ public class ChainSolver extends FABRIKSolver {
   public ArrayList<ArrayList<Vector>> divergeHistory() {
     return _divergeHistory;
   }
-
 
   //TODO : clean
   public List<? extends Node> internalChain() {
@@ -171,7 +165,6 @@ public class ChainSolver extends FABRIKSolver {
       _positions.set(i + 1, new_pos);
     }
   }
-
 
   /*
    * Performs a FABRIK ITERATION
@@ -375,7 +368,6 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(_chain.size() - 2, Vector.add(direction, p));
   }
 
-
   public ArrayList<Vector> dir_temp = new ArrayList<>();
   public ArrayList<Vector> dir_temp_i = new ArrayList<>();
 
@@ -448,7 +440,6 @@ public class ChainSolver extends FABRIKSolver {
         if (debug) System.out.println("    BEST Joint Change : " + b_d + " Dist : " + d);
       }
     }
-
 
     for (int i = 0; i < 20; i++) {
       List<Node> copy = i < 10 ? _copy(b_copy) : _copy(_chain);

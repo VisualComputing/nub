@@ -211,16 +211,12 @@ public class OperatorMethods {
   public static class Adoption extends Operator {
     protected Individual[] _parents;
     protected Individual _best;
-
-
     public Adoption() {
       _arity = 1;
     }
-
     public void setParents(Individual... individuals) {
       _parents = individuals;
     }
-
     public void setBest(Individual best) {
       _best = best;
     }
@@ -231,7 +227,6 @@ public class OperatorMethods {
       Vector parents = new Vector();
       float rp = Util.random.nextFloat();
       float rb = Util.random.nextFloat();
-
       for (int i = 0; i < individuals[0].structure().size(); i++) {
         if (i < individuals[0].structure().size() - 1)
           if (individuals[0].structure().get(i + 1).reference().translation().magnitude() < 0.0001) continue;
@@ -269,6 +264,4 @@ public class OperatorMethods {
    *    b. Do a whole FABRIK Iteration From J0...Ji (Being Ji+1 the Target) (Doesn't seem promising)
    * Pitfalls : Costly operation
    * */
-
-
 }

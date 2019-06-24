@@ -193,4 +193,3 @@ public class SDLSSolver extends Solver {
     return Vector.distance(_target.position(), _chain.get(_chain.size() - 1).position());
   }
 }
-

@@ -96,13 +96,10 @@ public abstract class FABRIKSolver extends Solver {
   protected ArrayList<Quaternion> _orientations = new ArrayList<Quaternion>();
   protected ArrayList<Float> _distances = new ArrayList<Float>();
   protected ArrayList<Float> _jointChange = new ArrayList<Float>();
-
   protected ArrayList<Vector> _positions() {
     return _positions;
   }
-
   protected int _head = 0;
-
 
   //Animation Stuff
   //TODO : Animation with proposed heuristics
@@ -228,7 +225,6 @@ public abstract class FABRIKSolver extends Solver {
     return change;
   }
 
-
   protected static float _forwardReaching(List<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties, boolean kd) {
     float change = 0;
     for (int i = chain.size() - 2; i >= 0; i--) {
@@ -266,7 +262,6 @@ public abstract class FABRIKSolver extends Solver {
     }
     return change;
   }
-
 
   //TODO : Check for scaling when chain has constraints
   protected static float _backwardReaching(List<? extends Node> chain, ArrayList<Vector> positions, ArrayList<Float> distances, HashMap<Integer, Properties> properties, boolean kd, Vector o) {
@@ -380,9 +375,6 @@ public abstract class FABRIKSolver extends Solver {
     if (_enableHistory) history().incrementIteration();
     return change;
   }
-
-
-
 
   /*
    * Check the type of the constraint related to the Frame Parent (at the i-th position),
@@ -569,7 +561,6 @@ public abstract class FABRIKSolver extends Solver {
     return o.get();
   }
 
-
   protected void _forwardTwist(ArrayList<Vector> positions, int idx, Vector o, Vector p, Vector q, Vector t) {
     //1. Get The vector normal to Plane of interest
     Vector n = Vector.subtract(p, o);
@@ -639,7 +630,6 @@ public abstract class FABRIKSolver extends Solver {
       positions.set(i, v_j);
     }
   }
-
 
   protected float _distance(ArrayList<? extends Node> chain) {
     float distance = 0.f;

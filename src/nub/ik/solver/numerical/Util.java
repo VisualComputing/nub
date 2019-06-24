@@ -66,7 +66,6 @@ public class Util {
     return new DMatrixRMaj(J);
   }
 
-
   //Here it is assumed a kinematic chain
   public static DMatrixRMaj numericalJacobian(List<? extends Node> chain, Node endEffector, Vector target, Vector[] axes) {
     if (chain == null) return null;
@@ -95,7 +94,6 @@ public class Util {
     }
     return new DMatrixRMaj(J);
   }
-
 
   public static DMatrixRMaj solvePseudoinverse(DMatrixRMaj J, DMatrixRMaj error) {
     LinearSolver<DMatrixRMaj, DMatrixRMaj> solver = LinearSolverFactory_DDRM.pseudoInverse(true);

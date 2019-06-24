@@ -105,7 +105,6 @@ public class ESSolver extends Solver {
     return copy;
   }
 
-
   @Override
   protected boolean _iterate() {
     ArrayList<Node> x_i1 = _copy(_x_i);
@@ -135,7 +134,6 @@ public class ESSolver extends Solver {
     }
     return d1 < _minDistance;
   }
-
 
   public Node head() {
     return _chain.get(0);

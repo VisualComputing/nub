@@ -22,9 +22,7 @@ import java.util.ArrayList;
  */
 
 public class ClosedLoopChainSolver extends FABRIKSolver {
-
   //TODO : Update
-
   protected ArrayList<? extends Node> _chain;
   protected ArrayList<Node> _reversedChain;
   protected ArrayList<? extends Node> _original;
@@ -176,7 +174,6 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
     return change;
   }
 
-
   @Override
   protected boolean _iterate() {
     //Execute Until the distance between the end effector and the target is below a threshold
@@ -231,5 +228,4 @@ public class ClosedLoopChainSolver extends FABRIKSolver {
   public void setTarget(Node endEffector, Node target) {
 
   }
-
 }

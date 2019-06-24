@@ -82,5 +82,4 @@ public class Statistics {
     _std_avg = std(sorted, _avg);
     _std_median = std(sorted, _median);
   }
-
 }

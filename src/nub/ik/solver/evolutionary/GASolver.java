@@ -16,24 +16,19 @@ public class GASolver extends Solver {
   public enum Replacement {
     GENERATIONAL, ELITISM, KEEP_BEST
   }
-
   protected Selection _selection;
   protected Operator _mutation;
   protected Operator _crossover;
   protected float _cross_probability = 1f;
   protected int _population_size;
   protected Replacement replacement = Replacement.ELITISM;
-
   protected Random _random = new Random();
   protected HashMap<Integer, Node> _previousTarget;
   protected HashMap<Integer, Node> _targets;
   protected List<Node> _structure;
   protected List<Individual> _population;
   protected Individual _best;
-
-
   protected List<Statistics> _statistics;
-
   protected boolean _debug = false;
 
   public GASolver(List<Node> structure, int population_size) {
@@ -209,7 +204,6 @@ public class GASolver extends Solver {
     }
     return _best.fitness() < _minDistance;
   }
-
 
   public Node head() {
     return _structure.get(0);

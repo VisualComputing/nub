@@ -10,7 +10,6 @@ import java.util.List;
  * Created by sebchaparr on 29/10/18.
  */
 public class SelectionMethods {
-
   public static class Uniform implements Selection {
     @Override
     public List<Individual> choose(boolean replacement, List<Individual> population, int m) {
@@ -43,7 +42,6 @@ public class SelectionMethods {
       }
       return sum;
     }
-
 
     @Override
     public List<Individual> choose(boolean replacement, List<Individual> population, int m) {
@@ -151,5 +149,4 @@ public class SelectionMethods {
       return choosed;
     }
   }
-
 }
