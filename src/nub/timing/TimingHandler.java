@@ -52,16 +52,21 @@ public class TimingHandler {
    */
   public void handle() {
     _updateFrameRate();
-    for (TimingTask task : _taskPool)
+    for (int i = 0; i < _taskPool.size(); i++) {
+      TimingTask task = _taskPool.get(i);
       if (task.timer() != null)
         if (task.timer() instanceof SequentialTimer)
           if (task.timer().timingTask() != null)
             ((SequentialTimer) task.timer())._execute();
+    }
+
     // Animation
-    for (Animator animator : _animatorPool)
+    for (int i = 0; i < _animatorPool.size(); i++) {
+      Animator animator = _animatorPool.get(i);
       if (animator.started())
         if (animator.timer().trigggered())
           animator.animate();
+    }
   }
 
   /**

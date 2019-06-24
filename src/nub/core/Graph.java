@@ -10,6 +10,8 @@
 
 package nub.core;
 
+import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.*;
 import nub.timing.Animator;
 import nub.timing.TimingHandler;
@@ -170,6 +172,9 @@ public class Graph {
   Vector _upVector;
   protected long _lookAroundCount;
 
+  // 6. IKinematics solvers
+  protected List<TreeSolver> _solvers;
+
   /**
    * Enumerates the different visibility states an object may have respect to the eye
    * boundary.
@@ -230,6 +235,7 @@ public class Graph {
     setHeight(height);
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
+    _solvers = new ArrayList<TreeSolver>();
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
@@ -2394,6 +2400,85 @@ public class Graph {
     return _lastNonEyeUpdate;
   }
 
+  /**
+   * Return registered solvers
+   */
+  public List<TreeSolver> treeSolvers() {
+    return _solvers;
+  }
+
+  /**
+   * Registers the given chain to solve IK.
+   */
+  public TreeSolver registerTreeSolver(Node node) {
+    for (TreeSolver solver : _solvers)
+      //If Head is Contained in any structure do nothing
+      if (!path(solver.head(), node).isEmpty())
+        return null;
+    TreeSolver solver = new TreeSolver(node);
+    _solvers.add(solver);
+    //Add task
+    registerTask(solver.task());
+    solver.task().run(40);
+    return solver;
+  }
+
+  /**
+   * Unregisters the IK Solver with the given Frame as branchRoot
+   */
+  public boolean unregisterTreeSolver(Node node) {
+    TreeSolver toRemove = null;
+    for (TreeSolver solver : _solvers) {
+      if (solver.head() == node) {
+        toRemove = solver;
+        break;
+      }
+    }
+    //Remove task
+    unregisterTask(toRemove.task());
+    return _solvers.remove(toRemove);
+  }
+
+  /**
+   * Gets the IK Solver with associated with branchRoot frame
+   */
+  public TreeSolver treeSolver(Node node) {
+    for (TreeSolver solver : _solvers) {
+      if (solver.head() == node) {
+        return solver;
+      }
+    }
+    return null;
+  }
+
+  public boolean addIKTarget(Node endEffector, Node target) {
+    for (TreeSolver solver : _solvers) {
+      if (solver.addTarget(endEffector, target)) return true;
+    }
+    return false;
+  }
+
+  /**
+   * Same as {@code executeIKSolver(_solver, 40)}.
+   *
+   * @see #executeSolver(Solver, long)
+   */
+  public void executeSolver(Solver solver) {
+    executeSolver(solver, 40);
+  }
+
+  /**
+   * Only meaningful for non-registered solvers. Solver should be different than
+   * {@link TreeSolver}.
+   *
+   * @see #registerTreeSolver(Node)
+   * @see #unregisterTreeSolver(Node)
+   */
+  public void executeSolver(Solver solver, long period) {
+    registerTask(solver.task());
+    solver.task().run(period);
+  }
+
   // traversal
 
   // detached nodes
@@ -2715,7 +2800,7 @@ public class Graph {
     _bbMatrixHandler.bind(projection(), view());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
-    if(isOffscreen())
+    if (isOffscreen())
       _rays.clear();
   }
 

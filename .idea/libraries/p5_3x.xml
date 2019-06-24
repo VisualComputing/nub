@@ -2,14 +2,9 @@
   <library name="p5-3x">
     <CLASSES>
       <root url="file://$USER_HOME$/.lib/p5-3x" />
-      <root url="file://$USER_HOME$/.lib/gcp" />
     </CLASSES>
     <JAVADOC />
-    <NATIVE>
-      <root url="file://$USER_HOME$/.lib/gcp" />
-    </NATIVE>
     <SOURCES />
-    <jarDirectory url="file://$USER_HOME$/.lib/gcp" recursive="false" />
     <jarDirectory url="file://$USER_HOME$/.lib/p5-3x" recursive="false" />
   </library>
 </component>
