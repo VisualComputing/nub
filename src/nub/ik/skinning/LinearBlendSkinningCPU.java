@@ -42,7 +42,7 @@ public class LinearBlendSkinningCPU implements Skinning {
       _initial = shape.getVertex(_vertexId).copy();
     }
 
-    protected void applyTransformation() {
+    protected void _applyTransformation() {
       Vector curPos = new Vector(_initial.x, _initial.y, _initial.z);
 
       Vector normal = new Vector(_shape.getNormalX(_vertexId),
@@ -72,7 +72,6 @@ public class LinearBlendSkinningCPU implements Skinning {
   public LinearBlendSkinningCPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
     this(skeleton, pg, shape, texture, factor, false);
   }
-
 
   public LinearBlendSkinningCPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
     this._shapes = new ArrayList<>();
@@ -106,6 +105,7 @@ public class LinearBlendSkinningCPU implements Skinning {
     return _shapes.get(0);
   }
 
+  @Override
   public List<Node> skeleton() {
     return _skeleton;
   }
@@ -114,6 +114,7 @@ public class LinearBlendSkinningCPU implements Skinning {
     return _ids;
   }
 
+  @Override
   public void initParams() {
     for (int i = 0; i < _skeleton.size(); i++) {
       Vector v = _skeleton.get(i).position();
@@ -123,6 +124,7 @@ public class LinearBlendSkinningCPU implements Skinning {
     }
   }
 
+  @Override
   public void updateParams() {
     //TODO: IT COULD BE DONE WITH LESS OPERATIONS
     for (int i = 0; i < _skeleton.size(); i++) {
@@ -132,7 +134,7 @@ public class LinearBlendSkinningCPU implements Skinning {
       _currentOrientations[i] = q;
     }
     for (Vertex vertex : _vertices) {
-      vertex.applyTransformation();
+      vertex._applyTransformation();
     }
 
   }
@@ -169,6 +171,7 @@ public class LinearBlendSkinningCPU implements Skinning {
     return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
   }
 
+  @Override
   public void render(PGraphics pg) {
     updateParams();
     for (PShape shape : _shapes) {
@@ -176,10 +179,12 @@ public class LinearBlendSkinningCPU implements Skinning {
     }
   }
 
+  @Override
   public void render() {
     render(_pg);
   }
 
+  @Override
   public void render(Node reference) {
     PGraphics pg = _pg;
     if (reference.graph() instanceof Scene) {

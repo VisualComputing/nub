@@ -63,7 +63,6 @@ public class LinearBlendSkinningGPU implements Skinning {
     this(skeleton, pg, shape, texture, factor, false);
   }
 
-
   public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
     this._shapes = new ArrayList<>();
     _ids = new HashMap<>();
@@ -99,6 +98,7 @@ public class LinearBlendSkinningGPU implements Skinning {
     return _shapes.get(0);
   }
 
+  @Override
   public List<Node> skeleton() {
     return _skeleton;
   }
@@ -107,6 +107,7 @@ public class LinearBlendSkinningGPU implements Skinning {
     return _ids;
   }
 
+  @Override
   public void initParams() {
     for (int i = 0; i < _skeleton.size(); i++) {
       Vector v = _skeleton.get(i).position();
@@ -122,6 +123,7 @@ public class LinearBlendSkinningGPU implements Skinning {
     _shader.set("paintMode", -1);
   }
 
+  @Override
   public void updateParams() {
     //TODO: IT COULD BE DONE WITH LESS OPERATIONS
     for (int i = 0; i < _skeleton.size(); i++) {
@@ -215,6 +217,7 @@ public class LinearBlendSkinningGPU implements Skinning {
     return distance.magnitude();
   }
 
+  @Override
   public void render(PGraphics pg) {
     updateParams();
     pg.shader(_shader);
@@ -224,11 +227,12 @@ public class LinearBlendSkinningGPU implements Skinning {
     pg.resetShader();
   }
 
+  @Override
   public void render() {
     render(_pg);
   }
 
-
+  @Override
   public void render(Node reference) {
     PGraphics pg = _pg;
     if (reference.graph() instanceof Scene) {
