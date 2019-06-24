@@ -1,7 +1,7 @@
 package ik.collada.test;
 
 import nub.ik.visual.Joint;
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Graph;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -21,7 +21,7 @@ public class LoadMesh6 extends PApplet {
     String dae = "hand_rig.dae";
     String tex = null;
     Model model;
-    LinearBlendSkinningGPU skinning;
+    GPULinearBlendSkinning skinning;
 
     public void settings() {
         size(700, 700, P3D);
@@ -45,7 +45,7 @@ public class LoadMesh6 extends PApplet {
         scene.fit();
 
         //4. Relate mesh and skinning
-        skinning = new LinearBlendSkinningGPU(model.structure(), scene.context(), model.mesh());
+        skinning = new GPULinearBlendSkinning(model.structure(), scene.context(), model.mesh());
     }
 
     public void draw() {

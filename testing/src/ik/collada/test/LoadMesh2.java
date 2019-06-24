@@ -1,7 +1,7 @@
 package ik.collada.test;
 
 import nub.ik.visual.Joint;
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.GPULinearBlendSkinning;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
@@ -27,7 +27,7 @@ public class LoadMesh2 extends PApplet {
     String dae = "dummy.dae";
     String tex = null;
     Model model;
-    LinearBlendSkinningGPU skinning;
+    GPULinearBlendSkinning skinning;
     Solver solver;
     public void settings() {
         size(700, 700, P3D);
@@ -52,7 +52,7 @@ public class LoadMesh2 extends PApplet {
         scene.fit();
 
         //4. Relate mesh and skinning
-        skinning = new LinearBlendSkinningGPU(model.structure(), scene.context(), model.mesh());
+        skinning = new GPULinearBlendSkinning(model.structure(), scene.context(), model.mesh());
 
         //5. Adding IK behavior
         //Register an IK Solver

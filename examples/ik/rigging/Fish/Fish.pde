@@ -106,9 +106,9 @@ void resetSkinning(boolean gpu){
   }
   
   if(gpu){
-    skinning = new LinearBlendSkinningGPU(skeleton, this.g, shapePath, texturePath, 200, true);    
+    skinning = new GPULinearBlendSkinning(skeleton, this.g, shapePath, texturePath, 200, true);    
   } else{
-    skinning = new LinearBlendSkinningCPU(skeleton, this.g, shapePath, texturePath, 200, true);    
+    skinning = new CPULinearBlendSkinning(skeleton, this.g, shapePath, texturePath, 200, true);    
   }
 }
 

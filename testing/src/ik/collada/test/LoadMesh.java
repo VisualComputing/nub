@@ -1,7 +1,7 @@
 package ik.collada.test;
 
 import nub.ik.visual.Joint;
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
@@ -30,7 +30,7 @@ public class LoadMesh extends PApplet {
     String dae = "humanoid.dae";
     String tex = "texture.png";
     Model model;
-    LinearBlendSkinningGPU skinning;
+    GPULinearBlendSkinning skinning;
     ArrayList<Node> targets = new ArrayList<Node>();
     String[] roots = {"Upper_Arm_R", "Upper_Arm_L", "Upper_Leg_R", "Upper_Leg_L"};
     String[] effectors = {"Hand_R", "Hand_L", "Foot_R", "Foot_L"};
@@ -52,7 +52,7 @@ public class LoadMesh extends PApplet {
         scene.eye().rotate(new Quaternion(new Vector(1,0,0), PI/2));
         scene.eye().rotate(new Quaternion(new Vector(0,0,1), PI));
         scene.fit();
-        skinning = new LinearBlendSkinningGPU(model.structure(), this.g, model.mesh());
+        skinning = new GPULinearBlendSkinning(model.structure(), this.g, model.mesh());
 
         for(int i = 0; i < effectors.length; i++){
             Node target = new Target(scene, ((Joint)model.root()).radius() * 0.6f);

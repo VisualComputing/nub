@@ -192,7 +192,7 @@ Node generateEagle(){
   objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
   objShape.scale(1);
 
-  skinning.add(new LinearBlendSkinningGPU(skeleton, this.g, shapeFile, textureFile, 100, false));
+  skinning.add(new GPULinearBlendSkinning(skeleton, this.g, shapeFile, textureFile, 100, false));
   
   //Adding IK behavior
   //Identify root and end effector(s)

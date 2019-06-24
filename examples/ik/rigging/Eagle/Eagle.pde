@@ -106,8 +106,8 @@ void setup() {
         
     }
     //use this method to visualize which node influences the most on a region of the mesh.
-    if(skinning instanceof LinearBlendSkinningGPU)
-        ((LinearBlendSkinningGPU) skinning).paintAllJoints();
+    if(skinning instanceof GPULinearBlendSkinning)
+        ((GPULinearBlendSkinning) skinning).paintAllJoints();
 
 }
 
@@ -163,9 +163,9 @@ void resetSkinning(boolean gpu){
   }
   
   if(gpu){
-    skinning = new LinearBlendSkinningGPU(skeleton, this.g, shapePath, texturePath, scene.radius(), false);    
+    skinning = new GPULinearBlendSkinning(skeleton, this.g, shapePath, texturePath, scene.radius(), false);    
   } else{
-    skinning = new LinearBlendSkinningCPU(skeleton, this.g, shapePath, texturePath, scene.radius(), false);    
+    skinning = new CPULinearBlendSkinning(skeleton, this.g, shapePath, texturePath, scene.radius(), false);    
   }
 }
 
@@ -206,13 +206,13 @@ void keyPressed() {
 
     if(key == 'A' || key == 'a') {
         activeRegion = (activeRegion + 1) % skinning.skeleton().size();
-        if(skinning instanceof LinearBlendSkinningGPU)
-          ((LinearBlendSkinningGPU) skinning).paintJoint(activeRegion);
+        if(skinning instanceof GPULinearBlendSkinning)
+          ((GPULinearBlendSkinning) skinning).paintJoint(activeRegion);
     }
 
     if(key == 'd' || key == 'D'){
-        if(skinning instanceof LinearBlendSkinningGPU)
-          ((LinearBlendSkinningGPU) skinning).disablePaintMode();
+        if(skinning instanceof GPULinearBlendSkinning)
+          ((GPULinearBlendSkinning) skinning).disablePaintMode();
     }
         
     if(key == 'i' || key == 'I'){

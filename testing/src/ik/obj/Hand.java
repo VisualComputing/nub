@@ -1,7 +1,7 @@
 package ik.obj;
 
 import nub.ik.visual.Joint;
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.GPULinearBlendSkinning;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
@@ -21,7 +21,7 @@ import java.util.List;
  */
 public class Hand extends PApplet {
     Scene scene;
-    LinearBlendSkinningGPU skinning;
+    GPULinearBlendSkinning skinning;
 
     String shapePath = "/testing/data/objs/Rigged_Hand.obj";
     String texturePath = "/testing/data/objs/HAND_C.jpg";
@@ -48,7 +48,7 @@ public class Hand extends PApplet {
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = buildSkeleton(reference);
         //3. Relate the shape with a skinning method (CPU or GPU)
-        skinning = new LinearBlendSkinningGPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
+        skinning = new GPULinearBlendSkinning(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
 
         //4. Adding IK behavior
         //4.1 Identify root and end effector(s)

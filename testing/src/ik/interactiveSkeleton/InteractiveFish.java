@@ -1,6 +1,6 @@
 package ik.interactiveSkeleton;
 
-import nub.ik.skinning.LinearBlendSkinningGPU;
+import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.core.Interpolator;
@@ -24,7 +24,7 @@ public class InteractiveFish extends PApplet {
     Scene scene;
     Node reference;
 
-    LinearBlendSkinningGPU skinning;
+    GPULinearBlendSkinning skinning;
 
     Node target;
     Interpolator targetInterpolator;
@@ -51,7 +51,7 @@ public class InteractiveFish extends PApplet {
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = fishSkeleton(reference);
         //3. Relate the shape with a skinning method (CPU or GPU)
-        skinning = new LinearBlendSkinningGPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, 200, true);
+        skinning = new GPULinearBlendSkinning(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, 200, true);
 
         //4. Adding IK behavior
         //4.1 Identify root and end effector(s) (first and last joint on the skeleton)

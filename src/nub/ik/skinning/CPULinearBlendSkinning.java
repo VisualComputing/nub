@@ -1,14 +1,11 @@
 package nub.ik.skinning;
 
 import nub.core.Node;
-import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.*;
-import processing.opengl.PShader;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,24 +14,66 @@ import java.util.Map;
 /**
  * Created by sebchaparr on 11/03/18.
  */
-public class LinearBlendSkinningGPU implements Skinning {
+public class CPULinearBlendSkinning implements Skinning {
   //Skeleton & Geometry information
   protected List<PShape> _shapes;
   protected List<Node> _skeleton;
-  protected PGraphics _pg;
   //Shader information
-  protected PShader _shader;
   protected Quaternion[] _initialOrientations;
   protected Vector[] _initialPositions;
-  protected float[] _initialPositionsArray;
-  protected float[] _positionsArray;
-  protected float[] _orientationsArray;
+  protected Quaternion[] _currentOrientations;
+  protected Vector[] _currentPositions;
   protected Map<Node, Integer> _ids;
-  protected final String _fragmentPath = "frag.glsl";
-  protected final String _vertexPath = "skinning.glsl";
+  protected List<Vertex> _vertices;
+  protected PGraphics _pg;
 
+  protected class Vertex {
+    protected int[] _joints;
+    protected float[] _weights;
+    protected int _vertexId;
+    protected PVector _initial;
+    protected PShape _shape;
 
-  public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, PShape shape) {
+    protected Vertex(PShape shape, int vertexId, int[] joints, float[] weights) {
+      _shape = shape;
+      _vertexId = vertexId;
+      _joints = joints;
+      _weights = weights;
+      _initial = shape.getVertex(_vertexId).copy();
+    }
+
+    protected void _applyTransformation() {
+      Vector curPos = new Vector(_initial.x, _initial.y, _initial.z);
+
+      Vector normal = new Vector(_shape.getNormalX(_vertexId),
+          _shape.getNormalY(_vertexId), _shape.getNormalZ(_vertexId));
+
+      Vector v = new Vector();
+      Vector n = new Vector();
+      for (int i = 0; i < _joints.length; i++) {
+        int idx = _joints[i];
+        if (_weights[i] == 0) continue;
+        Quaternion quat = _currentOrientations[idx];
+        Vector pos = _initialPositions[idx];
+        Vector off = _currentPositions[idx];
+        Vector u = Vector.subtract(curPos, pos);
+        u = quat.rotate(u);
+        u.add(pos);
+        u.add(off);
+        u.multiply(_weights[i]);
+        v.add(u);
+        n.add(Vector.multiply(quat.rotate(normal), _weights[i]));
+      }
+
+      _shape.setVertex(_vertexId, v.x(), v.y(), v.z());
+    }
+  }
+
+  public CPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
+    this(skeleton, pg, shape, texture, factor, false);
+  }
+
+  public CPULinearBlendSkinning(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
     this._shapes = new ArrayList<>();
     _ids = new HashMap<>();
     _skeleton = skeleton;
@@ -46,48 +85,16 @@ public class LinearBlendSkinningGPU implements Skinning {
                 ((Joint) _skeleton.get(i)).setColor(c);
             }*/
     }
-
     _initialOrientations = new Quaternion[joints];
     _initialPositions = new Vector[joints];
-    _initialPositionsArray = new float[joints * 3];
-    _positionsArray = new float[joints * 3];
-    _orientationsArray = new float[joints * 4];
-    PApplet pApplet = pg.parent;
-    _shader = pApplet.loadShader(_fragmentPath, _vertexPath);
-    _shapes.add(shape);
+    _currentOrientations = new Quaternion[joints];
+    _currentPositions = new Vector[joints];
+
+
+    _vertices = new ArrayList<Vertex>();
+    _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
     _pg = pg;
     initParams();
-  }
-
-  public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor) {
-    this(skeleton, pg, shape, texture, factor, false);
-  }
-
-  public LinearBlendSkinningGPU(List<Node> skeleton, PGraphics pg, String shape, String texture, float factor, boolean quad) {
-    this._shapes = new ArrayList<>();
-    _ids = new HashMap<>();
-    _skeleton = skeleton;
-    int joints = skeleton.size();
-    for (int i = 0; i < joints; i++) {
-      _ids.put(_skeleton.get(i), i);
-      if (_skeleton.get(i) instanceof Joint) {
-        int c = Color.HSBtoRGB((i + 1.0f) / skeleton.size(), 1f, 1f);
-        ((Joint) _skeleton.get(i)).setColor(c);
-      }
-    }
-    _initialOrientations = new Quaternion[joints];
-    _initialPositions = new Vector[joints];
-    _initialPositionsArray = new float[joints * 3];
-    _positionsArray = new float[joints * 3];
-    _orientationsArray = new float[joints * 4];
-    PApplet pApplet = pg.parent;
-    _shader = pApplet.loadShader(_fragmentPath, _vertexPath);
-    _shapes.add(createShape(pg, pg.loadShape(shape), texture, factor, quad));
-    initParams();
-  }
-
-  public PShader shader() {
-    return _shader;
   }
 
   public List<PShape> shapes() {
@@ -114,13 +121,7 @@ public class LinearBlendSkinningGPU implements Skinning {
       Quaternion q = _skeleton.get(i).orientation();
       _initialOrientations[i] = q;
       _initialPositions[i] = v.get();
-      _initialPositionsArray[i * 3 + 0] = v.x();
-      _initialPositionsArray[i * 3 + 1] = v.y();
-      _initialPositionsArray[i * 3 + 2] = v.z();
     }
-    _shader.set("bonePositionOrig", _initialPositionsArray);
-    _shader.set("boneLength", _skeleton.size());
-    _shader.set("paintMode", -1);
   }
 
   @Override
@@ -129,28 +130,13 @@ public class LinearBlendSkinningGPU implements Skinning {
     for (int i = 0; i < _skeleton.size(); i++) {
       Vector v = Vector.subtract(_skeleton.get(i).position(), _initialPositions[i]);
       Quaternion q = Quaternion.compose(_skeleton.get(i).orientation(), _initialOrientations[i].inverse());
-      _positionsArray[i * 3 + 0] = v.x();
-      _positionsArray[i * 3 + 1] = v.y();
-      _positionsArray[i * 3 + 2] = v.z();
-      _orientationsArray[i * 4 + 0] = q.x();
-      _orientationsArray[i * 4 + 1] = q.y();
-      _orientationsArray[i * 4 + 2] = q.z();
-      _orientationsArray[i * 4 + 3] = q.w();
+      _currentPositions[i] = v;
+      _currentOrientations[i] = q;
     }
-    _shader.set("bonePosition", _positionsArray);
-    _shader.set("boneRotation", _orientationsArray);
-  }
+    for (Vertex vertex : _vertices) {
+      vertex._applyTransformation();
+    }
 
-  public void paintAllJoints() {
-    _shader.set("paintMode", 0);
-  }
-
-  public void paintJoint(int id) {
-    _shader.set("paintMode", id);
-  }
-
-  public void disablePaintMode() {
-    _shader.set("paintMode", -1);
   }
 
   public float[] addWeights(List<Node> branch, PVector vector) {
@@ -182,9 +168,32 @@ public class LinearBlendSkinningGPU implements Skinning {
     for (int k = 0; k < joints.length; k++) {
       w[k] += 1.f / d[k] / total_dist;
     }
-
     return new float[]{joints[0], joints[1], joints[2], w[0], w[1], w[2]};
   }
+
+  @Override
+  public void render(PGraphics pg) {
+    updateParams();
+    for (PShape shape : _shapes) {
+      pg.shape(shape);
+    }
+  }
+
+  @Override
+  public void render() {
+    render(_pg);
+  }
+
+  @Override
+  public void render(Node reference) {
+    PGraphics pg = _pg;
+    if (reference.graph() instanceof Scene) {
+      pg = ((Scene) reference.graph()).context();
+    }
+    reference.graph().applyWorldTransformation(reference);
+    render(pg);
+  }
+
 
   /*
    * Get the distance from vertex to line formed by frame and the reference frame of frame
@@ -217,30 +226,6 @@ public class LinearBlendSkinningGPU implements Skinning {
     return distance.magnitude();
   }
 
-  @Override
-  public void render(PGraphics pg) {
-    updateParams();
-    pg.shader(_shader);
-    for (PShape shape : _shapes) {
-      pg.shape(shape);
-    }
-    pg.resetShader();
-  }
-
-  @Override
-  public void render() {
-    render(_pg);
-  }
-
-  @Override
-  public void render(Node reference) {
-    PGraphics pg = _pg;
-    if (reference.graph() instanceof Scene) {
-      pg = ((Scene) reference.graph()).context();
-    }
-    reference.graph().applyWorldTransformation(reference);
-    render(pg);
-  }
 
   //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
   public PShape createShape(PGraphics pg, PShape r, String texture, float size, boolean quad) {
@@ -254,18 +239,18 @@ public class LinearBlendSkinningGPU implements Skinning {
     if (r.getChildCount() == 0) {
       for (int j = 0; j < r.getVertexCount(); j++) {
         PVector p = r.getVertex(j).mult(scaleFactor);
-        System.out.println("scale " + scaleFactor);
-        System.out.println("v " + p);
         PVector n = r.getNormal(j);
         float u = r.getTextureU(j);
         float v = r.getTextureV(j);
         s.normal(n.x, n.y, n.z);
         float[] params = addWeights(_skeleton, p);
-        s.attrib("joints", params[0] * 1.f, params[1] * 1.f, params[2] * 1.f);
-        s.attrib("weights", params[3], params[4], params[5]);
         s.vertex(p.x, p.y, p.z, u, v);
+        //create vertex
+        _vertices.add(new Vertex(s, j, new int[]{(int) params[0],
+            (int) params[1], (int) params[2]}, new float[]{params[3], params[4], params[5]}));
       }
     } else {
+      int vc = 0;
       for (int i = 0; i < r.getChildCount(); i++) {
         for (int j = 0; j < r.getChild(i).getVertexCount(); j++) {
           PVector p = r.getChild(i).getVertex(j).mult(scaleFactor);
@@ -273,11 +258,13 @@ public class LinearBlendSkinningGPU implements Skinning {
           float u = r.getChild(i).getTextureU(j);
           float v = r.getChild(i).getTextureV(j);
           s.normal(n.x, n.y, n.z);
-          float[] params = addWeights(_skeleton, p);
-          s.attrib("joints", params[0] * 1.f, params[1] * 1.f, params[2] * 1.f);
-          s.attrib("weights", params[3], params[4], params[5]);
 
+          float[] params = addWeights(_skeleton, p);
           s.vertex(p.x, p.y, p.z, u, v);
+          //create vertex
+          _vertices.add(new Vertex(s, vc, new int[]{(int) params[0],
+              (int) params[1], (int) params[2]}, new float[]{params[3], params[4], params[5]}));
+          vc++;
         }
       }
     }

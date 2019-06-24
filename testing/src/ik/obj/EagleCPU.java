@@ -1,7 +1,7 @@
 package ik.obj;
 
 import nub.ik.visual.Joint;
-import nub.ik.skinning.LinearBlendSkinningCPU;
+import nub.ik.skinning.CPULinearBlendSkinning;
 import ik.interactive.Target;
 import nub.core.Graph;
 import nub.core.Node;
@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class EagleCPU extends PApplet {
     Scene scene;
-    LinearBlendSkinningCPU skinning;
+    CPULinearBlendSkinning skinning;
 
     String shapePath = "/testing/data/objs/EAGLE_2.OBJ";
     String texturePath = "/testing/data/objs/EAGLE2.jpg";
@@ -45,7 +45,7 @@ public class EagleCPU extends PApplet {
         //2.3 Create the Joints based on 2.2.
         List<Node> skeleton = buildSkeleton(reference);
         //3. Relate the shape with a skinning method (CPU or GPU)
-        skinning = new LinearBlendSkinningCPU(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
+        skinning = new CPULinearBlendSkinning(skeleton, this.g, sketchPath() + shapePath, sketchPath() + texturePath, scene.radius());
 
         //4. Adding IK behavior
         //4.1 Identify root and end effector(s)

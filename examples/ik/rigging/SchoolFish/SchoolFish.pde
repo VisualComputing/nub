@@ -190,7 +190,7 @@ Node generateFish(String name){
   objShape.rotate(new Quaternion(new Vector(0, 1, 0), -PI/2.f));
 
   //Uncomment to use Linear Blending Skinning with CPU
-  skinning.add(new LinearBlendSkinningGPU(skeleton, this.g, shapeFile, textureFile, 200, true));
+  skinning.add(new GPULinearBlendSkinning(skeleton, this.g, shapeFile, textureFile, 200, true));
   //Adding IK behavior
   Node target = new Node(scene);
   target.setReference(null);
