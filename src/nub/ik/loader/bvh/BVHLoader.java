@@ -44,8 +44,8 @@ public class BVHLoader {
     _setup(path, scene, reference);
   }
 
-  public BVHLoader(Class<? extends Node> frameClass, String path, Scene scene, Node reference) {
-    _class = frameClass;
+  public BVHLoader(Class<? extends Node> nodeClass, String path, Scene scene, Node reference) {
+    _class = nodeClass;
     _setup(path, scene, reference);
   }
 
@@ -337,9 +337,9 @@ public class BVHLoader {
       if (_loop) _currentPose = 0;
       else return;
     }
-    for (Node frame : _branch) {
-      frame.setRotation(_poses.get(frame.id()).get(_currentPose).rotation().get());
-      frame.setTranslation(_poses.get(frame.id()).get(_currentPose).translation().get());
+    for (Node node : _branch) {
+      node.setRotation(_poses.get(node.id()).get(_currentPose).rotation().get());
+      node.setTranslation(_poses.get(node.id()).get(_currentPose).translation().get());
     }
     _currentPose++;
   }
