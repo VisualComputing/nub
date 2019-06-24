@@ -1,9 +1,9 @@
 /*
- * Instantiate IK
- * by Sebastian Chaparro.
+ * Constrained IK
+ * by Sebastian Chaparro Cuevas.
  *
- * This example illustrates how to use an IK solver.
- * Here an IK solver will be related  with a pretty simple chain structure on the XY-Plane:
+ * In this example an IK solver will be related with a pretty simple chain structure on the XY-Plane,
+ * furthermore each node has a 1-DOF (Hinge) constraint:
  *                         World
  *                           ^
  *                           | \
@@ -24,10 +24,12 @@
  * Press 'S' to stop/restart IK Solver
  */
 
+
 import nub.primitives.*;
 import nub.core.*;
+import nub.core.constraint.*;
 import nub.processing.*;
-import nub.ik.*;
+import nub.ik.solver.geometric.*;
 import nub.timing.*;
 
 int w = 700;
@@ -54,28 +56,91 @@ void setup() {
     scene.setRadius(280);
     scene.fit(1);
     //1. Create the Skeleton (chain described above)
-    skeleton.add(createJoint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false));
-    skeleton.add(createJoint(scene,skeleton.get(0), new Vector(0, length), jointRadius, true));
-    skeleton.add(createJoint(scene,skeleton.get(1), new Vector(0, length), jointRadius, true));
-    skeleton.add(createJoint(scene,skeleton.get(2), new Vector(0, length), jointRadius, true));
-    skeleton.add(createJoint(scene,skeleton.get(3), new Vector(0, length), jointRadius, true));
-    //End Effector
-    Node endEffector = createJoint(scene,skeleton.get(4), new Vector(0, length), jointRadius, true);
-    skeleton.add(endEffector);
+    Node node0 = new Joint(scene,null, new Vector(0, -scene.radius()/2), jointRadius, false);
+    Node node1 = new Joint(scene,node0, new Vector(0, length), jointRadius, true);
+    Node node2 = new Joint(scene,node1, new Vector(0, length), jointRadius, true);
+    Node node3 = new Joint(scene,node2, new Vector(0, length), jointRadius, true);
+    Node node4 = new Joint(scene,node3, new Vector(0, length), jointRadius, true);
+    skeleton.add(node0);
+    skeleton.add(node1);
+    skeleton.add(node2);
+    skeleton.add(node3);
+    skeleton.add(node4);
     //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
-    endEffector.enableTracking(false);
-
+    node4.enableTracking(false);
+    //---------------------------------------------------
+    //Adding Hinge constraints
+    /*
+     * When working with constraints it is important to take into account the rotation / orientation of the nodes.
+     *
+     * Here we are drawing the local axes of each node to know how to set properly a constraint.
+     * Keep in mind that:
+     *   X Axis is represented as a red line.
+     *   Y Axis is represented as a green line.
+     *   Z Axis is represented as a blue line.
+     *
+     * Locating a constraint requires to set an initial reference rotation, a Twist Vector and an Up Vector.
+     * Once they are properly identified you could define which is the maximum and minimum angle of a Hinge rotation
+     * i.e a rotation whose Axis is the Twist Vector. (see Constraint explanation on nub wikis) 
+     * */
+    
+    //Note that in a 2D Scene only rotations around Z-Axis make sense.
+    //Apply a Hinge constraint to node0:
+    Vector twist0 = new Vector(1,0,0);
+    Vector up0 = new Vector(0,1,0);
+    if(scene.is2D()){
+        twist0 = new Vector(0,0,1);
+        up0 = new Vector(0,1,0);
+    }
+    Hinge constraint0 = new Hinge(radians(40), radians(60));
+    constraint0.setRestRotation(node0.rotation(), up0, twist0);
+    node0.setConstraint(constraint0);
+    
+    //Apply a Hinge constraint to node1:
+    Vector twist1 = new Vector(0,0,1);
+    Vector up1 = new Vector(0,1,0);
+    if(scene.is2D()){
+        twist1 = new Vector(0,0,1);
+        up1 = new Vector(0,1,0);
+    }
+    Hinge constraint1 = new Hinge(radians(20), radians(30));
+    constraint1.setRestRotation(node1.rotation(), up1, twist1);
+    node1.setConstraint(constraint1);
+    
+    //Apply a Hinge constraint to node2:
+    Vector twist2 = new Vector(1,0,0);
+    Vector up2 = new Vector(0,1,0);
+    if(scene.is2D()){
+        twist2 = new Vector(0,0,1);
+        up2 = new Vector(0,1,0);
+    }
+    Hinge constraint2 = new Hinge(radians(70), radians(40));
+    constraint2.setRestRotation(node2.rotation(), up2, twist2);
+    node2.setConstraint(constraint2);
+    
+    //Apply a Hinge constraint to node3:
+    Vector twist3 = new Vector(0,0,1);
+    Vector up3 = new Vector(0,1,0);
+    if(scene.is2D()){
+        twist3 = new Vector(0,0,1);
+        up3 = new Vector(0,1,0);
+    }
+    Hinge constraint3 = new Hinge(radians(40), radians(70));
+    constraint3.setRestRotation(node3.rotation(), up3, twist3);
+    node3.setConstraint(constraint3);
+    //---------------------------------------------------
+    
     //2. Lets create a Target (a bit bigger than a Joint in the structure)
-    Node target = createTarget(scene, jointRadius * 1.5f);
-
-    //Locate the Target on same spot of the end effectors
-    target.setPosition(endEffector.position());
-
+    Node target = new Target(scene, jointRadius * 1.5f);
+    
+    //Locate the Target on same spot of the end effector
+    target.setPosition(node4.position());
+    
     //3. Relate the structure with a Solver. In this example we instantiate a solver
     //As we're dealing with a Chain Structure a Chain Solver is preferable
     //A Chain solver constructor receives an ArrayList containing the Skeleton structure
     final ChainSolver solver = new ChainSolver(skeleton);
-
+    
     //Optionally you could modify the following parameters of the Solver:
     //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
     solver.setMaxError(1);
@@ -85,10 +150,10 @@ void setup() {
     solver.setTimesPerFrame(5);
     //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
     solver.setMinDistance(0.5f);
-
+    
     //4. relate targets with end effectors
-    solver.setTarget(endEffector, target);
-
+    solver.setTarget(node4, target);
+    
     //5. Create a Timing Task such that the solver executes each amount of time
     TimingTask solverTask = new TimingTask() {
         @Override
@@ -101,86 +166,27 @@ void setup() {
     };
     scene.registerTask(solverTask); //Add solverTask to the Graph scene
     solverTask.run(40); //Execute the solverTask each 40 ms
-
+    
     //Define Text Properties
     textAlign(CENTER);
     textSize(24);
 }
 
-void draw() {
+public void draw() {
     background(0);
-    if(scene.is3D()) lights();
+    lights();
     scene.drawAxes();
     scene.render();
-    noLights();
     scene.beginHUD();
     for (int i = 0; i < skeleton.size(); i++) {
         //Print Node names
         Vector screenLocation = scene.screenLocation(skeleton.get(i).position());
-        if(i == 0){
-          text("Chain Structure", screenLocation.x(), screenLocation.y() - 50);
-        }
-        if(i == skeleton.size() - 1){
-            text("End Effector " + i, screenLocation.x(), screenLocation.y() + 30);
-        } else{
-            text("Node " + i, screenLocation.x(), screenLocation.y() + 30);
-        }
+        text("Node " + i, screenLocation.x(), screenLocation.y());
     }
     scene.endHUD();
-
 }
 
 
-Node createTarget(Scene scene, float radius){
-    /*
-    * A target is a Node, we represent a Target as a
-    * Red ball.
-    * */
-    PShape redBall;
-    if (scene.is2D()) redBall = createShape(ELLIPSE,0, 0, radius*2, radius*2);
-    else  redBall = createShape(SPHERE, radius);
-    redBall.setStroke(false);
-    redBall.setFill(color(255,0,0));
-
-    Node target = new Node(scene, redBall);
-    //Exact picking precision
-    target.setPickingThreshold(0);
-    return target;
-}
-
-Node createJoint(Scene scene, Node node, Vector translation, final float radius, final boolean drawLine){
-    /*
-    * A Joint will be represented as a green ball
-    * that is joined to its reference Node
-    * */
-
-    Node joint = new Node(scene){
-        @Override
-        public void graphics(PGraphics pg){
-            Scene scene = (Scene) this._graph;
-            pg.pushStyle();
-            if (drawLine) {
-                pg.stroke(255);
-                Vector v = location(new Vector(), reference());
-                if (scene.is2D()) {
-                    pg.line(0, 0, v.x(), v.y());
-                } else {
-                    pg.line(0, 0, 0,  v.x(), v.y(), v.z());
-                }
-            }
-            pg.fill(color(0,255,0));
-            pg.noStroke();
-            if (scene.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
-            else pg.sphere(radius);
-            pg.popStyle();
-        }
-    };
-    joint.setReference(node);
-    //Exact picking precision
-    joint.setPickingThreshold(0);
-    joint.setTranslation(translation);
-    return joint;
-}
 
 void mouseMoved() {
     scene.cast();

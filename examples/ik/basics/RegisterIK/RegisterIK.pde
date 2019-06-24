@@ -25,7 +25,7 @@
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
-import nub.ik.*;
+import nub.ik.solver.*;
 
 
 int w = 1200;
@@ -53,24 +53,24 @@ void setup() {
     scene.setRadius(200);
     scene.fit(1);
     //1. Create the Skeleton (Y-Shape described above)
-    skeleton[0] = createJoint(scene,null, new Vector(0,-scene.radius()/2), jointRadius, false);
-    skeleton[1] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-    skeleton[2] = createJoint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
-    skeleton[3] = createJoint(scene,skeleton[1], new Vector(-length, length), jointRadius, true);
-    skeleton[4] = createJoint(scene,skeleton[2], new Vector(length, length), jointRadius, true);
+    skeleton[0] = new Joint(scene,null, new Vector(0,-scene.radius()/2), jointRadius, false);
+    skeleton[1] = new Joint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
+    skeleton[2] = new Joint(scene,skeleton[0], new Vector(0, length), jointRadius, true);
+    skeleton[3] = new Joint(scene,skeleton[1], new Vector(-length, length), jointRadius, true);
+    skeleton[4] = new Joint(scene,skeleton[2], new Vector(length, length), jointRadius, true);
 
     //Left End Effector
-    skeleton[5] = createJoint(scene,skeleton[3], new Vector(-length, length), jointRadius, true);
+    skeleton[5] = new Joint(scene,skeleton[3], new Vector(-length, length), jointRadius, true);
     //Right End Effector
-    skeleton[6] = createJoint(scene,skeleton[4], new Vector(length, length), jointRadius, true);
+    skeleton[6] = new Joint(scene,skeleton[4], new Vector(length, length), jointRadius, true);
 
     //As targets and effectors lie on the same spot, is preferable to disable End Effectors tracking
     skeleton[5].enableTracking(false);
     skeleton[6].enableTracking(false);
 
     //2. Lets create two Targets (a bit bigger than a Joint structure)
-    leftTarget = createTarget(scene, jointRadius * 1.3f);
-    rightTarget = createTarget(scene, jointRadius * 1.3f);
+    leftTarget = new Target(scene, jointRadius * 1.3f);
+    rightTarget = new Target(scene, jointRadius * 1.3f);
 
     //Locate the Targets on same spot of the end effectors
     leftTarget.setPosition(skeleton[5].position());
@@ -124,57 +124,6 @@ void draw() {
         }
     }
     scene.endHUD();
-}
-
-Node createTarget(Scene scene, float radius){
-    /*
-    * A target is a Node, we represent a Target as a
-    * Red ball.
-    * */
-    PShape redBall;
-    if (scene.is2D()) redBall = createShape(ELLIPSE,0, 0, radius*2, radius*2);
-    else  redBall = createShape(SPHERE, radius);
-    redBall.setStroke(false);
-    redBall.setFill(color(255,0,0));
-
-    Node target = new Node(scene, redBall);
-    //Exact picking precision
-    target.setPickingThreshold(0);
-    return target;
-}
-
-Node createJoint(Scene scene, Node node, Vector translation, final float radius, final boolean drawLine){
-    /*
-    * A Joint will be represented as a green ball
-    * that is joined to its reference Node
-    * */
-
-    Node joint = new Node(scene){
-        @Override
-        public void graphics(PGraphics pg){
-            Scene scene = (Scene) this._graph;
-            pg.pushStyle();
-            if (drawLine) {
-                pg.stroke(255);
-                Vector v = location(new Vector(), reference());
-                if (scene.is2D()) {
-                    pg.line(0, 0, v.x(), v.y());
-                } else {
-                    pg.line(0, 0, 0,  v.x(), v.y(), v.z());
-                }
-            }
-            pg.fill(color(0,255,0));
-            pg.noStroke();
-            if (scene.is2D()) pg.ellipse(0, 0, radius*2, radius*2);
-            else pg.sphere(radius);
-            pg.popStyle();
-        }
-    };
-    joint.setReference(node);
-    //Exact picking precision
-    joint.setPickingThreshold(0);
-    joint.setTranslation(translation);
-    return joint;
 }
 
 void mouseMoved() {

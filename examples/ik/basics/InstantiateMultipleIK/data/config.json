@@ -1,0 +1,18 @@
+{
+  "eye": {
+    "orientation": [
+      0,
+      0,
+      0,
+      1
+    ],
+    "magnitude": 0.800000011920929,
+    "position": [
+      0,
+      0,
+      484.9742431640625
+    ]
+  },
+  "radius": 280,
+  "type": "ORTHOGRAPHIC"
+}
