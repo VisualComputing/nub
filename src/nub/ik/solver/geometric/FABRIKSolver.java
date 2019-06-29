@@ -176,7 +176,7 @@ public abstract class FABRIKSolver extends Solver {
       Vector pos_i = _positions.get(i);
       Vector pos_i1 = _positions.get(i + 1);
       float dist_i = _distances.get(i + 1);
-      if (dist_i == 0) {
+      if (dist_i <= 10e-4) {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
         if (_enableHistory) {
@@ -231,7 +231,7 @@ public abstract class FABRIKSolver extends Solver {
       Vector pos_i = positions.get(i);
       Vector pos_i1 = positions.get(i + 1);
       float dist_i = distances.get(i + 1);
-      if (dist_i == 0) {
+      if (dist_i <= 10e-4) {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         positions.set(i, pos_i1.get());
         continue;
@@ -273,8 +273,9 @@ public abstract class FABRIKSolver extends Solver {
 
     Vector o_hat = o;
     for (int i = 0; i < chain.size() - 1; i++) {
-      if (distances.get(i + 1) == 0) {
-        positions.set(i + 1, positions.get(i));
+      if (distances.get(i + 1) <= 10e-4) {
+        positions.set(i + 1, positions.get(i)); //keep pos
+        orientation.compose(chain.get(i).rotation()); //update orientation
         continue;
       }
       magnitude *= chain.get(i).scaling();
@@ -322,8 +323,9 @@ public abstract class FABRIKSolver extends Solver {
 
     Vector o_hat = o;
     for (int i = 0; i < chain.size() - 1; i++) {
-      if (_distances.get(i + 1) == 0) {
-        _positions.set(i + 1, _positions.get(i));
+      if (_distances.get(i + 1) <= 10e-4) {
+        _positions.set(i + 1, _positions.get(i)); //keep pos
+        orientation.compose(chain.get(i).rotation()); //update orientation
         //Animation
         if (_enableHistory) {
           history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i + 1).get(), null);

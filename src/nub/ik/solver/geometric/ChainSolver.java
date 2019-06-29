@@ -126,7 +126,8 @@ public class ChainSolver extends FABRIKSolver {
       Quaternion orientation = prevOrientation.get();
       orientation.compose(joint.rotation().get());
       _positions.add(position);
-      _distances.add(Vector.subtract(position, prevPosition).magnitude());
+      float mag = Vector.subtract(position, prevPosition).magnitude();
+      _distances.add(mag <= 10e-4 ? 0 : mag);
       _jointChange.add(0f);
       _orientations.add(orientation);
       prevPosition = position;
@@ -341,7 +342,8 @@ public class ChainSolver extends FABRIKSolver {
       Quaternion orientation = prevOrientation.get();
       orientation.compose(node.rotation().get());
       _positions.add(position);
-      _distances.add(Vector.subtract(position, prevPosition).magnitude());
+      float mag = Vector.subtract(position, prevPosition).magnitude();
+      _distances.add(mag <= 10e-4 ? 0 : mag);
       _jointChange.add(0f);
       _orientations.add(orientation);
       prevPosition = position;

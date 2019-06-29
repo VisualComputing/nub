@@ -71,6 +71,7 @@ public class TreeSolver extends FABRIKSolver {
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
+  protected boolean _explore = true;
   protected boolean _is3D;
 
   public Node head() {
@@ -82,12 +83,18 @@ public class TreeSolver extends FABRIKSolver {
     if (frame.children().isEmpty()) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
+      solver._keepDirection = _keepDirection;
+      solver._fixTwisting = _fixTwisting;
+      solver.explore(_explore);
       new TreeNode(parent, solver);
       return;
     }
     if (frame.children().size() > 1) {
       list.add(frame);
       ChainSolver solver = new ChainSolver(list, _copyChain(parent, list), null);
+      solver._keepDirection = _keepDirection;
+      solver._fixTwisting = _fixTwisting;
+      solver.explore(_explore);
       TreeNode treeNode = new TreeNode(parent, solver);
       for (Node child : frame.children()) {
         ArrayList<Node> newList = new ArrayList<Node>();
@@ -201,20 +208,21 @@ public class TreeSolver extends FABRIKSolver {
     }
 
     /* TODO: Check if it's better for convergence to try more times with local regions */
-    Vector o = solver._chain.get(0).position();
-    Vector p = null;
-    if (solver._positions().size() > 1) p = solver._chain.get(1).position();
-
-    for (int i = 0; i < 3 && solver._positions().size() > 1; i++) {
-      solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
-      if (solver._targetDirection != null) {
-        solver._applyTargetdirection();
+    if (solver._positions().size() > 1) {
+      Vector o = solver._chain.get(0).position();
+      Vector p = solver._chain.get(1).position().get();
+      for (int i = 0; i < 3 && solver._positions().size() > 1; i++) {
+        solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
+        if (solver._targetDirection != null) {
+          solver._applyTargetdirection();
+        }
+        solver._forwardReaching();
+        solver._positions().set(0, o);
+        solver._positions().set(1, p);
+        solver._backwardReaching(o);
       }
-      solver._forwardReaching();
-      solver._positions().set(0, o);
-      solver._positions().set(1, p);
-      solver._backwardReaching(o);
     }
+
 
     solver._positions().set(solver._chain.size() - 1, solver._target.position().get());
     solver._forwardReaching();
@@ -263,7 +271,7 @@ public class TreeSolver extends FABRIKSolver {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
           if (child._solver()._chain.size() < 2) continue;
-          if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
+          if (child._solver()._chain.get(1).translation().magnitude() <= 10e-4) continue;
           Vector diff = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
           centroid.add(Vector.multiply(diff, child._weight()));
           Vector v1 = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
@@ -305,7 +313,6 @@ public class TreeSolver extends FABRIKSolver {
           child._solver()._positions().set(1, child._solver()._chain.get(1).position());
           //child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
           //child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
-          //child._solver()._chain.get(0).setRotation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).rotation().get());
           //if (child._solver()._chain.size() < 2) continue;
             /*if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
@@ -389,7 +396,7 @@ public class TreeSolver extends FABRIKSolver {
   protected void _reset() {
     _iterations = 0;
     _best = 0;
-    _current = 0;
+    _current = 10e10f;
     _reset(root);
   }
 
