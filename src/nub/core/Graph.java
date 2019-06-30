@@ -3317,8 +3317,21 @@ public class Graph {
   // Screen to node conversion
 
   /**
-   * Convenience function that simply returns {@code screenLocation(src, null)}.
+   * Converts the {@code node} origin location to screen space.
+   * Same as {@code return screenLocation(new Vector(), node)}.
    *
+   * @see #screenLocation(Vector)
+   * @see #screenLocation(Vector, Node)
+   */
+  public Vector screenLocation(Node node) {
+    return screenLocation(new Vector(), node);
+  }
+
+  /**
+   * Converts {@code vector} location from world to screen space.
+   * Same as {@code return screenLocation(src, null)}.
+   *
+   * @see #screenLocation(Node)
    * @see #screenLocation(Vector, Node)
    */
   public Vector screenLocation(Vector vector) {
@@ -3333,6 +3346,7 @@ public class Graph {
    * (0,0) being the upper left corner of the window. The z coordinate ranges between 0
    * (near plane) and 1 (excluded, far plane).
    *
+   * @see #screenLocation(Node)
    * @see #screenLocation(Vector)
    * @see #location(Vector, Node)
    * @see #location(Vector)

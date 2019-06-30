@@ -2136,10 +2136,24 @@ public class Node {
   // POINT CONVERSION
 
   /**
+   * Converts the {@code node} origin location to this node.
+   * Same as {@code return location(new Vector(), node)}.
+   * {@link #displacement(Vector, Node)} converts displacements instead of locations.
+   *
+   * @see #location(Vector)
+   * @see #location(Vector, Node)
+   * @see #displacement(Vector, Node)
+   */
+  public Vector location(Node node) {
+    return location(new Vector(), node);
+  }
+
+  /**
    * Converts {@code vector} location from world to this node.
    * Same as {@code return location(vector, null)}.
    * {@link #displacement(Vector)} converts displacements instead of locations.
    *
+   * @see #location(Node)
    * @see #location(Vector, Node)
    * @see #displacement(Vector)
    */
@@ -2152,6 +2166,7 @@ public class Node {
    * Use {@code node.location(vector, this)} to perform the inverse transformation.
    * {@link #displacement(Vector, Node)} converts displacements instead of locations.
    *
+   * @see #location(Node)
    * @see #location(Vector)
    * @see #worldLocation(Vector)
    */
