@@ -161,6 +161,7 @@ public class IKAnimation {
 
   public static class FollowArc extends Step {
     protected enum Arc {V1_TO_V2, V_TO_V2, V1_TO_V, V}
+
     protected long _edgePeriod;
     protected float _radius;//_iterations per edge is updated according to Animator period
     protected Vector[] _trajectory;
@@ -282,6 +283,7 @@ public class IKAnimation {
 
   public static class RotateNode extends Step {
     protected enum Rotate {V1_TO_V2, V_TO_V2, V1_TO_V, V}
+
     protected long _edgePeriod;
     protected boolean _updateNode = true;
     protected float _radius;//_iterations per edge is updated according to Animator period
@@ -392,6 +394,7 @@ public class IKAnimation {
 
   public static class TranslateNode extends Step {
     protected enum Translate {V1_TO_V2, V_TO_V2, V1_TO_V, V}
+
     protected long _edgePeriod;
     protected boolean _fixChildren = true;
     protected boolean _updateNode = true;

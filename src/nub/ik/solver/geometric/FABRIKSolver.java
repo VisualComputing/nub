@@ -96,9 +96,11 @@ public abstract class FABRIKSolver extends Solver {
   protected ArrayList<Quaternion> _orientations = new ArrayList<Quaternion>();
   protected ArrayList<Float> _distances = new ArrayList<Float>();
   protected ArrayList<Float> _jointChange = new ArrayList<Float>();
+
   protected ArrayList<Vector> _positions() {
     return _positions;
   }
+
   protected int _head = 0;
 
   //Animation Stuff

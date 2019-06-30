@@ -211,12 +211,15 @@ public class OperatorMethods {
   public static class Adoption extends Operator {
     protected Individual[] _parents;
     protected Individual _best;
+
     public Adoption() {
       _arity = 1;
     }
+
     public void setParents(Individual... individuals) {
       _parents = individuals;
     }
+
     public void setBest(Individual best) {
       _best = best;
     }
