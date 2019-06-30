@@ -2715,7 +2715,7 @@ public class Graph {
     _bbMatrixHandler.bind(projection(), view());
     for (Node node : _leadingNodes())
       _renderBackBuffer(node);
-    if(isOffscreen())
+    if (isOffscreen())
       _rays.clear();
   }
 

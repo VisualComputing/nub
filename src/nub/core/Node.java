@@ -1814,7 +1814,7 @@ public class Node {
    * @see #projection(Graph.Type, float, float, float, float, boolean)
    */
   public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return projection(type, width, height, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.projection(type, width, height, zNear, zFar) the node should be attached to a graph." +
@@ -1849,7 +1849,7 @@ public class Node {
    * @see #orthographic(float, float, float, float, boolean)
    */
   public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return orthographic(width, height, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.orthographic(width, height, zNear, zFar) the node should be attached to a graph." +
@@ -1878,7 +1878,7 @@ public class Node {
    * @see #perspective(float, float, float, boolean)
    */
   public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.perspective(float aspectRatio, float zNear, float zFar) the node should be attached to a graph." +
