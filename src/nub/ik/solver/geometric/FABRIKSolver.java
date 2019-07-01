@@ -17,8 +17,10 @@ import nub.core.constraint.DistanceFieldConstraint;
 import nub.core.constraint.Hinge;
 import nub.ik.animation.IKAnimation;
 import nub.ik.solver.Solver;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -292,6 +294,8 @@ public abstract class FABRIKSolver extends Solver {
         Vector desired = delta.rotate(tr);
         o_hat = positions.get(i + 1);
         positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
+      } else {
+        o_hat = positions.get(i + 1);
       }
       Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.divide(Vector.subtract(positions.get(i + 1), positions.get(i)), magnitude));
       Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
@@ -313,8 +317,12 @@ public abstract class FABRIKSolver extends Solver {
     return change;
   }
 
-  //TODO : All this code is a mess, remove duplicate code later, this is jusst to prove ideas
   protected float _backwardReaching(List<? extends Node> chain, Vector o) {
+    return _backwardReaching(chain, o, 0);
+  }
+
+  //TODO : All this code is a mess, remove duplicate code later, this is jusst to prove ideas
+  protected float _backwardReaching(List<? extends Node> chain, Vector o, int start) {
     float change = 0;
     Quaternion orientation;
     float magnitude;
@@ -322,7 +330,12 @@ public abstract class FABRIKSolver extends Solver {
     magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
 
     Vector o_hat = o;
-    for (int i = 0; i < chain.size() - 1; i++) {
+
+    for(int i = 0; i < start; i++){
+      orientation.compose(chain.get(i).rotation());
+    }
+
+    for (int i = start; i < chain.size() - 1; i++) {
       if (_distances.get(i + 1) <= 10e-4) {
         _positions.set(i + 1, _positions.get(i)); //keep pos
         orientation.compose(chain.get(i).rotation()); //update orientation
@@ -347,6 +360,8 @@ public abstract class FABRIKSolver extends Solver {
         Vector desired = delta.rotate(tr);
         o_hat = _positions.get(i + 1);
         _positions.set(i + 1, Vector.add(chain.get(i).position(), desired));
+      } else {
+        o_hat = _positions.get(i + 1);
       }
       Vector newTranslation = Quaternion.compose(orientation, chain.get(i).rotation()).inverse().rotate(Vector.divide(Vector.subtract(_positions.get(i + 1), _positions.get(i)), magnitude));
       Quaternion deltaRotation = new Quaternion(chain.get(i + 1).translation(), newTranslation);
@@ -661,6 +676,35 @@ public abstract class FABRIKSolver extends Solver {
       reference = new Node(reference.position().get(), reference.orientation().get(), 1);
     }
     return _copy(chain, reference);
+  }
+
+  /*TODO: remove this! (debug purposes)*/
+  protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene) {
+    Node ref = reference;
+    List<Node> copy = new ArrayList<Node>();
+    if(ref == null){
+      reference = chain.get(0).reference();
+      if (reference != null) {
+        ref = new Node(scene);
+        ref.setPosition(reference.position().get());
+        ref.setOrientation(reference.orientation().get());
+        ref.enableTracking(false);
+      }
+    }
+
+    for (Node joint : chain) {
+      Joint newJoint = new Joint(scene, scene.context().color(0,255,0,200), 3);
+      if(copy.isEmpty()){
+        newJoint.setRoot(true);
+      }
+      newJoint.setReference(ref);
+      newJoint.setPosition(joint.position().get());
+      newJoint.setOrientation(joint.orientation().get());
+      newJoint.setConstraint(joint.constraint());
+      copy.add(newJoint);
+      ref = newJoint;
+    }
+    return copy;
   }
 
   public ArrayList<Vector> positions() {
