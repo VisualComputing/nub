@@ -261,8 +261,13 @@ public class ChainSolver extends FABRIKSolver {
     _forwardReaching(_chain);
   }
 
+  protected float _backwardReaching(Vector o, int start) {
+    return _backwardReaching(_chain, o, start);
+  }
+
+
   protected float _backwardReaching(Vector o) {
-    return _backwardReaching(_chain, o);
+    return _backwardReaching(_chain, o, 0);
   }
 
   @Override
