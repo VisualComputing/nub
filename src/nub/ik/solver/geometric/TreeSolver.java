@@ -14,6 +14,7 @@ package nub.ik.solver.geometric;
 import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -231,7 +232,8 @@ public class TreeSolver extends FABRIKSolver {
       list.add(v.get());
     }
     aux_p.add(list);
-
+    //As the root could rotate it's better to apply backward step on parent
+    if(treeNode._parent != null)treeNode._parent._modified = true;
     treeNode._modified = true;
     for (TreeNode child : treeNode._children()) {
       if (!child._modified) chains += 1;
@@ -259,6 +261,7 @@ public class TreeSolver extends FABRIKSolver {
       //TODO : CHECK WHY CENTROID GENERATES WORST BEHAVIORS
       // (Last chain modified determines Sub Base orientation)
       //TODO : AVERAGE ROTATION USING SVD (SAME AS FINDING BEST RIGID TRANSFORMATION)
+      //TODO : Weight by distance to root?
       if (treeNode._children().size() > 1) {
         Vector centroid = new Vector();
         Vector newCentroid = new Vector();
@@ -271,7 +274,9 @@ public class TreeSolver extends FABRIKSolver {
           //If target is null, then Joint must not be included
           if (child._solver().target() == null) continue;
           if (child._solver()._chain.size() < 2) continue;
-          if (child._solver()._chain.get(1).translation().magnitude() <= 10e-4) continue;
+          if (child._solver()._chain.get(1).translation().magnitude() <= 10e-4){
+            continue;
+          }
           Vector diff = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
           centroid.add(Vector.multiply(diff, child._weight()));
           Vector v1 = solver._chain.get(solver._chain.size() - 1).location(child._solver()._chain.get(1).position());
@@ -284,6 +289,8 @@ public class TreeSolver extends FABRIKSolver {
             newCentroid.add(Vector.multiply(diff, child._weight()));
           }
           Quaternion q = new Quaternion(v1, v2);
+          //damp rotation
+          q = new Quaternion(q.axis(), q.angle() * 0.5f);
 
           if (amount == 1) {
             for (int i = 0; i < 4; i++)
@@ -309,10 +316,10 @@ public class TreeSolver extends FABRIKSolver {
         treeNode._solver()._positions().set(treeNode._solver()._chain.size() - 1, treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position());
 
         for (TreeNode child : treeNode._children()) {
+          child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
+          child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
           child._solver()._positions().set(0, child._solver()._chain.get(0).position());
           child._solver()._positions().set(1, child._solver()._chain.get(1).position());
-          //child._solver()._chain.get(0).setPosition(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).position().get());
-          //child._solver()._chain.get(0).setOrientation(treeNode._solver()._chain.get(treeNode._solver()._chain.size() - 1).orientation().get());
           //if (child._solver()._chain.size() < 2) continue;
             /*if (child._solver()._chain.get(1).translation().magnitude() == 0) continue;
             if (child._modified) {
@@ -410,14 +417,16 @@ public class TreeSolver extends FABRIKSolver {
     addTarget(endEffector, target);
   }
 
-
+  //TODO: Clean this!
   protected List<Node> _copyChain(TreeNode parent, List<Node> list) {
-    if (parent._solver != null) {
-      Node reference = parent._solver._chain.get(parent._solver._chain.size() - 1);
-      List<Node> copy = _copy(list.subList(1, list.size()), reference);
-      copy.add(0, reference);
-      return copy;
+    if(parent != null && parent._solver != null && parent._solver._chain.size() > 1) {
+      if (debug)
+        return _copy(list, parent._solver._chain.get(parent._solver._chain.size() - 2), ((Scene) list.get(0).graph()));
+      return _copy(list, parent._solver._chain.get(parent._solver._chain.size() - 2));
     }
+
+    if(debug)
+      return _copy(list, null, ((Scene) list.get(0).graph()));
     return _copy(list);
   }
 
