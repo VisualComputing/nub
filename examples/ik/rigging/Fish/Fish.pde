@@ -52,7 +52,7 @@ public void setup() {
     reference = new Node(scene);
     //2.2 Use SimpleBuilder example (or a Modelling Sw if desired) and locate each Joint accordingly to mesh
     //2.3 Create the Joints based on 2.2.
-    skeleton = fishSkeleton(reference);
+    skeleton = loadSkeleton(reference);
     //3. Relate the shape with a skinning method (CPU or GPU)
     resetSkinning(gpu);
     //4. Adding IK behavior
@@ -112,27 +112,26 @@ void resetSkinning(boolean gpu){
   }
 }
 
-List<Node> fishSkeleton(Node reference) {
-    Joint j1 = new Joint(scene);
-    j1.setReference(reference);
-    j1.setPosition(0, 10.8f, 93);
-    Joint j2 = new Joint(scene);
-    j2.setReference(j1);
-    j2.setPosition(0, 2.3f, 54.7f);
-    Joint j3 = new Joint(scene);
-    j3.setReference(j2);
-    j3.setPosition(0, 0.4f, 22);
-    Joint j4 = new Joint(scene);
-    j4.setReference(j3);
-    j4.setPosition(0, 0, -18);
-    Joint j5 = new Joint(scene);
-    j5.setReference(j4);
-    j5.setPosition(0, 1.8f, -54);
-    Joint j6 = new Joint(scene);
-    j6.setReference(j5);
-    j6.setPosition(0, -1.1f, -95);
-    j1.setRoot(true);
-    return scene.branch(j1);
+List<Node> loadSkeleton(Node reference){
+  JSONArray skeleton_data = loadJSONArray("skeleton.json");
+  HashMap<String, Joint> dict = new HashMap<String, Joint>();
+  List<Node> skeleton = new ArrayList<Node>();
+  for(int i = 0; i < skeleton_data.size(); i++){
+    JSONObject joint_data = skeleton_data.getJSONObject(i);
+    Joint joint = new Joint(scene, joint_data.getFloat("radius"));
+    joint.setPickingThreshold(joint_data.getFloat("picking"));
+    if(i == 0){
+      joint.setRoot(true);
+      joint.setReference(reference);
+    }else{
+      joint.setReference(dict.get(joint_data.getString("reference")));
+    }
+    joint.setTranslation(joint_data.getFloat("x"), joint_data.getFloat("y"), joint_data.getFloat("z"));
+    joint.setRotation(joint_data.getFloat("q_x"), joint_data.getFloat("q_y"), joint_data.getFloat("q_z"), joint_data.getFloat("q_w"));
+    skeleton.add(joint);
+    dict.put(joint_data.getString("name"), joint);
+  }  
+  return skeleton;
 }
 
 Interpolator setupTargetInterpolator(Node target) {

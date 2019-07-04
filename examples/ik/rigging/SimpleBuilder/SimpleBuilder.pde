@@ -20,6 +20,7 @@ import nub.core.*;
 import nub.primitives.*;
 import nub.processing.Scene;
 import nub.ik.visual.Joint;
+import java.util.List;
 
 //Build easily a Skeleton to relate to a Mesh
 Scene scene;
@@ -148,6 +149,7 @@ void keyPressed(){
     }else if(key == 'P' || key == 'p'){
         lastCommand = "Printing skeleton information"; 
         printJoints(scene.trackedNode(), "reference", 1);
+        saveSkeleton(scene.trackedNode());
     }else if(key == 'A' || key == 'a'){
         Joint.axes = !Joint.axes;
     }else if(key == 'E' || key == 'e'){
@@ -186,6 +188,57 @@ int printJoints(Node root, String reference, int i){
     return idx;
 }
 
+
+int saveJoints(JSONArray skeleton, Node root, String reference, int i){
+    if(root == null) return 0;
+    JSONObject joint = new JSONObject();
+    joint.setString("reference", reference);
+    joint.setString("name", "j"+i);
+    joint.setFloat("radius", scene.radius() * 0.01f);
+    joint.setFloat("picking", -0.01f);
+    joint.setFloat("x", root.translation().x());
+    joint.setFloat("y", root.translation().y());
+    joint.setFloat("z", root.translation().z());
+    joint.setFloat("q_x", root.rotation().x());
+    joint.setFloat("q_y", root.rotation().y());
+    joint.setFloat("q_z", root.rotation().z());
+    joint.setFloat("q_w", root.rotation().w());
+    skeleton.setJSONObject(i-1, joint);
+    int idx = i;
+    for(Node child : root.children()){
+        idx = saveJoints(skeleton, child, "j"+ i, idx + 1);
+    }
+    return idx;
+}
+
+void saveSkeleton(Node root){
+  JSONArray skeleton;
+  skeleton = new JSONArray();
+  saveJoints(skeleton, root, "reference", 1);  
+  saveJSONArray(skeleton, "data/skeleton.json");
+}
+
+List<Node> loadSkeleton(Node reference){
+  JSONArray skeleton_data = loadJSONArray("skeleton.json");
+  HashMap<String, Joint> dict = new HashMap<String, Joint>();
+  List<Node> skeleton = new ArrayList<Node>();
+  for(int i = 0; i < skeleton_data.size(); i++){
+    JSONObject joint_data = skeleton_data.getJSONObject(i);
+    Joint joint = new Joint(scene, joint_data.getFloat("radius"));
+    joint.setPickingThreshold(joint_data.getFloat("picking"));
+    if(i == 0){
+      joint.setRoot(true);
+      joint.setReference(reference);
+    }else{
+      joint.setReference(dict.get(joint_data.getString("reference")));
+    }
+    joint.setTranslation(joint_data.getFloat("x"), joint_data.getFloat("y"), joint_data.getFloat("z"));
+    joint.setRotation(joint_data.getFloat("q_x"), joint_data.getFloat("q_y"), joint_data.getFloat("q_z"), joint_data.getFloat("q_w"));
+    skeleton.add(joint);
+    dict.put(joint_data.getString("name"), joint);
+  }  
+  return skeleton;
+}
 
 //Adapted from http://www.cutsquash.com/2015/04/better-obj-model-loading-in-processing/
 PShape createShapeTri(PShape r, String texture, float size) {
