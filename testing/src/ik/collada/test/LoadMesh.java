@@ -1,7 +1,6 @@
 package ik.collada.test;
 
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.TreeSolver;
 import nub.ik.visual.Joint;
 import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Node;
