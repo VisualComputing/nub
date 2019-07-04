@@ -15,6 +15,7 @@ public class Individual {
   public enum FitnessFunction {
     POSITION, ORIENTATION, POSE
   }
+
   protected List<Node> _structure;
   protected HashMap<String, Float> _floatParams = new HashMap<String, Float>();
   protected HashMap<String, float[]> _arrayParams = new HashMap<String, float[]>();

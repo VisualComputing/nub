@@ -16,6 +16,7 @@ public class GASolver extends Solver {
   public enum Replacement {
     GENERATIONAL, ELITISM, KEEP_BEST
   }
+
   protected Selection _selection;
   protected Operator _mutation;
   protected Operator _crossover;
