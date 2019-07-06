@@ -1,5 +1,6 @@
 package ik.collada.test;
 
+import nub.ik.solver.Solver;
 import nub.ik.visual.Joint;
 import nub.ik.skinning.GPULinearBlendSkinning;
 import nub.core.Node;
@@ -32,8 +33,8 @@ public class LoadMesh extends PApplet {
     Model model;
     GPULinearBlendSkinning skinning;
     ArrayList<Node> targets = new ArrayList<Node>();
-    String[] roots = {"Upper_Arm_R", "Upper_Arm_L", "Upper_Leg_R", "Upper_Leg_L"};
-    String[] effectors = {"Hand_R", "Hand_L", "Foot_R", "Foot_L"};
+    String[] roots = {"Upper_Arm_R", "Upper_Arm_L", "Upper_Leg_R", "Upper_Leg_L", "Neck"};
+    String[] effectors = {"Hand_R", "Hand_L", "Foot_R", "Foot_L", "Head"};
 
 
     public void settings() {
@@ -60,7 +61,12 @@ public class LoadMesh extends PApplet {
             targets.add(target);
         }
 
+        Quaternion rot;
+        BallAndSocket root_constraint = new BallAndSocket(radians(5), radians(5), radians(5), radians(5));
+        root_constraint.setRestRotation(model.root().rotation().get(), model.root().displacement(new Vector(0, 1, 0)), model.root().displacement(new Vector(0, 0, 1)));
+        model.root().setConstraint(root_constraint);
 
+/**/
         BallAndSocket chest_constraint = new BallAndSocket(radians(70), radians(20), radians(70), radians(70));
         Node chest = model.skeleton().get("Chest");
         chest_constraint.setRestRotation(chest.rotation().get(), chest.displacement(new Vector(0, 1, 0)), chest.displacement(new Vector(0, 0, 1)));
@@ -71,7 +77,7 @@ public class LoadMesh extends PApplet {
         Node r_arm = model.skeleton().get("Upper_Arm_R");
         BallAndSocket r_arm_constraint = new BallAndSocket(radians(85), radians(50), radians(89), radians(89));
         r_arm_constraint.setTwistLimits(radians(90), radians(90));
-        Quaternion rot = r_arm.rotation().get();
+        rot = r_arm.rotation().get();
         r_arm_constraint.setRestRotation(rot, r_arm.displacement(new Vector(0, 1, 0)), r_arm.displacement(new Vector(-1, 0, 0)), r_arm.children().get(0).translation());
         r_arm.setConstraint(r_arm_constraint);
         //Elbow constraint
@@ -101,7 +107,7 @@ public class LoadMesh extends PApplet {
         Node r_knee = model.skeleton().get("Lower_Leg_R");
         Hinge r_knee_constraint = new Hinge(radians(5), radians(90), r_knee.rotation().get(), new Vector(0,1,0), new Vector(1,0,0));
         r_knee.setConstraint(r_knee_constraint);
-
+/**/
         Node l_leg = model.skeleton().get("Upper_Leg_L");
         BallAndSocket l_leg_constraint = new BallAndSocket(radians(30), radians(50), radians(50), radians(89));
         l_leg_constraint.setTwistLimits(radians(30), radians(30));
@@ -112,42 +118,46 @@ public class LoadMesh extends PApplet {
         Node l_knee = model.skeleton().get("Lower_Leg_L");
         Hinge l_knee_constraint = new Hinge(radians(5), radians(90), l_knee.rotation().get(), new Vector(0,1,0), new Vector(1,0,0));
         l_knee.setConstraint(l_knee_constraint);
+/**/
 
         model.printNames();
 
-        /* TODO: Fix Tree Solver when model has constraints!
-        Solver solver = scene.registerTreeSolver(model.root());
-        solver._maxError = 0.05f;
-        solver._maxIterations = 20;
-        solver.setTimesPerFrame(10);
+        boolean whole = true;
+        //TODO: Fix Tree Solver when model has constraints!
+        if(whole) {
+            Solver s = scene.registerTreeSolver(model.root());
+            s.setTimesPerFrame(1);
+            s.setMaxIterations(50);
+            s.setMaxError(0.01f);
+            s.setMinDistance(0.01f);
 
-        scene.addIKTarget(model.skeleton().get("Foot_R"), targets.get(0));
-        scene.addIKTarget(model.skeleton().get("Foot_L"), targets.get(1));
-        scene.addIKTarget(model.skeleton().get("Hand_L"), targets.get(2));
-        scene.addIKTarget(model.skeleton().get("Hand_R"), targets.get(3));
-        scene.addIKTarget(model.skeleton().get("Head"), targets.get(4));
-        */
+            for (int i = 0; i < effectors.length; i++) {
+                targets.get(i).setPosition(model.skeleton().get(effectors[i]).position());
+                scene.addIKTarget(model.skeleton().get(effectors[i]), targets.get(i));
+            }
+        }else {
+            /*Chain solver*/
+            for (int i = 0; i < effectors.length; i++) {
+                targets.get(i).setPosition(model.skeleton().get(effectors[i]).position());
+                ChainSolver solver_r_leg = new ChainSolver(scene.branch(model.skeleton().get(roots[i])));
+                solver_r_leg.setKeepDirection(false);
+                solver_r_leg.setFixTwisting(false);
+                solver_r_leg.explore(false);
 
-        /*Chain solver*/
-        for(int i = 0; i < effectors.length; i++) {
-            targets.get(i).setPosition(model.skeleton().get(effectors[i]).position());
-            ChainSolver solver_r_leg = new ChainSolver( scene.branch(model.skeleton().get(roots[i])));
-            solver_r_leg.setKeepDirection(true);
-            solver_r_leg.setFixTwisting(true);
-
-            solver_r_leg.setTimesPerFrame(5);
-            solver_r_leg.setMaxIterations(50);
-            solver_r_leg.setMaxError(0.01f);
-            solver_r_leg.setMinDistance(0.01f);
-            solver_r_leg.setTarget(model.skeleton().get(effectors[i]), targets.get(i));
-            TimingTask task = new TimingTask() {
-                @Override
-                public void execute() {
-                    solver_r_leg.solve();
-                }
-            };
-            scene.registerTask(task);
-            task.run(40);
+                solver_r_leg.setTimesPerFrame(5);
+                solver_r_leg.setMaxIterations(50);
+                solver_r_leg.setMaxError(0.01f);
+                solver_r_leg.setMinDistance(0.01f);
+                solver_r_leg.setTarget(model.skeleton().get(effectors[i]), targets.get(i));
+                TimingTask task = new TimingTask() {
+                    @Override
+                    public void execute() {
+                        solver_r_leg.solve();
+                    }
+                };
+                scene.registerTask(task);
+                task.run(40);
+            }
         }
     }
     public void draw() {
@@ -213,6 +223,10 @@ public class LoadMesh extends PApplet {
         }
         if(key == 'd' || key == 'D'){
             skinning.disablePaintMode();
+        }
+        if(key == ' '){
+            if(scene.trackedNode() != null)
+                scene.trackedNode().enableTracking(false);
         }
     }
 
