@@ -18,7 +18,7 @@ import nub.core.*;
 import nub.core.constraint.*;
 import nub.processing.*;
 import nub.ik.solver.*;
-import nub.ik.rigging.*;
+import nub.ik.skinning.*;
 import nub.ik.visual.Joint; //Joint provides default way to visualize the skeleton
 import java.util.List;
 
