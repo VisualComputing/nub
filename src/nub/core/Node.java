@@ -480,6 +480,9 @@ public class Node {
    *
    * @see #reset()
    * @see #worldMatrix()
+   * @see #setPosition(Node)
+   * @see #setOrientation(Node)
+   * @see #setMagnitude(Node)
    */
   public void set(Node node) {
     if (node == null)
@@ -1028,6 +1031,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #position()} to that of {@code node}.
+   *
+   * @see #setPosition(Vector)
+   * @see #set(Node)
+   */
+  public void setPosition(Node node) {
+    if (node == null)
+      node = new Node();
+    setPosition(node.position());
+  }
+
+  /**
    * Sets the node {@link #position()}, defined in the world coordinate system.
    * <p>
    * Use {@link #setTranslation(Vector)} to define the local node translation (with respect
@@ -1244,6 +1259,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #orientation()} to that of {@code node}.
+   *
+   * @see #setOrientation(Quaternion)
+   * @see #set(Node)
+   */
+  public void setOrientation(Node node) {
+    if (node == null)
+      node = new Node();
+    setOrientation(node.orientation());
+  }
+
+  /**
    * Sets the {@link #orientation()} of the node, defined in the world coordinate system.
    * <p>
    * Use {@link #setRotation(Quaternion)} to define the local node rotation (with respect
@@ -1322,6 +1349,18 @@ public class Node {
       return reference().magnitude() * scaling();
     else
       return scaling();
+  }
+
+  /**
+   * Sets the {@link #magnitude()} to that of {@code node}.
+   *
+   * @see #setMagnitude(float)
+   * @see #set(Node)
+   */
+  public void setMagnitude(Node node) {
+    if (node == null)
+      node = new Node();
+    setMagnitude(node.magnitude());
   }
 
   /**
