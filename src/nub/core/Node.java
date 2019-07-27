@@ -480,6 +480,9 @@ public class Node {
    *
    * @see #reset()
    * @see #worldMatrix()
+   * @see #setPosition(Node)
+   * @see #setOrientation(Node)
+   * @see #setMagnitude(Node)
    */
   public void set(Node node) {
     if (node == null)
@@ -1028,6 +1031,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #position()} to that of {@code node}.
+   *
+   * @see #setPosition(Vector)
+   * @see #set(Node)
+   */
+  public void setPosition(Node node) {
+    if (node == null)
+      node = new Node();
+    setPosition(node.position());
+  }
+
+  /**
    * Sets the node {@link #position()}, defined in the world coordinate system.
    * <p>
    * Use {@link #setTranslation(Vector)} to define the local node translation (with respect
@@ -1244,6 +1259,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #orientation()} to that of {@code node}.
+   *
+   * @see #setOrientation(Quaternion)
+   * @see #set(Node)
+   */
+  public void setOrientation(Node node) {
+    if (node == null)
+      node = new Node();
+    setOrientation(node.orientation());
+  }
+
+  /**
    * Sets the {@link #orientation()} of the node, defined in the world coordinate system.
    * <p>
    * Use {@link #setRotation(Quaternion)} to define the local node rotation (with respect
@@ -1322,6 +1349,18 @@ public class Node {
       return reference().magnitude() * scaling();
     else
       return scaling();
+  }
+
+  /**
+   * Sets the {@link #magnitude()} to that of {@code node}.
+   *
+   * @see #setMagnitude(float)
+   * @see #set(Node)
+   */
+  public void setMagnitude(Node node) {
+    if (node == null)
+      node = new Node();
+    setMagnitude(node.magnitude());
   }
 
   /**
@@ -1661,6 +1700,7 @@ public class Node {
    * @see #set(Node)
    * @see #worldMatrix()
    * @see #view()
+   * @see #viewInverse()
    */
   public Matrix matrix() {
     Matrix matrix = rotation().matrix();
@@ -1702,6 +1742,7 @@ public class Node {
    * @see #set(Node)
    * @see #matrix()
    * @see #view()
+   * @see #viewInverse()
    */
   public Matrix worldMatrix() {
     if (reference() != null)
@@ -1719,6 +1760,7 @@ public class Node {
    * so that coordinates can then be projected on screen using a projection matrix.
    *
    * @see Matrix#view(Vector, Quaternion)
+   * @see #viewInverse()
    * @see #matrix()
    * @see #worldMatrix()
    * @see #set(Node)
@@ -1726,6 +1768,22 @@ public class Node {
    */
   public Matrix view() {
     return Matrix.view(position(), orientation());
+  }
+
+  /**
+   * Returns the inverse of the {@link #view()} matrix. This matrix matches the
+   * {@link #worldMatrix()} when {@link #magnitude()} is {@code 1}.
+   * <p>
+   * This matrix converts from the eye to world space.
+   *
+   * @see #view()
+   * @see #matrix()
+   * @see #worldMatrix()
+   * @see #set(Node)
+   * @see #set(Node)
+   */
+  public Matrix viewInverse() {
+    return new Node(position(), orientation(), 1).matrix();
   }
 
   /**
@@ -1795,7 +1853,7 @@ public class Node {
    * @see #projection(Graph.Type, float, float, float, float, boolean)
    */
   public Matrix projection(Graph.Type type, float width, float height, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return projection(type, width, height, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.projection(type, width, height, zNear, zFar) the node should be attached to a graph." +
@@ -1830,7 +1888,7 @@ public class Node {
    * @see #orthographic(float, float, float, float, boolean)
    */
   public Matrix orthographic(float width, float height, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return orthographic(width, height, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.orthographic(width, height, zNear, zFar) the node should be attached to a graph." +
@@ -1859,7 +1917,7 @@ public class Node {
    * @see #perspective(float, float, float, boolean)
    */
   public Matrix perspective(float aspectRatio, float zNear, float zFar) {
-    if(!isDetached())
+    if (!isDetached())
       return perspective(aspectRatio, zNear, zFar, graph().isLeftHanded());
     else
       throw new RuntimeException("To call node.perspective(float aspectRatio, float zNear, float zFar) the node should be attached to a graph." +
@@ -2117,10 +2175,24 @@ public class Node {
   // POINT CONVERSION
 
   /**
+   * Converts the {@code node} origin location to this node.
+   * Same as {@code return location(new Vector(), node)}.
+   * {@link #displacement(Vector, Node)} converts displacements instead of locations.
+   *
+   * @see #location(Vector)
+   * @see #location(Vector, Node)
+   * @see #displacement(Vector, Node)
+   */
+  public Vector location(Node node) {
+    return location(new Vector(), node);
+  }
+
+  /**
    * Converts {@code vector} location from world to this node.
    * Same as {@code return location(vector, null)}.
    * {@link #displacement(Vector)} converts displacements instead of locations.
    *
+   * @see #location(Node)
    * @see #location(Vector, Node)
    * @see #displacement(Vector)
    */
@@ -2133,6 +2205,7 @@ public class Node {
    * Use {@code node.location(vector, this)} to perform the inverse transformation.
    * {@link #displacement(Vector, Node)} converts displacements instead of locations.
    *
+   * @see #location(Node)
    * @see #location(Vector)
    * @see #worldLocation(Vector)
    */
