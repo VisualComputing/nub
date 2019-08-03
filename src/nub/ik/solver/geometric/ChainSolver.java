@@ -12,6 +12,7 @@
 package nub.ik.solver.geometric;
 
 import nub.core.Node;
+import nub.core.constraint.BallAndSocket;
 import nub.ik.animation.IKAnimation;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
@@ -513,4 +514,86 @@ public class ChainSolver extends FABRIKSolver {
     }
     _afterAvoidPosition = (ArrayList<Vector>) _positions.clone();
   }
+
+  /*Original method is not accurate when joints are highly constrained, sometimes
+  * we observe that actions on Forward Step makes the root of the structure move away
+  * from initial position.
+  * TODO: Rename ?
+  */
+
+  BallAndSocket[] globalConstraints; //these constraint are useful only on froward step, hence we will reflect them
+  protected void _generateGlobalConstraints(){
+    globalConstraints = new BallAndSocket[_chain.size()];
+    Vector root_pos = _chain.get(0).position();
+    for(int i = 0; i < _chain.size(); i++){
+      Node j_i = _chain.get(i);
+      Vector j_i_pos = _chain.get(i).position();
+      Vector axis = Vector.subtract(j_i_pos, root_pos);
+      Vector up_axis = Vector.orthogonalVector(axis);
+      Vector left_axis = Vector.cross(axis, up_axis, null);
+      //TODO: Check avg vs Max / Min - Also, it is important to Take into account Twisting!
+      //TODO: This will work better if we consider angles up to PI (current boundaries are at maximum PI/2)
+      float up = 0, down = 0, left = 0, right = 0;
+      for(int k = 0; k <  i; k++){
+        Node j_k = _chain.get(k);
+        if(j_k.constraint() == null){
+          up = (float)Math.PI;
+          down = (float)Math.PI;
+          left = (float)Math.PI;
+          right = (float)Math.PI;
+          break;
+        }
+        //get axis in terms of J_k
+        Vector local_j_i = j_k.location(j_i);
+        Vector local_axis = j_k.displacement(axis);
+        Vector local_up = j_k.displacement(up_axis);
+        Vector local_right = j_k.displacement(left_axis);
+        float desired_down_angle = _computeAngle(local_right, local_axis, local_j_i);
+        float desired_right_angle = _computeAngle(local_up, local_axis, local_j_i);
+
+        right += _getBound(axis, local_up, desired_right_angle, j_k);
+        left += _getBound(axis, local_up, (float) Math.PI * 2 - desired_right_angle, j_k);
+        up += _getBound(axis, local_right, (float) Math.PI * 2 - desired_down_angle, j_k);
+        down += _getBound(axis, local_right, desired_down_angle, j_k);
+      }
+      //with the obtained information generate the global constraint for j_i
+      globalConstraints[i] = new BallAndSocket(down, up, left, right);
+      globalConstraints[i].setRestRotation(new Quaternion(), up_axis, Vector.multiply(axis,-1));
+    }
+  }
+
+  protected float _computeAngle(Vector axis, Vector a, Vector b){
+    Vector v1 = Vector.projectVectorOnPlane(b, axis);
+    Vector v2 = Vector.projectVectorOnPlane(Vector.multiply(a,-1), axis);
+    float angle = Vector.angleBetween(v1,v2);
+    Vector cross = Vector.cross(v1, v2, null);
+    if(Vector.dot(cross, axis) < 0){
+      angle = (float) Math.PI * 2 - angle;
+    }
+    return angle;
+  }
+
+  protected float _getBound(Vector axis, Vector local_axis, float angle, Node node){
+    Quaternion delta = node.constraint().constrainRotation(new Quaternion(local_axis, angle),node);
+    Quaternion rot = Quaternion.compose(node.orientation(),delta);
+    //Keep only the component that we're interested on
+    //Decompose in terms of twist and swing
+    Vector rotationAxis = new Vector(rot._quaternion[0], rot._quaternion[1], rot._quaternion[2]);
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, delta.inverseRotate(axis));
+    //Get rotation component on Axis direction
+    Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rot.w());
+    return rotationTwist.angle();
+  }
+
+  protected Quaternion applyGlobalConstraint(Vector j_hat, Vector j_root_hat,  Vector j_root, BallAndSocket b){
+    //Find angle in global space
+    Quaternion rot = new Quaternion(Vector.subtract(j_root_hat, j_hat), Vector.subtract(j_root, j_hat));
+    Vector axis = b.restRotation().rotate(new Vector(0,0,1));
+    Vector target = rot.rotate(axis);
+    //Apply constraint
+    Vector result = b.apply(target,b.restRotation());
+    //Apply inverse transformation
+    return new Quaternion(result, target);
+  }
+
 }
