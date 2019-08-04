@@ -140,6 +140,8 @@ public class ChainSolver extends FABRIKSolver {
     this._target = target;
     this._prevTarget =
         target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
+    //TODO : REFINE
+    _generateGlobalConstraints();
   }
 
   public ChainSolver(List<? extends Node> chain, Node target) {
@@ -362,6 +364,8 @@ public class ChainSolver extends FABRIKSolver {
     //TODO : REFINE & USE ONLY IN DEBUG MODE
     _avoidHistory = new ArrayList<>();
     _divergeHistory = new ArrayList<>();
+    //TODO : REFINE
+    _generateGlobalConstraints();
   }
 
   protected void _applyTargetdirection() {
@@ -521,11 +525,13 @@ public class ChainSolver extends FABRIKSolver {
   * TODO: Rename ?
   */
 
-  BallAndSocket[] globalConstraints; //these constraint are useful only on froward step, hence we will reflect them
+  BallAndSocket[] _globalConstraints; //these constraint are useful only on froward step, hence we will reflect them
   protected void _generateGlobalConstraints(){
-    globalConstraints = new BallAndSocket[_chain.size()];
+    _globalConstraints = new BallAndSocket[_chain.size()];
     Vector root_pos = _chain.get(0).position();
-    for(int i = 0; i < _chain.size(); i++){
+    System.out.println("Global Constraints Info");
+    for(int i = 1; i < _chain.size(); i++){
+      System.out.println("Joint i: " + i);
       Node j_i = _chain.get(i);
       Vector j_i_pos = _chain.get(i).position();
       Vector axis = Vector.subtract(j_i_pos, root_pos);
@@ -535,6 +541,7 @@ public class ChainSolver extends FABRIKSolver {
       //TODO: This will work better if we consider angles up to PI (current boundaries are at maximum PI/2)
       float up = 0, down = 0, left = 0, right = 0;
       for(int k = 0; k <  i; k++){
+        System.out.println("|--- Joint K: " + k);
         Node j_k = _chain.get(k);
         if(j_k.constraint() == null){
           up = (float)Math.PI;
@@ -551,14 +558,25 @@ public class ChainSolver extends FABRIKSolver {
         float desired_down_angle = _computeAngle(local_right, local_axis, local_j_i);
         float desired_right_angle = _computeAngle(local_up, local_axis, local_j_i);
 
-        right += _getBound(axis, local_up, desired_right_angle, j_k);
-        left += _getBound(axis, local_up, (float) Math.PI * 2 - desired_right_angle, j_k);
-        up += _getBound(axis, local_right, (float) Math.PI * 2 - desired_down_angle, j_k);
-        down += _getBound(axis, local_right, desired_down_angle, j_k);
+        float r_bound = _getBound(up_axis, local_up, desired_right_angle, j_k);
+        float l_bound = _getBound(up_axis, local_up, Math.min((float) Math.PI * 2 - desired_right_angle, (float) Math.PI * 0.99f), j_k);
+        System.out.println("Bounds : " + "r_bound : " + r_bound +  " l_bound : " + l_bound);
+        right += r_bound;
+        left += l_bound;
+        up += _getBound(left_axis, local_right, Math.min((float) Math.PI * 2 - desired_down_angle, (float) Math.PI * 0.99f), j_k);
+        down += _getBound(left_axis, local_right, desired_down_angle, j_k);
       }
+      System.out.println("axis " + axis);
+      System.out.println("left " + Math.toDegrees(left));
+      System.out.println("right " + Math.toDegrees(right));
+      System.out.println("up " + Math.toDegrees(up));
+      System.out.println("down " + Math.toDegrees(down));
+      //TODO : Generalize conic constraints
       //with the obtained information generate the global constraint for j_i
-      globalConstraints[i] = new BallAndSocket(down, up, left, right);
-      globalConstraints[i].setRestRotation(new Quaternion(), up_axis, Vector.multiply(axis,-1));
+      if(down < Math.PI/2  && up < Math.PI/2  && right < Math.PI/2  && left < Math.PI/2 ) {
+        _globalConstraints[i] = new BallAndSocket(down, up, left, right);
+        _globalConstraints[i].setRestRotation(new Quaternion(), up_axis, Vector.multiply(axis, -1));
+      }
     }
   }
 
@@ -570,22 +588,52 @@ public class ChainSolver extends FABRIKSolver {
     if(Vector.dot(cross, axis) < 0){
       angle = (float) Math.PI * 2 - angle;
     }
-    return angle;
+    return Math.min(angle, (float) Math.PI * 0.99f); //Rotation near to PI generates Singularity problems
   }
 
   protected float _getBound(Vector axis, Vector local_axis, float angle, Node node){
+    Quaternion q = new Quaternion(local_axis, angle);
     Quaternion delta = node.constraint().constrainRotation(new Quaternion(local_axis, angle),node);
+    System.out.println("----| cons: " + ((BallAndSocket)node.constraint()).orientation().axis() + Math.toDegrees(((BallAndSocket)node.constraint()).orientation().angle()));
+      System.out.println("----| axis: " + axis);
+    System.out.println("----| local axis: " + local_axis);
+    System.out.println("----| desired quat : " + q.axis() + " angle (degrees) " + Math.toDegrees(q.angle()));
+    System.out.println("----| constrained quat : " + delta.axis() + " angle (degrees) " + Math.toDegrees(delta.angle()));
+
+
+
+
+      Quaternion rotor = node.orientation();
+      System.out.println("----| rot orig computed : " + rotor.axis() + " angle (degrees) " + Math.toDegrees(rotor.angle()));
+
+      //Keep only the component that we're interested on
+      //Decompose in terms of twist and swing
+      Vector rotationOAxis = new Vector(rotor._quaternion[0], rotor._quaternion[1], rotor._quaternion[2]);
+      rotationOAxis = Vector.projectVectorOnAxis(rotationOAxis, axis);
+      //Get rotation component on Axis direction
+      Quaternion rotationOTwist = new Quaternion(rotationOAxis.x(), rotationOAxis.y(), rotationOAxis.z(), rotor.w());
+      System.out.println("----| rot orig twist : " + rotationOTwist.axis() + " angle (degrees) " + Math.toDegrees(rotationOTwist.angle()));
+
+
+
+
+
     Quaternion rot = Quaternion.compose(node.orientation(),delta);
+    System.out.println("----| rot computed : " + rot.axis() + " angle (degrees) " + Math.toDegrees(rot.angle()));
+
     //Keep only the component that we're interested on
     //Decompose in terms of twist and swing
     Vector rotationAxis = new Vector(rot._quaternion[0], rot._quaternion[1], rot._quaternion[2]);
-    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, delta.inverseRotate(axis));
+    rotationAxis = Vector.projectVectorOnAxis(rotationAxis, node.orientation().inverseRotate(axis));
+    System.out.println("rotAx : " +rotationAxis);
     //Get rotation component on Axis direction
     Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), rot.w());
+    System.out.println("----| rot twist : " + rotationTwist.axis() + " angle (degrees) " + Math.toDegrees(rotationTwist.angle()));
     return rotationTwist.angle();
   }
 
   protected Quaternion applyGlobalConstraint(Vector j_hat, Vector j_root_hat,  Vector j_root, BallAndSocket b){
+    if(b == null) return new Quaternion(); //no correction is done
     //Find angle in global space
     Quaternion rot = new Quaternion(Vector.subtract(j_root_hat, j_hat), Vector.subtract(j_root, j_hat));
     Vector axis = b.restRotation().rotate(new Vector(0,0,1));
@@ -594,6 +642,10 @@ public class ChainSolver extends FABRIKSolver {
     Vector result = b.apply(target,b.restRotation());
     //Apply inverse transformation
     return new Quaternion(result, target);
+  }
+
+  public BallAndSocket[] globalConstraints(){
+      return _globalConstraints;
   }
 
 }
