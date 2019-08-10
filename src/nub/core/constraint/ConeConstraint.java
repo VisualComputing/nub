@@ -73,6 +73,13 @@ public abstract class ConeConstraint extends Constraint {
     _max = max;
   }
 
+  public float minTwistAngle(){
+    return _min;
+  }
+
+  public float maxTwistAngle(){
+    return _max;
+  }
 
   public void setRestRotation(Quaternion reference, Vector up, Vector twist) {
     setRestRotation(reference, up, twist, twist);
