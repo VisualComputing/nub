@@ -8,6 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="p5-3x" level="project" />
-    <orderEntry type="module" module-name="framesjs" />
+    <orderEntry type="module" module-name="nubjs" />
   </component>
 </module>
