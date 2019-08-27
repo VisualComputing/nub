@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/framesjs.iml" filepath="$PROJECT_DIR$/.idea/framesjs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/nubjs.iml" filepath="$PROJECT_DIR$/.idea/nubjs.iml" />
       <module fileurl="file://$PROJECT_DIR$/testing/testing.iml" filepath="$PROJECT_DIR$/testing/testing.iml" />
     </modules>
   </component>
