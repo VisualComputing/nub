@@ -52,7 +52,7 @@ class Boid {
         if (scene.trackedNode("mouseMoved") == node) {
           pg.stroke(pg.color(0, 0, 255));
           pg.fill(pg.color(0, 0, 255));
-          PApplet.println("highlighted @" + pApplet.frameCount);
+          //PApplet.println("highlighted @" + pApplet.frameCount);
         }
 
         // highlight avatar
