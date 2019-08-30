@@ -46,7 +46,17 @@ public class SimpleCone  extends PApplet {
         j3.setReference(j2);
         j3.translate(30,30,0);
 
-        BallAndSocket c1 = new BallAndSocket(radians(30),radians(60));
+        Joint j4 = new Joint(scene, radius);
+        j4.translate(0,-30,0);
+        Joint j5 = new Joint(scene, radius);
+        j5.translate(0,-50,0);
+        j5.setReference(j4);
+        BallAndSocket c4 = new BallAndSocket(radians(20), radians(30), radians(60),radians(40));
+        c4.setRestRotation(j4.rotation().get(), new Vector(0,0,1), new Vector(0,-1,0));
+        c4.setTwistLimits(radians(35), radians(35));
+        j4.setConstraint(c4);
+
+        BallAndSocket c1 = new BallAndSocket(radians(20), radians(30), radians(40),radians(60));
         c1.setRestRotation(j1.rotation().get(), new Vector(0,0,1), new Vector(0,1,0));
         c1.setTwistLimits(radians(35), radians(35));
         j1.setConstraint(c1);

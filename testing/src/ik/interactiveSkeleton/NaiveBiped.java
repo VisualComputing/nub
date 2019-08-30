@@ -9,6 +9,7 @@ import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
+import nub.ik.solver.geometric.MySolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
-    public enum IKMode{ BIOIK, FABRIK, CCD};
+    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER};
 
     Scene scene;
     float boneLength = 50;
@@ -38,7 +39,7 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = true;
+    boolean debug = false;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
@@ -57,9 +58,11 @@ public class NaiveBiped extends PApplet {
 
         if(!debug) {
             createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
-            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.CCD);
+            //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.CCD);
+            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
+        //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
 
@@ -162,6 +165,12 @@ public class NaiveBiped extends PApplet {
                 solver.setTarget(limb.get(limb.size() - 1), target);
                 break;
             }
+            case MYSOLVER:{
+                solver = new MySolver(limb);
+                ((MySolver)solver).setTarget(target);
+                break;
+            }
+
             default:{
                 return null;
             }
