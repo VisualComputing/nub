@@ -12,6 +12,7 @@ import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.evolutionary.GASolver;
 import nub.ik.solver.evolutionary.HillClimbingSolver;
+import nub.ik.solver.geometric.MySolver;
 import nub.ik.solver.numerical.PseudoInverseSolver;
 import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.numerical.TransposeSolver;
@@ -30,7 +31,7 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
-    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA }
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA, MySolver }
 
     public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
@@ -66,6 +67,7 @@ public class Util {
             case GA: return new GASolver(structure, 10);
             case HAEA: return new HAEASolver(structure, 10, true);
             case SDLS: return new SDLSSolver(structure);
+            case MySolver: return  new MySolver(structure);
             default: return null;
         }
     }
@@ -266,6 +268,9 @@ public class Util {
         }
         if(solver instanceof HAEASolver){
             pg.text("HAEA \n Algorithm" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+        }
+        if(solver instanceof MySolver){
+            pg.text("MySolver" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         pg.popStyle();
     }

@@ -39,7 +39,7 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = false;
+    boolean debug = true;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
@@ -237,7 +237,7 @@ public class NaiveBiped extends PApplet {
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
-                float max = 10;
+                float max = 3;
                 float min = 45;
 
                 Hinge hinge = new Hinge(radians(min), radians(max), middle.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));

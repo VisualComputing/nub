@@ -36,7 +36,7 @@ public class VisualBenchmark extends PApplet {
 
 
     Util.SolverType solversType [] = {Util.SolverType.SDLS, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
-            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2}; //Place Here Solvers that you want to compare
+            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2, Util.SolverType.MySolver}; //Place Here Solvers that you want to compare
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 

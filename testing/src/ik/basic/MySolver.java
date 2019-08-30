@@ -77,7 +77,7 @@ public class MySolver extends PApplet {
         skeleton.add(endEffector);
 
 
-        Util.generateConstraints(skeleton, Util.ConstraintType.HINGE, 0, scene.is3D());
+        Util.generateConstraints(skeleton, Util.ConstraintType.HINGE, -1, scene.is3D());
 
 
 
