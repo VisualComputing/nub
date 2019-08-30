@@ -58,11 +58,15 @@ public abstract class ConeConstraint extends Constraint {
   public void setRestRotation(Quaternion reference, Vector up, Vector twist, Vector offset) {
     _orientation = reference.get();
     _idleRotation = reference.get();
+    //Align z-Axis with twist vector around new up Vector
+    Quaternion delta = new Quaternion(new Vector(0, 0, 1), twist);
+    Vector tw = delta.inverseRotate(up);
     //Align y-Axis with up vector
-    Quaternion delta = new Quaternion(new Vector(0, 1, 0), up);
-    Vector tw = delta.inverseRotate(twist);
-    //Align z-Axis with twist vector
-    delta.compose(new Quaternion(new Vector(0, 0, 1), tw));
+    //Assume that up and twist are orthogonal
+    float angle = Vector.angleBetween(tw, new Vector(0,1,0));
+    if(Vector.cross(new Vector(0,1,0),tw, null).dot(new Vector(0,0,1)) < 0)
+      angle *= -1;
+    delta.compose(new Quaternion(new Vector(0, 0, 1), angle));
     _orientation.compose(delta); // orientation = idle * rest
     _offset = new Quaternion(twist, offset); // TODO : check offset
     _restRotation = delta;
