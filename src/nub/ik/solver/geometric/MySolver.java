@@ -21,7 +21,7 @@ public class MySolver extends Solver{
     protected float _current = 10e10f, _best = 10e10f;
     protected Node _target;
     protected Node _prevTarget;
-    protected boolean debug = false; //TODO: remove this
+    protected boolean debug = true; //TODO: remove this
 
     public MySolver(List<? extends Node> chain) {
         this(chain, null);
@@ -125,8 +125,9 @@ public class MySolver extends Solver{
 
     @Override
     public float error() {
-        return Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
+        return Vector.distance(_original.get(_original.size() - 1).position(), _target.position());
     }
+
 
     public void setTarget(Node endEffector, Node target) {
         this._target = target;
@@ -271,6 +272,25 @@ public class MySolver extends Solver{
         Vector axis = Vector.cross(j_i.location(j_i_prev), j_i.location(j_i_next), null);
         if(axis.magnitude() < 1e-5) axis = j_i_next.translation().orthogonalVector();
         float delta = desired_theta - current_theta;
+        if(j_i.constraint() != null){
+            float delta2 = -desired_theta - current_theta;
+            //If the joint has a constraint choose the best solution between theta and -theta
+            Quaternion q1 = j_i.constraint().constrainRotation(new Quaternion(axis, delta), j_i);
+            Quaternion q2 = j_i.constraint().constrainRotation(new Quaternion(axis, delta2), j_i);
+            //Get components of this rotation along axis
+            Vector v1 = new Vector(q1.x(), q1.y(), q1.z());
+            Vector v2 = new Vector(q2.x(), q2.y(), q2.z());
+            Vector proj1 = Vector.projectVectorOnAxis(v1, axis);
+            Vector proj2 = Vector.projectVectorOnAxis(v2, axis);
+            Quaternion t1 = new Quaternion(proj1, q1.w());
+            Quaternion t2 = new Quaternion(proj2, q2.w());
+            //Keep the rotation whose angle is nearest to de desired one (delta)
+            //TODO : Deal with singularity at PI
+            if(Math.abs(Math.abs(delta) - Math.abs(t1.angle())) > Math.abs(Math.abs(delta2) - Math.abs(t2.angle()))){
+                delta = delta2;
+            }
+        }
+
         System.out.println("---| delta : " + Math.toDegrees(delta));
         System.out.println("---| axis : " + axis);
         j_i.rotate(axis, delta);
@@ -303,6 +323,10 @@ public class MySolver extends Solver{
             if(i > 0 && i < chain.size() -1) _reverseConstraint(chain.get(i - 1), joint,  chain.get(i + 1), newJoint);
             reversed.add(newJoint);
             reference = newJoint;
+        }
+
+        if(reversed.get(0) instanceof Joint){//TODO: Remove this
+            ((Joint) reversed.get(0)).setRoot(true);
         }
         return reversed;
     }
