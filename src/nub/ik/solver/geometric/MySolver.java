@@ -2,10 +2,14 @@ package nub.ik.solver.geometric;
 
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
+import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.Constraint;
+import nub.core.constraint.Hinge;
 import nub.ik.solver.Solver;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +21,7 @@ public class MySolver extends Solver{
     protected float _current = 10e10f, _best = 10e10f;
     protected Node _target;
     protected Node _prevTarget;
+    protected boolean debug = false; //TODO: remove this
 
     public MySolver(List<? extends Node> chain) {
         this(chain, null);
@@ -26,7 +31,7 @@ public class MySolver extends Solver{
         super();
         this._original = chain;
         this._chain = FABRIKSolver._copy(chain); //TODO: Move this method
-        this._reversed = _reverseChain(_original);
+        this._reversed = _reverseChain(_original, (Scene)_original.get(0).graph());
         _generateGlobalConstraints();
     }
 
@@ -41,21 +46,34 @@ public class MySolver extends Solver{
         if (Vector.distance(end.position(), target) <= _maxError) {
             return true;
         }
-        //st = 0;
-        //while(st < _original.size() - 1) {
-            if(st <= _original.size() - 2){
+        // /*NON DEBUG
+        if(!debug) {
+            st = 0;
+            while (st < _original.size() - 1) {
+                _applyStep(_original, _reversed, st);
+                st++;
+            }
+            _update(_original, _reversed);
+            _updateReverse(_original, _reversed);
+        }
+        else {
+            /*DEBUG*/
+            //st = 0;
+            //while(st < _original.size() - 1) {
+            if (st <= _original.size() - 2) {
                 _applyStep(_original, _reversed, st);
 
-            }
-            else{
+            } else {
                 _update(_original, _reversed);
                 _updateReverse(_original, _reversed);
                 st = 0;
             }
             //st++;
-        //}
-        //st = (st + 1) % (_original.size() - 1);
-        //Check total rotation change
+            //}
+            //st = (st + 1) % (_original.size() - 1);
+            /**/
+            //Check total rotation change
+        }
         return false;
     }
 
@@ -164,15 +182,25 @@ public class MySolver extends Solver{
         System.out.println("Desired ext : " + desired_extension);
         System.out.println("Extension final : " + extension);
         //Apply defined extension
-        if(cur == 0) {
+        //NON DEBUG
+        if(!debug) {
+
             _applyExtension(reversed, i + 1, extension);
-            cur++;
+            _applyRotation(reversed, i, current.get(0).position());
         }
-        else if(cur == 1){
-            _applyRotation(reversed,i, current.get(0).position());
-            cur = 0;
-            st++;
+        else {
+            /*DEBUG
+             */
+            if (cur == 0) {
+                _applyExtension(reversed, i + 1, extension);
+                cur++;
+            } else if (cur == 1) {
+                _applyRotation(reversed, i, current.get(0).position());
+                cur = 0;
+                st++;
+            }
         }
+        /**/
     }
 
 
@@ -259,7 +287,7 @@ public class MySolver extends Solver{
         j_i.rotate(desired_rotation);
     }
 
-    protected static List<Node> _reverseChain(List<? extends Node> chain){
+    protected static List<Node> _reverseChain(List<? extends Node> chain, Scene s){
         List<Node> reversed = new ArrayList<>();
         Node reference = chain.get(0).reference();
         if (reference != null) {
@@ -267,15 +295,72 @@ public class MySolver extends Solver{
         }
         for(int i = chain.size() -1; i >= 0; i--){
             Node joint = chain.get(i);
-            Node newJoint = new Node();
+            Node newJoint = new Joint(s);
             newJoint.setReference(reference);
             newJoint.setPosition(joint.position().get());
             newJoint.setOrientation(joint.orientation().get());
             //newJoint.setConstraint(joint.constraint()); TODO: Invert constraints
+            if(i > 0 && i < chain.size() -1) _reverseConstraint(chain.get(i - 1), joint,  chain.get(i + 1), newJoint);
             reversed.add(newJoint);
             reference = newJoint;
         }
         return reversed;
+    }
+
+    protected static void _reverseConstraint(Node j_i_prev, Node j_i, Node j_i_next, Node reversed_j_i){
+        if(j_i.constraint() instanceof ConeConstraint){
+            ConeConstraint constraint = (ConeConstraint) j_i.constraint();
+            Quaternion q_i_prev =  j_i_prev != null ? j_i_prev.orientation() : new Quaternion();
+            Quaternion rev_q_i_prev =  reversed_j_i.reference() != null ? reversed_j_i.reference().orientation() : new Quaternion();
+
+            //Getting Reference Quaternion
+            Quaternion local_ref = constraint.idleRotation(); //this reference is in terms of joint parent
+            Quaternion global_ref = Quaternion.compose(q_i_prev,local_ref);
+            //Align with previous segment
+            Quaternion alignment = new Quaternion(Vector.subtract(j_i_next.position(), j_i.position()),
+                    Vector.subtract(j_i.position(), j_i_prev != null ? j_i_prev.position() : new Vector()));
+            global_ref = Quaternion.compose(alignment, global_ref);
+            //Pass reference to reversed_joint space
+            Quaternion reversed_local_ref = Quaternion.compose(rev_q_i_prev.inverse(), global_ref);
+
+            //Getting up and twist vector
+            Quaternion local_rest = constraint.restRotation();
+            Vector up =local_rest.rotate(new Vector(0,1,0));
+            //Reverse twist vector
+            Vector twist = local_rest.rotate(new Vector(0,0,-1));
+            //Attach new constraint
+            if(j_i.constraint() instanceof BallAndSocket){
+                BallAndSocket bs = (BallAndSocket) j_i.constraint();
+                BallAndSocket rev_bs = new BallAndSocket(bs.down(), bs.up(), bs.right(), bs.left());
+                rev_bs.setRestRotation(reversed_local_ref, up, twist);
+                reversed_j_i.setConstraint(rev_bs);
+            }
+        } else if(j_i.constraint() instanceof Hinge){
+            Hinge constraint = (Hinge) j_i.constraint();
+            Quaternion q_i_prev = j_i_prev != null ? j_i_prev.orientation() : new Quaternion();
+            Quaternion rev_q_i_prev = reversed_j_i.reference() != null ? reversed_j_i.reference().orientation() : new Quaternion();
+
+            //Getting Reference quaternion
+            Quaternion local_ref = constraint.idleRotation();
+            Quaternion global_ref = Quaternion.compose(q_i_prev, local_ref);
+            //Align with previous segment
+            Quaternion alignment = new Quaternion(Vector.subtract(j_i_next.position(), j_i.position()),
+                    Vector.subtract(j_i.position(), j_i_prev != null ? j_i_prev.position() : new Vector()));
+            System.out.println("Alingmnet : " + alignment.axis() + " " + alignment.angle());
+            global_ref = Quaternion.compose(alignment, global_ref);
+            //Pass reference to reversed_joint space
+            Quaternion reversed_local_ref = Quaternion.compose(rev_q_i_prev.inverse(), global_ref);
+
+            //Getting up and twist vector
+            Quaternion local_rest = constraint.restRotation();
+            Vector up =local_rest.rotate(new Vector(0,-1,0));
+            //Reverse twist vector
+            Vector twist = local_rest.rotate(new Vector(0,0,1));
+            //Attach new constraint
+            Hinge rev_bs = new Hinge(constraint.maxAngle(), constraint.minAngle(), reversed_local_ref, up, twist);
+            rev_bs.setRestRotation(reversed_local_ref, up, twist);
+            reversed_j_i.setConstraint(rev_bs);
+        }
     }
 
 
