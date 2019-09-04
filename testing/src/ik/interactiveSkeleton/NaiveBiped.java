@@ -39,7 +39,7 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = true;
+    boolean debug = false;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
@@ -74,6 +74,12 @@ public class NaiveBiped extends PApplet {
         if(debug){
             hint(DISABLE_DEPTH_TEST);
             for(Solver solver : solvers){
+                if(solver instanceof MySolver){
+                    scene.beginHUD();
+                    Vector t = scene.screenLocation(((MySolver) solver).target());
+                    text(" " + ((MySolver) solver).target().position(), t.x(), t.y());
+                    scene.endHUD();
+                }
                 if(!(solver instanceof ChainSolver)) continue;
                 ChainSolver s = (ChainSolver) solver;
                 /*if(s.iterationsHistory() != null && !s.iterationsHistory().isEmpty() && show[0]) {
