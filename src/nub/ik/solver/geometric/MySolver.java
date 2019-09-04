@@ -23,6 +23,10 @@ public class MySolver extends Solver{
     protected Node _prevTarget;
     protected boolean debug = true; //TODO: remove this
 
+    public Node target(){
+        return _target;
+    }
+
     public MySolver(List<? extends Node> chain) {
         this(chain, null);
     }
@@ -80,7 +84,7 @@ public class MySolver extends Solver{
     protected void _update(List<? extends Node> chain, List<? extends Node> reversed){
         for(int i = 0; i < chain.size()-1; i++){
             Quaternion q = new Quaternion(chain.get(i).location(chain.get(i+1)), chain.get(i).location(reversed.get(reversed.size() - 2 - i)));
-           chain.get(i).rotate(q);
+            chain.get(i).rotate(q);
         }
     }
 
@@ -155,7 +159,7 @@ public class MySolver extends Solver{
     protected void _applyStep(List<? extends Node> current, List<? extends Node> reversed, int i){
         System.out.println("=========================");
         System.out.println("=========================");
-        System.out.println("i :" + i);
+        System.out.println("i :" + i + " cur : " + cur);
         int i_cur = current.size() - 1 - i;
         //Get how much to extend
         Vector root_j_i_hat = Vector.subtract(reversed.get(i).position(), current.get(0).position());
@@ -169,12 +173,17 @@ public class MySolver extends Solver{
         float local_possible_extension = 0;
         Vector dir = Vector.subtract(reversed.get(i + 1).position(), reversed.get(i).position());
         if(difference > 0){
-            remaining_possible_extension = _possibleGlobalExtension(reversed, i + 2, reversed.size() - 1);
+            remaining_possible_extension = _possibleGlobalExtension2(reversed, i + 2, reversed.size() - 1);
             local_possible_extension = _possibleLocalExtension(reversed, i);
             System.out.println("Ext : " + remaining_possible_extension + " Local : " + local_possible_extension);
+            if(remaining_possible_extension < 0){
+                System.out.println("ERROR!!!!!!");
+                throw new IllegalArgumentException("Max es menor!");
+            }
+
         }else{
             //TODO: Check this with pre-calculations
-            remaining_possible_extension = _possibleGlobalContraction(reversed, i + 2, reversed.size() - 1);
+            remaining_possible_extension = _possibleGlobalContraction2(reversed, i + 2, reversed.size() - 1);
             local_possible_extension = _possibleLocalContraction(reversed, i);
             System.out.println("Cont : " + remaining_possible_extension + " Local : " + local_possible_extension);
         }
@@ -206,7 +215,7 @@ public class MySolver extends Solver{
 
 
     protected float _possibleLocalExtension(List<? extends Node> chain, int i){
-        return _possibleGlobalExtension(chain, i, i + 2);
+        return _possibleGlobalExtension2(chain, i, i + 2);
     }
 
     //TODO: Do the same calculation but with constrained structures
@@ -228,14 +237,125 @@ public class MySolver extends Solver{
         return max - current_extension;
     }
 
+    protected float _possibleGlobalExtension2(List<? extends Node> chain, int init, int end){
+        System.out.println("EXTENSION 2 -------------");
+        if(init >= chain.size() || init >= end || end >= chain.size()) return 0;
+        Vector current = Vector.subtract(chain.get(init).position(), chain.get(end).position());
+        float current_extension = current.magnitude();
+        Quaternion ref = chain.get(init).orientation().get();
+        Vector last = chain.get(init + 1).position().get();
+        for(int i = init + 1; i < end; i++){
+            Node j_i = chain.get(i);
+            ref.compose(j_i.rotation());
+
+            Vector desired_direction = ref.inverseRotate(Vector.subtract(last, chain.get(init).position()));
+            Vector current_direction = chain.get(i+1).translation();
+            System.out.println("°°°°°°°°°° desired dir " + desired_direction);
+            System.out.println("°°°°°°°°°° current dir " + current_direction);
+            //Quaternion rotation = new Quaternion(current_direction, desired_direction);
+            //Similar as Quaternion(current, desired) but considering singularities (rot of nearly PI) when dealing with Hinge
+            Quaternion rotation;
+            float fromSqNorm = current_direction.squaredNorm();
+            float toSqNorm = desired_direction.squaredNorm();
+            // Identity Quaternion when one vector is null
+            if (fromSqNorm == 0 || toSqNorm == 0) {
+                rotation = new Quaternion();
+            } else {
+                Vector axis = current_direction.cross(desired_direction);
+                float axisSqNorm = axis.squaredNorm();
+                // Aligned vectors, pick any axis, not aligned with from or to
+                if(axis.magnitude() < 1e-4){ //If angle is nearly PI
+                    axis = desired_direction.orthogonalVector();
+                    if(j_i.constraint() instanceof Hinge){
+                        //Project Hinge axis on plane defined by axis
+                        axis = Vector.projectVectorOnPlane(((Hinge) j_i.constraint()).restRotation().rotate(new Vector(0,0,1)), desired_direction);
+                    }
+                }
+                float angle = (float) Math.asin((float) Math.sqrt(axisSqNorm / (fromSqNorm * toSqNorm)));
+                if (current_direction.dot(desired_direction) < 0.0)
+                    angle = (float) Math.PI - angle;
+
+                rotation = new Quaternion(axis, angle);
+            }
+
+            Quaternion constrained_rotation = j_i.constraint() != null ? j_i.constraint().constrainRotation(rotation, j_i) : rotation;
+            //Pass to world coordinates
+            ref.compose(constrained_rotation);
+            last.add(ref.rotate(current_direction));
+        }
+        float max = Vector.subtract(last, chain.get(init).position()).magnitude();
+        System.out.println("°°°°°°°°°° MAX " + max);
+        System.out.println("°°°°°°°°°° Curr " + current);
+        System.out.println("°°°°°°°°°° Curr_ext " + current_extension);
+        return Math.max(max - current_extension, 0);
+    }
+
+
     protected float _possibleGlobalContraction(List<? extends Node> chain, int init, int end){
         if(init >= chain.size() || init >= end || end >= chain.size()) return 0;
         return Vector.subtract(chain.get(init).position(), chain.get(end).position()).magnitude();
     }
 
+    /*
+    * Dummy approach, perhaps require further thinking
+    *
+    * */
+    protected float _possibleGlobalContraction2(List<? extends Node> chain, int init, int end){
+        System.out.println("Contraction 2 -------------");
+        if(init >= chain.size() || init >= end || end >= chain.size()) return 0;
+        Vector current = Vector.subtract(chain.get(init).position(), chain.get(end).position());
+        float current_extension = current.magnitude();
+        Quaternion ref = chain.get(init).orientation().get();
+        Vector last = chain.get(init + 1).position().get();
+        for(int i = init + 1; i < end; i++){
+            Node j_i = chain.get(i);
+            Vector desired_direction = ref.inverseRotate(Vector.subtract(chain.get(init).position(), last));
+            Vector current_direction = chain.get(i+1).translation();
+            System.out.println("°°°°°°°°°° desired dir " + desired_direction);
+            System.out.println("°°°°°°°°°° current dir " + current_direction);
+            System.out.println("°°°°°°°°°° axis  " + current_direction);
+
+            //Similar as Quaternion(current, desired) but considering singularities (rot of nearly PI) when dealing with Hinge
+            Quaternion rotation;
+            float fromSqNorm = current_direction.squaredNorm();
+            float toSqNorm = desired_direction.squaredNorm();
+            // Identity Quaternion when one vector is null
+            if (fromSqNorm == 0 || toSqNorm == 0) {
+                rotation = new Quaternion();
+            } else {
+                Vector axis = current_direction.cross(desired_direction);
+                float axisSqNorm = axis.squaredNorm();
+                // Aligned vectors, pick any axis, not aligned with from or to
+                if(axis.magnitude() < 1e-4){ //If angle is nearly PI
+                    axis = desired_direction.orthogonalVector();
+                    if(j_i.constraint() instanceof Hinge){
+                        //Project Hinge axis on plane defined by axis
+                        axis = Vector.projectVectorOnPlane(((Hinge) j_i.constraint()).restRotation().rotate(new Vector(0,0,1)), desired_direction);
+                    }
+                }
+                float angle = (float) Math.asin((float) Math.sqrt(axisSqNorm / (fromSqNorm * toSqNorm)));
+                if (current_direction.dot(desired_direction) < 0.0)
+                    angle = (float) Math.PI - angle;
+
+                rotation = new Quaternion(axis, angle);
+            }
+            Quaternion constrained_rotation = j_i.constraint() != null ? j_i.constraint().constrainRotation(rotation, j_i) : rotation;
+            //Pass to world coordinates
+            ref.compose(constrained_rotation);
+            last.add(ref.rotate(current_direction));
+        }
+        Vector first = chain.get(init).position();
+        float max = Vector.subtract(last, first).magnitude();
+        System.out.println("°°°°°°°°°° MAX " + max);
+        System.out.println("°°°°°°°°°° Curr " + current);
+        System.out.println("°°°°°°°°°° Curr_ext " + current_extension);
+        return Math.max(current_extension - max, 0);
+    }
+
+
     //TODO: Do the same calculation but with constrained structures
     protected float _possibleLocalContraction(List<? extends Node> chain, int i){
-        return _possibleGlobalContraction(chain, i, i + 2);
+        return _possibleGlobalContraction2(chain, i, i + 2);
     }
 
     //define how to extend/contract the local joint. the idea is to try to make all joint to move the same amount
@@ -270,23 +390,59 @@ public class MySolver extends Solver{
         float current_theta = Vector.angleBetween(j_i.location(j_i_prev), j_i.location(j_i_next));
         System.out.println("---| current_theta : " + Math.toDegrees(current_theta));
         Vector axis = Vector.cross(j_i.location(j_i_prev), j_i.location(j_i_next), null);
-        if(axis.magnitude() < 1e-5) axis = j_i_next.translation().orthogonalVector();
+        System.out.println(".....--| axis after cross : " + axis);
+        if(axis.magnitude() < 1e-4){
+            axis = j_i_next.translation().orthogonalVector();
+            if(j_i.constraint() instanceof Hinge){
+                //Project Hinge axis on plane defined by axis
+                axis = Vector.projectVectorOnPlane(((Hinge) j_i.constraint()).restRotation().rotate(new Vector(0,0,1)), j_i.location(j_i_next));
+            }
+        }
+        axis.normalize();
         float delta = desired_theta - current_theta;
+        System.out.println(".....--| axis : " + axis);
+
+        System.out.println(".....--| delta : " + Math.toDegrees(delta));
+        delta = delta > Math.PI ? (float)(-2 *Math.PI + delta) : delta;
+        delta = delta < -Math.PI ? (float)(2 *Math.PI + delta) : delta;
+
         if(j_i.constraint() != null){
             float delta2 = -desired_theta - current_theta;
+            if(j_i.constraint() instanceof Hinge)System.out.println("Axis twist : " + ((Hinge) j_i.constraint()).restRotation().rotate(new Vector(0,0,1)));
+            System.out.println(".....--| delta2 : " + Math.toDegrees(delta2));
+            delta2 = delta2 > Math.PI ? (float)(-2 *Math.PI + delta2) : delta2;
+            delta2 = delta2 < -Math.PI ? (float)(2 *Math.PI + delta2) : delta2;
+            System.out.println(".....--| delta n : " + Math.toDegrees(delta));
+            System.out.println(".....--| delta 2 n: " + Math.toDegrees(delta2));
             //If the joint has a constraint choose the best solution between theta and -theta
             Quaternion q1 = j_i.constraint().constrainRotation(new Quaternion(axis, delta), j_i);
+            q1.normalize();
             Quaternion q2 = j_i.constraint().constrainRotation(new Quaternion(axis, delta2), j_i);
+            q2.normalize();
+            System.out.println(".....--| q1: " + q1.axis() + Math.toDegrees(q1.angle()));
+            System.out.println(".....--| q1: " + q1.x() + ", " + q1.y() + ", " + q1.z() + ", " + q1.w() );
+            System.out.println(".....--| q2: " + q2.axis() + Math.toDegrees(q2.angle()));
+
             //Get components of this rotation along axis
             Vector v1 = new Vector(q1.x(), q1.y(), q1.z());
             Vector v2 = new Vector(q2.x(), q2.y(), q2.z());
             Vector proj1 = Vector.projectVectorOnAxis(v1, axis);
             Vector proj2 = Vector.projectVectorOnAxis(v2, axis);
-            Quaternion t1 = new Quaternion(proj1, q1.w());
-            Quaternion t2 = new Quaternion(proj2, q2.w());
+            Quaternion t1 = new Quaternion(proj1.x(), proj1.y(), proj1.z(), q1._quaternion[3]);
+            Quaternion t2 = new Quaternion(proj2.x(), proj2.y(), proj2.z(), q2._quaternion[3]);
+
             //Keep the rotation whose angle is nearest to de desired one (delta)
             //TODO : Deal with singularity at PI
-            if(Math.abs(Math.abs(delta) - Math.abs(t1.angle())) > Math.abs(Math.abs(delta2) - Math.abs(t2.angle()))){
+            System.out.println(".....--| t1: " + t1.axis() + Math.toDegrees(t1.angle()));
+            System.out.println(".....--| t2: " + t2.axis() + Math.toDegrees(t2.angle()));
+
+            float a1 = t1.axis().dot(axis) < 0 ? -t1.angle() : t1.angle();
+            float a2 = t2.axis().dot(axis) < 0 ? -t2.angle() : t2.angle();
+
+            System.out.println(".....--| a1: " + Math.toDegrees(a1));
+            System.out.println(".....--| a2: " + Math.toDegrees(a2));
+
+            if(Math.abs(delta - a1) > Math.abs(delta2 - a2)){
                 delta = delta2;
             }
         }
