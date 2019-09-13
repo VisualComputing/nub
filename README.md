@@ -7,6 +7,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.s
 - [Scene](#user-content-scene)
 - [Nodes](#user-content-nodes)
 - [Interpolators](#user-content-interpolators)
+- [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Control](#user-content-control)
 - [Installation](#user-content-installation)
@@ -16,7 +17,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.s
 
 [nub](http://visualcomputing.github.io/Transformations/#/6) is a simple, expressive, language-agnostic, and extensible [(2D/3D) scene graph](https://en.wikipedia.org/wiki/Scene_graph) featuring interaction, visualization and animation frameworks and supporting advanced (onscreen/offscreen) rendering techniques, such as [view frustum culling](http://cgvr.informatik.uni-bremen.de/teaching/cg_literatur/lighthouse3d_view_frustum_culling/index.html).
 
-*nub* is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nubjs/releases) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
+*nub* is meant to be coupled with third party real and non-real time [renderers](https://en.wikipedia.org/wiki/3D_rendering). Our current [release](https://github.com/VisualComputing/nub/releases) supports all major [Processing](https://processing.org/) desktop renderers: [2D and 3D PGraphicsOpenGL (a.k.a. P2D and P3D, respectively)](https://processing.github.io/processing-javadocs/core/processing/opengl/PGraphicsOpenGL.html), [PGraphicsJava2D (a.k.a. JAVA2D)](https://processing.github.io/processing-javadocs/core/processing/awt/PGraphicsJava2D.html) and [PGraphicsFX2D (a.k.a. FX2D)](https://processing.github.io/processing-javadocs/core/processing/javafx/PGraphicsFX2D.html).
 
 If looking for the API docs, check them [here](https://visualcomputing.github.io/nub-javadocs/).
 
@@ -145,7 +146,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [CajasOrientadas example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/CajasOrientadas).
+See the [CajasOrientadas example](https://github.com/VisualComputing/nub/tree/master/examples/basics/CajasOrientadas).
 
 ### Rendering
 
@@ -161,8 +162,8 @@ void draw() {
 observe that:
 
 * The scene gets rendered respect to the scene [eye()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#eye--) node.
-* Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [DepthOfField example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/DepthOfField).
-* Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [ShadowMap example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/ShadowMap).
+* Call [render(PGraphics)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render-java.lang.Object-) to render the scene into an arbitrary _PGraphics_ context. See the [DepthOfField example](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthOfField).
+* Call [render(PGraphics, Graph.Type, Node, zNear, zFar)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#render-processing.core.PGraphics-frames.core.Graph.Type-frames.core.Node-float-float-) to render the scene into an arbitrary _PGraphics_ context from an arbitrary node point-of-view. See the [DepthMap example](https://github.com/VisualComputing/nub/tree/master/examples/demos/DepthMap).
 * The role played by a [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance during a scene graph traversal is implemented by overriding its [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) method.
 
 To bypass the [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) algorithm use [detached nodes](detached.md), or override [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--) to setup a _cullingCondition_ for the node as follows (see [visit()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#visit--), [cull(boolean)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#cull-boolean-) and [isCulled()](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#isCulled--)):
@@ -223,7 +224,7 @@ void draw() {
 }
 ```
 
-while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/Interpolators).
+while [render()](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#render--) will draw the animated shape(s) [drawPath(Interpolator)](https://visualcomputing.github.io/nub-javadocs/nub/processing/Scene.html#drawPath-frames.core.Interpolator-) will draw the interpolated path too. See the [Interpolators example](https://github.com/VisualComputing/nub/tree/master/examples/basics/Interpolators).
 
 ## HIDs
 
@@ -232,7 +233,7 @@ Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_
 1. Define an _hid_ tracked-node instance, using an arbitrary name for it (see [setTrackedNode(String, Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setTrackedNode-java.lang.String-frames.core.Node-)); and,
 2. Call any interactivity method that take an _hid_ param (such as [translate(String, float, float, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#translate-java.lang.String-float-float-), [rotate(String, float, float, float)]() or [scale(String, float)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#scale-java.lang.String-float-) following the name convention you defined in 1.
 
-See the [SpaceNavigator example](https://github.com/VisualComputing/nubjs/tree/processing/examples/basics/SpaceNavigator).
+See the [SpaceNavigator example](https://github.com/VisualComputing/nub/tree/master/examples/basics/SpaceNavigator).
 
 Observations:
 
@@ -250,11 +251,11 @@ Implementing an application control for a node is a two step process:
 1. Override the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
 2. Send gesture data to the node by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-frames.core.Node-java.lang.Object...-).
 
-See the [ApplicationControl example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/ApplicationControl).
+See the [ApplicationControl example](https://github.com/VisualComputing/nub/tree/master/examples/demos/ApplicationControl).
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/nubjs/releases) and extract it to your sketchbook `libraries` folder.
+Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/nub/releases) and extract it to your sketchbook `libraries` folder.
 
 ## Contributors
 
@@ -262,7 +263,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/9769647?v=4" width="100px;"/><br /><sub><b>sechaparroc</b></sub>](https://github.com/sechaparroc)<br />[📝](#blog-sechaparroc "Blogposts") [🐛](https://github.com/VisualComputing/nubjs/issues?q=author%3Asechaparroc "Bug reports") [💻](https://github.com/VisualComputing/nubjs/commits?author=sechaparroc "Code") [🎨](#design-sechaparroc "Design") [📖](https://github.com/VisualComputing/nubjs/commits?author=sechaparroc "Documentation") [📋](#eventOrganizing-sechaparroc "Event Organizing") [💡](#example-sechaparroc "Examples") [💵](#financial-sechaparroc "Financial") [🔍](#fundingFinding-sechaparroc "Funding Finding") [🤔](#ideas-sechaparroc "Ideas, Planning, & Feedback") [📦](#platform-sechaparroc "Packaging/porting to new platform") [🔌](#plugin-sechaparroc "Plugin/utility libraries") [💬](#question-sechaparroc "Answering Questions") [👀](#review-sechaparroc "Reviewed Pull Requests") [📢](#talk-sechaparroc "Talks") [⚠️](https://github.com/VisualComputing/nubjs/commits?author=sechaparroc "Tests") [✅](#tutorial-sechaparroc "Tutorials") [📹](#video-sechaparroc "Videos") | [<img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;"/><br /><sub><b>Jean Pierre Charalambos</b></sub>](https://github.com/nakednous)<br />[📝](#blog-nakednous "Blogposts") [🐛](https://github.com/VisualComputing/nubjs/issues?q=author%3Anakednous "Bug reports") [💻](https://github.com/VisualComputing/nubjs/commits?author=nakednous "Code") [🎨](#design-nakednous "Design") [📖](https://github.com/VisualComputing/nubjs/commits?author=nakednous "Documentation") [📋](#eventOrganizing-nakednous "Event Organizing") [💡](#example-nakednous "Examples") [💵](#financial-nakednous "Financial") [🔍](#fundingFinding-nakednous "Funding Finding") [🤔](#ideas-nakednous "Ideas, Planning, & Feedback") [📦](#platform-nakednous "Packaging/porting to new platform") [🔌](#plugin-nakednous "Plugin/utility libraries") [💬](#question-nakednous "Answering Questions") [👀](#review-nakednous "Reviewed Pull Requests") [📢](#talk-nakednous "Talks") [⚠️](https://github.com/VisualComputing/nubjs/commits?author=nakednous "Tests") [✅](#tutorial-nakednous "Tutorials") [📹](#video-nakednous "Videos") |
+| [<img src="https://avatars2.githubusercontent.com/u/9769647?v=4" width="100px;"/><br /><sub><b>sechaparroc</b></sub>](https://github.com/sechaparroc)<br />[📝](#blog-sechaparroc "Blogposts") [🐛](https://github.com/VisualComputing/nub/issues?q=author%3Asechaparroc "Bug reports") [💻](https://github.com/VisualComputing/nub/commits?author=sechaparroc "Code") [🎨](#design-sechaparroc "Design") [📖](https://github.com/VisualComputing/nub/commits?author=sechaparroc "Documentation") [📋](#eventOrganizing-sechaparroc "Event Organizing") [💡](#example-sechaparroc "Examples") [💵](#financial-sechaparroc "Financial") [🔍](#fundingFinding-sechaparroc "Funding Finding") [🤔](#ideas-sechaparroc "Ideas, Planning, & Feedback") [📦](#platform-sechaparroc "Packaging/porting to new platform") [🔌](#plugin-sechaparroc "Plugin/utility libraries") [💬](#question-sechaparroc "Answering Questions") [👀](#review-sechaparroc "Reviewed Pull Requests") [📢](#talk-sechaparroc "Talks") [⚠️](https://github.com/VisualComputing/nub/commits?author=sechaparroc "Tests") [✅](#tutorial-sechaparroc "Tutorials") [📹](#video-sechaparroc "Videos") | [<img src="https://avatars2.githubusercontent.com/u/645599?v=4" width="100px;"/><br /><sub><b>Jean Pierre Charalambos</b></sub>](https://github.com/nakednous)<br />[📝](#blog-nakednous "Blogposts") [🐛](https://github.com/VisualComputing/nub/issues?q=author%3Anakednous "Bug reports") [💻](https://github.com/VisualComputing/nub/commits?author=nakednous "Code") [🎨](#design-nakednous "Design") [📖](https://github.com/VisualComputing/nub/commits?author=nakednous "Documentation") [📋](#eventOrganizing-nakednous "Event Organizing") [💡](#example-nakednous "Examples") [💵](#financial-nakednous "Financial") [🔍](#fundingFinding-nakednous "Funding Finding") [🤔](#ideas-nakednous "Ideas, Planning, & Feedback") [📦](#platform-nakednous "Packaging/porting to new platform") [🔌](#plugin-nakednous "Plugin/utility libraries") [💬](#question-nakednous "Answering Questions") [👀](#review-nakednous "Reviewed Pull Requests") [📢](#talk-nakednous "Talks") [⚠️](https://github.com/VisualComputing/nub/commits?author=nakednous "Tests") [✅](#tutorial-nakednous "Tutorials") [📹](#video-nakednous "Videos") |
 | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
