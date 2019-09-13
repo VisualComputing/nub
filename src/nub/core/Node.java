@@ -524,7 +524,7 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last node the this object was updated.
+   * @return the last frame the this node was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -564,7 +564,7 @@ public class Node {
   }
 
   /**
-   * Internal use. Automatically call by all methods which change the Node state.
+   * Internal use. Automatically call by all methods which change the node state.
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;

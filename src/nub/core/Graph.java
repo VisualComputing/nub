@@ -2379,7 +2379,7 @@ public class Graph {
   /**
    * Max between {@link Node#lastUpdate()} and {@link #_lastNonEyeUpdate()}.
    *
-   * @return last node the eye was updated
+   * @return last frame the eye was updated
    * @see #_lastNonEyeUpdate()
    */
   public long lastUpdate() {
