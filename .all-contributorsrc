@@ -8,32 +8,6 @@
   "commit": true,
   "contributors": [
     {
-      "login": "sechaparroc",
-      "name": "sechaparroc",
-      "avatar_url": "https://avatars2.githubusercontent.com/u/9769647?v=4",
-      "profile": "https://github.com/sechaparroc",
-      "contributions": [
-        "blog",
-        "bug",
-        "code",
-        "design",
-        "doc",
-        "eventOrganizing",
-        "example",
-        "financial",
-        "fundingFinding",
-        "ideas",
-        "platform",
-        "plugin",
-        "question",
-        "review",
-        "talk",
-        "test",
-        "tutorial",
-        "video"
-      ]
-    },
-    {
       "login": "nakednous",
       "name": "Jean Pierre Charalambos",
       "avatar_url": "https://avatars2.githubusercontent.com/u/645599?v=4",
