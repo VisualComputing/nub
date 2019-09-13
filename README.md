@@ -1,4 +1,4 @@
-nubjs[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
+nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 ===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
 
 **Table of Contents**
@@ -9,7 +9,6 @@ nubjs[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange
 - [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Control](#user-content-control)
-- [IK](#user-content-ik)
 - [Installation](#user-content-installation)
 - [Contributors](#user-content-contributors)
 
@@ -252,8 +251,6 @@ Implementing an application control for a node is a two step process:
 2. Send gesture data to the node by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-frames.core.Node-java.lang.Object...-).
 
 See the [ApplicationControl example](https://github.com/VisualComputing/nubjs/tree/processing/examples/demos/ApplicationControl).
-
-## IK
 
 ## Installation
 
