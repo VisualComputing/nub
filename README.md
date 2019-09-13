@@ -7,7 +7,6 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.s
 - [Scene](#user-content-scene)
 - [Nodes](#user-content-nodes)
 - [Interpolators](#user-content-interpolators)
-- [Interpolators](#user-content-interpolators)
 - [HIDs](#user-content-hids)
 - [Control](#user-content-control)
 - [Installation](#user-content-installation)
