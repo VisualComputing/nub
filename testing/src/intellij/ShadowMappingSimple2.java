@@ -46,8 +46,8 @@ public class ShadowMappingSimple2 extends PApplet {
     //lightScene.fit(1);
     //lightScene.togglePerspective();
     // initShadowPass
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth_alt/depth_nonlinear.glsl");
     lightScene.context().shader(depthShader);
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
@@ -78,7 +78,7 @@ public class ShadowMappingSimple2 extends PApplet {
     light.setMagnitude(lightScene.eye().magnitude());
 
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_vert.glsl");
     shader(shadowShader);
     //resetShader();
     noStroke();

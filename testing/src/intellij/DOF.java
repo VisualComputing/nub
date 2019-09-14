@@ -38,14 +38,14 @@ public class DOF extends PApplet {
       scene.randomize(models[i]);
     }
 
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/depth.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/depth.glsl");
     //depthShader.set("maxDepth", scene.radius() * 2);
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_nonlinear.glsl");
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
     depthPGraphics = createGraphics(width, height, P3D);
     depthPGraphics.shader(depthShader);
 
-    dofShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/dof/dof.glsl");
+    dofShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/dof/dof.glsl");
     dofShader.set("aspect", width / (float) height);
     dofShader.set("maxBlur", (float) 0.015);
     dofShader.set("aperture", (float) 0.02);

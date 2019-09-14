@@ -57,7 +57,7 @@ public class ShadowMappingTutorial extends PApplet {
     shapes = new Node[50];
     for (int i = 0; i < shapes.length; i++) {
       tint(random(0, 255), random(0, 255), random(0, 255), random(150, 255));
-      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj")) {
+      shapes[i] = new Node(scene, loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj")) {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
@@ -100,15 +100,15 @@ public class ShadowMappingTutorial extends PApplet {
     floor.setShape(box);
 
     // initShadowPass
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth_alt/depth_nonlinear.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_nub_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_nub_vert.glsl");
     //discard Processing matrices
     resetMatrix();
     shader(shadowShader);
@@ -147,7 +147,7 @@ public class ShadowMappingTutorial extends PApplet {
         if (immediate)
           node.resetShape();
         else
-          node.setShape(loadShape("/home/pierre/IdeaProjects/nubjs/testing/data/interaction/rocket.obj"));
+          node.setShape(loadShape("/home/pierre/IdeaProjects/nub/testing/data/interaction/rocket.obj"));
     }
     if (key == 'd') {
       debug = !debug;

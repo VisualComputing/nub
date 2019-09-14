@@ -61,15 +61,15 @@ public class ShadowMappingSimple extends PApplet {
     };
     light.setMagnitude(400f / 2048f);
     // initShadowPass
-    depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth/depth_frag.glsl");
-    //depthShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/depth_alt/depth_nonlinear.glsl");
+    //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
+    depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
     shadowMap = createGraphics(2048, 2048, P3D);
     shadowMap.shader(depthShader);
     // TODO testing the appearance of artifacts first
     //shadowMap.noSmooth();
 
     // initDefaultPass
-    shadowShader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/shadow/shadow_vert.glsl");
+    shadowShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_frag.glsl", "/home/pierre/IdeaProjects/nub/testing/data/shadow/shadow_vert.glsl");
     shader(shadowShader);
     noStroke();
   }
@@ -93,7 +93,8 @@ public class ShadowMappingSimple extends PApplet {
     if (!debug) {
       Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
       Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
+      //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
+      Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
       Vector lightDirection = scene.eye().displacement(light.zAxis(false));
       Scene.setUniform(shadowShader, "lightDirection", lightDirection);
       shadowShader.set("shadowMap", shadowMap);
