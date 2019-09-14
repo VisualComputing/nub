@@ -153,7 +153,7 @@ Render the node hierarchy onto [context()](https://visualcomputing.github.io/nub
 
 ```processing
 void draw() {
-  // calls visit() on each shape to draw the shape
+  // visits each shape drawing it
   scene.render();
 }
 ```
