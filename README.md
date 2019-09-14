@@ -78,9 +78,8 @@ void setup() {
     // immediate mode rendering procedure
     // defines n2 visual representation
     @Override
-    public boolean graphics(PGraphics pg) {
+    public void graphics(PGraphics pg) {
       Scene.drawTorusSolenoid(pg);
-      return true;
     }
   };
   // retained-mode rendering PShape
