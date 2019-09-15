@@ -16,7 +16,13 @@ public class MiniMap extends PApplet {
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = true;
+  // when onScreen = true, the minimap countour is not rendered and it gives:
+  /*
+  The pixels array is null.
+  OpenGL error 1282 at bot endDraw(): invalid operation
+  */
+  boolean onScreen = false;
+
   boolean interactiveEye;
 
   int w = 1200;
@@ -157,9 +163,12 @@ public class MiniMap extends PApplet {
       minimap.drawAxes();
       minimap.render();
       // draw scene eye
-      minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 125);
+      minimap.context().fill(255, sceneEye.isTracked(minimap) ? 25 : 50, 0, 125);
       minimap.context().stroke(0, 0, 255);
       minimap.context().strokeWeight(2);
+      // comment and the above errors disappear
+      // it has to do with the near plane drawing ant the texture
+      // see Scene._drawPlane
       minimap.drawFrustum(scene);
       minimap.endDraw();
       minimap.display();

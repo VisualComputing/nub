@@ -1092,7 +1092,9 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     _hudCalls++;
-    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (is3D())
+      pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
     disableDepthTest(pGraphics);
     // if-else same as:
     // matrixHandler(p).beginHUD();
@@ -1133,7 +1135,9 @@ public class Scene extends Graph implements PConstants {
     else
       matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
-    pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (is3D())
+      pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);
   }
 
   // drawing
@@ -2125,14 +2129,18 @@ public class Scene extends Graph implements PConstants {
    * Draws a representation of the viewing frustum onto {@code pGraphics} according to
    * {@code graph.eye()} and {@code graph.type()}.
    * <p>
-   * Note that if {@code graph == this} this method has not effect at all.
+   * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float)
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float, boolean)
    */
   public void drawFrustum(PGraphics pGraphics, Graph graph) {
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
+    if (pGraphics == graph.context())
+      return;
+    // texturing requires graph.isOffscreen() (third condition) otherwise got
+    // "The pixels array is null" message and the frustum near plane texture and contour are missed
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:

@@ -158,9 +158,9 @@ void draw() {
     minimap.drawAxes();
     minimap.render();
     // draw scene eye
-    minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255);
-    minimap.context().stroke(0, 0, 255);
+    minimap.context().fill(sceneEye.isTracked(minimap) ? 255 : 25, sceneEye.isTracked(minimap) ? 0 : 255, 255, 125);
     minimap.context().strokeWeight(2);
+    minimap.context().stroke(0, 0, 255);
     minimap.drawFrustum(scene);
     minimap.endDraw();
     minimap.display();
