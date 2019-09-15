@@ -1,27 +1,3 @@
-/**
- * Node API.
- * by Jean Pierre Charalambos.
- * <p>
- * This example illustrates the powerful Node API used to convert points and
- * vectors along a node hierarchy. The following node hierarchy is implemented:
- * <p>
- * world
- * ^
- * |\
- * | \
- * f1 eye
- * ^   ^
- * |\   \
- * | \   \
- * f2 f3  f5
- * ^
- * |
- * |
- * f4
- * <p>
- * Press the space bar to browse the different conversion methods shown here.
- */
-
 package intellij;
 
 import nub.core.Node;
@@ -31,7 +7,6 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 /*
-
 World
   ^
   |\
@@ -44,6 +19,7 @@ World
   |
   5
  */
+
 public class GraphAPI extends PApplet {
   Scene scene;
   PShape p1, p2, p3, p4, p5;
@@ -98,12 +74,21 @@ public class GraphAPI extends PApplet {
 
   public void draw() {
     background(125);
+    scene.drawAxes();
     scene.render();
   }
 
   public void keyPressed() {
     if (key == 'p')
-      scene.pruneBranch(n4);
+      scene.prune(n4);
+    if (key == 'a')
+      n4.setReference(n2);
+    if (key == 'r')
+      n4.resetReference();
+    if (key == 's')
+      n5.setReference(n2);
+    if (key == 't')
+      n4.setReference(n3);
   }
 
   @Override

@@ -683,7 +683,7 @@ public class Interpolator {
    */
   public void purgeKeyFrame(int index) {
     Node node = removeKeyFrame(index);
-    _graph.pruneBranch(node);
+    _graph.prune(node);
   }
 
   /**
@@ -703,14 +703,14 @@ public class Interpolator {
    * Same as {@link #clear()}, but also removes the keyframes node instances from the scene.
    *
    * @see #clear()
-   * @see Graph#pruneBranch(Node)
+   * @see Graph#prune(Node)
    */
   public void purge() {
     stop();
     ListIterator<KeyFrame> it = _list.listIterator();
     while (it.hasNext()) {
       KeyFrame keyFrame = it.next();
-      _graph.pruneBranch(keyFrame._node);
+      _graph.prune(keyFrame._node);
     }
     _list.clear();
     _pathIsValid = false;

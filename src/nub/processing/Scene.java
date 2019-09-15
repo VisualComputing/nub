@@ -820,7 +820,7 @@ public class Scene extends Graph implements PConstants {
     Interpolator interpolator = new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node node = new Node(this);
-      pruneBranch(node);
+      prune(node);
       node.set(_toNode(jsonInterpolator.getJSONObject(j)));
       node.setPickingThreshold(20);
       interpolator.addKeyFrame(node, jsonInterpolator.getJSONObject(j).getFloat("time"));

@@ -39,8 +39,7 @@ import java.util.List;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(Node)}, {@link #appendBranch(List)}, {@link #isReachable(Node)},
- * {@link #branch(Node)}, and {@link #clear()}.
+ * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>2.1. Eye handling</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several node wrapper functions to handle the eye, such as
@@ -583,7 +582,7 @@ public class Graph {
    *
    * @see #nodes()
    * @see #isReachable(Node)
-   * @see #pruneBranch(Node)
+   * @see #prune(Node)
    */
   protected List<Node> _leadingNodes() {
     return _seeds;
@@ -654,11 +653,11 @@ public class Graph {
   /**
    * Same as {@code for(Node node : _leadingNodes()) pruneBranch(node)}.
    *
-   * @see #pruneBranch(Node)
+   * @see #prune(Node)
    */
   public void clear() {
     for (Node node : _leadingNodes())
-      pruneBranch(node);
+      prune(node);
   }
 
   /**
@@ -669,53 +668,30 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
-   * To make all the nodes in the branch reachable again, first cache the nodes
-   * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
-   * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link Node#setReference(Node)} on a node belonging to the pruned branch will become
-   * reachable again by the traversal algorithm.
-   * <p>
-   * When collected, pruned nodes behave like {@link Node}, otherwise they are eligible for
-   * garbage collection.
+   * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
+   * on the pruned node.
    *
    * @see #clear()
-   * @see #appendBranch(List)
    * @see #isReachable(Node)
+   * @see Node#setReference(Node)
    */
-  public List<Node> pruneBranch(Node node) {
+  public boolean prune(Node node) {
     if (!isReachable(node))
-      return new ArrayList<Node>();
-    ArrayList<Node> list = new ArrayList<Node>();
-    _collect(list, node);
-    for (Node collectedNode : list)
-      if (collectedNode.reference() != null)
-        collectedNode.reference()._removeChild(collectedNode);
-      else
-        _removeLeadingNode(collectedNode);
-    return list;
-  }
-
-  /**
-   * Appends the branch which typically should come from the one pruned (and cached) with
-   * {@link #pruneBranch(Node)}.
-   * <p>
-   * {@link #pruneBranch(Node)}
-   */
-  public void appendBranch(List<Node> branch) {
-    if (branch == null)
-      return;
-    for (Node node : branch)
-      if (node.reference() != null)
-        node.reference()._addChild(node);
-      else
-        _addLeadingNode(node);
+      return false;
+    if (node.reference() != null) {
+      node.reference()._removeChild(node);
+      // TODO testing, maybe not necessary
+      node._reference = null;
+    } else
+      _removeLeadingNode(node);
+    return true;
   }
 
   /**
    * Returns {@code true} if the node is reachable by the {@link #render()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
+   * Nodes are made unreachable with {@link #prune(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
    *
    * @see #render()
@@ -724,7 +700,10 @@ public class Graph {
   public boolean isReachable(Node node) {
     if (node == null)
       return false;
-    return node.isAttached(this);
+    for (Node n : nodes())
+      if (n == node)
+        return true;
+    return false;
   }
 
   /**
@@ -754,21 +733,6 @@ public class Graph {
     ArrayList<Node> list = new ArrayList<Node>();
     _collect(list, node);
     return list;
-  }
-
-  /**
-   * Returns a straight path of nodes between {@code tail} and {@code tip}. Returns an empty list
-   * if either {@code tail} or {@code tip} aren't reachable. Use {@link Node#path(Node, Node)}
-   * to include all nodes even if they aren't reachable.
-   * <p>
-   * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
-   * Otherwise it will be empty.
-   *
-   * @see #isReachable(Node)
-   * @see Node#path(Node, Node)
-   */
-  public List<Node> path(Node tail, Node tip) {
-    return (isReachable(tail) && isReachable(tip)) ? Node.path(tail, tip) : new ArrayList<Node>();
   }
 
   /**
@@ -945,7 +909,7 @@ public class Graph {
     if (eye == null || _eye == eye)
       return;
     //TODO experimental
-    pruneBranch(_eye);
+    prune(_eye);
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(this, _eye);
