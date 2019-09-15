@@ -5,17 +5,17 @@
  * This example illustrates how to concatenate shaders to accumulate their
  * effects which requires drawing shapes into arbitrary PGraphics canvases.
  *
- * Press '1' to '9' to (de)activate effect.
+ * Press '1' to '7' to (de)activate effect.
  */
 
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 
-PShader noiseShader, kaleidoShader, raysShader, dofShader, pixelShader, edgeShader, depthShader, horizontalShader;
-PGraphics drawGraphics, dofGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
+PShader noiseShader, kaleidoShader, raysShader, pixelShader, edgeShader, depthShader, horizontalShader;
+PGraphics drawGraphics, noiseGraphics, kaleidoGraphics, raysGraphics, pixelGraphics, edgeGraphics, depthPGraphics, horizontalGraphics;
 Scene scene;
-boolean bdepth, brays, bpixel, bedge, bdof, bkaleido, bnoise, bhorizontal;
+boolean bdepth, brays, bpixel, bedge, bkaleido, bnoise, bhorizontal;
 int startTime;
 Node[] models;
 PFont font;
@@ -56,13 +56,6 @@ public void setup() {
   raysGraphics.shader(raysShader);
   raysShader.set("lightPositionOnScreen", 0.5, 0.5);
   raysShader.set("lightDirDOTviewDir", 0.7);
-
-  dofShader = loadShader("dof.glsl");
-  dofGraphics = createGraphics(width, height, P3D);
-  dofGraphics.shader(dofShader);
-  dofShader.set("aspect", width / (float) height);
-  dofShader.set("maxBlur", 0.015);
-  dofShader.set("aperture", 0.02);
 
   kaleidoShader = loadShader("kaleido.glsl");
   kaleidoGraphics = createGraphics(width, height, P3D);
@@ -126,15 +119,6 @@ public void draw() {
     pixelGraphics.endDraw();
     drawGraphics = pixelGraphics;
   }
-  if (bdof) {
-    dofGraphics.beginDraw();
-    dofShader.set("focus", map(mouseX, 0, width, -0.5f, 1.5f));
-    dofShader.set("tDepth", depthPGraphics);
-    dofShader.set("tex", drawGraphics);
-    dofGraphics.image(graphics, 0, 0);
-    dofGraphics.endDraw();
-    drawGraphics = dofGraphics;
-  }
   if (bedge) {
     edgeGraphics.beginDraw();
     edgeShader.set("tex", drawGraphics);
@@ -167,10 +151,9 @@ void drawText() {
   text(bkaleido ? "2. Kaleidoscope (*)" : "2. Kaleidoscope", 5, 35);
   text(bnoise ? "3. Noise (*)" : "3. Noise", 5, 50);
   text(bpixel ? "4. Pixelate (*)" : "4. Pixelate", 5, 65);
-  text(bdof ? "5. DOF (*)" : "5. DOF", 5, 80);
-  text(bedge ? "6. Edge (*)" : "6. Edge", 5, 95);
-  text(bhorizontal ? "7. Horizontal (*)" : "7. Horizontal", 5, 110);
-  text(brays ? "8. Rays (*)" : "8. Rays", 5, 125);
+  text(bedge ? "5. Edge (*)" : "5. Edge", 5, 80);
+  text(bhorizontal ? "6. Horizontal (*)" : "6. Horizontal", 5, 95);
+  text(brays ? "7. Rays (*)" : "7. Rays", 5, 110);
   scene.endHUD();
 }
 
@@ -195,12 +178,10 @@ void keyPressed() {
   if(key=='4')
     bpixel = !bpixel;
   if(key=='5')
-    bdof = !bdof;
-  if(key=='6')
     bedge = !bedge;
-  if(key=='7')
+  if(key=='6')
     bhorizontal = !bhorizontal;
-  if(key=='8')
+  if(key=='7')
     brays = !brays;
 }
 

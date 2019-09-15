@@ -2269,9 +2269,33 @@ public class Node {
    * Returns {@code true} if tracking is enabled.
    *
    * @see #enableTracking(boolean)
+   * @see #enableTracking()
+   * @see #disableTracking()
    */
   public boolean isTrackingEnabled() {
     return _tracking;
+  }
+
+  /**
+   * Same as {@code enableTracking(false)}.
+   *
+   * @see #isTrackingEnabled()
+   * @see #enableTracking()
+   * @see #enableTracking(boolean)
+   */
+  public void disableTracking() {
+    enableTracking(false);
+  }
+
+  /**
+   * Same as {@code enableTracking(true)}.
+   *
+   * @see #isTrackingEnabled()
+   * @see #enableTracking(boolean)
+   * @see #disableTracking()
+   */
+  public void enableTracking() {
+    enableTracking(true);
   }
 
   /**
@@ -2280,6 +2304,8 @@ public class Node {
    * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
    *
    * @see #isTrackingEnabled()
+   * @see #enableTracking()
+   * @see #disableTracking()
    */
   public void enableTracking(boolean flag) {
     _tracking = flag;
@@ -2352,7 +2378,6 @@ public class Node {
    * @see #cull(boolean)
    * @see #isCulled()
    */
-
   public void cull() {
     cull(true);
   }
