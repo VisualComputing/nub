@@ -89,6 +89,11 @@ public class GraphAPI extends PApplet {
       n5.setReference(n2);
     if (key == 't')
       n4.setReference(n3);
+    if (key == 'u')
+      if (scene.isReachable(n4))
+        println("yes");
+      else
+        println("no");
   }
 
   @Override

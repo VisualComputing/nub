@@ -13,20 +13,22 @@
  * Press 'd' to toggle visual debugging mode.
  */
 
+import nub.timing.*;
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
 
 Scene scene;
 Node landscape1, landscape2, landscape3, floor, light;
+TimingTask animation;
 PShader depthShader;
 PShader shadowShader;
 PGraphics shadowMap;
 float fov = THIRD_PI;
 Matrix biasMatrix = new Matrix(
-  0.5f, 0.0f, 0.0f, 0.0f, 
-  0.0f, 0.5f, 0.0f, 0.0f, 
-  0.0f, 0.0f, 0.5f, 0.0f, 
+  0.5f, 0.0f, 0.0f, 0.0f,
+  0.0f, 0.5f, 0.0f, 0.0f,
+  0.0f, 0.0f, 0.5f, 0.0f,
   0.5f, 0.5f, 0.5f, 1.0f
   );
 boolean debug;
@@ -125,6 +127,22 @@ void setup() {
   };
   light.setPickingThreshold(0);
   light.setMagnitude(400f / 2048f);
+
+  animation = new TimingTask() {
+    @Override
+    public void execute() {
+      // 1. Calculate the light position and orientation
+      if (!scene.isTrackedNode(light)) {
+        float lightAngle = frameCount * 0.002f;
+        light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
+      }
+      light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
+      light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
+    }
+  };
+  scene.registerTask(animation);
+  animation.run(60);
+
   // initShadowPass
   depthShader = loadShader("depth_frag.glsl");
   shadowMap = createGraphics(2048, 2048, P3D);
@@ -139,27 +157,18 @@ void setup() {
 }
 
 void draw() {
-  // 1. Calculate the light position and orientation
-  if (!scene.isTrackedNode(light)) {
-    float lightAngle = frameCount * 0.002f;
-    light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
-  }
-  light.setYAxis(Vector.projectVectorOnAxis(light.yAxis(), new Vector(0, 1, 0)));
-  light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
-
-  // 2. Render the shadowmap from light node 'point-of-view'
+  // 1. Render the shadowmap from light node 'point-of-view'
   shadowMap.beginDraw();
   shadowMap.noStroke();
   shadowMap.background(0xffffffff); // Will set the depth to 1.0 (maximum depth)
   scene.render(shadowMap, shadowMapType, light, zNear, zFar);
   shadowMap.endDraw();
 
-  // 3. Render the scene from the scene.eye() node
+  // 2. Render the scene from the scene.eye() node
   background(0);
   if (!debug) {
     Matrix projectionView = light.projectionView(shadowMapType, shadowMap.width, shadowMap.height, zNear, zFar);
     Matrix lightMatrix = Matrix.multiply(biasMatrix, projectionView);
-    //Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, Matrix.inverse(scene.view())));
     Scene.setUniform(shadowShader, "shadowTransform", Matrix.multiply(lightMatrix, scene.eye().viewInverse()));
     Vector lightDirection = scene.eye().displacement(light.zAxis(false));
     Scene.setUniform(shadowShader, "lightDirection", lightDirection);
