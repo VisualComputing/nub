@@ -131,7 +131,6 @@ void setup() {
   animation = new TimingTask() {
     @Override
     public void execute() {
-      // 1. Calculate the light position and orientation
       if (!scene.isTrackedNode(light)) {
         float lightAngle = frameCount * 0.002f;
         light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
