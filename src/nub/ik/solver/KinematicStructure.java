@@ -28,8 +28,8 @@ public class KinematicStructure {
             _node = node;
             _position = node.position().get();
             _orientation = node.orientation().get();
-            _lastProcessedUpdate = _structure._lastUpdate;
             _structure = structure;
+            _lastProcessedUpdate = _structure._lastUpdate;
         }
 
         public Vector translation(){
@@ -72,7 +72,7 @@ public class KinematicStructure {
             }else{
                 _node.setTranslation(translation);
             }
-            _structure._lastUpdate = _lastProcessedUpdate = _node.lastUpdate();
+            _structure._lastUpdate = _node.lastUpdate();
         }
 
         public void translate(Vector vector) {
@@ -84,7 +84,7 @@ public class KinematicStructure {
             }else{
                 _node.translate(vector);
             }
-            _structure._lastUpdate = _lastProcessedUpdate = _node.lastUpdate();
+            _structure._lastUpdate = _node.lastUpdate();
         }
 
         public void setPosition(Vector position) {
@@ -116,15 +116,20 @@ public class KinematicStructure {
             //TODO: here we assume that no Node above head is modified
             KNode node = tail;
             KNode last = tail;
+            long lastUpdate = tail._node.lastUpdate();
             //get last ancestor modified
             while(node != head){
-                if(node._lastProcessedUpdate > last._lastProcessedUpdate){
+                if(node._node.lastUpdate() > tail._lastProcessedUpdate){
+                    lastUpdate = node._node.lastUpdate();
+                }
+                if(node._lastProcessedUpdate > tail._lastProcessedUpdate){
                     last = node;
                 }
                 node = node._reference;
             }
             //update from last ancestor modified to tail
-            _recursiveUpdate(last, tail);
+            if(node._lastProcessedUpdate >= lastUpdate && last != head) _recursiveUpdate(last, tail);
+            else _recursiveUpdate(head, tail);
 
         }
 
@@ -184,6 +189,7 @@ public class KinematicStructure {
                 //ref._children.add(knode);
             }
             map.put(node, knode);
+            kchain.add(knode);
         }
         structure._endEffectors.add(map.get(chain.size() - 1));
         return kchain;
@@ -248,7 +254,4 @@ public class KinematicStructure {
         Vector position = Vector.add(init.position(), q.rotate(p));
         return new Node(position, orientation, 1);
     }
-
-
-
 }
