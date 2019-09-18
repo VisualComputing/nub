@@ -235,7 +235,7 @@ See the [ApplicationControl example](https://github.com/VisualComputing/nub/tree
 
 ## Installation
 
-Import/update it directly from your PDE. Otherwise download your [release](https://github.com/VisualComputing/nub/releases) and extract it to your sketchbook `libraries` folder.
+Import/update it directly from your [PDE](https://processing.org/reference/environment/). Otherwise download your [release](https://github.com/VisualComputing/nub/releases) and extract it to your sketchbook `libraries` folder.
 
 ## Contributors
 
