@@ -35,15 +35,10 @@ void draw() {
   pushStyle();
   strokeWeight(3); // Default
   beginShape(POINTS);
-  for (int i = 0; i < nbPart; i++) {
+  for (int i = 0; i < nbPart; i++)
     particle[i].draw();
-  }
   endShape();
   popStyle();
-}
-
-void mouseMoved() {
-  scene.track();
 }
 
 void mouseDragged() {
