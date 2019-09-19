@@ -11,13 +11,15 @@ import java.util.List;
 import java.util.Random;
 
 public class CacheTest {
-    static Random r1 = new Random(0), r2 = new Random(0);
+    static Random r = new Random(1), r1 = new Random(1), r2 = new Random(1);
     static int numJoints = 20;
     static float boneLength = 50;
     //Parameters
     static Util.ConstraintType constraintType = Util.ConstraintType.MIX; //Choose what kind of constraints apply to chain
     static int randRotation = 0; //Set seed to generate initial random rotations, otherwise set to -1
     static int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
+    static boolean debug = false; //set true to debug purposes
+
 
     public void setConstraint(float down, float up, float left, float right, Node f, Vector twist, float boneLength){
         BallAndSocket constraint = new BallAndSocket(down, up, left, right);
@@ -57,7 +59,11 @@ public class CacheTest {
 
     public static void applyRandomRotations(List structure, Random random){
         //first define how many rotations to apply
-        int rotations = random.nextInt(structure.size());
+        int rotations = random.nextInt(structure.size()) + 1;
+        if(debug){
+            System.out.println("#####Random Rots: ");
+            System.out.println("\t\tnumber of rotations : \t" + rotations);
+        }
         for(int i = 0; i < rotations; i++){
             //Generate a random Quaternion
             Quaternion q = new Quaternion(random.nextFloat() * (float) Math.PI,
@@ -66,9 +72,15 @@ public class CacheTest {
             int idx = random.nextInt(structure.size());
             if(structure.get(idx) instanceof Node){
                 ((Node)structure.get(idx)).rotate(q);
+                if(debug) {
+                    System.out.println("\t\tRotation at node : \t" + idx + " : " + ((Node) structure.get(idx)).rotation().axis() + " ang : " + Math.toDegrees(((Node) structure.get(idx)).rotation().angle()));
+                }
             }
             if(structure.get(idx) instanceof KinematicStructure.KNode){
                 ((KinematicStructure.KNode)structure.get(idx)).rotate(q);
+                if(debug) {
+                    System.out.println("\t\tRotation at node : \t" + idx + " : " + ((Node) structure.get(idx)).rotation().axis() + " ang : " + Math.toDegrees(((Node) structure.get(idx)).rotation().angle()));
+                }
             }
         }
     }
@@ -77,13 +89,19 @@ public class CacheTest {
         outl.clear();
         //Ask for some queries
         long queryTime = 0;
-        int queries = (int)(Math.max(0, structure.size()/4.f * random.nextGaussian()  + structure.size()));
+        int queries = random.nextInt(structure.size()*2) + 1;
+        if(debug) {
+            System.out.println("#####Random Queries: ");
+            System.out.println("\t\tnumber of queries : \t" + queries);
+        }
         //        queries = 1;
         for(int i = 0; i < queries; i++){
             Node out = new Node();
-
             //Pick a random joint
             int idx = random.nextInt(structure.size());
+            if(debug) {
+                System.out.println("\t\tquery at node : \t" + idx);
+            }
             //System.out.println(idx);
             //Ask for position / orientation
             long startTime = System.nanoTime();
@@ -100,6 +118,10 @@ public class CacheTest {
             }
             outl.add(out);
             queryTime += System.nanoTime() - startTime;
+            if(debug) {
+                System.out.println("\t\tobtained pos : \t" + out.position());
+                System.out.println("\t\tobtained ori : \t" + out.orientation().axis() + " ang : " + out.orientation().angle());
+            }
         }
         return queryTime;
     }
@@ -121,9 +143,9 @@ public class CacheTest {
         long queries1 = 0, queries2 = 0;
         for(int i = 0; i < 500000; i++){
             //Apply rotations
-            if(Math.random() < 0.3){
-                applyRandomRotations(chain1, r1);
-                applyRandomRotations(chain1, r2);
+            if(r.nextFloat() <= 0.3){
+                applyRandomRotations(kchain1, r1);
+                applyRandomRotations(chain2, r2);
             } else{
                 queries1 += performQueries(kchain1, r1, ol1);
                 queries2 += performQueries(chain2, r2, ol2);
@@ -140,8 +162,8 @@ public class CacheTest {
                             Math.abs(o1.rotation().y() - o2.rotation().y()) > 0.001 ||
                             Math.abs(o1.rotation().z() - o2.rotation().z()) > 0.001 ||
                             Math.abs(o1.rotation().w() - o2.rotation().w()) > 0.001) {
-                        System.out.println("o1 " + o1.rotation().axis() + " ang : " + o1.rotation().angle());
-                        System.out.println("o2 " + o2.rotation().axis() + " ang : " + o2.rotation().angle());
+                        System.out.println("o1 " + o1.rotation().axis() + " ang : " + Math.toDegrees(o1.rotation().angle()));
+                        System.out.println("o2 " + o2.rotation().axis() + " ang : " + Math.toDegrees(o2.rotation().angle()));
                         throw new Exception("o1 and o2 orientations must be equal");
                     }
                 }
