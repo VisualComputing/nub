@@ -15,7 +15,7 @@ public class KinematicStructure {
         /**
          * Convenient class to keep cache of global transformations
          */
-        protected long _lastProcessedUpdate;
+        protected long _lastProcessedUpdate, _lastUpdate;
         protected KinematicStructure _structure;
         protected Node _node;
         protected Vector _position;
@@ -30,6 +30,23 @@ public class KinematicStructure {
             _orientation = node.orientation().get();
             _structure = structure;
             _lastProcessedUpdate = _structure._lastUpdate;
+        }
+
+        public Node node(){
+            return _node;
+        }
+
+        public KNode reference(){
+            return _reference;
+        };
+
+        protected void _setLastUpdate(){
+            _structure._lastUpdate++;
+            _lastUpdate = _structure._lastUpdate;
+        }
+
+        public long lastUpdate(){
+            return _lastUpdate;
         }
 
         public Vector translation(){
@@ -48,7 +65,7 @@ public class KinematicStructure {
             }else{
                 _node.rotate(quaternion);
             }
-            _structure._lastUpdate = _lastProcessedUpdate = _node.lastUpdate();
+            _setLastUpdate();
         }
 
         public void rotate(Vector axis, float angle) {
@@ -72,7 +89,7 @@ public class KinematicStructure {
             }else{
                 _node.setTranslation(translation);
             }
-            _structure._lastUpdate = _node.lastUpdate();
+            _setLastUpdate();
         }
 
         public void translate(Vector vector) {
@@ -84,7 +101,7 @@ public class KinematicStructure {
             }else{
                 _node.translate(vector);
             }
-            _structure._lastUpdate = _node.lastUpdate();
+            _setLastUpdate();
         }
 
         public void setPosition(Vector position) {
@@ -102,25 +119,38 @@ public class KinematicStructure {
 
 
         public Quaternion orientation() {
-            if(_structure._lastUpdate != _lastProcessedUpdate) _updateFollowingPath(null, this);
+            if(_structure._lastUpdate != _lastProcessedUpdate){
+                _updateFollowingPath(null, this);
+            }
             return _orientation;
         }
 
         public Vector position() {
-            if(_structure._lastUpdate != _lastProcessedUpdate) _updateFollowingPath(null, this);
+            if(_structure._lastUpdate != _lastProcessedUpdate){
+                _updateFollowingPath(null, this);
+            }
             return _position;
         }
 
+        //Use this method only when you're sure that the last changes applied to the structure doesnt affect this Node
+        public Vector cachePosition() {
+            return _position;
+        }
+
+        //Use this method only when you're sure that the last changes applied to the structure doesnt affect this Node
+        public Quaternion cacheOrientation() {
+            return _orientation;
+        }
 
         protected void _updateFollowingPath(KNode head, KNode tail){
             //TODO: here we assume that no Node above head is modified
             KNode node = tail;
             KNode last = tail;
-            long lastUpdate = tail._node.lastUpdate();
+            long lastUpdate = tail.lastUpdate();
             //get last ancestor modified
             while(node != head){
-                if(node._node.lastUpdate() > tail._lastProcessedUpdate){
-                    lastUpdate = node._node.lastUpdate();
+                if(node.lastUpdate() > tail._lastProcessedUpdate){
+                    lastUpdate = node.lastUpdate();
                 }
                 if(node._lastProcessedUpdate > tail._lastProcessedUpdate){
                     last = node;
@@ -128,27 +158,47 @@ public class KinematicStructure {
                 node = node._reference;
             }
             //update from last ancestor modified to tail
-            if(node._lastProcessedUpdate >= lastUpdate && last != head) _recursiveUpdate(last, tail);
+            if(last._lastProcessedUpdate >= lastUpdate && last != head) _recursiveUpdate(last, tail);
             else _recursiveUpdate(head, tail);
 
         }
 
         protected void _recursiveUpdate(KNode head, KNode tail){
-            if(tail == null || tail == head) return;
+            if(tail == null) return;
             if(tail._reference != head){
-                _updateFollowingPath(head , tail._reference);
+                _recursiveUpdate(head , tail._reference);
             }
             //Update orientation
-            Quaternion reference = tail._reference == null ? tail._orientation : tail._reference.orientation();
+            Quaternion reference = tail._reference == null ? tail._node.reference() != null ? tail._node.reference().orientation() : new Quaternion() : tail._reference.orientation();
             tail._orientation = Quaternion.compose(reference, tail.rotation());
             //Update position
-            Vector o = _reference._position;
+            Vector o = tail._reference == null ? tail._node.reference() != null ? tail._node.reference().position() : new Vector() : tail._reference.position();
             tail._position = Vector.add(o, reference.rotate(tail.translation()));
             tail._lastProcessedUpdate = _structure._lastUpdate;
         }
 
-        public void updatePath(KNode end){
-            _recursiveUpdate(null, end);
+        //Get the location of a Vector v (in world space) in terms of this local space
+        public Vector location(Vector v, boolean useCache){
+            if(useCache) return _orientation.inverseRotate(Vector.subtract(v, _position));
+            return orientation().inverseRotate(Vector.subtract(v, position()));
+        }
+
+        public Vector location(Vector v){
+            return location(v, false);
+        }
+
+        //Get the location in world space of a Vector v (in local space) in
+        public Vector worldLocation(Vector v, boolean useCache){
+            if(useCache) return Vector.add(_orientation.rotate(v), _position);
+            return Vector.add(orientation().rotate(v), position());
+        }
+
+        public Vector worldLocation(Vector v){
+            return worldLocation(v, false);
+        }
+
+        public void updatePath(KNode init){
+            _recursiveUpdate(init, this);
         }
 
     }
@@ -159,7 +209,7 @@ public class KinematicStructure {
 
     //Useful operations between Node / KNode structures
     public KinematicStructure(){
-        _lastUpdate = TimingHandler.frameCount;
+        _lastUpdate = 0;
     }
 
     /*
@@ -177,7 +227,7 @@ public class KinematicStructure {
     }
 
     //Generates a KNode chain given a Node chain
-    public static List<KNode> generateKChain(List<Node> chain){
+    public static List<KNode> generateKChain(List<? extends Node> chain){
         KinematicStructure structure = new KinematicStructure();
         List<KNode> kchain = new ArrayList<KNode>();
         HashMap<Node, KNode> map = new HashMap<Node, KNode>();
