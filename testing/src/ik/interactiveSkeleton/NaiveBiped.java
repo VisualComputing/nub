@@ -58,11 +58,11 @@ public class NaiveBiped extends PApplet {
 
         if(!debug) {
             createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
-            //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.CCD);
-            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
+            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.CCD);
+            //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
+        //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
 
@@ -152,7 +152,7 @@ public class NaiveBiped extends PApplet {
         Solver solver;
         switch (mode){
             case CCD:{
-                solver = new CCDSolver(limb);
+                solver = new CCDSolver(limb,true);
                 ((CCDSolver)solver).setTarget(target);
                 break;
             }

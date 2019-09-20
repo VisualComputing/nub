@@ -63,9 +63,9 @@ public class CCDAnim extends PApplet {
         color = color(212,0,255);
         //structure = generateSkeleton(new Vector(0, 0, 0), color);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
+        Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
-        solver = new CCDSolver(structure);
+        solver = new CCDSolver(structure, false);
         solver.enableHistory(true);
 
         solver.setMaxError(0.001f);
