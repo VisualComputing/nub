@@ -4,7 +4,6 @@ import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,6 +14,7 @@ public class KinematicStructure {
         /**
          * Convenient class to keep cache of global transformations
          */
+        //TODO : This structure has troubles when reference node or ancestors are updated (must update path explicitly)
         protected long _lastProcessedUpdate, _lastUpdate;
         protected KinematicStructure _structure;
         protected Node _node;
@@ -218,7 +218,7 @@ public class KinematicStructure {
     * */
 
     //Obtains a Node chain given a KNode chain
-    public static List<Node> NodeChain(List<KNode> kchain){
+    public List<Node> nodeChain(List<KNode> kchain){
         List<Node> chain = new ArrayList<Node>();
         for(KNode knode : kchain){
             chain.add(knode._node);
