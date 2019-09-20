@@ -40,6 +40,7 @@ public class MySolver extends Solver{
     }
 
     int st = 0, cur = 0;
+    boolean bkd = false;
     @Override
     protected boolean _iterate() {
         //As no target is specified there is no need to perform an iteration
@@ -54,23 +55,108 @@ public class MySolver extends Solver{
         if(!debug) {
             st = 0;
             while (st < _original.size() - 1) {
-                _applyStep(_original, _reversed, st);
+                _applyStep(_reversed, st, _original.get(0).position());
                 st++;
             }
-            _update(_original, _reversed);
+            //Apply bkwd step
+            if(_original.get(0).constraint() != null) {
+                //2. Apply initial constraint
+                Vector desired = Vector.subtract(_reversed.get(_reversed.size() - 2).position(), _reversed.get(_reversed.size() - 1).position());
+                System.out.println("desired : " + desired);
+                //w.r.t j0
+                desired = _original.get(0).displacement(desired);
+                System.out.println("desired : " + desired);
+                //Find rotation
+                Quaternion desired_delta = new Quaternion(_original.get(1).translation(), desired);
+                System.out.println("original : " + _original.get(1).translation());
+                //Find inv constrained rotation
+                Quaternion constrained = _original.get(0).constraint().constrainRotation(desired_delta, _original.get(0));
+                System.out.println("desired_de : " + desired_delta.axis() + Math.toDegrees(desired_delta.angle()));
+                System.out.println("constr : " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                constrained.compose(desired_delta.inverse());
+                System.out.println("constr diff: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+
+                //constrained = constrained.inverse();
+                System.out.println("constr inv: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                //get constrained in terms of world
+                Quaternion o = _original.get(0).reference() != null ? _original.get(0).reference().orientation() : new Quaternion();
+                constrained = Quaternion.compose(o, constrained);
+                constrained.compose(o.inverse());
+                System.out.println("constr inv world: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                //get constrained in terms of r0
+                o = _reversed.get(0).reference() != null ? _reversed.get(0).reference().orientation() : new Quaternion();
+                constrained = Quaternion.compose(o.inverse(), constrained);
+                constrained.compose(o);
+                System.out.println("constr inv local: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                //Apply rotation to reversed
+                _reversed.get(0).rotate(constrained);
+                //translate reversed
+            }
+            translateChain(_reversed, Vector.add(_reversed.get(0).position(), Vector.subtract(_original.get(0).position(), _reversed.get(_reversed.size() - 1).position())));
+            _updateReverse(_reversed, _original);
+            st = 0;
+            while (st < _original.size() - 1) {
+                _applyStep(_original, st, _target.position());
+                st++;
+            }
+            translateChain(_reversed, _target.position());
             _updateReverse(_original, _reversed);
+            //_update(_original, _reversed);
+            //_updateReverse(_original, _reversed);
         }
         else {
             /*DEBUG*/
             //st = 0;
             //while(st < _original.size() - 1) {
-            if (st <= _original.size() - 2) {
-                _applyStep(_original, _reversed, st);
+            if (st <= _original.size() - 2 && !bkd) {
+                _applyStep(_reversed, st, _original.get(0).position());
+            } else if(st == _original.size() - 1 && !bkd){
+                bkd = true;
+                //Apply bkwd step
+                if(_original.get(0).constraint() != null) {
+                    //2. Apply initial constraint
+                    Vector desired = Vector.subtract(_reversed.get(_reversed.size() - 2).position(), _reversed.get(_reversed.size() - 1).position());
+                    System.out.println("desired : " + desired);
+                    //w.r.t j0
+                    desired = _original.get(0).displacement(desired);
+                    System.out.println("desired : " + desired);
+                    //Find rotation
+                    Quaternion desired_delta = new Quaternion(_original.get(1).translation(), desired);
+                    System.out.println("original : " + _original.get(1).translation());
+                    //Find inv constrained rotation
+                    Quaternion constrained = _original.get(0).constraint().constrainRotation(desired_delta, _original.get(0));
+                    System.out.println("desired_de : " + desired_delta.axis() + Math.toDegrees(desired_delta.angle()));
+                    System.out.println("constr : " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                    constrained.compose(desired_delta.inverse());
+                    System.out.println("constr diff: " + constrained.axis() + Math.toDegrees(constrained.angle()));
 
-            } else {
-                _update(_original, _reversed);
+                    //constrained = constrained.inverse();
+                    System.out.println("constr inv: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                    //get constrained in terms of world
+                    Quaternion o = _original.get(0).reference() != null ? _original.get(0).reference().orientation() : new Quaternion();
+                    constrained = Quaternion.compose(o, constrained);
+                    constrained.compose(o.inverse());
+                    System.out.println("constr inv world: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                    //get constrained in terms of r0
+                    o = _reversed.get(0).reference() != null ? _reversed.get(0).reference().orientation() : new Quaternion();
+                    constrained = Quaternion.compose(o.inverse(), constrained);
+                    constrained.compose(o);
+                    System.out.println("constr inv local: " + constrained.axis() + Math.toDegrees(constrained.angle()));
+                    //Apply rotation to reversed
+                    _reversed.get(0).rotate(constrained);
+                    //translate reversed
+                }
+                translateChain(_reversed, Vector.add(_reversed.get(0).position(), Vector.subtract(_original.get(0).position(), _reversed.get(_reversed.size() - 1).position())));
+                _updateReverse(_reversed, _original);
+                st = 0;
+            } else if(st <= _original.size() - 2 && bkd){
+                _applyStep(_original, st, _target.position());
+                //_update2(_original, _reversed);
+            }else{
+                translateChain(_reversed, _target.position());
                 _updateReverse(_original, _reversed);
                 st = 0;
+                bkd = false;
             }
             //st++;
             //}
@@ -86,6 +172,43 @@ public class MySolver extends Solver{
             Quaternion q = new Quaternion(chain.get(i).location(chain.get(i+1)), chain.get(i).location(reversed.get(reversed.size() - 2 - i)));
             chain.get(i).rotate(q);
         }
+    }
+
+    protected void _update2(List<? extends Node> chain, List<? extends Node> reversed){
+        //1. translate reversed
+        translateChain(reversed, Vector.add(reversed.get(0).position(), Vector.subtract(chain.get(0).position(), reversed.get(reversed.size() - 1).position())));
+        //2. Apply initial constraint
+        Vector desired = Vector.subtract(reversed.get(reversed.size() - 2).position(),reversed.get(reversed.size() - 1).position());
+        //w.r.t j0
+        desired = chain.get(0).displacement(desired);
+        //Find rotation
+        System.out.println("--rest " + chain.get(1).translation());
+        System.out.println("--des " + desired);
+        Quaternion desired_delta = new Quaternion(chain.get(1).translation(), desired);
+        System.out.println("--des q" + desired_delta);
+        //Find inv constrained rotation
+        Quaternion constrained = chain.get(0).constraint().constrainRotation(desired_delta, chain.get(0));
+        System.out.println("--const " + constrained);
+
+        constrained.compose(desired_delta.inverse());
+        constrained = constrained.inverse();
+        //get constrained in terms of world
+        Quaternion o = chain.get(0).reference() != null ? chain.get(0).reference().orientation() : new Quaternion();
+        constrained = Quaternion.compose(o, constrained);
+        constrained.compose(o.inverse());
+        //get constrained in terms of r0
+        o = reversed.get(0).reference() != null ? reversed.get(0).reference().orientation() : new Quaternion();
+        constrained = Quaternion.compose(o.inverse(), constrained);
+        constrained.compose(o);
+        //Apply rotation to reversed
+        reversed.get(0).rotate(constrained);
+        _updateReverse(reversed, chain);
+        int st = 0;
+        while (st < _original.size() - 1) {
+            _applyStep(_original, st, _target.position());
+            st++;
+        }
+        translateChain(_reversed, _target.position());
     }
 
     protected void _updateReverse(List<? extends Node> chain, List<? extends Node> reversed){
@@ -122,7 +245,7 @@ public class MySolver extends Solver{
     protected void _reset() {
         _prevTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
         _iterations = 0;
-        st = 0;
+        st = 0; cur = 0; bkd = false;
         _updateReverse(_original, _reversed);
         translateChain(_reversed, _target.position());
     }
@@ -156,13 +279,12 @@ public class MySolver extends Solver{
     //Goal: Decrease distance between j_0 and j_0_hat
     //Step 2.1 Stretch / Contract chain in order to to min | distance(j_i_hat, j_0_hat) - distance(j_i_hat, j_0) |
     //Step 2.2 Apply a rotation that approach root and projected root as much as possible
-    protected void _applyStep(List<? extends Node> current, List<? extends Node> reversed, int i){
+    protected void _applyStep(List<? extends Node> reversed, int i, Vector target){
         System.out.println("=========================");
         System.out.println("=========================");
         System.out.println("i :" + i + " cur : " + cur);
-        int i_cur = current.size() - 1 - i;
         //Get how much to extend
-        Vector root_j_i_hat = Vector.subtract(reversed.get(i).position(), current.get(0).position());
+        Vector root_j_i_hat = Vector.subtract(reversed.get(i).position(), target);
         Vector root_hat_j_i_hat = Vector.subtract(reversed.get(i).position(), reversed.get(reversed.size() - 1).position());
         float desired_extension = root_j_i_hat.magnitude();
         float current_extension = root_hat_j_i_hat.magnitude();
@@ -196,7 +318,7 @@ public class MySolver extends Solver{
         if(!debug) {
 
             _applyExtension(reversed, i + 1, extension);
-            _applyRotation(reversed, i, current.get(0).position());
+            _applyRotation(reversed, i, target);
         }
         else {
             /*DEBUG
@@ -205,7 +327,7 @@ public class MySolver extends Solver{
                 _applyExtension(reversed, i + 1, extension);
                 cur++;
             } else if (cur == 1) {
-                _applyRotation(reversed, i, current.get(0).position());
+                _applyRotation(reversed, i, target);
                 cur = 0;
                 st++;
             }
@@ -361,10 +483,14 @@ public class MySolver extends Solver{
     //define how to extend/contract the local joint. the idea is to try to make all joint to move the same amount
     protected float _localExtension(float remaining, float local, float desired, int n){
         float avg_extension = desired/n;
+        System.out.println("desired : " + desired);
+        System.out.println("n : " + n);
         System.out.println("Avg : " + avg_extension);
         System.out.println("local : " + local);
-        if(remaining + local < desired || remaining + avg_extension < desired || avg_extension > local){
+        if(remaining + local < desired || avg_extension > local){
             return local;
+        } else if(remaining + avg_extension < desired){
+            return Math.min(Math.abs(desired - remaining), local);
         }
         return Math.max(avg_extension,Math.min(local, avg_extension * 1.1f));
     }
@@ -461,6 +587,7 @@ public class MySolver extends Solver{
         Vector root_hat = j_i.location(reversed.get(reversed.size() - 1));
         Quaternion desired_rotation = new Quaternion(root_hat, root);
         j_i.rotate(desired_rotation);
+        //j_i.rotate(desired_rotation.axis(), desired_rotation.angle()/(reversed.size() -1 - i));
     }
 
     protected static List<Node> _reverseChain(List<? extends Node> chain, Scene s){
