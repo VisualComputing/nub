@@ -31,13 +31,17 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
-    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, GA, HAEA, MySolver }
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver }
 
     public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
             case HC: return new HillClimbingSolver(5, radians(5), structure);
             case HGSA: return new BioIk(structure,10, 4 );
             case CCD: return new CCDSolver(structure);
+            case CCD_V2:{
+                CCDSolver solver = new CCDSolver(structure, false);
+                return solver;
+            }
             case PINV: new PseudoInverseSolver(structure);
             case FABRIK:{
                 ChainSolver solver = new ChainSolver(structure);
