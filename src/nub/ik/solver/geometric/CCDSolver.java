@@ -159,17 +159,22 @@ public class CCDSolver extends Solver {
 
     float change = 0.0f;
 
-    if(_solverAnimation != null) _solverAnimation.enableSequential(true);
     //Traverse the structure backwards
     for (int i = _structure.size() - 2; i >= 0; i--) {
       Vector targetLocalPosition = _structure.get(i).location(target, true);
       Vector endLocalPosition = _structure.get(i).location(end.position(), true);
       if(_solverAnimation != null) {
-        _solverAnimation.enableSequential(true);
+        _solverAnimation.enableSequential(false);
         _solverAnimation.addTrajectory(null, _structure.get(i).position(), end.position());
+        _solverAnimation.addTrajectory(_structure.get(i).node(), new Vector(), endLocalPosition);
+        _solverAnimation.addMessage("Step 1: Find the segment line defined by Joint " + i + " and End Effector " + (_structure.size() -1), 32);
+        _solverAnimation.enableSequential(true);
+        _solverAnimation.clearStep(1);
         _solverAnimation.addTrajectory(null, _structure.get(i).position(), target);
         _solverAnimation.enableSequential(false);
-        _solverAnimation.addTrajectory(_structure.get(i).node(), new Vector(), endLocalPosition);
+        _solverAnimation.addMessage("Step 2: Find the segment Line defined by Joint " + i + " and Target", 32);
+        _solverAnimation.enableSequential(true);
+        _solverAnimation.clearStep(1);
       }
 
       Quaternion delta = new Quaternion(endLocalPosition, targetLocalPosition);
@@ -177,8 +182,10 @@ public class CCDSolver extends Solver {
 
       if(_solverAnimation != null){
         _solverAnimation.addRotateNode(_structure.get(i).node(), delta);
+        _solverAnimation.enableSequential(false);
+        _solverAnimation.addMessage("Step 3: Rotate Joint " + i + " to reduce the distance from End Effector " + i + " to Target (T)", 32);
         _solverAnimation.enableSequential(true);
-        _solverAnimation.clearStep(4);
+        _solverAnimation.clearStep(9);
       }
 
       //update end effector local position

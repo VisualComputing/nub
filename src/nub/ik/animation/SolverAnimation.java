@@ -52,7 +52,7 @@ public class SolverAnimation {
 
 
     public void addStep(Step step){
-        if(_sequential) addStepGroup(step);
+        if(_sequential || _steps.isEmpty()) addStepGroup(step);
         else addNonSequentialStep(step);
     }
 
@@ -200,16 +200,35 @@ public class SolverAnimation {
         addStep(clearStep);
     }
 
-    public void addTrajectory(Node node, Vector... vectors){
+    public void addTrajectory(Node node, FollowTrajectoryStep.Line mode, Vector... vectors){
         FollowTrajectoryStep followStep = new FollowTrajectoryStep(_scene, _radius, _period, _stepDuration);
+        followStep._mode = mode;
         followStep.setTrajectory(_nodeToJoint.get(node), vectors);
         addStep(followStep);
     }
+
+    public void addTrajectory(Node node, Vector... vectors){
+        addTrajectory(node, FollowTrajectoryStep.Line.V1_TO_V, vectors);
+    }
+
 
     public void addRotateNode(Node node, Quaternion delta){
         RotateNode rotateStep = new RotateNode(_scene, _nodeToJoint.get(node), _radius, _period, _stepDuration);
         rotateStep.setRotation(delta);
         addStep(rotateStep);
+    }
+
+    public void addMessage(String message, float size, Vector start, Vector end){
+        MessageStep messageStep = new MessageStep(_scene, message, _period, _stepDuration);
+        messageStep.setLocation(start,end);
+        messageStep.setSize(size);
+        addStep(messageStep);
+    }
+
+    public void addMessage(String message, float size){
+        MessageStep messageStep = new MessageStep(_scene, message, _period, _stepDuration);
+        messageStep.setSize(size);
+        addStep(messageStep);
     }
 
 
@@ -288,6 +307,109 @@ public class SolverAnimation {
         pg.fill(cv2);
         pg.ellipse(v2.x(), v2.y(), radius, radius);
         pg.popStyle();
+    }
+
+    public static class MessageStep implements Step{
+        protected enum Location {TOP, BOTTOM, CUSTOM};
+        protected boolean _completed, _stopDrawing;
+        protected long _period, _duration;
+        protected float _textSize = 28;
+        protected int _color, _times, _totalTimes;
+        protected String _message;
+        protected Vector _start_location, _end_location;
+        protected Location _mode = Location.BOTTOM;
+        protected Scene _scene;
+
+        public MessageStep(Scene scene, String message, long period, long duration) {
+            _scene = scene;
+            _color = _scene.pApplet().color(255);
+            _message = message;
+            _period = period;
+            _duration = duration;
+            init();
+        }
+
+        public void setLocation(Location location){
+            _mode = location;
+            switch (_mode){
+                case TOP:{
+                    _start_location = new Vector(1.f *_scene.width() / 16.f, 1.f * _scene.height() / 8.f);
+                    _end_location = new Vector(14.f *_scene.width() / 16.f,  3.f * _scene.height() / 8.f);
+                    break;
+                }
+                case BOTTOM:{
+                    _start_location = new Vector(1.f *_scene.width() / 16.f, 6.f * _scene.height() / 8.f);
+                    _end_location = new Vector(14.f *_scene.width() / 16.f,  _scene.height());
+                    break;
+                }
+            }
+        }
+
+        public void setLocation(Vector start, Vector end){
+            _mode = Location.CUSTOM;
+            _start_location = start; //in terms of screen
+            _end_location = end; //in terms of screen
+            init();
+        }
+
+        public void setSize(float size){
+            _textSize = size;
+        }
+
+        @Override
+        public void init() {
+            _completed = false;
+            _times = 0;
+            _totalTimes = (int) Math.ceil(_duration / _period) + 1;
+            setLocation(_mode);
+        }
+
+        @Override
+        public void reverse() {
+
+        }
+
+        @Override
+        public void execute() {
+            if (_times++ >= _totalTimes) {
+                //set rotation to fit exactly final rotation
+                _completed = true;
+                return;
+            }
+        }
+
+        @Override
+        public void draw() {
+            PGraphics pg = _scene.context();
+            pg.hint(PConstants.DISABLE_DEPTH_TEST);
+            pg.pushStyle();
+            if (_message != null) {
+                _scene.beginHUD();
+                pg.stroke(_color);
+                pg.fill(_color);
+                pg.textSize(_textSize);
+                pg.textAlign(PConstants.CENTER);
+                pg.text(_message, _start_location.x(),_start_location.y(), _end_location.x(), _end_location.y());
+                _scene.endHUD();
+            }
+            pg.popStyle();
+            pg.hint(PConstants.ENABLE_DEPTH_TEST);
+        }
+
+        @Override
+        public boolean completed() {
+            return _completed;
+        }
+
+        @Override
+        public void stopDrawing(boolean stop) {
+            _stopDrawing = stop;
+        }
+
+        @Override
+        public boolean stopDrawing() {
+            return _stopDrawing;
+        }
     }
 
 
@@ -483,7 +605,7 @@ public class SolverAnimation {
                 _completed = true;
                 return;
             }
-            if (1 - Math.pow(Quaternion.dot(_node.rotation(), _final), 2) < 0.00001) {
+            if (1 - Math.pow(Quaternion.dot(_node.rotation(), _final), 2) < 0.000001) {
                 return;
             } else {
                 _node.rotate(_deltaPerFrame);
