@@ -66,12 +66,12 @@ public class SolverAnim extends PApplet {
         color = color(212,0,255);
         //structure = generateSkeleton(new Vector(0, 0, 0), color);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
+        //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
         solver = new CCDSolver(structure);
 
         //Create animation
-        animation = new SolverAnimation(auxiliar, targetRadius, 40, 1000);
+        animation = new SolverAnimation(auxiliar, targetRadius, 40, 5000);
         solver.attachSolverAnimation(animation);
         solver.setMaxError(0.001f);
         solver.setTimesPerFrame(5);
@@ -117,7 +117,7 @@ public class SolverAnim extends PApplet {
         if(displayAuxiliar) {
             auxiliar.beginDraw();
             auxiliar.context().lights();
-            auxiliar.context().background(255);
+            auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
             animation.draw();
