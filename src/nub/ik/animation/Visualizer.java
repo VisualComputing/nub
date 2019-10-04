@@ -15,9 +15,6 @@ import java.util.*;
 public class Visualizer {
     protected List<InterestingEvent> _events = new ArrayList<InterestingEvent>();
     protected List<VisualStep> _steps = new ArrayList<VisualStep>(); //Execution flow
-    protected List<VisualStep> _drawingQueue = new ArrayList<VisualStep>(); //Steps to be drawn (even if they have no more updates)
-    protected List<Long> _drawingTimers = new ArrayList<Long>();
-
     protected HashMap<String, Joint> _structures = new HashMap<String, Joint>();
     protected HashMap<Node, Joint> _nodeToJoint = new HashMap<Node, Joint>();
     protected float _radius;
@@ -25,60 +22,52 @@ public class Visualizer {
     protected Scene _scene;
 
     protected int _next = 0;
-    protected long _period, _stepDuration, _wait = 0;
+    protected long _period, _stepStamp, _time = 0;
 
     public Visualizer(Scene scene, float radius, long period, long stepDuration){
         _scene = scene;
         _radius = radius;
         _period = period;
-        _stepDuration = stepDuration;
+        _stepStamp = stepDuration;
     }
 
 
     public void execute(){
         _initSteps();
         _executeSteps();
-        _wait+=_period;
+        _time += _period;
     }
 
     protected void _initSteps(){
         //Get next events at given time
-        while(_next < _events.size() && _wait == _events.get(_next).waitDuration() * _stepDuration){
+        while(_next < _events.size() && _time == _events.get(_next).startingTime() * _stepStamp){
             VisualStep step = eventToVizMapping(_events.get(_next));
             step.initialize();
             //add to steps to be drawn
-            _drawingQueue.add(step);
-            _drawingTimers.add(0L);
             _steps.add(step);
             _next++;
-            _wait = 0;
         }
     }
 
     protected void _executeSteps(){
         for(int i = _steps.size() - 1; i >= 0; i--){
             _steps.get(i).execute();
-            if(_steps.get(i).completed()) _steps.remove(i);
+            if(!_steps.get(i).keepDrawing()){
+                _steps.remove(i);
+            }
         }
     }
 
     public void reset(){
-        _wait = 0;
+        _time = 0;
         _next = 0;
+        _steps.clear();
     }
 
 
     public void render(){
-        for(int i = _drawingQueue.size() - 1; i >= 0; i--){
-            System.out.println("i :" + i + "timer : " + _drawingTimers.get(i) + "rend : " + _drawingQueue.get(i)._renderingDuration + " s dur" + _stepDuration);
-
-            if(_drawingTimers.get(i) == _drawingQueue.get(i)._renderingDuration) {
-                _drawingQueue.remove(i);
-                _drawingTimers.remove(i);
-            }else{
-                _drawingQueue.get(i).render();
-                _drawingTimers.set(i, _drawingTimers.get(i) + _period);
-            }
+        for(int i = _steps.size() - 1; i >= 0; i--){
+            _steps.get(i).render();
         }
     }
 
@@ -142,19 +131,29 @@ public class Visualizer {
     }
 
     public void addEvent(InterestingEvent event){
-        //Insert the event at the corresponding position o(n)
-        _events.add(event);
-        /*for(int i = _events.size() -1; i >= 0; i--){
-            if(event.init() >= _events.get(i).init()){
+        //Insert the event at its corresponding position o(n)
+        if(_events.isEmpty()){
+            _events.add(event);
+            return;
+        }
+        for(int i = _events.size() -1; i >= 0; i--){
+            if(event.startingTime() >= _events.get(i).startingTime()){
                 if(i + 1 < _events.size()) _events.add(i + 1, event);
                 else _events.add(event);
                 break;
             }
-        }*/
+        }
     }
 
     public List<InterestingEvent> events(){
         return _events;
+    }
+
+    public void resetStructures(){
+        for(Map.Entry<Node, Joint> entry : _nodeToJoint.entrySet()){
+            entry.getValue().setOrientation(entry.getKey().orientation().get());
+            entry.getValue().setPosition(entry.getKey().position().get());
+        }
     }
 
 

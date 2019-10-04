@@ -22,15 +22,15 @@ public class InterestingEvent{
 
     //Interesting Events, besides of their representation, must provide information about its initial time stamp
     //along with their execution rendering duration (discrete values)
-    protected int _wait, _renderingDuration, _executionDuration;
+    protected int _startingTime, _renderingDuration, _executionDuration;
     //each interesting event should contain a message that explains what is visually depicted
     //An event must contain a set of attributes that contains a key information to preserve
     protected HashMap<String, Object> _attributes;
 
-    public InterestingEvent(String id, String type, int wait, int executionDuration, int renderingDuration){
+    public InterestingEvent(String id, String type, int startingTime, int executionDuration, int renderingDuration){
         _id = id;
         _type = type;
-        _wait = wait;
+        _startingTime = startingTime;
         _executionDuration = executionDuration;
         _renderingDuration = renderingDuration;
         _attributes = new HashMap<String, Object>();
@@ -57,8 +57,8 @@ public class InterestingEvent{
         return _executionDuration;
     }
 
-    public long waitDuration(){
-        return _wait;
+    public long startingTime(){
+        return _startingTime;
     }
 
 }

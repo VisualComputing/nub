@@ -47,9 +47,9 @@ public class VisualSteps {
             _times = 0;
             _calculateSpeedPerIteration();
             //how many times to execute?
-            _totalTimes = (int) Math.ceil(_duration / _period) + 1;
+            _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
             //how many times to render?
-            _totalRenderingTimes = (int) Math.ceil( _renderingDuration / _period) + 1;
+            _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
         }
 
         @Override
@@ -136,8 +136,11 @@ public class VisualSteps {
         public void initialize() {
             _completed = false;
             _times = 0;
-            _totalTimes = (int) Math.ceil(_duration / _period) + 1;
             setLocation(_mode);
+            //how many times to execute?
+            _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
+            //how many times to render?
+            _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
         }
 
         @Override
@@ -149,8 +152,7 @@ public class VisualSteps {
         public void execute() {
             if(_completed && _times >= _totalRenderingTimes){
                 _keepDrawing = false;
-            } else if(_times++ >= _totalTimes) {
-                //set rotation to fit exactly final rotation
+            } else if(_times >= _totalTimes) {
                 _completed = true;
             }
             _times++;
@@ -217,7 +219,9 @@ public class VisualSteps {
             _times = 0;
             _calculateSpeedPerIteration();
             //how many times to execute?
-            _totalTimes = (int) Math.ceil(_duration / _period) + 1;
+            _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
+            //how many times to render?
+            _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
         }
 
         @Override

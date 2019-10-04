@@ -32,6 +32,7 @@ public abstract class VisualStep {
         _period = period;
         _duration = duration;
         _renderingDuration = renderingDuration;
+        _completed = false;
         _keepDrawing = true;
     }
 

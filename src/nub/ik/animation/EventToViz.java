@@ -1,9 +1,7 @@
 package nub.ik.animation;
 
-import nub.core.Node;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 
 import java.util.Arrays;
 
@@ -39,11 +37,11 @@ public class EventToViz {
 
 
     public static VisualSteps.RotateNode generateRotateNode(Visualizer visualizer, InterestingEvent event) {
-        return generateRotateNode(visualizer, visualizer._scene.radius()*0.05f, event);
+        return generateRotateNode(visualizer, visualizer._radius, event);
     }
     public static VisualSteps.RotateNode generateRotateNode(Visualizer visualizer, float radius, InterestingEvent event){
-        long executionDuration = event.executionDuration() * visualizer._stepDuration;
-        long renderingDuration = event.renderingDuration() * visualizer._stepDuration;
+        long executionDuration = event.executionDuration() * visualizer._stepStamp;
+        long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         VisualSteps.RotateNode  visualStep = new VisualSteps.RotateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), radius, visualizer._period, executionDuration, renderingDuration);
         visualStep.setRotation((Quaternion) event.getAttribute("rotation"));
         return visualStep;
@@ -54,19 +52,19 @@ public class EventToViz {
     }
 
     public static VisualSteps.MessageStep generateMessage(Visualizer visualizer, float size, InterestingEvent event){
-        long executionDuration = event.executionDuration() * visualizer._stepDuration;
-        long renderingDuration = event.renderingDuration() * visualizer._stepDuration;
+        long executionDuration = event.executionDuration() * visualizer._stepStamp;
+        long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         VisualSteps.MessageStep visualStep = new VisualSteps.MessageStep(visualizer._scene, (String) event.getAttribute("message"), visualizer._period, executionDuration, renderingDuration);
         visualStep.setSize(size);
         return visualStep;
     }
 
     public static VisualSteps.FollowTrajectoryStep generateTrajectory(Visualizer visualizer, InterestingEvent event) {
-        return generateTrajectory(visualizer, visualizer._scene.radius()*0.05f, event);
+        return generateTrajectory(visualizer, visualizer._radius, event);
     }
     public static VisualSteps.FollowTrajectoryStep generateTrajectory(Visualizer visualizer, float radius, InterestingEvent event){
-        long executionDuration = event.executionDuration() * visualizer._stepDuration;
-        long renderingDuration = event.renderingDuration() * visualizer._stepDuration;
+        long executionDuration = event.executionDuration() * visualizer._stepStamp;
+        long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         VisualSteps.FollowTrajectoryStep visualStep = new VisualSteps.FollowTrajectoryStep(visualizer._scene, radius, visualizer._period, executionDuration, renderingDuration);
         Vector[] positions = Arrays.asList((Object[]) event.getAttribute("positions")).toArray(new Vector[((Object[])event.getAttribute("positions")).length]);
         visualStep.setTrajectory(visualizer._nodeToJoint.get(event.getAttribute("reference")), positions);
