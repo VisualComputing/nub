@@ -13,7 +13,9 @@ package nub.ik.solver.geometric;
 
 import nub.core.Node;
 import nub.ik.animation.IKAnimation;
+import nub.ik.animation.InterestingEvent;
 import nub.ik.animation.SolverAnimation;
+import nub.ik.animation.Visualizer;
 import nub.ik.solver.KinematicStructure;
 import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
@@ -40,9 +42,18 @@ public class CCDSolver extends Solver {
 
   //TODO: Refactor, perhaps move to Solver class
   protected SolverAnimation _solverAnimation;
+  //TODO: Refactor, perhaps move to Solver class
+  protected boolean _enableEventQueue = false;
+  protected List<InterestingEvent> _eventQueue;
+  protected int _last_time_event = 0;
+
 
   public void enableHistory(boolean enableHistory) {
     _enableHistory = enableHistory;
+  }
+
+  public void enableEventQueue(boolean enableQueue) {
+    _enableEventQueue = enableQueue;
   }
 
   public List<? extends Node> chain() {
@@ -90,6 +101,7 @@ public class CCDSolver extends Solver {
     this._previousTarget =
         target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
     if (_enableHistory) _history = new IKAnimation.NodeStates();
+    if (_enableEventQueue) _eventQueue = new ArrayList<InterestingEvent>();
   }
 
   /*
@@ -163,6 +175,44 @@ public class CCDSolver extends Solver {
     for (int i = _structure.size() - 2; i >= 0; i--) {
       Vector targetLocalPosition = _structure.get(i).location(target, true);
       Vector endLocalPosition = _structure.get(i).location(end.position(), true);
+      if(_eventQueue != null){
+        //STEP 1:
+        //Create the event
+        InterestingEvent event1a = new InterestingEvent("E1A", "Trajectory", _last_time_event, 1, 2);
+        //Add the convenient attributes
+        event1a.addAttribute("positions", _structure.get(i).position(), end.position());
+        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        _eventQueue.add(event1a);
+
+        InterestingEvent event1b = new InterestingEvent("E1B", "Trajectory", _last_time_event, 1, 3);
+        //Add the convenient attributes
+        event1b.addAttribute("reference", _structure.get(i).node());
+        event1b.addAttribute("positions", new Vector(), endLocalPosition);
+        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        _eventQueue.add(event1b);
+
+        //Create the event
+        InterestingEvent event2 = new InterestingEvent("E2", "Message", _last_time_event, 0, 1);
+        //Add the convenient attributes
+        event2.addAttribute("message", "Step 1: Find the segment line defined by Joint " + i + " and End Effector " + (_structure.size() -1));
+        //Add it to the event queue
+        _eventQueue.add(event2);
+
+        //STEP 2
+        //Create the event
+        InterestingEvent event3 = new InterestingEvent("E3", "Trajectory", _last_time_event + 1, 1, 2);
+        //Add the convenient attributes
+        event3.addAttribute("positions", _structure.get(i).position(), target);
+        //Add it to the event queue
+        _eventQueue.add(event3);
+        //Create the event
+        InterestingEvent event4 = new InterestingEvent("E4", "Message", _last_time_event + 1, 0, 1);
+        //Add the convenient attributes
+        event4.addAttribute("message", "Step 2: Find the segment Line defined by Joint " + i + " and Target");
+        //Add it to the event queue
+        _eventQueue.add(event4);
+      }
+
       if(_solverAnimation != null) {
         _solverAnimation.enableSequential(false);
         _solverAnimation.addTrajectory(null, _structure.get(i).position(), end.position());
@@ -180,6 +230,25 @@ public class CCDSolver extends Solver {
       Quaternion delta = new Quaternion(endLocalPosition, targetLocalPosition);
       _structure.get(i).rotate(delta);
 
+
+      if(_eventQueue != null){
+        //STEP 3:
+        //Create the event
+        InterestingEvent event5 = new InterestingEvent("E5", "NodeRotation", _last_time_event + 2, 1, 1);
+        //Add the convenient attributes
+        event5.addAttribute("node", _structure.get(i).node());
+        event5.addAttribute("rotation", delta);
+        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        _eventQueue.add(event5);
+        //Create the event
+        InterestingEvent event6 = new InterestingEvent("E6", "Message", _last_time_event + 2, 0, 1);
+        //Add the convenient attributes
+        event6.addAttribute("message", "Step 3: Rotate Joint " + i + " to reduce the distance from End Effector " + i + " to Target (T)");
+        //Add it to the event queue
+        _eventQueue.add(event6);
+        _last_time_event += 3;
+      }
+
       if(_solverAnimation != null){
         _solverAnimation.addRotateNode(_structure.get(i).node(), delta);
         _solverAnimation.enableSequential(false);
@@ -187,7 +256,6 @@ public class CCDSolver extends Solver {
         _solverAnimation.enableSequential(true);
         _solverAnimation.clearStep(9);
       }
-
       //update end effector local position
       if (_enableHistory) {
         history().addNodeState("step", _structure.get(i).node(), _structure.get(i).node().reference(), null, _structure.get(i).rotation().get());
@@ -221,10 +289,16 @@ public class CCDSolver extends Solver {
   protected void _reset() {
     _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
+    if(_enableEventQueue){
+      if (_eventQueue == null) _eventQueue = new ArrayList<InterestingEvent>();
+      else _eventQueue.clear();
+    }
+
     if (_enableHistory) {
       if (_history == null) _history = new IKAnimation.NodeStates();
       else _history.clear();
     }
+
     if(_enable_kinematic_structure){
         //TODO: Remove this update!
         _structure.get(_structure.size()-1).updatePath(null);
@@ -257,20 +331,19 @@ public class CCDSolver extends Solver {
   }
 
   //TODO: Refactor, perhaps move to Solver class
-  public void attachSolverAnimation(SolverAnimation solverAnimation){
-      _solverAnimation = solverAnimation;
-      registerStructures();
-  }
-
-  public void registerStructures(){
+  public void registerStructures(Visualizer visualizer){
       if(_enable_kinematic_structure){
           List<Node> chain = new ArrayList<Node>();
           for(KinematicStructure.KNode knode : _structure){
               chain.add(knode.node());
           }
-          _solverAnimation.registerStructure("Chain", chain);
+          visualizer.registerStructure("Chain", chain);
       }else {
-          _solverAnimation.registerStructure("Chain", _chain);
+          visualizer.registerStructure("Chain", _chain);
       }
+  }
+
+  public List<InterestingEvent> eventQueue(){
+    return _eventQueue;
   }
 }
