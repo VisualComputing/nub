@@ -4,8 +4,8 @@ import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
+import nub.ik.animation.*;
 import nub.ik.solver.geometric.CCDSolver;
-import nub.ik.animation.IKAnimation;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
@@ -18,8 +18,19 @@ import processing.event.MouseEvent;
 import java.util.ArrayList;
 
 public class CCDAnim extends PApplet {
+
+    class CCDVisualizer extends Visualizer{
+        public CCDVisualizer(Scene scene, float radius, long period, long stepDuration) {
+            super(scene, radius, period, stepDuration);
+        }
+        public VisualStep eventToVizMapping(InterestingEvent event){
+            return EventToViz.generateDefaultViz(this, event);
+        }
+    }
+
+
     Scene scene, auxiliar, focus;
-    boolean displayAuxiliar = false;
+    boolean displayAuxiliar = false, anim = false;
 
     int numJoints = 7;
     float targetRadius = 7;
@@ -28,11 +39,14 @@ public class CCDAnim extends PApplet {
     int color;
 
     CCDSolver solver;
+    CCDVisualizer visualizer;
+    VisualizerMediator mediator;
+
     ArrayList<Node> structure = new ArrayList<>(); //Keep Structures
     Node target; //Keep targets
     boolean solve = false;
 
-    IKAnimation.CCDAnimation CCDAnimator = null;
+
 
     public void settings() {
         size(700, 700, P3D);
@@ -63,11 +77,17 @@ public class CCDAnim extends PApplet {
         color = color(212,0,255);
         //structure = generateSkeleton(new Vector(0, 0, 0), color);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
+        //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
-        solver = new CCDSolver(structure, false);
-        solver.enableHistory(true);
+        solver = new CCDSolver(structure);
+        solver.enableMediator(true);
+        //Create visualizer
+        visualizer = new CCDVisualizer(auxiliar, targetRadius * 0.8f, 40, 400);
 
+        //Create Mediator
+        mediator = new VisualizerMediator(solver, visualizer);
+
+        //solver.attachSolverAnimation(animation);
         solver.setMaxError(0.001f);
         solver.setTimesPerFrame(5);
         solver.setMaxIterations(200);
@@ -85,6 +105,17 @@ public class CCDAnim extends PApplet {
         };
         scene.registerTask(task);
         task.run(40);
+
+        TimingTask animTask = new TimingTask() {
+            @Override
+            public void execute() {
+                if (anim) {
+                    visualizer.execute();
+                }
+            }
+        };
+        scene.registerTask(animTask);
+        animTask.run(40);
         //Define Text Font
         textFont(createFont("Zapfino", 38));
     }
@@ -104,7 +135,7 @@ public class CCDAnim extends PApplet {
             auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
-            if(CCDAnimator != null)  CCDAnimator.draw();
+            visualizer.render();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -175,18 +206,17 @@ public class CCDAnim extends PApplet {
         } else if(key == 'q'){
             displayAuxiliar = true;
             solver.solve();
-            if(CCDAnimator == null) CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, solver, targetRadius, color);
-            else CCDAnimator.reset();
+            anim = true;
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            if(CCDAnimator != null) CCDAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
+            //if(animation != null) animation.setPeriod(Integer.valueOf("" + key) * 1000);
         }
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.animation.CCDAnim"});
+        PApplet.main(new String[]{"ik.animation.CCDAnim2"});
     }
 }

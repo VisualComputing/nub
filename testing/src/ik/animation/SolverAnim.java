@@ -35,8 +35,6 @@ public class SolverAnim extends PApplet {
     Node target; //Keep targets
     boolean solve = false;
 
-    IKAnimation.CCDAnimation CCDAnimator = null;
-
     public void settings() {
         size(700, 700, P3D);
     }
@@ -72,7 +70,7 @@ public class SolverAnim extends PApplet {
 
         //Create animation
         animation = new SolverAnimation(auxiliar, targetRadius, 40, 5000);
-        solver.attachSolverAnimation(animation);
+        //solver.attachSolverAnimation(animation);
         solver.setMaxError(0.001f);
         solver.setTimesPerFrame(5);
         solver.setMaxIterations(200);

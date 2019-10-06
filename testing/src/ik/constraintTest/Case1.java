@@ -38,7 +38,6 @@ public class Case1 extends PApplet {
     boolean solve = false;
 
     IKAnimation.FABRIKAnimation FABRIKAnimator = null;
-    IKAnimation.CCDAnimation CCDAnimator = null;
 
     public void settings() {
         size(700, 700, P3D);
@@ -88,7 +87,6 @@ public class Case1 extends PApplet {
         int i = 0;
         //CCD
         CCDSolver ccdSolver = new CCDSolver(structures.get(i++));
-        ccdSolver.enableHistory(true);
         solvers.add(ccdSolver);
         //BioIK
         solvers.add(new BioIk(structures.get(i++), 10, 4));
@@ -161,7 +159,6 @@ public class Case1 extends PApplet {
             auxiliar.drawAxes();
             auxiliar.render();
             if(FABRIKAnimator != null)  FABRIKAnimator.draw();
-            if(CCDAnimator != null)  CCDAnimator.draw();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -240,8 +237,6 @@ public class Case1 extends PApplet {
         } else if(key == '2'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            if(CCDAnimator == null) CCDAnimator = new IKAnimation.CCDAnimation(auxiliar, (CCDSolver) solvers.get(0), targetRadius);
-            else CCDAnimator.reset();
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){
