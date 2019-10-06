@@ -36,7 +36,7 @@ public class Visualizer {
     public void execute(){
         _initSteps();
         _executeSteps();
-        _time += _period;
+        if(_next < _mediator.lastEvent()) _time += _period;
     }
 
     protected void _initSteps(){

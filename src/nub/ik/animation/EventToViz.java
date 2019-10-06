@@ -48,8 +48,6 @@ public class EventToViz {
     public static VisualSteps.RotateNode generateRotateNode(Visualizer visualizer, float radius, InterestingEvent event){
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
-        System.out.println(visualizer._nodeToJoint.size());
-        System.out.println(visualizer._nodeToJoint.get(event.getAttribute("node")));
         VisualSteps.RotateNode  visualStep = new VisualSteps.RotateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), radius, visualizer._period, executionDuration, renderingDuration);
         visualStep.setRotation((Quaternion) event.getAttribute("rotation"));
         return visualStep;
