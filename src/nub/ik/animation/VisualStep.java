@@ -2,6 +2,10 @@ package nub.ik.animation;
 
 import nub.processing.Scene;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * A Visual Step receive as input key information preserved by an interesting event and
  * gives then a visual representation.
@@ -17,6 +21,8 @@ public abstract class VisualStep {
     protected long _period, _duration, _renderingDuration;
     protected int _times, _totalTimes, _totalRenderingTimes;
     protected Scene _scene;
+    //This are the visual attributes of the Step, since this varies among concrete subclasses we use a HashMap
+    protected HashMap<String, Object> _attributes;
 
     public abstract void initialize();
     public abstract void reverse();
@@ -34,6 +40,8 @@ public abstract class VisualStep {
         _renderingDuration = renderingDuration;
         _completed = false;
         _keepDrawing = true;
+        _attributes = new HashMap<>();
+        _defineAttributes();
     }
 
     public boolean isInitialized(){
@@ -48,9 +56,32 @@ public abstract class VisualStep {
         _completed = completed;
     }
 
-
     public void keepDrawing(boolean keep){
         _keepDrawing = keep;
     }
 
+    public Set<String> getAttributes(){
+        return _attributes.keySet();
+    }
+
+    public HashMap<String, Object> attributes(){
+        return _attributes;
+    }
+
+    public void setAttributes(HashMap<String, Object> attributes){
+        if(attributes == null) return;
+        for(Map.Entry<String, Object> entry : attributes.entrySet()){
+            setAttribute(entry.getKey(), entry.getValue());
+        }
+    }
+
+    public void setAttribute(String name, Object value){
+        if(_attributes.get(name) == null){
+            throw new RuntimeException(name + "is not an attribute of the visual step. Please check the valid attrubtes calling at " +
+                    "getAttributes method.");
+        }
+        _attributes.put(name, value);
+    }
+
+    protected abstract void _defineAttributes();
 }
