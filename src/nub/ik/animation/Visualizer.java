@@ -13,15 +13,16 @@ import java.util.*;
 * */
 
 public class Visualizer {
-    protected List<InterestingEvent> _events = new ArrayList<InterestingEvent>();
     protected List<VisualStep> _steps = new ArrayList<VisualStep>(); //Execution flow
-    protected HashMap<String, Joint> _structures = new HashMap<String, Joint>();
     protected HashMap<Node, Joint> _nodeToJoint = new HashMap<Node, Joint>();
     protected float _radius;
 
+
+    protected VisualizerMediator _mediator;
+
     protected Scene _scene;
 
-    protected int _next = 0;
+    protected long _next = 0; //Event counter
     protected long _period, _stepStamp, _time = 0;
 
     public Visualizer(Scene scene, float radius, long period, long stepDuration){
@@ -40,8 +41,8 @@ public class Visualizer {
 
     protected void _initSteps(){
         //Get next events at given time
-        while(_next < _events.size() && _time == _events.get(_next).startingTime() * _stepStamp){
-            VisualStep step = eventToVizMapping(_events.get(_next));
+        while(_next < _mediator.lastEvent() && _time == _mediator.event(_next).startingTime() * _stepStamp){
+            VisualStep step = eventToVizMapping( _mediator.event(_next));
             step.initialize();
             //add to steps to be drawn
             _steps.add(step);
@@ -71,17 +72,27 @@ public class Visualizer {
         }
     }
 
+    public void setMediator(VisualizerMediator mediator){
+        _mediator = mediator;
+    }
 
     //TODO: ADD "SAME" OPTION i.e animate the same structure instead of create a new one
     //Register the structures to Animate
-    public void registerStructure(String name, Node root){
-        Joint joint = _generateBranch(root);
-        _structures.put(name, joint);
+    public void registerNode(Node node){
+        Joint joint = new Joint(_scene, _scene.pApplet().color(255, 0, 0));
+        joint.setRoot(true);
+        joint.setPosition(node.position().get());
+        joint.setOrientation(node.orientation().get());
+        joint.setConstraint(node.constraint());
+        _nodeToJoint.put(node, joint);
     }
 
-    public void registerStructure(String name, List<? extends Node> structure){
-        Joint joint = _generateChain(structure);
-        _structures.put(name, joint);
+    public void registerStructure(Node root){
+        _generateBranch(root);
+    }
+
+    public void registerStructure(List<? extends Node> structure){
+        _generateChain(structure);
     }
 
     //TODO: Move this constructor
@@ -110,43 +121,22 @@ public class Visualizer {
     }
 
     protected Joint _generateChain(List<?  extends Node> chain){
-        Node prev = chain.get(0);
         Joint root = new Joint(_scene, _radius);
-        root.setPosition(prev.position().get());
-        root.setOrientation(prev.orientation().get());
+        root.setPosition(chain.get(0).position().get());
+        root.setOrientation(chain.get(0).orientation().get());
         root.setRoot(true);
-        _nodeToJoint.put(prev, root);
+        _nodeToJoint.put(chain.get(0), root);
         for(int i = 1; i < chain.size(); i++){
             Node current = chain.get(i);
             Joint joint = new Joint(_scene, _radius);
-            Joint ref = _nodeToJoint.get(prev);
+            Joint ref = _nodeToJoint.get(current.reference());
             joint.setReference(ref);
             joint.setPosition(current.position().get());
             joint.setOrientation(current.orientation().get());
             joint.setConstraint(current.constraint());
             _nodeToJoint.put(current, joint);
-            prev = current;
         }
         return root;
-    }
-
-    public void addEvent(InterestingEvent event){
-        //Insert the event at its corresponding position o(n)
-        if(_events.isEmpty()){
-            _events.add(event);
-            return;
-        }
-        for(int i = _events.size() -1; i >= 0; i--){
-            if(event.startingTime() >= _events.get(i).startingTime()){
-                if(i + 1 < _events.size()) _events.add(i + 1, event);
-                else _events.add(event);
-                break;
-            }
-        }
-    }
-
-    public List<InterestingEvent> events(){
-        return _events;
     }
 
     public void resetStructures(){
@@ -156,6 +146,15 @@ public class Visualizer {
         }
     }
 
+    public void jumpTo(long nextStep){
+        while(_next < nextStep){
+            execute();
+        }
+    }
+
+    protected void setTime(long t){
+        _time = t;
+    }
 
     /*
     * This method must establish the mapping between an event of a given type to a Visual Step
