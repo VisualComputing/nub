@@ -16,15 +16,43 @@ import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CCDAnim extends PApplet {
+    /*
+    * This example shows how to visualize an IK  Algorithm step by step
+    * */
 
+    /*
+    (*) Define a Visualizer to your algorithm.
+    Here, you must specify the way that each interesting event annotated on the solver will be mapped to a visual step
+     */
     class CCDVisualizer extends Visualizer{
         public CCDVisualizer(Scene scene, float radius, long period, long stepDuration) {
             super(scene, radius, period, stepDuration);
         }
+
+        /*
+        Override this method is critical, Although EventToViz contains a default way to map an Interesting event into a
+        visual step, there could be times in which you require to generate your own mapping
+         */
+        @Override
         public VisualStep eventToVizMapping(InterestingEvent event){
-            return EventToViz.generateDefaultViz(this, event);
+            return EventToViz.generateDefaultViz(this, event, setVisualFeatures(event));
+        }
+
+        /*
+        * Use this method to customize the aspect of a visual step, take into account the Type of the Events or their ids
+        * */
+        @Override
+        public HashMap<String, Object> setVisualFeatures(InterestingEvent event){
+            //In this basic example we customize the aspect of the rotation step:
+            HashMap<String, Object> attribs = null;
+            if(event.type() == "NodeRotation"){
+                attribs = new HashMap<String, Object>();
+                attribs.put("color", color(0,255,0));
+            }
+            return attribs;
         }
     }
 
@@ -38,9 +66,9 @@ public class CCDAnim extends PApplet {
 
     int color;
 
-    CCDSolver solver;
-    CCDVisualizer visualizer;
-    VisualizerMediator mediator;
+    CCDSolver solver; //IK Algorithm that uses Solver template
+    CCDVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
+    VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
 
     ArrayList<Node> structure = new ArrayList<>(); //Keep Structures
     Node target; //Keep targets
@@ -59,6 +87,7 @@ public class CCDAnim extends PApplet {
         scene.fit(1);
         scene.setRightHanded();
 
+        //(*) The auxiliar Scene is where the animation will take place
         auxiliar = new Scene(this, P3D, width, height , 0, 0);
         auxiliar.setType(Graph.Type.ORTHOGRAPHIC);
         auxiliar.setRadius(numJoints * boneLength);
@@ -75,19 +104,17 @@ public class CCDAnim extends PApplet {
 
         //create skeleton
         color = color(212,0,255);
-        //structure = generateSkeleton(new Vector(0, 0, 0), color);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
         solver = new CCDSolver(structure);
         solver.enableMediator(true);
-        //Create visualizer
-        visualizer = new CCDVisualizer(auxiliar, targetRadius * 0.8f, 40, 400);
 
-        //Create Mediator
+        //Create the visualizer
+        visualizer = new CCDVisualizer(auxiliar, targetRadius * 0.8f, 40, 40);
+
+        //Create Mediator that relates a Solver with at least one visualizer
         mediator = new VisualizerMediator(solver, visualizer);
 
-        //solver.attachSolverAnimation(animation);
         solver.setMaxError(0.001f);
         solver.setTimesPerFrame(5);
         solver.setMaxIterations(200);
@@ -95,6 +122,7 @@ public class CCDAnim extends PApplet {
         solver.setTarget(structure.get(numJoints - 1), target);
         target.setPosition(structure.get(numJoints - 1).position());
 
+        //Defines a task to run the solver each 40 ms
         TimingTask task = new TimingTask() {
             @Override
             public void execute() {
@@ -106,6 +134,7 @@ public class CCDAnim extends PApplet {
         scene.registerTask(task);
         task.run(40);
 
+        //Defines a task to run the animation each 40 ms
         TimingTask animTask = new TimingTask() {
             @Override
             public void execute() {
@@ -115,7 +144,7 @@ public class CCDAnim extends PApplet {
             }
         };
         scene.registerTask(animTask);
-        animTask.run(40);
+        animTask.run(visualizer.period());
         //Define Text Font
         textFont(createFont("Zapfino", 38));
     }
@@ -127,7 +156,7 @@ public class CCDAnim extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        //Util.printInfo(scene, solver, structure.get(0).position());
+        Util.printInfo(scene, solver, structure.get(0).position());
 
         if(displayAuxiliar) {
             auxiliar.beginDraw();
@@ -217,6 +246,6 @@ public class CCDAnim extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.animation.CCDAnim2"});
+        PApplet.main(new String[]{"ik.animation.CCDAnim"});
     }
 }
