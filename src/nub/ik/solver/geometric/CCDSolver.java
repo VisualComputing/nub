@@ -17,7 +17,6 @@ import nub.ik.solver.KinematicStructure;
 import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.processing.Scene;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -295,6 +294,7 @@ public class CCDSolver extends Solver {
       }else {
           mediator.registerStructure(_chain);
       }
+      mediator.registerStructure(_target);
   }
 
   @Override
