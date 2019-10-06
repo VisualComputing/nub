@@ -20,26 +20,9 @@ import java.util.*;
  * */
 
 public class VisualizerMediator {
-    protected class NodeState{
-        protected Vector _position;
-        protected Quaternion _orientation;
-        protected NodeState(Node node){
-            _position = node.position();
-            _orientation = node.orientation();
-        }
-        protected Vector position(){
-            return _position;
-        }
-        protected Quaternion orientation(){
-            return _orientation;
-        }
-    }
-
-
     protected List<Visualizer> _visualizers = new ArrayList<>();
     protected Solver _solver;
     protected List<InterestingEvent> _eventQueue = new ArrayList<>();
-    protected HashMap<Node, NodeState> _initialState = new HashMap<>();
     protected long _firstEvent = 0;
     protected final long MAX_EVENT_SIZE = 1000;
 
@@ -97,29 +80,6 @@ public class VisualizerMediator {
         //Make sure that each visualizer is updated to new first event
         for(Visualizer v : _visualizers){
             v.jumpTo(_firstEvent);
-        }
-    }
-
-    public void setInitialState(){
-        Iterator<? extends Node> iterator = _solver.iterator();
-        _initialState.clear();
-        while(iterator.hasNext()){
-            Node node = iterator.next();
-            _initialState.put(node, new NodeState(node));
-        }
-    }
-
-    public void sendInitialState(){
-        for(Visualizer v : _visualizers){
-            //reset all structures with the initial information
-            _resetStructure(v);
-        }
-    }
-
-    protected void _resetStructure(Visualizer v){
-        for(Map.Entry<Node, Joint> entry : v._nodeToJoint.entrySet()){
-            entry.getValue().setPosition(_initialState.get(entry).position());
-            entry.getValue().setOrientation(_initialState.get(entry).orientation());
         }
     }
 
