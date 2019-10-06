@@ -15,17 +15,11 @@ import java.util.List;
  * */
 public class VisualSteps {
     public static class RotateNode extends VisualStep{
-        protected enum Rotate {HIGHLIGHT, NONE}
-        protected Rotate _mode = Rotate.HIGHLIGHT;
-        protected float _radius;
         protected Node _node;
-        protected int _color;
         protected Quaternion _initial, _final, _deltaPerFrame, _delta;
 
-        public RotateNode(Scene scene, Node node, float radius, long period, long duration, long renderingDuration) {
+        public RotateNode(Scene scene, Node node, long period, long duration, long renderingDuration) {
             super(scene, period, duration, renderingDuration);
-            _color = _scene.pApplet().color(0, 0, 255); //use some default colors
-            _radius = radius;
             _node = node;
         }
 
@@ -75,70 +69,69 @@ public class VisualSteps {
 
         @Override
         public void render() {
-            if(_mode == Rotate.NONE) return;
+            if(!(boolean)_attributes.get("highlight")) return;
             PGraphics pg = _scene.context();
             pg.pushStyle();
             pg.hint(PConstants.DISABLE_DEPTH_TEST);
             pg.pushMatrix();
             _scene.applyWorldTransformation(_node);
             pg.noStroke();
-            if(!_completed) pg.fill(_color);
-            else pg.fill(_color, 150);
-            pg.sphere(_radius);
+            if(!_completed) pg.fill((int)_attributes.get("color"));
+            else pg.fill((int)_attributes.get("color"), 150);
+            pg.sphere((float)_attributes.get("radius"));
             pg.popMatrix();
             pg.hint(PConstants.ENABLE_DEPTH_TEST);
             pg.popStyle();
+        }
+
+        @Override
+        protected void _defineAttributes(){
+            _attributes.put("highlight", true);
+            _attributes.put("color", _scene.pApplet().color(0, 0, 255));
+            _attributes.put("radius", _scene.radius()*0.02f);
         }
     }
 
 
     public static class MessageStep extends VisualStep {
-        protected enum Location {TOP, BOTTOM, CUSTOM};
-        protected float _textSize = 28;
-        protected int _color;
         protected String _message;
         protected Vector _start_location, _end_location;
-        protected Location _mode = Location.BOTTOM;
 
         public MessageStep(Scene scene, String message, long period, long duration, long renderingDuration) {
             super(scene, period, duration, renderingDuration);
-            _color = _scene.pApplet().color(255);
             _message = message;
             initialize();
         }
 
-        public void setLocation(Location location){
-            _mode = location;
-            switch (_mode){
-                case TOP:{
+        public void setLocation(){
+            switch ((String) attributes().get("location")){
+                case "TOP":{
                     _start_location = new Vector(1.f *_scene.width() / 16.f, 1.f * _scene.height() / 8.f);
                     _end_location = new Vector(14.f *_scene.width() / 16.f,  3.f * _scene.height() / 8.f);
                     break;
                 }
-                case BOTTOM:{
+                case "BOTTOM":{
                     _start_location = new Vector(1.f *_scene.width() / 16.f, 6.f * _scene.height() / 8.f);
                     _end_location = new Vector(14.f *_scene.width() / 16.f,  _scene.height());
                     break;
                 }
+                case "CUSTOM":{
+                    _start_location = (Vector)_attributes.get("startLocation"); //in terms of screen
+                    _end_location = (Vector) _attributes.get("endLocation");
+                    break;
+                }
+                default:{
+                    throw new RuntimeException("Location attribute must have either of the following values:" +
+                            "TOP, BOTTOM or CUSTOM ");
+                }
             }
-        }
-
-        public void setLocation(Vector start, Vector end){
-            _mode = Location.CUSTOM;
-            _start_location = start; //in terms of screen
-            _end_location = end; //in terms of screen
-            initialize();
-        }
-
-        public void setSize(float size){
-            _textSize = size;
         }
 
         @Override
         public void initialize() {
             _completed = false;
             _times = 0;
-            setLocation(_mode);
+            setLocation();
             //how many times to execute?
             _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
             //how many times to render?
@@ -167,9 +160,9 @@ public class VisualSteps {
             pg.pushStyle();
             if (_message != null) {
                 _scene.beginHUD();
-                pg.stroke(_color);
-                pg.fill(_color);
-                pg.textSize(_textSize);
+                pg.stroke((int)_attributes.get("color"));
+                pg.fill((int)_attributes.get("color"));
+                pg.textSize((int)_attributes.get("textSize"));
                 pg.textAlign(PConstants.CENTER);
                 pg.text(_message, _start_location.x(),_start_location.y(), _end_location.x(), _end_location.y());
                 _scene.endHUD();
@@ -177,26 +170,23 @@ public class VisualSteps {
             pg.popStyle();
             pg.hint(PConstants.ENABLE_DEPTH_TEST);
         }
+
+        @Override
+        protected void _defineAttributes(){
+            _attributes.put("location", "BOTTOM"); //Choose among the following modes: TOP, BOTTOM, CUSTOM
+            _attributes.put("textSize", 24);
+            _attributes.put("color", _scene.pApplet().color(255));
+        }
     }
 
     public static class FollowTrajectoryStep extends VisualStep{
-        protected enum Line {V1_TO_V2, V_TO_V2, V1_TO_V};
         protected Node _reference;
-        protected float _radius;
         protected Vector[] _trajectory;
         protected Vector _current, _delta;
         protected int _idx = 0;
-        protected int _cline, _cv1, _cv2, _cv;
-        protected Line _mode = Line.V1_TO_V;
 
-        public FollowTrajectoryStep(Scene scene, float radius, long period, long duration, long renderingDuration) {
+        public FollowTrajectoryStep(Scene scene, long period, long duration, long renderingDuration) {
             super(scene, period, duration, renderingDuration);
-            _radius = radius;
-            //use some default colors
-            _cv1 = _scene.pApplet().color(0, 0, 255);
-            _cv2 = _scene.pApplet().color(0, 0, 255);
-            _cv = _scene.pApplet().color(0, 0, 255);
-            _cline = _scene.pApplet().color(255, 0, 0);
         }
 
         public void setTrajectory(Node node, Vector... trajectory) {
@@ -258,16 +248,30 @@ public class VisualSteps {
         public void render() {
             Vector v1 = _trajectory[_idx];
             Vector v2 = _trajectory[_idx + 1 < _trajectory.length ? _idx + 1 : _idx];
-            switch (_mode) {
-                case V1_TO_V: {
+            switch ((String) attributes().get("mode")) {
+                case "V1_TO_V": {
                     v2 = _current;
                     break;
                 }
-                case V_TO_V2: {
+                case "V_TO_V2": {
                     v1 = _current;
                     break;
                 }
+                case "V1_TO_V2":{
+                    break;
+                }
+                default:{
+                    throw new RuntimeException("mode attribute must have either of the following values:" +
+                            "V1_TO_V, V_TO_V2 or V1_TO_V2 ");
+                }
             }
+
+            float _radius = (float)_attributes.get("radius");
+            int cv = (int)_attributes.get("v_color");
+            int cv1 = (int)_attributes.get("v1_color");
+            int cv2 = (int)_attributes.get("v2_color");
+            int cline = (int)_attributes.get("line_color");
+
             PGraphics pg = _scene.context();
             pg.pushStyle();
             pg.pushMatrix();
@@ -277,40 +281,32 @@ public class VisualSteps {
                 pg.noStroke();
                 pg.pushMatrix();
                 pg.translate(_current.x(), _current.y(), _current.z());
-                if(!_completed) pg.fill(_cv2);
-                else pg.fill(_cv2, 150);
+                if(!_completed) pg.fill(cv2);
+                else pg.fill(cv2, 150);
                 pg.sphere(_radius);
                 pg.popMatrix();
-                pg.fill(_cline);
+                pg.fill(cline);
                 if (Vector.distance(v1, v2) > 1.2f * _radius) _scene.drawArrow(v1, v2, _radius / 4f);
             } else {
-                drawSegment2D(pg, v1, v2, _radius, pg.color(_cline, _completed ? 255 : 100), pg.color(_cv1, _completed ? 255 : 100), pg.color(_cv2, _completed ? 255 : 100));
-                if(!_completed) pg.fill(_cv);
-                else pg.stroke(_cv, 150);
+                drawSegment2D(pg, v1, v2, _radius, pg.color(cline, _completed ? 255 : 100), pg.color(cv1, _completed ? 255 : 100), pg.color(cv2, _completed ? 255 : 100));
+                if(!_completed) pg.fill(cv);
+                else pg.stroke(cv, 150);
                 pg.ellipse(_current.x(), _current.y(), _radius, _radius);
             }
             pg.hint(PConstants.ENABLE_DEPTH_TEST);
             pg.popMatrix();
             pg.popStyle();
         }
-    }
 
-
-    //Some common rendering routines
-    public static void drawSegment2D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2) {
-        pg.pushStyle();
-        pg.strokeWeight(radius / 2.f);
-        pg.stroke(cline);
-        pg.fill(cline);
-        pg.line(v1.x(), v1.y(), v2.x(), v2.y());
-        pg.strokeWeight(radius);
-        pg.stroke(cv1);
-        pg.fill(cv1);
-        pg.ellipse(v1.x(), v1.y(), radius, radius);
-        pg.stroke(cv2);
-        pg.fill(cv2);
-        pg.ellipse(v2.x(), v2.y(), radius, radius);
-        pg.popStyle();
+        @Override
+        protected void _defineAttributes(){
+            _attributes.put("mode", "V1_TO_V"); //Choose among the following modes: V1_TO_V2, V_TO_V2, V1_TO_V
+            _attributes.put("radius", _scene.radius()*0.02f);
+            _attributes.put("line_color", _scene.pApplet().color(255,0,0));
+            _attributes.put("v1_color", _scene.pApplet().color(0,0,255));
+            _attributes.put("v2_color", _scene.pApplet().color(0,0,255));
+            _attributes.put("v_color", _scene.pApplet().color(0,0,255));
+        }
     }
 
     public static class UpdateStructure extends VisualStep {
@@ -403,7 +399,27 @@ public class VisualSteps {
         public void render() {
             //Do nothing
         }
+
+        @Override
+        protected void _defineAttributes() {
+            //Do nothing
+        }
     }
 
-
+    //Some common rendering routines
+    public static void drawSegment2D(PGraphics pg, Vector v1, Vector v2, float radius, int cline, int cv1, int cv2) {
+        pg.pushStyle();
+        pg.strokeWeight(radius / 2.f);
+        pg.stroke(cline);
+        pg.fill(cline);
+        pg.line(v1.x(), v1.y(), v2.x(), v2.y());
+        pg.strokeWeight(radius);
+        pg.stroke(cv1);
+        pg.fill(cv1);
+        pg.ellipse(v1.x(), v1.y(), radius, radius);
+        pg.stroke(cv2);
+        pg.fill(cv2);
+        pg.ellipse(v2.x(), v2.y(), radius, radius);
+        pg.popStyle();
+    }
 }
