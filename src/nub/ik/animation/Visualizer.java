@@ -32,6 +32,10 @@ public class Visualizer {
         _stepStamp = stepDuration;
     }
 
+    public long period(){
+        return _period;
+    }
+
 
     public void execute(){
         _initSteps();
@@ -97,11 +101,14 @@ public class Visualizer {
 
     //TODO: Move this constructor
     protected Joint _generateBranch(Node root){
-        Joint joint = new Joint(_scene);
+        Joint joint = new Joint(_scene, _radius);
         joint.setRoot(true);
         joint.setPosition(root.position().get());
         joint.setOrientation(root.orientation().get());
         joint.setConstraint(root.constraint());
+        if(root instanceof Joint){
+            joint.setColor(((Joint) root).color());
+        }
         _nodeToJoint.put(root, joint);
         _addBranch(joint, root);
         return joint;
@@ -110,11 +117,14 @@ public class Visualizer {
     protected void _addBranch(Joint reference, Node node){
         //here we assume that node is attached to a graph
         for(Node child : node.children()){
-            Joint joint = new Joint(_scene);
+            Joint joint = new Joint(_scene, _radius);
             child.setReference(reference);
             child.setTranslation(node.translation().get());
             child.setRotation(node.rotation().get());
             child.setConstraint(node.constraint());
+            if(node instanceof Joint){
+                joint.setColor(((Joint) node).color());
+            }
             _nodeToJoint.put(child, joint);
             _addBranch(joint, child);
         }
@@ -125,6 +135,9 @@ public class Visualizer {
         root.setPosition(chain.get(0).position().get());
         root.setOrientation(chain.get(0).orientation().get());
         root.setRoot(true);
+        if(chain.get(0) instanceof Joint){
+            root.setColor(((Joint) chain.get(0)).color());
+        }
         _nodeToJoint.put(chain.get(0), root);
         for(int i = 1; i < chain.size(); i++){
             Node current = chain.get(i);
@@ -134,6 +147,9 @@ public class Visualizer {
             joint.setPosition(current.position().get());
             joint.setOrientation(current.orientation().get());
             joint.setConstraint(current.constraint());
+            if(current instanceof Joint){
+                joint.setColor(((Joint) current).color());
+            }
             _nodeToJoint.put(current, joint);
         }
         return root;
@@ -161,7 +177,15 @@ public class Visualizer {
     * Here a default mapping is provided
     * */
     public VisualStep eventToVizMapping(InterestingEvent event){
-        return EventToViz.generateDefaultViz(this, event);
+        return EventToViz.generateDefaultViz(this, event, setVisualFeatures(event));
+    }
+
+    /*
+     * Use this method to set up the visual features of the given step. To do so consider the Type or the Id of the
+     * Event
+     * */
+    public HashMap<String, Object> setVisualFeatures(InterestingEvent event){
+        return null;
     }
 
 }
