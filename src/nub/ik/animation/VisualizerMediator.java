@@ -2,9 +2,6 @@ package nub.ik.animation;
 
 import nub.core.Node;
 import nub.ik.solver.Solver;
-import nub.ik.visual.Joint;
-import nub.primitives.Quaternion;
-import nub.primitives.Vector;
 
 import java.util.*;
 
@@ -76,11 +73,14 @@ public class VisualizerMediator {
 
     protected void _limitEventQueue(){
         //How many events must be removed ?
-        _firstEvent += _eventQueue.size() - MAX_EVENT_SIZE;
+        long firstEvent = _firstEvent + _eventQueue.size() - MAX_EVENT_SIZE;
         //Make sure that each visualizer is updated to new first event
         for(Visualizer v : _visualizers){
-            v.jumpTo(_firstEvent);
+            v.jumpTo(firstEvent);
         }
+        _firstEvent = firstEvent;
+        //remove first events
+        while(_eventQueue.size() > MAX_EVENT_SIZE) _eventQueue.remove(0);
     }
 
     public void registerStructure(Object structure){
