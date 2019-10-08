@@ -163,8 +163,19 @@ public class Visualizer {
     }
 
     public void jumpTo(long nextStep){
+        nextStep = Math.min(nextStep, _mediator.lastEvent());
         while(_next < nextStep){
-            execute();
+            if(_next < _mediator.lastEvent() && _time == _mediator.event(_next).startingTime() * _stepStamp){
+                VisualStep step = eventToVizMapping( _mediator.event(_next));
+                step.initialize();
+                //add steps to be drawn
+                _steps.add(step);
+                _next++;
+            }
+            _executeSteps();
+            if(_next < _mediator.lastEvent() && _mediator.event(_next).startingTime() * _stepStamp >  _time){
+                _time += _period;
+            }
         }
     }
 
