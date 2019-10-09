@@ -198,11 +198,13 @@ public abstract class FABRIKSolver extends Solver {
       event2.addAttribute("node", chain.get(chain.size() - 1));
       Vector translation = null;
       if(chain.get(chain.size() - 1).reference() != null)
-        translation = Vector.subtract(chain.get(chain.size() - 1).reference().location(_positions.get(chain.size() - 1)), chain.get(chain.size() - 1).translation());
+        translation = Vector.subtract(_positions.get(chain.size() - 1), chain.get(chain.size() - 1).position());
       else
         translation = _positions.get(chain.size() - 1).get();
       event2.addAttribute("translation", translation);
       event2.addAttribute("enableConstraint", false);
+      event2.addAttribute("useGlobalCoordinates", true);
+
       //Add it to the event queue
       mediator().addEvent(event2);
       //Create the event
@@ -232,12 +234,14 @@ public abstract class FABRIKSolver extends Solver {
           event.addAttribute("node", chain.get(i));
           Vector translation = null;
           if(chain.get(i).reference() != null)
-           translation = Vector.subtract(chain.get(i).reference().location(pos_i1), chain.get(i).translation());
+           translation = Vector.subtract(pos_i1, chain.get(i).position());
           else
             translation = pos_i1;
           event.addAttribute("translation", translation);
           event.addAttribute("enableConstraint", false);
           event.addAttribute("modifyChildren", false);
+          event.addAttribute("useGlobalCoordinates", true);
+
           //Add it to the event queue
           mediator().addEvent(event);
           InterestingEvent message = new InterestingEvent("FWD_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
@@ -289,12 +293,14 @@ public abstract class FABRIKSolver extends Solver {
         event.addAttribute("node", chain.get(i));
         Vector translation = null;
         if(chain.get(i).reference() != null)
-          translation = Vector.subtract(chain.get(i).reference().location(_positions.get(i)), chain.get(i).translation());
+          translation = Vector.subtract(_positions.get(i), chain.get(i).position());
         else
           translation = _positions.get(i);
         event.addAttribute("translation", translation);
         event.addAttribute("enableConstraint", false);
         event.addAttribute("modifyChildren", false);
+        event.addAttribute("useGlobalCoordinates", true);
+
         //Add it to the event queue
         mediator().addEvent(event);
         //Create the event
@@ -433,12 +439,14 @@ public abstract class FABRIKSolver extends Solver {
       event2.addAttribute("node", chain.get(0));
       Vector translation = null;
       if(chain.get(0).reference() != null)
-        translation = Vector.subtract(chain.get(0).reference().location(o), chain.get(0).reference().location(_positions.get(0)));
+        translation = Vector.subtract(o, _positions.get(0));
       else
         translation = Vector.multiply(o,-1);
       event2.addAttribute("translation", translation);
       event2.addAttribute("enableConstraint", false);
       event2.addAttribute("modifyChildren", false);
+      event2.addAttribute("useGlobalCoordinates", true);
+
       //Add it to the event queue
       mediator().addEvent(event2);
       //Create the event
@@ -474,12 +482,14 @@ public abstract class FABRIKSolver extends Solver {
           event.addAttribute("node", chain.get(i + 1));
           Vector translation = null;
           if(chain.get(i + 1).reference() != null)
-            translation = Vector.subtract(chain.get(i + 1).reference().location(_positions.get(i)), chain.get(i + 1).translation());
+            translation = Vector.subtract(_positions.get(i), chain.get(i + 1).position());
           else
             translation = _positions.get(i);
           event.addAttribute("translation", translation);
           event.addAttribute("enableConstraint", false);
           event.addAttribute("modifyChildren", false);
+          event.addAttribute("useGlobalCoordinates", true);
+
           //Add it to the event queue
           mediator().addEvent(event);
           InterestingEvent message = new InterestingEvent("BKW_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
