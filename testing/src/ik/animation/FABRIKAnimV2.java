@@ -1,16 +1,15 @@
 package ik.animation;
 
-import nub.core.Node;
+import ik.basic.Util;
 import nub.core.Graph;
-import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.Hinge;
+import nub.core.Node;
 import nub.ik.animation.*;
 import nub.ik.solver.geometric.CCDSolver;
+import nub.ik.solver.geometric.ChainSolver;
+import nub.ik.solver.geometric.FABRIKSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
-import ik.basic.Util;
-import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -18,17 +17,17 @@ import processing.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class CCDAnim extends PApplet {
+public class FABRIKAnimV2 extends PApplet {
     /*
-    * This example shows how to visualize an IK  Algorithm step by step
-    * */
+     * This example shows how to visualize an IK  Algorithm step by step
+     * */
 
     /*
     (*) Define a Visualizer to your algorithm.
     Here, you must specify the way that each interesting event annotated on the solver will be mapped to a visual step
      */
-    class CCDVisualizer extends Visualizer{
-        public CCDVisualizer(Scene scene, float radius, long period, long stepDuration) {
+    class FABRIKVisualizer extends Visualizer {
+        public FABRIKVisualizer(Scene scene, float radius, long period, long stepDuration) {
             super(scene, radius, period, stepDuration);
         }
 
@@ -42,13 +41,13 @@ public class CCDAnim extends PApplet {
         }
 
         /*
-        * Use this method to customize the aspect of a visual step, take into account the Type of the Events or their ids
-        * */
+         * Use this method to customize the aspect of a visual step, take into account the Type of the Events or their ids
+         * */
         @Override
         public HashMap<String, Object> setVisualFeatures(InterestingEvent event){
             //In this basic example we customize the aspect of the rotation step:
             HashMap<String, Object> attribs = null;
-            if(event.type() == "NodeRotation"){
+            if(event.type() == "NodeRotation" || event.type() == "NodeTranslation"){
                 attribs = new HashMap<String, Object>();
                 attribs.put("color", color(0,255,0));
             }
@@ -66,8 +65,8 @@ public class CCDAnim extends PApplet {
 
     int color;
 
-    CCDSolver solver; //IK Algorithm that uses Solver template
-    CCDVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
+    ChainSolver solver; //IK Algorithm that uses Solver template
+    FABRIKVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
     VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
 
     ArrayList<Node> structure = new ArrayList<>(); //Keep Structures
@@ -106,11 +105,11 @@ public class CCDAnim extends PApplet {
         color = color(212,0,255);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
 
-        solver = new CCDSolver(structure);
+        solver = new ChainSolver(structure);
         solver.enableMediator(true);
 
         //Create the visualizer
-        visualizer = new CCDVisualizer(auxiliar, targetRadius * 0.8f, 40, 480);
+        visualizer = new FABRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 2000);
 
         //Create Mediator that relates a Solver with at least one visualizer
         mediator = new VisualizerMediator(solver, visualizer);
@@ -218,6 +217,6 @@ public class CCDAnim extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.animation.CCDAnim"});
+        PApplet.main(new String[]{"ik.animation.FABRIKAnimV2"});
     }
 }
