@@ -35,6 +35,9 @@ public class EventToViz {
             case "NodeRotation":{
                 return generateRotateNode(visualizer, event, attributes);
             }
+            case "NodeTranslation":{
+                return generateTranslateNode(visualizer, event, attributes);
+            }
             case "UpdateStructure":{
                 return generateUpdateStructure(visualizer, event);
             }
@@ -48,6 +51,31 @@ public class EventToViz {
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         VisualSteps.RotateNode  visualStep = new VisualSteps.RotateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
         visualStep.setRotation((Quaternion) event.getAttribute("rotation"));
+        if(event.getAttribute("enableConstraint") != null){
+            visualStep.enableConstraint((boolean) event.getAttribute("enableConstraint"));
+        }
+        if(event.getAttribute("modifyChildren") != null){
+            visualStep.modifyChildren((boolean) event.getAttribute("modifyChildren"));
+        }
+        if(attributes == null || !attributes.containsKey("radius")) visualStep.setAttribute("radius", visualizer._radius);
+        visualStep.setAttributes(attributes);
+        return visualStep;
+    }
+
+    public static VisualSteps.TranslateNode generateTranslateNode(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
+        long executionDuration = event.executionDuration() * visualizer._stepStamp;
+        long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
+        VisualSteps.TranslateNode  visualStep = new VisualSteps.TranslateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
+        visualStep.setTranslation((Vector) event.getAttribute("translation"));
+        if(event.getAttribute("enableConstraint") != null){
+            visualStep.enableConstraint((boolean) event.getAttribute("enableConstraint"));
+        }
+        if(event.getAttribute("modifyChildren") != null){
+            visualStep.modifyChildren((boolean) event.getAttribute("modifyChildren"));
+        }
+        if(event.getAttribute("useGlobalCoordinates") != null){
+            visualStep.useGlobalCoordinates((boolean) event.getAttribute("useGlobalCoordinates"));
+        }
         if(attributes == null || !attributes.containsKey("radius")) visualStep.setAttribute("radius", visualizer._radius);
         visualStep.setAttributes(attributes);
         return visualStep;
