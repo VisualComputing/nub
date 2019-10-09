@@ -14,6 +14,8 @@ package nub.ik.solver.geometric;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.ik.animation.IKAnimation;
+import nub.ik.animation.VisualizerMediator;
+import nub.ik.solver.KinematicStructure;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -714,4 +716,16 @@ public class ChainSolver extends FABRIKSolver {
       return _globalConstraints;
   }
 
+  //Animation Stuff
+  //TODO: Refactor, perhaps move to Solver class
+  @Override
+  public void registerStructure(VisualizerMediator mediator){
+    mediator.registerStructure(_chain);
+    mediator.registerStructure(_target);
+  }
+
+  @Override
+  public Iterator<? extends Node> iterator(){
+    return _chain.iterator();
+  }
 }

@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-//TODO : Enable / Disable iteration Hist
-
 public class CCDSolver extends Solver {
   protected List<? extends Node> _chain;
   //TODO: This is just for debug purposes
@@ -34,8 +32,6 @@ public class CCDSolver extends Solver {
   protected Node _previousTarget;
 
   //Animation Stuff
-  //TODO: Refactor, perhaps move to Solver class
-  //TODO: Refactor, perhaps move to Solver class
   protected int _last_time_event = 0;
 
   public List<? extends Node> chain() {
@@ -156,20 +152,20 @@ public class CCDSolver extends Solver {
         InterestingEvent event1a = new InterestingEvent("E1A", "Trajectory", _last_time_event, 1, 2);
         //Add the convenient attributes
         event1a.addAttribute("positions", _structure.get(i).position(), end.position());
-        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        //Add it to the event queue
         mediator().addEvent(event1a);
 
         InterestingEvent event1b = new InterestingEvent("E1B", "Trajectory", _last_time_event, 1, 3);
         //Add the convenient attributes
         event1b.addAttribute("reference", _structure.get(i).node());
         event1b.addAttribute("positions", new Vector(), endLocalPosition);
-        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        //Add it to the event queue
         mediator().addEvent(event1b);
 
         //Create the event
         InterestingEvent event2 = new InterestingEvent("E2", "Message", _last_time_event, 0, 1);
         //Add the convenient attributes
-        event2.addAttribute("message", "Step 1: Find the segment line defined by Joint " + i + " and End Effector " + (_structure.size() -1));
+        event2.addAttribute("message", "Find the desired position of Joint " + i + " by fixing the length of the bone");
         //Add it to the event queue
         mediator().addEvent(event2);
 
@@ -198,8 +194,8 @@ public class CCDSolver extends Solver {
         InterestingEvent event5 = new InterestingEvent("E5", "NodeRotation", _last_time_event + 2, 1, 1);
         //Add the convenient attributes
         event5.addAttribute("node", _structure.get(i).node());
-        event5.addAttribute("rotation", delta);
-        //Add it to the event queue TODO: Replace the event queue by a mediator class
+        event5.addAttribute("rotation", _structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()));
+        //Add it to the event queue
         mediator().addEvent(event5);
         //Create the event
         InterestingEvent event6 = new InterestingEvent("E6", "Message", _last_time_event + 2, 0, 1);
