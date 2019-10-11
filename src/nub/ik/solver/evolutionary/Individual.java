@@ -25,8 +25,16 @@ public class Individual {
   protected FitnessFunction _fitness_function = FitnessFunction.POSITION;
 
   public Individual(List<Node> structure) {
-    _structure = structure;
+    this(structure, false);
   }
+
+  public Individual(List<Node> structure, boolean copy){
+    if(!copy) _structure = structure;
+    else _structure = _copy(structure);
+    _fitness = Float.NaN;
+    arrayParams().put("Evolution_Gradient", new float[structure.size() * 3]);
+  }
+
 
   public List<Node> structure() {
     return _structure;
@@ -135,20 +143,37 @@ public class Individual {
     return copy;
   }
 
-  public Individual clone() {
-    Individual individual = new Individual(_copy(_structure));
-    individual._fitness = _fitness;
+  //here we assume that chain and copy has the same structure
+  public void setChain(List<Node> chain) {
+    for(int i = 0; i < chain.size(); i++){
+      _structure.get(i).setTranslation(chain.get(i).translation().get());
+      _structure.get(i).setRotation(chain.get(i).rotation().get());
+    }
+  }
+
+  protected void _cloneAttributes(Individual individual){
+    _fitness = individual._fitness;
     if (_floatParams != null) {
       for (String name : _floatParams.keySet()) {
-        individual._floatParams.put(name, _floatParams.get(name).floatValue());
+        _floatParams.put(name, individual._floatParams.get(name).floatValue());
       }
     }
     if (_arrayParams != null) {
       for (String name : _arrayParams.keySet()) {
-        individual._arrayParams.put(name, _arrayParams.get(name).clone());
+        _arrayParams.put(name, individual._arrayParams.get(name).clone());
       }
     }
+  }
+
+  public Individual clone() {
+    Individual individual = new Individual(_copy(_structure));
+    individual._cloneAttributes(this);
     return individual;
+  }
+
+  public void set(Individual individual){
+    setChain(individual._structure);
+    _cloneAttributes(individual);
   }
 
   public String toString() {
