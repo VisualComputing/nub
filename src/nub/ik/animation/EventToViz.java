@@ -41,6 +41,12 @@ public class EventToViz {
             case "UpdateStructure":{
                 return generateUpdateStructure(visualizer, event);
             }
+            case "HighlightStructure":{
+                return generateHighLightStructure(visualizer, event, attributes, false);
+            }
+            case "HideStructure":{
+                return generateHighLightStructure(visualizer, event, attributes, true);
+            }
         }
         return null;
     }
@@ -85,6 +91,7 @@ public class EventToViz {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         VisualSteps.MessageStep visualStep = new VisualSteps.MessageStep(visualizer._scene, (String) event.getAttribute("message"), visualizer._period, executionDuration, renderingDuration);
+        visualStep.setAttributes(attributes);
         return visualStep;
     }
 
@@ -112,4 +119,17 @@ public class EventToViz {
         return visualStep;
     }
 
+    public static VisualSteps.HighLightStructure generateHighLightStructure(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes, boolean hide) {
+        long executionDuration = event.executionDuration() * visualizer._stepStamp;
+        long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
+        List<Node> structure = new ArrayList<Node>();
+        for(Node node : (List<? extends Node>) event.getAttribute("structure")){
+            structure.add(visualizer._nodeToJoint.get(node));
+        }
+        VisualSteps.HighLightStructure  visualStep = new VisualSteps.HighLightStructure(visualizer._scene, structure, visualizer._period, executionDuration, renderingDuration);
+        if(!hide) visualStep.setHighlight(0,255);
+        else visualStep.setHighlight(255,0);
+        visualStep.setAttributes(attributes);
+        return visualStep;
+    }
 }
