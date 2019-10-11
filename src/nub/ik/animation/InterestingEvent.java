@@ -16,7 +16,7 @@ import java.util.HashMap;
 
 public class InterestingEvent{
     //This id will be used later identify and customize properly a visual event (Must be unique)
-    protected String _id;
+    protected String _name;
     //It is desirable to identify common behaviors across IK algorithms
     protected String _type;
 
@@ -27,8 +27,8 @@ public class InterestingEvent{
     //An event must contain a set of attributes that contains a key information to preserve
     protected HashMap<String, Object> _attributes;
 
-    public InterestingEvent(String id, String type, int startingTime, int executionDuration, int renderingDuration){
-        _id = id;
+    public InterestingEvent(String name, String type, int startingTime, int executionDuration, int renderingDuration){
+        _name = name;
         _type = type;
         _startingTime = startingTime;
         _executionDuration = executionDuration;
@@ -47,6 +47,10 @@ public class InterestingEvent{
 
     public String type(){
         return _type;
+    }
+
+    public String name(){
+        return _name;
     }
 
     public long renderingDuration(){
