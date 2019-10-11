@@ -199,4 +199,7 @@ public class Visualizer {
         return null;
     }
 
+    public HashMap<Node, Joint> nodeToJoint(){
+        return _nodeToJoint;
+    }
 }

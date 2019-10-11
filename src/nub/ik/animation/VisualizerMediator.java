@@ -21,7 +21,7 @@ public class VisualizerMediator {
     protected Solver _solver;
     protected List<InterestingEvent> _eventQueue = new ArrayList<>();
     protected long _firstEvent = 0;
-    protected final long MAX_EVENT_SIZE = 1000;
+    protected final long MAX_EVENT_SIZE = 5000;
 
 
     public VisualizerMediator(Solver solver, Visualizer... visualizers){
