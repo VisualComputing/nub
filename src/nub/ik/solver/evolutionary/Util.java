@@ -54,6 +54,17 @@ public class Util {
     return individual;
   }
 
+  public static void setupIndividual(Individual individual, float max_angle) {
+    for (Node frame : individual.structure()) {
+      float roll = 2 * max_angle * random.nextFloat() - max_angle;
+      float pitch = 2 * max_angle * random.nextFloat() - max_angle;
+      float yaw = 2 * max_angle * random.nextFloat() - max_angle;
+      frame.rotate(new Quaternion(roll, pitch, yaw));
+    }
+    individual.arrayParams().put("Evolution_Gradient", new float[individual.structure().size() * 3]);
+  }
+
+
   public static List<Individual> generatePopulation(List<Node> structure, int n, float max_angle) {
     List<Individual> population = new ArrayList<>();
     Individual original = new Individual(structure);
@@ -68,6 +79,16 @@ public class Util {
   public static List<Individual> generatePopulation(List<Node> structure, int n) {
     return generatePopulation(structure, n, (float) Math.toRadians(60));
   }
+
+  public static void setupPopulation(List<Node> structure, List<Individual> population){
+    population.get(0).setChain(structure);
+    population.get(0).arrayParams().put("Evolution_Gradient", new float[population.get(0).structure().size() * 3]);
+    for (int i = 1; i < population.size(); i++) {
+      population.get(i).setChain(structure);
+      setupIndividual(population.get(i), (float) Math.toRadians(60));
+    }
+  }
+
 
   public static List<Individual> concatenate(List<Individual>... lists) {
     List<Individual> concatenation = new ArrayList<>();
