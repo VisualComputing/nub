@@ -3,9 +3,11 @@ package nub.ik.animation;
 
 import nub.core.Node;
 import nub.core.constraint.Constraint;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
+import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
 
@@ -547,6 +549,95 @@ public class VisualSteps {
         @Override
         protected void _defineAttributes() {
             //Do nothing
+        }
+    }
+
+
+    //TODO: this works but must affect only joint transparency
+    public static class HighLightStructure extends VisualStep {
+        protected List<? extends Node> _structure;
+        protected int _color[], _alpha[];
+        protected int _init = 0, _end = 255;
+        float _transparency, _delta;
+
+        public HighLightStructure(Scene scene, List<? extends Node> structure, long period, long duration, long renderingDuration) {
+            super(scene, period, duration, renderingDuration);
+            _structure = structure;
+        }
+
+        public void setHighlight(int init, int end){
+            _init = init;
+            _end = end;
+        }
+
+        protected void _calculateSpeedPerIteration() {
+            float inc = ((float) _period) / (_duration - _duration % _period);
+            //Calculate deltas per frame
+            _delta = (_end - _init)*inc;
+        }
+
+
+        @Override
+        public void initialize() {
+            int n =  _structure.size();
+            _completed = false;
+            _color = new int[n];
+            _alpha = new int[n];
+
+            int color = (int)_attributes.get("highlight");
+            for(int i = 0; i < n; i++){
+                if(_structure.get(i) instanceof Joint){
+                    _color[i] = ((Joint) _structure.get(i)).color();
+                    ((Joint) _structure.get(i)).setColor(color);
+                    _alpha[i] = ((Joint) _structure.get(i)).alpha();
+                    ((Joint) _structure.get(i)).setAlpha((int)_transparency);
+                }
+            }
+
+            _transparency = _init;
+            _times = 0;
+            _calculateSpeedPerIteration();
+            //how many times to execute?
+            _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
+            //how many times to render?
+            _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
+        }
+
+        @Override
+        public void reverse() {
+
+        }
+
+        @Override
+        public void execute() {
+            if(_completed && _times >= _totalRenderingTimes){
+                _keepDrawing = false;
+                for(int i = 0; i < _structure.size(); i++){
+                    if(_structure.get(i) instanceof Joint){
+                        ((Joint) _structure.get(i)).setColor((int)_attributes.get("highlight"));
+                        ((Joint) _structure.get(i)).setAlpha((int)_transparency);
+                    }
+                }
+            } else if (_times >= _totalTimes) {
+                _completed = true;
+            }else{
+                for(int i = 0; i < _structure.size(); i++){
+                    if(_structure.get(i) instanceof Joint) ((Joint) _structure.get(i)).setAlpha((int)_transparency);
+                }
+            }
+            _transparency += _delta;
+            _times++;
+        }
+
+        @Override
+        public void render() {
+            //Do nothing
+        }
+
+        @Override
+        protected void _defineAttributes() {
+            //Do nothing
+            _attributes.put("highlight", _scene.pApplet().color(255));
         }
     }
 
