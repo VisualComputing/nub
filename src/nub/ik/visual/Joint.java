@@ -18,7 +18,7 @@ public class Joint extends Node {
   public static boolean depth = false;
   public static boolean markers = false;
   protected String _name;
-  protected int _color;
+  protected int _color, _alpha = 255;
   protected float _radius;
   protected List<PShape> _mesh;
   public static boolean axes = false;
@@ -65,7 +65,7 @@ public class Joint extends Node {
     pg.pushStyle();
     if (!_isRoot) {
       pg.strokeWeight(Math.max(_radius / 4f, 2));
-      pg.stroke(reference() instanceof Joint ? ((Joint) reference())._color : _color);
+      pg.stroke(reference() instanceof Joint ? ((Joint) reference())._color : _color, _alpha);
       Vector v = location(new Vector(), reference());
       float m = v.magnitude();
       if (scene.is2D()) {
@@ -74,7 +74,7 @@ public class Joint extends Node {
         pg.line(_radius * v.x() / m, _radius * v.y() / m, _radius * v.z() / m, (m - _radius) * v.x() / m, (m - _radius) * v.y() / m, (m - _radius) * v.z() / m);
       }
     }
-    pg.fill(_color);
+    pg.fill(_color, _alpha);
     pg.noStroke();
     if (scene.is2D()) pg.ellipse(0, 0, _radius * 2, _radius * 2);
     else pg.sphere(_radius);
@@ -97,6 +97,10 @@ public class Joint extends Node {
     _color = color;
   }
 
+  public void setAlpha(int alpha) {
+    _alpha = alpha;
+  }
+
   public void setRadius(float radius) {
     _radius = radius;
     setPickingThreshold(-_radius * 2);
@@ -116,6 +120,10 @@ public class Joint extends Node {
 
   public int color() {
     return _color;
+  }
+
+  public int alpha() {
+    return _alpha;
   }
 
   public String name() {
