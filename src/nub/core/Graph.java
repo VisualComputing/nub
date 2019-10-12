@@ -11,7 +11,6 @@
 package nub.core;
 
 import nub.primitives.*;
-import nub.timing.Animator;
 import nub.timing.TimingHandler;
 import nub.timing.TimingTask;
 
@@ -789,31 +788,6 @@ public class Graph {
    */
   public boolean isTaskRegistered(TimingTask task) {
     return timingHandler().isTaskRegistered(task);
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().registerAnimator(animator)}.
-   */
-  public void registerAnimator(Animator animator) {
-    timingHandler().registerAnimator(animator);
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().unregisterAnimator(animator)}.
-   *
-   * @see TimingHandler#unregisterAnimator(Animator)
-   */
-  public void unregisterAnimator(Animator animator) {
-    timingHandler().unregisterAnimator(animator);
-  }
-
-  /**
-   * Convenience wrapper function that simply returns {@code timingHandler().isAnimatorRegistered(animator)}.
-   *
-   * @see TimingHandler#isAnimatorRegistered(Animator)
-   */
-  public boolean isAnimatorRegistered(Animator animator) {
-    return timingHandler().isAnimatorRegistered(animator);
   }
 
   // Matrix and transformations stuff

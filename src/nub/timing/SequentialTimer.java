@@ -14,7 +14,7 @@ package nub.timing;
  * Sequential timers are single-threaded timers handled by a TimingHandler.
  */
 public class SequentialTimer implements Timer {
-  protected Taskable _task;
+  protected TimingTask _task;
   protected TimingHandler _handler;
   protected boolean _active;
   protected boolean _once;
@@ -41,11 +41,11 @@ public class SequentialTimer implements Timer {
     this(timingHandler, singleShot, null);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, Taskable task) {
+  public SequentialTimer(TimingHandler timingHandler, TimingTask task) {
     this(timingHandler, false, task);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, Taskable task) {
+  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, TimingTask task) {
     _handler = timingHandler;
     _once = singleShot;
     _task = task;
@@ -53,7 +53,7 @@ public class SequentialTimer implements Timer {
   }
 
   @Override
-  public Taskable timingTask() {
+  public TimingTask timingTask() {
     return _task;
   }
 

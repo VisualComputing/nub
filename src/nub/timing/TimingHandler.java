@@ -13,11 +13,8 @@ package nub.timing;
 import java.util.ArrayList;
 
 /**
- * A timing handler holds a {@link #timerPool()} and an {@link #animatorPool()}. The timer
- * pool are all the tasks scheduled to be performed in the future (one single time or
- * periodically). The animation pool are all the objects that implement an animation
- * callback function. For an introduction to FPSTiming please refer to
- * <a href="http://nakednous.github.io/projects/fpstiming">this</a>.
+ * A timing handler holds a {@link #timerPool()} with all the tasks
+ * scheduled to be performed in the future (one single time or periodically).
  */
 public class TimingHandler {
   static public long frameCount;
@@ -29,9 +26,6 @@ public class TimingHandler {
   protected long _frameRateLastMillis;
   protected long _localCount;
 
-  // A N I M A T I O N
-  protected ArrayList<Animator> _animatorPool;
-
   /**
    * Main constructor.
    */
@@ -41,14 +35,12 @@ public class TimingHandler {
     _frameRate = 10;
     _frameRateLastMillis = System.currentTimeMillis();
     _taskPool = new ArrayList<TimingTask>();
-    _animatorPool = new ArrayList<Animator>();
   }
 
   /**
-   * Handler's main method. It should be called from within your main event loop. It does
-   * the following: 1. Recomputes the node rate; 2. Executes the all timers (those in the
-   * {@link #timerPool()}) callback functions; and, 3. Performs all the animated objects
-   * (those in the {@link #animatorPool()}) animation functions.
+   * Handler's main method. It should be called from within your main event loop. It
+   * recomputes the node rate, and executes the all timers (those in the
+   * {@link #timerPool()}) callback functions.
    */
   public void handle() {
     _updateFrameRate();
@@ -57,11 +49,6 @@ public class TimingHandler {
         if (task.timer() instanceof SequentialTimer)
           if (task.timer().timingTask() != null)
             ((SequentialTimer) task.timer())._execute();
-    // Animation
-    for (Animator animator : _animatorPool)
-      if (animator.started())
-        if (animator.timer().trigggered())
-          animator.animate();
   }
 
   /**
@@ -155,7 +142,6 @@ public class TimingHandler {
    */
   public void restoreTimers() {
     boolean isActive;
-
     for (TimingTask task : _taskPool) {
       long period = 0;
       boolean rOnce = false;
@@ -173,38 +159,6 @@ public class TimingHandler {
           task.run(period);
       }
     }
-
     System.out.println("single threaded timers set");
-  }
-
-  // Animation -->
-
-  /**
-   * Returns all the animated objects registered at the handler.
-   */
-  public ArrayList<Animator> animatorPool() {
-    return _animatorPool;
-  }
-
-  /**
-   * Registers the animation object.
-   */
-  public void registerAnimator(Animator animator) {
-    _animatorPool.add(animator);
-  }
-
-  /**
-   * Unregisters the animation object.
-   */
-  public void unregisterAnimator(Animator animator) {
-    _animatorPool.remove(animator);
-  }
-
-  /**
-   * Returns {@code true} if the animation object is registered and {@code false}
-   * otherwise.
-   */
-  public boolean isAnimatorRegistered(Animator animator) {
-    return _animatorPool.contains(animator);
   }
 }

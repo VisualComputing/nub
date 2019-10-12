@@ -11,11 +11,10 @@
 package nub.timing;
 
 /**
- * An abstract wrapper class holding a {@link #timer()} together with its call back method
- * ( {@link nub.timing.Taskable#execute()}) which derived classes should
- * implement.
+ * An abstract wrapper class holding a {@link #timer()} together with its call back
+ * method {@link #execute()} which derived classes should implement.
  */
-public abstract class TimingTask implements Taskable {
+public abstract class TimingTask {
   protected Timer _timer;
 
   /**
@@ -30,6 +29,13 @@ public abstract class TimingTask implements Taskable {
    */
   public void setTimer(Timer t) {
     _timer = t;
+  }
+
+  /**
+   * Callback method which should be implemented by derived classes.
+   * Default implementation is empty.
+   */
+  public void execute() {
   }
 
   // Wrappers
