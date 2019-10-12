@@ -10,7 +10,6 @@ public class ParticleSystem extends PApplet {
   Scene scene;
   int nbPart;
   Particle[] particle;
-  TimingTask animation;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -25,20 +24,9 @@ public class ParticleSystem extends PApplet {
     particle = new Particle[nbPart];
     for (int i = 0; i < particle.length; i++)
       particle[i] = new Particle();
-    animation = new TimingTask() {
-      @Override
-      public void execute() {
-        for (int i = 0; i < nbPart; i++)
-          if (particle[i] != null)
-            particle[i].animate();
-      }
-    };
-    scene.registerTask(animation);
-    animation.run(60);
   }
 
   public void draw() {
-    background(0);
     background(0);
     pushStyle();
     strokeWeight(3); // Default
@@ -71,11 +59,21 @@ public class ParticleSystem extends PApplet {
   }
 
   public void keyPressed() {
+    /*
+    if (key == '+')
+      for (int i = 0; i < particle.length; i++)
+        particle[i].setPeriod(particle[i].period()-2);
+    if (key == '-')
+      for (int i = 0; i < particle.length; i++)
+        particle[i].setPeriod(particle[i].period()+2);
+     // */
+    //particle[i].toggle();
     if (key == ' ')
-      if (animation.isActive())
-        animation.stop();
-      else
-        animation.run(60);
+      for (int i = 0; i < particle.length; i++)
+        if (particle[i].animation.isActive())
+          particle[i].animation.stop();
+        else
+          particle[i].animation.run(60);
   }
 
   public static void main(String[] args) {
@@ -83,6 +81,7 @@ public class ParticleSystem extends PApplet {
   }
 
   class Particle {
+    TimingTask animation;
     PVector speed;
     PVector pos;
     int age;
@@ -92,19 +91,21 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-    }
-
-    public void animate() {
-      speed.z -= 0.05f;
-      pos = PVector.add(pos, PVector.mult(speed, 10f));
-
-      if (pos.z < 0.0) {
-        speed.z = -0.8f * speed.z;
-        pos.z = 0.0f;
-      }
-
-      if (++age == ageMax)
-        init();
+      animation = new TimingTask() {
+        @Override
+        public void execute() {
+          speed.z -= 0.05f;
+          pos = PVector.add(pos, PVector.mult(speed, 10f));
+          if (pos.z < 0.0) {
+            speed.z = -0.8f * speed.z;
+            pos.z = 0.0f;
+          }
+          if (++age == ageMax)
+            init();
+        }
+      };
+      scene.registerTask(animation);
+      animation.run(60);
     }
 
     public void draw() {
