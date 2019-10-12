@@ -1,8 +1,10 @@
 package intellij;
 
+import nub.core.Node;
 import nub.processing.Scene;
 import nub.timing.TimingTask;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 import processing.event.MouseEvent;
 
@@ -23,19 +25,12 @@ public class ParticleSystem extends PApplet {
     nbPart = 2000;
     particle = new Particle[nbPart];
     for (int i = 0; i < particle.length; i++)
-      particle[i] = new Particle();
+      particle[i] = new Particle(scene);
   }
 
   public void draw() {
     background(0);
-    pushStyle();
-    strokeWeight(3); // Default
-    beginShape(POINTS);
-    for (int i = 0; i < nbPart; i++) {
-      particle[i].draw();
-    }
-    endShape();
-    popStyle();
+    scene.render();
   }
 
   public void mouseMoved() {
@@ -80,14 +75,15 @@ public class ParticleSystem extends PApplet {
     PApplet.main(new String[]{"intellij.ParticleSystem"});
   }
 
-  class Particle {
+  class Particle extends Node {
     TimingTask animation;
     PVector speed;
     PVector pos;
     int age;
     int ageMax;
 
-    public Particle() {
+    public Particle(Scene scene) {
+      super(scene);
       speed = new PVector();
       pos = new PVector();
       init();
@@ -108,18 +104,24 @@ public class ParticleSystem extends PApplet {
       animation.run(60);
     }
 
-    public void draw() {
-      stroke(255 * ((float) age / (float) ageMax), 255 * ((float) age / (float) ageMax), 255);
-      vertex(pos.x, pos.y, pos.z);
+    @Override
+    public void graphics(PGraphics pg) {
+      pg.pushStyle();
+      pg.strokeWeight(3); // Default
+      pg.beginShape(POINTS);
+      pg.stroke(255 * ((float) age / (float) ageMax), 255 * ((float) age / (float) ageMax), 255);
+      pg.vertex(pos.x, pos.y, pos.z);
+      pg.endShape();
+      pg.popStyle();
     }
 
     public void init() {
       pos = new PVector(0.0f, 0.0f, 0.0f);
-      float angle = 2.0f * PI * random(1);
-      float norm = 0.04f * random(1);
-      speed = new PVector(norm * cos(angle), norm * sin(angle), random(1));
+      float angle = 2.0f * PI * ParticleSystem.this.random(1);
+      float norm = 0.04f * ParticleSystem.this.random(1);
+      speed = new PVector(norm * cos(angle), norm * sin(angle), ParticleSystem.this.random(1));
       age = 0;
-      ageMax = 50 + (int) random(100);
+      ageMax = 50 + (int) ParticleSystem.this.random(100);
     }
   }
 }
