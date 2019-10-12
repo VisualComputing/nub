@@ -54,14 +54,12 @@ public class ParticleSystem extends PApplet {
   }
 
   public void keyPressed() {
-    /*
     if (key == '+')
       for (int i = 0; i < particle.length; i++)
-        particle[i].setPeriod(particle[i].period()-2);
+        particle[i].animation.timer().setPeriod(particle[i].animation.period() - 2);
     if (key == '-')
       for (int i = 0; i < particle.length; i++)
-        particle[i].setPeriod(particle[i].period()+2);
-     // */
+        particle[i].animation.timer().setPeriod(particle[i].animation.period() + 2);
     //particle[i].toggle();
     if (key == ' ')
       for (int i = 0; i < particle.length; i++)

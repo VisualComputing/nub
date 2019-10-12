@@ -21,7 +21,6 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.SequentialTimer;
 import nub.timing.TimingTask;
 import processing.core.*;
 import processing.data.JSONArray;
@@ -459,7 +458,7 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Sets all {@link #timingHandler()} timers as (single-threaded) {@link SequentialTimer}(s).
+   * Sets all {@link #timingHandler()} timers as sequential.
    *
    * @see #setParallelTimers()
    * @see #shiftTimers()
@@ -468,7 +467,6 @@ public class Scene extends Graph implements PConstants {
   public void setSequentialTimers() {
     if (areTimersSequential())
       return;
-
     _javaTiming = false;
     timingHandler().restoreTimers();
   }
@@ -483,9 +481,7 @@ public class Scene extends Graph implements PConstants {
   public void setParallelTimers() {
     if (!areTimersSequential())
       return;
-
     boolean isActive;
-
     for (TimingTask task : timingHandler().timerPool()) {
       long period = 0;
       boolean rOnce = false;
@@ -503,14 +499,12 @@ public class Scene extends Graph implements PConstants {
           task.run(period);
       }
     }
-
     _javaTiming = true;
     PApplet.println("java util timers set");
   }
 
   /**
-   * Returns true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
-   * timers are (single-threaded) {@link SequentialTimer}(s)).
+   * Returns true, if timing is handling sequentially.
    *
    * @see #setSequentialTimers()
    * @see #setParallelTimers()

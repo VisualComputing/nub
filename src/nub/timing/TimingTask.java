@@ -35,8 +35,7 @@ public abstract class TimingTask {
    * Callback method which should be implemented by derived classes.
    * Default implementation is empty.
    */
-  public void execute() {
-  }
+  abstract public void execute();
 
   // Wrappers
 

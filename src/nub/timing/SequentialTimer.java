@@ -13,7 +13,7 @@ package nub.timing;
 /**
  * Sequential timers are single-threaded timers handled by a TimingHandler.
  */
-public class SequentialTimer implements Timer {
+class SequentialTimer implements Timer {
   protected TimingTask _task;
   protected TimingHandler _handler;
   protected boolean _active;
@@ -128,28 +128,19 @@ public class SequentialTimer implements Timer {
   public boolean trigggered() {
     if (!_active)
       return false;
-
     long elapsedTime = System.currentTimeMillis() - _startTime;
-
     float timePerFrame = (1 / _handler.frameRate()) * 1000;
     long threshold = _counter * _period;
-
     boolean result = false;
     if (threshold >= elapsedTime) {
       long diff = elapsedTime + (long) timePerFrame - threshold;
-      if (diff >= 0) {
-        if ((threshold - elapsedTime) < diff) {
+      if (diff >= 0)
+        if ((threshold - elapsedTime) < diff)
           result = true;
-        }
-      }
-    } else {
+    } else
       result = true;
-    }
-
-    if (result) {
+    if (result)
       _counter++;
-    }
-
     return result;
   }
 

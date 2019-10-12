@@ -85,7 +85,7 @@ import java.util.List;
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
  * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
- * and {@link #registerAnimator(Animator)}, are provided for convenience.
+ * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(Rectangle)}, {@link #fit(Node)} and {@link #fit(Node, float)}.

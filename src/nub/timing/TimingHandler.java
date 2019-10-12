@@ -108,8 +108,8 @@ public class TimingHandler {
     long now = System.currentTimeMillis();
     if (_localCount > 1) {
       // update the current _frameRate
-      double rate = 1000.0 / ((now - _frameRateLastMillis) / 1000.0);
-      float instantaneousRate = (float) rate / 1000.0f;
+      float rate = 1000.0f / ((now - _frameRateLastMillis) / 1000.0f);
+      float instantaneousRate = rate / 1000.0f;
       _frameRate = (_frameRate * 0.9f) + (instantaneousRate * 0.1f);
     }
     _frameRateLastMillis = now;
