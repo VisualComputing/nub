@@ -2,7 +2,7 @@ package intellij;
 
 import nub.core.Node;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -74,7 +74,7 @@ public class ParticleSystem extends PApplet {
   }
 
   class Particle extends Node {
-    TimingTask animation;
+    Task animation;
     PVector speed;
     PVector pos;
     int age;
@@ -85,7 +85,7 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-      animation = new TimingTask() {
+      animation = new Task() {
         @Override
         public void execute() {
           speed.z -= 0.05f;

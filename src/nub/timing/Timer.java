@@ -30,7 +30,7 @@ public interface Timer {
   /**
    * Returns the object defining the timer callback method. May be null.
    */
-  TimingTask timingTask();
+  Task task();
 
   /**
    * Stops the timer.

@@ -10,8 +10,8 @@
 
 package nub.processing;
 
+import nub.timing.Task;
 import nub.timing.Timer;
-import nub.timing.TimingTask;
 
 /**
  * Parallel timer based on java.util.Timer and java.util.TimerTask.
@@ -19,7 +19,7 @@ import nub.timing.TimingTask;
 class ParallelTimer implements Timer {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
-  TimingTask _task;
+  Task _task;
   boolean _once;
   boolean _active;
   long _period;
@@ -27,9 +27,9 @@ class ParallelTimer implements Timer {
   /**
    * Same as {@code this(task, false)}.
    *
-   * @see #ParallelTimer(TimingTask, boolean)
+   * @see #ParallelTimer(Task, boolean)
    */
-  public ParallelTimer(TimingTask task) {
+  public ParallelTimer(Task task) {
     this(task, false);
   }
 
@@ -39,13 +39,13 @@ class ParallelTimer implements Timer {
    * @param task
    * @param singleShot
    */
-  public ParallelTimer(TimingTask task, boolean singleShot) {
+  public ParallelTimer(Task task, boolean singleShot) {
     _once = singleShot;
     _task = task;
   }
 
   @Override
-  public TimingTask timingTask() {
+  public Task task() {
     return _task;
   }
 

@@ -22,7 +22,7 @@ public class TimingHandler {
 
   protected long _deltaCount;
   // T i m e r P o o l
-  protected ArrayList<TimingTask> _taskPool;
+  protected ArrayList<Task> _taskPool;
   protected long _frameRateLastMillis;
   protected long _localCount;
 
@@ -34,7 +34,7 @@ public class TimingHandler {
     _deltaCount = frameCount;
     _frameRate = 10;
     _frameRateLastMillis = System.currentTimeMillis();
-    _taskPool = new ArrayList<TimingTask>();
+    _taskPool = new ArrayList<Task>();
   }
 
   /**
@@ -44,24 +44,24 @@ public class TimingHandler {
    */
   public void handle() {
     _updateFrameRate();
-    for (TimingTask task : _taskPool)
+    for (Task task : _taskPool)
       if (task.timer() != null)
         if (task.timer() instanceof SequentialTimer)
-          if (task.timer().timingTask() != null)
+          if (task.timer().task() != null)
             ((SequentialTimer) task.timer())._execute();
   }
 
   /**
    * Returns the timer pool.
    */
-  public ArrayList<TimingTask> timerPool() {
+  public ArrayList<Task> timerPool() {
     return _taskPool;
   }
 
   /**
    * Register a task in the timer pool and creates a sequential timer for it.
    */
-  public void registerTask(TimingTask task) {
+  public void registerTask(Task task) {
     task.setTimer(new SequentialTimer(this, task));
     _taskPool.add(task);
   }
@@ -69,7 +69,7 @@ public class TimingHandler {
   /**
    * Register a task in the timer pool with the given timer.
    */
-  public void registerTask(TimingTask task, Timer timer) {
+  public void registerTask(Task task, Timer timer) {
     task.setTimer(timer);
     _taskPool.add(task);
   }
@@ -77,10 +77,10 @@ public class TimingHandler {
   /**
    * Unregisters the timer. You may also unregister the task this timer is attached to.
    *
-   * @see #unregisterTask(TimingTask)
+   * @see #unregisterTask(Task)
    */
   public void unregisterTask(SequentialTimer timer) {
-    _taskPool.remove(timer.timingTask());
+    _taskPool.remove(timer.task());
   }
 
   /**
@@ -88,14 +88,14 @@ public class TimingHandler {
    *
    * @see #unregisterTask(SequentialTimer)
    */
-  public void unregisterTask(TimingTask task) {
+  public void unregisterTask(Task task) {
     _taskPool.remove(task);
   }
 
   /**
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
-  public boolean isTaskRegistered(TimingTask task) {
+  public boolean isTaskRegistered(Task task) {
     return _taskPool.contains(task);
   }
 
@@ -142,7 +142,7 @@ public class TimingHandler {
    */
   public void restoreTimers() {
     boolean isActive;
-    for (TimingTask task : _taskPool) {
+    for (Task task : _taskPool) {
       long period = 0;
       boolean rOnce = false;
       isActive = task.isActive();

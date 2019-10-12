@@ -14,7 +14,7 @@ package nub.timing;
  * An abstract wrapper class holding a {@link #timer()} together with its call back
  * method {@link #execute()} which derived classes should implement.
  */
-public abstract class TimingTask {
+public abstract class Task {
   protected Timer _timer;
 
   /**

@@ -11,8 +11,8 @@
 package nub.core;
 
 import nub.primitives.*;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
-import nub.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +84,7 @@ import java.util.List;
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
- * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
+ * {@link TimingHandler} wrapper functions, such as {@link #registerTask(Task)}
  * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
@@ -770,23 +770,23 @@ public class Graph {
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
    *
-   * @see TimingHandler#registerTask(TimingTask)
+   * @see TimingHandler#registerTask(Task)
    */
-  public void registerTask(TimingTask task) {
+  public void registerTask(Task task) {
     timingHandler().registerTask(task);
   }
 
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
    */
-  public void unregisterTask(TimingTask task) {
+  public void unregisterTask(Task task) {
     timingHandler().unregisterTask(task);
   }
 
   /**
    * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
    */
-  public boolean isTaskRegistered(TimingTask task) {
+  public boolean isTaskRegistered(Task task) {
     return timingHandler().isTaskRegistered(task);
   }
 

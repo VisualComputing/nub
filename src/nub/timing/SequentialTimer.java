@@ -14,7 +14,7 @@ package nub.timing;
  * Sequential timers are single-threaded timers handled by a TimingHandler.
  */
 class SequentialTimer implements Timer {
-  protected TimingTask _task;
+  protected Task _task;
   protected TimingHandler _handler;
   protected boolean _active;
   protected boolean _once;
@@ -41,11 +41,11 @@ class SequentialTimer implements Timer {
     this(timingHandler, singleShot, null);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, TimingTask task) {
+  public SequentialTimer(TimingHandler timingHandler, Task task) {
     this(timingHandler, false, task);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, TimingTask task) {
+  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, Task task) {
     _handler = timingHandler;
     _once = singleShot;
     _task = task;
@@ -53,12 +53,12 @@ class SequentialTimer implements Timer {
   }
 
   @Override
-  public TimingTask timingTask() {
+  public Task task() {
     return _task;
   }
 
   /**
-   * Executes the callback method defined by the {@link #timingTask()}.
+   * Executes the callback method defined by the {@link #task()}.
    *
    * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link nub.timing.TimingHandler#handle()}).
@@ -66,7 +66,7 @@ class SequentialTimer implements Timer {
   protected boolean _execute() {
     boolean result = trigggered();
     if (result) {
-      timingTask().execute();
+      task().execute();
       if (_once)
         inactivate();
     }

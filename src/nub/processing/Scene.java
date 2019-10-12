@@ -21,7 +21,7 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.TimingTask;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -450,7 +450,7 @@ public class Scene extends Graph implements PConstants {
   // TIMING
 
   @Override
-  public void registerTask(TimingTask task) {
+  public void registerTask(Task task) {
     if (areTimersSequential())
       timingHandler().registerTask(task);
     else
@@ -482,7 +482,7 @@ public class Scene extends Graph implements PConstants {
     if (!areTimersSequential())
       return;
     boolean isActive;
-    for (TimingTask task : timingHandler().timerPool()) {
+    for (Task task : timingHandler().timerPool()) {
       long period = 0;
       boolean rOnce = false;
       isActive = task.isActive();

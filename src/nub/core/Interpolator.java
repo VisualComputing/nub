@@ -12,8 +12,8 @@ package nub.core;
 
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
-import nub.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -174,7 +174,7 @@ public class Interpolator {
   protected Node _node;
 
   // Beat
-  protected TimingTask _task;
+  protected Task _task;
   protected int _period;
   protected float _time;
   protected float _speed;
@@ -245,7 +245,7 @@ public class Interpolator {
     _current2 = _list.listIterator();
     _current3 = _list.listIterator();
 
-    _task = new TimingTask() {
+    _task = new Task() {
       public void execute() {
         _update();
       }
@@ -284,7 +284,7 @@ public class Interpolator {
     this._current2 = _list.listIterator(other._current2.nextIndex());
     this._current3 = _list.listIterator(other._current3.nextIndex());
 
-    this._task = new TimingTask() {
+    this._task = new Task() {
       public void execute() {
         _update();
       }
