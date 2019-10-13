@@ -28,7 +28,7 @@ public interface Timer {
   void run();
 
   /**
-   * Returns the object defining the timer callback method. May be null.
+   * Returns the object defining the timer callback method.
    */
   Task task();
 

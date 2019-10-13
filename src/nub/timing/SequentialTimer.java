@@ -23,29 +23,26 @@ class SequentialTimer implements Timer {
   private long _startTime;
 
   /**
-   * Defines a single shot sequential (single-threaded) timer.
+   * Defines a multiple shot sequential (single-threaded) timer. Same as
+   * {@code this(timingHandler, task, false)}.
    *
    * @param timingHandler timing handler owner
+   * @param task task to be executed
+   * @see #SequentialTimer(TimingHandler, Task, boolean)
    */
-  public SequentialTimer(TimingHandler timingHandler) {
-    this(timingHandler, false, null);
+  SequentialTimer(TimingHandler timingHandler, Task task) {
+    this(timingHandler, task, false);
   }
 
   /**
-   * Defines a sequential (single-threaded) timer.
+   * Defines a single or multiple shot (depending on {@code singleShot}) sequential (single-threaded) timer.
    *
+   * @param singleShot    defines a single or multiple shot timer
    * @param timingHandler timing handler owner
-   * @param singleShot
+   * @param task          task to be executed
+   * @see #SequentialTimer(TimingHandler, Task)
    */
-  SequentialTimer(TimingHandler timingHandler, boolean singleShot) {
-    this(timingHandler, singleShot, null);
-  }
-
-  SequentialTimer(TimingHandler timingHandler, Task task) {
-    this(timingHandler, false, task);
-  }
-
-  SequentialTimer(TimingHandler timingHandler, boolean singleShot, Task task) {
+  SequentialTimer(TimingHandler timingHandler, Task task, boolean singleShot) {
     _handler = timingHandler;
     _once = singleShot;
     _task = task;
