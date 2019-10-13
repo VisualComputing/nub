@@ -50,17 +50,6 @@ class ParallelTimer implements Timer {
   }
 
   @Override
-  public void create() {
-    stop();
-    _timer = new java.util.Timer();
-    _timerTask = new java.util.TimerTask() {
-      public void run() {
-        _task.execute();
-      }
-    };
-  }
-
-  @Override
   public void run(long period) {
     setPeriod(period);
     run();
@@ -68,7 +57,13 @@ class ParallelTimer implements Timer {
 
   @Override
   public void run() {
-    create();
+    stop();
+    _timer = new java.util.Timer();
+    _timerTask = new java.util.TimerTask() {
+      public void run() {
+        _task.execute();
+      }
+    };
     if (isSingleShot())
       _timer.schedule(_timerTask, _period);
     else

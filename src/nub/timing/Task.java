@@ -80,15 +80,6 @@ public abstract class Task {
   /**
    * Timer wrapper method.
    */
-  public void create() {
-    if (timer() != null) {
-      timer().create();
-    }
-  }
-
-  /**
-   * Timer wrapper method.
-   */
   public boolean isActive() {
     if (timer() != null) {
       return timer().isActive();

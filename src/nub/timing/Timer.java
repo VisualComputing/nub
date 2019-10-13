@@ -43,11 +43,6 @@ public interface Timer {
   void cancel();
 
   /**
-   * Creates the timer.
-   */
-  void create();
-
-  /**
    * Tells whether or not the timer is active.
    */
   boolean isActive();

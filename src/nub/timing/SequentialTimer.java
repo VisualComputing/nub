@@ -49,7 +49,7 @@ class SequentialTimer implements Timer {
     _handler = timingHandler;
     _once = singleShot;
     _task = task;
-    create();
+    _active = false;
   }
 
   @Override
@@ -68,7 +68,7 @@ class SequentialTimer implements Timer {
     if (result) {
       task().execute();
       if (_once)
-        inactivate();
+        _active = false;
     }
     return result;
   }
@@ -77,11 +77,6 @@ class SequentialTimer implements Timer {
   public void cancel() {
     stop();
     _handler.unregisterTask(this);
-  }
-
-  @Override
-  public void create() {
-    inactivate();
   }
 
   @Override
@@ -94,7 +89,7 @@ class SequentialTimer implements Timer {
   public void run() {
     if (_period <= 0)
       return;
-    inactivate();
+    _active = false;
     _counter = 1;
     _active = true;
     _startTime = System.currentTimeMillis();
@@ -102,7 +97,7 @@ class SequentialTimer implements Timer {
 
   @Override
   public void stop() {
-    inactivate();
+    _active = false;
   }
 
   @Override
@@ -111,13 +106,6 @@ class SequentialTimer implements Timer {
   }
 
   // others
-
-  /**
-   * Deactivates the SequentialTimer.
-   */
-  public void inactivate() {
-    _active = false;
-  }
 
   /**
    * Returns {@code true} if the timer was triggered at the given node.
