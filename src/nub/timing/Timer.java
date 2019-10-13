@@ -38,11 +38,6 @@ public interface Timer {
   void stop();
 
   /**
-   * Stops the timer.
-   */
-  void cancel();
-
-  /**
    * Tells whether or not the timer is active.
    */
   boolean isActive();

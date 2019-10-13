@@ -71,15 +71,6 @@ public abstract class Task {
   /**
    * Timer wrapper method.
    */
-  public void cancel() {
-    if (timer() != null) {
-      timer().cancel();
-    }
-  }
-
-  /**
-   * Timer wrapper method.
-   */
   public boolean isActive() {
     if (timer() != null) {
       return timer().isActive();

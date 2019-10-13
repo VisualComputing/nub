@@ -75,18 +75,7 @@ public class TimingHandler {
   }
 
   /**
-   * Unregisters the timer. You may also unregister the task this timer is attached to.
-   *
-   * @see #unregisterTask(Task)
-   */
-  public void unregisterTask(SequentialTimer timer) {
-    _taskPool.remove(timer.task());
-  }
-
-  /**
    * Unregisters the timer task.
-   *
-   * @see #unregisterTask(SequentialTimer)
    */
   public void unregisterTask(Task task) {
     _taskPool.remove(task);

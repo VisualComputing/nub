@@ -85,12 +85,6 @@ class SequentialTimer implements Timer {
   }
 
   @Override
-  public void cancel() {
-    stop();
-    _handler.unregisterTask(this);
-  }
-
-  @Override
   public void run(long period) {
     setPeriod(period);
     run();

@@ -72,11 +72,6 @@ class ParallelTimer implements Timer {
   }
 
   @Override
-  public void cancel() {
-    stop();
-  }
-
-  @Override
   public void stop() {
     if (_timer != null) {
       _timer.cancel();
