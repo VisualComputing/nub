@@ -10,68 +10,42 @@
 
 package nub.processing;
 
-import nub.timing.Task;
-import nub.timing.Timer;
-
 /**
- * Parallel timer based on java.util.Timer and java.util.TimerTask.
+ * Parallel task based on java.util.Timer and java.util.TimerTask.
  */
-class ParallelTimer implements Timer {
+public abstract class ParallelTask {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
-  Task _task;
   boolean _once;
   boolean _active;
   long _period;
 
   /**
-   * Same as {@code this(task, false)}.
-   *
-   * @see #ParallelTimer(Task, boolean)
+   * Callback method which should be implemented by derived classes.
+   * Default implementation is empty.
    */
-  ParallelTimer(Task task) {
-    this(task, false);
-  }
+  abstract public void execute();
 
-  /**
-   * Defines a parallel (multi-threaded) timer.
-   *
-   * @param task
-   * @param singleShot
-   */
-  ParallelTimer(Task task, boolean singleShot) {
-    _once = singleShot;
-    _task = task;
-  }
-
-  @Override
-  public Task task() {
-    return _task;
-  }
-
-  @Override
   public void run(long period) {
     setPeriod(period);
     run();
   }
 
-  @Override
   public void run() {
     stop();
     _timer = new java.util.Timer();
     _timerTask = new java.util.TimerTask() {
       public void run() {
-        _task.execute();
+        execute();
       }
     };
-    if (isSingleShot())
+    if (_once)
       _timer.schedule(_timerTask, _period);
     else
       _timer.scheduleAtFixedRate(_timerTask, 0, _period);
     _active = true;
   }
 
-  @Override
   public void stop() {
     if (_timer != null) {
       _timer.cancel();
@@ -80,28 +54,23 @@ class ParallelTimer implements Timer {
     _active = false;
   }
 
-  @Override
   public boolean isActive() {
     return _timer != null && _active;
   }
 
-  @Override
   public long period() {
     return _period;
   }
 
-  @Override
   public void setPeriod(long period) {
     _period = period;
   }
 
-  @Override
-  public boolean isSingleShot() {
-    return _once;
+  public void toggleRecurrence() {
+    _once = !_once;
   }
 
-  @Override
-  public void setSingleShot(boolean singleShot) {
-    _once = singleShot;
+  public boolean isRecurrent() {
+    return !_once;
   }
 }

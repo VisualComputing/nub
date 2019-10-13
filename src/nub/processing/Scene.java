@@ -21,7 +21,6 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -104,8 +103,6 @@ import java.util.List;
  * @see Interpolator
  */
 public class Scene extends Graph implements PConstants {
-  // Timing
-  protected boolean _javaTiming;
   public static String prettyVersion = "0.1.0";
   public static String version = "1";
 
@@ -445,84 +442,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void enableDepthTest(PGraphics pGraphics) {
     pGraphics.hint(PApplet.ENABLE_DEPTH_TEST);
-  }
-
-  // TIMING
-
-  @Override
-  public void registerTask(Task task) {
-    if (areTimersSequential())
-      timingHandler().registerTask(task);
-    else
-      timingHandler().registerTask(task, new ParallelTimer(task));
-  }
-
-  /**
-   * Sets all {@link #timingHandler()} timers as sequential.
-   *
-   * @see #setParallelTimers()
-   * @see #shiftTimers()
-   * @see #areTimersSequential()
-   */
-  public void setSequentialTimers() {
-    if (areTimersSequential())
-      return;
-    _javaTiming = false;
-    timingHandler().restoreTimers();
-  }
-
-  /**
-   * Sets all {@link #timingHandler()} timers as (multi-threaded) java.util.Timer(s).
-   *
-   * @see #setSequentialTimers()
-   * @see #shiftTimers()
-   * @see #areTimersSequential()
-   */
-  public void setParallelTimers() {
-    if (!areTimersSequential())
-      return;
-    boolean isActive;
-    for (Task task : timingHandler().timerPool()) {
-      long period = 0;
-      boolean rOnce = false;
-      isActive = task.isActive();
-      if (isActive) {
-        period = task.period();
-        rOnce = task.timer().isSingleShot();
-      }
-      task.stop();
-      task.setTimer(new ParallelTimer(task));
-      if (isActive) {
-        if (rOnce)
-          task.runOnce(period);
-        else
-          task.run(period);
-      }
-    }
-    _javaTiming = true;
-    PApplet.println("java util timers set");
-  }
-
-  /**
-   * Returns true, if timing is handling sequentially.
-   *
-   * @see #setSequentialTimers()
-   * @see #setParallelTimers()
-   * @see #shiftTimers()
-   */
-  public boolean areTimersSequential() {
-    return !_javaTiming;
-  }
-
-  /**
-   * If {@link #areTimersSequential()} calls {@link #setParallelTimers()}, otherwise call
-   * {@link #setSequentialTimers()}.
-   */
-  public void shiftTimers() {
-    if (areTimersSequential())
-      setParallelTimers();
-    else
-      setSequentialTimers();
   }
 
   // 3. Drawing methods

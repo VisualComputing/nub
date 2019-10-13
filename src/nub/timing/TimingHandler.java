@@ -13,7 +13,7 @@ package nub.timing;
 import java.util.ArrayList;
 
 /**
- * A timing handler holds a {@link #timerPool()} with all the tasks
+ * A timing handler holds a {@link #taskPool()} with all the tasks
  * scheduled to be performed in the future (one single time or periodically).
  */
 public class TimingHandler {
@@ -38,44 +38,32 @@ public class TimingHandler {
   }
 
   /**
-   * Handler's main method. It should be called from within your main event loop. It
-   * recomputes the node rate, and executes the all timers (those in the
-   * {@link #timerPool()}) callback functions.
+   * Handler's main method. It should be called from within your main event loop.
+   * It recomputes the frame rate, and executes all tasks (those in the
+   * {@link #taskPool()}) callback functions.
    */
   public void handle() {
     _updateFrameRate();
     for (Task task : _taskPool)
-      if (task.timer() != null)
-        if (task.timer() instanceof SequentialTimer)
-          if (task.timer().task() != null)
-            ((SequentialTimer) task.timer())._execute(frameRate());
+      task._execute(frameRate());
   }
 
   /**
-   * Returns the timer pool.
+   * Returns the task pool.
    */
-  public ArrayList<Task> timerPool() {
+  public ArrayList<Task> taskPool() {
     return _taskPool;
   }
 
   /**
-   * Register a task in the timer pool and creates a sequential timer for it.
+   * Register a task in the task pool.
    */
   public void registerTask(Task task) {
-    task.setTimer(new SequentialTimer(task));
     _taskPool.add(task);
   }
 
   /**
-   * Register a task in the timer pool with the given timer.
-   */
-  public void registerTask(Task task, Timer timer) {
-    task.setTimer(timer);
-    _taskPool.add(task);
-  }
-
-  /**
-   * Unregisters the timer task.
+   * Unregisters the task.
    */
   public void unregisterTask(Task task) {
     _taskPool.remove(task);
@@ -89,8 +77,8 @@ public class TimingHandler {
   }
 
   /**
-   * Recomputes the node rate based upon the frequency at which {@link #handle()} is
-   * called from within the application main event loop. The node rate is needed to sync
+   * Recomputes the frame rate based upon the frequency at which {@link #handle()} is
+   * called from within the application main event loop. The frame rate is needed to sync
    * all timing operations.
    */
   protected void _updateFrameRate() {
@@ -111,43 +99,18 @@ public class TimingHandler {
   }
 
   /**
-   * Returns the approximate node rate of the software as it executes. The initial value
-   * is 10 fps and is updated with each node. The value is averaged (integrated) over
-   * several nodes. As such, this value won't be valid until after 5-10 nodes.
+   * Returns the approximate frame rate of the software as it executes. The initial value
+   * is 10 fps and is updated with each frame. The value is averaged (integrated) over
+   * several frames. As such, this value won't be valid until after 5-10 frames.
    */
   public float frameRate() {
     return _frameRate;
   }
 
   /**
-   * Returns the number of nodes displayed since this timing handler was instantiated.
+   * Returns the number of frames displayed since this timing handler was instantiated.
    */
   public long frameCount() {
     return _localCount;
-  }
-
-  /**
-   * Converts all registered timers to single-threaded timers.
-   */
-  public void restoreTimers() {
-    boolean isActive;
-    for (Task task : _taskPool) {
-      long period = 0;
-      boolean rOnce = false;
-      isActive = task.isActive();
-      if (isActive) {
-        period = task.period();
-        rOnce = task.timer().isSingleShot();
-      }
-      task.stop();
-      task.setTimer(new SequentialTimer(task));
-      if (isActive) {
-        if (rOnce)
-          task.runOnce(period);
-        else
-          task.run(period);
-      }
-    }
-    System.out.println("single threaded timers set");
   }
 }

@@ -1,8 +1,8 @@
 package intellij;
 
 import nub.core.Node;
+import nub.processing.ParallelTask;
 import nub.processing.Scene;
-import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PVector;
@@ -56,17 +56,17 @@ public class ParticleSystem extends PApplet {
   public void keyPressed() {
     if (key == '+')
       for (int i = 0; i < particle.length; i++)
-        particle[i].animation.timer().setPeriod(particle[i].animation.period() - 2);
+        particle[i].task.setPeriod(particle[i].task.period() - 2);
     if (key == '-')
       for (int i = 0; i < particle.length; i++)
-        particle[i].animation.timer().setPeriod(particle[i].animation.period() + 2);
+        particle[i].task.setPeriod(particle[i].task.period() + 2);
     //particle[i].toggle();
     if (key == ' ')
       for (int i = 0; i < particle.length; i++)
-        if (particle[i].animation.isActive())
-          particle[i].animation.stop();
+        if (particle[i].task.isActive())
+          particle[i].task.stop();
         else
-          particle[i].animation.run(60);
+          particle[i].task.run(60);
   }
 
   public static void main(String[] args) {
@@ -74,7 +74,8 @@ public class ParticleSystem extends PApplet {
   }
 
   class Particle extends Node {
-    Task animation;
+    //Task task;
+    ParallelTask task;
     PVector speed;
     PVector pos;
     int age;
@@ -85,7 +86,8 @@ public class ParticleSystem extends PApplet {
       speed = new PVector();
       pos = new PVector();
       init();
-      animation = new Task() {
+      //task = new Task() {
+      task = new ParallelTask() {
         @Override
         public void execute() {
           speed.z -= 0.05f;
@@ -98,8 +100,8 @@ public class ParticleSystem extends PApplet {
             init();
         }
       };
-      scene.registerTask(animation);
-      animation.run(60);
+      //scene.registerTask(task);
+      task.run(100);
     }
 
     @Override

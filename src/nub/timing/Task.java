@@ -11,25 +11,18 @@
 package nub.timing;
 
 /**
- * An abstract wrapper class holding a {@link #timer()} together with its call back
- * method {@link #execute()} which derived classes should implement.
+ * Tasks are single-threaded recurrent callbacks defined by {@link #execute()}.
+ * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Task)}.
+ * <p>
+ * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
+ * will only be executed once.
  */
-public abstract class Task {
-  protected Timer _timer;
-
-  /**
-   * Returns the timer instance.
-   */
-  public Timer timer() {
-    return _timer;
-  }
-
-  /**
-   * Sets the timer instance.
-   */
-  public void setTimer(Timer t) {
-    _timer = t;
-  }
+abstract public class Task {
+  protected boolean _active;
+  protected boolean _once;
+  private long _counter;
+  private long _period;
+  private long _startTime;
 
   /**
    * Callback method which should be implemented by derived classes.
@@ -37,51 +30,97 @@ public abstract class Task {
    */
   abstract public void execute();
 
-  // Wrappers
+  /**
+   * Executes the callback method defined by the {@link #execute()}.
+   *
+   * <b>Note:</b> You should not call this method since it's done by the timing handler
+   * (see {@link nub.timing.TimingHandler#handle()}).
+   */
+  protected boolean _execute(float frameRate) {
+    boolean result = false;
+    if (_active) {
+      long elapsedTime = System.currentTimeMillis() - _startTime;
+      float timePerFrame = (1 / frameRate) * 1000;
+      long threshold = _counter * _period;
+      if (threshold >= elapsedTime) {
+        long diff = elapsedTime + (long) timePerFrame - threshold;
+        if (diff >= 0)
+          if ((threshold - elapsedTime) < diff)
+            result = true;
+      } else
+        result = true;
+      if (result)
+        _counter++;
+    }
+    if (result) {
+      execute();
+      if (_once)
+        _active = false;
+    }
+    return result;
+  }
 
   /**
-   * Timer wrapper method.
+   * Sets the task {@link #period()} and call {@link #run()}.
+   * If task {@link #isRecurrent()} the {@link #execute()} method
+   * will be invoked recurrently every {@link #period()} milliseconds;
+   * otherwise it will be invoked once after a {@link #period()} delay
+   * milliseconds.
+   *
+   * @see #run()
+   * @see #isRecurrent()
+   * @see #toggleRecurrence()
+   * @see #period()
+   * @see #setPeriod(long)
    */
   public void run(long period) {
-    if (timer() != null) {
-      timer().setSingleShot(false);
-      timer().run(period);
-    }
+    setPeriod(period);
+    run();
   }
 
   /**
-   * Timer wrapper method.
+   * Runs the timer according to {@link #period()}. The timer may be scheduled for
+   * repeated fixed-rate execution according to {@link #isRecurrent()}.
    */
-  public void runOnce(long period) {
-    if (timer() != null) {
-      timer().setSingleShot(true);
-      timer().run(period);
-    }
+  public void run() {
+    if (_period <= 0)
+      return;
+    _active = true;
+    _counter = 1;
+    _startTime = System.currentTimeMillis();
   }
 
   /**
-   * Timer wrapper method.
+   * Deactivates the task. See {@link #isActive()}.
    */
   public void stop() {
-    if (timer() != null) {
-      timer().stop();
-    }
+    _active = false;
   }
 
   /**
-   * Timer wrapper method.
+   * Tells whether or not the timer is active.
    */
   public boolean isActive() {
-    if (timer() != null) {
-      return timer().isActive();
-    }
-    return false;
+    return _active;
   }
 
-  /**
-   * Timer wrapper method.
-   */
+  // others
+
+  // TODO find better name: merge period and delay
+  // maybe setPeriod and setDelay
   public long period() {
-    return timer().period();
+    return _period;
+  }
+
+  public void setPeriod(long period) {
+    _period = period;
+  }
+
+  public void toggleRecurrence() {
+    _once = !_once;
+  }
+
+  public boolean isRecurrent() {
+    return !_once;
   }
 }

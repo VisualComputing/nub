@@ -502,7 +502,7 @@ public class Interpolator {
     if (started())
       stop();
     _period = Math.abs(period);
-    _task.timer().setPeriod(_period);
+    _task.setPeriod(_period);
     _speed = speed;
     if (!_list.isEmpty()) {
       if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
@@ -510,7 +510,7 @@ public class Interpolator {
       if ((_speed < 0.0) && (time() <= _list.get(0).time()))
         setTime(_list.get(_list.size() - 1).time());
       if (_list.size() > 1)
-        _task.run(_task.timer().period());
+        _task.run(_task.period());
       _started = true;
       _update();
     }
