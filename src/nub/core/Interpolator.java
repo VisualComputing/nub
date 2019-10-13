@@ -55,14 +55,10 @@ import java.util.ListIterator;
  * }
  * </pre>
  * The keyframes are defined by a node and a time, expressed in seconds. The time has to
- * be monotonously increasing over keyframes. When {@link #speed()} equals
- * 1 (default value), these times correspond to actual user's seconds during
- * interpolation (provided that your main loop is fast enough). The interpolation is then
- * real-time: the keyframes will be reached at their {@link #time(int)}.
- *
+ * be monotonously increasing over keyframes.
  * <h3>Interpolation details</h3>
  * <p>
- * TODO start
+ * TODO see all start versions.
  * <p>
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
@@ -210,7 +206,7 @@ public class Interpolator {
    * <p>
    * The {@link #node()} can be set or changed using {@link #setNode(Node)}.
    * <p>
-   * {@link #time()} and {@link #speed()} are set to their default values.
+   * {@link #time()} is set to its default values.
    */
   public Interpolator(Graph graph, Node node) {
     if (graph == null)
@@ -220,7 +216,6 @@ public class Interpolator {
     _path = new ArrayList<Node>();
     setNode(node);
     _time = 0.0f;
-    _speed = 1.0f;
     _started = false;
     _loop = false;
     _pathIsValid = false;
@@ -355,27 +350,17 @@ public class Interpolator {
   }
 
   /**
-   * Returns the current interpolation speed.
-   * <p>
-   * Default value is 1, which means {@link #time(int)} will be matched during
-   * the interpolation (provided that your main loop is fast enough).
-   * <p>
-   * A negative value will result in a reverse interpolation of the keyframes.
-   */
-  public float speed() {
-    return _speed;
-  }
-
-  /**
    * Returns {@code true} when the interpolation is played in an infinite loop.
    * <p>
    * When {@code false} (default), the interpolation stops when
    * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@link #speed()}) or {@link #lastTime()}.
+   * {@code speed} which is set with {@link #start(int, float)}) or
+   * {@link #lastTime()}.
    * <p>
    * {@link #time()} is otherwise reset to {@link #firstTime()} (+
    * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@link #speed()}) and interpolation continues.
+   * {@code speed} which is set with {@link #start(int, float)}) and
+   * interpolation continues.
    */
   public boolean loop() {
     return _loop;
@@ -391,13 +376,6 @@ public class Interpolator {
    */
   public void setTime(float time) {
     _time = time;
-  }
-
-  /**
-   * Sets the {@link #speed()}. Negative or null values are allowed.
-   */
-  public void setSpeed(float speed) {
-    _speed = speed;
   }
 
   /**
@@ -424,7 +402,8 @@ public class Interpolator {
 
   /**
    * Updates {@link #node()} state according to current {@link #time()}.
-   * Then adds {@code period} * {@link #speed()} to {@link #time()}.
+   * Then adds {@code period} * {@code speed} (which is set with
+   * {@link #start(int, float)}) to {@link #time()}.
    * <p>
    * This internal method is called by a timer when {@link #started()}. It
    * can be used for debugging purpose. {@link #stop()} is called when
@@ -434,7 +413,7 @@ public class Interpolator {
   protected void _update() {
     interpolate(time());
 
-    _time += speed() * _task.timer().period() / 1000.0f;
+    _time += _speed * _task.timer().period() / 1000.0f;
 
     if (time() > _list.get(_list.size() - 1).time()) {
       if (loop())
@@ -467,12 +446,23 @@ public class Interpolator {
   }
 
   /**
-   * Convenience function that simply calls {@code start(40)}.
+   * Starts a real time interpolation, i.e., the keyframes will be reached at their
+   * {@link #time(int)} in seconds (provided that your main loop is fast enough),
+   * with a {@code period} of {@code 40}. Same as: {@code start(40, 1)}.
    *
-   * @see #start(int)
+   * @see #start(int, float)
    */
   public void start() {
-    start(40);
+    start(40, 1);
+  }
+
+  /**
+   * Same as {@code start(40, speed)}.
+   *
+   * @see #start(int, float)
+   */
+  public void start(float speed) {
+    start(40, speed);
   }
 
   /**
@@ -480,16 +470,18 @@ public class Interpolator {
    * <p>
    * A timer is started which will update the {@link #node()}'s position,
    * orientation and magnitude every {@code period} milliseconds. This
-   * update increases the {@link #time()} by {@code #period} * {@link #speed()}
-   * milliseconds. Note that this mechanism ensures that the number of
+   * update increases the {@link #time()} by {@code #period} * {@code speed}
+   * milliseconds. This mechanism thus ensures that the number of
    * interpolation steps is constant and equal to the total path
-   * {@link #duration()} divided by the {@code period} * {@link #speed()}.
+   * {@link #duration()} divided by the {@code period} * {@code speed}.
    * This is especially useful for benchmarking or movie creation
-   * (constant number of snapshots).
+   * (constant number of snapshots). Note that if {@code speed = 1} then
+   * {@link #time(int)} will be matched during the interpolation (provided
+   * that your main loop is fast enough).
    * <p>
    * If {@link #time()} is larger than {@link #lastTime()},
    * {@link #time()} is reset to {@link #firstTime()} before interpolation
-   * starts (and inversely for negative {@link #speed()}.
+   * starts (and inversely for negative {@code speed}.
    * <p>
    * Use {@link #setTime(float)} before calling this method to change the
    * starting {@link #time()}.
@@ -500,18 +492,20 @@ public class Interpolator {
    * <b>Attention:</b> The keyframes must be defined (see
    * {@link #addKeyFrame(Node, float)}) before you start(), or else
    * the interpolation will naturally immediately stop.
+   *
+   * @see #start()
    */
-  public void start(int period) {
+  public void start(int period, float speed) {
     if (started())
       stop();
     // TODO negative periods?
     if (period >= 0)
       _task.timer().setPeriod(period);
-
+    _speed = speed;
     if (!_list.isEmpty()) {
-      if ((speed() > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
+      if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
         setTime(_list.get(0).time());
-      if ((speed() < 0.0) && (time() <= _list.get(0).time()))
+      if ((_speed < 0.0) && (time() <= _list.get(0).time()))
         setTime(_list.get(_list.size() - 1).time());
       if (_list.size() > 1)
         _task.run(_task.timer().period());

@@ -14,6 +14,7 @@ import processing.event.MouseEvent;
 public class BasicInterpolation extends PApplet {
   Scene scene;
   Interpolator interpolator;
+  float speed = 1;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -80,10 +81,13 @@ public class BasicInterpolation extends PApplet {
   }
 
   public void keyPressed() {
-    if (key == '-')
-      interpolator.setSpeed(interpolator.speed() - 0.25f);
-    if (key == '+')
-      interpolator.setSpeed(interpolator.speed() + 0.25f);
+    if (key == '-' || key == '+') {
+      if (key == '-')
+        speed -= 0.25f;
+      else
+        speed += 0.25f;
+      interpolator.start(speed);
+    }
 
     if (key == 's')
       scene.fit(1);

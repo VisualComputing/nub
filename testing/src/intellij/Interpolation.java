@@ -16,6 +16,7 @@ public class Interpolation extends PApplet {
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
   boolean showEyePath = true;
+  float speed = 1;
 
   //Choose P3D for a 3D scene, or P2D or JAVA2D for a 2D scene
   String renderer = P3D;
@@ -129,10 +130,13 @@ public class Interpolation extends PApplet {
     if (key == 'd')
       eyeInterpolator2.purge();
 
-    if (key == '-')
-      interpolator.setSpeed(interpolator.speed() - 0.25f);
-    if (key == '+')
-      interpolator.setSpeed(interpolator.speed() + 0.25f);
+    if (key == '-' || key == '+') {
+      if (key == '-')
+        speed -= 0.25f;
+      else
+        speed += 0.25f;
+      interpolator.start(speed);
+    }
 
     if (key == 's')
       scene.fit(1);
