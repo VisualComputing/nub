@@ -162,6 +162,7 @@ public class Interpolator {
   protected Task _task;
   protected float _time;
   protected float _speed;
+  protected int _period;
   protected boolean _started;
 
   // Misc
@@ -247,6 +248,7 @@ public class Interpolator {
 
     this._time = other._time;
     this._speed = other._speed;
+    this._period = other._period;
     this._started = other._started;
     this._loop = other._loop;
     this._pathIsValid = other._pathIsValid;
@@ -410,10 +412,11 @@ public class Interpolator {
    * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
    * unless {@link #loop()} is {@code true}.
    */
+  // TODO parallel tasks
   protected void _update() {
     interpolate(time());
 
-    _time += _speed * _task.timer().period() / 1000.0f;
+    _time += _speed * _period / 1000.0f;
 
     if (time() > _list.get(_list.size() - 1).time()) {
       if (loop())
@@ -498,9 +501,8 @@ public class Interpolator {
   public void start(int period, float speed) {
     if (started())
       stop();
-    // TODO negative periods?
-    if (period >= 0)
-      _task.timer().setPeriod(period);
+    _period = Math.abs(period);
+    _task.timer().setPeriod(_period);
     _speed = speed;
     if (!_list.isEmpty()) {
       if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
