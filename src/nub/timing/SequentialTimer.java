@@ -61,7 +61,21 @@ class SequentialTimer implements Timer {
    * (see {@link nub.timing.TimingHandler#handle()}).
    */
   protected boolean _execute() {
-    boolean result = trigggered();
+    boolean result = false;
+    if (_active) {
+      long elapsedTime = System.currentTimeMillis() - _startTime;
+      float timePerFrame = (1 / _handler.frameRate()) * 1000;
+      long threshold = _counter * _period;
+      if (threshold >= elapsedTime) {
+        long diff = elapsedTime + (long) timePerFrame - threshold;
+        if (diff >= 0)
+          if ((threshold - elapsedTime) < diff)
+            result = true;
+      } else
+        result = true;
+      if (result)
+        _counter++;
+    }
     if (result) {
       task().execute();
       if (_once)
@@ -103,31 +117,6 @@ class SequentialTimer implements Timer {
   }
 
   // others
-
-  /**
-   * Returns {@code true} if the timer was triggered at the given node.
-   *
-   * <b>Note:</b> You should not call this method since it's done by the timing handler
-   * (see {@link nub.timing.TimingHandler#handle()}).
-   */
-  public boolean trigggered() {
-    if (!_active)
-      return false;
-    long elapsedTime = System.currentTimeMillis() - _startTime;
-    float timePerFrame = (1 / _handler.frameRate()) * 1000;
-    long threshold = _counter * _period;
-    boolean result = false;
-    if (threshold >= elapsedTime) {
-      long diff = elapsedTime + (long) timePerFrame - threshold;
-      if (diff >= 0)
-        if ((threshold - elapsedTime) < diff)
-          result = true;
-    } else
-      result = true;
-    if (result)
-      _counter++;
-    return result;
-  }
 
   @Override
   public long period() {
