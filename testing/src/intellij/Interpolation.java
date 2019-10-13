@@ -138,6 +138,9 @@ public class Interpolation extends PApplet {
       scene.fit(1);
     if (key == 'f')
       scene.fit();
+
+    if (key == 't')
+      scene.shiftTimers();
   }
 
   public static void main(String[] args) {
