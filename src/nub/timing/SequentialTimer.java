@@ -37,15 +37,15 @@ class SequentialTimer implements Timer {
    * @param timingHandler timing handler owner
    * @param singleShot
    */
-  public SequentialTimer(TimingHandler timingHandler, boolean singleShot) {
+  SequentialTimer(TimingHandler timingHandler, boolean singleShot) {
     this(timingHandler, singleShot, null);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, Task task) {
+  SequentialTimer(TimingHandler timingHandler, Task task) {
     this(timingHandler, false, task);
   }
 
-  public SequentialTimer(TimingHandler timingHandler, boolean singleShot, Task task) {
+  SequentialTimer(TimingHandler timingHandler, boolean singleShot, Task task) {
     _handler = timingHandler;
     _once = singleShot;
     _task = task;

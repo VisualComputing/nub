@@ -29,7 +29,7 @@ class ParallelTimer implements Timer {
    *
    * @see #ParallelTimer(Task, boolean)
    */
-  public ParallelTimer(Task task) {
+  ParallelTimer(Task task) {
     this(task, false);
   }
 
@@ -39,7 +39,7 @@ class ParallelTimer implements Timer {
    * @param task
    * @param singleShot
    */
-  public ParallelTimer(Task task, boolean singleShot) {
+  ParallelTimer(Task task, boolean singleShot) {
     _once = singleShot;
     _task = task;
   }
