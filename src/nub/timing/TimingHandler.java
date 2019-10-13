@@ -48,7 +48,7 @@ public class TimingHandler {
       if (task.timer() != null)
         if (task.timer() instanceof SequentialTimer)
           if (task.timer().task() != null)
-            ((SequentialTimer) task.timer())._execute();
+            ((SequentialTimer) task.timer())._execute(frameRate());
   }
 
   /**
@@ -62,7 +62,7 @@ public class TimingHandler {
    * Register a task in the timer pool and creates a sequential timer for it.
    */
   public void registerTask(Task task) {
-    task.setTimer(new SequentialTimer(this, task));
+    task.setTimer(new SequentialTimer(task));
     _taskPool.add(task);
   }
 
@@ -140,7 +140,7 @@ public class TimingHandler {
         rOnce = task.timer().isSingleShot();
       }
       task.stop();
-      task.setTimer(new SequentialTimer(this, task));
+      task.setTimer(new SequentialTimer(task));
       if (isActive) {
         if (rOnce)
           task.runOnce(period);

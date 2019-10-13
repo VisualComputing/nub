@@ -15,7 +15,6 @@ package nub.timing;
  */
 class SequentialTimer implements Timer {
   protected Task _task;
-  protected TimingHandler _handler;
   protected boolean _active;
   protected boolean _once;
   private long _counter;
@@ -26,24 +25,21 @@ class SequentialTimer implements Timer {
    * Defines a multiple shot sequential (single-threaded) timer. Same as
    * {@code this(timingHandler, task, false)}.
    *
-   * @param timingHandler timing handler owner
    * @param task task to be executed
-   * @see #SequentialTimer(TimingHandler, Task, boolean)
+   * @see #SequentialTimer(Task, boolean)
    */
-  SequentialTimer(TimingHandler timingHandler, Task task) {
-    this(timingHandler, task, false);
+  SequentialTimer(Task task) {
+    this(task, false);
   }
 
   /**
    * Defines a single or multiple shot (depending on {@code singleShot}) sequential (single-threaded) timer.
    *
    * @param singleShot    defines a single or multiple shot timer
-   * @param timingHandler timing handler owner
    * @param task          task to be executed
-   * @see #SequentialTimer(TimingHandler, Task)
+   * @see #SequentialTimer(Task)
    */
-  SequentialTimer(TimingHandler timingHandler, Task task, boolean singleShot) {
-    _handler = timingHandler;
+  SequentialTimer(Task task, boolean singleShot) {
     _once = singleShot;
     _task = task;
     _active = false;
@@ -60,11 +56,11 @@ class SequentialTimer implements Timer {
    * <b>Note:</b> You should not call this method since it's done by the timing handler
    * (see {@link nub.timing.TimingHandler#handle()}).
    */
-  protected boolean _execute() {
+  protected boolean _execute(float frameRate) {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / _handler.frameRate()) * 1000;
+      float timePerFrame = (1 / frameRate) * 1000;
       long threshold = _counter * _period;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
