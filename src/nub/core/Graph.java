@@ -758,6 +758,13 @@ public class Graph {
   }
 
   /**
+   * Returns the current frame-rate.
+   */
+  public float frameRate() {
+    return timingHandler().frameRate();
+  }
+
+  /**
    * Returns the number of nodes displayed since the graph was instantiated.
    * <p>
    * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
