@@ -80,7 +80,7 @@ public class TaskTesting extends PApplet {
     background(0);
     //drawScene();
     scene.render();
-    println("fps: p5 " + frameRate + " nub " + scene.frameRate());
+    println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
   }
 
   void drawScene() {
@@ -175,7 +175,7 @@ public class TaskTesting extends PApplet {
     }
 
     if (key == 'p') {
-      println("fps: p5 " + frameRate + " nub " + scene.frameRate());
+      println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
     }
   }
 

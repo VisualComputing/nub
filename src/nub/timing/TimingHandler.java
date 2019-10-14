@@ -23,7 +23,7 @@ public class TimingHandler {
   protected long _deltaCount;
   // T i m e r P o o l
   protected ArrayList<Task> _taskPool;
-  protected long _frameRateLastMillis;
+  protected long _frameRateLastNanos;
   protected long _localCount;
 
   /**
@@ -32,8 +32,8 @@ public class TimingHandler {
   public TimingHandler() {
     _localCount = 0;
     _deltaCount = frameCount;
-    _frameRate = 10;
-    _frameRateLastMillis = System.currentTimeMillis();
+    _frameRate = 60;
+    _frameRateLastNanos = 0;
     _taskPool = new ArrayList<Task>();
   }
 
@@ -82,14 +82,14 @@ public class TimingHandler {
    * all timing operations.
    */
   protected void _updateFrameRate() {
-    long now = System.currentTimeMillis();
+    long now = System.nanoTime();
     if (_localCount > 1) {
-      // update the current _frameRate
-      float rate = 1000.0f / ((now - _frameRateLastMillis) / 1000.0f);
-      float instantaneousRate = rate / 1000.0f;
-      _frameRate = (_frameRate * 0.9f) + (instantaneousRate * 0.1f);
+      float frameTimeSecs = (float) (now - this._frameRateLastNanos) / 1.0E9f;
+      float avgFrameTimeSecs = 1.0f / _frameRate;
+      avgFrameTimeSecs = 0.95f * avgFrameTimeSecs + 0.05f * frameTimeSecs;
+      _frameRate = (1.0f / avgFrameTimeSecs);
     }
-    _frameRateLastMillis = now;
+    _frameRateLastNanos = now;
     _localCount++;
     //TODO needs testing but I think is also safe and simpler
     //if (TimingHandler.frameCount < frameCount())
