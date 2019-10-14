@@ -46,6 +46,11 @@ public interface Taskable {
   void stop();
 
   /**
+   * Calls {@link #stop()} if the task {@link #isActive()}, and {@link #run()} otherwise.
+   */
+  void toggle();
+
+  /**
    * Tells whether or not the timer is active.
    */
   boolean isActive();

@@ -54,6 +54,14 @@ public abstract class ParallelTask implements Taskable {
   }
 
   @Override
+  public void toggle() {
+    if (isActive())
+      stop();
+    else
+      run();
+  }
+
+  @Override
   public boolean isActive() {
     return _timer != null && _active;
   }

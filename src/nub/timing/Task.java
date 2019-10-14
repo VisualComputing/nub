@@ -16,6 +16,8 @@ package nub.timing;
  * <p>
  * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
  * will only be executed once.
+ * <p>
+ * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
  */
 abstract public class Task implements Taskable {
   protected boolean _active;
@@ -72,6 +74,14 @@ abstract public class Task implements Taskable {
   @Override
   public void stop() {
     _active = false;
+  }
+
+  @Override
+  public void toggle() {
+    if (isActive())
+      stop();
+    else
+      run();
   }
 
   @Override
