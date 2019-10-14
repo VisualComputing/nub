@@ -16,6 +16,8 @@ public class TaskTesting extends PApplet {
   Scene scene;
   Task task;
   float fps = 60;
+  long lapse, totalLapse, targetLapse;
+  long period = 100;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
   boolean showEyePath = true;
@@ -69,18 +71,25 @@ public class TaskTesting extends PApplet {
     task = new Task() {
       @Override
       public void execute() {
-
+        long current = System.currentTimeMillis();
+        if (lapse == 0)
+          lapse = period;
+        else
+          lapse = current - lapse;
+        totalLapse += lapse;
+        targetLapse += period;
+        println(scene.frameCount() + " target fps: " + fps + " nub fps: " + scene.frameRate() + " period: " + period + " lapse: " + lapse + " targetLapse: " + targetLapse + " totalLapse: " + totalLapse);
+        lapse = current;
       }
     };
     scene.registerTask(task);
-    task.run(100);
   }
 
   public void draw() {
     background(0);
     //drawScene();
     scene.render();
-    println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
+    //println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
   }
 
   void drawScene() {
@@ -177,6 +186,18 @@ public class TaskTesting extends PApplet {
     if (key == 'p') {
       println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
     }
+
+    if (key == 'h' || key == 'H')
+      if (key == 'H')
+        period += 5;
+      else
+        period -= 5;
+
+    if (key == 'r' || key == 'R')
+      if (task.isActive())
+        task.stop();
+      else
+        task.run(period);
   }
 
   public static void main(String[] args) {
