@@ -10,27 +10,25 @@
 
 package nub.processing;
 
+import nub.timing.Taskable;
+
 /**
  * Parallel task based on java.util.Timer and java.util.TimerTask.
  */
-public abstract class ParallelTask {
+public abstract class ParallelTask implements Taskable {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
   boolean _once;
   boolean _active;
   long _period;
 
-  /**
-   * Callback method which should be implemented by derived classes.
-   * Default implementation is empty.
-   */
-  abstract public void execute();
-
+  @Override
   public void run(long period) {
     setPeriod(period);
     run();
   }
 
+  @Override
   public void run() {
     stop();
     _timer = new java.util.Timer();
@@ -46,6 +44,7 @@ public abstract class ParallelTask {
     _active = true;
   }
 
+  @Override
   public void stop() {
     if (_timer != null) {
       _timer.cancel();
@@ -54,22 +53,27 @@ public abstract class ParallelTask {
     _active = false;
   }
 
+  @Override
   public boolean isActive() {
     return _timer != null && _active;
   }
 
+  @Override
   public long period() {
     return _period;
   }
 
+  @Override
   public void setPeriod(long period) {
     _period = period;
   }
 
+  @Override
   public void toggleRecurrence() {
     _once = !_once;
   }
 
+  @Override
   public boolean isRecurrent() {
     return !_once;
   }

@@ -17,18 +17,12 @@ package nub.timing;
  * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
  * will only be executed once.
  */
-abstract public class Task {
+abstract public class Task implements Taskable {
   protected boolean _active;
   protected boolean _once;
   private long _counter;
   private long _period;
   private long _startTime;
-
-  /**
-   * Callback method which should be implemented by derived classes.
-   * Default implementation is empty.
-   */
-  abstract public void execute();
 
   /**
    * Executes the callback method defined by the {@link #execute()}.
@@ -60,28 +54,13 @@ abstract public class Task {
     return result;
   }
 
-  /**
-   * Sets the task {@link #period()} and call {@link #run()}.
-   * If task {@link #isRecurrent()} the {@link #execute()} method
-   * will be invoked recurrently every {@link #period()} milliseconds;
-   * otherwise it will be invoked once after a {@link #period()} delay
-   * milliseconds.
-   *
-   * @see #run()
-   * @see #isRecurrent()
-   * @see #toggleRecurrence()
-   * @see #period()
-   * @see #setPeriod(long)
-   */
+  @Override
   public void run(long period) {
     setPeriod(period);
     run();
   }
 
-  /**
-   * Runs the timer according to {@link #period()}. The timer may be scheduled for
-   * repeated fixed-rate execution according to {@link #isRecurrent()}.
-   */
+  @Override
   public void run() {
     if (_period <= 0)
       return;
@@ -90,36 +69,32 @@ abstract public class Task {
     _startTime = System.currentTimeMillis();
   }
 
-  /**
-   * Deactivates the task. See {@link #isActive()}.
-   */
+  @Override
   public void stop() {
     _active = false;
   }
 
-  /**
-   * Tells whether or not the timer is active.
-   */
+  @Override
   public boolean isActive() {
     return _active;
   }
 
-  // others
-
-  // TODO find better name: merge period and delay
-  // maybe setPeriod and setDelay
+  @Override
   public long period() {
     return _period;
   }
 
+  @Override
   public void setPeriod(long period) {
     _period = period;
   }
 
+  @Override
   public void toggleRecurrence() {
     _once = !_once;
   }
 
+  @Override
   public boolean isRecurrent() {
     return !_once;
   }
