@@ -21,6 +21,7 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -231,6 +232,48 @@ public class Scene extends Graph implements PConstants {
     pApplet().registerMethod("dispose", this);
     // 4. Handed
     setLeftHanded();
+  }
+
+  // Interpolator timer
+  //TODO api names pending
+
+  public void setParrallelTask(Interpolator interpolator) {
+    if (interpolator.task() instanceof ParallelTask)
+      return;
+    boolean isActive = interpolator.task().isActive();
+    if (isActive)
+      interpolator.task().stop();
+    if (interpolator.task() instanceof Task)
+      timingHandler().unregisterTask((Task) interpolator.task());
+    ParallelTask task = new ParallelTask() {
+      public void execute() {
+        interpolator._update();
+      }
+    };
+    task.setPeriod(interpolator.period());
+    interpolator.setTask(task);
+    if (isActive)
+      interpolator.task().run();
+    System.out.println("parallel task set");
+  }
+
+  public void setTask(Interpolator interpolator) {
+    if (interpolator.task() instanceof Task)
+      return;
+    boolean isActive = interpolator.task().isActive();
+    if (isActive)
+      interpolator.task().stop();
+    Task task = new Task() {
+      public void execute() {
+        interpolator._update();
+      }
+    };
+    registerTask(task);
+    task.setPeriod(interpolator.period());
+    interpolator.setTask(task);
+    if (isActive)
+      interpolator.task().run();
+    System.out.println("sequential task set");
   }
 
   // P5 STUFF

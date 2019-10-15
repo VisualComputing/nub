@@ -326,7 +326,7 @@ public class Interpolator {
    * Returns the node that is to be interpolated by the interpolator.
    * <p>
    * When {@link #started()}, this node's position, orientation and
-   * magnitude will regularly be updated by a timer, so that they follow the
+   * magnitude will regularly be updated by a task, so that they follow the
    * interpolator path.
    * <p>
    * Set using {@link #setNode(Node)} or with the interpolator constructor.
@@ -370,9 +370,9 @@ public class Interpolator {
   }
 
   /**
-   * Returns the current interpolation period, expressed in milliseconds. The update of
-   * the {@link #node()} state will be done by a timer at this period when
-   * {@link #started()}.
+   * Returns the current interpolation period, expressed in milliseconds. The
+   * update of the {@link #node()} state will be performed by a task at this
+   * period when {@link #started()}.
    * <p>
    * This period (multiplied by {@link #speed()}) is added to the
    * {@link #time()} at each update, and the {@link #node()} state is
@@ -423,6 +423,23 @@ public class Interpolator {
   }
 
   /**
+   * Returns the task use to perform the interpolation. Internal use.
+   *
+   * @see #setTask(Taskable)
+   */
+  public Taskable task() {
+    return _task;
+  }
+
+  /**
+   * Sets the task use to perform the interpolation. Internally used
+   * by the graph and to change to {@link #task()} type.
+   */
+  public void setTask(Taskable task) {
+    _task = task;
+  }
+
+  /**
    * Sets the {@link #period()}.
    */
   public void setPeriod(int period) {
@@ -457,13 +474,13 @@ public class Interpolator {
    * Then adds {@code period} * {@code speed} (which is set with
    * {@link #start(int, float)}) to {@link #time()}.
    * <p>
-   * This internal method is called by a timer when {@link #started()}. It
+   * This internal method is called by a task when {@link #started()}. It
    * can be used for debugging purpose. {@link #stop()} is called when
    * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
    * unless {@link #loop()} is {@code true}.
    */
-  // TODO parallel tasks
-  protected void _update() {
+  //TODO was protected
+  public void _update() {
     interpolate(time());
 
     _time += _speed * _period / 1000.0f;
@@ -501,7 +518,7 @@ public class Interpolator {
   /**
    * Starts the interpolation process.
    * <p>
-   * A timer is started which will update the {@link #node()}'s position,
+   * A task is started which will update the {@link #node()}'s position,
    * orientation and magnitude every {@link #period()} milliseconds. This
    * update increases the {@link #time()} by {@link #period()} * {@link #speed()}
    * milliseconds. This mechanism thus ensures that the number of

@@ -12,6 +12,7 @@ package nub.core;
 
 import nub.primitives.*;
 import nub.timing.Task;
+import nub.timing.Taskable;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -777,23 +778,27 @@ public class Graph {
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
    *
-   * @see TimingHandler#registerTask(Task)
+   * @see TimingHandler#registerTask(Taskable)
    */
-  public void registerTask(Task task) {
+  public void registerTask(Taskable task) {
     timingHandler().registerTask(task);
   }
 
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
+   *
+   * @see TimingHandler#unregisterTask(Taskable)
    */
-  public void unregisterTask(Task task) {
+  public void unregisterTask(Taskable task) {
     timingHandler().unregisterTask(task);
   }
 
   /**
    * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
+   *
+   * @see TimingHandler#isTaskRegistered(Taskable)
    */
-  public boolean isTaskRegistered(Task task) {
+  public boolean isTaskRegistered(Taskable task) {
     return timingHandler().isTaskRegistered(task);
   }
 

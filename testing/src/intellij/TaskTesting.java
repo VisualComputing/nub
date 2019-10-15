@@ -2,8 +2,10 @@ package intellij;
 
 import nub.core.Interpolator;
 import nub.core.Node;
+import nub.processing.ParallelTask;
 import nub.processing.Scene;
 import nub.timing.Task;
+import nub.timing.Taskable;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -65,7 +67,7 @@ public class TaskTesting extends PApplet {
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
-    //interpolator.start();
+    interpolator.start();
 
     //frameRate(100);
     task = new Task() {
@@ -83,12 +85,32 @@ public class TaskTesting extends PApplet {
       }
     };
     scene.registerTask(task);
+
+    Taskable task2 = new Task() {
+      @Override
+      public void execute() {
+        println("one timer seq");
+      }
+    };
+    task2.toggleRecurrence();
+    scene.registerTask(task2);
+    task2.run(5000);
+
+    Taskable task3 = new ParallelTask() {
+      @Override
+      public void execute() {
+        println("one timer parallel");
+      }
+    };
+    task3.toggleRecurrence();
+    scene.registerTask(task3);
+    task3.run(5000);
   }
 
   public void draw() {
     background(0);
-    //drawScene();
-    scene.render();
+    drawScene();
+    //scene.render();
     //println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
   }
 
@@ -198,6 +220,12 @@ public class TaskTesting extends PApplet {
         task.stop();
       else
         task.run(period);
+
+    if (key == 't')
+      scene.setParrallelTask(interpolator);
+
+    if (key == 'u')
+      scene.setTask(interpolator);
   }
 
   public static void main(String[] args) {

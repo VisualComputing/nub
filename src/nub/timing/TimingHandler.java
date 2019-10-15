@@ -58,22 +58,28 @@ public class TimingHandler {
   /**
    * Register a task in the task pool.
    */
-  public void registerTask(Task task) {
-    _taskPool.add(task);
+  public void registerTask(Taskable task) {
+    if (task instanceof Task)
+      _taskPool.add((Task) task);
+    else
+      System.out.println("Task was not registered because there's no need to");
   }
 
   /**
    * Unregisters the task.
    */
-  public void unregisterTask(Task task) {
-    _taskPool.remove(task);
+  public void unregisterTask(Taskable task) {
+    if (task instanceof Task)
+      _taskPool.remove(task);
   }
 
   /**
    * Returns {@code true} if the task is registered and {@code false} otherwise.
    */
-  public boolean isTaskRegistered(Task task) {
-    return _taskPool.contains(task);
+  public boolean isTaskRegistered(Taskable task) {
+    if (task instanceof Task)
+      return _taskPool.contains(task);
+    return false;
   }
 
   /**
