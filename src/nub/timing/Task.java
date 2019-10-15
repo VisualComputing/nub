@@ -12,12 +12,12 @@ package nub.timing;
 
 /**
  * Tasks are single-threaded recurrent callbacks defined by {@link #execute()}.
- * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Task)}.
+ * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Taskable)}.
  * <p>
  * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
  * will only be executed once.
  * <p>
- * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
+ * Call {@link TimingHandler#unregisterTask(Taskable)} to cancel the task.
  */
 abstract public class Task implements Taskable {
   protected boolean _active;
