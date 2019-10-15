@@ -1,27 +1,41 @@
-class Particle extends AnimatorObject {
+class Particle {
+  TimingTask task;
   PVector speed;
   PVector pos;
   int age;
   int ageMax;
 
-  Particle(Scene scene) {
-    super(scene.timingHandler());
+  Particle() {
     speed = new PVector();
     pos = new PVector();
     init();
-    start();
+    task = new TimingTask(scene) {
+      @Override
+      public void execute() {
+        speed.z -= 0.05f;
+        pos = PVector.add(pos, PVector.mult(speed, 10f));
+        if (pos.z < 0.0) {
+          speed.z = -0.8f * speed.z;
+          pos.z = 0.0f;
+        }
+        if (++age == ageMax)
+          init();
+      }
+    };
+    task.toggleConcurrence();
+    task.run();
   }
 
-  @Override
-  public void animate() {
-    speed.z -= 0.05f;
-    pos = PVector.add(pos, PVector.mult(speed, 10f));
-    if (pos.z < 0.0) {
-      speed.z = -0.8f * speed.z;
-      pos.z = 0.0f;
-    }
-    if (++age == ageMax)
-      init();
+  void incrementPeriod() {
+    task.setPeriod(task.period() + 2);
+  }
+
+  void decrementPeriod() {
+    task.setPeriod(task.period() - 2);
+  }
+
+  void toggle() {
+    task.toggle();
   }
 
   void init() {

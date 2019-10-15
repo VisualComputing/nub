@@ -15,7 +15,6 @@
  */
 
 import nub.processing.*;
-import nub.timing.*;
 
 Scene scene;
 int nbPart;
@@ -27,7 +26,7 @@ void setup() {
   nbPart = 2000;
   particle = new Particle[nbPart];
   for (int i = 0; i < particle.length; i++)
-    particle[i] = new Particle(scene);
+    particle[i] = new Particle();
 }
 
 void draw() {
@@ -57,10 +56,10 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   if (key == '+')
     for (int i = 0; i < particle.length; i++)
-      particle[i].setPeriod(particle[i].period()-2);
+      particle[i].incrementPeriod();
   if (key == '-')
     for (int i = 0; i < particle.length; i++)
-      particle[i].setPeriod(particle[i].period()+2);
+      particle[i].decrementPeriod();
   if (key == ' ')
     for (int i = 0; i < particle.length; i++)
       particle[i].toggle();

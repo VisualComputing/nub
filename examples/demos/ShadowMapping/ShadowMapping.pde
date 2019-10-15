@@ -13,7 +13,6 @@
  * Press 'd' to toggle visual debugging mode.
  */
 
-import nub.timing.*;
 import nub.primitives.*;
 import nub.core.*;
 import nub.processing.*;
@@ -128,7 +127,7 @@ void setup() {
   light.setPickingThreshold(0);
   light.setMagnitude(400f / 2048f);
 
-  animation = new TimingTask() {
+  animation = new TimingTask(scene) {
     @Override
     public void execute() {
       if (!scene.isTrackedNode(light)) {
@@ -139,7 +138,6 @@ void setup() {
       light.setZAxis(new Vector(light.position().x(), light.position().y(), light.position().z()));
     }
   };
-  scene.registerTask(animation);
   animation.run(60);
 
   // initShadowPass
