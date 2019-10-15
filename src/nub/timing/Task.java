@@ -27,6 +27,10 @@ abstract public class Task {
   protected long _period;
   protected long _startTime;
 
+  public Task(TimingHandler timingHandler) {
+    timingHandler.registerTask(this);
+  }
+
   /**
    * Callback method which should be implemented by derived classes.
    */

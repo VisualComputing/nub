@@ -218,12 +218,11 @@ public class Interpolator {
     setNode(node);
     _time = 0.0f;
     _speed = 1.0f;
-    _task = new Task() {
+    _task = new Task(_graph.timingHandler()) {
       public void execute() {
         _update();
       }
     };
-    _graph.registerTask(_task);
     setPeriod(40);
     _started = false;
     _loop = false;
@@ -249,7 +248,7 @@ public class Interpolator {
 
     this._time = other._time;
     this._speed = other._speed;
-    this._task = new Task() {
+    this._task = new Task(this._graph.timingHandler()) {
       public void execute() {
         _update();
       }

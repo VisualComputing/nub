@@ -20,7 +20,7 @@ public abstract class TimingTask extends Task {
   java.util.TimerTask _timerTask;
 
   public TimingTask(Scene scene) {
-    scene.registerTask(this);
+    super(scene.timingHandler());
   }
 
   @Override
