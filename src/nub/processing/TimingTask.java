@@ -10,17 +10,18 @@
 
 package nub.processing;
 
-import nub.timing.Taskable;
+import nub.timing.Task;
 
 /**
  * Parallel task based on java.util.Timer and java.util.TimerTask.
  */
-public abstract class ParallelTask implements Taskable {
+public abstract class TimingTask extends Task {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
-  boolean _once;
-  boolean _active;
-  long _period;
+
+  public TimingTask(Scene scene) {
+    scene.registerTask(this);
+  }
 
   @Override
   public void run(long period) {
@@ -54,35 +55,7 @@ public abstract class ParallelTask implements Taskable {
   }
 
   @Override
-  public void toggle() {
-    if (isActive())
-      stop();
-    else
-      run();
-  }
-
-  @Override
   public boolean isActive() {
     return _timer != null && _active;
-  }
-
-  @Override
-  public long period() {
-    return _period;
-  }
-
-  @Override
-  public void setPeriod(long period) {
-    _period = period;
-  }
-
-  @Override
-  public void toggleRecurrence() {
-    _once = !_once;
-  }
-
-  @Override
-  public boolean isRecurrent() {
-    return !_once;
   }
 }

@@ -12,19 +12,24 @@ package nub.timing;
 
 /**
  * Tasks are single-threaded recurrent callbacks defined by {@link #execute()}.
- * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Taskable)}.
+ * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Task)}.
  * <p>
  * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
  * will only be executed once.
  * <p>
- * Call {@link TimingHandler#unregisterTask(Taskable)} to cancel the task.
+ * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
  */
-abstract public class Task implements Taskable {
+abstract public class Task {
   protected boolean _active;
   protected boolean _once;
-  private long _counter;
-  private long _period;
-  private long _startTime;
+  protected long _counter;
+  protected long _period;
+  protected long _startTime;
+
+  /**
+   * Callback method which should be implemented by derived classes.
+   */
+  abstract public void execute();
 
   /**
    * Executes the callback method defined by the {@link #execute()}.
@@ -56,13 +61,28 @@ abstract public class Task implements Taskable {
     return result;
   }
 
-  @Override
+  /**
+   * Sets the task {@link #period()} and call {@link #run()}.
+   * If task {@link #isRecurrent()} the {@link #execute()} method
+   * will be invoked recurrently every {@link #period()} milliseconds;
+   * otherwise it will be invoked once after a {@link #period()} delay
+   * milliseconds.
+   *
+   * @see #run()
+   * @see #isRecurrent()
+   * @see #toggleRecurrence()
+   * @see #period()
+   * @see #setPeriod(long)
+   */
   public void run(long period) {
     setPeriod(period);
     run();
   }
 
-  @Override
+  /**
+   * Runs the task according to {@link #period()}. The timer may be scheduled for
+   * repeated fixed-rate execution according to {@link #isRecurrent()}.
+   */
   public void run() {
     if (_period <= 0)
       return;
@@ -71,12 +91,16 @@ abstract public class Task implements Taskable {
     _startTime = System.currentTimeMillis();
   }
 
-  @Override
+  /**
+   * Deactivates the task. See {@link #isActive()}.
+   */
   public void stop() {
     _active = false;
   }
 
-  @Override
+  /**
+   * Calls {@link #stop()} if the task {@link #isActive()}, and {@link #run()} otherwise.
+   */
   public void toggle() {
     if (isActive())
       stop();
@@ -84,27 +108,37 @@ abstract public class Task implements Taskable {
       run();
   }
 
-  @Override
+  /**
+   * Tells whether or not the timer is active.
+   */
   public boolean isActive() {
     return _active;
   }
 
-  @Override
+  /**
+   * Returns the task period in milliseconds.
+   */
   public long period() {
     return _period;
   }
 
-  @Override
+  /**
+   * Defines the task period in milliseconds.
+   */
   public void setPeriod(long period) {
     _period = period;
   }
 
-  @Override
+  /**
+   * Toggles the task recurrence.
+   */
   public void toggleRecurrence() {
     _once = !_once;
   }
 
-  @Override
+  /**
+   * Returns whether or not the task is scheduled to be executed recurrently.
+   */
   public boolean isRecurrent() {
     return !_once;
   }

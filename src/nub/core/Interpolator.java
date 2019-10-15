@@ -13,7 +13,6 @@ package nub.core;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.Task;
-import nub.timing.Taskable;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
@@ -160,7 +159,7 @@ public class Interpolator {
   protected Node _node;
 
   // Beat
-  protected Taskable _task;
+  protected Task _task;
   protected float _time;
   protected float _speed;
   protected int _period;
@@ -224,8 +223,7 @@ public class Interpolator {
         _update();
       }
     };
-    if (_task instanceof Task)
-      _graph.registerTask((Task) _task);
+    _graph.registerTask(_task);
     setPeriod(40);
     _started = false;
     _loop = false;
@@ -256,8 +254,7 @@ public class Interpolator {
         _update();
       }
     };
-    if (_task instanceof Task)
-      _graph.registerTask((Task) _task);
+    _graph.registerTask(_task);
     this.setPeriod(other.period());
     this._started = other._started;
     this._loop = other._loop;
@@ -425,9 +422,9 @@ public class Interpolator {
   /**
    * Returns the task use to perform the interpolation. Internal use.
    *
-   * @see #setTask(Taskable)
+   * @see #setTask(Task)
    */
-  public Taskable task() {
+  public Task task() {
     return _task;
   }
 
@@ -435,7 +432,7 @@ public class Interpolator {
    * Sets the task use to perform the interpolation. Internally used
    * by the graph and to change to {@link #task()} type.
    */
-  public void setTask(Taskable task) {
+  public void setTask(Task task) {
     _task = task;
   }
 

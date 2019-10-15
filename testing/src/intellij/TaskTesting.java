@@ -2,10 +2,9 @@ package intellij;
 
 import nub.core.Interpolator;
 import nub.core.Node;
-import nub.processing.ParallelTask;
 import nub.processing.Scene;
+import nub.processing.TimingTask;
 import nub.timing.Task;
-import nub.timing.Taskable;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -70,7 +69,7 @@ public class TaskTesting extends PApplet {
     interpolator.start();
 
     //frameRate(100);
-    task = new Task() {
+    task = new TimingTask(scene) {
       @Override
       public void execute() {
         long current = System.currentTimeMillis();
@@ -84,8 +83,9 @@ public class TaskTesting extends PApplet {
         lapse = current;
       }
     };
-    scene.registerTask(task);
+    task.run(60);
 
+    /*
     Taskable task2 = new Task() {
       @Override
       public void execute() {
@@ -96,7 +96,7 @@ public class TaskTesting extends PApplet {
     scene.registerTask(task2);
     task2.run(5000);
 
-    Taskable task3 = new ParallelTask() {
+    Taskable task3 = new TimingTask() {
       @Override
       public void execute() {
         println("one timer parallel");
@@ -105,6 +105,8 @@ public class TaskTesting extends PApplet {
     task3.toggleRecurrence();
     scene.registerTask(task3);
     task3.run(5000);
+
+     */
   }
 
   public void draw() {
@@ -220,12 +222,6 @@ public class TaskTesting extends PApplet {
         task.stop();
       else
         task.run(period);
-
-    if (key == 't')
-      scene.setParrallelTask(interpolator);
-
-    if (key == 'u')
-      scene.setTask(interpolator);
   }
 
   public static void main(String[] args) {
