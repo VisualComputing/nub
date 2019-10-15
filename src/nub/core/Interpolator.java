@@ -23,9 +23,11 @@ import java.util.ListIterator;
  * A keyframe Catmull-Rom interpolator.
  * <p>
  * An interpolator holds keyframes (that define a path) and, optionally, a
- * reference to a node of your application (which will be interpolated). In this case,
- * when the user {@link #start()}, the interpolator regularly updates
- * the {@link #node()} position, orientation and magnitude along the path.
+ * reference to a node of your application (which will be interpolated).
+ * In this case, when the user call {@link #start()}, an interpolator
+ * {@link Task} will regularly updates the {@link #node()} position,
+ * orientation and magnitude along the path. Note that {@link #setPeriod(long)},
+ * and {@link #toggleConcurrence()} controls the task details.
  * <p>
  * Here is a typical usage example:
  * <pre>
@@ -54,15 +56,10 @@ import java.util.ListIterator;
  * }
  * }
  * </pre>
- * The keyframes are defined by a node and a time, expressed in seconds. The time has to
- * be monotonously increasing over keyframes.
- * <h3>Interpolation details</h3>
- * <p>
- * TODO see all start versions.
- * <p>
  * The interpolation is stopped when {@link #time()} is greater than the
  * {@link #lastTime()} (unless loop() is {@code true}).
- *
+ * <p>
+ * The
  * <b>Attention:</b> If a {@link nub.core.constraint.Constraint} is attached to
  * the {@link #node()} (see {@link Node#constraint()}), it should be reset before
  * {@link #start()} is called, otherwise the interpolated motion (computed as if
@@ -162,7 +159,6 @@ public class Interpolator {
   protected Task _task;
   protected float _time;
   protected float _speed;
-  protected int _period;
   protected boolean _started;
 
   // Misc
@@ -218,11 +214,7 @@ public class Interpolator {
     setNode(node);
     _time = 0.0f;
     _speed = 1.0f;
-    _task = new Task(_graph.timingHandler()) {
-      public void execute() {
-        _update();
-      }
-    };
+    _task = _graph._initTask(this);
     setPeriod(40);
     _started = false;
     _loop = false;
@@ -248,13 +240,10 @@ public class Interpolator {
 
     this._time = other._time;
     this._speed = other._speed;
-    this._task = new Task(this._graph.timingHandler()) {
-      public void execute() {
-        _update();
-      }
-    };
-    _graph.registerTask(_task);
+    this._task = _graph._initTask(this);
     this.setPeriod(other.period());
+    if (other._task.isConcurrent())
+      this._task.toggleConcurrence();
     this._started = other._started;
     this._loop = other._loop;
     this._pathIsValid = other._pathIsValid;
@@ -375,11 +364,11 @@ public class Interpolator {
    * modified accordingly (see {@link #interpolate(float)}). Default value is 40
    * milliseconds.
    *
-   * @see #setPeriod(int)
+   * @see #setPeriod(long)
    * @see #speed()
    */
-  public int period() {
-    return _period;
+  public long period() {
+    return _task.period();
   }
 
   /**
@@ -419,28 +408,17 @@ public class Interpolator {
   }
 
   /**
-   * Returns the task use to perform the interpolation. Internal use.
-   *
-   * @see #setTask(Task)
+   * Toggles concurrence of the task used to execute the interpolator.
    */
-  public Task task() {
-    return _task;
-  }
-
-  /**
-   * Sets the task use to perform the interpolation. Internally used
-   * by the graph and to change to {@link #task()} type.
-   */
-  public void setTask(Task task) {
-    _task = task;
+  public void toggleConcurrence() {
+    _task.toggleConcurrence();
   }
 
   /**
    * Sets the {@link #period()}.
    */
-  public void setPeriod(int period) {
-    _period = Math.abs(period);
-    _task.setPeriod(_period);
+  public void setPeriod(long period) {
+    _task.setPeriod(period);
   }
 
   /**
@@ -475,16 +453,12 @@ public class Interpolator {
    * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
    * unless {@link #loop()} is {@code true}.
    */
-  //TODO was protected
-  public void _update() {
+  public void update() {
     interpolate(time());
-
-    _time += _speed * _period / 1000.0f;
-
+    _time += _speed * _task.period() / 1000.0f;
     if (time() > _list.get(_list.size() - 1).time()) {
       if (loop())
-        setTime(
-            _list.get(0).time() + _time - _list.get(_list.size() - 1).time());
+        setTime(_list.get(0).time() + _time - _list.get(_list.size() - 1).time());
       else {
         // Make sure last KeyFrame is reached and displayed
         interpolate(_list.get(_list.size() - 1).time());
@@ -492,8 +466,7 @@ public class Interpolator {
       }
     } else if (time() < _list.get(0).time()) {
       if (loop())
-        setTime(
-            _list.get(_list.size() - 1).time() - _list.get(0).time() + _time);
+        setTime(_list.get(_list.size() - 1).time() - _list.get(0).time() + _time);
       else {
         // Make sure first KeyFrame is reached and displayed
         interpolate(_list.get(0).time());
@@ -554,7 +527,7 @@ public class Interpolator {
       if (_list.size() > 1)
         _task.run();
       _started = true;
-      _update();
+      update();
     }
   }
 
@@ -571,7 +544,7 @@ public class Interpolator {
   }
 
   /**
-   * Call {@link #setPeriod(int)} and then {@link #start()}.
+   * Call {@link #setPeriod(long)} and then {@link #start()}.
    *
    * @see #start()
    * @see #start(int, float)
@@ -583,7 +556,7 @@ public class Interpolator {
   }
 
   /**
-   * Call {@link #setPeriod(int)}, {@link #setSpeed(float)} and then {@link #start()}.
+   * Call {@link #setPeriod(long)}, {@link #setSpeed(float)} and then {@link #start()}.
    *
    * @see #start()
    * @see #start(int)
@@ -670,14 +643,14 @@ public class Interpolator {
   }
 
   /**
-   * Appends a new keyframe to the path, with its associated {@code time} (in seconds).
+   * Appends a new keyframe to the path, with its associated {@code time} (in seconds)
+   * which has to be monotonously increasing over keyframes.
    * <p>
    * Note that when {@code node} is modified, the interpolator path is updated accordingly.
    * This allows for dynamic paths, where keyframes can be edited, even during the
    * interpolation.
    * <p>
-   * {@code null} node references are silently ignored. The {@link #time(int)} has to be
-   * monotonously increasing over keyframes.
+   * {@code null} node references are silently ignored.
    */
   public void addKeyFrame(Node node, float time) {
     if (node == null)

@@ -11,15 +11,18 @@
 package nub.timing;
 
 /**
- * Tasks are single-threaded recurrent callbacks defined by {@link #execute()}.
- * Tasks should be registered after instantiation calling {@link TimingHandler#registerTask(Task)}.
+ * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
+ * and {@link #isConcurrent()} resp.) callbacks defined by overridden
+ * {@link #execute()}.
  * <p>
- * Call {@link #toggleRecurrence()} to toggle recurrence, i.e., the tasks
- * will only be executed once.
+ * Note that concurrence of the task execution (which requires a separate
+ * execution thread) should be implemented by derived classes, i.e., this
+ * class just implements the task sequential api.
  * <p>
  * Call {@link TimingHandler#unregisterTask(Task)} to cancel the task.
  */
 abstract public class Task {
+  protected TimingHandler _timingHandler;
   protected boolean _active;
   protected boolean _recurrence;
   protected boolean _concurrence;
@@ -27,8 +30,15 @@ abstract public class Task {
   protected long _period;
   protected long _startTime;
 
+  /**
+   * Constructs a sequential recurrent task with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
   public Task(TimingHandler timingHandler) {
-    timingHandler.registerTask(this);
+    _timingHandler = timingHandler;
+    _timingHandler.registerTask(this);
+    _recurrence = true;
+    _period = 40;
   }
 
   /**
@@ -60,14 +70,14 @@ abstract public class Task {
     }
     if (result) {
       execute();
-      if (_recurrence)
+      if (!_recurrence)
         _active = false;
     }
     return result;
   }
 
   /**
-   * Sets the task {@link #period()} and call {@link #run()}.
+   * Sets the task {@link #period()} in milliseconds and call {@link #run()}.
    * If task {@link #isRecurrent()} the {@link #execute()} method
    * will be invoked recurrently every {@link #period()} milliseconds;
    * otherwise it will be invoked once after a {@link #period()} delay
@@ -89,8 +99,6 @@ abstract public class Task {
    * repeated fixed-rate execution according to {@link #isRecurrent()}.
    */
   public void run() {
-    if (_period <= 0)
-      return;
     _active = true;
     _counter = 1;
     _startTime = System.currentTimeMillis();
@@ -121,37 +129,80 @@ abstract public class Task {
   }
 
   /**
-   * Returns the task period in milliseconds.
+   * Returns the task period (the task execution interval duration) in milliseconds.
+   * Non-recurrent tasks execute only once taking this value as their execution delay.
+   * Default value is 40 ms.
+   *
+   * @see #setPeriod(long)
+   * @see #frequency()
    */
   public long period() {
     return _period;
   }
 
   /**
-   * Defines the task period in milliseconds.
+   * Defines the task {@link #period()} in milliseconds.
+   *
+   * @see #period()
+   * @see #setFrequency(float)
    */
   public void setPeriod(long period) {
-    _period = period;
+    _period = Math.abs(period);
+    float target = frequency();
+    if (!isConcurrent() && _timingHandler.frameRate() < target) {
+      System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
+          "but currently it just achieves " + _timingHandler.frameRate() + " Hz." + '\n' + "Either set a period of at least "
+          + 1000 / _timingHandler.frameRate() + " ms or call toggleConcurrence() to execute the task concurrently.");
+    }
   }
 
   /**
-   * Toggles the task recurrence.
+   * Defines the task {@link #frequency()} in Hz.
+   *
+   * @see #frequency()
+   * @see #setPeriod(long)
+   */
+  public void setFrequency(float frequency) {
+    setPeriod((long) (1000 / frequency));
+  }
+
+  /**
+   * Returns the task execution frequency in milliseconds. Default value is 25 Hz.
+   *
+   * @see #setFrequency(float)
+   * @see #period()
+   */
+  public float frequency() {
+    return 1000 / _period;
+  }
+
+  /**
+   * Toggles the task recurrence. Non-recurrent tasks execute only once
+   * using {@link #period()} as their execution delay.
    *
    * @see #isRecurrent()
    */
   public void toggleRecurrence() {
+    boolean isActive = isActive();
+    stop();
     _recurrence = !_recurrence;
+    if (isActive)
+      run();
+    System.out.println("Task made " + (_recurrence ? "recurrent" : "non-recurrent"));
   }
 
   /**
    * Returns whether or not the task is scheduled to be executed recurrently.
    * <p>
-   * If the task {@link #isRecurrent()}
-   * it will be executed at fixed  time intervals defined with {@link #period()}.
-   * If the task is not recurrent, it will be executed only once after delay of
-   * {@link #period()}. The task {@link #isRecurrent()} by default.
+   * A recurrent task (see {@link #isRecurrent()}) is periodically executed
+   * at fixed duration time intervals (see {@link #period()} and
+   * {@link #setPeriod(long)}). A non-recurrent task will only be executed once
+   * just after a delay of {@link #period()} ms.
    *
-   * @see #isRecurrent()
+   * Tasks are recurrent by default, see {@link #Task(TimingHandler)}.
+   *
+   * @see #toggleRecurrence()
+   * @see #isConcurrent()
    */
   public boolean isRecurrent() {
     return !_recurrence;
@@ -161,9 +212,10 @@ abstract public class Task {
    * Toggles the task concurrence.
    *
    * @see #isConcurrent()
+   * @see #toggleRecurrence()
    */
   public void toggleConcurrence() {
-    System.out.println("Task can't be made recurrent. Recurrence should be implemented by derived classes.");
+    System.out.println("Task can't be made concurrent. Concurrence should be implemented by derived classes.");
   }
 
   /**
@@ -173,6 +225,7 @@ abstract public class Task {
    * Task recurrence should be implemented by derived classes.
    *
    * @see #toggleConcurrence()
+   * @see #isRecurrent()
    */
   public boolean isConcurrent() {
     return _concurrence;

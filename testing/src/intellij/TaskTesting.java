@@ -15,7 +15,7 @@ import processing.event.MouseEvent;
  */
 public class TaskTesting extends PApplet {
   Scene scene;
-  Task task;
+  Task task, task2, task3;
   float fps = 60;
   long lapse, totalLapse, targetLapse;
   long period = 100;
@@ -62,7 +62,9 @@ public class TaskTesting extends PApplet {
       }
     };
     interpolator = new Interpolator(shape);
-    interpolator.setLoop();
+    //interpolator.setLoop();
+    interpolator.toggleConcurrence();
+    interpolator.setPeriod(1);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
@@ -83,30 +85,30 @@ public class TaskTesting extends PApplet {
         lapse = current;
       }
     };
-    task.run(60);
+    //task.run(60);
 
-    /*
-    Taskable task2 = new Task() {
+    ///*
+    task2 = new TimingTask(scene) {
       @Override
       public void execute() {
         println("one timer seq");
       }
     };
     task2.toggleRecurrence();
-    scene.registerTask(task2);
-    task2.run(5000);
+    task2.run(3000);
 
-    Taskable task3 = new TimingTask() {
+    task3 = new TimingTask(scene) {
       @Override
       public void execute() {
         println("one timer parallel");
       }
     };
     task3.toggleRecurrence();
-    scene.registerTask(task3);
-    task3.run(5000);
+    task3.toggleConcurrence();
+    task3.run(3000);
 
-     */
+    println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
+    //*/
   }
 
   public void draw() {
@@ -197,6 +199,14 @@ public class TaskTesting extends PApplet {
 
     if (key == 'g')
       interpolator.toggle();
+
+    if (key == 'i')
+      interpolator.toggleConcurrence();
+
+    if (key == 'j') {
+      task2.toggleRecurrence();
+      task3.toggleRecurrence();
+    }
 
     if (key == 'f' || key == 'F') {
       if (key == 'F')

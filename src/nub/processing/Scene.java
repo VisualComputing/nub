@@ -21,6 +21,7 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -231,6 +232,18 @@ public class Scene extends Graph implements PConstants {
     pApplet().registerMethod("dispose", this);
     // 4. Handed
     setLeftHanded();
+  }
+
+  // Tasks
+
+  @Override
+  protected Task _initTask(Interpolator interpolator) {
+    return new TimingTask(this) {
+      @Override
+      public void execute() {
+        interpolator.update();
+      }
+    };
   }
 
   // P5 STUFF

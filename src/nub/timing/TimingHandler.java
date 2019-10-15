@@ -39,8 +39,8 @@ public class TimingHandler {
 
   /**
    * Handler's main method. It should be called from within your main event loop.
-   * It recomputes the frame rate, and executes all tasks (those in the
-   * {@link #taskPool()}) callback functions.
+   * It recomputes the frame rate, and executes all non-concurrent tasks found in
+   * the {@link #taskPool()}.
    */
   public void handle() {
     _updateFrameRate();
@@ -57,7 +57,7 @@ public class TimingHandler {
   }
 
   /**
-   * Register a task in the task pool.
+   * Register a task in the pool.
    */
   public void registerTask(Task task) {
     if (isTaskRegistered(task)) {

@@ -12,13 +12,28 @@ package nub.processing;
 
 import nub.timing.Task;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Parallel task based on java.util.Timer and java.util.TimerTask.
+ *
+ * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
+ * and {@link #isConcurrent()} resp.) callbacks defined by overridden
+ * {@link #execute()}.
+ * <p>
+ * This class implements both the task's sequential and parallel apis.
+ * <p>
+ * Call {@link Scene#unregisterTask(Task)} to cancel the task.
  */
 public abstract class TimingTask extends Task {
   java.util.Timer _timer;
   java.util.TimerTask _timerTask;
 
+  /**
+   * Constructs a sequential recurrent task with a {@link #period()} of 40ms
+   * (i.e., a {@link #frequency()} of 25 Hz).
+   */
   public TimingTask(Scene scene) {
     super(scene.timingHandler());
   }
@@ -27,13 +42,13 @@ public abstract class TimingTask extends Task {
   public void run() {
     if (isConcurrent()) {
       stop();
-      _timer = new java.util.Timer();
-      _timerTask = new java.util.TimerTask() {
+      _timer = new Timer();
+      _timerTask = new TimerTask() {
         public void run() {
           execute();
         }
       };
-      if (_recurrence)
+      if (isRecurrent())
         _timer.schedule(_timerTask, _period);
       else
         _timer.scheduleAtFixedRate(_timerTask, 0, _period);
@@ -61,6 +76,11 @@ public abstract class TimingTask extends Task {
 
   @Override
   public void toggleConcurrence() {
+    boolean isActive = isActive();
+    stop();
     _concurrence = !_concurrence;
+    if (isActive)
+      run();
+    System.out.println("Task made " + (_concurrence ? "concurrent" : "non-concurrent"));
   }
 }
