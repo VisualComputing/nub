@@ -100,6 +100,7 @@ public class ParticleSystem extends PApplet {
             init();
         }
       };
+      task.toggleConcurrence();
       task.run(100);
     }
 

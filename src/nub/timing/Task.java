@@ -21,7 +21,8 @@ package nub.timing;
  */
 abstract public class Task {
   protected boolean _active;
-  protected boolean _once;
+  protected boolean _recurrence;
+  protected boolean _concurrence;
   protected long _counter;
   protected long _period;
   protected long _startTime;
@@ -55,7 +56,7 @@ abstract public class Task {
     }
     if (result) {
       execute();
-      if (_once)
+      if (_recurrence)
         _active = false;
     }
     return result;
@@ -131,15 +132,45 @@ abstract public class Task {
 
   /**
    * Toggles the task recurrence.
+   *
+   * @see #isRecurrent()
    */
   public void toggleRecurrence() {
-    _once = !_once;
+    _recurrence = !_recurrence;
   }
 
   /**
    * Returns whether or not the task is scheduled to be executed recurrently.
+   * <p>
+   * If the task {@link #isRecurrent()}
+   * it will be executed at fixed  time intervals defined with {@link #period()}.
+   * If the task is not recurrent, it will be executed only once after delay of
+   * {@link #period()}. The task {@link #isRecurrent()} by default.
+   *
+   * @see #isRecurrent()
    */
   public boolean isRecurrent() {
-    return !_once;
+    return !_recurrence;
+  }
+
+  /**
+   * Toggles the task concurrence.
+   *
+   * @see #isConcurrent()
+   */
+  public void toggleConcurrence() {
+    System.out.println("Task can't be made recurrent. Recurrence should be implemented by derived classes.");
+  }
+
+  /**
+   * Returns {@code true} if the task is concurrent, i.e., if it runs in parallel, and
+   * {@code false} otherwise.
+   * <p>
+   * Task recurrence should be implemented by derived classes.
+   *
+   * @see #toggleConcurrence()
+   */
+  public boolean isConcurrent() {
+    return _concurrence;
   }
 }

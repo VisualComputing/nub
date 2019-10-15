@@ -24,38 +24,43 @@ public abstract class TimingTask extends Task {
   }
 
   @Override
-  public void run(long period) {
-    setPeriod(period);
-    run();
-  }
-
-  @Override
   public void run() {
-    stop();
-    _timer = new java.util.Timer();
-    _timerTask = new java.util.TimerTask() {
-      public void run() {
-        execute();
-      }
-    };
-    if (_once)
-      _timer.schedule(_timerTask, _period);
-    else
-      _timer.scheduleAtFixedRate(_timerTask, 0, _period);
-    _active = true;
+    if (isConcurrent()) {
+      stop();
+      _timer = new java.util.Timer();
+      _timerTask = new java.util.TimerTask() {
+        public void run() {
+          execute();
+        }
+      };
+      if (_recurrence)
+        _timer.schedule(_timerTask, _period);
+      else
+        _timer.scheduleAtFixedRate(_timerTask, 0, _period);
+      _active = true;
+    } else
+      super.run();
   }
 
   @Override
   public void stop() {
-    if (_timer != null) {
-      _timer.cancel();
-      _timer.purge();
-    }
-    _active = false;
+    if (isConcurrent()) {
+      if (_timer != null) {
+        _timer.cancel();
+        _timer.purge();
+      }
+      _active = false;
+    } else
+      super.stop();
   }
 
   @Override
   public boolean isActive() {
-    return _timer != null && _active;
+    return isConcurrent() ? _timer != null && _active : super.isActive();
+  }
+
+  @Override
+  public void toggleConcurrence() {
+    _concurrence = !_concurrence;
   }
 }

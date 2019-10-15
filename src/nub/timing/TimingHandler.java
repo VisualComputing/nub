@@ -45,7 +45,8 @@ public class TimingHandler {
   public void handle() {
     _updateFrameRate();
     for (Task task : _taskPool)
-      task._execute(frameRate());
+      if (!task.isConcurrent())
+        task._execute(frameRate());
   }
 
   /**
