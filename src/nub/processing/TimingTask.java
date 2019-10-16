@@ -16,8 +16,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Parallel task based on java.util.Timer and java.util.TimerTask.
- *
  * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
  * and {@link #isConcurrent()} resp.) callbacks defined by overridden
  * {@link #execute()}.
@@ -75,12 +73,11 @@ public abstract class TimingTask extends Task {
   }
 
   @Override
-  public void toggleConcurrence() {
+  public void enableConcurrence(boolean enable) {
     boolean isActive = isActive();
     stop();
-    _concurrence = !_concurrence;
+    _concurrence = enable;
     if (isActive)
       run();
-    System.out.println("Task made " + (_concurrence ? "concurrent" : "non-concurrent"));
   }
 }

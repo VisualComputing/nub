@@ -22,7 +22,7 @@ class Particle {
           init();
       }
     };
-    task.toggleConcurrence();
+    task.enableConcurrence();
     task.run();
   }
 

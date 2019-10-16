@@ -27,7 +27,7 @@ import java.util.ListIterator;
  * In this case, when the user call {@link #start()}, an interpolator
  * {@link Task} will regularly updates the {@link #node()} position,
  * orientation and magnitude along the path. Note that {@link #setPeriod(long)},
- * and {@link #toggleConcurrence()} controls the task details.
+ * and {@link #enableConcurrence(boolean)} controls the task details.
  * <p>
  * Here is a typical usage example:
  * <pre>
@@ -242,8 +242,7 @@ public class Interpolator {
     this._speed = other._speed;
     this._task = _graph._initTask(this);
     this.setPeriod(other.period());
-    if (other._task.isConcurrent())
-      this._task.toggleConcurrence();
+    this._task.enableConcurrence(other._task.isConcurrent());
     this._started = other._started;
     this._loop = other._loop;
     this._pathIsValid = other._pathIsValid;
@@ -408,10 +407,30 @@ public class Interpolator {
   }
 
   /**
-   * Toggles concurrence of the task used to execute the interpolator.
+   * Same as {@code _task.enableConcurrence()}.
+   *
+   * @see Task#enableConcurrence()
    */
-  public void toggleConcurrence() {
-    _task.toggleConcurrence();
+  public void enableConcurrence() {
+    _task.enableConcurrence();
+  }
+
+  /**
+   * Same as {@code _task.disableConcurrence()}.
+   *
+   * @see Task#disableConcurrence()
+   */
+  public void disableConcurrence() {
+    _task.disableConcurrence();
+  }
+
+  /**
+   * Same as {@code _task.enableConcurrence(enable)}.
+   *
+   * @see Task#enableConcurrence(boolean)
+   */
+  public void enableConcurrence(boolean enable) {
+    _task.enableConcurrence(enable);
   }
 
   /**

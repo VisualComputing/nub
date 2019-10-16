@@ -85,7 +85,7 @@ abstract public class Task {
    *
    * @see #run()
    * @see #isRecurrent()
-   * @see #toggleRecurrence()
+   * @see #enableRecurrence(boolean)
    * @see #period()
    * @see #setPeriod(long)
    */
@@ -177,18 +177,44 @@ abstract public class Task {
   }
 
   /**
-   * Toggles the task recurrence. Non-recurrent tasks execute only once
-   * using {@link #period()} as their execution delay.
+   * Same as {@code enableRecurrence(true)}.
+   *
+   * @see #disableRecurrence()
+   * @see #enableRecurrence(boolean)
+   * @see #isRecurrent()
+   * @see #enableConcurrence(boolean)
+   */
+  public void enableRecurrence() {
+    enableRecurrence(true);
+  }
+
+  /**
+   * Same as {@code enableRecurrence(false)}.
+   *
+   * @see #enableRecurrence()
+   * @see #enableRecurrence(boolean)
+   * @see #isRecurrent()
+   * @see #enableConcurrence(boolean)
+   */
+  public void disableRecurrence() {
+    enableRecurrence(false);
+  }
+
+  /**
+   * Enables or (disables) the task recurrence according to {@code enable}.
+   * Non-recurrent tasks execute only once using {@link #period()} as their execution delay.
    *
    * @see #isRecurrent()
+   * @see #enableRecurrence()
+   * @see #disableRecurrence()
+   * @see #enableConcurrence(boolean)
    */
-  public void toggleRecurrence() {
+  public void enableRecurrence(boolean enable) {
     boolean isActive = isActive();
     stop();
-    _recurrence = !_recurrence;
+    _recurrence = enable;
     if (isActive)
       run();
-    System.out.println("Task made " + (_recurrence ? "recurrent" : "non-recurrent"));
   }
 
   /**
@@ -201,7 +227,7 @@ abstract public class Task {
    *
    * Tasks are recurrent by default, see {@link #Task(TimingHandler)}.
    *
-   * @see #toggleRecurrence()
+   * @see #enableRecurrence(boolean)
    * @see #isConcurrent()
    */
   public boolean isRecurrent() {
@@ -209,13 +235,41 @@ abstract public class Task {
   }
 
   /**
-   * Toggles the task concurrence.
+   * Same as {@code enableConcurrence(true)}.
+   *
+   * @see #disableConcurrence()
+   * @see #enableConcurrence(boolean)
+   * @see #isConcurrent()
+   * @see #enableRecurrence(boolean)
+   */
+  public void enableConcurrence() {
+    enableConcurrence(true);
+  }
+
+  /**
+   * Same as {@code enableConcurrence(false)}.
+   *
+   * @see #enableConcurrence()
+   * @see #enableConcurrence(boolean)
+   * @see #isConcurrent()
+   * @see #enableRecurrence(boolean)
+   */
+  public void disableConcurrence() {
+    enableConcurrence(false);
+  }
+
+  /**
+   * Enables or (disables) the task recurrence according to {@code enable}.
+   * Task recurrence should be implemented by derived classes.
    *
    * @see #isConcurrent()
-   * @see #toggleRecurrence()
+   * @see #enableConcurrence()
+   * @see #disableConcurrence()
+   * @see #enableRecurrence(boolean)
    */
-  public void toggleConcurrence() {
-    System.out.println("Task can't be made concurrent. Concurrence should be implemented by derived classes.");
+  public void enableConcurrence(boolean enable) {
+    if (enable)
+      System.out.println("Task can't be made concurrent. Concurrence should be implemented by derived classes.");
   }
 
   /**
@@ -224,7 +278,7 @@ abstract public class Task {
    * <p>
    * Task recurrence should be implemented by derived classes.
    *
-   * @see #toggleConcurrence()
+   * @see #enableConcurrence(boolean)
    * @see #isRecurrent()
    */
   public boolean isConcurrent() {
