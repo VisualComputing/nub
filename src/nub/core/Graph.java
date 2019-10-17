@@ -172,6 +172,7 @@ public class Graph {
 
   // 6. IKinematics solvers
   protected List<TreeSolver> _solvers;
+  protected HashMap<Solver, Task> _solverTasks;
 
   /**
    * Enumerates the different visibility states an object may have respect to the eye
@@ -234,6 +235,7 @@ public class Graph {
     cacheProjectionViewInverse(false);
     _seeds = new ArrayList<Node>();
     _solvers = new ArrayList<TreeSolver>();
+    _solverTasks = new HashMap<Solver, Task>();
     _timingHandler = new TimingHandler();
     setFrustum(new Vector(), 100);
     setEye(new Node(this));
@@ -2375,14 +2377,20 @@ public class Graph {
   public TreeSolver registerTreeSolver(Node node) {
     for (TreeSolver solver : _solvers)
       //If Head is Contained in any structure do nothing
-      if (!path(solver.head(), node).isEmpty())
+      if (!((isReachable(solver.head()) && isReachable(node)) ? Node.path(solver.head(), node) : new ArrayList<Node>()).isEmpty())
         return null;
-    TreeSolver solver = new TreeSolver(node);
-    _solvers.add(solver);
-    //Add task
-    registerTask(solver.task());
-    solver.task().run(40);
-    return solver;
+      TreeSolver solver = new TreeSolver(node);
+      _solvers.add(solver);
+      //Add task
+      Task task = new Task(_timingHandler) {
+        @Override
+        public void execute() {
+          solver.solve();
+        }
+      };
+      task.run(40);
+      _solverTasks.put(solver, task);
+      return solver;
   }
 
   /**
@@ -2397,7 +2405,7 @@ public class Graph {
       }
     }
     //Remove task
-    unregisterTask(toRemove.task());
+    unregisterTask(_solverTasks.get(toRemove));
     return _solvers.remove(toRemove);
   }
 
@@ -2437,8 +2445,15 @@ public class Graph {
    * @see #unregisterTreeSolver(Node)
    */
   public void executeSolver(Solver solver, long period) {
-    registerTask(solver.task());
-    solver.task().run(period);
+    //Add task
+    Task task = new Task(_timingHandler) {
+      @Override
+      public void execute() {
+        solver.solve();
+      }
+    };
+    task.run(period);
+    _solverTasks.put(solver, task);
   }
 
   // traversal
