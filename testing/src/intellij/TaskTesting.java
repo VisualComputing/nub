@@ -99,14 +99,12 @@ public class TaskTesting extends PApplet {
     task3 = new TimingTask(scene) {
       @Override
       public void execute() {
-        println("non-recurrent timer parallel");
+        println("recurrent timer parallel");
       }
     };
-    //task3.enableRecurrence(false);
+    task3.enableRecurrence(false);
     task3.enableConcurrence();
     task3.run(2000);
-    //if(((TimingTask)task3)._timer != null)
-    println("- null");
 
     //println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
     //*/
@@ -170,6 +168,15 @@ public class TaskTesting extends PApplet {
   public void keyPressed() {
     if (key == ' ')
       showEyePath = !showEyePath;
+
+    if (key == 't')
+      task3.toggle();
+
+    if (key == 'q')
+      if (task3.isActive())
+        println("task3 is active");
+      else
+        println("task3 is NOT active");
 
     if (key == '1')
       eyeInterpolator1.addKeyFrame();

@@ -46,11 +46,13 @@ public abstract class TimingTask extends Task {
           execute();
         }
       };
-      if (isRecurrent())
+      if (isRecurrent()) {
         _timer.scheduleAtFixedRate(_timerTask, 0, _period);
-      else
+        _active = true;
+      } else {
         _timer.schedule(_timerTask, _period);
-      _active = true;
+        _active = false;
+      }
     } else
       super.run();
   }
@@ -67,7 +69,6 @@ public abstract class TimingTask extends Task {
       super.stop();
   }
 
-  // TODO find isActive concurrent condition
   @Override
   public boolean isActive() {
     return isConcurrent() ? _timer != null && _active : super.isActive();
