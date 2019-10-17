@@ -194,7 +194,7 @@ public class CCDSolver extends Solver {
         InterestingEvent event5 = new InterestingEvent("E5", "NodeRotation", _last_time_event + 2, 1, 1);
         //Add the convenient attributes
         event5.addAttribute("node", _structure.get(i).node());
-        event5.addAttribute("rotation", _structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()));
+        event5.addAttribute("rotation", _structure.get(i).node().constraint() != null ?_structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()) : delta);
         //Add it to the event queue
         mediator().addEvent(event5);
         //Create the event

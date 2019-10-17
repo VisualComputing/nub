@@ -15,7 +15,6 @@ import nub.core.Node;
 import nub.core.constraint.ConeConstraint;
 import nub.core.constraint.DistanceFieldConstraint;
 import nub.core.constraint.Hinge;
-import nub.ik.animation.IKAnimation;
 import nub.ik.animation.InterestingEvent;
 import nub.ik.solver.Solver;
 import nub.ik.visual.Joint;
@@ -108,8 +107,6 @@ public abstract class FABRIKSolver extends Solver {
 
   //Animation Stuff
   //TODO : Animation with proposed heuristics
-  protected boolean _enableHistory;
-  protected IKAnimation.NodeStates _history;
   protected int _last_time_event = 0;
 
   /*Heuristic Parameters*/
@@ -222,10 +219,6 @@ public abstract class FABRIKSolver extends Solver {
       if (dist_i <= 10e-4) {
         //As rigid segment between J_i and J_i1 lies on same position, J_i must match exactly J_i1 position
         _positions.set(i, pos_i1.get());
-        if (_enableHistory) {
-          history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), pos_i1.get(), null);
-          history().incrementStep();
-        }
 
         if(_enableMediator) {
           //Create the event
@@ -281,11 +274,6 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i, _move(pos_i1, pos_i, dist_i, 0));
       }
 
-      if (_enableHistory) {
-        history().addNodeState("Forward step", chain.get(i), chain.get(i).reference(), _positions.get(i).get(), null);
-        history().incrementStep();
-      }
-
       if(_enableMediator) {
         //Create the event
         InterestingEvent event = new InterestingEvent("FWD_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
@@ -313,7 +301,6 @@ public abstract class FABRIKSolver extends Solver {
       }
       change += Vector.distance(pos_i, _positions().get(i));
     }
-    if (_enableHistory) history().incrementIteration();
     return change;
   }
 
@@ -470,11 +457,6 @@ public abstract class FABRIKSolver extends Solver {
         _positions.set(i + 1, _positions.get(i)); //keep pos
         orientation.compose(chain.get(i).rotation()); //update orientation
         //Animation
-        if (_enableHistory) {
-          history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i + 1).get(), null);
-          history().incrementStep();
-        }
-
         if(_enableMediator) {
           //Create the event
           InterestingEvent event = new InterestingEvent("BKW_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
@@ -541,10 +523,6 @@ public abstract class FABRIKSolver extends Solver {
       //change += Vector.distance(_positions.get(i + 1), constrained_pos);
       _positions.set(i + 1, constrained_pos);
 
-      if (_enableHistory) {
-        history().addNodeState("Backward step", chain.get(i + 1), chain.get(i + 1).reference(), _positions.get(i + 1).get(), null);
-        history().incrementStep();
-      }
       if(_enableMediator) {
         //Create the event
         InterestingEvent event = new InterestingEvent("BKW_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
@@ -571,7 +549,6 @@ public abstract class FABRIKSolver extends Solver {
       }
 
     }
-    if (_enableHistory) history().incrementIteration();
     return change;
   }
 
@@ -896,14 +873,4 @@ public abstract class FABRIKSolver extends Solver {
   public FABRIKSolver() {
     super();
   }
-
-  //Animation Stuff
-  public IKAnimation.NodeStates history() {
-    return _history;
-  }
-
-  public void enableHistory(boolean enable) {
-    _enableHistory = enable;
-  }
-
 }

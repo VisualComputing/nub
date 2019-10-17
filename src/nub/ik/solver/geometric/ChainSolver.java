@@ -13,7 +13,6 @@ package nub.ik.solver.geometric;
 
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
-import nub.ik.animation.IKAnimation;
 import nub.ik.animation.VisualizerMediator;
 import nub.ik.solver.KinematicStructure;
 import nub.primitives.Quaternion;
@@ -217,11 +216,6 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(_chain.size() - 1, target.get());
 
     //Animation
-    if (_enableHistory) {
-      history().addNodeState("Effector to Target step", _chain.get(_chain.size() - 1), _chain.get(_chain.size() - 1).reference(), target.get(), null);
-      history().incrementStep();
-    }
-
     _forwardReaching();
     //Animation stuff
     //if(debug) addIterationRecord(_positions);
@@ -230,11 +224,6 @@ public class ChainSolver extends FABRIKSolver {
     _positions.set(0, initial);
 
     //Animation
-    if (_enableHistory) {
-      history().addNodeState("Head to Initial", _chain.get(0), _chain.get(0).reference(), initial, null);
-      history().incrementStep();
-    }
-
     float change = _backwardReaching(o);
     //Save best solution
     float currentError = Vector.distance(end.position(), _target.position());
@@ -317,11 +306,6 @@ public class ChainSolver extends FABRIKSolver {
 
   protected void _init() {
     //Initialize List with info about Positions and Orientations
-    if (_enableHistory) {
-      if (_history == null) _history = new IKAnimation.NodeStates();
-      else _history.clear();
-    }
-
     if (_original.get(0).reference() != null) {
       _chain.get(0).reference().setMagnitude(_original.get(0).reference().magnitude());
       _chain.get(0).reference().setOrientation(_original.get(0).reference().orientation().get());
@@ -358,8 +342,6 @@ public class ChainSolver extends FABRIKSolver {
       _orientations.add(orientation);
       prevPosition = position;
       prevOrientation = orientation.get();
-      if (_enableHistory)
-        _history.addNodeState("initialization", node, node.reference(), node.translation().get(), node.rotation().get());
     }
     _jointChange.remove(0);
     _explorationTimes = 0;
