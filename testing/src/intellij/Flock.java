@@ -138,9 +138,6 @@ public class Flock extends PApplet {
         if (scene.eye().reference() == null)
           scene.fit(1);
         break;
-      case 't':
-        scene.shiftTimers();
-        break;
       case 'p':
         println("Node rate: " + frameRate);
         break;

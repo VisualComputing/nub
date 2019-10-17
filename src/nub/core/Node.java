@@ -1,12 +1,12 @@
-/****************************************************************************************
+/******************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
  * handling to a third party (real or non-real time) renderer. Released under the terms
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ ******************************************************************************************/
 
 package nub.core;
 
@@ -480,6 +480,9 @@ public class Node {
    *
    * @see #reset()
    * @see #worldMatrix()
+   * @see #setPosition(Node)
+   * @see #setOrientation(Node)
+   * @see #setMagnitude(Node)
    */
   public void set(Node node) {
     if (node == null)
@@ -521,7 +524,7 @@ public class Node {
   // MODIFIED
 
   /**
-   * @return the last node the this object was updated.
+   * @return the last frame the this node was updated.
    */
   public long lastUpdate() {
     return _lastUpdate;
@@ -561,7 +564,7 @@ public class Node {
   }
 
   /**
-   * Internal use. Automatically call by all methods which change the Node state.
+   * Internal use. Automatically call by all methods which change the node state.
    */
   protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
@@ -1028,6 +1031,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #position()} to that of {@code node}.
+   *
+   * @see #setPosition(Vector)
+   * @see #set(Node)
+   */
+  public void setPosition(Node node) {
+    if (node == null)
+      node = new Node();
+    setPosition(node.position());
+  }
+
+  /**
    * Sets the node {@link #position()}, defined in the world coordinate system.
    * <p>
    * Use {@link #setTranslation(Vector)} to define the local node translation (with respect
@@ -1244,6 +1259,18 @@ public class Node {
   }
 
   /**
+   * Sets the {@link #orientation()} to that of {@code node}.
+   *
+   * @see #setOrientation(Quaternion)
+   * @see #set(Node)
+   */
+  public void setOrientation(Node node) {
+    if (node == null)
+      node = new Node();
+    setOrientation(node.orientation());
+  }
+
+  /**
    * Sets the {@link #orientation()} of the node, defined in the world coordinate system.
    * <p>
    * Use {@link #setRotation(Quaternion)} to define the local node rotation (with respect
@@ -1322,6 +1349,18 @@ public class Node {
       return reference().magnitude() * scaling();
     else
       return scaling();
+  }
+
+  /**
+   * Sets the {@link #magnitude()} to that of {@code node}.
+   *
+   * @see #setMagnitude(float)
+   * @see #set(Node)
+   */
+  public void setMagnitude(Node node) {
+    if (node == null)
+      node = new Node();
+    setMagnitude(node.magnitude());
   }
 
   /**
@@ -2230,9 +2269,33 @@ public class Node {
    * Returns {@code true} if tracking is enabled.
    *
    * @see #enableTracking(boolean)
+   * @see #enableTracking()
+   * @see #disableTracking()
    */
   public boolean isTrackingEnabled() {
     return _tracking;
+  }
+
+  /**
+   * Same as {@code enableTracking(false)}.
+   *
+   * @see #isTrackingEnabled()
+   * @see #enableTracking()
+   * @see #enableTracking(boolean)
+   */
+  public void disableTracking() {
+    enableTracking(false);
+  }
+
+  /**
+   * Same as {@code enableTracking(true)}.
+   *
+   * @see #isTrackingEnabled()
+   * @see #enableTracking(boolean)
+   * @see #disableTracking()
+   */
+  public void enableTracking() {
+    enableTracking(true);
   }
 
   /**
@@ -2241,6 +2304,8 @@ public class Node {
    * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
    *
    * @see #isTrackingEnabled()
+   * @see #enableTracking()
+   * @see #disableTracking()
    */
   public void enableTracking(boolean flag) {
     _tracking = flag;
@@ -2313,7 +2378,6 @@ public class Node {
    * @see #cull(boolean)
    * @see #isCulled()
    */
-
   public void cull() {
     cull(true);
   }

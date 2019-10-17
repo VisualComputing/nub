@@ -1,21 +1,20 @@
-/****************************************************************************************
+/******************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
  * handling to a third party (real or non-real time) renderer. Released under the terms
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ ******************************************************************************************/
 
 package nub.core;
 
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.TreeSolver;
 import nub.primitives.*;
-import nub.timing.Animator;
+import nub.timing.Task;
 import nub.timing.TimingHandler;
-import nub.timing.TimingTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +40,7 @@ import java.util.List;
  * <p>
  * The node collection belonging to the graph may be retrieved with {@link #nodes()}.
  * The graph provides other useful routines to handle the hierarchy, such as
- * {@link #pruneBranch(Node)}, {@link #appendBranch(List)}, {@link #isReachable(Node)},
- * {@link #branch(Node)}, and {@link #clear()}.
+ * {@link #prune(Node)}, {@link #isReachable(Node)}, {@link #branch(Node)}, and {@link #clear()}.
  * <h2>2.1. Eye handling</h2>
  * Any {@link Node} (belonging or not to the graph hierarchy) may be set as the {@link #eye()}
  * (see {@link #setEye(Node)}). Several node wrapper functions to handle the eye, such as
@@ -88,8 +86,8 @@ import java.util.List;
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
- * {@link TimingHandler} wrapper functions, such as {@link #registerTask(TimingTask)}
- * and {@link #registerAnimator(Animator)}, are provided for convenience.
+ * {@link TimingHandler} wrapper functions, such as {@link #registerTask(Task)}
+ * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
  * such as {@link #fit(float)}, {@link #fit(Rectangle)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
@@ -589,7 +587,7 @@ public class Graph {
    *
    * @see #nodes()
    * @see #isReachable(Node)
-   * @see #pruneBranch(Node)
+   * @see #prune(Node)
    */
   protected List<Node> _leadingNodes() {
     return _seeds;
@@ -660,11 +658,11 @@ public class Graph {
   /**
    * Same as {@code for(Node node : _leadingNodes()) pruneBranch(node)}.
    *
-   * @see #pruneBranch(Node)
+   * @see #prune(Node)
    */
   public void clear() {
     for (Node node : _leadingNodes())
-      pruneBranch(node);
+      prune(node);
   }
 
   /**
@@ -675,53 +673,30 @@ public class Graph {
    * that all nodes in the {@code node} branch will become unreachable by the
    * {@link #render()} algorithm.
    * <p>
-   * To make all the nodes in the branch reachable again, first cache the nodes
-   * belonging to the branch (i.e., {@code branch=pruneBranch(node)}) and then call
-   * {@link #appendBranch(List)} on the cached branch. Note that calling
-   * {@link Node#setReference(Node)} on a node belonging to the pruned branch will become
-   * reachable again by the traversal algorithm.
-   * <p>
-   * When collected, pruned nodes behave like {@link Node}, otherwise they are eligible for
-   * garbage collection.
+   * To make all the nodes in the branch reachable again, call {@link Node#setReference(Node)}
+   * on the pruned node.
    *
    * @see #clear()
-   * @see #appendBranch(List)
    * @see #isReachable(Node)
+   * @see Node#setReference(Node)
    */
-  public List<Node> pruneBranch(Node node) {
+  public boolean prune(Node node) {
     if (!isReachable(node))
-      return new ArrayList<Node>();
-    ArrayList<Node> list = new ArrayList<Node>();
-    _collect(list, node);
-    for (Node collectedNode : list)
-      if (collectedNode.reference() != null)
-        collectedNode.reference()._removeChild(collectedNode);
-      else
-        _removeLeadingNode(collectedNode);
-    return list;
-  }
-
-  /**
-   * Appends the branch which typically should come from the one pruned (and cached) with
-   * {@link #pruneBranch(Node)}.
-   * <p>
-   * {@link #pruneBranch(Node)}
-   */
-  public void appendBranch(List<Node> branch) {
-    if (branch == null)
-      return;
-    for (Node node : branch)
-      if (node.reference() != null)
-        node.reference()._addChild(node);
-      else
-        _addLeadingNode(node);
+      return false;
+    if (node.reference() != null) {
+      node.reference()._removeChild(node);
+      // TODO testing, maybe not necessary
+      node._reference = null;
+    } else
+      _removeLeadingNode(node);
+    return true;
   }
 
   /**
    * Returns {@code true} if the node is reachable by the {@link #render()}
    * algorithm and {@code false} otherwise.
    * <p>
-   * Nodes are made unreachable with {@link #pruneBranch(Node)} and reachable
+   * Nodes are made unreachable with {@link #prune(Node)} and reachable
    * again with {@link Node#setReference(Node)}.
    *
    * @see #render()
@@ -730,7 +705,10 @@ public class Graph {
   public boolean isReachable(Node node) {
     if (node == null)
       return false;
-    return node.isAttached(this);
+    for (Node n : nodes())
+      if (n == node)
+        return true;
+    return false;
   }
 
   /**
@@ -763,21 +741,6 @@ public class Graph {
   }
 
   /**
-   * Returns a straight path of nodes between {@code tail} and {@code tip}. Returns an empty list
-   * if either {@code tail} or {@code tip} aren't reachable. Use {@link Node#path(Node, Node)}
-   * to include all nodes even if they aren't reachable.
-   * <p>
-   * If {@code tail} is ancestor of {@code tip} the returned list will include both of them.
-   * Otherwise it will be empty.
-   *
-   * @see #isReachable(Node)
-   * @see Node#path(Node, Node)
-   */
-  public List<Node> path(Node tail, Node tip) {
-    return (isReachable(tail) && isReachable(tip)) ? Node.path(tail, tip) : new ArrayList<Node>();
-  }
-
-  /**
    * Collects {@code node} and all its descendant nodes. Note that for a node to be collected
    * it must be reachable.
    *
@@ -801,6 +764,13 @@ public class Graph {
   }
 
   /**
+   * Returns the current frame-rate.
+   */
+  public float frameRate() {
+    return timingHandler().frameRate();
+  }
+
+  /**
    * Returns the number of nodes displayed since the graph was instantiated.
    * <p>
    * Use {@code TimingHandler.frameCount} to retrieve the number of nodes displayed since
@@ -813,49 +783,41 @@ public class Graph {
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().registerTask(task)}.
    *
-   * @see TimingHandler#registerTask(TimingTask)
+   * @see TimingHandler#registerTask(Task)
    */
-  public void registerTask(TimingTask task) {
+  public void registerTask(Task task) {
     timingHandler().registerTask(task);
   }
 
   /**
    * Convenience wrapper function that simply calls {@code timingHandler().unregisterTask(task)}.
+   *
+   * @see TimingHandler#unregisterTask(Task)
    */
-  public void unregisterTask(TimingTask task) {
+  public void unregisterTask(Task task) {
     timingHandler().unregisterTask(task);
   }
 
   /**
    * Convenience wrapper function that simply returns {@code timingHandler().isTaskRegistered(task)}.
+   *
+   * @see TimingHandler#isTaskRegistered(Task)
    */
-  public boolean isTaskRegistered(TimingTask task) {
+  public boolean isTaskRegistered(Task task) {
     return timingHandler().isTaskRegistered(task);
   }
 
   /**
-   * Convenience wrapper function that simply calls {@code timingHandler().registerAnimator(animator)}.
+   * Init the interpolator task. Call by interpolator constructor.
+   * This method should overridden to change the task type.
    */
-  public void registerAnimator(Animator animator) {
-    timingHandler().registerAnimator(animator);
-  }
-
-  /**
-   * Convenience wrapper function that simply calls {@code timingHandler().unregisterAnimator(animator)}.
-   *
-   * @see TimingHandler#unregisterAnimator(Animator)
-   */
-  public void unregisterAnimator(Animator animator) {
-    timingHandler().unregisterAnimator(animator);
-  }
-
-  /**
-   * Convenience wrapper function that simply returns {@code timingHandler().isAnimatorRegistered(animator)}.
-   *
-   * @see TimingHandler#isAnimatorRegistered(Animator)
-   */
-  public boolean isAnimatorRegistered(Animator animator) {
-    return timingHandler().isAnimatorRegistered(animator);
+  protected Task _initTask(Interpolator interpolator) {
+    return new Task(this.timingHandler()) {
+      @Override
+      public void execute() {
+        interpolator.update();
+      }
+    };
   }
 
   // Matrix and transformations stuff
@@ -951,7 +913,7 @@ public class Graph {
     if (eye == null || _eye == eye)
       return;
     //TODO experimental
-    pruneBranch(_eye);
+    prune(_eye);
     _eye = eye;
     if (_interpolator == null)
       _interpolator = new Interpolator(this, _eye);
@@ -1107,7 +1069,7 @@ public class Graph {
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
-   * every node instead.
+   * every frame instead.
    */
   public float[][] updateBoundaryEquations() {
     _initCoefficients();
@@ -1245,7 +1207,7 @@ public class Graph {
   }
 
   /**
-   * Disables automatic update of the frustum plane equations every node.
+   * Disables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1258,7 +1220,7 @@ public class Graph {
   }
 
   /**
-   * Enables automatic update of the frustum plane equations every node.
+   * Enables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1271,7 +1233,7 @@ public class Graph {
   }
 
   /**
-   * Enables or disables automatic update of the eye boundary plane equations every node
+   * Enables or disables automatic update of the eye boundary plane equations every frame
    * according to {@code flag}. Computation of the equations is expensive and hence is
    * disabled by default.
    *
@@ -2385,7 +2347,7 @@ public class Graph {
   /**
    * Max between {@link Node#lastUpdate()} and {@link #_lastNonEyeUpdate()}.
    *
-   * @return last node the eye was updated
+   * @return last frame the eye was updated
    * @see #_lastNonEyeUpdate()
    */
   public long lastUpdate() {

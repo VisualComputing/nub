@@ -57,7 +57,7 @@ void draw() {
 }
 ```
 
-See the [Sceneless example](https://github.com/VisualComputing/nubjs/tree/processing/testing/src/processing/DetachedNodes/Sceneless). Some advantages of using _detached_ nodes without instantiating a `scene` object are:
+See the [Sceneless example](https://github.com/VisualComputing/nub/tree/master/testing/src/processing/DetachedNodes/Sceneless). Some advantages of using _detached_ nodes without instantiating a `scene` object are:
 
 * The scene gets rendered respect to an `eye` node.
 * The graph topology is set (even at run time) with [setReference(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#setReference-frames.core.Node-).
@@ -148,7 +148,7 @@ public void mouseDragged() {
 }
 ```
 
-See the [detached-nodes CajasOrientadas example](https://github.com/VisualComputing/nubjs/tree/processing/testing/src/processing/DetachedNodes/CajasOrientadas). Some advantages of using _detached_ nodes through an instantiated `scene` object:
+See the [detached-nodes CajasOrientadas example](https://github.com/VisualComputing/nub/tree/master/testing/src/processing/DetachedNodes/CajasOrientadas). Some advantages of using _detached_ nodes through an instantiated `scene` object:
 
 * Same as with _detached_ nodes without an instantiated `scene` object.
 * The `eye` node is automatically handled by the `scene` and may be set from any (attached or detached) [Node](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html) instance (see [setEye(Node)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#setEye-frames.core.Node-)).

@@ -3,6 +3,8 @@ package intellij;
 import nub.core.Interpolator;
 import nub.core.Node;
 import nub.processing.Scene;
+import nub.processing.TimingTask;
+import nub.timing.Task;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.event.MouseEvent;
@@ -11,8 +13,12 @@ import processing.event.MouseEvent;
  * This example introduces the three different interpolations offered
  * by the Graph.
  */
-public class Interpolation extends PApplet {
+public class TaskTesting extends PApplet {
   Scene scene;
+  Task task, task2, task3;
+  float fps = 60;
+  long lapse, totalLapse, targetLapse;
+  long period = 100;
   Interpolator interpolator, eyeInterpolator1, eyeInterpolator2;
   Node shape;
   boolean showEyePath = true;
@@ -56,15 +62,63 @@ public class Interpolation extends PApplet {
       }
     };
     interpolator = new Interpolator(shape);
-    interpolator.setLoop();
+    //interpolator.setLoop();
+    interpolator.enableConcurrence();
+    interpolator.setPeriod(1);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
     interpolator.start();
+
+    //frameRate(100);
+    task = new TimingTask(scene) {
+      @Override
+      public void execute() {
+        long current = System.currentTimeMillis();
+        if (lapse == 0)
+          lapse = period;
+        else
+          lapse = current - lapse;
+        totalLapse += lapse;
+        targetLapse += period;
+        println(scene.frameCount() + " target fps: " + fps + " nub fps: " + scene.frameRate() + " period: " + period + " lapse: " + lapse + " targetLapse: " + targetLapse + " totalLapse: " + totalLapse);
+        lapse = current;
+      }
+    };
+    //task.run(60);
+
+    ///*
+    task2 = new TimingTask(scene) {
+      @Override
+      public void execute() {
+        println("one timer seq");
+      }
+    };
+    task2.enableRecurrence();
+    task2.run(3000);
+
+    task3 = new TimingTask(scene) {
+      @Override
+      public void execute() {
+        println("one timer parallel");
+      }
+    };
+    task3.enableRecurrence();
+    task3.enableConcurrence();
+    task3.run(3000);
+
+    println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
+    //*/
   }
 
   public void draw() {
     background(0);
+    drawScene();
+    //scene.render();
+    //println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
+  }
+
+  void drawScene() {
     scene.render();
 
     pushStyle();
@@ -142,9 +196,45 @@ public class Interpolation extends PApplet {
       scene.fit(1);
     if (key == 'f')
       scene.fit();
+
+    if (key == 'g')
+      interpolator.toggle();
+
+    if (key == 'i')
+      interpolator.enableConcurrence();
+
+    if (key == 'j') {
+      task2.enableRecurrence();
+      task3.enableRecurrence();
+    }
+
+    if (key == 'f' || key == 'F') {
+      if (key == 'F')
+        fps += 5;
+      else
+        fps -= 5;
+      frameRate(fps);
+      println("New target fps set to: " + fps);
+    }
+
+    if (key == 'p') {
+      println("count: p5 " + frameCount + " nub " + scene.frameCount() + " fps: p5 " + frameRate + " nub " + scene.frameRate());
+    }
+
+    if (key == 'h' || key == 'H')
+      if (key == 'H')
+        period += 5;
+      else
+        period -= 5;
+
+    if (key == 'r' || key == 'R')
+      if (task.isActive())
+        task.stop();
+      else
+        task.run(period);
   }
 
   public static void main(String[] args) {
-    PApplet.main(new String[]{"intellij.Interpolation"});
+    PApplet.main(new String[]{"intellij.TaskTesting"});
   }
 }

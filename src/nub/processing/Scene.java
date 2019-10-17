@@ -1,12 +1,12 @@
-/****************************************************************************************
+/******************************************************************************************
  * nub
- * Copyright (c) 2019 National University of Colombia, https://visualcomputing.github.io/
+ * Copyright (c) 2019 Universidad Nacional de Colombia, https://visualcomputing.github.io/
  * @author Jean Pierre Charalambos, https://github.com/VisualComputing
  *
  * All rights reserved. A 2D or 3D scene graph library providing eye, input and timing
  * handling to a third party (real or non-real time) renderer. Released under the terms
  * of the GPL v3.0 which is available at http://www.gnu.org/licenses/gpl.html
- ****************************************************************************************/
+ ******************************************************************************************/
 
 // Thanks goes to Andres Colubri, https://www.sabetilab.org/andres-colubri/
 // for implementing the first off-screen scene working example
@@ -25,8 +25,7 @@ import nub.primitives.Matrix;
 import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
-import nub.timing.SequentialTimer;
-import nub.timing.TimingTask;
+import nub.timing.Task;
 import processing.core.*;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
@@ -109,10 +108,8 @@ import java.util.List;
  * @see Interpolator
  */
 public class Scene extends Graph implements PConstants {
-  // Timing
-  protected boolean _javaTiming;
-  public static String prettyVersion = "0.1.0";
-  public static String version = "1";
+  public static String prettyVersion = "0.2.0";
+  public static String version = "2";
 
   // P R O C E S S I N G A P P L E T A N D O B J E C T S
   protected PApplet _parent;
@@ -239,6 +236,18 @@ public class Scene extends Graph implements PConstants {
     pApplet().registerMethod("dispose", this);
     // 4. Handed
     setLeftHanded();
+  }
+
+  // Tasks
+
+  @Override
+  protected Task _initTask(Interpolator interpolator) {
+    return new TimingTask(this) {
+      @Override
+      public void execute() {
+        interpolator.update();
+      }
+    };
   }
 
   // P5 STUFF
@@ -450,89 +459,6 @@ public class Scene extends Graph implements PConstants {
    */
   public void enableDepthTest(PGraphics pGraphics) {
     pGraphics.hint(PApplet.ENABLE_DEPTH_TEST);
-  }
-
-  // TIMING
-
-  @Override
-  public void registerTask(TimingTask task) {
-    if (areTimersSequential())
-      timingHandler().registerTask(task);
-    else
-      timingHandler().registerTask(task, new ParallelTimer(task));
-  }
-
-  /**
-   * Sets all {@link #timingHandler()} timers as (single-threaded) {@link SequentialTimer}(s).
-   *
-   * @see #setParallelTimers()
-   * @see #shiftTimers()
-   * @see #areTimersSequential()
-   */
-  public void setSequentialTimers() {
-    if (areTimersSequential())
-      return;
-
-    _javaTiming = false;
-    timingHandler().restoreTimers();
-  }
-
-  /**
-   * Sets all {@link #timingHandler()} timers as (multi-threaded) java.util.Timer(s).
-   *
-   * @see #setSequentialTimers()
-   * @see #shiftTimers()
-   * @see #areTimersSequential()
-   */
-  public void setParallelTimers() {
-    if (!areTimersSequential())
-      return;
-
-    boolean isActive;
-
-    for (TimingTask task : timingHandler().timerPool()) {
-      long period = 0;
-      boolean rOnce = false;
-      isActive = task.isActive();
-      if (isActive) {
-        period = task.period();
-        rOnce = task.timer().isSingleShot();
-      }
-      task.stop();
-      task.setTimer(new ParallelTimer(task));
-      if (isActive) {
-        if (rOnce)
-          task.runOnce(period);
-        else
-          task.run(period);
-      }
-    }
-
-    _javaTiming = true;
-    PApplet.println("java util timers set");
-  }
-
-  /**
-   * Returns true, if timing is handling sequentially (i.e., all {@link #timingHandler()}
-   * timers are (single-threaded) {@link SequentialTimer}(s)).
-   *
-   * @see #setSequentialTimers()
-   * @see #setParallelTimers()
-   * @see #shiftTimers()
-   */
-  public boolean areTimersSequential() {
-    return !_javaTiming;
-  }
-
-  /**
-   * If {@link #areTimersSequential()} calls {@link #setParallelTimers()}, otherwise call
-   * {@link #setSequentialTimers()}.
-   */
-  public void shiftTimers() {
-    if (areTimersSequential())
-      setParallelTimers();
-    else
-      setSequentialTimers();
   }
 
   // 3. Drawing methods
@@ -824,7 +750,7 @@ public class Scene extends Graph implements PConstants {
     Interpolator interpolator = new Interpolator(this);
     for (int j = 0; j < jsonInterpolator.size(); j++) {
       Node node = new Node(this);
-      pruneBranch(node);
+      prune(node);
       node.set(_toNode(jsonInterpolator.getJSONObject(j)));
       node.setPickingThreshold(20);
       interpolator.addKeyFrame(node, jsonInterpolator.getJSONObject(j).getFloat("time"));
@@ -1096,7 +1022,9 @@ public class Scene extends Graph implements PConstants {
       throw new RuntimeException("There should be exactly one beginHUD() call followed by a "
           + "endHUD() and they cannot be nested. Check your implementation!");
     _hudCalls++;
-    pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (is3D())
+      pGraphics.hint(PApplet.DISABLE_OPTIMIZED_STROKE);
     disableDepthTest(pGraphics);
     // if-else same as:
     // matrixHandler(p).beginHUD();
@@ -1137,7 +1065,9 @@ public class Scene extends Graph implements PConstants {
     else
       matrixHandler(pGraphics).endHUD();
     enableDepthTest(pGraphics);
-    pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);// -> new line not present in Graph.eS
+    // Otherwise Processing says: "Optimized strokes can only be disabled in 3D"
+    if (is3D())
+      pGraphics.hint(PApplet.ENABLE_OPTIMIZED_STROKE);
   }
 
   // drawing
@@ -2129,14 +2059,18 @@ public class Scene extends Graph implements PConstants {
    * Draws a representation of the viewing frustum onto {@code pGraphics} according to
    * {@code graph.eye()} and {@code graph.type()}.
    * <p>
-   * Note that if {@code graph == this} this method has not effect at all.
+   * Note that if {@code pGraphics == graph.context()} this method has not effect at all.
    *
    * @see #drawFrustum(Graph)
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float)
    * @see #drawFrustum(PGraphics, PGraphics, Type, Node, float, float, boolean)
    */
   public void drawFrustum(PGraphics pGraphics, Graph graph) {
-    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene;
+    if (pGraphics == graph.context())
+      return;
+    // texturing requires graph.isOffscreen() (third condition) otherwise got
+    // "The pixels array is null" message and the frustum near plane texture and contour are missed
+    boolean texture = pGraphics instanceof PGraphicsOpenGL && graph instanceof Scene && graph.isOffscreen();
     switch (graph.type()) {
       case TWO_D:
       case ORTHOGRAPHIC:
@@ -2542,7 +2476,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a bullseye around the node {@link Node#position()} projection.
    * <p>
-   * The shape of the bullseye may be squared or circled dependeing on the node
+   * The shape of the bullseye may be squared or circled depending on the node
    * {@link Node#pickingThreshold()} sign.
    *
    * @see Node#pickingThreshold()

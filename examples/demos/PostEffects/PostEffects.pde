@@ -2,10 +2,12 @@
  * PostEffects.
  * by Ivan Castellanos and Jean Pierre Charalambos.
  *
- * This example illustrates how to concatenate shaders to accumulate their
- * effects which requires drawing shapes into arbitrary PGraphics canvases.
+ * This example is an adaption of Neil Mendoza great openFrameworks
+ * ofxPostProcessing addon (http://www.neilmendoza.com/ofxpostprocessing/)
+ * which illustrates how to concatenate shaders to accumulate their effects
+ * by drawing shapes into arbitrary PGraphics canvases.
  *
- * Press '1' to '9' to (de)activate effect.
+ * Press '1' to '7' to (de)activate effect.
  */
 
 import nub.primitives.*;

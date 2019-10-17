@@ -16,13 +16,17 @@ public class MiniMap2 extends PApplet {
   boolean displayMinimap = true;
   // whilst scene is either on-screen or not, the minimap is always off-screen
   // test both cases here:
-  boolean onScreen = false;
+  // when onScreen = true, the minimap countour is not rendered and it gives:
+  /*
+  The pixels array is null.
+  */
+  boolean onScreen = true;
 
   int w = 1200;
   int h = 1200;
 
   //Choose FX2D, JAVA2D, P2D or P3D
-  String renderer = P3D;
+  String renderer = P2D;
 
   public void settings() {
     size(w, h, renderer);
@@ -72,9 +76,12 @@ public class MiniMap2 extends PApplet {
       @Override
       public void graphics(PGraphics pg) {
         pg.pushStyle();
-        pg.fill(isTracked() ? 255 : 25, isTracked() ? 0 : 255, 255);
+        pg.fill(255, isTracked() ? 25 : 50, 0, 125);
         pg.stroke(0, 0, 255);
         pg.strokeWeight(2);
+        // comment and the above errors disappear
+        // it has to do with the near plane drawing ant the texture
+        // see Scene._drawPlane
         minimap.drawFrustum(pg, scene);
         pg.popStyle();
       }

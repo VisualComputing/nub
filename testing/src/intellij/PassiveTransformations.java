@@ -46,7 +46,7 @@ public class PassiveTransformations extends PApplet {
     }
     //discard Processing matrices
     resetMatrix();
-    _shader = loadShader("/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nubjs/testing/data/matrix_handler/vertex.glsl");
+    _shader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/fragment.glsl", "/home/pierre/IdeaProjects/nub/testing/data/matrix_handler/vertex.glsl");
   }
 
   public void draw() {
