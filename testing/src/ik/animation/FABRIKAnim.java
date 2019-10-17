@@ -1,25 +1,61 @@
 package ik.animation;
 
 import ik.basic.Util;
-import nub.ik.visual.Joint;
 import nub.core.Graph;
 import nub.core.Node;
-import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.Hinge;
+import nub.ik.animation.*;
 import nub.ik.solver.geometric.ChainSolver;
-import nub.ik.animation.IKAnimation;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FABRIKAnim extends PApplet {
+    /*
+     * This example shows how to visualize an IK  Algorithm step by step
+     * */
+
+    /*
+    (*) Define a Visualizer to your algorithm.
+    Here, you must specify the way that each interesting event annotated on the solver will be mapped to a visual step
+     */
+    class FABRIKVisualizer extends Visualizer {
+        public FABRIKVisualizer(Scene scene, float radius, long period, long stepDuration) {
+            super(scene, radius, period, stepDuration);
+        }
+
+        /*
+        Override this method is critical, Although EventToViz contains a default way to map an Interesting event into a
+        visual step, there could be times in which you require to generate your own mapping
+         */
+        @Override
+        public VisualStep eventToVizMapping(InterestingEvent event){
+            return EventToViz.generateDefaultViz(this, event, setVisualFeatures(event));
+        }
+
+        /*
+         * Use this method to customize the aspect of a visual step, take into account the Type of the Events or their ids
+         * */
+        @Override
+        public HashMap<String, Object> setVisualFeatures(InterestingEvent event){
+            //In this basic example we customize the aspect of the rotation step:
+            HashMap<String, Object> attribs = null;
+            if(event.type() == "NodeRotation" || event.type() == "NodeTranslation"){
+                attribs = new HashMap<String, Object>();
+                attribs.put("color", color(0,255,0));
+            }
+            return attribs;
+        }
+    }
+
+
     Scene scene, auxiliar, focus;
-    boolean displayAuxiliar = false;
+    boolean displayAuxiliar = false, anim = false;
 
     int numJoints = 7;
     float targetRadius = 7;
@@ -27,12 +63,15 @@ public class FABRIKAnim extends PApplet {
 
     int color;
 
-    ChainSolver solver;
+    ChainSolver solver; //IK Algorithm that uses Solver template
+    FABRIKVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
+    VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
+
     ArrayList<Node> structure = new ArrayList<>(); //Keep Structures
     Node target; //Keep targets
     boolean solve = false;
 
-    IKAnimation.FABRIKAnimation FABRIKAnimator = null;
+
 
     public void settings() {
         size(700, 700, P3D);
@@ -45,6 +84,7 @@ public class FABRIKAnim extends PApplet {
         scene.fit(1);
         scene.setRightHanded();
 
+        //(*) The auxiliar Scene is where the animation will take place
         auxiliar = new Scene(this, P3D, width, height , 0, 0);
         auxiliar.setType(Graph.Type.ORTHOGRAPHIC);
         auxiliar.setRadius(numJoints * boneLength);
@@ -61,21 +101,26 @@ public class FABRIKAnim extends PApplet {
 
         //create skeleton
         color = color(212,0,255);
-        //structure = generateSkeleton(new Vector(0, 0, 0), color);
         structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
-        //Util.generateConstraints(structure,Util.ConstraintType.MIX, 0, true);
 
         solver = new ChainSolver(structure);
-        solver.enableHistory(true);
+        solver.enableMediator(true);
+
+        //Create the visualizer
+        visualizer = new FABRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 2000);
+
+        //Create Mediator that relates a Solver with at least one visualizer
+        mediator = new VisualizerMediator(solver, visualizer);
 
         solver.setMaxError(0.001f);
-        solver.setTimesPerFrame(5);
+        solver.setTimesPerFrame(20);
         solver.setMaxIterations(200);
         //7. Set targets
         solver.setTarget(structure.get(numJoints - 1), target);
         target.setPosition(structure.get(numJoints - 1).position());
 
-        TimingTask task = new TimingTask() {
+        //Defines a task to run the solver each 40 ms
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if(solve) {
@@ -83,8 +128,18 @@ public class FABRIKAnim extends PApplet {
                 }
             }
         };
-        scene.registerTask(task);
         task.run(40);
+
+        //Defines a task to run the animation each 40 ms
+        TimingTask animTask = new TimingTask(scene) {
+            @Override
+            public void execute() {
+                if (anim) {
+                    visualizer.execute();
+                }
+            }
+        };
+        animTask.run(visualizer.period());
         //Define Text Font
         textFont(createFont("Zapfino", 38));
     }
@@ -96,7 +151,7 @@ public class FABRIKAnim extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        //Util.printInfo(scene, solver, structure.get(0).position());
+        Util.printInfo(scene, solver, structure.get(0).position());
 
         if(displayAuxiliar) {
             auxiliar.beginDraw();
@@ -104,7 +159,7 @@ public class FABRIKAnim extends PApplet {
             auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
-            if(FABRIKAnimator != null)  FABRIKAnimator.draw();
+            visualizer.render();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -112,34 +167,6 @@ public class FABRIKAnim extends PApplet {
 
     }
 
-    public ArrayList<Node> generateSkeleton(Vector position, int color){
-        //3-Segment-Arm
-        ArrayList<Node> skeleton = new ArrayList<>();
-        Joint j1 = new Joint(scene, color);
-        Joint j2 = new Joint(scene, color);
-        j2.setReference(j1);
-        j2.translate(boneLength, 0, 0);
-        Joint j3 = new Joint(scene);
-        j3.setReference(j2);
-        Vector v = new Vector(boneLength, -boneLength, 0);
-        v.normalize();
-        v.multiply(boneLength);
-        j3.translate(v);
-        j1.setRoot(true);
-        j1.translate(position);
-        skeleton.add(j1);
-        skeleton.add(j2);
-        skeleton.add(j3);
-        //Add constraints
-        BallAndSocket c1 = new BallAndSocket(radians(45),radians(45));
-        c1.setRestRotation(j1.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
-        c1.setTwistLimits(radians(0),radians(180));
-        j1.setConstraint(c1);
-
-        Hinge c2 = new Hinge(radians(0),radians(120),j2.rotation().get(), j3.translation().get(), new Vector(0,0,-1));
-        j2.setConstraint(c2);
-        return skeleton;
-    }
 
 
     @Override
@@ -175,14 +202,13 @@ public class FABRIKAnim extends PApplet {
         } else if(key == 'q'){
             displayAuxiliar = true;
             solver.solve();
-            if(FABRIKAnimator == null) FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, solver, targetRadius, color);
-            else FABRIKAnimator.reset();
+            anim = true;
         } else if(key == ' '){
             displayAuxiliar = !displayAuxiliar;
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            if(FABRIKAnimator != null) FABRIKAnimator.setPeriod(Integer.valueOf("" + key) * 1000);
+            //if(animation != null) animation.setPeriod(Integer.valueOf("" + key) * 1000);
         }
     }
 
