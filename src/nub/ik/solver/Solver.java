@@ -12,13 +12,9 @@
 package nub.ik.solver;
 
 import nub.core.Node;
-import nub.ik.animation.Visualizer;
 import nub.ik.animation.VisualizerMediator;
-import nub.timing.TimingTask;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 /**
  * A Solver is a convenient class to solve IK problem,
@@ -39,22 +35,8 @@ public abstract class Solver {
   protected int _last_iteration = 0; //TODO : Clean this!
   protected boolean _change_temp = false; //TODO : Clean this!
 
-  protected TimingTask _task;
   protected VisualizerMediator _mediator;
   protected boolean _enableMediator = false;
-
-  public TimingTask task() {
-    return _task;
-  }
-
-  public Solver() {
-    _task = new TimingTask() {
-      @Override
-      public void execute() {
-        solve();
-      }
-    };
-  }
 
   /*Getters and setters*/
   public int lastIteration() {
