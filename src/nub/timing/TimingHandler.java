@@ -84,6 +84,9 @@ public class TimingHandler {
    * Recomputes the frame rate based upon the frequency at which {@link #handle()} is
    * called from within the application main event loop. The frame rate is needed to sync
    * all timing operations.
+   * <p>
+   * Computation adaptd from here (refer to handleDraw()):
+   * https://github.com/processing/processing/blob/master/core/src/processing/core/PApplet.java
    */
   protected void _updateFrameRate() {
     long now = System.nanoTime();
