@@ -147,7 +147,11 @@ abstract public class Task {
    * @see #setFrequency(float)
    */
   public void setPeriod(long period) {
-    _period = Math.abs(period);
+    if (period <= 0) {
+      System.out.println("Task period not set as it should have non-negative value");
+      return;
+    }
+    _period = period;
     float target = frequency();
     if (!isConcurrent() && _timingHandler.frameRate() < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
