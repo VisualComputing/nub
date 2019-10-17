@@ -22,8 +22,11 @@ class Particle {
           init();
       }
     };
-    task.enableConcurrence();
     task.run();
+  }
+
+  long period() {
+    return task.period();
   }
 
   void incrementPeriod() {
@@ -36,6 +39,14 @@ class Particle {
 
   void toggle() {
     task.toggle();
+  }
+
+  void enableConcurrence(boolean enable) {
+    task.enableConcurrence(enable);
+  }
+
+  boolean isConcurrent() {
+    return task.isConcurrent();
   }
 
   void init() {

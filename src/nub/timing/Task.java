@@ -156,7 +156,7 @@ abstract public class Task {
     if (!isConcurrent() && _timingHandler.frameRate() < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
           "but currently it just achieves " + _timingHandler.frameRate() + " Hz." + '\n' + "Either set a period of at least "
-          + 1000 / _timingHandler.frameRate() + " ms or call toggleConcurrence() to execute the task concurrently.");
+          + 1000 / _timingHandler.frameRate() + " ms or call enableConcurrence() to execute the task concurrently.");
     }
   }
 
@@ -235,7 +235,7 @@ abstract public class Task {
    * @see #isConcurrent()
    */
   public boolean isRecurrent() {
-    return !_recurrence;
+    return _recurrence;
   }
 
   /**

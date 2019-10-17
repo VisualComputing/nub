@@ -64,7 +64,6 @@ public class TaskTesting extends PApplet {
     interpolator = new Interpolator(shape);
     //interpolator.setLoop();
     interpolator.enableConcurrence();
-    interpolator.setPeriod(1);
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
@@ -95,19 +94,21 @@ public class TaskTesting extends PApplet {
       }
     };
     task2.enableRecurrence();
-    task2.run(3000);
+    //task2.run(3000);
 
     task3 = new TimingTask(scene) {
       @Override
       public void execute() {
-        println("one timer parallel");
+        println("non-recurrent timer parallel");
       }
     };
-    task3.enableRecurrence();
+    //task3.enableRecurrence(false);
     task3.enableConcurrence();
-    task3.run(3000);
+    task3.run(2000);
+    //if(((TimingTask)task3)._timer != null)
+    println("- null");
 
-    println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
+    //println("Total steps (according to formula): " + (interpolator.duration() * 1000) / (interpolator.period() * interpolator.speed()));
     //*/
   }
 
@@ -191,6 +192,10 @@ public class TaskTesting extends PApplet {
         speed += 0.25f;
       interpolator.start(speed);
     }
+
+    if (key == 'n')
+      //if(((TimingTask)task3)._timer == null)
+      println("null");
 
     if (key == 's')
       scene.fit(1);

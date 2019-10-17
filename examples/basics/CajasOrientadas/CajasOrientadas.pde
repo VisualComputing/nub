@@ -30,7 +30,7 @@ void setup() {
   scene.fit();
   esfera = new Sphere(scene, color(random(0, 255), random(0, 255), random(0, 255)), 10);
   esfera.setPosition(new Vector(0, 1.4, 0));
-  cajas = new Box[30];
+  cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++)
     cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)), 
       random(10, 40), random(10, 40), random(10, 40));
