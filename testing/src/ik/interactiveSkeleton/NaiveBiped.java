@@ -12,7 +12,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.MySolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import ik.basic.Util;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
@@ -186,13 +186,12 @@ public class NaiveBiped extends PApplet {
         if (!debug) solver.setTimesPerFrame(5);
         else solver.setTimesPerFrame(1f);
         target.setPosition(limb.get(limb.size() - 1).position());
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if (solve) solver.solve();
             }
         };
-        scene.registerTask(task);
         task.run(20);
         return solver;
     }
@@ -272,7 +271,7 @@ public class NaiveBiped extends PApplet {
         Cycle cycle = new Cycle(scene);
         //Create Steps
         // First step
-        Cycle.Step step1 = new Cycle.Step() {
+        Cycle.Step step1 = new Cycle.Step(scene) {
             float angle = 0;
             float step = 3f;
             float w = 0.5f * stepWidth / 180;
@@ -300,7 +299,7 @@ public class NaiveBiped extends PApplet {
         cycle.addStep(step1);
         cycle.initialStep(step1);
         //Second step move root
-        Cycle.Step step2 = new Cycle.Step() {
+        Cycle.Step step2 = new Cycle.Step(scene) {
             float z = 0;
             float step = 0;
             float times = 15;
@@ -329,7 +328,7 @@ public class NaiveBiped extends PApplet {
         cycle.addStep(step2);
         cycle.addTransition(step1, step2);
         // First step
-        Cycle.Step step3 = new Cycle.Step() {
+        Cycle.Step step3 = new Cycle.Step(scene) {
             float angle = 0;
             float step = 3f;
             float w = 0.5f * stepWidth / 180;
@@ -361,12 +360,16 @@ public class NaiveBiped extends PApplet {
 
     public static class Cycle{
         public static abstract class Step{
-            TimingTask _task = new TimingTask() {
-                @Override
-                public void execute() {
-                    Step.this.execute();
-                }
-            };
+            public Step(Scene scene){
+                _task = new TimingTask(scene) {
+                    @Override
+                    public void execute() {
+                        Step.this.execute();
+                    }
+                };
+            }
+
+            TimingTask _task;
             public abstract boolean completed();
             public abstract void execute();
             public abstract void start();
@@ -395,7 +398,6 @@ public class NaiveBiped extends PApplet {
 
         public void addStep(Step step){
             _steps.add(step);
-            _scene.registerTask(step._task);
         }
 
         public void initialStep(Step step){
@@ -408,13 +410,12 @@ public class NaiveBiped extends PApplet {
 
         public Cycle(Scene scene){
             _scene = scene;
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     Cycle.this.run();
                 }
             };
-            _scene.registerTask(task);
             task.run(5);
         }
     }

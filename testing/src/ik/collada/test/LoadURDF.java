@@ -10,7 +10,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.ik.loader.collada.data.Model;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -49,7 +49,7 @@ public class LoadURDF extends PApplet {
             Target target = new Target(scene, ((Joint) model.root()).radius());
             /*Chain solver*/
 
-            List<Node> branch = scene.path(model.skeleton().get("node1"), model.skeleton().get(dae == 0 ? "node10" : "node8"));
+            List<Node> branch = Node.path(model.skeleton().get("node1"), model.skeleton().get(dae == 0 ? "node10" : "node8"));
 
             ChainSolver solver = new ChainSolver( branch);
             solver.setKeepDirection(true);
@@ -61,13 +61,12 @@ public class LoadURDF extends PApplet {
             solver.setMinDistance(scene.radius() * 0.001f);
             solver.setTarget(branch.get(branch.size() - 1), target);
             target.setPosition(branch.get(branch.size() - 1).position().get());
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     solver.solve();
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
     }

@@ -15,7 +15,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.ik.loader.collada.data.Model;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -100,7 +100,7 @@ public class UR10 extends PApplet {
         model.skeleton().get("node2").cull();
 
         //Adding solver
-        List<Node> branch = scene.path(model.skeleton().get("node1"), model.skeleton().get("node2"));
+        List<Node> branch = Node.path(model.skeleton().get("node1"), model.skeleton().get("node2"));
 
 
         if(!ccd) {
@@ -117,13 +117,12 @@ public class UR10 extends PApplet {
         solver.setMaxError(scene.radius() * 0.01f); solver.setMinDistance(scene.radius() * 0.01f);
         solver.setTarget(branch.get(branch.size() - 1), target);
         target.setPosition(branch.get(branch.size() - 1).position().get());
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if (solve) solver.solve();
             }
         };
-        scene.registerTask(task);
         task.run(40);
         base = model.skeleton().get("node1").reference().translation();
 
@@ -220,7 +219,7 @@ public class UR10 extends PApplet {
         }else if(key =='a' || key == 'A'){
             solver.solve();
         }else if(key == ' '){
-            Node f = generateRandomReachablePosition(scene.path(model.skeleton().get("vkmodel0_node1"), model.skeleton().get("vkmodel0_node2")), scene.is3D());
+            Node f = generateRandomReachablePosition(Node.path(model.skeleton().get("vkmodel0_node1"), model.skeleton().get("vkmodel0_node2")), scene.is3D());
             Vector delta = Vector.subtract(f.position(), target.position());
             target.setPosition(Vector.add(target.position(), delta));
         }else if(key == 'k' || key == 'K') {

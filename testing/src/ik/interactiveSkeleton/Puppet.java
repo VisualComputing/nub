@@ -78,7 +78,6 @@ public class Puppet extends PApplet {
                     solver.solve();
                 }
             };
-            scene.registerTask(task);
             task.run(40);
             */
         }

@@ -10,7 +10,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import ik.basic.Util;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
@@ -119,7 +119,7 @@ public class ConeBall extends PApplet{
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
 
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     if(solve) {
@@ -127,7 +127,6 @@ public class ConeBall extends PApplet{
                     }
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
     }

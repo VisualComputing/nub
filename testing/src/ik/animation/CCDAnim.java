@@ -2,15 +2,12 @@ package ik.animation;
 
 import nub.core.Node;
 import nub.core.Graph;
-import nub.core.constraint.BallAndSocket;
-import nub.core.constraint.Hinge;
 import nub.ik.animation.*;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import ik.basic.Util;
-import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
 import processing.event.MouseEvent;
@@ -123,7 +120,7 @@ public class CCDAnim extends PApplet {
         target.setPosition(structure.get(numJoints - 1).position());
 
         //Defines a task to run the solver each 40 ms
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if(solve) {
@@ -131,11 +128,10 @@ public class CCDAnim extends PApplet {
                 }
             }
         };
-        scene.registerTask(task);
         task.run(40);
 
         //Defines a task to run the animation each 40 ms
-        TimingTask animTask = new TimingTask() {
+        TimingTask animTask = new TimingTask(scene) {
             @Override
             public void execute() {
                 if (anim) {
@@ -143,7 +139,6 @@ public class CCDAnim extends PApplet {
                 }
             }
         };
-        scene.registerTask(animTask);
         animTask.run(visualizer.period());
         //Define Text Font
         textFont(createFont("Zapfino", 38));

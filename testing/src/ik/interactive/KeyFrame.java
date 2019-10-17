@@ -48,7 +48,7 @@ public class KeyFrame extends Node {
 
     public void remove(){
         _target.removeKeyFrame(this);
-        _graph.pruneBranch(this);
+        _graph.prune(this);
     }
 
     //------------------------------------

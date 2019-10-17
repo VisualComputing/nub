@@ -11,7 +11,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.BallAndSocket;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -208,7 +208,7 @@ public class Viewer extends PApplet{
             chain.setMaxError(0.1f);
             chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     //if(solve) {
@@ -216,7 +216,6 @@ public class Viewer extends PApplet{
                     //}
                 }
             };
-            scene.registerTask(task);
             task.run(40);
             chainsolvers.add(chain);
         }

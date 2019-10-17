@@ -5,7 +5,7 @@ import nub.core.Interpolator;
 import nub.core.Node;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PConstants;
 import processing.core.PShape;
 
@@ -38,14 +38,13 @@ public class Target extends Node {
         setPickingThreshold(0);
 
         Target t = this;
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 _last.add(t.position());
                 while(_last.size() > 50) _last.remove(0);
             }
         };
-        scene.registerTask(task);
         task.run(150);
     }
 

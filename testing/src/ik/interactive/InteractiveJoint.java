@@ -56,7 +56,7 @@ public class InteractiveJoint extends Joint {
     }
 
     public void removeChild(){
-        _graph.pruneBranch(this);
+        _graph.prune(this);
     }
 
     //------------------------------------

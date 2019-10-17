@@ -7,11 +7,10 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
-import nub.ik.animation.IKAnimation;
 import nub.ik.solver.evolutionary.BioIk;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import ik.basic.Util;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
@@ -36,8 +35,6 @@ public class Case1 extends PApplet {
 
     int numSolvers = 7; //Set number of solvers
     boolean solve = false;
-
-    IKAnimation.FABRIKAnimation FABRIKAnimator = null;
 
     public void settings() {
         size(700, 700, P3D);
@@ -125,7 +122,7 @@ public class Case1 extends PApplet {
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
 
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     if(solve) {
@@ -133,7 +130,6 @@ public class Case1 extends PApplet {
                     }
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
 
@@ -158,7 +154,6 @@ public class Case1 extends PApplet {
             auxiliar.context().background(0);
             auxiliar.drawAxes();
             auxiliar.render();
-            if(FABRIKAnimator != null)  FABRIKAnimator.draw();
             auxiliar.endDraw();
             auxiliar.display();
         }
@@ -233,7 +228,6 @@ public class Case1 extends PApplet {
         } else if(key == '1'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();
-            FABRIKAnimator = new IKAnimation.FABRIKAnimation(auxiliar, (ChainSolver) solvers.get(2), targetRadius);
         } else if(key == '2'){
             displayAuxiliar = true;
             for (Solver s : solvers) s.solve();

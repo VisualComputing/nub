@@ -6,7 +6,7 @@ import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import nub.ik.visual.Arrow;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
@@ -63,13 +63,12 @@ public class TargetWithDirection  extends PApplet {
         solver.setTimesPerFrame(1f);
         solver.setTargetDirection(new Vector(1,0,0));
         solver.setTarget(target);
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if(solve) solver.solve();
             }
         };
-        scene.registerTask(task);
         task.run(40);
     }
 

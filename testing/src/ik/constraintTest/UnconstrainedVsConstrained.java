@@ -6,7 +6,7 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -75,7 +75,7 @@ public class UnconstrainedVsConstrained extends PApplet{
         solver.setTarget(endEffector, target);
 
         //5. Create a Timing Task such that the solver executes each amount of time
-        TimingTask solverTask = new TimingTask() {
+        TimingTask solverTask = new TimingTask(scene) {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -84,7 +84,6 @@ public class UnconstrainedVsConstrained extends PApplet{
                 }
             }
         };
-        scene.registerTask(solverTask); //Add solverTask to the Graph scene
         solverTask.run(40); //Execute the solverTask each 40 ms
 
         //Define Text Properties

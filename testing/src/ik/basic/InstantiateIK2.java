@@ -6,7 +6,7 @@ import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -108,7 +108,7 @@ public class InstantiateIK2 extends PApplet {
         solver2.setTarget(skeleton2.get(skeleton2.size() - 1), target2);
 
         //5. Create a Timing Task for each solver such that the solver executes each amount of time
-        TimingTask solverTask1 = new TimingTask() {
+        TimingTask solverTask1 = new TimingTask(scene) {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -118,7 +118,7 @@ public class InstantiateIK2 extends PApplet {
             }
         };
 
-        TimingTask solverTask2 = new TimingTask() {
+        TimingTask solverTask2 = new TimingTask(scene) {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
@@ -128,8 +128,6 @@ public class InstantiateIK2 extends PApplet {
             }
         };
 
-        scene.registerTask(solverTask1); //Add solverTask to the Graph scene
-        scene.registerTask(solverTask2); //Add solverTask to the Graph scene
         solverTask1.run(40); //Execute the solverTask each 40 ms
         solverTask2.run(40); //Execute the solverTask each 40 ms
 

@@ -6,7 +6,7 @@ import nub.ik.solver.geometric.ChainSolver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.core.PConstants;
 import processing.core.PGraphics;
@@ -153,13 +153,12 @@ public class LuxoIK extends PApplet {
         solver.setFixTwisting(true);
         solver.setMaxError(3);
 
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 solver.solve();
             }
         };
-        scene.registerTask(task);
         task.run(40);
 
         //scene.registerTreeSolver(lamp.frame(0));

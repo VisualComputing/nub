@@ -8,7 +8,7 @@ import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.PApplet;
 import processing.event.MouseEvent;
 
@@ -90,13 +90,12 @@ public class VisualBenchmark extends PApplet {
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
             targets.get(i).setPosition(structures.get(i).get(numJoints - 1).position());
             //8. Register task
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     if(solve) solver.solve();
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
     }

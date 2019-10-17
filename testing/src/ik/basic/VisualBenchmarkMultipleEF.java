@@ -73,7 +73,6 @@ public class VisualBenchmarkMultipleEF  extends PApplet {
             }
         };
 
-        scene.registerTask(task);
         task.run(40);
         */
     }

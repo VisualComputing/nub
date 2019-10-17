@@ -15,7 +15,7 @@ import nub.processing.Scene;
 import nub.ik.loader.collada.data.Model;
 import nub.ik.loader.collada.BlenderLoader;
 import ik.interactive.Target;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import processing.core.*;
 import processing.event.MouseEvent;
 
@@ -149,13 +149,12 @@ public class LoadMesh extends PApplet {
                 solver_r_leg.setMaxError(0.01f);
                 solver_r_leg.setMinDistance(0.01f);
                 solver_r_leg.setTarget(model.skeleton().get(effectors[i]), targets.get(i));
-                TimingTask task = new TimingTask() {
+                TimingTask task = new TimingTask(scene) {
                     @Override
                     public void execute() {
                         solver_r_leg.solve();
                     }
                 };
-                scene.registerTask(task);
                 task.run(40);
             }
         }

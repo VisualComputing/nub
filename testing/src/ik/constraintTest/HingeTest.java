@@ -9,7 +9,7 @@ import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.Hinge;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -91,13 +91,12 @@ public class HingeTest extends PApplet {
             s.setTarget(targets.get(i));
             if(i != 0)targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     if(solve) s.solve();
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
 
@@ -108,13 +107,12 @@ public class HingeTest extends PApplet {
             s.setTarget(targets.get(i));
             targets.get(i).setReference(targets.get(0));
             targets.get(i++).setPosition(s.endEffector().position());
-            TimingTask task = new TimingTask() {
+            TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     if(solve) s.solve();
                 }
             };
-            scene.registerTask(task);
             task.run(40);
         }
     }

@@ -7,7 +7,7 @@ import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
-import nub.timing.TimingTask;
+import nub.processing.TimingTask;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
 import processing.core.PShape;
@@ -125,14 +125,12 @@ public class GaitGenerator extends PApplet {
         y_floor = j4.position().y();
         scene.addIKTarget(j4, target);
         Vector o = reference.location(new Vector(), j4);
-        TimingTask task = new TimingTask() {
+        TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 updateTarget(scene.timingHandler().frameCount()*8, o, target, mirror, inv, d);
             }
         };
-
-        scene.registerTask(task);
         task.run(100);
     }
 
