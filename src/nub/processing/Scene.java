@@ -2472,7 +2472,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Draws a bullseye around the node {@link Node#position()} projection.
    * <p>
-   * The shape of the bullseye may be squared or circled dependeing on the node
+   * The shape of the bullseye may be squared or circled depending on the node
    * {@link Node#pickingThreshold()} sign.
    *
    * @see Node#pickingThreshold()

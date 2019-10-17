@@ -1063,7 +1063,7 @@ public class Graph {
    * <b>Attention:</b> You should not call this method explicitly, unless you need the
    * frustum equations to be updated only occasionally (rare). Use
    * {@link Graph#enableBoundaryEquations()} which automatically update the frustum equations
-   * every node instead.
+   * every frame instead.
    */
   public float[][] updateBoundaryEquations() {
     _initCoefficients();
@@ -1201,7 +1201,7 @@ public class Graph {
   }
 
   /**
-   * Disables automatic update of the frustum plane equations every node.
+   * Disables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1214,7 +1214,7 @@ public class Graph {
   }
 
   /**
-   * Enables automatic update of the frustum plane equations every node.
+   * Enables automatic update of the frustum plane equations every frame.
    * Computation of the equations is expensive and hence is disabled by default.
    *
    * @see #areBoundaryEquationsEnabled()
@@ -1227,7 +1227,7 @@ public class Graph {
   }
 
   /**
-   * Enables or disables automatic update of the eye boundary plane equations every node
+   * Enables or disables automatic update of the eye boundary plane equations every frame
    * according to {@code flag}. Computation of the equations is expensive and hence is
    * disabled by default.
    *
