@@ -16,6 +16,10 @@
  *
  * Press ' ' to switch between the different eye modes.
  * Press 'a' to toggle (start/stop) animation.
+ * Press '+' to speed up the boids animation.
+ * Press '-' to speed down the boids animation.
+ * Press 'e' to enable concurrence of the flock animation.
+ * Press 'd' to disable concurrence of the flock animation.
  * Press 'p' to print the current node rate.
  * Press 'm' to change the boid visual mode.
  * Press 'v' to toggle boids' wall skipping.
@@ -36,7 +40,6 @@ boolean avoidWalls = true;
 int initBoidNum = 900; // amount of boids to start the program with
 ArrayList<Boid> flock;
 Node avatar;
-boolean animate = true;
 
 void setup() {
   size(1000, 800, P3D);
@@ -46,7 +49,7 @@ void setup() {
   // create and fill the list of boids
   flock = new ArrayList();
   for (int i = 0; i < initBoidNum; i++)
-    flock.add(new Boid(scene, new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
+    flock.add(new Boid(new Vector(flockWidth / 2, flockHeight / 2, flockDepth / 2)));
 }
 
 void draw() {
@@ -150,7 +153,24 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   switch (key) {
   case 'a':
-    animate = !animate;
+    for (Boid boid : flock)
+      boid.toggle();
+    break;
+  case '+':
+    for (Boid boid : flock)
+      boid.increasePeriod(-2);
+    break;
+  case '-':
+    for (Boid boid : flock)
+      boid.increasePeriod(2);
+    break;
+  case 'e':
+    for (Boid boid : flock)
+      boid.enableConcurrence(true);
+    break;
+  case 'd':
+    for (Boid boid : flock)
+      boid.enableConcurrence(false);
     break;
   case 's':
     if (scene.eye().reference() == null)

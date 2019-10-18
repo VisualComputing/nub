@@ -11,8 +11,8 @@
  * Press '+' to speed up the particles animation.
  * Press '-' to speed down the particles animation.
  * Press ' ' (the space bar) to toggle the particles animation.
- * Press 'e' to enable animation system concurrence.
- * Press 'd' to disable animation system concurrence.
+ * Press 'e' to enable concurrence of the system animation.
+ * Press 'd' to disable concurrence of the system animation.
  */
 
 import nub.processing.*;
@@ -27,7 +27,7 @@ void setup() {
   nbPart = 2000;
   particles = new Particle[nbPart];
   for (int i = 0; i < particles.length; i++)
-    particles[i] = new Particle(scene);
+    particles[i] = new Particle();
 }
 
 void draw() {

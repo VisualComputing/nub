@@ -5,8 +5,8 @@ class Particle extends TimingTask {
   int age;
   int ageMax;
 
-  Particle(Scene scn) {
-    super(scn);
+  Particle() {
+    super(scene);
     speed = new PVector();
     pos = new PVector();
     init();
