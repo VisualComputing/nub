@@ -400,7 +400,22 @@ public class Interpolator {
   }
 
   /**
+   * Same as {@code setSpeed(speed() + delta)}.
+   *
+   * @see #speed()
+   * @see #setSpeed(float)
+   * @see #increasePeriod(long)
+   */
+  public void increaseSpeed(float delta) {
+    setSpeed(speed() + delta);
+  }
+
+  /**
    * Sets the {@link #speed()}. Negative values are allowed.
+   *
+   * @see #speed()
+   * @see #increaseSpeed(float)
+   * @see #period()
    */
   public void setSpeed(float speed) {
     _speed = speed;
@@ -434,7 +449,20 @@ public class Interpolator {
   }
 
   /**
+   * Same as {@code setPeriod(period() + delta)}.
+   *
+   * @see #period()
+   * @see #setPeriod(long)
+   * @see #increaseSpeed(float)
+   */
+  public void increasePeriod(long delta) {
+    _task.increasePeriod(delta);
+  }
+
+  /**
    * Sets the {@link #period()}.
+   *
+   * @see #speed()
    */
   public void setPeriod(long period) {
     _task.setPeriod(period);
@@ -464,13 +492,16 @@ public class Interpolator {
 
   /**
    * Updates {@link #node()} state according to current {@link #time()}.
-   * Then adds {@code period} * {@code speed} (which is set with
-   * {@link #start(int, float)}) to {@link #time()}.
+   * and then adds {@link #period()} * {@link #speed()} to it (see
+   * {@link #setTime(float)}). This method is called by an interpolator
+   * task (see {@link Task}) when the interpolation is {@link #started()}.
    * <p>
-   * This internal method is called by a task when {@link #started()}. It
-   * can be used for debugging purpose. {@link #stop()} is called when
-   * {@link #time()} reaches {@link #firstTime()} or {@link #lastTime()},
-   * unless {@link #loop()} is {@code true}.
+   * Note that {@link #stop()} is called when {@link #time()} reaches
+   * {@link #firstTime()} or {@link #lastTime()}, unless {@link #loop()}
+   * is {@code true}.
+   *
+   * @see #start(int, float)
+   * @see #time()
    */
   public void update() {
     interpolate(time());

@@ -150,6 +150,16 @@ abstract public class Task {
   }
 
   /**
+   * Same as {@code setPeriod(period() + delta)}.
+   *
+   * @see #setPeriod(long)
+   * @see #setFrequency(float)
+   */
+  public void increasePeriod(long delta) {
+    setPeriod(period() + delta);
+  }
+
+  /**
    * Defines the task {@link #period()} in milliseconds.
    *
    * @see #period()

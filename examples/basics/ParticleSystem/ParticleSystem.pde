@@ -27,7 +27,7 @@ void setup() {
   nbPart = 2000;
   particles = new Particle[nbPart];
   for (int i = 0; i < particles.length; i++)
-    particles[i] = new Particle();
+    particles[i] = new Particle(scene);
 }
 
 void draw() {
@@ -57,9 +57,10 @@ void mouseWheel(MouseEvent event) {
 void keyPressed() {
   for (Particle particle : particles) {
     if (key == '+')
-      particle.decrementPeriod();
+      // less period is faster
+      particle.increasePeriod(-2);
     if (key == '-')
-      particle.incrementPeriod();
+      particle.increasePeriod(2);
     if (key == ' ')
       particle.toggle();
     if (key == 'e')
@@ -67,5 +68,5 @@ void keyPressed() {
     if (key == 'd')
       particle.enableConcurrence(false);
   }
-  println((!particles[0].task.isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].period());
+  println((!particles[0].isConcurrent() ? "Non-concurrent " : "Concurrent ") + "system. Particle period: " + particles[0].period());
 }

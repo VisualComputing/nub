@@ -1,52 +1,28 @@
-class Particle {
+class Particle extends TimingTask {
   TimingTask task;
   PVector speed;
   PVector pos;
   int age;
   int ageMax;
 
-  Particle() {
+  Particle(Scene scn) {
+    super(scn);
     speed = new PVector();
     pos = new PVector();
     init();
-    task = new TimingTask(scene) {
-      @Override
-      public void execute() {
-        speed.z -= 0.05f;
-        pos = PVector.add(pos, PVector.mult(speed, 10f));
-        if (pos.z < 0.0) {
-          speed.z = -0.8f * speed.z;
-          pos.z = 0.0f;
-        }
-        if (++age == ageMax)
-          init();
-      }
-    };
-    task.run();
+    run();
   }
 
-  long period() {
-    return task.period();
-  }
-
-  void incrementPeriod() {
-    task.setPeriod(task.period() + 2);
-  }
-
-  void decrementPeriod() {
-    task.setPeriod(task.period() - 2);
-  }
-
-  void toggle() {
-    task.toggle();
-  }
-
-  void enableConcurrence(boolean enable) {
-    task.enableConcurrence(enable);
-  }
-
-  boolean isConcurrent() {
-    return task.isConcurrent();
+  @Override
+  public void execute() {
+    speed.z -= 0.05f;
+    pos = PVector.add(pos, PVector.mult(speed, 10f));
+    if (pos.z < 0.0) {
+      speed.z = -0.8f * speed.z;
+      pos.z = 0.0f;
+    }
+    if (++age == ageMax)
+      init();
   }
 
   void init() {

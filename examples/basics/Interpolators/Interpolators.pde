@@ -132,9 +132,9 @@ void keyPressed() {
     eyeInterpolator2.purge();
 
   if (key == '-')
-    interpolator.setSpeed(interpolator.speed() - 0.25f);
+    interpolator.increaseSpeed(-0.25f);
   if (key == '+')
-    interpolator.setSpeed(interpolator.speed() + 0.25f);
+    interpolator.increaseSpeed(0.25f);
 
   if (key == 's')
     scene.fit(1);
