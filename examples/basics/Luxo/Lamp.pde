@@ -1,22 +1,20 @@
 /**
  * Lamp by Jean Pierre Charalambos.
- * 
+ *
  * This class is part of the Luxo example.
- * 
+ *
  * Add a graphics handler to an InteractiveNode to automatically pick
  * an object. The object is described in the graphics handler procedure.
  */
 
-class Lamp implements PConstants {
-  Scene scene;
+class Lamp {
   Piece[] pieces;
 
-  Lamp(Scene s) {
-    scene = s;
+  Lamp() {
     pieces = new Piece[4];
 
     for (int i = 0; i < 4; ++i) {
-      pieces[i] = new Piece(scene);
+      pieces[i] = new Piece();
       node(i).setReference(i > 0 ? pieces[i - 1] : null);
     }
 

@@ -1,7 +1,7 @@
 class Piece extends Node {
   int mode;
 
-  Piece(Scene scene) {
+  Piece() {
     super(scene);
     // set picking precision to the pixels of the node projection
     setPickingThreshold(0);

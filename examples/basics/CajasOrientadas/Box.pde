@@ -2,7 +2,7 @@ public class Box extends Node {
   float _w, _h, _d;
   int _color;
 
-  public Box(Scene scene, int tint, float w, float h, float d) {
+  public Box(int tint, float w, float h, float d) {
     super(scene);
     _color = tint;
     _w = w;

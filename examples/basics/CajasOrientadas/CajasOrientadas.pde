@@ -1,14 +1,14 @@
 /**
  * Cajas Orientadas.
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example illustrates some basic Node properties, particularly how to
  * orient them.
  *
  * The sphere and the boxes are interactive. Pick and drag them with the
  * right mouse button. Use also the arrow keys to select and move the sphere.
  * See how the boxes will always remain oriented towards the sphere.
- * 
+ *
  * Press ' ' the change the picking policy adaptive/fixed.
  * Press 'c' to change the bullseye shape.
  */
@@ -28,11 +28,11 @@ void setup() {
   scene.setRadius(200);
   scene.togglePerspective();
   scene.fit();
-  esfera = new Sphere(scene, color(random(0, 255), random(0, 255), random(0, 255)), 10);
+  esfera = new Sphere(color(random(0, 255), random(0, 255), random(0, 255)), 10);
   esfera.setPosition(new Vector(0, 1.4, 0));
   cajas = new Box[15];
   for (int i = 0; i < cajas.length; i++)
-    cajas[i] = new Box(scene, color(random(0, 255), random(0, 255), random(0, 255)), 
+    cajas[i] = new Box(color(random(0, 255), random(0, 255), random(0, 255)),
       random(10, 40), random(10, 40), random(10, 40));
   scene.fit(1);
   scene.setTrackedNode("keyboard", esfera);

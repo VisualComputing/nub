@@ -1,12 +1,12 @@
 /**
  * Luxo.
  * by Jean Pierre Charalambos.
- * 
+ *
  * A more complex example that combines Shapes, selection and constraints.
- * 
+ *
  * This example displays a famous luxo lamp (Pixar) that can be interactively
  * manipulated with the mouse.
- * 
+ *
  * Hover over lamp elements to select them, and then drag them with the mouse.
  */
 
@@ -23,7 +23,7 @@ void setup() {
   scene = new Scene(this);
   scene.setRadius(100);
   scene.fit(1);
-  lamp = new Lamp(scene);
+  lamp = new Lamp();
 }
 
 void draw() {
