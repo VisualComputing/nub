@@ -172,7 +172,7 @@ abstract public class Task {
     }
     _period = period;
     float target = frequency();
-    if (!isConcurrent() && _timingHandler.frameRate() < target) {
+    if (_timingHandler.frameRate() < target) {
       System.out.println("Warning: Your task period of " + period + " ms requires at least a " + target + " Hz frameRate, " +
           "but currently it just achieves " + _timingHandler.frameRate() + " Hz." + '\n' + "Either set a period of at least "
           + 1000 / _timingHandler.frameRate() + " ms or call enableConcurrence() to execute the task concurrently.");

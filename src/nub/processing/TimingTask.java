@@ -70,6 +70,24 @@ public abstract class TimingTask extends Task {
   }
 
   @Override
+  public void setPeriod(long period) {
+    if (!isConcurrent()) {
+      super.setPeriod(period);
+      return;
+    }
+    if (period <= 0) {
+      System.out.println("Task period not set as it should have non-negative value");
+      return;
+    }
+    boolean active = isActive();
+    if (active)
+      stop();
+    _period = period;
+    if (active)
+      run();
+  }
+
+  @Override
   public boolean isActive() {
     return isConcurrent() ? _timer != null && _active : super.isActive();
   }
