@@ -16,11 +16,15 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Tasks are (non)recurrent, (non)concurrent (see {@link #isRecurrent()}
- * and {@link #isConcurrent()} resp.) callbacks defined by overridden
- * {@link #execute()}.
+ * Timing tasks are (non)recurrent, (non)concurrent
+ * (see {@link #isRecurrent()} and {@link #isConcurrent()} resp.)
+ * callbacks defined by overridden {@link #execute()}.
  * <p>
- * This class implements both the task's sequential and parallel apis.
+ * A timing task runs (see {@link #run(long)}) at a certain
+ * {@link #period()} which define the interval duration between
+ * two consecutive executions (see also {@link #frequency()}).
+ * Do not use the task for drawing since it will not necessarily
+ * run every frame.
  * <p>
  * Call {@link Scene#unregisterTask(Task)} to cancel the task.
  */

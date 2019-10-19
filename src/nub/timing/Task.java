@@ -282,8 +282,8 @@ abstract public class Task {
   }
 
   /**
-   * Enables or (disables) the task recurrence according to {@code enable}.
-   * Task recurrence should be implemented by derived classes.
+   * Enables or (disables) the task concurrence according to {@code enable}.
+   * Task concurrence should be implemented by derived classes.
    *
    * @see #isConcurrent()
    * @see #enableConcurrence()
@@ -299,7 +299,7 @@ abstract public class Task {
    * Returns {@code true} if the task is concurrent, i.e., if it runs in parallel, and
    * {@code false} otherwise.
    * <p>
-   * Task recurrence should be implemented by derived classes.
+   * Task concurrence should be implemented by derived classes.
    *
    * @see #enableConcurrence(boolean)
    * @see #isRecurrent()

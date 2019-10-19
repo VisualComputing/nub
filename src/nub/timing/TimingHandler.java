@@ -70,7 +70,10 @@ public class TimingHandler {
    * Unregisters the task.
    */
   public void unregisterTask(Task task) {
-    _taskPool.remove(task);
+    if (isTaskRegistered(task)) {
+      task.stop();
+      _taskPool.remove(task);
+    }
   }
 
   /**
