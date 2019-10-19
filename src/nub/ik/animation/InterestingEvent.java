@@ -27,12 +27,9 @@ public class InterestingEvent{
     //An event must contain a set of attributes that contains a key information to preserve
     protected HashMap<String, Object> _attributes;
 
-    public InterestingEvent(String name, String type, int startingTime, int executionDuration, int renderingDuration){
+    public InterestingEvent(String name, String type){
         _name = name;
         _type = type;
-        _startingTime = startingTime;
-        _executionDuration = executionDuration;
-        _renderingDuration = renderingDuration;
         _attributes = new HashMap<String, Object>();
     }
 
@@ -53,16 +50,59 @@ public class InterestingEvent{
         return _name;
     }
 
-    public long renderingDuration(){
+    public int renderingDuration(){
         return _renderingDuration;
     }
 
-    public long executionDuration(){
+    public int executionDuration(){
         return _executionDuration;
     }
 
-    public long startingTime(){
+    public int startingTime(){
         return _startingTime;
     }
 
+    public int finishingTime(){
+        return _startingTime + _executionDuration;
+    }
+
+    //set starting time and duration
+    public void startAt(int time){
+        _startingTime = time;
+    }
+
+    public void startAfter(int wait, InterestingEvent previous){
+        startAt(previous.finishingTime() + wait);
+    }
+
+    public void startAfter(InterestingEvent previous){
+        startAfter(0, previous);
+    }
+
+    public void startWith(InterestingEvent event){
+        startAt(event.startingTime());
+    }
+
+    public static void startAt(int time, InterestingEvent... events){
+        for(InterestingEvent e : events){
+            e.startAt(time);
+        }
+    }
+
+    public static void startAfter(int time, int wait, InterestingEvent... events){
+        startAt(time + wait, events);
+    }
+
+    public void setRenderingDuration(int renderingDuration){
+        _renderingDuration = renderingDuration;
+    }
+
+    public void setExecutionDuration(int executionDuration){
+        _executionDuration = executionDuration;
+    }
+
+    public void setDuration(int executionDuration, int renderingDuration){
+        _executionDuration = executionDuration;
+        _renderingDuration = renderingDuration;
+    }
 }
