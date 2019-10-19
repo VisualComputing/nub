@@ -105,10 +105,6 @@ public abstract class FABRIKSolver extends Solver {
 
   protected int _head = 0;
 
-  //Animation Stuff
-  //TODO : Animation with proposed heuristics
-  protected int _last_time_event = 0;
-
   /*Heuristic Parameters*/
   protected boolean _fixTwisting = true;
   protected boolean _keepDirection = true;
@@ -176,24 +172,14 @@ public abstract class FABRIKSolver extends Solver {
   protected float _forwardReaching(List<? extends Node> chain) {
     float change = 0;
     if(_enableMediator) {
+      InterestingEvent event1 = mediator().addEventStartingAfterLast("FWD_SET_TARGET", "Trajectory", 1, 2); //Create the event at the desired time
+      event1.addAttribute("positions", chain.get(chain.size() - 1).position(), _positions.get(chain.size() - 1).get()); //Add the convenient attributes
       //Create the event
-      InterestingEvent event1 = new InterestingEvent("FWD_SET_TARGET", "Trajectory", _last_time_event, 1, 2);
-      //Add the convenient attributes
-      event1.addAttribute("positions", chain.get(chain.size() - 1).position(), _positions.get(chain.size() - 1).get());
-      //Add it to the event queue
-      mediator().addEvent(event1);
-      //Create the event
-      InterestingEvent message1 = new InterestingEvent("FWD_SET_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-      //Add the convenient attributes
-      message1.addAttribute("message", "Step 1: Find the segment line defined by the end effector and the desired position");
-      //Add it to the event queue
-      mediator().addEvent(message1);
-      _last_time_event++;
-      //Create the event
-      InterestingEvent event2 = new InterestingEvent("FWD_MOVE_TO_TARGET", "NodeTranslation", _last_time_event, 1, 1);
-      //Add the convenient attributes
-      event2.addAttribute("node", chain.get(chain.size() - 1));
-      Vector translation = null;
+      InterestingEvent message1 = mediator().addEventStartingWithLast("FWD_SET_TARGET_MESSAGE", "Message", 0, 1);
+      message1.addAttribute("message", "Step 1: Find the segment line defined by the end effector and the desired position"); //Add the convenient attributes
+      InterestingEvent event2 = mediator().addEventStartingAfterLast("FWD_MOVE_TO_TARGET", "NodeTranslation", 1, 1);
+      event2.addAttribute("node", chain.get(chain.size() - 1)); //Add the convenient attributes
+      Vector translation;
       if(chain.get(chain.size() - 1).reference() != null)
         translation = Vector.subtract(_positions.get(chain.size() - 1), chain.get(chain.size() - 1).position());
       else
@@ -201,16 +187,8 @@ public abstract class FABRIKSolver extends Solver {
       event2.addAttribute("translation", translation);
       event2.addAttribute("enableConstraint", false);
       event2.addAttribute("useGlobalCoordinates", true);
-
-      //Add it to the event queue
-      mediator().addEvent(event2);
-      //Create the event
-      InterestingEvent message2 = new InterestingEvent("FWD_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-      //Add the convenient attributes
-      message2.addAttribute("message", "Step 2: Assume that end effector reach the desired position");
-      //Add it to the event queue
-      mediator().addEvent(message2);
-      _last_time_event++;
+      InterestingEvent message2 = mediator().addEventStartingWithLast("FWD_MOVE_TO_TARGET_MESSAGE", "Message", 0, 1); //Create the event
+      message2.addAttribute("message", "Step 2: Assume that end effector reach the desired position"); //Add the convenient attributes
     }
     for (int i = chain.size() - 2; i >= 0; i--) {
       Vector pos_i = _positions.get(i);
@@ -222,10 +200,9 @@ public abstract class FABRIKSolver extends Solver {
 
         if(_enableMediator) {
           //Create the event
-          InterestingEvent event = new InterestingEvent("FWD_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
-          //Add the convenient attributes
-          event.addAttribute("node", chain.get(i));
-          Vector translation = null;
+          InterestingEvent event = mediator().addEventStartingAfterLast("FWD_FIX_LENGTH", "NodeTranslation", 1, 2);
+          event.addAttribute("node", chain.get(i)); //Add the convenient attributes
+          Vector translation ;
           if(chain.get(i).reference() != null)
            translation = Vector.subtract(pos_i1, chain.get(i).position());
           else
@@ -234,15 +211,8 @@ public abstract class FABRIKSolver extends Solver {
           event.addAttribute("enableConstraint", false);
           event.addAttribute("modifyChildren", false);
           event.addAttribute("useGlobalCoordinates", true);
-
-          //Add it to the event queue
-          mediator().addEvent(event);
-          InterestingEvent message = new InterestingEvent("FWD_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-          //Add the convenient attributes
-          message.addAttribute("message", "Step 3: Fix the bone's length");
-          //Add it to the event queue
-          mediator().addEvent(message);
-          _last_time_event++;
+          InterestingEvent message = mediator().addEventStartingWithLast("FWD_MOVE_TO_TARGET_MESSAGE", "Message", 0, 1);
+          message.addAttribute("message", "Step 3: Fix the bone's length"); //Add the convenient attributes
         }
         continue;
       }
@@ -275,11 +245,9 @@ public abstract class FABRIKSolver extends Solver {
       }
 
       if(_enableMediator) {
-        //Create the event
-        InterestingEvent event = new InterestingEvent("FWD_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
-        //Add the convenient attributes
-        event.addAttribute("node", chain.get(i));
-        Vector translation = null;
+        InterestingEvent event = mediator().addEventStartingAfterLast("FWD_FIX_LENGTH", "NodeTranslation", 1, 2); //Create the event
+        event.addAttribute("node", chain.get(i)); //Add the convenient attributes
+        Vector translation;
         if(chain.get(i).reference() != null)
           translation = Vector.subtract(_positions.get(i), chain.get(i).position());
         else
@@ -288,16 +256,8 @@ public abstract class FABRIKSolver extends Solver {
         event.addAttribute("enableConstraint", false);
         event.addAttribute("modifyChildren", false);
         event.addAttribute("useGlobalCoordinates", true);
-
-        //Add it to the event queue
-        mediator().addEvent(event);
-        //Create the event
-        InterestingEvent message = new InterestingEvent("FWD_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-        //Add the convenient attributes
-        message.addAttribute("message", "Step 3: Fix the bone's length");
-        //Add it to the event queue
-        mediator().addEvent(message);
-        _last_time_event++;
+        InterestingEvent message = mediator().addEventStartingWithLast("FWD_MOVE_TO_TARGET_MESSAGE", "Message",0, 1); //Create the event
+        message.addAttribute("message", "Step 3: Fix the bone's length"); //Add the convenient attributes
       }
       change += Vector.distance(pos_i, _positions().get(i));
     }
@@ -407,24 +367,14 @@ public abstract class FABRIKSolver extends Solver {
     magnitude = chain.get(0).reference() != null ? chain.get(0).reference().scaling() : 1;
 
     if(_enableMediator) {
-      //Create the event
-      InterestingEvent event1 = new InterestingEvent("BKW_SET_TARGET", "Trajectory", _last_time_event, 1, 2);
-      //Add the convenient attributes
-      event1.addAttribute("positions", o, chain.get(0).position());
-      //Add it to the event queue
-      mediator().addEvent(event1);
-      //Create the event
-      InterestingEvent message1 = new InterestingEvent("BKW_SET_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-      //Add the convenient attributes
-      message1.addAttribute("message", "Step 4: Find the segment line defined by the root and the initial position");
-      //Add it to the event queue
-      mediator().addEvent(message1);
-      _last_time_event++;
-      //Create the event
-      InterestingEvent event2 = new InterestingEvent("FWD_MOVE_TO_INIT", "NodeTranslation", _last_time_event, 1, 1);
+      InterestingEvent event1 = mediator().addEventStartingAfterLast("BKW_SET_TARGET", "Trajectory", 1, 2); //Create the event
+      event1.addAttribute("positions", o, chain.get(0).position()); //Add the convenient attributes
+      InterestingEvent message1 = mediator().addEventStartingWithLast("BKW_SET_TARGET_MESSAGE", "Message", 0, 1); //Create the event
+      message1.addAttribute("message", "Step 4: Find the segment line defined by the root and the initial position"); //Add the convenient attributes
+      InterestingEvent event2 = mediator().addEventStartingAfterLast("FWD_MOVE_TO_INIT", "NodeTranslation", 1, 1); //Create the event
       //Add the convenient attributes
       event2.addAttribute("node", chain.get(0));
-      Vector translation = null;
+      Vector translation;
       if(chain.get(0).reference() != null)
         translation = Vector.subtract(o, _positions.get(0));
       else
@@ -433,18 +383,9 @@ public abstract class FABRIKSolver extends Solver {
       event2.addAttribute("enableConstraint", false);
       event2.addAttribute("modifyChildren", false);
       event2.addAttribute("useGlobalCoordinates", true);
-
-      //Add it to the event queue
-      mediator().addEvent(event2);
-      //Create the event
-      InterestingEvent message2 = new InterestingEvent("BKW_MOVE_TO_INIT_MESSAGE", "Message", _last_time_event, 0, 1);
-      //Add the convenient attributes
-      message2.addAttribute("message", "Step 5: Assume that root reach the initial position");
-      //Add it to the event queue
-      mediator().addEvent(message2);
-      _last_time_event++;
+      InterestingEvent message2 = mediator().addEventStartingWithLast("BKW_MOVE_TO_INIT_MESSAGE", "Message", 0, 1); //Create the event
+      message2.addAttribute("message", "Step 5: Assume that root reach the initial position"); //Add the convenient attributes
     }
-
 
     Vector o_hat = o;
 
@@ -458,10 +399,8 @@ public abstract class FABRIKSolver extends Solver {
         orientation.compose(chain.get(i).rotation()); //update orientation
         //Animation
         if(_enableMediator) {
-          //Create the event
-          InterestingEvent event = new InterestingEvent("BKW_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
-          //Add the convenient attributes
-          event.addAttribute("node", chain.get(i + 1));
+          InterestingEvent event = mediator().addEventStartingAfterLast("BKW_FIX_LENGTH", "NodeTranslation", 1, 2); //Create the event
+          event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
           Vector translation = null;
           if(chain.get(i + 1).reference() != null)
             translation = Vector.subtract(_positions.get(i), chain.get(i + 1).position());
@@ -471,17 +410,9 @@ public abstract class FABRIKSolver extends Solver {
           event.addAttribute("enableConstraint", false);
           event.addAttribute("modifyChildren", false);
           event.addAttribute("useGlobalCoordinates", true);
-
-          //Add it to the event queue
-          mediator().addEvent(event);
-          InterestingEvent message = new InterestingEvent("BKW_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-          //Add the convenient attributes
-          message.addAttribute("message", "Step 6: Fix the bone's length");
-          //Add it to the event queue
-          mediator().addEvent(message);
-          _last_time_event++;
+          InterestingEvent message = mediator().addEventStartingWithLast("BKW_MOVE_TO_TARGET_MESSAGE", "Message",0, 1);
+          message.addAttribute("message", "Step 6: Fix the bone's length"); //Add the convenient attributes
         }
-
         continue;
       }
       magnitude *= chain.get(i).scaling();
@@ -524,11 +455,9 @@ public abstract class FABRIKSolver extends Solver {
       _positions.set(i + 1, constrained_pos);
 
       if(_enableMediator) {
-        //Create the event
-        InterestingEvent event = new InterestingEvent("BKW_FIX_LENGTH", "NodeTranslation", _last_time_event, 1, 2);
-        //Add the convenient attributes
-        event.addAttribute("node", chain.get(i + 1));
-        Vector translation = null;
+        InterestingEvent event = mediator().addEventStartingAfterLast("BKW_FIX_LENGTH", "NodeTranslation",1, 2); //Create the event
+        event.addAttribute("node", chain.get(i + 1)); //Add the convenient attributes
+        Vector translation;
         if(chain.get(i + 1).reference() != null)
           translation = Vector.subtract(_positions.get(i + 1), prevPos);
         else
@@ -537,15 +466,8 @@ public abstract class FABRIKSolver extends Solver {
         event.addAttribute("enableConstraint", false);
         event.addAttribute("modifyChildren", false);
         event.addAttribute("useGlobalCoordinates", true);
-        //Add it to the event queue
-        mediator().addEvent(event);
-        //Create the event
-        InterestingEvent message = new InterestingEvent("BKW_MOVE_TO_TARGET_MESSAGE", "Message", _last_time_event, 0, 1);
-        //Add the convenient attributes
-        message.addAttribute("message", "Step 6: Fix the bone's length");
-        //Add it to the event queue
-        mediator().addEvent(message);
-        _last_time_event++;
+        InterestingEvent message = mediator().addEventStartingWithLast("BKW_MOVE_TO_TARGET_MESSAGE", "Message", 0, 1); //Create the event
+        message.addAttribute("message", "Step 6: Fix the bone's length"); //Add the convenient attributes
       }
 
     }
