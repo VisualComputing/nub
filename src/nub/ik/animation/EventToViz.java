@@ -1,6 +1,7 @@
 package nub.ik.animation;
 
 import nub.core.Node;
+import nub.ik.animation.visualsteps.*;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 
@@ -52,10 +53,10 @@ public class EventToViz {
     }
 
 
-    public static VisualSteps.RotateNode generateRotateNode(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
+    public static RotateNode generateRotateNode(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
-        VisualSteps.RotateNode  visualStep = new VisualSteps.RotateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
+        RotateNode  visualStep = new RotateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
         visualStep.setRotation((Quaternion) event.getAttribute("rotation"));
         if(event.getAttribute("enableConstraint") != null){
             visualStep.enableConstraint((boolean) event.getAttribute("enableConstraint"));
@@ -68,10 +69,10 @@ public class EventToViz {
         return visualStep;
     }
 
-    public static VisualSteps.TranslateNode generateTranslateNode(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
+    public static TranslateNode generateTranslateNode(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
-        VisualSteps.TranslateNode  visualStep = new VisualSteps.TranslateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
+        TranslateNode  visualStep = new TranslateNode(visualizer._scene, visualizer._nodeToJoint.get(event.getAttribute("node")), visualizer._period, executionDuration, renderingDuration);
         visualStep.setTranslation((Vector) event.getAttribute("translation"));
         if(event.getAttribute("enableConstraint") != null){
             visualStep.enableConstraint((boolean) event.getAttribute("enableConstraint"));
@@ -87,18 +88,18 @@ public class EventToViz {
         return visualStep;
     }
 
-    public static VisualSteps.MessageStep generateMessage(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
+    public static MessageStep generateMessage(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
-        VisualSteps.MessageStep visualStep = new VisualSteps.MessageStep(visualizer._scene, (String) event.getAttribute("message"), visualizer._period, executionDuration, renderingDuration);
+        MessageStep visualStep = new MessageStep(visualizer._scene, (String) event.getAttribute("message"), visualizer._period, executionDuration, renderingDuration);
         visualStep.setAttributes(attributes);
         return visualStep;
     }
 
-    public static VisualSteps.FollowTrajectoryStep generateTrajectory(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
+    public static FollowTrajectoryStep generateTrajectory(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
-        VisualSteps.FollowTrajectoryStep visualStep = new VisualSteps.FollowTrajectoryStep(visualizer._scene, visualizer._period, executionDuration, renderingDuration);
+        FollowTrajectoryStep visualStep = new FollowTrajectoryStep(visualizer._scene, visualizer._period, executionDuration, renderingDuration);
         Vector[] positions = Arrays.asList((Object[]) event.getAttribute("positions")).toArray(new Vector[((Object[])event.getAttribute("positions")).length]);
         visualStep.setTrajectory(visualizer._nodeToJoint.get(event.getAttribute("reference")), positions);
         if(attributes == null || !attributes.containsKey("radius")) visualStep.setAttribute("radius", visualizer._radius);
@@ -106,27 +107,27 @@ public class EventToViz {
         return visualStep;
     }
 
-    public static VisualSteps.UpdateStructure generateUpdateStructure(Visualizer visualizer, InterestingEvent event) {
+    public static UpdateStructure generateUpdateStructure(Visualizer visualizer, InterestingEvent event) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         List<Node> structure = new ArrayList<Node>();
         for(Node node : (List<? extends Node>) event.getAttribute("structure")){
             structure.add(visualizer._nodeToJoint.get(node));
         }
-        VisualSteps.UpdateStructure  visualStep = new VisualSteps.UpdateStructure(visualizer._scene, structure, visualizer._period, executionDuration, renderingDuration);
+        UpdateStructure  visualStep = new UpdateStructure(visualizer._scene, structure, visualizer._period, executionDuration, renderingDuration);
         visualStep.setFinalRotations((Quaternion[]) event.getAttribute("rotations"));
         visualStep.setFinalTranslations((Vector[]) event.getAttribute("translations"));
         return visualStep;
     }
 
-    public static VisualSteps.HighLightStructure generateHighLightStructure(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes, boolean hide) {
+    public static HighLightStructure generateHighLightStructure(Visualizer visualizer, InterestingEvent event, HashMap<String, Object> attributes, boolean hide) {
         long executionDuration = event.executionDuration() * visualizer._stepStamp;
         long renderingDuration = event.renderingDuration() * visualizer._stepStamp;
         List<Node> structure = new ArrayList<Node>();
         for(Node node : (List<? extends Node>) event.getAttribute("structure")){
             structure.add(visualizer._nodeToJoint.get(node));
         }
-        VisualSteps.HighLightStructure  visualStep = new VisualSteps.HighLightStructure(visualizer._scene, structure, visualizer._period, executionDuration, renderingDuration);
+        HighLightStructure  visualStep = new HighLightStructure(visualizer._scene, structure, visualizer._period, executionDuration, renderingDuration);
         if(!hide) visualStep.setHighlight(0,255);
         else visualStep.setHighlight(255,0);
         visualStep.setAttributes(attributes);
