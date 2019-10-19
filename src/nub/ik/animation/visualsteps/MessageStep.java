@@ -10,10 +10,9 @@ public class MessageStep extends VisualStep {
     protected String _message;
     protected Vector _start_location, _end_location;
 
-    public MessageStep(Scene scene, String message, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public MessageStep(Scene scene, String message, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
         _message = message;
-        initialize();
     }
 
     public void setLocation(){
@@ -38,6 +37,11 @@ public class MessageStep extends VisualStep {
                         "TOP, BOTTOM or CUSTOM ");
             }
         }
+    }
+
+    @Override
+    protected void _onTimeUpdate(int remainingTimes){
+        //Do nothing
     }
 
     @Override

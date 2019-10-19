@@ -45,6 +45,12 @@ public class Visualizer {
 
     protected void _initSteps(){
         //Get next events at given time
+        //System.out.println("prev time : "  + _prevTime);
+        //System.out.println("new time : "  + _time);
+        //System.out.println("next : " + _next);
+        //System.out.println("next starting time dis: " + _mediator.event(_next).startingTime());
+        //System.out.println("next starting time con: " + _mediator.event(_next).startingTime() * _stepStamp);
+
         while(_next < _mediator.lastEvent() && _time == _mediator.event(_next).startingTime() * _stepStamp){
             VisualStep step = eventToVizMapping( _mediator.event(_next));
             step.initialize();
@@ -67,6 +73,27 @@ public class Visualizer {
         _time = 0;
         _next = 0;
         _steps.clear();
+    }
+
+    long _prevTime = 0;
+    public void setStepDuration(int duration){
+        //duration must be divisible by period
+        duration = (int) Math.max(duration - duration % _period, _period);
+        //set current step duration
+        for(VisualStep step : _steps){
+            step.setStepDuration(duration);
+        }
+        //set time according to new time stamp
+        System.out.println("previous time : "  + _time);
+        System.out.println("previous duration : "  + _stepStamp);
+        _prevTime = _time;
+        _time = (long)((1.0 *_time/_stepStamp) * duration);
+        _time -= _time % _period;
+        System.out.println("new time : "  + _time);
+        System.out.println("new duration : "  + duration);
+
+        //set new duration
+        _stepStamp = duration;
     }
 
 

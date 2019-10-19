@@ -14,15 +14,14 @@ public class TranslateNode extends VisualStep {
     protected Vector _initial, _final, _deltaPerFrame, _delta;
     protected Constraint _constraint;
 
-    public TranslateNode(Scene scene, Node node, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public TranslateNode(Scene scene, Node node, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
         _node = node;
     }
 
     public void setTranslation(Vector delta) {
         _completed = false;
         _delta = delta;
-        initialize();
     }
 
     public void enableConstraint(boolean enable){
@@ -37,8 +36,12 @@ public class TranslateNode extends VisualStep {
         _modifyChildren = modifyChildren;
     }
 
-    protected void _calculateSpeedPerIteration() {
-        _deltaPerFrame = Vector.multiply(_delta, 1.f/Math.max(1.f,_totalTimes));
+    @Override
+    protected void _onTimeUpdate(int remainingTimes) {
+        //Given current status and remaining work find delta per frame
+        Vector remaining = Vector.subtract(_final, _node.translation());
+        if(remainingTimes == 0) remainingTimes = 1;
+        _deltaPerFrame = Vector.multiply(remaining, 1.f/remainingTimes);
     }
 
     @Override
@@ -52,7 +55,6 @@ public class TranslateNode extends VisualStep {
         }
         _delta = _enableConstraint && _node.constraint() != null ? _node.constraint().constrainTranslation(_delta, _node) : _delta;
         _final = Vector.add(_initial, _delta);
-        _calculateSpeedPerIteration();
     }
 
     @Override

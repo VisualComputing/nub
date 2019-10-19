@@ -18,17 +18,18 @@ import java.util.Set;
 
 public abstract class VisualStep {
     protected boolean _initialized, _completed, _keepDrawing;
-    protected long _period, _duration, _renderingDuration;
-    protected int _times, _totalTimes, _totalRenderingTimes;
+    protected long _period, _stepDuration, _executionTimes, _renderingTimes;
+    protected int _times, _totalExecutionTimes, _totalRenderingTimes;
     protected Scene _scene;
     //This are the visual attributes of the Step, since this varies among concrete subclasses we use a HashMap
     protected HashMap<String, Object> _attributes;
 
-    public VisualStep(Scene scene, long period, long duration, long renderingDuration) {
+    public VisualStep(Scene scene, long period, long stepDuration, long executionTimes, long renderingTimes) {
         _scene = scene;
         _period = period;
-        _duration = duration;
-        _renderingDuration = renderingDuration;
+        _stepDuration = stepDuration;
+        _executionTimes = executionTimes;
+        _renderingTimes = renderingTimes;
         _completed = false;
         _keepDrawing = true;
         _attributes = new HashMap<>();
@@ -39,30 +40,47 @@ public abstract class VisualStep {
     protected abstract void _onInit();
     protected abstract void _onRunning();
     protected abstract void _onComplete();
+    protected abstract void _onTimeUpdate(int remainingTimes); //Call it at initialization and at each time period or step duration is modified
+
     public abstract void render();
 
     public void initialize(){
         _completed = false;
         _times = 0;
-        //how many times to execute?
-        _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
-        //how many times to render?
-        _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
         _onInit();
+        _setDuration();
     }
 
-    protected void execute(){
-        if(!_completed && _times < _totalTimes){
+    public void execute(){
+        if(!_completed && _times < _totalExecutionTimes){
             _onRunning();
         }
         _times++;
-        if(!_completed && _times >= _totalTimes){
+        if(!_completed && _times >= _totalExecutionTimes){
             _onComplete();
             _completed = true;
         }
         if(_times >= _totalRenderingTimes){
             _keepDrawing = false;
         }
+    }
+
+    public void setStepDuration(long stepDuration){
+        _stepDuration = stepDuration;
+        _setDuration();
+    }
+
+    public void setPeriod(long period){
+        _period = period;
+        _setDuration();
+    }
+
+    protected void _setDuration(){
+        float frac = (1.f * _times/_totalExecutionTimes);
+        _totalExecutionTimes = (int) Math.ceil( 1.0 * _stepDuration * _executionTimes / _period); //how many times to execute?
+        _totalRenderingTimes = (int) Math.ceil( 1.0 * _stepDuration * _renderingTimes / _period); //how many times to render?
+        _times = (int) Math.floor(_totalExecutionTimes * frac);
+        _onTimeUpdate(_totalExecutionTimes - _times);
     }
 
     public boolean completed(){

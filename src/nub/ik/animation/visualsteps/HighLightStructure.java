@@ -12,8 +12,8 @@ public class HighLightStructure extends VisualStep {
     protected int _init = 0, _end = 255;
     float _transparency, _delta;
 
-    public HighLightStructure(Scene scene, List<? extends Node> structure, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public HighLightStructure(Scene scene, List<? extends Node> structure, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
         _structure = structure;
     }
 
@@ -22,10 +22,13 @@ public class HighLightStructure extends VisualStep {
         _end = end;
     }
 
-    protected void _calculateSpeedPerIteration() {
-        float inc = ((float) _period) / (_duration - _duration % _period);
+    @Override
+    protected void _onTimeUpdate(int remainingTimes){
+        //Define delta value given current configuration and remaining times
+        float remaining = (_end - _transparency);
+        if(remainingTimes == 0) remainingTimes = 1;
         //Calculate deltas per frame
-        _delta = (_end - _init)*inc;
+        _delta = remaining * 1.f/remainingTimes;
     }
 
 
@@ -40,7 +43,6 @@ public class HighLightStructure extends VisualStep {
             }
         }
         _transparency = _init;
-        _calculateSpeedPerIteration();
     }
 
     @Override

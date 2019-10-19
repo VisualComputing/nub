@@ -14,15 +14,14 @@ public class RotateNode extends VisualStep {
     protected Quaternion _initial, _final, _deltaPerFrame, _delta;
     protected Constraint _constraint;
 
-    public RotateNode(Scene scene, Node node, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public RotateNode(Scene scene, Node node, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
         _node = node;
     }
 
     public void setRotation(Quaternion delta) {
         _completed = false;
         _delta = delta;
-        initialize();
     }
 
     public void enableConstraint(boolean enableConstraint){
@@ -33,9 +32,12 @@ public class RotateNode extends VisualStep {
         _modifyChildren = modifyChildren;
     }
 
-    protected void _calculateSpeedPerIteration() {
-        float inc = ((float) _period) / (_duration - _duration % _period);
-        _deltaPerFrame = new Quaternion(_delta.axis(), _delta.angle() * inc);
+    @Override
+    protected void _onTimeUpdate(int remainingTimes) {
+        //Given current status and remaining work find delta per frame
+        Quaternion remaining = Quaternion.compose(_node.rotation().inverse(), _final);
+        if(remainingTimes == 0) remainingTimes = 1;
+        _deltaPerFrame = new Quaternion(remaining.axis(), remaining.angle() / remainingTimes);
     }
 
     @Override
@@ -46,7 +48,6 @@ public class RotateNode extends VisualStep {
         }
         _delta = _enableConstraint && _node.constraint() != null ? _node.constraint().constrainRotation(_delta, _node) : _delta;
         _final = Quaternion.compose(_initial, _delta);
-        _calculateSpeedPerIteration();
     }
 
     @Override

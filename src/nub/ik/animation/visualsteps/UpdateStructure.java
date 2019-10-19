@@ -14,8 +14,8 @@ public class UpdateStructure extends VisualStep {
     protected Quaternion[] _initialRotations, _finalRotations, _deltaPerFrameRotations, _deltaRotations;
 
 
-    public UpdateStructure(Scene scene, List<? extends Node> structure, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public UpdateStructure(Scene scene, List<? extends Node> structure, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
         _structure = structure;
     }
 
@@ -32,12 +32,16 @@ public class UpdateStructure extends VisualStep {
         _finalRotations = rotations;
     }
 
-    protected void _calculateSpeedPerIteration() {
-        float inc = ((float) _period) / (_duration - _duration % _period);
+    @Override
+    protected void _onTimeUpdate(int remainingTimes) {
+        if(remainingTimes == 0) remainingTimes = 1;
         //Calculate deltas per frame
         for(int i = 0; i < _structure.size(); i++){
-            _deltaPerFrameRotations[i] = new Quaternion(_deltaRotations[i].axis(), _deltaRotations[i].angle() * inc);
-            _deltaPerFrameTranslations[i] = Vector.multiply(_deltaTranslations[i], inc);
+            //Given current status and remaining work find delta per frame
+            Vector remainingTranslation = Vector.subtract(_finalTranslations[i], _structure.get(i).translation());
+            Quaternion remainingRotation = Quaternion.compose(_structure.get(i).rotation().inverse(), _finalRotations[i]);
+            _deltaPerFrameRotations[i] = new Quaternion(remainingRotation.axis(), remainingRotation.angle() / remainingTimes);
+            _deltaPerFrameTranslations[i] = Vector.multiply(remainingTranslation, 1.f/remainingTimes);
         }
     }
 
@@ -58,7 +62,6 @@ public class UpdateStructure extends VisualStep {
             _deltaRotations[i] = Quaternion.compose(node.rotation().inverse(), _finalRotations[i]);
             _deltaTranslations[i] = Vector.subtract(_finalTranslations[i], node.translation());
         }
-        _calculateSpeedPerIteration();
     }
 
     @Override

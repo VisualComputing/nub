@@ -13,29 +13,29 @@ public class FollowTrajectoryStep extends VisualStep {
     protected Vector _current, _delta;
     protected int _idx = 0;
 
-    public FollowTrajectoryStep(Scene scene, long period, long duration, long renderingDuration) {
-        super(scene, period, duration, renderingDuration);
+    public FollowTrajectoryStep(Scene scene, long period, long stepDuration, long executionTimes, long renderingTimes) {
+        super(scene, period, stepDuration, executionTimes, renderingTimes);
     }
 
     public void setTrajectory(Node node, Vector... trajectory) {
         _reference = node;
         _trajectory = trajectory;
-        initialize();
     }
 
-    protected void _calculateSpeedPerIteration() {
-        Vector v1 = _trajectory[_idx];
+    @Override
+    protected void _onTimeUpdate(int remainingTimes){
+        //Define delta value given current configuration and remaining times
+        int remainingTimesPerEdge = remainingTimes / _trajectory.length;
+        Vector v1 = _current;
         Vector v2 = _trajectory[_idx + 1];
-        float inc = ((float) _period) / (_duration - _duration % _period);
         _delta = Vector.subtract(v2, v1);
-        _delta.multiply(inc);
+        if(remainingTimesPerEdge > 0) _delta.divide(remainingTimesPerEdge);
     }
 
     @Override
     public void _onInit() {
         _idx = 0;
         _current = _trajectory[_idx].get();
-        _calculateSpeedPerIteration();
     }
 
     @Override
@@ -57,7 +57,7 @@ public class FollowTrajectoryStep extends VisualStep {
                 _idx--;
             } else {
                 _current = v2;
-                _calculateSpeedPerIteration();
+                _onTimeUpdate(_totalExecutionTimes - (_times + 1));
             }
         } else {
             _current.add(_delta);
