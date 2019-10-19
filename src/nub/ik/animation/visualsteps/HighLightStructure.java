@@ -7,8 +7,7 @@ import nub.processing.Scene;
 
 import java.util.List;
 
-//TODO: this works but must affect only joint transparency
-public class HighLightStructure  extends VisualStep {
+public class HighLightStructure extends VisualStep {
     protected List<? extends Node> _structure;
     protected int _init = 0, _end = 255;
     float _transparency, _delta;
@@ -33,9 +32,11 @@ public class HighLightStructure  extends VisualStep {
     @Override
     public void _onInit() {
         int n =  _structure.size();
+        _completed = false;
+        int color = (int)_attributes.get("highlight");
         for(int i = 0; i < n; i++){
             if(_structure.get(i) instanceof Joint){
-                ((Joint) _structure.get(i)).setAlpha((int)_transparency);
+                ((Joint) _structure.get(i)).setColor(color);
             }
         }
         _transparency = _init;
@@ -48,14 +49,17 @@ public class HighLightStructure  extends VisualStep {
     }
 
     @Override
-    protected void _onComplete(){
+    public void _onComplete(){
+        _keepDrawing = false;
         for(int i = 0; i < _structure.size(); i++){
-            if(_structure.get(i) instanceof Joint) ((Joint) _structure.get(i)).setAlpha(_end);
+            if(_structure.get(i) instanceof Joint){
+                ((Joint) _structure.get(i)).setAlpha((int)_transparency);
+            }
         }
     }
 
     @Override
-    protected void _onRunning(){
+    public void _onRunning() {
         for(int i = 0; i < _structure.size(); i++){
             if(_structure.get(i) instanceof Joint) ((Joint) _structure.get(i)).setAlpha((int)_transparency);
         }
@@ -70,5 +74,6 @@ public class HighLightStructure  extends VisualStep {
     @Override
     protected void _defineAttributes() {
         //Do nothing
+        _attributes.put("highlight", _scene.pApplet().color(255));
     }
 }
