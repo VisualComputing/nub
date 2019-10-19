@@ -224,7 +224,7 @@ public class GASolverAnim  extends PApplet {
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            //if(animation != null) animation.setPeriod(Integer.valueOf("" + key) * 1000);
+            if(visualizer != null) visualizer.setStepDuration(Integer.valueOf("" + key) * 1000);
         }
     }
 

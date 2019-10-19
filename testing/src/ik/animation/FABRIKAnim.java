@@ -107,7 +107,7 @@ public class FABRIKAnim extends PApplet {
         solver.enableMediator(true);
 
         //Create the visualizer
-        visualizer = new FABRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 2000);
+        visualizer = new FABRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 5000);
 
         //Create Mediator that relates a Solver with at least one visualizer
         mediator = new VisualizerMediator(solver, visualizer);
@@ -208,7 +208,7 @@ public class FABRIKAnim extends PApplet {
         } else if(key == 's'){
             solver.solve();
         } else if(Character.isDigit(key)){
-            //if(animation != null) animation.setPeriod(Integer.valueOf("" + key) * 1000);
+            if(visualizer != null) visualizer.setStepDuration(Integer.valueOf("" + key) * 1000);
         }
     }
 
