@@ -24,15 +24,6 @@ public abstract class VisualStep {
     //This are the visual attributes of the Step, since this varies among concrete subclasses we use a HashMap
     protected HashMap<String, Object> _attributes;
 
-    public abstract void initialize();
-    public abstract void reverse();
-    public abstract void execute();
-    public abstract void render();
-
-    public boolean completed(){
-        return _completed;
-    }
-
     public VisualStep(Scene scene, long period, long duration, long renderingDuration) {
         _scene = scene;
         _period = period;
@@ -42,6 +33,40 @@ public abstract class VisualStep {
         _keepDrawing = true;
         _attributes = new HashMap<>();
         _defineAttributes();
+    }
+
+    public abstract void reverse();
+    protected abstract void _onInit();
+    protected abstract void _onRunning();
+    protected abstract void _onComplete();
+    public abstract void render();
+
+    public void initialize(){
+        _completed = false;
+        _times = 0;
+        //how many times to execute?
+        _totalTimes = (int) Math.ceil( 1.0* _duration / _period);
+        //how many times to render?
+        _totalRenderingTimes = (int) Math.ceil( 1.0* _renderingDuration / _period);
+        _onInit();
+    }
+
+    protected void execute(){
+        if(!_completed && _times < _totalTimes){
+            _onRunning();
+        }
+        _times++;
+        if(!_completed && _times >= _totalTimes){
+            _onComplete();
+            _completed = true;
+        }
+        if(_times >= _totalRenderingTimes){
+            _keepDrawing = false;
+        }
+    }
+
+    public boolean completed(){
+        return _completed;
     }
 
     public boolean isInitialized(){
@@ -77,7 +102,7 @@ public abstract class VisualStep {
 
     public void setAttribute(String name, Object value){
         if(_attributes.get(name) == null){
-            throw new RuntimeException(name + "is not an attribute of the visual step. Please check the valid attrubtes calling at " +
+            throw new RuntimeException(name + " is not an attribute of the visual step. Please check the valid attrubtes calling at " +
                     "getAttributes method.");
         }
         _attributes.put(name, value);
