@@ -57,7 +57,7 @@ public class Visualizer {
     protected void _executeSteps(){
         for(int i = _steps.size() - 1; i >= 0; i--){
             _steps.get(i).execute();
-            if(!_steps.get(i).keepDrawing()){
+            if(!_steps.get(i).keepDrawing() && _steps.get(i).completed()){
                 _steps.remove(i);
             }
         }
@@ -72,7 +72,7 @@ public class Visualizer {
 
     public void render(){
         for(int i = _steps.size() - 1; i >= 0; i--){
-            _steps.get(i).render();
+            if(_steps.get(i).keepDrawing()) _steps.get(i).render();
         }
     }
 
