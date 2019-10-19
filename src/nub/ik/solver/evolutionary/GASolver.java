@@ -37,9 +37,6 @@ public class GASolver extends Solver {
   protected List<Statistics> _statistics;
   protected boolean _debug = false;
 
-  //Animation Stuff
-  protected int _last_time_event = 0;
-
   public GASolver(List<Node> structure, int population_size) {
     this._structure = structure;
     this._population_size = population_size;
@@ -147,20 +144,15 @@ public class GASolver extends Solver {
     }
 
     if(_enableMediator){
+      int lastTime = mediator().finishingTime();
       for(Individual individual : parents) {
-        InterestingEvent event = new InterestingEvent("SELECT_PARENTS", "HighlightStructure", _last_time_event, 1, 1);
+        InterestingEvent event = mediator().addEvent("SELECT_PARENTS", "HighlightStructure", lastTime, 1, 1);
         event.addAttribute("structure", individual.structure());
-        mediator().addEvent(event);
-
-        InterestingEvent event2 = new InterestingEvent("SELECT_PARENTS", "HideStructure", _last_time_event + 1, 1, 1);
+        InterestingEvent event2 = mediator().addEvent("SELECT_PARENTS", "HideStructure", lastTime + 1, 1, 1);
         event2.addAttribute("structure", individual.structure());
-        mediator().addEvent(event2);
       }
-      InterestingEvent messageEvent = new InterestingEvent("SELECT_MESSAGE", "Message", _last_time_event, 0, 2);
-      //Add the convenient attributes
-      messageEvent.addAttribute("message", "Choose from population the structures that will be used as parents");
-      mediator().addEvent(messageEvent);
-      _last_time_event+=2;
+      InterestingEvent messageEvent = mediator().addEvent("SELECT_MESSAGE", "Message", lastTime, 0, 2);
+      messageEvent.addAttribute("message", "Choose from population the structures that will be used as parents"); //Add the convenient attributes
     }
 
 
@@ -169,27 +161,16 @@ public class GASolver extends Solver {
     Individual best = _best;
     for (int i = 0; i < parents.size(); i += 2) {
       if(_enableMediator){
-        InterestingEvent event1 = new InterestingEvent("SELECT_PARENT1", "HighlightStructure", _last_time_event, 1, 1);
+        InterestingEvent event1 = mediator().addEventStartingAfterLast("SELECT_PARENT1", "HighlightStructure", 1, 1);
         event1.addAttribute("structure", parents.get(i).structure());
-        mediator().addEvent(event1);
-
-        event1 = new InterestingEvent("SELECT_PARENT1", "HideStructure", _last_time_event + 2, 1, 1);
+        InterestingEvent event2 = mediator().addEventStartingWithLast("SELECT_PARENT2", "HighlightStructure", 1, 1);
+        event2.addAttribute("structure", parents.get(i+1).structure());
+        InterestingEvent messageEvent = mediator().addEventStartingWithLast("SELECT_PAIR_MESSAGE", "Message", 0, 1);
+        messageEvent.addAttribute("message", "Choose two parents to match"); //Add the convenient attributes
+        event1 = mediator().addEventStartingAfterLast("SELECT_PARENT1", "HideStructure", 1, 1);
         event1.addAttribute("structure", parents.get(i).structure());
-        mediator().addEvent(event1);
-
-        InterestingEvent event2 = new InterestingEvent("SELECT_PARENT2", "HighlightStructure", _last_time_event, 1, 1);
+        event2 = mediator().addEventStartingWithLast("SELECT_PARENT2", "HideStructure", 1, 1);
         event2.addAttribute("structure", parents.get(i+1).structure());
-        mediator().addEvent(event2);
-
-        event2 = new InterestingEvent("SELECT_PARENT2", "HideStructure", _last_time_event + 2, 1, 1);
-        event2.addAttribute("structure", parents.get(i+1).structure());
-        mediator().addEvent(event2);
-
-        InterestingEvent messageEvent = new InterestingEvent("SELECT_PAIR_MESSAGE", "Message", _last_time_event, 0, 1);
-        //Add the convenient attributes
-        messageEvent.addAttribute("message", "Choose two parents to match");
-        mediator().addEvent(messageEvent);
-        _last_time_event++;
       }
 
       if (_random.nextFloat() < _cross_probability) {
@@ -206,7 +187,7 @@ public class GASolver extends Solver {
         _children.get(i).set(child1);
 
         if(_enableMediator){
-          InterestingEvent event = new InterestingEvent("CHILD1", "UpdateStructure", _last_time_event, 0, 1);
+          InterestingEvent event = mediator().addEventStartingAfterLast("CHILD1", "UpdateStructure", 0, 1);
           Vector[] translations = new Vector[_children.get(i).structure().size()];
           Quaternion[] rotations = new Quaternion[_children.get(i).structure().size()];
             for(int k = 0; k < _children.get(i).structure().size(); k++){
@@ -216,16 +197,12 @@ public class GASolver extends Solver {
           event.addAttribute("structure", _children.get(i).structure());
           event.addAttribute("rotations", rotations);
           event.addAttribute("translations", translations);
-          mediator().addEvent(event);
 
-          InterestingEvent event2 = new InterestingEvent("CHILD1_h", "HighlightStructure", _last_time_event, 1, 1);
+          InterestingEvent event2 = mediator().addEventStartingWithLast("CHILD1_h", "HighlightStructure",1, 1);
           event2.addAttribute("structure", _children.get(i).structure());
-          mediator().addEvent(event2);
 
-          event2 = new InterestingEvent("CHILD1_h", "HideStructure", _last_time_event + 1, 1, 1);
+          event2 = mediator().addEventStartingAfterLast("CHILD1_h", "HideStructure",1, 1);
           event2.addAttribute("structure", _children.get(i).structure());
-          mediator().addEvent(event2);
-
         }
 
 
@@ -235,7 +212,7 @@ public class GASolver extends Solver {
         _children.get(i+1).set(child2);
 
         if(_enableMediator){
-          InterestingEvent event = new InterestingEvent("CHILD2", "UpdateStructure", _last_time_event, 0, 1);
+          InterestingEvent event = mediator().addEventStartingWith("CHILD1","CHILD2", "UpdateStructure", 0, 1);
           Vector[] translations = new Vector[_children.get(i+1).structure().size()];
           Quaternion[] rotations = new Quaternion[_children.get(i+1).structure().size()];
           for(int k = 0; k < _children.get(i+1).structure().size(); k++){
@@ -245,21 +222,15 @@ public class GASolver extends Solver {
           event.addAttribute("structure", _children.get(i+1).structure());
           event.addAttribute("rotations", rotations);
           event.addAttribute("translations", translations);
-          mediator().addEvent(event);
 
-          InterestingEvent event2 = new InterestingEvent("CHILD2_h", "HighlightStructure", _last_time_event, 1, 1);
+          InterestingEvent event2 = mediator().addEventStartingWithLast("CHILD2_h", "HighlightStructure", 1, 1);
           event2.addAttribute("structure", _children.get(i+1).structure());
-          mediator().addEvent(event2);
+          event2 = mediator().addEventStartingAfterLast("CHILD2_h", "HideStructure", 1, 1);
+          event2.addAttribute("structure", _children.get(i+1).structure());
 
-            event2 = new InterestingEvent("CHILD2_h", "HideStructure", _last_time_event + 1, 1, 1);
-            event2.addAttribute("structure", _children.get(i+1).structure());
-            mediator().addEvent(event2);
-
-          InterestingEvent messageEvent = new InterestingEvent("CHILD1_MESSAGE", "Message", _last_time_event, 0, 2);
+          InterestingEvent messageEvent = mediator().addEventStartingWith("CHILD1","CHILD1_MESSAGE", "Message", 0, 2);
           //Add the convenient attributes
           messageEvent.addAttribute("message", "Generate children from selected parents");
-          mediator().addEvent(messageEvent);
-          _last_time_event+=2;
         }
 
 
@@ -289,24 +260,23 @@ public class GASolver extends Solver {
 
       if(_enableMediator){
           for(int i = 0; i < _population.size(); i++) {
-              InterestingEvent event = new InterestingEvent("POPULATION", "HighlightStructure", _last_time_event, 1, 1);
-              event.addAttribute("structure", _population.get(i).structure());
-              mediator().addEvent(event);
-
-              event = new InterestingEvent("POPULATION", "HighlightStructure", _last_time_event + 1, 1, 1);
-              event.addAttribute("structure", _children.get(i).structure());
-              mediator().addEvent(event);
+              if(i == 0){
+                  InterestingEvent event = mediator().addEventStartingAfterLast("POPULATION", "HighlightStructure", 1, 1);
+                  event.addAttribute("structure", _population.get(i).structure());
+                  event = mediator().addEventStartingAfterLast("CHILDREN", "HighlightStructure", 1, 1);
+                  event.addAttribute("structure", _children.get(i).structure());
+              } else{
+                  InterestingEvent event = mediator().addEventStartingWith("POPULATION","POPULATION", "HighlightStructure", 1, 1);
+                  event.addAttribute("structure", _population.get(i).structure());
+                  event = mediator().addEventStartingWith("CHILDREN", "CHILDREN", "HighlightStructure", 1, 1);
+                  event.addAttribute("structure", _children.get(i).structure());
+              }
           }
-          InterestingEvent messageEvent = new InterestingEvent("Population_MESSAGE", "Message", _last_time_event, 0, 1);
-          //Add the convenient attributes
-          messageEvent.addAttribute("message", "Previous population");
-          mediator().addEvent(messageEvent);
+          InterestingEvent messageEvent = mediator().addEventStartingWith("POPULATION","Population_MESSAGE", "Message", 0, 1);
+          messageEvent.addAttribute("message", "Previous population"); //Add the convenient attributes
 
-          messageEvent = new InterestingEvent("Children_MESSAGE", "Message", _last_time_event + 1, 0, 1);
-          //Add the convenient attributes
-          messageEvent.addAttribute("message", "new children");
-          mediator().addEvent(messageEvent);
-          _last_time_event+=2;
+          messageEvent = mediator().addEventStartingWith("CHILDREN","Children_MESSAGE", "Message", 0, 1);
+          messageEvent.addAttribute("message", "new children"); //Add the convenient attributes
       }
 
 
@@ -336,17 +306,18 @@ public class GASolver extends Solver {
 
           if(_enableMediator){
               for(int i = 0; i < concatenation.size(); i++) {
-                  int inc = !_population.contains(concatenation.get(i)) ? 0 : 2;
-                  InterestingEvent event = new InterestingEvent("population", "HideStructure", _last_time_event + inc, 1, 1);
-                  event.addAttribute("structure", concatenation.get(i).structure());
-                  mediator().addEvent(event);
+                  if(_population.contains(concatenation.get(i))){
+                      InterestingEvent event = mediator().addEventStartingAfter("CHILDREN", "REMOVED_POPULATION", "HideStructure", 1, 1);
+                      event.addAttribute("structure", concatenation.get(i).structure());
+                  } else{
+                      InterestingEvent event = mediator().addEventStartingAfter("CHILDREN", "NEW_POPULATION", "HideStructure", 1, 1, 2);
+                      event.addAttribute("structure", concatenation.get(i).structure());
+                  }
               }
-              InterestingEvent messageEvent = new InterestingEvent("Population_MESSAGE", "Message", _last_time_event, 0, 2);
-              //Add the convenient attributes
-              messageEvent.addAttribute("message", "Keep best individuals form previous population and offspring");
-              mediator().addEvent(messageEvent);
+              InterestingEvent messageEvent = mediator().addEventStartingWith("REMOVED_POPULATION", "Population_MESSAGE", "Message", 0, 2);
+              messageEvent.addAttribute("message", "Keep best individuals form previous population and offspring"); //Add the convenient attributes
 
-              InterestingEvent event = new InterestingEvent("Best", "UpdateStructure", _last_time_event, 0, 1);
+              InterestingEvent event = mediator().addEventStartingWithLast("Best", "UpdateStructure", 0, 1);
               Vector[] translations = new Vector[_best.structure().size()];
               Quaternion[] rotations = new Quaternion[_best.structure().size()];
               for(int k = 0; k < _best.structure().size(); k++){
@@ -356,24 +327,15 @@ public class GASolver extends Solver {
               event.addAttribute("structure", _best.structure());
               event.addAttribute("rotations", rotations);
               event.addAttribute("translations", translations);
-              mediator().addEvent(event);
 
-
-              event = new InterestingEvent("BEST_HIGHLIGHT", "HighlightStructure", _last_time_event + 2, 1, 1);
+              event = mediator().addEventStartingAfterLast("BEST_HIGHLIGHT", "HighlightStructure",1, 1, 1);
               event.addAttribute("structure", _best.structure());
-              mediator().addEvent(event);
 
-              event = new InterestingEvent("BEST_HIGHLIGHT", "HideStructure", _last_time_event + 3, 1, 1);
+              event = mediator().addEventStartingAfterLast("BEST_HIDE", "HideStructure",1, 1);
               event.addAttribute("structure", _best.structure());
-              mediator().addEvent(event);
 
-
-              messageEvent = new InterestingEvent("SELECT_MESSAGE", "Message", _last_time_event + 2, 0, 2);
-              //Add the convenient attributes
-              messageEvent.addAttribute("message", "Best solution obtained so far.");
-              mediator().addEvent(messageEvent);
-              _last_time_event+=4;
-
+              messageEvent = mediator().addEventStartingWith("BEST_HIGHLIGHT","SELECT_MESSAGE", "Message", 0, 2);
+              messageEvent.addAttribute("message", "Best solution obtained so far."); //Add the convenient attributes
           }
 
         break;
@@ -414,7 +376,7 @@ public class GASolver extends Solver {
     for (int i = 0; i < _structure.size(); i++) {
       _structure.get(i).setRotation(_best.structure().get(i).rotation().get());
     }
-    InterestingEvent event = new InterestingEvent("structure", "UpdateStructure", _last_time_event, 1, 1);
+    InterestingEvent event = mediator().addEventStartingAfterLast("structure", "UpdateStructure",1, 1);
     Vector[] translations = new Vector[_structure.size()];
     Quaternion[] rotations = new Quaternion[_structure.size()];
     for(int k = 0; k < _structure.size(); k++){
@@ -424,13 +386,9 @@ public class GASolver extends Solver {
     event.addAttribute("structure", _structure);
     event.addAttribute("rotations", rotations);
     event.addAttribute("translations", translations);
-    mediator().addEvent(event);
 
-    InterestingEvent messageEvent = new InterestingEvent("STRUCTURE_MESSAGE", "Message", _last_time_event, 0, 1);
-    //Add the convenient attributes
-    messageEvent.addAttribute("message", "Set structure state according with best solution");
-    mediator().addEvent(messageEvent);
-    _last_time_event ++;
+    InterestingEvent messageEvent = mediator().addEventStartingWithLast("STRUCTURE_MESSAGE", "Message",0, 1);
+    messageEvent.addAttribute("message", "Set structure state according with best solution"); //Add the convenient attributes
   }
 
   @Override
@@ -479,6 +437,7 @@ public class GASolver extends Solver {
       _best.set(best);
 
       if(_enableMediator){
+          int lastTime = mediator().finishingTime();
           for(Individual individual : _population) {
               Vector[] translations = new Vector[individual.structure().size()];
               Quaternion[] rotations = new Quaternion[individual.structure().size()];
@@ -486,25 +445,19 @@ public class GASolver extends Solver {
                   translations[k] = individual.structure().get(k).translation().get();
                   rotations[k] = individual.structure().get(k).rotation().get();
               }
-              InterestingEvent event = new InterestingEvent("GENERATE_POPULATION", "UpdateStructure", _last_time_event, 1, 0);
-              event.addAttribute("structure", individual.structure());
-              event.addAttribute("rotations", rotations);
-              event.addAttribute("translations", translations);
-              mediator().addEvent(event);
-              event = new InterestingEvent("GENERATE_POPULATION", "HighlightStructure", _last_time_event, 1, 1);
-              event.addAttribute("structure", individual.structure());
-              mediator().addEvent(event);
-              InterestingEvent event2 = new InterestingEvent("GENERATE_POPULATION", "HideStructure", _last_time_event + 1, 1, 0);
-              event2.addAttribute("structure", individual.structure());
-              mediator().addEvent(event2);
+              InterestingEvent update = mediator().addEvent("GENERATE_POPULATION", "UpdateStructure", lastTime, 1, 0);
+              update.addAttribute("structure", individual.structure());
+              update.addAttribute("rotations", rotations);
+              update.addAttribute("translations", translations);
+              InterestingEvent highlight = mediator().addEventStartingAfter(update,"GENERATE_POPULATION", "HighlightStructure", 1, 1);
+              highlight.addAttribute("structure", individual.structure());
+              InterestingEvent hide = mediator().addEventStartingAfter(highlight, "GENERATE_POPULATION", "HideStructure", 1, 0);
+              hide.addAttribute("structure", individual.structure());
           }
-          InterestingEvent messageEvent = new InterestingEvent("SELECT_MESSAGE", "Message", _last_time_event, 0, 1);
-          //Add the convenient attributes
-          messageEvent.addAttribute("message", "Generate an initial population");
-          mediator().addEvent(messageEvent);
-          _last_time_event++;
+          InterestingEvent messageEvent = mediator().addEvent("SELECT_MESSAGE", "Message", lastTime, 0, 1);
+          messageEvent.addAttribute("message", "Generate an initial population"); //Add the convenient attributes
 
-          InterestingEvent event = new InterestingEvent("Best", "UpdateStructure", _last_time_event, 0, 1);
+          InterestingEvent event =  mediator().addEventStartingAfterLast("Best", "UpdateStructure", 0, 1);
           Vector[] translations = new Vector[_best.structure().size()];
           Quaternion[] rotations = new Quaternion[_best.structure().size()];
           for(int k = 0; k < _best.structure().size(); k++){
@@ -514,22 +467,15 @@ public class GASolver extends Solver {
           event.addAttribute("structure", _best.structure());
           event.addAttribute("rotations", rotations);
           event.addAttribute("translations", translations);
-          mediator().addEvent(event);
 
-
-          event = new InterestingEvent("BEST_HIGHLIGHT", "HighlightStructure", _last_time_event, 1, 1);
+          event = mediator().addEventStartingWithLast("BEST_HIGHLIGHT", "HighlightStructure", 1, 1);
           event.addAttribute("structure", _best.structure());
-          mediator().addEvent(event);
 
-        event = new InterestingEvent("BEST_HIGHLIGHT", "HideStructure", _last_time_event + 1, 1, 1);
-        event.addAttribute("structure", _best.structure());
-        mediator().addEvent(event);
+          event = mediator().addEventStartingAfterLast("BEST_HIDE", "HideStructure", 1, 1);
+          event.addAttribute("structure", _best.structure());
 
-          messageEvent = new InterestingEvent("SELECT_MESSAGE", "Message", _last_time_event, 0, 1);
-          //Add the convenient attributes
-          messageEvent.addAttribute("message", "Best solution obtained so far.");
-          mediator().addEvent(messageEvent);
-          _last_time_event++;
+          messageEvent = mediator().addEventStartingWith("BEST_HIGHLIGHT","SELECT_MESSAGE", "Message", 0, 1);
+          messageEvent.addAttribute("message", "Best solution obtained so far."); //Add the convenient attributes
       }
   }
 
