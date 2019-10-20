@@ -61,11 +61,11 @@ abstract public class Task {
    * <b>Note:</b> This method is called by the timing handler
    * (see {@link nub.timing.TimingHandler#handle()}).
    */
-  protected boolean _execute(float frameRate) {
+  protected boolean _execute() {
     boolean result = false;
     if (_active) {
       long elapsedTime = System.currentTimeMillis() - _startTime;
-      float timePerFrame = (1 / frameRate) * 1000;
+      float timePerFrame = (1 / _timingHandler.frameRate()) * 1000;
       long threshold = _counter * _period;
       if (threshold >= elapsedTime) {
         long diff = elapsedTime + (long) timePerFrame - threshold;
