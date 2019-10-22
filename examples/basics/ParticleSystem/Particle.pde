@@ -1,5 +1,4 @@
 class Particle extends TimingTask {
-  TimingTask task;
   PVector speed;
   PVector pos;
   int age;
