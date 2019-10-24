@@ -77,6 +77,15 @@ public class Slot extends Node {
         _cell._board._fixRowOverlapping(_cell._row);
     }
 
+    protected void _updateTranslation(float x, float y){
+        Constraint constraint = constraint();
+        setConstraint(null);
+        setTranslation(x, y);
+        setConstraint(constraint);
+        //update end point
+        _endPoint = new Vector(_duration * _cell._board._cellWidth, 0);
+    }
+
 
     //------------------------------------
     //Interactive actions - same method found in Graph Class (duplicated cause of visibility)

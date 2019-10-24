@@ -19,12 +19,13 @@ public class Board extends Node {
     protected int _rows;
     protected int _cols;
     protected float _width, _height;
-    protected float _cellHeight, _cellWidth, _slotHeight, _pointDiameter, _draggingRadius;
+    protected float _cellHeight, _cellWidth, _slotHeight, _pointDiameter, _draggingRadius, _offsetHeight;
     protected int _colorRenderingSlot, _colorExecutionSlot, _colorRenderingEmptySlot, _colorExecutionEmptySlot;
     protected int _colorEmptyCell, _colorBoardBackground, _colorEdgeBoard, _colorCell, _colorDraggingPoint, _colorEmptyDraggingPoint;
     protected int _colorText;
     protected PFont _font36;
 
+    protected Label _label;
     protected EventCell[][] _eventMatrix = new EventCell[MAX_ROWS][MAX_COLS];
     protected List<EventCell> _events = new ArrayList<>();
 
@@ -49,7 +50,7 @@ public class Board extends Node {
         _colorEmptyCell = _gray2;
         _colorCell = _gray1;
         _colorDraggingPoint = _yellow;
-        _colorEmptyDraggingPoint = scene.pApplet().color(_yellow, 20);
+        _colorEmptyDraggingPoint = scene.pApplet().color(_yellow, 60);
         _colorText = _white;
         _font36 = scene.pApplet().createFont("Arial", 48, true);//loadFont("FreeSans-36.vlw");
 
@@ -66,6 +67,14 @@ public class Board extends Node {
                 return new Quaternion();
             }
         });
+    }
+
+    public float width(){
+        return _width;
+    }
+
+    public float height(){
+        return _height;
     }
 
     public void setDimension(float x, float y, float width, float height){
@@ -85,7 +94,7 @@ public class Board extends Node {
         drawGrid(pg, _cellWidth, _slotHeight);
         drawHeader(pg, _cellWidth, _slotHeight);
         pg.pushMatrix();
-        pg.translate(0, _slotHeight);
+        pg.translate(0, _slotHeight + _offsetHeight);
         for(int r = 0; r < _rows; r++){
             for(int c = 0; c < _cols; c++){
                 drawCell(pg, r, c, _cellWidth, _cellHeight);
@@ -109,9 +118,18 @@ public class Board extends Node {
 
     protected void drawGrid(PGraphics pg, float width, float height){
         pg.pushStyle();
-        for(int r = 0; r <= 3*_rows + 1; r++){
-            pg.line(0, r*height, _width, r*height);
+        pg.fill(_colorEdgeBoard);
+        float y = 0;
+        for(int r = 0; r < _rows; r++){
+            pg.rect(0, r*(_offsetHeight + _cellHeight) + _slotHeight, _width, _offsetHeight);
+       }
+
+        for(int r = 0; r <= 4*_rows + 1; r++){
+            pg.line(0, y , _width, y);
+            if(r % 4 == 1) y += _offsetHeight;
+            else y += _slotHeight;
         }
+
         for(int c = 0; c <= _cols; c++){
             pg.line(c*width, 0, c*width, _height);
         }
@@ -123,13 +141,13 @@ public class Board extends Node {
         pg.noStroke();
         pg.fill(_colorEmptyDraggingPoint);
         float r = _draggingRadius;
-        float xc = width * col , yc = height * row;
+        float xc = width * col , yc = height * row + _offsetHeight * row;
         pg.quad(xc - r,yc,xc, yc + r, xc + r,yc, xc, yc - r);
         pg.fill(_colorExecutionEmptySlot);
         xc += width * 0.5f;
-        pg.ellipse(xc,yc + height/2f, _pointDiameter, _pointDiameter);
+        pg.ellipse(xc,yc + _slotHeight*1.5f, _pointDiameter, _pointDiameter);
         pg.fill(_colorRenderingEmptySlot);
-        pg.ellipse(xc,yc + 5*height/6f, _pointDiameter, _pointDiameter);
+        pg.ellipse(xc,yc + _slotHeight*2.5f, _pointDiameter, _pointDiameter);
         pg.popStyle();
     }
 
@@ -156,7 +174,8 @@ public class Board extends Node {
     }
 
     protected void _setCellDimension(){
-        _slotHeight = _height/(3.f * _rows + 1);
+        _offsetHeight = _height/(7f * _rows + 2);
+        _slotHeight = _offsetHeight * 2;
         _cellWidth = _width / _cols;
         _cellHeight = _slotHeight*3;
         _pointDiameter = Math.min(_cellWidth, _slotHeight) * 0.5f;
@@ -253,6 +272,14 @@ public class Board extends Node {
 
     protected boolean isOccupied(int row, int col){
         return _eventMatrix[row][col] != null;
+    }
+
+    public void setLabel(String text){
+        //Add a label right before the cell
+        if(_label == null){
+            _label = new Label(this);
+        }
+        _label.setText(text);
     }
 
 }

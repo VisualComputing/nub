@@ -11,6 +11,7 @@ public class EventCell extends Node {
     protected Slot _executionDurationSlot, _renderingDurationSlot;
     protected int _row, _col = 0;
     protected int _colorCell;
+    protected Label _label;
 
     public  EventCell(Board board, String name, int start, int executionDuration, int renderingDuration){
         super(board);
@@ -25,7 +26,7 @@ public class EventCell extends Node {
         _row = _board._firstAvailableRow(this, true);
         if(_row >= _board._rows)
             _board.addRows(_row - _board._rows + 1, false);
-        translate(_col * _board._cellWidth, _row * _board._cellHeight + _board._slotHeight);
+        setTranslation(_col * _board._cellWidth, _row * (_board._cellHeight + _board._offsetHeight) + _board._slotHeight + _board._offsetHeight);
         _board._eventMatrix[_row][_col] = this;
         _colorCell = _board._colorCell;
     }
@@ -36,7 +37,7 @@ public class EventCell extends Node {
         _name = name;
         _row = row;
         _col = col;
-        translate(_col * _board._cellWidth, _row * _board._cellHeight + _board._slotHeight);
+        setTranslation(_col * _board._cellWidth, _row * _board._cellHeight + _board._slotHeight);
         _board._eventMatrix[row][col] = this;
         _board._events.add(this);
         Vector executionPos = new Vector(_board._cellWidth * 0.5f, _board._slotHeight * 1.5f);
@@ -77,7 +78,7 @@ public class EventCell extends Node {
 
     public void applyMovement(){
         int col = Math.round(translation().x() / _board._cellWidth);
-        int row = Math.round((translation().y() - _board._slotHeight) / _board._cellHeight);
+        int row = Math.round((translation().y() - _board._slotHeight) / (_board._cellHeight + _board._offsetHeight));
         if(_board.isOccupied(row, col)){
             _board.moveCell(_row, _col, _row, _col);
         }
@@ -93,11 +94,24 @@ public class EventCell extends Node {
     }
 
     public void updateTranslation(){
-        setTranslation(_col * _board._cellWidth, _row * _board._cellHeight + _board._slotHeight);
+        setTranslation(_col * _board._cellWidth, _row * (_board._cellHeight + _board._offsetHeight) + _board._slotHeight + _board._offsetHeight);
+        _executionDurationSlot._updateTranslation(_board._cellWidth * 0.5f, _board._slotHeight * 1.5f);
+        _renderingDurationSlot._updateTranslation(_board._cellWidth * 0.5f, _board._slotHeight * 2.5f);
     }
 
     public void setColorCell(int col){
         _colorCell = col;
     }
 
+    public void setLabel(String text){
+        //Add a label right before the cell
+        if(_label == null){
+            _label = new Label(this);
+        }
+        _label.setText(text);
+    }
+
+    public int duration(){
+        return Math.max(_executionDurationSlot._duration, _renderingDurationSlot._duration);
+    }
 }
