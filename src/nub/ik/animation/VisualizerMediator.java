@@ -59,10 +59,6 @@ public class VisualizerMediator {
 
     //Methods for facilitating event insertion on events queue
     public void addEvent(InterestingEvent event){
-        System.out.print("name " + event.name());
-        System.out.print(" start " + event.startingTime());
-        System.out.println(" duration " + event.executionDuration());
-
         //Insert the event at its corresponding position o(n)
         if(_eventQueue.isEmpty()){
             _eventQueue.add(event);
@@ -129,11 +125,10 @@ public class VisualizerMediator {
     }
 
     public InterestingEvent addEventStartingAfterLast(String name, String type, int executionDuration, int renderingDuration, int wait){
-        return  addEventStartingAfter(_eventQueue.get(_eventQueue.size() - 1), name, type, executionDuration, renderingDuration, wait);
+        return  addEvent(name, type, finishingTime() + wait,executionDuration, renderingDuration);
     }
 
     public InterestingEvent addEventStartingAfterLast(String name, String type, int executionDuration, int renderingDuration){
-        System.out.println("finishing time : " + finishingTime());
         return  addEvent(name, type, finishingTime(),executionDuration, renderingDuration);
     }
 

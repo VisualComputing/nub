@@ -44,13 +44,6 @@ public class Visualizer {
     }
 
     protected void _initSteps(){
-        //Get next events at given time
-        //System.out.println("prev time : "  + _prevTime);
-        //System.out.println("new time : "  + _time);
-        //System.out.println("next : " + _next);
-        //System.out.println("next starting time dis: " + _mediator.event(_next).startingTime());
-        //System.out.println("next starting time con: " + _mediator.event(_next).startingTime() * _stepStamp);
-
         while(_next < _mediator.lastEvent() && _time == _mediator.event(_next).startingTime() * _stepStamp){
             VisualStep step = eventToVizMapping( _mediator.event(_next));
             step.initialize();
@@ -75,8 +68,7 @@ public class Visualizer {
         _steps.clear();
     }
 
-    long _prevTime = 0;
-    public void setStepDuration(int duration){
+    public void setStepDuration(int duration){ //TODO: setPeriod implementation is similar to this method
         //duration must be divisible by period
         duration = (int) Math.max(duration - duration % _period, _period);
         //set current step duration
@@ -84,14 +76,8 @@ public class Visualizer {
             step.setStepDuration(duration);
         }
         //set time according to new time stamp
-        System.out.println("previous time : "  + _time);
-        System.out.println("previous duration : "  + _stepStamp);
-        _prevTime = _time;
         _time = (long)((1.0 *_time/_stepStamp) * duration);
         _time -= _time % _period;
-        System.out.println("new time : "  + _time);
-        System.out.println("new duration : "  + duration);
-
         //set new duration
         _stepStamp = duration;
     }
@@ -143,6 +129,7 @@ public class Visualizer {
 
     protected void _addBranch(Joint reference, Node node){
         //here we assume that node is attached to a graph
+        if(node.children() == null) return;
         for(Node child : node.children()){
             Joint joint = new Joint(_scene, _radius);
             child.setReference(reference);
@@ -204,10 +191,6 @@ public class Visualizer {
                 _time += _period;
             }
         }
-    }
-
-    protected void setTime(long t){
-        _time = t;
     }
 
     /*
