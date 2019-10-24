@@ -145,17 +145,17 @@ public class CCDSolver extends Solver {
       Vector endLocalPosition = _structure.get(i).location(end.position(), true);
       if(_enableMediator){
         //STEP 1:
-        InterestingEvent event1a = mediator().addEventStartingAfterLast("E1A", "Trajectory", 1, 2); //Create the event at the desired time
+        InterestingEvent event1a = mediator().addEventStartingAfterLast("JOINT TO EFF LINE", "Trajectory", 1, 2); //Create the event at the desired time
         event1a.addAttribute("positions", _structure.get(i).position(), end.position()); //Add the convenient attributes
-        InterestingEvent event1b = mediator().addEventStartingWithLast("E1B", "Trajectory", 1, 3); //Create the event at the desired time
+        InterestingEvent event1b = mediator().addEventStartingWithLast("JOINT TO EFF LINE LOCAL", "Trajectory", 1, 3); //Create the event at the desired time
         event1b.addAttribute("reference", _structure.get(i).node()); //Add the convenient attributes
         event1b.addAttribute("positions", new Vector(), endLocalPosition);
-        InterestingEvent event2 = mediator().addEventStartingWithLast("E2", "Message", 0,1); //Create the event
+        InterestingEvent event2 = mediator().addEventStartingWithLast("JOINT TO EFF MESSAGE", "Message", 0,1); //Create the event
         event2.addAttribute("message", "Find the desired position of Joint " + i + " by fixing the length of the bone"); //Add the convenient attributes
         //STEP 2:
-        InterestingEvent event3 = mediator().addEventStartingAfterLast("E3", "Trajectory", 1, 2); //Create the event
+        InterestingEvent event3 = mediator().addEventStartingAfterLast("JOINT TO TARGET", "Trajectory", 1, 2); //Create the event
         event3.addAttribute("positions", _structure.get(i).position(), target); //Add the convenient attributes
-        InterestingEvent event4 = mediator().addEventStartingWithLast("E4", "Message", 0, 1); //Create the event
+        InterestingEvent event4 = mediator().addEventStartingWithLast("JOINT TO TARGET MESSAGE", "Message", 0, 1); //Create the event
         event4.addAttribute("message", "Step 2: Find the segment Line defined by Joint " + i + " and Target"); //Add the convenient attributes
       }
 
@@ -164,10 +164,10 @@ public class CCDSolver extends Solver {
 
       if(_enableMediator){
         //STEP 3:
-        InterestingEvent event5 = mediator().addEventStartingAfterLast("E5", "NodeRotation", 1, 1); //Create the event
+        InterestingEvent event5 = mediator().addEventStartingAfterLast("APPLY JOINT ROTATION", "NodeRotation", 1, 1); //Create the event
         event5.addAttribute("node", _structure.get(i).node()); //Add the convenient attributes
         event5.addAttribute("rotation", _structure.get(i).node().constraint() != null ?_structure.get(i).node().constraint().constrainRotation(delta, _structure.get(i).node()) : delta);
-        InterestingEvent event6 = mediator().addEventStartingWithLast("E6", "Message", 0, 1); //Create the event
+        InterestingEvent event6 = mediator().addEventStartingWithLast("JOINT ROTATION MESSAGE", "Message", 0, 1); //Create the event
         event6.addAttribute("message", "Step 3: Rotate Joint " + i + " to reduce the distance from End Effector " + i + " to Target (T)"); //Add the convenient attributes
       }
     }
@@ -198,7 +198,7 @@ public class CCDSolver extends Solver {
     _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
     _iterations = 0;
     if(_enableMediator){
-      InterestingEvent event = mediator().addEventStartingAfterLast("R", "UpdateStructure", 1, 1);
+      InterestingEvent event = mediator().addEventStartingAfterLast("RESET STRUCTURE", "UpdateStructure", 1, 1);
       if(_enable_kinematic_structure){
         List<Node> chain = new ArrayList<Node>();
         int i = 0;
@@ -224,7 +224,7 @@ public class CCDSolver extends Solver {
         event.addAttribute("rotations", rotations);
         event.addAttribute("translations", translations);
       }
-      InterestingEvent messageEvent = mediator().addEventStartingWithLast("RM", "Message", 0, 1);
+      InterestingEvent messageEvent = mediator().addEventStartingWithLast("RESET MESSAGE", "Message", 0, 1);
       //Add the convenient attributes
       messageEvent.addAttribute("message", "Updating structure");
     }
