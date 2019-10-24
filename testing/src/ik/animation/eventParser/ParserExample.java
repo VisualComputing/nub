@@ -2,28 +2,11 @@ package ik.animation.eventParser;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.expr.*;
-import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.visitor.VoidVisitor;
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import ik.animation.CCDEventVisualizer;
 import ik.animation.eventVisualizer.Board;
 import ik.animation.eventVisualizer.EventCell;
 import ik.animation.eventVisualizer.Slot;
-import ik.basic.Util;
-import nub.core.Node;
-import nub.core.constraint.Constraint;
 import nub.ik.animation.InterestingEvent;
-import nub.ik.animation.VisualizerMediator;
-import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.CCDSolver;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import processing.core.PApplet;
@@ -32,14 +15,13 @@ import processing.event.MouseEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.util.function.Consumer;
 
 public class ParserExample extends PApplet {
     //final static String PATH = "/src/nub/ik/solver/geometric/";
     final static String PATH = "/src/nub/ik/solver/evolutionary/";
     //final static String FILE = "FABRIKSolver.java";
     final static String FILE = "GASolver.java";
-    int rows = 10, cols = 50;
+    int rows = 3, cols = 50;
     Scene eventScene;
     Board board;
 
@@ -51,28 +33,19 @@ public class ParserExample extends PApplet {
         eventScene = new Scene(this);
         eventScene.setRadius(height/2.f);
         eventScene.fit();
-        //Setting the board
-        board = new Board(eventScene, rows, cols);
+
+        //Setting the boards (one per method - as they are independent flows)
+        List<MethodEvents> methodEventsList = methodEvents();
         float rh = eventScene.radius(), rw = rh*eventScene.aspectRatio();
-        board.setDimension(-rw, -rh, 10*rw, 2*rh);
-        //set eye constraint
-        eventScene.eye().setConstraint(new Constraint() {
-            @Override
-            public Vector constrainTranslation(Vector translation, Node node) {
-                Vector v = Vector.add(node.translation(), translation);
-                if(v.x() < -5) v.setX(-5);
-                if(v.y() < -5) v.setY(-5);
+        Vector corner = new Vector(-rw,-rh + 50);
 
-                return Vector.subtract(v,node.translation());
-            }
-
-            @Override
-            public Quaternion constrainRotation(Quaternion rotation, Node node) {
-                return new Quaternion(); //no rotation is allowed
-            }
-        });
-        //Adding some cells
-        addEventsToBoard(board);
+        for(MethodEvents methodEvents : methodEventsList){
+            board = new Board(eventScene, rows, cols);
+            board.setDimension(corner.x(), corner.y(), 10*rw, rh);
+            board.setLabel("ON METHOD: " + methodEvents._name);
+            addEventsToBoard(board, methodEvents);
+            corner.set(corner.x(), corner.y() + board.height() + 50);
+        }
     }
 
     public void draw() {
@@ -124,17 +97,25 @@ public class ParserExample extends PApplet {
         List<MethodEvents> methodEventsList = new ArrayList<MethodEvents>();
         VoidVisitor<List<MethodEvents>> methodNameVisitor = new EventCollector();
         methodNameVisitor.visit(compilationUnit, methodEventsList);
-        for(MethodEvents method : methodEventsList){
-            System.out.println(method);
+        //sort MethodEvents based on their number of events
+        methodEventsList.sort((o1, o2) -> {
+            int s1 = o1.eventQueue().size();
+            int s2 = o2.eventQueue().size();
+            return s1 - s2;
+        });
+
+        for(MethodEvents m : methodEventsList){
+            System.out.println(m);
         }
         return methodEventsList;
     }
 
-    public void addEventsToBoard(Board board){
-        List<MethodEvents> methodEventsList = methodEvents();
-        for(MethodEvents methodEvents : methodEventsList) {
-            for (InterestingEvent event : methodEvents.eventQueue()) {
-                new EventCell(board, event.name(), event.startingTime(), event.executionDuration(), event.renderingDuration());
+    public void addEventsToBoard(Board board, MethodEvents methodEvents){
+        for (InterestingEvent event : methodEvents.eventQueue()) {
+            EventCell cell = new EventCell(board, event.name(), event.startingTime(), event.executionDuration(), event.renderingDuration());
+            if(event.getAttribute("ON_IF") != null){
+                cell.setColorCell(((Scene) cell.graph()).pApplet().color(78,204,163));
+                cell.setLabel("ON IF: " + event.getAttribute("ON_IF"));
             }
         }
     }

@@ -20,30 +20,36 @@ public class EventCollector extends VoidVisitorAdapter<List<MethodEvents>> {
                 //get the addEvent Method
                 Optional<MethodCallExpr> inner = expr.findAncestor(MethodCallExpr.class, methodCallExpr -> methodCallExpr != expr);
                 if(inner.isPresent()) {
-                    //consider edge cases: ON_COND, ON_WHILE, ON_METHOD
                     MethodCallExpr methodCall = inner.get();
-                    Optional<IfStmt> condition = methodCall.findAncestor(IfStmt.class, stmt -> !stmt.getCondition().toString().contains("enableMediator")); //If is surrounded by IF CLAUSE
+                    //Create the InterestingEvent according to the method signature
+                    InterestingEvent interestingEvent = null;
+                    switch(methodCall.getName().toString()){
+                        case "addEventStartingAfterLast":{
+                            interestingEvent = addBasedOnLast(methodCall, methodEvents, true);
+                            break;
+                        }
+                        case "addEventStartingWithLast": {
+                            interestingEvent = addBasedOnLast(methodCall, methodEvents, false);
+                            break;
+                        }
+                    }
+                    if(interestingEvent == null) return;
+
+                    //consider edge cases: ON_COND, ON_WHILE, ON_METHOD
+                    Optional<IfStmt> condition = methodCall.findAncestor(IfStmt.class, stmt -> !stmt.getCondition().toString().contains("enableMediator")); //If is surrounded by non dummy IF CLAUSE
                     if(condition.isPresent()){
                         //EVENT IS CONTAINED IN AL IF/ELSE STRUCTURE
-
-
+                        if(condition.get().hasThenBlock() && condition.get().getThenStmt().isAncestorOf(methodCall)){
+                            interestingEvent.addAttribute("ON_IF", condition.get().getCondition());
+                        } else if(condition.get().hasElseBlock() && condition.get().getElseStmt().get().isAncestorOf(methodCall)){
+                            interestingEvent.addAttribute("ON_ELSE", condition.get().getCondition());
+                        }
                     }
                     if(methodEvents._eventQueue.isEmpty()){
                         //FIRST EVENT IN THE GIVEN METHOD
 
                     }
 
-                    //Create the InterestingEvent according to the method signature
-                    switch(methodCall.getName().toString()){
-                        case "addEventStartingAfterLast":{
-                            addBasedOnLast(methodCall, methodEvents, true);
-                            break;
-                        }
-                        case "addEventStartingWithLast": {
-                            addBasedOnLast(methodCall, methodEvents, false);
-                            break;
-                        }
-                    }
                     //InterestingEvent ev = new InterestingEvent(methodCall.getArgument(0).toString(), methodCall.getArgument(1).toString());
                     //methodEvents.addEvent(ev);
                 }
@@ -53,9 +59,9 @@ public class EventCollector extends VoidVisitorAdapter<List<MethodEvents>> {
         if(!methodEvents._eventQueue.isEmpty())methodEventsList.add(methodEvents);
     }
 
-    protected  void addBasedOnLast(MethodCallExpr methodCall, MethodEvents methodEvents, boolean after){
-        String name = methodCall.getArgument(0).toString();
-        String type = methodCall.getArgument(1).toString();
+    protected  InterestingEvent addBasedOnLast(MethodCallExpr methodCall, MethodEvents methodEvents, boolean after){
+        String name = methodCall.getArgument(0).toString().replace("\"", "");
+        String type = methodCall.getArgument(1).toString().replace("\"", "");
         int duration = 1;
         int renderingDuration = 1;
         int waitTime = 0;
@@ -81,8 +87,8 @@ public class EventCollector extends VoidVisitorAdapter<List<MethodEvents>> {
                 //...
             }
         }
-        if(after) methodEvents.addEventStartingAfterLast(name, type, duration, renderingDuration, waitTime);
-        else methodEvents.addEventStartingWithLast(name, type, duration, renderingDuration);
+        if(after) return methodEvents.addEventStartingAfterLast(name, type, duration, renderingDuration, waitTime);
+        else return methodEvents.addEventStartingWithLast(name, type, duration, renderingDuration);
     }
 }
 
