@@ -159,7 +159,6 @@ public class Interpolator {
   protected Task _task;
   protected float _time;
   protected float _speed;
-  protected boolean _started;
 
   // Misc
   protected boolean _loop;
@@ -216,7 +215,6 @@ public class Interpolator {
     _speed = 1.0f;
     _task = _graph._initTask(this);
     setPeriod(40);
-    _started = false;
     _loop = false;
     _pathIsValid = false;
     _valuesAreValid = true;
@@ -243,7 +241,6 @@ public class Interpolator {
     this._task = _graph._initTask(this);
     this.setPeriod(other.period());
     this._task.enableConcurrence(other._task.isConcurrent());
-    this._started = other._started;
     this._loop = other._loop;
     this._pathIsValid = other._pathIsValid;
     this._valuesAreValid = other._valuesAreValid;
@@ -487,7 +484,7 @@ public class Interpolator {
    * {@link #start()} or {@link #stop()} to modify this state.
    */
   public boolean started() {
-    return _started;
+    return _task.isActive();
   }
 
   /**
@@ -504,6 +501,8 @@ public class Interpolator {
    * @see #time()
    */
   public void update() {
+    if ((_list.isEmpty()) || (node() == null))
+      return;
     interpolate(time());
     _time += _speed * _task.period() / 1000.0f;
     if (time() > _list.get(_list.size() - 1).time()) {
@@ -576,7 +575,6 @@ public class Interpolator {
         setTime(_list.get(_list.size() - 1).time());
       if (_list.size() > 1)
         _task.run();
-      _started = true;
       update();
     }
   }
@@ -623,14 +621,10 @@ public class Interpolator {
    */
   public void stop() {
     _task.stop();
-    _started = false;
   }
 
   public void toggle() {
-    if (started())
-      stop();
-    else
-      start();
+    _task.toggle();
   }
 
   /**
