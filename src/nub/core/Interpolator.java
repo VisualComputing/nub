@@ -503,6 +503,12 @@ public class Interpolator {
   public void update() {
     if ((_list.isEmpty()) || (node() == null))
       return;
+    // TODO experimental
+    if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
+      setTime(_list.get(0).time());
+    if ((_speed < 0.0) && (time() <= _list.get(0).time()))
+      setTime(_list.get(_list.size() - 1).time());
+    // */
     interpolate(time());
     _time += _speed * _task.period() / 1000.0f;
     if (time() > _list.get(_list.size() - 1).time()) {
@@ -566,17 +572,7 @@ public class Interpolator {
    * @see #start(float)
    */
   public void start() {
-    if (started())
-      stop();
-    if (!_list.isEmpty()) {
-      if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
-        setTime(_list.get(0).time());
-      if ((_speed < 0.0) && (time() <= _list.get(0).time()))
-        setTime(_list.get(_list.size() - 1).time());
-      if (_list.size() > 1)
-        _task.run();
-      update();
-    }
+    _task.run();
   }
 
   /**
