@@ -56,7 +56,7 @@ public class PassiveTransformations extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(mouseX, mouseY, nodes);
+    graph.track(nodes, mouseX, mouseY);
   }
 
   public void mouseDragged() {

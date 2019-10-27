@@ -75,9 +75,9 @@ import java.util.List;
  * {@link #scale(String, float)} calls {@link #scale(Node, float)} passing the {@code hid} default-node).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
+ * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Node[], Point)}
  * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
- * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
+ * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Node[], Point)} and
  * {@link #track(String, Point)} update the {@code hid} tracked-node synchronously (i.e., they return the
  * {@code hid} tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
  * optimally updates the {@code hid} tracked-node during the next call to the {@link #render()} algorithm).</li>
@@ -2366,7 +2366,7 @@ public class Graph {
    * @see #track(String, float, float, Node[])
    */
   public Node track(Point pixel, Node[] nodeArray) {
-    return track(null, pixel, nodeArray);
+    return track(null, nodeArray, pixel);
   }
 
   /**
@@ -2374,7 +2374,7 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, Point pixel, Node[] nodeArray) {
+  public Node track(String hid, Node[] nodeArray, Point pixel) {
     return track(hid, pixel.x(), pixel.y(), nodeArray);
   }
 
@@ -2383,7 +2383,7 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(float x, float y, Node[] nodeArray) {
+  public Node track(Node[] nodeArray, float x, float y) {
     return track(null, x, y, nodeArray);
   }
 
