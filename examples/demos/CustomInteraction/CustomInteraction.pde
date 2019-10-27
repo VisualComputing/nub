@@ -102,9 +102,9 @@ void keyPressed() {
     else if (keyCode == DOWN)
       scene.translate(0, 10);
     else if (keyCode == LEFT)
-      scene.defaultHIDControl("menos");
+      scene.interact("menos");
     else if (keyCode == RIGHT)
-      scene.defaultHIDControl("mas");
+      scene.interact("mas");
 }
 
 void mouseDragged() {
@@ -117,12 +117,12 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.defaultHIDControl(event.getCount());
+  scene.interact(event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.defaultHIDControl();
+    scene.interact();
   if (event.getCount() == 2)
     scene.cast();
 }
