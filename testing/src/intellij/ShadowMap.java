@@ -115,7 +115,7 @@ public class ShadowMap extends PApplet {
     if (event.isShiftDown())
       // application control of the light: setting the light zFar plane
       // is implemented as a custom behavior by node.interact()
-      scene.control("light", event.getCount() * 20);
+      scene.interact("light", event.getCount() * 20);
     else
       scene.scale(event.getCount() * 20);
   }

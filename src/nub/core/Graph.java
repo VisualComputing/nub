@@ -54,7 +54,7 @@ import java.util.List;
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
  * <p>
- * Call {@link #control(Node, Object...)} to send arbitrary gesture data to the node. Note that
+ * Call {@link #interact(Node, Object...)} to send arbitrary gesture data to the node. Note that
  * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
  * <p>
  * To check if a given node would be picked with a ray casted at a given screen position
@@ -3937,10 +3937,10 @@ public class Graph {
    * the {@link #defaultNode()} which requires overriding {@link Node#interact(Object...)}.
    *
    * @see #defaultNode()
-   * @see #control(Node, Object...)
+   * @see #interact(Node, Object...)
    */
-  public void defaultHIDControl(Object... gesture) {
-    control(defaultNode(), gesture);
+  public void interact(Object... gesture) {
+    defaultNode().interact(gesture);
   }
 
   /**
@@ -3948,20 +3948,20 @@ public class Graph {
    * the {@link #defaultNode(String)} which requires overriding {@link Node#interact(Object...)}.
    *
    * @see #defaultNode(String)
-   * @see #control(Node, Object...)
+   * @see #interact(Node, Object...)
    */
-  public void control(String hid, Object... gesture) {
-    control(defaultNode(hid), gesture);
+  public void interact(String hid, Object... gesture) {
+    defaultNode(hid).interact(gesture);
   }
 
   /**
    * Same as {@code node.interact(gesture)}.
    *
-   * @see #defaultHIDControl(Object...)
-   * @see #control(String, Object...)
+   * @see #interact(Object...)
+   * @see #interact(String, Object...)
    * @see Node#interact(Object...)
    */
-  public void control(Node node, Object... gesture) {
+  public void interact(Node node, Object... gesture) {
     node.interact(gesture);
   }
 

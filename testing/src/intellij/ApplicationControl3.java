@@ -98,9 +98,9 @@ public class ApplicationControl3 extends PApplet {
       else if (keyCode == DOWN)
         scene.translate(0, 10);
       else if (keyCode == LEFT) {
-        scene.defaultHIDControl("menos");
+        scene.interact("menos");
       } else if (keyCode == RIGHT)
-        scene.defaultHIDControl("mas");
+        scene.interact("mas");
   }
 
   public void mouseDragged() {
@@ -109,16 +109,16 @@ public class ApplicationControl3 extends PApplet {
     else if (mouseButton == CENTER)
       scene.translate();
     else
-      scene.defaultHIDControl();
+      scene.interact();
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.defaultHIDControl(event.getCount());
+    scene.interact(event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.defaultHIDControl();
+      scene.interact();
     if (event.getCount() == 2)
       scene.cast();
   }
