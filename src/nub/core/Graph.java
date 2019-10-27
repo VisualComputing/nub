@@ -48,8 +48,8 @@ import java.util.List;
  * {@link #location(Vector, Node)}, are provided for convenience.
  * <h1>3. Interactivity</h1>
  * Several methods taking a {@link Node} parameter provide interactivity to nodes, such as
- * {@link #translate(float, float, float, Node)}, {@link #rotate(float, float, float, Node)}
- * and {@link #scale(float, Node)}.
+ * {@link #translate(Node, float, float, float)}, {@link #rotate(Node, float, float, float)}
+ * and {@link #scale(Node, float)}.
  * <p>
  * Some interactivity methods are only available for the {@link #eye()} and hence they don't
  * take a node parameter, such as {@link #lookAround(float, float)} or {@link #rotateCAD(float, float)}.
@@ -58,7 +58,7 @@ import java.util.List;
  * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
  * <p>
  * To check if a given node would be picked with a ray casted at a given screen position
- * use {@link #tracks(float, float, Node)}. Refer to {@link Node#pickingThreshold()} (and
+ * use {@link #tracks(Node, float, float)}. Refer to {@link Node#pickingThreshold()} (and
  * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
@@ -72,7 +72,7 @@ import java.util.List;
  * {@code hid} tracked-node is {@code null}.</li>
  * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
  * by simply passing the {@code hid} {@link #defaultNode(String)} to them (e.g.,
- * {@link #scale(String, float)} calls {@link #scale(float, Node)} passing the {@code hid} default-node).</li>
+ * {@link #scale(String, float)} calls {@link #scale(Node, float)} passing the {@code hid} default-node).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
  * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
@@ -2391,18 +2391,18 @@ public class Graph {
    * Updates the {@code hid} device tracked-node from the {@code nodeArray} and returns it.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
+   * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
    * Use this version of the method instead of {@link #track(String, float, float)} when dealing with
    * detached nodes.
    *
    * @see #track(String, float, float)
-   * @see #track(String, float, float, List)
+   * @see #track(String, List, float, float)
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2414,7 +2414,7 @@ public class Graph {
   public Node track(String hid, float x, float y, Node[] nodeArray) {
     resetTrackedNode(hid);
     for (Node node : nodeArray)
-      if (tracks(x, y, node)) {
+      if (tracks(node, x, y)) {
         setTrackedNode(hid, node);
         break;
       }
@@ -2424,7 +2424,7 @@ public class Graph {
   /**
    * Same as {@code return track(null, pixel, nodeList)}.
    *
-   * @see #track(String, float, float, List)
+   * @see #track(String, List, float, float)
    */
   public Node track(Point pixel, List<Node> nodeList) {
     return track(null, pixel, nodeList);
@@ -2433,19 +2433,19 @@ public class Graph {
   /**
    * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeList)}.
    *
-   * @see #track(String, float, float, List)
+   * @see #track(String, List, float, float)
    */
   public Node track(String hid, Point pixel, List<Node> nodeList) {
-    return track(hid, pixel.x(), pixel.y(), nodeList);
+    return track(hid, nodeList, pixel.x(), pixel.y());
   }
 
   /**
    * Same as {@code return track(null, x, y, nodeList)}.
    *
-   * @see #track(String, float, float, List)
+   * @see #track(String, List, float, float)
    */
   public Node track(float x, float y, List<Node> nodeList) {
-    return track(null, x, y, nodeList);
+    return track(null, nodeList, x, y);
   }
 
   /**
@@ -2453,10 +2453,10 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, float x, float y, List<Node> nodeList) {
+  public Node track(String hid, List<Node> nodeList, float x, float y) {
     resetTrackedNode(hid);
     for (Node node : nodeList)
-      if (tracks(x, y, node)) {
+      if (tracks(node, x, y)) {
         setTrackedNode(hid, node);
         break;
       }
@@ -2471,7 +2471,7 @@ public class Graph {
    * @see #track(String, Point)
    */
   public Node track(Point pixel) {
-    return track(null, pixel.x(), pixel.y());
+    return track(null, pixel);
   }
 
   /**
@@ -2496,7 +2496,7 @@ public class Graph {
    * Updates the {@code hid} device tracked-node and returns it.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(float, float, Node)}). If no node is found under the pixel, it returns {@code null}.
+   * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
    * Use this version of the method instead of {@link #track(String, float, float, Node[])} when dealing with
    * attached nodes to the graph.
@@ -2506,7 +2506,7 @@ public class Graph {
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2527,7 +2527,7 @@ public class Graph {
    */
   protected void _track(String hid, Node node, float x, float y) {
     if (trackedNode(hid) == null && node.isTrackingEnabled())
-      if (tracks(x, y, node)) {
+      if (tracks(node, x, y)) {
         setTrackedNode(hid, node);
         return;
       }
@@ -2539,10 +2539,10 @@ public class Graph {
   /**
    * Same as {tracks(pixel.x(), pixel.y(), node)}.
    *
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    */
-  public boolean tracks(Point pixel, Node node) {
-    return tracks(pixel.x(), pixel.y(), node);
+  public boolean tracks(Node node, Point pixel) {
+    return tracks(node, pixel.x(), pixel.y());
   }
 
   /**
@@ -2559,11 +2559,11 @@ public class Graph {
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    */
-  public boolean tracks(float x, float y, Node node) {
+  public boolean tracks(Node node, float x, float y) {
     if (node.pickingThreshold() == 0 && _bb != null)
-      return _tracks(x, y, node);
+      return _tracks(node, x, y);
     else
-      return _tracks(x, y, screenLocation(node.position()), node);
+      return _tracks(node, x, y, screenLocation(node.position()));
   }
 
   /**
@@ -2577,14 +2577,14 @@ public class Graph {
    *
    * @see Node#setPickingThreshold(float)
    */
-  protected boolean _tracks(float x, float y, Node node) {
+  protected boolean _tracks(Node node, float x, float y) {
     return false;
   }
 
   /**
-   * Cached version of {@link #tracks(float, float, Node)}.
+   * Cached version of {@link #tracks(Node, float, float)}.
    */
-  protected boolean _tracks(float x, float y, Vector projection, Node node) {
+  protected boolean _tracks(Node node, float x, float y, Vector projection) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTrackingEnabled())
@@ -2634,7 +2634,7 @@ public class Graph {
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -3021,7 +3021,7 @@ public class Graph {
         resetTrackedNode(ray._hid);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), projection, node)) {
+        if (_tracks(node, ray._pixel.x(), ray._pixel.y(), projection)) {
           setTrackedNode(ray._hid, node);
           it.remove();
         }
@@ -3040,7 +3040,7 @@ public class Graph {
         resetTrackedNode(ray._hid);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._hid))
-        if (_tracks(ray._pixel.x(), ray._pixel.y(), node)) {
+        if (_tracks(node, ray._pixel.x(), ray._pixel.y())) {
           setTrackedNode(ray._hid, node);
           it.remove();
         }
@@ -3063,7 +3063,7 @@ public class Graph {
    * using ray casting.
    *
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
    * @see #isTrackedNode(String, Node)
@@ -3095,7 +3095,7 @@ public class Graph {
    * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedNode(String)}.
    *
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
    * @see #isTrackedNode(String, Node)
@@ -3135,7 +3135,7 @@ public class Graph {
    * Returns {@code true} if {@code node} is the current {@code hid} {@link #trackedNode(String)} and {@code false} otherwise.
    *
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
    * @see #setTrackedNode(String, Node)
@@ -3150,7 +3150,7 @@ public class Graph {
    *
    * @see #trackedNode(String)
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
@@ -3174,7 +3174,7 @@ public class Graph {
    *
    * @see #trackedNode(String)
    * @see #defaultNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
@@ -3198,7 +3198,7 @@ public class Graph {
    *
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #tracks(float, float, Node)
+   * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
@@ -3486,19 +3486,19 @@ public class Graph {
    * @see #translate(String, float, float)
    */
   public void translate(float dx, float dy) {
-    translate(null, dx, dy);
+    translate(defaultNode(null), dx, dy);
   }
 
   /**
    * Same as {@code translate(dx, dy, 0, defaultNode(hid))}.
    *
-   * @see #translate(float, float, Node)
-   * @see #translate(float, float, float, Node)
+   * @see #translate(Node, float, float)
+   * @see #translate(Node, float, float, float)
    * @see #translate(String, float, float, float)
    * @see #defaultNode(String)
    */
   public void translate(String hid, float dx, float dy) {
-    translate(dx, dy, 0, defaultNode(hid));
+    translate(defaultNode(hid), dx, dy, 0);
   }
 
   /**
@@ -3507,19 +3507,19 @@ public class Graph {
    * @see #translate(String, float, float, float)
    */
   public void translate(float dx, float dy, float dz) {
-    translate(null, dx, dy, dz);
+    translate(defaultNode(null), dx, dy, dz);
   }
 
   /**
    * Same as {@code translate(dx, dy, dz, defaultNode(hid))}.
    *
-   * @see #translate(float, float, Node)
+   * @see #translate(Node, float, float)
    * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Node)
+   * @see #translate(Node, float, float, float)
    * @see #defaultNode(String)
    */
   public void translate(String hid, float dx, float dy, float dz) {
-    translate(dx, dy, dz, defaultNode(hid));
+    translate(defaultNode(hid), dx, dy, dz);
   }
 
   /**
@@ -3527,11 +3527,11 @@ public class Graph {
    *
    * @see #translate(String, float, float, float)
    * @see #translate(String, float, float)
-   * @see #translate(float, float, float, Node)
+   * @see #translate(Node, float, float, float)
    * @see #defaultNode(String)
    */
-  public void translate(float dx, float dy, Node node) {
-    translate(dx, dy, 0, node);
+  public void translate(Node node, float dx, float dy) {
+    translate(node, dx, dy, 0);
   }
 
   /**
@@ -3539,24 +3539,24 @@ public class Graph {
    * coordinates are expressed in screen space, and the {@code dz} coordinate is given in world units.
    * The translated node would be kept exactly under a pointer if such a device were used to translate it.
    *
-   * @see #translate(float, float, Node)
+   * @see #translate(Node, float, float)
    * @see #translate(String, float, float)
    * @see #translate(String, float, float, float)
    * @see #defaultNode(String)
    */
-  public void translate(float dx, float dy, float dz, Node node) {
+  public void translate(Node node, float dx, float dy, float dz) {
     if (node == null)
       throw new RuntimeException("translate(vector, node) requires a non-null node param");
-    node.translate(_translate(dx, dy, dz, node));
+    node.translate(_translate(node, dx, dy, dz));
   }
 
   /**
    * Same as {@code return _translate(dx, dy, dz, Math.min(width(), height()), node)}.
    *
-   * @see #_translate(float, float, float, int, Node)
+   * @see #_translate(Node, float, float, float, int)
    */
-  protected Vector _translate(float dx, float dy, float dz, Node node) {
-    return _translate(dx, dy, dz, Math.min(width(), height()), node);
+  protected Vector _translate(Node node, float dx, float dy, float dz) {
+    return _translate(node, dx, dy, dz, Math.min(width(), height()));
   }
 
   /**
@@ -3567,7 +3567,7 @@ public class Graph {
    * (e.g., the translated node would be kept exactly under a pointer if such a device were used to translate it).
    * The z-coordinate is mapped from [0..{@code zMax}] to the [0..2*{@link #radius()}}] range.
    */
-  protected Vector _translate(float dx, float dy, float dz, int zMax, Node node) {
+  protected Vector _translate(Node node, float dx, float dy, float dz, int zMax) {
     if (is2D() && dz != 0) {
       System.out.println("Warning: graph is 2D. Z-translation reset");
       dz = 0;
@@ -3595,17 +3595,17 @@ public class Graph {
    * @see #scale(String, float)
    */
   public void scale(float delta) {
-    scale(null, delta);
+    scale(defaultNode(null), delta);
   }
 
   /**
    * Same as {@code scale(delta, defaultNode(hid))}.
    *
-   * @see #scale(float, Node)
+   * @see #scale(Node, float)
    * @see #defaultNode(String)
    */
   public void scale(String hid, float delta) {
-    scale(delta, defaultNode(hid));
+    scale(defaultNode(hid), delta);
   }
 
   /**
@@ -3614,7 +3614,7 @@ public class Graph {
    *
    * @see #scale(String, float)
    */
-  public void scale(float delta, Node node) {
+  public void scale(Node node, float delta) {
     float factor = 1 + Math.abs(delta) / (float) (isEye(node) ? -height() : height());
     node.scale(delta >= 0 ? factor : 1 / factor);
   }
@@ -3625,17 +3625,17 @@ public class Graph {
    * @see #rotate(String, float, float, float)
    */
   public void rotate(float roll, float pitch, float yaw) {
-    rotate(null, roll, pitch, yaw);
+    rotate(defaultNode(null), roll, pitch, yaw);
   }
 
   /**
    * Rotates the {@code hid} default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
    * space x, y and z axes, respectively.
    *
-   * @see #rotate(float, float, float, Node)
+   * @see #rotate(Node, float, float, float)
    */
   public void rotate(String hid, float roll, float pitch, float yaw) {
-    rotate(roll, pitch, yaw, defaultNode(hid));
+    rotate(defaultNode(hid), roll, pitch, yaw);
   }
 
   /**
@@ -3647,18 +3647,18 @@ public class Graph {
    * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
    *
    * @see #rotate(String, float, float, float)
-   * @see #spin(Point, Point, float, Node)
+   * @see #spin(Node, Point, Point, float)
    */
-  public void rotate(float roll, float pitch, float yaw, Node node) {
+  public void rotate(Node node, float roll, float pitch, float yaw) {
     if (node == null)
       throw new RuntimeException("rotate(roll, pitch, yaw, node) requires a non-null node param");
-    spin(_rotate(roll, pitch, yaw, node), node);
+    spin(node, _rotate(node, roll, pitch, yaw));
   }
 
   /**
    * Low-level roll-pitch and yaw rotation. Axes are physical, i.e., screen space.
    */
-  protected Quaternion _rotate(float roll, float pitch, float yaw, Node node) {
+  protected Quaternion _rotate(Node node, float roll, float pitch, float yaw) {
     if (is2D() && (roll != 0 || pitch != 0)) {
       roll = 0;
       pitch = 0;
@@ -3685,29 +3685,29 @@ public class Graph {
    * @see #spin(String, Point, Point)
    */
   public void spin(Point tail, Point head) {
-    spin(null, tail, head);
+    spin(defaultNode(null), tail, head);
   }
 
   /**
    * Same as {@code spin(tail, head, defaultNode(hid))}.
    *
-   * @see #spin(Point, Point, float, Node)
-   * @see #spin(Point, Point, Node)
+   * @see #spin(Node, Point, Point, float)
+   * @see #spin(Node, Point, Point)
    * @see #spin(String, Point, Point, float)
    */
   public void spin(String hid, Point tail, Point head) {
-    spin(tail, head, defaultNode(hid));
+    spin(defaultNode(hid), tail, head);
   }
 
   /**
    * Same as {@code spin(tail, head, 1, node)}.
    *
-   * @see #spin(Point, Point, float, Node)
+   * @see #spin(Node, Point, Point, float)
    * @see #spin(String, Point, Point)
    * @see #spin(String, Point, Point, float)
    */
-  public void spin(Point tail, Point head, Node node) {
-    spin(tail, head, 1, node);
+  public void spin(Node node, Point tail, Point head) {
+    spin(node, tail, head, 1);
   }
 
   /**
@@ -3716,19 +3716,19 @@ public class Graph {
    * @see #spin(String, Point, Point, float)
    */
   public void spin(Point tail, Point head, float sensitivity) {
-    spin(null, tail, head, sensitivity);
+    spin(defaultNode(null), tail, head, sensitivity);
   }
 
   /**
    * Same as {@code spin(tail, head, sensitivity, defaultNode(hid))}.
    *
-   * @see #spin(Point, Point, float, Node)
+   * @see #spin(Node, Point, Point, float)
    * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Node)
+   * @see #spin(Node, Point, Point)
    * @see #defaultNode(String)
    */
   public void spin(String hid, Point tail, Point head, float sensitivity) {
-    spin(tail, head, sensitivity, defaultNode(hid));
+    spin(defaultNode(hid), tail, head, sensitivity);
   }
 
   /**
@@ -3739,35 +3739,35 @@ public class Graph {
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
    * orientation using a mouse.
    * <p>
-   * Override this class an call {@link #_spin(Point, Point, Point, float, Node)} if you want to define a different
+   * Override this class an call {@link #_spin(Node, Point, Point, Point, float)} if you want to define a different
    * rotation center (rare).
    *
    * @see #spin(String, Point, Point)
-   * @see #spin(Point, Point, Node)
+   * @see #spin(Node, Point, Point)
    * @see #spin(String, Point, Point, float)
-   * @see #rotate(float, float, float, Node)
+   * @see #rotate(Node, float, float, float)
    */
-  public void spin(Point tail, Point head, float sensitivity, Node node) {
+  public void spin(Node node, Point tail, Point head, float sensitivity) {
     if (node == null)
       throw new RuntimeException("spin(point1, point2, sensitivity, node) requires a non-null node param");
-    spin(_spin(tail, head, sensitivity, node), node);
+    spin(node, _spin(node, tail, head, sensitivity));
   }
 
   /**
    * Same as {@code return _spin(point1, point2, center, sensitivity, node)} where {@code center} is {@link #anchor()}
    * if the node is the {@link #eye()} or {@link Node#position()} otherwise.
    */
-  protected Quaternion _spin(Point point1, Point point2, float sensitivity, Node node) {
+  protected Quaternion _spin(Node node, Point point1, Point point2, float sensitivity) {
     Vector vector = screenLocation(isEye(node) ? anchor() : node.position());
     Point center = new Point(vector.x(), vector.y());
-    return _spin(point1, point2, center, sensitivity, node);
+    return _spin(node, point1, point2, center, sensitivity);
   }
 
   /**
    * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    */
-  protected Quaternion _spin(Point point1, Point point2, Point center, float sensitivity, Node node) {
+  protected Quaternion _spin(Node node, Point point1, Point point2, Point center, float sensitivity) {
     float cx = center.x();
     float cy = center.y();
     float x = point2.x();
@@ -3817,7 +3817,7 @@ public class Graph {
    * Rotates the node using {@code quaternion} around its {@link Node#position()} (non-eye nodes)
    * or around the {@link Graph#anchor()} when the {@code node} is the {@link Graph#eye()}.
    */
-  public void spin(Quaternion quaternion, Node node) {
+  public void spin(Node node, Quaternion quaternion) {
     if (isEye(node))
       //same as:
       //node.orbit(new Quaternion(node.worldDisplacement(quaternion.axis()), quaternion.angle()));
@@ -3831,11 +3831,11 @@ public class Graph {
   /**
    * Same as {@code translate(0, 0, delta, eye()); }.
    *
-   * @see #translate(float, float, float, Node)
+   * @see #translate(Node, float, float, float)
    */
   public void moveForward(float delta) {
     float d1 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
-    translate(0, 0, delta, eye());
+    translate(eye(), 0, 0, delta);
     float d2 = type() == Type.ORTHOGRAPHIC ? Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis()) : 1;
     if (type() == Type.ORTHOGRAPHIC)
       if (d2 / d1 > 0 && d1 != 0)
@@ -3917,7 +3917,7 @@ public class Graph {
    * @see #rotateCAD(float, float)
    */
   public void rotateCAD(float roll, float pitch, Vector upVector) {
-    spin(_rotateCAD(roll, pitch, upVector), eye());
+    spin(eye(), _rotateCAD(roll, pitch, upVector));
   }
 
   /**

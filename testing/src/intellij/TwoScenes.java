@@ -56,7 +56,7 @@ public class TwoScenes extends PApplet {
       Vector zNear = new Vector(0, 0, scene1.zNear());
       Vector zFar = new Vector(0, 0, scene1.zFar());
       Vector zNear2ZFar = Vector.subtract(zFar, zNear);
-      scene1.translate(0, 0, zNear2ZFar.magnitude(), node);
+      scene1.translate(node, 0, 0, zNear2ZFar.magnitude());
     }
     if (key == 'n')
       scene1.eye().setMagnitude(1);

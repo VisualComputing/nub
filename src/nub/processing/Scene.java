@@ -853,15 +853,15 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code return track(mouse(), node)}.
    *
    * @see #mouse()
-   * @see #tracks(Point, Node)
-   * @see #tracks(float, float, Node)
+   * @see Graph#tracks(Node, Point)
+   * @see Graph#tracks(Node, float, float)
    */
   public boolean tracks(Node node) {
-    return tracks(mouse(), node);
+    return tracks(node, mouse());
   }
 
   @Override
-  protected boolean _tracks(float x, float y, Node node) {
+  protected boolean _tracks(Node node, float x, float y) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTrackingEnabled())
@@ -2979,12 +2979,12 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code translate(mouseDX(), mouseDY(), node)}.
    *
-   * @see #translate(float, float, Node)
+   * @see Graph#translate(Node, float, float)
    * @see #mouseDX()
    * @see #mouseDY()
    */
   public void translate(Node node) {
-    translate(mouseDX(), mouseDY(), node);
+    translate(node, mouseDX(), mouseDY());
   }
 
   /**
@@ -3001,12 +3001,12 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code spin(pmouse(), mouse(), node)}.
    *
-   * @see #spin(Point, Point, Node)
+   * @see Graph#spin(Node, Point, Point)
    * @see #pmouse()
    * @see #mouse()
    */
   public void spin(Node node) {
-    spin(pmouse(), mouse(), node);
+    spin(node, pmouse(), mouse());
   }
 
   // only eye

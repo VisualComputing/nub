@@ -2299,7 +2299,7 @@ public class Node {
   }
 
   /**
-   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Point, Node)}
+   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Node, Point)}
    * returns {@code false}, {@link Graph#setTrackedNode(String, Node)} does nothing while
    * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
    *

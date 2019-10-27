@@ -60,7 +60,7 @@ public class AdaptivePrecision1 extends PApplet {
     else if (mouseButton == RIGHT)
       scene.translate(defaultShape());
     else
-      scene.scale(mouseX - pmouseX, defaultShape());
+      scene.scale(defaultShape(), mouseX - pmouseX);
   }
 
   public void mouseWheel(MouseEvent event) {
@@ -70,7 +70,7 @@ public class AdaptivePrecision1 extends PApplet {
   public void mouseClicked() {
     trackedShape = null;
     for (int i = 0; i < shapes.length; i++)
-      if (scene.tracks(mouseX, mouseY, shapes[i])) {
+      if (scene.tracks(shapes[i], mouseX, mouseY)) {
         trackedShape = shapes[i];
         break;
       }
