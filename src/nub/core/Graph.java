@@ -3937,9 +3937,10 @@ public class Graph {
    * the {@link #defaultNode()} which requires overriding {@link Node#interact(Object...)}.
    *
    * @see #defaultNode()
+   * @see #interact(String, Object...)
    * @see #interact(Node, Object...)
    */
-  public void interact(Object... gesture) {
+  public void interactDefaultHID(Object... gesture) {
     defaultNode().interact(gesture);
   }
 
@@ -3948,6 +3949,7 @@ public class Graph {
    * the {@link #defaultNode(String)} which requires overriding {@link Node#interact(Object...)}.
    *
    * @see #defaultNode(String)
+   * @see #interactDefaultHID(Object...)
    * @see #interact(Node, Object...)
    */
   public void interact(String hid, Object... gesture) {
@@ -3957,7 +3959,7 @@ public class Graph {
   /**
    * Same as {@code node.interact(gesture)}.
    *
-   * @see #interact(Object...)
+   * @see #interactDefaultHID(Object...)
    * @see #interact(String, Object...)
    * @see Node#interact(Object...)
    */

@@ -119,16 +119,16 @@ public class ApplicationControl3 extends PApplet {
     else if (mouseButton == CENTER)
       scene.translate();
     else
-      scene.interact();
+      scene.interact(scene.defaultNode());
   }
 
   public void mouseWheel(MouseEvent event) {
-    scene.interact(event.getCount());
+    scene.interact(scene.defaultNode(), event.getCount());
   }
 
   public void mouseClicked(MouseEvent event) {
     if (event.getCount() == 1)
-      scene.interact();
+      scene.interact(scene.defaultNode());
     if (event.getCount() == 2)
       scene.cast();
   }
