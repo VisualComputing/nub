@@ -66,7 +66,6 @@ public class ApplicationControl1 extends PApplet {
             }
         }
       };
-      shapes[i].scale(23);
       shapes[i].randomize();
     }
     font36 = loadFont("FreeSans-36.vlw");

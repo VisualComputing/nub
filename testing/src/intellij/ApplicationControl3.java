@@ -51,20 +51,27 @@ public class ApplicationControl3 extends PApplet {
 
         @Override
         public void interact(Object... gesture) {
-          if (gesture.length == 0)
+          println("enter");
+          if (gesture.length == 0) {
+            println("0");
             _color = randomColor();
-          if (gesture.length == 1)
+          }
+          if (gesture.length == 1) {
+            println("1");
             if (gesture[0] instanceof String) {
+              println("1 string");
               if (((String) gesture[0]).matches("mas"))
                 _faces++;
               else if (((String) gesture[0]).matches("menos"))
                 if (_faces > 2)
                   _faces--;
             } else if (gesture[0] instanceof Integer) {
+              println("1 integer");
               int delta = (Integer) gesture[0];
               if (_faces + delta > 1)
                 _faces = _faces + delta;
             }
+          }
         }
       };
       shapes[i].randomize();
@@ -98,9 +105,12 @@ public class ApplicationControl3 extends PApplet {
       else if (keyCode == DOWN)
         scene.translate(0, 10);
       else if (keyCode == LEFT) {
-        scene.interact("menos");
-      } else if (keyCode == RIGHT)
-        scene.interact("mas");
+        println("menos sent");
+        scene.interact(scene.defaultNode(), "menos");
+      } else if (keyCode == RIGHT) {
+        println("mas sent");
+        scene.interact(scene.defaultNode(), "mas");
+      }
   }
 
   public void mouseDragged() {
