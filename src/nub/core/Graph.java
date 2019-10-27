@@ -2444,7 +2444,7 @@ public class Graph {
    *
    * @see #track(String, List, float, float)
    */
-  public Node track(float x, float y, List<Node> nodeList) {
+  public Node track(List<Node> nodeList, float x, float y) {
     return track(null, nodeList, x, y);
   }
 
@@ -2480,7 +2480,7 @@ public class Graph {
    * @see #track(String, float, float)
    */
   public Node track(float x, float y) {
-    return track(null, x, y);
+    return track(null, new Point(x, y));
   }
 
   /**
