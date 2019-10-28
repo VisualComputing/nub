@@ -1,7 +1,7 @@
 /**
  * Application Control.
  * by Jean Pierre Charalambos.
- * 
+ *
  * This example illustrates how to customize shape behaviors by
  * overriding the node interact(Object... gesture) method.
  *
@@ -9,7 +9,7 @@
  * keys and the mouse. To pick a torus press the [0..9] keys
  * or double-click on it; press other key or double-click on the
  * the background to reset your picking selection. Once a torus
- * is picked try the key arrows, the mouse wheel or a single 
+ * is picked try the key arrows, the mouse wheel or a single
  * mouse click, to control its color and number of faces.
  */
 
@@ -102,9 +102,9 @@ void keyPressed() {
     else if (keyCode == DOWN)
       scene.translate(0, 10);
     else if (keyCode == LEFT)
-      scene.interact("menos");
+      scene.interact(scene.defaultNode(), "menos");
     else if (keyCode == RIGHT)
-      scene.interact("mas");
+      scene.interact(scene.defaultNode(), "mas");
 }
 
 void mouseDragged() {
@@ -117,12 +117,12 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.interact(event.getCount());
+  scene.interact(scene.defaultNode(), event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.interact();
+    scene.interact(scene.defaultNode());
   if (event.getCount() == 2)
     scene.cast();
 }
