@@ -121,25 +121,13 @@ public class Interpolator {
       return _tangentVector;
     }
 
-    Vector position() {
-      return node().position();
-    }
-
-    Quaternion orientation() {
-      return node().orientation();
-    }
-
-    float magnitude() {
-      return node().magnitude();
-    }
-
     float time() {
       return _time;
     }
 
     void computeTangent(KeyFrame prev, KeyFrame next) {
-      _tangentVector = Vector.multiply(Vector.subtract(next.position(), prev.position()), 0.5f);
-      _tangentQuaternion = Quaternion.squadTangent(prev.orientation(), orientation(), next.orientation());
+      _tangentVector = Vector.multiply(Vector.subtract(next.node().position(), prev.node().position()), 0.5f);
+      _tangentQuaternion = Quaternion.squadTangent(prev.node().orientation(), node().orientation(), next.node().orientation());
     }
   }
 
@@ -766,17 +754,17 @@ public class Interpolator {
     else
       alpha = (time - _list.get(_current1.nextIndex()).time()) / dt;
 
-    Vector pos = Vector.add(_list.get(_current1.nextIndex()).position(), Vector.multiply(
+    Vector pos = Vector.add(_list.get(_current1.nextIndex()).node().position(), Vector.multiply(
         Vector.add(_list.get(_current1.nextIndex()).tangentVector(),
             Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
 
-    float mag = Vector.lerp(_list.get(_current1.nextIndex()).magnitude(),
-        _list.get(_current2.nextIndex()).magnitude(), alpha);
+    float mag = Vector.lerp(_list.get(_current1.nextIndex()).node().magnitude(),
+        _list.get(_current2.nextIndex()).node().magnitude(), alpha);
 
-    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).orientation(),
+    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).node().orientation(),
         _list.get(_current1.nextIndex()).tangentQuaternion(),
         _list.get(_current2.nextIndex()).tangentQuaternion(),
-        _list.get(_current2.nextIndex()).orientation(), alpha);
+        _list.get(_current2.nextIndex()).node().orientation(), alpha);
 
     node().setPosition(pos);
     node().setRotation(q);
@@ -840,8 +828,8 @@ public class Interpolator {
    * Internal use. Used by {@link #interpolate(float)}.
    */
   protected void _updateSplineCache() {
-    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).position(),
-        _list.get(_current1.nextIndex()).position());
+    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).node().position(),
+        _list.get(_current1.nextIndex()).node().position());
     _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex()).tangentVector(), (-2.0f)));
     _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex()).tangentVector());
     _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex()).tangentVector());
@@ -879,7 +867,7 @@ public class Interpolator {
 
       if (_list.get(0) == _list.get(_list.size() - 1))
         _path.add(
-            new Node(_list.get(0).position(), _list.get(0).orientation(), _list.get(0).magnitude()));
+            new Node(_list.get(0).node().position(), _list.get(0).node().orientation(), _list.get(0).node().magnitude()));
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
         keyFrames[0] = _list.get(0);
@@ -891,7 +879,7 @@ public class Interpolator {
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
 
         while (keyFrames[2] != null) {
-          Vector pdiff = Vector.subtract(keyFrames[2].position(), keyFrames[1].position());
+          Vector pdiff = Vector.subtract(keyFrames[2].node().position(), keyFrames[1].node().position());
           Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1].tangentVector(), (-2.0f)));
           pvec1 = Vector.subtract(pvec1, keyFrames[2].tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1].tangentVector());
@@ -900,9 +888,9 @@ public class Interpolator {
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
             _path.add(new Node(
-                Vector.add(keyFrames[1].position(), Vector.multiply(Vector.add(keyFrames[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1].orientation(), keyFrames[1].tangentQuaternion(), keyFrames[2].tangentQuaternion(), keyFrames[2].orientation(), alpha),
-                Vector.lerp(keyFrames[1].magnitude(), keyFrames[2].magnitude(), alpha))
+                Vector.add(keyFrames[1].node().position(), Vector.multiply(Vector.add(keyFrames[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(keyFrames[1].node().orientation(), keyFrames[1].tangentQuaternion(), keyFrames[2].tangentQuaternion(), keyFrames[2].node().orientation(), alpha),
+                Vector.lerp(keyFrames[1].node().magnitude(), keyFrames[2].node().magnitude(), alpha))
             );
           }
 
@@ -915,7 +903,7 @@ public class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Node(keyFrames[1].position(), keyFrames[1].orientation(), keyFrames[1].magnitude()));
+        _path.add(new Node(keyFrames[1].node().position(), keyFrames[1].node().orientation(), keyFrames[1].node().magnitude()));
       }
       _pathIsValid = true;
     }
