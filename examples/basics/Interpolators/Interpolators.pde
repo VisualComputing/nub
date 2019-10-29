@@ -61,7 +61,7 @@ void setup() {
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)
     interpolator.addKeyFrame(scene.randomNode());
-  interpolator.start();
+  interpolator.run();
 }
 
 void draw() {
@@ -122,14 +122,14 @@ void keyPressed() {
   if (key == 'a')
     eyeInterpolator1.toggle();
   if (key == 'b')
-    eyeInterpolator1.purge();
+    eyeInterpolator1.clear();
 
   if (key == '2')
     eyeInterpolator2.addKeyFrame();
   if (key == 'c')
     eyeInterpolator2.toggle();
   if (key == 'd')
-    eyeInterpolator2.purge();
+    eyeInterpolator2.clear();
 
   if (key == '-')
     interpolator.increaseSpeed(-0.25f);
