@@ -460,17 +460,6 @@ public class Interpolator {
   }
 
   /**
-   * Returns the current interpolation time (in seconds) along the interpolator
-   * path.
-   * <p>
-   * This time is regularly updated when {@link Task#isActive()}. Can be set
-   * directly with {@link #setTime(float)} or {@link #interpolate(float)}.
-   */
-  public float time() {
-    return _time;
-  }
-
-  /**
    * Returns the current interpolation speed.
    * <p>
    * Default value is 1, which means {@link #time(int)} will be matched during
@@ -515,6 +504,69 @@ public class Interpolator {
   }
 
   /**
+   * Returns the current interpolation time (in seconds) along the interpolator
+   * path.
+   * <p>
+   * This time is regularly updated when {@link Task#isActive()}. Can be set
+   * directly with {@link #setTime(float)} or {@link #interpolate(float)}.
+   */
+  public float time() {
+    return _time;
+  }
+
+  /**
+   * Returns the time corresponding to the {@code index} keyframe. Not that index has
+   * to be in the range 0.. {@link #size()}-1.
+   *
+   * @see #keyFrame(int)
+   */
+  public float time(int index) {
+    return _list.get(index).time();
+  }
+
+  /**
+   * Returns the duration of the interpolator path, expressed in seconds.
+   * <p>
+   * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0 if the
+   * path has less than 2 keyframes.
+   *
+   * @see #time(int)
+   */
+  public float duration() {
+    return lastTime() - firstTime();
+  }
+
+  /**
+   * Returns the time corresponding to the first keyframe, expressed in seconds.
+   * <p>
+   * Returns 0 if the path is empty.
+   *
+   * @see #lastTime()
+   * @see #duration()
+   * @see #time(int)
+   */
+  public float firstTime() {
+    if (_list.isEmpty())
+      return 0.0f;
+    else
+      return _list.get(0).time();
+  }
+
+  /**
+   * Returns the time corresponding to the last keyframe, expressed in seconds.
+   *
+   * @see #firstTime()
+   * @see #duration()
+   * @see #time(int)
+   */
+  public float lastTime() {
+    if (_list.isEmpty())
+      return 0.0f;
+    else
+      return _list.get(_list.size() - 1).time();
+  }
+
+  /**
    * Same as {@code setSpeed(speed() + delta)}.
    *
    * @see #speed()
@@ -551,12 +603,23 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Called by {@link #_checkValidity()}.
+   * Returns the node associated with the keyframe at index {@code index}.
+   * <p>
+   * See also {@link #time(int)}. {@code index} has to be in the range 0..
+   * {@link #size()}-1.
    */
-  protected void _invalidateValues() {
-    _valuesAreValid = false;
-    _pathIsValid = false;
-    _splineCacheIsValid = false;
+  public Node keyFrame(int index) {
+    return _list.get(index).node();
+  }
+
+  /**
+   * Returns the list of keyframes which defines this interpolator.
+   */
+  public List<Node> keyFrames() {
+    List<Node> list = new ArrayList<Node>();
+    for (KeyFrame keyFrame : _list)
+      list.add(keyFrame.node());
+    return list;
   }
 
   /**
@@ -598,12 +661,10 @@ public class Interpolator {
    */
   public void addKeyFrame(Node node) {
     float time;
-
     if (_list.isEmpty())
       time = 0.0f;
     else
       time = _list.get(_list.size() - 1).time() + 1.0f;
-
     addKeyFrame(node, time);
   }
 
@@ -640,7 +701,7 @@ public class Interpolator {
   }
 
   /**
-   * Remove keyframe according to {@code index} in the list and
+   * Remove keyframe according to {@code index} in the list and calls
    * {@link Task#stop()} if {@link Task#isActive()}.
    */
   public Node removeKeyFrame(int index) {
@@ -653,15 +714,8 @@ public class Interpolator {
       _task.stop();
     KeyFrame keyFrame = _list.remove(index);
     setTime(firstTime());
+    _graph.prune(keyFrame.node());
     return keyFrame.node();
-  }
-
-  /**
-   * Same as {@link #removeKeyFrame(int)}, but also removes the keyframe from the scene if it is a node instance.
-   */
-  public void purgeKeyFrame(int index) {
-    Node node = removeKeyFrame(index);
-    _graph.prune(node);
   }
 
   /**
@@ -683,35 +737,62 @@ public class Interpolator {
   }
 
   /**
-   * Internal use.
+   * Interpolate {@link #node()} at time {@code time} (expressed in seconds).
+   * {@link #time()} is set to {@code time} and {@link #node()} is set accordingly.
+   * <p>
+   * If you simply want to change {@link #time()} but not the
+   * {@link #node()} state, use {@link #setTime(float)} instead.
    */
-  protected void _updateModifiedKeyFrames() {
-    KeyFrame keyFrame;
-    KeyFrame prev = _list.get(0);
-    keyFrame = _list.get(0);
+  public void interpolate(float time) {
+    this._checkValidity();
+    setTime(time);
 
-    int index = 1;
-    while (keyFrame != null) {
-      KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
-      index++;
-      if (next != null)
-        keyFrame.computeTangent(prev, next);
-      else
-        keyFrame.computeTangent(prev, keyFrame);
-      prev = keyFrame;
-      keyFrame = next;
-    }
-    _valuesAreValid = true;
+    if ((_list.isEmpty()) || (node() == null))
+      return;
+
+    if (!_valuesAreValid)
+      _updateModifiedKeyFrames();
+
+    _updateCurrentKeyFrameForTime(time);
+
+    if (!_splineCacheIsValid)
+      _updateSplineCache();
+
+    float alpha;
+    float dt = _list.get(_current2.nextIndex()).time() - _list.get(_current1.nextIndex()).time();
+    if (dt == 0)
+      alpha = 0.0f;
+    else
+      alpha = (time - _list.get(_current1.nextIndex()).time()) / dt;
+
+    Vector pos = Vector.add(_list.get(_current1.nextIndex()).position(), Vector.multiply(
+        Vector.add(_list.get(_current1.nextIndex()).tangentVector(),
+            Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
+
+    float mag = Vector.lerp(_list.get(_current1.nextIndex()).magnitude(),
+        _list.get(_current2.nextIndex()).magnitude(), alpha);
+
+    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).orientation(),
+        _list.get(_current1.nextIndex()).tangentQuaternion(),
+        _list.get(_current2.nextIndex()).tangentQuaternion(),
+        _list.get(_current2.nextIndex()).orientation(), alpha);
+
+    node().setPosition(pos);
+    node().setRotation(q);
+    node().setMagnitude(mag);
   }
 
   /**
-   * Returns the list of keyframes which defines this interpolator.
+   * Internal use. Used by {@link #interpolate(float)}.
    */
-  public List<Node> keyFrames() {
-    List<Node> list = new ArrayList<Node>();
-    for (KeyFrame keyFrame : _list)
-      list.add(keyFrame.node());
-    return list;
+  protected void _updateSplineCache() {
+    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).position(),
+        _list.get(_current1.nextIndex()).position());
+    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex()).tangentVector(), (-2.0f)));
+    _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex()).tangentVector());
+    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex()).tangentVector());
+    _vector2 = Vector.add(_vector2, _list.get(_current2.nextIndex()).tangentVector());
+    _splineCacheIsValid = true;
   }
 
   /**
@@ -787,86 +868,6 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Calls {@link #_invalidateValues()} if a keyframe defining the
-   * path was recently modified.
-   */
-  protected void _checkValidity() {
-    boolean flag = false;
-    for (KeyFrame keyFrame : _list) {
-      if (keyFrame.node().lastUpdate() > _lastUpdate()) {
-        flag = true;
-        break;
-      }
-    }
-    if (flag) {
-      this._invalidateValues();
-      this._checked();
-    }
-  }
-
-  /**
-   * Returns the node associated with the keyframe at index {@code index}.
-   * <p>
-   * See also {@link #time(int)}. {@code index} has to be in the range 0..
-   * {@link #size()}-1.
-   */
-  public Node keyFrame(int index) {
-    return _list.get(index).node();
-  }
-
-  /**
-   * Returns the time corresponding to the {@code index} keyframe. Not that index has
-   * to be in the range 0.. {@link #size()}-1.
-   *
-   * @see #keyFrame(int)
-   */
-  public float time(int index) {
-    return _list.get(index).time();
-  }
-
-  /**
-   * Returns the duration of the interpolator path, expressed in seconds.
-   * <p>
-   * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0 if the
-   * path has less than 2 keyframes.
-   *
-   * @see #time(int)
-   */
-  public float duration() {
-    return lastTime() - firstTime();
-  }
-
-  /**
-   * Returns the time corresponding to the first keyframe, expressed in seconds.
-   * <p>
-   * Returns 0 if the path is empty.
-   *
-   * @see #lastTime()
-   * @see #duration()
-   * @see #time(int)
-   */
-  public float firstTime() {
-    if (_list.isEmpty())
-      return 0.0f;
-    else
-      return _list.get(0).time();
-  }
-
-  /**
-   * Returns the time corresponding to the last keyframe, expressed in seconds.
-   *
-   * @see #firstTime()
-   * @see #duration()
-   * @see #time(int)
-   */
-  public float lastTime() {
-    if (_list.isEmpty())
-      return 0.0f;
-    else
-      return _list.get(_list.size() - 1).time();
-  }
-
-  /**
    * Internal use.
    */
   protected void _updateCurrentKeyFrameForTime(float time) {
@@ -920,61 +921,51 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Used by {@link #interpolate(float)}.
+   * Internal use.
    */
-  protected void _updateSplineCache() {
-    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).position(),
-        _list.get(_current1.nextIndex()).position());
-    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex()).tangentVector(), (-2.0f)));
-    _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex()).tangentVector());
-    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex()).tangentVector());
-    _vector2 = Vector.add(_vector2, _list.get(_current2.nextIndex()).tangentVector());
-    _splineCacheIsValid = true;
+  protected void _updateModifiedKeyFrames() {
+    KeyFrame keyFrame;
+    KeyFrame prev = _list.get(0);
+    keyFrame = _list.get(0);
+
+    int index = 1;
+    while (keyFrame != null) {
+      KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
+      index++;
+      if (next != null)
+        keyFrame.computeTangent(prev, next);
+      else
+        keyFrame.computeTangent(prev, keyFrame);
+      prev = keyFrame;
+      keyFrame = next;
+    }
+    _valuesAreValid = true;
   }
 
   /**
-   * Interpolate {@link #node()} at time {@code time} (expressed in seconds).
-   * {@link #time()} is set to {@code time} and {@link #node()} is set accordingly.
-   * <p>
-   * If you simply want to change {@link #time()} but not the
-   * {@link #node()} state, use {@link #setTime(float)} instead.
+   * Internal use. Calls {@link #_invalidateValues()} if a keyframe defining the
+   * path was recently modified.
    */
-  public void interpolate(float time) {
-    this._checkValidity();
-    setTime(time);
+  protected void _checkValidity() {
+    boolean flag = false;
+    for (KeyFrame keyFrame : _list) {
+      if (keyFrame.node().lastUpdate() > _lastUpdate()) {
+        flag = true;
+        break;
+      }
+    }
+    if (flag) {
+      this._invalidateValues();
+      this._checked();
+    }
+  }
 
-    if ((_list.isEmpty()) || (node() == null))
-      return;
-
-    if (!_valuesAreValid)
-      _updateModifiedKeyFrames();
-
-    _updateCurrentKeyFrameForTime(time);
-
-    if (!_splineCacheIsValid)
-      _updateSplineCache();
-
-    float alpha;
-    float dt = _list.get(_current2.nextIndex()).time() - _list.get(_current1.nextIndex()).time();
-    if (dt == 0)
-      alpha = 0.0f;
-    else
-      alpha = (time - _list.get(_current1.nextIndex()).time()) / dt;
-
-    Vector pos = Vector.add(_list.get(_current1.nextIndex()).position(), Vector.multiply(
-        Vector.add(_list.get(_current1.nextIndex()).tangentVector(),
-            Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
-
-    float mag = Vector.lerp(_list.get(_current1.nextIndex()).magnitude(),
-        _list.get(_current2.nextIndex()).magnitude(), alpha);
-
-    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).orientation(),
-        _list.get(_current1.nextIndex()).tangentQuaternion(),
-        _list.get(_current2.nextIndex()).tangentQuaternion(),
-        _list.get(_current2.nextIndex()).orientation(), alpha);
-
-    node().setPosition(pos);
-    node().setRotation(q);
-    node().setMagnitude(mag);
+  /**
+   * Internal use. Called by {@link #_checkValidity()}.
+   */
+  protected void _invalidateValues() {
+    _valuesAreValid = false;
+    _pathIsValid = false;
+    _splineCacheIsValid = false;
   }
 }
