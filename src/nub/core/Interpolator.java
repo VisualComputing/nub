@@ -703,6 +703,7 @@ public class Interpolator {
   /**
    * Remove keyframe according to {@code index} in the list and calls
    * {@link Task#stop()} if {@link Task#isActive()}.
+   * //TODO index should be time!
    */
   public Node removeKeyFrame(int index) {
     if (index < 0 || index >= _list.size())
@@ -780,6 +781,59 @@ public class Interpolator {
     node().setPosition(pos);
     node().setRotation(q);
     node().setMagnitude(mag);
+  }
+
+  /**
+   * Internal use.
+   */
+  protected void _updateCurrentKeyFrameForTime(float time) {
+    // Assertion: times are sorted in monotone order.
+    // Assertion: keyFrame_ is not empty
+
+    // TODO: Special case for loops when closed path is implemented !!
+    if (!_currentKeyFrameValid)
+      // Recompute everything from scratch
+      _current1 = _list.listIterator();
+
+    // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
+    while (_list.get(_current1.nextIndex()).time() > time) {
+      _currentKeyFrameValid = false;
+      if (!_current1.hasPrevious())
+        break;
+      _current1.previous();
+    }
+
+    if (!_currentKeyFrameValid)
+      _current2 = _list.listIterator(_current1.nextIndex());
+
+    while (_list.get(_current2.nextIndex()).time() < time) {
+      _currentKeyFrameValid = false;
+
+      if (!_current2.hasNext())
+        break;
+
+      _current2.next();
+    }
+
+    if (!_currentKeyFrameValid) {
+      _current1 = _list.listIterator(_current2.nextIndex());
+
+      if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex()).time()))
+        _current1.previous();
+
+      _current0 = _list.listIterator(_current1.nextIndex());
+
+      if (_current0.hasPrevious())
+        _current0.previous();
+
+      _current3 = _list.listIterator(_current2.nextIndex());
+
+      if (_current3.hasNext())
+        _current3.next();
+
+      _currentKeyFrameValid = true;
+      _splineCacheIsValid = false;
+    }
   }
 
   /**
@@ -864,59 +918,6 @@ public class Interpolator {
         _path.add(new Node(keyFrames[1].position(), keyFrames[1].orientation(), keyFrames[1].magnitude()));
       }
       _pathIsValid = true;
-    }
-  }
-
-  /**
-   * Internal use.
-   */
-  protected void _updateCurrentKeyFrameForTime(float time) {
-    // Assertion: times are sorted in monotone order.
-    // Assertion: keyFrame_ is not empty
-
-    // TODO: Special case for loops when closed path is implemented !!
-    if (!_currentKeyFrameValid)
-      // Recompute everything from scratch
-      _current1 = _list.listIterator();
-
-    // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
-    while (_list.get(_current1.nextIndex()).time() > time) {
-      _currentKeyFrameValid = false;
-      if (!_current1.hasPrevious())
-        break;
-      _current1.previous();
-    }
-
-    if (!_currentKeyFrameValid)
-      _current2 = _list.listIterator(_current1.nextIndex());
-
-    while (_list.get(_current2.nextIndex()).time() < time) {
-      _currentKeyFrameValid = false;
-
-      if (!_current2.hasNext())
-        break;
-
-      _current2.next();
-    }
-
-    if (!_currentKeyFrameValid) {
-      _current1 = _list.listIterator(_current2.nextIndex());
-
-      if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex()).time()))
-        _current1.previous();
-
-      _current0 = _list.listIterator(_current1.nextIndex());
-
-      if (_current0.hasPrevious())
-        _current0.previous();
-
-      _current3 = _list.listIterator(_current2.nextIndex());
-
-      if (_current3.hasNext())
-        _current3.next();
-
-      _currentKeyFrameValid = true;
-      _splineCacheIsValid = false;
     }
   }
 
