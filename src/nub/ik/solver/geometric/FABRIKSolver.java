@@ -737,26 +737,34 @@ public abstract class FABRIKSolver extends Solver {
     return distance;
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain, Node reference) {
+  protected static List<Node> _copy(List<? extends Node> chain, Node reference){
+    return  _copy(chain, reference, true);
+  }
+
+  protected static List<Node> _copy(List<? extends Node> chain, Node reference, boolean copy_constraints) {
     List<Node> copy = new ArrayList<Node>();
     for (Node joint : chain) {
       Node newJoint = new Node();
       newJoint.setReference(reference);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
+      if(copy_constraints) newJoint.setConstraint(joint.constraint());
       copy.add(newJoint);
       reference = newJoint;
     }
     return copy;
   }
 
-  protected static List<Node> _copy(List<? extends Node> chain) {
+  protected static List<Node> _copy(List<? extends Node> chain){
+    return _copy(chain, true);
+  }
+
+  protected static List<Node> _copy(List<? extends Node> chain, boolean copy_constraints) {
     Node reference = chain.get(0).reference();
     if (reference != null) {
       reference = new Node(reference.position().get(), reference.orientation().get(), 1);
     }
-    return _copy(chain, reference);
+    return _copy(chain, reference, copy_constraints);
   }
 
   /*TODO: remove this! (debug purposes)*/
