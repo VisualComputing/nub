@@ -1791,7 +1791,7 @@ public class Graph {
       eye().set(node);
     else {
       _interpolator.reset();
-      _interpolator.purge();
+      _interpolator.clear();
       _interpolator.addKeyFrame(eye().detach());
       _interpolator.addKeyFrame(node.detach(), duration);
       _interpolator.run();
@@ -1866,7 +1866,7 @@ public class Graph {
       fit(center, radius);
     else {
       _interpolator.reset();
-      _interpolator.purge();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
@@ -1942,7 +1942,7 @@ public class Graph {
       fitFOV();
     else {
       _interpolator.reset();
-      _interpolator.purge();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
@@ -2012,7 +2012,7 @@ public class Graph {
       fit(corner1, corner2);
     else {
       _interpolator.reset();
-      _interpolator.purge();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
@@ -2074,7 +2074,7 @@ public class Graph {
       fit(rectangle);
     else {
       _interpolator.reset();
-      _interpolator.purge();
+      _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
