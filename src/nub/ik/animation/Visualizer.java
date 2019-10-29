@@ -45,6 +45,7 @@ public class Visualizer {
 
     protected void _initSteps(){
         while(_next < _mediator.lastEvent() && _time == _mediator.event(_next).startingTime() * _stepStamp){
+            if(_mediator._config != null) _mediator.setDurationUsingJSON(_mediator.event(_next)); //TODO : move this method
             VisualStep step = eventToVizMapping( _mediator.event(_next));
             step.initialize();
             //add to steps to be drawn

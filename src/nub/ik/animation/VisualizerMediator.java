@@ -2,7 +2,11 @@ package nub.ik.animation;
 
 import nub.core.Node;
 import nub.ik.solver.Solver;
+import processing.core.PApplet;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
 
+import java.io.File;
 import java.util.*;
 
 /**
@@ -180,5 +184,100 @@ public class VisualizerMediator {
         } else if(structure instanceof List){
             v.registerStructure((List<? extends Node>) structure);
         }
+    }
+
+    public void hide(String eventName){
+        hide(lastEventWithName(eventName));
+    }
+
+    public void hide(InterestingEvent event){
+        event.setRenderingDuration(finishingTime());
+    }
+
+
+    //Testing with JSON
+    protected File _configFile;
+    protected HashMap<String, EventConfig> _config;
+
+
+    protected class EventConfig{
+        protected  int _wait, _waitRender, _waitExecution;
+        protected String _startEvent, _stopRenderingEvent, _stopExecutionEvent;
+        //this is useful only for events inside loops
+        protected String _beforeLoopEvent, _startEventOnFirstIteration;
+        protected boolean _first = false;
+    }
+
+    public void loadJSONConfiguration(PApplet pApplet, String configFile){
+        _config = new HashMap<String, EventConfig>();
+        JSONArray events_data = pApplet.loadJSONArray(_configFile);
+        for(int i = 0; i < events_data.size(); i++){
+            EventConfig eventConfig = new EventConfig();
+            JSONObject event_data = events_data.getJSONObject(i);
+            eventConfig._startEvent = event_data.getString("start_event");
+            eventConfig._wait = event_data.getInt("start_wait");
+            eventConfig._stopRenderingEvent = event_data.getString("stop_rendering");
+            eventConfig._waitRender = event_data.getInt("rendering_wait");
+            eventConfig._stopExecutionEvent = event_data.getString("stop_execution");
+            eventConfig._waitRender = event_data.getInt("execution_wait");
+            eventConfig._waitRender = event_data.getInt("execution_wait");
+            if(event_data.hasKey("before_loop")) eventConfig._beforeLoopEvent = event_data.getString("before_loop");
+            if(event_data.hasKey("first_iteration")) eventConfig._beforeLoopEvent = event_data.getString("first_iteration");
+            _config.put(event_data.getString("name"), eventConfig);
+        }
+    }
+
+    public void addEventUsingJSON(String name, String type){
+        EventConfig config =  _config.get(name);
+        InterestingEvent prev = null;
+        if(config._beforeLoopEvent != null){
+            _config.get(config._beforeLoopEvent)._first = true;
+        }
+
+        if(config._first == true && config._startEventOnFirstIteration != null){ // is within a loop
+            if(config._first){
+                prev  = lastEventWithName(config._startEventOnFirstIteration);
+                config._first = false;
+            }
+        } else if(config._startEvent.equals("last")){
+            prev = eventQueue().get(eventQueue().size() - 1);
+        } else{
+            prev = lastEventWithName(config._startEvent);
+        }
+        //Execution duration and rendering will be defined later
+        addEvent(name, type, prev.startingTime() + config._wait, 1, 1);
+    }
+
+    public void setDurationUsingJSON(InterestingEvent event){
+        //find first occurrence of future event
+        int i = eventQueue().indexOf(event);
+        EventConfig config = _config.get(event);
+
+        while(eventQueue().get(i).startingTime() >= event.startingTime()){
+            i--;
+        }
+        //from i find first occurrence of render and exec
+        InterestingEvent stopExec = null, stopRender = null;
+        for(int index = i + 1; i < eventQueue().size(); i++){
+            InterestingEvent next = eventQueue().get(index);
+            if(stopExec == null && next.name().equals(config._stopExecutionEvent)){
+                stopExec = next;
+            }
+            if(stopRender == null && next.name().equals(config._stopRenderingEvent)){
+                stopRender = next;
+            }
+            if(stopRender != null && stopExec != null) break;
+        }
+        //set the values accordingly
+        event.setRenderingDuration(stopExec.startingTime() - event.startingTime() + config._waitExecution);
+        event.setRenderingDuration(stopExec.startingTime() - event.startingTime() + config._waitRender);
+        //sort the eventQueue
+        i = eventQueue().indexOf(event);
+        while(event.startingTime() <= eventQueue().get(i).startingTime() && event.executionDuration() >= eventQueue().get(i).executionDuration()){
+            i++;
+        }
+        eventQueue().remove(event);
+        if (i < eventQueue().size()) eventQueue().add(i, event);
+        else eventQueue().add(event);
     }
 }
