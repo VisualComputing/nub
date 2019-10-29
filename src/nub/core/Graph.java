@@ -809,7 +809,7 @@ public class Graph {
     return new Task(this.timingHandler()) {
       @Override
       public void execute() {
-        interpolator.update();
+        interpolator.execute();
       }
     };
   }
@@ -1790,11 +1790,11 @@ public class Graph {
     if (duration <= 0)
       eye().set(node);
     else {
-      _interpolator.stop();
+      _interpolator.reset();
       _interpolator.purge();
       _interpolator.addKeyFrame(eye().detach());
       _interpolator.addKeyFrame(node.detach(), duration);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -1865,7 +1865,7 @@ public class Graph {
     if (duration <= 0)
       fit(center, radius);
     else {
-      _interpolator.stop();
+      _interpolator.reset();
       _interpolator.purge();
       Node eye = eye();
       setEye(eye().detach());
@@ -1873,7 +1873,7 @@ public class Graph {
       fit(center, radius);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -1941,7 +1941,7 @@ public class Graph {
     if (duration <= 0)
       fitFOV();
     else {
-      _interpolator.stop();
+      _interpolator.reset();
       _interpolator.purge();
       Node eye = eye();
       setEye(eye().detach());
@@ -1949,7 +1949,7 @@ public class Graph {
       fitFOV();
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -2011,7 +2011,7 @@ public class Graph {
     if (duration <= 0)
       fit(corner1, corner2);
     else {
-      _interpolator.stop();
+      _interpolator.reset();
       _interpolator.purge();
       Node eye = eye();
       setEye(eye().detach());
@@ -2019,7 +2019,7 @@ public class Graph {
       fit(corner1, corner2);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 
@@ -2073,7 +2073,7 @@ public class Graph {
     if (duration <= 0)
       fit(rectangle);
     else {
-      _interpolator.stop();
+      _interpolator.reset();
       _interpolator.purge();
       Node eye = eye();
       setEye(eye().detach());
@@ -2081,7 +2081,7 @@ public class Graph {
       fit(rectangle);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
-      _interpolator.start();
+      _interpolator.run();
     }
   }
 

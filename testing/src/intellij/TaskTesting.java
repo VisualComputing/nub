@@ -63,11 +63,10 @@ public class TaskTesting extends PApplet {
     };
     interpolator = new Interpolator(shape);
     //interpolator.setLoop();
-    interpolator.enableConcurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(scene.randomNode());
-    interpolator.start();
+    interpolator.run();
 
     //frameRate(100);
     task = new TimingTask(scene) {
@@ -197,7 +196,7 @@ public class TaskTesting extends PApplet {
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.start(speed);
+      interpolator.run(speed);
     }
 
     if (key == 'n')
@@ -211,9 +210,6 @@ public class TaskTesting extends PApplet {
 
     if (key == 'g')
       interpolator.toggle();
-
-    if (key == 'i')
-      interpolator.enableConcurrence();
 
     if (key == 'j') {
       task2.enableRecurrence();

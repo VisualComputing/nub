@@ -37,7 +37,7 @@ public class BasicInterpolation extends PApplet {
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(Node.random(scene));
-    interpolator.start();
+    interpolator.run();
   }
 
   public void draw() {
@@ -86,7 +86,7 @@ public class BasicInterpolation extends PApplet {
         speed -= 0.25f;
       else
         speed += 0.25f;
-      interpolator.start(speed);
+      interpolator.run(speed);
     }
 
     if (key == 's')

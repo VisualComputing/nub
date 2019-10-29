@@ -241,7 +241,7 @@ public class Scene extends Graph implements PConstants {
     return new TimingTask(this) {
       @Override
       public void execute() {
-        interpolator.update();
+        interpolator.execute();
       }
     };
   }
