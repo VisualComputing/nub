@@ -35,6 +35,9 @@ public class Label extends Node {
         _text = text;
     }
 
+    public void setColorLabel(int col){
+        _colorLabel = col;
+    }
 
     @Override
     public void graphics(PGraphics pg) {

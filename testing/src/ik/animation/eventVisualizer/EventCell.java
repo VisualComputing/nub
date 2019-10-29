@@ -47,6 +47,78 @@ public class EventCell extends Node {
         _colorCell = _board._colorCell;
     }
 
+    public Board board() {
+        return _board;
+    }
+
+    public int row(){
+        return _row;
+    }
+
+    public int col(){
+        return _col;
+    }
+
+    public void setBoard(Board _board) {
+        this._board = _board;
+    }
+
+    public String name() {
+        return _name;
+    }
+
+    public void setName(String _name) {
+        this._name = _name;
+    }
+
+    public Slot executionDurationSlot() {
+        return _executionDurationSlot;
+    }
+
+    public void executionDurationSlot(Slot _executionDurationSlot) {
+        this._executionDurationSlot = _executionDurationSlot;
+    }
+
+    public Slot renderingDurationSlot() {
+        return _renderingDurationSlot;
+    }
+
+    public void setRenderingDurationSlot(Slot _renderingDurationSlot) {
+        this._renderingDurationSlot = _renderingDurationSlot;
+    }
+
+    public int colorCell() {
+        return _colorCell;
+    }
+
+    public void setColorCell(int _colorCell) {
+        this._colorCell = _colorCell;
+    }
+
+    public Label label() {
+        return _label;
+    }
+
+    public void setLabel(String text){
+        //Add a label right before the cell
+        if(_label == null){
+            _label = new Label(this);
+        }
+        _label.setText(text);
+    }
+
+    public int duration(){
+        return Math.max(_executionDurationSlot._duration, _renderingDurationSlot._duration);
+    }
+
+    public int executionDuration(){
+        return _executionDurationSlot._duration;
+    }
+
+    public int renderingDuration(){
+        return _renderingDurationSlot._duration;
+    }
+
     @Override
     public float pickingThreshold() {
         return -_board._draggingRadius*2;
@@ -99,19 +171,4 @@ public class EventCell extends Node {
         _renderingDurationSlot._updateTranslation(_board._cellWidth * 0.5f, _board._slotHeight * 2.5f);
     }
 
-    public void setColorCell(int col){
-        _colorCell = col;
-    }
-
-    public void setLabel(String text){
-        //Add a label right before the cell
-        if(_label == null){
-            _label = new Label(this);
-        }
-        _label.setText(text);
-    }
-
-    public int duration(){
-        return Math.max(_executionDurationSlot._duration, _renderingDurationSlot._duration);
-    }
 }

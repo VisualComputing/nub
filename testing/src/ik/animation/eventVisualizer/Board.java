@@ -69,6 +69,14 @@ public class Board extends Node {
         });
     }
 
+    public int rows(){
+        return _rows;
+    }
+
+    public int cols(){
+        return _cols;
+    }
+
     public float width(){
         return _width;
     }
@@ -263,12 +271,42 @@ public class Board extends Node {
     }
 
 
+    //TODO: THIS METHODS ASSUME THAT THERE'S ONLY AN EVENT PER ROW
     protected EventCell _previousOccupiedCellOnRow(int row, int col){
         for(int c = col -1; c >= 0; c--){
             if(_eventMatrix[row][c] != null) return _eventMatrix[row][c];
         }
         return null;
     }
+
+    public EventCell previousCell(EventCell cell){
+        int row = cell.row() - 1;
+        if(row < 0) return null;
+        for(int c = cell.col(); c >= 0; c--){
+            if(_eventMatrix[row][c] != null) return _eventMatrix[row][c];
+        }
+        return null;
+    }
+
+    public EventCell nextCell(EventCell cell){
+        int row = cell.row() - 1;
+        if(row < 0) return null;
+        for(int c = cell.col(); c >= 0; c--){
+            if(_eventMatrix[row][c] != null) return _eventMatrix[row][c];
+        }
+        return null;
+    }
+
+
+    public EventCell cellAt(int row){
+        for(int c = 0; c < _cols; c++){
+            if(_eventMatrix[row][c] != null){
+                return _eventMatrix[row][c];
+            }
+        }
+        return null;
+    }
+
 
     protected boolean isOccupied(int row, int col){
         return _eventMatrix[row][col] != null;
