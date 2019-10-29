@@ -142,7 +142,7 @@ public class ChainSolver extends FABRIKSolver {
     this._prevTarget =
         target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
     //TODO : REFINE
-    _generateGlobalConstraints();
+    //_generateGlobalConstraints();
   }
 
   public ChainSolver(List<? extends Node> chain, Node target) {
@@ -349,7 +349,7 @@ public class ChainSolver extends FABRIKSolver {
     _avoidHistory = new ArrayList<>();
     _divergeHistory = new ArrayList<>();
     //TODO : REFINE
-    _generateGlobalConstraints();
+    //_generateGlobalConstraints();
   }
 
   protected void _applyTargetdirection() {
