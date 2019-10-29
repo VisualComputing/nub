@@ -4,18 +4,16 @@ import nub.core.Node;
 import nub.core.Graph;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
-import nub.ik.solver.geometric.CCDSolver;
-import nub.ik.solver.geometric.ChainSolver;
-import nub.ik.solver.geometric.FABRIKSolver;
+import nub.ik.solver.geometric.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
-import nub.ik.solver.geometric.MySolver;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
 import ik.basic.Util;
 import nub.ik.visual.Joint;
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.MouseEvent;
 
@@ -25,13 +23,13 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
-    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER};
+    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, BRIK};
 
     Scene scene;
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 7;
+    int segments = 11;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
@@ -39,13 +37,14 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = false;
+    boolean debug = true;
     boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
     ArrayList<Solver> solvers = new ArrayList<>();
 
     public void setup(){
+        Joint.axes = true;
         if(debug){
             FABRIKSolver.debug = true;
             for(int i = 0; i < show.length; i++) show[i] = true;
@@ -58,10 +57,10 @@ public class NaiveBiped extends PApplet {
 
         if(!debug) {
             createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
-            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.CCD);
+            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.FABRIK);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.BRIK);
         //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
@@ -137,6 +136,7 @@ public class NaiveBiped extends PApplet {
             solve = !solve;
         }else if(key =='a' || key == 'A'){
             for(Solver s : solvers){
+                s.setTimesPerFrame(1);
                 s.solve();
             }
         }else {
@@ -177,6 +177,12 @@ public class NaiveBiped extends PApplet {
                 break;
             }
 
+            case BRIK:{
+                solver = new SimpleBRIK(limb);
+                ((SimpleBRIK)solver).setTarget(target);
+                break;
+            }
+
             default:{
                 return null;
             }
@@ -200,7 +206,13 @@ public class NaiveBiped extends PApplet {
         PShape ball = createShape(SPHERE, radius);
         ball.setFill(color(255,0,0));
         ball.setStroke(false);
-        return new Node(scene, ball);
+        return new Node(scene){
+            @Override
+            public void graphics(PGraphics pg){
+                scene.drawAxes(pg, radius * 3);
+                pg.shape(ball);
+            }
+        };
     }
 
     public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode){
@@ -252,7 +264,7 @@ public class NaiveBiped extends PApplet {
         }
         BallAndSocket cone = new BallAndSocket(radians(20),radians(20));
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
-        //joints.get(joints.size() - 1).setConstraint(cone);
+        joints.get(joints.size() - 1).setConstraint(cone);
 
         Joint low = new Joint(scene, color, radius);
         low.setReference(joints.get(joints.size() - 1));
