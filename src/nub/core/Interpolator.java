@@ -78,7 +78,7 @@ public class Interpolator {
   }
 
   /**
-   * Internal protected class representing 2d and 3d keyrames.
+   * Internal protected class representing 2d and 3d key-frames.
    */
   protected class KeyFrame {
     /**
@@ -133,10 +133,8 @@ public class Interpolator {
 
   protected long _lastUpdate;
   protected List<KeyFrame> _list;
-  protected ListIterator<KeyFrame> _current0;
   protected ListIterator<KeyFrame> _current1;
   protected ListIterator<KeyFrame> _current2;
-  protected ListIterator<KeyFrame> _current3;
   protected List<Node> _path;
 
   // Main node
@@ -207,10 +205,8 @@ public class Interpolator {
     _valuesAreValid = true;
     _currentKeyFrameValid = false;
 
-    _current0 = _list.listIterator();
     _current1 = _list.listIterator();
     _current2 = _list.listIterator();
-    _current3 = _list.listIterator();
   }
 
   protected Interpolator(Interpolator other) {
@@ -240,10 +236,8 @@ public class Interpolator {
       this._list.add(keyFrame);
     }
 
-    this._current0 = _list.listIterator(other._current0.nextIndex());
     this._current1 = _list.listIterator(other._current1.nextIndex());
     this._current2 = _list.listIterator(other._current2.nextIndex());
-    this._current3 = _list.listIterator(other._current3.nextIndex());
 
     this._invalidateValues();
   }
@@ -775,14 +769,10 @@ public class Interpolator {
    * Internal use.
    */
   protected void _updateCurrentKeyFrameForTime(float time) {
-    // Assertion: times are sorted in monotone order.
-    // Assertion: keyFrame_ is not empty
-
     // TODO: Special case for loops when closed path is implemented !!
     if (!_currentKeyFrameValid)
       // Recompute everything from scratch
       _current1 = _list.listIterator();
-
     // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
     while (_list.get(_current1.nextIndex()).time() > time) {
       _currentKeyFrameValid = false;
@@ -790,35 +780,18 @@ public class Interpolator {
         break;
       _current1.previous();
     }
-
     if (!_currentKeyFrameValid)
       _current2 = _list.listIterator(_current1.nextIndex());
-
     while (_list.get(_current2.nextIndex()).time() < time) {
       _currentKeyFrameValid = false;
-
       if (!_current2.hasNext())
         break;
-
       _current2.next();
     }
-
     if (!_currentKeyFrameValid) {
       _current1 = _list.listIterator(_current2.nextIndex());
-
       if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex()).time()))
         _current1.previous();
-
-      _current0 = _list.listIterator(_current1.nextIndex());
-
-      if (_current0.hasPrevious())
-        _current0.previous();
-
-      _current3 = _list.listIterator(_current2.nextIndex());
-
-      if (_current3.hasNext())
-        _current3.next();
-
       _currentKeyFrameValid = true;
       _splineCacheIsValid = false;
     }
