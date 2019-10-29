@@ -75,6 +75,7 @@ public class MethodEvents{
     //Starts the event right after the last event with the given name (if there's no one an error will be thrown)
     public InterestingEvent addEventStartingAfter(String previousEventName, String name, String type, int executionDuration, int renderingDuration, int wait){
         InterestingEvent event = lastEventWithName(previousEventName);
+        if(!eventQueue().isEmpty())System.out.println(eventQueue().get(eventQueue().size()-1).name());
         if(event == null) throw new RuntimeException("There is no event with name " + previousEventName);
         return  addEventStartingAfter(event, name, type, executionDuration, renderingDuration, wait);
     }
@@ -93,6 +94,11 @@ public class MethodEvents{
 
     public InterestingEvent addEventStartingAfterLast(String name, String type, int executionDuration, int renderingDuration){
         return  addEvent(name, type, finishingTime(),executionDuration, renderingDuration);
+    }
+
+    public void addEventStartingAfterLast(InterestingEvent event){
+        event.startAt(finishingTime());
+        addEvent(event);
     }
 
     public InterestingEvent addEventStartingAfterLast(String name, String type, int executionDuration){
@@ -125,6 +131,17 @@ public class MethodEvents{
 
     public List<InterestingEvent> eventQueue(){
         return _eventQueue;
+    }
+
+
+    public InterestingEvent findPrevious(InterestingEvent ev){
+        for(int i = _eventQueue.size() - 1; i >= 0; i--){
+            InterestingEvent other = _eventQueue.get(i);
+            if(other != ev && other.startingTime() <= ev.startingTime() ){
+                return other;
+            }
+        }
+        return null;
     }
 
 
