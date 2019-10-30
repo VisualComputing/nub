@@ -204,7 +204,6 @@ public class Interpolator {
     _pathIsValid = false;
     _valuesAreValid = true;
     _currentKeyFrameValid = false;
-
     _current1 = _list.listIterator();
     _current2 = _list.listIterator();
   }
@@ -216,9 +215,7 @@ public class Interpolator {
     while (nodeIt.hasNext()) {
       this._path.add(nodeIt.next().get());
     }
-
     this.setNode(other.node());
-
     this._time = other._time;
     this._speed = other._speed;
     this._task = _graph._initTask(this);
@@ -228,17 +225,13 @@ public class Interpolator {
     this._pathIsValid = other._pathIsValid;
     this._valuesAreValid = other._valuesAreValid;
     this._currentKeyFrameValid = other._currentKeyFrameValid;
-
     this._list = new ArrayList<KeyFrame>();
-
     for (KeyFrame element : other._list) {
       KeyFrame keyFrame = element.get();
       this._list.add(keyFrame);
     }
-
     this._current1 = _list.listIterator(other._current1.nextIndex());
     this._current2 = _list.listIterator(other._current2.nextIndex());
-
     this._invalidateValues();
   }
 
@@ -260,7 +253,7 @@ public class Interpolator {
    * Internal use. Updates the last node path was updated. Called by
    * {@link #_checkValidity()}.
    */
-  protected void _checked() {
+  protected void _modified() {
     _lastUpdate = TimingHandler.frameCount;
   }
 
@@ -528,10 +521,7 @@ public class Interpolator {
    * @see #time(int)
    */
   public float firstTime() {
-    if (_list.isEmpty())
-      return 0.0f;
-    else
-      return _list.get(0).time();
+    return _list.isEmpty() ? 0.0f : _list.get(0).time();
   }
 
   /**
@@ -542,10 +532,7 @@ public class Interpolator {
    * @see #time(int)
    */
   public float lastTime() {
-    if (_list.isEmpty())
-      return 0.0f;
-    else
-      return _list.get(_list.size() - 1).time();
+    return _list.isEmpty() ? 0.0f : _list.get(_list.size() - 1).time();
   }
 
   /**
@@ -605,10 +592,12 @@ public class Interpolator {
   }
 
   /**
-   * Appends the current {@link #graph()} {@link Graph#eye()} to the path at {@code 1s}.
-   * Sets the appended keyframe {@link Node#pickingThreshold()} to {@code 20}.
+   * Appends the current {@link #graph()} {@link Graph#eye()}
+   * one second after the previously added keyframe.
    *
+   * @see #addKeyFrame(float)
    * @see #addKeyFrame(Node)
+   * @see #addKeyFrame(Node, float)
    * @see #graph()
    * @see Node#get()
    * @see Graph#eye()
@@ -620,9 +609,11 @@ public class Interpolator {
   }
 
   /**
-   * Appends the current {@link #graph()} {@link Graph#eye()} to the path at {@code time}.
-   * Sets the appended keyframe {@link Node#pickingThreshold()} to {@code 20}.
+   * Appends the current {@link #graph()} {@link Graph#eye()}
+   * {@code time} seconds after the previously added keyframe.
    *
+   * @see #addKeyFrame()
+   * @see #addKeyFrame(Node)
    * @see #addKeyFrame(Node, float)
    * @see #graph()
    * @see Node#get()
@@ -635,47 +626,39 @@ public class Interpolator {
   }
 
   /**
-   * Appends a new keyframe to the path.
-   * <p>
-   * Same as {@link #addKeyFrame(Node, float)}, except that the
-   * {@link #time(int)} is set to the previous {@link #time(int)} plus one
-   * second (or 0 if there is no previous keyframe).
+   * Appends a new keyframe one second after the previously added one.
+   *
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame()
+   * @see #addKeyFrame(Node, float)
    */
   public void addKeyFrame(Node node) {
-    float time;
-    if (_list.isEmpty())
-      time = 0.0f;
-    else
-      time = _list.get(_list.size() - 1).time() + 1.0f;
-    addKeyFrame(node, time);
+    addKeyFrame(node, _list.isEmpty() ? 0.0f : 1.0f);
   }
 
   /**
-   * Appends a new keyframe to the path, with its associated {@code time} (in seconds)
-   * which has to be monotonously increasing over keyframes.
+   * Appends a new keyframe {@code time} seconds after the previously added one.
    * <p>
    * Note that when {@code node} is modified, the interpolator path is updated accordingly.
    * This allows for dynamic paths, where keyframes can be edited, even during the
    * interpolation.
    * <p>
    * {@code null} node references are silently ignored.
+   *
+   * @see #addKeyFrame(float)
+   * @see #addKeyFrame(Node)
+   * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
+    if (time < 0)
+      return;
     if (node == null)
       return;
-
     if (node.graph() != null)
-      if (graph() != node.graph())
+      if (graph() != node.graph()) {
         throw new RuntimeException("Node and Interpolator graphs should match");
-
-    if (_list.isEmpty())
-      _time = time;
-
-    if ((!_list.isEmpty()) && (_list.get(_list.size() - 1).time() > time))
-      System.out.println("Error in Interpolator.addKeyFrame: time is not monotone");
-    else
-      _list.add(new KeyFrame(node, time));
-
+      }
+    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1).time() + time));
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -729,37 +712,28 @@ public class Interpolator {
   public void interpolate(float time) {
     this._checkValidity();
     setTime(time);
-
     if ((_list.isEmpty()) || (node() == null))
       return;
-
     if (!_valuesAreValid)
       _updateModifiedKeyFrames();
-
     _updateCurrentKeyFrameForTime(time);
-
     if (!_splineCacheIsValid)
       _updateSplineCache();
-
     float alpha;
     float dt = _list.get(_current2.nextIndex()).time() - _list.get(_current1.nextIndex()).time();
     if (dt == 0)
       alpha = 0.0f;
     else
       alpha = (time - _list.get(_current1.nextIndex()).time()) / dt;
-
     Vector pos = Vector.add(_list.get(_current1.nextIndex()).node().position(), Vector.multiply(
         Vector.add(_list.get(_current1.nextIndex()).tangentVector(),
             Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
-
     float mag = Vector.lerp(_list.get(_current1.nextIndex()).node().magnitude(),
         _list.get(_current2.nextIndex()).node().magnitude(), alpha);
-
     Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).node().orientation(),
         _list.get(_current1.nextIndex()).tangentQuaternion(),
         _list.get(_current2.nextIndex()).tangentQuaternion(),
         _list.get(_current2.nextIndex()).node().orientation(), alpha);
-
     node().setPosition(pos);
     node().setRotation(q);
     node().setMagnitude(mag);
@@ -831,13 +805,10 @@ public class Interpolator {
     if (!_pathIsValid) {
       _path.clear();
       int nbSteps = 30;
-
       if (_list.isEmpty())
         return;
-
       if (!_valuesAreValid)
         _updateModifiedKeyFrames();
-
       if (_list.get(0) == _list.get(_list.size() - 1))
         _path.add(
             new Node(_list.get(0).node().position(), _list.get(0).node().orientation(), _list.get(0).node().magnitude()));
@@ -845,19 +816,16 @@ public class Interpolator {
         KeyFrame[] keyFrames = new KeyFrame[4];
         keyFrames[0] = _list.get(0);
         keyFrames[1] = keyFrames[0];
-
         int index = 1;
         keyFrames[2] = (index < _list.size()) ? _list.get(index) : null;
         index++;
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
-
         while (keyFrames[2] != null) {
           Vector pdiff = Vector.subtract(keyFrames[2].node().position(), keyFrames[1].node().position());
           Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1].tangentVector(), (-2.0f)));
           pvec1 = Vector.subtract(pvec1, keyFrames[2].tangentVector());
           Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1].tangentVector());
           pvec2 = Vector.add(pvec2, keyFrames[2].tangentVector());
-
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
             _path.add(new Node(
@@ -866,12 +834,10 @@ public class Interpolator {
                 Vector.lerp(keyFrames[1].node().magnitude(), keyFrames[2].node().magnitude(), alpha))
             );
           }
-
           // Shift
           keyFrames[0] = keyFrames[1];
           keyFrames[1] = keyFrames[2];
           keyFrames[2] = keyFrames[3];
-
           index++;
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
@@ -889,7 +855,6 @@ public class Interpolator {
     KeyFrame keyFrame;
     KeyFrame prev = _list.get(0);
     keyFrame = _list.get(0);
-
     int index = 1;
     while (keyFrame != null) {
       KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
@@ -918,7 +883,7 @@ public class Interpolator {
     }
     if (flag) {
       this._invalidateValues();
-      this._checked();
+      this._modified();
     }
   }
 
