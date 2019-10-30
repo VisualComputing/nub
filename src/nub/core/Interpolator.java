@@ -839,11 +839,9 @@ public class Interpolator {
       KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
       index++;
       if (next != null) {
-        //keyFrame._node.computeTangent(prev, next, keyFrame);
         keyFrame._tangentVector = Vector.multiply(Vector.subtract(next._node.position(), prev._node.position()), 0.5f);
         keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), next._node.orientation());
       } else {
-        //keyFrame._node.computeTangent(prev, keyFrame, keyFrame);
         keyFrame._tangentVector = Vector.multiply(Vector.subtract(keyFrame._node.position(), prev._node.position()), 0.5f);
         keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), keyFrame._node.orientation());
       }
