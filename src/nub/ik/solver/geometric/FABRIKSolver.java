@@ -769,6 +769,10 @@ public abstract class FABRIKSolver extends Solver {
 
   /*TODO: remove this! (debug purposes)*/
   protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene) {
+    return _copy(chain, reference, scene, true);
+  }
+
+  protected static List<Node> _copy(List<? extends Node> chain, Node reference, Scene scene, boolean copy_constraints) {
     Node ref = reference;
     List<Node> copy = new ArrayList<Node>();
     if(ref == null){
@@ -781,15 +785,16 @@ public abstract class FABRIKSolver extends Solver {
       }
     }
 
+    int color = scene.context().color((float) Math.random() * 255, (float) Math.random() * 255, (float) Math.random() * 255);
     for (Node joint : chain) {
-      Joint newJoint = new Joint(scene, scene.context().color(0,255,0,200), 3);
+      Joint newJoint = new Joint(scene, color, 3);
       if(copy.isEmpty()){
         newJoint.setRoot(true);
       }
       newJoint.setReference(ref);
       newJoint.setPosition(joint.position().get());
       newJoint.setOrientation(joint.orientation().get());
-      newJoint.setConstraint(joint.constraint());
+      if(copy_constraints) newJoint.setConstraint(joint.constraint());
       copy.add(newJoint);
       ref = newJoint;
     }
