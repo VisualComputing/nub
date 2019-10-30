@@ -1,5 +1,6 @@
 package nub.ik.solver.geometric;
 
+import javafx.util.Pair;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
 import nub.ik.animation.InterestingEvent;
@@ -7,11 +8,14 @@ import nub.ik.animation.VisualizerMediator;
 import nub.ik.solver.Solver;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
+import nub.processing.Scene;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-public class SimpleBRIK extends Solver {
+public class TRIK extends Solver {
     protected List<? extends Node> _original;
     protected List<Node> _auxiliary_chain, _chain;
     protected Node _target;
@@ -20,16 +24,24 @@ public class SimpleBRIK extends Solver {
     //Steady state algorithm
     protected float _current = 10e10f, _best = 10e10f;
 
+    //TODO : REMOVE!
+    protected boolean _debug = false;
 
-    public SimpleBRIK(List<? extends Node> chain) {
+    public TRIK(List<? extends Node> chain) {
         this(chain, null);
     }
 
-    public SimpleBRIK(List<? extends Node> chain, Node target) {
+    public TRIK(List<? extends Node> chain, Node target) {
         super();
         this._original = chain;
-        this._chain = FABRIKSolver._copy(chain);
-        this._auxiliary_chain = FABRIKSolver._copy(chain, false);
+        if(_debug && _original.get(0).graph() instanceof Scene) {
+            this._chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph());
+            this._auxiliary_chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph(), false);
+        }
+        else {
+            this._chain = FABRIKSolver._copy(chain);
+            this._auxiliary_chain = FABRIKSolver._copy(chain, false);
+        }
         this._target = target;
         this._previousTarget =
                 target == null ? null : new Node(target.position().get(), target.orientation().get(), 1);
@@ -38,7 +50,10 @@ public class SimpleBRIK extends Solver {
     protected void _copyChainState(List<? extends Node> origin, List<? extends Node> dest){
        //Copy the content of the origin chain into dest
        for(int i = 0; i < origin.size(); i++){
+           Constraint constraint = dest.get(i).constraint();
+           dest.get(i).setConstraint(null);
            dest.get(i).set(origin.get(i));
+           dest.get(i).setConstraint(constraint);
        }
 
         if(_enableMediator) {
@@ -104,25 +119,57 @@ public class SimpleBRIK extends Solver {
         _translateToTarget(root, eff, target);
     }
 
-    protected static void _applyLocalRotation(Node j_i1, Node j_i1_hat){
+    //TODO REMOVE!
+    public List<Pair<Vector, Vector>> sec = new ArrayList<>();
+    public List<Pair<Vector, Vector>> main = new ArrayList<>();
+    public List<Pair<Vector, Vector>> av = new ArrayList<>();
+
+    protected Quaternion _applyLocalRotation(Node j_i1, Node j_i1_hat){
         Node j_i = j_i1.reference(); //must have a parent
         //Define how much rotate j_i in order to align j_i1 with j_i1_hat
         Vector p = j_i1.translation();
         //Find j_i1_hat w.r.t j_i
         Vector q = j_i.location(j_i1_hat);
+        main.add(new Pair<>(j_i.worldLocation(q),j_i.position()));
+        //Find vector desired to accomplish secondary target
+
+        /*Vector secondary = _calculateGTargetDirection(j_i, j_i1);
+        if (secondary != null) {
+            //Find weighted average
+            secondary.normalize();
+            q.normalize();
+            float targetWeight = 0.8f;
+            q = Vector.add(Vector.multiply(q, targetWeight), Vector.multiply(secondary, 1 - targetWeight));
+            q.normalize();
+            av.add(new Pair<>(j_i.worldLocation(Vector.multiply(q, 50)),j_i.position()));
+        }*/
+
+
         //Apply desired rotation removing twist component
         Quaternion delta = new Quaternion(p, q);
-
         Vector tw = j_i1.translation(); // w.r.t j_i
         Vector rotationAxis = new Vector(delta._quaternion[0], delta._quaternion[1], delta._quaternion[2]);
         rotationAxis = Vector.projectVectorOnAxis(rotationAxis, tw); // w.r.t j_i
         //Get rotation component on Axis direction
         Quaternion rotationTwist = new Quaternion(rotationAxis.x(), rotationAxis.y(), rotationAxis.z(), delta.w()); //w.r.t j_i
         Quaternion rotationSwing = Quaternion.compose(delta, rotationTwist.inverse()); //w.r.t idle
-        j_i.rotate(delta); //find a rotation from p to q
+        //j_i.rotate(delta); //find a rotation from p to q
+        return delta;
     }
 
-    protected static Quaternion _applyTwisting(Node j_i, Node j_i1, Node eff, Node target){
+    protected Vector _calculateGTargetDirection(Node j_i, Node j_i1){
+        if(_gTargets == null || _gTargets.isEmpty()) return null;
+        Vector secondaryDirection = new Vector();
+        for(GTarget gTarget : _gTargets){
+            Vector v = gTarget.pointVector(j_i, j_i1.translation());
+            if(v != null) secondaryDirection.add(v);
+        }
+        secondaryDirection.multiply(1f/_gTargets.size());
+        return secondaryDirection;
+    }
+
+
+    protected Quaternion _applyTwisting(Node j_i, Node j_i1, Node eff, Node target){
         //Find twist that approach EFF to its desired orientation
         Quaternion O_i_inv = j_i.rotation().inverse();
         //q_delta = O_i_inv * O_t * (O_i_inv * O_eff)^-1
@@ -177,8 +224,26 @@ public class SimpleBRIK extends Solver {
     }
 
 
+    protected Quaternion _bestLocalActions(Node j_i, Node j_i1, Node j_i1_hat, Node eff, Node target){
+            //Step 3. Apply twisting to help reach desired rotation
+            Quaternion t1, t2, twist, swing;
+            t1 = t2 = _applyCCDTwist(j_i, j_i1, eff, target);
+            if(_direction){
+                t2 = _applyTwisting(j_i, j_i1, eff, target);
+            }
+            if(t1.axis().dot(t2.axis()) < 0){
+                twist = new Quaternion(t1.axis(), 0.5f * t1.angle() - 0.5f * t2.angle());
+            } else{
+                twist = new Quaternion(t1.axis(), 0.5f * t1.angle() + 0.5f * t2.angle());
+            }
+            //Step 4. Apply local rotation to each joint of the chain
+            swing = _applyLocalRotation(j_i1, j_i1_hat);
+            return Quaternion.compose(twist, swing);
+    }
+
     @Override
     protected boolean _iterate() {
+        main.clear(); av.clear(); sec.clear();//TODO: Remove!
         //As no target is specified there is no need to solve IK
         if (_target == null) return true;
         _current = 10e10f; //Keep the current error
@@ -187,26 +252,17 @@ public class SimpleBRIK extends Solver {
         _copyChainState(_chain, _auxiliary_chain);
         //Step 2. Translate the auxiliary chain to the target position
         _alignToTarget(_auxiliary_chain.get(0), _auxiliary_chain.get(_auxiliary_chain.size() - 1), _target);
-
         for(int i = 1; i < _chain.size(); i++) {
-            //Step 3. Apply twisting to help reach desired rotation
-            Quaternion t1, t2;
-            t1 = t2 = _applyCCDTwist(_chain.get(i - 1), _chain.get(i), _chain.get(_chain.size() -1), _target);
-            if(_direction){
-                t2 = _applyTwisting(_chain.get(i - 1), _chain.get(i), _chain.get(_chain.size() -1), _target);
+            Quaternion delta;
+            if(_lookAhead > 0 && i < _chain.size() - 2){
+                delta = _lookAhead(i - 1, Math.min(_lookAhead, _chain.size() - 2 - i));
+            } else {
+                delta =_bestLocalActions(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target);
             }
-            if(t1.axis().dot(t2.axis()) < 0){
-                _chain.get(i - 1).rotate(t1.axis(), 0.5f * t1.angle() - 0.5f * t2.angle());
-            } else{
-                _chain.get(i - 1).rotate(t1.axis(), 0.5f * t1.angle() + 0.5f * t2.angle());
-            }
-
-            //Step 4. Apply local rotation to each joint of the chain
-            _applyLocalRotation(_chain.get(i), _auxiliary_chain.get(i));
+            _chain.get(i - 1).rotate(delta);
         }
-
         //Get the current error
-        _current = Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
+        _current = _error(_chain);
         _update();
 
         if(_enableMediator){
@@ -227,12 +283,13 @@ public class SimpleBRIK extends Solver {
         }
 
         //Check total change
-        if (Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position()) <= _minDistance) return true;
+        //if (Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position()) <= _minDistance) return true;
         return  false;
     }
 
     @Override
     protected void _update() {
+        //System.out.println("Current : " + _current + " best " + _best);
         if (_current < _best) {
             for (int i = 0; i < _original.size(); i++) {
                 _original.get(i).setRotation(_chain.get(i).rotation().get());
@@ -249,6 +306,17 @@ public class SimpleBRIK extends Solver {
         } else if (_previousTarget == null) {
             return true;
         }
+
+/*
+        for(GTarget gTarget : _gTargets){
+            if(gTarget._prev == null){
+                return true;
+            }
+            if(!(gTarget._node.position().matches(gTarget._prev))){
+                return  true;
+            }
+        }
+*/
         return !(_previousTarget.position().matches(_target.position()) && _previousTarget.orientation().matches(_target.orientation()));
     }
 
@@ -286,19 +354,41 @@ public class SimpleBRIK extends Solver {
             messageEvent.addAttribute("message", "Updating chain");
         }
         _previousTarget = _target == null ? null : new Node(_target.position().get(), _target.orientation().get(), 1);
+        for(GTarget gTarget : _gTargets){
+            gTarget._prev = gTarget._node.position().get();
+        }
+
+        _copyChainState(_original, _chain);
         _iterations = 0;
 
         if (_target != null) {
-            _best = Vector.distance(_original.get(_original.size() - 1).position(), _target.position());
+            _best = _error(_original);
         } else {
             _best = 10e10f;
         }
+
+    }
+
+    protected float _error(List<? extends Node> chain){
+        //TODO : Error must be defined as a weighted average between orientational error and translational error
+        float distToTarget = Vector.distance(chain.get(chain.size() - 1).position(), _target.position());
+        float distToGTargets = 0;
+        for(int i = 0; i < chain.size(); i++){
+            //dist of node to gtarget
+            for(GTarget gTarget : _gTargets){
+                if(gTarget._influence.get(_chain.get(i)) != null) {
+                    float dist = Vector.distance(chain.get(i).position(), gTarget._node.position());
+                    dist *= gTarget._influence.get(_chain.get(i)); //Low value compared with main error
+                    distToGTargets +=1f/dist;
+                }
+            }
+        }
+        return distToTarget + distToGTargets;
     }
 
     @Override
     public float error() {
-        //TODO : Error must be defined as a weighted average between orientational error and translational error
-        return Vector.distance(_original.get(_original.size() - 1).position(), _target.position());
+        return _error(_original);
     }
 
     @Override
@@ -333,4 +423,110 @@ public class SimpleBRIK extends Solver {
         return _auxiliary_chain;
     }
 
+    //TODO : Look at this idea further
+    /*Look ahead:
+    * This is much more expensive since we're trying to look ahead n steps
+    * based on what we think are the best actions and based on this advice an additional correction rotation
+    * */
+
+    //TODO: Move this class
+    public class NodeState{
+        Vector _translation;
+        Quaternion _rotation;
+        public NodeState(Node node){
+            _translation = node.translation().get();
+            _rotation = node.rotation().get();
+        }
+
+        public void apply(Node node){
+            node.setTranslation(_translation);
+            node.setRotation(_rotation);
+        }
+    }
+
+
+    protected int _lookAhead = 0;
+
+    protected Quaternion _lookAhead(int from, int times){
+        if(times <= 0) return null;
+        //save node states
+        NodeState states[] = new NodeState[times + 1];
+        Quaternion best = null;
+
+        for(int i = from; i <= from + times; i++) {
+            Node j_i = _chain.get(i);
+            Node j_i1 = _chain.get(i + 1);
+            Node j_i1_hat = _auxiliary_chain.get(i + 1);
+            //save state prior to modification
+            states[i - from] = new NodeState(j_i);
+            Quaternion delta = _bestLocalActions(j_i, j_i1, j_i1_hat, _chain.get(_chain.size() -1), _target);
+            j_i.rotate(delta);
+            if(i == from) best = delta;
+        }
+
+        //Given configuration until now try to help the algorithm in a future
+        //alpha w.r.t last
+        Quaternion alpha = _applyLocalRotation(_chain.get(from + times),  _auxiliary_chain.get(from + times));
+        //get alpha w.r.t from
+        Quaternion fromToLast = Quaternion.compose(_chain.get(from).rotation().inverse(), _chain.get(from + times).rotation());
+        Quaternion alpha_hat = Quaternion.compose(fromToLast, alpha);
+        //TODO : Damp the rotation
+        alpha_hat.compose(fromToLast.inverse());
+        //revert actions
+        for(int i = from; i < from + times + 1; i++) {
+            states[i - from].apply(_chain.get(i));
+        }
+        //Return the best found action in addition to fixed action (alpha hat)
+        return Quaternion.compose(best, alpha_hat);
+    }
+
+    public void setLookAhead(int n){
+        _lookAhead = Math.max(n, 0);
+    }
+
+
+    //Secondary goals
+
+    //TODO : Move this!
+    //TODO : Fix error measure
+    protected float avg_bone_length;
+
+    List<GTarget> _gTargets = new ArrayList<GTarget>();
+
+    protected void _calculateAverageLength(){
+        for(int i = 1; i < _original.size(); i++){
+            avg_bone_length += _original.get(i).translation().magnitude() * _original.get(i).magnitude();
+        }
+        avg_bone_length /= _original.size();
+    }
+
+    public void addGTarget(Node target, float g){
+        GTarget gTarget = new GTarget(target, g);
+        //calculate force that must be applied to each joint
+        _gTargets.add(gTarget);
+    }
+
+    class GTarget{
+        protected float _g;
+        protected Vector _prev;
+        protected Node _node;
+        protected HashMap<Node, Float> _influence;
+
+        public GTarget(Node node, float g){
+            this._node = node;
+            this._g = g;
+            _influence = new HashMap<Node, Float>();
+        }
+
+        public Vector pointVector(Node node, Vector next){
+            //1. Find the Direction between this target and the given Node
+            Vector vector = Vector.subtract(node.location(_node), next);
+            sec.add(new Pair<>(node.worldLocation(next).get(),_node.position()));
+            float mag = vector.magnitude();
+            //2. scale the vector
+            vector.multiply(_g / mag);
+            _influence.put(node, _g / mag);
+            return vector;
+        }
+    }
 }
