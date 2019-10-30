@@ -87,7 +87,7 @@ public class Interpolator {
      * @param keyFrame other keyFrame
      */
     public boolean matches(KeyFrame keyFrame) {
-      return node().matches(keyFrame.node()) && time() == keyFrame.time();
+      return node().matches(keyFrame._node) && _time == keyFrame._time;
     }
 
     protected Quaternion _tangentQuaternion;
@@ -108,27 +108,6 @@ public class Interpolator {
     public KeyFrame get() {
       return new KeyFrame(this);
     }
-
-    Node node() {
-      return _node;
-    }
-
-    Quaternion tangentQuaternion() {
-      return _tangentQuaternion;
-    }
-
-    Vector tangentVector() {
-      return _tangentVector;
-    }
-
-    float time() {
-      return _time;
-    }
-
-    void computeTangent(KeyFrame prev, KeyFrame next) {
-      _tangentVector = Vector.multiply(Vector.subtract(next.node().position(), prev.node().position()), 0.5f);
-      _tangentQuaternion = Quaternion.squadTangent(prev.node().orientation(), node().orientation(), next.node().orientation());
-    }
   }
 
   protected long _lastUpdate;
@@ -142,7 +121,7 @@ public class Interpolator {
 
   // Beat
   protected Task _task;
-  protected float _time;
+  protected float _t;
   protected float _speed;
 
   // Misc
@@ -196,7 +175,7 @@ public class Interpolator {
     _list = new ArrayList<KeyFrame>();
     _path = new ArrayList<Node>();
     setNode(node);
-    _time = 0.0f;
+    _t = 0.0f;
     _speed = 1.0f;
     _task = _graph._initTask(this);
     _task.setPeriod(40);
@@ -216,7 +195,7 @@ public class Interpolator {
       this._path.add(nodeIt.next().get());
     }
     this.setNode(other.node());
-    this._time = other._time;
+    this._t = other._t;
     this._speed = other._speed;
     this._task = _graph._initTask(this);
     this._task.setPeriod(other.task().period());
@@ -338,27 +317,27 @@ public class Interpolator {
     if ((_list.isEmpty()) || (node() == null))
       return;
     // TODO experimental
-    if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1).time()))
-      setTime(_list.get(0).time());
-    if ((_speed < 0.0) && (time() <= _list.get(0).time()))
-      setTime(_list.get(_list.size() - 1).time());
+    if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1)._time))
+      setTime(_list.get(0)._time);
+    if ((_speed < 0.0) && (time() <= _list.get(0)._time))
+      setTime(_list.get(_list.size() - 1)._time);
     // */
     interpolate(time());
-    _time += _speed * _task.period() / 1000.0f;
-    if (time() > _list.get(_list.size() - 1).time()) {
+    _t += _speed * _task.period() / 1000.0f;
+    if (time() > _list.get(_list.size() - 1)._time) {
       if (loop())
-        setTime(_list.get(0).time() + _time - _list.get(_list.size() - 1).time());
+        setTime(_list.get(0)._time + _t - _list.get(_list.size() - 1)._time);
       else {
         // Make sure last KeyFrame is reached and displayed
-        interpolate(_list.get(_list.size() - 1).time());
+        interpolate(_list.get(_list.size() - 1)._time);
         _task.stop();
       }
-    } else if (time() < _list.get(0).time()) {
+    } else if (time() < _list.get(0)._time) {
       if (loop())
-        setTime(_list.get(_list.size() - 1).time() - _list.get(0).time() + _time);
+        setTime(_list.get(_list.size() - 1)._time - _list.get(0)._time + _t);
       else {
         // Make sure first KeyFrame is reached and displayed
-        interpolate(_list.get(0).time());
+        interpolate(_list.get(0)._time);
         _task.stop();
       }
     }
@@ -475,7 +454,7 @@ public class Interpolator {
    * interpolate at a given time.
    */
   public void setTime(float time) {
-    _time = time;
+    _t = time;
   }
 
   /**
@@ -486,7 +465,7 @@ public class Interpolator {
    * directly with {@link #setTime(float)} or {@link #interpolate(float)}.
    */
   public float time() {
-    return _time;
+    return _t;
   }
 
   /**
@@ -496,7 +475,7 @@ public class Interpolator {
    * @see #keyFrame(int)
    */
   public float time(int index) {
-    return _list.get(index).time();
+    return _list.get(index)._time;
   }
 
   /**
@@ -521,7 +500,7 @@ public class Interpolator {
    * @see #time(int)
    */
   public float firstTime() {
-    return _list.isEmpty() ? 0.0f : _list.get(0).time();
+    return _list.isEmpty() ? 0.0f : _list.get(0)._time;
   }
 
   /**
@@ -532,7 +511,7 @@ public class Interpolator {
    * @see #time(int)
    */
   public float lastTime() {
-    return _list.isEmpty() ? 0.0f : _list.get(_list.size() - 1).time();
+    return _list.isEmpty() ? 0.0f : _list.get(_list.size() - 1)._time;
   }
 
   /**
@@ -578,7 +557,7 @@ public class Interpolator {
    * {@link #size()}-1.
    */
   public Node keyFrame(int index) {
-    return _list.get(index).node();
+    return _list.get(index)._node;
   }
 
   /**
@@ -587,7 +566,7 @@ public class Interpolator {
   public List<Node> keyFrames() {
     List<Node> list = new ArrayList<Node>();
     for (KeyFrame keyFrame : _list)
-      list.add(keyFrame.node());
+      list.add(keyFrame._node);
     return list;
   }
 
@@ -658,7 +637,7 @@ public class Interpolator {
       if (graph() != node.graph()) {
         throw new RuntimeException("Node and Interpolator graphs should match");
       }
-    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1).time() + time));
+    _list.add(new KeyFrame(node, _list.isEmpty() ? time : _list.get(_list.size() - 1)._time + time));
     _valuesAreValid = false;
     _pathIsValid = false;
     _currentKeyFrameValid = false;
@@ -680,8 +659,8 @@ public class Interpolator {
       _task.stop();
     KeyFrame keyFrame = _list.remove(index);
     setTime(firstTime());
-    _graph.prune(keyFrame.node());
-    return keyFrame.node();
+    _graph.prune(keyFrame._node);
+    return keyFrame._node;
   }
 
   /**
@@ -720,20 +699,20 @@ public class Interpolator {
     if (!_splineCacheIsValid)
       _updateSplineCache();
     float alpha;
-    float dt = _list.get(_current2.nextIndex()).time() - _list.get(_current1.nextIndex()).time();
+    float dt = _list.get(_current2.nextIndex())._time - _list.get(_current1.nextIndex())._time;
     if (dt == 0)
       alpha = 0.0f;
     else
-      alpha = (time - _list.get(_current1.nextIndex()).time()) / dt;
-    Vector pos = Vector.add(_list.get(_current1.nextIndex()).node().position(), Vector.multiply(
-        Vector.add(_list.get(_current1.nextIndex()).tangentVector(),
+      alpha = (time - _list.get(_current1.nextIndex())._time) / dt;
+    Vector pos = Vector.add(_list.get(_current1.nextIndex())._node.position(), Vector.multiply(
+        Vector.add(_list.get(_current1.nextIndex())._tangentVector,
             Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
-    float mag = Vector.lerp(_list.get(_current1.nextIndex()).node().magnitude(),
-        _list.get(_current2.nextIndex()).node().magnitude(), alpha);
-    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex()).node().orientation(),
-        _list.get(_current1.nextIndex()).tangentQuaternion(),
-        _list.get(_current2.nextIndex()).tangentQuaternion(),
-        _list.get(_current2.nextIndex()).node().orientation(), alpha);
+    float mag = Vector.lerp(_list.get(_current1.nextIndex())._node.magnitude(),
+        _list.get(_current2.nextIndex())._node.magnitude(), alpha);
+    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex())._node.orientation(),
+        _list.get(_current1.nextIndex())._tangentQuaternion,
+        _list.get(_current2.nextIndex())._tangentQuaternion,
+        _list.get(_current2.nextIndex())._node.orientation(), alpha);
     node().setPosition(pos);
     node().setRotation(q);
     node().setMagnitude(mag);
@@ -748,7 +727,7 @@ public class Interpolator {
       // Recompute everything from scratch
       _current1 = _list.listIterator();
     // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
-    while (_list.get(_current1.nextIndex()).time() > time) {
+    while (_list.get(_current1.nextIndex())._time > time) {
       _currentKeyFrameValid = false;
       if (!_current1.hasPrevious())
         break;
@@ -756,7 +735,7 @@ public class Interpolator {
     }
     if (!_currentKeyFrameValid)
       _current2 = _list.listIterator(_current1.nextIndex());
-    while (_list.get(_current2.nextIndex()).time() < time) {
+    while (_list.get(_current2.nextIndex())._time < time) {
       _currentKeyFrameValid = false;
       if (!_current2.hasNext())
         break;
@@ -764,7 +743,7 @@ public class Interpolator {
     }
     if (!_currentKeyFrameValid) {
       _current1 = _list.listIterator(_current2.nextIndex());
-      if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex()).time()))
+      if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex())._time))
         _current1.previous();
       _currentKeyFrameValid = true;
       _splineCacheIsValid = false;
@@ -775,12 +754,12 @@ public class Interpolator {
    * Internal use. Used by {@link #interpolate(float)}.
    */
   protected void _updateSplineCache() {
-    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex()).node().position(),
-        _list.get(_current1.nextIndex()).node().position());
-    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex()).tangentVector(), (-2.0f)));
-    _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex()).tangentVector());
-    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex()).tangentVector());
-    _vector2 = Vector.add(_vector2, _list.get(_current2.nextIndex()).tangentVector());
+    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex())._node.position(),
+        _list.get(_current1.nextIndex())._node.position());
+    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex())._tangentVector, (-2.0f)));
+    _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex())._tangentVector);
+    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex())._tangentVector);
+    _vector2 = Vector.add(_vector2, _list.get(_current2.nextIndex())._tangentVector);
     _splineCacheIsValid = true;
   }
 
@@ -811,7 +790,7 @@ public class Interpolator {
         _updateModifiedKeyFrames();
       if (_list.get(0) == _list.get(_list.size() - 1))
         _path.add(
-            new Node(_list.get(0).node().position(), _list.get(0).node().orientation(), _list.get(0).node().magnitude()));
+            new Node(_list.get(0)._node.position(), _list.get(0)._node.orientation(), _list.get(0)._node.magnitude()));
       else {
         KeyFrame[] keyFrames = new KeyFrame[4];
         keyFrames[0] = _list.get(0);
@@ -821,17 +800,17 @@ public class Interpolator {
         index++;
         keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         while (keyFrames[2] != null) {
-          Vector pdiff = Vector.subtract(keyFrames[2].node().position(), keyFrames[1].node().position());
-          Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1].tangentVector(), (-2.0f)));
-          pvec1 = Vector.subtract(pvec1, keyFrames[2].tangentVector());
-          Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1].tangentVector());
-          pvec2 = Vector.add(pvec2, keyFrames[2].tangentVector());
+          Vector pdiff = Vector.subtract(keyFrames[2]._node.position(), keyFrames[1]._node.position());
+          Vector pvec1 = Vector.add(Vector.multiply(pdiff, 3.0f), Vector.multiply(keyFrames[1]._tangentVector, (-2.0f)));
+          pvec1 = Vector.subtract(pvec1, keyFrames[2]._tangentVector);
+          Vector pvec2 = Vector.add(Vector.multiply(pdiff, (-2.0f)), keyFrames[1]._tangentVector);
+          pvec2 = Vector.add(pvec2, keyFrames[2]._tangentVector);
           for (int step = 0; step < nbSteps; ++step) {
             float alpha = step / (float) nbSteps;
             _path.add(new Node(
-                Vector.add(keyFrames[1].node().position(), Vector.multiply(Vector.add(keyFrames[1].tangentVector(), Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
-                Quaternion.squad(keyFrames[1].node().orientation(), keyFrames[1].tangentQuaternion(), keyFrames[2].tangentQuaternion(), keyFrames[2].node().orientation(), alpha),
-                Vector.lerp(keyFrames[1].node().magnitude(), keyFrames[2].node().magnitude(), alpha))
+                Vector.add(keyFrames[1]._node.position(), Vector.multiply(Vector.add(keyFrames[1]._tangentVector, Vector.multiply(Vector.add(pvec1, Vector.multiply(pvec2, alpha)), alpha)), alpha)),
+                Quaternion.squad(keyFrames[1]._node.orientation(), keyFrames[1]._tangentQuaternion, keyFrames[2]._tangentQuaternion, keyFrames[2]._node.orientation(), alpha),
+                Vector.lerp(keyFrames[1]._node.magnitude(), keyFrames[2]._node.magnitude(), alpha))
             );
           }
           // Shift
@@ -842,7 +821,7 @@ public class Interpolator {
           keyFrames[3] = (index < _list.size()) ? _list.get(index) : null;
         }
         // Add last KeyFrame
-        _path.add(new Node(keyFrames[1].node().position(), keyFrames[1].node().orientation(), keyFrames[1].node().magnitude()));
+        _path.add(new Node(keyFrames[1]._node.position(), keyFrames[1]._node.orientation(), keyFrames[1]._node.magnitude()));
       }
       _pathIsValid = true;
     }
@@ -859,10 +838,15 @@ public class Interpolator {
     while (keyFrame != null) {
       KeyFrame next = (index < _list.size()) ? _list.get(index) : null;
       index++;
-      if (next != null)
-        keyFrame.computeTangent(prev, next);
-      else
-        keyFrame.computeTangent(prev, keyFrame);
+      if (next != null) {
+        //keyFrame._node.computeTangent(prev, next, keyFrame);
+        keyFrame._tangentVector = Vector.multiply(Vector.subtract(next._node.position(), prev._node.position()), 0.5f);
+        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), next._node.orientation());
+      } else {
+        //keyFrame._node.computeTangent(prev, keyFrame, keyFrame);
+        keyFrame._tangentVector = Vector.multiply(Vector.subtract(keyFrame._node.position(), prev._node.position()), 0.5f);
+        keyFrame._tangentQuaternion = Quaternion.squadTangent(prev._node.orientation(), keyFrame._node.orientation(), keyFrame._node.orientation());
+      }
       prev = keyFrame;
       keyFrame = next;
     }
@@ -876,7 +860,7 @@ public class Interpolator {
   protected void _checkValidity() {
     boolean flag = false;
     for (KeyFrame keyFrame : _list) {
-      if (keyFrame.node().lastUpdate() > _lastUpdate()) {
+      if (keyFrame._node.lastUpdate() > _lastUpdate()) {
         flag = true;
         break;
       }
