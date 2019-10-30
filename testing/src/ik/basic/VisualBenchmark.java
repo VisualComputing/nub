@@ -5,7 +5,7 @@ import nub.core.Graph;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.Solver;
-import nub.ik.solver.geometric.SimpleBRIK;
+import nub.ik.solver.geometric.TRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -37,7 +37,7 @@ public class VisualBenchmark extends PApplet {
 
 
     Util.SolverType solversType [] = {Util.SolverType.CCD_V2, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
-            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2, Util.SolverType.BRIK}; //Place Here Solvers that you want to compare
+            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK}; //Place Here Solvers that you want to compare
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
@@ -129,9 +129,9 @@ public class VisualBenchmark extends PApplet {
                     Util.drawPositions(scene.context(),((ChainSolver) solvers.get(i)).afterAvoidPosition(), color(0, 255, 0), 6);
                 }
 
-            } else if(solvers.get(i) instanceof SimpleBRIK){
-                List<Node> aux = ((SimpleBRIK) solvers.get(i)).auxiliaryChain();
-                List<Node> chain = ((SimpleBRIK) solvers.get(i)).copyChain();
+            } else if(solvers.get(i) instanceof TRIK){
+                List<Node> aux = ((TRIK) solvers.get(i)).auxiliaryChain();
+                List<Node> chain = ((TRIK) solvers.get(i)).copyChain();
 
                 ArrayList<Vector> aux_pos = new ArrayList<Vector>();
                 for(Node n : aux){

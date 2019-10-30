@@ -6,7 +6,7 @@ import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
 import nub.core.constraint.Hinge;
 import nub.ik.animation.*;
-import nub.ik.solver.geometric.SimpleBRIK;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.visual.Joint;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class SimpleBRIKAnim extends PApplet {
+public class SimpleTRIKAnim extends PApplet {
     /*
      * This example shows how to visualize an IK  Algorithm step by step
      * */
@@ -29,8 +29,8 @@ public class SimpleBRIKAnim extends PApplet {
     (*) Define a Visualizer to your algorithm.
     Here, you must specify the way that each interesting event annotated on the solver will be mapped to a visual step
      */
-    class BRIKVisualizer extends Visualizer {
-        public BRIKVisualizer(Scene scene, float radius, long period, long stepDuration) {
+    class TRIKVisualizer extends Visualizer {
+        public TRIKVisualizer(Scene scene, float radius, long period, long stepDuration) {
             super(scene, radius, period, stepDuration);
         }
 
@@ -62,8 +62,8 @@ public class SimpleBRIKAnim extends PApplet {
 
     int color;
 
-    SimpleBRIK solver; //IK Algorithm that uses Solver template
-    BRIKVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
+    TRIK solver; //IK Algorithm that uses Solver template
+    TRIKVisualizer visualizer; //A Visualizer manages a scene in which the IK algorithm will be animated
     VisualizerMediator mediator; //Since the interaction between a solver and a Visualizer is bidirectional a mediator is required to handle the events
 
     List<Node> structure = new ArrayList<>(); //Keep Structures
@@ -111,11 +111,11 @@ public class SimpleBRIKAnim extends PApplet {
         //structure = Util.generateChain(scene, numJoints, targetRadius * 0.8f, boneLength, new Vector(), color);
         structure = createLimb(scene, numJoints, boneLength, targetRadius * 0.8f, color(0,255,0), new Vector());
 
-        solver = new SimpleBRIK(structure);
+        solver = new TRIK(structure);
         solver.enableMediator(true);
 
         //Create the visualizer
-        visualizer = new BRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 1000);
+        visualizer = new TRIKVisualizer(auxiliar, targetRadius * 0.8f, 40, 1000);
 
         //Create Mediator that relates a Solver with at least one visualizer
         mediator = new VisualizerMediator(solver, visualizer);
@@ -261,6 +261,6 @@ public class SimpleBRIKAnim extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.animation.SimpleBRIKAnim"});
+        PApplet.main(new String[]{"ik.animation.SimpleTRIKAnim"});
     }
 }

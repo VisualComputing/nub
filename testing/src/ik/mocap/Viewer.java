@@ -7,6 +7,7 @@ import nub.ik.loader.bvh.BVHLoader;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIK;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.core.constraint.BallAndSocket;
@@ -40,7 +41,7 @@ public class Viewer extends PApplet{
     ChainSolver chain_solver;
     Solver solver;
 
-    ArrayList<ChainSolver> chainsolvers = new ArrayList<>();
+    ArrayList<Solver> chainsolvers = new ArrayList<>();
     float[] exploration;
 
     float targetRadius = 7;
@@ -199,14 +200,16 @@ public class Viewer extends PApplet{
             }
 
             //BioIk chain = new BioIk(fr, 10, 4);
-            ChainSolver chain = new ChainSolver((ArrayList) fr);
-            chain.setKeepDirection(true);
-            chain.setFixTwisting(true);
+            //ChainSolver chain = new ChainSolver((ArrayList) fr);
+            TRIK chain = new TRIK((ArrayList) fr);
+            //chain.setKeepDirection(true);
+            //chain.setFixTwisting(true);
 
-            chain.setTimesPerFrame(5);
+            //chain.explore(true);
+            chain.setTimesPerFrame(50);
             chain.setMaxIterations(50);
-            chain.setMaxError(0.1f);
-            chain.setMinDistance(0.1f);
+            //chain.setMaxError(0.1f);
+            //chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
             TimingTask task = new TimingTask(scene) {
                 @Override
@@ -263,11 +266,11 @@ public class Viewer extends PApplet{
 //            text("" +  targets.get(k).position().x() + "\n" + targets.get(k).position().y() + "\n" + targets.get(k).position().z(), sc.x(), sc.y());
 //        }
         for(int i = 0; i < chainsolvers.size(); i++){
-            ChainSolver ch = chainsolvers.get(i);
-            Vector sc = scene.screenLocation(ch.target().position());
-            fill(255);
-            exploration[i] = ch.explorationTimes() > exploration[i] ? ch.explorationTimes() : exploration[i];
-            text("" +  exploration[i], sc.x(), sc.y());
+            //ChainSolver ch = chainsolvers.get(i);
+            //Vector sc = scene.screenLocation(ch.target().position());
+            //fill(255);
+            //exploration[i] = ch.explorationTimes() > exploration[i] ? ch.explorationTimes() : exploration[i];
+            //text("" +  exploration[i], sc.x(), sc.y());
         }
 
         scene.endHUD();

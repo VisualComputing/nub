@@ -8,6 +8,7 @@ import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
+import nub.ik.solver.geometric.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -33,7 +34,7 @@ public class Case1 extends PApplet {
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
-    int numSolvers = 7; //Set number of solvers
+    int numSolvers = 8; //Set number of solvers
     boolean solve = false;
 
     public void settings() {
@@ -111,6 +112,10 @@ public class Case1 extends PApplet {
         //HGSA
         BioIk bioIk = new BioIk(structures.get(i++), 20, 12);
         solvers.add(bioIk);
+        //HGSA
+        TRIK trik = new TRIK(structures.get(i++));
+        trik.setLookAhead(2);
+        solvers.add(trik);
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);

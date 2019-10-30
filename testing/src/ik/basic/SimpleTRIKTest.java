@@ -3,8 +3,8 @@ package ik.basic;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.ik.solver.Solver;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.visual.Joint;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -20,7 +20,7 @@ import java.util.List;
  * Created by sebchaparr on 01/06/19.
  */
 
-public class SimpleBRIKTest extends PApplet {
+public class SimpleTRIKTest extends PApplet {
     /*
     In this example an IK solver will be related
     with a pretty simple chain structure on the XY-Plane:
@@ -49,8 +49,8 @@ public class SimpleBRIKTest extends PApplet {
     float jointRadius = 5;
     float length = 50;
     boolean enableSolver = false;
-    Solver brik, fabrik;
-    List<Node> skeleton_brik, skeleton_fabrik;
+    Solver trik, fabrik;
+    List<Node> skeleton_trik, skeleton_fabrik;
     List<Node> targets = new ArrayList<Node>();
 
     public void settings() {
@@ -66,10 +66,10 @@ public class SimpleBRIKTest extends PApplet {
         scene.setRadius(280);
         scene.fit(1);
         //Create the Skeleton (chain described above)
-        skeleton_brik  = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
+        skeleton_trik = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
         skeleton_fabrik  = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
         //Create solver
-        brik = createSolver("BRIK", skeleton_brik);
+        trik = createSolver("TRIK", skeleton_trik);
         fabrik = createSolver("FABRIK", skeleton_fabrik);
         //Define Text Properties
         textAlign(CENTER);
@@ -82,7 +82,7 @@ public class SimpleBRIKTest extends PApplet {
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        drawInfo(skeleton_brik);
+        drawInfo(skeleton_trik);
         drawInfo(skeleton_fabrik);
         scene.endHUD();
     }
@@ -113,8 +113,8 @@ public class SimpleBRIKTest extends PApplet {
         targets.add(target);
         //3. Relate the structure with a Solver. In this example we instantiate a solver
         switch(type){
-            case "BRIK":{
-                solver = new nub.ik.solver.geometric.SimpleBRIK(skeleton);
+            case "TRIK":{
+                solver = new TRIK(skeleton);
                 break;
             }
             case "FABRIK":{
@@ -122,7 +122,7 @@ public class SimpleBRIKTest extends PApplet {
                 break;
             }
             default:{
-                solver = new nub.ik.solver.geometric.SimpleBRIK(skeleton);
+                solver = new TRIK(skeleton);
             }
         }
         //Optionally you could modify the following parameters of the Solver:
@@ -144,7 +144,7 @@ public class SimpleBRIKTest extends PApplet {
                 if(type.equals("FABRIK") && !enableSolver){
                     solver.solve();
                 }
-                if(type.equals("BRIK") && enableSolver){
+                if(type.equals("TRIK") && enableSolver){
                     solver.solve();
                 }
 
@@ -239,6 +239,6 @@ public class SimpleBRIKTest extends PApplet {
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.SimpleBRIKTest"});
+        PApplet.main(new String[]{"ik.basic.SimpleTRIKTest"});
     }
 }

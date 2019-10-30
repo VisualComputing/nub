@@ -13,7 +13,7 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.evolutionary.GASolver;
 import nub.ik.solver.evolutionary.HillClimbingSolver;
 import nub.ik.solver.geometric.MySolver;
-import nub.ik.solver.geometric.SimpleBRIK;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.solver.numerical.PseudoInverseSolver;
 import nub.ik.solver.numerical.SDLSSolver;
 import nub.ik.solver.numerical.TransposeSolver;
@@ -32,7 +32,7 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
-    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, BRIK }
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK}
 
     public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
@@ -73,7 +73,11 @@ public class Util {
             case HAEA: return new HAEASolver(structure, 10, true);
             case SDLS: return new SDLSSolver(structure);
             case MySolver: return  new MySolver(structure);
-            case BRIK: return new SimpleBRIK(structure);
+            case TRIK:{
+                TRIK solver = new TRIK(structure);
+                solver.setLookAhead(2);
+                return solver;
+            }
             default: return null;
         }
     }
@@ -278,8 +282,8 @@ public class Util {
         if(solver instanceof MySolver){
             pg.text("MySolver" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
-        if(solver instanceof SimpleBRIK){
-            pg.text("BRIK" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
+        if(solver instanceof TRIK){
+            pg.text("TRIK" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 
         pg.popStyle();

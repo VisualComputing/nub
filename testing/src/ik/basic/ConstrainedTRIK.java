@@ -1,6 +1,5 @@
 package ik.basic;
 
-import ik.interactiveSkeleton.NaiveBiped;
 import nub.core.Graph;
 import nub.core.Node;
 import nub.core.constraint.BallAndSocket;
@@ -10,9 +9,8 @@ import nub.ik.solver.evolutionary.BioIk;
 import nub.ik.solver.geometric.CCDSolver;
 import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.MySolver;
-import nub.ik.solver.geometric.SimpleBRIK;
+import nub.ik.solver.geometric.TRIK;
 import nub.ik.visual.Joint;
-import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -28,8 +26,8 @@ import java.util.List;
  * Created by sebchaparr on 01/06/19.
  */
 
-public class ConstrainedBRIK extends PApplet {
-    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, BRIK};
+public class ConstrainedTRIK extends PApplet {
+    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, TRIK};
     Scene scene;
     //Set the scene as P3D or P2D
     String renderer = P3D;
@@ -40,7 +38,7 @@ public class ConstrainedBRIK extends PApplet {
     List<Node> targets = new ArrayList<Node>();
     boolean debug = true;
     boolean solve = !debug;
-    Solver brik, fabrik;
+    Solver trik, fabrik;
 
 
 
@@ -57,7 +55,7 @@ public class ConstrainedBRIK extends PApplet {
         scene.setRadius(280);
         scene.fit(1);
         //Create the Skeleton (chain described above)
-        brik = createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.BRIK);
+        trik = createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK);
     }
 
     public void draw() {
@@ -105,7 +103,7 @@ public class ConstrainedBRIK extends PApplet {
         }
         BallAndSocket cone = new BallAndSocket(radians(20),radians(20));
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
-        joints.get(joints.size() - 1).setConstraint(cone);
+        //joints.get(joints.size() - 1).setConstraint(cone);
 
         Joint low = new Joint(scene, color, radius);
         low.setReference(joints.get(joints.size() - 1));
@@ -142,9 +140,9 @@ public class ConstrainedBRIK extends PApplet {
                 break;
             }
 
-            case BRIK:{
-                solver = new SimpleBRIK(limb);
-                ((SimpleBRIK)solver).setTarget(target);
+            case TRIK:{
+                solver = new TRIK(limb);
+                ((TRIK)solver).setTarget(target);
                 break;
             }
 
@@ -155,7 +153,7 @@ public class ConstrainedBRIK extends PApplet {
 
         solver.setMaxError(3f);
         if (!debug) solver.setTimesPerFrame(5);
-        else solver.setTimesPerFrame(1f);
+        else solver.setTimesPerFrame(5f);
         target.setPosition(limb.get(limb.size() - 1).position());
         TimingTask task = new TimingTask(scene) {
             @Override
@@ -251,11 +249,11 @@ public class ConstrainedBRIK extends PApplet {
         if(key == 'S' || key == 's') {
             solve = !solve;
         }else if(key =='a' || key == 'A'){
-                brik.solve();
+                trik.solve();
         }
     }
 
     public static void main(String args[]) {
-        PApplet.main(new String[]{"ik.basic.ConstrainedBRIK"});
+        PApplet.main(new String[]{"ik.basic.ConstrainedTRIK"});
     }
 }

@@ -23,13 +23,13 @@ import java.util.List;
 
 public class NaiveBiped extends PApplet {
 
-    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, BRIK};
+    public enum IKMode{ BIOIK, FABRIK, CCD, MYSOLVER, TRIK};
 
     Scene scene;
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 11;
+    int segments = 10;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
@@ -37,8 +37,8 @@ public class NaiveBiped extends PApplet {
     }
 
     //DEBUGGING VARS
-    boolean debug = true;
-    boolean solve = !debug;
+    static boolean debug = false;
+    static boolean solve = !debug;
     boolean show[] = new boolean[4];
     //--------------------
     ArrayList<Solver> solvers = new ArrayList<>();
@@ -56,11 +56,11 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
-            createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
-            createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
+            //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
+            //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.BRIK);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK);
         //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
@@ -177,9 +177,10 @@ public class NaiveBiped extends PApplet {
                 break;
             }
 
-            case BRIK:{
-                solver = new SimpleBRIK(limb);
-                ((SimpleBRIK)solver).setTarget(target);
+            case TRIK:{
+                solver = new TRIK(limb);
+                ((TRIK)solver).setTarget(target);
+                ((TRIK)solver).setLookAhead(2);
                 break;
             }
 
@@ -188,17 +189,18 @@ public class NaiveBiped extends PApplet {
             }
         }
 
-        solver.setMaxError(3f);
-        if (!debug) solver.setTimesPerFrame(5);
-        else solver.setTimesPerFrame(1f);
+        //solver.setMaxError(0f);
+        if (!debug) solver.setTimesPerFrame(50);
+        else solver.setTimesPerFrame(10);
+        solver.setMaxIterations(50);
         target.setPosition(limb.get(limb.size() - 1).position());
-        TimingTask task = new TimingTask(scene) {
+        /*TimingTask task = new TimingTask(scene) {
             @Override
             public void execute() {
                 if (solve) solver.solve();
             }
         };
-        task.run(20);
+        task.run(40);*/
         return solver;
     }
 
@@ -254,8 +256,8 @@ public class NaiveBiped extends PApplet {
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
-                float max = 3;
-                float min = 45;
+                float max = 0;
+                float min = 40;
 
                 Hinge hinge = new Hinge(radians(min), radians(max), middle.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
                 middle.setConstraint(hinge);
@@ -264,7 +266,7 @@ public class NaiveBiped extends PApplet {
         }
         BallAndSocket cone = new BallAndSocket(radians(20),radians(20));
         cone.setRestRotation(joints.get(joints.size() - 1).rotation().get(), new Vector(0,-1,0), new Vector(0,0,1));
-        joints.get(joints.size() - 1).setConstraint(cone);
+        //joints.get(joints.size() - 1).setConstraint(cone);
 
         Joint low = new Joint(scene, color, radius);
         low.setReference(joints.get(joints.size() - 1));
@@ -280,7 +282,7 @@ public class NaiveBiped extends PApplet {
 
     public void createBipedCycle(Scene scene, Node root, Solver leg1, Solver leg2, Node target1, Node target2){
         //Create Walking Cycle
-        Cycle cycle = new Cycle(scene);
+        Cycle cycle = new Cycle(scene, leg1, leg2);
         //Create Steps
         // First step
         Cycle.Step step1 = new Cycle.Step(scene) {
@@ -390,21 +392,28 @@ public class NaiveBiped extends PApplet {
         List<Step> _steps = new ArrayList<Step>();
         HashMap<Step, Step> _transition = new HashMap<>();
         Step _current = null;
+        Solver _leg1, _leg2;
 
         public void run(){
             if(_current == null){
                 if(_transition.containsKey(_current)) {
                     _current = _transition.get(null);
                     _current.start();
-                    _current._task.run(10);
+                    _current._task.run(40);
                 }
             }else if(_current.completed()){
                 _current._task.stop();
                 if(_transition.containsKey(_current)) {
                     _current = _transition.get(_current);
                     _current.start();
-                    _current._task.run(10);
+                    _current._task.run(40);
                 }
+            }
+            if (solve){
+                _leg1.change(true);
+                _leg2.change(true);
+                _leg1.solve();
+                _leg2.solve();
             }
         }
 
@@ -420,15 +429,17 @@ public class NaiveBiped extends PApplet {
             _transition.put(from, to);
         }
 
-        public Cycle(Scene scene){
+        public Cycle(Scene scene, Solver leg1, Solver leg2){
             _scene = scene;
+            this._leg1 = leg1;
+            this._leg2 = leg2;
             TimingTask task = new TimingTask(scene) {
                 @Override
                 public void execute() {
                     Cycle.this.run();
                 }
             };
-            task.run(5);
+            task.run(40);
         }
     }
     public static void main(String args[]) {
