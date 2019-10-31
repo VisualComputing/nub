@@ -2994,6 +2994,16 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
+   * Same as {@code translate(defaultNode(hid))}.
+   *
+   * @see #translate(Node)
+   * @see #defaultNode(String)
+   */
+  public void translate(String hid) {
+    translate(defaultNode(hid));
+  }
+
+  /**
    * Same as {@code translate(mouseDX(), mouseDY(), node)}.
    *
    * @see Graph#translate(Node, float, float)
@@ -3013,6 +3023,16 @@ public class Scene extends Graph implements PConstants {
    */
   public void spin() {
     spin(pmouse(), mouse());
+  }
+
+  /**
+   * Same as {@code spin(defaultNode(hid)}.
+   *
+   * @see #spin(Node)
+   * @see #defaultNode(String)
+   */
+  public void spin(String hid) {
+    spin(defaultNode(hid));
   }
 
   /**

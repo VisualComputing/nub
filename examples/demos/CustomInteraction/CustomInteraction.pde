@@ -111,9 +111,9 @@ void mouseDragged() {
   if (mouseButton == LEFT)
     scene.spin("key");
   else if (mouseButton == CENTER)
-    scene.scale(scene.mouseDX());
+    scene.scale("key", scene.mouseDX());
   else
-    scene.translate();
+    scene.translate("key");
 }
 
 void mouseWheel(MouseEvent event) {
@@ -122,7 +122,7 @@ void mouseWheel(MouseEvent event) {
 
 void mouseClicked(MouseEvent event) {
   if (event.getCount() == 1)
-    scene.interact(scene.defaultNode());
+    scene.interact("key");
   if (event.getCount() == 2)
-    scene.cast();
+    scene.cast("key");
 }

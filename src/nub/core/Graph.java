@@ -3933,9 +3933,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code control(defaultNode(hid), gesture)}. This method implements application control with
-   * the {@link #defaultNode(String)} which requires overriding {@link Node#interact(Object...)}.
+   * HID generic interaction pattern. Same as {@code defaultNode(hid).interact(gesture)}.
+   * <p>
+   * Uses gesture data to interact with the hid default node (either the {@link #eye()}
+   * or the hid {@link #resetTrackedNode(String)} (see {@link #defaultNode(String)} for
+   * details).
+   * <p>
+   * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
    *
+   * @see Node#interact(Object...)
    * @see #defaultNode(String)
    * @see #interact(Node, Object...)
    */
@@ -3944,7 +3950,11 @@ public class Graph {
   }
 
   /**
-   * Same as {@code node.interact(gesture)}.
+   * Node generic interaction pattern. Same as {@code node.interact(gesture)}.
+   * <p>
+   * Uses gesture data to interact with the node.
+   * <p>
+   * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
    *
    * @see #interact(String, Object...)
    * @see Node#interact(Object...)
