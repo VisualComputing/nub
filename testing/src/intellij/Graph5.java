@@ -54,7 +54,7 @@ public class Graph5 extends PApplet {
   }
 
   public void mouseMoved() {
-    graph.track(nodes, mouseX, mouseY);
+    graph.track(mouseX, mouseY, nodes);
   }
 
   public void mouseDragged() {

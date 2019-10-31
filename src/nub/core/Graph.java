@@ -75,9 +75,9 @@ import java.util.List;
  * {@link #scale(String, float)} calls {@link #scale(Node, float)} passing the {@code hid} default-node).</li>
  * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
  * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Node[], Point)}
+ * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
  * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
- * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Node[], Point)} and
+ * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
  * {@link #track(String, Point)} update the {@code hid} tracked-node synchronously (i.e., they return the
  * {@code hid} tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
  * optimally updates the {@code hid} tracked-node during the next call to the {@link #render()} algorithm).</li>
@@ -2364,14 +2364,9 @@ public class Graph {
    * Same as {@code return track(null, pixel, nodeArray)}.
    *
    * @see #track(String, float, float, Node[])
-   * // TODO Horrible signature
-   * should be: Node track(Point pixel, Node[] nodeArray)
-   * but it makes track(String hid, pixel) cumbersome (see
-   * public Node track(Point pixel) and public Node track(float x, float y))
-   * discard me?
    */
   public Node track(Point pixel, Node[] nodeArray) {
-    return track(null, nodeArray, pixel);
+    return track(null, pixel, nodeArray);
   }
 
   /**
@@ -2379,7 +2374,7 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, Node[] nodeArray, Point pixel) {
+  public Node track(String hid, Point pixel, Node[] nodeArray) {
     return track(hid, pixel.x(), pixel.y(), nodeArray);
   }
 
@@ -2388,7 +2383,7 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(Node[] nodeArray, float x, float y) {
+  public Node track(float x, float y, Node[] nodeArray) {
     return track(null, x, y, nodeArray);
   }
 
@@ -2402,7 +2397,7 @@ public class Graph {
    * detached nodes.
    *
    * @see #track(String, float, float)
-   * @see #track(String, List, float, float)
+   * @see #track(String, float, float, List)
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
@@ -2429,7 +2424,7 @@ public class Graph {
   /**
    * Same as {@code return track(null, pixel, nodeList)}.
    *
-   * @see #track(String, List, float, float)
+   * @see #track(String, float, float, List)
    */
   public Node track(Point pixel, List<Node> nodeList) {
     return track(null, pixel, nodeList);
@@ -2438,19 +2433,19 @@ public class Graph {
   /**
    * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeList)}.
    *
-   * @see #track(String, List, float, float)
+   * @see #track(String, float, float, List)
    */
   public Node track(String hid, Point pixel, List<Node> nodeList) {
-    return track(hid, nodeList, pixel.x(), pixel.y());
+    return track(hid, pixel.x(), pixel.y(), nodeList);
   }
 
   /**
    * Same as {@code return track(null, x, y, nodeList)}.
    *
-   * @see #track(String, List, float, float)
+   * @see #track(String, float, float, List)
    */
-  public Node track(List<Node> nodeList, float x, float y) {
-    return track(null, nodeList, x, y);
+  public Node track(float x, float y, List<Node> nodeList) {
+    return track(null, x, y, nodeList);
   }
 
   /**
@@ -2458,7 +2453,7 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, List<Node> nodeList, float x, float y) {
+  public Node track(String hid, float x, float y, List<Node> nodeList) {
     resetTrackedNode(hid);
     for (Node node : nodeList)
       if (tracks(node, x, y)) {
