@@ -642,20 +642,24 @@ public class Interpolator {
    */
   // TODO needs testing
   public boolean removeKeyFrame(float time) {
-    HashMap<Float, Node> map = keyFrames();
-    Node node = map.get(time);
-    if (node != null) {
-      _valuesAreValid = false;
-      _pathIsValid = false;
-      _currentKeyFrameValid = false;
-      if (_task.isActive())
-        _task.stop();
-      _list.remove(node);
-      setTime(firstTime());
-      _graph.prune(node);
-      return true;
+    boolean result = false;
+    ListIterator<KeyFrame> listIterator = _list.listIterator();
+    while (listIterator.hasNext()) {
+      KeyFrame keyFrame = listIterator.next();
+      // check if result of student is "Fail"
+      if (keyFrame._time == time) {
+        _valuesAreValid = false;
+        _pathIsValid = false;
+        _currentKeyFrameValid = false;
+        if (_task.isActive())
+          _task.stop();
+        _graph.prune(keyFrame._node);
+        setTime(firstTime());
+        listIterator.remove();
+        result = true;
+      }
     }
-    return false;
+    return result;
   }
 
   /**
