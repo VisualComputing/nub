@@ -24,8 +24,15 @@ public class TRIK extends Solver {
     //Steady state algorithm
     protected float _current = 10e10f, _best = 10e10f;
 
+    //TODO : Refine
+    boolean _enableWeight;
+
     //TODO : REMOVE!
-    protected boolean _debug = false;
+    public static boolean _debug = false;
+
+    public void enableWeight(boolean enable){
+        _enableWeight = enable;
+    }
 
     public TRIK(List<? extends Node> chain) {
         this(chain, null);
@@ -123,6 +130,15 @@ public class TRIK extends Solver {
     public List<Pair<Vector, Vector>> sec = new ArrayList<>();
     public List<Pair<Vector, Vector>> main = new ArrayList<>();
     public List<Pair<Vector, Vector>> av = new ArrayList<>();
+
+    //TODO : REFINE
+    protected float _calculateWeight(float boneLength, float distToDesired){
+        float dist = distToDesired - boneLength;
+        dist = dist < 0 ? -1f / dist : dist;
+        float d_i = dist / boneLength;
+        return (float) Math.pow(1.5, -d_i);
+    }
+
 
     protected Quaternion _applyLocalRotation(Node j_i1, Node j_i1_hat){
         Node j_i = j_i1.reference(); //must have a parent
@@ -238,6 +254,11 @@ public class TRIK extends Solver {
             }
             //Step 4. Apply local rotation to each joint of the chain
             swing = _applyLocalRotation(j_i1, j_i1_hat);
+            if(_enableWeight) {
+                float weight = _calculateWeight(j_i1.translation().magnitude(), j_i.location(j_i1_hat).magnitude());
+                //System.out.println("w : " + weight);
+                swing = new Quaternion(swing.axis(), swing.angle() * weight);
+            }
             return Quaternion.compose(twist, swing);
     }
 
