@@ -1,5 +1,5 @@
 /**
- * Application Control.
+ * Custom Interaction.
  * by Jean Pierre Charalambos.
  *
  * This example illustrates how to customize shape behaviors by
