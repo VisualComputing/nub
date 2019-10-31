@@ -79,7 +79,8 @@ public class Interpolator {
   }
 
   /**
-   * Internal protected class representing 2d and 3d key-frames.
+   * Internal protected class representing 2d and 3d key-frames. It's just
+   * a time-node pairing with vector and quaternion tangent caches.
    */
   protected class KeyFrame {
     /**
@@ -112,6 +113,8 @@ public class Interpolator {
   }
 
   protected long _lastUpdate;
+  // Attention: We should go like this: protected Map<Float, Node> _list;
+  // but Java doesn't allow to iterate backwards a map
   protected List<KeyFrame> _list;
   protected ListIterator<KeyFrame> _backwards;
   protected ListIterator<KeyFrame> _forwards;
@@ -179,7 +182,6 @@ public class Interpolator {
     _t = 0.0f;
     _speed = 1.0f;
     _task = _graph._initTask(this);
-    _task.setPeriod(40);
     _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = false;
@@ -224,14 +226,6 @@ public class Interpolator {
    */
   public Graph graph() {
     return _graph;
-  }
-
-  /**
-   * Internal use. Updates the last node path was updated. Called by
-   * {@link #_checkValidity()}.
-   */
-  protected void _modified() {
-    _lastUpdate = TimingHandler.frameCount;
   }
 
   /**
@@ -315,7 +309,6 @@ public class Interpolator {
   public void execute() {
     if ((_list.isEmpty()) || (node() == null))
       return;
-    // TODO experimental
     if ((_speed > 0.0) && (time() >= _list.get(_list.size() - 1)._time))
       setTime(_list.get(0)._time);
     if ((_speed < 0.0) && (time() <= _list.get(0)._time))
@@ -643,7 +636,6 @@ public class Interpolator {
     ListIterator<KeyFrame> listIterator = _list.listIterator();
     while (listIterator.hasNext()) {
       KeyFrame keyFrame = listIterator.next();
-      // check if result of student is "Fail"
       if (keyFrame._time == time) {
         _valuesAreValid = false;
         _pathIsValid = false;
@@ -720,9 +712,7 @@ public class Interpolator {
   protected void _updateCurrentKeyFrameForTime(float time) {
     // TODO: Special case for loops when closed path is implemented !!
     if (!_currentKeyFrameValid)
-      // Recompute everything from scratch
       _backwards = _list.listIterator();
-    // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
     while (_list.get(_backwards.nextIndex())._time > time) {
       _currentKeyFrameValid = false;
       if (!_backwards.hasPrevious())
@@ -848,29 +838,21 @@ public class Interpolator {
   }
 
   /**
-   * Internal use. Calls {@link #_invalidateValues()} if a keyframe defining the
-   * path was recently modified.
+   * Internal use. Checks if any of the keyframes defining the path was recently modified.
    */
   protected void _checkValidity() {
-    boolean flag = false;
+    boolean modified = false;
     for (KeyFrame keyFrame : _list) {
       if (keyFrame._node.lastUpdate() > _lastUpdate()) {
-        flag = true;
+        modified = true;
         break;
       }
     }
-    if (flag) {
-      this._invalidateValues();
-      this._modified();
+    if (modified) {
+      _lastUpdate = TimingHandler.frameCount;
+      _valuesAreValid = false;
+      _pathIsValid = false;
+      _splineCacheIsValid = false;
     }
-  }
-
-  /**
-   * Internal use. Called by {@link #_checkValidity()}.
-   */
-  protected void _invalidateValues() {
-    _valuesAreValid = false;
-    _pathIsValid = false;
-    _splineCacheIsValid = false;
   }
 }

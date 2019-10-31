@@ -67,19 +67,11 @@ void setup() {
 void draw() {
   background(0);
   scene.render();
-
   pushStyle();
   stroke(255);
   // same as:scene.drawPath(interpolator, 5);
   scene.drawPath(interpolator);
   popStyle();
-
-  for (Node node : interpolator.keyFrames().values()) {
-    pushMatrix();
-    scene.applyTransformation(node);
-    scene.drawAxes(scene.tracks(node) ? 40 : 20);
-    popMatrix();
-  }
   if (showEyePath) {
     pushStyle();
     fill(255, 0, 0);

@@ -72,7 +72,6 @@ public class Interpolation extends PApplet {
     // same as:scene.drawPath(interpolator, 5);
     scene.drawPath(interpolator);
     popStyle();
-
     for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
