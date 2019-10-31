@@ -59,7 +59,7 @@ public class Interpolation extends PApplet {
     interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
-      interpolator.addKeyFrame(scene.randomNode());
+      interpolator.addKeyFrame(scene.randomNode(), i % 2 == 1 ? 1 : 4);
     interpolator.run();
   }
 

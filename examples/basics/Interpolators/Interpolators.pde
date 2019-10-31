@@ -57,7 +57,7 @@ void setup() {
     }
   };
   interpolator = new Interpolator(shape);
-  interpolator.setLoop();
+  interpolator.enableRecurrence();
   // Create an initial path
   for (int i = 0; i < random(4, 10); i++)
     interpolator.addKeyFrame(scene.randomNode());
@@ -74,7 +74,7 @@ void draw() {
   scene.drawPath(interpolator);
   popStyle();
 
-  for (Node node : interpolator.keyFrames()) {
+  for (Node node : interpolator.keyFrames().values()) {
     pushMatrix();
     scene.applyTransformation(node);
     scene.drawAxes(scene.tracks(node) ? 40 : 20);
