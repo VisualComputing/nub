@@ -16,6 +16,7 @@ import nub.timing.Task;
 import nub.timing.TimingHandler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -125,7 +126,7 @@ public class Interpolator {
   protected float _speed;
 
   // Misc
-  protected boolean _loop;
+  protected boolean _recurrent;
 
   // Cached values and flags
   protected boolean _pathIsValid;
@@ -179,7 +180,7 @@ public class Interpolator {
     _speed = 1.0f;
     _task = _graph._initTask(this);
     _task.setPeriod(40);
-    _loop = false;
+    _recurrent = false;
     _pathIsValid = false;
     _valuesAreValid = true;
     _currentKeyFrameValid = false;
@@ -200,7 +201,7 @@ public class Interpolator {
     this._task = _graph._initTask(this);
     this._task.setPeriod(other.task().period());
     this._task.enableConcurrence(other._task.isConcurrent());
-    this._loop = other._loop;
+    this._recurrent = other._recurrent;
     this._pathIsValid = other._pathIsValid;
     this._valuesAreValid = other._valuesAreValid;
     this._currentKeyFrameValid = other._currentKeyFrameValid;
@@ -287,7 +288,8 @@ public class Interpolator {
 
   /**
    * Returns the low-level timing task. Prefer the high-level-api instead:
-   * {@link #run()}, {@link #reset()}, {@link #time()} and {@link #toggle()}.
+   * {@link #run()}, {@link #reset()}, {@link #time()} ({@link #setTime(float)})
+   * and {@link #toggle()}.
    */
   public Task task() {
     return _task;
@@ -303,11 +305,11 @@ public class Interpolator {
    * constant and equal to the total path {@link #duration()} divided by the
    * {@link Task#period()} * {@link #speed()} which is is especially useful
    * for benchmarking or movie creation (constant number of snapshots). Note
-   * that if {@code speed = 1} then {@link #time(int)} will be matched
+   * that if {@code speed = 1} then {@link #time()} will be matched
    * during the interpolation (provided that your main loop is fast enough).
    * <p>
    * Note that {@link Task#stop()} is called when {@link #time()} reaches
-   * {@link #firstTime()} or {@link #lastTime()}, unless {@link #loop()}
+   * {@link #firstTime()} or {@link #lastTime()}, unless {@link #isRecurrent()}
    * is {@code true}.
    *
    * @see #run(int, float)
@@ -325,7 +327,7 @@ public class Interpolator {
     interpolate(time());
     _t += _speed * _task.period() / 1000.0f;
     if (time() > _list.get(_list.size() - 1)._time) {
-      if (loop())
+      if (isRecurrent())
         setTime(_list.get(0)._time + _t - _list.get(_list.size() - 1)._time);
       else {
         // Make sure last KeyFrame is reached and displayed
@@ -333,7 +335,7 @@ public class Interpolator {
         _task.stop();
       }
     } else if (time() < _list.get(0)._time) {
-      if (loop())
+      if (isRecurrent())
         setTime(_list.get(_list.size() - 1)._time - _list.get(0)._time + _t);
       else {
         // Make sure first KeyFrame is reached and displayed
@@ -414,38 +416,6 @@ public class Interpolator {
   }
 
   /**
-   * Returns the current interpolation speed.
-   * <p>
-   * Default value is 1, which means {@link #time(int)} will be matched during
-   * the interpolation (provided that your main loop is fast enough).
-   * <p>
-   * A negative value will result in a reverse interpolation of the keyframes.
-   *
-   * @see #setSpeed(float)
-   * @see Task#period()
-   */
-  public float speed() {
-    return _speed;
-  }
-
-  /**
-   * Returns {@code true} when the interpolation is played in an infinite loop.
-   * <p>
-   * When {@code false} (default), the interpolation stops when
-   * {@link #time()} reaches {@link #firstTime()} (with negative
-   * {@code speed} which is set with {@link #run(int, float)}) or
-   * {@link #lastTime()}.
-   * <p>
-   * {@link #time()} is otherwise reset to {@link #firstTime()} (+
-   * {@link #time()} - {@link #lastTime()}) (and inversely for negative
-   * {@code speed} which is set with {@link #run(int, float)}) and
-   * interpolation continues.
-   */
-  public boolean loop() {
-    return _loop;
-  }
-
-  /**
    * Sets the {@link #time()}.
    *
    * <b>Attention:</b> The {@link #node()} state is not affected by this method. Use this
@@ -469,22 +439,10 @@ public class Interpolator {
   }
 
   /**
-   * Returns the time corresponding to the {@code index} keyframe. Not that index has
-   * to be in the range 0.. {@link #size()}-1.
-   *
-   * @see #keyFrame(int)
-   */
-  public float time(int index) {
-    return _list.get(index)._time;
-  }
-
-  /**
    * Returns the duration of the interpolator path, expressed in seconds.
    * <p>
    * Simply corresponds to {@link #lastTime()} - {@link #firstTime()}. Returns 0 if the
    * path has less than 2 keyframes.
-   *
-   * @see #time(int)
    */
   public float duration() {
     return lastTime() - firstTime();
@@ -497,7 +455,7 @@ public class Interpolator {
    *
    * @see #lastTime()
    * @see #duration()
-   * @see #time(int)
+   * @see #time()
    */
   public float firstTime() {
     return _list.isEmpty() ? 0.0f : _list.get(0)._time;
@@ -508,10 +466,63 @@ public class Interpolator {
    *
    * @see #firstTime()
    * @see #duration()
-   * @see #time(int)
+   * @see #time()
    */
   public float lastTime() {
     return _list.isEmpty() ? 0.0f : _list.get(_list.size() - 1)._time;
+  }
+
+  /**
+   * Convenience function that simply calls {@code enableRecurrence(false)}.
+   */
+  public void disableRecurrence() {
+    enableRecurrence(false);
+  }
+
+  /**
+   * Convenience function that simply calls {@code enableRecurrence(true)}.
+   */
+  public void enableRecurrence() {
+    enableRecurrence(true);
+  }
+
+  /**
+   * Sets the {@link #isRecurrent()} value.
+   */
+  public void enableRecurrence(boolean enable) {
+    _recurrent = enable;
+  }
+
+  /**
+   * Returns {@code true} when the interpolation is played in an infinite loop.
+   * <p>
+   * When {@code false} (default), the interpolation stops when
+   * {@link #time()} reaches {@link #firstTime()} (with negative
+   * {@code speed} which is set with {@link #run(int, float)}) or
+   * {@link #lastTime()}.
+   * <p>
+   * {@link #time()} is otherwise reset to {@link #firstTime()} (+
+   * {@link #time()} - {@link #lastTime()}) (and inversely for negative
+   * {@code speed} which is set with {@link #run(int, float)}) and
+   * interpolation continues.
+   */
+  public boolean isRecurrent() {
+    return _recurrent;
+  }
+
+  /**
+   * Returns the current interpolation speed.
+   * <p>
+   * Default value is 1, which means {@link #time()} will be matched during
+   * the interpolation (provided that your main loop is fast enough).
+   * <p>
+   * A negative value will result in a reverse interpolation of the keyframes.
+   *
+   * @see #setSpeed(float)
+   * @see Task#period()
+   */
+  public float speed() {
+    return _speed;
   }
 
   /**
@@ -537,37 +548,14 @@ public class Interpolator {
   }
 
   /**
-   * Convenience function that simply calls {@code setLoop(true)}.
+   * Returns the collection of keyframes represented as a map of
+   * time to node pairings.
    */
-  public void setLoop() {
-    setLoop(true);
-  }
-
-  /**
-   * Sets the {@link #loop()} value.
-   */
-  public void setLoop(boolean loop) {
-    _loop = loop;
-  }
-
-  /**
-   * Returns the node associated with the keyframe at index {@code index}.
-   * <p>
-   * See also {@link #time(int)}. {@code index} has to be in the range 0..
-   * {@link #size()}-1.
-   */
-  public Node keyFrame(int index) {
-    return _list.get(index)._node;
-  }
-
-  /**
-   * Returns the list of keyframes which defines this interpolator.
-   */
-  public List<Node> keyFrames() {
-    List<Node> list = new ArrayList<Node>();
+  public HashMap<Float, Node> keyFrames() {
+    HashMap map = new HashMap<Float, Node>();
     for (KeyFrame keyFrame : _list)
-      list.add(keyFrame._node);
-    return list;
+      map.put(keyFrame._time, keyFrame._node);
+    return map;
   }
 
   /**
@@ -629,7 +617,10 @@ public class Interpolator {
    * @see #addKeyFrame()
    */
   public void addKeyFrame(Node node, float time) {
-    if (time < 0)
+    if (_list.size() == 0) {
+      if (time < 0)
+        return;
+    } else if (time <= 0)
       return;
     if (node == null)
       return;
@@ -645,22 +636,26 @@ public class Interpolator {
   }
 
   /**
-   * Remove keyframe according to {@code index} in the list and calls
-   * {@link Task#stop()} if {@link Task#isActive()}.
-   * //TODO index should be time!
+   * Remove keyframe according to {@code time}. Calls {@link Task#stop()}
+   * and returns {@code true} if the deletion was successful and returns
+   * {@code false} otherwise.
    */
-  public Node removeKeyFrame(int index) {
-    if (index < 0 || index >= _list.size())
-      return null;
-    _valuesAreValid = false;
-    _pathIsValid = false;
-    _currentKeyFrameValid = false;
-    if (_task.isActive())
-      _task.stop();
-    KeyFrame keyFrame = _list.remove(index);
-    setTime(firstTime());
-    _graph.prune(keyFrame._node);
-    return keyFrame._node;
+  // TODO needs testing
+  public boolean removeKeyFrame(float time) {
+    HashMap<Float, Node> map = keyFrames();
+    Node node = map.get(time);
+    if (node != null) {
+      _valuesAreValid = false;
+      _pathIsValid = false;
+      _currentKeyFrameValid = false;
+      if (_task.isActive())
+        _task.stop();
+      _list.remove(node);
+      setTime(firstTime());
+      _graph.prune(node);
+      return true;
+    }
+    return false;
   }
 
   /**

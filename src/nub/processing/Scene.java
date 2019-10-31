@@ -33,6 +33,7 @@ import processing.opengl.PShader;
 import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A 2D or 3D interactive, on-screen or off-screen, Processing mouse-driven {@link Graph}.
@@ -767,11 +768,22 @@ public class Scene extends Graph implements PConstants {
    */
   protected JSONArray _toJSONArray(Interpolator interpolator) {
     JSONArray jsonKeyFrames = new JSONArray();
+    // TODO needs testing
+    int i = 0;
+    for (Map.Entry<Float, Node> entry : interpolator.keyFrames().entrySet()) {
+      JSONObject jsonKeyFrame = _toJSONObject(entry.getValue());
+      jsonKeyFrame.setFloat("time", entry.getKey());
+      jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
+      i++;
+    }
+    /*
+    // it previously was
     for (int i = 0; i < interpolator.size(); i++) {
       JSONObject jsonKeyFrame = _toJSONObject(interpolator.keyFrame(i));
-      jsonKeyFrame.setFloat("time", interpolator.time(i));
+      jsonKeyFrame.setFloat("time", interpolator.timeBluf(i));
       jsonKeyFrames.setJSONObject(i, jsonKeyFrame);
     }
+    */
     return jsonKeyFrames;
   }
 
@@ -1304,8 +1316,8 @@ public class Scene extends Graph implements PConstants {
       List<Node> path = interpolator.path();
       if (((mask & 1) != 0) && path.size() > 1) {
         context().beginShape();
-        for (Node myFr : path)
-          vertex(myFr.position().x(), myFr.position().y(), myFr.position().z());
+        for (Node node : path)
+          vertex(node.position().x(), node.position().y(), node.position().z());
         context().endShape();
       }
       if ((mask & 6) != 0) {
@@ -1313,7 +1325,6 @@ public class Scene extends Graph implements PConstants {
         if (steps > nbSteps)
           steps = nbSteps;
         float goal = 0.0f;
-
         for (Node node : path)
           if ((count++) >= goal) {
             goal += nbSteps / (float) steps;
@@ -1326,10 +1337,16 @@ public class Scene extends Graph implements PConstants {
             _matrixHandler.popMatrix();
           }
       }
-      context().strokeWeight(context().strokeWeight / 2f);
+      context().strokeWeight(context().strokeWeight / 2f); // draw the picking targets:
+      /*
+      // TODO picking targets currently broken, requires attach nodes in interpolator._list to interpolator._path
+      for (Node node : interpolator.path())
+        if(node.isAttached(this))
+          drawBullsEye(node);
+       */
     }
     // draw the picking targets:
-    for (Node node : interpolator.keyFrames())
+    for (Node node : interpolator.keyFrames().values())
       drawBullsEye(node);
     context().popStyle();
   }

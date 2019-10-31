@@ -33,7 +33,7 @@ public class BasicInterpolation extends PApplet {
     scene.fit(1);
 
     interpolator = new Interpolator(scene);
-    interpolator.setLoop();
+    interpolator.enableRecurrence();
     // Create an initial path
     for (int i = 0; i < random(4, 10); i++)
       interpolator.addKeyFrame(Node.random(scene));

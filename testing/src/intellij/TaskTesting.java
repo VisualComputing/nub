@@ -125,7 +125,7 @@ public class TaskTesting extends PApplet {
     scene.drawPath(interpolator);
     popStyle();
 
-    for (Node node : interpolator.keyFrames()) {
+    for (Node node : interpolator.keyFrames().values()) {
       pushMatrix();
       scene.applyTransformation(node);
       scene.drawAxes(scene.tracks(node) ? 40 : 20);

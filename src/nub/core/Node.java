@@ -108,8 +108,8 @@ import java.util.List;
  * Implementing an application control for the node is a two step process:
  * <ul>
  * <li>Parse user gesture data by overriding {@link #interact(Object...)}.</li>
- * <li>Send gesture data to the node by calling {@link Graph#interact(Object...)},
- * {@link Graph#interact(String, Object...)} or {@link Graph#interact(Node, Object...)}.</li>
+ * <li>Send gesture data to the node by calling {@link Graph#interact(String, Object...)} or
+ * {@link Graph#interact(Node, Object...)}.</li>
  * </ul>
  * <h2>Syncing</h2>
  * Two nodes can be synced together ({@link #sync(Node, Node)}), meaning that they will
