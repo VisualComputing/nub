@@ -93,23 +93,23 @@ void draw() {
 void keyPressed() {
   int value = Character.getNumericValue(key);
   if (value >= 0 && value < 10)
-    scene.setTrackedNode(shapes[value]);
+    scene.setTrackedNode("key", shapes[value]);
   if (key == ' ')
-    scene.resetTrackedNode();
+    scene.resetTrackedNode("key");
   if (key == CODED)
     if (keyCode == UP)
-      scene.translate(0, -10);
+      scene.translate("key", 0, -10);
     else if (keyCode == DOWN)
-      scene.translate(0, 10);
+      scene.translate("key", 0, 10);
     else if (keyCode == LEFT)
-      scene.interact(scene.defaultNode(), "menos");
+      scene.interact("key", "menos");
     else if (keyCode == RIGHT)
-      scene.interact(scene.defaultNode(), "mas");
+      scene.interact("key", "mas");
 }
 
 void mouseDragged() {
   if (mouseButton == LEFT)
-    scene.spin();
+    scene.spin("key");
   else if (mouseButton == CENTER)
     scene.scale(scene.mouseDX());
   else
@@ -117,7 +117,7 @@ void mouseDragged() {
 }
 
 void mouseWheel(MouseEvent event) {
-  scene.interact(scene.defaultNode(), event.getCount());
+  scene.interact("key", event.getCount());
 }
 
 void mouseClicked(MouseEvent event) {
