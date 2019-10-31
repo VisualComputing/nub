@@ -2364,6 +2364,11 @@ public class Graph {
    * Same as {@code return track(null, pixel, nodeArray)}.
    *
    * @see #track(String, float, float, Node[])
+   * // TODO Horrible signature
+   * should be: Node track(Point pixel, Node[] nodeArray)
+   * but it makes track(String hid, pixel) cumbersome (see
+   * public Node track(Point pixel) and public Node track(float x, float y))
+   * discard me?
    */
   public Node track(Point pixel, Node[] nodeArray) {
     return track(null, nodeArray, pixel);
