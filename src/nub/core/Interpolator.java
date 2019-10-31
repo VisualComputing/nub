@@ -113,8 +113,8 @@ public class Interpolator {
 
   protected long _lastUpdate;
   protected List<KeyFrame> _list;
-  protected ListIterator<KeyFrame> _current1;
-  protected ListIterator<KeyFrame> _current2;
+  protected ListIterator<KeyFrame> _backwards;
+  protected ListIterator<KeyFrame> _forwards;
   protected List<Node> _path;
 
   // Main node
@@ -182,19 +182,21 @@ public class Interpolator {
     _task.setPeriod(40);
     _recurrent = false;
     _pathIsValid = false;
-    _valuesAreValid = true;
+    _valuesAreValid = false;
     _currentKeyFrameValid = false;
-    _current1 = _list.listIterator();
-    _current2 = _list.listIterator();
+    _splineCacheIsValid = false;
+    _backwards = _list.listIterator();
+    _forwards = _list.listIterator();
   }
 
   protected Interpolator(Interpolator other) {
     this._graph = other._graph;
-    this._path = new ArrayList<Node>();
-    ListIterator<Node> nodeIt = other._path.listIterator();
-    while (nodeIt.hasNext()) {
-      this._path.add(nodeIt.next().get());
+    this._list = new ArrayList<KeyFrame>();
+    for (KeyFrame element : other._list) {
+      KeyFrame keyFrame = element.get();
+      this._list.add(keyFrame);
     }
+    this._path = new ArrayList<Node>();
     this.setNode(other.node());
     this._t = other._t;
     this._speed = other._speed;
@@ -202,17 +204,12 @@ public class Interpolator {
     this._task.setPeriod(other.task().period());
     this._task.enableConcurrence(other._task.isConcurrent());
     this._recurrent = other._recurrent;
-    this._pathIsValid = other._pathIsValid;
-    this._valuesAreValid = other._valuesAreValid;
-    this._currentKeyFrameValid = other._currentKeyFrameValid;
-    this._list = new ArrayList<KeyFrame>();
-    for (KeyFrame element : other._list) {
-      KeyFrame keyFrame = element.get();
-      this._list.add(keyFrame);
-    }
-    this._current1 = _list.listIterator(other._current1.nextIndex());
-    this._current2 = _list.listIterator(other._current2.nextIndex());
-    this._invalidateValues();
+    this._pathIsValid = false;
+    this._valuesAreValid = false;
+    this._currentKeyFrameValid = false;
+    this._splineCacheIsValid = false;
+    this._backwards = _list.listIterator();
+    this._forwards = _list.listIterator();
   }
 
   /**
@@ -698,20 +695,20 @@ public class Interpolator {
     if (!_splineCacheIsValid)
       _updateSplineCache();
     float alpha;
-    float dt = _list.get(_current2.nextIndex())._time - _list.get(_current1.nextIndex())._time;
+    float dt = _list.get(_forwards.nextIndex())._time - _list.get(_backwards.nextIndex())._time;
     if (dt == 0)
       alpha = 0.0f;
     else
-      alpha = (time - _list.get(_current1.nextIndex())._time) / dt;
-    Vector pos = Vector.add(_list.get(_current1.nextIndex())._node.position(), Vector.multiply(
-        Vector.add(_list.get(_current1.nextIndex())._tangentVector,
+      alpha = (time - _list.get(_backwards.nextIndex())._time) / dt;
+    Vector pos = Vector.add(_list.get(_backwards.nextIndex())._node.position(), Vector.multiply(
+        Vector.add(_list.get(_backwards.nextIndex())._tangentVector,
             Vector.multiply(Vector.add(_vector1, Vector.multiply(_vector2, alpha)), alpha)), alpha));
-    float mag = Vector.lerp(_list.get(_current1.nextIndex())._node.magnitude(),
-        _list.get(_current2.nextIndex())._node.magnitude(), alpha);
-    Quaternion q = Quaternion.squad(_list.get(_current1.nextIndex())._node.orientation(),
-        _list.get(_current1.nextIndex())._tangentQuaternion,
-        _list.get(_current2.nextIndex())._tangentQuaternion,
-        _list.get(_current2.nextIndex())._node.orientation(), alpha);
+    float mag = Vector.lerp(_list.get(_backwards.nextIndex())._node.magnitude(),
+        _list.get(_forwards.nextIndex())._node.magnitude(), alpha);
+    Quaternion q = Quaternion.squad(_list.get(_backwards.nextIndex())._node.orientation(),
+        _list.get(_backwards.nextIndex())._tangentQuaternion,
+        _list.get(_forwards.nextIndex())._tangentQuaternion,
+        _list.get(_forwards.nextIndex())._node.orientation(), alpha);
     node().setPosition(pos);
     node().setRotation(q);
     node().setMagnitude(mag);
@@ -724,26 +721,26 @@ public class Interpolator {
     // TODO: Special case for loops when closed path is implemented !!
     if (!_currentKeyFrameValid)
       // Recompute everything from scratch
-      _current1 = _list.listIterator();
+      _backwards = _list.listIterator();
     // currentFrame_[1]->peekNext() <---> keyFr.get(_current1.nextIndex());
-    while (_list.get(_current1.nextIndex())._time > time) {
+    while (_list.get(_backwards.nextIndex())._time > time) {
       _currentKeyFrameValid = false;
-      if (!_current1.hasPrevious())
+      if (!_backwards.hasPrevious())
         break;
-      _current1.previous();
+      _backwards.previous();
     }
     if (!_currentKeyFrameValid)
-      _current2 = _list.listIterator(_current1.nextIndex());
-    while (_list.get(_current2.nextIndex())._time < time) {
+      _forwards = _list.listIterator(_backwards.nextIndex());
+    while (_list.get(_forwards.nextIndex())._time < time) {
       _currentKeyFrameValid = false;
-      if (!_current2.hasNext())
+      if (!_forwards.hasNext())
         break;
-      _current2.next();
+      _forwards.next();
     }
     if (!_currentKeyFrameValid) {
-      _current1 = _list.listIterator(_current2.nextIndex());
-      if ((_current1.hasPrevious()) && (time < _list.get(_current2.nextIndex())._time))
-        _current1.previous();
+      _backwards = _list.listIterator(_forwards.nextIndex());
+      if ((_backwards.hasPrevious()) && (time < _list.get(_forwards.nextIndex())._time))
+        _backwards.previous();
       _currentKeyFrameValid = true;
       _splineCacheIsValid = false;
     }
@@ -753,12 +750,12 @@ public class Interpolator {
    * Internal use. Used by {@link #interpolate(float)}.
    */
   protected void _updateSplineCache() {
-    Vector deltaP = Vector.subtract(_list.get(_current2.nextIndex())._node.position(),
-        _list.get(_current1.nextIndex())._node.position());
-    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_current1.nextIndex())._tangentVector, (-2.0f)));
-    _vector1 = Vector.subtract(_vector1, _list.get(_current2.nextIndex())._tangentVector);
-    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_current1.nextIndex())._tangentVector);
-    _vector2 = Vector.add(_vector2, _list.get(_current2.nextIndex())._tangentVector);
+    Vector deltaP = Vector.subtract(_list.get(_forwards.nextIndex())._node.position(),
+        _list.get(_backwards.nextIndex())._node.position());
+    _vector1 = Vector.add(Vector.multiply(deltaP, 3.0f), Vector.multiply(_list.get(_backwards.nextIndex())._tangentVector, (-2.0f)));
+    _vector1 = Vector.subtract(_vector1, _list.get(_forwards.nextIndex())._tangentVector);
+    _vector2 = Vector.add(Vector.multiply(deltaP, (-2.0f)), _list.get(_backwards.nextIndex())._tangentVector);
+    _vector2 = Vector.add(_vector2, _list.get(_forwards.nextIndex())._tangentVector);
     _splineCacheIsValid = true;
   }
 
