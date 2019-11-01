@@ -313,7 +313,6 @@ public class Interpolator {
       setTime(_list.get(0)._time);
     if ((_speed < 0.0) && (time() <= _list.get(0)._time))
       setTime(_list.get(_list.size() - 1)._time);
-    // */
     interpolate(time());
     _t += _speed * _task.period() / 1000.0f;
     if (time() > _list.get(_list.size() - 1)._time) {

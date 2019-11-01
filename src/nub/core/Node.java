@@ -2323,14 +2323,14 @@ public class Node {
   }
 
   /**
-   * Returns {@code true} if the {@code node} is being tracked by at least one {@code graph}
-   * {@code hid} and {@code false} otherwise.
+   * Returns {@code true} if the {@code node} is being tracked by the {@code graph} at least once
+   * and {@code false} otherwise.
    *
    * @see Graph#isTrackedNode(String, Node)
    * @see Graph#isTrackedNode(Node)
    */
   public boolean isTracked(Graph graph) {
-    return graph._agents.containsValue(this);
+    return graph._hids.containsValue(this);
   }
 
   /**

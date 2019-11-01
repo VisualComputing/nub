@@ -96,9 +96,9 @@ import java.util.Map;
  * while {@link #render()} will draw the animated node(s), {@link #drawPath(Interpolator, int)}
  * will draw the interpolated path too.
  * <h1>Human Interface Devices</h1>
- * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
+ * The default <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
  * is the Processing mouse, see {@link #track()}, {@link #cast()}, {@link #spin()}, {@link #translate()}
- * {@link #scale(float)}, etc. To set up another {@code hid} refer to the {@link Graph} documentation.
+ * {@link #scale(float)}, etc. To set up another device refer to the {@link Graph} documentation.
  *
  * @see Graph
  * @see Node
@@ -2943,13 +2943,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code return track(hid, mouse())}.
+   * Same as {@code return track(tag, mouse())}.
    *
    * @see #track(String, Point)
    * @see #mouse()
    */
-  public Node track(String hid) {
-    return track(hid, mouse());
+  public Node track(String tag) {
+    return track(tag, mouse());
   }
 
   /**
@@ -2963,13 +2963,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code cast(hid, mouse())}.
+   * Same as {@code cast(tag, mouse())}.
    *
    * @see #cast(String, Point)
    * @see #mouse()
    */
-  public void cast(String hid) {
-    cast(hid, mouse());
+  public void cast(String tag) {
+    cast(tag, mouse());
   }
 
   /**
@@ -2994,13 +2994,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code translate(defaultNode(hid))}.
+   * Same as {@code translate(defaultNode(tag))}.
    *
    * @see #translate(Node)
    * @see #defaultNode(String)
    */
-  public void translate(String hid) {
-    translate(defaultNode(hid));
+  public void translate(String tag) {
+    translate(defaultNode(tag));
   }
 
   /**
@@ -3026,13 +3026,13 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code spin(defaultNode(hid)}.
+   * Same as {@code spin(defaultNode(tag)}.
    *
    * @see #spin(Node)
    * @see #defaultNode(String)
    */
-  public void spin(String hid) {
-    spin(defaultNode(hid));
+  public void spin(String tag) {
+    spin(defaultNode(tag));
   }
 
   /**

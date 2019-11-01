@@ -61,26 +61,27 @@ import java.util.List;
  * use {@link #tracks(Node, float, float)}. Refer to {@link Node#pickingThreshold()} (and
  * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
  * <h1>4. Human Interface Devices</h1>
- * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device (hid)</a>
- * is a two step process: 1. Define an {@code hid} tracked-node instance, using an arbitrary name for it
- * (see {@link #setTrackedNode(String, Node)}); and, 2. Call any interactivity method that take an {@code hid}
- * param (such as {@link #translate(String, float, float, float)}, {@link #rotate(String, float, float, float)}
- * or {@link #scale(String, float)}) following the name convention you defined in 1. Observations:
+ * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
+ * is a tag-based two step process: 1. Tag the node to be tracked using an arbitrary name (which
+ * may be {@code null}) for it (see {@link #setTrackedNode(String, Node)}); and, 2. Call any interactivity
+ * method that take a {@code tag} string param (such as {@link #translate(String, float, float, float)},
+ * {@link #rotate(String, float, float, float)} or {@link #scale(String, float)}) following the name
+ * convention you defined in 1. Observations:
  * <ol>
- * <li>An {@code hid} tracked-node (see {@link #trackedNode(String)}) defines in turn an {@code hid} default-node
- * (see {@link #defaultNode(String)}) which simply returns the tracked-node or the {@link #eye()} when the
- * {@code hid} tracked-node is {@code null}.</li>
- * <li>The {@code hid} interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the {@code hid} {@link #defaultNode(String)} to them (e.g.,
- * {@link #scale(String, float)} calls {@link #scale(Node, float)} passing the {@code hid} default-node).</li>
- * <li>The default {@code hid} is defined with a {@code null} String parameter (e.g.,
- * {@link #scale(float delta)} simply calls {@code scale(null, delta)}).</li>
- * <li>To update an {@code hid} tracked-node using ray-casting call {@link #track(String, Point, Node[])}
+ * <li>A {@code tagged} tracked-node (see {@link #trackedNode(String)}) defines in turn a {@code tagged}
+ * default-node (see {@link #defaultNode(String)}) which either returns the tracked-node or the {@link #eye()}
+ * when the tagged tracked-node is {@code null}.</li>
+ * <li>The interactivity methods are implemented in terms of the ones defined previously
+ * by simply passing the tagged {@link #defaultNode(String)} to them (e.g.,{@link #scale(String, float)}
+ * calls {@link #scale(Node, float)} passing the tagged default-node).</li>
+ * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
+ * calls {@code scale(null, delta)}).</li>
+ * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, Point, Node[])}
  * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
  * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
- * {@link #track(String, Point)} update the {@code hid} tracked-node synchronously (i.e., they return the
- * {@code hid} tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
- * optimally updates the {@code hid} tracked-node during the next call to the {@link #render()} algorithm).</li>
+ * {@link #track(String, Point)} update the tagged tracked-node synchronously (i.e., they return the
+ * tagged tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
+ * optimally updates the tagged tracked-node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
  * The graph performs timing handling through a {@link #timingHandler()}. Several
@@ -147,17 +148,17 @@ public class Graph {
 
   // 3. Handlers
   protected class Ray {
-    public String _hid;
+    public String _tag;
     public Point _pixel;
 
-    Ray(String hid, Point pixel) {
-      _hid = hid;
+    Ray(String tag, Point pixel) {
+      _tag = tag;
       _pixel = pixel;
     }
   }
 
   protected TimingHandler _timingHandler;
-  protected HashMap<String, Node> _agents;
+  protected HashMap<String, Node> _hids;
   protected ArrayList<Ray> _rays;
 
   // 4. Graph
@@ -235,7 +236,7 @@ public class Graph {
     if (is3D())
       setFOV((float) Math.PI / 3);
     fit();
-    _agents = new HashMap<String, Node>();
+    _hids = new HashMap<String, Node>();
     _rays = new ArrayList<Ray>();
     setRightHanded();
     enableBoundaryEquations(false);
@@ -2370,12 +2371,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeArray)}.
+   * Same as {@code return track(tag, pixel.x(), pixel.y(), nodeArray)}.
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, Point pixel, Node[] nodeArray) {
-    return track(hid, pixel.x(), pixel.y(), nodeArray);
+  public Node track(String tag, Point pixel, Node[] nodeArray) {
+    return track(tag, pixel.x(), pixel.y(), nodeArray);
   }
 
   /**
@@ -2388,7 +2389,7 @@ public class Graph {
   }
 
   /**
-   * Updates the {@code hid} device tracked-node from the {@code nodeArray} and returns it.
+   * Updates the tagged tracked-node from the {@code nodeArray} and returns it.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
@@ -2411,14 +2412,14 @@ public class Graph {
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
-  public Node track(String hid, float x, float y, Node[] nodeArray) {
-    resetTrackedNode(hid);
+  public Node track(String tag, float x, float y, Node[] nodeArray) {
+    resetTrackedNode(tag);
     for (Node node : nodeArray)
       if (tracks(node, x, y)) {
-        setTrackedNode(hid, node);
+        setTrackedNode(tag, node);
         break;
       }
-    return trackedNode(hid);
+    return trackedNode(tag);
   }
 
   /**
@@ -2431,12 +2432,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y(), nodeList)}.
+   * Same as {@code return track(tag, pixel.x(), pixel.y(), nodeList)}.
    *
    * @see #track(String, float, float, List)
    */
-  public Node track(String hid, Point pixel, List<Node> nodeList) {
-    return track(hid, pixel.x(), pixel.y(), nodeList);
+  public Node track(String tag, Point pixel, List<Node> nodeList) {
+    return track(tag, pixel.x(), pixel.y(), nodeList);
   }
 
   /**
@@ -2453,14 +2454,14 @@ public class Graph {
    *
    * @see #track(String, float, float, Node[])
    */
-  public Node track(String hid, float x, float y, List<Node> nodeList) {
-    resetTrackedNode(hid);
+  public Node track(String tag, float x, float y, List<Node> nodeList) {
+    resetTrackedNode(tag);
     for (Node node : nodeList)
       if (tracks(node, x, y)) {
-        setTrackedNode(hid, node);
+        setTrackedNode(tag, node);
         break;
       }
-    return trackedNode(hid);
+    return trackedNode(tag);
   }
 
   // attached nodes
@@ -2484,16 +2485,16 @@ public class Graph {
   }
 
   /**
-   * Same as {@code return track(hid, pixel.x(), pixel.y())}.
+   * Same as {@code return track(tag, pixel.x(), pixel.y())}. Note that {@code null} tags are allowed.
    *
    * @see #track(String, float, float)
    */
-  public Node track(String hid, Point pixel) {
-    return track(hid, pixel.x(), pixel.y());
+  public Node track(String tag, Point pixel) {
+    return track(tag, pixel.x(), pixel.y());
   }
 
   /**
-   * Updates the {@code hid} device tracked-node and returns it.
+   * Updates the tagged tracked-node and returns it. Note that {@code null} tags are allowed.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
    * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
@@ -2515,25 +2516,25 @@ public class Graph {
    * @see #cast(String, Point)
    * @see #cast(String, float, float)
    */
-  public Node track(String hid, float x, float y) {
-    resetTrackedNode(hid);
+  public Node track(String tag, float x, float y) {
+    resetTrackedNode(tag);
     for (Node node : _leadingNodes())
-      _track(hid, node, x, y);
-    return trackedNode(hid);
+      _track(tag, node, x, y);
+    return trackedNode(tag);
   }
 
   /**
    * Use internally by {@link #track(String, float, float)}.
    */
-  protected void _track(String hid, Node node, float x, float y) {
-    if (trackedNode(hid) == null && node.isTrackingEnabled())
+  protected void _track(String tag, Node node, float x, float y) {
+    if (trackedNode(tag) == null && node.isTrackingEnabled())
       if (tracks(node, x, y)) {
-        setTrackedNode(hid, node);
+        setTrackedNode(tag, node);
         return;
       }
-    if (!node.isCulled() && trackedNode(hid) == null)
+    if (!node.isCulled() && trackedNode(tag) == null)
       for (Node child : node.children())
-        _track(hid, child, x, y);
+        _track(tag, child, x, y);
   }
 
   /**
@@ -2605,12 +2606,12 @@ public class Graph {
   }
 
   /**
-   * Same as {@code cast(hid, new Point(x, y))}.
+   * Same as {@code cast(tag, new Point(x, y))}.
    *
    * @see #cast(String, Point)
    */
-  public void cast(String hid, float x, float y) {
-    cast(hid, new Point(x, y));
+  public void cast(String tag, float x, float y) {
+    cast(tag, new Point(x, y));
   }
 
   /**
@@ -2623,12 +2624,14 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #track(String, Point)} but doesn't return immediately the {@code hid} device tracked-node.
-   * The algorithm schedules an updated of the {@code hid} tracked-node for the next traversal and hence should be
+   * Same as {@link #track(String, Point)} but doesn't return immediately the tagged tracked-node.
+   * The algorithm schedules an updated of the tagged tracked-node for the next traversal and hence should be
    * always be used in conjunction with {@link #render()}.
    * <p>
-   * This method is optimal since it updates the {@code hid} tracked-node at traversal time. Prefer this method over
-   * {@link #track(String, Point)} when dealing with several {@code hids}.
+   * This method is optimal since it updates the tagged tracked-node at traversal time. Prefer this method over
+   * {@link #track(String, Point)} when dealing with several tags.
+   * <p>
+   * Note that {@code null} tags are allowed.
    *
    * @see #render()
    * @see #trackedNode(String)
@@ -2641,9 +2644,10 @@ public class Graph {
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    * @see #cast(String, float, float)
+   * @see #cast(Point)
    */
-  public void cast(String hid, Point pixel) {
-    _rays.add(new Ray(hid, pixel));
+  public void cast(String tag, Point pixel) {
+    _rays.add(new Ray(tag, pixel));
   }
 
   // Off-screen
@@ -3018,11 +3022,11 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedNode(ray._hid);
+        resetTrackedNode(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._hid))
+        //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixel.x(), ray._pixel.y(), projection)) {
-          setTrackedNode(ray._hid, node);
+          setTrackedNode(ray._tag, node);
           it.remove();
         }
       }
@@ -3037,11 +3041,11 @@ public class Graph {
       Iterator<Ray> it = _rays.iterator();
       while (it.hasNext()) {
         Ray ray = it.next();
-        resetTrackedNode(ray._hid);
+        resetTrackedNode(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
-        //if (!isTracking(ray._hid))
+        //if (!isTracking(ray._tag))
         if (_tracks(node, ray._pixel.x(), ray._pixel.y())) {
-          setTrackedNode(ray._hid, node);
+          setTrackedNode(ray._tag, node);
           it.remove();
         }
       }
@@ -3058,9 +3062,10 @@ public class Graph {
   }
 
   /**
-   * Sets the {@code hid} tracked-node (see {@link #trackedNode(String)}). Call this function if you want to set the
-   * tracked node manually and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it automatically
-   * using ray casting.
+   * Tags the node for tracking (see {@link #trackedNode(String)}). The {@code null} tag
+   * is allowed. Call this function if you want to set the tagged tracked node manually
+   * and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it
+   * automatically using ray casting.
    *
    * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
@@ -3069,7 +3074,7 @@ public class Graph {
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
    */
-  public void setTrackedNode(String hid, Node node) {
+  public void setTrackedNode(String tag, Node node) {
     if (node == null) {
       System.out.println("Warning. Cannot track a null node!");
       return;
@@ -3078,7 +3083,7 @@ public class Graph {
       System.out.println("Warning. Node cannot be tracked! Enable tracking on the node first by call node.enableTracking(true)");
       return;
     }
-    _agents.put(hid, node);
+    _hids.put(tag, node);
   }
 
   /**
@@ -3091,8 +3096,9 @@ public class Graph {
   }
 
   /**
-   * Returns the current {@code hid} tracked node which is usually set by ray casting (see
-   * {@link #track(String, float, float)}). May return {@code null}. Reset it with {@link #resetTrackedNode(String)}.
+   * Returns the node tracked with {@code tag} which is usually set by ray casting (see
+   * {@link #track(String, float, float)}). May return {@code null}. Reset it with
+   * {@link #resetTrackedNode(String)}.
    *
    * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
@@ -3101,8 +3107,8 @@ public class Graph {
    * @see #isTrackedNode(String, Node)
    * @see #setTrackedNode(String, Node)
    */
-  public Node trackedNode(String hid) {
-    return _agents.get(hid);
+  public Node trackedNode(String tag) {
+    return _hids.get(tag);
   }
 
   /**
@@ -3115,10 +3121,10 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if the {@code hid} has a non-null tracked node and {@code false} otherwise.
+   * Returns {@code true} if the {@code tag} currently tracks a non-null node and {@code false} otherwise.
    */
-  public boolean isTracking(String hid) {
-    return _agents.containsKey(hid);
+  public boolean isTracking(String tag) {
+    return _hids.containsKey(tag);
   }
 
   /**
@@ -3132,7 +3138,7 @@ public class Graph {
   }
 
   /**
-   * Returns {@code true} if {@code node} is the current {@code hid} {@link #trackedNode(String)} and {@code false} otherwise.
+   * Returns {@code true} if {@code node} is the current tagged {@link #trackedNode(String)} and {@code false} otherwise.
    *
    * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
@@ -3141,12 +3147,12 @@ public class Graph {
    * @see #setTrackedNode(String, Node)
    * @see Node#isTracked()
    */
-  public boolean isTrackedNode(String hid, Node node) {
-    return trackedNode(hid) == node;
+  public boolean isTrackedNode(String tag, Node node) {
+    return trackedNode(tag) == node;
   }
 
   /**
-   * Resets all HID's {@link #trackedNode(String)}.
+   * Resets all tagged {@link #trackedNode(String)}.
    *
    * @see #trackedNode(String)
    * @see #defaultNode(String)
@@ -3156,7 +3162,7 @@ public class Graph {
    * @see #isTrackedNode(String, Node)
    */
   public void resetTracking() {
-    _agents.clear();
+    _hids.clear();
   }
 
   /**
@@ -3169,7 +3175,7 @@ public class Graph {
   }
 
   /**
-   * Resets the current {@code hid} {@link #trackedNode(String)} so that a call to {@link #isTracking(String)}
+   * Resets the current tagged {@link #trackedNode(String)} so that a call to {@link #isTracking(String)}
    * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked node automatically.
    *
    * @see #trackedNode(String)
@@ -3179,8 +3185,8 @@ public class Graph {
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    */
-  public void resetTrackedNode(String hid) {
-    _agents.remove(hid);
+  public void resetTrackedNode(String tag) {
+    _hids.remove(tag);
   }
 
   /**
@@ -3193,8 +3199,8 @@ public class Graph {
   }
 
   /**
-   * Returns the {@code hid} default-node. Used by methods dealing with interactivity that don't take a node
-   * param. Same as {@code return trackedNode(hid) == null ? eye() : trackedNode(hid)}. Never returns {@code null}.
+   * Returns the default-node tracked with {@code tag}. Used by methods dealing with interactivity that don't take a node
+   * param. Same as {@code return trackedNode(tag) == null ? eye() : trackedNode(tag)}. Never returns {@code null}.
    *
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
@@ -3203,8 +3209,8 @@ public class Graph {
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    */
-  public Node defaultNode(String hid) {
-    return trackedNode(hid) == null ? eye() : trackedNode(hid);
+  public Node defaultNode(String tag) {
+    return trackedNode(tag) == null ? eye() : trackedNode(tag);
   }
 
   /**
@@ -3217,13 +3223,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code align(defaultNode(hid))}.
+   * Same as {@code align(defaultNode(tag))}.
    *
    * @see #alignWith(Node)
    * @see #defaultNode(String)
    */
-  public void align(String hid) {
-    alignWith(defaultNode(hid));
+  public void align(String tag) {
+    alignWith(defaultNode(tag));
   }
 
   /**
@@ -3255,13 +3261,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code focus(defaultNode())}.
+   * Same as {@code focusWith(defaultNode(tag))}.
    *
    * @see #focusWith(Node)
    * @see #defaultNode(String)
    */
-  public void focus(String hid) {
-    focusWith(defaultNode(hid));
+  public void focus(String tag) {
+    focusWith(defaultNode(tag));
   }
 
   /**
@@ -3490,15 +3496,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, 0, defaultNode(hid))}.
+   * Same as {@code translate(dx, dy, 0, defaultNode(tag))}.
    *
    * @see #translate(Node, float, float)
    * @see #translate(Node, float, float, float)
    * @see #translate(String, float, float, float)
    * @see #defaultNode(String)
    */
-  public void translate(String hid, float dx, float dy) {
-    translate(defaultNode(hid), dx, dy, 0);
+  public void translate(String tag, float dx, float dy) {
+    translate(defaultNode(tag), dx, dy, 0);
   }
 
   /**
@@ -3511,15 +3517,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code translate(dx, dy, dz, defaultNode(hid))}.
+   * Same as {@code translate(dx, dy, dz, defaultNode(tag))}.
    *
    * @see #translate(Node, float, float)
    * @see #translate(String, float, float)
    * @see #translate(Node, float, float, float)
    * @see #defaultNode(String)
    */
-  public void translate(String hid, float dx, float dy, float dz) {
-    translate(defaultNode(hid), dx, dy, dz);
+  public void translate(String tag, float dx, float dy, float dz) {
+    translate(defaultNode(tag), dx, dy, dz);
   }
 
   /**
@@ -3599,13 +3605,13 @@ public class Graph {
   }
 
   /**
-   * Same as {@code scale(delta, defaultNode(hid))}.
+   * Same as {@code scale(delta, defaultNode(tag))}.
    *
    * @see #scale(Node, float)
    * @see #defaultNode(String)
    */
-  public void scale(String hid, float delta) {
-    scale(defaultNode(hid), delta);
+  public void scale(String tag, float delta) {
+    scale(defaultNode(tag), delta);
   }
 
   /**
@@ -3629,13 +3635,13 @@ public class Graph {
   }
 
   /**
-   * Rotates the {@code hid} default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
+   * Rotates the tagged default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
    * space x, y and z axes, respectively.
    *
    * @see #rotate(Node, float, float, float)
    */
-  public void rotate(String hid, float roll, float pitch, float yaw) {
-    rotate(defaultNode(hid), roll, pitch, yaw);
+  public void rotate(String tag, float roll, float pitch, float yaw) {
+    rotate(defaultNode(tag), roll, pitch, yaw);
   }
 
   /**
@@ -3689,14 +3695,14 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, defaultNode(hid))}.
+   * Same as {@code spin(tail, head, defaultNode(tag))}.
    *
    * @see #spin(Node, Point, Point, float)
    * @see #spin(Node, Point, Point)
    * @see #spin(String, Point, Point, float)
    */
-  public void spin(String hid, Point tail, Point head) {
-    spin(defaultNode(hid), tail, head);
+  public void spin(String tag, Point tail, Point head) {
+    spin(defaultNode(tag), tail, head);
   }
 
   /**
@@ -3720,15 +3726,15 @@ public class Graph {
   }
 
   /**
-   * Same as {@code spin(tail, head, sensitivity, defaultNode(hid))}.
+   * Same as {@code spin(tail, head, sensitivity, defaultNode(tag))}.
    *
    * @see #spin(Node, Point, Point, float)
    * @see #spin(String, Point, Point)
    * @see #spin(Node, Point, Point)
    * @see #defaultNode(String)
    */
-  public void spin(String hid, Point tail, Point head, float sensitivity) {
-    spin(defaultNode(hid), tail, head, sensitivity);
+  public void spin(String tag, Point tail, Point head, float sensitivity) {
+    spin(defaultNode(tag), tail, head, sensitivity);
   }
 
   /**
@@ -3933,10 +3939,10 @@ public class Graph {
   }
 
   /**
-   * HID generic interaction pattern. Same as {@code defaultNode(hid).interact(gesture)}.
+   * Tag-based generic interaction pattern. Same as {@code defaultNode(tag).interact(gesture)}.
    * <p>
-   * Uses gesture data to interact with the hid default node (either the {@link #eye()}
-   * or the hid {@link #resetTrackedNode(String)} (see {@link #defaultNode(String)} for
+   * Uses gesture data to interact with the tagged default node (either the {@link #eye()}
+   * or the tagged {@link #trackedNode(String)} (see {@link #defaultNode(String)} for
    * details).
    * <p>
    * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
@@ -3945,8 +3951,8 @@ public class Graph {
    * @see #defaultNode(String)
    * @see #interact(Node, Object...)
    */
-  public void interact(String hid, Object... gesture) {
-    defaultNode(hid).interact(gesture);
+  public void interact(String tag, Object... gesture) {
+    defaultNode(tag).interact(gesture);
   }
 
   /**
@@ -3971,8 +3977,8 @@ public class Graph {
     zoom(null, delta);
   }
 
-  public void zoom(String hid, float delta) {
-    zoom(delta, defaultNode(hid));
+  public void zoom(String tag, float delta) {
+    zoom(delta, defaultNode(tag));
   }
 
   public void zoom(float delta, Node node) {
