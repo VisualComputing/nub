@@ -509,6 +509,10 @@ public class Node {
 
   // colorID
 
+  /**
+   * Returns the unique sequential node id assigned at instantiation time.
+   * Used by {@link #colorID()} and {@link Graph#_drawBackBuffer(Node)}.
+   */
   public int id() {
     return _id;
   }
