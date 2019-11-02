@@ -37,7 +37,7 @@ void draw() {
   noStroke();
   fill(120, 120, 120);
   float nbPatches = 100;
-  normal(0.0f, 0.0f, 1.0f);
+  normal(0, 0, 1);
   for (int j = 0; j < nbPatches; ++j) {
     beginShape(QUAD_STRIP);
     for (int i = 0; i <= nbPatches; ++i) {

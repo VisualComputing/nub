@@ -10,7 +10,7 @@ class OctreeNode {
   }
 
   void draw(PGraphics pg) {
-    pg.stroke(color(0.3f * level * 255, 0.2f * 255, (1.0f - 0.3f * level) * 255));
+    pg.stroke(color(0.3 * level * 255, 0.2 * 255, (1 - 0.3 * level) * 255));
     pg.strokeWeight(level + 1);
 
     pg.beginShape();
@@ -50,7 +50,7 @@ class OctreeNode {
 
   void buildBoxHierarchy(int l) {
     level = l;
-    Vector middle = Vector.multiply(Vector.add(p1, p2), 1 / 2.0f);
+    Vector middle = Vector.multiply(Vector.add(p1, p2), 0.5);
     for (int i = 0; i < 8; ++i) {
       // point in one of the 8 box corners
       Vector point = new Vector(((i & 4) != 0) ? p1.x() : p2.x(), ((i & 2) != 0) ? p1.y() : p2.y(), ((i & 1) != 0) ? p1.z() : p2.z());

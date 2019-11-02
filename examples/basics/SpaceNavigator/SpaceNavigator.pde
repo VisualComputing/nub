@@ -57,8 +57,8 @@ void draw() {
 }
 
 void spaceNavigatorPicking() {
-  float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
-  float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
+  float x = map(snXPos.getValue(), -0.8, 0.8, 0, width);
+  float y = map(snYPos.getValue(), -0.8, 0.8, 0, height);
   // update the space navigator tracked node:
   scene.cast("SPCNAV", x, y);
   // draw picking visual hint
@@ -108,7 +108,7 @@ void openSpaceNavigator() {
     println("No suitable device configured");
     System.exit(-1); // End the program NOW!
   }
-  //device.setTolerance(5.00f);
+  //device.setTolerance(5);
   snXPos = device.getSlider(0);
   snYPos = device.getSlider(1);
   snZPos = device.getSlider(2);

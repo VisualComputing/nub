@@ -117,30 +117,30 @@ void keyPressed() {
       .rotationConstraintType()));
   }
 
-  Vector dir = new Vector(0.0f, 0.0f, 0.0f);
+  Vector dir = new Vector(0, 0, 0);
   switch (transDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setTranslationConstraintDirection(dir);
 
-  dir.set(0.0f, 0.0f, 0.0f);
+  dir.set(0, 0, 0);
   switch (rotDir) {
   case 0:
-    dir.setX(1.0f);
+    dir.setX(1);
     break;
   case 1:
-    dir.setY(1.0f);
+    dir.setY(1);
     break;
   case 2:
-    dir.setZ(1.0f);
+    dir.setZ(1);
     break;
   }
   constraints[activeConstraint].setRotationConstraintDirection(dir);

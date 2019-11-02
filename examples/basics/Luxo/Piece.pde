@@ -8,9 +8,9 @@ class Piece extends Node {
   }
 
   void drawCone(PGraphics pg, float zMin, float zMax, float r1, float r2, int nbSub) {
-    pg.translate(0.0f, 0.0f, zMin);
+    pg.translate(0, 0, zMin);
     Scene.drawCone(pg, nbSub, 0, 0, r1, r2, zMax - zMin);
-    pg.translate(0.0f, 0.0f, -zMin);
+    pg.translate(0, 0, -zMin);
   }
 
   @Override

@@ -112,7 +112,7 @@ public class ShadowMappingSimple extends PApplet {
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         } else {
           pg.fill(0, 255, 255);
-          Scene.drawCone(pg, 150f, 60f, 240f);
+          Scene.drawCone(pg, 150f, 60, 240);
         }
         Scene.drawAxes(pg, 300);
         pg.pushStyle();
