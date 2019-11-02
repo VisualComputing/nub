@@ -10,7 +10,7 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
   - [Rendering](#rendering)
     - [Drawing functionality](#drawing-functionality)
   - [Interactivity](#interactivity)
-  - [Tagging](#tagging)
+    - [Tagging](#tagging)
     - [Customization](#customization)
     - [Mouse](#mouse)
   - [Interpolators](#interpolators)
@@ -139,7 +139,7 @@ Another scene's eye (different than this one) can be drawn with [drawEye(Graph)]
 
 ## Interactivity
 
-## Tagging
+### Tagging
 
 Setting up a [Human Interface Device (hid)](https://en.wikipedia.org/wiki/Human_interface_device) (different than the mouse which is provided by default) such as a keyboard or a [space-navigator](https://en.wikipedia.org/wiki/3Dconnexion), is a two step process:
 
