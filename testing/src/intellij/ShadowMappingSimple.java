@@ -182,7 +182,8 @@ public class ShadowMappingSimple extends PApplet {
   }
 
   public void mouseMoved() {
-    scene.cast();
+    if (scene.track() == null)
+      scene.setTrackedNode(scene.eye());
   }
 
   public void mouseDragged() {

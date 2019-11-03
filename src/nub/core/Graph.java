@@ -68,19 +68,16 @@ import java.util.List;
  * {@link #rotate(String, float, float, float)} or {@link #scale(String, float)}) following the name
  * convention you defined in 1. Observations:
  * <ol>
- * <li>A {@code tagged} tracked-node (see {@link #trackedNode(String)}) defines in turn a {@code tagged}
- * default-node (see {@link #defaultNode(String)}) which either returns the tracked-node or the {@link #eye()}
- * when the tagged tracked-node is {@code null}.</li>
  * <li>The interactivity methods are implemented in terms of the ones defined previously
- * by simply passing the tagged {@link #defaultNode(String)} to them (e.g.,{@link #scale(String, float)}
+ * by simply passing the tagged {@link #trackedNode(String)} to them (e.g.,{@link #scale(String, float)}
  * calls {@link #scale(Node, float)} passing the tagged default-node).</li>
  * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
  * calls {@code scale(null, delta)}).</li>
- * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, Point, Node[])}
- * (detached or attached nodes), {@link #track(String, Point)} (only attached nodes) or
- * {@link #cast(String, Point)} (only for attached nodes too). While {@link #track(String, Point, Node[])} and
- * {@link #track(String, Point)} update the tagged tracked-node synchronously (i.e., they return the
- * tagged tracked-node immediately), {@link #cast(String, Point)} updates it asynchronously (i.e., it
+ * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, float, float, Node[])}
+ * (detached or attached nodes), {@link #track(String, float, float)} (only attached nodes) or
+ * {@link #cast(String, float, float)} (only for attached nodes too). While {@link #track(String, float, float, Node[])} and
+ * {@link #track(String, float, float)} update the tagged tracked-node synchronously (i.e., they return the
+ * tagged tracked-node immediately), {@link #cast(String, float, float)} updates it asynchronously (i.e., it
  * optimally updates the tagged tracked-node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
@@ -2362,24 +2359,6 @@ public class Graph {
   // detached nodes
 
   /**
-   * Same as {@code return track(null, pixel, nodeArray)}.
-   *
-   * @see #track(String, float, float, Node[])
-   */
-  public Node track(Point pixel, Node[] nodeArray) {
-    return track(null, pixel, nodeArray);
-  }
-
-  /**
-   * Same as {@code return track(tag, pixel.x(), pixel.y(), nodeArray)}.
-   *
-   * @see #track(String, float, float, Node[])
-   */
-  public Node track(String tag, Point pixel, Node[] nodeArray) {
-    return track(tag, pixel.x(), pixel.y(), nodeArray);
-  }
-
-  /**
    * Same as {@code return track(null, x, y, nodeArray)}.
    *
    * @see #track(String, float, float, Node[])
@@ -2402,14 +2381,13 @@ public class Graph {
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, Point)
+   * @see #cast(String, float, float)
    * @see #cast(String, float, float)
    */
   public Node track(String tag, float x, float y, Node[] nodeArray) {
@@ -2420,24 +2398,6 @@ public class Graph {
         break;
       }
     return trackedNode(tag);
-  }
-
-  /**
-   * Same as {@code return track(null, pixel, nodeList)}.
-   *
-   * @see #track(String, float, float, List)
-   */
-  public Node track(Point pixel, List<Node> nodeList) {
-    return track(null, pixel, nodeList);
-  }
-
-  /**
-   * Same as {@code return track(tag, pixel.x(), pixel.y(), nodeList)}.
-   *
-   * @see #track(String, float, float, List)
-   */
-  public Node track(String tag, Point pixel, List<Node> nodeList) {
-    return track(tag, pixel.x(), pixel.y(), nodeList);
   }
 
   /**
@@ -2467,30 +2427,12 @@ public class Graph {
   // attached nodes
 
   /**
-   * Same as {@code return track(null, pixel.x(), pixel.y())}.
-   *
-   * @see #track(String, Point)
-   */
-  public Node track(Point pixel) {
-    return track(null, pixel);
-  }
-
-  /**
    * Same as {@code return track(null, x, y)}.
    *
    * @see #track(String, float, float)
    */
   public Node track(float x, float y) {
-    return track(null, new Point(x, y));
-  }
-
-  /**
-   * Same as {@code return track(tag, pixel.x(), pixel.y())}. Note that {@code null} tags are allowed.
-   *
-   * @see #track(String, float, float)
-   */
-  public Node track(String tag, Point pixel) {
-    return track(tag, pixel.x(), pixel.y());
+    return track(null, x, y);
   }
 
   /**
@@ -2506,14 +2448,13 @@ public class Graph {
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, Point)
+   * @see #cast(String, float, float)
    * @see #cast(String, float, float)
    */
   public Node track(String tag, float x, float y) {
@@ -2538,22 +2479,11 @@ public class Graph {
   }
 
   /**
-   * Same as {tracks(pixel.x(), pixel.y(), node)}.
-   *
-   * @see #tracks(Node, float, float)
-   */
-  public boolean tracks(Node node, Point pixel) {
-    return tracks(node, pixel.x(), pixel.y());
-  }
-
-  /**
    * Casts a ray at pixel position {@code (x, y)} and returns {@code true} if the ray picks the {@code node} and
    * {@code false} otherwise. The node is picked according to the {@link Node#pickingThreshold()}.
    *
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
-   * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2596,58 +2526,46 @@ public class Graph {
         Point.distance(x, y, projection._vector[0], projection._vector[1]) < -threshold;
   }
 
+  public void cast(float x, float y, Node defaultNode) {
+    cast(null, x, y, defaultNode);
+  }
+
   /**
    * Same as {@code cast(null, new Point(x, y))}.
    *
-   * @see #cast(String, Point)
+   * @see #cast(String, float, float, Node)
    */
   public void cast(float x, float y) {
-    cast(null, new Point(x, y));
+    cast(null, x, y, eye());
   }
 
-  /**
-   * Same as {@code cast(tag, new Point(x, y))}.
-   *
-   * @see #cast(String, Point)
-   */
   public void cast(String tag, float x, float y) {
-    cast(tag, new Point(x, y));
+    cast(tag, x, y, eye());
   }
 
   /**
-   * Same as {@code cast(null, pixel)}.
-   *
-   * @see #cast(String, float, float)
-   */
-  public void cast(Point pixel) {
-    cast(null, pixel);
-  }
-
-  /**
-   * Same as {@link #track(String, Point)} but doesn't return immediately the tagged tracked-node.
+   * Same as {@link #track(String, float, float)} but doesn't return immediately the tagged tracked-node.
    * The algorithm schedules an updated of the tagged tracked-node for the next traversal and hence should be
    * always be used in conjunction with {@link #render()}.
    * <p>
    * This method is optimal since it updates the tagged tracked-node at traversal time. Prefer this method over
-   * {@link #track(String, Point)} when dealing with several tags.
+   * {@link #track(String, float, float)} when dealing with several tags.
    * <p>
    * Note that {@code null} tags are allowed.
    *
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, float, float)
-   * @see #cast(Point)
+   * @see #cast(float, float)
    */
-  public void cast(String tag, Point pixel) {
-    _rays.add(new Ray(tag, pixel));
+  public void cast(String tag, float x, float y, Node defaultNode) {
+    _rays.add(new Ray(tag, new Point(x, y)));
   }
 
   // Off-screen
@@ -3064,10 +2982,9 @@ public class Graph {
   /**
    * Tags the node for tracking (see {@link #trackedNode(String)}). The {@code null} tag
    * is allowed. Call this function if you want to set the tagged tracked node manually
-   * and {@link #track(String, Point)} or {@link #cast(String, Point)} to set it
+   * and {@link #track(String, float, float)} or {@link #cast(String, float, float)} to set it
    * automatically using ray casting.
    *
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
@@ -3100,7 +3017,6 @@ public class Graph {
    * {@link #track(String, float, float)}). May return {@code null}. Reset it with
    * {@link #resetTrackedNode(String)}.
    *
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
@@ -3140,7 +3056,6 @@ public class Graph {
   /**
    * Returns {@code true} if {@code node} is the current tagged {@link #trackedNode(String)} and {@code false} otherwise.
    *
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #resetTrackedNode(String)
@@ -3155,7 +3070,6 @@ public class Graph {
    * Resets all tagged {@link #trackedNode(String)}.
    *
    * @see #trackedNode(String)
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
@@ -3179,7 +3093,6 @@ public class Graph {
    * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked node automatically.
    *
    * @see #trackedNode(String)
-   * @see #defaultNode(String)
    * @see #tracks(Node, float, float)
    * @see #track(String, float, float)
    * @see #setTrackedNode(String, Node)
@@ -3187,30 +3100,6 @@ public class Graph {
    */
   public void resetTrackedNode(String tag) {
     _hids.remove(tag);
-  }
-
-  /**
-   * Same as {@code return defaultNode(null)}.
-   *
-   * @see #defaultNode(String)
-   */
-  public Node defaultNode() {
-    return defaultNode(null);
-  }
-
-  /**
-   * Returns the default-node tracked with {@code tag}. Used by methods dealing with interactivity that don't take a node
-   * param. Same as {@code return trackedNode(tag) == null ? eye() : trackedNode(tag)}. Never returns {@code null}.
-   *
-   * @see #trackedNode(String)
-   * @see #resetTrackedNode(String)
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
-   * @see #setTrackedNode(String, Node)
-   * @see #isTrackedNode(String, Node)
-   */
-  public Node defaultNode(String tag) {
-    return trackedNode(tag) == null ? eye() : trackedNode(tag);
   }
 
   /**
@@ -3226,10 +3115,9 @@ public class Graph {
    * Same as {@code align(defaultNode(tag))}.
    *
    * @see #alignWith(Node)
-   * @see #defaultNode(String)
    */
   public void align(String tag) {
-    alignWith(defaultNode(tag));
+    alignWith(trackedNode(tag));
   }
 
   /**
@@ -3240,7 +3128,6 @@ public class Graph {
    * Wrapper method for {@link Node#align(boolean, float, Node)}.
    *
    * @see #isEye(Node)
-   * @see #defaultNode(String)
    */
   public void alignWith(Node node) {
     if (node == null)
@@ -3264,10 +3151,9 @@ public class Graph {
    * Same as {@code focusWith(defaultNode(tag))}.
    *
    * @see #focusWith(Node)
-   * @see #defaultNode(String)
    */
   public void focus(String tag) {
-    focusWith(defaultNode(tag));
+    focusWith(trackedNode(tag));
   }
 
   /**
@@ -3492,7 +3378,7 @@ public class Graph {
    * @see #translate(String, float, float)
    */
   public void translate(float dx, float dy) {
-    translate(defaultNode(null), dx, dy);
+    translate(trackedNode(null), dx, dy);
   }
 
   /**
@@ -3501,10 +3387,9 @@ public class Graph {
    * @see #translate(Node, float, float)
    * @see #translate(Node, float, float, float)
    * @see #translate(String, float, float, float)
-   * @see #defaultNode(String)
    */
   public void translate(String tag, float dx, float dy) {
-    translate(defaultNode(tag), dx, dy, 0);
+    translate(trackedNode(tag), dx, dy, 0);
   }
 
   /**
@@ -3513,7 +3398,7 @@ public class Graph {
    * @see #translate(String, float, float, float)
    */
   public void translate(float dx, float dy, float dz) {
-    translate(defaultNode(null), dx, dy, dz);
+    translate(trackedNode(null), dx, dy, dz);
   }
 
   /**
@@ -3522,10 +3407,9 @@ public class Graph {
    * @see #translate(Node, float, float)
    * @see #translate(String, float, float)
    * @see #translate(Node, float, float, float)
-   * @see #defaultNode(String)
    */
   public void translate(String tag, float dx, float dy, float dz) {
-    translate(defaultNode(tag), dx, dy, dz);
+    translate(trackedNode(tag), dx, dy, dz);
   }
 
   /**
@@ -3534,7 +3418,6 @@ public class Graph {
    * @see #translate(String, float, float, float)
    * @see #translate(String, float, float)
    * @see #translate(Node, float, float, float)
-   * @see #defaultNode(String)
    */
   public void translate(Node node, float dx, float dy) {
     translate(node, dx, dy, 0);
@@ -3548,7 +3431,6 @@ public class Graph {
    * @see #translate(Node, float, float)
    * @see #translate(String, float, float)
    * @see #translate(String, float, float, float)
-   * @see #defaultNode(String)
    */
   public void translate(Node node, float dx, float dy, float dz) {
     if (node == null)
@@ -3601,17 +3483,16 @@ public class Graph {
    * @see #scale(String, float)
    */
   public void scale(float delta) {
-    scale(defaultNode(null), delta);
+    scale(trackedNode(null), delta);
   }
 
   /**
    * Same as {@code scale(delta, defaultNode(tag))}.
    *
    * @see #scale(Node, float)
-   * @see #defaultNode(String)
    */
   public void scale(String tag, float delta) {
-    scale(defaultNode(tag), delta);
+    scale(trackedNode(tag), delta);
   }
 
   /**
@@ -3631,17 +3512,17 @@ public class Graph {
    * @see #rotate(String, float, float, float)
    */
   public void rotate(float roll, float pitch, float yaw) {
-    rotate(defaultNode(null), roll, pitch, yaw);
+    rotate(trackedNode(null), roll, pitch, yaw);
   }
 
   /**
-   * Rotates the tagged default-node (see {@link #defaultNode(String)}) roll, pitch and yaw radians around screen
+   * Rotates the tagged default-node (see {@link #trackedNode(String)}) roll, pitch and yaw radians around screen
    * space x, y and z axes, respectively.
    *
    * @see #rotate(Node, float, float, float)
    */
   public void rotate(String tag, float roll, float pitch, float yaw) {
-    rotate(defaultNode(tag), roll, pitch, yaw);
+    rotate(trackedNode(tag), roll, pitch, yaw);
   }
 
   /**
@@ -3691,7 +3572,7 @@ public class Graph {
    * @see #spin(String, Point, Point)
    */
   public void spin(Point tail, Point head) {
-    spin(defaultNode(null), tail, head);
+    spin(trackedNode(null), tail, head);
   }
 
   /**
@@ -3702,7 +3583,7 @@ public class Graph {
    * @see #spin(String, Point, Point, float)
    */
   public void spin(String tag, Point tail, Point head) {
-    spin(defaultNode(tag), tail, head);
+    spin(trackedNode(tag), tail, head);
   }
 
   /**
@@ -3722,7 +3603,7 @@ public class Graph {
    * @see #spin(String, Point, Point, float)
    */
   public void spin(Point tail, Point head, float sensitivity) {
-    spin(defaultNode(null), tail, head, sensitivity);
+    spin(trackedNode(null), tail, head, sensitivity);
   }
 
   /**
@@ -3731,10 +3612,9 @@ public class Graph {
    * @see #spin(Node, Point, Point, float)
    * @see #spin(String, Point, Point)
    * @see #spin(Node, Point, Point)
-   * @see #defaultNode(String)
    */
   public void spin(String tag, Point tail, Point head, float sensitivity) {
-    spin(defaultNode(tag), tail, head, sensitivity);
+    spin(trackedNode(tag), tail, head, sensitivity);
   }
 
   /**
@@ -3942,17 +3822,15 @@ public class Graph {
    * Tag-based generic interaction pattern. Same as {@code defaultNode(tag).interact(gesture)}.
    * <p>
    * Uses gesture data to interact with the tagged default node (either the {@link #eye()}
-   * or the tagged {@link #trackedNode(String)} (see {@link #defaultNode(String)} for
-   * details).
+   * or the tagged {@link #trackedNode(String)}.
    * <p>
    * Implement the node actual behavior by overriding {@link Node#interact(Object...)}.
    *
    * @see Node#interact(Object...)
-   * @see #defaultNode(String)
    * @see #interact(Node, Object...)
    */
   public void interact(String tag, Object... gesture) {
-    defaultNode(tag).interact(gesture);
+    interact(trackedNode(tag), gesture);
   }
 
   /**
@@ -3966,7 +3844,8 @@ public class Graph {
    * @see Node#interact(Object...)
    */
   public void interact(Node node, Object... gesture) {
-    node.interact(gesture);
+    if (node != null)
+      node.interact(gesture);
   }
 
   /*

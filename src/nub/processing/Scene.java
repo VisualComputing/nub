@@ -846,30 +846,29 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return super.track(mouse(), nodeArray)}.
    *
-   * @see Graph#track(Point, Node[])
+   * @see Graph#track(float, float, Node[])
    */
   public Node track(Node[] nodeArray) {
-    return track(mouse(), nodeArray);
+    return track(mouse().x(), mouse().y(), nodeArray);
   }
 
   /**
    * Same as {@code return super.track(mouse(), nodeList)}.
    *
-   * @see Graph#track(Point, List< Node >)
+   * @see Graph#track(float, float, List< Node >)
    */
   public Node track(List<Node> nodeList) {
-    return track(mouse(), nodeList);
+    return track(mouse().x(), mouse().y(), nodeList);
   }
 
   /**
    * Same as {@code return track(mouse(), node)}.
    *
    * @see #mouse()
-   * @see Graph#tracks(Node, Point)
    * @see Graph#tracks(Node, float, float)
    */
   public boolean tracks(Node node) {
-    return tracks(node, mouse());
+    return tracks(node, mouse().x(), mouse().y());
   }
 
   @Override
@@ -2945,41 +2944,41 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return track(tag, mouse())}.
    *
-   * @see #track(String, Point)
+   * @see #track(String, float, float)
    * @see #mouse()
    */
   public Node track(String tag) {
-    return track(tag, mouse());
+    return track(tag, mouse().x(), mouse().y());
   }
 
   /**
    * Same as {@code return track(mouse())}.
    *
-   * @see #track(Point)
+   * @see #track(float, float)
    * @see #mouse()
    */
   public Node track() {
-    return track(mouse());
+    return super.track(mouse().x(), mouse().y());
   }
 
   /**
    * Same as {@code cast(tag, mouse())}.
    *
-   * @see #cast(String, Point)
+   * @see #cast(String, float, float)
    * @see #mouse()
    */
   public void cast(String tag) {
-    cast(tag, mouse());
+    cast(tag, mouse().x(), mouse().y());
   }
 
   /**
    * Same as {@code cast(mouse())}.
    *
-   * @see #cast(Point)
+   * @see #cast(float, float)
    * @see #mouse()
    */
   public void cast() {
-    cast(mouse());
+    cast(mouse().x(), mouse().y());
   }
 
   /**
@@ -2994,13 +2993,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code translate(defaultNode(tag))}.
+   * Same as {@code translate(trackedNode(tag))}.
    *
    * @see #translate(Node)
-   * @see #defaultNode(String)
    */
   public void translate(String tag) {
-    translate(defaultNode(tag));
+    translate(trackedNode(tag));
   }
 
   /**
@@ -3026,13 +3024,12 @@ public class Scene extends Graph implements PConstants {
   }
 
   /**
-   * Same as {@code spin(defaultNode(tag)}.
+   * Same as {@code spin(trackedNode(tag)}.
    *
    * @see #spin(Node)
-   * @see #defaultNode(String)
    */
   public void spin(String tag) {
-    spin(defaultNode(tag));
+    spin(trackedNode(tag));
   }
 
   /**
