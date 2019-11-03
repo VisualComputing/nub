@@ -846,7 +846,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return super.track(mouse(), nodeArray)}.
    *
-   * @see Graph#track(float, float, Node[])
+   * @see Graph#track(int, int, Node[])
    */
   public Node track(Node[] nodeArray) {
     return track(mouse().x(), mouse().y(), nodeArray);
@@ -855,7 +855,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return super.track(mouse(), nodeList)}.
    *
-   * @see Graph#track(float, float, List< Node >)
+   * @see Graph#track(int, int, List< Node >)
    */
   public Node track(List<Node> nodeList) {
     return track(mouse().x(), mouse().y(), nodeList);
@@ -865,19 +865,19 @@ public class Scene extends Graph implements PConstants {
    * Same as {@code return track(mouse(), node)}.
    *
    * @see #mouse()
-   * @see Graph#tracks(Node, float, float)
+   * @see Graph#tracks(Node, int, int)
    */
   public boolean tracks(Node node) {
     return tracks(node, mouse().x(), mouse().y());
   }
 
   @Override
-  protected boolean _tracks(Node node, float x, float y) {
+  protected boolean _tracks(Node node, int x, int y) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTrackingEnabled())
       return false;
-    int index = (int) y * width() + (int) x;
+    int index = y * width() + x;
     if (_backBuffer().pixels != null)
       if ((0 <= index) && (index < _backBuffer().pixels.length))
         return _backBuffer().pixels[index] == node.colorID();
@@ -2944,7 +2944,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return track(tag, mouse())}.
    *
-   * @see #track(String, float, float)
+   * @see #track(String, int, int)
    * @see #mouse()
    */
   public Node track(String tag) {
@@ -2954,7 +2954,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code return track(mouse())}.
    *
-   * @see #track(float, float)
+   * @see #track(int, int)
    * @see #mouse()
    */
   public Node track() {

@@ -58,7 +58,7 @@ import java.util.List;
  * {@link Node#interact(Object...)} should be overridden to implement the node custom behavior.
  * <p>
  * To check if a given node would be picked with a ray casted at a given screen position
- * use {@link #tracks(Node, float, float)}. Refer to {@link Node#pickingThreshold()} (and
+ * use {@link #tracks(Node, int, int)}. Refer to {@link Node#pickingThreshold()} (and
  * {@link Node#setPickingThreshold(float)}) for the different node picking policies.
  * <h1>4. Human Interface Devices</h1>
  * Setting up a <a href="https://en.wikipedia.org/wiki/Human_interface_device">Human Interface Device</a>
@@ -73,10 +73,10 @@ import java.util.List;
  * calls {@link #scale(Node, float)} passing the tagged default-node).</li>
  * <li>Many interactive methods support the {@code null} tag (e.g., {@link #scale(float delta)} simply
  * calls {@code scale(null, delta)}).</li>
- * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, float, float, Node[])}
- * (detached or attached nodes), {@link #track(String, float, float)} (only attached nodes) or
- * {@link #cast(String, int, int)} (only for attached nodes too). While {@link #track(String, float, float, Node[])} and
- * {@link #track(String, float, float)} update the tagged tracked-node synchronously (i.e., they return the
+ * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, int, int, Node[])}
+ * (detached or attached nodes), {@link #track(String, int, int)} (only attached nodes) or
+ * {@link #cast(String, int, int)} (only for attached nodes too). While {@link #track(String, int, int, Node[])} and
+ * {@link #track(String, int, int)} update the tagged tracked-node synchronously (i.e., they return the
  * tagged tracked-node immediately), {@link #cast(String, int, int)} updates it asynchronously (i.e., it
  * optimally updates the tagged tracked-node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
@@ -2361,9 +2361,9 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y, nodeArray)}.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #track(String, int, int, Node[])
    */
-  public Node track(float x, float y, Node[] nodeArray) {
+  public Node track(int x, int y, Node[] nodeArray) {
     return track(null, x, y, nodeArray);
   }
 
@@ -2371,17 +2371,17 @@ public class Graph {
    * Updates the tagged tracked-node from the {@code nodeArray} and returns it.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
+   * (see {@link #tracks(Node, int, int)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
-   * Use this version of the method instead of {@link #track(String, float, float)} when dealing with
+   * Use this version of the method instead of {@link #track(String, int, int)} when dealing with
    * detached nodes.
    *
-   * @see #track(String, float, float)
-   * @see #track(String, float, float, List)
+   * @see #track(String, int, int)
+   * @see #track(String, int, int, List)
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #tracks(Node, float, float)
+   * @see #tracks(Node, int, int)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2390,7 +2390,7 @@ public class Graph {
    * @see #cast(String, int, int)
    * @see #cast(String, int, int)
    */
-  public Node track(String tag, float x, float y, Node[] nodeArray) {
+  public Node track(String tag, int x, int y, Node[] nodeArray) {
     resetTrackedNode(tag);
     for (Node node : nodeArray)
       if (tracks(node, x, y)) {
@@ -2403,18 +2403,18 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y, nodeList)}.
    *
-   * @see #track(String, float, float, List)
+   * @see #track(String, int, int, List)
    */
-  public Node track(float x, float y, List<Node> nodeList) {
+  public Node track(int x, int y, List<Node> nodeList) {
     return track(null, x, y, nodeList);
   }
 
   /**
-   * Same as {@link #track(String, float, float, Node[])} but using a node list instead of an array.
+   * Same as {@link #track(String, int, int, Node[])} but using a node list instead of an array.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #track(String, int, int, Node[])
    */
-  public Node track(String tag, float x, float y, List<Node> nodeList) {
+  public Node track(String tag, int x, int y, List<Node> nodeList) {
     resetTrackedNode(tag);
     for (Node node : nodeList)
       if (tracks(node, x, y)) {
@@ -2429,9 +2429,9 @@ public class Graph {
   /**
    * Same as {@code return track(null, x, y)}.
    *
-   * @see #track(String, float, float)
+   * @see #track(String, int, int)
    */
-  public Node track(float x, float y) {
+  public Node track(int x, int y) {
     return track(null, x, y);
   }
 
@@ -2439,16 +2439,16 @@ public class Graph {
    * Updates the tagged tracked-node and returns it. Note that {@code null} tags are allowed.
    * <p>
    * To set the {@link #trackedNode(String)} the algorithm casts a ray at pixel position {@code (x, y)}
-   * (see {@link #tracks(Node, float, float)}). If no node is found under the pixel, it returns {@code null}.
+   * (see {@link #tracks(Node, int, int)}). If no node is found under the pixel, it returns {@code null}.
    * <p>
-   * Use this version of the method instead of {@link #track(String, float, float, Node[])} when dealing with
+   * Use this version of the method instead of {@link #track(String, int, int, Node[])} when dealing with
    * attached nodes to the graph.
    *
-   * @see #track(String, float, float, Node[])
+   * @see #track(String, int, int, Node[])
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #tracks(Node, float, float)
+   * @see #tracks(Node, int, int)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2457,7 +2457,7 @@ public class Graph {
    * @see #cast(String, int, int)
    * @see #cast(String, int, int)
    */
-  public Node track(String tag, float x, float y) {
+  public Node track(String tag, int x, int y) {
     resetTrackedNode(tag);
     for (Node node : _leadingNodes())
       _track(tag, node, x, y);
@@ -2465,9 +2465,9 @@ public class Graph {
   }
 
   /**
-   * Use internally by {@link #track(String, float, float)}.
+   * Use internally by {@link #track(String, int, int)}.
    */
-  protected void _track(String tag, Node node, float x, float y) {
+  protected void _track(String tag, Node node, int x, int y) {
     if (trackedNode(tag) == null && node.isTrackingEnabled())
       if (tracks(node, x, y)) {
         setTrackedNode(tag, node);
@@ -2490,7 +2490,7 @@ public class Graph {
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
    */
-  public boolean tracks(Node node, float x, float y) {
+  public boolean tracks(Node node, int x, int y) {
     if (node.pickingThreshold() == 0 && _bb != null)
       return _tracks(node, x, y);
     else
@@ -2508,14 +2508,14 @@ public class Graph {
    *
    * @see Node#setPickingThreshold(float)
    */
-  protected boolean _tracks(Node node, float x, float y) {
+  protected boolean _tracks(Node node, int x, int y) {
     return false;
   }
 
   /**
-   * Cached version of {@link #tracks(Node, float, float)}.
+   * Cached version of {@link #tracks(Node, int, int)}.
    */
-  protected boolean _tracks(Node node, float x, float y, Vector projection) {
+  protected boolean _tracks(Node node, int x, int y, Vector projection) {
     if (node == null || isEye(node))
       return false;
     if (!node.isTrackingEnabled())
@@ -2536,19 +2536,19 @@ public class Graph {
   }
 
   /**
-   * Same as {@link #track(String, float, float)} but doesn't return immediately the tagged tracked-node.
+   * Same as {@link #track(String, int, int)} but doesn't return immediately the tagged tracked-node.
    * The algorithm schedules an updated of the tagged tracked-node for the next traversal and hence should be
    * always be used in conjunction with {@link #render()}.
    * <p>
    * This method is optimal since it updates the tagged tracked-node at traversal time. Prefer this method over
-   * {@link #track(String, float, float)} when dealing with several tags.
+   * {@link #track(String, int, int)} when dealing with several tags.
    * <p>
    * Note that {@code null} tags are allowed.
    *
    * @see #render()
    * @see #trackedNode(String)
    * @see #resetTrackedNode(String)
-   * @see #tracks(Node, float, float)
+   * @see #tracks(Node, int, int)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -2974,11 +2974,11 @@ public class Graph {
   /**
    * Tags the node for tracking (see {@link #trackedNode(String)}). The {@code null} tag
    * is allowed. Call this function if you want to set the tagged tracked node manually
-   * and {@link #track(String, float, float)} or {@link #cast(String, int, int)} to set it
+   * and {@link #track(String, int, int)} or {@link #cast(String, int, int)} to set it
    * automatically using ray casting.
    *
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
+   * @see #tracks(Node, int, int)
+   * @see #track(String, int, int)
    * @see #resetTrackedNode(String)
    * @see #isTrackedNode(String, Node)
    * @see Node#enableTracking(boolean)
@@ -3006,11 +3006,11 @@ public class Graph {
 
   /**
    * Returns the node tracked with {@code tag} which is usually set by ray casting (see
-   * {@link #track(String, float, float)}). May return {@code null}. Reset it with
+   * {@link #track(String, int, int)}). May return {@code null}. Reset it with
    * {@link #resetTrackedNode(String)}.
    *
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
+   * @see #tracks(Node, int, int)
+   * @see #track(String, int, int)
    * @see #resetTrackedNode(String)
    * @see #isTrackedNode(String, Node)
    * @see #setTrackedNode(String, Node)
@@ -3048,8 +3048,8 @@ public class Graph {
   /**
    * Returns {@code true} if {@code node} is the current tagged {@link #trackedNode(String)} and {@code false} otherwise.
    *
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
+   * @see #tracks(Node, int, int)
+   * @see #track(String, int, int)
    * @see #resetTrackedNode(String)
    * @see #setTrackedNode(String, Node)
    * @see Node#isTracked()
@@ -3062,8 +3062,8 @@ public class Graph {
    * Resets all tagged {@link #trackedNode(String)}.
    *
    * @see #trackedNode(String)
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
+   * @see #tracks(Node, int, int)
+   * @see #track(String, int, int)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    */
@@ -3082,11 +3082,11 @@ public class Graph {
 
   /**
    * Resets the current tagged {@link #trackedNode(String)} so that a call to {@link #isTracking(String)}
-   * will return {@code false}. Note that {@link #track(String, float, float)} will reset the tracked node automatically.
+   * will return {@code false}. Note that {@link #track(String, int, int)} will reset the tracked node automatically.
    *
    * @see #trackedNode(String)
-   * @see #tracks(Node, float, float)
-   * @see #track(String, float, float)
+   * @see #tracks(Node, int, int)
+   * @see #track(String, int, int)
    * @see #setTrackedNode(String, Node)
    * @see #isTrackedNode(String, Node)
    */
