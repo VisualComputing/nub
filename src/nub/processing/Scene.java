@@ -2974,7 +2974,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code cast(mouse())}.
    *
-   * @see #cast(float, float)
+   * @see #cast(int, int)
    * @see #mouse()
    */
   public void cast() {
