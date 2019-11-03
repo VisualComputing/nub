@@ -69,8 +69,8 @@ public class SpaceNavigator extends PApplet {
   }
 
   void spaceNavigatorPicking() {
-    float x = map(snXPos.getValue(), -.8f, .8f, 0, width);
-    float y = map(snYPos.getValue(), -.8f, .8f, 0, height);
+    int x = (int) map(snXPos.getValue(), -.8f, .8f, 0, width);
+    int y = (int) map(snYPos.getValue(), -.8f, .8f, 0, height);
     // update the space navigator tracked node:
     scene.cast("SPCNAV", x, y);
     // draw picking visual hint

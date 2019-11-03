@@ -75,9 +75,9 @@ import java.util.List;
  * calls {@code scale(null, delta)}).</li>
  * <li>To update a tagged tracked-node using ray-casting call {@link #track(String, float, float, Node[])}
  * (detached or attached nodes), {@link #track(String, float, float)} (only attached nodes) or
- * {@link #cast(String, float, float)} (only for attached nodes too). While {@link #track(String, float, float, Node[])} and
+ * {@link #cast(String, int, int)} (only for attached nodes too). While {@link #track(String, float, float, Node[])} and
  * {@link #track(String, float, float)} update the tagged tracked-node synchronously (i.e., they return the
- * tagged tracked-node immediately), {@link #cast(String, float, float)} updates it asynchronously (i.e., it
+ * tagged tracked-node immediately), {@link #cast(String, int, int)} updates it asynchronously (i.e., it
  * optimally updates the tagged tracked-node during the next call to the {@link #render()} algorithm).</li>
  * </ol>
  * <h1>5. Timing handling</h1>
@@ -2387,8 +2387,8 @@ public class Graph {
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, float, float)
-   * @see #cast(String, float, float)
+   * @see #cast(String, int, int)
+   * @see #cast(String, int, int)
    */
   public Node track(String tag, float x, float y, Node[] nodeArray) {
     resetTrackedNode(tag);
@@ -2454,8 +2454,8 @@ public class Graph {
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(String, float, float)
-   * @see #cast(String, float, float)
+   * @see #cast(String, int, int)
+   * @see #cast(String, int, int)
    */
   public Node track(String tag, float x, float y) {
     resetTrackedNode(tag);
@@ -2529,9 +2529,9 @@ public class Graph {
   /**
    * Same as {@code cast(null, new Point(x, y))}.
    *
-   * @see #cast(String, float, float)
+   * @see #cast(String, int, int)
    */
-  public void cast(float x, float y) {
+  public void cast(int x, int y) {
     cast(null, x, y);
   }
 
@@ -2556,7 +2556,7 @@ public class Graph {
    * @see Node#setPickingThreshold(float)
    * @see #cast(float, float)
    */
-  public void cast(String tag, float x, float y) {
+  public void cast(String tag, int x, int y) {
     _rays.add(new Ray(tag, new Point(x, y)));
   }
 
@@ -2974,7 +2974,7 @@ public class Graph {
   /**
    * Tags the node for tracking (see {@link #trackedNode(String)}). The {@code null} tag
    * is allowed. Call this function if you want to set the tagged tracked node manually
-   * and {@link #track(String, float, float)} or {@link #cast(String, float, float)} to set it
+   * and {@link #track(String, float, float)} or {@link #cast(String, int, int)} to set it
    * automatically using ray casting.
    *
    * @see #tracks(Node, float, float)

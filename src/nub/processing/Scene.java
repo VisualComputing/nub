@@ -2964,7 +2964,7 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code cast(tag, mouse())}.
    *
-   * @see #cast(String, float, float)
+   * @see Graph#cast(String, int, int)
    * @see #mouse()
    */
   public void cast(String tag) {
