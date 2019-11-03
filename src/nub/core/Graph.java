@@ -2526,21 +2526,13 @@ public class Graph {
         Point.distance(x, y, projection._vector[0], projection._vector[1]) < -threshold;
   }
 
-  public void cast(float x, float y, Node defaultNode) {
-    cast(null, x, y, defaultNode);
-  }
-
   /**
    * Same as {@code cast(null, new Point(x, y))}.
    *
-   * @see #cast(String, float, float, Node)
+   * @see #cast(String, float, float)
    */
   public void cast(float x, float y) {
-    cast(null, x, y, eye());
-  }
-
-  public void cast(String tag, float x, float y) {
-    cast(tag, x, y, eye());
+    cast(null, x, y);
   }
 
   /**
@@ -2564,7 +2556,7 @@ public class Graph {
    * @see Node#setPickingThreshold(float)
    * @see #cast(float, float)
    */
-  public void cast(String tag, float x, float y, Node defaultNode) {
+  public void cast(String tag, float x, float y) {
     _rays.add(new Ray(tag, new Point(x, y)));
   }
 
