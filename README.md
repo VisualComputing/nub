@@ -3,18 +3,14 @@ nub[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.s
 
 **Table of Contents**
 
-- [nub![All Contributors](#contributors)](#nuball-contributorscontributors)
-  - [Description](#description)
-  - [Scene](#scene)
-  - [Nodes](#nodes)
-    - [Interactivity](#interactivity)
-    - [Rendering](#rendering)
-      - [Drawing functionality](#drawing-functionality)
-  - [Interpolators](#interpolators)
-  - [HIDs](#hids)
-  - [Control](#control)
-  - [Installation](#installation)
-  - [Contributors](#contributors)
+- [Description](#user-content-description)
+- [Scene](#user-content-scene)
+- [Nodes](#user-content-nodes)
+- [Interpolators](#user-content-interpolators)
+- [HIDs](#user-content-hids)
+- [Control](#user-content-control)
+- [Installation](#user-content-installation)
+- [Contributors](#user-content-contributors)
 
 ## Description
 
@@ -235,9 +231,9 @@ Observations:
 Implementing an application control for a node is a two step process:
 
 1. Override the node method [interact(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Node.html#interact-java.lang.Object...-) to parse the gesture into a custom (application) control.
-2. Send gesture data to the node by calling one of the following scene methods: [interact(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interact-java.lang.String-java.lang.Object...-) or [interact(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#interact-nub.core.Node-java.lang.Object...-).
+2. Send gesture data to the node by calling one of the following scene methods: [defaultHIDControl(Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#defaultHIDControl-java.lang.Object...-), [control(String, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-java.lang.String-java.lang.Object...-) or [control(Node, Object...)](https://visualcomputing.github.io/nub-javadocs/nub/core/Graph.html#control-frames.core.Node-java.lang.Object...-).
 
-See the [CustomInteraction](https://github.com/VisualComputing/nub/tree/master/examples/demos/CustomInteraction) example.
+See the [ApplicationControl](https://github.com/VisualComputing/nub/tree/master/examples/demos/ApplicationControl) example.
 
 ## Installation
 
