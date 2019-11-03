@@ -6,6 +6,7 @@ import nub.ik.solver.geometric.ChainSolver;
 import nub.ik.solver.geometric.FABRIKSolver;
 import nub.ik.solver.Solver;
 import nub.ik.solver.geometric.TRIK;
+import nub.ik.visual.Joint;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.processing.Scene;
@@ -29,15 +30,16 @@ public class VisualBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.CONE_ELLIPSE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
     int randLength = 0; //Set seed to generate random segment lengths, otherwise set to -1
 
 
-    Util.SolverType solversType [] = {Util.SolverType.CCD_V2, Util.SolverType.CCD, Util.SolverType.FABRIK, Util.SolverType.HGSA,
-            Util.SolverType.FABRIK_H1, Util.SolverType.FABRIK_H2, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK}; //Place Here Solvers that you want to compare
+    Util.SolverType solversType [] = {Util.SolverType.HGSA, Util.SolverType.FABRIK, Util.SolverType.FABRIK_H1_H2, Util.SolverType.TRIK_V1,
+            Util.SolverType.TRIK_V2, Util.SolverType.TRIK_V3, Util.SolverType.TRIK_V4}; //Place Here Solvers that you want to compare
+
     ArrayList<ArrayList<Node>> structures = new ArrayList<>(); //Keep Structures
     ArrayList<Node> targets = new ArrayList<Node>(); //Keep targets
 
@@ -49,6 +51,7 @@ public class VisualBenchmark extends PApplet {
     }
 
     public void setup() {
+        Joint.axes = true;
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(numJoints * 1f * boneLength);
@@ -84,8 +87,8 @@ public class VisualBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             solvers.get(i).setMaxError(0.001f);
-            solvers.get(i).setTimesPerFrame(1f);
-            solvers.get(i).setMaxIterations(300);
+            solvers.get(i).setTimesPerFrame(15);
+            solvers.get(i).setMaxIterations(15);
             solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));
@@ -192,6 +195,7 @@ public class VisualBenchmark extends PApplet {
         // /*
 
         if(key == '1'){
+            TRIK._debug = !TRIK._debug;
             show1 = !show1;
         }
         if(key == '2'){

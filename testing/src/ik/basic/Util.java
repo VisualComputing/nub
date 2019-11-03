@@ -32,7 +32,7 @@ import static processing.core.PApplet.*;
 
 public class Util {
     public enum ConstraintType{ NONE, HINGE, CONE_POLYGON, CONE_ELLIPSE, CONE_CIRCLE, MIX }
-    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK}
+    public enum SolverType{ HC, FABRIK, FABRIK_H1, FABRIK_H2, FABRIK_H1_H2, HGSA, SDLS, PINV, TRANSPOSE, CCD, CCD_V2, GA, HAEA, MySolver, TRIK_V1, TRIK_V2, TRIK_V3, TRIK_V4}
 
     public static Solver createSolver(SolverType type, ArrayList<Node> structure){
         switch (type){
@@ -73,9 +73,24 @@ public class Util {
             case HAEA: return new HAEASolver(structure, 10, true);
             case SDLS: return new SDLSSolver(structure);
             case MySolver: return  new MySolver(structure);
-            case TRIK:{
+            case TRIK_V1:{
                 TRIK solver = new TRIK(structure);
-                solver.setLookAhead(2);
+                return solver;
+            }
+            case TRIK_V2:{
+                TRIK solver = new TRIK(structure);
+                solver.enableWeight(true);
+                return solver;
+            }
+            case TRIK_V3:{
+                TRIK solver = new TRIK(structure);
+                solver.setLookAhead(3);
+                return solver;
+            }
+            case TRIK_V4:{
+                TRIK solver = new TRIK(structure);
+                solver.setLookAhead(3);
+                solver.enableWeight(true);
                 return solver;
             }
             default: return null;
@@ -283,6 +298,7 @@ public class Util {
             pg.text("MySolver" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
         if(solver instanceof TRIK){
+            String heuristics = "";
             pg.text("TRIK" + "\n Error: " + String.format( "%.3f", solver.error()) + "\n iter : " + solver.lastIteration(), pos.x() - 30, pos.y() + 10, pos.x() + 30, pos.y() + 50);
         }
 

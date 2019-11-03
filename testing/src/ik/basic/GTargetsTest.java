@@ -36,6 +36,7 @@ public class GTargetsTest extends PApplet {
     }
 
     public void setup() {
+        //TRIK._debug = true;
         Joint.axes = true;
         //Setting the scene
         scene = new Scene(this);
@@ -50,7 +51,12 @@ public class GTargetsTest extends PApplet {
         trik1 = createSolver(skeleton_trik1, 0);
         trik2 = createSolver(skeleton_trik2, 1);
         trik3 = createSolver(skeleton_trik3, 2);
-        trik2.setLookAhead(1);
+        trik1.enableDirection(true);
+        trik2.enableDirection(true);
+        trik3.enableDirection(true);
+        trik2.enableWeight(true);
+        trik3.enableWeight(true);
+        //trik2.setLookAhead(1);
         trik3.setLookAhead(2);
         //Define Text Properties
         textAlign(CENTER);
@@ -62,10 +68,6 @@ public class GTargetsTest extends PApplet {
         if(scene.is3D()) lights();
         scene.drawAxes();
         scene.render();
-        drawSec(trik1);
-        drawSec(trik2);
-        drawSec(trik3);
-
         scene.beginHUD();
         //drawInfo(skeleton_trik1);
         //drawInfo(skeleton_trik2);
@@ -108,9 +110,9 @@ public class GTargetsTest extends PApplet {
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)
         solver.setMaxError(0.0001f);
         //Number of iterations to perform in order to reach the target (Default value is 50)
-        solver.setMaxIterations(2000);
+        solver.setMaxIterations(10);
         //Times a solver will iterate on a single Frame (Default value is 5)
-        solver.setTimesPerFrame(5);
+        solver.setTimesPerFrame(TRIK._debug ? 1 : 5);
         //Minimum distance between previous and current solution to consider that Solver converges (Default value is 0.01)
         solver.setMinDistance(5f);
         //4. relate targets with end effectors
@@ -176,40 +178,6 @@ public class GTargetsTest extends PApplet {
             Vector screenLocation = scene.screenLocation(skeleton.get(i).position());
             text("Node " + i, screenLocation.x(), screenLocation.y());
         }
-    }
-
-    public void drawSec(TRIK trik){
-
-        for(int i = 0; i < trik.sec.size(); i++){
-            push();
-            stroke(255);
-            strokeWeight(1);
-            Vector u = trik.sec.get(i).getKey();
-            Vector v = trik.sec.get(i).getValue();
-            line(u.x(), u.y(), u.z(), v.x(),v.y(),v.z());
-            pop();
-        }
-
-        for(int i = 0; i < trik.main.size(); i++){
-            push();
-            stroke(255,0,0);
-            strokeWeight(1);
-            Vector u = trik.main.get(i).getKey();
-            Vector v = trik.main.get(i).getValue();
-            line(u.x(), u.y(), u.z(), v.x(),v.y(),v.z());
-            pop();
-        }
-
-        for(int i = 0; i < trik.av.size(); i++){
-            push();
-            stroke(0,255,0);
-            strokeWeight(1);
-            Vector u = trik.av.get(i).getKey();
-            Vector v = trik.av.get(i).getValue();
-            line(u.x(), u.y(), u.z(), v.x(),v.y(),v.z());
-            pop();
-        }
-
     }
 
     @Override

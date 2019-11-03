@@ -42,6 +42,8 @@ public class Case1 extends PApplet {
     }
 
     public void setup() {
+        TRIK._singleStep = true;
+
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(numJoints * boneLength * 2.5f);
@@ -115,13 +117,14 @@ public class Case1 extends PApplet {
         //HGSA
         TRIK trik = new TRIK(structures.get(i++));
         trik.setLookAhead(2);
+        trik.enableWeight(true);
         solvers.add(trik);
 
         for(i = 0; i < solvers.size(); i++){
             Solver solver = solvers.get(i);
             //6. Define solver parameters
             solver.setMaxError(0.001f);
-            solver.setTimesPerFrame(5);
+            solver.setTimesPerFrame(1);
             solver.setMaxIterations(200);
             //7. Set targets
             solver.setTarget(structures.get(i).get(numJoints - 1), targets.get(i));

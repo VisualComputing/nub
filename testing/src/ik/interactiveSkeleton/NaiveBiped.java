@@ -7,6 +7,7 @@ import nub.core.constraint.Hinge;
 import nub.ik.solver.geometric.*;
 import nub.ik.solver.Solver;
 import nub.ik.solver.evolutionary.BioIk;
+import nub.ik.solver.geometric.TRIK;
 import nub.primitives.Vector;
 import nub.processing.Scene;
 import nub.processing.TimingTask;
@@ -29,7 +30,7 @@ public class NaiveBiped extends PApplet {
     float boneLength = 50;
     float radius = 10;
 
-    int segments = 10;
+    int segments = 25;
     float stepHeight = boneLength/2 * segments/3f, stepWidth = boneLength * segments/3f;
 
     public void settings() {
@@ -181,6 +182,7 @@ public class NaiveBiped extends PApplet {
                 solver = new TRIK(limb);
                 ((TRIK)solver).setTarget(target);
                 ((TRIK)solver).setLookAhead(2);
+                ((TRIK)solver).enableWeight(true);
                 break;
             }
 
@@ -190,9 +192,9 @@ public class NaiveBiped extends PApplet {
         }
 
         //solver.setMaxError(0f);
-        if (!debug) solver.setTimesPerFrame(50);
+        if (!debug) solver.setTimesPerFrame(10);
         else solver.setTimesPerFrame(10);
-        solver.setMaxIterations(50);
+        solver.setMaxIterations(10);
         target.setPosition(limb.get(limb.size() - 1).position());
         /*TimingTask task = new TimingTask(scene) {
             @Override
@@ -256,8 +258,8 @@ public class NaiveBiped extends PApplet {
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
-                float max = 0;
-                float min = 40;
+                float max = 40;
+                float min = 0;
 
                 Hinge hinge = new Hinge(radians(min), radians(max), middle.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
                 middle.setConstraint(hinge);

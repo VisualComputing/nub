@@ -21,33 +21,12 @@ import java.util.List;
  */
 
 public class SimpleTRIKTest extends PApplet {
-    /*
-    In this example an IK solver will be related
-    with a pretty simple chain structure on the XY-Plane:
-                             World
-                               ^
-                               | \
-                               0 eye
-                               ^
-                               |
-                               1
-                               ^
-                               |
-                               2
-                               ^
-                               |
-                               3
-                               ^
-                               |
-                               4
-    As Node 4 is the End effector of the structure (leaf node) we will attach a Target to it.
-    */
-
     Scene scene;
     //Set the scene as P3D or P2D
     String renderer = P3D;
     float jointRadius = 5;
     float length = 50;
+    int numJoints = 8;
     boolean enableSolver = false;
     Solver trik, fabrik;
     List<Node> skeleton_trik, skeleton_fabrik;
@@ -59,15 +38,24 @@ public class SimpleTRIKTest extends PApplet {
 
     public void setup() {
         Joint.axes = true;
+        TRIK._debug = true;
+        TRIK._singleStep = true;
 
         //Setting the scene
         scene = new Scene(this);
         if(scene.is3D()) scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(280);
         scene.fit(1);
-        //Create the Skeleton (chain described above)
-        skeleton_trik = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
-        skeleton_fabrik  = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
+        int color = color(random(255), random(255), random(255));
+        skeleton_fabrik = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), -scene.radius()/2f), color, -1, 0);
+        color = color(random(255), random(255), random(255));
+        skeleton_trik = Util.generateChain(scene, numJoints, jointRadius, length, Vector.multiply(scene.rightVector(), scene.radius()/2f), color, -1, 0);
+
+        Util.generateConstraints(skeleton_fabrik, Util.ConstraintType.CONE_ELLIPSE, 0, scene.is3D());
+        Util.generateConstraints(skeleton_trik, Util.ConstraintType.CONE_ELLIPSE, 0, scene.is3D());
+
+        //skeleton_trik = createSkeleton(Vector.multiply(scene.rightVector(), -scene.radius()/2f));
+        // skeleton_fabrik  = createSkeleton(Vector.multiply(scene.rightVector(), scene.radius()/2f));
         //Create solver
         trik = createSolver("TRIK", skeleton_trik);
         fabrik = createSolver("FABRIK", skeleton_fabrik);
@@ -77,13 +65,18 @@ public class SimpleTRIKTest extends PApplet {
     }
 
     public void draw() {
+        if(((TRIK) trik)._singleStep && ((TRIK) trik)._stepCounter > 1){
+            if(((TRIK) trik)._stepCounter > 2) ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 3))).setColor(color(255,0,0));
+            ((Joint)(((TRIK) trik).copyChain().get(((TRIK) trik)._stepCounter - 2))).setColor(255);
+        }
+
         background(0);
         if(scene.is3D()) lights();
         scene.drawAxes();
         scene.render();
         scene.beginHUD();
-        drawInfo(skeleton_trik);
-        drawInfo(skeleton_fabrik);
+        //drawInfo(skeleton_trik);
+        //drawInfo(skeleton_fabrik);
         scene.endHUD();
     }
 
@@ -114,7 +107,10 @@ public class SimpleTRIKTest extends PApplet {
         //3. Relate the structure with a Solver. In this example we instantiate a solver
         switch(type){
             case "TRIK":{
-                solver = new TRIK(skeleton);
+                TRIK trik = new TRIK(skeleton);
+                trik.enableWeight(true);
+                trik.setLookAhead(4);
+                solver = trik;
                 break;
             }
             case "FABRIK":{
@@ -141,13 +137,9 @@ public class SimpleTRIKTest extends PApplet {
             @Override
             public void execute() {
                 //a solver perform an iteration when solve method is called
-                if(type.equals("FABRIK") && !enableSolver){
+                if(enableSolver){
                     solver.solve();
                 }
-                if(type.equals("TRIK") && enableSolver){
-                    solver.solve();
-                }
-
             }
         };
         solverTask.run(40); //Execute the solverTask each 40 ms
@@ -233,6 +225,12 @@ public class SimpleTRIKTest extends PApplet {
     }
 
     public void keyPressed(){
+        if(key == 'A' || key == 'a'){
+            enableSolver = false;
+            trik.solve();
+            fabrik.solve();
+        }
+
         if(key == 'S' || key == 's'){
             enableSolver = !enableSolver;
         }

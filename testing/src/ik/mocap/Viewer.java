@@ -54,6 +54,7 @@ public class Viewer extends PApplet{
     }
 
     public void setup() {
+        TRIK._debug = true;
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(200);
@@ -202,6 +203,7 @@ public class Viewer extends PApplet{
             //BioIk chain = new BioIk(fr, 10, 4);
             //ChainSolver chain = new ChainSolver((ArrayList) fr);
             TRIK chain = new TRIK((ArrayList) fr);
+            chain.setLookAhead(3);
             //chain.setKeepDirection(true);
             //chain.setFixTwisting(true);
 
