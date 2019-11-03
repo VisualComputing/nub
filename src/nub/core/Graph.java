@@ -2554,7 +2554,7 @@ public class Graph {
    * @see Node#enableTracking(boolean)
    * @see Node#pickingThreshold()
    * @see Node#setPickingThreshold(float)
-   * @see #cast(float, float)
+   * @see #cast(int, int)
    */
   public void cast(String tag, int x, int y) {
     _rays.add(new Ray(tag, new Point(x, y)));
