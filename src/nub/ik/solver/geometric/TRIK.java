@@ -3,6 +3,7 @@ package nub.ik.solver.geometric;
 import javafx.util.Pair;
 import nub.core.Node;
 import nub.core.constraint.Constraint;
+import nub.core.constraint.Hinge;
 import nub.ik.animation.InterestingEvent;
 import nub.ik.animation.VisualizerMediator;
 import nub.ik.solver.Solver;
@@ -24,7 +25,9 @@ public class TRIK extends Solver {
     //Steady state algorithm
     protected float _current = 10e10f, _best = 10e10f;
 
-    protected boolean _enableWeight; //TODO : Refine
+    protected boolean _enableWeight, _explore; //TODO : Refine
+    protected int _lockTimes = 0, _lockTimesCriteria = 4;
+
 
     public static boolean _debug = false; //TODO : REMOVE!
 
@@ -46,7 +49,7 @@ public class TRIK extends Solver {
         if(_debug && _original.get(0).graph() instanceof Scene) {
             this._chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph());
             this._auxiliary_chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph(), false);
-            this._dead_lock_chain = FABRIKSolver._copy(chain, null, (Scene) _original.get(0).graph());
+            this._dead_lock_chain = FABRIKSolver._copy(chain);
         }
         else {
             this._chain = FABRIKSolver._copy(chain);
@@ -68,7 +71,7 @@ public class TRIK extends Solver {
             if (_target == null) return true; //As no target is specified there is no need to solve IK
             _current = 10e10f; //Keep the current error
             //Step 1. make a deep copy of _chain state into _auxiliary_chain
-            //_copyChainState(_original, _chain);
+            _copyChainState(_original, _chain);
             _copyChainState(_chain, _auxiliary_chain);
         } else if(_stepCounter == 1) {
             //Step 2. Translate the auxiliary chain to the target position
@@ -78,10 +81,10 @@ public class TRIK extends Solver {
             int i = _stepCounter - 1;
             if (_lookAhead > 0 && i < _chain.size() - 1) {
                 System.out.println("Max Ahead : " + Math.min(_lookAhead, _chain.size() - i));
-                Quaternion delta = _lookAhead(mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
+                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
                 _chain.get(i - 1).rotate(delta);
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(20), (float) Math.toRadians(15), _enableWeight, _direction);
+                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(60), (float) Math.toRadians(60), _enableWeight, _direction);
             }
         } else{
             _current = _error(_chain);
@@ -98,29 +101,39 @@ public class TRIK extends Solver {
         if(_singleStep) return _iterateStepByStep();
         //As no target is specified there is no need to solve IK
         if (_target == null) return true;
+        _explore = false; //Explore only when required
+
+        //in case the error is not converging
+        if(_lockTimes > _lockTimesCriteria) {
+            //enable exploration
+            System.out.println("<<<<<<<<<<<<<<<<<<<<<<<<<<Locked!!! " + _iterations);
+            _explore = true;
+            _lockTimes = 0;
+        }
+
         _current = 10e10f; //Keep the current error
+
         //Step 1. make a deep copy of _chain state into _auxiliary_chain
+        _copyChainState(_original, _chain);
         _copyChainState(_chain, _auxiliary_chain);
         //Step 2. Translate the auxiliary chain to the target position
         _alignToTarget(_auxiliary_chain.get(0), _auxiliary_chain.get(_auxiliary_chain.size() - 1), _target);
         //Step 3. Choose best local action
         for(int i = 1; i < _chain.size(); i++) {
             if(_lookAhead > 0 && i < _chain.size() - 1){
-                Quaternion delta = _lookAhead(mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
+                Quaternion delta = _lookAhead(_chain, _auxiliary_chain, _target, _direction, _enableWeight, _explore, mode,i - 1, Math.min(_lookAhead, _chain.size() - i), 0, null, new ArrayList<>());
                 _chain.get(i - 1).rotate(delta);
             } else {
-                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(360), (float) Math.toRadians(360), _enableWeight, _direction);
+                applySwingTwist(_chain.get(i - 1), _chain.get(i), _auxiliary_chain.get(i), _chain.get(_chain.size() - 1), _target, (float) Math.toRadians(15), (float) Math.toRadians(15), _enableWeight, _direction);
             }
         }
         //Obtain current error
         _current = _error(_chain);
-        _update(); //update if required
-
-        //in case the error is not converging
-        if(_current > _best){
-            //_fixDeadLock();
-            //_copyChainState(_original, _chain);
+        if(_current >= _best){
+            _lockTimes++;
         }
+
+        _update(); //update if required
 
         if(_enableMediator){
             InterestingEvent event = mediator().addEventStartingAfterLast("UPDATE STRUCTURE", "UpdateStructure", 1, 1);
@@ -138,7 +151,6 @@ public class TRIK extends Solver {
             //Add the convenient attributes
             messageEvent.addAttribute("message", "Updating chain");
         }
-
         //Check total change
         //if (Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position()) <= _minDistance) return true;
         return  false;
@@ -163,7 +175,6 @@ public class TRIK extends Solver {
         } else if (_previousTarget == null) {
             return true;
         }
-
 /*
         for(GTarget gTarget : _gTargets){
             if(gTarget._prev == null){
@@ -223,6 +234,8 @@ public class TRIK extends Solver {
         } else {
             _best = 10e10f;
         }
+        _lockTimes = 0;
+        _explore = false;
 
         if(_singleStep) _stepCounter = 0;
 
@@ -292,118 +305,125 @@ public class TRIK extends Solver {
 
     protected int _lookAhead = 0;
 
-    protected List<Quaternion> _findActions(int i, boolean choose){
+    protected List<Quaternion> _findActions(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, int i, boolean choose, boolean explore){
         List<Quaternion> actions = new ArrayList<Quaternion>();
-        Node j_i = _chain.get(i);
-        Node j_i1 = _chain.get(i + 1);
-        Node j_i1_hat = _auxiliary_chain.get(i + 1);
-        Node eff = _chain.get(_chain.size() - 1);
-
+        Node j_i = chain.get(i);
+        Node j_i1 = chain.get(i + 1);
+        Node j_i1_hat = auxiliary_chain.get(i + 1);
+        Node eff = chain.get(chain.size() - 1);
         //Swing twist action
         Quaternion original = j_i.rotation().get();
         Quaternion q1 = null;
-        if(_iterations % 3 == 0){
-            applySwingTwist(j_i, j_i1, j_i1_hat, eff, _target, (float) Math.toRadians(360), (float) Math.toRadians(360), _enableWeight, _direction);
+        if(Math.random() < 0.8){
+            applySwingTwist(j_i, j_i1, j_i1_hat, eff, target, (float) Math.toRadians(20), (float) Math.toRadians(20), enableWeight, direction); //Apply swing twist
             q1 = Quaternion.compose(original.inverse(), j_i.rotation());
+            j_i.setRotation(original);
         } else{
-            q1 = _findLocalRotation(j_i1, j_i1_hat, _enableWeight);
+            q1 = _findLocalRotation(j_i1, j_i1_hat, enableWeight); //Apply just swing
         }
         actions.add(q1);
-        j_i.setRotation(original);
 
         if(choose){
-            Quaternion q2 = _findCCDTwist(j_i, j_i1, eff, _target, (float) Math.toRadians(360));
+            Quaternion q2 = _findCCDTwist(j_i, j_i1, eff, target, (float) Math.toRadians(40));
+            Quaternion q3 = new Quaternion(j_i1.translation().orthogonalVector(), (float) Math.toRadians(Math.random() * 90 - 45));
+            Quaternion q4 = new Quaternion(Vector.cross(j_i1.translation(), j_i1.translation().orthogonalVector(), null), (float) Math.toRadians(Math.random() * 90 - 45));
+            Quaternion q5 = new Quaternion(j_i1.translation(), (float) Math.toRadians(Math.random() * 90 - 45));
             actions.add(q2);
-            if(Math.random() < 0.3f) {
-                //Quaternion q3 = _bestLocalActions(j_i, j_i1, j_i1_hat, eff, _target, (float) Math.toRadians(20), (float) Math.toRadians(15), !_enableWeight);
-                Quaternion q4 = new Quaternion(j_i1.translation().orthogonalVector(), (float) Math.toRadians(Math.random() * 90 - 45));
-                Quaternion q5 = new Quaternion(Vector.cross(j_i1.translation(), j_i1.translation().orthogonalVector(), null), (float) Math.toRadians(Math.random() * 90 - 45));
-                actions.add(q4);
-                actions.add(q5);
-            }
-            if(Math.random() < 0.3f) {
-                Quaternion q6 = new Quaternion(j_i1.translation(), (float) Math.toRadians(Math.random() * 90 - 45));
-                actions.add(q6);
-            }
-/*
-            if (i + 2 < _chain.size() && Math.random() < 0.3f) {
-                Node j_i2 = _chain.get(i + 2);
-                Node j_i2_hat = _auxiliary_chain.get(i + 2);
-*/
-/*
-                System.out.println("<<<ENTRA>>>>");
-                System.out.println("ji" + j_i.translation());
-                System.out.println("ji1" + j_i1.translation());
-                System.out.println("ji2" + j_i2.translation());
-                System.out.println("ji2 hat" + j_i2_hat.translation());
-*//*
+            actions.add(q3);
+            actions.add(q4);
+            actions.add(q5);
+        }
 
-                Quaternion q7 = _twistToChangeBoundary(j_i, j_i1, j_i2, j_i2_hat, 20);
-
-//                System.out.println("q7 : " + q7.axis() + " ang " + q7.angle() + " tr " + j_i1.translation());
-
-                return new Quaternion[]{q1, q2, q3, q4, q5, q6, q7};
+        //Explore when the chain has reach a dead lock status
+        if(explore){
+            if(j_i.constraint() == null || ! (j_i.constraint() instanceof Hinge)) {
+                Vector x = new Vector(1, 0, 0);
+                Vector y = new Vector(0, 1, 0);
+                Vector z = new Vector(0, 0, 1);
+                for (int c = 0; c < 15; c++) {
+                    if (c % 3 == 0) actions.add(new Quaternion(x, (float) Math.toRadians(Math.random() * 90 - 45)));
+                    else if (c % 3 == 1) actions.add(new Quaternion(y, (float) Math.toRadians(Math.random() * 90 - 45)));
+                    else actions.add(new Quaternion(z, (float) Math.toRadians(Math.random() * 90 - 45)));
+                }
             }
-*/
+            else{
+                Quaternion delta = Quaternion.compose(((Hinge)j_i.constraint()).idleRotation(), j_i.rotation().inverse());
+                delta.compose(((Hinge)j_i.constraint()).restRotation());
+                Vector axis = delta.multiply(new Vector(0,0,1));
+
+                float max = ((Hinge)j_i.constraint()).maxAngle(), min = ((Hinge)j_i.constraint()).minAngle();
+
+                for (int c = 0; c < 15; c++) {
+                    Quaternion q = null;
+                    if (c % 2 == 0) q = new Quaternion(axis, (float) Math.toRadians(Math.random() * Math.min(Math.toDegrees(max), 45)));
+                    else q = new Quaternion(axis, (float) -Math.toRadians(Math.random() * Math.min(Math.toDegrees(min), 45)));
+                    actions.add(Quaternion.compose(j_i.rotation().inverse(), q));
+                }
+            }
+
         }
         return actions;
     }
 
     //TODO: MOVE THIS
-    enum LookAheadMode{ CHOOSE, CHOOSE_ALL, NO_CHOOSE}
-    protected LookAheadMode mode = LookAheadMode.NO_CHOOSE;
+    enum LookAheadMode{ CHOOSE, CHOOSE_ALL}
+    protected LookAheadMode mode = LookAheadMode.CHOOSE;
     //Mode: 0 - Look ahead is used only to apply correction
     //Mode: 1 - First iteration of look ahead choose action
     //Mode: 2 - choose at each step
-    protected Quaternion _lookAhead(LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions){
+    protected Quaternion _lookAhead(List<Node> chain, List<Node> auxiliary_chain, Node target, boolean direction, boolean enableWeight, boolean explore, LookAheadMode mode, int from, int times, int depth, Quaternion initial, List<Pair<Quaternion, Float>> actions){
         if(times < 0) return null;
         if(depth == times){
             //Given configuration until now try to help the algorithm in a future
             //alpha w.r.t last
-            Quaternion alpha = _findLocalRotation(_chain.get(from + times),  _auxiliary_chain.get(from + times), _enableWeight);
+            Quaternion alpha = _findLocalRotation(chain.get(from + times),  auxiliary_chain.get(from + times), enableWeight);
             //get alpha w.r.t from
-            Quaternion fromToLast = Quaternion.compose(_chain.get(from).rotation().inverse(), _chain.get(from + times).rotation());
-            Quaternion alpha_hat = Quaternion.compose(fromToLast, alpha);
+            Quaternion fromToLast = Quaternion.compose(chain.get(from).rotation().inverse(), chain.get(from + times).rotation());
+            //Quaternion alpha_hat = Quaternion.compose(fromToLast, alpha);
             //TODO : Damp the rotation
-            alpha_hat.compose(fromToLast.inverse());
+            //alpha_hat.compose(fromToLast.inverse());
             //alpha_hat = Quaternion.slerp(new Quaternion(), alpha_hat, 0.25f);
+            //alpha_hat = new Quaternion();
             //calculate error
-            Pair<Quaternion, Float> action = new Pair<Quaternion, Float>(Quaternion.compose(initial, alpha_hat), Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position()));
+            float e1 = Vector.distance(chain.get(chain.size() - 1).position(), target.position());
+            float e2 = Vector.distance(chain.get(from + times).position(), auxiliary_chain.get(from + times).position());
+
+            Pair<Quaternion, Float> action = new Pair<Quaternion, Float>(initial, e1 + e2 * 0.5f);
             actions.add(action);
             return null;
         }
 
         //System.out.println("    ----> on depth " + depth);
-        if((depth == 0 && mode != LookAheadMode.NO_CHOOSE) || mode == LookAheadMode.CHOOSE_ALL){ //Visit each action (expand the tree)
-            for (Quaternion rotation : _findActions(from + depth, true)){
+        if(depth == 0 || mode == LookAheadMode.CHOOSE_ALL){ //Visit each action (expand the tree)
+            for (Quaternion rotation : _findActions(chain, auxiliary_chain, target, direction, enableWeight, from + depth, true, depth == 0 && explore)){
                 if(depth == 0) initial = rotation;
                 //System.out.println("    ----> Rot " + rotation.axis() + rotation.angle());
-                Node j_i = _chain.get(from + depth);
+                Node j_i = chain.get(from + depth);
                 Quaternion prev = j_i.rotation().get(); //Keep rotation
                 j_i.rotate(rotation); //Apply action
-                _lookAhead(mode, from, times, depth + 1, initial, actions); //look ahead
-                j_i.setRotation(prev); //Undo action
+                _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, mode, from, times, depth + 1, initial, actions); //look ahead
+                j_i.setRotation(prev.get()); //Undo action
             }
         } else{
             //Expand only the most promising action
-            List<Quaternion> rotations = _findActions(from + depth, mode != LookAheadMode.NO_CHOOSE);
+            List<Quaternion> rotations = _findActions(chain, auxiliary_chain, target, direction, enableWeight,from + depth, true, false);
             Quaternion best = null;
             float error = 10e10f;
-            Node j_i = _chain.get(from + depth);
+            Node j_i = chain.get(from + depth);
             Quaternion prev = j_i.rotation().get(); //Keep rotation
             for (Quaternion rotation : rotations) {
                 j_i.rotate(rotation); //Apply action
-                float e = Vector.distance(_chain.get(_chain.size() - 1).position(), _target.position());
+                float e = Vector.distance(chain.get(chain.size() - 1).position(), target.position());
                 if(e < error){
                     error = e;
                     best = rotation;
                 }
-                j_i.setRotation(prev); //Undo action
+                j_i.setRotation(prev.get()); //Undo action
             }
             if(depth == 0) initial = best;
             j_i.rotate(best); //Apply action
-            _lookAhead(mode, from, times, depth + 1, initial, actions); //look ahead
-            j_i.setRotation(prev); //Undo action
+            _lookAhead(chain, auxiliary_chain, target, direction, enableWeight, explore, mode, from, times, depth + 1, initial, actions); //look ahead
+            j_i.setRotation(prev.get()); //Undo action
         }
 
         if(depth == 0){
@@ -538,7 +558,7 @@ public class TRIK extends Solver {
                     bestError = dist;
                 }
 
-                j_i.setRotation(prev); //Undo action
+                j_i.setRotation(prev.get()); //Undo action
 
                 angle = -angle;
             }
@@ -791,8 +811,8 @@ public class TRIK extends Solver {
     }
 
     protected static void applySwingTwist(Node j_i, Node j_i1, Node j_i1_hat, Node eff, Node target, float maxT1, float maxT2, boolean enableWeight, boolean direction){
-        j_i.rotate(_findTwist(j_i, j_i1, eff, target, maxT1, maxT2, direction)); //Apply twist
         j_i.rotate(_findLocalRotation(j_i1, j_i1_hat, enableWeight)); //Apply swing
+        j_i.rotate(_findTwist(j_i, j_i1, eff, target, maxT1, maxT2, direction)); //Apply twist
     }
 
 
