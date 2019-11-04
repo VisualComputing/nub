@@ -146,11 +146,12 @@ public class Graph {
   // 3. Handlers
   protected class Ray {
     public String _tag;
-    public Point _pixel;
+    public int _pixelX, _pixelY;
 
-    Ray(String tag, Point pixel) {
+    Ray(String tag, int x, int y) {
       _tag = tag;
-      _pixel = pixel;
+      _pixelX = x;
+      _pixelY = y;
     }
   }
 
@@ -2557,7 +2558,7 @@ public class Graph {
    * @see #cast(int, int)
    */
   public void cast(String tag, int x, int y) {
-    _rays.add(new Ray(tag, new Point(x, y)));
+    _rays.add(new Ray(tag, x, y));
   }
 
   // Off-screen
@@ -2935,7 +2936,7 @@ public class Graph {
         resetTrackedNode(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._tag))
-        if (_tracks(node, ray._pixel.x(), ray._pixel.y(), projection)) {
+        if (_tracks(node, ray._pixelX, ray._pixelY, projection)) {
           setTrackedNode(ray._tag, node);
           it.remove();
         }
@@ -2954,7 +2955,7 @@ public class Graph {
         resetTrackedNode(ray._tag);
         // Condition is overkill. Use it only in place of resetTrackedNode
         //if (!isTracking(ray._tag))
-        if (_tracks(node, ray._pixel.x(), ray._pixel.y())) {
+        if (_tracks(node, ray._pixelX, ray._pixelY)) {
           setTrackedNode(ray._tag, node);
           it.remove();
         }
