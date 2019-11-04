@@ -54,7 +54,7 @@ public class Viewer extends PApplet{
     }
 
     public void setup() {
-        TRIK._debug = true;
+        //TRIK._debug = true;
         scene = new Scene(this);
         scene.setType(Graph.Type.ORTHOGRAPHIC);
         scene.setRadius(200);
@@ -133,8 +133,8 @@ public class Viewer extends PApplet{
         ccd_solver.setTarget(targets.get("RIGHTHAND"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));*/
 
-        String[] target_names = {"RIGHTFOOT", "RIGHTHAND", "LEFTHAND", "LEFTFOOT"};
-        String[] head_names = {"RIGHTUPLEG", "RIGHTUPARM", "LEFTUPARM", "LEFTUPLEG"};
+        String[] target_names = {"RIGHTFOOT", "RIGHTHAND", "LEFTHAND", "LEFTFOOT", "HEAD"};
+        String[] head_names = {"RIGHTUPLEG", "RIGHTUPARM", "LEFTUPARM", "LEFTUPLEG", "NECK"};
 
         //Adding constraints
         //CHEST  [ 45.6711, 116.072105, -16.3786 ] -> B & S - NECK  [ 46.18769, 145.8957, -9.860168 ]
@@ -204,12 +204,13 @@ public class Viewer extends PApplet{
             //ChainSolver chain = new ChainSolver((ArrayList) fr);
             TRIK chain = new TRIK((ArrayList) fr);
             chain.setLookAhead(3);
+            chain.enableWeight(true);
             //chain.setKeepDirection(true);
             //chain.setFixTwisting(true);
 
             //chain.explore(true);
-            chain.setTimesPerFrame(50);
-            chain.setMaxIterations(50);
+            chain.setTimesPerFrame(10);
+            chain.setMaxIterations(10);
             //chain.setMaxError(0.1f);
             //chain.setMinDistance(0.1f);
             chain.setTarget(limbs.get(target_names[i]), targets.get(target_names[i]));
@@ -234,7 +235,7 @@ public class Viewer extends PApplet{
         //scene.addIKTarget(limbs.get("RIGHTFOOT"), targets.get("RIGHTFOOT"));
         //scene.addIKTarget(limbs.get("HEAD"), targets.get("HEAD"));
         //rootIK.cull(true);
-        //root.cull(true);
+        root.cull(true);
     }
 
     public Node createTarget(float radius){
