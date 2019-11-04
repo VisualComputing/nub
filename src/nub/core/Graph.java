@@ -2127,14 +2127,15 @@ public class Graph {
 
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    Point center = new Point((int) rectangle.centerX(), (int) rectangle.centerY());
+    int centerX = (int)rectangle.centerX();
+    int centerY = (int)rectangle.centerY();
     Vector orig = new Vector();
     Vector dir = new Vector();
-    convertClickToLine(center, orig, dir);
+    convertClickToLine(centerX, centerY, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine(new Point(rectangle.x(), center.y()), orig, dir);
+    convertClickToLine((int)rectangle.x(), centerY, orig, dir);
     Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine(new Point(center.x(), rectangle.y()), orig, dir);
+    convertClickToLine(centerX, (int)rectangle.y(), orig, dir);
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
@@ -2165,18 +2166,16 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(Point pixel, Vector origin, Vector direction) {
-    Point pixelCopy = new Point(pixel.x(), pixel.y());
-
+  public void convertClickToLine(int x, int y, Vector origin, Vector direction) {
     // left-handed coordinate system correction
     if (isLeftHanded())
-      pixelCopy.setY(height() - pixel.y());
+      y = height() - y;
 
     switch (type()) {
       case PERSPECTIVE:
         origin.set(eye().position());
-        direction.set(new Vector(((2.0f * pixelCopy.x() / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
-            ((2.0f * (height() - pixelCopy.y()) / height()) - 1.0f) * eye().magnitude(),
+        direction.set(new Vector(((2.0f * x / width()) - 1.0f) * eye().magnitude() * aspectRatio(),
+            ((2.0f * (height() - y) / height()) - 1.0f) * eye().magnitude(),
             -1.0f));
         direction.set(Vector.subtract(eye().worldLocation(direction), origin));
         direction.normalize();
@@ -2186,8 +2185,8 @@ public class Graph {
       case ORTHOGRAPHIC: {
         float wh0 = eye().magnitude() * width() / 2;
         float wh1 = eye().magnitude() * height() / 2;
-        origin.set(new Vector((2.0f * pixelCopy.x() / width() - 1.0f) * wh0,
-            -(2.0f * pixelCopy.y() / height() - 1.0f) * wh1,
+        origin.set(new Vector((2.0f * x / width() - 1.0f) * wh0,
+            -(2.0f * y / height() - 1.0f) * wh1,
             0.0f));
         origin.set(eye().worldLocation(origin));
         direction.set(viewDirection());
