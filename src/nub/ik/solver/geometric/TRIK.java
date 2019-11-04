@@ -18,7 +18,7 @@ import java.util.List;
 
 public class TRIK extends Solver {
     protected List<? extends Node> _original;
-    protected List<Node> _auxiliary_chain, _chain, _dead_lock_chain;
+    protected List<Node> _auxiliary_chain, _chain, _dead_lock_chain; //TODO: CHECK REFERENCE NODE
     protected Node _target;
     protected Node _previousTarget;
     protected boolean _direction = false;
@@ -620,6 +620,13 @@ public class TRIK extends Solver {
     //HERE ARE DEFINED THE TWIST/SWING ACTIONS
     protected void _copyChainState(List<? extends Node> origin, List<? extends Node> dest){
         //Copy the content of the origin chain into dest
+        if(dest.get(0).reference() != null && origin.get(0).reference() != null){ //TODO: CHECK THIS!
+            Constraint constraint = dest.get(0).reference().constraint();
+            dest.get(0).reference().setConstraint(null);
+            dest.get(0).reference().set(origin.get(0).reference());
+            dest.get(0).reference().setConstraint(constraint);
+        }
+
         for(int i = 0; i < origin.size(); i++){
             Constraint constraint = dest.get(i).constraint();
             dest.get(i).setConstraint(null);
@@ -651,7 +658,8 @@ public class TRIK extends Solver {
         //Move the root accordingly (disable constraints)
         Constraint constraint = root.constraint();
         root.setConstraint(null);
-        root.translate(diff);
+        //root.translate(diff);
+        root.setPosition(Vector.add(root.position(), diff)); //TODO: CHECK THIS!
         root.setConstraint(constraint); // enable constraint
 
         if(_enableMediator) {
