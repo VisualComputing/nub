@@ -47,6 +47,8 @@ public class NaiveBiped extends PApplet {
     public void setup(){
         Joint.axes = true;
         if(debug){
+            TRIK._debug = true;
+            TRIK._singleStep = true;
             FABRIKSolver.debug = true;
             for(int i = 0; i < show.length; i++) show[i] = true;
         }
@@ -57,11 +59,12 @@ public class NaiveBiped extends PApplet {
         scene.fit(1);
 
         if(!debug) {
+            createStructure(scene, segments, boneLength, radius, color(0,255,0), new Vector(-boneLength*3, 0,0), IKMode.TRIK, 40 , 0);
             //createStructure(scene, segments, boneLength, radius, color(255, 0, 0), new Vector(-boneLength * 3, 0, 0), IKMode.BIOIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
             //createStructure(scene, segments, boneLength, radius, color(0, 255, 0), new Vector(boneLength * 1, 0, 0), IKMode.FABRIK);
         }
-        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK);
+        createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.TRIK, 0 , 40);
         //createStructure(scene, segments, boneLength, radius, color(0,0,255), new Vector(boneLength*5, 0,0), IKMode.MYSOLVER);
 
     }
@@ -192,9 +195,14 @@ public class NaiveBiped extends PApplet {
         }
 
         //solver.setMaxError(0f);
-        if (!debug) solver.setTimesPerFrame(10);
-        else solver.setTimesPerFrame(10);
-        solver.setMaxIterations(10);
+        if (!debug){
+            solver.setTimesPerFrame(4);
+            solver.setMaxIterations(4);
+        }
+        else{
+            solver.setTimesPerFrame(1);
+            solver.setMaxIterations(1000);
+        }
         target.setPosition(limb.get(limb.size() - 1).position());
         /*TimingTask task = new TimingTask(scene) {
             @Override
@@ -219,7 +227,7 @@ public class NaiveBiped extends PApplet {
         };
     }
 
-    public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode){
+    public void createStructure(Scene scene, int segments, float length, float radius, int color, Vector translation, IKMode mode, float min , float max){
         Node reference = new Node(scene);
         reference.translate(translation);
 
@@ -233,20 +241,20 @@ public class NaiveBiped extends PApplet {
             Node target1 = createTarget(scene, radius*1.2f);
             Node target2 = createTarget(scene, radius*1.2f);
 
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode));
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode));
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target1, new Vector(-length,0,0), mode, min, max));
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target2, new Vector(length,0,0), mode, min, max));
 
             //3. Create walking cycle
             createBipedCycle(scene, root, solvers.get(solvers.size() - 1), solvers.get(solvers.size() - 2), target1, target2);
         } else{
             Node target = createTarget(scene, radius*1.2f);
-            solvers.add(createLimb(scene, segments, length, radius, color, root, target, new Vector(length,length,0), mode));
+            solvers.add(createLimb(scene, segments, length, radius, color, root, target, new Vector(length,length,0), mode, min, max));
         }
 
     }
 
 
-    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode){
+    public Solver createLimb(Scene scene, int segments, float length, float radius, int color, Node reference, Node target, Vector translation, IKMode mode, float min, float max){
         target.setReference(reference.reference());
         ArrayList<Node> joints = new ArrayList<>();
         Joint root = new Joint(scene, color, radius);
@@ -258,9 +266,6 @@ public class NaiveBiped extends PApplet {
             middle.setReference(joints.get(i));
             middle.translate(0, length, 0);
             if(i < max(segments, 2) - 1) {
-                float max = 40;
-                float min = 0;
-
                 Hinge hinge = new Hinge(radians(min), radians(max), middle.rotation().get(), new Vector(0, 1, 0), new Vector(1, 0, 0));
                 middle.setConstraint(hinge);
             }

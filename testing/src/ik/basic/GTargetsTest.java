@@ -57,7 +57,7 @@ public class GTargetsTest extends PApplet {
         trik2.enableWeight(true);
         trik3.enableWeight(true);
         //trik2.setLookAhead(1);
-        trik3.setLookAhead(2);
+        trik3.setLookAhead(5);
         //Define Text Properties
         textAlign(CENTER);
         textSize(24);
@@ -104,7 +104,7 @@ public class GTargetsTest extends PApplet {
         for(int i = 0; i < gTargets; i++) {
             Node gTarget = createTarget(scene, jointRadius * 1.5f, color(0,255,255));
             gTarget.setPosition(Vector.add(skeleton.get(i).position(), new Vector(- length, length * 3)));
-            solver.addGTarget(gTarget, 0.25f);
+            //solver.addGTarget(gTarget, 0.25f);
         }
         //Optionally you could modify the following parameters of the Solver:
         //Maximum distance between end effector and target, If is below maxError, then we stop executing IK solver (Default value is 0.01)

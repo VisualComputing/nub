@@ -1,5 +1,6 @@
 package ik.basic;
 
+import javafx.util.Pair;
 import nub.core.Node;
 import nub.core.Graph;
 import nub.ik.solver.geometric.ChainSolver;
@@ -30,7 +31,7 @@ public class VisualBenchmark extends PApplet {
     float boneLength = 50; //Define length of segments (bones)
 
     //Benchmark Parameters
-    Util.ConstraintType constraintType = Util.ConstraintType.HINGE; //Choose what kind of constraints apply to chain
+    Util.ConstraintType constraintType = Util.ConstraintType.MIX; //Choose what kind of constraints apply to chain
     Random random = new Random();
     ArrayList<Solver> solvers; //Will store Solvers
     int randRotation = -1; //Set seed to generate initial random rotations, otherwise set to -1
@@ -87,8 +88,8 @@ public class VisualBenchmark extends PApplet {
             solvers.add(solver);
             //6. Define solver parameters
             solvers.get(i).setMaxError(0.001f);
-            solvers.get(i).setTimesPerFrame(15);
-            solvers.get(i).setMaxIterations(15);
+            solvers.get(i).setTimesPerFrame(5);
+            solvers.get(i).setMaxIterations(5);
             solvers.get(i).setMinDistance(0.001f);
             //7. Set targets
             solvers.get(i).setTarget(structures.get(i).get(numJoints - 1), targets.get(i));

@@ -109,7 +109,7 @@ public class SimpleTRIKTest extends PApplet {
             case "TRIK":{
                 TRIK trik = new TRIK(skeleton);
                 trik.enableWeight(true);
-                trik.setLookAhead(4);
+                trik.setLookAhead(3);
                 solver = trik;
                 break;
             }
