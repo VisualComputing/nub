@@ -48,7 +48,7 @@ public class Flock extends PApplet {
 
   public void updateAvatar() {
     // boid is the one picked with a 'mouseClicked'
-    Node boid = scene.trackedNode("mouseClicked");
+    Node boid = scene.node("mouseClicked");
     if (boid != avatar) {
       avatar = boid;
       if (avatar != null)

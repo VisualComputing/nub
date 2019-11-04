@@ -2303,7 +2303,7 @@ public class Node {
 
   /**
    * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Node, int, int)}
-   * returns {@code false}, {@link Graph#setTrackedNode(String, Node)} does nothing while
+   * returns {@code false}, {@link Graph#tag(String, Node)} does nothing while
    * {@link Graph#track(String, int, int)} and {@link Graph#cast(int, int)} would bypass the node.
    *
    * @see #isTrackingEnabled()
@@ -2329,8 +2329,8 @@ public class Node {
    * Returns {@code true} if the {@code node} is being tracked by the {@code graph} at least once
    * and {@code false} otherwise.
    *
-   * @see Graph#isTrackedNode(String, Node)
-   * @see Graph#isTrackedNode(Node)
+   * @see Graph#isTagged(String, Node)
+   * @see Graph#isTagged(Node)
    */
   public boolean isTracked(Graph graph) {
     return graph._hids.containsValue(this);

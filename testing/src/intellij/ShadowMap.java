@@ -35,9 +35,9 @@ public class ShadowMap extends PApplet {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
-          if (scene.trackedNode("light") == this) {
+          if (scene.node("light") == this) {
             Scene.drawAxes(pg, 150);
-            pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+            pg.fill(0, scene.isTagged(this) ? 255 : 0, 255, 120);
             Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
           } else {
             if (pg == shadowMap)
@@ -74,8 +74,8 @@ public class ShadowMap extends PApplet {
     depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_nonlinear.glsl");
     shadowMap.shader(depthShader);
 
-    scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.trackedNode("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.trackedNode("light").position()));
+    scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
+    scene.node("light").setOrientation(new Quaternion(new Vector(0, 0, 1), scene.node("light").position()));
   }
 
   public void draw() {
@@ -83,10 +83,10 @@ public class ShadowMap extends PApplet {
     // 1. Fill in and display front-buffer
     scene.render();
     // 2. Fill in shadow map using the light point of view
-    if (scene.trackedNode("light") != null) {
+    if (scene.node("light") != null) {
       shadowMap.beginDraw();
       shadowMap.background(140, 160, 125);
-      scene.render(shadowMap, shadowMapType, scene.trackedNode("light"), zNear, zFar);
+      scene.render(shadowMap, shadowMapType, scene.node("light"), zNear, zFar);
       shadowMap.endDraw();
       // 3. Display shadow map
       scene.beginHUD();

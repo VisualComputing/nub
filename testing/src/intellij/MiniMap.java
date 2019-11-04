@@ -91,9 +91,9 @@ public class MiniMap extends PApplet {
     if (key == 'i') {
       interactiveEye = !interactiveEye;
       if (interactiveEye)
-        minimap.setTrackedNode(sceneEye);
+        minimap.tag(sceneEye);
       else
-        minimap.resetTrackedNode();
+        minimap.removeTag();
     }
     if (key == 'f')
       focus.fit(1);

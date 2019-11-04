@@ -45,9 +45,9 @@ public class ShadowMapping extends PApplet {
         @Override
         public void graphics(PGraphics pg) {
           pg.pushStyle();
-          if (scene.trackedNode("light") == this) {
+          if (scene.node("light") == this) {
             if (debug) {
-              pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255, 120);
+              pg.fill(0, scene.isTagged(this) ? 255 : 0, 255, 120);
               Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
             }
             Scene.drawAxes(pg, 300);
@@ -64,8 +64,8 @@ public class ShadowMapping extends PApplet {
       shapes[i].setPickingThreshold(debug ? 0 : 20);
       //shapes[i].setHighlighting(Node.Highlighting.NONE);
     }
-    scene.setTrackedNode("light", shapes[(int) random(0, shapes.length - 1)]);
-    scene.trackedNode("light").setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
+    scene.tag("light", shapes[(int) random(0, shapes.length - 1)]);
+    scene.node("light").setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
     // initShadowPass
     depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth/depth_frag.glsl");
     //depthShader = loadShader("/home/pierre/IdeaProjects/nub/testing/data/depth_alt/depth_nonlinear.glsl");
@@ -81,8 +81,8 @@ public class ShadowMapping extends PApplet {
   }
 
   public void draw() {
-    if (scene.trackedNode("light") != null) {
-      Node light = scene.trackedNode("light");
+    if (scene.node("light") != null) {
+      Node light = scene.node("light");
       light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
       // 1. Render the shadowmap from light node 'point-of-view'
       shadowMap.beginDraw();
@@ -133,7 +133,7 @@ public class ShadowMapping extends PApplet {
   public void keyPressed() {
     if (key == ' ') {
       shadowMapType = shadowMapType == Graph.Type.ORTHOGRAPHIC ? Graph.Type.PERSPECTIVE : Graph.Type.ORTHOGRAPHIC;
-      Node light = scene.trackedNode("light");
+      Node light = scene.node("light");
       if (light != null)
         light.setMagnitude(shadowMapType == Graph.Type.ORTHOGRAPHIC ? 400f / 2048f : tan(fov / 2));
     }

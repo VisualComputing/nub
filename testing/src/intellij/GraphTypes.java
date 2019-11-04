@@ -84,10 +84,10 @@ public class GraphTypes extends PApplet {
       //scene1.fit();
     }
     if (key == 'e')
-      if (auxScene.trackedNode() == boxNode)
-        auxScene.resetTrackedNode();
+      if (auxScene.node() == boxNode)
+        auxScene.removeTag();
       else
-        auxScene.setTrackedNode(boxNode);
+        auxScene.tag(boxNode);
     if (key == '+')
       scene.eye().rotate(0, 1, 0, QUARTER_PI / 2);
     if (key == '-')

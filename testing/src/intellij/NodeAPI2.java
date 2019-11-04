@@ -326,7 +326,7 @@ public class NodeAPI2 extends PApplet {
       return;
     if (event.isShiftDown())
       scene.translate();
-    else if (scene.trackedNode() == null)
+    else if (scene.node() == null)
       scene.lookAround();
     else
       scene.spin();

@@ -32,7 +32,7 @@ public class CajasOrientadas extends PApplet {
       cajas[i] = new Box();
 
     scene.fit(1);
-    scene.setTrackedNode("keyboard", esfera.iNode);
+    scene.tag("keyboard", esfera.iNode);
   }
 
   public void draw() {
@@ -79,10 +79,10 @@ public class CajasOrientadas extends PApplet {
     if (key == 'S')
       scene.fit();
     if (key == 'u')
-      if (scene.trackedNode("keyboard") == null)
-        scene.setTrackedNode("keyboard", esfera.iNode);
+      if (scene.node("keyboard") == null)
+        scene.tag("keyboard", esfera.iNode);
       else
-        scene.resetTrackedNode("keyboard");
+        scene.removeTag("keyboard");
     if (key == CODED)
       if (keyCode == UP)
         scene.translate("keyboard", 0, -10);

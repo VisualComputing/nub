@@ -108,7 +108,7 @@ public class ShadowMappingSimple extends PApplet {
       public void graphics(PGraphics pg) {
         pg.pushStyle();
         if (debug) {
-          pg.fill(0, scene.isTrackedNode(this) ? 255 : 0, 255);
+          pg.fill(0, scene.isTagged(this) ? 255 : 0, 255);
           Scene.drawFrustum(pg, shadowMap, shadowMapType, this, zNear, zFar);
         } else {
           pg.fill(0, 255, 255);
@@ -136,7 +136,7 @@ public class ShadowMappingSimple extends PApplet {
 
   public void draw() {
     // 1. Calculate the light position and orientation
-    if (!scene.isTrackedNode(light)) {
+    if (!scene.isTagged(light)) {
       float lightAngle = frameCount * 0.002f;
       light.setPosition(sin(lightAngle) * 160, 160, cos(lightAngle) * 160);
     }
@@ -183,7 +183,7 @@ public class ShadowMappingSimple extends PApplet {
 
   public void mouseMoved() {
     if (scene.track() == null)
-      scene.setTrackedNode(scene.eye());
+      scene.tag(scene.eye());
   }
 
   public void mouseDragged() {

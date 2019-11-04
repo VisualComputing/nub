@@ -86,11 +86,11 @@ public class ConstrainedFrame extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      if (scene.isTrackedNode(iNode)) {
-        scene.resetTrackedNode();
+      if (scene.isTagged(iNode)) {
+        scene.removeTag();
         mouseTracking = true;
       } else {
-        scene.setTrackedNode(iNode);
+        scene.tag(iNode);
         mouseTracking = false;
       }
     if (key == 'b' || key == 'B') {

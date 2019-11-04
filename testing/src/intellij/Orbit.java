@@ -49,7 +49,7 @@ public class Orbit extends PApplet {
     shape2.setShape(shape());
     shape2.translate(275, 275, 275);
 
-    scene.setTrackedNode(shape2);
+    scene.tag(shape2);
     axis = Vector.random();
     axis.multiply(scene.radius() / 3);
   }
@@ -64,7 +64,7 @@ public class Orbit extends PApplet {
 
   public void keyPressed() {
     if (key == 'i')
-      scene.setTrackedNode(scene.isTrackedNode(shape1) ? shape2 : shape1);
+      scene.tag(scene.isTagged(shape1) ? shape2 : shape1);
     if (key == 'f')
       scene.flip();
   }
