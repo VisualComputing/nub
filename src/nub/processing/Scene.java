@@ -213,7 +213,8 @@ public class Scene extends Graph implements PConstants {
     // 1. P5 objects
     _parent = pApplet;
     _offscreen = pGraphics != pApplet.g;
-    _upperLeftCorner = _offscreen ? new Point(x, y) : new Point(0, 0);
+    _upperLeftCornerX = _offscreen ? x : 0;
+    _upperLeftCornerY = _offscreen ? y : 0;
     // 2. Back buffer
     _bb = (context() instanceof processing.opengl.PGraphicsOpenGL) ?
         pApplet().createGraphics(context().width, context().height, context() instanceof PGraphics3D ? P3D : P2D) :
@@ -614,7 +615,7 @@ public class Scene extends Graph implements PConstants {
    */
   public void display(PGraphics pgraphics) {
     if (isOffscreen())
-      pApplet().image(pgraphics, _upperLeftCorner.x(), _upperLeftCorner.y());
+      pApplet().image(pgraphics, _upperLeftCornerX, _upperLeftCornerY);
   }
 
   /**
@@ -2931,14 +2932,14 @@ public class Scene extends Graph implements PConstants {
    * Returns the current mouse cursor position.
    */
   public Point mouse() {
-    return toPoint(pApplet().mouseX - _upperLeftCorner.x(), pApplet().mouseY - _upperLeftCorner.y());
+    return toPoint(pApplet().mouseX - _upperLeftCornerX, pApplet().mouseY - _upperLeftCornerY);
   }
 
   /**
    * Returns the previous mouse cursor position.
    */
   public Point pmouse() {
-    return toPoint(pApplet().pmouseX - _upperLeftCorner.x(), pApplet().pmouseY - _upperLeftCorner.y());
+    return toPoint(pApplet().pmouseX - _upperLeftCornerX, pApplet().pmouseY - _upperLeftCornerY);
   }
 
   /**

@@ -115,7 +115,7 @@ import java.util.List;
  */
 public class Graph {
   // offscreen
-  protected Point _upperLeftCorner;
+  protected int _upperLeftCornerX, _upperLeftCornerY;
   protected boolean _offscreen;
 
   // 0. Contexts
