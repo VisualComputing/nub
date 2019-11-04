@@ -114,31 +114,12 @@ public class Point {
   /**
    * Convenience wrapper function that simply returns {@code Point.distance(new
    * Point(x1, y1), new Point(x2, y2))}.
-   *
-   * @see #distance(Point, Point)
    */
+  /*
   public static float distance(int x1, int y1, int x2, int y2) {
     return Point.distance((float) x1, (float) y1, (float) x2, (float) y2);
   }
 
-  /**
-   * Convenience wrapper function that simply returns {@code Point.distance(new
-   * Point(x1, y1), new Point(x2, y2))}.
-   *
-   * @see #distance(Point, Point)
    */
-  public static float distance(float x1, float y1, float x2, float y2) {
-    return (float) Math.sqrt((float) Math.pow((x2 - x1), 2.0) + (float) Math.pow((y2 - y1), 2.0));
-  }
 
-  /**
-   * Returns the Euclidean distance between points point1 and point2.
-   */
-  public static float distance(Point point1, Point point2) {
-    return Point.distance(point1.x(), point1.y(), point2.x(), point2.y());
-  }
-
-  public static float distance(float deltaX, float deltaY) {
-    return (float) Math.sqrt((float) Math.pow((deltaX), 2.0) + (float) Math.pow((deltaY), 2.0));
-  }
 }
