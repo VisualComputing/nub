@@ -3016,12 +3016,12 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code spin(pmouse(), mouse())}.
    *
-   * @see #spin(Point, Point)
+   * @see #spin(int, int, int, int)
    * @see #pmouse()
    * @see #mouse()
    */
   public void spin() {
-    spin(pmouse(), mouse());
+    spin(pmouse().x(), pmouse().y(), mouse().x(), mouse().y());
   }
 
   /**
@@ -3036,12 +3036,12 @@ public class Scene extends Graph implements PConstants {
   /**
    * Same as {@code spin(pmouse(), mouse(), node)}.
    *
-   * @see Graph#spin(Node, Point, Point)
+   * @see Graph#spin(Node, int, int, int, int)
    * @see #pmouse()
    * @see #mouse()
    */
   public void spin(Node node) {
-    spin(node, pmouse(), mouse());
+    spin(node, pmouse().x(), pmouse().y(), mouse().x(), mouse().y());
   }
 
   // only eye

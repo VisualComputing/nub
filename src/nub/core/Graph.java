@@ -3533,7 +3533,7 @@ public class Graph {
    * {@code eye().rotate(new Quaternion(roll, pitch, yaw))}.
    *
    * @see #rotate(String, float, float, float)
-   * @see #spin(Node, Point, Point, float)
+   * @see #spin(Node, int, int, int, int, float)
    */
   public void rotate(Node node, float roll, float pitch, float yaw) {
     if (node == null)
@@ -3568,52 +3568,52 @@ public class Graph {
   /**
    * Same as {@code spin(null, tail, head)}.
    *
-   * @see #spin(String, Point, Point)
+   * @see #spin(String, int, int, int, int)
    */
-  public void spin(Point tail, Point head) {
-    spin(trackedNode(null), tail, head);
+  public void spin(int point1X, int point1Y, int point2X, int point2Y) {
+    spin(trackedNode(null), point1X, point1Y, point2X, point2Y);
   }
 
   /**
    * Same as {@code spin(tail, head, defaultNode(tag))}.
    *
-   * @see #spin(Node, Point, Point, float)
-   * @see #spin(Node, Point, Point)
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(Node, int, int, int, int, float)
+   * @see #spin(Node, int, int, int, int)
+   * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(String tag, Point tail, Point head) {
-    spin(trackedNode(tag), tail, head);
+  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y) {
+    spin(trackedNode(tag), point1X, point1Y, point2X, point2Y);
   }
 
   /**
    * Same as {@code spin(tail, head, 1, node)}.
    *
-   * @see #spin(Node, Point, Point, float)
-   * @see #spin(String, Point, Point)
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(Node, int, int, int, int, float)
+   * @see #spin(String, int, int, int, int)
+   * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(Node node, Point tail, Point head) {
-    spin(node, tail, head, 1);
+  public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y) {
+    spin(node, point1X, point1Y, point2X, point2Y, 1);
   }
 
   /**
    * Same as {@code spin(null, tail, head, sensitivity)}.
    *
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(String, int, int, int, int, float)
    */
-  public void spin(Point tail, Point head, float sensitivity) {
-    spin(trackedNode(null), tail, head, sensitivity);
+  public void spin(int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    spin(trackedNode(null), point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
   /**
    * Same as {@code spin(tail, head, sensitivity, defaultNode(tag))}.
    *
-   * @see #spin(Node, Point, Point, float)
-   * @see #spin(String, Point, Point)
-   * @see #spin(Node, Point, Point)
+   * @see #spin(Node, int, int, int, int, float)
+   * @see #spin(String, int, int, int, int)
+   * @see #spin(Node, int, int, int, int)
    */
-  public void spin(String tag, Point tail, Point head, float sensitivity) {
-    spin(trackedNode(tag), tail, head, sensitivity);
+  public void spin(String tag, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
+    spin(trackedNode(tag), point1X, point1Y, point2X, point2Y, sensitivity);
   }
 
   /**
@@ -3624,41 +3624,40 @@ public class Graph {
    * For implementation details refer to Shoemake 92 paper: Arcball: a user interface for specifying three-dimensional
    * orientation using a mouse.
    * <p>
-   * Override this class an call {@link #_spin(Node, Point, Point, Point, float)} if you want to define a different
+   * Override this class an call {@link #_spin(Node, int, int, int, int, int, int, float)} if you want to define a different
    * rotation center (rare).
    *
-   * @see #spin(String, Point, Point)
-   * @see #spin(Node, Point, Point)
-   * @see #spin(String, Point, Point, float)
+   * @see #spin(String, int, int, int, int)
+   * @see #spin(Node, int, int, int, int)
+   * @see #spin(String, int, int, int, int, float)
    * @see #rotate(Node, float, float, float)
    */
-  public void spin(Node node, Point tail, Point head, float sensitivity) {
+  public void spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     if (node == null)
       throw new RuntimeException("spin(point1, point2, sensitivity, node) requires a non-null node param");
-    spin(node, _spin(node, tail, head, sensitivity));
+    spin(node, _spin(node, point1X, point1Y, point2X, point2Y, sensitivity));
   }
 
   /**
    * Same as {@code return _spin(point1, point2, center, sensitivity, node)} where {@code center} is {@link #anchor()}
    * if the node is the {@link #eye()} or {@link Node#position()} otherwise.
    */
-  protected Quaternion _spin(Node node, Point point1, Point point2, float sensitivity) {
+  protected Quaternion _spin(Node node, int point1X, int point1Y, int point2X, int point2Y, float sensitivity) {
     Vector vector = screenLocation(isEye(node) ? anchor() : node.position());
-    Point center = new Point(vector.x(), vector.y());
-    return _spin(node, point1, point2, center, sensitivity);
+    return _spin(node, point1X, point1Y, point2X, point2Y, (int)vector.x(), (int)vector.y(), sensitivity);
   }
 
   /**
    * Computes the classical arcball quaternion. Refer to Shoemake 92 paper: Arcball: a user interface for specifying
    * three-dimensional orientation using a mouse.
    */
-  protected Quaternion _spin(Node node, Point point1, Point point2, Point center, float sensitivity) {
-    float cx = center.x();
-    float cy = center.y();
-    float x = point2.x();
-    float y = point2.y();
-    float prevX = point1.x();
-    float prevY = point1.y();
+  protected Quaternion _spin(Node node, int point1X, int point1Y, int point2X, int point2Y, int centerX, int centerY, float sensitivity) {
+    float cx = centerX;
+    float cy = centerY;
+    float x = point2X;
+    float y = point2Y;
+    float prevX = point1X;
+    float prevY = point1Y;
     // Points on the deformed ball
     float px = sensitivity * ((int) prevX - cx) / width();
     float py = sensitivity * (isLeftHanded() ? ((int) prevY - cy) : (cy - (int) prevY)) / height();
