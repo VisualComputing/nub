@@ -3835,9 +3835,13 @@ public class Graph {
    * @see #interact(String, Object...)
    * @see Node#interact(Object...)
    */
-  public void interact(Node node, Object... gesture) {
+  public boolean interact(Node node, Object... gesture) {
     if (node != null)
+      return false;
+    else {
       node.interact(gesture);
+      return true;
+    }
   }
 
   /*

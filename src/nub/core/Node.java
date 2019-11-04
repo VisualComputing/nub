@@ -12,7 +12,6 @@ package nub.core;
 
 import nub.core.constraint.Constraint;
 import nub.primitives.Matrix;
-import nub.primitives.Point;
 import nub.primitives.Quaternion;
 import nub.primitives.Vector;
 import nub.timing.TimingHandler;
@@ -2303,9 +2302,9 @@ public class Node {
   }
 
   /**
-   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Node, Point)}
+   * Enables node tracking according to {@code flag}. When tracking is disabled {@link Graph#tracks(Node, int, int)}
    * returns {@code false}, {@link Graph#setTrackedNode(String, Node)} does nothing while
-   * {@link Graph#track(String, Point)} and {@link Graph#cast(String, Point)} would bypass the node.
+   * {@link Graph#track(String, int, int)} and {@link Graph#cast(int, int)} would bypass the node.
    *
    * @see #isTrackingEnabled()
    * @see #enableTracking()
