@@ -2131,11 +2131,11 @@ public class Graph {
     int centerY = (int)rectangle.centerY();
     Vector orig = new Vector();
     Vector dir = new Vector();
-    convertClickToLine(centerX, centerY, orig, dir);
+    convertPixelToLine(centerX, centerY, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine((int)rectangle.x(), centerY, orig, dir);
+    convertPixelToLine((int)rectangle.x(), centerY, orig, dir);
     Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertClickToLine(centerX, (int)rectangle.y(), orig, dir);
+    convertPixelToLine(centerX, (int)rectangle.y(), orig, dir);
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
@@ -2166,7 +2166,7 @@ public class Graph {
    * <p>
    * This method is useful for analytical intersection in a selection method.
    */
-  public void convertClickToLine(int x, int y, Vector origin, Vector direction) {
+  public void convertPixelToLine(int x, int y, Vector origin, Vector direction) {
     // left-handed coordinate system correction
     if (isLeftHanded())
       y = height() - y;
