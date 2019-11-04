@@ -10,7 +10,9 @@
 
 package nub.core;
 
-import nub.primitives.*;
+import nub.primitives.Matrix;
+import nub.primitives.Quaternion;
+import nub.primitives.Vector;
 import nub.timing.Task;
 import nub.timing.TimingHandler;
 
@@ -86,7 +88,7 @@ import java.util.List;
  * are provided for convenience.
  * <p>
  * A default {@link #interpolator()} may perform several {@link #eye()} interpolations
- * such as {@link #fit(float)}, {@link #fit(Rectangle)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
+ * such as {@link #fit(float)}, {@link #fit(int, int, int, int)}, {@link #fit(Node)} and {@link #fit(Node, float)}.
  * Refer to the {@link Interpolator} documentation for details.
  * <h1>6. Visibility and culling techniques</h1>
  * Geometry may be culled against the viewing volume by calling {@link #isPointVisible(Vector)},
@@ -1751,7 +1753,7 @@ public class Graph {
 
   /**
    * Returns the {@link #eye()} {@link Interpolator} used by {@link #fit(float)},
-   * {@link #fit(Rectangle)}, {@link #fit(Node)}, etc.
+   * {@link #fit(int, int, int, int)}, {@link #fit(Node)}, etc.
    */
   public Interpolator interpolator() {
     return _interpolator;
@@ -1763,9 +1765,9 @@ public class Graph {
    * @see #fit(Node, float)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
@@ -1783,9 +1785,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Vector, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit()
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
@@ -1813,9 +1815,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(float)
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
@@ -1835,9 +1837,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1860,9 +1862,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1892,9 +1894,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -1938,9 +1940,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV(float duration) {
@@ -1977,9 +1979,9 @@ public class Graph {
    * @see #fit(Node)
    * @see #fit(Node, float)
    * @see #fit(Vector, Vector)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    */
   public void fitFOV() {
@@ -2006,9 +2008,9 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -2038,9 +2040,9 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fit(Node)
    * @see #fit(Node, float)
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit()
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
@@ -2063,7 +2065,7 @@ public class Graph {
    * {@link #center()}) that is used to define the 3D rectangle that is eventually
    * fitted.
    *
-   * @see #fit(Rectangle)
+   * @see #fit(int, int, int, int)
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
@@ -2075,16 +2077,16 @@ public class Graph {
    * @see #fitFOV()
    * @see #fitFOV(float)
    */
-  public void fit(Rectangle rectangle, float duration) {
+  public void fit(int x, int y, int width, int height, float duration) {
     if (duration <= 0)
-      fit(rectangle);
+      fit(x, y, width, height);
     else {
       _interpolator.reset();
       _interpolator.clear();
       Node eye = eye();
       setEye(eye().detach());
       _interpolator.addKeyFrame(eye().detach());
-      fit(rectangle);
+      fit(x, y, width, height);
       _interpolator.addKeyFrame(eye().detach(), duration);
       setEye(eye);
       _interpolator.run();
@@ -2101,7 +2103,7 @@ public class Graph {
    * to the {@link #viewDirection()} and passing through the {@link #center()}) that
    * is used to define the 3D rectangle that is eventually fitted.
    *
-   * @see #fit(Rectangle, float)
+   * @see #fit(int, int, int, int, float)
    * @see #fit(Vector, Vector, float)
    * @see #fit(Vector, Vector)
    * @see #fit(float)
@@ -2112,37 +2114,41 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
+   * @param x
+   * @param y
+   * @param width
+   * @param height
    */
-  public void fit(Rectangle rectangle) {
+  public void fit(int x, int y, int width, int height) {
+    int centerX = (int) ((float) x + (float) width / 2);
+    int centerY = (int) ((float) y + (float) height / 2);
     //ad-hoc
     if (is2D()) {
-      float rectRatio = (float) rectangle.width() / (float) rectangle.height();
+      float rectRatio = (float) width / (float) height;
       if (aspectRatio() < 1.0f) {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          eye().setMagnitude(eye().magnitude() * (float) width / (float) width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          eye().setMagnitude(eye().magnitude() * (float) height / (float) height());
       } else {
         if (aspectRatio() < rectRatio)
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.width() / width());
+          eye().setMagnitude(eye().magnitude() * (float) width / (float) width());
         else
-          eye().setMagnitude(eye().magnitude() * (float) rectangle.height() / height());
+          eye().setMagnitude(eye().magnitude() * (float) height / (float) height());
       }
-      lookAt(location(new Vector(rectangle.centerX(), rectangle.centerY(), 0)));
+      lookAt(location(new Vector(centerX, centerY, 0)));
       return;
     }
 
     Vector vd = viewDirection();
     float distToPlane = Vector.scalarProjection(Vector.subtract(eye().position(), center()), eye().zAxis());
-    int centerX = (int)rectangle.centerX();
-    int centerY = (int)rectangle.centerY();
     Vector orig = new Vector();
     Vector dir = new Vector();
     convertPixelToLine(centerX, centerY, orig, dir);
     Vector newCenter = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertPixelToLine((int)rectangle.x(), centerY, orig, dir);
+    convertPixelToLine(x, centerY, orig, dir);
     Vector pointX = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
-    convertPixelToLine(centerX, (int)rectangle.y(), orig, dir);
+    convertPixelToLine(centerX, y, orig, dir);
     Vector pointY = Vector.add(orig, Vector.multiply(dir, (distToPlane / Vector.dot(dir, vd))));
     float distance = 0.0f;
     float distX, distY;
