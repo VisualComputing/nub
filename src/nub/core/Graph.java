@@ -2094,8 +2094,9 @@ public class Graph {
   }
 
   /**
-   * Moves the eye so that the rectangular screen region defined by {@code rectangle}
-   * (pixel units, with origin in the upper left corner) fits the screen.
+   * Moves the eye so that the rectangular screen region defined by
+   * {@code x, y, width, height} (pixel units, with origin in the upper left corner)
+   * fits the screen.
    * <p>
    * In 3D the eye is translated (its {@link Node#orientation()} is unchanged) so that
    * {@code rectangle} is entirely visible. Since the pixel coordinates only define a
@@ -2114,10 +2115,10 @@ public class Graph {
    * @see #fit(Vector, float, float)
    * @see #fitFOV()
    * @see #fitFOV(float)
-   * @param x
-   * @param y
-   * @param width
-   * @param height
+   * @param x coordinate of the rectangle
+   * @param y coordinate of the rectangle
+   * @param width width of the rectangle
+   * @param height height of the rectangle
    */
   public void fit(int x, int y, int width, int height) {
     int centerX = (int) ((float) x + (float) width / 2);
